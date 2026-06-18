@@ -39,6 +39,13 @@ import { createWebClipboard } from "@interactive-os/json-document-clipboard-web"
 
 Official extension은 현재 shipped `packages/*`만이다. `labs/extensions/*`는 후보이고 공식 package로 안내하지 않는다.
 
+다음 이름은 쓰지 않는다.
+
+- `zod-crud`
+- `@json-document/*`
+- `@interactive-os/json-document/*` 내부 subpath. 예외는 `@interactive-os/json-document/react`뿐이다.
+- `src/*`, `application/*`, `domain/*`, `foundation/*` 같은 source path import
+
 ## 왜 / 핵심 / 튜토리얼 맥락
 
 프론트엔드 편집기는 보통 JSON state를 바꾼다. Form, CMS block, kanban board, outliner, settings screen은 모두 insert, replace, delete, move, duplicate, select, copy, paste, undo, redo를 다룬다.
@@ -61,6 +68,8 @@ schema -> document -> pointer/query -> can* -> change -> result
 - Result/error code: `docs/standard/result-contract.md`
 - Selection semantics: `docs/standard/selection-contract.md`
 - Schema introspection: `docs/standard/schema-introspection-contract.md`
+- Signature/call shape: `packages/json-document/tests/public/signature-contract.test-d.ts`
+- Semantic fixture: `packages/json-document/tests/public/semantic-contract.test.ts`
 
 ## 작업별 진입점
 
@@ -107,9 +116,16 @@ const doc = createJSONDocument(Card, {
 const patch = [{ op: "replace", path: "/status", value: "doing" }] as const;
 
 if (doc.canPatch(patch).ok) {
-  doc.commit(patch, { label: "change status" });
+  doc.commit(patch, {
+    label: "change status",
+    selectionAfter: "/status",
+  });
 }
 ```
+
+`selectionAfter`는 patch 적용 후 최종 selection을 command가 알고 있을 때 쓴다.
+Patch, history entry, subscriber metadata, 현재 selection이 같은 최종 선택을 본다.
+실패한 commit은 value, selection, history를 부분 변경 상태로 남기지 않는다.
 
 ## Patch, Pointer, JSONPath
 
@@ -144,6 +160,31 @@ if (!can.ok) {
 ```
 
 `violations[].path`는 RFC 6901 JSON Pointer다. `schema.accepts(path, value, mode)`는 요청한 schema 위치 기준인 `schema-slot` path를 보고한다. `canPatch`, `canPaste`, `canDuplicate` 같은 mutation preflight는 patch planning 뒤 실제 document 위치 기준인 `document-result` path를 보고한다.
+
+기본값은 `strict: false`다. 실패는 throw가 아니라 `{ ok: false, code, ... }` result로 분기한다. `strict: true`는 execution API에서 `JSONDocumentError`를 throw할 수 있지만, 앱의 안정적인 분기 기준은 `reason` 문구가 아니라 `code`, `pointer`, `violations` 같은 구조다.
+
+## 1.0 Signature contract
+
+1.0에서 고정되는 것은 export 이름만이 아니다. 다음 overload와 call shape도 public API다.
+
+```ts
+createJSONDocument(Schema, input);
+createJSONDocument(Schema, output, { trustedInitial: true });
+
+useJSONDocument(Schema, input);
+useJSONDocument(Schema, output, { trustedInitial: true });
+
+doc.insert(value);
+doc.insert(target, value, options);
+
+doc.move(source, target);
+doc.move(target);
+
+doc.paste(target, options);
+doc.canPaste(target, options);
+```
+
+`trustedInitial: true`는 초기값 parse를 건너뛰므로 caller가 이미 schema output 경계를 소유할 때만 쓴다. Zod transform처럼 input과 output이 다른 schema에서는 trusted/untrusted overload 구분이 중요하다.
 
 ## Duplicate
 

@@ -65,7 +65,12 @@ async function checkOnce() {
   }
 
   const llms = await fetchText("/llms.txt");
-  if (!/Import 경계/.test(llms) || !/@interactive-os\/json-document-id-resolver/.test(llms)) {
+  if (
+    !/Import 경계/.test(llms)
+    || !/@interactive-os\/json-document-id-resolver/.test(llms)
+    || !/다음 이름은 쓰지 않는다[\s\S]*zod-crud[\s\S]*@json-document\/\*/.test(llms)
+    || !/1\.0 Signature contract[\s\S]*trustedInitial: true[\s\S]*selectionAfter/.test(llms)
+  ) {
     fail("live llms.txt is missing expected content.");
   }
 

@@ -97,6 +97,14 @@ for (const path of markdownFiles()) {
 
 for (const [name, source] of Object.entries(surfaces)) {
   for (const pattern of [
+    /zod-crud/,
+    /@json-document\//,
+  ]) {
+    if (name === "llms") continue;
+    if (pattern.test(source)) fail(`${name}: stale package naming found: ${pattern}`);
+  }
+
+  for (const pattern of [
     /\{\s*at\s*:/,
     /JSONDocumentPasteMode|PasteMode/,
     /\bUseJSONDocumentOptions\b|\bUseSelectionOptions\b/,
@@ -220,9 +228,9 @@ const required = [
   ["api", /구조만 가진 Zod schema/],
   ["api", /전체 루트 schema 검증/],
   ["api", /기본값은 `strict: false`/],
-  ["extensions", /@json-document\/collection/],
-  ["extensions", /@json-document\/clipboard-web/],
-  ["extensions", /@json-document\/outline/],
+  ["extensions", /@interactive-os\/json-document-collection/],
+  ["extensions", /@interactive-os\/json-document-clipboard-web/],
+  ["extensions", /@interactive-os\/json-document-outline/],
   ["extensions", /labs\/extensions\/\*/],
   ["extensionsCatalog", /Generated extension catalog/],
   ["extensionsCatalog", /Official extensions: \d+/],
@@ -248,7 +256,7 @@ const required = [
   ["rootReadme", /packages\/json-document/],
   ["rootReadme", /apps\/site/],
   ["rootReadme", /labs\/extensions/],
-  ["readme", /npm install json-document zod/],
+  ["readme", /npm install @interactive-os\/json-document zod/],
   ["readme", /왜 json-document인가/],
   ["readme", /작업별 진입점/],
   ["readme", /React — `useJSONDocument`/],
@@ -262,6 +270,12 @@ const required = [
   ["llms", /docs\/standard\/result-contract\.md/],
   ["llms", /docs\/standard\/selection-contract\.md/],
   ["llms", /docs\/standard\/schema-introspection-contract\.md/],
+  ["llms", /1\.0 Signature contract/],
+  ["llms", /trustedInitial: true/],
+  ["llms", /selectionAfter/],
+  ["llms", /signature-contract\.test-d\.ts/],
+  ["llms", /semantic-contract\.test\.ts/],
+  ["llms", /다음 이름은 쓰지 않는다[\s\S]*zod-crud[\s\S]*@json-document\/\*/],
   ["spec", /JSONPath는 검색 언어/],
   ["spec", /duplicate\(pointer, options\)/],
   ["spec", /public-contract\.json/],
