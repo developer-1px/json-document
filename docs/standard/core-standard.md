@@ -245,6 +245,14 @@ strict 기본값, 실패 atomicity, clipboard spread, selection/history round-tr
 1.0 이후 바뀌면 breaking change가 되는 예시를 고정해야 한다. Fixture는 reason
 문구가 아니라 stable `code`와 구조를 검증해야 한다.
 
+Signature fixture는 export name lock과 semantic fixture 사이의 빈틈을 막는다.
+1.0에서 고정되는 것은 이름만이 아니라 overload와 call shape다. `doc.insert(value)`
+와 `doc.insert(target, value, options)`, `doc.paste(target, options)`,
+`doc.move(source, target)`, `createJSONDocument` trusted/untrusted 초기값,
+React `useJSONDocument` 초기값 overload처럼 사용자가 컴파일 시점에 의존하는
+호출 형태는 public API 일부다. 이 fixture는 public package entrypoint만
+import해야 하며, implementation-private type이나 source path를 요구하면 안 된다.
+
 일반 구현 테스트를 통과하는 것만으로는 표준 적합성을 주장할 수 없다.
 json-document 호환 구현체는 implementation-private module 없이 적합성 suite를
 통과해야 한다.

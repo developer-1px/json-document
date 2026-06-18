@@ -47,6 +47,7 @@ RFC급 foundation
 | export lock | `packages/json-document/public-contract.json` | 활성 |
 | 의미론 conformance | `packages/json-document/tests/public/standard-conformance.test.ts` | 활성 |
 | semantic fixture lock | `packages/json-document/tests/public/semantic-contract.test.ts` | 활성 |
+| signature fixture lock | `packages/json-document/tests/public/signature-contract.test-d.ts` | 활성 |
 | 표준화 evaluator | `scripts/evaluate-standardization.mjs` | 활성 |
 | 릴리스 기계 검증 | `npm run release:check` | 활성 |
 
