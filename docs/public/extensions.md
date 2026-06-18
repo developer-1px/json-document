@@ -19,8 +19,6 @@ npm install @interactive-os/json-document @interactive-os/json-document-collecti
 Lab package는 제품 feature 압력을 검증하기 위한 실험입니다. 설치 가능한 공식
 package로 안내하지 않고, 제품별 조합은 Recipes에서 먼저 확인합니다.
 
-문서에서 짧게 `@json-document/collection`, `@json-document/clipboard-web`, `@json-document/outline`처럼 쓰는 표기는 capability 별칭입니다. 실제 npm package는 `@interactive-os/json-document-collection`처럼 `@interactive-os/json-document-*` 이름을 씁니다.
-
 ## 선택 기준
 
 | 상황 | 먼저 쓰는 표면 |

@@ -25,7 +25,7 @@ schema -> document -> pointer/query -> can* -> change -> result
 ## 설치
 
 ```sh
-npm install json-document zod
+npm install @interactive-os/json-document zod
 ```
 
 `zod`는 peer dependency입니다. React를 쓰는 앱만 `@interactive-os/json-document/react`를 import합니다.

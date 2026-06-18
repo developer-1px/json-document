@@ -108,11 +108,11 @@ describe("public docs consistency", () => {
     expect(docs.quickstart).toMatch(/튜토리얼: 작은 카드 편집기 만들기/);
     expect(docs.api).toMatch(/## 작업별 진입점/);
     expect(docs.api).toMatch(/ReadResult/);
-    expect(docs.extensions).toMatch(/@json-document\/collection/);
-    expect(docs.extensions).toMatch(/@json-document\/clipboard-web/);
+    expect(docs.extensions).toMatch(/@interactive-os\/json-document-collection/);
+    expect(docs.extensions).toMatch(/@interactive-os\/json-document-clipboard-web/);
     expect(docs.generatedExtensionsCatalog).toMatch(/Generated extension catalog/);
     expect(docs.generatedExtensionsCatalog).toMatch(/Official extensions: \d+/);
-    expect(docs.readme).toMatch(/npm install json-document zod/);
+    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document zod/);
     expect(docs.readme).toMatch(/왜 json-document인가/);
     expect(docs.llms).toMatch(/왜 \/ 핵심 \/ 튜토리얼 맥락/);
   });
@@ -132,6 +132,10 @@ describe("public docs consistency", () => {
 
   test("describe paste targets without legacy target aliases", () => {
     for (const [name, source] of Object.entries(docs)) {
+      if (name !== "llms") {
+        expect(source, name).not.toMatch(/zod-crud/);
+        expect(source, name).not.toMatch(/@json-document\//);
+      }
       expect(source, name).not.toMatch(/\{\s*at\s*:/);
       expect(source, name).not.toMatch(/JSONDocumentPasteMode|PasteMode/);
       expect(source, name).not.toMatch(/\bUseJSONDocumentOptions\b|\bUseSelectionOptions\b/);
@@ -142,6 +146,10 @@ describe("public docs consistency", () => {
 
     expect(docs.api).toMatch(/\{ after: pointer \}|\{ after: "\/lists\/0\/cards\/0" \}/);
     expect(docs.llms).toMatch(/삽입\/이동 위치에는 `\/items\/-`/);
+    expect(docs.llms).toMatch(/1\.0 Signature contract/);
+    expect(docs.llms).toMatch(/trustedInitial: true/);
+    expect(docs.llms).toMatch(/selectionAfter/);
+    expect(docs.llms).toMatch(/다음 이름은 쓰지 않는다[\s\S]*zod-crud[\s\S]*@json-document\/\*/);
   });
 
   test("keep JSONPath scoped to search and JSON Pointer scoped to mutation", () => {
