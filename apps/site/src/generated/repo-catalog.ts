@@ -237,6 +237,46 @@ export const repoCatalog = {
       ]
     },
     {
+      "path": "packages/grouping",
+      "name": "@interactive-os/json-document-grouping",
+      "status": "official-extension",
+      "private": false,
+      "publishable": true,
+      "version": "0.1.0",
+      "description": "Official structural group and ungroup extension functions for json-document documents.",
+      "license": "MIT",
+      "summary": "Official extension for structural `group` and `ungroup`.",
+      "guidance": {
+        "useFor": "group and ungroup selected sibling JSON items",
+        "notFor": "Airtable group-by views"
+      },
+      "publicExports": [
+        "Grouping",
+        "GroupingAdapter",
+        "GroupingApplyResult",
+        "GroupingChange",
+        "GroupingChangeResult",
+        "GroupingCreateContext",
+        "GroupingError",
+        "GroupingErrorCode",
+        "GroupingOperation",
+        "GroupingSource",
+        "canGroupSelection",
+        "canUngroupSelection",
+        "createGrouping",
+        "groupSelection",
+        "ungroupSelection"
+      ],
+      "publicExportCount": 15,
+      "keywords": [
+        "@interactive-os/json-document",
+        "group",
+        "headless",
+        "selection",
+        "ungroup"
+      ]
+    },
+    {
       "path": "packages/id-resolver",
       "name": "@interactive-os/json-document-id-resolver",
       "status": "official-extension",
@@ -313,8 +353,13 @@ export const repoCatalog = {
         "JSONDocumentDuplicateError",
         "JSONDocumentDuplicateOptions",
         "JSONDocumentDuplicateResult",
+        "JSONDocumentEditError",
+        "JSONDocumentEditResult",
         "JSONDocumentError",
         "JSONDocumentHistory",
+        "JSONDocumentInsertOptions",
+        "JSONDocumentInsertTarget",
+        "JSONDocumentMoveTarget",
         "JSONDocumentOptions",
         "JSONDocumentPasteOptions",
         "JSONDocumentPasteTarget",
@@ -396,7 +441,7 @@ export const repoCatalog = {
         "unescapeSegment",
         "withLastSegment"
       ],
-      "publicExportCount": 112,
+      "publicExportCount": 117,
       "keywords": [
         "clipboard",
         "crud",
@@ -1009,6 +1054,46 @@ export const repoCatalog = {
         "field",
         "form",
         "headless"
+      ]
+    },
+    {
+      "path": "packages/grouping",
+      "name": "@interactive-os/json-document-grouping",
+      "status": "official-extension",
+      "private": false,
+      "publishable": true,
+      "version": "0.1.0",
+      "description": "Official structural group and ungroup extension functions for json-document documents.",
+      "license": "MIT",
+      "summary": "Official extension for structural `group` and `ungroup`.",
+      "guidance": {
+        "useFor": "group and ungroup selected sibling JSON items",
+        "notFor": "Airtable group-by views"
+      },
+      "publicExports": [
+        "Grouping",
+        "GroupingAdapter",
+        "GroupingApplyResult",
+        "GroupingChange",
+        "GroupingChangeResult",
+        "GroupingCreateContext",
+        "GroupingError",
+        "GroupingErrorCode",
+        "GroupingOperation",
+        "GroupingSource",
+        "canGroupSelection",
+        "canUngroupSelection",
+        "createGrouping",
+        "groupSelection",
+        "ungroupSelection"
+      ],
+      "publicExportCount": 15,
+      "keywords": [
+        "@interactive-os/json-document",
+        "group",
+        "headless",
+        "selection",
+        "ungroup"
       ]
     },
     {
@@ -2085,46 +2170,6 @@ export const repoCatalog = {
       ]
     },
     {
-      "path": "labs/extensions/grouping",
-      "name": "@interactive-os/json-document-grouping",
-      "status": "lab-extension",
-      "private": true,
-      "publishable": false,
-      "version": "0.1.0",
-      "description": "Lab structural group and ungroup extension functions for json-document documents.",
-      "license": "MIT",
-      "summary": "Lab extension for structural `group` and `ungroup`.",
-      "guidance": {
-        "useFor": "group and ungroup selected sibling JSON items",
-        "notFor": "Airtable group-by views"
-      },
-      "publicExports": [
-        "Grouping",
-        "GroupingAdapter",
-        "GroupingApplyResult",
-        "GroupingChange",
-        "GroupingChangeResult",
-        "GroupingCreateContext",
-        "GroupingError",
-        "GroupingErrorCode",
-        "GroupingOperation",
-        "GroupingSource",
-        "canGroupSelection",
-        "canUngroupSelection",
-        "createGrouping",
-        "groupSelection",
-        "ungroupSelection"
-      ],
-      "publicExportCount": 15,
-      "keywords": [
-        "@interactive-os/json-document",
-        "group",
-        "headless",
-        "selection",
-        "ungroup"
-      ]
-    },
-    {
       "path": "labs/extensions/increment-number",
       "name": "@interactive-os/json-document-increment-number",
       "status": "lab-extension",
@@ -3048,9 +3093,9 @@ export const repoCatalog = {
     }
   ],
   "totals": {
-    "packages": 17,
-    "officialExtensions": 16,
-    "labExtensions": 39,
+    "packages": 18,
+    "officialExtensions": 17,
+    "labExtensions": 38,
     "apps": 12
   }
 } as const;

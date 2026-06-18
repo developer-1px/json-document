@@ -39,6 +39,61 @@ if (packages.length === 0) {
   process.exit(1);
 }
 
+function writeOutput(result) {
+  if (result.stdout) process.stdout.write(result.stdout);
+  if (result.stderr) process.stderr.write(result.stderr);
+}
+
+function buildCorePackage() {
+  const result = spawnSync("npm", ["run", "build", "-w", "@interactive-os/json-document"], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  writeOutput(result);
+  return result.status === 0;
+}
+
+function isCoreResolutionFailure(result) {
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  return output.includes("Cannot find module '@interactive-os/json-document'")
+    || (/TS2307/.test(output) && /(?:^|\.\.\/|\/)json-document\/dist\//.test(output));
+}
+
+function runPackageScript(pkg) {
+  const args = ["run", scriptName, "-w", pkg.name];
+  let retriedCoreResolution = false;
+
+  while (true) {
+    const result = spawnSync("npm", args, {
+      cwd: root,
+      encoding: "utf8",
+    });
+    if (result.status === 0) {
+      writeOutput(result);
+      return true;
+    }
+
+    if (!retriedCoreResolution && isCoreResolutionFailure(result)) {
+      console.error(`$ npm run ${scriptName} -w ${pkg.name} could not resolve @interactive-os/json-document; rebuilding core package and retrying once.`);
+      retriedCoreResolution = true;
+      if (!buildCorePackage()) {
+        writeOutput(result);
+        return false;
+      }
+      continue;
+    }
+
+    writeOutput(result);
+    return false;
+  }
+}
+
+if (workspaceRoot === "packages" && !packages.some((pkg) => pkg.name === "@interactive-os/json-document")) {
+  if (!buildCorePackage()) {
+    process.exit(1);
+  }
+}
+
 let failed = false;
 for (const pkg of packages) {
   if (typeof pkg.name !== "string" || pkg.name.length === 0) {
@@ -54,11 +109,7 @@ for (const pkg of packages) {
   }
 
   console.log(`$ npm run ${scriptName} -w ${pkg.name}`);
-  const result = spawnSync("npm", ["run", scriptName, "-w", pkg.name], {
-    cwd: root,
-    stdio: "inherit",
-  });
-  if (result.status !== 0) {
+  if (!runPackageScript(pkg)) {
     failed = true;
   }
 }

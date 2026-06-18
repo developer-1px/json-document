@@ -1,4 +1,4 @@
-import type { ClipboardPasteResult, JSONCapabilityResult, JSONDocument, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocument, JSONDocumentEditResult, JSONDocumentInsertTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
 import type { PasteSpecialAdapter, PasteSpecialAdapterResult, PasteSpecialDiagnostic, PasteSpecialError, PasteSpecialErrorCode, PasteSpecialInput, PasteSpecialOptions, PasteSpecialPlanResult } from "./types.js";
 
 export function canPasteSpecial<TDocument>(
@@ -33,7 +33,7 @@ export function canPasteSpecial<TDocument>(
 
   const payload = copyPayload(adapted.payload);
   const options = copyOptions(adapted.options);
-  const capability = doc.canPaste(input.target, { ...options, payload });
+  const capability = canApplyPayload(doc, input.target, payload, options);
   const diagnostics = copyDiagnostics(adapted.diagnostics);
 
   return {
@@ -55,7 +55,7 @@ export function pasteSpecialError(
     pointer?: Pointer;
     diagnostics?: ReadonlyArray<PasteSpecialDiagnostic>;
     capability?: Exclude<JSONCapabilityResult, { ok: true }>;
-    result?: Exclude<ClipboardPasteResult<unknown>, { ok: true }>;
+    result?: Exclude<JSONDocumentEditResult, { ok: true }>;
   } = {},
 ): PasteSpecialError {
   return { ok: false, code, reason, ...(options.target === undefined ? {} : { target: copyPayload(options.target) as JSONDocumentPasteTarget }), ...(options.pointer === undefined ? {} : { pointer: options.pointer }), ...(options.diagnostics === undefined ? {} : { diagnostics: copyDiagnostics(options.diagnostics) }), ...(options.capability === undefined ? {} : { capability: options.capability }), ...(options.result === undefined ? {} : { result: options.result }) };
@@ -95,4 +95,19 @@ export function copyPayload<T>(value: T): T {
   } catch {
     return value;
   }
+}
+
+export function canApplyPayload<TDocument>(
+  doc: JSONDocument<TDocument>,
+  target: JSONDocumentPasteTarget,
+  payload: unknown,
+  options?: PasteSpecialOptions,
+): JSONCapabilityResult {
+  return isReplaceTarget(target)
+    ? doc.canReplace(target.replace, payload)
+    : doc.canInsert(target as JSONDocumentInsertTarget, payload, options);
+}
+
+export function isReplaceTarget(target: JSONDocumentPasteTarget): target is { replace: Pointer } {
+  return typeof target === "object" && target !== null && "replace" in target;
 }

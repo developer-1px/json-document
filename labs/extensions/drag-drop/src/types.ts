@@ -1,6 +1,6 @@
-import type { JSONCapabilityResult, JSONDocumentPasteOptions, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
 
-export type DragDropPayloadOptions = Omit<JSONDocumentPasteOptions, "payload">;
+export type DragDropPayloadOptions = JSONDocumentInsertOptions;
 
 export type DragDropSource =
   | { kind: "move"; pointer: Pointer }
@@ -33,7 +33,7 @@ export interface DragDropError {
 export interface DragDropPlan {
   ok: true;
   kind: DragDropSource["kind"];
-  target: Pointer | JSONDocumentPasteTarget;
+  target: JSONDocumentMoveTarget | JSONDocumentInsertTarget | JSONDocumentPasteTarget;
   capability: JSONCapabilityResult;
 }
 
@@ -44,7 +44,7 @@ export type DragDropPlanResult =
 export interface DragDropPerformOk {
   ok: true;
   kind: DragDropSource["kind"];
-  target: Pointer | JSONDocumentPasteTarget;
+  target: JSONDocumentMoveTarget | JSONDocumentInsertTarget | JSONDocumentPasteTarget;
   result: unknown;
 }
 

@@ -50,9 +50,10 @@ const publicContract = JSON.parse(read("packages/json-document/public-contract.j
 
 function officialExtensionNames(): string[] {
   return readdirSync(join(root, "packages"), { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name !== "@interactive-os/json-document")
+    .filter((entry) => entry.isDirectory() && entry.name !== "json-document")
     .map((entry) => JSON.parse(read(`packages/${entry.name}/package.json`)) as { name: string })
     .map((pkg) => pkg.name)
+    .filter((name) => name.startsWith("@interactive-os/json-document-"))
     .sort();
 }
 
@@ -140,7 +141,7 @@ describe("public docs consistency", () => {
     }
 
     expect(docs.api).toMatch(/\{ after: pointer \}|\{ after: "\/lists\/0\/cards\/0" \}/);
-    expect(docs.llms).toMatch(/삽입 위치에는 `\/items\/-`/);
+    expect(docs.llms).toMatch(/삽입\/이동 위치에는 `\/items\/-`/);
   });
 
   test("keep JSONPath scoped to search and JSON Pointer scoped to mutation", () => {

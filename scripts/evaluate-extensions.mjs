@@ -166,6 +166,19 @@ const officialExtensions = [
     ],
   },
   {
+    root: "packages/grouping",
+    name: "@interactive-os/json-document-grouping",
+    description: /structural group and ungroup extension functions/,
+    readme: [
+      /createGrouping\(doc/,
+      /select contiguous sibling JSON array items/,
+      /create one host-defined group value/,
+      /2D bounds/,
+      /object-surface grouping semantics/,
+      /does not call\s*`doc\.use\(\.\.\.\)`/,
+    ],
+  },
+  {
     root: "packages/protected-ranges",
     name: "@interactive-os/json-document-protected-ranges",
     description: /protected range guard extension functions/,
@@ -184,7 +197,7 @@ const officialExtensions = [
     readme: [
       /createSnippets\(doc/,
       /block editors,\s*CMS sections,\s*kanban cards,\s*form fields,\s*generated admin templates,\s*slide objects,\s*or import presets/,
-      /Insert a snippet payload with `canPaste` \/ `paste`/,
+      /Insert a snippet payload with `canInsert` \/ `insert`/,
       /No slash command UI, palette, menu, editor toolbar, or search ranking/,
       /does not call\s*`doc\.use\(\.\.\.\)`/,
     ],

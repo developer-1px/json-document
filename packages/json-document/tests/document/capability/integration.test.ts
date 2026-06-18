@@ -38,7 +38,7 @@ describe("JSONDocument can* interface", () => {
     expect(doc.canDelete("/items/0")).toEqual({ ok: true });
     expect(doc.canCopy("/items/99")).toMatchObject({ ok: false, code: "path_not_found" });
     expect(doc.canCut("/items/0")).toEqual({ ok: true });
-    expect(doc.canPaste("/items/-", { payload: { id: "c", name: "C" } })).toEqual({ ok: true });
+    expect(doc.canInsert("/items/-", { id: "c", name: "C" })).toEqual({ ok: true });
   });
 
   test("canFind validates query syntax without traversing the document", () => {
@@ -75,7 +75,7 @@ describe("JSONDocument can* interface", () => {
   test("does not mutate the document while checking capabilities", () => {
     const doc = createJSONDocument(Schema, initial, { history: 10 });
 
-    expect(doc.canPaste("/items/-", { payload: { id: 1, name: "C" } })).toMatchObject({
+    expect(doc.canInsert("/items/-", { id: 1, name: "C" })).toMatchObject({
       ok: false,
       code: "schema_violation",
     });
@@ -83,7 +83,7 @@ describe("JSONDocument can* interface", () => {
     expect(doc.history.undoDepth).toBe(0);
   });
 
-  test("reports spread paste discriminated union mismatch before commit", () => {
+  test("reports spread insert discriminated union mismatch before commit", () => {
     const BlockSchema = z.object({
       blocks: z.array(z.discriminatedUnion("kind", [
         z.object({ kind: z.literal("text"), text: z.string() }),
@@ -99,11 +99,11 @@ describe("JSONDocument can* interface", () => {
       { kind: "video", src: "bad" },
     ];
 
-    expect(doc.canPaste("/blocks/-", { payload, spread: true })).toMatchObject({
+    expect(doc.canInsert("/blocks/-", payload, { spread: true })).toMatchObject({
       ok: false,
       code: "discriminator_mismatch",
     });
-    expect(doc.clipboard.paste("/blocks/-", { payload, spread: true })).toMatchObject({
+    expect(doc.insert("/blocks/-", payload, { spread: true })).toMatchObject({
       ok: false,
       code: "discriminator_mismatch",
       source: { discriminator: "kind", value: "video" },
@@ -111,7 +111,7 @@ describe("JSONDocument can* interface", () => {
     expect(doc.value.blocks).toEqual([{ kind: "text", text: "hello" }]);
   });
 
-  test("reports spread paste literal field mismatch before commit", () => {
+  test("reports spread insert literal field mismatch before commit", () => {
     const BlockSchema = z.object({
       blocks: z.array(z.object({
         kind: z.literal("text"),
@@ -122,10 +122,7 @@ describe("JSONDocument can* interface", () => {
       blocks: [{ kind: "text", text: "hello" }],
     }, { history: 10 });
 
-    expect(doc.clipboard.paste("/blocks/-", {
-      payload: [{ kind: "image", text: "bad" }],
-      spread: true,
-    })).toMatchObject({
+    expect(doc.insert("/blocks/-", [{ kind: "image", text: "bad" }], { spread: true })).toMatchObject({
       ok: false,
       code: "discriminator_mismatch",
       source: { discriminator: "kind", value: "image" },

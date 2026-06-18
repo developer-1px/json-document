@@ -198,7 +198,7 @@ describe("InterfaceWorkbench", () => {
       "doc.canCopy",
       "doc.canCut",
       "doc.canPaste",
-      "doc.canPaste payload",
+      "doc.canInsert payload",
       "doc.canUndo",
       "doc.canRedo",
     ]);
@@ -242,9 +242,9 @@ describe("InterfaceWorkbench", () => {
       "doc.copy",
       "doc.cut",
       "doc.paste",
-      "doc.paste payload",
+      "doc.insert payload",
       "doc.paste after",
-      "doc.paste payload after",
+      "doc.insert payload after",
     ]);
     expectButtons("history API", [
       "history.canUndo",

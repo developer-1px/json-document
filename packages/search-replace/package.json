@@ -12,6 +12,11 @@
     "url": "git+https://github.com/developer-1px/json-document.git",
     "directory": "packages/search-replace"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
   "keywords": [
     "@interactive-os/json-document",
     "text",

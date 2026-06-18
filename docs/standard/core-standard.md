@@ -185,9 +185,9 @@ adapter는 headless buffer를 host clipboard API에 연결할 수 있다.
 multi-source clipboard buffer를 array insertion target에 paste하면 기본적으로
 저장된 item을 spread해야 한다.
 
-직접 `paste(target, { payload })`에 array payload를 넘긴 경우 기본적으로
-spread하면 안 된다. caller가 명시적으로 spread를 요청한 경우에만
-spread해야 한다.
+직접 array payload를 `insert(target, payload, { spread: true })`로 넣으면
+item별 sibling insert가 된다. `insert(target, payload)`는 payload 자체를
+하나의 값으로 넣는다.
 
 paste failure는 원자적이어야 한다.
 

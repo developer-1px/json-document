@@ -20,6 +20,7 @@ export const officialExtensionPackages = [
   "proposed-changes",
   "comments",
   "form-draft",
+  "grouping",
   "protected-ranges",
   "snippets",
 ] as const;

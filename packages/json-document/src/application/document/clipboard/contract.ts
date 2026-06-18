@@ -7,21 +7,18 @@ import type { CutError as DomainCutError } from "../../../domain/clipboard/cut.j
 import type {
   PasteDiscriminatorMismatch as DomainPasteDiscriminatorMismatch,
   PasteError as DomainPasteError,
-  PasteOptions,
-  PasteTarget,
 } from "../../../domain/clipboard/paste.js";
 import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/contract.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
+import type {
+  JSONDocumentPasteOptions,
+  JSONDocumentPasteTarget,
+} from "../edit/target.js";
 
-export interface JSONDocumentPasteOptions extends PasteOptions {
-  /**
-   * Paste this payload directly instead of reading the document clipboard buffer.
-   * Use this for external clipboard, drag/drop, and extension-provided payloads.
-   */
-  payload?: unknown;
-}
-
-export type JSONDocumentPasteTarget = PasteTarget;
+export type {
+  JSONDocumentPasteOptions,
+  JSONDocumentPasteTarget,
+} from "../edit/target.js";
 
 export interface ClipboardWriteOptions {
   source?: Pointer | null;

@@ -69,7 +69,22 @@ function formatCommand(command, args, cwd = root) {
   return `$ ${command} ${args.join(" ")}  # cwd=${relativeCwd}`;
 }
 
-function run(command, args, cwd = root) {
+function buildCorePackage() {
+  const result = spawnSync("npm", ["run", "build", "-w", "@interactive-os/json-document"], {
+    cwd: root,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) {
+    throw new Error("@interactive-os/json-document build failed before lab verification.");
+  }
+}
+
+function isCoreResolutionFailure(output) {
+  return output.includes("Cannot find module '@interactive-os/json-document'")
+    || (/TS2307/.test(output) && /(?:^|\.\.\/|\/)json-document\/dist\//.test(output));
+}
+
+function run(command, args, cwd = root, options = {}) {
   const label = formatCommand(command, args, cwd);
   console.log(label);
   return new Promise((resolve, reject) => {
@@ -86,6 +101,17 @@ function run(command, args, cwd = root) {
       if (code === 0) {
         resolve();
         return;
+      }
+      if (options.retryCoreResolution === true && isCoreResolutionFailure(output)) {
+        try {
+          console.error(`${label} could not resolve @interactive-os/json-document; rebuilding core package and retrying once.`);
+          buildCorePackage();
+          run(command, args, cwd, { ...options, retryCoreResolution: false }).then(resolve, reject);
+          return;
+        } catch (error) {
+          reject(error);
+          return;
+        }
       }
       reject(new Error(`${label} failed with exit code ${code}\n${output}`));
     });
@@ -148,10 +174,10 @@ function verificationSelection(labs) {
 
 async function verifyPackage({ dir, name }) {
   const packageRoot = join(root, dir);
-  await run("npx", ["--no-install", "tsc", "-p", "tsconfig.test.json", "--noEmit"], packageRoot);
+  await run("npx", ["--no-install", "tsc", "-p", "tsconfig.test.json", "--noEmit"], packageRoot, { retryCoreResolution: true });
   await run("npx", ["--no-install", "vitest", "run", "--config", "vitest.config.ts"], packageRoot);
   rmSync(join(packageRoot, "dist"), { recursive: true, force: true });
-  await run("npx", ["--no-install", "tsc", "-p", "tsconfig.json"], packageRoot);
+  await run("npx", ["--no-install", "tsc", "-p", "tsconfig.json"], packageRoot, { retryCoreResolution: true });
   await run("node", ["--input-type=module", "--eval", `await import(${JSON.stringify(name)});`], packageRoot);
   console.log(`[ok] ${name}`);
 }
@@ -258,6 +284,7 @@ for (const dir of labs) {
 if (verify && process.exitCode !== 1) {
   console.log(`extension lab verify scope: ${verificationTargets.length}/${labs.length} package(s); ${selectedVerification.reason}`);
   if (verificationTargets.length > 0) {
+    buildCorePackage();
     await verifyPackages(verificationTargets);
   }
 }

@@ -63,7 +63,7 @@ All notable changes to this project are documented here.
 - Added lab extension runtime import smoke coverage so generated `dist`
   artifacts cannot contain invalid JavaScript identifiers after feature renames.
 - Clarified clipboard spread docs: multi-source clipboard buffer paste spreads
-  by default at array insertion targets, while direct array payload paste needs
+  by default at array insertion targets, while direct array payload insert uses
   explicit `spread: true`.
 - Added semantic contract references for result/error, selection, and schema
   introspection to LLM-facing docs.

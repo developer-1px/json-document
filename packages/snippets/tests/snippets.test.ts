@@ -62,7 +62,7 @@ describe("@interactive-os/json-document-snippets", () => {
     expect(snippets.get("todo-card")).toMatchObject(cardSnippet);
   });
 
-  test("plans and inserts a snippet through direct payload paste", () => {
+  test("plans and inserts a snippet through payload insert", () => {
     const doc = createBoard();
     const snippets = createSnippets(doc, [cardSnippet]);
 

@@ -353,29 +353,28 @@ for (const size of sizes) {
 
   {
     const doc = createJSONDocument(Schema, state, { history: 0 });
-    bench("doc.canPaste direct payload single append", rounds, (index) =>
-      doc.canPaste("/items/-", { payload: makeItem(size + index) }));
+    bench("doc.canInsert direct payload single append", rounds, (index) =>
+      doc.canInsert("/items/-", makeItem(size + index)));
   }
 
   {
     const doc = createJSONDocument(Schema, state, { history: 0 });
-    bench("doc.clipboard.paste direct payload single append", rounds, (index) =>
-      doc.clipboard.paste("/items/-", { payload: makeItem(size + index) }));
+    bench("doc.insert direct payload single append", rounds, (index) =>
+      doc.insert("/items/-", makeItem(size + index)));
   }
 
   {
     const doc = createJSONDocument(Schema, state, { history: 0 });
-    bench(`doc.clipboard.paste direct payload spread ${insertedItems.length}`, Math.max(3, Math.ceil(rounds / 2)), () =>
-      doc.clipboard.paste("/items/-", { payload: insertedItems, spread: true }));
+    bench(`doc.insert direct payload spread ${insertedItems.length}`, Math.max(3, Math.ceil(rounds / 2)), () =>
+      doc.insert("/items/-", insertedItems, { spread: true }));
   }
 
   {
     let doc;
-    benchWithSetup(`doc.clipboard.paste direct payload spread ${insertedItems.length} + rekey`, Math.max(3, Math.ceil(rounds / 2)), () => {
+    benchWithSetup(`doc.insert direct payload spread ${insertedItems.length} + rekey`, Math.max(3, Math.ceil(rounds / 2)), () => {
       doc = createJSONDocument(Schema, state, { history: 0 });
     }, () =>
-      doc.clipboard.paste("/items/-", {
-        payload: insertedItems,
+      doc.insert("/items/-", insertedItems, {
         spread: true,
         rekey: { fields: ["id"], strategy: "suffix" },
       }));
@@ -383,11 +382,10 @@ for (const size of sizes) {
 
   {
     let doc;
-    benchWithSetup(`doc.clipboard.paste direct payload spread repeated rekey ${repeatedRekeyItems.length}`, Math.max(3, Math.ceil(rounds / 2)), () => {
+    benchWithSetup(`doc.insert direct payload spread repeated rekey ${repeatedRekeyItems.length}`, Math.max(3, Math.ceil(rounds / 2)), () => {
       doc = createJSONDocument(Schema, state, { history: 0 });
     }, () =>
-      doc.clipboard.paste("/items/-", {
-        payload: repeatedRekeyItems,
+      doc.insert("/items/-", repeatedRekeyItems, {
         spread: true,
         rekey: { fields: ["id"], strategy: "suffix" },
       }));
@@ -395,8 +393,8 @@ for (const size of sizes) {
 
   {
     const doc = createJSONDocument(Schema, state, { history: 0 });
-    bench(`doc.clipboard.paste direct payload spread ${insertedItems.length} before middle`, Math.max(3, Math.ceil(rounds / 2)), () =>
-      doc.clipboard.paste(`/items/${middle}`, { payload: insertedItems, spread: true }));
+    bench(`doc.insert direct payload spread ${insertedItems.length} before middle`, Math.max(3, Math.ceil(rounds / 2)), () =>
+      doc.insert(`/items/${middle}`, insertedItems, { spread: true }));
   }
 
   {
@@ -437,14 +435,16 @@ for (const size of sizes) {
 
   {
     const doc = createJSONDocument(UnknownItemsSchema, { items: [] }, { history: 0 });
-    bench("doc.clipboard.paste direct payload unknown replace /items", Math.max(3, Math.ceil(rounds / 2)), () =>
-      doc.clipboard.paste({ replace: "/items" }, { payload: state.items }));
+    bench("doc.replace direct payload unknown /items", Math.max(3, Math.ceil(rounds / 2)), () =>
+      doc.replace("/items", state.items));
   }
 
   {
     const doc = createJSONDocument(UnknownItemsSchema, { items: [] }, { history: 0 });
-    bench("doc.clipboard.paste direct payload unknown replace /items trusted", Math.max(3, Math.ceil(rounds / 2)), () =>
-      doc.clipboard.paste({ replace: "/items" }, { payload: state.items, trustedPayload: true }));
+    bench("doc.clipboard.write trusted + paste replace /items", Math.max(3, Math.ceil(rounds / 2)), () => {
+      doc.clipboard.write(state.items, { trustedPayload: true, clonePayload: false });
+      return doc.clipboard.paste({ replace: "/items" });
+    });
   }
 
   {

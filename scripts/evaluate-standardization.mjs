@@ -34,7 +34,7 @@ for (const [label, pattern] of [
   ["document surface", /find[\s\S]*insert[\s\S]*replace[\s\S]*delete[\s\S]*move[\s\S]*duplicate[\s\S]*copy[\s\S]*cut[\s\S]*paste[\s\S]*undo[\s\S]*redo[\s\S]*canFind[\s\S]*canInsert[\s\S]*canRedo/],
   ["strict semantics", /기본값은 `strict: false`/],
   ["selection semantics", /selection은 DOM focus가 아니라 headless document data다/],
-  ["clipboard spread", /직접 `paste\(target, \{ payload \}\)`에 array payload를 넘긴 경우 기본적으로[\s\S]*spread하면 안/],
+  ["clipboard spread", /직접 array payload를 `insert\(target, payload, \{ spread: true \}\)`로 넣으면[\s\S]*item별 sibling insert/],
   ["history semantics", /history는 undo\/redo control surface/],
   ["breaking change", /breaking change로\s+취급해야 한다/],
   ["adapter pressure", /form editing[\s\S]*storage, history, collaboration bridge/],
@@ -111,7 +111,7 @@ for (const [label, pattern] of [
   ["json pointer mutation", /path: "\/columns\/0\/cards\/0\/title"/],
   ["capability purity", /keeps capability probes reasoned and mutation-free/],
   ["selection history", /commits patch and final selection as one history step/],
-  ["clipboard spread", /explicit about spread/],
+  ["clipboard insert split", /uses insert for explicit payloads/],
   ["subscriber atomicity", /only after successful atomic changes/],
 ]) {
   requirePattern("standard conformance", conformance, pattern);
@@ -126,6 +126,9 @@ if (!publicContract.react.values.includes("useJSONDocument")) {
 for (const requiredType of [
   "JSONDocument",
   "JSONCapabilityResult",
+  "JSONDocumentInsertTarget",
+  "JSONDocumentInsertOptions",
+  "JSONDocumentMoveTarget",
   "SelectionSnap",
   "ClipboardPasteResult",
   "JSONDocumentHistory",

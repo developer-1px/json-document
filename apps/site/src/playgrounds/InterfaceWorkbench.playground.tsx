@@ -627,7 +627,7 @@ export function InterfaceWorkbench() {
   const canCutSource = doc.canCut(selectedSource);
   const canPasteClipboardAfterTarget = doc.canPaste({ after: valueTarget });
   const canPasteClipboardToInsertTarget = doc.canPaste(insertTarget, { spread: true, rekey: cardRekey() });
-  const canPasteDirectPayloadToInsertTarget = doc.canPaste(insertTarget, { payload: payloadValue, rekey: cardRekey() });
+  const canInsertPayloadToInsertTarget = doc.canInsert(insertTarget, payloadValue, { rekey: cardRekey() });
   const canFindQuery = doc.canFind(query);
   const canUndo = doc.canUndo();
   const canRedo = doc.canRedo();
@@ -760,14 +760,16 @@ export function InterfaceWorkbench() {
     rekey: cardRekey(),
   });
 
-  const pasteDirectPayloadAfterTarget = (): unknown => doc.paste(
+  const insertPayloadAfterTarget = (): unknown => doc.insert(
     { after: valueTarget },
-    { payload: parsedPayload(), rekey: cardRekey() },
+    parsedPayload(),
+    { rekey: cardRekey() },
   );
 
-  const pasteDirectPayloadToInsertTarget = (): unknown => doc.paste(
+  const insertPayloadToInsertTarget = (): unknown => doc.insert(
     insertTarget,
-    { payload: parsedPayload(), rekey: cardRekey() },
+    parsedPayload(),
+    { rekey: cardRekey() },
   );
 
   const duplicateTarget = (): unknown => {
@@ -1415,13 +1417,13 @@ export function InterfaceWorkbench() {
           <ActionButton disabledReason={bulkSelectionReason ?? canDisabledReason(canPasteClipboardToInsertTarget)} onClick={executePasteCommand}>Paste</ActionButton>
         </CommandRow>
         <CommandRow
-          title="Paste payload into column"
-          api="doc.paste(target, { payload })"
-          status={<CommandState reason={bulkSelectionReason} capability={canPasteDirectPayloadToInsertTarget} />}
+          title="Insert payload into column"
+          api="doc.insert(target, payload, options)"
+          status={<CommandState reason={bulkSelectionReason} capability={canInsertPayloadToInsertTarget} />}
           args={<>{insertTargetInput("payload target")}{payloadInput("column payload")}</>}
           result={featureResult("Bulk cards")}
         >
-          <ActionButton disabledReason={bulkSelectionReason ?? canDisabledReason(canPasteDirectPayloadToInsertTarget)} onClick={() => run(`doc.paste("${insertTarget}", { payload, rekey })`, pasteDirectPayloadToInsertTarget, "Bulk cards")}>Paste payload</ActionButton>
+          <ActionButton disabledReason={bulkSelectionReason ?? canDisabledReason(canInsertPayloadToInsertTarget)} onClick={() => run(`doc.insert("${insertTarget}", payload, { rekey })`, insertPayloadToInsertTarget, "Bulk cards")}>Insert payload</ActionButton>
         </CommandRow>
       </>
     ),
@@ -1650,7 +1652,7 @@ export function InterfaceWorkbench() {
           <ApiRow action={<ActionButton onClick={() => run("doc.canCopy(source)", () => doc.canCopy(selectedSource))}>doc.canCopy</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run("doc.canCut(source)", () => doc.canCut(selectedSource))}>doc.canCut</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run(`doc.canPaste("${insertTarget}", { spread: true, rekey })`, () => doc.canPaste(insertTarget, { spread: true, rekey: cardRekey() }))}>doc.canPaste</ActionButton>} />
-          <ApiRow action={<ActionButton onClick={() => run(`doc.canPaste("${insertTarget}", { payload })`, () => doc.canPaste(insertTarget, { payload: parsedPayload() }))}>doc.canPaste payload</ActionButton>} />
+          <ApiRow action={<ActionButton onClick={() => run(`doc.canInsert("${insertTarget}", payload)`, () => doc.canInsert(insertTarget, parsedPayload()))}>doc.canInsert payload</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run("doc.canUndo()", () => doc.canUndo())}>doc.canUndo</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run("doc.canRedo()", () => doc.canRedo())}>doc.canRedo</ActionButton>} />
         </ActionGroup>
@@ -1696,9 +1698,9 @@ export function InterfaceWorkbench() {
           <ApiRow action={<ActionButton onClick={() => run("doc.copy(source)", copySelection)}>doc.copy</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run("doc.cut(source)", () => doc.cut(selectedSource))}>doc.cut</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run(`doc.paste("${insertTarget}", { spread: true, rekey })`, pasteClipboardToInsertTarget)}>doc.paste</ActionButton>} />
-          <ApiRow action={<ActionButton onClick={() => run(`doc.paste("${insertTarget}", { payload, rekey })`, pasteDirectPayloadToInsertTarget)}>doc.paste payload</ActionButton>} />
+          <ApiRow action={<ActionButton onClick={() => run(`doc.insert("${insertTarget}", payload, { rekey })`, insertPayloadToInsertTarget)}>doc.insert payload</ActionButton>} />
           <ApiRow action={<ActionButton onClick={() => run(`doc.paste({ after: "${valueTarget}" })`, pasteClipboardAfterTarget)}>doc.paste after</ActionButton>} />
-          <ApiRow action={<ActionButton onClick={() => run(`doc.paste({ after: "${valueTarget}" }, { payload, rekey })`, pasteDirectPayloadAfterTarget)}>doc.paste payload after</ActionButton>} />
+          <ApiRow action={<ActionButton onClick={() => run(`doc.insert({ after: "${valueTarget}" }, payload, { rekey })`, insertPayloadAfterTarget)}>doc.insert payload after</ActionButton>} />
         </ActionGroup>
 
         <ActionGroup title="history API">

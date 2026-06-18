@@ -72,13 +72,14 @@ if (doc.canPatch(patch).ok) {
 | 실행 전 확인 | `doc.canPatch`, `doc.canFind`, `doc.canInsert`, `doc.canReplace`, `doc.canDelete`, `doc.canMove`, `doc.canDuplicate`, `doc.canCopy`, `doc.canCut`, `doc.canPaste`, `doc.canUndo`, `doc.canRedo` |
 | sibling 복제 | `doc.duplicate(pointer?, options)` |
 | 선택 상태 저장 | `doc.selection` |
-| copy, cut, paste, 직접 payload paste | `doc.copy(...)`, `doc.cut(...)`, `doc.paste(...)`, `doc.paste(target, { payload })` |
+| copy, cut, paste | `doc.copy(...)`, `doc.cut(...)`, `doc.paste(...)` |
+| 외부 payload 삽입 | `doc.insert(target, value, options?)` |
 | undo, redo | `doc.undo()`, `doc.redo()`, `doc.history` |
 | 위치별 schema 확인 | `doc.schema.at`, `doc.schema.kind`, `doc.schema.describe`, `doc.schema.accepts` |
 
 ## 핵심 규칙
 
-- Patch path와 selection/clipboard target은 JSON Pointer입니다.
+- Patch path와 source는 JSON Pointer입니다. `insert`와 `move` target은 exact Pointer 또는 `{ before }`, `{ after }`, `{ into }`를 받습니다.
 - JSONPath는 값을 찾는 언어이며 직접 변경하지 않습니다.
 - `doc.at(pointer)`는 raw value가 아니라 `ReadResult`를 반환합니다.
 - `can*`는 boolean이 아니라 이유 있는 capability result입니다.
@@ -135,7 +136,7 @@ if (copied.ok) {
 }
 ```
 
-삽입 위치를 이미 알고 있으면 `/items/-`나 `/lists/1/cards/-` 같은 Pointer를 그대로 넘깁니다. 기존 값을 기준으로 붙일 때는 `{ before: pointer }`, `{ after: pointer }`, `{ replace: pointer }`를 사용합니다.
+삽입/이동 위치를 이미 알고 있으면 `/items/-`나 `/lists/1/cards/-` 같은 exact Pointer를 그대로 넘깁니다. Array container 안에 append할 때는 `{ into: "/items" }`, array item 기준으로 배치할 때는 `{ before: "/items/0" }`, `{ after: "/items/0" }`를 사용합니다. Object member 추가는 `/record/key` 같은 exact Pointer를 씁니다. 기존 값을 바꿀 때는 `doc.replace(...)`를 쓰고, document clipboard paste만 `{ replace: pointer }`를 추가로 지원합니다.
 
 ## Official extensions
 
@@ -155,6 +156,7 @@ import { createDocumentPersistence } from "@interactive-os/json-document-persist
 import { createIdResolver } from "@interactive-os/json-document-id-resolver";
 import { createPatchPreview } from "@interactive-os/json-document-patch-preview";
 import { createSearchReplace } from "@interactive-os/json-document-search-replace";
+import { createGrouping } from "@interactive-os/json-document-grouping";
 import { createProposedChanges } from "@interactive-os/json-document-proposed-changes";
 import { createComments } from "@interactive-os/json-document-comments";
 import { createWebClipboard } from "@interactive-os/json-document-clipboard-web";

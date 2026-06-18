@@ -4,7 +4,7 @@
 
 This section is generated from `packages/*` and `labs/extensions/*`.
 
-Official extensions: 16
+Official extensions: 17
 
 | Package | Exports | Use for | Not for | Summary |
 | --- | ---: | --- | --- | --- |
@@ -14,6 +14,7 @@ Official extensions: 16
 | `@interactive-os/json-document-comments` | 14 | anchor review comments to document structure | comment UI, moderation, or author storage | Official headless comments extension for review notes anchored to `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-dirty-state` | 7 | compare a document to a clean baseline | persistence or server save status | Official headless dirty state tracking extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-form-draft` | 15 | hold temporary invalid form input before committing valid JSON | rendered form components | Official headless form draft extension for temporary input that is not ready to enter a schema-valid `@interactive-os/json-document` document. |
+| `@interactive-os/json-document-grouping` | 15 | group and ungroup selected sibling JSON items | Airtable group-by views | Official extension for structural `group` and `ungroup`. |
 | `@interactive-os/json-document-id-resolver` | 10 | resolve scoped stable ids to current JSON Pointers | id generation, relation graphs, routing, or server identity | Official headless stable id resolver extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-outline` | 19 | project and edit nested document outline structures | Figma layer panels without a tree schema adapter | Official headless outline tree and structure editing extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-patch-log` | 9 | record and replay applied JSON Patch records | product activity feeds or audit authorization | Official headless patch recording and replay extension for `@interactive-os/json-document` documents. |
@@ -25,7 +26,7 @@ Official extensions: 16
 | `@interactive-os/json-document-search-replace` | 23 | find and replace text across document string fields | regex engines, rendered text extraction, or search UI | Official headless search and replace extension for text fields in `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-snippets` | 12 | insert reusable JSON payloads with schema-safe paste checks | slash palette UI or snippet storage | Official headless snippet insertion extension for `@interactive-os/json-document` documents. |
 
-Lab extensions: 39
+Lab extensions: 38
 
 Lab extensions are private candidates. They are listed to show product pressure, not as shipped packages.
 
@@ -49,7 +50,6 @@ Lab extensions are private candidates. They are listed to show product pressure,
 | `@interactive-os/json-document-fill-series` | lab-only | 12 | fill a value or linear series across a contiguous sibling range | date/pattern series, 2D grid fill, or fill-handle drag UI | Lab fill/series propagation extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-generate-slug` | lab-only | 9 | derive a URL-safe slug from a string field (CMS title to slug) | uniqueness/collision handling or non-Latin transliteration | Lab generate-slug extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-grid-range` | lab-only | 27 | paste or fill rectangular grid ranges backed by sparse JSON records | DOM grid selection, coordinate naming policy, formulas, or TSV/CSV parsing | Lab grid-range editing extension for sparse-record-backed `@interactive-os/json-document` documents. |
-| `@interactive-os/json-document-grouping` | lab-only | 15 | group and ungroup selected sibling JSON items | Airtable group-by views | Lab extension for structural `group` and `ungroup`. |
 | `@interactive-os/json-document-increment-number` | lab-only | 9 | increment, decrement, or step a numeric field with optional clamping | rendered spinners, formatting, units, or currency | Lab increment-number extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-join-text` | lab-only | 9 | join an array into a string field with a separator (inverse of split-text) | locale list formatting, or reading the result without writing | Lab join-text extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-layer-order` | lab-only | 11 | reorder visual stack arrays with bring/send commands | canvas rendering or z-index CSS management | Lab layer ordering extension for `@interactive-os/json-document` documents. |

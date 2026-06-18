@@ -1,8 +1,7 @@
 {
   "name": "@interactive-os/json-document-grouping",
   "version": "0.1.0",
-  "description": "Lab structural group and ungroup extension functions for json-document documents.",
-  "private": true,
+  "description": "Official structural group and ungroup extension functions for json-document documents.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -11,7 +10,12 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/developer-1px/json-document.git",
-    "directory": "labs/extensions/grouping"
+    "directory": "packages/grouping"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
   "keywords": [
     "@interactive-os/json-document",

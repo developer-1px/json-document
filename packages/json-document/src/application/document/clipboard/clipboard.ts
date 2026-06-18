@@ -27,7 +27,6 @@ import {
   writeClipboardBuffer,
 } from "./buffer.js";
 import { createClipboardPasteRuntime } from "./paste.js";
-import { splitPasteOptions } from "./pasteOptions.js";
 
 const EMPTY_CLIPBOARD: ClipboardEmpty = {
   ok: false,
@@ -188,22 +187,14 @@ export function createClipboard<S extends z.ZodType>(
     },
 
     paste(target, options) {
-      const pasteOptions = splitPasteOptions(options);
-      if (pasteOptions.kind === "payload") {
-        return pasteRuntime.pastePayload(pasteOptions.payload, target, pasteOptions.options, false, false);
-      }
       if (!buffer) return EMPTY_CLIPBOARD;
-      return pasteRuntime.pastePayload(buffer.payload, target, pasteOptions.options, (buffer.sources?.length ?? 0) > 1, true);
+      return pasteRuntime.pastePayload(buffer.payload, target, options, (buffer.sources?.length ?? 0) > 1, true);
     },
 
     [INTERNAL_CLIPBOARD_CAN_PASTE](target, options) {
-      const pasteOptions = splitPasteOptions(options);
-      if (pasteOptions.kind === "payload") {
-        return pasteRuntime.canPastePayload(pasteOptions.payload, target, pasteOptions.options, false, false);
-      }
       if (!buffer) return EMPTY_CLIPBOARD;
-      if (pasteRuntime.canReplaceBufferedSource(buffer, target, pasteOptions.options)) return OK;
-      return pasteRuntime.canPastePayload(buffer.payload, target, pasteOptions.options, (buffer.sources?.length ?? 0) > 1, true);
+      if (pasteRuntime.canReplaceBufferedSource(buffer, target, options)) return OK;
+      return pasteRuntime.canPastePayload(buffer.payload, target, options, (buffer.sources?.length ?? 0) > 1, true);
     },
   };
 }

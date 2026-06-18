@@ -74,7 +74,12 @@ import {
   type JSONDocumentDuplicateError,
   type JSONDocumentDuplicateOptions,
   type JSONDocumentDuplicateResult,
+  type JSONDocumentEditError,
+  type JSONDocumentEditResult,
   type JSONDocumentHistory,
+  type JSONDocumentInsertOptions,
+  type JSONDocumentInsertTarget,
+  type JSONDocumentMoveTarget,
   type JSONDocumentOptions,
   type JSONDocumentPasteOptions,
   type JSONDocumentPasteTarget,
@@ -185,13 +190,13 @@ interface JSONDocument<T> {
   patch(operations: JSONPatchInput, metadata?: JSONChangeMetadata): JSONResult;
   commit(operations: readonly JSONPatchOperation[], options?: JSONDocumentCommitOptions): JSONResult;
   find(jsonPath: string): QueryResult;
-  insert(path: Pointer, value: unknown): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
+  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
   insert(value: unknown): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
   replace(path: Pointer, value: unknown): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
   replace(value: unknown): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
   delete(source?: SelectionSource): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
-  move(source: Pointer, target: Pointer): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
-  move(target: Pointer): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
+  move(source: Pointer, target: JSONDocumentMoveTarget): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
+  move(target: JSONDocumentMoveTarget): JSONResult | Extract<JSONCapabilityResult, { ok: false }>;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   duplicate(options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   copy(source?: SelectionSource, options?: ClipboardCopyOptions): ClipboardCopyResult;
@@ -211,12 +216,12 @@ interface JSONDocument<T> {
   canPatch(operations: JSONPatchInput): JSONCapabilityResult;
   canFind(jsonPath: string): JSONCapabilityResult;
   canInsert(value: unknown): JSONCapabilityResult;
-  canInsert(path: Pointer, value: unknown): JSONCapabilityResult;
+  canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONCapabilityResult;
   canReplace(value: unknown): JSONCapabilityResult;
   canReplace(path: Pointer, value: unknown): JSONCapabilityResult;
   canDelete(source?: SelectionSource): JSONCapabilityResult;
-  canMove(target: Pointer): JSONCapabilityResult;
-  canMove(source: Pointer, target: Pointer): JSONCapabilityResult;
+  canMove(target: JSONDocumentMoveTarget): JSONCapabilityResult;
+  canMove(source: Pointer, target: JSONDocumentMoveTarget): JSONCapabilityResult;
   canDuplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONCapabilityResult;
   canDuplicate(options?: JSONDocumentDuplicateOptions): JSONCapabilityResult;
   canCopy(source?: SelectionSource): JSONCapabilityResult;
@@ -244,6 +249,7 @@ doc.insert("/items/-", item);
 doc.replace("/title", "Ready");
 doc.delete("/items/0");
 doc.move("/items/0", "/items/2");
+doc.move("/items/0", { after: "/items/2" });
 doc.copy("/items/0");
 doc.cut("/items/1");
 doc.paste("/items/-");
@@ -331,21 +337,25 @@ Clipboard는 JSON payload flow를 소유한다. Headless buffer이며 `navigator
 doc.copy("/items/0");
 doc.cut(["/items/0", "/items/1"]);
 doc.paste("/items/-");
+doc.paste({ into: "/items" });
 doc.paste({ after: "/items/0" });
-doc.paste("/items/-", { payload: { id: "new", name: "New" } });
+doc.insert("/items/-", { id: "new", name: "New" });
+doc.insert({ into: "/items" }, { id: "new", name: "New" });
+doc.insert({ after: "/items/0" }, { id: "new", name: "New" });
+doc.move("/items/0", { into: "/archive" });
 doc.clipboard.write(payload, { trustedPayload: true });
 doc.clipboard.clear();
 ```
 
-Top-level `copy`, `cut`, `paste`는 보편 편집 feature verb다. `doc.clipboard`는 payload buffer state와 lower-level clipboard boundary를 유지한다. `copy`와 `cut`은 source를 생략하면 현재 selection source를 사용한다. `paste`는 target을 생략하면 current primary selection pointer를 사용한다. Direct payload paste는 `paste(target, { payload })`를 사용하며 먼저 buffer에 write할 필요가 없다.
+Top-level `copy`, `cut`, `paste`는 보편 clipboard feature verb다. `paste`는 document clipboard buffer를 읽는다. 외부 payload, snippet, drag/drop payload처럼 값 자체를 넣는 경우에는 `insert(target, value, options?)`를 사용한다. `doc.clipboard`는 payload buffer state와 lower-level clipboard boundary를 유지한다. `copy`와 `cut`은 source를 생략하면 현재 selection source를 사용한다. `paste`와 `insert(value)`는 target을 생략하면 current primary selection pointer를 사용한다.
 
 `write(..., { trustedPayload: true })`는 호출자가 JSON-serializability boundary를 이미 소유할 때 payload JSON 검사를 건너뛴다. 기본적으로 payload는 buffer에 저장되기 전에 clone된다.
 
 `cut`, `paste`는 즉시 적용된다. 성공 결과의 `value`는 현재 document value이고 `applied`는 이미 적용된 patch record다.
 
-기존 값 기준 target은 `{ before: pointer }`, `{ after: pointer }`, `{ replace: pointer }`를 쓴다. 삽입 위치가 이미 있으면 `/items/-` 같은 Pointer를 그대로 쓴다.
+삽입/이동 위치가 이미 있으면 `/items/-` 같은 exact Pointer를 그대로 쓴다. Array container 안에 append할 때는 `{ into: "/items" }`를 쓴다. Array item 기준 sibling 배치는 `{ before: "/items/0" }`, `{ after: "/items/0" }`를 쓴다. Object member 추가는 순서가 없으므로 `/record/key` 같은 exact Pointer를 쓴다. Clipboard paste는 추가로 `{ replace: pointer }`를 지원한다. `move`의 relative target은 같은 array 안에서 source removal 때문에 target index가 밀리는 경우 core가 JSON Patch destination을 보정한다.
 
-Multi-source copy/cut은 array payload를 저장한다. 이 buffer를 array insertion target에 paste하면 기본적으로 spread된다. `{ spread: false }`는 array payload 자체를 하나의 값으로 넣을 때만 쓴다. Direct array payload paste는 multi-source 의도를 추론하지 않으므로 item별 sibling paste에는 `{ spread: true }`를 명시한다.
+Multi-source copy/cut은 array payload를 저장한다. 이 buffer를 array insertion target에 paste하면 기본적으로 spread된다. `{ spread: false }`는 array payload 자체를 하나의 값으로 넣을 때만 쓴다. 직접 array payload를 `insert(target, payload, { spread: true })`로 넣으면 item별 sibling insert가 된다.
 
 `discriminator_mismatch`는 schema violation이 아니며 `violations`를 노출하지 않는다. Capability check는 `code`와 `reason`으로 보고하고, clipboard paste mutation result는 `ClipboardPasteDiscriminatorMismatch` 형태의 `source`와 `expected`를 포함할 수 있다.
 
