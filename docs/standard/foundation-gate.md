@@ -46,6 +46,7 @@ RFC급 foundation
 | self-improvement loop report | `docs/standard/self-improvement-loop-report.md` | 10회 루프 완료 |
 | export lock | `packages/json-document/public-contract.json` | 활성 |
 | 의미론 conformance | `packages/json-document/tests/public/standard-conformance.test.ts` | 활성 |
+| semantic fixture lock | `packages/json-document/tests/public/semantic-contract.test.ts` | 활성 |
 | 표준화 evaluator | `scripts/evaluate-standardization.mjs` | 활성 |
 | 릴리스 기계 검증 | `npm run release:check` | 활성 |
 

@@ -22,6 +22,7 @@ const resultContract = read("docs/standard/result-contract.md");
 const selectionContract = read("docs/standard/selection-contract.md");
 const schemaIntrospectionContract = read("docs/standard/schema-introspection-contract.md");
 const conformance = read("packages/json-document/tests/public/standard-conformance.test.ts");
+const semanticContract = read("packages/json-document/tests/public/semantic-contract.test.ts");
 const publicContract = JSON.parse(read("packages/json-document/public-contract.json"));
 const rootPackage = JSON.parse(read("package.json"));
 
@@ -34,6 +35,7 @@ for (const [label, pattern] of [
   ["document surface", /find[\s\S]*insert[\s\S]*replace[\s\S]*delete[\s\S]*move[\s\S]*duplicate[\s\S]*copy[\s\S]*cut[\s\S]*paste[\s\S]*undo[\s\S]*redo[\s\S]*canFind[\s\S]*canInsert[\s\S]*canRedo/],
   ["strict semantics", /기본값은 `strict: false`/],
   ["selection semantics", /selection은 DOM focus가 아니라 headless document data다/],
+  ["semantic fixture lock", /Semantic fixture[\s\S]*result code[\s\S]*strict 기본값[\s\S]*실패 atomicity/],
   ["clipboard spread", /직접 array payload를 `insert\(target, payload, \{ spread: true \}\)`로 넣으면[\s\S]*item별 sibling insert/],
   ["history semantics", /history는 undo\/redo control surface/],
   ["breaking change", /breaking change로\s+취급해야 한다/],
@@ -63,6 +65,7 @@ for (const [label, pattern] of [
   ["selection freeze artifact", /selection-contract\.md/],
   ["schema freeze artifact", /schema-introspection-contract\.md/],
   ["conformance artifact", /standard-conformance\.test\.ts/],
+  ["semantic fixture artifact", /semantic-contract\.test\.ts/],
   ["evaluator artifact", /evaluate-standardization\.mjs/],
   ["adapter pressure", /form[\s\S]*table\/data-grid[\s\S]*outliner\/tree[\s\S]*rich text[\s\S]*storage\/collaboration/i],
 ]) {
@@ -115,6 +118,22 @@ for (const [label, pattern] of [
   ["subscriber atomicity", /only after successful atomic changes/],
 ]) {
   requirePattern("standard conformance", conformance, pattern);
+}
+
+if (!/from "@interactive-os\/json-document"/.test(semanticContract)) {
+  fail("semantic contract: must import from the public root package.");
+}
+if (/from "\.\.|from '\.\.|\/src\//.test(semanticContract)) {
+  fail("semantic contract: must not import implementation-private modules.");
+}
+for (const [label, pattern] of [
+  ["fixture suite", /json-document 1\.0 semantic contract fixtures/],
+  ["stable result codes", /invalid_pointer[\s\S]*schema_violation[\s\S]*empty_stack[\s\S]*empty_clipboard[\s\S]*not_serializable/],
+  ["strict policy", /strict policy[\s\S]*strict: true[\s\S]*JSONDocumentError/],
+  ["failed mutation atomicity", /failed mutation atomicity[\s\S]*undoDepth[\s\S]*observed\)\.toEqual\(\[\]\)/],
+  ["clipboard and selection history", /clipboard spread[\s\S]*selection history[\s\S]*undo\(\)[\s\S]*redo\(\)/],
+]) {
+  requirePattern("semantic contract", semanticContract, pattern);
 }
 
 if (!publicContract.root.values.includes("createJSONDocument")) {

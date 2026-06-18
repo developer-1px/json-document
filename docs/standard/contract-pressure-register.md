@@ -366,12 +366,13 @@ product policy 주입인지 feature 구현 위임 실패인지 더 확인해야 
 - Schema introspection contract.
 - `strict: false` 기본값.
 - Top-level `doc.undo()` / `doc.redo()` Result surface.
+- Semantic fixture lock: result code, strict policy, failed mutation atomicity,
+  clipboard spread, selection/history round-trip.
 
-다음 후보:
+남은 후보:
 
 - public type signature snapshot.
-- error code fixture.
-- selection and clipboard semantic fixture.
+- broader signature/overload snapshot beyond the package smoke typecheck.
 
 ## Loop Gate
 
