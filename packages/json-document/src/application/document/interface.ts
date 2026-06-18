@@ -21,9 +21,15 @@ import type {
 } from "./history/metadata.js";
 import type { JSONDocumentHistory } from "./history/undoRedo.js";
 import type {
+  JSONDocumentEditResult,
   JSONDocumentDuplicateOptions,
   JSONDocumentDuplicateResult,
 } from "./edit/actions.js";
+import type {
+  JSONDocumentInsertOptions,
+  JSONDocumentInsertTarget,
+  JSONDocumentMoveTarget,
+} from "./edit/target.js";
 import type {
   EntriesResult,
   QueryResult,
@@ -46,9 +52,6 @@ export interface JSONDocumentOptions {
 
 export type JSONCapabilityResult = CapabilityResult;
 
-type JSONDocumentEditError = Extract<JSONCapabilityResult, { ok: false }>;
-type JSONDocumentEditResult = JSONResult | JSONDocumentEditError;
-
 export interface JSONDocument<T> {
   readonly value: T;
   readonly lastPatch: ReadonlyArray<JSONPatchOperation>;
@@ -59,13 +62,13 @@ export interface JSONDocument<T> {
   patch(operations: JSONPatchInput, metadata?: JSONChangeMetadata): JSONResult;
   commit(operations: ReadonlyArray<JSONPatchOperation>, options?: JSONDocumentCommitOptions): JSONResult;
   find(jsonpath: string): QueryResult;
-  insert(path: Pointer, value: unknown): JSONDocumentEditResult;
+  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult;
   insert(value: unknown): JSONDocumentEditResult;
   replace(path: Pointer, value: unknown): JSONDocumentEditResult;
   replace(value: unknown): JSONDocumentEditResult;
   delete(source?: SelectionSource): JSONDocumentEditResult;
-  move(source: Pointer, target: Pointer): JSONDocumentEditResult;
-  move(target: Pointer): JSONDocumentEditResult;
+  move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult;
+  move(target: JSONDocumentMoveTarget): JSONDocumentEditResult;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   duplicate(options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   copy(source?: SelectionSource, options?: ClipboardCopyOptions): ClipboardCopyResult;
@@ -86,12 +89,12 @@ export interface JSONDocument<T> {
   canPatch(operations: JSONPatchInput): JSONCapabilityResult;
   canFind(jsonpath: string): JSONCapabilityResult;
   canInsert(value: unknown): JSONCapabilityResult;
-  canInsert(path: Pointer, value: unknown): JSONCapabilityResult;
+  canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONCapabilityResult;
   canReplace(value: unknown): JSONCapabilityResult;
   canReplace(path: Pointer, value: unknown): JSONCapabilityResult;
   canDelete(source?: SelectionSource): JSONCapabilityResult;
-  canMove(target: Pointer): JSONCapabilityResult;
-  canMove(source: Pointer, target: Pointer): JSONCapabilityResult;
+  canMove(target: JSONDocumentMoveTarget): JSONCapabilityResult;
+  canMove(source: Pointer, target: JSONDocumentMoveTarget): JSONCapabilityResult;
   canDuplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONCapabilityResult;
   canDuplicate(options?: JSONDocumentDuplicateOptions): JSONCapabilityResult;
   canCopy(source?: SelectionSource): JSONCapabilityResult;

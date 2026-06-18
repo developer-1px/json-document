@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createSnippets, type Snippet, type SnippetInsertOptions } from "@interactive-os/json-document-snippets";
 import { useJSONDocument } from "@interactive-os/json-document/react";
-import type { JSONCapabilityResult, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocumentInsertTarget, Pointer } from "@interactive-os/json-document";
 import { z } from "zod";
 import "./snippet-composer-lab.css";
 
@@ -75,6 +75,8 @@ const snippetCatalog = [
 ] satisfies ReadonlyArray<Snippet>;
 
 type TargetMode = "append" | "after-selected" | "replace-selected";
+type SnippetPlanResult = ReturnType<ReturnType<typeof createSnippets>["canInsert"]>;
+type CommandPlanResult = SnippetPlanResult | JSONCapabilityResult;
 
 export function App() {
   const doc = useJSONDocument(PageSchema, initialPage, { history: 50 });
@@ -86,18 +88,38 @@ export function App() {
   const [message, setMessage] = useState("ready");
 
   const blockIndex = Math.min(selectedBlockIndex, Math.max(doc.value.blocks.length - 1, 0));
-  const target = targetFromMode(targetMode, blockIndex);
+  const insertTarget = insertTargetFromMode(targetMode, blockIndex);
+  const replaceTarget = targetMode === "replace-selected" ? blockPointer(blockIndex) : null;
+  const selectedSnippet = snippets.get(selectedSnippetId);
   const options = useMemo<SnippetInsertOptions | undefined>(() => (
     rekey
       ? { rekey: { fields: ["id"], strategy: "suffix" } }
       : undefined
   ), [rekey]);
-  const plan = snippets.canInsert(selectedSnippetId, target, options);
+  const plan: CommandPlanResult = replaceTarget === null
+    ? snippets.canInsert(selectedSnippetId, insertTarget, options)
+    : selectedSnippet === null
+      ? missingSnippetPlan(selectedSnippetId)
+      : doc.canReplace(replaceTarget, selectedSnippet.payload);
   const canInsert = plan.ok;
   const summaries = snippets.list();
 
   const insertSelectedSnippet = () => {
-    const result = snippets.insert(selectedSnippetId, target, options);
+    if (replaceTarget !== null) {
+      if (selectedSnippet === null) {
+        setMessage(`snippet_not_found: ${selectedSnippetId}`);
+        return;
+      }
+      const result = doc.replace(replaceTarget, copyPayload(selectedSnippet.payload));
+      if (!result.ok) {
+        setMessage(`${result.code}: ${result.reason ?? result.code}`);
+        return;
+      }
+      setMessage(`replace ${selectedSnippet.id}`);
+      return;
+    }
+
+    const result = snippets.insert(selectedSnippetId, insertTarget, options);
     if (!result.ok) {
       setMessage(`${result.code}: ${result.reason}`);
       return;
@@ -163,7 +185,7 @@ export function App() {
             </div>
             <div>
               <dt>target</dt>
-              <dd aria-label="target value">{targetLabel(target)}</dd>
+              <dd aria-label="target value">{targetLabel(insertTarget, replaceTarget)}</dd>
             </div>
           </dl>
 
@@ -200,9 +222,8 @@ function BlockContent(props: { block: z.output<typeof BlockSchema> }) {
   return <span>{block.text}</span>;
 }
 
-function targetFromMode(mode: TargetMode, selectedIndex: number): JSONDocumentPasteTarget {
+function insertTargetFromMode(mode: TargetMode, selectedIndex: number): JSONDocumentInsertTarget {
   if (mode === "after-selected") return { after: blockPointer(selectedIndex) };
-  if (mode === "replace-selected") return { replace: blockPointer(selectedIndex) };
   return "/blocks/-";
 }
 
@@ -210,15 +231,15 @@ function blockPointer(index: number): Pointer {
   return `/blocks/${index}` as Pointer;
 }
 
-function targetLabel(target: JSONDocumentPasteTarget): string {
+function targetLabel(target: JSONDocumentInsertTarget, replaceTarget: Pointer | null): string {
+  if (replaceTarget !== null) return `replace ${replaceTarget}`;
   if (typeof target === "string") return target;
   if ("after" in target) return `after ${target.after}`;
   if ("before" in target) return `before ${target.before}`;
-  if ("replace" in target) return `replace ${target.replace}`;
   return "target";
 }
 
-function capabilityLabel(plan: ReturnType<ReturnType<typeof createSnippets>["canInsert"]>): string {
+function capabilityLabel(plan: CommandPlanResult): string {
   if (!plan.ok) {
     return plan.code === "disabled" && plan.capability !== undefined
       ? capabilityErrorLabel(plan.capability)
@@ -232,4 +253,21 @@ function capabilityErrorLabel(capability: Exclude<JSONCapabilityResult, { ok: tr
     return `${capability.code}: ${capability.violations[0]?.message ?? "schema"}`;
   }
   return capability.code;
+}
+
+function missingSnippetPlan(id: string): SnippetPlanResult {
+  return {
+    ok: false,
+    code: "snippet_not_found",
+    reason: `snippet not found: ${id}`,
+    id,
+  };
+}
+
+function copyPayload(value: unknown): unknown {
+  try {
+    return structuredClone(value);
+  } catch {
+    return value;
+  }
 }

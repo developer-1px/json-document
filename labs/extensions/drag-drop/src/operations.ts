@@ -1,5 +1,5 @@
-import type { JSONDocument, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
-import { canDrop, pasteOptions, readCopyPayload } from "./plan.js";
+import type { JSONDocument, JSONDocumentMoveTarget, JSONDocumentPasteTarget } from "@interactive-os/json-document";
+import { applyPayload, canDrop, insertOptions, readCopyPayload } from "./plan.js";
 import type { DragDropInput, DragDropPerformError, DragDropPerformResult } from "./types.js";
 
 export function performDrop<TDocument>(
@@ -44,19 +44,19 @@ export function performDrop<TDocument>(
 function performPlannedDrop<TDocument>(
   doc: JSONDocument<TDocument>,
   input: DragDropInput,
-  target: Pointer | JSONDocumentPasteTarget,
+  target: JSONDocumentMoveTarget | JSONDocumentPasteTarget,
 ): unknown {
   switch (input.source.kind) {
     case "move":
-      return doc.move(input.source.pointer, target as Pointer);
+      return doc.move(input.source.pointer, target as JSONDocumentMoveTarget);
     case "copy": {
       const payload = readCopyPayload(doc, input.source.pointer);
       return payload.ok
-        ? doc.paste(target as JSONDocumentPasteTarget, pasteOptions(input.source, payload.value))
+        ? applyPayload(doc, target as JSONDocumentPasteTarget, payload.value, insertOptions(input.source))
         : payload.capability;
     }
     case "payload":
-      return doc.paste(target as JSONDocumentPasteTarget, pasteOptions(input.source, input.source.value));
+      return applyPayload(doc, target as JSONDocumentPasteTarget, input.source.value, insertOptions(input.source));
   }
 }
 

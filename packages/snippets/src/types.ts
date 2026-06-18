@@ -1,12 +1,12 @@
 import type {
-  ClipboardPasteResult,
   JSONCapabilityResult,
-  JSONDocumentPasteOptions,
-  JSONDocumentPasteTarget,
+  JSONDocumentEditResult,
+  JSONDocumentInsertOptions,
+  JSONDocumentInsertTarget,
   Pointer,
 } from "@interactive-os/json-document";
 
-export type SnippetInsertOptions = Omit<JSONDocumentPasteOptions, "payload">;
+export type SnippetInsertOptions = JSONDocumentInsertOptions;
 
 export interface Snippet {
   id: string;
@@ -30,16 +30,16 @@ export interface SnippetError {
   code: SnippetErrorCode;
   reason: string;
   id?: string;
-  target?: JSONDocumentPasteTarget;
+  target?: JSONDocumentInsertTarget;
   pointer?: Pointer;
   capability?: Exclude<JSONCapabilityResult, { ok: true }>;
-  result?: Exclude<ClipboardPasteResult<unknown>, { ok: true }>;
+  result?: Exclude<JSONDocumentEditResult, { ok: true }>;
 }
 
 export interface SnippetPlan {
   ok: true;
   id: string;
-  target: JSONDocumentPasteTarget;
+  target: JSONDocumentInsertTarget;
   capability: { ok: true };
 }
 
@@ -51,14 +51,14 @@ export type SnippetInsertResult<TDocument> =
   | {
     ok: true;
     id: string;
-    target: JSONDocumentPasteTarget;
-    result: ClipboardPasteResult<TDocument>;
+    target: JSONDocumentInsertTarget;
+    result: JSONDocumentEditResult;
   }
   | SnippetError;
 
 export interface Snippets<TDocument> {
   list(): ReadonlyArray<SnippetSummary>;
   get(id: string): Snippet | null;
-  canInsert(id: string, target: JSONDocumentPasteTarget, options?: SnippetInsertOptions): SnippetPlanResult;
-  insert(id: string, target: JSONDocumentPasteTarget, options?: SnippetInsertOptions): SnippetInsertResult<TDocument>;
+  canInsert(id: string, target: JSONDocumentInsertTarget, options?: SnippetInsertOptions): SnippetPlanResult;
+  insert(id: string, target: JSONDocumentInsertTarget, options?: SnippetInsertOptions): SnippetInsertResult<TDocument>;
 }

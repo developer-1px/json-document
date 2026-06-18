@@ -1,6 +1,6 @@
 # @interactive-os/json-document-grouping
 
-Lab extension for structural `group` and `ungroup`.
+Official extension for structural `group` and `ungroup`.
 
 ## Scope
 
@@ -9,6 +9,7 @@ Lab extension for structural `group` and `ungroup`.
 - ungroup a host-defined group value back into sibling items
 - return JSON Patch operations and `selectionAfter`
 - validate through the public `@interactive-os/json-document` document facade
+- does not call `doc.use(...)`
 
 ## Non-goals
 
@@ -16,6 +17,7 @@ Lab extension for structural `group` and `ungroup`.
 - hit testing
 - group-local coordinates
 - visual selection handles
+- object-surface grouping semantics
 - app-specific ids beyond the host `createGroup` function
 
 ```ts
@@ -38,5 +40,4 @@ if (canGroup.ok) grouping.group(canGroup.source);
 - `group` is a real editor feature vocabulary, but the JSON shape is host-owned.
 - Public pointer helpers were enough for same-parent selection planning.
 - `selectionAfter` is useful enough to belong in the extension result.
-- This should remain lab-only until another product proves the same command
-  contract with a different schema.
+- The JSON shape remains host-owned so apps can use their own group schema.

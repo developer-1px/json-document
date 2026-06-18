@@ -68,25 +68,24 @@ describe("validation violation paths", () => {
     });
   });
 
-  test("canPaste direct payload anchors after replace and spread violations to result paths", () => {
+  test("canInsert payload anchors after and spread violations to result paths", () => {
     const doc = createJSONDocument(Schema, initial);
 
-    expect(doc.canPaste({ after: "/items/0" }, { payload: { id: "", name: "C" } })).toMatchObject({
+    expect(doc.canInsert({ after: "/items/0" }, { id: "", name: "C" })).toMatchObject({
       ok: false,
       code: "schema_violation",
       violations: [{ path: "/items/1/id", message: expect.any(String) }],
     });
-    expect(doc.canPaste({ replace: "/items/0" }, { payload: { id: "", name: "C" } })).toMatchObject({
+    expect(doc.canReplace("/items/0", { id: "", name: "C" })).toMatchObject({
       ok: false,
       code: "schema_violation",
       violations: [{ path: "/items/0/id", message: expect.any(String) }],
     });
 
-    const spread = doc.canPaste("/items/-", {
-      payload: [
+    const spread = doc.canInsert("/items/-", [
         { id: "", name: "C" },
         { id: "", name: "D" },
-      ],
+      ], {
       spread: true,
     });
     expect(spread).toMatchObject({ ok: false, code: "schema_violation" });
@@ -156,7 +155,7 @@ describe("validation violation paths", () => {
       blocks: [{ kind: "text", text: "hello" }],
     });
 
-    const result = doc.canPaste("/blocks/-", { payload: { kind: "video", src: "bad" } });
+    const result = doc.canInsert("/blocks/-", { kind: "video", src: "bad" });
 
     expect(result).toMatchObject({
       ok: false,

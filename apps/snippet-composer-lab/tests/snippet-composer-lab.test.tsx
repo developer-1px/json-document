@@ -54,6 +54,24 @@ describe("snippet composer lab dogfood", () => {
     expect(screen.getByLabelText("target value").textContent).toBe("after /blocks/1");
   });
 
+  test("uses replace for the selected block target", async () => {
+    renderLab();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByLabelText("select block 1"));
+    await user.selectOptions(screen.getByLabelText("target mode"), "replace-selected");
+    await user.click(screen.getByLabelText("select cta-link"));
+    await user.click(screen.getByRole("button", { name: "insert" }));
+
+    const blockLabels = within(documentPanel()).getAllByRole("button").map((button) => button.textContent);
+    expect(blockLabels).toEqual([
+      "introtextDraft the opening copy.",
+      "ctactaRead docs - https://example.com/docs",
+    ]);
+    expect(screen.getByRole("status").textContent).toBe("replace cta-link");
+    expect(screen.getByLabelText("target value").textContent).toBe("replace /blocks/1");
+  });
+
   test("surfaces schema rejection for snippets that do not fit the document", async () => {
     renderLab();
     const user = userEvent.setup();

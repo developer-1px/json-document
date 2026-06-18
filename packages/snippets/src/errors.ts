@@ -1,7 +1,7 @@
 import type {
-  ClipboardPasteResult,
   JSONCapabilityResult,
-  JSONDocumentPasteTarget,
+  JSONDocumentEditResult,
+  JSONDocumentInsertTarget,
 } from "@interactive-os/json-document";
 
 import type {
@@ -19,7 +19,7 @@ export function snippetNotFound(id: string): SnippetError {
 
 export function disabled(
   id: string,
-  target: JSONDocumentPasteTarget,
+  target: JSONDocumentInsertTarget,
   capability: Exclude<JSONCapabilityResult, { ok: true }>,
 ): SnippetError {
   const error: SnippetError = {
@@ -34,10 +34,10 @@ export function disabled(
   return error;
 }
 
-export function executionFailed<TDocument>(
+export function executionFailed(
   id: string,
-  target: JSONDocumentPasteTarget,
-  result: Exclude<ClipboardPasteResult<TDocument>, { ok: true }>,
+  target: JSONDocumentInsertTarget,
+  result: Exclude<JSONDocumentEditResult, { ok: true }>,
 ): SnippetError {
   return {
     ok: false,
@@ -45,6 +45,6 @@ export function executionFailed<TDocument>(
     reason: "snippet insert failed",
     id,
     target,
-    result: result as Exclude<ClipboardPasteResult<unknown>, { ok: true }>,
+    result,
   };
 }

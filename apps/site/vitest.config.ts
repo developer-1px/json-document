@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: jsonDocumentSourceAliases(),
+    dedupe: ["react", "react-dom"],
   },
   test: {
     environment: "jsdom",

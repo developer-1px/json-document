@@ -40,7 +40,7 @@ describe("@interactive-os/json-document-drag-drop", () => {
     })).toEqual({
       ok: true,
       kind: "move",
-      target: "/cards/1",
+      target: { after: "/cards/1" },
       capability: { ok: true },
     });
     expect(doc.value.cards.map((card) => card.id)).toEqual(["a", "b", "c"]);
@@ -55,13 +55,13 @@ describe("@interactive-os/json-document-drag-drop", () => {
     })).toMatchObject({
       ok: true,
       kind: "move",
-      target: "/cards/1",
+      target: { after: "/cards/1" },
       result: { ok: true },
     });
     expect(doc.value.cards.map((card) => card.id)).toEqual(["b", "a", "c"]);
   });
 
-  test("performs a payload drop through direct payload paste", () => {
+  test("performs a payload drop through payload insert", () => {
     const doc = createDoc();
     const drop = createDragDrop(doc);
 
@@ -87,7 +87,7 @@ describe("@interactive-os/json-document-drag-drop", () => {
     ]);
   });
 
-  test("performs a copy drop through direct payload paste", () => {
+  test("performs a copy drop through payload insert", () => {
     const doc = createDoc();
     const drop = createDragDrop(doc);
 
@@ -185,7 +185,7 @@ describe("@interactive-os/json-document-drag-drop", () => {
     expect(doc.value.archive).toEqual([]);
   });
 
-  test("rejects unsupported move replace target and invalid after target", () => {
+  test("rejects unsupported move replace target and preserves invalid relative target capability", () => {
     const doc = createDoc();
     const drop = createDragDrop(doc);
 
@@ -202,10 +202,15 @@ describe("@interactive-os/json-document-drag-drop", () => {
       source: { kind: "move", pointer: "/cards/0" },
       target: { after: "/archive" },
     })).toEqual({
-      ok: false,
-      code: "invalid_target",
-      reason: "relative target must address an array item: /archive",
-      pointer: "/archive",
+      ok: true,
+      kind: "move",
+      target: { after: "/archive" },
+      capability: {
+        ok: false,
+        code: "invalid_pointer",
+        reason: "relative move target must address an array item: /archive",
+        pointer: "/archive",
+      },
     });
   });
 });

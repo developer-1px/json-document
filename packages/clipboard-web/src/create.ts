@@ -17,6 +17,8 @@ import {
   resolveWriteHost,
 } from "./host.js";
 import {
+  applyPayload,
+  canApplyPayload,
   canPasteText,
   pasteText,
 } from "./paste.js";
@@ -108,7 +110,7 @@ export function createWebClipboard<T>(
     async canPaste(target, pasteOptions) {
       const result = await read();
       if (!result.ok) return result;
-      return doc.canPaste(target, { ...pasteOptions, payload: result.payload });
+      return canApplyPayload(doc, target, result.payload, pasteOptions);
     },
 
     canPasteText: (target, text, pasteOptions) => canPasteText(doc, codec, target, text, pasteOptions),
@@ -117,10 +119,10 @@ export function createWebClipboard<T>(
       const result = await read();
       if (!result.ok) return result;
 
-      const capability = doc.canPaste(target, { ...pasteOptions, payload: result.payload });
+      const capability = canApplyPayload(doc, target, result.payload, pasteOptions);
       if (!capability.ok) return capability;
 
-      return doc.paste(target, { ...pasteOptions, payload: result.payload });
+      return applyPayload(doc, target, result.payload, pasteOptions);
     },
 
     pasteText: (target, text, pasteOptions): WebClipboardPasteResult<T> => pasteText(doc, codec, target, text, pasteOptions),

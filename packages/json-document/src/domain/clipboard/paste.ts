@@ -3,16 +3,17 @@
 
 import type * as z from "zod";
 import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/contract.js";
-import { readAt, tryParsePointer, type Pointer } from "../../foundation/pointer/index.js";
+import { appendSegment, buildPointer, readAt, tryParsePointer, type Pointer } from "../../foundation/pointer/index.js";
 import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/patch.js";
 import { getDiscriminatedUnionInfo, schemaAtPointer } from "../schema/introspection.js";
 import { tryRekeyPayload } from "../schema/rekey.js";
 import type { RekeyOptions } from "../schema/rekey.js";
 import { getDef, getObjectShape } from "../schema/zod.js";
 
-type PasteMode = "before" | "after" | "into" | "replace";
+type PasteMode = "at" | "before" | "after" | "into" | "replace";
 export type PasteTarget =
   | Pointer
+  | { into: Pointer }
   | { before: Pointer }
   | { after: Pointer }
   | { replace: Pointer };
@@ -73,14 +74,15 @@ export function resolvePasteArgs(
   options: PasteOptions = {},
 ): ResolvedPasteArgs {
   if (typeof target === "object" && target !== null) {
+    if ("into" in target) return { target: target.into, mode: "into", options };
     if ("before" in target) return { target: target.before, mode: "before", options };
     if ("after" in target) return { target: target.after, mode: "after", options };
     if ("replace" in target) return { target: target.replace, mode: "replace", options };
-    return { mode: "into", options };
+    return { mode: "at", options };
   }
   return {
     ...(target !== undefined ? { target } : {}),
-    mode: "into",
+    mode: "at",
     options,
   };
 }
@@ -98,11 +100,14 @@ export function paste<S extends z.ZodType>(
   });
   if (!rekeyed.ok) return rekeyed;
   const nextPayload = rekeyed.payload;
-  const spread = shouldSpread(nextPayload, state, target, mode, options);
-  const mismatch = findPasteMismatch(schema, nextPayload, target, mode, spread);
+  const placement = resolvePastePlacement(state, target, mode);
+  if (!placement.ok) return placement;
+
+  const spread = shouldSpread(nextPayload, state, placement.path, mode, options);
+  const mismatch = findPasteMismatch(schema, nextPayload, placement.path, mode, spread);
   if (mismatch) return mismatch;
 
-  const patch = spread ? buildSpreadPasteOps(nextPayload, target, mode) : [buildPasteOp(nextPayload, target, mode)];
+  const patch = spread ? buildSpreadPasteOps(nextPayload, placement.path) : [buildPasteOp(nextPayload, placement.path, mode)];
   const r = options.previewPatch
     ? patchPreflightFromApplyResult(options.previewPatch(patch))
     : patchPreflight(schema, state, patch);
@@ -119,7 +124,7 @@ function findPasteMismatch<S extends z.ZodType>(
   mode: PasteMode,
   spread: boolean,
 ): PasteDiscriminatorMismatch | null {
-  const targetSchema = schemaAtPointer(schema, target, mode === "into" || mode === "before" || mode === "after" ? "insert" : "value");
+  const targetSchema = schemaAtPointer(schema, target, mode === "replace" ? "value" : "insert");
   if (!targetSchema) return null;
 
   const checkPayload = createPayloadMismatchCapabilityer(targetSchema);
@@ -211,20 +216,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function buildPasteOp(payload: unknown, target: Pointer, mode: PasteMode): JSONPatchOperation {
-  switch (mode) {
-    case "replace":
-      return { op: "replace", path: target, value: payload };
-    case "before":
-      return { op: "add", path: target, value: payload };
-    case "after": {
-      // /items/3 → /items/4. array index 만 안전하게 처리. object 는 사용자가 명시 path 권장.
-      return { op: "add", path: incrementTrailingDecimalPath(target) ?? target, value: payload };
-    }
-    case "into":
-    default:
-      // collapsed selection / 빈 위치 — add 그대로. 배열의 `/-` 도 자연 처리.
-      return { op: "add", path: target, value: payload };
-  }
+  return mode === "replace"
+    ? { op: "replace", path: target, value: payload }
+    : { op: "add", path: target, value: payload };
 }
 
 function shouldSpread(
@@ -237,11 +231,10 @@ function shouldSpread(
   return options.spread === true
     && mode !== "replace"
     && Array.isArray(payload)
-    && isArrayInsertionPath(state, insertionTarget(target, mode));
+    && isArrayInsertionPath(state, target);
 }
 
-function buildSpreadPasteOps(payload: ReadonlyArray<unknown>, target: Pointer, mode: PasteMode): JSONPatchOperation[] {
-  const path = insertionTarget(target, mode);
+function buildSpreadPasteOps(payload: ReadonlyArray<unknown>, path: Pointer): JSONPatchOperation[] {
   const ops = new Array<JSONPatchOperation>(payload.length);
   if (path.endsWith("/-")) {
     for (let index = 0; index < payload.length; index += 1) {
@@ -266,11 +259,6 @@ function buildSpreadPasteOps(payload: ReadonlyArray<unknown>, target: Pointer, m
   return ops;
 }
 
-function insertionTarget(target: Pointer, mode: PasteMode): Pointer {
-  if (mode !== "after") return target;
-  return incrementTrailingDecimalPath(target) ?? target;
-}
-
 function isArrayInsertionPath(state: unknown, path: Pointer): boolean {
   const segments = tryParsePointer(path);
   if (segments === null || segments.length === 0) return false;
@@ -280,11 +268,6 @@ function isArrayInsertionPath(state: unknown, path: Pointer): boolean {
 
   const parent = readAt(state, segments.slice(0, -1));
   return parent.ok && Array.isArray(parent.value);
-}
-
-function incrementTrailingDecimalPath(path: Pointer): Pointer | null {
-  const parsed = trailingDecimalPath(path);
-  return parsed === null ? null : parsed.prefix + String(parsed.index + 1);
 }
 
 function trailingDecimalPath(path: Pointer): { prefix: string; index: number } | null {
@@ -311,4 +294,60 @@ function isArrayInsertionSegment(segment: string): boolean {
     if (code < 48 || code > 57) return false;
   }
   return true;
+}
+
+function resolvePastePlacement(
+  state: unknown,
+  target: Pointer,
+  mode: PasteMode,
+): { ok: true; path: Pointer } | PasteError {
+  switch (mode) {
+    case "replace":
+    case "at":
+      return { ok: true, path: target };
+    case "into":
+      return resolveIntoArrayTarget(state, target);
+    case "before":
+      return resolveRelativeInsertTarget(target, "before");
+    case "after":
+      return resolveRelativeInsertTarget(target, "after");
+  }
+}
+
+function resolveIntoArrayTarget(
+  state: unknown,
+  target: Pointer,
+): { ok: true; path: Pointer } | PasteError {
+  const segments = tryParsePointer(target);
+  if (segments === null) return pasteError("invalid_pointer", `invalid into target pointer: ${target}`);
+  const container = readAt(state, segments);
+  if (!container.ok || !Array.isArray(container.value)) {
+    return pasteError("invalid_pointer", `into target must address an array container: ${target}`);
+  }
+  return { ok: true, path: appendSegment(target, "-") };
+}
+
+function resolveRelativeInsertTarget(
+  target: Pointer,
+  position: "before" | "after",
+): { ok: true; path: Pointer } | PasteError {
+  const location = arrayItemLocation(target);
+  if (location === null) {
+    return pasteError("invalid_pointer", `relative insert target must address an array item: ${target}`);
+  }
+  return {
+    ok: true,
+    path: appendSegment(location.parent, position === "before" ? location.index : location.index + 1),
+  };
+}
+
+function arrayItemLocation(pointer: Pointer): { parent: Pointer; index: number } | null {
+  const segments = tryParsePointer(pointer);
+  if (segments === null || segments.length === 0) return null;
+  const indexSegment = segments[segments.length - 1]!;
+  if (!isArrayInsertionSegment(indexSegment) || indexSegment === "-") return null;
+  return {
+    parent: buildPointer(segments.slice(0, -1)),
+    index: Number(indexSegment),
+  };
 }

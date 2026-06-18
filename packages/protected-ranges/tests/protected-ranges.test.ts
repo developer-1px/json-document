@@ -150,16 +150,14 @@ describe("@interactive-os/json-document-protected-ranges", () => {
       code: "protected_range",
       operation: "move",
     });
-    expect(protectedRanges.canPaste({ before: "/sections/1" }, {
-      payload: { id: "new", title: "New", body: "Before" },
-    })).toMatchObject({
+    expect(doc.clipboard.write({ id: "new", title: "New", body: "Before" })).toMatchObject({ ok: true });
+    expect(protectedRanges.canPaste({ before: "/sections/1" })).toMatchObject({
       ok: false,
       code: "protected_range",
       operation: "paste",
     });
-    expect(protectedRanges.paste("/sections/-", {
-      payload: { id: "tail", title: "Tail", body: "After" },
-    })).toMatchObject({
+    expect(doc.clipboard.write({ id: "tail", title: "Tail", body: "After" })).toMatchObject({ ok: true });
+    expect(protectedRanges.paste("/sections/-")).toMatchObject({
       ok: true,
     });
   });

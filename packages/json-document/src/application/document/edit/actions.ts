@@ -4,15 +4,19 @@ import type { SelectionSource } from "../../../domain/selection/read.js";
 import type { DuplicateError as DomainDuplicateError, DuplicateOpts } from "../../../domain/edit/duplicate.js";
 import type { CapabilityResult } from "../can/result.js";
 import type { SelectionState } from "../selection/create.js";
+import type {
+  JSONDocumentInsertOptions,
+  JSONDocumentInsertTarget,
+  JSONDocumentMoveTarget,
+} from "./target.js";
 import {
   planDocumentDelete,
-  planDocumentInsert,
   planDocumentMove,
   planDocumentReplace,
 } from "./plan.js";
 
-type JSONDocumentEditError = Extract<CapabilityResult, { ok: false }>;
-type JSONDocumentEditResult = JSONResult | JSONDocumentEditError;
+export type JSONDocumentEditError = Extract<CapabilityResult, { ok: false }>;
+export type JSONDocumentEditResult = JSONResult | JSONDocumentEditError;
 
 export type JSONDocumentDuplicateOptions = DuplicateOpts;
 export type JSONDocumentDuplicateError = DomainDuplicateError;
@@ -31,20 +35,29 @@ interface DocumentEditMutation<T> {
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
 }
 
+interface DocumentInsertRuntime<T> {
+  insertPayload(
+    payload: unknown,
+    target: JSONDocumentInsertTarget | undefined,
+    options: JSONDocumentInsertOptions | undefined,
+  ): JSONDocumentEditResult;
+}
+
 interface CreateDocumentEditActionsInput<T> {
   getState(): T;
   selection?: SelectionState | undefined;
   mutation: DocumentEditMutation<T>;
+  insertRuntime: DocumentInsertRuntime<T>;
 }
 
 export interface DocumentEditActions<T> {
-  insert(path: Pointer, value: unknown): JSONDocumentEditResult;
+  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult;
   insert(value: unknown): JSONDocumentEditResult;
   replace(path: Pointer, value: unknown): JSONDocumentEditResult;
   replace(value: unknown): JSONDocumentEditResult;
   delete(source?: SelectionSource): JSONDocumentEditResult;
-  move(source: Pointer, target: Pointer): JSONDocumentEditResult;
-  move(target: Pointer): JSONDocumentEditResult;
+  move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult;
+  move(target: JSONDocumentMoveTarget): JSONDocumentEditResult;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   duplicate(options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
 }
@@ -52,18 +65,18 @@ export interface DocumentEditActions<T> {
 export function createDocumentEditActions<T>(
   input: CreateDocumentEditActionsInput<T>,
 ): DocumentEditActions<T> {
-  const { getState, mutation, selection } = input;
+  const { getState, insertRuntime, mutation, selection } = input;
 
-  function insert(path: Pointer, value: unknown): JSONDocumentEditResult;
+  function insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult;
   function insert(value: unknown): JSONDocumentEditResult;
-  function insert(pathOrValue: Pointer | unknown, maybeValue?: unknown): JSONDocumentEditResult {
-    const plan = planDocumentInsert({
-      selection,
-      pathOrValue,
-      value: maybeValue,
-      hasValueArg: arguments.length >= 2,
-    });
-    return plan.ok ? mutation.patch(plan.operations) : plan;
+  function insert(
+    targetOrValue: JSONDocumentInsertTarget | unknown,
+    maybeValue?: unknown,
+    maybeOptions?: JSONDocumentInsertOptions,
+  ): JSONDocumentEditResult {
+    return arguments.length >= 2
+      ? insertRuntime.insertPayload(maybeValue, targetOrValue as JSONDocumentInsertTarget, maybeOptions)
+      : insertRuntime.insertPayload(targetOrValue, undefined, undefined);
   }
 
   function replace(path: Pointer, value: unknown): JSONDocumentEditResult;
@@ -84,10 +97,11 @@ export function createDocumentEditActions<T>(
     return plan.ok ? mutation.patch(plan.operations) : plan;
   };
 
-  function move(source: Pointer, target: Pointer): JSONDocumentEditResult;
-  function move(target: Pointer): JSONDocumentEditResult;
-  function move(sourceOrTarget: Pointer, maybeTarget?: Pointer): JSONDocumentEditResult {
+  function move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult;
+  function move(target: JSONDocumentMoveTarget): JSONDocumentEditResult;
+  function move(sourceOrTarget: Pointer | JSONDocumentMoveTarget, maybeTarget?: JSONDocumentMoveTarget): JSONDocumentEditResult {
     const plan = planDocumentMove({
+      state: getState(),
       selection,
       sourceOrTarget,
       target: maybeTarget,

@@ -290,14 +290,14 @@ describe("useJSONDocument doc.selection", () => {
     });
   });
 
-  test("clipboard paste can use an explicit payload and the current selection target", () => {
+  test("insert can use an explicit payload and the current selection target", () => {
     const hook = renderHook(() => useJSONDocument(Schema, initial, {
       history: 10,
       selection: { mode: "single", initial: ["/items/0"] },
     }));
 
     act(() => {
-      hook.current.clipboard.paste({ after: "/items/0" }, { payload: { id: "x", name: "X" } });
+      hook.current.insert({ after: "/items/0" }, { id: "x", name: "X" });
     });
 
     expect(hook.current.value.items.map((item) => item.id)).toEqual(["a", "x", "b"]);

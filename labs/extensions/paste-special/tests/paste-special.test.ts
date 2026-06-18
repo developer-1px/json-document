@@ -106,7 +106,7 @@ describe("@interactive-os/json-document-paste-special", () => {
     });
   });
 
-  test("adapts array payloads to spread paste with ID remapping", () => {
+  test("adapts array payloads to spread insert with ID remapping", () => {
     const doc = createBoard();
 
     expect(pasteSpecial(doc, adapter, {

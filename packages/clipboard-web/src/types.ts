@@ -4,9 +4,9 @@ import type {
   ClipboardCopyResult,
   ClipboardCutOptions,
   ClipboardCutResult,
-  ClipboardPasteResult,
   ClipboardSource,
   JSONCapabilityResult,
+  JSONDocumentEditResult,
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
   Pointer,
@@ -67,7 +67,7 @@ export type WebClipboardWriteResult = WebClipboardWriteOk | WebClipboardError;
 export type WebClipboardReadResult = ({ ok: true } & WebClipboardPayload) | WebClipboardError;
 export type WebClipboardCanPasteResult = JSONCapabilityResult | WebClipboardError;
 export type JSONCapabilityError = Exclude<JSONCapabilityResult, { ok: true }>;
-export type WebClipboardPasteResult<T> = ClipboardPasteResult<T> | JSONCapabilityError | WebClipboardError;
+export type WebClipboardPasteResult<T> = JSONDocumentEditResult | WebClipboardError;
 export type WebClipboardCutResult<T> = ClipboardCutResult<T> | ClipboardCopyError | WebClipboardError;
 export type WebClipboardCopyResult = ClipboardCopyResult | WebClipboardError;
 

@@ -74,10 +74,8 @@ describe("@interactive-os/json-document-clipboard-web", () => {
 
     const result = await clipboard.paste("/items/-");
 
-    expect(result).toMatchObject({
-      ok: true,
-      applied: [{ op: "add", path: "/items/2", value: { id: "c", name: "C" } }],
-    });
+    expect(result).toEqual({ ok: true });
+    expect(doc.lastPatch).toEqual([{ op: "add", path: "/items/2", value: { id: "c", name: "C" } }]);
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "c"]);
   });
 
@@ -133,10 +131,8 @@ describe("@interactive-os/json-document-clipboard-web", () => {
 
     const result = clipboard.pasteText("/items/-", JSON.stringify({ id: "c", name: "C" }));
 
-    expect(result).toMatchObject({
-      ok: true,
-      applied: [{ op: "add", path: "/items/2", value: { id: "c", name: "C" } }],
-    });
+    expect(result).toEqual({ ok: true });
+    expect(doc.lastPatch).toEqual([{ op: "add", path: "/items/2", value: { id: "c", name: "C" } }]);
   });
 
   test("reports parse errors before mutating the document", () => {

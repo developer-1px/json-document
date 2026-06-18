@@ -1,5 +1,6 @@
 import type * as z from "zod";
 import { INTERNAL_CLIPBOARD_CAN_PASTE, createClipboard } from "./clipboard/clipboard.js";
+import { createClipboardPasteRuntime } from "./clipboard/paste.js";
 import { createDocumentCapabilities } from "./can/create.js";
 import { createDocumentEditActions } from "./edit/actions.js";
 import { createJSONState } from "./state/json.js";
@@ -15,6 +16,10 @@ import type {
   JSONDocument,
   JSONDocumentOptions,
 } from "./interface.js";
+import type {
+  JSONDocumentInsertOptions,
+  JSONDocumentInsertTarget,
+} from "./edit/target.js";
 import { createDocumentRead } from "./read/read.js";
 import { createDocumentMutationRuntime } from "./state/patch.js";
 import { createDocumentHistoryRuntime } from "./history/undoRedo.js";
@@ -22,26 +27,32 @@ import { createDocumentHistoryRuntimeState } from "./history/state.js";
 import type {
   TrustedJSONStateOps,
 } from "./state/json.js";
+import type {
+  JSONDocumentSchemaInput,
+  JSONDocumentSchemaLike,
+  JSONDocumentSchemaOutput,
+} from "./schema-type.js";
 
 type TrustedInitialDocumentOptions = JSONDocumentOptions & { trustedInitial: true };
 type UntrustedInitialDocumentOptions = JSONDocumentOptions & { trustedInitial?: false | undefined };
 
-export function createJSONDocument<S extends z.ZodType>(
+export function createJSONDocument<S extends JSONDocumentSchemaLike>(
   schema: S,
-  initial: z.output<S>,
+  initial: JSONDocumentSchemaOutput<S>,
   options: TrustedInitialDocumentOptions,
-): JSONDocument<z.output<S>>;
-export function createJSONDocument<S extends z.ZodType>(
+): JSONDocument<JSONDocumentSchemaOutput<S>>;
+export function createJSONDocument<S extends JSONDocumentSchemaLike>(
   schema: S,
-  initial: z.input<S>,
+  initial: JSONDocumentSchemaInput<S>,
   options?: UntrustedInitialDocumentOptions,
-): JSONDocument<z.output<S>>;
-export function createJSONDocument<S extends z.ZodType>(
+): JSONDocument<JSONDocumentSchemaOutput<S>>;
+export function createJSONDocument<S extends JSONDocumentSchemaLike>(
   schema: S,
-  initial: z.input<S> | z.output<S>,
+  initial: JSONDocumentSchemaInput<S> | JSONDocumentSchemaOutput<S>,
   options: JSONDocumentOptions = {},
-): JSONDocument<z.output<S>> {
-  const rawOps: TrustedJSONStateOps<z.output<S>> = createJSONState(schema, initial, options);
+): JSONDocument<JSONDocumentSchemaOutput<S>> {
+  const zodSchema = schema as unknown as z.ZodType<JSONDocumentSchemaOutput<S>, JSONDocumentSchemaInput<S>>;
+  const rawOps = createJSONState(zodSchema, initial, options) as TrustedJSONStateOps<JSONDocumentSchemaOutput<S>>;
   const historyLimit = options.history ?? 0;
   const historyState = createDocumentHistoryRuntimeState();
   const patchState = createDocumentPatchRuntimeState();
@@ -54,7 +65,7 @@ export function createJSONDocument<S extends z.ZodType>(
   const selectionState = selectionRuntime.state;
   const syncLastPatch = (): void => { patchState.lastPatch = rawOps.lastApplied; };
   const mutation = createDocumentMutationRuntime({
-    schema,
+    schema: zodSchema,
     rawOps,
     historyLimit,
     historyState,
@@ -77,17 +88,45 @@ export function createJSONDocument<S extends z.ZodType>(
     syncLastPatch,
   });
 
-  const capabilities = createDocumentCapabilities({
-    schema,
+  const insertPasteRuntime = createClipboardPasteRuntime({
+    schema: zodSchema,
+    getState: () => rawOps.state,
     ops,
     previewPatch: rawOps.previewPatch,
     previewTrustedValuesPatch: rawOps.previewTrustedValuesPatch,
+    applyPreviewedPatch: mutation.applyPreviewedDocumentPatch,
+    getSelectionTarget: () => selectionState?.primaryPointer ?? null,
+    getAppliedPatch: () => patchState.lastPatch,
+  });
+  const insertRuntime = {
+    insertPayload(
+      payload: unknown,
+      target: JSONDocumentInsertTarget | undefined,
+      insertOptions: JSONDocumentInsertOptions | undefined,
+    ) {
+      const result = insertPasteRuntime.pastePayload(payload, target, insertOptions, false, false);
+      return result.ok ? OK : result;
+    },
+    canInsertPayload(
+      payload: unknown,
+      target: JSONDocumentInsertTarget | undefined,
+      insertOptions: JSONDocumentInsertOptions | undefined,
+    ) {
+      return insertPasteRuntime.canPastePayload(payload, target, insertOptions, false, false);
+    },
+  };
+
+  const capabilities = createDocumentCapabilities({
+    schema: zodSchema,
+    ops,
+    previewPatch: rawOps.previewPatch,
     getStateJsonTrusted: () => rawOps.stateJsonTrusted,
     history: historyControls,
     ...(selectionRuntime.ref ? { selectionRef: selectionRuntime.ref } : {}),
+    insertRuntime,
   });
   const clipboardOptions = {
-    schema,
+    schema: zodSchema,
     getState: () => rawOps.state,
     ops,
     previewPatch: rawOps.previewPatch,
@@ -111,12 +150,13 @@ export function createJSONDocument<S extends z.ZodType>(
           reason: `${direction} failed to apply history entry`,
         };
   };
-  const read = createDocumentRead(schema, () => rawOps.state);
-  const schemaState = createSchemaState(schema);
+  const read = createDocumentRead(zodSchema, () => rawOps.state);
+  const schemaState = createSchemaState(zodSchema);
   const edit = createDocumentEditActions({
     getState: () => rawOps.state,
     selection: selectionState,
     mutation,
+    insertRuntime,
   });
 
   return {

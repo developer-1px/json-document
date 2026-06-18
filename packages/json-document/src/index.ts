@@ -22,7 +22,14 @@ export type {
   JSONDocumentDuplicateError,
   JSONDocumentDuplicateOptions,
   JSONDocumentDuplicateResult,
+  JSONDocumentEditError,
+  JSONDocumentEditResult,
 } from "./application/document/edit/actions.js";
+export type {
+  JSONDocumentInsertOptions,
+  JSONDocumentInsertTarget,
+  JSONDocumentMoveTarget,
+} from "./application/document/edit/target.js";
 export type {
   JSONDocumentHistory,
 } from "./application/document/history/undoRedo.js";

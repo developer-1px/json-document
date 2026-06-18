@@ -1,13 +1,16 @@
 import type {
   JSONDocument,
-  JSONDocumentPasteTarget,
+  JSONDocumentInsertTarget,
 } from "@interactive-os/json-document";
 
+import {
+  copyPayload,
+} from "./copy.js";
 import {
   executionFailed,
 } from "./errors.js";
 import {
-  pasteOptions,
+  insertOptions,
 } from "./options.js";
 import {
   canInsertSnippet,
@@ -21,13 +24,13 @@ import type {
 export function insertSnippet<TDocument>(
   doc: JSONDocument<TDocument>,
   snippet: Snippet,
-  target: JSONDocumentPasteTarget,
+  target: JSONDocumentInsertTarget,
   options?: SnippetInsertOptions,
 ): SnippetInsertResult<TDocument> {
   const plan = canInsertSnippet(doc, snippet, target, options);
   if (!plan.ok) return plan;
 
-  const result = doc.paste(target, pasteOptions(snippet, options));
+  const result = doc.insert(target, copyPayload(snippet.payload), insertOptions(snippet, options));
   if (!result.ok) return executionFailed(snippet.id, target, result);
 
   return {

@@ -1,5 +1,6 @@
 import type {
   JSONDocument,
+  JSONDocumentInsertTarget,
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
 } from "@interactive-os/json-document";
@@ -22,7 +23,7 @@ export function canPasteText<T>(
 ): WebClipboardCanPasteResult {
   const decoded = decodeText(codec, text);
   if (!decoded.ok) return decoded;
-  return doc.canPaste(target, { ...pasteOptions, payload: decoded.payload });
+  return canApplyPayload(doc, target, decoded.payload, pasteOptions);
 }
 
 export function pasteText<T>(
@@ -35,8 +36,34 @@ export function pasteText<T>(
   const decoded = decodeText(codec, text);
   if (!decoded.ok) return decoded;
 
-  const capability = doc.canPaste(target, { ...pasteOptions, payload: decoded.payload });
+  const capability = canApplyPayload(doc, target, decoded.payload, pasteOptions);
   if (!capability.ok) return capability;
 
-  return doc.paste(target, { ...pasteOptions, payload: decoded.payload });
+  return applyPayload(doc, target, decoded.payload, pasteOptions);
+}
+
+export function canApplyPayload<T>(
+  doc: JSONDocument<T>,
+  target: JSONDocumentPasteTarget,
+  payload: unknown,
+  options?: JSONDocumentPasteOptions,
+): WebClipboardCanPasteResult {
+  return isReplaceTarget(target)
+    ? doc.canReplace(target.replace, payload)
+    : doc.canInsert(target as JSONDocumentInsertTarget, payload, options);
+}
+
+export function applyPayload<T>(
+  doc: JSONDocument<T>,
+  target: JSONDocumentPasteTarget,
+  payload: unknown,
+  options?: JSONDocumentPasteOptions,
+): WebClipboardPasteResult<T> {
+  return isReplaceTarget(target)
+    ? doc.replace(target.replace, payload)
+    : doc.insert(target as JSONDocumentInsertTarget, payload, options);
+}
+
+function isReplaceTarget(target: JSONDocumentPasteTarget): target is { replace: string } {
+  return typeof target === "object" && target !== null && "replace" in target;
 }

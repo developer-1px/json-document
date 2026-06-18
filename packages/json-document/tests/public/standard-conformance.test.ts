@@ -127,6 +127,12 @@ describe("json-document core standard conformance", () => {
     expect(doc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["b", "c"]);
     expect(doc.canRedo()).toEqual({ ok: false, code: "empty_stack", reason: "redo stack is empty" });
     expect(doc.redo()).toEqual({ ok: false, code: "empty_stack", reason: "redo stack is empty" });
+
+    const relativeDoc = createBoardDocument();
+    expect(relativeDoc.insert("/columns/0/cards/-", { id: "c", title: "C" })).toEqual({ ok: true });
+    expect(relativeDoc.canMove("/columns/0/cards/2", { before: "/columns/0/cards/0" })).toEqual({ ok: true });
+    expect(relativeDoc.move("/columns/0/cards/2", { before: "/columns/0/cards/0" })).toEqual({ ok: true });
+    expect(relativeDoc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["c", "a", "b"]);
   });
 
   test("keeps capability probes reasoned and mutation-free", () => {
@@ -175,7 +181,7 @@ describe("json-document core standard conformance", () => {
     expect(doc.selection?.snapshot()).toEqual(selectedSecondCard);
   });
 
-  test("keeps clipboard headless, JSON-only, and explicit about spread", () => {
+  test("keeps clipboard headless and uses insert for explicit payloads", () => {
     const doc = createBoardDocument();
 
     expect(doc.clipboard.write({ fn: () => undefined })).toMatchObject({
@@ -191,14 +197,11 @@ describe("json-document core standard conformance", () => {
     expect(doc.value.columns[1]?.cards.map((card) => card.id)).toEqual(["c", "a", "b"]);
 
     const directPayloadDoc = createBoardDocument();
-    expect(directPayloadDoc.paste("/columns/1/cards/-", {
-      payload: [{ id: "x", title: "X" }],
-    })).toMatchObject({
+    expect(directPayloadDoc.insert("/columns/1/cards/-", [{ id: "x", title: "X" }])).toMatchObject({
       ok: false,
       code: "schema_violation",
     });
-    expect(directPayloadDoc.paste("/columns/1/cards/-", {
-      payload: [{ id: "x", title: "X" }],
+    expect(directPayloadDoc.insert("/columns/1/cards/-", [{ id: "x", title: "X" }], {
       spread: true,
     })).toMatchObject({ ok: true });
     expect(directPayloadDoc.value.columns[1]?.cards.map((card) => card.id)).toEqual(["c", "x"]);

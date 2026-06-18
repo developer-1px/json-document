@@ -1,6 +1,6 @@
-import type { ClipboardPasteResult, JSONCapabilityResult, JSONDocumentPasteOptions, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocumentEditResult, JSONDocumentInsertOptions, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
 
-export type PasteSpecialOptions = Omit<JSONDocumentPasteOptions, "payload">;
+export type PasteSpecialOptions = JSONDocumentInsertOptions;
 
 export type PasteSpecialErrorCode =
   | "adapter_failed"
@@ -67,7 +67,7 @@ export interface PasteSpecialError {
   pointer?: Pointer;
   diagnostics?: ReadonlyArray<PasteSpecialDiagnostic>;
   capability?: Exclude<JSONCapabilityResult, { ok: true }>;
-  result?: Exclude<ClipboardPasteResult<unknown>, { ok: true }>;
+  result?: Exclude<JSONDocumentEditResult, { ok: true }>;
 }
 
 export type PasteSpecialPlanResult =
@@ -81,7 +81,7 @@ export type PasteSpecialApplyResult<TDocument> =
       target: JSONDocumentPasteTarget;
       payload: unknown;
       options: PasteSpecialOptions;
-      result: ClipboardPasteResult<TDocument>;
+      result: JSONDocumentEditResult;
       diagnostics: ReadonlyArray<PasteSpecialDiagnostic>;
     }
   | PasteSpecialError;

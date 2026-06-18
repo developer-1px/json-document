@@ -47,6 +47,7 @@ schema -> document -> pointer/query -> can* -> change -> result
 | [packages/id-resolver](packages/id-resolver) | stable id를 현재 JSON Pointer로 해석 |
 | [packages/patch-preview](packages/patch-preview) | JSON Patch 적용 전 schema-safe dry-run |
 | [packages/search-replace](packages/search-replace) | JSON string field 검색/치환 |
+| [packages/grouping](packages/grouping) | sibling JSON item structural group/ungroup |
 | [packages/proposed-changes](packages/proposed-changes) | JSON Patch 제안 accept/reject review model |
 | [packages/comments](packages/comments) | JSON Pointer anchor 기반 review comment |
 | [packages/outline](packages/outline) | document outline projection |

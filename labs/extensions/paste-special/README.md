@@ -3,14 +3,14 @@
 Lab extension for paste special.
 
 Use it when a host receives a clipboard/import/drop payload that may need to be
-adapted before it can be pasted into the current document.
+adapted before it can be inserted into the current document.
 
 ## Scope
 
 - let the host classify and adapt external payloads
-- let the host attach paste options such as `spread` and `rekey`
-- preflight the adapted payload through `doc.canPaste`
-- execute through `doc.paste`
+- let the host attach insert options such as `spread` and `rekey`
+- preflight the adapted payload through `doc.canInsert`
+- execute through `doc.insert`
 - return structured compatibility, capability, and execution errors
 
 ## Non-goals
@@ -49,10 +49,10 @@ if (canPaste.ok) paste.paste(canPaste.input);
 
 ## Friction report
 
-- Core `canPaste`/`paste` already handles schema validation, discriminator
-  checks, spread paste, and rekeying.
+- Core `canInsert`/`insert` handles schema validation, discriminator checks,
+  spread insert, and rekeying for external payloads.
 - The missing feature-level boundary is not another core primitive. It is the
-  repeated app code that adapts external payloads, chooses paste options, and
+  repeated app code that adapts external payloads, chooses insert options, and
   preserves diagnostics.
 - This lab should stay separate from `snippets`: snippets own known reusable
   payloads, while paste special owns unknown or cross-product payloads.

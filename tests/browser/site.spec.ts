@@ -5,7 +5,7 @@ test("official overview defers demo and engine code until a demo route opens", a
   page.on("request", (request) => requests.push(request.url()));
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "@interactive-os/json-document" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "json-document" })).toBeVisible();
   await expect(page.getByText("Interface bench")).toHaveCount(0);
   expect(requests.some(isDemoOrEngineRequest)).toBe(false);
 

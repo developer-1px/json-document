@@ -15,7 +15,7 @@ import 표면
 ## 기준
 
 - 공개 import는 `@interactive-os/json-document`와 `@interactive-os/json-document/react`입니다.
-- JSON Pointer는 정확한 주소입니다. patch, selection, clipboard target은 Pointer를 씁니다.
+- JSON Pointer는 정확한 주소입니다. patch와 selection source는 Pointer를 씁니다. `insert`, `move`, clipboard target은 Pointer 또는 공개 target object를 씁니다.
 - JSONPath는 검색입니다. `doc.find(...)`는 여러 match를 찾고 Pointer 목록을 돌려줍니다.
 - JSON Patch는 변경 형식입니다. 실행 진입점은 `doc.patch(...)`와 `doc.commit(...)`입니다.
 - `can*`는 boolean이 아니라 이유가 있는 결과입니다.
@@ -61,11 +61,12 @@ function Editor() {
 | 한 위치 읽기 | `doc.at(pointer)` | raw value가 아니라 `ReadResult`를 반환합니다. |
 | 하위 항목 나열 | `doc.entries(pointer)` | object, record, array entry를 Pointer와 함께 돌려줍니다. |
 | 여러 위치 찾기 | `doc.find(jsonPath)`, `doc.query(jsonPath)` | JSONPath는 변경 언어가 아닙니다. 결과 Pointer로 patch를 만듭니다. |
-| 값 삽입, 변경, 삭제, 이동 | `doc.insert(...)`, `doc.replace(...)`, `doc.delete(...)`, `doc.move(...)` | `path`, `source`, `target`은 JSON Pointer입니다. |
+| 값 삽입, 변경, 삭제, 이동 | `doc.insert(...)`, `doc.replace(...)`, `doc.delete(...)`, `doc.move(...)` | `source`는 JSON Pointer입니다. `insert`와 `move` target은 exact Pointer 또는 `{ before }`, `{ after }`, `{ into }`를 받습니다. |
 | 실행 전 검증 | `doc.can*` | 실패 code, reason, violations를 UI에 쓸 수 있습니다. |
 | sibling 복제 | `doc.duplicate(pointer?, options)` | source를 생략하면 현재 primary selection을 사용합니다. |
 | 선택 | `doc.selection` | 선택 사실을 JSON-safe snapshot으로 보관합니다. |
-| 복사/붙여넣기 | `doc.copy(...)`, `doc.cut(...)`, `doc.paste(...)`, `doc.paste(target, { payload })` | source와 target을 명시하면 동작이 드러납니다. |
+| 복사/붙여넣기 | `doc.copy(...)`, `doc.cut(...)`, `doc.paste(...)` | source와 target을 명시하면 동작이 드러납니다. |
+| 외부 payload 삽입 | `doc.insert(target, value, options?)` | snippet, drag/drop, import payload는 paste가 아니라 insert로 넣습니다. |
 | undo/redo | `doc.undo()`, `doc.redo()`, `doc.history` | patch와 inverse patch를 기록합니다. |
 | 위치별 schema 확인 | `doc.schema` | insert/value 위치가 어떤 값을 받는지 확인합니다. |
 
@@ -160,7 +161,7 @@ if (result.ok) {
 `can*`는 실행 가능 여부와 실패 이유를 같은 모양으로 돌려줍니다.
 
 ```ts
-const result = doc.canPaste("/lists/0/cards/-", { payload: candidateCard });
+const result = doc.canInsert("/lists/0/cards/-", candidateCard);
 
 if (!result.ok) {
   result.code;
@@ -178,6 +179,7 @@ doc.canInsert("/lists/0/cards/-", candidateCard);
 doc.canReplace("/title", "Ready");
 doc.canDelete(["/lists/0/cards/0"]);
 doc.canMove("/lists/0/cards/0", "/lists/1/cards/-");
+doc.canMove("/lists/0/cards/0", { after: "/lists/1/cards/1" });
 doc.canDuplicate("/lists/0/cards/0", { rekey: { fields: ["id"], strategy: "suffix" } });
 doc.canCopy(["/lists/0/cards/0"]);
 doc.canCut(["/lists/0/cards/0"]);
@@ -236,14 +238,18 @@ if (copied.ok) {
 }
 ```
 
-직접 payload를 넣을 수도 있습니다.
+외부 payload를 직접 넣을 수도 있습니다.
 
 ```ts
-doc.paste("/lists/0/cards/-", { payload: { id: "new", title: "New card" } });
+doc.insert("/lists/0/cards/-", { id: "new", title: "New card" });
+doc.insert({ into: "/lists/0/cards" }, { id: "new", title: "New card" });
+doc.insert({ after: "/lists/0/cards/0" }, { id: "new", title: "New card" });
+doc.move("/lists/0/cards/0", { into: "/lists/1/cards" });
+doc.move("/lists/0/cards/0", { after: "/lists/1/cards/1" });
 doc.paste({ after: "/lists/0/cards/0" });
 ```
 
-이미 `/cards/-` 같은 삽입 위치가 있으면 pointer를 그대로 넘깁니다. 기존 값을 기준으로 붙이면 `{ before: pointer }`, `{ after: pointer }`, `{ replace: pointer }`를 씁니다.
+이미 `/cards/-` 같은 삽입/이동 위치가 있으면 Pointer를 그대로 넘깁니다. Array container 안에 append하려면 `{ into: "/cards" }`를 씁니다. Array item 기준으로 배치하려면 `{ before: "/cards/0" }`, `{ after: "/cards/0" }`를 씁니다. Object member 추가는 순서가 없으므로 `/record/key` 같은 exact Pointer를 씁니다. Clipboard paste는 추가로 `{ replace: pointer }`를 지원합니다.
 
 Pointer 배열을 copy/cut하면 clipboard payload도 배열입니다. 여러 source를 담은 clipboard buffer는 array 삽입 target에 기본으로 펼쳐집니다.
 

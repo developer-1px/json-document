@@ -14,6 +14,15 @@ const initial: z.output<typeof Schema> = {
   ],
 };
 
+const ordered: z.output<typeof Schema> = {
+  items: [
+    { id: "a", name: "A" },
+    { id: "b", name: "B" },
+    { id: "c", name: "C" },
+    { id: "d", name: "D" },
+  ],
+};
+
 describe("JSONDocument interface", () => {
   test("reads through direct document queries", () => {
     const doc = createJSONDocument(Schema, initial);
@@ -49,7 +58,7 @@ describe("JSONDocument interface", () => {
     });
     expect(doc.canCopy("/items/0")).toEqual({ ok: true });
     expect(doc.canCut("/items/0")).toEqual({ ok: true });
-    expect(doc.canPaste("/items/-", { payload: { id: "c", name: "C" } })).toEqual({ ok: true });
+    expect(doc.canInsert("/items/-", { id: "c", name: "C" })).toEqual({ ok: true });
     expect(doc.canUndo()).toEqual({ ok: false, code: "empty_stack", reason: "undo stack is empty" });
 
     expect(doc.patch({ op: "replace", path: "/items/0/name", value: "A1" })).toEqual({ ok: true });
@@ -106,6 +115,84 @@ describe("JSONDocument interface", () => {
     expect(doc.value.items.map((item) => item.id)).toEqual(["b", "a", "c"]);
   });
 
+  test("inserts values with relative insert targets", () => {
+    const doc = createJSONDocument(Schema, initial);
+
+    expect(doc.canInsert({ into: "/items" }, { id: "d", name: "D" })).toEqual({ ok: true });
+    expect(doc.insert({ into: "/items" }, { id: "d", name: "D" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "d"]);
+    expect(doc.lastPatch).toEqual([{ op: "add", path: "/items/2", value: { id: "d", name: "D" } }]);
+
+    expect(doc.canInsert({ after: "/items/0" }, { id: "c", name: "C" })).toEqual({ ok: true });
+    expect(doc.insert({ after: "/items/0" }, { id: "c", name: "C" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "c", "b", "d"]);
+
+    expect(doc.insert({ before: "/items/0" }, { id: "z", name: "Z" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["z", "a", "c", "b", "d"]);
+  });
+
+  test("rejects placement targets that do not address an array slot", () => {
+    const doc = createJSONDocument(Schema, initial);
+
+    expect(doc.canInsert({ into: "/items/0" }, { id: "c", name: "C" })).toMatchObject({
+      ok: false,
+      code: "invalid_pointer",
+      reason: "into target must address an array container: /items/0",
+    });
+    expect(doc.canInsert({ after: "/items" }, { id: "c", name: "C" })).toMatchObject({
+      ok: false,
+      code: "invalid_pointer",
+      reason: "relative insert target must address an array item: /items",
+    });
+  });
+
+  test("moves values with relative move targets", () => {
+    const doc = createJSONDocument(Schema, ordered);
+
+    expect(doc.canMove("/items/0", { after: "/items/2" })).toEqual({ ok: true });
+    expect(doc.move("/items/0", { after: "/items/2" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["b", "c", "a", "d"]);
+    expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/0", path: "/items/2" }]);
+
+    expect(doc.canMove("/items/3", { before: "/items/1" })).toEqual({ ok: true });
+    expect(doc.move("/items/3", { before: "/items/1" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["b", "d", "c", "a"]);
+    expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/3", path: "/items/1" }]);
+
+    expect(doc.canMove("/items/0", { into: "/items" })).toEqual({ ok: true });
+    expect(doc.move("/items/0", { into: "/items" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["d", "c", "a", "b"]);
+    expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/0", path: "/items/3" }]);
+  });
+
+  test("moves the primary selection with a relative target", () => {
+    const doc = createJSONDocument(Schema, ordered, {
+      selection: { mode: "single", initial: ["/items/1"] },
+    });
+
+    expect(doc.canMove({ after: "/items/3" })).toEqual({ ok: true });
+    expect(doc.move({ after: "/items/3" })).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "c", "d", "b"]);
+  });
+
+  test("rejects relative move targets that do not address an array item", () => {
+    const doc = createJSONDocument(Schema, initial);
+
+    expect(doc.canMove("/items/0", { after: "/items" })).toEqual({
+      ok: false,
+      code: "invalid_pointer",
+      reason: "relative move target must address an array item: /items",
+      pointer: "/items",
+    });
+    expect(doc.move("/items/0", { after: "/items" })).toEqual({
+      ok: false,
+      code: "invalid_pointer",
+      reason: "relative move target must address an array item: /items",
+      pointer: "/items",
+    });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b"]);
+  });
+
   test("uses explicit selection sources for clipboard and history", () => {
     const doc = createJSONDocument(Schema, initial, {
       history: 10,
@@ -118,7 +205,7 @@ describe("JSONDocument interface", () => {
     });
     expect(doc.clipboard.hasData).toBe(true);
 
-    expect(doc.clipboard.paste("/items/-")).toMatchObject({ ok: true });
+    expect(doc.clipboard.paste({ into: "/items" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.name)).toEqual(["A", "B", "A"]);
     expect(doc.history.undoDepth).toBe(1);
 
@@ -146,8 +233,8 @@ describe("JSONDocument interface", () => {
     expect(doc.cut("/items/2")).toMatchObject({ ok: true, source: "/items/2" });
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b"]);
 
-    expect(doc.canPaste("/items/-", { payload: { id: "c", name: "C" } })).toEqual({ ok: true });
-    expect(doc.paste("/items/-", { payload: { id: "c", name: "C" } })).toMatchObject({ ok: true });
+    expect(doc.canInsert("/items/-", { id: "c", name: "C" })).toEqual({ ok: true });
+    expect(doc.insert("/items/-", { id: "c", name: "C" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "c"]);
   });
 

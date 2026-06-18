@@ -26,7 +26,7 @@ describe("official site shell", () => {
     render(<App />);
 
     expect(screen.getByRole("link", { name: "Skip to content" }).getAttribute("href")).toBe("#main-content");
-    expect(screen.getByRole("heading", { level: 1, name: "@interactive-os/json-document" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
     expect(screen.getByText(/Zod-guarded JSON editing/)).toBeTruthy();
     expect(screen.getByText("npm install json-document zod")).toBeTruthy();
     expect(screen.getByText('import { createJSONDocument } from "@interactive-os/json-document";')).toBeTruthy();
