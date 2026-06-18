@@ -11,7 +11,7 @@ export function batchUpdate<TDocument, TValue = unknown>(
   const change = canBatchUpdate(doc, targets, value, options);
   if (!change.ok) return change;
   if (change.operations.length === 0) return change;
-  const patched = doc.patch(change.operations);
+  const patched = doc.commit(change.operations, { selectionAfter: change.selectionAfter });
   if (!patched.ok) {
     return {
       ok: false,

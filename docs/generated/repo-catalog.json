@@ -362,6 +362,7 @@
         "JSONDocumentOptions",
         "JSONDocumentPasteOptions",
         "JSONDocumentPasteTarget",
+        "JSONDocumentSelectionTarget",
         "JSONPatchInput",
         "JSONPatchOperation",
         "JSONResult",
@@ -440,7 +441,7 @@
         "unescapeSegment",
         "withLastSegment"
       ],
-      "publicExportCount": 117,
+      "publicExportCount": 118,
       "keywords": [
         "clipboard",
         "crud",

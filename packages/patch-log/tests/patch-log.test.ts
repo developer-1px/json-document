@@ -1,7 +1,13 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument, type JSONChangeMetadata, type JSONPatchOperation } from "@interactive-os/json-document";
+import {
+  createJSONDocument,
+  type JSONChangeMetadata,
+  type JSONDocumentCommitOptions,
+  type JSONPatchOperation,
+  type SelectionSnap,
+} from "@interactive-os/json-document";
 import { createPatchLog } from "../src/index.js";
 
 const Item = z.object({
@@ -28,6 +34,14 @@ function createDoc(
     history: 10,
   });
 }
+
+const selectedSecondItem: SelectionSnap = {
+  selectedPointers: ["/items/1"],
+  selectionRanges: [{ anchor: "/items/1", focus: "/items/1" }],
+  primaryIndex: 0,
+  anchor: "/items/1",
+  focus: "/items/1",
+};
 
 describe("@interactive-os/json-document-patch-log", () => {
   test("records applied patches and metadata from document subscriptions", () => {
@@ -159,7 +173,7 @@ describe("@interactive-os/json-document-patch-log", () => {
     const log = createPatchLog(source);
     const target = createDoc();
     const originalCommit = target.commit.bind(target);
-    const commitCalls: JSONChangeMetadata[] = [];
+    const commitCalls: JSONDocumentCommitOptions[] = [];
 
     target.commit = ((operations, options) => {
       if (options !== undefined) commitCalls.push(options);
@@ -183,6 +197,41 @@ describe("@interactive-os/json-document-patch-log", () => {
       {
         label: "replay commit",
         origin: "programmatic",
+      },
+    ]);
+  });
+
+  test("commit replay preserves recorded selectionAfter metadata", () => {
+    const source = createDoc();
+    const log = createPatchLog(source);
+    const target = createDoc();
+    const originalCommit = target.commit.bind(target);
+    const commitCalls: JSONDocumentCommitOptions[] = [];
+
+    target.commit = ((operations, options) => {
+      if (options !== undefined) commitCalls.push(options);
+      return originalCommit(operations, options);
+    }) as typeof target.commit;
+
+    expect(source.patch({
+      op: "replace",
+      path: "/items/1/title",
+      value: "B2",
+    }, {
+      label: "select replayed item",
+      selectionAfter: selectedSecondItem,
+    })).toEqual({ ok: true });
+
+    expect(log.replayInto(target, { mode: "commit" })).toMatchObject({
+      ok: true,
+      appliedEntries: 1,
+    });
+
+    expect(target.value.items[1]?.title).toBe("B2");
+    expect(commitCalls).toEqual([
+      {
+        label: "select replayed item",
+        selectionAfter: selectedSecondItem,
       },
     ]);
   });

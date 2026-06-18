@@ -794,14 +794,14 @@ export function InterfaceWorkbench() {
     if (!hasTitleSelection) doc.selection?.collapse({ path: "/title", offset: 0 });
     const planned = doc.selection?.textPatch(textPayload);
     return planned?.ok
-      ? doc.commit(planned.patch, { mergeKey: "title-text", selection: planned.selection })
+      ? doc.commit(planned.patch, { mergeKey: "title-text", selectionAfter: planned.selection })
       : planned;
   };
 
   const commitReplaceTitle = (): unknown => {
     return doc.commit(
       [{ op: "replace", path: targetTitlePath, value: textPayload }],
-      { label: "commit", selection: collapsedSelection(valueTarget) },
+      { label: "commit", selectionAfter: collapsedSelection(valueTarget) },
     );
   };
 
@@ -1302,12 +1302,12 @@ export function InterfaceWorkbench() {
         </CommandRow>
         <CommandRow
           title="Commit rename"
-          api="doc.commit(replace title, selection)"
+          api="doc.commit(replace title, selectionAfter)"
           status={<CommandState reason={selectedCardReason} capability={canReplaceTargetTitle} />}
           args={<>{valueTargetInput("commit target")}{textInput("commit title")}</>}
           result={featureResult("Edit card")}
         >
-          <ActionButton disabledReason={selectedCardReason ?? canDisabledReason(canReplaceTargetTitle)} onClick={() => run(`doc.commit([{ op: "replace", path: "${targetTitlePath}", value }], { selection })`, commitReplaceTitle, "Edit card")}>Commit</ActionButton>
+          <ActionButton disabledReason={selectedCardReason ?? canDisabledReason(canReplaceTargetTitle)} onClick={() => run(`doc.commit([{ op: "replace", path: "${targetTitlePath}", value }], { selectionAfter })`, commitReplaceTitle, "Edit card")}>Commit</ActionButton>
         </CommandRow>
         <CommandRow
           title="Replace points"

@@ -363,6 +363,7 @@ export const repoCatalog = {
         "JSONDocumentOptions",
         "JSONDocumentPasteOptions",
         "JSONDocumentPasteTarget",
+        "JSONDocumentSelectionTarget",
         "JSONPatchInput",
         "JSONPatchOperation",
         "JSONResult",
@@ -441,7 +442,7 @@ export const repoCatalog = {
         "unescapeSegment",
         "withLastSegment"
       ],
-      "publicExportCount": 117,
+      "publicExportCount": 118,
       "keywords": [
         "clipboard",
         "crud",

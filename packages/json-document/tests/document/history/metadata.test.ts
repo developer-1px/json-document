@@ -202,7 +202,7 @@ describe("doc.history metadata", () => {
       label: "Insert title text",
       origin: "keyboard",
       mergeKey: "typing:title",
-      selection: insert.selection,
+      selectionAfter: insert.selection,
     });
 
     const deletion = doc.selection?.deleteText();
@@ -211,7 +211,7 @@ describe("doc.history metadata", () => {
       label: "Delete title text",
       origin: "keyboard",
       mergeKey: "typing:title",
-      selection: deletion.selection,
+      selectionAfter: deletion.selection,
     });
 
     expect(metadata).toHaveLength(2);

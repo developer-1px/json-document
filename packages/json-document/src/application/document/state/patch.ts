@@ -3,7 +3,7 @@ import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/c
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import { commitMutable, historyDepth } from "../../../foundation/history.js";
 import { duplicate as duplicateVerb } from "../../../domain/edit/duplicate.js";
-import { restoreSelection } from "../../../domain/selection/snap.js";
+import { restoreSelectionTarget } from "../../../domain/selection/snap.js";
 import { EMPTY_SELECTION, type SelectionSnap } from "../../../domain/selection/snap.js";
 import type {
   HistoryTransactionOptions,
@@ -223,12 +223,12 @@ export function createDocumentMutationRuntime<S extends z.ZodType>(
     commitOptions?: JSONDocumentCommitOptions,
   ): JSONResult => {
     const metadata = commitOptions === undefined ? undefined : compactHistoryMetadata(commitOptions);
-    if (commitOptions?.selection === undefined) return applyDocumentPatch(operations, metadata);
+    if (commitOptions?.selectionAfter === undefined) return applyDocumentPatch(operations, metadata);
     const before = rawOps.state;
     const selectionBefore = selection.snapSelection();
     const predicted = rawOps.previewPatch(operations);
     if (!predicted.result.ok) return patch(operations, metadata);
-    const selectionAfter = restoreSelection(commitOptions.selection, selection.selectionMode, predicted.state);
+    const selectionAfter = restoreSelectionTarget(commitOptions.selectionAfter, selection.selectionMode, predicted.state);
     const directMetadata: JSONChangeMetadata = metadata === undefined
       ? { selectionAfter }
       : { ...metadata, selectionAfter };

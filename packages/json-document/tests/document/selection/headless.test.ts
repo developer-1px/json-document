@@ -313,6 +313,52 @@ describe("JSONDocument selection interface", () => {
     expect(doc.selection?.primaryPointer).toBe("/children/0/children/0");
   });
 
+  test("commit selectionAfter overrides auto recovery and round-trips through history", () => {
+    const doc = createJSONDocument(Schema, initial, {
+      history: 10,
+      selection: { mode: "multiple", initial: ["/items/0"] },
+    });
+
+    expect(doc.commit([{
+      op: "add",
+      path: "/items/-",
+      value: { id: "d", name: "D" },
+    }], {
+      selectionAfter: ["/items/1", "/items/2"],
+    })).toEqual({ ok: true });
+
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "c", "d"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/items/1", "/items/2"]);
+    expect(doc.selection?.primaryPointer).toBe("/items/2");
+
+    expect(doc.undo()).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/items/0"]);
+
+    expect(doc.redo()).toEqual({ ok: true });
+    expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "c", "d"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/items/1", "/items/2"]);
+  });
+
+  test("failed commit does not apply selectionAfter", () => {
+    const doc = createJSONDocument(Schema, initial, {
+      history: 10,
+      selection: { mode: "single", initial: ["/items/0"] },
+    });
+
+    expect(doc.commit([{
+      op: "replace",
+      path: "/items/1/id",
+      value: 1,
+    }], {
+      selectionAfter: "/items/2",
+    })).toMatchObject({ ok: false, code: "schema_violation" });
+
+    expect(doc.value).toEqual(initial);
+    expect(doc.selection?.selectedPointers).toEqual(["/items/0"]);
+    expect(doc.history.undoDepth).toBe(0);
+  });
+
   test("builds text patches from selected string ranges", () => {
     const doc = createJSONDocument(Schema, initial, {
       history: 10,
@@ -332,7 +378,7 @@ describe("JSONDocument selection interface", () => {
     });
     if (!planned?.ok) throw new Error("text patch did not plan");
 
-    expect(doc.commit(planned.patch, { selection: planned.selection })).toEqual({ ok: true });
+    expect(doc.commit(planned.patch, { selectionAfter: planned.selection })).toEqual({ ok: true });
     expect(doc.value.items[0]?.name).toBe("Alpha");
     expect(doc.selection?.caret).toEqual({ path: "/items/0/name", offset: 5 });
   });

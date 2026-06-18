@@ -35,6 +35,7 @@ export type {
 } from "./application/document/history/undoRedo.js";
 export type {
   JSONDocumentCommitOptions,
+  JSONDocumentSelectionTarget,
 } from "./application/document/history/metadata.js";
 export type {
   JSONDocumentPasteOptions,

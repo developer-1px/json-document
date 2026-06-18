@@ -902,7 +902,7 @@ describe("createJSONDocument public interface", () => {
       label: "typing",
       origin: "keyboard",
       mergeKey: "title",
-      selection: planned.selection,
+      selectionAfter: planned.selection,
     })).toEqual({ ok: true });
 
     expect(doc.value.title).toBe("Adraft");

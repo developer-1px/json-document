@@ -10,7 +10,7 @@ export function clearContents<TDocument>(
   const change = canClearContents(doc, targets, options);
   if (!change.ok) return change;
   if (!change.changed) return change;
-  const patched = doc.patch(change.operations);
+  const patched = doc.commit(change.operations, { selectionAfter: change.selectionAfter });
   if (!patched.ok) {
     return {
       ok: false,
