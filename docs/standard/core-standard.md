@@ -239,6 +239,12 @@ adapter가 새 core concept을 요구한다면 public requirement, 기존 concep
 capability purity, selection snapshot, clipboard spread semantics, history
 round-trip을 다뤄야 한다.
 
+Semantic fixture는 적합성 suite보다 좁고 더 보수적인 release gate다. Export name
+lock이 public symbol의 존재를 고정한다면, semantic fixture는 result code,
+strict 기본값, 실패 atomicity, clipboard spread, selection/history round-trip처럼
+1.0 이후 바뀌면 breaking change가 되는 예시를 고정해야 한다. Fixture는 reason
+문구가 아니라 stable `code`와 구조를 검증해야 한다.
+
 일반 구현 테스트를 통과하는 것만으로는 표준 적합성을 주장할 수 없다.
 json-document 호환 구현체는 implementation-private module 없이 적합성 suite를
 통과해야 한다.
