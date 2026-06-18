@@ -128,5 +128,6 @@ function commitOptionsFromMetadata(
   if (metadata.label !== undefined) options.label = metadata.label;
   if (metadata.origin !== undefined) options.origin = metadata.origin;
   if (metadata.mergeKey !== undefined) options.mergeKey = metadata.mergeKey;
+  if (metadata.selectionAfter !== undefined) options.selectionAfter = metadata.selectionAfter;
   return Object.keys(options).length > 0 ? options : undefined;
 }

@@ -10,7 +10,7 @@ export function groupSelection<TDocument>(
   const change = canGroupSelection(doc, adapter, source);
   if (!change.ok) return change;
 
-  const result = doc.patch(change.operations);
+  const result = doc.commit(change.operations, { selectionAfter: change.selectionAfter });
   if (!result.ok) return patchError("group", change.parent, result);
 
   return {
@@ -27,7 +27,7 @@ export function ungroupSelection<TDocument>(
   const change = canUngroupSelection(doc, adapter, source);
   if (!change.ok) return change;
 
-  const result = doc.patch(change.operations);
+  const result = doc.commit(change.operations, { selectionAfter: change.selectionAfter });
   if (!result.ok) return patchError("ungroup", change.parent, result);
 
   return {

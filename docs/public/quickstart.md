@@ -83,6 +83,17 @@ doc.commit([
 ], { label: "finish card" });
 ```
 
+편집 후 focus가 어디로 가야 하는지 command가 알고 있으면 `selectionAfter`를 같이 넘깁니다.
+
+```ts
+doc.commit([
+  { op: "add", path: "/lists/0/cards/1", value: card },
+], {
+  label: "insert card",
+  selectionAfter: "/lists/0/cards/1",
+});
+```
+
 ## 4. JSONPath로 찾고 Pointer로 바꾸기
 
 여러 위치를 찾을 때는 JSONPath로 검색하고, 반환된 Pointer로 patch를 만듭니다.

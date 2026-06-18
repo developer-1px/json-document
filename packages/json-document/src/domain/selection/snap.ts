@@ -9,12 +9,14 @@ import {
 import {
   clonePoint,
   cloneRange,
+  normalizeRangeInput,
   normalizeSelectionRange,
   pointPath,
   samePoint,
   sameRange,
   type SelectionPoint,
   type SelectionRange,
+  type SelectionRangeInput,
 } from "./point.js";
 
 type JSONPrimitive = string | number | boolean | null;
@@ -35,6 +37,11 @@ export interface SelectionSnap {
   focus: SelectionPoint | null;
   context?: SelectionContext | undefined;
 }
+
+export type SelectionTarget =
+  | SelectionSnap
+  | SelectionRangeInput
+  | ReadonlyArray<SelectionRangeInput>;
 
 export const EMPTY_SELECTION: SelectionSnap = {
   selectedPointers: [],
@@ -107,6 +114,25 @@ export function restoreSelection(
     ? EMPTY_SELECTION
     : snapFromRanges(snap.selectionRanges, snap.primaryIndex, mode, state);
   return snap.context === undefined ? restored : withSelectionContext(restored, snap.context);
+}
+
+export function restoreSelectionTarget(
+  target: SelectionTarget,
+  mode: SelectionMode,
+  state?: unknown,
+): SelectionSnap {
+  if (isSelectionSnap(target)) return restoreSelection(target, mode, state);
+  const ranges = (Array.isArray(target) ? target : [target]).map(normalizeRangeInput);
+  return snapFromRanges(ranges, ranges.length - 1, mode, state);
+}
+
+function isSelectionSnap(target: SelectionTarget): target is SelectionSnap {
+  return typeof target === "object"
+    && target !== null
+    && !Array.isArray(target)
+    && "selectedPointers" in target
+    && "selectionRanges" in target
+    && "primaryIndex" in target;
 }
 
 export function snapFromPointerTargets(

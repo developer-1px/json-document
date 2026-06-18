@@ -10,7 +10,7 @@ export function wrapSelection<TDocument>(
   const change = canWrapSelection(doc, adapter, source);
   if (!change.ok) return change;
 
-  const result = doc.patch(change.operations);
+  const result = doc.commit(change.operations, { selectionAfter: change.selectionAfter });
   if (!result.ok) return patchError("wrap", change.parent, result);
 
   return {
@@ -27,7 +27,7 @@ export function unwrapSelection<TDocument>(
   const change = canUnwrapSelection(doc, adapter, source);
   if (!change.ok) return change;
 
-  const result = doc.patch(change.operations);
+  const result = doc.commit(change.operations, { selectionAfter: change.selectionAfter });
   if (!result.ok) return patchError("unwrap", change.parent, result);
 
   return {

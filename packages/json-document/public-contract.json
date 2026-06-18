@@ -38,6 +38,7 @@
       "JSONDocumentOptions",
       "JSONDocumentPasteOptions",
       "JSONDocumentPasteTarget",
+      "JSONDocumentSelectionTarget",
       "JSONPatchInput",
       "JSONPatchOperation",
       "SelectionPoint",

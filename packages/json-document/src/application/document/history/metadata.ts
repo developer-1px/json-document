@@ -1,5 +1,7 @@
-import type { SelectionSnap } from "../../../domain/selection/snap.js";
+import type { SelectionSnap, SelectionTarget } from "../../../domain/selection/snap.js";
 import type { DocumentHistoryEntry } from "./entry.js";
+
+export type JSONDocumentSelectionTarget = SelectionTarget;
 
 export interface HistoryTransactionOptions {
   label?: string;
@@ -13,7 +15,7 @@ export interface JSONChangeMetadata extends HistoryTransactionOptions {
 }
 
 export interface JSONDocumentCommitOptions extends HistoryTransactionOptions {
-  selection?: SelectionSnap;
+  selectionAfter?: JSONDocumentSelectionTarget;
 }
 
 export function buildChangeMetadata(

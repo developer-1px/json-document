@@ -165,7 +165,7 @@ describe("json-document core standard conformance", () => {
       label: "rename card",
       origin: "keyboard",
       mergeKey: "card:title",
-      selection: selectedSecondCard,
+      selectionAfter: selectedSecondCard,
     })).toEqual({ ok: true });
 
     expect(doc.value.columns[0]?.cards[0]?.title).toBe("A1");

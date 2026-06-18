@@ -489,12 +489,12 @@ for (const size of sizes) {
       selection: { mode: "single", initial: [`/items/${middle}/done`] },
     });
     const selection = doc.selection?.snapshot();
-    bench("doc.commit single leaf + selection", rounds, (index) =>
+    bench("doc.commit single leaf + selectionAfter", rounds, (index) =>
       doc.commit([{
         op: "replace",
         path: `/items/${middle}/done`,
         value: index % 2 === 0,
-      }], selection ? { selection } : undefined));
+      }], selection ? { selectionAfter: selection } : undefined));
   }
 
   {

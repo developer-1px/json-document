@@ -271,7 +271,7 @@ if (planned?.ok) {
     label: "typing",
     origin: "keyboard",
     mergeKey: "title",
-    selection: planned.selection,
+    selectionAfter: planned.selection,
   });
 }
 ```

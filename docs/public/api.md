@@ -135,6 +135,19 @@ doc.commit([
 
 Patch의 `path`와 `from`은 JSON Pointer입니다. JSONPath를 patch에 직접 넣지 않습니다.
 
+구조 편집 후 앱이 정확한 다음 선택 위치를 알고 있으면 `selectionAfter`를 같이 넘깁니다. 기본 편집은 document가 selection을 자동 복구하지만, group, unwrap, bulk edit처럼 결과 focus가 command 의미에 속하는 경우에는 command가 최종 selection을 명시합니다.
+
+```ts
+doc.commit([
+  { op: "add", path: "/lists/0/cards/1", value: newCard },
+], {
+  label: "insert card",
+  selectionAfter: "/lists/0/cards/1",
+});
+```
+
+`selectionAfter`는 Pointer, selection range input 배열, 또는 `SelectionSnap`을 받습니다. 같은 commit의 patch, history entry, subscriber metadata, 현재 `doc.selection`이 같은 최종 선택을 봅니다. 실패한 commit은 값을 바꾸지 않고 selection도 바꾸지 않습니다.
+
 ## query
 
 `doc.find`는 편집 feature verb로 JSONPath match pointer를 반환합니다. `doc.query`는 같은 engine을 lower-level read primitive로 노출합니다.

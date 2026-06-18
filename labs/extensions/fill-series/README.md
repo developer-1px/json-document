@@ -50,7 +50,7 @@ filler.fill(["/rows/1", "/rows/2"], { from: (cell) => `row-${cell.index}` }, { f
 The public facade is enough to express constant fill, linear series, and a host
 generator. The flow is: normalize the target with `resolveSiblingRange`, read
 current cell values with `doc.at`, build per-cell `replace` operations,
-preflight the whole batch with `doc.canPatch`, then apply with `doc.patch`.
+preflight the whole batch with `doc.canPatch`, then apply with `doc.commit`.
 Schema safety falls out of `canPatch` for free — a numeric series aimed at a
 string field is rejected as `patch_rejected` and nothing is applied.
 
@@ -60,4 +60,6 @@ Resolved core pressure:
   `resolveSiblingRange` after enough independent labs repeated it.
 - This lab maps `resolveSiblingRange` errors back to its existing error codes so
   the feature contract stays stable.
-- `selectionAfter` remains a lab convention, not a core concept yet.
+- Pointer-based `selectionAfter` now flows through `doc.commit`, so the value
+  mutation, history entry, metadata, and current document selection stay in one
+  boundary.

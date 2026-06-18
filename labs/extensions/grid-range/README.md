@@ -35,9 +35,10 @@ preflight, and one document mutation boundary.
 - Accept host-owned `keyForCell`, bounds, value-to-intent, fill-intent
   generation, and equality hooks.
 - Plan entry-level `add`, `replace`, `remove`, and `noop` decisions with one
-  `doc.canPatch` preflight and one `doc.patch` apply.
+  `doc.canPatch` preflight and one `doc.commit` apply.
 - Return structured cell decisions, operation counts, planned JSON Patch
   operations, and `selectionAfter` coordinates for focus/selection recovery.
+  The document selection is restored with the corresponding cell JSON Pointers.
 
 ## Non-goals
 
