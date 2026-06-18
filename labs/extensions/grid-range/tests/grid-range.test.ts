@@ -16,7 +16,7 @@ const Schema = z.object({
   rows: z.array(z.string()),
 });
 
-function createDoc() {
+function createDoc(options: { selection?: boolean } = {}) {
   return createJSONDocument(Schema, {
     cells: {
       A1: "old",
@@ -28,7 +28,9 @@ function createDoc() {
       A1: { bold: true },
     },
     rows: [],
-  });
+  }, options.selection
+    ? { history: 10, selection: { mode: "multiple", initial: ["/cells/A1"] } }
+    : undefined);
 }
 
 function createSeriesDoc() {
@@ -53,7 +55,7 @@ function expectOk(result: GridRangeResult): Extract<GridRangeResult, { ok: true 
 
 describe("@interactive-os/json-document-grid-range", () => {
   test("pastes a matrix into a sparse record range with add replace remove and no-op planning", () => {
-    const doc = createDoc();
+    const doc = createDoc({ selection: true });
     const grid = createGridRange(doc);
 
     const result = expectOk(grid.paste({
@@ -93,6 +95,7 @@ describe("@interactive-os/json-document-grid-range", () => {
       { key: "C2", pointer: "/cells/C2", intent: "set", action: "add" },
     ]);
     expect(result.selectionAfter.map((cell) => cell.key)).toEqual(["A1", "B1", "C1", "A2", "B2", "C2"]);
+    expect(doc.selection?.selectedPointers).toEqual(result.selectionAfter.map((cell) => cell.pointer));
     expect(doc.lastPatch).toEqual(result.operations);
     expect(doc.value.cells).toEqual({
       A1: "new",

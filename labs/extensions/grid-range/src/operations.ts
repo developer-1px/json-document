@@ -1,6 +1,6 @@
-import type { JSONChangeMetadata, JSONDocument, JSONResult } from "@interactive-os/json-document";
+import type { JSONChangeMetadata, JSONDocument, JSONDocumentCommitOptions, JSONResult } from "@interactive-os/json-document";
 import { canFillGridRange, canPasteGridRange } from "./plan.js";
-import type { GridRangeError, GridRangeFillInput, GridRangeOptions, GridRangePasteInput, GridRangeResult } from "./types.js";
+import type { GridRangeError, GridRangeFillInput, GridRangeOptions, GridRangePasteInput, GridRangeResolvedCell, GridRangeResult } from "./types.js";
 
 export function pasteGridRange<TDocument>(
   doc: JSONDocument<TDocument>,
@@ -12,7 +12,7 @@ export function pasteGridRange<TDocument>(
   if (!change.ok) return change;
   if (!change.changed) return change;
 
-  const patched = doc.patch(change.operations, metadata);
+  const patched = doc.commit(change.operations, gridCommitOptions(metadata, change.selectionAfter));
   if (!patched.ok) return patchError(patched);
   return change;
 }
@@ -27,9 +27,22 @@ export function fillGridRange<TDocument>(
   if (!change.ok) return change;
   if (!change.changed) return change;
 
-  const patched = doc.patch(change.operations, metadata);
+  const patched = doc.commit(change.operations, gridCommitOptions(metadata, change.selectionAfter));
   if (!patched.ok) return patchError(patched);
   return change;
+}
+
+function gridCommitOptions(
+  metadata: JSONChangeMetadata | undefined,
+  selectionAfter: ReadonlyArray<GridRangeResolvedCell>,
+): JSONDocumentCommitOptions {
+  const options: JSONDocumentCommitOptions = {
+    selectionAfter: selectionAfter.map((cell) => cell.pointer),
+  };
+  if (metadata?.label !== undefined) options.label = metadata.label;
+  if (metadata?.origin !== undefined) options.origin = metadata.origin;
+  if (metadata?.mergeKey !== undefined) options.mergeKey = metadata.mergeKey;
+  return options;
 }
 
 function patchError(patch: Extract<JSONResult, { ok: false }>): GridRangeError {

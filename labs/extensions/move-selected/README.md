@@ -53,6 +53,6 @@ RFC #87):
   existing error codes.
 - **`selectionAfter` planning.** The moved block maps to a fresh contiguous
   pointer run; computing it is trivial once the new array index is known. The
-  open question stays whether `operations` / `selectionAfter` should converge to
-  one shared structural-result shape.
+  operation now applies through `doc.commit(..., { selectionAfter })`, while the
+  lab result shape remains feature-owned.
 - **No core gap for the feature itself.** Block move needs no new core concept.
