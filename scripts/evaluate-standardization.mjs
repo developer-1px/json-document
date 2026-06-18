@@ -23,6 +23,7 @@ const selectionContract = read("docs/standard/selection-contract.md");
 const schemaIntrospectionContract = read("docs/standard/schema-introspection-contract.md");
 const conformance = read("packages/json-document/tests/public/standard-conformance.test.ts");
 const semanticContract = read("packages/json-document/tests/public/semantic-contract.test.ts");
+const signatureContract = read("packages/json-document/tests/public/signature-contract.test-d.ts");
 const publicContract = JSON.parse(read("packages/json-document/public-contract.json"));
 const rootPackage = JSON.parse(read("package.json"));
 
@@ -36,6 +37,7 @@ for (const [label, pattern] of [
   ["strict semantics", /기본값은 `strict: false`/],
   ["selection semantics", /selection은 DOM focus가 아니라 headless document data다/],
   ["semantic fixture lock", /Semantic fixture[\s\S]*result code[\s\S]*strict 기본값[\s\S]*실패 atomicity/],
+  ["signature fixture lock", /Signature fixture[\s\S]*overload[\s\S]*call shape/],
   ["clipboard spread", /직접 array payload를 `insert\(target, payload, \{ spread: true \}\)`로 넣으면[\s\S]*item별 sibling insert/],
   ["history semantics", /history는 undo\/redo control surface/],
   ["breaking change", /breaking change로\s+취급해야 한다/],
@@ -66,6 +68,7 @@ for (const [label, pattern] of [
   ["schema freeze artifact", /schema-introspection-contract\.md/],
   ["conformance artifact", /standard-conformance\.test\.ts/],
   ["semantic fixture artifact", /semantic-contract\.test\.ts/],
+  ["signature fixture artifact", /signature-contract\.test-d\.ts/],
   ["evaluator artifact", /evaluate-standardization\.mjs/],
   ["adapter pressure", /form[\s\S]*table\/data-grid[\s\S]*outliner\/tree[\s\S]*rich text[\s\S]*storage\/collaboration/i],
 ]) {
@@ -134,6 +137,27 @@ for (const [label, pattern] of [
   ["clipboard and selection history", /clipboard spread[\s\S]*selection history[\s\S]*undo\(\)[\s\S]*redo\(\)/],
 ]) {
   requirePattern("semantic contract", semanticContract, pattern);
+}
+
+if (!/from "@interactive-os\/json-document"/.test(signatureContract)) {
+  fail("signature contract: must import from the public root package.");
+}
+if (!/from "@interactive-os\/json-document\/react"/.test(signatureContract)) {
+  fail("signature contract: must import React from the public react package.");
+}
+if (/from "\.\.|from '\.\.|\/src\//.test(signatureContract)) {
+  fail("signature contract: must not import implementation-private modules.");
+}
+for (const [label, pattern] of [
+  ["fixture type", /signature-contract\.test-d\.ts/],
+  ["create overload", /ExpectedCreateJSONDocument[\s\S]*TrustedInitialDocumentOptions[\s\S]*UntrustedInitialDocumentOptions/],
+  ["react overload", /ExpectedUseJSONDocument[\s\S]*TrustedInitialDocumentOptions[\s\S]*UntrustedInitialDocumentOptions/],
+  ["document surface", /ExpectedJSONDocument[\s\S]*insert\(target[\s\S]*move\(source[\s\S]*paste\(target[\s\S]*canPaste\(target/],
+  ["patch helpers", /ExpectedPatchHelpers[\s\S]*applyOperation[\s\S]*applyPatchToTrustedState/],
+  ["placement shapes", /JSONDocumentPasteTarget[\s\S]*before[\s\S]*after[\s\S]*into[\s\S]*replace/],
+  ["negative shape", /@ts-expect-error[\s\S]*\{ at \}/],
+]) {
+  requirePattern("signature contract", signatureContract, pattern);
 }
 
 if (!publicContract.root.values.includes("createJSONDocument")) {

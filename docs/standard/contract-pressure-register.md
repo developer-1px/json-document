@@ -368,11 +368,13 @@ product policy 주입인지 feature 구현 위임 실패인지 더 확인해야 
 - Top-level `doc.undo()` / `doc.redo()` Result surface.
 - Semantic fixture lock: result code, strict policy, failed mutation atomicity,
   clipboard spread, selection/history round-trip.
+- Signature fixture lock: public root/react entrypoint import 기준으로
+  `createJSONDocument`, `useJSONDocument`, `JSONDocument<T>` method overload,
+  JSON Patch helper, placement target call shape를 typecheck fixture로 고정한다.
 
 남은 후보:
 
-- public type signature snapshot.
-- broader signature/overload snapshot beyond the package smoke typecheck.
+- broader consumer-project type fixture beyond the package smoke typecheck.
 
 ## Loop Gate
 
