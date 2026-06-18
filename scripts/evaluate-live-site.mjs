@@ -65,7 +65,7 @@ async function checkOnce() {
   }
 
   const llms = await fetchText("/llms.txt");
-  if (!/Import 경계/.test(llms) || !/@json-document\/id-resolver/.test(llms)) {
+  if (!/Import 경계/.test(llms) || !/@interactive-os\/json-document-id-resolver/.test(llms)) {
     fail("live llms.txt is missing expected content.");
   }
 
