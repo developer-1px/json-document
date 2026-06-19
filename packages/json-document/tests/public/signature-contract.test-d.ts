@@ -6,11 +6,16 @@ import {
   applyPatch,
   applyPatchToTrustedState,
   createJSONDocument,
+  type ClipboardCopyError,
   type ClipboardCopyOptions,
   type ClipboardCopyResult,
+  type ClipboardCutError,
   type ClipboardCutOptions,
   type ClipboardCutResult,
+  type ClipboardEmpty,
+  type ClipboardPasteError,
   type ClipboardPasteResult,
+  type ClipboardReadResult,
   type ClipboardState,
   type EntriesResult,
   type JSONCapabilityResult,
@@ -101,6 +106,59 @@ type FixtureApplyResult = {
   applied: ReadonlyArray<JSONPatchOperation>;
 };
 
+type ExpectedJSONResultCode =
+  | "invalid_pointer"
+  | "path_not_found"
+  | "move_into_self"
+  | "schema_violation"
+  | "test_failed"
+  | "not_serializable";
+
+type ExpectedCapabilityErrorCode =
+  | ExpectedJSONResultCode
+  | "preflight_failed"
+  | "discriminator_mismatch"
+  | "rekey_failed"
+  | "missing_new_key"
+  | "key_conflict"
+  | "empty_selection"
+  | "empty_scope"
+  | "empty_match"
+  | "cursor_boundary"
+  | "syntax_error"
+  | "empty_stack"
+  | "apply_failed"
+  | "empty_clipboard"
+  | "missing_length"
+  | "multi_pointer_range"
+  | "overlapping_ranges"
+  | "not_string"
+  | "point_not_in_order";
+
+type ExpectedCopyErrorCode =
+  | "empty_selection"
+  | "invalid_pointer"
+  | "path_not_found"
+  | "not_serializable";
+
+type ExpectedCutErrorCode = ExpectedCopyErrorCode | ExpectedJSONResultCode | "preflight_failed";
+type ExpectedPasteErrorCode =
+  | "empty_selection"
+  | "not_serializable"
+  | "rekey_failed"
+  | ExpectedJSONResultCode
+  | "preflight_failed";
+type ExpectedDuplicateErrorCode =
+  | "empty_selection"
+  | "invalid_pointer"
+  | "path_not_found"
+  | "missing_new_key"
+  | "key_conflict"
+  | "not_serializable"
+  | "rekey_failed"
+  | ExpectedJSONResultCode
+  | "preflight_failed";
+
 interface ExpectedPatchHelpers {
   applyOperation(schema: FixtureSchema, state: FixtureRow, op: JSONPatchOperation): FixtureApplyResult;
   applyPatch(schema: FixtureSchema, state: FixtureRow, ops: ReadonlyArray<JSONPatchOperation>): FixtureApplyResult;
@@ -187,6 +245,25 @@ type _applyPatchSignature = Expect<
 >;
 type _applyPatchToTrustedStateSignature = Expect<
   Equal<typeof applyPatchToTrustedState<FixtureSchema>, ExpectedPatchHelpers["applyPatchToTrustedState"]>
+>;
+
+type _jsonResultCodeCatalog = Expect<
+  Equal<Extract<JSONResult, { ok: false }>["code"], ExpectedJSONResultCode>
+>;
+type _capabilityResultCodeCatalog = Expect<
+  Equal<Extract<JSONCapabilityResult, { ok: false }>["code"], ExpectedCapabilityErrorCode>
+>;
+type _copyErrorCodeCatalog = Expect<Equal<ClipboardCopyError["code"], ExpectedCopyErrorCode>>;
+type _cutErrorCodeCatalog = Expect<Equal<ClipboardCutError["code"], ExpectedCutErrorCode>>;
+type _pasteErrorCodeCatalog = Expect<
+  Equal<ClipboardPasteError["code"], ExpectedPasteErrorCode>
+>;
+type _pasteEmptyCodeCatalog = Expect<Equal<ClipboardEmpty["code"], "empty_clipboard">>;
+type _readEmptyCodeCatalog = Expect<
+  Equal<Extract<ClipboardReadResult, { ok: false }>["code"], "empty_clipboard">
+>;
+type _duplicateErrorCodeCatalog = Expect<
+  Equal<Extract<JSONDocumentDuplicateResult<FixtureRow>, { ok: false }>["code"], ExpectedDuplicateErrorCode>
 >;
 
 type _documentKeys = Expect<Equal<keyof JSONDocument<FixtureRow>, keyof ExpectedJSONDocument<FixtureRow>>>;

@@ -133,14 +133,21 @@ Clipboard와 structural command result는 `ok` discriminant를 공유하지만 A
 | Family | 성공 payload |
 | --- | --- |
 | read/query/entries | 읽은 값 또는 pointer 목록 |
-| copy | clipboard `payload`, source pointer |
-| cut | next `value`, `applied`, clipboard `payload`, source pointer |
+| `insert`, `replace`, `delete`, `move` | `JSONResult` 성공 `{ ok: true }`; 실제 commit patch는 `doc.lastPatch`, subscriber, history entry에 기록 |
+| copy | clipboard `payload`, primary `source`, all `sources` |
+| cut | next `value`, `applied`, clipboard `payload`, primary `source`, all `sources` |
 | paste | next `value`, `applied` |
 | duplicate | next `value`, `applied`, `duplicatedTo` |
 | undo/redo | top-level document command는 `JSONCapabilityResult` |
 
 Clipboard family와 structural result의 실패 diagnostic field는 `reason`이다.
 Stable branch key는 `code`다.
+
+`applied`를 가진 성공 result의 `value`는 commit 후 document value다. 같은
+document instance에서 읽는 `doc.value`와 같은 최종 state를 가리킨다. 반대로
+`insert`, `replace`, `delete`, `move`, `patch`, `commit`은 low-level
+`JSONResult` family라 성공 result 자체에 `applied`를 싣지 않는다. 이 family의
+호출자는 `doc.lastPatch`나 subscriber metadata를 통해 실제 applied patch를 읽는다.
 
 `discriminator_mismatch`는 추가 정보를 제공한다.
 
@@ -188,6 +195,7 @@ throw 여부가 아니라 result contract의 `code`로 실패를 분류해야 �
 - `ok` discriminant 제거 또는 의미 변경.
 - 기존 error code 제거, rename, 의미 변경.
 - 실패 result의 `code` 제거.
+- `copy`/`cut`의 primary `source`와 all `sources` 의미 변경.
 - `violations[].path`를 JSON Pointer가 아닌 형식으로 변경.
 - `schema-slot`과 `document-result` violation path 기준 변경.
 - 성공 mutation result에서 `applied` 의미를 실제 commit patch가 아닌 것으로 변경.
