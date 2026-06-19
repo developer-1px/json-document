@@ -15,14 +15,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+      - name: Detect changed scope
+        id: scope
+        env:
+          CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.sha }}
+        run: node scripts/ci-scope.mjs
       - name: Install dependencies
+        if: steps.scope.outputs.package_any == 'true'
         run: npm ci --no-audit --no-fund
       - name: Verify package and official extensions
+        if: steps.scope.outputs.package_full == 'true'
         run: npm run typecheck && npm test && npm run build && npm run smoke:package && npm run extensions:verify && npm run docs:evaluate
+      - name: Verify package documentation
+        if: steps.scope.outputs.package_full != 'true' && (steps.scope.outputs.package_docs == 'true' || steps.scope.outputs.package_smoke == 'true')
+        run: |
+          if [ "${{ steps.scope.outputs.package_docs }}" = "true" ]; then
+            npm run docs:evaluate
+          fi
+          if [ "${{ steps.scope.outputs.package_smoke }}" = "true" ]; then
+            npm run smoke:package
+          fi
       - name: Check package contents
+        if: steps.scope.outputs.package_full == 'true' || steps.scope.outputs.package_smoke == 'true'
         env:
           npm_config_cache: ${{ runner.temp }}/npm-cache
         run: npm pack -w @interactive-os/json-document --dry-run
@@ -37,23 +57,47 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+      - name: Detect changed scope
+        id: scope
+        env:
+          CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.sha }}
+        run: node scripts/ci-scope.mjs
       - name: Install dependencies
+        if: steps.scope.outputs.lab_extensions == 'true'
         run: npm ci --no-audit --no-fund
       - name: Verify changed lab extension dist imports
+        if: steps.scope.outputs.lab_extensions == 'true'
         env:
           LAB_EXTENSIONS_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           LAB_EXTENSIONS_HEAD: ${{ github.sha }}
-        run: npm run build && npm run labs:extensions:verify:changed
+        run: npm run labs:extensions:verify:changed
 
   playground-site:
     name: Playgrounds and site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+      - name: Detect changed scope
+        id: scope
+        env:
+          CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.sha }}
+        run: node scripts/ci-scope.mjs
       - name: Install dependencies
+        if: steps.scope.outputs.site == 'true' || steps.scope.outputs.playground == 'true' || steps.scope.outputs.browser == 'true'
         run: npm ci --no-audit --no-fund
       - name: Verify playgrounds and site
-        run: npm run playground:typecheck && npm run playground:test && npm run playground:build && npm run site:evaluate && npm run site:verify:pages && npm run browser:test
+        if: steps.scope.outputs.playground == 'true'
+        run: npm run playground:typecheck && npm run playground:test && npm run playground:build
+      - name: Verify site
+        if: steps.scope.outputs.site == 'true'
+        run: npm run site:verify:pages
+      - name: Verify browser behavior
+        if: steps.scope.outputs.browser == 'true'
+        run: npm run browser:test
