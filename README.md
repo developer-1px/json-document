@@ -25,6 +25,7 @@ schema -> document -> pointer/query -> can* -> change -> result
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
 | core 의미론 명세 | [docs/standard/json-document-spec.md](docs/standard/json-document-spec.md) |
+| 1.0 conformance profile | [docs/standard/conformance-profile.md](docs/standard/conformance-profile.md) |
 | result/error 계약 | [docs/standard/result-contract.md](docs/standard/result-contract.md) |
 | selection 계약 | [docs/standard/selection-contract.md](docs/standard/selection-contract.md) |
 | schema introspection 계약 | [docs/standard/schema-introspection-contract.md](docs/standard/schema-introspection-contract.md) |

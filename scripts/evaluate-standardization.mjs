@@ -17,6 +17,7 @@ function requirePattern(name, source, pattern) {
 }
 
 const standard = read("docs/standard/core-standard.md");
+const conformanceProfile = read("docs/standard/conformance-profile.md");
 const foundationGate = read("docs/standard/foundation-gate.md");
 const resultContract = read("docs/standard/result-contract.md");
 const selectionContract = read("docs/standard/selection-contract.md");
@@ -47,6 +48,18 @@ for (const [label, pattern] of [
   requirePattern("core standard", standard, pattern);
 }
 
+for (const [label, pattern] of [
+  ["documented profile", /1\.0의 conformance profile은 문서화된 profile/],
+  ["no runner package", /별도 npm package[\s\S]*CLI runner[\s\S]*1\.0 범위에 포함하지 않는다/],
+  ["public entrypoint", /public package entrypoint/],
+  ["profile artifacts", /public-contract\.json[\s\S]*signature-contract\.test-d\.ts[\s\S]*semantic-contract\.test\.ts[\s\S]*result-contract\.test\.ts[\s\S]*standard-conformance\.test\.ts/],
+  ["included semantics", /JSON Pointer[\s\S]*JSONPath[\s\S]*selectionAfter[\s\S]*clipboard[\s\S]*undo\/redo/],
+  ["excluded surfaces", /official extension[\s\S]*lab extension[\s\S]*DOM focus/],
+  ["breaking criteria", /breaking change[\s\S]*public export[\s\S]*error code[\s\S]*selectionAfter/],
+]) {
+  requirePattern("conformance profile", conformanceProfile, pattern);
+}
+
 for (const token of [
   "src/index.ts",
   "src/react.ts",
@@ -63,6 +76,7 @@ for (const token of [
 for (const [label, pattern] of [
   ["foundation tree", /RFC급 foundation/],
   ["normative artifact", /core-standard\.md/],
+  ["conformance profile artifact", /conformance-profile\.md/],
   ["result freeze artifact", /result-contract\.md/],
   ["selection freeze artifact", /selection-contract\.md/],
   ["schema freeze artifact", /schema-introspection-contract\.md/],

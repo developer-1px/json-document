@@ -37,7 +37,9 @@ import { createComments } from "@interactive-os/json-document-comments";
 import { createWebClipboard } from "@interactive-os/json-document-clipboard-web";
 ```
 
-Official extension은 현재 shipped `packages/*`만이다. `labs/extensions/*`는 후보이고 공식 package로 안내하지 않는다.
+Official extension은 현재 shipped `packages/*`만이다. `labs/extensions/*`는 후보이고 공식 package로 안내하지 않는다. `calculated-fields`, `paste-special`, `autosave`는 1.0에서 lab 유지이며 official 승격을 보류한다.
+
+Structural command extension은 `operations`, `selectionAfter`, `diagnostics` 어휘로 수렴한다. 외부 extension에는 SHOULD convention이고, 이 repo의 official/lab에는 MUST convention이다. 이것은 core `JSONDocument` method 추가가 아니다.
 
 다음 이름은 쓰지 않는다.
 
@@ -68,6 +70,7 @@ schema -> document -> pointer/query -> can* -> change -> result
 - Result/error code: `docs/standard/result-contract.md`
 - Selection semantics: `docs/standard/selection-contract.md`
 - Schema introspection: `docs/standard/schema-introspection-contract.md`
+- Conformance profile: `docs/standard/conformance-profile.md`
 - Signature/call shape: `packages/json-document/tests/public/signature-contract.test-d.ts`
 - Semantic fixture: `packages/json-document/tests/public/semantic-contract.test.ts`
 

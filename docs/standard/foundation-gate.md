@@ -38,6 +38,7 @@ RFC급 foundation
 | 게이트 | 산출물 | 상태 |
 | --- | --- | --- |
 | 규범 표준 | `docs/standard/core-standard.md` | 초안 추가 |
+| conformance profile | `docs/standard/conformance-profile.md` | 활성 |
 | result/error freeze | `docs/standard/result-contract.md` | 활성 |
 | selection freeze | `docs/standard/selection-contract.md` | 활성 |
 | schema introspection freeze | `docs/standard/schema-introspection-contract.md` | 활성 |

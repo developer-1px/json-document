@@ -277,6 +277,64 @@ extension은 React plugin이나 document plugin으로 등록되는 계층이 아
 extension은 필요할 때 함수로 조립한다. 다만 official extension은 custom hook보다
 더 엄격하게 concept boundary를 증명해야 한다.
 
+### 4.6 Structural command result convention
+
+구조 편집 command는 JSON document의 모양, sibling order, group, outline,
+range, grid-like region을 바꾼다. 이 계열은 core API를 새로 요구하지 않는다.
+Core에는 이미 JSON Patch batch와 `commit(..., { selectionAfter })`가 있다.
+따라서 extension은 같은 의미를 새 이름으로 다시 만들지 말고, 다음 어휘로
+수렴해야 한다.
+
+```ts
+type StructuralCommandChange = {
+  operations: readonly JSONPatchOperation[];
+  selectionAfter?: unknown;
+  diagnostics?: readonly unknown[];
+};
+```
+
+| Field | 의미 |
+| --- | --- |
+| `operations` | 적용 예정 또는 적용한 JSON Patch batch |
+| `selectionAfter` | command가 의미를 알고 있는 최종 headless selection |
+| `diagnostics` | 실행을 막지는 않지만 host가 보여줄 수 있는 warning/info |
+
+Third-party extension은 이 convention을 `SHOULD`로 따른다. 이미 공개된 외부
+extension까지 강제로 깨뜨릴 수는 없기 때문이다.
+
+이 repo의 official extension과 lab extension은 이 convention을 `MUST`로 따른다.
+1.0 전에 package 표면을 소급 적용할 수 있는 상태이므로, 같은 의미를 `patches`,
+`nextSelection`, `warnings` 같은 별도 이름으로 새로 노출하면 안 된다.
+
+```txt
+structural command
+|-- plan/can 단계에서 operations를 노출한다
+|-- command가 다음 focus를 알면 selectionAfter를 노출한다
+|-- 실행을 막지 않는 정보는 diagnostics에 둔다
+`-- 실제 commit은 core doc.commit(..., { selectionAfter })를 사용한다
+```
+
+`selectionAfter`는 DOM focus가 아니다. JSON Pointer, selection range input,
+또는 `SelectionSnap`으로 복원할 수 있는 headless selection이다. Visual focus,
+keyboard roving tabindex, scroll position은 host app 책임으로 남는다.
+
+`diagnostics`는 실패 result를 대체하지 않는다. 실행을 막는 문제는 stable `code`를
+가진 실패 result여야 한다. `diagnostics`는 import/paste/review처럼 host가
+사용자에게 보여줄 수 있는 비차단 정보를 보존하기 위한 field다.
+
+현재 repo audit 기준으로 다음 package들은 이미 convention에 맞는다.
+
+| 범주 | Package |
+| --- | --- |
+| official structural command | `grouping`, `outline`, `bulk-edit`, `proposed-changes` |
+| lab structural command | `wrap-selection`, `move-selected`, `layer-order`, `fill-series`, `grid-range`, `paste-cells`, `batch-update`, `clear-contents`, `fill-blanks` |
+| diagnostics convention | `paste-special`, `id-resolver`, `references` |
+
+`patch-preview`, `patch-log`, `persist-web`, `autosave`의 `applied`는 이
+structural command convention의 `operations`가 아니다. 이들은 이미 실행된 patch
+record나 subscriber event를 기록하는 boundary이므로 result contract의
+`applied` 의미를 유지한다.
+
 ## 5. MUST NOT gate
 
 다음 중 하나에 해당하면 official extension으로 올리면 안 된다.
