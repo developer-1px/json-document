@@ -4,6 +4,19 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+No unreleased changes.
+
+## 1.0.1 - 2026-06-19
+
+This release publishes the finalized 1.0 public API artifact after the npm
+`1.0.0` package had already been published.
+
+The current package keeps the same core concept set, but its published surface
+now matches the locked 1.0 API: relative insert/move targets, payload-only
+document paste, exported edit target/result types, `strict: false` default
+execution policy, reasoned undo/redo command results, and the finalized
+result/error contract.
+
 ### Added
 
 - Added lab `@interactive-os/json-document-grid-range` to delegate rectangular grid paste/fill
