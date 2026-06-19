@@ -9,7 +9,12 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const monorepoRoot = resolve(repoRoot, "..", "..");
 const workspace = await mkdtemp(join(tmpdir(), "json-document-package-"));
 const npmCache = join(workspace, ".npm-cache");
-const npmEnv = { ...process.env, npm_config_cache: npmCache, npm_config_package_lock: "false" };
+const npmEnv = {
+  ...process.env,
+  npm_config_cache: npmCache,
+  npm_config_dry_run: "false",
+  npm_config_package_lock: "false",
+};
 const lockfilePath = join(monorepoRoot, "package-lock.json");
 const lockfileSnapshot = existsSync(lockfilePath) ? await readFile(lockfilePath) : null;
 const packageJson = JSON.parse(await readFile(join(repoRoot, "package.json"), "utf8"));
