@@ -10,7 +10,9 @@ const verify = process.argv.includes("--verify");
 const verifyChanged = process.argv.includes("--changed");
 const fullVerificationPathPatterns = [
   /^package(?:-lock)?\.json$/,
-  /^packages\/json-document\//,
+  /^packages\/json-document\/src\//,
+  /^packages\/json-document\/dist\//,
+  /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig\.json)$/,
   /^scripts\/evaluate-extension-lab\.mjs$/,
 ];
 const retiredLabNames = new Set([
