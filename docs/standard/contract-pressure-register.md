@@ -41,7 +41,7 @@ Core 승격은 마지막 단계다. 다음 중 하나라도 불명확하면 core
 | --- | --- | --- | --- |
 | guard composition | `protected-ranges`, `proposed-changes`, `search-replace`, paste/drop 계열이 guard와 core capability 실패를 조합 | 부분 반영: `@interactive-os/json-document-protected-ranges` | 같은 guard result shape가 3개 이상 package에서 자연스럽게 맞는지 확인 |
 | patch preview / dry-run | `patch-preview`, `document-diff`, `proposed-changes`, import/review workflow가 apply 전 next value를 요구 | 반영됨: `@interactive-os/json-document-patch-preview` | downstream dogfood에서 visual diff/review workflow가 host-owned로 남는지 확인 |
-| structural change result | `grouping`, `wrap-selection`, `outline`, `bulk-edit`가 prospective operations와 execution result를 노출 | lab convention | `operations`, `selectionAfter`, `diagnostics` naming을 통일할 수 있는지 확인 |
+| structural change result | `grouping`, `wrap-selection`, `outline`, `bulk-edit`가 prospective operations와 execution result를 노출 | **결정됨: extension convention** | Core API 변경 없음. 외부 extension에는 SHOULD, repo official/lab에는 MUST로 `operations`, `selectionAfter`, `diagnostics`를 소급 적용 |
 | anchored pointer lifecycle | `comments`, `bookmarks`, `live-cursors`, review anchor가 `trackPointer` 이후 lost/recovered 상태를 반복 | 부분 반영: `@interactive-os/json-document-comments` | generic anchor lifecycle이 bookmark/presence 밖에서도 같은지 확인 |
 | stable id to Pointer | Kanban, form builder, import/review, slide/layer selection, blind object editor review에서 반복 | 반영됨: `@interactive-os/json-document-id-resolver` | downstream dogfood에서 id policy가 host-owned로 남는지 확인 |
 | invalid form draft | form builder, settings, CMS property panel, spreadsheet cell editing에서 valid JSON commit 전 temporary input이 반복 | 반영됨: `@interactive-os/json-document-form-draft` | parser/widget/focus policy가 host-owned로 남는지 확인 |
@@ -52,7 +52,7 @@ Core 승격은 마지막 단계다. 다음 중 하나라도 불명확하면 core
 | lab result boilerplate | 여러 lab이 `capabilityError`/`patchError`/`error`/`cloneJson` helper를 반복 | lab convention | helper 모양만으로 shared package/core를 만들지 않는다. 같은 실패 의미론이나 실행 단계가 반복될 때만 후보로 기록 |
 | command-sized feature granularity | `pad-text`, `trim-text`, `round`, `limit-items` 같은 단일 field/array command lab이 빠르게 증가 | reusable command feature | 편집도구 command로 이름 붙일 수 있으면 feature다. package 배포 단위와 feature 판정은 분리 |
 | semantic contract lock | export lock은 이름만 고정하고 signature/error literal 의미론은 문서와 테스트가 고정 | evaluator 후보 | signature snapshot 또는 semantic fixture를 추가할지 확인 |
-| structural object commands | grouping, wrap/unwrap, layer order가 slide/diagram/object editor에서 반복 | official 후보 | 같은 `operations`/`selectionAfter` result shape로 승격 가능한지 확인 |
+| structural object commands | grouping, wrap/unwrap, layer order가 slide/diagram/object editor에서 반복 | official/lab convention | `operations`/`selectionAfter`는 extension convention으로 고정. 개별 package 승격은 별도 증거 필요 |
 | sibling-range 정규화 | "선택된 sibling pointer → {공유 parent, 정렬 index, 연속성}" 를 `fill-series`·`move-selected`·`grouping`·`wrap-selection`·`layer-order` 5개 독립 확장이 재구현. `grouping`/`wrap-selection`의 resolver는 byte 단위 동일 | **반영됨: core `resolveSiblingRange` (#95)** | 순수 path helper로 core 승격(#95), 5개 소비자 모두 수렴(#96/#97/#98). `drag-drop`은 단일 source/target 개별 해석이라 range 대상이 아님(하위 primitive 사용, 제외). 남은 후보: 에러 코드 통일(현재 각 확장이 helper 코드를 자기 코드로 매핑) |
 
 ## Guard Composition
@@ -108,8 +108,11 @@ plan pressure
 
 - `patch-preview`는 `@interactive-os/json-document-patch-preview` official extension으로 승격했다.
 - `PatchPlan`은 core 타입으로 만들지 않는다.
-- lab에서는 `operations`, `preview`, `apply`, `diagnostics`, `selectionAfter`를
-  같은 의미로 쓰는지 확인한다.
+- structural command 계열은 `operations`, `selectionAfter`, `diagnostics`를
+  convention으로 쓴다. 외부 extension에는 SHOULD, 이 repo의 official/lab에는
+  MUST다.
+- `preview`와 `apply`는 feature가 preview/execution boundary를 노출할 때의
+  method 이름 후보이지, 모든 structural result의 공통 field가 아니다.
 
 최소 공유 어휘 후보:
 
@@ -120,6 +123,13 @@ plan pressure
 | `apply` | 실제 document execution |
 | `diagnostics` | 실행을 막지는 않지만 adapter/import/paste에서 알려야 하는 정보 |
 | `selectionAfter` | 구조 편집 후 host가 focus/selection을 옮길 Pointer |
+
+Repo 내부 audit 결과 `grouping`, `outline`, `bulk-edit`, `proposed-changes`,
+`wrap-selection`, `move-selected`, `layer-order`, `fill-series`, `grid-range`,
+`paste-cells`, `batch-update`, `clear-contents`, `fill-blanks`는 이미
+`operations`와 필요한 경우 `selectionAfter`로 수렴했다. `paste-special`,
+`id-resolver`, `references`는 비차단 정보를 `diagnostics`로 노출한다.
+따라서 이 항목은 core 승격 후보가 아니라 extension surface convention이다.
 
 ## Anchor Lifecycle
 
@@ -310,14 +320,14 @@ delegation lens
 
 | Lab | Delegation | App-owned residue | Midcheck action |
 | --- | --- | --- | --- |
-| `autosave` | partial | host save transport, scheduler, retry/offline/conflict policy가 큼 | coalescing/status는 위임됐지만 "autosave" 기대치에는 retry/backoff/offline profile 후보가 남음 |
+| `autosave` | partial | host save transport, scheduler, retry/offline/conflict policy가 큼 | **lab 유지**. coalescing/status는 위임됐지만 "autosave" 기대치에는 retry/backoff/offline profile 후보가 남음 |
 | `batch-update` | strong | target selection, value/compute policy | 유지. batch atomicity, per-target patch, failure는 위임됨 |
 | `bookmarks` | strong | bookmark names, persistence, focus sync | 유지. pointer tracking/lost state는 위임됨 |
 | `checkpoints` | strong | persistence, retention, compare/restore UI | 유지. named snapshot/restore mechanics는 위임됨 |
 | `clear-contents` | mostly | ambiguous enum/object empty policy | 유지. schema-derived clear는 위임됐고 `emptyFor`는 product policy |
 | `convert-type` | strong | target type choice, locale-specific parsing beyond built-ins | 유지하되 command label은 `convert type` 후보 |
 | `sort-items` | mostly | comparator/sort key, rendered sort UI | 유지. array replacement, reverse, can/execute는 위임됨 |
-| `calculated-fields` | partial | formula definitions, dependency graph, scheduling | deepen 후보. 현재는 sync boundary 위임이고 "computed fields" 전체는 아직 host가 많이 앎 |
+| `calculated-fields` | partial | formula definitions, dependency graph, scheduling | **lab 유지**. 현재는 sync boundary 위임이고 "computed fields" 전체는 아직 host가 많이 앎 |
 | `convert-block-type` | mostly | kind descriptor, field preservation, default factory | 유지. conversion patch/failure는 위임됐고 schema-specific factory는 product policy |
 | `toggle-value` | strong | optional custom order via `values` | 유지. boolean/closed-set toggle-value mechanics는 위임됨 |
 | `dedupe` | mostly | duplicate key policy for objects | 유지. dedupe mechanics/atomicity는 위임됨 |
@@ -335,7 +345,7 @@ delegation lens
 | `move-selected` | strong | source/target selection and focus | 유지. contiguous block move mechanics are delegated |
 | `increment-number` | strong | rendered spinner/unit/formatting | 유지. numeric step/clamp mechanics are delegated |
 | `pad-text` | strong | target choice, number formatting if needed | 유지. stored string padding mechanics are delegated |
-| `paste-special` | partial | payload adaptation rules are the hard part and live in host adapter | deepen 후보. boundary/error preservation is delegated; common adapters may be needed for full feature delegation |
+| `paste-special` | partial | payload adaptation rules are the hard part and live in host adapter | **lab 유지**. boundary/error preservation is delegated; common adapters may be needed for full feature delegation |
 | `live-cursors` | mostly | realtime transport, identity/color policy, timeout | 유지. remote anchor tracking over patches is delegated |
 | `references` | mostly | descriptor/readId/query policy, routing/remote lookup | 유지. indexing/backlink/set-reference mechanics are delegated |
 | `renumber-items` | strong | when reorder has happened, field name | 유지. order-field sync mechanics are delegated |
@@ -349,9 +359,13 @@ delegation lens
 | `wrap-selection` | mostly | wrapper shape factory, product container policy | 유지. wrap/unwrap range mechanics are delegated |
 
 `partial`은 제거 판정이 아니다. 완전 위임이라는 제품 목표에서 다음에 깊게 만들
-후보라는 뜻이다. 현재 우선순위는 `calculated-fields`, `paste-special`,
-`autosave`다. 세 package 모두 이름은 feature로 유효하지만, host callback이
-product policy 주입인지 feature 구현 위임 실패인지 더 확인해야 한다.
+후보라는 뜻이다.
+
+1.0 결정: `calculated-fields`, `paste-special`, `autosave`는 아직 lab으로
+유지한다. Core API 변경은 없고, official 승격도 보류한다. 세 package 모두 이름은
+feature로 유효하지만, host callback이 product policy 주입인지 feature 구현 위임
+실패인지 더 확인해야 한다. 후속 작업은 승격 PR이 아니라 lab README와 recipe에서
+host-owned residue를 더 선명하게 만드는 audit이다.
 
 ## Semantic Contract Lock
 

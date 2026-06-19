@@ -11,9 +11,10 @@ headless JSON 편집 도구의 foundation 계약으로 쓰일 수 있는지를 �
 
 `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`는 규범 키워드다.
 
-어떤 구현체가 json-document 호환이라고 주장하려면 이 문서와 적합성
-suite를 통과해야 한다. README와 사이트 문서는 사용법을 설명할 수 있지만,
-의미론 계약의 기준은 이 문서다.
+어떤 구현체가 json-document 호환이라고 주장하려면 이 문서와
+`docs/standard/conformance-profile.md`의 적합성 profile을 만족해야 한다.
+README와 사이트 문서는 사용법을 설명할 수 있지만, 의미론 계약의 기준은
+standard 문서다.
 
 ## 2. 범위
 
@@ -233,6 +234,10 @@ adapter가 새 core concept을 요구한다면 public requirement, 기존 concep
 
 ## 14. 적합성
 
+1.0 적합성 기준은 `docs/standard/conformance-profile.md`가 정의한다. 이
+profile은 문서화된 profile이며, 1.0에서는 별도 npm package나 CLI runner를
+public artifact로 만들지 않는다.
+
 적합성 suite는 public package entrypoint에서만 import해야 한다.
 
 적합성 suite는 정상 동작, 실패 동작, atomicity, JSON serializability,
@@ -254,5 +259,5 @@ React `useJSONDocument` 초기값 overload처럼 사용자가 컴파일 시점�
 import해야 하며, implementation-private type이나 source path를 요구하면 안 된다.
 
 일반 구현 테스트를 통과하는 것만으로는 표준 적합성을 주장할 수 없다.
-json-document 호환 구현체는 implementation-private module 없이 적합성 suite를
-통과해야 한다.
+json-document 호환 구현체는 implementation-private module 없이 conformance
+profile을 만족해야 한다.

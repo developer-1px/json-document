@@ -5,6 +5,16 @@ Lab extension for paste special.
 Use it when a host receives a clipboard/import/drop payload that may need to be
 adapted before it can be inserted into the current document.
 
+## 1.0 status
+
+1.0에서는 lab으로 유지한다. Core API 변경도 없고 official 승격도 보류한다.
+
+이 package가 맡는 책임은 external payload adaptation boundary, insert/replace
+capability check, execution error preservation이다. 실제 payload parsing,
+product-specific adapter rule, TSV/HTML/schema mapping, autocomplete UI는 아직
+host-owned로 남는다. 공통 adapter vocabulary가 더 수렴하기 전까지 official
+surface로 얼리지 않는다.
+
 ## Scope
 
 - let the host classify and adapt external payloads
