@@ -266,6 +266,19 @@ doc.paste({ after: "/lists/0/cards/0" });
 
 Pointer 배열을 copy/cut하면 clipboard payload도 배열입니다. 여러 source를 담은 clipboard buffer는 array 삽입 target에 기본으로 펼쳐집니다.
 
+성공 result shape는 method family별로 다릅니다.
+
+| Method | 성공 result |
+| --- | --- |
+| `insert`, `replace`, `delete`, `move`, `patch`, `commit` | `{ ok: true }`; 실제 patch는 `doc.lastPatch`, subscriber, history에 기록 |
+| `copy` | `{ ok: true, payload, source, sources }` |
+| `cut` | `{ ok: true, value, applied, payload, source, sources }` |
+| `paste` | `{ ok: true, value, applied }` |
+| `duplicate` | `{ ok: true, value, applied, duplicatedTo }` |
+
+`applied`는 이미 commit된 JSON Patch입니다. 다시 `commit`하지 않습니다. 실패
+result는 `reason` 문구가 아니라 stable `code`로 분기합니다.
+
 ## history
 
 History는 document patch와 inverse patch를 기록합니다.

@@ -197,6 +197,11 @@ const duplicated = doc.duplicate("/lists/0/cards/0", {
 ```
 
 `duplicate`, `doc.cut`, `doc.paste`는 즉시 mutate한다. 성공 결과의 `applied`는 이미 적용된 patch record이므로 다시 `commit`하지 않는다.
+`insert`, `replace`, `delete`, `move`, `patch`, `commit`의 성공 result는 `JSONResult` family인 `{ ok: true }`다. 실제 applied patch는 `doc.lastPatch`, subscriber, history entry에서 읽는다.
+`copy` 성공 result는 `{ ok: true, payload, source, sources }`다.
+`cut` 성공 result는 `{ ok: true, value, applied, payload, source, sources }`다.
+`paste` 성공 result는 `{ ok: true, value, applied }`다.
+`duplicate` 성공 result는 `{ ok: true, value, applied, duplicatedTo }`다.
 
 ## 선택
 
