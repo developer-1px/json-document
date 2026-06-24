@@ -7,6 +7,8 @@ export interface SourceAlias {
 
 export const officialExtensionPackages = [
   "clipboard-web",
+  "contenteditable-web",
+  "contenteditable-react",
   "collection",
   "outline",
   "schema-form",

@@ -267,6 +267,8 @@ import { createGrouping } from "@interactive-os/json-document-grouping";
 import { createProposedChanges } from "@interactive-os/json-document-proposed-changes";
 import { createComments } from "@interactive-os/json-document-comments";
 import { createWebClipboard } from "@interactive-os/json-document-clipboard-web";
+import { createContentEditableAdapter } from "@interactive-os/json-document-contenteditable-web";
+import { useContentEditable } from "@interactive-os/json-document-contenteditable-react";
 ```
 
 공식 package는 현재 `packages/*`에 있는 extension만 뜻합니다.

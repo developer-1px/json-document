@@ -14,6 +14,34 @@ const officialExtensions = [
     ],
   },
   {
+    root: "packages/contenteditable-web",
+    name: "@interactive-os/json-document-contenteditable-web",
+    description: /contenteditable DOM adapter/,
+    readme: [
+      /createContentEditableAdapter\(/,
+      /DOM Selection.*SelectionSnap/s,
+      /composition\/native input leases/,
+      /does not call\s*`doc\.use\(\.\.\.\)`/,
+      /does not define editor block semantics/,
+    ],
+  },
+  {
+    root: "packages/contenteditable-react",
+    name: "@interactive-os/json-document-contenteditable-react",
+    description: /React hook/,
+    allowedImports: [
+      "@interactive-os/json-document-contenteditable-web",
+      "react",
+    ],
+    readme: [
+      /useContentEditable\(/,
+      /rendering document value into the contenteditable root/,
+      /preserving command-start selection/,
+      /does not call\s*`doc\.use\(\.\.\.\)`/,
+      /does not define editor block semantics/,
+    ],
+  },
+  {
     root: "packages/collection",
     name: "@interactive-os/json-document-collection",
     description: /collection editing extension functions/,
@@ -290,6 +318,7 @@ for (const extension of officialExtensions) {
     for (const match of source.matchAll(/\bfrom\s+["']([^"']+)["']/g)) {
       const specifier = match[1];
       if (specifier === "@interactive-os/json-document") continue;
+      if (extension.allowedImports?.includes(specifier)) continue;
       if (specifier.startsWith(".") && !specifier.includes("../json-document")) continue;
       fail(`${sourcePath}: extension source must import json-document only through the package entrypoint (${specifier}).`);
     }

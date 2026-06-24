@@ -1,0 +1,61 @@
+{
+  "name": "@interactive-os/json-document-contenteditable-react",
+  "version": "0.1.0",
+  "description": "React hook for the json-document contenteditable web adapter.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/contenteditable-react"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "@interactive-os/json-document",
+    "contenteditable",
+    "react",
+    "json",
+    "headless"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "prebuild": "npm run build -w @interactive-os/json-document-contenteditable-web",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "pretypecheck": "npm run build -w @interactive-os/json-document-contenteditable-web",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@interactive-os/json-document": "^1.0.0",
+    "@interactive-os/json-document-contenteditable-web": "^0.1.0",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-contenteditable-web": "*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7",
+    "zod": "^4.0.0"
+  }
+}

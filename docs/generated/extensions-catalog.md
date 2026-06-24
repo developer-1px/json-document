@@ -4,7 +4,7 @@
 
 This section is generated from `packages/*` and `labs/extensions/*`.
 
-Official extensions: 17
+Official extensions: 19
 
 | Package | Exports | Use for | Not for | Summary |
 | --- | ---: | --- | --- | --- |
@@ -12,6 +12,8 @@ Official extensions: 17
 | `@interactive-os/json-document-clipboard-web` | 20 | bridge json-document clipboard payloads to the browser clipboard | TSV/CSV spreadsheet paste engines | Web clipboard extension functions for `@interactive-os/json-document`. |
 | `@interactive-os/json-document-collection` | 9 | edit ordered JSON arrays with item-level commands | database collections or rendered list UI | Official headless collection editing extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-comments` | 14 | anchor review comments to document structure | comment UI, moderation, or author storage | Official headless comments extension for review notes anchored to `@interactive-os/json-document` documents. |
+| `@interactive-os/json-document-contenteditable-react` | 4 | wrap the contenteditable web adapter with React render and selection restore timing | rendering policy, editor commands, or non-React hosts | Thin React hook for `@interactive-os/json-document-contenteditable-web`. |
+| `@interactive-os/json-document-contenteditable-web` | 13 | bind text surfaces to DOM contenteditable selection, IME input, and clipboard events | editor block semantics, toolbar commands, React rendering, or rich text schema policy | Official DOM adapter for using `@interactive-os/json-document` text surfaces with browser `contenteditable`. |
 | `@interactive-os/json-document-dirty-state` | 7 | compare a document to a clean baseline | persistence or server save status | Official headless dirty state tracking extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-form-draft` | 15 | hold temporary invalid form input before committing valid JSON | rendered form components | Official headless form draft extension for temporary input that is not ready to enter a schema-valid `@interactive-os/json-document` document. |
 | `@interactive-os/json-document-grouping` | 15 | group and ungroup selected sibling JSON items | Airtable group-by views | Official extension for structural `group` and `ungroup`. |

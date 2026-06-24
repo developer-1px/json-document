@@ -46,6 +46,14 @@ const extensionGuidance = {
     useFor: "bridge json-document clipboard payloads to the browser clipboard",
     notFor: "TSV/CSV spreadsheet paste engines",
   },
+  "@interactive-os/json-document-contenteditable-web": {
+    useFor: "bind text surfaces to DOM contenteditable selection, IME input, and clipboard events",
+    notFor: "editor block semantics, toolbar commands, React rendering, or rich text schema policy",
+  },
+  "@interactive-os/json-document-contenteditable-react": {
+    useFor: "wrap the contenteditable web adapter with React render and selection restore timing",
+    notFor: "rendering policy, editor commands, or non-React hosts",
+  },
   "@interactive-os/json-document-convert-type": {
     useFor: "convert a field type (string/number/integer/boolean) where the schema permits it",
     notFor: "locale/format-aware parsing of currency or dates, or input masks",
