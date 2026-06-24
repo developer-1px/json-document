@@ -1,20 +1,16 @@
 import type {
   JSONDocument,
-  JSONPatchOperation,
   SelectionSnap,
   TextSurfaceFragment,
 } from "@interactive-os/json-document";
 import type {
-  ContentEditableError,
-  ContentEditableErrorCode,
-  ContentEditableFlushOptions,
+  ContentEditableResult,
   TextSurfaceResolver,
 } from "./core.js";
 
 export type {
   ContentEditableError,
-  ContentEditableErrorCode,
-  ContentEditableFlushOptions,
+  ContentEditableResult,
   TextSurfaceResolver,
 } from "./core.js";
 
@@ -27,35 +23,19 @@ export interface ContentEditableAdapterOptions<T> {
   clipboardMime?: string;
 }
 
-export type ContentEditableUpdate =
-  | {
-      ok: true;
-      kind: "no-change" | "selection" | "text";
-      patch: ReadonlyArray<JSONPatchOperation>;
-      selection: SelectionSnap | null;
-    }
-  | ContentEditableError;
-
-export type ContentEditableClipboardResult<T> =
-  | {
-      ok: true;
-      value: T;
-    }
-  | ContentEditableError;
-
 export interface ContentEditableAdapter<T> {
   bind(): () => void;
-  handle(event: Event): ContentEditableUpdate;
-  flush(options?: ContentEditableFlushOptions): ContentEditableUpdate;
+  handle(event: Event): ContentEditableResult<T>;
+  flush(): ContentEditableResult<T>;
   syncSelectionFromDOM(): SelectionSnap | null;
   restoreSelectionToDOM(selection?: SelectionSnap): boolean;
-  copy(event?: ClipboardEvent): ContentEditableClipboardResult<T>;
-  cut(event?: ClipboardEvent): ContentEditableClipboardResult<T>;
-  paste(event?: ClipboardEvent): ContentEditableClipboardResult<T>;
-  pasteText(text: string, selection?: SelectionSnap | null): ContentEditableClipboardResult<T>;
+  copy(event?: ClipboardEvent): ContentEditableResult<T>;
+  cut(event?: ClipboardEvent): ContentEditableResult<T>;
+  paste(event?: ClipboardEvent): ContentEditableResult<T>;
+  pasteText(text: string, selection?: SelectionSnap | null): ContentEditableResult<T>;
   pasteFragment(
     fragment: TextSurfaceFragment,
     selection?: SelectionSnap | null,
-  ): ContentEditableClipboardResult<T>;
+  ): ContentEditableResult<T>;
   reset(): void;
 }

@@ -9,19 +9,12 @@ export { createContentEditableAdapter } from "./create.js";
 export type {
   ContentEditableAdapter,
   ContentEditableAdapterOptions,
-  ContentEditableClipboardResult,
   ContentEditableError,
-  ContentEditableErrorCode,
-  ContentEditableFlushOptions,
-  ContentEditableUpdate,
+  ContentEditableResult,
   TextSurfaceResolver,
 } from "./types.js";
 export type {
   ContentEditableCommand,
   ContentEditableCore,
-  ContentEditableCoreOptions,
-  ContentEditableCoreResult,
-  ContentEditableHistoryCommand,
   ContentEditableObservationReader,
-  ContentEditableTextPoint,
 } from "./core.js";

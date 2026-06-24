@@ -17,40 +17,33 @@ export type TextSurfaceResolver =
   | TextSurface
   | ((textPath: Pointer) => TextSurface | null);
 
-export interface ContentEditableTextPoint {
-  path: Pointer;
-  offset: number;
-}
-
 export interface ContentEditableObservationReader {
-  point?(): ContentEditableTextPoint | null;
+  point?(): { path: Pointer; offset: number } | null;
   text(path: Pointer): string | null;
   selection(): SelectionSnap | null;
 }
 
-export interface ContentEditableFlushOptions {
+interface FlushOptions {
   label?: string;
   mergeKey?: string;
 }
 
-export type ContentEditableHistoryCommand = "undo" | "redo";
-
 export type ContentEditableCommand =
   | {
       type: "begin-native-input";
-      point: ContentEditableTextPoint | null;
+      point: { path: Pointer; offset: number } | null;
     }
   | {
       type: "commit-native-input";
-      point: ContentEditableTextPoint | null;
+      point: { path: Pointer; offset: number } | null;
     }
   | {
       type: "begin-composition";
-      point: ContentEditableTextPoint | null;
+      point: { path: Pointer; offset: number } | null;
     }
   | {
       type: "commit-composition";
-      point: ContentEditableTextPoint | null;
+      point: { path: Pointer; offset: number } | null;
     }
   | {
       type: "sync-selection";
@@ -58,7 +51,6 @@ export type ContentEditableCommand =
     }
   | {
       type: "flush";
-      options?: ContentEditableFlushOptions;
     }
   | {
       type: "copy";
@@ -73,10 +65,10 @@ export type ContentEditableCommand =
     }
   | {
       type: "history";
-      command: ContentEditableHistoryCommand;
+      command: "undo" | "redo";
     };
 
-export type ContentEditableCoreResult<T> =
+export type ContentEditableResult<T> =
   | {
       ok: true;
       kind: "no-change" | "selection" | "text" | "history";
@@ -94,29 +86,22 @@ export type ContentEditableCoreResult<T> =
     }
   | ContentEditableError;
 
-export type ContentEditableErrorCode =
-  | "clipboard_unavailable"
-  | "commit_failed"
-  | "empty_selection"
-  | "invalid_payload"
-  | "missing_text_path";
-
 export interface ContentEditableError {
   ok: false;
-  code: ContentEditableErrorCode;
+  code:
+    | "clipboard_unavailable"
+    | "commit_failed"
+    | "empty_selection"
+    | "invalid_payload"
+    | "missing_text_path";
   reason: string;
-}
-
-export interface ContentEditableCoreOptions<T> {
-  document: JSONDocument<T>;
-  surface: TextSurfaceResolver;
 }
 
 export interface ContentEditableCore<T> {
   handle(
     command: ContentEditableCommand,
     reader: ContentEditableObservationReader,
-  ): ContentEditableCoreResult<T>;
+  ): ContentEditableResult<T>;
   reset(): void;
 }
 
@@ -128,11 +113,14 @@ type NativeInputLease = {
 export function createContentEditableCore<T>({
   document,
   surface,
-}: ContentEditableCoreOptions<T>): ContentEditableCore<T> {
+}: {
+  document: JSONDocument<T>;
+  surface: TextSurfaceResolver;
+}): ContentEditableCore<T> {
   let lease: NativeInputLease | null = null;
 
   const beginLease = (
-    point: ContentEditableTextPoint | null,
+    point: { path: Pointer; offset: number } | null,
     phase: NativeInputLease["phase"] = "native",
   ): NativeInputLease | null => {
     if (point === null) return lease;
@@ -143,8 +131,8 @@ export function createContentEditableCore<T>({
 
   const flush = (
     reader: ContentEditableObservationReader,
-    options: ContentEditableFlushOptions = {},
-  ): ContentEditableCoreResult<T> => {
+    options: FlushOptions = {},
+  ): ContentEditableResult<T> => {
     const path = lease?.path ?? reader.point?.()?.path ?? null;
     if (path === null) {
       return syncSelection(reader.selection());
@@ -215,7 +203,7 @@ export function createContentEditableCore<T>({
     };
   };
 
-  const syncSelection = (selection: SelectionSnap | null): ContentEditableCoreResult<T> => {
+  const syncSelection = (selection: SelectionSnap | null): ContentEditableResult<T> => {
     if (selection !== null) document.selection?.restore(selection);
     return {
       ok: true,
@@ -226,7 +214,7 @@ export function createContentEditableCore<T>({
     };
   };
 
-  const copy = (reader: ContentEditableObservationReader): ContentEditableCoreResult<T> => {
+  const copy = (reader: ContentEditableObservationReader): ContentEditableResult<T> => {
     const flushed = flush(reader, { label: "copy selection" });
     if (!flushed.ok) return flushed;
     const selection = document.selection?.snapshot() ?? null;
@@ -251,7 +239,7 @@ export function createContentEditableCore<T>({
     };
   };
 
-  const cut = (reader: ContentEditableObservationReader): ContentEditableCoreResult<T> => {
+  const cut = (reader: ContentEditableObservationReader): ContentEditableResult<T> => {
     const copyResult = copy(reader);
     if (!copyResult.ok) return copyResult;
     if (copyResult.kind !== "copy") return noChange(document);
@@ -262,21 +250,21 @@ export function createContentEditableCore<T>({
     fragment: TextSurfaceFragment,
     reader: ContentEditableObservationReader,
     selection?: SelectionSnap | null,
-  ): ContentEditableCoreResult<T> =>
+  ): ContentEditableResult<T> =>
     replaceSelection(fragment, reader, selection, "paste text");
 
   const pasteText = (
     text: string,
     reader: ContentEditableObservationReader,
     selection?: SelectionSnap | null,
-  ): ContentEditableCoreResult<T> =>
+  ): ContentEditableResult<T> =>
     replaceSelection(text, reader, selection, "paste text");
 
   const paste = (
     payload: TextSurfaceFragment | string | null,
     reader: ContentEditableObservationReader,
     selection?: SelectionSnap | null,
-  ): ContentEditableCoreResult<T> => {
+  ): ContentEditableResult<T> => {
     if (typeof payload === "string") return pasteText(payload, reader, selection);
     if (payload !== null) return pasteFragment(payload, reader, selection);
 
@@ -292,7 +280,7 @@ export function createContentEditableCore<T>({
   const handle = (
     command: ContentEditableCommand,
     reader: ContentEditableObservationReader,
-  ): ContentEditableCoreResult<T> => {
+  ): ContentEditableResult<T> => {
     if (command.type === "begin-native-input") {
       beginLease(command.point, "native");
       return noChange(document);
@@ -319,7 +307,7 @@ export function createContentEditableCore<T>({
       return syncSelection(command.selection);
     }
     if (command.type === "flush") {
-      return flush(reader, command.options);
+      return flush(reader);
     }
     if (command.type === "copy") {
       return copy(reader);
@@ -352,7 +340,7 @@ export function createContentEditableCore<T>({
     label: string,
     kind: "cut" | "text" = "text",
     payload?: TextSurfaceFragment,
-  ): ContentEditableCoreResult<T> {
+  ): ContentEditableResult<T> {
     const flushed = flush(reader, { label: "flush before text surface replace" });
     if (!flushed.ok) return flushed;
     const targetSelection =
@@ -447,7 +435,7 @@ function readDocumentClipboardFragment<T>(
   return result.ok && isTextSurfaceFragment(result.payload) ? result.payload : null;
 }
 
-function noChange<T>(document: JSONDocument<T>): ContentEditableCoreResult<T> {
+function noChange<T>(document: JSONDocument<T>): ContentEditableResult<T> {
   return {
     ok: true,
     kind: "no-change",

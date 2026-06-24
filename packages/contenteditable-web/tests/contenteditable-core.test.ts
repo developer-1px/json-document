@@ -2,15 +2,15 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
+import * as ts from "typescript";
 import * as z from "zod";
 
 import { createJSONDocument, type SelectionSnap, type TextSurface } from "@interactive-os/json-document";
 import {
+  JSON_ATOM_REPLACEMENT,
   createContentEditableCore,
   type ContentEditableObservationReader,
-  type ContentEditableTextPoint,
-} from "../src/core.js";
-import { JSON_ATOM_REPLACEMENT } from "../src/constants.js";
+} from "../src/index.js";
 
 const AtomSchema = z.object({
   type: z.literal("mention"),
@@ -65,7 +65,7 @@ function selection(anchor: number, focus: number): SelectionSnap {
 function createTestAdapter(initialText: string, initialSelection: SelectionSnap | null = null) {
   let text = initialText;
   let currentSelection = initialSelection;
-  const currentPoint: ContentEditableTextPoint = { path: "/body", offset: 0 };
+  const currentPoint = { path: "/body", offset: 0 };
   const reader: ContentEditableObservationReader = {
     point: () => currentPoint,
     text: (path) => path === "/body" ? text : null,
@@ -89,6 +89,27 @@ function createTestAdapter(initialText: string, initialSelection: SelectionSnap 
 }
 
 describe("contenteditable headless core", () => {
+  test("keeps the root public API fixed", () => {
+    const source = readFileSync(new URL("../src/index.ts", import.meta.url), "utf8");
+
+    expect(exportedNames(source)).toEqual([
+      "ContentEditableAdapter",
+      "ContentEditableAdapterOptions",
+      "ContentEditableCommand",
+      "ContentEditableCore",
+      "ContentEditableError",
+      "ContentEditableObservationReader",
+      "ContentEditableResult",
+      "JSON_ATOM_ATTRIBUTE",
+      "JSON_ATOM_REPLACEMENT",
+      "JSON_DOCUMENT_CONTENTEDITABLE_MIME",
+      "JSON_TEXT_ATTRIBUTE",
+      "TextSurfaceResolver",
+      "createContentEditableAdapter",
+      "createContentEditableCore",
+    ]);
+  });
+
   test("keeps the core source free of DOM APIs", () => {
     for (const path of ["../src/core.ts", "../src/fragment.ts"]) {
       const source = readFileSync(new URL(path, import.meta.url), "utf8");
@@ -196,3 +217,22 @@ describe("contenteditable headless core", () => {
     expect(doc.selection?.focus).toMatchObject({ path: "/body", offset: 4 });
   });
 });
+
+function exportedNames(source: string): string[] {
+  const names = new Set<string>();
+  const sourceFile = ts.createSourceFile("index.ts", source, ts.ScriptTarget.Latest, true);
+
+  for (const statement of sourceFile.statements) {
+    if (
+      ts.isExportDeclaration(statement) &&
+      statement.exportClause !== undefined &&
+      ts.isNamedExports(statement.exportClause)
+    ) {
+      for (const element of statement.exportClause.elements) {
+        names.add(element.name.text);
+      }
+    }
+  }
+
+  return Array.from(names).sort();
+}

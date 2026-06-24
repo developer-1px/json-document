@@ -16,9 +16,8 @@ import {
 } from "./clipboard.js";
 import {
   createContentEditableCore,
-  type ContentEditableCoreResult,
-  type ContentEditableHistoryCommand,
   type ContentEditableObservationReader,
+  type ContentEditableResult,
 } from "./core.js";
 import { editableTextContent, findElementByAttribute } from "./domText.js";
 import {
@@ -29,9 +28,6 @@ import {
 import type {
   ContentEditableAdapter,
   ContentEditableAdapterOptions,
-  ContentEditableClipboardResult,
-  ContentEditableFlushOptions,
-  ContentEditableUpdate,
 } from "./types.js";
 
 export function createContentEditableAdapter<T>({
@@ -67,85 +63,73 @@ export function createContentEditableAdapter<T>({
     return selection;
   };
 
-  const flush = (options: ContentEditableFlushOptions = {}): ContentEditableUpdate =>
-    coreResultToUpdate(core.handle({ type: "flush", options }, reader));
+  const flush = (): ContentEditableResult<T> =>
+    core.handle({ type: "flush" }, reader);
 
-  const copy = (event?: ClipboardEvent): ContentEditableClipboardResult<T> => {
+  const copy = (event?: ClipboardEvent): ContentEditableResult<T> => {
     const result = core.handle({ type: "copy" }, reader);
     if (result.ok && result.kind === "copy") {
       writeClipboardFragment(event, result.payload, clipboardMime);
     }
-    return coreResultToClipboardResult(result);
+    return result;
   };
 
-  const cut = (event?: ClipboardEvent): ContentEditableClipboardResult<T> => {
+  const cut = (event?: ClipboardEvent): ContentEditableResult<T> => {
     const result = core.handle({ type: "cut" }, reader);
     if (result.ok && result.kind === "cut") {
       writeClipboardFragment(event, result.payload, clipboardMime);
     }
-    return coreResultToClipboardResult(result);
+    return result;
   };
 
   const pasteFragment = (
     fragment: TextSurfaceFragment,
     selection = document.selection?.snapshot() ?? null,
-  ): ContentEditableClipboardResult<T> =>
-    coreResultToClipboardResult(
-      core.handle({ type: "paste", payload: fragment, selection }, reader),
-    );
+  ): ContentEditableResult<T> =>
+    core.handle({ type: "paste", payload: fragment, selection }, reader);
 
   const pasteText = (
     text: string,
     selection = document.selection?.snapshot() ?? null,
-  ): ContentEditableClipboardResult<T> =>
-    coreResultToClipboardResult(
-      core.handle({ type: "paste", payload: text, selection }, reader),
-    );
+  ): ContentEditableResult<T> =>
+    core.handle({ type: "paste", payload: text, selection }, reader);
 
-  const paste = (event?: ClipboardEvent): ContentEditableClipboardResult<T> =>
-    coreResultToClipboardResult(core.handle({
+  const paste = (event?: ClipboardEvent): ContentEditableResult<T> =>
+    core.handle({
       type: "paste",
       payload: readClipboardPayload(event, clipboardMime),
-    }, reader));
+    }, reader);
 
-  const handle = (event: Event): ContentEditableUpdate => {
+  const handle = (event: Event): ContentEditableResult<T> => {
     if (event.type === "beforeinput") {
-      return coreResultToUpdate(
-        core.handle({ type: "begin-native-input", point: point() }, reader),
-      );
+      return core.handle({ type: "begin-native-input", point: point() }, reader);
     }
     if (event.type === "compositionstart") {
-      return coreResultToUpdate(core.handle({ type: "begin-composition", point: point() }, reader));
+      return core.handle({ type: "begin-composition", point: point() }, reader);
     }
     if (event.type === "compositionend") {
-      return coreResultToUpdate(
-        core.handle({ type: "commit-composition", point: point() }, reader),
-      );
+      return core.handle({ type: "commit-composition", point: point() }, reader);
     }
     if (event.type === "input") {
-      return coreResultToUpdate(
-        core.handle({ type: "commit-native-input", point: point() }, reader),
-      );
+      return core.handle({ type: "commit-native-input", point: point() }, reader);
     }
     if (event.type === "selectionchange" || event.type === "select") {
-      return coreResultToUpdate(
-        core.handle({ type: "sync-selection", selection: domSelection() }, reader),
-      );
+      return core.handle({ type: "sync-selection", selection: domSelection() }, reader);
     }
     if (event.type === "copy" && isClipboardEventLike(event)) {
       event.preventDefault();
-      return coreResultToUpdate(copyCoreAndWrite(event));
+      return copyCoreAndWrite(event);
     }
     if (event.type === "cut" && isClipboardEventLike(event)) {
       event.preventDefault();
-      return coreResultToUpdate(cutCoreAndWrite(event));
+      return cutCoreAndWrite(event);
     }
     if (event.type === "paste" && isClipboardEventLike(event)) {
       event.preventDefault();
-      return coreResultToUpdate(core.handle({
+      return core.handle({
         type: "paste",
         payload: readClipboardPayload(event, clipboardMime),
-      }, reader));
+      }, reader);
     }
     if (event.type === "keydown" && isKeyboardEventLike(event)) {
       const command = historyCommandFromKey(event);
@@ -160,7 +144,7 @@ export function createContentEditableAdapter<T>({
             atomAttribute,
           );
         }
-        return coreResultToUpdate(result);
+        return result;
       }
     }
     return noChange(document);
@@ -196,7 +180,7 @@ export function createContentEditableAdapter<T>({
     };
   };
 
-  function copyCoreAndWrite(event?: ClipboardEvent): ContentEditableCoreResult<T> {
+  function copyCoreAndWrite(event?: ClipboardEvent): ContentEditableResult<T> {
     const result = core.handle({ type: "copy" }, reader);
     if (result.ok && result.kind === "copy") {
       writeClipboardFragment(event, result.payload, clipboardMime);
@@ -204,7 +188,7 @@ export function createContentEditableAdapter<T>({
     return result;
   }
 
-  function cutCoreAndWrite(event?: ClipboardEvent): ContentEditableCoreResult<T> {
+  function cutCoreAndWrite(event?: ClipboardEvent): ContentEditableResult<T> {
     const result = core.handle({ type: "cut" }, reader);
     if (result.ok && result.kind === "cut") {
       writeClipboardFragment(event, result.payload, clipboardMime);
@@ -241,36 +225,17 @@ function readClipboardPayload(
   return text.length === 0 ? null : text;
 }
 
-function coreResultToUpdate<T>(result: ContentEditableCoreResult<T>): ContentEditableUpdate {
-  if (!result.ok) return result;
-  return {
-    ok: true,
-    kind: result.kind === "history" || result.kind === "copy" || result.kind === "cut"
-      ? "text"
-      : result.kind,
-    patch: result.patch,
-    selection: result.selection,
-  };
-}
-
-function noChange<T>(document: JSONDocument<T>): ContentEditableUpdate {
+function noChange<T>(document: JSONDocument<T>): ContentEditableResult<T> {
   return {
     ok: true,
     kind: "no-change",
     patch: [],
     selection: document.selection?.snapshot() ?? null,
+    value: document.value,
   };
 }
 
-function coreResultToClipboardResult<T>(
-  result: ContentEditableCoreResult<T>,
-): ContentEditableClipboardResult<T> {
-  return result.ok
-    ? { ok: true, value: result.value }
-    : result;
-}
-
-function historyCommandFromKey(event: KeyboardEvent): ContentEditableHistoryCommand | null {
+function historyCommandFromKey(event: KeyboardEvent): "undo" | "redo" | null {
   const key = event.key.toLowerCase();
   if (!(event.metaKey || event.ctrlKey) || event.altKey) return null;
   if (key === "z" && !event.shiftKey) return "undo";
