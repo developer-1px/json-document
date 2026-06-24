@@ -17,8 +17,8 @@ export type {
   TextSurfaceResolver,
 } from "./types.js";
 export type {
+  ContentEditableCommand,
   ContentEditableCore,
-  ContentEditableCoreEvent,
   ContentEditableCoreOptions,
   ContentEditableCoreResult,
   ContentEditableHistoryCommand,

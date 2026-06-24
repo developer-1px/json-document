@@ -62,7 +62,7 @@ function selection(anchor: number, focus: number): SelectionSnap {
   };
 }
 
-function createReader(initialText: string, initialSelection: SelectionSnap | null = null) {
+function createTestAdapter(initialText: string, initialSelection: SelectionSnap | null = null) {
   let text = initialText;
   let currentSelection = initialSelection;
   const currentPoint: ContentEditableTextPoint = { path: "/body", offset: 0 };
@@ -82,6 +82,9 @@ function createReader(initialText: string, initialSelection: SelectionSnap | nul
     setOffset(offset: number) {
       currentPoint.offset = offset;
     },
+    point() {
+      return currentPoint;
+    },
   };
 }
 
@@ -98,15 +101,15 @@ describe("contenteditable headless core", () => {
 
   test("commits native input observations without DOM", () => {
     const doc = createDoc();
-    const observed = createReader(doc.value.body, selection(5, 5));
+    const adapter = createTestAdapter(doc.value.body, selection(5, 5));
     const core = createContentEditableCore({ document: doc, surface });
 
-    observed.setOffset(5);
-    core.handle({ type: "beforeinput", point: observed.reader.point?.() ?? null }, observed.reader);
-    observed.setText(`Plain! text ${JSON_ATOM_REPLACEMENT}`);
-    observed.setSelection(selection(6, 6));
+    adapter.setOffset(5);
+    core.handle({ type: "begin-native-input", point: adapter.point() }, adapter.reader);
+    adapter.setText(`Plain! text ${JSON_ATOM_REPLACEMENT}`);
+    adapter.setSelection(selection(6, 6));
 
-    const result = core.handle({ type: "input", point: observed.reader.point?.() ?? null }, observed.reader);
+    const result = core.handle({ type: "commit-native-input", point: adapter.point() }, adapter.reader);
 
     expect(result).toMatchObject({ ok: true, kind: "text" });
     expect(doc.value.body).toBe(`Plain! text ${JSON_ATOM_REPLACEMENT}`);
@@ -116,16 +119,16 @@ describe("contenteditable headless core", () => {
 
   test("keeps IME composition out of the document until compositionend", () => {
     const doc = createDoc({ body: "", atoms: {}, marks: {} });
-    const observed = createReader("", selection(0, 0));
+    const adapter = createTestAdapter("", selection(0, 0));
     const core = createContentEditableCore({ document: doc, surface });
 
-    core.handle({ type: "compositionstart", point: observed.reader.point?.() ?? null }, observed.reader);
-    observed.setText("한");
-    observed.setSelection(selection(1, 1));
+    core.handle({ type: "begin-composition", point: adapter.point() }, adapter.reader);
+    adapter.setText("한");
+    adapter.setSelection(selection(1, 1));
 
     expect(doc.value.body).toBe("");
 
-    const result = core.handle({ type: "compositionend", point: observed.reader.point?.() ?? null }, observed.reader);
+    const result = core.handle({ type: "commit-composition", point: adapter.point() }, adapter.reader);
 
     expect(result).toMatchObject({ ok: true, kind: "text" });
     expect(doc.value.body).toBe("한");
@@ -143,10 +146,10 @@ describe("contenteditable headless core", () => {
       },
     });
     const selected = selection(0, 4);
-    const observed = createReader(doc.value.body, selected);
+    const adapter = createTestAdapter(doc.value.body, selected);
     const core = createContentEditableCore({ document: doc, surface });
 
-    const copied = core.copy(observed.reader);
+    const copied = core.handle({ type: "copy" }, adapter.reader);
 
     expect(copied).toMatchObject({
       ok: true,
@@ -159,15 +162,15 @@ describe("contenteditable headless core", () => {
     });
     if (!copied.ok || copied.kind !== "copy") throw new Error("copy failed");
 
-    const cut = core.cut(observed.reader);
+    const cut = core.handle({ type: "cut" }, adapter.reader);
 
     expect(cut).toMatchObject({ ok: true, kind: "cut" });
     expect(doc.value).toEqual({ body: "", atoms: {}, marks: {} });
 
-    observed.setText(doc.value.body);
-    observed.setSelection(selection(0, 0));
+    adapter.setText(doc.value.body);
+    adapter.setSelection(selection(0, 0));
 
-    const pasted = core.paste(copied.payload, observed.reader);
+    const pasted = core.handle({ type: "paste", payload: copied.payload }, adapter.reader);
 
     expect(pasted).toMatchObject({ ok: true, kind: "text" });
     expect(doc.value).toEqual({
@@ -183,10 +186,10 @@ describe("contenteditable headless core", () => {
 
   test("uses current selection for plain text paste without DOM", () => {
     const doc = createDoc({ body: "Plain text", atoms: {}, marks: {} });
-    const observed = createReader(doc.value.body, selection(0, 5));
+    const adapter = createTestAdapter(doc.value.body, selection(0, 5));
     const core = createContentEditableCore({ document: doc, surface });
 
-    const pasted = core.paste("Rich", observed.reader);
+    const pasted = core.handle({ type: "paste", payload: "Rich" }, adapter.reader);
 
     expect(pasted).toMatchObject({ ok: true, kind: "text" });
     expect(doc.value.body).toBe("Rich text");

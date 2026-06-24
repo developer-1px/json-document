@@ -35,26 +35,30 @@ export interface ContentEditableFlushOptions {
 
 export type ContentEditableHistoryCommand = "undo" | "redo";
 
-export type ContentEditableCoreEvent =
+export type ContentEditableCommand =
   | {
-      type: "beforeinput";
+      type: "begin-native-input";
       point: ContentEditableTextPoint | null;
     }
   | {
-      type: "compositionstart";
+      type: "commit-native-input";
       point: ContentEditableTextPoint | null;
     }
   | {
-      type: "compositionend";
+      type: "begin-composition";
       point: ContentEditableTextPoint | null;
     }
   | {
-      type: "input";
+      type: "commit-composition";
       point: ContentEditableTextPoint | null;
     }
   | {
-      type: "selection";
+      type: "sync-selection";
       selection: SelectionSnap | null;
+    }
+  | {
+      type: "flush";
+      options?: ContentEditableFlushOptions;
     }
   | {
       type: "copy";
@@ -65,6 +69,7 @@ export type ContentEditableCoreEvent =
   | {
       type: "paste";
       payload: TextSurfaceFragment | string | null;
+      selection?: SelectionSnap | null;
     }
   | {
       type: "history";
@@ -109,35 +114,13 @@ export interface ContentEditableCoreOptions<T> {
 
 export interface ContentEditableCore<T> {
   handle(
-    event: ContentEditableCoreEvent,
+    command: ContentEditableCommand,
     reader: ContentEditableObservationReader,
-  ): ContentEditableCoreResult<T>;
-  flush(
-    reader: ContentEditableObservationReader,
-    options?: ContentEditableFlushOptions,
-  ): ContentEditableCoreResult<T>;
-  syncSelection(selection: SelectionSnap | null): ContentEditableCoreResult<T>;
-  copy(reader: ContentEditableObservationReader): ContentEditableCoreResult<T>;
-  cut(reader: ContentEditableObservationReader): ContentEditableCoreResult<T>;
-  paste(
-    payload: TextSurfaceFragment | string | null,
-    reader: ContentEditableObservationReader,
-    selection?: SelectionSnap | null,
-  ): ContentEditableCoreResult<T>;
-  pasteText(
-    text: string,
-    reader: ContentEditableObservationReader,
-    selection?: SelectionSnap | null,
-  ): ContentEditableCoreResult<T>;
-  pasteFragment(
-    fragment: TextSurfaceFragment,
-    reader: ContentEditableObservationReader,
-    selection?: SelectionSnap | null,
   ): ContentEditableCoreResult<T>;
   reset(): void;
 }
 
-type BrowserLease = {
+type NativeInputLease = {
   path: Pointer;
   phase: "native" | "composing" | "pending-commit";
 };
@@ -146,12 +129,12 @@ export function createContentEditableCore<T>({
   document,
   surface,
 }: ContentEditableCoreOptions<T>): ContentEditableCore<T> {
-  let lease: BrowserLease | null = null;
+  let lease: NativeInputLease | null = null;
 
   const beginLease = (
     point: ContentEditableTextPoint | null,
-    phase: BrowserLease["phase"] = "native",
-  ): BrowserLease | null => {
+    phase: NativeInputLease["phase"] = "native",
+  ): NativeInputLease | null => {
     if (point === null) return lease;
     if (readDocumentString(document, point.path) === null) return lease;
     lease = { path: point.path, phase };
@@ -307,42 +290,48 @@ export function createContentEditableCore<T>({
   };
 
   const handle = (
-    event: ContentEditableCoreEvent,
+    command: ContentEditableCommand,
     reader: ContentEditableObservationReader,
   ): ContentEditableCoreResult<T> => {
-    if (event.type === "beforeinput") {
-      beginLease(event.point, "native");
+    if (command.type === "begin-native-input") {
+      beginLease(command.point, "native");
       return noChange(document);
     }
-    if (event.type === "compositionstart") {
-      beginLease(event.point, "composing");
-      return noChange(document);
-    }
-    if (event.type === "compositionend") {
-      if (lease !== null) lease = { ...lease, phase: "pending-commit" };
-      return flush(reader, { label: "composition commit" });
-    }
-    if (event.type === "input") {
-      beginLease(event.point, lease?.phase === "pending-commit" ? "pending-commit" : "native");
+    if (command.type === "commit-native-input") {
+      beginLease(
+        command.point,
+        lease?.phase === "pending-commit" ? "pending-commit" : "native",
+      );
       return flush(reader, {
         label: "native input",
         ...(lease === null ? {} : { mergeKey: `native:${lease.path}` }),
       });
     }
-    if (event.type === "selection") {
-      return syncSelection(event.selection);
+    if (command.type === "begin-composition") {
+      beginLease(command.point, "composing");
+      return noChange(document);
     }
-    if (event.type === "copy") {
+    if (command.type === "commit-composition") {
+      if (lease !== null) lease = { ...lease, phase: "pending-commit" };
+      return flush(reader, { label: "composition commit" });
+    }
+    if (command.type === "sync-selection") {
+      return syncSelection(command.selection);
+    }
+    if (command.type === "flush") {
+      return flush(reader, command.options);
+    }
+    if (command.type === "copy") {
       return copy(reader);
     }
-    if (event.type === "cut") {
+    if (command.type === "cut") {
       return cut(reader);
     }
-    if (event.type === "paste") {
-      return paste(event.payload, reader);
+    if (command.type === "paste") {
+      return paste(command.payload, reader, command.selection);
     }
-    if (event.type === "history") {
-      const result = event.command === "undo" ? document.undo() : document.redo();
+    if (command.type === "history") {
+      const result = command.command === "undo" ? document.undo() : document.redo();
       return result.ok
         ? {
             ok: true,
@@ -412,13 +401,6 @@ export function createContentEditableCore<T>({
 
   return {
     handle,
-    flush,
-    syncSelection,
-    copy,
-    cut,
-    paste,
-    pasteFragment,
-    pasteText,
     reset() {
       lease = null;
     },

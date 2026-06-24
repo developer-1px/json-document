@@ -63,15 +63,15 @@ export function createContentEditableAdapter<T>({
 
   const syncSelectionFromDOM = (): SelectionSnap | null => {
     const selection = domSelection();
-    core.syncSelection(selection);
+    core.handle({ type: "sync-selection", selection }, reader);
     return selection;
   };
 
   const flush = (options: ContentEditableFlushOptions = {}): ContentEditableUpdate =>
-    coreResultToUpdate(core.flush(reader, options));
+    coreResultToUpdate(core.handle({ type: "flush", options }, reader));
 
   const copy = (event?: ClipboardEvent): ContentEditableClipboardResult<T> => {
-    const result = core.copy(reader);
+    const result = core.handle({ type: "copy" }, reader);
     if (result.ok && result.kind === "copy") {
       writeClipboardFragment(event, result.payload, clipboardMime);
     }
@@ -79,7 +79,7 @@ export function createContentEditableAdapter<T>({
   };
 
   const cut = (event?: ClipboardEvent): ContentEditableClipboardResult<T> => {
-    const result = core.cut(reader);
+    const result = core.handle({ type: "cut" }, reader);
     if (result.ok && result.kind === "cut") {
       writeClipboardFragment(event, result.payload, clipboardMime);
     }
@@ -90,32 +90,47 @@ export function createContentEditableAdapter<T>({
     fragment: TextSurfaceFragment,
     selection = document.selection?.snapshot() ?? null,
   ): ContentEditableClipboardResult<T> =>
-    coreResultToClipboardResult(core.pasteFragment(fragment, reader, selection));
+    coreResultToClipboardResult(
+      core.handle({ type: "paste", payload: fragment, selection }, reader),
+    );
 
   const pasteText = (
     text: string,
     selection = document.selection?.snapshot() ?? null,
   ): ContentEditableClipboardResult<T> =>
-    coreResultToClipboardResult(core.pasteText(text, reader, selection));
+    coreResultToClipboardResult(
+      core.handle({ type: "paste", payload: text, selection }, reader),
+    );
 
   const paste = (event?: ClipboardEvent): ContentEditableClipboardResult<T> =>
-    coreResultToClipboardResult(core.paste(readClipboardPayload(event, clipboardMime), reader));
+    coreResultToClipboardResult(core.handle({
+      type: "paste",
+      payload: readClipboardPayload(event, clipboardMime),
+    }, reader));
 
   const handle = (event: Event): ContentEditableUpdate => {
     if (event.type === "beforeinput") {
-      return coreResultToUpdate(core.handle({ type: "beforeinput", point: point() }, reader));
+      return coreResultToUpdate(
+        core.handle({ type: "begin-native-input", point: point() }, reader),
+      );
     }
     if (event.type === "compositionstart") {
-      return coreResultToUpdate(core.handle({ type: "compositionstart", point: point() }, reader));
+      return coreResultToUpdate(core.handle({ type: "begin-composition", point: point() }, reader));
     }
     if (event.type === "compositionend") {
-      return coreResultToUpdate(core.handle({ type: "compositionend", point: point() }, reader));
+      return coreResultToUpdate(
+        core.handle({ type: "commit-composition", point: point() }, reader),
+      );
     }
     if (event.type === "input") {
-      return coreResultToUpdate(core.handle({ type: "input", point: point() }, reader));
+      return coreResultToUpdate(
+        core.handle({ type: "commit-native-input", point: point() }, reader),
+      );
     }
     if (event.type === "selectionchange" || event.type === "select") {
-      return coreResultToUpdate(core.handle({ type: "selection", selection: domSelection() }, reader));
+      return coreResultToUpdate(
+        core.handle({ type: "sync-selection", selection: domSelection() }, reader),
+      );
     }
     if (event.type === "copy" && isClipboardEventLike(event)) {
       event.preventDefault();

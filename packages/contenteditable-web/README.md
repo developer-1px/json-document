@@ -30,14 +30,14 @@ const core = createContentEditableCore({
   surface,
 });
 
-const result = core.handle({
-  type: "input",
-  point: { path: "/body", offset: 4 },
-}, {
+const reader = {
   point: () => ({ path: "/body", offset: 4 }),
   text: (path) => path === "/body" ? "Next text" : null,
   selection: () => doc.selection?.snapshot() ?? null,
-});
+};
+
+core.handle({ type: "begin-native-input", point: reader.point() }, reader);
+const result = core.handle({ type: "commit-native-input", point: reader.point() }, reader);
 ```
 
 ```ts
