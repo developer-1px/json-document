@@ -1,15 +1,22 @@
 import type {
   JSONDocument,
   JSONPatchOperation,
-  Pointer,
   SelectionSnap,
-  TextSurface,
   TextSurfaceFragment,
 } from "@interactive-os/json-document";
+import type {
+  ContentEditableError,
+  ContentEditableErrorCode,
+  ContentEditableFlushOptions,
+  TextSurfaceResolver,
+} from "./core.js";
 
-export type TextSurfaceResolver =
-  | TextSurface
-  | ((textPath: Pointer) => TextSurface | null);
+export type {
+  ContentEditableError,
+  ContentEditableErrorCode,
+  ContentEditableFlushOptions,
+  TextSurfaceResolver,
+} from "./core.js";
 
 export interface ContentEditableAdapterOptions<T> {
   document: JSONDocument<T>;
@@ -35,24 +42,6 @@ export type ContentEditableClipboardResult<T> =
       value: T;
     }
   | ContentEditableError;
-
-export type ContentEditableErrorCode =
-  | "clipboard_unavailable"
-  | "commit_failed"
-  | "empty_selection"
-  | "invalid_payload"
-  | "missing_text_path";
-
-export interface ContentEditableError {
-  ok: false;
-  code: ContentEditableErrorCode;
-  reason: string;
-}
-
-export interface ContentEditableFlushOptions {
-  label?: string;
-  mergeKey?: string;
-}
 
 export interface ContentEditableAdapter<T> {
   bind(): () => void;

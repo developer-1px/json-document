@@ -4,6 +4,7 @@ export {
   JSON_DOCUMENT_CONTENTEDITABLE_MIME,
   JSON_TEXT_ATTRIBUTE,
 } from "./constants.js";
+export { createContentEditableCore } from "./core.js";
 export { createContentEditableAdapter } from "./create.js";
 export type {
   ContentEditableAdapter,
@@ -15,3 +16,12 @@ export type {
   ContentEditableUpdate,
   TextSurfaceResolver,
 } from "./types.js";
+export type {
+  ContentEditableCore,
+  ContentEditableCoreEvent,
+  ContentEditableCoreOptions,
+  ContentEditableCoreResult,
+  ContentEditableHistoryCommand,
+  ContentEditableObservationReader,
+  ContentEditableTextPoint,
+} from "./core.js";
