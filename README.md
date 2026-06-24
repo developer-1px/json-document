@@ -37,6 +37,8 @@ schema -> document -> pointer/query -> can* -> change -> result
 | [packages/json-document](packages/json-document) | core package. `createJSONDocument`, JSON Patch/Pointer/Path, selection, clipboard, history |
 | [packages/collection](packages/collection) | ordered JSON array item 이동/복제/삭제 |
 | [packages/clipboard-web](packages/clipboard-web) | browser clipboard bridge |
+| [packages/contenteditable-web](packages/contenteditable-web) | `@interactive-os/json-document-contenteditable-web` DOM contenteditable text-surface adapter |
+| [packages/contenteditable-react](packages/contenteditable-react) | `@interactive-os/json-document-contenteditable-react` React wrapper for contenteditable timing |
 | [packages/schema-form](packages/schema-form) | schema-backed field descriptor |
 | [packages/form-draft](packages/form-draft) | valid JSON commit 전 temporary invalid form input |
 | [packages/protected-ranges](packages/protected-ranges) | protected JSON Pointer range edit guard |

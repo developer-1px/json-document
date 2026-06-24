@@ -35,6 +35,8 @@ import { createGrouping } from "@interactive-os/json-document-grouping";
 import { createProposedChanges } from "@interactive-os/json-document-proposed-changes";
 import { createComments } from "@interactive-os/json-document-comments";
 import { createWebClipboard } from "@interactive-os/json-document-clipboard-web";
+import { createContentEditableAdapter } from "@interactive-os/json-document-contenteditable-web";
+import { useContentEditable } from "@interactive-os/json-document-contenteditable-react";
 ```
 
 Official extension은 현재 shipped `packages/*`만이다. `labs/extensions/*`는 후보이고 공식 package로 안내하지 않는다. `calculated-fields`, `paste-special`, `autosave`는 1.0에서 lab 유지이며 official 승격을 보류한다.

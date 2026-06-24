@@ -165,6 +165,73 @@ export const repoCatalog = {
       ]
     },
     {
+      "path": "packages/contenteditable-react",
+      "name": "@interactive-os/json-document-contenteditable-react",
+      "status": "official-extension",
+      "private": false,
+      "publishable": true,
+      "version": "0.1.0",
+      "description": "React hook for the json-document contenteditable web adapter.",
+      "license": "MIT",
+      "summary": "Thin React hook for `@interactive-os/json-document-contenteditable-web`.",
+      "guidance": {
+        "useFor": "wrap the contenteditable web adapter with React render and selection restore timing",
+        "notFor": "rendering policy, editor commands, or non-React hosts"
+      },
+      "publicExports": [
+        "ContentEditableCommandPointerEvent",
+        "UseContentEditableOptions",
+        "UseContentEditableResult",
+        "useContentEditable"
+      ],
+      "publicExportCount": 4,
+      "keywords": [
+        "@interactive-os/json-document",
+        "contenteditable",
+        "headless",
+        "json",
+        "react"
+      ]
+    },
+    {
+      "path": "packages/contenteditable-web",
+      "name": "@interactive-os/json-document-contenteditable-web",
+      "status": "official-extension",
+      "private": false,
+      "publishable": true,
+      "version": "0.1.0",
+      "description": "Official contenteditable DOM adapter for json-document text surfaces.",
+      "license": "MIT",
+      "summary": "Official DOM adapter for using `@interactive-os/json-document` text surfaces with\nbrowser `contenteditable`.",
+      "guidance": {
+        "useFor": "bind text surfaces to DOM contenteditable selection, IME input, and clipboard events",
+        "notFor": "editor block semantics, toolbar commands, React rendering, or rich text schema policy"
+      },
+      "publicExports": [
+        "ContentEditableAdapter",
+        "ContentEditableAdapterOptions",
+        "ContentEditableClipboardResult",
+        "ContentEditableError",
+        "ContentEditableErrorCode",
+        "ContentEditableFlushOptions",
+        "ContentEditableUpdate",
+        "JSON_ATOM_ATTRIBUTE",
+        "JSON_ATOM_REPLACEMENT",
+        "JSON_DOCUMENT_CONTENTEDITABLE_MIME",
+        "JSON_TEXT_ATTRIBUTE",
+        "TextSurfaceResolver",
+        "createContentEditableAdapter"
+      ],
+      "publicExportCount": 13,
+      "keywords": [
+        "@interactive-os/json-document",
+        "contenteditable",
+        "headless",
+        "json",
+        "web"
+      ]
+    },
+    {
       "path": "packages/dirty-state",
       "name": "@interactive-os/json-document-dirty-state",
       "status": "official-extension",
@@ -999,6 +1066,73 @@ export const repoCatalog = {
         "comment",
         "headless",
         "review"
+      ]
+    },
+    {
+      "path": "packages/contenteditable-react",
+      "name": "@interactive-os/json-document-contenteditable-react",
+      "status": "official-extension",
+      "private": false,
+      "publishable": true,
+      "version": "0.1.0",
+      "description": "React hook for the json-document contenteditable web adapter.",
+      "license": "MIT",
+      "summary": "Thin React hook for `@interactive-os/json-document-contenteditable-web`.",
+      "guidance": {
+        "useFor": "wrap the contenteditable web adapter with React render and selection restore timing",
+        "notFor": "rendering policy, editor commands, or non-React hosts"
+      },
+      "publicExports": [
+        "ContentEditableCommandPointerEvent",
+        "UseContentEditableOptions",
+        "UseContentEditableResult",
+        "useContentEditable"
+      ],
+      "publicExportCount": 4,
+      "keywords": [
+        "@interactive-os/json-document",
+        "contenteditable",
+        "headless",
+        "json",
+        "react"
+      ]
+    },
+    {
+      "path": "packages/contenteditable-web",
+      "name": "@interactive-os/json-document-contenteditable-web",
+      "status": "official-extension",
+      "private": false,
+      "publishable": true,
+      "version": "0.1.0",
+      "description": "Official contenteditable DOM adapter for json-document text surfaces.",
+      "license": "MIT",
+      "summary": "Official DOM adapter for using `@interactive-os/json-document` text surfaces with\nbrowser `contenteditable`.",
+      "guidance": {
+        "useFor": "bind text surfaces to DOM contenteditable selection, IME input, and clipboard events",
+        "notFor": "editor block semantics, toolbar commands, React rendering, or rich text schema policy"
+      },
+      "publicExports": [
+        "ContentEditableAdapter",
+        "ContentEditableAdapterOptions",
+        "ContentEditableClipboardResult",
+        "ContentEditableError",
+        "ContentEditableErrorCode",
+        "ContentEditableFlushOptions",
+        "ContentEditableUpdate",
+        "JSON_ATOM_ATTRIBUTE",
+        "JSON_ATOM_REPLACEMENT",
+        "JSON_DOCUMENT_CONTENTEDITABLE_MIME",
+        "JSON_TEXT_ATTRIBUTE",
+        "TextSurfaceResolver",
+        "createContentEditableAdapter"
+      ],
+      "publicExportCount": 13,
+      "keywords": [
+        "@interactive-os/json-document",
+        "contenteditable",
+        "headless",
+        "json",
+        "web"
       ]
     },
     {
@@ -3110,8 +3244,8 @@ export const repoCatalog = {
     }
   ],
   "totals": {
-    "packages": 18,
-    "officialExtensions": 17,
+    "packages": 20,
+    "officialExtensions": 19,
     "labExtensions": 38,
     "apps": 12
   }
