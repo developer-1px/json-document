@@ -5,7 +5,7 @@ export {
   JSON_TEXT_ATTRIBUTE,
 } from "./constants.js";
 export { createContentEditableCore } from "./core.js";
-export { createContentEditableAdapter } from "./create.js";
+export { createContentEditableAdapter } from "./dom/createAdapter.js";
 export type {
   ContentEditableAdapter,
   ContentEditableAdapterOptions,

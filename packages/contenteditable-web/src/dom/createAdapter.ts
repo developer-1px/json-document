@@ -8,18 +8,18 @@ import {
   JSON_ATOM_ATTRIBUTE,
   JSON_DOCUMENT_CONTENTEDITABLE_MIME,
   JSON_TEXT_ATTRIBUTE,
-} from "./constants.js";
+} from "../constants.js";
 import {
   readClipboardFragment,
   readClipboardPlainText,
   writeClipboardFragment,
-} from "./clipboard.js";
+} from "./clipboardEvent.js";
 import {
   createContentEditableCore,
   type ContentEditableObservationReader,
   type ContentEditableResult,
-} from "./core.js";
-import { editableTextContent, findElementByAttribute } from "./domText.js";
+} from "../core.js";
+import { editableTextContent, findElementByAttribute } from "./textProjection.js";
 import {
   restoreDOMSelection,
   selectionFromDOM,
@@ -28,7 +28,7 @@ import {
 import type {
   ContentEditableAdapter,
   ContentEditableAdapterOptions,
-} from "./types.js";
+} from "../types.js";
 
 export function createContentEditableAdapter<T>({
   atomAttribute = JSON_ATOM_ATTRIBUTE,

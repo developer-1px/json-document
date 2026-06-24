@@ -1,12 +1,6 @@
 import type { TextSurfaceFragment } from "@interactive-os/json-document";
-import { JSON_DOCUMENT_CONTENTEDITABLE_MIME } from "./constants.js";
-import { isTextSurfaceFragment, plainTextFromFragment } from "./fragment.js";
-
-export {
-  isTextSurfaceFragment,
-  plainTextFromFragment,
-  selectedTextSurfaceFragment,
-} from "./fragment.js";
+import { JSON_DOCUMENT_CONTENTEDITABLE_MIME } from "../constants.js";
+import { isTextSurfaceFragment, plainTextFromFragment } from "../fragment.js";
 
 export function writeClipboardFragment(
   event: ClipboardEvent | undefined,
