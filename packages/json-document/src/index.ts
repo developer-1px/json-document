@@ -178,4 +178,24 @@ export type {
   SelectionTextDeleteDirection,
   SelectionTextDeleteOptions,
 } from "./domain/selection/textDelete.js";
+export {
+  replaceTextSurfaceSelection,
+  syncTextSurfaceMutation,
+  textSurfaceFragment,
+} from "./domain/text-surface/surface.js";
+export type {
+  TextSurface,
+  TextSurfaceAtom,
+  TextSurfaceError,
+  TextSurfaceErrorCode,
+  TextSurfaceFragment,
+  TextSurfaceFragmentResult,
+  TextSurfaceMutationRange,
+  TextSurfaceMutationResult,
+  TextSurfaceRange,
+  TextSurfaceReplaceOptions,
+  TextSurfaceReplaceResult,
+  TextSurfaceReplacement,
+  TextSurfaceSelectionRange,
+} from "./domain/text-surface/surface.js";
 export { trackPointer } from "./foundation/patch/track.js";
