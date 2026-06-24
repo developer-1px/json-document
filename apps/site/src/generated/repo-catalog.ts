@@ -210,19 +210,20 @@ export const repoCatalog = {
       "publicExports": [
         "ContentEditableAdapter",
         "ContentEditableAdapterOptions",
-        "ContentEditableClipboardResult",
+        "ContentEditableCommand",
+        "ContentEditableCore",
         "ContentEditableError",
-        "ContentEditableErrorCode",
-        "ContentEditableFlushOptions",
-        "ContentEditableUpdate",
+        "ContentEditableObservationReader",
+        "ContentEditableResult",
         "JSON_ATOM_ATTRIBUTE",
         "JSON_ATOM_REPLACEMENT",
         "JSON_DOCUMENT_CONTENTEDITABLE_MIME",
         "JSON_TEXT_ATTRIBUTE",
         "TextSurfaceResolver",
-        "createContentEditableAdapter"
+        "createContentEditableAdapter",
+        "createContentEditableCore"
       ],
-      "publicExportCount": 13,
+      "publicExportCount": 14,
       "keywords": [
         "@interactive-os/json-document",
         "contenteditable",
@@ -1114,19 +1115,20 @@ export const repoCatalog = {
       "publicExports": [
         "ContentEditableAdapter",
         "ContentEditableAdapterOptions",
-        "ContentEditableClipboardResult",
+        "ContentEditableCommand",
+        "ContentEditableCore",
         "ContentEditableError",
-        "ContentEditableErrorCode",
-        "ContentEditableFlushOptions",
-        "ContentEditableUpdate",
+        "ContentEditableObservationReader",
+        "ContentEditableResult",
         "JSON_ATOM_ATTRIBUTE",
         "JSON_ATOM_REPLACEMENT",
         "JSON_DOCUMENT_CONTENTEDITABLE_MIME",
         "JSON_TEXT_ATTRIBUTE",
         "TextSurfaceResolver",
-        "createContentEditableAdapter"
+        "createContentEditableAdapter",
+        "createContentEditableCore"
       ],
-      "publicExportCount": 13,
+      "publicExportCount": 14,
       "keywords": [
         "@interactive-os/json-document",
         "contenteditable",

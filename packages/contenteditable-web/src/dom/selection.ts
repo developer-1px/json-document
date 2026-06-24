@@ -4,7 +4,7 @@ import {
   findElementByAttribute,
   textDOMPositionForOffset,
   textOffsetInElement,
-} from "./domText.js";
+} from "./textProjection.js";
 
 export function selectionFromDOM(
   root: HTMLElement,

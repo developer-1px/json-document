@@ -1,4 +1,4 @@
-import { JSON_ATOM_REPLACEMENT } from "./constants.js";
+import { JSON_ATOM_REPLACEMENT } from "../constants.js";
 
 export function editableTextContent(node: Node, atomAttribute: string): string {
   if (isAtomElement(node, atomAttribute)) return JSON_ATOM_REPLACEMENT;
