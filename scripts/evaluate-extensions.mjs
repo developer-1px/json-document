@@ -282,10 +282,10 @@ if (!tsconfigPathAliases["@interactive-os/json-document-*"]?.includes("packages/
 if (!tsconfigPathAliases["@interactive-os/json-document-*"]?.includes("labs/extensions/*/src/index.ts")) {
   fail("tsconfig.json-document-paths.json: missing lab extension wildcard source path.");
 }
-if (tsconfigPathAliases["@interactive-os/json-document/react"]?.[0] !== "packages/json-document/src/react.ts") {
+if (tsconfigPathAliases["@interactive-os/json-document/react"]?.[0] !== "packages/json-document/src/application/react-document/index.ts") {
   fail("tsconfig.json-document-paths.json: missing @interactive-os/json-document/react source path.");
 }
-if (tsconfigPathAliases["@interactive-os/json-document"]?.[0] !== "packages/json-document/src/index.ts") {
+if (tsconfigPathAliases["@interactive-os/json-document"]?.[0] !== "packages/json-document/src/application/document/index.ts") {
   fail("tsconfig.json-document-paths.json: missing json-document source path.");
 }
 

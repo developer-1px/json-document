@@ -4,11 +4,11 @@
 import type * as z from "zod";
 import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/contract.js";
 import { appendSegment, buildPointer, readAt, tryParsePointer, type Pointer } from "../../foundation/pointer/index.js";
-import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/patch.js";
-import { getDiscriminatedUnionInfo, schemaAtPointer } from "../schema/introspection.js";
-import { tryRekeyPayload } from "../schema/rekey.js";
-import type { RekeyOptions } from "../schema/rekey.js";
-import { getDef, getObjectShape } from "../schema/zod.js";
+import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/mutation/patch.js";
+import { getDiscriminatedUnionInfo, schemaAtPointer } from "../schema/inspection/introspection.js";
+import { tryRekeyPayload } from "../schema/mutation/rekey.js";
+import type { RekeyOptions } from "../schema/mutation/rekey.js";
+import { getDef, getObjectShape } from "../schema/inspection/zod.js";
 
 type PasteMode = "at" | "before" | "after" | "into" | "replace";
 export type PasteTarget =

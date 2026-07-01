@@ -1,32 +1,32 @@
 import type * as z from "zod";
-import { INTERNAL_CLIPBOARD_CAN_PASTE, createClipboard } from "./clipboard/clipboard.js";
-import { createClipboardPasteRuntime } from "./clipboard/paste.js";
-import { createDocumentCapabilities } from "./can/create.js";
-import { createDocumentEditActions } from "./edit/actions.js";
-import { createJSONState } from "./state/json.js";
-import { createDocumentStateOps } from "./state/ops.js";
-import { createDocumentPatchRuntimeState } from "./state/runtime.js";
-import { createSchemaState } from "./schema/state.js";
-import { createDocumentSelectionRuntime } from "./selection/runtime.js";
+import { INTERNAL_CLIPBOARD_CAN_PASTE, createClipboard } from "../../domain/document/clipboard/clipboard.js";
+import { createClipboardPasteRuntime } from "../../domain/document/clipboard/paste.js";
+import { createDocumentCapabilities } from "../../domain/document/capabilities/create.js";
+import { createDocumentEditActions } from "../../domain/document/editing/actions.js";
+import { createJSONState } from "../../domain/document/state/json.js";
+import { createDocumentStateOps } from "../../domain/document/state/ops.js";
+import { createDocumentPatchRuntimeState } from "../../domain/document/state/runtime.js";
+import { createSchemaState } from "../../domain/document/schema/state.js";
+import { createDocumentSelectionRuntime } from "../../domain/document/selection/runtime.js";
 import {
   OK,
   type CapabilityResult,
-} from "./can/result.js";
+} from "../../domain/document/capabilities/result.js";
 import type {
   JSONDocument,
   JSONDocumentOptions,
-} from "./interface.js";
+} from "./contract.js";
 import type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,
-} from "./edit/target.js";
-import { createDocumentRead } from "./read/read.js";
-import { createDocumentMutationRuntime } from "./state/patch.js";
-import { createDocumentHistoryRuntime } from "./history/undoRedo.js";
-import { createDocumentHistoryRuntimeState } from "./history/state.js";
+} from "../../domain/document/editing/target.js";
+import { createDocumentRead } from "../../domain/document/reading/read.js";
+import { createDocumentMutationRuntime } from "../../domain/document/state/patch.js";
+import { createDocumentHistoryRuntime } from "../../domain/document/history/undoRedo.js";
+import { createDocumentHistoryRuntimeState } from "../../domain/document/history/state.js";
 import type {
   TrustedJSONStateOps,
-} from "./state/json.js";
+} from "../../domain/document/state/json.js";
 import type {
   JSONDocumentSchemaInput,
   JSONDocumentSchemaLike,

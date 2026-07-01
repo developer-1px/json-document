@@ -53,8 +53,8 @@ function isDemoOrEngineRequest(url: string): boolean {
     "/src/playgrounds/InterfaceWorkbench.playground",
     "/apps/outliner/src/",
     "/apps/mobile-cms/src/",
-    "/packages/json-document/src/index.ts",
-    "/packages/json-document/src/react.ts",
+    "/packages/json-document/src/application/document/index.ts",
+    "/packages/json-document/src/application/react-document/index.ts",
   ].some((part) => url.includes(part));
 }
 

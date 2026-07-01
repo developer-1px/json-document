@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import * as z from "zod";
 
-const distEntry = new URL("../packages/json-document/dist/index.js", import.meta.url);
+const distEntry = new URL("../packages/json-document/dist/application/document/index.js", import.meta.url);
 const distJsonCloneEntry = new URL("../packages/json-document/dist/foundation/json/clone.js", import.meta.url);
 const distJsonSerializableEntry = new URL("../packages/json-document/dist/foundation/json/serializable.js", import.meta.url);
 const distJsonPathEntry = new URL("../packages/json-document/dist/foundation/jsonpath/index.js", import.meta.url);
@@ -10,7 +10,7 @@ const distJsonPathParseEntry = new URL("../packages/json-document/dist/foundatio
 const distJsonPathEvaluateEntry = new URL("../packages/json-document/dist/foundation/jsonpath/evaluate.js", import.meta.url);
 const distPatchEntry = new URL("../packages/json-document/dist/foundation/patch/trusted.js", import.meta.url);
 const distPatchInverseEntry = new URL("../packages/json-document/dist/foundation/patch/inverse.js", import.meta.url);
-const distHistoryEntry = new URL("../packages/json-document/dist/foundation/history.js", import.meta.url);
+const distHistoryEntry = new URL("../packages/json-document/dist/foundation/history/index.js", import.meta.url);
 
 if (
   !existsSync(distEntry)

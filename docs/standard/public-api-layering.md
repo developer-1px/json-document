@@ -2,31 +2,47 @@
 
 ## 의도
 
-`json-document`의 1차 public API는 document facade를 중심으로 둔다. 앱 코드는 가능한 한 `createJSONDocument`, `useJSONDocument`, `doc.*`만 기억하고, JSON Patch, JSON Pointer helper, selection detail, text-surface adapter 같은 저수준 도구는 advanced entrypoint에서 가져온다.
+`json-document`의 public API는 document facade를 중심으로 둔다. 앱 코드는 가능한 한 `createJSONDocument`, `useJSONDocument`, `doc.*`만 기억한다. JSON Patch, JSON Pointer helper, selection detail, text-surface adapter 같은 저수준 도구는 root facade에서만 노출하고, 별도 advanced subpath는 공개 계약으로 두지 않는다.
 
 ## 레이어 지도
 
 ```txt
-App code
-└─ Document facade
-   └─ Domain capability
-      └─ Foundation primitive
+src/
+├─ application/
+│  ├─ document/
+│  └─ react-document/
+├─ domain/
+│  ├─ document/
+│  ├─ clipboard/
+│  ├─ editing/
+│  ├─ schema/
+│  ├─ selection/
+│  └─ text-surface/
+└─ foundation/
+   ├─ error/
+   ├─ history/
+   ├─ json/
+   ├─ jsonpath/
+   ├─ patch/
+   └─ pointer/
 ```
+
+레이어 의존은 인접 하위 레이어만 허용한다.
+
+```txt
+application -> domain -> foundation
+```
+
+`application -> foundation`처럼 레이어를 건너뛰는 import는 금지한다. 이 규칙은 `npm run layers:check -w @interactive-os/json-document`로 검증한다.
 
 ## Entrypoint
 
 | Entrypoint | 역할 | 의도한 caller |
 | --- | --- | --- |
-| `@interactive-os/json-document` | core document facade와 호환 root | 앱 코드 |
+| `@interactive-os/json-document` | core document facade | 앱 코드 |
 | `@interactive-os/json-document/react` | core document facade의 React adapter | React 앱 코드 |
-| `@interactive-os/json-document/patch` | JSON Patch helper와 patch result type | 고급 adapter 코드 |
-| `@interactive-os/json-document/pointer` | JSON Pointer helper, sibling range, pointer tracking | 고급 adapter 코드 |
-| `@interactive-os/json-document/selection` | Selection type surface | 고급 editor 코드 |
-| `@interactive-os/json-document/text-surface` | Text editing adapter helper | rich text/contenteditable adapter |
-| `@interactive-os/json-document/schema` | Schema inspection type | schema-driven UI adapter |
-| `@interactive-os/json-document/clipboard` | Clipboard capability type | clipboard adapter와 extension 코드 |
 
-root package는 1.x 동안 기존 low-level export를 호환성 때문에 유지한다. 새 예시는 low-level helper를 직접 쓸 때 advanced subpath를 우선한다.
+Package export는 source layer가 아니라 routing table이다. `public` 또는 `surface` 폴더를 첫 번째 path segment로 두지 않는다.
 
 ## Core Surface
 

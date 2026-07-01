@@ -17,7 +17,7 @@ import {
 import {
   cachedSchemaAtPointer,
   isPlainStructuralSchema,
-} from "../shared/schema.js";
+} from "../model/schema.js";
 import { arrayElementSchemaAtPath } from "./schema.js";
 import {
   applyReplacePatchWithLocalSchemaValidation,
@@ -35,7 +35,7 @@ import {
   readAppliedLocalOpSourceValue,
   type AppliedLocalOpSourceValue,
 } from "../array/path.js";
-import { failedLocalSchemaValidation, okLocalSchemaValidation, schemaViolation } from "../shared/result.js";
+import { failedLocalSchemaValidation, okLocalSchemaValidation, schemaViolation } from "../model/result.js";
 
 export type LocalSchemaValidationResult<S extends z.ZodType> = ApplyResult<S> | null;
 

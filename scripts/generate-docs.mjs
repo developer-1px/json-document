@@ -337,7 +337,9 @@ function packageEntries(dir) {
 function packageDoc(path, status) {
   const pkg = readJson(`${path}/package.json`);
   const readme = readIfExists(`${path}/README.md`);
-  const sourcePath = `${path}/src/index.ts`;
+  const sourcePath = pkg.name === "@interactive-os/json-document"
+    ? `${path}/src/application/document/index.ts`
+    : `${path}/src/index.ts`;
   const source = readIfExists(sourcePath);
   const publicExports = extractExports(source);
 

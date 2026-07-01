@@ -117,18 +117,9 @@ if (!result.ok) {
 └─ useJSONDocument
 ```
 
-저수준 도구나 고급 편집기 adapter를 만들 때는 목적별 subpath를 사용합니다. root는
-1.x 호환성을 위해 기존 helper export를 유지하지만, 새 코드에서는 아래 subpath가
-레이어 의도를 더 분명하게 드러냅니다.
-
-```txt
-@interactive-os/json-document/patch        JSON Patch helper
-@interactive-os/json-document/pointer      JSON Pointer helper, pointer tracking
-@interactive-os/json-document/selection    Selection type surface
-@interactive-os/json-document/text-surface Text editing adapter helper
-@interactive-os/json-document/schema       Schema inspection types
-@interactive-os/json-document/clipboard    Clipboard capability types
-```
+저수준 도구나 고급 편집기 adapter용 helper도 root document facade에서 노출합니다.
+소비자는 package subpath가 아니라 `@interactive-os/json-document`와
+`@interactive-os/json-document/react`만 기억합니다.
 
 ## 1.0 public contract
 
@@ -138,14 +129,8 @@ contract입니다.
 
 - public import는 `@interactive-os/json-document`와
   `@interactive-os/json-document/react`가 1차 core입니다.
-- advanced import는 `@interactive-os/json-document/patch`,
-  `@interactive-os/json-document/pointer`,
-  `@interactive-os/json-document/selection`,
-  `@interactive-os/json-document/text-surface`,
-  `@interactive-os/json-document/schema`,
-  `@interactive-os/json-document/clipboard`입니다.
-- root의 기존 low-level helper export는 1.x 호환성을 위해 유지됩니다. 새 문서와
-  예시는 core와 advanced subpath를 구분합니다.
+- advanced subpath는 공개 계약이 아닙니다. package export는 layer 구조 위의
+  routing table이며, root facade와 React adapter만 노출합니다.
 - 실패 분기는 `reason` 문구가 아니라 stable `code`와 구조로 합니다.
 - 기본값은 `strict: false`입니다. 실패는 throw가 아니라 result로 돌아옵니다.
 - `doc.undo()`와 `doc.redo()`는 top-level command이며
