@@ -5,8 +5,8 @@
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/application/document/index.js",
+  "types": "./dist/application/document/index.d.ts",
   "homepage": "https://developer-1px.github.io/json-document/",
   "repository": {
     "type": "git",
@@ -40,47 +40,24 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/application/document/index.d.ts",
+      "import": "./dist/application/document/index.js"
     },
     "./react": {
-      "types": "./dist/react.d.ts",
-      "import": "./dist/react.js"
-    },
-    "./patch": {
-      "types": "./dist/patch.d.ts",
-      "import": "./dist/patch.js"
-    },
-    "./pointer": {
-      "types": "./dist/pointer.d.ts",
-      "import": "./dist/pointer.js"
-    },
-    "./selection": {
-      "types": "./dist/selection.d.ts",
-      "import": "./dist/selection.js"
-    },
-    "./text-surface": {
-      "types": "./dist/text-surface.d.ts",
-      "import": "./dist/text-surface.js"
-    },
-    "./schema": {
-      "types": "./dist/schema.d.ts",
-      "import": "./dist/schema.js"
-    },
-    "./clipboard": {
-      "types": "./dist/clipboard.d.ts",
-      "import": "./dist/clipboard.js"
+      "types": "./dist/application/react-document/index.d.ts",
+      "import": "./dist/application/react-document/index.js"
     }
   },
   "scripts": {
     "clean": "rm -rf dist",
+    "layers:check": "node ../../scripts/evaluate-json-document-layers.mjs",
     "build": "npm run clean && tsc -p tsconfig.json",
     "prepack": "npm run build",
     "prepublishOnly": "npm --prefix ../.. run release:check",
     "smoke:package": "node ./tests/smoke/package-smoke.mjs",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
-    "verify": "npm run typecheck && npm test && npm run build && npm run smoke:package"
+    "verify": "npm run layers:check && npm run typecheck && npm test && npm run build && npm run smoke:package"
   },
   "peerDependencies": {
     "react": ">=18",

@@ -14,11 +14,11 @@ import { parsePointer, type Pointer } from "../../../foundation/pointer/index.js
 import {
   acceptsKnownJsonValueWithValidator,
   knownJsonValueValidatorForSchema,
-} from "../shared/knownJson.js";
+} from "../model/knownJson.js";
 import {
   arrayElementSchemaAtParent,
   cachedSchemaAtPointer,
-} from "../shared/schema.js";
+} from "../model/schema.js";
 import { replaceObjectDataValue } from "../object/value.js";
 import {
   arrayElementIndexPrefix,
@@ -26,12 +26,12 @@ import {
   parseKnownArrayElementReplaceIndex,
   readArrayAtSegments,
 } from "./path.js";
-import { okLocalSchemaValidation } from "../shared/result.js";
+import { okLocalSchemaValidation } from "../model/result.js";
 import {
   evaluateAppliedReplaceValueValidationPlan,
   toAppliedReplaceOperations,
   type IndexedReplaceValueValidationOperation,
-} from "../shared/value.js";
+} from "../model/value.js";
 
 export interface ArrayIndexReplacement {
   index: number;

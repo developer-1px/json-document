@@ -1,0 +1,500 @@
+import { cloneJson } from "../../../foundation/json/clone.js";
+import { cloneTrustedPlainJson } from "../../../foundation/json/trustedClone.js";
+
+const hasOwn = Object.prototype.hasOwnProperty;
+const COPY_SUFFIX = "-copy";
+const COPY_NESTED_SUFFIX = "-copy-";
+
+export type RekeyStrategy = "suffix" | "uuid" | ((value: unknown, ctx: RekeyContext) => string);
+
+export interface RekeyContext {
+  field: string;
+  existing: ReadonlySet<string>;
+  attempt: number;
+}
+
+export interface RekeyOptions {
+  fields: string[];
+  strategy: RekeyStrategy;
+}
+
+export type RekeyErrorCode = "not_serializable" | "rekey_failed";
+export type RekeyResult =
+  | { ok: true; payload: unknown }
+  | { ok: false; code: RekeyErrorCode; reason: string };
+
+export interface RekeyExecutionOptions {
+  trustedPayload?: boolean | undefined;
+}
+
+export interface RekeyField {
+  field: string;
+  existing: Set<string>;
+}
+
+interface SuffixAttemptField extends RekeyField {
+  nextAttempts: Map<string, number>;
+}
+
+interface SuffixRekeyField extends RekeyField {
+  bases: Set<string>;
+}
+
+export function rekeyPayload(
+  payload: unknown,
+  state: unknown,
+  options?: RekeyOptions,
+  executionOptions: RekeyExecutionOptions = {},
+): unknown {
+  if (!options || options.fields.length === 0) return payload;
+
+  const fields = uniqueFields(options.fields);
+  if (fields.length === 0) return payload;
+
+  const next = executionOptions.trustedPayload ? cloneTrustedPlainJson(payload) : cloneJson(payload);
+  if (options.strategy === "suffix") {
+    const payloadEntries: Array<Record<string, unknown>> = [];
+    const existing = collectSuffixExistingValues(state, next, fields, payloadEntries);
+    rekeyEntries(payloadEntries, existing, options.strategy);
+    return next;
+  }
+
+  const existing = collectExistingValues(state, fields);
+  rekeyValue(next, existing, options.strategy);
+  return next;
+}
+
+export function tryRekeyPayload(
+  payload: unknown,
+  state: unknown,
+  options?: RekeyOptions,
+  executionOptions?: RekeyExecutionOptions,
+): RekeyResult {
+  try {
+    return { ok: true, payload: rekeyPayload(payload, state, options, executionOptions) };
+  } catch (error) {
+    return rekeyError(error);
+  }
+}
+
+function rekeyError(error: unknown): RekeyResult {
+  const message = error instanceof Error ? error.message : String(error);
+  return {
+    ok: false,
+    code: message.startsWith("Value is not JSON-serializable") ? "not_serializable" : "rekey_failed",
+    reason: message,
+  };
+}
+
+function uniqueFields(fields: ReadonlyArray<string>): string[] {
+  if (fields.length === 0) return [];
+  if (fields.length === 1) return [fields[0]!];
+  return [...new Set(fields)];
+}
+
+function walk(value: unknown, visit: (value: Record<string, unknown>) => void): void {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const item = value[index];
+      if (item !== null && typeof item === "object") walk(item, visit);
+    }
+    return;
+  }
+  if (isRecord(value)) {
+    visit(value);
+    for (const key in value) {
+      if (hasOwn.call(value, key)) {
+        const item = value[key];
+        if (item !== null && typeof item === "object") walk(item, visit);
+      }
+    }
+  }
+}
+
+function walkSingleFieldText(
+  value: unknown,
+  field: string,
+  visit: (text: string) => void,
+): void {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const item = value[index];
+      if (item !== null && typeof item === "object") {
+        walkSingleFieldText(item, field, visit);
+      }
+    }
+    return;
+  }
+  if (!isRecord(value)) return;
+
+  const text = scalarText(value[field]);
+  if (text !== null) visit(text);
+
+  for (const key in value) {
+    if (!hasOwn.call(value, key)) continue;
+    const item = value[key];
+    if (item !== null && typeof item === "object" && mayContainField(item, field)) {
+      walkSingleFieldText(item, field, visit);
+    }
+  }
+}
+
+function mayContainField(value: object, field: string): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  if (!isRecord(value)) return false;
+  if (hasOwn.call(value, field)) return true;
+  for (const key in value) {
+    if (!hasOwn.call(value, key)) continue;
+    const child = value[key];
+    if (child !== null && typeof child === "object") return true;
+  }
+  return false;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function scalarText(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
+function collectExistingValues(value: unknown, fields: ReadonlyArray<string>): RekeyField[] {
+  if (fields.length === 1) {
+    const field = fields[0]!;
+    const existing = new Set<string>();
+    collectSingleExistingField(value, field, existing);
+    return [{ field, existing }];
+  }
+
+  const existing = fields.map((field): RekeyField => ({ field, existing: new Set() }));
+
+  walk(value, (entry) => {
+    for (let index = 0; index < existing.length; index += 1) {
+      const { field, existing: values } = existing[index]!;
+      const value = scalarText(entry[field]);
+      if (value !== null) values.add(value);
+    }
+  });
+
+  return existing;
+}
+
+function collectSingleExistingField(value: unknown, field: string, existing: Set<string>): void {
+  walkSingleFieldText(value, field, (text) => existing.add(text));
+}
+
+function collectSuffixExistingValues(
+  state: unknown,
+  payload: unknown,
+  fields: ReadonlyArray<string>,
+  payloadEntries: Array<Record<string, unknown>>,
+): RekeyField[] {
+  if (fields.length === 1) {
+    return collectSingleSuffixExistingValues(state, payload, fields[0]!, payloadEntries);
+  }
+
+  const suffixFields = fields.map((field): SuffixRekeyField => ({
+    field,
+    existing: new Set(),
+    bases: new Set(),
+  }));
+
+  walk(payload, (entry) => {
+    let hasRekeyValue = false;
+    for (let index = 0; index < suffixFields.length; index += 1) {
+      const { field, bases } = suffixFields[index]!;
+      const current = scalarText(entry[field]);
+      if (current === null) continue;
+      bases.add(current);
+      hasRekeyValue = true;
+    }
+    if (hasRekeyValue) payloadEntries.push(entry);
+  });
+
+  let hasBases = false;
+  for (const field of suffixFields) {
+    if (field.bases.size === 0) continue;
+    hasBases = true;
+  }
+  if (!hasBases) return suffixFields;
+
+  if (suffixFields.length === 1) {
+    const suffixField = suffixFields[0]!;
+    if (suffixField.bases.size === 1) {
+      collectSingleSuffixField(state, suffixField);
+      return suffixFields;
+    }
+    walk(state, (entry) => {
+      const text = scalarText(entry[suffixField.field]);
+      if (text === null) return;
+      if (matchesSuffixCandidate(text, suffixField)) suffixField.existing.add(text);
+    });
+    return suffixFields;
+  }
+
+  walk(state, (entry) => {
+    for (let index = 0; index < suffixFields.length; index += 1) {
+      const suffixField = suffixFields[index]!;
+      const text = scalarText(entry[suffixField.field]);
+      if (text === null) continue;
+      if (matchesSuffixCandidate(text, suffixField)) suffixField.existing.add(text);
+    }
+  });
+
+  return suffixFields;
+}
+
+function collectSingleSuffixExistingValues(
+  state: unknown,
+  payload: unknown,
+  field: string,
+  payloadEntries: Array<Record<string, unknown>>,
+): RekeyField[] {
+  const suffixField: SuffixRekeyField = {
+    field,
+    existing: new Set(),
+    bases: new Set(),
+  };
+  let hasDuplicateBase = false;
+
+  walk(payload, (entry) => {
+    const current = scalarText(entry[field]);
+    if (current === null) return;
+    payloadEntries.push(entry);
+    if (suffixField.bases.has(current)) {
+      hasDuplicateBase = true;
+      return;
+    }
+    suffixField.bases.add(current);
+  });
+
+  if (suffixField.bases.size === 0) return [suffixField];
+  if (suffixField.bases.size === 1) {
+    collectSingleSuffixField(state, suffixField);
+    return [suffixField];
+  }
+
+  if (!hasDuplicateBase && !collectExactSuffixFieldConflicts(state, suffixField)) {
+    return [suffixField];
+  }
+
+  walk(state, (entry) => {
+    const text = scalarText(entry[suffixField.field]);
+    if (text === null) return;
+    if (matchesSuffixCandidate(text, suffixField)) suffixField.existing.add(text);
+  });
+  return [suffixField];
+}
+
+function collectExactSuffixFieldConflicts(state: unknown, suffixField: SuffixRekeyField): boolean {
+  let hasConflict = false;
+  walkSingleFieldText(state, suffixField.field, (text) => {
+    if (!suffixField.bases.has(text)) return;
+    suffixField.existing.add(text);
+    hasConflict = true;
+  });
+  return hasConflict;
+}
+
+function collectSingleSuffixField(state: unknown, suffixField: SuffixRekeyField): void {
+  const base = suffixField.bases.values().next().value as string;
+  const exact = `${base}-copy`;
+  const nested = `${exact}-`;
+  scanSingleSuffixField(state, suffixField.field, suffixField.existing, base, exact, nested);
+}
+
+function scanSingleSuffixField(
+  value: unknown,
+  field: string,
+  existing: Set<string>,
+  base: string,
+  exact: string,
+  nested: string,
+): void {
+  walkSingleFieldText(value, field, (text) => {
+    if (text === base || text === exact || (text.length >= nested.length && text.startsWith(nested))) {
+      existing.add(text);
+    }
+  });
+}
+
+function matchesSuffixCandidate(value: string, field: SuffixRekeyField): boolean {
+  if (field.bases.has(value)) return true;
+
+  if (
+    value.endsWith(COPY_SUFFIX)
+    && field.bases.has(value.slice(0, -COPY_SUFFIX.length))
+  ) {
+    return true;
+  }
+
+  let marker = value.indexOf(COPY_NESTED_SUFFIX);
+  while (marker !== -1) {
+    if (field.bases.has(value.slice(0, marker))) return true;
+    marker = value.indexOf(COPY_NESTED_SUFFIX, marker + 1);
+  }
+  return false;
+}
+
+function rekeyValue(
+  value: unknown,
+  fields: ReadonlyArray<RekeyField>,
+  strategy: RekeyStrategy,
+): void {
+  if (fields.length === 1) {
+    const { field, existing } = fields[0]!;
+    const suffixAttempts = strategy === "suffix" ? new Map<string, number>() : null;
+    walk(value, (entry) => {
+      const current = entry[field];
+      const currentText = scalarText(current);
+      if (currentText === null) return;
+
+      if (!existing.has(currentText)) {
+        existing.add(currentText);
+        return;
+      }
+
+      const next = suffixAttempts === null
+        ? mintValue(current, { field, existing, attempt: 1 }, strategy)
+        : mintSuffixValueWithCache(currentText, existing, field, suffixAttempts);
+      entry[field] = next;
+      existing.add(next);
+    });
+    return;
+  }
+
+  const suffixFields = strategy === "suffix" ? createSuffixAttemptFields(fields) : null;
+  walk(value, (entry) => {
+    for (let index = 0; index < fields.length; index += 1) {
+      const { field, existing } = fields[index]!;
+      const current = entry[field];
+      const currentText = scalarText(current);
+      if (currentText === null) continue;
+
+      if (!existing.has(currentText)) {
+        existing.add(currentText);
+        continue;
+      }
+
+      const next = suffixFields === null
+        ? mintValue(current, { field, existing, attempt: 1 }, strategy)
+        : mintSuffixValueWithCache(currentText, existing, field, suffixFields[index]!.nextAttempts);
+      entry[field] = next;
+      existing.add(next);
+    }
+  });
+}
+
+function rekeyEntries(
+  entries: ReadonlyArray<Record<string, unknown>>,
+  fields: ReadonlyArray<RekeyField>,
+  strategy: RekeyStrategy,
+): void {
+  if (fields.length === 1) {
+    const { field, existing } = fields[0]!;
+    const suffixAttempts = strategy === "suffix" ? new Map<string, number>() : null;
+    for (const entry of entries) {
+      const current = entry[field];
+      const currentText = scalarText(current);
+      if (currentText === null) continue;
+
+      if (!existing.has(currentText)) {
+        existing.add(currentText);
+        continue;
+      }
+
+      const next = suffixAttempts === null
+        ? mintValue(current, { field, existing, attempt: 1 }, strategy)
+        : mintSuffixValueWithCache(currentText, existing, field, suffixAttempts);
+      entry[field] = next;
+      existing.add(next);
+    }
+    return;
+  }
+
+  const suffixFields = strategy === "suffix" ? createSuffixAttemptFields(fields) : null;
+  for (const entry of entries) {
+    for (let index = 0; index < fields.length; index += 1) {
+      const { field, existing } = fields[index]!;
+      const current = entry[field];
+      const currentText = scalarText(current);
+      if (currentText === null) continue;
+
+      if (!existing.has(currentText)) {
+        existing.add(currentText);
+        continue;
+      }
+
+      const next = suffixFields === null
+        ? mintValue(current, { field, existing, attempt: 1 }, strategy)
+        : mintSuffixValueWithCache(currentText, existing, field, suffixFields[index]!.nextAttempts);
+      entry[field] = next;
+      existing.add(next);
+    }
+  }
+}
+
+function createSuffixAttemptFields(fields: ReadonlyArray<RekeyField>): SuffixAttemptField[] {
+  return fields.map((field) => ({
+    field: field.field,
+    existing: field.existing,
+    nextAttempts: new Map(),
+  }));
+}
+
+function mintValue(value: unknown, ctx: RekeyContext, strategy: RekeyStrategy): string {
+  if (strategy === "suffix") return mintSuffixValue(String(value), ctx.existing, ctx.field);
+
+  for (let attempt = 1; attempt < 10_000; attempt += 1) {
+    const attemptCtx = { ...ctx, attempt };
+    const next =
+      typeof strategy === "function"
+        ? strategy(value, attemptCtx)
+        : randomId();
+    if (!ctx.existing.has(next)) return next;
+  }
+  throw new Error(`could not mint unique value for ${ctx.field}`);
+}
+
+function mintSuffixValue(value: string, existing: ReadonlySet<string>, field: string): string {
+  for (let attempt = 1; attempt < 10_000; attempt += 1) {
+    const next = suffixValue(value, attempt);
+    if (!existing.has(next)) return next;
+  }
+  throw new Error(`could not mint unique value for ${field}`);
+}
+
+function mintSuffixValueWithCache(
+  value: string,
+  existing: ReadonlySet<string>,
+  field: string,
+  nextAttempts: Map<string, number>,
+): string {
+  for (let attempt = nextAttempts.get(value) ?? 1; attempt < 10_000; attempt += 1) {
+    const next = suffixValue(value, attempt);
+    if (!existing.has(next)) {
+      nextAttempts.set(value, attempt + 1);
+      return next;
+    }
+  }
+  throw new Error(`could not mint unique value for ${field}`);
+}
+
+function suffixValue(value: string, attempt: number): string {
+  return attempt === 1 ? `${value}-copy` : `${value}-copy-${attempt}`;
+}
+
+function randomId(): string {
+  const cryptoLike = globalThis.crypto as { randomUUID?: () => string; getRandomValues?: (bytes: Uint8Array) => Uint8Array } | undefined;
+  if (cryptoLike?.randomUUID) return cryptoLike.randomUUID();
+  if (!cryptoLike?.getRandomValues) throw new Error("crypto.getRandomValues is required for uuid rekey strategy");
+
+  const bytes = cryptoLike.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}

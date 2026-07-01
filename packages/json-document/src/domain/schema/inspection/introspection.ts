@@ -1,0 +1,96 @@
+import type * as z from "zod";
+import type { Pointer } from "../../../foundation/pointer/index.js";
+import { tryParsePointer } from "../../../foundation/pointer/index.js";
+import { getArrayElement, getDef, getObjectShape } from "./zod.js";
+
+export interface DiscriminatedUnionInfo {
+  discriminator: string;
+  allowed: unknown[];
+}
+
+interface SchemaPointerCache {
+  schemas: Map<string, z.ZodType | null>;
+}
+
+const schemaPointerCaches = new WeakMap<object, SchemaPointerCache>();
+
+export function getDiscriminatedUnionInfo(schema: z.ZodType): DiscriminatedUnionInfo | null {
+  const def = getDef(schema);
+  if (def.discriminator && Array.isArray(def.options)) {
+    return {
+      discriminator: def.discriminator,
+      allowed: def.options.flatMap((option) => getDiscriminatorValues(option, def.discriminator as string)),
+    };
+  }
+  return null;
+}
+
+export function schemaAtPointer(schema: z.ZodType, pointer: Pointer, mode: "value" | "insert" = "value"): z.ZodType | null {
+  let cache = schemaPointerCaches.get(schema as object);
+  if (!cache) {
+    cache = { schemas: new Map() };
+    schemaPointerCaches.set(schema as object, cache);
+  }
+  const cacheKey = `${mode}\0${pointer}`;
+  if (cache.schemas.has(cacheKey)) return cache.schemas.get(cacheKey)!;
+
+  const result = schemaAtPointerUncached(schema, pointer, mode);
+  cache.schemas.set(cacheKey, result);
+  return result;
+}
+
+function schemaAtPointerUncached(schema: z.ZodType, pointer: Pointer, mode: "value" | "insert"): z.ZodType | null {
+  let current: z.ZodType | null = schema;
+  const segments = tryParsePointer(pointer);
+  if (segments === null) return null;
+
+  for (let i = 0; i < segments.length && current; i += 1) {
+    const segment = segments[i];
+    if (segment === undefined) return null;
+    const arrayElement = getArrayElement(current);
+    if (arrayElement && isArrayElementSegment(segment)) {
+      current = arrayElement;
+      continue;
+    }
+
+    const shape = getObjectShape(current);
+    if (shape && segment in shape) {
+      current = shape[segment] ?? null;
+      continue;
+    }
+
+    const def = getDef(current);
+    if (def.type === "record" && def.valueType) {
+      current = def.valueType;
+      continue;
+    }
+
+    return null;
+  }
+
+  if (mode === "insert") {
+    return current ? (getArrayElement(current) ?? current) : null;
+  }
+  return current;
+}
+
+function isArrayElementSegment(segment: string): boolean {
+  if (segment === "-") return true;
+  if (segment.length === 0) return false;
+  for (let index = 0; index < segment.length; index += 1) {
+    const code = segment.charCodeAt(index);
+    if (code < 48 || code > 57) return false;
+  }
+  return true;
+}
+
+function getDiscriminatorValues(schema: z.ZodType, discriminator: string): unknown[] {
+  const shape = getObjectShape(schema);
+  const discriminatorSchema = shape?.[discriminator];
+  if (!discriminatorSchema) return [];
+
+  const def = getDef(discriminatorSchema);
+  if (Array.isArray(def.values)) return def.values;
+  if ("value" in def) return [(def as { value: unknown }).value];
+  return [];
+}

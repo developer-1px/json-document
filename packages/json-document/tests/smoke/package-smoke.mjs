@@ -28,49 +28,13 @@ const rootPublicExports = [...rootValueExports, ...rootTypeExports];
 const reactPublicExports = [...reactValueExports, ...reactTypeExports];
 const rootTypeOnlyExports = [...rootTypeExports];
 const reactTypeOnlyExports = [...reactTypeExports];
-const publicSubpathContracts = [
-  {
-    label: "patch",
-    specifier: "@interactive-os/json-document/patch",
-    declaration: "patch.d.ts",
-    valueExports: publicContract.patch.values,
-    typeExports: publicContract.patch.types,
-  },
-  {
-    label: "pointer",
-    specifier: "@interactive-os/json-document/pointer",
-    declaration: "pointer.d.ts",
-    valueExports: publicContract.pointer.values,
-    typeExports: publicContract.pointer.types,
-  },
-  {
-    label: "selection",
-    specifier: "@interactive-os/json-document/selection",
-    declaration: "selection.d.ts",
-    valueExports: publicContract.selection.values,
-    typeExports: publicContract.selection.types,
-  },
-  {
-    label: "textSurface",
-    specifier: "@interactive-os/json-document/text-surface",
-    declaration: "text-surface.d.ts",
-    valueExports: publicContract.textSurface.values,
-    typeExports: publicContract.textSurface.types,
-  },
-  {
-    label: "schema",
-    specifier: "@interactive-os/json-document/schema",
-    declaration: "schema.d.ts",
-    valueExports: publicContract.schema.values,
-    typeExports: publicContract.schema.types,
-  },
-  {
-    label: "clipboard",
-    specifier: "@interactive-os/json-document/clipboard",
-    declaration: "clipboard.d.ts",
-    valueExports: publicContract.clipboard.values,
-    typeExports: publicContract.clipboard.types,
-  },
+const removedPublicSubpaths = [
+  "@interactive-os/json-document/patch",
+  "@interactive-os/json-document/pointer",
+  "@interactive-os/json-document/selection",
+  "@interactive-os/json-document/text-surface",
+  "@interactive-os/json-document/schema",
+  "@interactive-os/json-document/clipboard",
 ];
 
 function run(command, args, cwd) {
@@ -686,31 +650,17 @@ try {
   await writeFile(
     join(workspace, "subpath-smoke.mjs"),
     [
-      'import * as z from "zod";',
-      `const contracts = ${JSON.stringify(publicSubpathContracts.map(({ label, specifier, valueExports, typeExports }) => ({ label, specifier, valueExports, typeExports })))};`,
-      'for (const contract of contracts) {',
-      '  const runtime = await import(contract.specifier);',
-      '  const actual = Object.keys(runtime).sort();',
-      '  if (JSON.stringify(actual) !== JSON.stringify([...contract.valueExports].sort())) {',
-      '    throw new Error(`${contract.label} runtime exports mismatch: ${actual.join(", ")}`);',
+      `const removedPublicSubpaths = ${JSON.stringify(removedPublicSubpaths)};`,
+      'for (const specifier of removedPublicSubpaths) {',
+      '  try {',
+      '    await import(specifier);',
+      '  } catch (error) {',
+      '    const output = `${error?.code ?? ""}\\n${error?.message ?? ""}`;',
+      '    if (!output.includes("ERR_PACKAGE_PATH_NOT_EXPORTED")) throw error;',
+      '    continue;',
       '  }',
-      '  for (const name of contract.valueExports) {',
-      '    if (!(name in runtime)) throw new Error(`${contract.label}.${name} runtime export missing`);',
-      '  }',
-      '  for (const name of contract.typeExports) {',
-      '    if (name in runtime) throw new Error(`${contract.label}.${name} type-only export leaked at runtime`);',
-      '  }',
+      '  throw new Error(`${specifier} unexpectedly resolved`);',
       '}',
-      'const patch = await import("@interactive-os/json-document/patch");',
-      'const pointer = await import("@interactive-os/json-document/pointer");',
-      'const textSurface = await import("@interactive-os/json-document/text-surface");',
-      'const schema = z.object({ name: z.string(), items: z.array(z.string()) });',
-      'const state = { name: "ok", items: [] };',
-      'const patched = patch.applyPatch(schema, state, [{ op: "replace", path: "/name", value: "next" }]);',
-      'if (!patched.result.ok || patched.state.name !== "next") throw new Error("patch subpath failed");',
-      'if (pointer.buildPointer(["items", 0]) !== "/items/0") throw new Error("pointer subpath failed");',
-      'if (typeof pointer.trackPointer !== "function") throw new Error("pointer trackPointer export failed");',
-      'if (typeof textSurface.textSurfaceFragment !== "function") throw new Error("text-surface subpath failed");',
     ].join("\n"),
   );
   await writeFile(
@@ -720,24 +670,14 @@ try {
       namedImportLine(rootTypeExports, "@interactive-os/json-document", { prefix: "RootType_", typeOnly: true }),
       namedImportLine(reactValueExports, "@interactive-os/json-document/react", { prefix: "ReactValue_" }),
       namedImportLine(reactTypeExports, "@interactive-os/json-document/react", { prefix: "ReactType_", typeOnly: true }),
-      ...publicSubpathContracts.flatMap((entry) => [
-        namedImportLine(entry.valueExports, entry.specifier, { prefix: `${entry.label}Value_` }),
-        namedImportLine(entry.typeExports, entry.specifier, { prefix: `${entry.label}Type_`, typeOnly: true }),
-      ]),
       "const rootValues = {",
       ...rootValueExports.map((name) => `  ${name}: RootValue_${name},`),
       "};",
       "const reactValues = {",
       ...reactValueExports.map((name) => `  ${name}: ReactValue_${name},`),
       "};",
-      ...publicSubpathContracts.flatMap((entry) => [
-        `const ${entry.label}Values = {`,
-        ...entry.valueExports.map((name) => `  ${name}: ${entry.label}Value_${name},`),
-        "};",
-      ]),
       "rootValues satisfies Record<string, unknown>;",
       "reactValues satisfies Record<string, unknown>;",
-      ...publicSubpathContracts.map((entry) => `${entry.label}Values satisfies Record<string, unknown>;`),
     ].filter((line) => line !== null).join("\n"),
   );
   await writeFile(
@@ -833,22 +773,15 @@ try {
   );
   await assertInstalledTextFiles(installedPackageRoot);
   assertDeclarationExports(
-    await readFile(join(installedPackageRoot, "dist", "index.d.ts"), "utf8"),
+    await readFile(join(installedPackageRoot, packageJson.exports["."].types.replace(/^\.\//, "")), "utf8"),
     rootPublicExports,
     "root",
   );
   assertDeclarationExports(
-    await readFile(join(installedPackageRoot, "dist", "react.d.ts"), "utf8"),
+    await readFile(join(installedPackageRoot, packageJson.exports["./react"].types.replace(/^\.\//, "")), "utf8"),
     reactPublicExports,
     "react",
   );
-  for (const entry of publicSubpathContracts) {
-    assertDeclarationExports(
-      await readFile(join(installedPackageRoot, "dist", entry.declaration), "utf8"),
-      [...entry.valueExports, ...entry.typeExports],
-      entry.label,
-    );
-  }
   await assertDeclarationSpecifiers(installedPackageRoot);
   await assertRuntimeSpecifiers(installedPackageRoot);
 

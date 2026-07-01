@@ -9,7 +9,7 @@ import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/con
 import { removeSourcesPatch } from "../../foundation/patch/source.js";
 import type { Pointer } from "../../foundation/pointer/index.js";
 import { readAt, tryParsePointer } from "../../foundation/pointer/index.js";
-import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/patch.js";
+import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/mutation/patch.js";
 import type { ClipboardSource } from "./copy.js";
 
 export interface CutOk<T> {

@@ -2,13 +2,13 @@ import type * as z from "zod";
 import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/contract.js";
 import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/trusted.js";
 import { validateOperationShape } from "../../../foundation/patch/apply.js";
-import { cachedSchemaAtPointer } from "../shared/schema.js";
-import { acceptsKnownJsonValue } from "../shared/knownJson.js";
+import { cachedSchemaAtPointer } from "../model/schema.js";
+import { acceptsKnownJsonValue } from "../model/knownJson.js";
 import {
   haveIndependentReplacePaths,
   planIndependentReplacePaths as planIndependentReplacePathsRaw,
 } from "../array/path.js";
-import { failedLocalSchemaValidation, okLocalSchemaValidation } from "../shared/result.js";
+import { failedLocalSchemaValidation, okLocalSchemaValidation } from "../model/result.js";
 import {
   applySingleArrayFieldReplace,
   applyKnownJsonSameArrayElementReplacePatchWithLocalSchemaValidation,
@@ -21,7 +21,7 @@ import {
 import {
   evaluateLocalSchemaValidationValueValidationPlan,
   planLocalSchemaValidationValueValidation,
-} from "../shared/value.js";
+} from "../model/value.js";
 
 export function applyReplacePatchWithLocalSchemaValidation<S extends z.ZodType>(
   schema: S,
