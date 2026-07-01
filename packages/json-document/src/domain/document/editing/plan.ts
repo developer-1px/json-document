@@ -1,7 +1,7 @@
 import { query as jsonpathQuery } from "../../../foundation/jsonpath/index.js";
-import { JSONPathSyntaxError } from "../../../foundation/jsonpath/tokenize.js";
-import type { JSONPatchOperation } from "../../../foundation/patch/contract.js";
-import { removeSourcesPatch } from "../../../foundation/patch/source.js";
+import { JSONPathSyntaxError } from "../../../foundation/jsonpath/index.js";
+import type { JSONPatchOperation } from "../../../foundation/patch/index.js";
+import { removeSourcesPatch } from "../../../foundation/patch/index.js";
 import { appendSegment, buildPointer, readAt, tryParsePointer, type Pointer } from "../../../foundation/pointer/index.js";
 import {
   primaryPointer,

@@ -1,6 +1,6 @@
 import type * as z from "zod";
 import { readAt, tryParsePointer, type Pointer } from "../../../foundation/pointer/index.js";
-import type { ApplyResult, JSONPatchOperation, JSONResult } from "../../../foundation/patch/contract.js";
+import type { ApplyResult, JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
 import { isPlainStructuralSchema } from "../../schema/model/schema.js";
 import {
   paste,

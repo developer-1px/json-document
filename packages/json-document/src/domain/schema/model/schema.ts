@@ -1,6 +1,6 @@
 import type * as z from "zod";
 import { parsePointer, type Pointer } from "../../../foundation/pointer/index.js";
-import { numericSegment } from "../../../foundation/patch/path.js";
+import { numericSegment } from "../../../foundation/patch/index.js";
 import { schemaAtPointer } from "../inspection/introspection.js";
 import { isJsonPrimitive, isPlainStringKeySchema } from "./knownJson.js";
 import { getArrayElement, getDef, getObjectShape } from "../inspection/zod.js";

@@ -1,5 +1,5 @@
-import { cloneJson } from "../../foundation/json/clone.js";
-import type { JSONPatchOperation } from "../../foundation/patch/contract.js";
+import { cloneJson } from "../../foundation/json/index.js";
+import type { JSONPatchOperation } from "../../foundation/patch/index.js";
 import {
   escapeSegment,
   readAt,

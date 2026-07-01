@@ -1,7 +1,7 @@
 import type * as z from "zod";
-import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/contract.js";
-import { validateOperationShape } from "../../../foundation/patch/apply.js";
-import { replaceValueAtSegments } from "../../../foundation/patch/replaceValue.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
+import { validateOperationShape } from "../../../foundation/patch/index.js";
+import { replaceValueAtSegments } from "../../../foundation/patch/index.js";
 import { parsePointer, type Pointer } from "../../../foundation/pointer/index.js";
 import {
   arrayElementSchemaAtParent,

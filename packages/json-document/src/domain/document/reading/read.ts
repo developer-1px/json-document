@@ -1,6 +1,6 @@
 import type * as z from "zod";
 import { query as jsonpathQuery } from "../../../foundation/jsonpath/index.js";
-import { JSONPathSyntaxError } from "../../../foundation/jsonpath/tokenize.js";
+import { JSONPathSyntaxError } from "../../../foundation/jsonpath/index.js";
 import { appendSegment, parsePointer, readAt, type Pointer } from "../../../foundation/pointer/index.js";
 import { schemaAtPointer } from "../../schema/inspection/introspection.js";
 import { getDef } from "../../schema/inspection/zod.js";

@@ -1,5 +1,5 @@
-import { cloneJson } from "../../foundation/json/clone.js";
-import { jsonEqual } from "../../foundation/json/equal.js";
+import { cloneJson } from "../../foundation/json/index.js";
+import { jsonEqual } from "../../foundation/json/index.js";
 import {
   escapeSegment,
   readAt,

@@ -1,5 +1,5 @@
-import { computeInverses } from "../../../foundation/patch/inverse.js";
-import type { JSONPatchOperation } from "../../../foundation/patch/contract.js";
+import { computeInverses } from "../../../foundation/patch/index.js";
+import type { JSONPatchOperation } from "../../../foundation/patch/index.js";
 import { readAt, tryParsePointer } from "../../../foundation/pointer/index.js";
 import type { HistoryTransactionOptions, JSONChangeMetadata } from "./metadata.js";
 import type { SelectionSnap } from "../../selection/snap.js";

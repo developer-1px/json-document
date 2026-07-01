@@ -1,7 +1,7 @@
 import type * as z from "zod";
-import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/contract.js";
-import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/trusted.js";
-import { validateOperationShape } from "../../../foundation/patch/apply.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
+import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/index.js";
+import { validateOperationShape } from "../../../foundation/patch/index.js";
 import { cachedSchemaAtPointer } from "../model/schema.js";
 import { acceptsKnownJsonValue } from "../model/knownJson.js";
 import {

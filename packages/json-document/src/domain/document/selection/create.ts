@@ -3,7 +3,7 @@
 
 import type { JSONStateOps } from "../state/ops.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
-import { jsonEqual } from "../../../foundation/json/equal.js";
+import { jsonEqual } from "../../../foundation/json/index.js";
 import {
   anchorPointer,
   caretPoint,

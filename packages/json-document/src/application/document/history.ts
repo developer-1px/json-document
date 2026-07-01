@@ -3,5 +3,5 @@ export type {
   JSONChangeMetadata,
   JSONDocumentCommitOptions,
   JSONDocumentSelectionTarget,
-} from "../../domain/document/history/metadata.js";
-export type { JSONDocumentHistory } from "../../domain/document/history/undoRedo.js";
+} from "../../domain/document/index.js";
+export type { JSONDocumentHistory } from "../../domain/document/index.js";

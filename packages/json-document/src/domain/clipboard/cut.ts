@@ -3,10 +3,10 @@
 // payload + remove 가 atomic. patchPreflight 거부 시 둘 다 안 일어남 — history 오염 0.
 
 import type * as z from "zod";
-import { jsonSerializableError } from "../../foundation/json/serializable.js";
-import { cloneTrustedPlainJson } from "../../foundation/json/trustedClone.js";
-import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/contract.js";
-import { removeSourcesPatch } from "../../foundation/patch/source.js";
+import { jsonSerializableError } from "../../foundation/json/index.js";
+import { cloneTrustedPlainJson } from "../../foundation/json/index.js";
+import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/index.js";
+import { removeSourcesPatch } from "../../foundation/patch/index.js";
 import type { Pointer } from "../../foundation/pointer/index.js";
 import { readAt, tryParsePointer } from "../../foundation/pointer/index.js";
 import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/mutation/patch.js";

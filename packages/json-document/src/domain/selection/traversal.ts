@@ -1,5 +1,5 @@
 import { queryMatches } from "../../foundation/jsonpath/index.js";
-import { JSONPathSyntaxError } from "../../foundation/jsonpath/tokenize.js";
+import { JSONPathSyntaxError } from "../../foundation/jsonpath/index.js";
 import { appendSegment, readAt, tryParsePointer, type Pointer } from "../../foundation/pointer/index.js";
 import { clonePoint, pointPath, samePoint } from "./point.js";
 import type { SelectionPoint } from "./point.js";

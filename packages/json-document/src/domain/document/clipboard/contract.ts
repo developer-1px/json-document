@@ -8,7 +8,7 @@ import type {
   PasteDiscriminatorMismatch as DomainPasteDiscriminatorMismatch,
   PasteError as DomainPasteError,
 } from "../../clipboard/paste.js";
-import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/contract.js";
+import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import type {
   JSONDocumentPasteOptions,

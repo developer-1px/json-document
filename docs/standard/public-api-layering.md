@@ -33,7 +33,21 @@ src/
 application -> domain -> foundation
 ```
 
-`application -> foundation`처럼 레이어를 건너뛰는 import는 금지한다. 이 규칙은 `npm run layers:check -w @interactive-os/json-document`로 검증한다.
+`application -> foundation`처럼 레이어를 건너뛰는 import는 금지한다. 이 규칙은 방향성 벽이다.
+
+방향성 벽만으로는 추상화 벽이 완전히 봉인되지 않는다. 상위 레이어가 인접 하위 레이어 안의 구현 파일을 직접 import하면, 방향은 맞아도 하위 레이어의 파일 구조와 내부 어휘가 새어 나온다. 그래서 레이어를 crossing할 때는 하위 레이어가 명시한 seam만 통과한다.
+
+```txt
+application -> domain/document/index
+domain -> foundation/{error,history,json,jsonpath,patch,pointer}/index
+```
+
+`npm run layers:check -w @interactive-os/json-document`는 두 가지를 함께 검증한다.
+
+- 첫 번째 path segment는 `application`, `domain`, `foundation` 중 하나다.
+- cross-layer import는 인접 하위 레이어의 명시 seam 목록에 포함되어야 한다.
+
+즉 `application`은 `domain/document/index.ts`를 통해서만 domain으로 들어간다. `domain`은 foundation concept index를 통해서만 foundation으로 들어간다. 하위 레이어 내부 파일 이동은 상위 레이어 import 변경을 요구하지 않아야 한다.
 
 ## Entrypoint
 

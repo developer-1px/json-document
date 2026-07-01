@@ -1,4 +1,4 @@
-import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/contract.js";
+import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import type { SelectionSnap } from "../../selection/snap.js";
 import { resetDocumentHistoryRuntimeState } from "../history/state.js";

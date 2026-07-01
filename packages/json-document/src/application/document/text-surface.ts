@@ -2,7 +2,7 @@ export {
   replaceTextSurfaceSelection,
   syncTextSurfaceMutation,
   textSurfaceFragment,
-} from "../../domain/document/text-surface/index.js";
+} from "../../domain/document/index.js";
 export type {
   TextSurface,
   TextSurfaceAtom,
@@ -17,4 +17,4 @@ export type {
   TextSurfaceReplaceResult,
   TextSurfaceReplacement,
   TextSurfaceSelectionRange,
-} from "../../domain/document/text-surface/index.js";
+} from "../../domain/document/index.js";

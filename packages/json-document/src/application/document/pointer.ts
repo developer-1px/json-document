@@ -12,11 +12,11 @@ export {
   withLastSegment,
   resolveSiblingRange,
   trackPointer,
-} from "../../domain/document/pointer/index.js";
+} from "../../domain/document/index.js";
 export type {
   Pointer,
   ResolveSiblingRangeOptions,
   SiblingLocation,
   SiblingRangeErrorCode,
   SiblingRangeResult,
-} from "../../domain/document/pointer/index.js";
+} from "../../domain/document/index.js";

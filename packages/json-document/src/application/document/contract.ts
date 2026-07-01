@@ -1,7 +1,7 @@
-import type { CapabilityResult } from "../../domain/document/capabilities/result.js";
-import type { JSONPatchOperation, JSONResult } from "../../domain/document/patch/index.js";
-import type { Pointer } from "../../domain/document/pointer/index.js";
-import type { SelectionSource } from "../../domain/selection/read.js";
+import type { CapabilityResult } from "../../domain/document/index.js";
+import type { JSONPatchOperation, JSONResult } from "../../domain/document/index.js";
+import type { Pointer } from "../../domain/document/index.js";
+import type { SelectionSource } from "../../domain/document/index.js";
 import type {
   ClipboardCopyOptions,
   ClipboardCopyResult,
@@ -11,31 +11,31 @@ import type {
   ClipboardState,
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
-} from "../../domain/document/clipboard/contract.js";
-import type { SchemaState } from "../../domain/document/schema/state.js";
-import type { SelectionState, SelectionOptions } from "../../domain/document/selection/create.js";
-import type { JSONDocumentError } from "../../domain/document/error/index.js";
+} from "../../domain/document/index.js";
+import type { SchemaState } from "../../domain/document/index.js";
+import type { SelectionState, SelectionOptions } from "../../domain/document/index.js";
+import type { JSONDocumentError } from "../../domain/document/index.js";
 import type {
   JSONChangeMetadata,
   JSONDocumentCommitOptions,
-} from "../../domain/document/history/metadata.js";
-import type { JSONDocumentHistory } from "../../domain/document/history/undoRedo.js";
+} from "../../domain/document/index.js";
+import type { JSONDocumentHistory } from "../../domain/document/index.js";
 import type {
   JSONDocumentEditResult,
   JSONDocumentDuplicateOptions,
   JSONDocumentDuplicateResult,
-} from "../../domain/document/editing/actions.js";
+} from "../../domain/document/index.js";
 import type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,
   JSONDocumentMoveTarget,
-} from "../../domain/document/editing/target.js";
+} from "../../domain/document/index.js";
 import type {
   EntriesResult,
   QueryResult,
   ReadResult,
-} from "../../domain/document/reading/read.js";
-import type { JSONPatchInput } from "../../domain/document/state/patch.js";
+} from "../../domain/document/index.js";
+import type { JSONPatchInput } from "../../domain/document/index.js";
 
 export interface JSONDocumentOptions {
   strict?: boolean | undefined;
