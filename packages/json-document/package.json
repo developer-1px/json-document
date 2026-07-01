@@ -46,6 +46,30 @@
     "./react": {
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
+    },
+    "./patch": {
+      "types": "./dist/patch.d.ts",
+      "import": "./dist/patch.js"
+    },
+    "./pointer": {
+      "types": "./dist/pointer.d.ts",
+      "import": "./dist/pointer.js"
+    },
+    "./selection": {
+      "types": "./dist/selection.d.ts",
+      "import": "./dist/selection.js"
+    },
+    "./text-surface": {
+      "types": "./dist/text-surface.d.ts",
+      "import": "./dist/text-surface.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.js"
+    },
+    "./clipboard": {
+      "types": "./dist/clipboard.d.ts",
+      "import": "./dist/clipboard.js"
     }
   },
   "scripts": {

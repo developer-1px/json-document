@@ -144,5 +144,149 @@
       "useJSONDocument"
     ],
     "types": []
+  },
+  "patch": {
+    "values": [
+      "applyOperation",
+      "applyPatch",
+      "applyPatchToTrustedState"
+    ],
+    "types": [
+      "JSONPatchInput",
+      "JSONPatchOperation",
+      "JSONResult"
+    ]
+  },
+  "pointer": {
+    "values": [
+      "PointerSyntaxError",
+      "appendSegment",
+      "buildPointer",
+      "escapeSegment",
+      "lastSegment",
+      "lastSegmentIndex",
+      "parentPointer",
+      "parsePointer",
+      "resolveSiblingRange",
+      "trackPointer",
+      "tryParsePointer",
+      "unescapeSegment",
+      "withLastSegment"
+    ],
+    "types": [
+      "Pointer",
+      "ResolveSiblingRangeOptions",
+      "SiblingLocation",
+      "SiblingRangeErrorCode",
+      "SiblingRangeResult"
+    ]
+  },
+  "selection": {
+    "values": [],
+    "types": [
+      "DeleteSelectionTextResult",
+      "ReplaceSelectionTextResult",
+      "SelectionAffinity",
+      "SelectionContext",
+      "SelectionCursorDirection",
+      "SelectionCursorErrorCode",
+      "SelectionCursorOptions",
+      "SelectionCursorResult",
+      "SelectionCursorTarget",
+      "SelectionDirection",
+      "SelectionEdge",
+      "SelectionMode",
+      "SelectionOptions",
+      "SelectionOrderErrorCode",
+      "SelectionOrderOptions",
+      "SelectionOrderedRange",
+      "SelectionOrderedRangeEntry",
+      "SelectionPoint",
+      "SelectionPointObject",
+      "SelectionPointOrderResult",
+      "SelectionPointerSpan",
+      "SelectionPointerSpansResult",
+      "SelectionRange",
+      "SelectionRangeInput",
+      "SelectionRangeOrderResult",
+      "SelectionRangesOrderResult",
+      "SelectionScopeErrorCode",
+      "SelectionScopeOptions",
+      "SelectionScopeResult",
+      "SelectionScopeTarget",
+      "SelectionSnap",
+      "SelectionSource",
+      "SelectionSpanOptions",
+      "SelectionState",
+      "SelectionTextDeleteDirection",
+      "SelectionTextDeleteOptions",
+      "SelectionTextEdit",
+      "SelectionTextEditErrorCode",
+      "SelectionTextEditOptions",
+      "SelectionTextEditsResult",
+      "SelectionType"
+    ]
+  },
+  "textSurface": {
+    "values": [
+      "replaceTextSurfaceSelection",
+      "syncTextSurfaceMutation",
+      "textSurfaceFragment"
+    ],
+    "types": [
+      "TextSurface",
+      "TextSurfaceAtom",
+      "TextSurfaceError",
+      "TextSurfaceErrorCode",
+      "TextSurfaceFragment",
+      "TextSurfaceFragmentResult",
+      "TextSurfaceMutationRange",
+      "TextSurfaceMutationResult",
+      "TextSurfaceRange",
+      "TextSurfaceReplaceOptions",
+      "TextSurfaceReplaceResult",
+      "TextSurfaceReplacement",
+      "TextSurfaceSelectionRange"
+    ]
+  },
+  "schema": {
+    "values": [],
+    "types": [
+      "SchemaDescription",
+      "SchemaDescriptionResult",
+      "SchemaErrorCode",
+      "SchemaErrorResult",
+      "SchemaKind",
+      "SchemaKindResult",
+      "SchemaPathMode",
+      "SchemaQueryResult",
+      "SchemaState"
+    ]
+  },
+  "clipboard": {
+    "values": [],
+    "types": [
+      "ClipboardCopyError",
+      "ClipboardCopyOk",
+      "ClipboardCopyOptions",
+      "ClipboardCopyResult",
+      "ClipboardCutError",
+      "ClipboardCutOk",
+      "ClipboardCutOptions",
+      "ClipboardCutResult",
+      "ClipboardEmpty",
+      "ClipboardMutationOk",
+      "ClipboardPasteDiscriminatorMismatch",
+      "ClipboardPasteError",
+      "ClipboardPasteResult",
+      "ClipboardReadOk",
+      "ClipboardReadOptions",
+      "ClipboardReadResult",
+      "ClipboardSource",
+      "ClipboardState",
+      "ClipboardWriteOptions",
+      "JSONDocumentPasteOptions",
+      "JSONDocumentPasteTarget"
+    ]
   }
 }
