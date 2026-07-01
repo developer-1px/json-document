@@ -5,7 +5,6 @@ import { createDocumentCapabilities } from "./capabilities/create.js";
 import { createDocumentEditActions } from "./editing/actions.js";
 import { createJSONState, type TrustedJSONStateOps } from "./state/json.js";
 import { createDocumentStateOps } from "./state/ops.js";
-import { createDocumentPatchRuntimeState } from "./state/runtime.js";
 import { createSchemaState } from "./schema/state.js";
 import type { SelectionOptions, SelectionState } from "./selection/create.js";
 import { createDocumentSelectionRuntime } from "./selection/runtime.js";
@@ -41,8 +40,8 @@ import type { JSONDocumentHistory } from "./history/undoRedo.js";
 import type {
   JSONPatchOperation,
   JSONResult,
-} from "./patch/index.js";
-import type { Pointer } from "./pointer/index.js";
+} from "../../foundation/patch/index.js";
+import type { Pointer } from "../../foundation/pointer/index.js";
 import type {
   EntriesResult,
   QueryResult,
@@ -50,10 +49,9 @@ import type {
 } from "./reading/read.js";
 import { createDocumentRead } from "./reading/read.js";
 import type { SchemaState } from "./schema/state.js";
-import { createDocumentMutationRuntime, type JSONPatchInput } from "./state/patch.js";
-import { createDocumentHistoryRuntime } from "./history/undoRedo.js";
-import { createDocumentHistoryRuntimeState } from "./history/state.js";
-import type { JSONDocumentError } from "./error/index.js";
+import { createDocumentMutationRuntime, createDocumentPatchRuntimeState, type JSONPatchInput } from "./state/patch.js";
+import { createDocumentHistoryRuntime, createDocumentHistoryRuntimeState } from "./history/undoRedo.js";
+import type { JSONDocumentError } from "../../foundation/error/index.js";
 import type { SelectionSource } from "../selection/read.js";
 
 export interface DocumentRuntimeOptions {
@@ -64,8 +62,6 @@ export interface DocumentRuntimeOptions {
   selection?: boolean | SelectionOptions;
   onChange?: () => void;
 }
-
-export type DocumentCapabilityResult = CapabilityResult;
 
 export interface DocumentRuntime<T> {
   readonly value: T;
@@ -89,8 +85,8 @@ export interface DocumentRuntime<T> {
   copy(source?: SelectionSource, options?: ClipboardCopyOptions): ClipboardCopyResult;
   cut(source?: SelectionSource, options?: ClipboardCutOptions): ClipboardCutResult<T>;
   paste(target?: JSONDocumentPasteTarget, options?: JSONDocumentPasteOptions): ClipboardPasteResult<T>;
-  undo(): DocumentCapabilityResult;
-  redo(): DocumentCapabilityResult;
+  undo(): CapabilityResult;
+  redo(): CapabilityResult;
   load(value: unknown, options?: { preserveHistory?: boolean }): JSONResult;
   reset(value?: unknown): JSONResult;
   subscribe(listener: (
@@ -101,22 +97,22 @@ export interface DocumentRuntime<T> {
   exists(path: Pointer): boolean;
   query(jsonpath: string): QueryResult;
   entries(path: Pointer): EntriesResult;
-  canPatch(operations: JSONPatchInput): DocumentCapabilityResult;
-  canFind(jsonpath: string): DocumentCapabilityResult;
-  canInsert(value: unknown): DocumentCapabilityResult;
-  canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): DocumentCapabilityResult;
-  canReplace(value: unknown): DocumentCapabilityResult;
-  canReplace(path: Pointer, value: unknown): DocumentCapabilityResult;
-  canDelete(source?: SelectionSource): DocumentCapabilityResult;
-  canMove(target: JSONDocumentMoveTarget): DocumentCapabilityResult;
-  canMove(source: Pointer, target: JSONDocumentMoveTarget): DocumentCapabilityResult;
-  canDuplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): DocumentCapabilityResult;
-  canDuplicate(options?: JSONDocumentDuplicateOptions): DocumentCapabilityResult;
-  canCopy(source?: SelectionSource): DocumentCapabilityResult;
-  canCut(source?: SelectionSource): DocumentCapabilityResult;
-  canPaste(target?: JSONDocumentPasteTarget, options?: JSONDocumentPasteOptions): DocumentCapabilityResult;
-  canUndo(): DocumentCapabilityResult;
-  canRedo(): DocumentCapabilityResult;
+  canPatch(operations: JSONPatchInput): CapabilityResult;
+  canFind(jsonpath: string): CapabilityResult;
+  canInsert(value: unknown): CapabilityResult;
+  canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): CapabilityResult;
+  canReplace(value: unknown): CapabilityResult;
+  canReplace(path: Pointer, value: unknown): CapabilityResult;
+  canDelete(source?: SelectionSource): CapabilityResult;
+  canMove(target: JSONDocumentMoveTarget): CapabilityResult;
+  canMove(source: Pointer, target: JSONDocumentMoveTarget): CapabilityResult;
+  canDuplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): CapabilityResult;
+  canDuplicate(options?: JSONDocumentDuplicateOptions): CapabilityResult;
+  canCopy(source?: SelectionSource): CapabilityResult;
+  canCut(source?: SelectionSource): CapabilityResult;
+  canPaste(target?: JSONDocumentPasteTarget, options?: JSONDocumentPasteOptions): CapabilityResult;
+  canUndo(): CapabilityResult;
+  canRedo(): CapabilityResult;
 }
 
 export function createDocumentRuntime<S extends z.ZodType>(

@@ -1,7 +1,3 @@
-// json-document — application document facade.
-// Lower-layer helpers are exposed through application-owned surface modules so
-// package consumers do not import domain/foundation paths directly.
-
 export { createJSONDocument } from "./create.js";
 export type {
   JSONCapabilityResult,
@@ -12,16 +8,16 @@ export type {
   JSONDocumentSchemaInput,
   JSONDocumentSchemaLike,
   JSONDocumentSchemaOutput,
-} from "./schema-type.js";
+} from "./create.js";
 
-export { JSONDocumentError } from "./error.js";
+export { JSONDocumentError } from "../../domain/document/index.js";
 export type {
   HistoryTransactionOptions,
   JSONChangeMetadata,
   JSONDocumentCommitOptions,
   JSONDocumentHistory,
   JSONDocumentSelectionTarget,
-} from "./history.js";
+} from "../../domain/document/index.js";
 export type {
   JSONDocumentDuplicateError,
   JSONDocumentDuplicateOptions,
@@ -31,7 +27,7 @@ export type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,
   JSONDocumentMoveTarget,
-} from "./editing.js";
+} from "../../domain/document/index.js";
 export type {
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
@@ -54,14 +50,14 @@ export type {
   ClipboardState,
   ClipboardWriteOptions,
   ClipboardSource,
-} from "./clipboard.js";
+} from "../../domain/document/index.js";
 export type {
   EntriesResult,
   EntryKind,
   QueryResult,
   ReadEntry,
   ReadResult,
-} from "./reading.js";
+} from "../../domain/document/index.js";
 export type {
   SchemaDescription,
   SchemaDescriptionResult,
@@ -72,7 +68,7 @@ export type {
   SchemaPathMode,
   SchemaQueryResult,
   SchemaState,
-} from "./schema.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionOptions,
   SelectionState,
@@ -115,17 +111,17 @@ export type {
   SelectionTextEditErrorCode,
   SelectionTextEditOptions,
   SelectionTextEditsResult,
-} from "./selection.js";
+} from "../../domain/document/index.js";
 export {
   applyOperation,
   applyPatch,
   applyPatchToTrustedState,
-} from "./patch.js";
+} from "../../domain/document/index.js";
 export type {
   JSONPatchInput,
   JSONPatchOperation,
   JSONResult,
-} from "./patch.js";
+} from "../../domain/document/index.js";
 export {
   parsePointer,
   tryParsePointer,
@@ -140,19 +136,19 @@ export {
   withLastSegment,
   resolveSiblingRange,
   trackPointer,
-} from "./pointer.js";
+} from "../../domain/document/index.js";
 export type {
   Pointer,
   ResolveSiblingRangeOptions,
   SiblingLocation,
   SiblingRangeErrorCode,
   SiblingRangeResult,
-} from "./pointer.js";
+} from "../../domain/document/index.js";
 export {
   replaceTextSurfaceSelection,
   syncTextSurfaceMutation,
   textSurfaceFragment,
-} from "./text-surface.js";
+} from "../../domain/document/index.js";
 export type {
   TextSurface,
   TextSurfaceAtom,
@@ -167,4 +163,4 @@ export type {
   TextSurfaceReplaceResult,
   TextSurfaceReplacement,
   TextSurfaceSelectionRange,
-} from "./text-surface.js";
+} from "../../domain/document/index.js";

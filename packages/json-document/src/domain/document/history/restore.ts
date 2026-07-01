@@ -1,9 +1,8 @@
 import { computeInverses } from "../../../foundation/patch/index.js";
 import type { JSONPatchOperation } from "../../../foundation/patch/index.js";
 import { readAt, tryParsePointer } from "../../../foundation/pointer/index.js";
-import type { HistoryTransactionOptions, JSONChangeMetadata } from "./metadata.js";
+import type { DocumentHistoryEntry, HistoryTransactionOptions, JSONChangeMetadata } from "./metadata.js";
 import type { SelectionSnap } from "../../selection/snap.js";
-import type { DocumentHistoryEntry } from "./entry.js";
 import { compactHistoryMetadata, mergeRepeatedReplaceTransactionMetadata, planCompactedRepeatedReplaceHistory } from "./metadata.js";
 
 const ROOT_BULK_HISTORY_SNAPSHOT_THRESHOLD = 512;

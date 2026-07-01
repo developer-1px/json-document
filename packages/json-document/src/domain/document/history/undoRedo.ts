@@ -2,27 +2,46 @@ import {
   backEntry,
   canRedoMutable,
   canUndoMutable,
+  emptyMutableHistory,
   forwardEntry,
   historyDepth,
   moveBack,
   moveForward,
   redoDepth,
+  type MutableHistoryStack,
 } from "../../../foundation/history/index.js";
 import {
+  type DocumentHistoryEntry,
+  type HistoryTransactionOptions,
   planMergedDocumentHistoryEntry,
 } from "./metadata.js";
 import {
   planDocumentHistoryRestore,
 } from "./restore.js";
 import type {
-  DocumentHistoryEntry,
-} from "./entry.js";
-import type { HistoryTransactionOptions } from "./metadata.js";
-import type { DocumentHistoryRuntimeState } from "./state.js";
-import type {
   TrustedJSONStateOps,
 } from "../state/json.js";
 import type { SelectionRuntimeAccess } from "../selection/runtime.js";
+
+export interface DocumentHistoryRuntimeState {
+  stack: MutableHistoryStack<DocumentHistoryEntry>;
+  isRestoring: boolean;
+  activeHistoryMetadata: HistoryTransactionOptions | undefined;
+  activeTransactionStartDepth: number | undefined;
+}
+
+export function createDocumentHistoryRuntimeState(): DocumentHistoryRuntimeState {
+  return {
+    stack: emptyMutableHistory(),
+    isRestoring: false,
+    activeHistoryMetadata: undefined,
+    activeTransactionStartDepth: undefined,
+  };
+}
+
+export function resetDocumentHistoryRuntimeState(state: DocumentHistoryRuntimeState): void {
+  state.stack = emptyMutableHistory();
+}
 
 export interface JSONDocumentHistory {
   readonly canUndo: boolean;
