@@ -6,19 +6,33 @@
 import 표면
 |-- json-document
 |   |-- createJSONDocument
-|   |-- applyPatch / JSON Pointer helper
-|   `-- public type
+|   |-- JSONDocument / JSONDocumentOptions
+|   `-- doc.* facade
 `-- @interactive-os/json-document/react
     `-- useJSONDocument
 ```
 
 ## 기준
 
-- 공개 import는 `@interactive-os/json-document`와 `@interactive-os/json-document/react`입니다.
+- 1차 core 공개 import는 `@interactive-os/json-document`와 `@interactive-os/json-document/react`입니다.
+- JSON Patch, JSON Pointer, selection, text surface 같은 저수준 도구는 목적별 advanced subpath에서 가져옵니다.
 - JSON Pointer는 정확한 주소입니다. patch와 selection source는 Pointer를 씁니다. `insert`, `move`, clipboard target은 Pointer 또는 공개 target object를 씁니다.
 - JSONPath는 검색입니다. `doc.find(...)`는 여러 match를 찾고 Pointer 목록을 돌려줍니다.
 - JSON Patch는 변경 형식입니다. 실행 진입점은 `doc.patch(...)`와 `doc.commit(...)`입니다.
 - `can*`는 boolean이 아니라 이유가 있는 결과입니다.
+
+Advanced import 표면은 다음처럼 나뉩니다.
+
+```txt
+@interactive-os/json-document/patch        JSON Patch helper
+@interactive-os/json-document/pointer      JSON Pointer helper, pointer tracking
+@interactive-os/json-document/selection    Selection type surface
+@interactive-os/json-document/text-surface Text editing adapter helper
+@interactive-os/json-document/schema       Schema inspection types
+@interactive-os/json-document/clipboard    Clipboard capability types
+```
+
+1.x root package는 기존 low-level helper export를 호환성 때문에 유지합니다. 새 코드와 문서는 core facade와 advanced subpath를 구분합니다.
 
 ## 시작
 
