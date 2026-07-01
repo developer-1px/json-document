@@ -2,9 +2,9 @@ export {
   applyOperation,
   applyPatch,
   applyPatchToTrustedState,
-} from "../../domain/document/patch/index.js";
+} from "../../domain/document/index.js";
 export type {
   JSONPatchInput,
   JSONPatchOperation,
   JSONResult,
-} from "../../domain/document/patch/index.js";
+} from "../../domain/document/index.js";

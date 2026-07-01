@@ -1,5 +1,5 @@
-import { cloneJson } from "../../../foundation/json/clone.js";
-import { cloneTrustedPlainJson } from "../../../foundation/json/trustedClone.js";
+import { cloneJson } from "../../../foundation/json/index.js";
+import { cloneTrustedPlainJson } from "../../../foundation/json/index.js";
 
 const hasOwn = Object.prototype.hasOwnProperty;
 const COPY_SUFFIX = "-copy";

@@ -6,6 +6,25 @@ const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const sourceRoot = join(repoRoot, "packages/json-document/src");
 const layerOrder = ["application", "domain", "foundation"];
 const layerRank = new Map(layerOrder.map((layer, index) => [layer, index]));
+const allowedLayerSeams = new Map([
+  [
+    "application->domain",
+    new Set([
+      "domain/document/index.ts",
+    ]),
+  ],
+  [
+    "domain->foundation",
+    new Set([
+      "foundation/error/index.ts",
+      "foundation/history/index.ts",
+      "foundation/json/index.ts",
+      "foundation/jsonpath/index.ts",
+      "foundation/patch/index.ts",
+      "foundation/pointer/index.ts",
+    ]),
+  ],
+]);
 const failures = [];
 
 for (const entry of readdirSync(sourceRoot, { withFileTypes: true })) {
@@ -41,6 +60,14 @@ for (const file of sourceFiles(sourceRoot)) {
     const distance = layerRank.get(toLayer) - layerRank.get(fromLayer);
     if (distance !== 1) {
       failures.push(`${relative(sourceRoot, file)} -> ${relative(sourceRoot, target)}: layers must import only adjacent lower layers`);
+      continue;
+    }
+
+    const seamKey = `${fromLayer}->${toLayer}`;
+    const allowedSeams = allowedLayerSeams.get(seamKey);
+    const targetPath = relative(sourceRoot, target);
+    if (!allowedSeams?.has(targetPath)) {
+      failures.push(`${relative(sourceRoot, file)} -> ${targetPath}: cross-layer imports must use an explicit ${toLayer} seam`);
     }
   }
 }

@@ -4,4 +4,4 @@ export type {
   QueryResult,
   ReadEntry,
   ReadResult,
-} from "../../domain/document/reading/read.js";
+} from "../../domain/document/index.js";

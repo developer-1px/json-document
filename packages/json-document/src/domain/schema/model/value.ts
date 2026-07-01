@@ -1,8 +1,8 @@
 import type * as z from "zod";
-import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/contract.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
-import { jsonSerializableError } from "../../../foundation/json/serializable.js";
-import { appendArrayIndexPath } from "../../../foundation/patch/path.js";
+import { jsonSerializableError } from "../../../foundation/json/index.js";
+import { appendArrayIndexPath } from "../../../foundation/patch/index.js";
 import { operationFailure, schemaViolation } from "./result.js";
 
 export interface PlanLocalSchemaValidationValueValidationInput {

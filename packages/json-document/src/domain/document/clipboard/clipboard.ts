@@ -1,7 +1,7 @@
 import type * as z from "zod";
 
-import { cloneTrustedPlainJson } from "../../../foundation/json/trustedClone.js";
-import type { ApplyResult, JSONPatchOperation, JSONResult } from "../../../foundation/patch/contract.js";
+import { cloneTrustedPlainJson } from "../../../foundation/json/index.js";
+import type { ApplyResult, JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import type { SelectionSource } from "../../selection/read.js";
 import {

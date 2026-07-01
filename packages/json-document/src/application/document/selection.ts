@@ -1,7 +1,7 @@
 export type {
   SelectionOptions,
   SelectionState,
-} from "../../domain/document/selection/create.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionAffinity,
   SelectionEdge,
@@ -9,19 +9,19 @@ export type {
   SelectionPointObject,
   SelectionRange,
   SelectionRangeInput,
-} from "../../domain/selection/point.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionContext,
   SelectionMode,
   SelectionSnap,
-} from "../../domain/selection/snap.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionCursorDirection,
   SelectionCursorErrorCode,
   SelectionCursorOptions,
   SelectionCursorResult,
   SelectionCursorTarget,
-} from "../../domain/selection/reducer.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionDirection,
   SelectionOrderedRange,
@@ -35,25 +35,25 @@ export type {
   SelectionScopeOptions,
   SelectionScopeResult,
   SelectionScopeTarget,
-} from "../../domain/selection/order.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionPointerSpan,
   SelectionPointerSpansResult,
   SelectionSpanOptions,
-} from "../../domain/selection/spans.js";
+} from "../../domain/document/index.js";
 export type {
   SelectionSource,
   SelectionType,
-} from "../../domain/selection/read.js";
+} from "../../domain/document/index.js";
 export type {
   ReplaceSelectionTextResult,
   SelectionTextEdit,
   SelectionTextEditErrorCode,
   SelectionTextEditOptions,
   SelectionTextEditsResult,
-} from "../../domain/selection/textEdit.js";
+} from "../../domain/document/index.js";
 export type {
   DeleteSelectionTextResult,
   SelectionTextDeleteDirection,
   SelectionTextDeleteOptions,
-} from "../../domain/selection/textDelete.js";
+} from "../../domain/document/index.js";

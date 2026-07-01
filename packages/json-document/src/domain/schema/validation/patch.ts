@@ -1,8 +1,8 @@
 import type * as z from "zod";
-import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/contract.js";
-import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/trusted.js";
-import { validateOperationShape } from "../../../foundation/patch/apply.js";
-import { applyPatchToTrustedState as applyPatchToTrustedStateCore } from "../../../foundation/patch/schema.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
+import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/index.js";
+import { validateOperationShape } from "../../../foundation/patch/index.js";
+import { applyPatchToTrustedState as applyPatchToTrustedStateCore } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import {
   applyAppendOnlyAddPatchWithLocalSchemaValidation,

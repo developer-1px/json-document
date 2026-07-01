@@ -1,4 +1,4 @@
-import { objectHasOwn } from "../../../foundation/patch/object.js";
+import { objectHasOwn } from "../../../foundation/patch/index.js";
 
 export {
   copyRootObject as copyRootRecord,
@@ -6,7 +6,7 @@ export {
   copyRootObjectKeys as copyRootRecordKeys,
   objectHasOwn,
   removedRootKeysMatchSuffix,
-} from "../../../foundation/patch/object.js";
+} from "../../../foundation/patch/index.js";
 
 export function writeObjectDataValue(target: Record<string, unknown>, key: string, value: unknown): void {
   if (key === "__proto__") {

@@ -20,4 +20,4 @@ export type {
   ClipboardSource,
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
-} from "../../domain/document/clipboard/contract.js";
+} from "../../domain/document/index.js";

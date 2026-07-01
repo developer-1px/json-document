@@ -12,11 +12,11 @@ export {
   withLastSegment,
 } from "../../../foundation/pointer/index.js";
 export type { Pointer } from "../../../foundation/pointer/index.js";
-export { resolveSiblingRange } from "../../../foundation/pointer/siblingRange.js";
+export { resolveSiblingRange } from "../../../foundation/pointer/index.js";
 export type {
   ResolveSiblingRangeOptions,
   SiblingLocation,
   SiblingRangeErrorCode,
   SiblingRangeResult,
-} from "../../../foundation/pointer/siblingRange.js";
-export { trackPointer } from "../../../foundation/patch/track.js";
+} from "../../../foundation/pointer/index.js";
+export { trackPointer } from "../../../foundation/patch/index.js";

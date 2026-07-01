@@ -2,7 +2,7 @@
 // (schema, state, payload, target, mode) → { next, patch }.
 
 import type * as z from "zod";
-import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/contract.js";
+import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/index.js";
 import { appendSegment, buildPointer, readAt, tryParsePointer, type Pointer } from "../../foundation/pointer/index.js";
 import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/mutation/patch.js";
 import { getDiscriminatedUnionInfo, schemaAtPointer } from "../schema/inspection/introspection.js";

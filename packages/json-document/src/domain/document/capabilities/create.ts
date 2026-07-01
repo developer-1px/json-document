@@ -1,7 +1,7 @@
 import type * as z from "zod";
-import { parse as parseJSONPath } from "../../../foundation/jsonpath/parse.js";
-import { JSONPathSyntaxError } from "../../../foundation/jsonpath/tokenize.js";
-import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/contract.js";
+import { parse as parseJSONPath } from "../../../foundation/jsonpath/index.js";
+import { JSONPathSyntaxError } from "../../../foundation/jsonpath/index.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import { copy } from "../../clipboard/copy.js";
 import { cut } from "../../clipboard/cut.js";

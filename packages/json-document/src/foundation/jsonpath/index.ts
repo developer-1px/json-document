@@ -16,6 +16,9 @@ import { evaluate, matchPointers } from "./evaluate.js";
 import { matchPointersForSimpleQuery } from "./simple.js";
 import type { Pointer } from "../pointer/index.js";
 import type { Match, Query } from "./ast.js";
+export { parse } from "./parse.js";
+export { JSONPathSyntaxError } from "./tokenize.js";
+export type { Match, Query } from "./ast.js";
 
 const QUERY_CACHE_LIMIT = 128;
 const queryCache = new Map<string, Query>();

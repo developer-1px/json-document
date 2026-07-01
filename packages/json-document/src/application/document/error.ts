@@ -1,2 +1,2 @@
-export { JSONDocumentError } from "../../domain/document/error/index.js";
-export type { ErrorPolicy } from "../../domain/document/error/index.js";
+export { JSONDocumentError } from "../../domain/document/index.js";
+export type { ErrorPolicy } from "../../domain/document/index.js";

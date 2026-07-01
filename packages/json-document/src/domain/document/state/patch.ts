@@ -1,5 +1,5 @@
 import type * as z from "zod";
-import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/contract.js";
+import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import { commitMutable, historyDepth } from "../../../foundation/history/index.js";
 import { duplicate as duplicateVerb } from "../../editing/duplicate.js";

@@ -4,9 +4,9 @@ export type {
   JSONDocumentDuplicateResult,
   JSONDocumentEditError,
   JSONDocumentEditResult,
-} from "../../domain/document/editing/actions.js";
+} from "../../domain/document/index.js";
 export type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,
   JSONDocumentMoveTarget,
-} from "../../domain/document/editing/target.js";
+} from "../../domain/document/index.js";

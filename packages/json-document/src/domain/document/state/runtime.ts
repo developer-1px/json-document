@@ -1,4 +1,4 @@
-import type { JSONPatchOperation } from "../../../foundation/patch/contract.js";
+import type { JSONPatchOperation } from "../../../foundation/patch/index.js";
 
 export interface DocumentPatchRuntimeState {
   lastPatch: ReadonlyArray<JSONPatchOperation>;

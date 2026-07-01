@@ -7,14 +7,14 @@ import {
   applyPatch,
   applySingleTrustedValuePatchToTrustedState,
   applyPatchToTrustedState as applyPatchToTrustedStateCore,
-} from "../../../foundation/patch/schema.js";
-import { applyAcceptedPatch } from "../../../foundation/patch/trusted.js";
+} from "../../../foundation/patch/index.js";
+import { applyAcceptedPatch } from "../../../foundation/patch/index.js";
 import type {
   ApplyResult,
   JSONPatchOperation,
   JSONResult,
-} from "../../../foundation/patch/contract.js";
-import { jsonSerializableError } from "../../../foundation/json/serializable.js";
+} from "../../../foundation/patch/index.js";
+import { jsonSerializableError } from "../../../foundation/json/index.js";
 import { handleResult, type ErrorPolicy } from "../../../foundation/error/index.js";
 import { schemaOutputIsKnownJson } from "../../schema/model/schema.js";
 import {
