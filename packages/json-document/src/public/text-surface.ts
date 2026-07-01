@@ -5,7 +5,7 @@ export {
   replaceTextSurfaceSelection,
   syncTextSurfaceMutation,
   textSurfaceFragment,
-} from "./domain/text-surface/surface.js";
+} from "../domain/text-surface/surface.js";
 export type {
   TextSurface,
   TextSurfaceAtom,
@@ -20,4 +20,4 @@ export type {
   TextSurfaceReplaceResult,
   TextSurfaceReplacement,
   TextSurfaceSelectionRange,
-} from "./domain/text-surface/surface.js";
+} from "../domain/text-surface/surface.js";

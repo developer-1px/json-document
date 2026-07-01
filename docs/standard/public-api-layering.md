@@ -7,11 +7,21 @@
 ## 레이어 지도
 
 ```txt
-App code
-└─ Document facade
-   └─ Domain capability
-      └─ Foundation primitive
+src/
+├─ public/                 package entrypoint
+├─ application/document/    document facade runtime
+│  ├─ contract.ts           document facade contract
+│  ├─ create.ts             facade composition
+│  └─ {can, clipboard, edit, history, read, schema, selection, state}/
+├─ domain/                  reusable domain capability layer
+│  └─ {clipboard, edit, schema, selection, text-surface}/
+└─ foundation/              low-level primitive layer
+   └─ {json, jsonpath, patch, pointer}/
 ```
+
+`public/`은 패키지 경계다. 앱 코드는 `public/`에서 노출한 entrypoint만 보고, entrypoint가 필요한 만큼 application/domain/foundation을 조합한다.
+`application`, `domain`, `foundation`은 추상화 레이어다. `clipboard`, `selection`, `schema` 같은 이름은 레이어가 아니라 capability slice다.
+상위 레이어가 하위 레이어를 사용할 수는 있지만, 앱 코드나 adapter가 구현 폴더를 직접 알아야 하면 추상화 벽이 새는 신호로 본다.
 
 ## Entrypoint
 

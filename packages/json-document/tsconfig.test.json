@@ -10,28 +10,28 @@
     ],
     "paths": {
       "@interactive-os/json-document": [
-        "./src/index.ts"
+        "./src/public/index.ts"
       ],
       "@interactive-os/json-document/react": [
-        "./src/react.ts"
+        "./src/public/react.ts"
       ],
       "@interactive-os/json-document/patch": [
-        "./src/patch.ts"
+        "./src/public/patch.ts"
       ],
       "@interactive-os/json-document/pointer": [
-        "./src/pointer.ts"
+        "./src/public/pointer.ts"
       ],
       "@interactive-os/json-document/selection": [
-        "./src/selection.ts"
+        "./src/public/selection.ts"
       ],
       "@interactive-os/json-document/text-surface": [
-        "./src/text-surface.ts"
+        "./src/public/text-surface.ts"
       ],
       "@interactive-os/json-document/schema": [
-        "./src/schema.ts"
+        "./src/public/schema.ts"
       ],
       "@interactive-os/json-document/clipboard": [
-        "./src/clipboard.ts"
+        "./src/public/clipboard.ts"
       ]
     },
     "types": [

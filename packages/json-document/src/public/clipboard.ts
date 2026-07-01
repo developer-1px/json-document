@@ -23,4 +23,4 @@ export type {
   ClipboardWriteOptions,
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
-} from "./application/document/clipboard/contract.js";
+} from "../application/document/clipboard/contract.js";

@@ -5,8 +5,8 @@
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/public/index.js",
+  "types": "./dist/public/index.d.ts",
   "homepage": "https://developer-1px.github.io/json-document/",
   "repository": {
     "type": "git",
@@ -40,36 +40,36 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/public/index.d.ts",
+      "import": "./dist/public/index.js"
     },
     "./react": {
-      "types": "./dist/react.d.ts",
-      "import": "./dist/react.js"
+      "types": "./dist/public/react.d.ts",
+      "import": "./dist/public/react.js"
     },
     "./patch": {
-      "types": "./dist/patch.d.ts",
-      "import": "./dist/patch.js"
+      "types": "./dist/public/patch.d.ts",
+      "import": "./dist/public/patch.js"
     },
     "./pointer": {
-      "types": "./dist/pointer.d.ts",
-      "import": "./dist/pointer.js"
+      "types": "./dist/public/pointer.d.ts",
+      "import": "./dist/public/pointer.js"
     },
     "./selection": {
-      "types": "./dist/selection.d.ts",
-      "import": "./dist/selection.js"
+      "types": "./dist/public/selection.d.ts",
+      "import": "./dist/public/selection.js"
     },
     "./text-surface": {
-      "types": "./dist/text-surface.d.ts",
-      "import": "./dist/text-surface.js"
+      "types": "./dist/public/text-surface.d.ts",
+      "import": "./dist/public/text-surface.js"
     },
     "./schema": {
-      "types": "./dist/schema.d.ts",
-      "import": "./dist/schema.js"
+      "types": "./dist/public/schema.d.ts",
+      "import": "./dist/public/schema.js"
     },
     "./clipboard": {
-      "types": "./dist/clipboard.d.ts",
-      "import": "./dist/clipboard.js"
+      "types": "./dist/public/clipboard.d.ts",
+      "import": "./dist/public/clipboard.js"
     }
   },
   "scripts": {

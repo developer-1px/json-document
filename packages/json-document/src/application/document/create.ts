@@ -15,7 +15,7 @@ import {
 import type {
   JSONDocument,
   JSONDocumentOptions,
-} from "./interface.js";
+} from "./contract.js";
 import type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,

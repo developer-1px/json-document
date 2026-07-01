@@ -32,42 +32,42 @@ const publicSubpathContracts = [
   {
     label: "patch",
     specifier: "@interactive-os/json-document/patch",
-    declaration: "patch.d.ts",
+    declaration: "public/patch.d.ts",
     valueExports: publicContract.patch.values,
     typeExports: publicContract.patch.types,
   },
   {
     label: "pointer",
     specifier: "@interactive-os/json-document/pointer",
-    declaration: "pointer.d.ts",
+    declaration: "public/pointer.d.ts",
     valueExports: publicContract.pointer.values,
     typeExports: publicContract.pointer.types,
   },
   {
     label: "selection",
     specifier: "@interactive-os/json-document/selection",
-    declaration: "selection.d.ts",
+    declaration: "public/selection.d.ts",
     valueExports: publicContract.selection.values,
     typeExports: publicContract.selection.types,
   },
   {
     label: "textSurface",
     specifier: "@interactive-os/json-document/text-surface",
-    declaration: "text-surface.d.ts",
+    declaration: "public/text-surface.d.ts",
     valueExports: publicContract.textSurface.values,
     typeExports: publicContract.textSurface.types,
   },
   {
     label: "schema",
     specifier: "@interactive-os/json-document/schema",
-    declaration: "schema.d.ts",
+    declaration: "public/schema.d.ts",
     valueExports: publicContract.schema.values,
     typeExports: publicContract.schema.types,
   },
   {
     label: "clipboard",
     specifier: "@interactive-os/json-document/clipboard",
-    declaration: "clipboard.d.ts",
+    declaration: "public/clipboard.d.ts",
     valueExports: publicContract.clipboard.values,
     typeExports: publicContract.clipboard.types,
   },
@@ -833,12 +833,12 @@ try {
   );
   await assertInstalledTextFiles(installedPackageRoot);
   assertDeclarationExports(
-    await readFile(join(installedPackageRoot, "dist", "index.d.ts"), "utf8"),
+    await readFile(join(installedPackageRoot, "dist", "public", "index.d.ts"), "utf8"),
     rootPublicExports,
     "root",
   );
   assertDeclarationExports(
-    await readFile(join(installedPackageRoot, "dist", "react.d.ts"), "utf8"),
+    await readFile(join(installedPackageRoot, "dist", "public", "react.d.ts"), "utf8"),
     reactPublicExports,
     "react",
   );
