@@ -3,7 +3,6 @@ export type {
 } from "./capabilities/result.js";
 export { createDocumentRuntime } from "./create.js";
 export type {
-  DocumentCapabilityResult,
   DocumentRuntime,
   DocumentRuntimeOptions,
 } from "./create.js";
@@ -44,10 +43,10 @@ export type {
 } from "./editing/target.js";
 export {
   JSONDocumentError,
-} from "./error/index.js";
+} from "../../foundation/error/index.js";
 export type {
   ErrorPolicy,
-} from "./error/index.js";
+} from "../../foundation/error/index.js";
 export type {
   HistoryTransactionOptions,
   JSONChangeMetadata,
@@ -58,13 +57,13 @@ export type { JSONDocumentHistory } from "./history/undoRedo.js";
 export {
   applyOperation,
   applyPatch,
-  applyPatchToTrustedState,
-} from "./patch/index.js";
+} from "../../foundation/patch/index.js";
+export { applyPatchToTrustedState } from "../schema/validation/patch.js";
 export type {
-  JSONPatchInput,
   JSONPatchOperation,
   JSONResult,
-} from "./patch/index.js";
+} from "../../foundation/patch/index.js";
+export type { JSONPatchInput } from "./state/patch.js";
 export {
   PointerSyntaxError,
   appendSegment,
@@ -75,18 +74,18 @@ export {
   parentPointer,
   parsePointer,
   resolveSiblingRange,
-  trackPointer,
   tryParsePointer,
   unescapeSegment,
   withLastSegment,
-} from "./pointer/index.js";
+} from "../../foundation/pointer/index.js";
+export { trackPointer } from "../../foundation/patch/index.js";
 export type {
   Pointer,
   ResolveSiblingRangeOptions,
   SiblingLocation,
   SiblingRangeErrorCode,
   SiblingRangeResult,
-} from "./pointer/index.js";
+} from "../../foundation/pointer/index.js";
 export type {
   EntriesResult,
   EntryKind,

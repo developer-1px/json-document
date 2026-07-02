@@ -1,15 +1,15 @@
 import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import type { SelectionSnap } from "../../selection/snap.js";
-import { resetDocumentHistoryRuntimeState } from "../history/state.js";
+import { resetDocumentHistoryRuntimeState } from "../history/undoRedo.js";
 import type {
   DocumentHistoryRuntimeState,
-} from "../history/state.js";
+} from "../history/undoRedo.js";
 import type {
   JSONChangeMetadata,
 } from "../history/metadata.js";
 import type { TrustedJSONStateOps } from "./json.js";
-import type { DocumentPatchRuntimeState } from "./runtime.js";
+import type { DocumentPatchRuntimeState } from "./patch.js";
 
 export interface JSONStateOps<T> {
   add(path: Pointer, value: unknown): JSONResult;

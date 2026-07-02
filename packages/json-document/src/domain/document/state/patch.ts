@@ -18,12 +18,23 @@ import { buildChangeMetadata, compactHistoryMetadata } from "../history/metadata
 import { planDocumentHistoryRecord } from "../history/restore.js";
 import type {
   DocumentHistoryRuntimeState,
-} from "../history/state.js";
+} from "../history/undoRedo.js";
 import type { TrustedJSONStateOps } from "./json.js";
-import type { DocumentPatchRuntimeState } from "./runtime.js";
 import type { SelectionRuntimeAccess } from "../selection/runtime.js";
 
 export type JSONPatchInput = JSONPatchOperation | ReadonlyArray<JSONPatchOperation>;
+
+export interface DocumentPatchRuntimeState {
+  lastPatch: ReadonlyArray<JSONPatchOperation>;
+  documentSubscriberCount: number;
+}
+
+export function createDocumentPatchRuntimeState(): DocumentPatchRuntimeState {
+  return {
+    lastPatch: [],
+    documentSubscriberCount: 0,
+  };
+}
 
 interface CreateDocumentMutationRuntimeInput<S extends z.ZodType> {
   schema: S;

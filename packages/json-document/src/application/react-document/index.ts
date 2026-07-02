@@ -11,7 +11,7 @@ import type {
   JSONDocumentSchemaInput,
   JSONDocumentSchemaLike,
   JSONDocumentSchemaOutput,
-} from "../document/schema-type.js";
+} from "../document/create.js";
 
 type TrustedInitialDocumentOptions = JSONDocumentOptions & { trustedInitial: true };
 type UntrustedInitialDocumentOptions = JSONDocumentOptions & { trustedInitial?: false | undefined };

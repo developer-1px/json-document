@@ -1,5 +1,5 @@
+import type { JSONPatchOperation } from "../../../foundation/patch/index.js";
 import type { SelectionSnap, SelectionTarget } from "../../selection/snap.js";
-import type { DocumentHistoryEntry } from "./entry.js";
 
 export type JSONDocumentSelectionTarget = SelectionTarget;
 
@@ -12,6 +12,18 @@ export interface HistoryTransactionOptions {
 export interface JSONChangeMetadata extends HistoryTransactionOptions {
   selectionBefore?: SelectionSnap;
   selectionAfter?: SelectionSnap;
+}
+
+export interface DocumentHistoryEntry {
+  forward: JSONPatchOperation[];
+  inverse: JSONPatchOperation[];
+  selectionBefore: SelectionSnap;
+  selectionAfter: SelectionSnap;
+  metadata?: HistoryTransactionOptions;
+  snapshot?: {
+    before: unknown;
+    after?: unknown;
+  };
 }
 
 export interface JSONDocumentCommitOptions extends HistoryTransactionOptions {
