@@ -422,6 +422,7 @@ export const repoCatalog = {
         "JSONDocumentDuplicateOptions",
         "JSONDocumentDuplicateResult",
         "JSONDocumentEditError",
+        "JSONDocumentEditOk",
         "JSONDocumentEditResult",
         "JSONDocumentError",
         "JSONDocumentHistory",
@@ -529,7 +530,7 @@ export const repoCatalog = {
         "unescapeSegment",
         "withLastSegment"
       ],
-      "publicExportCount": 137,
+      "publicExportCount": 138,
       "keywords": [
         "clipboard",
         "crud",
