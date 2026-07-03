@@ -68,6 +68,8 @@ export interface ClipboardMutationOk<T> {
   ok: true;
   value: T;
   applied: ReadonlyArray<JSONPatchOperation>;
+  /** 연산이 착지한 pointer (#219 EditOk 통일). cut 처럼 착지점이 없으면 null. */
+  target: Pointer | null;
 }
 
 export interface ClipboardCutOk<T> extends ClipboardMutationOk<T> {

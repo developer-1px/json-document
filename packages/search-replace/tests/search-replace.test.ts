@@ -114,7 +114,7 @@ describe("@interactive-os/json-document-search-replace", () => {
   test("filters search and replace-all targets with a host predicate", () => {
     const doc = createDoc();
     const text = createSearchReplace(doc);
-    expect(doc.replace("/pages/0/id", "draft-id")).toEqual({ ok: true });
+    expect(doc.replace("/pages/0/id", "draft-id")).toMatchObject({ ok: true });
 
     const include = ({ pointer }: { pointer: string }) =>
       pointer === "/title"
@@ -230,7 +230,7 @@ describe("@interactive-os/json-document-search-replace", () => {
     const text = createSearchReplace(doc);
     const target = firstRange(doc, "/pages/0/body");
 
-    expect(doc.replace("/pages/0/body", "changed body")).toEqual({ ok: true });
+    expect(doc.replace("/pages/0/body", "changed body")).toMatchObject({ ok: true });
 
     expect(text.replaceMatch(target, "final")).toMatchObject({
       ok: false,

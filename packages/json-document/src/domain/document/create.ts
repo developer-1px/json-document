@@ -73,13 +73,13 @@ export interface DocumentRuntime<T> {
   patch(operations: JSONPatchInput, metadata?: JSONChangeMetadata): JSONResult;
   commit(operations: ReadonlyArray<JSONPatchOperation>, options?: JSONDocumentCommitOptions): JSONResult;
   find(jsonpath: string): QueryResult;
-  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult;
-  insert(value: unknown): JSONDocumentEditResult;
-  replace(path: Pointer, value: unknown): JSONDocumentEditResult;
-  replace(value: unknown): JSONDocumentEditResult;
-  delete(source?: SelectionSource): JSONDocumentEditResult;
-  move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult;
-  move(target: JSONDocumentMoveTarget): JSONDocumentEditResult;
+  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult<T>;
+  insert(value: unknown): JSONDocumentEditResult<T>;
+  replace(path: Pointer, value: unknown): JSONDocumentEditResult<T>;
+  replace(value: unknown): JSONDocumentEditResult<T>;
+  delete(source?: SelectionSource): JSONDocumentEditResult<T>;
+  move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult<T>;
+  move(target: JSONDocumentMoveTarget): JSONDocumentEditResult<T>;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   duplicate(options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   copy(source?: SelectionSource, options?: ClipboardCopyOptions): ClipboardCopyResult;
@@ -174,8 +174,8 @@ export function createDocumentRuntime<S extends z.ZodType>(
       target: JSONDocumentInsertTarget | undefined,
       insertOptions: JSONDocumentInsertOptions | undefined,
     ) {
-      const result = insertPasteRuntime.pastePayload(payload, target, insertOptions, false, false);
-      return result.ok ? OK : result;
+      // paste machinery 가 이미 계산한 value/applied/target 을 그대로 반환 (#219 EditOk).
+      return insertPasteRuntime.pastePayload(payload, target, insertOptions, false, false);
     },
     canInsertPayload(
       payload: unknown,

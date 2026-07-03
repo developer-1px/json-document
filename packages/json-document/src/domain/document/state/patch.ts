@@ -311,10 +311,13 @@ export function createDocumentMutationRuntime<S extends z.ZodType>(
           ok: true,
           value: rawOps.state,
           applied: patchState.lastPatch,
+          target: planned.duplicatedTo,
           duplicatedTo: planned.duplicatedTo,
         }
       : r;
   };
 
-  return { applyDocumentPatch, applyPreviewedDocumentPatch, patch, commit, duplicate };
+  const lastApplied = (): ReadonlyArray<JSONPatchOperation> => patchState.lastPatch;
+
+  return { applyDocumentPatch, applyPreviewedDocumentPatch, patch, commit, duplicate, lastApplied };
 }

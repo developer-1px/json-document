@@ -55,6 +55,7 @@
       "JSONDocumentDuplicateOptions",
       "JSONDocumentDuplicateResult",
       "JSONDocumentEditError",
+      "JSONDocumentEditOk",
       "JSONDocumentEditResult",
       "JSONDocumentHistory",
       "JSONDocumentInsertOptions",

@@ -34,6 +34,7 @@ export type {
   JSONDocumentDuplicateOptions,
   JSONDocumentDuplicateResult,
   JSONDocumentEditError,
+  JSONDocumentEditOk,
   JSONDocumentEditResult,
 } from "./editing/actions.js";
 export type {

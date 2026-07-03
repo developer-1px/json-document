@@ -128,17 +128,22 @@ export function createClipboardPasteRuntime<S extends z.ZodType>(
       const patchResult = applyPreviewedPatch
         ? applyPreviewedPatch(result.next as z.output<S>, result.patch, result.applied)
         : ops.patch(result.patch);
-      return patchResult.ok
-        ? {
-            ok: true,
-            value: getState(),
-            applied: getAppliedPatch?.() ?? result.patch,
-          }
-        : {
-            ok: false,
-            code: patchResult.code,
-            reason: patchResult.reason ?? patchResult.code,
-          };
+      if (!patchResult.ok) {
+        return {
+          ok: false,
+          code: patchResult.code,
+          reason: patchResult.reason ?? patchResult.code,
+        };
+      }
+      const applied = getAppliedPatch?.() ?? result.patch;
+      // target: 첫 착지 slot (applied 는 정규화된 concrete op — `/-` 없음).
+      const first = applied[0];
+      return {
+        ok: true,
+        value: getState(),
+        applied,
+        target: first !== undefined && first.op !== "remove" && first.op !== "test" ? first.path : null,
+      };
     },
 
     canPastePayload(payload, targetOrSelectionTarget, options, spreadByDefault, trustedPayload) {

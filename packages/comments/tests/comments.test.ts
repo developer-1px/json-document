@@ -39,7 +39,7 @@ describe("@interactive-os/json-document-comments", () => {
       id: "review-1",
       pointer: "/items/0/title",
       text: "Needs a clearer title",
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
 
     expect(comments.add({
       id: "review-1",
@@ -96,19 +96,19 @@ describe("@interactive-os/json-document-comments", () => {
       text: "Review B",
     });
 
-    expect(doc.insert("/items/0", { id: "x", title: "X", done: false })).toEqual({ ok: true });
+    expect(doc.insert("/items/0", { id: "x", title: "X", done: false })).toMatchObject({ ok: true });
     expect(comments.byId("b-title")).toMatchObject({
       pointer: "/items/2/title",
       lost: false,
     });
 
-    expect(doc.delete("/items/0")).toEqual({ ok: true });
+    expect(doc.delete("/items/0")).toMatchObject({ ok: true });
     expect(comments.byId("b-title")).toMatchObject({
       pointer: "/items/1/title",
       lost: false,
     });
 
-    expect(doc.move("/items/1", "/items/-")).toEqual({ ok: true });
+    expect(doc.move("/items/1", "/items/-")).toMatchObject({ ok: true });
     expect(comments.byId("b-title")).toMatchObject({
       pointer: "/items/2/title",
       lost: false,
@@ -132,7 +132,7 @@ describe("@interactive-os/json-document-comments", () => {
       text: "Review document title",
     });
 
-    expect(doc.delete("/items/1")).toEqual({ ok: true });
+    expect(doc.delete("/items/1")).toMatchObject({ ok: true });
 
     expect(comments.current()).toEqual({
       comments: [
@@ -278,7 +278,7 @@ describe("@interactive-os/json-document-comments", () => {
     comments.subscribe(listener);
     comments.dispose();
 
-    expect(doc.insert("/items/0", { id: "x", title: "X", done: false })).toEqual({ ok: true });
+    expect(doc.insert("/items/0", { id: "x", title: "X", done: false })).toMatchObject({ ok: true });
     expect(comments.byId("note")).toMatchObject({
       pointer: "/items/1/title",
       lost: false,

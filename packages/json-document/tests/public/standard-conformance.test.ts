@@ -104,19 +104,19 @@ describe("json-document core standard conformance", () => {
     const doc = createBoardDocument();
 
     expect(doc.canReplace("/columns/0/cards/0/title", "A1")).toEqual({ ok: true });
-    expect(doc.replace("/columns/0/cards/0/title", "A1")).toEqual({ ok: true });
+    expect(doc.replace("/columns/0/cards/0/title", "A1")).toMatchObject({ ok: true });
     expect(doc.value.columns[0]?.cards[0]?.title).toBe("A1");
 
     expect(doc.canInsert("/columns/0/cards/-", { id: "c", title: "C" })).toEqual({ ok: true });
-    expect(doc.insert("/columns/0/cards/-", { id: "c", title: "C" })).toEqual({ ok: true });
+    expect(doc.insert("/columns/0/cards/-", { id: "c", title: "C" })).toMatchObject({ ok: true });
     expect(doc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["a", "b", "c"]);
 
     expect(doc.canMove("/columns/0/cards/0", "/columns/0/cards/1")).toEqual({ ok: true });
-    expect(doc.move("/columns/0/cards/0", "/columns/0/cards/1")).toEqual({ ok: true });
+    expect(doc.move("/columns/0/cards/0", "/columns/0/cards/1")).toMatchObject({ ok: true });
     expect(doc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["b", "a", "c"]);
 
     expect(doc.canDelete("/columns/0/cards/1")).toEqual({ ok: true });
-    expect(doc.delete("/columns/0/cards/1")).toEqual({ ok: true });
+    expect(doc.delete("/columns/0/cards/1")).toMatchObject({ ok: true });
     expect(doc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["b", "c"]);
 
     expect(doc.canUndo()).toEqual({ ok: true });
@@ -129,9 +129,9 @@ describe("json-document core standard conformance", () => {
     expect(doc.redo()).toEqual({ ok: false, code: "empty_stack", reason: "redo stack is empty" });
 
     const relativeDoc = createBoardDocument();
-    expect(relativeDoc.insert("/columns/0/cards/-", { id: "c", title: "C" })).toEqual({ ok: true });
+    expect(relativeDoc.insert("/columns/0/cards/-", { id: "c", title: "C" })).toMatchObject({ ok: true });
     expect(relativeDoc.canMove("/columns/0/cards/2", { before: "/columns/0/cards/0" })).toEqual({ ok: true });
-    expect(relativeDoc.move("/columns/0/cards/2", { before: "/columns/0/cards/0" })).toEqual({ ok: true });
+    expect(relativeDoc.move("/columns/0/cards/2", { before: "/columns/0/cards/0" })).toMatchObject({ ok: true });
     expect(relativeDoc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["c", "a", "b"]);
   });
 

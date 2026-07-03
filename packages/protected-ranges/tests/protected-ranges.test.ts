@@ -78,7 +78,7 @@ describe("@interactive-os/json-document-protected-ranges", () => {
     const doc = createPage();
     const protectedRanges = createProtectedRanges(doc, createRanges());
 
-    expect(protectedRanges.replace("/title", "Next")).toEqual({ ok: true });
+    expect(protectedRanges.replace("/title", "Next")).toMatchObject({ ok: true });
     expect(doc.value.title).toBe("Next");
 
     expect(protectedRanges.canReplace("/title", 123)).toMatchObject({
@@ -124,12 +124,12 @@ describe("@interactive-os/json-document-protected-ranges", () => {
       id: "tail",
       title: "Tail",
       body: "After",
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(protectedRanges.insert("/sections/-", {
       id: "tail",
       title: "Tail",
       body: "After",
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(doc.value.sections.map((section) => section.id)).toEqual(["intro", "legal", "cta", "tail"]);
   });
 

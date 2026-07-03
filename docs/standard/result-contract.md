@@ -140,24 +140,39 @@ document result를 기준으로 한다. 이 구분은 각각 `schema-slot`,
 Clipboard와 structural command result는 `ok` discriminant를 공유하지만 API별
 성공 payload를 가진다.
 
+Mutation verb의 성공은 통일 `EditOk` shape를 따른다. "duplicate는 새
+객체(위치)를 반환한다"는 정본을 전 verb로 일반화한 것이다.
+
+```ts
+type JSONDocumentEditOk<T> = {
+  ok: true;
+  value: T;                                    // 적용 후 document value
+  applied: readonly JSONPatchOperation[];      // 실제 적용된 정규화 patch
+  target: Pointer | null;                      // 연산이 착지한 pointer (없으면 null)
+};
+```
+
+`target` 규칙: `insert`/`paste`는 첫 착지 slot의 concrete pointer,
+`replace`는 단일 대상 pointer(다중 JSONPath replace는 `null`), `move`는
+목적지 pointer, `duplicate`는 복제본 pointer, `delete`/`cut`은 착지점이
+없으므로 `null`이다.
+
 | Family | 성공 payload |
 | --- | --- |
 | read/query/entries | 읽은 값 또는 pointer 목록 |
-| `insert`, `replace`, `delete`, `move` | `JSONResult` 성공 `{ ok: true }`; 실제 commit patch는 `doc.lastPatch`, subscriber, history entry에 기록 |
+| `insert`, `replace`, `delete`, `move` | `EditOk` (`value`, `applied`, `target`) |
 | copy | clipboard `payload`, primary `source`, all `sources` |
-| cut | next `value`, `applied`, clipboard `payload`, primary `source`, all `sources` |
-| paste | next `value`, `applied` |
-| duplicate | next `value`, `applied`, `duplicatedTo` |
+| cut | `EditOk`(`target: null`) + clipboard `payload`, primary `source`, all `sources` |
+| paste | `EditOk` |
+| duplicate | `EditOk` + `duplicatedTo` (1.x migration alias, `target`과 동일 값) |
 | undo/redo | top-level document command는 `JSONCapabilityResult` |
+| `patch`, `commit` | low-level `JSONResult` `{ ok: true }`; `EditOk` 승격은 2.0에서 다룬다(#219). 호출자는 `doc.lastPatch`나 subscriber metadata로 applied patch를 읽는다 |
 
 Clipboard family와 structural result의 실패 diagnostic field는 `reason`이다.
 Stable branch key는 `code`다.
 
 `applied`를 가진 성공 result의 `value`는 commit 후 document value다. 같은
-document instance에서 읽는 `doc.value`와 같은 최종 state를 가리킨다. 반대로
-`insert`, `replace`, `delete`, `move`, `patch`, `commit`은 low-level
-`JSONResult` family라 성공 result 자체에 `applied`를 싣지 않는다. 이 family의
-호출자는 `doc.lastPatch`나 subscriber metadata를 통해 실제 applied patch를 읽는다.
+document instance에서 읽는 `doc.value`와 같은 최종 state를 가리킨다.
 
 `discriminator_mismatch`는 추가 정보를 제공한다.
 

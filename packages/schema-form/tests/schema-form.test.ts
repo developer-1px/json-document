@@ -90,8 +90,8 @@ describe("@interactive-os/json-document-schema-form", () => {
     const title = form.fields.find((field) => field.key === "title");
     if (!title) throw new Error("missing title field");
 
-    expect(title.canSet("Published")).toEqual({ ok: true });
-    expect(title.set("Published")).toEqual({ ok: true });
+    expect(title.canSet("Published")).toMatchObject({ ok: true });
+    expect(title.set("Published")).toMatchObject({ ok: true });
     expect(doc.value.title).toBe("Published");
     expect(doc.lastPatch).toEqual([
       { op: "replace", path: "/title", value: "Published" },
@@ -106,7 +106,7 @@ describe("@interactive-os/json-document-schema-form", () => {
     const count = form.fields.find((field) => field.key === "count");
     if (!count) throw new Error("missing count field");
 
-    expect(count.canSet(2)).toEqual({ ok: true });
+    expect(count.canSet(2)).toMatchObject({ ok: true });
     expect(count.canSet("two")).toMatchObject({
       ok: false,
       code: "schema_violation",
@@ -142,7 +142,7 @@ describe("@interactive-os/json-document-schema-form", () => {
       { key: "1", path: "/tags/1", value: "beta", kind: "string" },
     ]);
 
-    expect(form.fields[1]?.set("stable")).toEqual({ ok: true });
+    expect(form.fields[1]?.set("stable")).toMatchObject({ ok: true });
     expect(doc.value.tags).toEqual(["alpha", "stable"]);
   });
 
@@ -224,7 +224,7 @@ describe("@interactive-os/json-document-schema-form", () => {
       throw new Error("missing meta field");
     }
 
-    expect(doc.replace("/meta/owner", "Grace")).toEqual({ ok: true });
+    expect(doc.replace("/meta/owner", "Grace")).toMatchObject({ ok: true });
     expect(meta.value).toEqual({ owner: "Ada" });
   });
 
@@ -358,8 +358,8 @@ describe("@interactive-os/json-document-schema-form", () => {
     const text = block.fields.find((field) => field.key === "text");
     if (!text) throw new Error("missing text field");
 
-    expect(text.canSet("Updated")).toEqual({ ok: true });
-    expect(text.set("Updated")).toEqual({ ok: true });
+    expect(text.canSet("Updated")).toMatchObject({ ok: true });
+    expect(text.set("Updated")).toMatchObject({ ok: true });
     expect(doc.value.blocks[0]).toEqual({ kind: "text", text: "Updated" });
     expect(text.canSet(123)).toMatchObject({
       ok: false,

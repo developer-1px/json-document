@@ -16,7 +16,8 @@ import type { CapabilityResult } from "../capabilities/result.js";
 import type { JSONDocumentMoveTarget } from "./target.js";
 
 export type DocumentEditPlan =
-  | { ok: true; operations: JSONPatchOperation[] }
+  // target: 연산이 착지하는 pointer. 단일 착지점이 없으면(다중 replace, delete) null.
+  | { ok: true; operations: JSONPatchOperation[]; target: Pointer | null }
   | Extract<CapabilityResult, { ok: false }>;
 
 type DocumentPathValueArgs = { target?: Pointer; value: unknown };
@@ -42,7 +43,7 @@ export function planDocumentReplace(input: {
   const target = args.target ?? primaryPointer(input.selection ?? EMPTY_SELECTION) ?? null;
   if (target === null) return emptySelectionCapability("replace target selection is empty");
   if (!target.startsWith("$")) {
-    return { ok: true, operations: [{ op: "replace", path: target, value: args.value }] };
+    return { ok: true, operations: [{ op: "replace", path: target, value: args.value }], target };
   }
 
   let pointers: Pointer[];
@@ -62,6 +63,7 @@ export function planDocumentReplace(input: {
         operations: [...pointers]
           .sort((a, b) => b.length - a.length)
           .map((path) => ({ op: "replace", path, value: args.value })),
+        target: pointers.length === 1 ? pointers[0]! : null,
       };
 }
 
@@ -83,7 +85,7 @@ export function planDocumentDelete(input: {
         }
       : emptySelectionCapability("delete source selection is empty");
   }
-  return { ok: true, operations: planned.patch };
+  return { ok: true, operations: planned.patch, target: null };
 }
 
 export function planDocumentMove(input: {
@@ -101,7 +103,7 @@ export function planDocumentMove(input: {
   const target = input.hasSourceArg ? input.target! : input.sourceOrTarget as JSONDocumentMoveTarget;
   const destination = resolveMoveTarget(input.state, source, target);
   return destination.ok
-    ? { ok: true, operations: [{ op: "move", from: source, path: destination.path }] }
+    ? { ok: true, operations: [{ op: "move", from: source, path: destination.path }], target: destination.path }
     : destination;
 }
 

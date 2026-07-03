@@ -34,7 +34,7 @@ describe("@interactive-os/json-document-live-cursors", () => {
       color: "#00f",
       selection: [{ anchor: "/blocks/1/text", focus: "/blocks/1/text" }],
       data: { role: "reviewer" },
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
 
     expect(presence.upsert({
       peerId: "ada",
@@ -116,21 +116,21 @@ describe("@interactive-os/json-document-live-cursors", () => {
       selection: [{ anchor: "/blocks/1/text", focus: "/blocks/1/text" }],
     });
 
-    expect(doc.insert("/blocks/0", { id: "x", text: "Intro" })).toEqual({ ok: true });
+    expect(doc.insert("/blocks/0", { id: "x", text: "Intro" })).toMatchObject({ ok: true });
     expect(presence.byPeer("ada")).toMatchObject({
       selection: [{ anchor: "/blocks/2/text", focus: "/blocks/2/text" }],
       primaryPointer: "/blocks/2/text",
       lost: false,
     });
 
-    expect(doc.delete("/blocks/0")).toEqual({ ok: true });
+    expect(doc.delete("/blocks/0")).toMatchObject({ ok: true });
     expect(presence.byPeer("ada")).toMatchObject({
       selection: [{ anchor: "/blocks/1/text", focus: "/blocks/1/text" }],
       primaryPointer: "/blocks/1/text",
       lost: false,
     });
 
-    expect(doc.move("/blocks/1", "/blocks/-")).toEqual({ ok: true });
+    expect(doc.move("/blocks/1", "/blocks/-")).toMatchObject({ ok: true });
     expect(presence.byPeer("ada")).toMatchObject({
       selection: [{ anchor: "/blocks/2/text", focus: "/blocks/2/text" }],
       primaryPointer: "/blocks/2/text",
@@ -152,7 +152,7 @@ describe("@interactive-os/json-document-live-cursors", () => {
       }],
     });
 
-    expect(doc.insert("/blocks/0", { id: "x", text: "Intro" })).toEqual({ ok: true });
+    expect(doc.insert("/blocks/0", { id: "x", text: "Intro" })).toMatchObject({ ok: true });
     expect(presence.byPeer("ada")).toMatchObject({
       selection: [{
         anchor: { path: "/blocks/2/text", offset: 1, affinity: "forward" },
@@ -162,7 +162,7 @@ describe("@interactive-os/json-document-live-cursors", () => {
       lost: false,
     });
 
-    expect(doc.delete("/blocks/2")).toEqual({ ok: true });
+    expect(doc.delete("/blocks/2")).toMatchObject({ ok: true });
     expect(presence.byPeer("ada")).toEqual({
       peerId: "ada",
       selection: [],
@@ -225,7 +225,7 @@ describe("@interactive-os/json-document-live-cursors", () => {
     presence.subscribe(listener);
     presence.dispose();
 
-    expect(doc.insert("/blocks/0", { id: "x", text: "Intro" })).toEqual({ ok: true });
+    expect(doc.insert("/blocks/0", { id: "x", text: "Intro" })).toMatchObject({ ok: true });
     expect(presence.byPeer("ada")).toMatchObject({
       selection: [{ anchor: "/blocks/1", focus: "/blocks/1" }],
       primaryPointer: "/blocks/1",

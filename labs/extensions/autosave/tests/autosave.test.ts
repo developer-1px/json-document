@@ -60,7 +60,7 @@ describe("@interactive-os/json-document-autosave", () => {
       },
     });
 
-    expect(doc.replace("/title", "Next")).toEqual({ ok: true });
+    expect(doc.replace("/title", "Next")).toMatchObject({ ok: true });
     expect(autosave.current()).toMatchObject({
       state: "pending",
       pending: true,

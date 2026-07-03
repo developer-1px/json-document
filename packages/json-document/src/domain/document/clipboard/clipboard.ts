@@ -170,6 +170,7 @@ export function createClipboard<S extends z.ZodType>(
             ok: true,
             value: getState(),
             applied: getAppliedPatch?.() ?? result.patch,
+            target: null,
             payload: result.payload,
             source: result.source,
             sources: result.sources,
