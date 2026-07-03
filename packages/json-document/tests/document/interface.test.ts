@@ -136,12 +136,12 @@ describe("JSONDocument interface", () => {
 
     expect(doc.canInsert({ into: "/items/0" }, { id: "c", name: "C" })).toMatchObject({
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
       reason: "into target must address an array container: /items/0",
     });
     expect(doc.canInsert({ after: "/items" }, { id: "c", name: "C" })).toMatchObject({
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
       reason: "relative insert target must address an array item: /items",
     });
   });
@@ -180,13 +180,13 @@ describe("JSONDocument interface", () => {
 
     expect(doc.canMove("/items/0", { after: "/items" })).toEqual({
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
       reason: "relative move target must address an array item: /items",
       pointer: "/items",
     });
     expect(doc.move("/items/0", { after: "/items" })).toEqual({
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
       reason: "relative move target must address an array item: /items",
       pointer: "/items",
     });

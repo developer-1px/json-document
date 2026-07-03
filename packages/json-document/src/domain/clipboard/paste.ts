@@ -27,7 +27,7 @@ interface PasteOk<T> {
 
 export interface PasteError {
   ok: false;
-  code: "empty_selection" | "not_serializable" | "rekey_failed" | PatchPreflightErrorCode;
+  code: "empty_selection" | "not_serializable" | "rekey_failed" | "invalid_target" | PatchPreflightErrorCode;
   reason: string;
   violations?: ReadonlyArray<{ path: string; message: string }>;
 }
@@ -321,10 +321,10 @@ function resolveIntoArrayTarget(
   const segments = tryParsePointer(target);
   if (segments === null) return pasteError("invalid_pointer", `invalid into target pointer: ${target}`);
   const container = readAt(state, segments);
-  // 구문은 맞지만 대상이 없음 → path_not_found. 존재하나 배열이 아님은 별개(타입 불일치).
+  // 구문 위반 = invalid_pointer, 부재 = path_not_found, 존재하나 종류 불일치 = invalid_target.
   if (!container.ok) return pasteError("path_not_found", `into target not found: ${target}`);
   if (!Array.isArray(container.value)) {
-    return pasteError("invalid_pointer", `into target must address an array container: ${target}`);
+    return pasteError("invalid_target", `into target must address an array container: ${target}`);
   }
   return { ok: true, path: appendSegment(target, "-") };
 }
@@ -335,7 +335,7 @@ function resolveRelativeInsertTarget(
 ): { ok: true; path: Pointer } | PasteError {
   const location = arrayItemLocation(target);
   if (location === null) {
-    return pasteError("invalid_pointer", `relative insert target must address an array item: ${target}`);
+    return pasteError("invalid_target", `relative insert target must address an array item: ${target}`);
   }
   return {
     ok: true,

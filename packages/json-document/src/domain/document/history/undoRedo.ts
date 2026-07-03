@@ -50,6 +50,8 @@ export interface JSONDocumentHistory {
   readonly redoDepth: number;
   undo(): boolean;
   redo(): boolean;
+  /** undo/redo 스택 전체 비우기 (NSUndoManager removeAllActions / QUndoStack clear 계보). */
+  clear(): void;
   mergeLast(options?: { mergeKey?: string }): boolean;
   transaction(fn: () => void): void;
   transaction(options: HistoryTransactionOptions, fn: () => void): void;
@@ -173,6 +175,7 @@ export function createDocumentHistoryRuntime<T>(
     get redoDepth() { return redoDepth(historyState.stack); },
     undo: () => restore("undo"),
     redo: () => restore("redo"),
+    clear: () => resetDocumentHistoryRuntimeState(historyState),
     mergeLast,
     transaction,
   };

@@ -83,6 +83,7 @@ type JSONCapabilityResult =
 | Code | 의미 |
 | --- | --- |
 | `preflight_failed` | patch 미리 검증 단계에서 실패함 |
+| `invalid_target` | target이 존재하지만 verb가 요구하는 종류가 아님 (예: `into`가 배열이 아닌 곳을 가리킴). 문법 위반은 `invalid_pointer`, 부재는 `path_not_found` |
 | `discriminator_mismatch` | discriminated union target과 payload가 맞지 않음 |
 | `rekey_failed` | duplicate/paste 중 key 재생성 실패 |
 | `missing_new_key` | key가 필요한 작업에 새 key가 없음 |
@@ -105,6 +106,15 @@ Selection text editing은 selection order code에 다음 값을 더할 수 있�
 | `overlapping_ranges` | text replacement range들이 겹침 |
 | `not_string` | text edit target이 string 값이 아님 |
 | `point_not_in_order` | selection point를 traversal order에서 찾을 수 없음 |
+
+Text-surface primitive(`textSurfaceFragment`, `replaceTextSurfaceSelection`,
+`syncTextSurfaceMutation`)는 위 집합에 다음 값을 더할 수 있다.
+
+| Code | 의미 |
+| --- | --- |
+| `invalid_sidecar` | atoms/ranges sidecar 값이 surface 계약과 맞지 않음 |
+| `missing_selection` | text surface 작업에 필요한 primary selection range가 없음 |
+| `missing_offsets` | selection point에 text offset이 없음 (pointer-only point) |
 
 ## CapabilityViolation
 

@@ -99,6 +99,8 @@ export interface DocumentRuntime<T> {
   entries(path: Pointer): EntriesResult;
   canPatch(operations: JSONPatchInput): CapabilityResult;
   canFind(jsonpath: string): CapabilityResult;
+  /** `query` 의 capability probe. `canFind` 와 동일 — find/query 수렴(#219) 의 query 측 이름. */
+  canQuery(jsonpath: string): CapabilityResult;
   canInsert(value: unknown): CapabilityResult;
   canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): CapabilityResult;
   canReplace(value: unknown): CapabilityResult;
@@ -256,6 +258,7 @@ export function createDocumentRuntime<S extends z.ZodType>(
     entries: read.entries,
     canPatch: (operations: JSONPatchInput) => capabilities.patch(Array.isArray(operations) ? operations : [operations]),
     canFind: capabilities.find,
+    canQuery: capabilities.find,
     canInsert: capabilities.insert,
     canReplace: capabilities.replace,
     canDelete: capabilities.delete,

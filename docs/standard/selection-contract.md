@@ -105,6 +105,7 @@ Selection action은 snapshot을 새 snapshot으로 줄이는 pure 의미론을 �
 | `toggleRange` | 같은 range가 있으면 제거하고 없으면 추가한다 |
 | `togglePointer` | pointer collapsed range를 toggle한다 |
 | `selectRanges` | range 목록을 한 번에 설정한다 |
+| `selectAll` | 현재 scope 안 전체를 선택한다 (`selectScope`의 정본 이름 alias, 1984 ⌘A 계보) |
 | `empty` | empty selection으로 만든다 |
 | `setContext` | JSON context를 저장한다 |
 | `clearContext` | context를 제거한다 |

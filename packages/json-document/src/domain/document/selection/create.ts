@@ -124,6 +124,8 @@ export interface SelectionState extends SelectionSnap {
   textPatch(replacement: string, options?: SelectionTextEditOptions): ReplaceSelectionTextResult;
   deleteText(options?: SelectionTextDeleteOptions): DeleteSelectionTextResult;
   selectScope(options?: SelectionScopeOptions): SelectionScopeResult;
+  /** 42년 편집 동사 (⌘A, 1984~). 현재 scope 안 전체 선택 — selectScope 의 정본 이름 alias. */
+  selectAll(options?: SelectionScopeOptions): SelectionScopeResult;
   resolveScope(options?: SelectionScopeOptions): SelectionScopeTarget;
   selectRanges(
     ranges: ReadonlyArray<SelectionRangeInput>,
@@ -210,6 +212,12 @@ export function createSelection<T>(
   const dispatch = (action: SelectionAction): void => {
     setSnap(reduceSelection(snap, action, mode, ops.state));
   };
+  // selectScope 와 selectAll(42년 동사 ⌘A)의 공유 구현.
+  const applySelectionScope = (scopeOptions?: SelectionScopeOptions): SelectionScopeResult => {
+    const result = selectSelectionScope(snap, mode, ops.state, scopeOptions);
+    if (result.ok) setSnap(result.selection);
+    return result;
+  };
   ops.subscribe((applied, metadata) => {
     setSnap(applyMetadataSelectionAfter && metadata?.selectionAfter
       ? restoreSelection(metadata.selectionAfter, mode, ops.state)
@@ -278,11 +286,8 @@ export function createSelection<T>(
     textEdits: (replacement, textEditOptions) => selectionTextEdits(snap, ops.state, replacement, textEditOptions),
     textPatch: (replacement, textEditOptions) => replaceSelectionText(snap, ops.state, replacement, textEditOptions),
     deleteText: (textDeleteOptions) => deleteSelectionText(snap, ops.state, textDeleteOptions),
-    selectScope(scopeOptions) {
-      const result = selectSelectionScope(snap, mode, ops.state, scopeOptions);
-      if (result.ok) setSnap(result.selection);
-      return result;
-    },
+    selectScope: applySelectionScope,
+    selectAll: applySelectionScope,
     resolveScope: (scopeOptions) => resolveSelectionScope(ops.state, scopeOptions),
     selectRanges(ranges, anchor, focus, primaryIndex) {
       dispatch({

@@ -117,6 +117,7 @@ type ExpectedJSONResultCode =
 type ExpectedCapabilityErrorCode =
   | ExpectedJSONResultCode
   | "preflight_failed"
+  | "invalid_target"
   | "discriminator_mismatch"
   | "rekey_failed"
   | "missing_new_key"
@@ -146,6 +147,7 @@ type ExpectedPasteErrorCode =
   | "empty_selection"
   | "not_serializable"
   | "rekey_failed"
+  | "invalid_target"
   | ExpectedJSONResultCode
   | "preflight_failed";
 type ExpectedDuplicateErrorCode =
@@ -201,6 +203,7 @@ interface ExpectedJSONDocument<T> {
   entries(path: Pointer): EntriesResult;
   canPatch(operations: JSONPatchInput): JSONCapabilityResult;
   canFind(jsonpath: string): JSONCapabilityResult;
+  canQuery(jsonpath: string): JSONCapabilityResult;
   canInsert(value: unknown): JSONCapabilityResult;
   canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONCapabilityResult;
   canReplace(value: unknown): JSONCapabilityResult;

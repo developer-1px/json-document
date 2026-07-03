@@ -43,6 +43,7 @@ export type TextSurfaceErrorCode =
   | "invalid_pointer"
   | "invalid_sidecar"
   | "missing_selection"
+  | "missing_offsets"
   | "multi_pointer_range"
   | "not_string"
   | "path_not_found";
@@ -218,7 +219,7 @@ function textSurfaceSelectionRange(
   if (!isOffsetPoint(range.anchor) || !isOffsetPoint(range.focus)) {
     return {
       ok: false,
-      code: "missing_selection",
+      code: "missing_offsets",
       reason: "text surface selection points must include offsets",
       pointer: surface.textPath,
     };
