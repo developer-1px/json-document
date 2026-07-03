@@ -152,8 +152,11 @@ export function readAt(state: unknown, segs: ReadonlyArray<string>): { ok: true;
   for (const seg of segs) {
     if (cur === null || typeof cur !== "object") return { ok: false };
     if (Array.isArray(cur)) {
-      const i = seg === "-" ? -1 : Number(seg);
-      if (!Number.isInteger(i) || i < 0 || i >= cur.length) return { ok: false };
+      // RFC 6901 §4: 배열 인덱스는 `0` 또는 `[1-9][0-9]*` 만 허용. write path 와
+      // 동일한 strict 파서를 써서 1.0/01/+1/"-" 같은 non-canonical 토큰을 거부한다.
+      if (!isArrayIndexSegment(seg)) return { ok: false };
+      const i = Number(seg);
+      if (i >= cur.length) return { ok: false };
       cur = cur[i];
     } else {
       if (!Object.prototype.hasOwnProperty.call(cur, seg)) return { ok: false };
