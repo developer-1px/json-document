@@ -244,10 +244,13 @@ function withAdded(prev: SelectionSnap, mode: SelectionMode, range: SelectionRan
 function withRemoved(prev: SelectionSnap, input: SelectionPoint | SelectionRange | number, mode: SelectionMode, state?: unknown): SelectionSnap {
   const removeAt = typeof input === "number"
     ? input
-    : prev.selectionRanges.findIndex((candidate) => selectionInputMatches(candidate, input, prev.selectedPointers));
+    : prev.selectionRanges.findIndex((candidate) => selectionInputMatches(candidate, input));
   if (removeAt < 0 || removeAt >= prev.selectionRanges.length) return prev;
   const next = prev.selectionRanges.filter((_, index) => index !== removeAt);
-  return snapFromRanges(next, Math.min(prev.primaryIndex, next.length - 1), mode, state);
+  const nextPrimary = removeAt < prev.primaryIndex
+    ? prev.primaryIndex - 1
+    : Math.min(prev.primaryIndex, next.length - 1);
+  return snapFromRanges(next, nextPrimary, mode, state);
 }
 
 function withToggledPointer(prev: SelectionSnap, pointer: Pointer, mode: SelectionMode, state?: unknown): SelectionSnap {
@@ -279,11 +282,10 @@ function actionRange(action: { pointer?: Pointer; point?: SelectionPoint; range?
   return action.range ?? collapsedRange(actionPoint(action));
 }
 
-function selectionInputMatches(candidate: SelectionRange, input: SelectionPoint | SelectionRange, selectedPointers: ReadonlyArray<Pointer>): boolean {
+function selectionInputMatches(candidate: SelectionRange, input: SelectionPoint | SelectionRange): boolean {
   if (typeof input === "object" && "anchor" in input && "focus" in input) return sameRange(candidate, input);
   return samePoint(candidate.anchor, input)
-    || samePoint(candidate.focus, input)
-    || selectedPointers.includes(pointPath(input));
+    || samePoint(candidate.focus, input);
 }
 
 function applyActionContext(
