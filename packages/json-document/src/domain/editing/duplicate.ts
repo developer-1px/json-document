@@ -5,7 +5,7 @@
 
 import type * as z from "zod";
 import type { ApplyResult, JSONPatchOperation } from "../../foundation/patch/index.js";
-import { parentPointer, lastSegment, lastSegmentIndex, withLastSegment, readAt, tryParsePointer } from "../../foundation/pointer/index.js";
+import { parentPointer, lastSegmentIndex, withLastSegment, readAt, tryParsePointer } from "../../foundation/pointer/index.js";
 import type { Pointer } from "../../foundation/pointer/index.js";
 import { patchPreflight, patchPreflightFromApplyResult, type PatchPreflightErrorCode } from "../schema/mutation/patch.js";
 import { tryRekeyPayload } from "../schema/mutation/rekey.js";
@@ -137,6 +137,3 @@ function duplicateError(
     ? { ok: false, code, reason }
     : { ok: false, code, reason, violations };
 }
-
-/** unused helper hint to silence linter for lastSegment import — also useful in error messages. */
-void lastSegment;

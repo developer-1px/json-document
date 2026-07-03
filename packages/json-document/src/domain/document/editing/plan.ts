@@ -31,19 +31,6 @@ export function resolvePathValueArgs(
     : { value: pathOrValue };
 }
 
-export function planDocumentInsert(input: {
-  selection?: SelectionSnap | null | undefined;
-  pathOrValue: Pointer | unknown;
-  value: unknown;
-  hasValueArg: boolean;
-}): DocumentEditPlan {
-  const args = resolvePathValueArgs(input.pathOrValue, input.value, input.hasValueArg);
-  const target = args.target ?? primaryPointer(input.selection ?? EMPTY_SELECTION) ?? null;
-  return target === null
-    ? emptySelectionCapability("insert target selection is empty")
-    : { ok: true, operations: [{ op: "add", path: target, value: args.value }] };
-}
-
 export function planDocumentReplace(input: {
   state: unknown;
   selection?: SelectionSnap | null | undefined;
