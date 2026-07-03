@@ -132,10 +132,14 @@ function resolveMoveIntoTarget(
     return { ok: false, code: "invalid_pointer", reason: `invalid move into target pointer: ${target}`, pointer: target };
   }
   const container = readAt(state, segments);
-  if (!container.ok || !Array.isArray(container.value)) {
+  // 구문 위반 = invalid_pointer, 부재 = path_not_found, 존재하나 종류 불일치 = invalid_target.
+  if (!container.ok) {
+    return { ok: false, code: "path_not_found", reason: `move into target not found: ${target}`, pointer: target };
+  }
+  if (!Array.isArray(container.value)) {
     return {
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
       reason: `move into target must address an array container: ${target}`,
       pointer: target,
     };
@@ -152,7 +156,7 @@ function resolveRelativeMoveTarget(
   if (targetLocation === null) {
     return {
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
       reason: `relative move target must address an array item: ${target}`,
       pointer: target,
     };

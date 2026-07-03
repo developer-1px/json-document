@@ -7,6 +7,7 @@ export type CapabilityErrorCode =
   | ErrorCode
   | PatchPreflightErrorCode
   | SelectionTextEditErrorCode
+  | "invalid_target"
   | "discriminator_mismatch"
   | "rekey_failed"
   | "missing_new_key"

@@ -19,10 +19,10 @@ describe("#210 paste/insert into target error codes", () => {
     });
   });
 
-  it("existing non-array into target → invalid_pointer (unchanged, type mismatch)", () => {
+  it("existing non-array into target → invalid_target (type mismatch, #219)", () => {
     expect(doc.canInsert({ into: "/meta" }, { id: "x" })).toMatchObject({
       ok: false,
-      code: "invalid_pointer",
+      code: "invalid_target",
     });
   });
 
