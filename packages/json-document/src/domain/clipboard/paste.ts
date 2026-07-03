@@ -321,7 +321,9 @@ function resolveIntoArrayTarget(
   const segments = tryParsePointer(target);
   if (segments === null) return pasteError("invalid_pointer", `invalid into target pointer: ${target}`);
   const container = readAt(state, segments);
-  if (!container.ok || !Array.isArray(container.value)) {
+  // 구문은 맞지만 대상이 없음 → path_not_found. 존재하나 배열이 아님은 별개(타입 불일치).
+  if (!container.ok) return pasteError("path_not_found", `into target not found: ${target}`);
+  if (!Array.isArray(container.value)) {
     return pasteError("invalid_pointer", `into target must address an array container: ${target}`);
   }
   return { ok: true, path: appendSegment(target, "-") };
