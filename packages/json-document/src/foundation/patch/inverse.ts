@@ -34,7 +34,10 @@ function inverseOp(op: JSONPatchOperation, before: unknown): JSONPatchOperation 
   switch (op.op) {
     case "add":
     case "copy": {
+      if (op.path === "") return { op: "replace", path: "", value: before };
       const path = resolveAppendPath(op.path, before);
+      const overwritten = objectMemberValue(before, parsePointer(path));
+      if (overwritten.ok) return { op: "replace", path, value: overwritten.value };
       return { op: "remove", path };
     }
     case "remove": {
@@ -282,6 +285,24 @@ function computeRootObjectAddInverses(
 
 function createSeenRootKeys(): SeenRootKeys {
   return Object.create(null) as SeenRootKeys;
+}
+
+// add/copy 가 기존 object 멤버를 덮어쓰는 경우, inverse 는 remove 가 아니라
+// 이전 값을 복원하는 replace 여야 한다. 배열 index 삽입(shift)과 신규 key 는 remove.
+function objectMemberValue(
+  before: unknown,
+  segments: string[],
+): { ok: true; value: unknown } | { ok: false } {
+  if (segments.length === 0) return { ok: false };
+  const parent = getValueAt(before, segments.slice(0, -1));
+  if (!parent.ok) return { ok: false };
+  const container = parent.value;
+  if (container === null || typeof container !== "object" || Array.isArray(container)) {
+    return { ok: false };
+  }
+  const key = segments[segments.length - 1]!;
+  if (!objectHasOwn.call(container, key)) return { ok: false };
+  return { ok: true, value: (container as Record<string, unknown>)[key] };
 }
 
 function readValueAtPointer(
