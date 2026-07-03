@@ -16,22 +16,35 @@ import {
 } from "./plan.js";
 
 export type JSONDocumentEditError = Extract<CapabilityResult, { ok: false }>;
-export type JSONDocumentEditResult = JSONResult | JSONDocumentEditError;
+
+/**
+ * 모든 mutation verb 의 통일 성공 shape (#219).
+ * "duplicate 는 새 객체(위치)를 반환한다"는 42년 정본을 전 verb 로 일반화 —
+ * value = 적용 후 document, applied = 실제 적용된 정규화 patch,
+ * target = 연산이 착지한 pointer (단일 착지점이 없으면 null).
+ */
+export interface JSONDocumentEditOk<T> {
+  ok: true;
+  value: T;
+  applied: ReadonlyArray<JSONPatchOperation>;
+  target: Pointer | null;
+}
+export type JSONDocumentEditResult<T = unknown> = JSONDocumentEditOk<T> | JSONDocumentEditError;
 
 export type JSONDocumentDuplicateOptions = DuplicateOpts;
 export type JSONDocumentDuplicateError = DomainDuplicateError;
 export type JSONDocumentDuplicateResult<T> =
-  | {
-      ok: true;
-      value: T;
-      applied: ReadonlyArray<JSONPatchOperation>;
+  | (JSONDocumentEditOk<T> & {
+      target: Pointer;
+      /** @deprecated `target` 으로 대체 (#219). 1.x 병행 유지. */
       duplicatedTo: Pointer;
-    }
+    })
   | JSONDocumentDuplicateError
   | Extract<JSONResult, { ok: false }>;
 
 interface DocumentEditMutation<T> {
   patch(operations: ReadonlyArray<JSONPatchOperation>): JSONResult;
+  lastApplied(): ReadonlyArray<JSONPatchOperation>;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
 }
 
@@ -40,7 +53,7 @@ interface DocumentInsertRuntime<T> {
     payload: unknown,
     target: JSONDocumentInsertTarget | undefined,
     options: JSONDocumentInsertOptions | undefined,
-  ): JSONDocumentEditResult;
+  ): JSONDocumentEditResult<T>;
 }
 
 interface CreateDocumentEditActionsInput<T> {
@@ -51,13 +64,13 @@ interface CreateDocumentEditActionsInput<T> {
 }
 
 export interface DocumentEditActions<T> {
-  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult;
-  insert(value: unknown): JSONDocumentEditResult;
-  replace(path: Pointer, value: unknown): JSONDocumentEditResult;
-  replace(value: unknown): JSONDocumentEditResult;
-  delete(source?: SelectionSource): JSONDocumentEditResult;
-  move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult;
-  move(target: JSONDocumentMoveTarget): JSONDocumentEditResult;
+  insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult<T>;
+  insert(value: unknown): JSONDocumentEditResult<T>;
+  replace(path: Pointer, value: unknown): JSONDocumentEditResult<T>;
+  replace(value: unknown): JSONDocumentEditResult<T>;
+  delete(source?: SelectionSource): JSONDocumentEditResult<T>;
+  move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult<T>;
+  move(target: JSONDocumentMoveTarget): JSONDocumentEditResult<T>;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
   duplicate(options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
 }
@@ -67,47 +80,51 @@ export function createDocumentEditActions<T>(
 ): DocumentEditActions<T> {
   const { getState, insertRuntime, mutation, selection } = input;
 
-  function insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult;
-  function insert(value: unknown): JSONDocumentEditResult;
+  // 계획 실행 + 통일 성공 shape 구성 (#219 EditOk).
+  const applyPlan = (plan: ReturnType<typeof planDocumentReplace>): JSONDocumentEditResult<T> => {
+    if (!plan.ok) return plan;
+    const r = mutation.patch(plan.operations);
+    if (!r.ok) return r;
+    return { ok: true, value: getState(), applied: mutation.lastApplied(), target: plan.target };
+  };
+
+  function insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult<T>;
+  function insert(value: unknown): JSONDocumentEditResult<T>;
   function insert(
     targetOrValue: JSONDocumentInsertTarget | unknown,
     maybeValue?: unknown,
     maybeOptions?: JSONDocumentInsertOptions,
-  ): JSONDocumentEditResult {
+  ): JSONDocumentEditResult<T> {
     return arguments.length >= 2
       ? insertRuntime.insertPayload(maybeValue, targetOrValue as JSONDocumentInsertTarget, maybeOptions)
       : insertRuntime.insertPayload(targetOrValue, undefined, undefined);
   }
 
-  function replace(path: Pointer, value: unknown): JSONDocumentEditResult;
-  function replace(value: unknown): JSONDocumentEditResult;
-  function replace(pathOrValue: Pointer | unknown, maybeValue?: unknown): JSONDocumentEditResult {
-    const plan = planDocumentReplace({
+  function replace(path: Pointer, value: unknown): JSONDocumentEditResult<T>;
+  function replace(value: unknown): JSONDocumentEditResult<T>;
+  function replace(pathOrValue: Pointer | unknown, maybeValue?: unknown): JSONDocumentEditResult<T> {
+    return applyPlan(planDocumentReplace({
       state: getState(),
       selection,
       pathOrValue,
       value: maybeValue,
       hasValueArg: arguments.length >= 2,
-    });
-    return plan.ok ? mutation.patch(plan.operations) : plan;
+    }));
   }
 
-  const deleteSelection = (source?: SelectionSource): JSONDocumentEditResult => {
-    const plan = planDocumentDelete({ selection, source });
-    return plan.ok ? mutation.patch(plan.operations) : plan;
-  };
+  const deleteSelection = (source?: SelectionSource): JSONDocumentEditResult<T> =>
+    applyPlan(planDocumentDelete({ selection, source }));
 
-  function move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult;
-  function move(target: JSONDocumentMoveTarget): JSONDocumentEditResult;
-  function move(sourceOrTarget: Pointer | JSONDocumentMoveTarget, maybeTarget?: JSONDocumentMoveTarget): JSONDocumentEditResult {
-    const plan = planDocumentMove({
+  function move(source: Pointer, target: JSONDocumentMoveTarget): JSONDocumentEditResult<T>;
+  function move(target: JSONDocumentMoveTarget): JSONDocumentEditResult<T>;
+  function move(sourceOrTarget: Pointer | JSONDocumentMoveTarget, maybeTarget?: JSONDocumentMoveTarget): JSONDocumentEditResult<T> {
+    return applyPlan(planDocumentMove({
       state: getState(),
       selection,
       sourceOrTarget,
       target: maybeTarget,
       hasSourceArg: maybeTarget !== undefined,
-    });
-    return plan.ok ? mutation.patch(plan.operations) : plan;
+    }));
   }
 
   function duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;

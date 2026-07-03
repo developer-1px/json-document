@@ -65,7 +65,7 @@ describe("@interactive-os/json-document-id-resolver", () => {
       pointer: "/columns/0/cards/1",
     });
 
-    expect(doc.move("/columns/0/cards/1", "/columns/1/cards/-")).toEqual({ ok: true });
+    expect(doc.move("/columns/0/cards/1", "/columns/1/cards/-")).toMatchObject({ ok: true });
     expect(ids.resolve("card", "b")).toEqual({
       ok: true,
       scope: "card",
@@ -103,7 +103,7 @@ describe("@interactive-os/json-document-id-resolver", () => {
 
   test("reports duplicate ids and rejects ambiguous resolution", () => {
     const doc = createBoard();
-    expect(doc.replace("/columns/1/cards/0/id", "a")).toEqual({ ok: true });
+    expect(doc.replace("/columns/1/cards/0/id", "a")).toMatchObject({ ok: true });
     const ids = createIdResolver(doc, {
       scopes: [
         {

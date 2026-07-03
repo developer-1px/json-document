@@ -165,7 +165,7 @@ describe("createJSONDocument public interface", () => {
     ], {
       spread: true,
       rekey: { fields: ["id"], strategy: "suffix" },
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(doc.lastPatch).toEqual([
       { op: "add", path: "/items/4", value: { id: "a-copy-2", name: "A2" } },
       { op: "add", path: "/items/5", value: { id: "b-copy-2", name: "B2" } },
@@ -186,7 +186,7 @@ describe("createJSONDocument public interface", () => {
     ], {
       spread: true,
       rekey: { fields: ["id"], strategy: "suffix" },
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(doc.lastPatch).toEqual([
       { op: "add", path: "/items/1", value: { id: "a", name: "A1" } },
       { op: "add", path: "/items/2", value: { id: "a-copy-2", name: "A2" } },
@@ -209,7 +209,7 @@ describe("createJSONDocument public interface", () => {
     ], {
       spread: true,
       rekey: { fields: ["id"], strategy: "suffix" },
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(doc.lastPatch).toEqual([
       { op: "add", path: "/items/1", value: { id: "a-copy", name: "A1" } },
       { op: "add", path: "/items/2", value: { id: "a-copy-2", name: "A2" } },
@@ -331,7 +331,7 @@ describe("createJSONDocument public interface", () => {
     expect("next" in pasted).toBe(false);
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "a", "b"]);
 
-    expect(doc.insert("/items/-", { id: "x", name: "X" })).toEqual({ ok: true });
+    expect(doc.insert("/items/-", { id: "x", name: "X" })).toMatchObject({ ok: true });
     expect(doc.lastPatch).toEqual([{ op: "add", path: "/items/4", value: { id: "x", name: "X" } }]);
     expect(doc.value.items.at(-1)).toEqual({ id: "x", name: "X" });
     expect(doc.history.undoDepth).toBe(2);
@@ -345,7 +345,7 @@ describe("createJSONDocument public interface", () => {
       { id: "y", name: "Y" },
     ], {
       spread: true,
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(doc.lastPatch).toEqual([
       { op: "add", path: "/items/1", value: { id: "x", name: "X" } },
       { op: "add", path: "/items/2", value: { id: "y", name: "Y" } },

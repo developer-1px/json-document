@@ -90,13 +90,13 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.canMoveUp("/backlog/1")).toEqual({ ok: true });
-    expect(collection.moveUp("/backlog/1")).toEqual({ ok: true });
+    expect(collection.canMoveUp("/backlog/1")).toMatchObject({ ok: true });
+    expect(collection.moveUp("/backlog/1")).toMatchObject({ ok: true });
     expect(doc.value.backlog.map((card) => card.id)).toEqual(["todo", "idea", "later"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/backlog/1", path: "/backlog/0" }]);
 
-    expect(collection.canMoveDown("/backlog/1")).toEqual({ ok: true });
-    expect(collection.moveDown("/backlog/1")).toEqual({ ok: true });
+    expect(collection.canMoveDown("/backlog/1")).toMatchObject({ ok: true });
+    expect(collection.moveDown("/backlog/1")).toMatchObject({ ok: true });
     expect(doc.value.backlog.map((card) => card.id)).toEqual(["todo", "later", "idea"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/backlog/1", path: "/backlog/2" }]);
   });
@@ -123,13 +123,13 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.canMoveBefore("/backlog/0", "/backlog/2")).toEqual({ ok: true });
-    expect(collection.moveBefore("/backlog/0", "/backlog/2")).toEqual({ ok: true });
+    expect(collection.canMoveBefore("/backlog/0", "/backlog/2")).toMatchObject({ ok: true });
+    expect(collection.moveBefore("/backlog/0", "/backlog/2")).toMatchObject({ ok: true });
     expect(doc.value.backlog.map((card) => card.id)).toEqual(["todo", "idea", "later"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/backlog/0", path: "/backlog/1" }]);
 
-    expect(collection.canMoveAfter("/backlog/2", "/backlog/0")).toEqual({ ok: true });
-    expect(collection.moveAfter("/backlog/2", "/backlog/0")).toEqual({ ok: true });
+    expect(collection.canMoveAfter("/backlog/2", "/backlog/0")).toMatchObject({ ok: true });
+    expect(collection.moveAfter("/backlog/2", "/backlog/0")).toMatchObject({ ok: true });
     expect(doc.value.backlog.map((card) => card.id)).toEqual(["todo", "later", "idea"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/backlog/2", path: "/backlog/1" }]);
   });
@@ -138,12 +138,12 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.moveBefore("/columns/0/cards/1", "/columns/1/cards/1")).toEqual({ ok: true });
+    expect(collection.moveBefore("/columns/0/cards/1", "/columns/1/cards/1")).toMatchObject({ ok: true });
     expect(doc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["a"]);
     expect(doc.value.columns[1]?.cards.map((card) => card.id)).toEqual(["c", "b", "d"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/columns/0/cards/1", path: "/columns/1/cards/1" }]);
 
-    expect(collection.moveAfter("/columns/1/cards/0", "/columns/0/cards/0")).toEqual({ ok: true });
+    expect(collection.moveAfter("/columns/1/cards/0", "/columns/0/cards/0")).toMatchObject({ ok: true });
     expect(doc.value.columns[0]?.cards.map((card) => card.id)).toEqual(["a", "c"]);
     expect(doc.value.columns[1]?.cards.map((card) => card.id)).toEqual(["b", "d"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/columns/1/cards/0", path: "/columns/0/cards/1" }]);
@@ -153,7 +153,7 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.moveAfter("/outline/0", "/outline/1")).toEqual({ ok: true });
+    expect(collection.moveAfter("/outline/0", "/outline/1")).toMatchObject({ ok: true });
     expect(doc.value.outline.map((item) => item.id)).toEqual(["child", "heading"]);
 
     expect(collection.duplicateAfter("/sections/0", {
@@ -161,10 +161,10 @@ describe("@interactive-os/json-document-collection", () => {
     })).toMatchObject({ ok: true, duplicatedTo: "/sections/1" });
     expect(doc.value.sections.map((section) => section.id)).toEqual(["hero", "hero-copy", "gallery"]);
 
-    expect(collection.moveUp("/layers/1")).toEqual({ ok: true });
+    expect(collection.moveUp("/layers/1")).toMatchObject({ ok: true });
     expect(doc.value.layers.map((layer) => layer.id)).toEqual(["title", "background"]);
 
-    expect(collection.deleteItems("/tabs/0")).toEqual({ ok: true });
+    expect(collection.deleteItems("/tabs/0")).toMatchObject({ ok: true });
     expect(doc.value.tabs.map((tab) => tab.id)).toEqual(["sheet-2", "sheet-3", "sheet-4"]);
   });
 
@@ -172,10 +172,10 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.canMoveBefore("/backlog/0", "/backlog/1")).toEqual({ ok: true });
-    expect(collection.moveBefore("/backlog/0", "/backlog/1")).toEqual({ ok: true });
-    expect(collection.canMoveAfter("/backlog/1", "/backlog/0")).toEqual({ ok: true });
-    expect(collection.moveAfter("/backlog/1", "/backlog/0")).toEqual({ ok: true });
+    expect(collection.canMoveBefore("/backlog/0", "/backlog/1")).toMatchObject({ ok: true });
+    expect(collection.moveBefore("/backlog/0", "/backlog/1")).toMatchObject({ ok: true });
+    expect(collection.canMoveAfter("/backlog/1", "/backlog/0")).toMatchObject({ ok: true });
+    expect(collection.moveAfter("/backlog/1", "/backlog/0")).toMatchObject({ ok: true });
     expect(doc.value.backlog.map((card) => card.id)).toEqual(["idea", "todo", "later"]);
     expect(doc.history.undoDepth).toBe(0);
   });
@@ -186,7 +186,7 @@ describe("@interactive-os/json-document-collection", () => {
 
     expect(collection.canDuplicateAfter("/slides/0", {
       rekey: { fields: ["id"], strategy: "suffix" },
-    })).toEqual({ ok: true });
+    })).toMatchObject({ ok: true });
     expect(collection.duplicateAfter("/slides/0", {
       rekey: { fields: ["id"], strategy: "suffix" },
     })).toMatchObject({
@@ -201,8 +201,8 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.canDeleteItems(["/tabs/1", "/tabs/3"])).toEqual({ ok: true });
-    expect(collection.deleteItems(["/tabs/1", "/tabs/3"])).toEqual({ ok: true });
+    expect(collection.canDeleteItems(["/tabs/1", "/tabs/3"])).toMatchObject({ ok: true });
+    expect(collection.deleteItems(["/tabs/1", "/tabs/3"])).toMatchObject({ ok: true });
     expect(doc.value.tabs.map((tab) => tab.id)).toEqual(["sheet-1", "sheet-3"]);
     expect(doc.lastPatch).toEqual([
       { op: "remove", path: "/tabs/3" },
@@ -215,7 +215,7 @@ describe("@interactive-os/json-document-collection", () => {
     const doc = createBoard();
     const collection = createCollection(doc);
 
-    expect(collection.deleteItems(["/tabs/1", "/tabs/1", "/tabs/2"])).toEqual({ ok: true });
+    expect(collection.deleteItems(["/tabs/1", "/tabs/1", "/tabs/2"])).toMatchObject({ ok: true });
     expect(doc.value.tabs.map((tab) => tab.id)).toEqual(["sheet-1", "sheet-4"]);
     expect(doc.lastPatch).toEqual([
       { op: "remove", path: "/tabs/2" },

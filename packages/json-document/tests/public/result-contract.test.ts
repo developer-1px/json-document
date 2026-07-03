@@ -38,26 +38,38 @@ function expectOkKeys(result: unknown, keys: ReadonlyArray<string>) {
 }
 
 describe("json-document 1.0 result contract", () => {
-  test("locks JSONResult mutation shape and lastPatch handoff", () => {
+  test("locks unified EditOk mutation shape and lastPatch handoff", () => {
     const doc = createDoc();
 
+    // #219: 모든 mutation verb 성공은 { ok, value, applied, target } 로 통일된다.
     const insertPatch: JSONPatchOperation[] = [
       { op: "add", path: "/items/2", value: { id: "c", title: "C" } },
     ];
     const inserted = doc.insert("/items/-", { id: "c", title: "C" });
-    expect(inserted).toEqual({ ok: true });
+    expectOkKeys(inserted, ["ok", "value", "applied", "target"]);
+    if (!inserted.ok) return;
+    expect(inserted.applied).toEqual(insertPatch);
+    expect(inserted.target).toBe("/items/2");
+    expect(inserted.value).toBe(doc.value);
     expect(doc.lastPatch).toEqual(insertPatch);
 
     const replaced = doc.replace("/items/2/title", "C1");
-    expect(replaced).toEqual({ ok: true });
+    expectOkKeys(replaced, ["ok", "value", "applied", "target"]);
+    if (!replaced.ok) return;
+    expect(replaced.target).toBe("/items/2/title");
+    expect(replaced.value).toBe(doc.value);
     expect(doc.lastPatch).toEqual([{ op: "replace", path: "/items/2/title", value: "C1" }]);
 
     const moved = doc.move("/items/2", { before: "/items/0" });
-    expect(moved).toEqual({ ok: true });
+    expectOkKeys(moved, ["ok", "value", "applied", "target"]);
+    if (!moved.ok) return;
+    expect(moved.target).toBe("/items/0");
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/2", path: "/items/0" }]);
 
     const deleted = doc.delete("/items/0");
-    expect(deleted).toEqual({ ok: true });
+    expectOkKeys(deleted, ["ok", "value", "applied", "target"]);
+    if (!deleted.ok) return;
+    expect(deleted.target).toBeNull();
     expect(doc.lastPatch).toEqual([{ op: "remove", path: "/items/0" }]);
   });
 
@@ -79,20 +91,22 @@ describe("json-document 1.0 result contract", () => {
     expect(doc.lastPatch).toEqual([]);
 
     const pasted = doc.paste("/items/-");
-    expectOkKeys(pasted, ["ok", "value", "applied"]);
+    expectOkKeys(pasted, ["ok", "value", "applied", "target"]);
     if (!pasted.ok) return;
     expect(pasted.applied).toEqual([
       { op: "add", path: "/items/2", value: { id: "a", title: "A" } },
       { op: "add", path: "/items/3", value: { id: "b", title: "B" } },
     ]);
+    expect(pasted.target).toBe("/items/2");
     expect(pasted.value).toBe(doc.value);
     expect(doc.lastPatch).toEqual(pasted.applied);
 
     const duplicated = doc.duplicate("/items/0", {
       rekey: { fields: ["id"], strategy: "suffix" },
     });
-    expectOkKeys(duplicated, ["ok", "value", "applied", "duplicatedTo"]);
+    expectOkKeys(duplicated, ["ok", "value", "applied", "target", "duplicatedTo"]);
     if (!duplicated.ok) return;
+    expect(duplicated.target).toBe("/items/1");
     expect(duplicated.duplicatedTo).toBe("/items/1");
     expect(duplicated.applied).toEqual([
       {
@@ -105,7 +119,7 @@ describe("json-document 1.0 result contract", () => {
     expect(doc.lastPatch).toEqual(duplicated.applied);
 
     const cut = doc.cut("/items/1");
-    expectOkKeys(cut, ["ok", "value", "applied", "payload", "source", "sources"]);
+    expectOkKeys(cut, ["ok", "value", "applied", "target", "payload", "source", "sources"]);
     if (!cut.ok) return;
     expect(cut).toMatchObject({
       applied: [{ op: "remove", path: "/items/1" }],

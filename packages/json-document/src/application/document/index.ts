@@ -23,6 +23,7 @@ export type {
   JSONDocumentDuplicateOptions,
   JSONDocumentDuplicateResult,
   JSONDocumentEditError,
+  JSONDocumentEditOk,
   JSONDocumentEditResult,
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,

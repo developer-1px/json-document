@@ -421,6 +421,7 @@
         "JSONDocumentDuplicateOptions",
         "JSONDocumentDuplicateResult",
         "JSONDocumentEditError",
+        "JSONDocumentEditOk",
         "JSONDocumentEditResult",
         "JSONDocumentError",
         "JSONDocumentHistory",
@@ -528,7 +529,7 @@
         "unescapeSegment",
         "withLastSegment"
       ],
-      "publicExportCount": 137,
+      "publicExportCount": 138,
       "keywords": [
         "clipboard",
         "crud",

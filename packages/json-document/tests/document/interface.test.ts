@@ -83,19 +83,19 @@ describe("JSONDocument interface", () => {
     });
 
     expect(doc.canInsert("/items/-", { id: "c", name: "C" })).toEqual({ ok: true });
-    expect(doc.insert("/items/-", { id: "c", name: "C" })).toEqual({ ok: true });
+    expect(doc.insert("/items/-", { id: "c", name: "C" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "c"]);
 
     expect(doc.canReplace("/items/0/name", "A1")).toEqual({ ok: true });
-    expect(doc.replace("/items/0/name", "A1")).toEqual({ ok: true });
+    expect(doc.replace("/items/0/name", "A1")).toMatchObject({ ok: true });
     expect(doc.value.items[0]?.name).toBe("A1");
 
     expect(doc.canReplace("$.items[*].name", "Renamed")).toEqual({ ok: true });
-    expect(doc.replace("$.items[*].name", "Renamed")).toEqual({ ok: true });
+    expect(doc.replace("$.items[*].name", "Renamed")).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.name)).toEqual(["Renamed", "Renamed", "Renamed"]);
 
     expect(doc.canMove("/items/0", "/items/1")).toEqual({ ok: true });
-    expect(doc.move("/items/0", "/items/1")).toEqual({ ok: true });
+    expect(doc.move("/items/0", "/items/1")).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["b", "a", "c"]);
 
     doc.selection?.collapse("/items/0");
@@ -104,7 +104,7 @@ describe("JSONDocument interface", () => {
     expect(doc.value.items.map((item) => item.id)).toEqual(["b", "b-copy", "a", "c"]);
 
     expect(doc.canDelete("/items/1")).toEqual({ ok: true });
-    expect(doc.delete("/items/1")).toEqual({ ok: true });
+    expect(doc.delete("/items/1")).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["b", "a", "c"]);
 
     expect(doc.canUndo()).toEqual({ ok: true });
@@ -119,15 +119,15 @@ describe("JSONDocument interface", () => {
     const doc = createJSONDocument(Schema, initial);
 
     expect(doc.canInsert({ into: "/items" }, { id: "d", name: "D" })).toEqual({ ok: true });
-    expect(doc.insert({ into: "/items" }, { id: "d", name: "D" })).toEqual({ ok: true });
+    expect(doc.insert({ into: "/items" }, { id: "d", name: "D" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "b", "d"]);
     expect(doc.lastPatch).toEqual([{ op: "add", path: "/items/2", value: { id: "d", name: "D" } }]);
 
     expect(doc.canInsert({ after: "/items/0" }, { id: "c", name: "C" })).toEqual({ ok: true });
-    expect(doc.insert({ after: "/items/0" }, { id: "c", name: "C" })).toEqual({ ok: true });
+    expect(doc.insert({ after: "/items/0" }, { id: "c", name: "C" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "c", "b", "d"]);
 
-    expect(doc.insert({ before: "/items/0" }, { id: "z", name: "Z" })).toEqual({ ok: true });
+    expect(doc.insert({ before: "/items/0" }, { id: "z", name: "Z" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["z", "a", "c", "b", "d"]);
   });
 
@@ -150,17 +150,17 @@ describe("JSONDocument interface", () => {
     const doc = createJSONDocument(Schema, ordered);
 
     expect(doc.canMove("/items/0", { after: "/items/2" })).toEqual({ ok: true });
-    expect(doc.move("/items/0", { after: "/items/2" })).toEqual({ ok: true });
+    expect(doc.move("/items/0", { after: "/items/2" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["b", "c", "a", "d"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/0", path: "/items/2" }]);
 
     expect(doc.canMove("/items/3", { before: "/items/1" })).toEqual({ ok: true });
-    expect(doc.move("/items/3", { before: "/items/1" })).toEqual({ ok: true });
+    expect(doc.move("/items/3", { before: "/items/1" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["b", "d", "c", "a"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/3", path: "/items/1" }]);
 
     expect(doc.canMove("/items/0", { into: "/items" })).toEqual({ ok: true });
-    expect(doc.move("/items/0", { into: "/items" })).toEqual({ ok: true });
+    expect(doc.move("/items/0", { into: "/items" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["d", "c", "a", "b"]);
     expect(doc.lastPatch).toEqual([{ op: "move", from: "/items/0", path: "/items/3" }]);
   });
@@ -171,7 +171,7 @@ describe("JSONDocument interface", () => {
     });
 
     expect(doc.canMove({ after: "/items/3" })).toEqual({ ok: true });
-    expect(doc.move({ after: "/items/3" })).toEqual({ ok: true });
+    expect(doc.move({ after: "/items/3" })).toMatchObject({ ok: true });
     expect(doc.value.items.map((item) => item.id)).toEqual(["a", "c", "d", "b"]);
   });
 

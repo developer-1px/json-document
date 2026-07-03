@@ -63,10 +63,10 @@ describe("@interactive-os/json-document-checkpoints", () => {
     const checkpoints = createCheckpoints(doc, { now: () => 1 });
 
     checkpoints.save("start");
-    expect(doc.replace("/title", "Changed")).toEqual({ ok: true });
-    expect(doc.insert("/cards/-", { id: "b", title: "B" })).toEqual({ ok: true });
+    expect(doc.replace("/title", "Changed")).toMatchObject({ ok: true });
+    expect(doc.insert("/cards/-", { id: "b", title: "B" })).toMatchObject({ ok: true });
 
-    expect(checkpoints.canRestore("start")).toEqual({ ok: true });
+    expect(checkpoints.canRestore("start")).toMatchObject({ ok: true });
     expect(checkpoints.restore("start")).toMatchObject({
       ok: true,
       checkpoint: {
@@ -90,14 +90,14 @@ describe("@interactive-os/json-document-checkpoints", () => {
 
     checkpoints.save("start");
     doc.replace("/title", "Changed");
-    expect(doc.canUndo()).toEqual({ ok: true });
+    expect(doc.canUndo()).toMatchObject({ ok: true });
 
     checkpoints.restore("start");
     expect(doc.canUndo()).toMatchObject({ ok: false, code: "empty_stack" });
 
     doc.replace("/title", "Changed again");
     checkpoints.restore("start", { preserveHistory: true });
-    expect(doc.canUndo()).toEqual({ ok: true });
+    expect(doc.canUndo()).toMatchObject({ ok: true });
   });
 
   test("reports missing checkpoints", () => {

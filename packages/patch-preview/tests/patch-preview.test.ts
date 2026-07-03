@@ -31,7 +31,7 @@ describe("@interactive-os/json-document-patch-preview", () => {
 
     expect(previewer.canPreview([
       { op: "replace", path: "/title", value: "Next" },
-    ])).toEqual({ ok: true });
+    ])).toMatchObject({ ok: true });
 
     const preview = previewer.preview([
       { op: "replace", path: "/title", value: "Next" },
@@ -78,7 +78,7 @@ describe("@interactive-os/json-document-patch-preview", () => {
     const doc = createDoc();
     const previewer = createPatchPreview(Schema, doc);
 
-    expect(doc.replace("/title", "Current")).toEqual({ ok: true });
+    expect(doc.replace("/title", "Current")).toMatchObject({ ok: true });
 
     expect(previewer.preview([
       { op: "replace", path: "/items/0/done", value: true },

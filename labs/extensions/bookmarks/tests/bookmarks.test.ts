@@ -36,11 +36,11 @@ describe("@interactive-os/json-document-bookmarks", () => {
       metaTitle: "/meta/title",
     });
 
-    expect(doc.insert("/items/0", { id: "x", title: "X" })).toEqual({ ok: true });
+    expect(doc.insert("/items/0", { id: "x", title: "X" })).toMatchObject({ ok: true });
     expect(bookmarks.pointerFor("bTitle")).toBe("/items/2/title");
     expect(bookmarks.pointerFor("metaTitle")).toBe("/meta/title");
 
-    expect(doc.delete("/items/0")).toEqual({ ok: true });
+    expect(doc.delete("/items/0")).toMatchObject({ ok: true });
     expect(bookmarks.pointerFor("bTitle")).toBe("/items/1/title");
   });
 
@@ -51,7 +51,7 @@ describe("@interactive-os/json-document-bookmarks", () => {
       item: "/items/2",
     });
 
-    expect(doc.delete("/items/1")).toEqual({ ok: true });
+    expect(doc.delete("/items/1")).toMatchObject({ ok: true });
     expect(bookmarks.current()).toEqual({
       bookmarks: [
         { key: "item", pointer: "/items/1", lost: false },
@@ -61,7 +61,7 @@ describe("@interactive-os/json-document-bookmarks", () => {
       lost: 1,
     });
 
-    expect(doc.replace("/items", [])).toEqual({ ok: true });
+    expect(doc.replace("/items", [])).toMatchObject({ ok: true });
     expect(bookmarks.current()).toEqual({
       bookmarks: [
         { key: "item", pointer: null, lost: true },
@@ -79,7 +79,7 @@ describe("@interactive-os/json-document-bookmarks", () => {
       sibling: "/items/2/title",
     });
 
-    expect(doc.move("/items/0", "/items/-")).toEqual({ ok: true });
+    expect(doc.move("/items/0", "/items/-")).toMatchObject({ ok: true });
 
     expect(bookmarks.pointerFor("nested")).toBe("/items/2/title");
     expect(bookmarks.pointerFor("sibling")).toBe("/items/1/title");
@@ -89,7 +89,7 @@ describe("@interactive-os/json-document-bookmarks", () => {
     const doc = createDoc();
     const bookmarks = createBookmarks(doc);
 
-    expect(bookmarks.canSet("/items/0/title")).toEqual({ ok: true });
+    expect(bookmarks.canSet("/items/0/title")).toMatchObject({ ok: true });
     expect(bookmarks.set("title", "/items/0/title")).toEqual({
       ok: true,
       bookmark: { key: "title", pointer: "/items/0/title", lost: false },
@@ -143,7 +143,7 @@ describe("@interactive-os/json-document-bookmarks", () => {
     });
 
     bookmarks.dispose();
-    expect(doc.insert("/items/0", { id: "x", title: "X" })).toEqual({ ok: true });
+    expect(doc.insert("/items/0", { id: "x", title: "X" })).toMatchObject({ ok: true });
 
     expect(bookmarks.pointerFor("title")).toBe("/items/1/title");
   });
