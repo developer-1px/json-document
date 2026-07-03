@@ -14,7 +14,7 @@ export function evaluateArrayWildcardField(query: Query, root: unknown): Match[]
   const rootObject = root as Record<string, unknown>;
   if (!objectHasOwn.call(rootObject, simple.arrayName)) return [];
   const array = rootObject[simple.arrayName];
-  if (!Array.isArray(array)) return [];
+  if (!Array.isArray(array)) return null;
 
   const rootPointer = "/" + escapeSeg(simple.arrayName);
   const fieldPointer = "/" + escapeSeg(simple.fieldName);
@@ -64,7 +64,7 @@ export function evaluateArrayRegexFilter(query: Query, root: unknown): Match[] |
   const rootObject = root as Record<string, unknown>;
   if (!objectHasOwn.call(rootObject, arraySelector.name)) return [];
   const array = rootObject[arraySelector.name];
-  if (!Array.isArray(array)) return [];
+  if (!Array.isArray(array)) return null;
 
   const literal = plainRegexLiteral(filter.pattern);
   const regex = literal === null ? compiledRegex(filter.pattern, filter.full) : null;
@@ -120,7 +120,7 @@ export function matchArrayWildcardFieldPointers(query: Query, root: unknown): st
   const rootObject = root as Record<string, unknown>;
   if (!objectHasOwn.call(rootObject, simple.arrayName)) return [];
   const array = rootObject[simple.arrayName];
-  if (!Array.isArray(array)) return [];
+  if (!Array.isArray(array)) return null;
 
   const rootPointer = "/" + escapeSeg(simple.arrayName);
   const fieldPointer = "/" + escapeSeg(simple.fieldName);
