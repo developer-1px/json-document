@@ -207,7 +207,7 @@ describe("@interactive-os/json-document-drag-drop", () => {
       target: { after: "/archive" },
       capability: {
         ok: false,
-        code: "invalid_pointer",
+        code: "invalid_target",
         reason: "relative move target must address an array item: /archive",
         pointer: "/archive",
       },
