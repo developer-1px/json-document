@@ -106,3 +106,5 @@ operation planner -> execute/apply/history/selection update
 ### insert와 paste option 어휘 분리
 
 `insert`는 내부적으로 paste와 구현을 공유할 수 있다. 하지만 public option이 paste vocabulary를 자동으로 상속하면 안 된다. `InsertOptions`는 core edit verb에 필요한 범위로 제한하고, paste-specific option은 paste/clipboard surface에서 노출한다.
+
+진행 상태(#214/#219): `JSONDocumentInsertOptions`는 더 이상 `PasteOptions`를 상속하지 않고 자체 필드(`spread`, `trustedPayload`)로 정의된다. `rekey`는 deprecated alias로 1.x에서만 허용되며 2.0에서 제거된다.
