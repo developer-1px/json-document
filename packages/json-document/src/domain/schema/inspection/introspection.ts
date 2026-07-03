@@ -47,19 +47,21 @@ function schemaAtPointerUncached(schema: z.ZodType, pointer: Pointer, mode: "val
   for (let i = 0; i < segments.length && current; i += 1) {
     const segment = segments[i];
     if (segment === undefined) return null;
-    const arrayElement = getArrayElement(current);
+    // wrapper(optional/nullable/default/pipe/lazy 등)를 벗겨야 안쪽 컨테이너로 내려갈 수 있다.
+    const container = unwrapStructuralSchema(current);
+    const arrayElement = getArrayElement(container);
     if (arrayElement && isArrayElementSegment(segment)) {
       current = arrayElement;
       continue;
     }
 
-    const shape = getObjectShape(current);
+    const shape = getObjectShape(container);
     if (shape && segment in shape) {
       current = shape[segment] ?? null;
       continue;
     }
 
-    const def = getDef(current);
+    const def = getDef(container);
     if (def.type === "record" && def.valueType) {
       current = def.valueType;
       continue;
@@ -69,7 +71,47 @@ function schemaAtPointerUncached(schema: z.ZodType, pointer: Pointer, mode: "val
   }
 
   if (mode === "insert") {
-    return current ? (getArrayElement(current) ?? current) : null;
+    if (!current) return null;
+    const container = unwrapStructuralSchema(current);
+    return getArrayElement(container) ?? current;
+  }
+  return current;
+}
+
+// 단일 inner 를 가진 schema wrapper 를 벗겨 structural schema 로 수렴한다.
+// wrapper→inner 매핑은 model/schema.ts 의 schemaOutputIsKnownJson 과 일치시킨다.
+function unwrapStructuralSchema(schema: z.ZodType): z.ZodType {
+  let current = schema;
+  const seen = new Set<z.ZodType>();
+  while (!seen.has(current)) {
+    seen.add(current);
+    const def = getDef(current);
+    switch (def.type) {
+      case "optional":
+      case "nullable":
+      case "nonoptional":
+      case "prefault":
+      case "default":
+      case "catch":
+      case "readonly":
+        if (!def.innerType) return current;
+        current = def.innerType;
+        continue;
+      case "pipe":
+        if (!def.out) return current;
+        current = def.out;
+        continue;
+      case "lazy":
+        if (!def.getter) return current;
+        try {
+          current = def.getter();
+        } catch {
+          return current;
+        }
+        continue;
+      default:
+        return current;
+    }
   }
   return current;
 }
