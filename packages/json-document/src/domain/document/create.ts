@@ -72,6 +72,7 @@ export interface DocumentRuntime<T> {
   readonly schema: SchemaState;
   patch(operations: JSONPatchInput, metadata?: JSONChangeMetadata): JSONResult;
   commit(operations: ReadonlyArray<JSONPatchOperation>, options?: JSONDocumentCommitOptions): JSONResult;
+  /** @deprecated `query` 를 사용하라. 42년 정본에서 find 는 콘텐츠 검색(search-replace 영역)이고 구조 질의의 이름은 query 다 (#219). 2.0 에서 제거. */
   find(jsonpath: string): QueryResult;
   insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult<T>;
   insert(value: unknown): JSONDocumentEditResult<T>;
@@ -98,8 +99,9 @@ export interface DocumentRuntime<T> {
   query(jsonpath: string): QueryResult;
   entries(path: Pointer): EntriesResult;
   canPatch(operations: JSONPatchInput): CapabilityResult;
+  /** @deprecated `canQuery` 를 사용하라 (#219). 2.0 에서 제거. */
   canFind(jsonpath: string): CapabilityResult;
-  /** `query` 의 capability probe. `canFind` 와 동일 — find/query 수렴(#219) 의 query 측 이름. */
+  /** `query` 의 capability probe. */
   canQuery(jsonpath: string): CapabilityResult;
   canInsert(value: unknown): CapabilityResult;
   canInsert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): CapabilityResult;
