@@ -6,6 +6,50 @@ All notable changes to this project are documented here.
 
 No unreleased changes.
 
+## 1.1.0 - 2026-07-05
+
+This release adds the next additive public API surface for the core
+`@interactive-os/json-document` document facade while keeping 1.x compatibility.
+
+### Added
+
+- Added `doc.query(jsonpath)` and `doc.canQuery(jsonpath)` as the canonical
+  structural JSONPath query names.
+- Added `selection.selectAll(options?)` as the canonical scope-wide selection
+  command alias for `selectScope`.
+- Added `doc.history.clear()` to clear undo/redo stacks without changing the
+  current document value.
+- Added `JSONDocumentEditOk<T>` and unified mutation success results around
+  `{ ok, value, applied, target }`.
+- Added text-surface helpers and exported text-surface result/type contracts for
+  string surfaces with sidecar atom/range metadata.
+- Added `invalid_target` and `missing_offsets` result codes so callers can
+  distinguish target-kind failures and pointer-only text selections from other
+  recoverable failures.
+
+### Changed
+
+- Changed mutation verbs to report a normalized `target` pointer on success when
+  the operation has a single landing point. `insert` and `paste` report the first
+  landing slot, `replace` reports the replaced pointer for single-target
+  replaces, `move` reports the destination, `duplicate` reports the duplicated
+  pointer, and delete/cut or multi-target operations report `null`.
+- Deprecated `doc.find(jsonpath)` and `doc.canFind(jsonpath)` in favor of
+  `query` and `canQuery`. The aliases remain available in 1.x and are planned
+  for removal in 2.0.
+- Deprecated `JSONDocumentInsertOptions.rekey` as paste-specific vocabulary.
+  New code should use `JSONDocumentPasteOptions.rekey` or duplicate options.
+
+### Fixed
+
+- Fixed undo for values overwritten by add/copy inverse patches.
+- Fixed JSONPath fast-path queries returning empty results for object
+  containers.
+- Fixed selection range removal so remaining ranges re-home correctly.
+- Fixed schema introspection traversal through wrapper schemas.
+- Fixed `readAt` so non-canonical array indices are rejected.
+- Fixed paste-into capability errors for absent targets.
+
 ## 1.0.1 - 2026-06-19
 
 This release publishes the finalized 1.0 public API artifact after the npm

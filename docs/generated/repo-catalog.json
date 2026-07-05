@@ -384,7 +384,7 @@
       "status": "core",
       "private": false,
       "publishable": true,
-      "version": "1.0.1",
+      "version": "1.1.0",
       "description": "Headless JSON editing primitives guarded by Zod schemas.",
       "license": "MIT",
       "summary": "Zod schema로 보호되는 JSON state를 읽고, 바꾸고, 선택하고, 복사하고,\n붙여넣고, 되돌리기 위한 headless document layer입니다.",
