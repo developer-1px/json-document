@@ -14,6 +14,7 @@ import {
 } from "./array.js";
 import {
   applyIndependentReplacePatch,
+  applySequentialReplacePatch,
   applySameArrayElementReplacePatch,
   applySameArrayFieldReplacePatch,
   applySameArrayNestedReplacePatch,
@@ -43,6 +44,7 @@ export const publicTrustedStateStrategies: readonly FastPatchStrategy[] = [
   applySameArrayNestedReplacePatch,
   applySameArrayElementReplacePatch,
   applyIndependentReplacePatch,
+  applySequentialReplacePatch,
   applySameArrayStructuralPatch,
 ];
 
@@ -56,6 +58,7 @@ export const trustedStrategies: readonly FastPatchStrategy[] = [
   rootObjectReplaceWhenValuesTrusted,
   applySameArrayElementReplacePatch,
   applyIndependentReplacePatch,
+  applySequentialReplacePatch,
   applySameArrayStructuralPatch,
 ];
 
@@ -66,6 +69,7 @@ export const acceptedStrategies: readonly FastPatchStrategy[] = [
   applySameArrayFieldReplacePatch,
   applySameArrayNestedReplacePatch,
   applySameArrayElementReplacePatch,
+  applySequentialReplacePatch,
 ];
 
 export function applyFastPatchStrategies(
@@ -85,7 +89,13 @@ function applyRootObjectRemovePatch(
   state: unknown,
   ops: ReadonlyArray<JSONPatchOperation>,
 ): FastPatchResult {
-  if (ops.length < 2 || state === null || typeof state !== "object" || Array.isArray(state)) {
+  if (
+    ops.length < 2
+    || state === null
+    || typeof state !== "object"
+    || Array.isArray(state)
+    || !firstFlatRootObjectOperationIs(ops, "remove")
+  ) {
     return { handled: false };
   }
 
@@ -173,7 +183,13 @@ function applyRootObjectAddPatch(
   ops: ReadonlyArray<JSONPatchOperation>,
   valuesTrusted = false,
 ): FastPatchResult {
-  if (ops.length < 2 || state === null || typeof state !== "object" || Array.isArray(state)) return { handled: false };
+  if (
+    ops.length < 2
+    || state === null
+    || typeof state !== "object"
+    || Array.isArray(state)
+    || !firstFlatRootObjectOperationIs(ops, "add")
+  ) return { handled: false };
 
   let next: Record<string, unknown> | null = null;
   const applied = new Array<JSONPatchOperation>(ops.length);
@@ -218,7 +234,13 @@ function applyRootObjectReplacePatch(
   ops: ReadonlyArray<JSONPatchOperation>,
   valuesTrusted = false,
 ): FastPatchResult {
-  if (ops.length < 2 || state === null || typeof state !== "object" || Array.isArray(state)) return { handled: false };
+  if (
+    ops.length < 2
+    || state === null
+    || typeof state !== "object"
+    || Array.isArray(state)
+    || !firstFlatRootObjectOperationIs(ops, "replace")
+  ) return { handled: false };
 
   const source = state as Record<string, unknown>;
   const sourceKeys = Object.keys(source);
@@ -282,4 +304,19 @@ function applyRootObjectReplacePatch(
     }
   }
   return { handled: true, state: next, applied };
+}
+
+function firstFlatRootObjectOperationIs(
+  ops: ReadonlyArray<JSONPatchOperation>,
+  operation: "add" | "remove" | "replace",
+): boolean {
+  if (!(0 in ops)) return false;
+  const first = ops[0]!;
+  return validateOperationShape(first) === null
+    && first.op === operation
+    && typeof first.path === "string"
+    && first.path.length > 1
+    && first.path[0] === "/"
+    && !first.path.includes("~")
+    && first.path.indexOf("/", 1) === -1;
 }

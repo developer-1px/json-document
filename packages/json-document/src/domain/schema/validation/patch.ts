@@ -20,6 +20,7 @@ import {
 } from "../model/schema.js";
 import { arrayElementSchemaAtPath } from "./schema.js";
 import {
+  applyKnownJsonReplacePatchWithLocalSchemaValidation,
   applyReplacePatchWithLocalSchemaValidation,
   applySingleReplacePatchWithLocalSchemaValidation,
   planIndependentReplacePatch,
@@ -84,6 +85,8 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
   if (rootRecordAdd) return rootRecordAdd;
   const rootRecordRemove = applyRootRecordRemovePatchWithLocalSchemaValidation(schema, state, ops);
   if (rootRecordRemove) return rootRecordRemove;
+  const knownJsonReplace = applyKnownJsonReplacePatchWithLocalSchemaValidation(schema, state, ops);
+  if (knownJsonReplace?.result.ok) return knownJsonReplace;
   if (planIndependentReplacePatch(ops)) return applyReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
 
   const appendOnlyAdd = applyAppendOnlyAddPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);

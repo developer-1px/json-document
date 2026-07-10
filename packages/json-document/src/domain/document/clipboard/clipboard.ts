@@ -1,7 +1,7 @@
 import type * as z from "zod";
 
 import { cloneTrustedPlainJson } from "../../../foundation/json/index.js";
-import type { ApplyResult, JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import type { SelectionSource } from "../../selection/read.js";
 import {
@@ -22,6 +22,7 @@ import type {
   JSONDocumentPasteTarget,
 } from "./contract.js";
 import type { JSONStateOps } from "../state/ops.js";
+import type { PreviewedDocumentPatchResult } from "../state/patch.js";
 import {
   trustedSourceBuffer,
   writeClipboardBuffer,
@@ -46,14 +47,14 @@ interface InternalClipboardState<T> extends ClipboardState<T> {
 interface CreateClipboardOptions<S extends z.ZodType> {
   schema: S;
   getState(): z.output<S>;
+  getRevision?: () => number;
   ops: JSONStateOps<z.output<S>>;
   previewPatch?: (operations: ReadonlyArray<JSONPatchOperation>) => ApplyResult<S>;
   previewTrustedValuesPatch?: (operations: ReadonlyArray<JSONPatchOperation>) => ApplyResult<S>;
   applyPreviewedPatch?: (
-    next: z.output<S>,
+    prepared: ApplyResult<z.ZodTypeAny>,
     operations: ReadonlyArray<JSONPatchOperation>,
-    applied: ReadonlyArray<JSONPatchOperation>,
-  ) => JSONResult;
+  ) => PreviewedDocumentPatchResult;
   getSelectionSource?: () => SelectionSource | null;
   getSelectionTarget?: () => Pointer | null;
   getAppliedPatch?: () => ReadonlyArray<JSONPatchOperation>;
@@ -67,6 +68,7 @@ export function createClipboard<S extends z.ZodType>(
   const {
     schema,
     getState,
+    getRevision,
     ops,
     previewPatch,
     previewTrustedValuesPatch,
@@ -81,6 +83,7 @@ export function createClipboard<S extends z.ZodType>(
   const pasteRuntime = createClipboardPasteRuntime({
     schema,
     getState,
+    getRevision,
     ops,
     previewPatch,
     previewTrustedValuesPatch,
@@ -143,48 +146,55 @@ export function createClipboard<S extends z.ZodType>(
     },
 
     cut(source, options = {}) {
-      const resolvedSource = source ?? getSelectionSource?.() ?? null;
-      if (resolvedSource === null) {
-        return {
-          ok: false,
-          code: "empty_selection",
-          reason: "cut source selection is empty",
-        };
-      }
-      const cutOptions: {
-        trusted: boolean;
-        clonePayload?: boolean;
-        previewPatch?: (operations: ReadonlyArray<JSONPatchOperation>) => ApplyResult<S>;
-      } = {
-        trusted: getStateJsonTrusted?.() === true,
-      };
-      if (options.clonePayload !== undefined) cutOptions.clonePayload = options.clonePayload;
-      if (previewPatch !== undefined) cutOptions.previewPatch = previewPatch;
-      const result = cut(schema, getState(), resolvedSource, cutOptions);
-      if (!result.ok) return result;
-      const patchResult = applyPreviewedPatch
-        ? applyPreviewedPatch(result.next as z.output<S>, result.patch, result.applied)
-        : ops.patch(result.patch);
-      const applyResult: ClipboardCutResult<z.output<S>> = patchResult.ok
-        ? {
-            ok: true,
-            value: getState(),
-            applied: getAppliedPatch?.() ?? result.patch,
-            target: null,
-            payload: result.payload,
-            source: result.source,
-            sources: result.sources,
-          }
-        : {
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const baseRevision = getRevision?.();
+        const resolvedSource = source ?? getSelectionSource?.() ?? null;
+        if (resolvedSource === null) {
+          return {
             ok: false,
-            code: patchResult.code,
-            reason: patchResult.reason ?? patchResult.code,
-            violations: [],
+            code: "empty_selection",
+            reason: "cut source selection is empty",
           };
-      if (applyResult.ok) {
-        setBuffer(trustedSourceBuffer(applyResult.payload, applyResult.source, applyResult.sources));
+        }
+        const cutOptions: {
+          trusted: boolean;
+          clonePayload?: boolean;
+          previewPatch?: (operations: ReadonlyArray<JSONPatchOperation>) => ApplyResult<S>;
+        } = {
+          trusted: getStateJsonTrusted?.() === true,
+        };
+        if (options.clonePayload !== undefined) cutOptions.clonePayload = options.clonePayload;
+        if (previewPatch !== undefined) cutOptions.previewPatch = previewPatch;
+        const result = cut(schema, getState(), resolvedSource, cutOptions);
+        if (baseRevision !== undefined && getRevision?.() !== baseRevision) continue;
+        if (!result.ok) return result;
+        const publication: PreviewedDocumentPatchResult = applyPreviewedPatch
+          ? applyPreviewedPatch(result.prepared, result.patch)
+          : { status: "applied", result: ops.patch(result.patch) };
+        if (publication.status === "stale") continue;
+        const patchResult = publication.result;
+        const applyResult: ClipboardCutResult<z.output<S>> = patchResult.ok
+          ? {
+              ok: true,
+              value: getState(),
+              applied: getAppliedPatch?.() ?? result.patch,
+              target: null,
+              payload: result.payload,
+              source: result.source,
+              sources: result.sources,
+            }
+          : {
+              ok: false,
+              code: patchResult.code,
+              reason: patchResult.reason ?? patchResult.code,
+              violations: [],
+            };
+        if (applyResult.ok) {
+          setBuffer(trustedSourceBuffer(applyResult.payload, applyResult.source, applyResult.sources));
+        }
+        return applyResult;
       }
-      return applyResult;
+      throw new Error("state changed repeatedly while preparing cut");
     },
 
     paste(target, options) {

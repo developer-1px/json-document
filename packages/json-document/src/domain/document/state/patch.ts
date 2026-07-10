@@ -1,10 +1,14 @@
 import type * as z from "zod";
-import type { JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
+import type {
+  ApplyResult,
+  JSONPatchOperation,
+  JSONResult,
+} from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import { commitMutable, historyDepth } from "../../../foundation/history/index.js";
 import { duplicate as duplicateVerb } from "../../editing/duplicate.js";
 import { restoreSelectionTarget } from "../../selection/snap.js";
-import { EMPTY_SELECTION, type SelectionSnap } from "../../selection/snap.js";
+import type { SelectionSnap } from "../../selection/snap.js";
 import type {
   HistoryTransactionOptions,
   JSONChangeMetadata,
@@ -19,10 +23,17 @@ import { planDocumentHistoryRecord } from "../history/restore.js";
 import type {
   DocumentHistoryRuntimeState,
 } from "../history/undoRedo.js";
-import type { TrustedJSONStateOps } from "./json.js";
+import type {
+  PreparedJSONStateChange,
+  TrustedJSONStateOps,
+} from "./json.js";
 import type { SelectionRuntimeAccess } from "../selection/runtime.js";
 
 export type JSONPatchInput = JSONPatchOperation | ReadonlyArray<JSONPatchOperation>;
+
+export type PreviewedDocumentPatchResult =
+  | { status: "applied"; result: JSONResult }
+  | { status: "stale" };
 
 export interface DocumentPatchRuntimeState {
   lastPatch: ReadonlyArray<JSONPatchOperation>;
@@ -183,17 +194,26 @@ export function createDocumentMutationRuntime<S extends z.ZodType>(
   };
 
   const applyPreviewedDocumentPatch = (
-    next: z.output<S>,
+    candidate: ApplyResult<z.ZodTypeAny>,
     operations: ReadonlyArray<JSONPatchOperation>,
-    applied: ReadonlyArray<JSONPatchOperation>,
     metadata?: JSONChangeMetadata,
-  ): JSONResult => {
+  ): PreviewedDocumentPatchResult => {
+    if (!isPreparedJSONStateChange<z.output<S>>(candidate) || !candidate.result.ok) {
+      return { status: "applied", result: applyDocumentPatch(operations, metadata) };
+    }
+    const prepared = candidate;
     const record = shouldRecordHistory(operations.length);
     const captureMetadata = shouldCaptureMetadata(record, metadata);
     if (!captureMetadata) {
-      const r = rawOps.trustedApply(next, applied);
-      applyDocumentChangeResult(r, applied.length, rawOps.lastApplied, null);
-      return r;
+      const publication = rawOps.publishPreparedPatch(prepared);
+      if (publication.status === "stale") return publication;
+      applyDocumentChangeResult(
+        prepared.result,
+        prepared.applied.length,
+        publication.changed ? prepared.applied : rawOps.lastApplied,
+        null,
+      );
+      return { status: "applied", result: prepared.result };
     }
 
     const before = record ? rawOps.state : undefined;
@@ -204,23 +224,24 @@ export function createDocumentMutationRuntime<S extends z.ZodType>(
       selectionBefore,
       selection.selectionEnabled,
     );
-    const r = rawOps.trustedApply(next, applied, changeMetadata);
+    const publication = rawOps.publishPreparedPatch(prepared, changeMetadata);
+    if (publication.status === "stale") return publication;
     const selectionAfter = selection.snapSelection();
     applyDocumentChangeResult(
-      r,
-      applied.length,
+      prepared.result,
+      prepared.applied.length,
       rawOps.lastApplied,
       historyRecord(
         record,
         before,
-        next,
+        prepared.state,
         operations,
         selectionBefore,
         selectionAfter,
         changeMetadata,
       ),
     );
-    return r;
+    return { status: "applied", result: prepared.result };
   };
 
   const patch = (operations: JSONPatchInput, metadata?: JSONChangeMetadata): JSONResult => {
@@ -235,89 +256,83 @@ export function createDocumentMutationRuntime<S extends z.ZodType>(
   ): JSONResult => {
     const metadata = commitOptions === undefined ? undefined : compactHistoryMetadata(commitOptions);
     if (commitOptions?.selectionAfter === undefined) return applyDocumentPatch(operations, metadata);
-    const before = rawOps.state;
-    const selectionBefore = selection.snapSelection();
-    const predicted = rawOps.previewPatch(operations);
-    if (!predicted.result.ok) return patch(operations, metadata);
-    const selectionAfter = restoreSelectionTarget(commitOptions.selectionAfter, selection.selectionMode, predicted.state);
-    const directMetadata: JSONChangeMetadata = metadata === undefined
-      ? { selectionAfter }
-      : { ...metadata, selectionAfter };
-    const changeMetadata = buildChangeMetadata(
-      historyState.activeHistoryMetadata,
-      directMetadata,
-      selectionBefore,
-      selection.selectionEnabled,
-    );
-    const r = rawOps.trustedApply(predicted.state as z.output<S>, predicted.applied, changeMetadata);
-    if (!r.ok) return r;
-    selection.restoreSelection(selectionAfter);
-    applyDocumentChangeResult(
-      r,
-      operations.length,
-      rawOps.lastApplied,
-      historyRecord(
-        shouldRecordHistory(operations.length),
-        before,
-        predicted.state,
-        operations,
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const before = rawOps.state;
+      const selectionBefore = selection.snapSelection();
+      const predicted = rawOps.previewPatch(operations);
+      if (predicted.baseRevision !== rawOps.revision || predicted.before !== rawOps.state) continue;
+      if (!predicted.result.ok) return patch(operations, metadata);
+      const selectionAfter = restoreSelectionTarget(commitOptions.selectionAfter, selection.selectionMode, predicted.state);
+      const directMetadata: JSONChangeMetadata = metadata === undefined
+        ? { selectionAfter }
+        : { ...metadata, selectionAfter };
+      const changeMetadata = buildChangeMetadata(
+        historyState.activeHistoryMetadata,
+        directMetadata,
         selectionBefore,
-        selectionAfter,
-        changeMetadata,
-      ),
-    );
-    return r;
+        selection.selectionEnabled,
+      );
+      const publication = rawOps.publishPreparedPatch(predicted, changeMetadata);
+      if (publication.status === "stale") continue;
+      selection.restoreSelection(selectionAfter);
+      applyDocumentChangeResult(
+        predicted.result,
+        operations.length,
+        rawOps.lastApplied,
+        historyRecord(
+          shouldRecordHistory(operations.length),
+          before,
+          predicted.state,
+          operations,
+          selectionBefore,
+          selectionAfter,
+          changeMetadata,
+        ),
+      );
+      return predicted.result;
+    }
+    throw new Error("state changed repeatedly while preparing commit");
   };
 
   const duplicate = (
     source: Pointer,
     duplicateOptions?: JSONDocumentDuplicateOptions,
   ): JSONDocumentDuplicateResult<z.output<S>> => {
-    const before = rawOps.state;
-    const planned = duplicateVerb(schema, before, source, duplicateOptions, {
-      previewPatch: rawOps.previewPatch,
-      trustedPayload: rawOps.stateJsonTrusted,
-    });
-    if (!planned.ok) return planned;
-    const record = shouldRecordHistory(planned.patch.length);
-    const captureMetadata = shouldCaptureMetadata(record, undefined);
-    const selectionBefore = captureMetadata ? selection.snapSelection() : EMPTY_SELECTION;
-    const changeMetadata = captureMetadata
-      ? buildChangeMetadata(
-          historyState.activeHistoryMetadata,
-          undefined,
-          selectionBefore,
-          selection.selectionEnabled,
-        )
-      : undefined;
-    const r = rawOps.trustedApply(planned.next, planned.patch, changeMetadata);
-    const selectionAfter = captureMetadata ? selection.snapSelection() : EMPTY_SELECTION;
-    applyDocumentChangeResult(
-      r,
-      planned.patch.length,
-      rawOps.lastApplied,
-      historyRecord(
-        record,
-        before,
-        planned.next,
-        planned.patch,
-        selectionBefore,
-        selectionAfter,
-        changeMetadata,
-      ),
-    );
-    return r.ok
-      ? {
-          ok: true,
-          value: rawOps.state,
-          applied: patchState.lastPatch,
-          target: planned.duplicatedTo,
-          duplicatedTo: planned.duplicatedTo,
-        }
-      : r;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const baseRevision = rawOps.revision;
+      const planned = duplicateVerb(schema, rawOps.state, source, duplicateOptions, {
+        previewPatch: rawOps.previewPatch,
+        trustedPayload: rawOps.stateJsonTrusted,
+      });
+      if (rawOps.revision !== baseRevision) continue;
+      if (!planned.ok) return planned;
+      const publication = applyPreviewedDocumentPatch(planned.prepared, planned.patch);
+      if (publication.status === "stale") continue;
+      const r = publication.result;
+      return r.ok
+        ? {
+            ok: true,
+            value: rawOps.state,
+            applied: patchState.lastPatch,
+            target: planned.duplicatedTo,
+            duplicatedTo: planned.duplicatedTo,
+          }
+        : r;
+    }
+    throw new Error("state changed repeatedly while preparing duplicate");
   };
 
   const lastApplied = (): ReadonlyArray<JSONPatchOperation> => patchState.lastPatch;
 
   return { applyDocumentPatch, applyPreviewedDocumentPatch, patch, commit, duplicate, lastApplied };
+}
+
+function isPreparedJSONStateChange<T>(
+  candidate: ApplyResult<z.ZodTypeAny>,
+): candidate is PreparedJSONStateChange<T> {
+  return candidate !== null
+    && typeof candidate === "object"
+    && "baseRevision" in candidate
+    && typeof candidate.baseRevision === "number"
+    && "before" in candidate;
 }

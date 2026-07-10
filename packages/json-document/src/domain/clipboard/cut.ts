@@ -17,6 +17,7 @@ export interface CutOk<T> {
   next: T;
   patch: JSONPatchOperation[];
   applied: ReadonlyArray<JSONPatchOperation>;
+  prepared: ApplyResult<z.ZodTypeAny>;
   payload: unknown;
   /** Primary source. Multi-source cut keeps the first selected source here for single-source compatibility. */
   source: Pointer;
@@ -74,6 +75,7 @@ export function cut<S extends z.ZodType>(
     next: r.draft as z.output<S>,
     patch,
     applied: r.applied,
+    prepared: r.prepared,
     payload,
     source: removePlan.source,
     sources: removePlan.sources,
