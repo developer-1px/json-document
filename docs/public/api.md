@@ -309,7 +309,7 @@ doc.schema.accepts("/lists/0/cards/-", candidateCard, "insert");
 
 큰 문서의 hot path는 document facade인 `doc.patch`, `doc.commit`, `doc.canPatch`를 기준으로 둡니다. 공개 `applyPatch`는 외부 JSON 경계입니다.
 
-Document 내부 state는 신뢰된 document state입니다. schema가 구조만 가진 Zod schema이고 edit가 independent non-root `replace` 또는 array edit에 해당하면 document path는 더 좁은 검증 경로를 쓸 수 있습니다. Refinement, transform, check가 있는 schema는 전체 루트 schema 검증으로 돌아갑니다.
+Document 내부 state는 신뢰된 document state입니다. schema가 구조만 가진 Zod schema이고 edit가 non-root `replace` batch(독립 경로와 순차 ancestor/descendant overlap 포함) 또는 지원되는 array edit에 해당하면 document path는 더 좁은 검증 경로를 쓸 수 있습니다. Leading `test` assertion이 붙은 guarded batch도 assertion 확인 뒤 같은 mutation 경로를 사용합니다. Overlapping `replace`의 history inverse도 operation별 이전 값과 undo 순서를 그대로 유지하는 copy-on-write 순회 구현을 사용합니다. Refinement, transform, check가 있는 schema는 전체 루트 schema 검증으로 돌아갑니다.
 
 ## 트리 편집 cookbook
 

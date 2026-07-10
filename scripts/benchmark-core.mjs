@@ -96,6 +96,7 @@ const batchSize = envNumber("PERF_BATCH", 1000);
 const individualCount = envNumber("PERF_INDIVIDUAL", 100);
 const jsonpathRepeats = envNumber("PERF_JSONPATH_REPEATS", 10000);
 const rounds = envNumber("PERF_ROUNDS", 5);
+const overlappingReplaceRounds = Math.max(15, rounds);
 const forceGc = process.env.PERF_GC === "1";
 const runtimeGc = typeof globalThis.gc === "function" ? globalThis.gc.bind(globalThis) : null;
 
@@ -152,6 +153,11 @@ for (const size of sizes) {
           path: "/items/0/meta/rank",
           value: index,
         });
+  const guardedOverlappingNestedReplaceOps = [
+    { op: "test", path: "/items/0/meta", value: { tag: "tag-0", rank: 0 } },
+    { op: "test", path: "/items/0/meta/rank", value: 0 },
+    ...overlappingNestedReplaceOps,
+  ];
   const escapedNestedFieldReplaceOps = Array.from({ length: Math.min(batchSize, size) }, (_, index) => ({
     op: "replace",
     path: `/a~1b/${index}/m~0eta/ra~1nk`,
@@ -565,6 +571,8 @@ for (const size of sizes) {
     applyTrustedPatch(state, nestedFieldReplaceOps, { valuesTrusted: true }));
   bench(`computeInverses nested field replace batch ${nestedFieldReplaceOps.length}`, Math.max(3, Math.ceil(rounds / 2)), () =>
     computeInverses(state, nestedFieldReplaceOps));
+  bench(`computeInverses overlapping nested replace batch ${overlappingNestedReplaceOps.length}`, overlappingReplaceRounds, () =>
+    computeInverses(state, overlappingNestedReplaceOps));
   bench(`accepted escaped nested field replace batch ${escapedNestedFieldReplaceOps.length}`, Math.max(3, Math.ceil(rounds / 2)), () =>
     applyAcceptedPatch(escapedNestedState, escapedNestedFieldReplaceOps));
   bench(`trusted escaped nested field replace batch ${escapedNestedFieldReplaceOps.length}`, Math.max(3, Math.ceil(rounds / 2)), () =>
@@ -580,9 +588,44 @@ for (const size of sizes) {
 
   {
     let doc;
-    benchWithSetup(`doc.patch overlapping nested replace batch ${overlappingNestedReplaceOps.length} history=0`, Math.max(3, Math.ceil(rounds / 2)), () => {
+    benchWithSetup(`doc.patch overlapping nested replace batch ${overlappingNestedReplaceOps.length} history=0`, overlappingReplaceRounds, () => {
       doc = createJSONDocument(Schema, state, { history: 0, trustedInitial: true });
     }, () => doc.patch(overlappingNestedReplaceOps));
+  }
+  {
+    let doc;
+    benchWithSetup(`doc.patch overlapping nested replace batch ${overlappingNestedReplaceOps.length} history=100`, overlappingReplaceRounds, () => {
+      doc = createJSONDocument(Schema, state, { history: 100, trustedInitial: true });
+    }, () => doc.patch(overlappingNestedReplaceOps));
+  }
+  {
+    let doc;
+    benchWithSetup(`doc.patch guarded overlapping nested replace batch ${guardedOverlappingNestedReplaceOps.length} history=0`, overlappingReplaceRounds, () => {
+      doc = createJSONDocument(Schema, state, { history: 0, trustedInitial: true });
+    }, () => doc.patch(guardedOverlappingNestedReplaceOps));
+  }
+  {
+    let doc;
+    benchWithSetup(`doc.patch guarded overlapping nested replace batch ${guardedOverlappingNestedReplaceOps.length} history=100`, overlappingReplaceRounds, () => {
+      doc = createJSONDocument(Schema, state, { history: 100, trustedInitial: true });
+    }, () => doc.patch(guardedOverlappingNestedReplaceOps));
+  }
+  {
+    const doc = createJSONDocument(Schema, state, { history: 100, trustedInitial: true });
+    const result = doc.patch(overlappingNestedReplaceOps);
+    if (!result.ok) throw new Error(`setup overlapping nested replace batch failed: ${JSON.stringify(result)}`);
+    benchWithSetup(`history undo overlapping nested replace batch ${overlappingNestedReplaceOps.length}`, overlappingReplaceRounds, () => {
+      if (!doc.history.canUndo) {
+        const redone = doc.history.redo();
+        if (!redone) throw new Error("overlapping nested replace redo setup failed");
+      }
+    }, () => ({ ok: doc.history.undo() }));
+    benchWithSetup(`history redo overlapping nested replace batch ${overlappingNestedReplaceOps.length}`, overlappingReplaceRounds, () => {
+      if (!doc.history.canRedo) {
+        const undone = doc.history.undo();
+        if (!undone) throw new Error("overlapping nested replace undo setup failed");
+      }
+    }, () => ({ ok: doc.history.redo() }));
   }
   {
     const doc = createJSONDocument(EscapedNestedSchema, escapedNestedState, { history: 0 });

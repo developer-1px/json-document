@@ -251,6 +251,13 @@ if (proposedChanges.canAccept("rename-title").ok) {
 }
 ```
 
+`canAccept`는 현재 상태를 설명하는 capability probe다. 실제 `accept`는 저장된 guard를
+RFC 6902 `test`로 바꾸어 proposed operations 앞에 놓고 하나의 atomic patch로 실행한다.
+따라서 schema validation 중 document revision이 바뀌어도 최신 상태에서 guard부터 다시
+확인한다. Document state가 실제 publish되면 생성된 `test` operation도 `lastPatch`,
+subscriber, history forward에 나타난다. 같은 proposal id는 `accept` 실행 동안 예약되어
+document subscriber의 재진입이 proposal을 교체하거나 제거하지 못한다.
+
 ## comments
 
 ```ts

@@ -7,6 +7,7 @@ import {
   removedRootKeysMatchSuffix,
 } from "../object.js";
 import { validateOperationShape } from "../apply.js";
+import { applySequentialReplacePatch } from "../sequentialReplace.js";
 import {
   applyAppendOnlyAddPatch,
   applySameArrayStructuralPatch,
@@ -14,7 +15,6 @@ import {
 } from "./array.js";
 import {
   applyIndependentReplacePatch,
-  applySequentialReplacePatch,
   applySameArrayElementReplacePatch,
   applySameArrayFieldReplacePatch,
   applySameArrayNestedReplacePatch,
