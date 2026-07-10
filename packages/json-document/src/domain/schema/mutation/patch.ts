@@ -16,6 +16,7 @@ export interface PatchPreflightOk<T> {
   ok: true;
   draft: T;
   applied: ReadonlyArray<JSONPatchOperation>;
+  prepared: ApplyResult<z.ZodTypeAny>;
 }
 
 export type PatchPreflightErrorCode = ErrorCode | "preflight_failed";
@@ -45,7 +46,7 @@ export function patchPreflightFromApplyResult<S extends z.ZodType>(
   r: ApplyResult<S>,
 ): PatchPreflightResult<z.output<S>> {
   if (r.result.ok) {
-    return { ok: true, draft: r.state, applied: r.applied };
+    return { ok: true, draft: r.state, applied: r.applied, prepared: r };
   }
   // schema_violation 또는 다른 RFC 6902 op 실패. patchPreflight 가 거부 — 호출자가 처리.
   // schema_violation 의 경우 result.reason 에 zod issues JSON 이 들어있다 (foundation/json-patch §applyPatch).

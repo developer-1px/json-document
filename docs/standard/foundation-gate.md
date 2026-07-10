@@ -69,3 +69,42 @@ query, selection, clipboard, history, capability로 요구를 표현해 봐야 �
 반복 압력은 `docs/standard/contract-pressure-register.md`에 먼저 기록한다.
 `guard composition`과 `PatchPlan` 같은 후보는 바로 core public API가 아니라
 recipe, lab convention, official extension 후보 순서로 검증한다.
+
+## 내부 change 실행 seam
+
+Public document interface와 JSON Patch 의미론은 유지하면서 implementation은
+change를 다음 단계로 나눈다.
+
+```txt
+prepare(base revision, current state, operations)
+|-- operation 검증과 concrete applied patch 계산
+|-- private copy-on-write draft 생성
+`-- before / next / applied를 prepared change로 고정
+
+publish(prepared change)
+|-- base revision과 current revision 일치 확인
+|-- state를 한 번 교체
+`-- selection / history / subscriber 관찰을 기존 순서로 실행
+```
+
+이 seam은 public `PatchPlan`이나 CRDT interface가 아니다. 현재 동기 document는
+prepare 직후 publish한다. Internal revision은 오래된 prepared change가 최신 state를
+덮지 못하게 하는 local freshness token일 뿐, actor id, Lamport clock, vector clock,
+CRDT node identity를 뜻하지 않는다.
+
+Freshness 경계는 state 교체 직전까지다. Schema validation 중 state가 바뀌면 patch는
+최신 revision에서 다시 prepare하고, cut/paste/duplicate처럼 payload나 target을 함께
+계산하는 action은 patch만 재사용하지 않고 action 전체를 다시 계획한다. 반면 publish
+뒤 synchronous subscriber가 다시 mutation하는 순서는 기존 notification 계약이며,
+이 revision token이 listener reentrancy나 remote merge policy까지 해결한다고 보지 않는다.
+
+향후 storage/collaboration adapter는 stale prepared change를 그대로 publish하지 않고
+자신이 소유한 OT/CRDT/rebase policy로 새 operation을 계산한 뒤 다시 prepare해야 한다.
+Remote transport와 conflict policy는 계속 core 밖에 둔다.
+
+성능상 prepare 단계의 private draft는 같은 batch에서 겹치는 ancestor/descendant
+replace가 있어도 touched container를 commit당 한 번만 복제한다. 최적화 경로는
+순차 RFC 6902 결과, 실패 atomicity, applied order, structural sharing을 reference
+경로와 동일하게 유지해야 한다. Plain structural schema의 overlapping replace는 각
+value가 target schema에 허용됨을 빠르게 증명할 수 있을 때만 이 bulk 경로로 승격하고,
+그 외 배치는 기존 validation/error-order 경로로 되돌린다.

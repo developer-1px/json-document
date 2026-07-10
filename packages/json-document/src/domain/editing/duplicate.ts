@@ -22,6 +22,7 @@ export interface DuplicateOk<T> {
   ok: true;
   next: T;
   patch: JSONPatchOperation[];
+  prepared: ApplyResult<z.ZodTypeAny>;
   /** 복제 결과의 path. */
   duplicatedTo: Pointer;
 }
@@ -125,7 +126,13 @@ export function duplicate<S extends z.ZodType>(
   if (!r.ok) {
     return duplicateError(r.code, r.message, r.violations);
   }
-  return { ok: true, next: r.draft as z.output<S>, patch: [op], duplicatedTo: target };
+  return {
+    ok: true,
+    next: r.draft as z.output<S>,
+    patch: [op],
+    prepared: r.prepared,
+    duplicatedTo: target,
+  };
 }
 
 function duplicateError(

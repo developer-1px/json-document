@@ -163,6 +163,7 @@ export function createDocumentRuntime<S extends z.ZodType>(
   const insertPasteRuntime = createClipboardPasteRuntime({
     schema: zodSchema,
     getState: () => rawOps.state,
+    getRevision: () => rawOps.revision,
     ops,
     previewPatch: rawOps.previewPatch,
     previewTrustedValuesPatch: rawOps.previewTrustedValuesPatch,
@@ -200,6 +201,7 @@ export function createDocumentRuntime<S extends z.ZodType>(
   const clipboardOptions = {
     schema: zodSchema,
     getState: () => rawOps.state,
+    getRevision: () => rawOps.revision,
     ops,
     previewPatch: rawOps.previewPatch,
     previewTrustedValuesPatch: rawOps.previewTrustedValuesPatch,

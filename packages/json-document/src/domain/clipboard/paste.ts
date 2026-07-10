@@ -23,6 +23,7 @@ interface PasteOk<T> {
   next: T;
   patch: JSONPatchOperation[];
   applied: ReadonlyArray<JSONPatchOperation>;
+  prepared: ApplyResult<z.ZodTypeAny>;
 }
 
 export interface PasteError {
@@ -114,7 +115,13 @@ export function paste<S extends z.ZodType>(
   if (!r.ok) {
     return pasteError(r.code, r.message, r.violations);
   }
-  return { ok: true, next: r.draft as z.output<S>, patch, applied: r.applied };
+  return {
+    ok: true,
+    next: r.draft as z.output<S>,
+    patch,
+    applied: r.applied,
+    prepared: r.prepared,
+  };
 }
 
 function findPasteMismatch<S extends z.ZodType>(

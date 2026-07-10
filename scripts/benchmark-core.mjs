@@ -140,6 +140,18 @@ for (const size of sizes) {
     path: `/items/${index}/meta/rank`,
     value: size + index,
   }));
+  const overlappingNestedReplaceOps = Array.from({ length: Math.min(batchSize, size) }, (_, index) =>
+    index % 2 === 0
+      ? {
+          op: "replace",
+          path: "/items/0/meta",
+          value: { tag: "overlap", rank: index },
+        }
+      : {
+          op: "replace",
+          path: "/items/0/meta/rank",
+          value: index,
+        });
   const escapedNestedFieldReplaceOps = Array.from({ length: Math.min(batchSize, size) }, (_, index) => ({
     op: "replace",
     path: `/a~1b/${index}/m~0eta/ra~1nk`,
@@ -565,6 +577,13 @@ for (const size of sizes) {
     bench(`doc.patch nested field replace batch ${nestedFieldReplaceOps.length} history=0`, Math.max(3, Math.ceil(rounds / 2)), () =>
       doc.patch(nestedFieldReplaceOps));
   }
+
+  {
+    let doc;
+    benchWithSetup(`doc.patch overlapping nested replace batch ${overlappingNestedReplaceOps.length} history=0`, Math.max(3, Math.ceil(rounds / 2)), () => {
+      doc = createJSONDocument(Schema, state, { history: 0, trustedInitial: true });
+    }, () => doc.patch(overlappingNestedReplaceOps));
+  }
   {
     const doc = createJSONDocument(EscapedNestedSchema, escapedNestedState, { history: 0 });
     bench(`doc.patch escaped nested field replace batch ${escapedNestedFieldReplaceOps.length} history=0`, Math.max(3, Math.ceil(rounds / 2)), () =>
@@ -974,6 +993,12 @@ for (const size of sizes) {
     op: "remove",
     path: `/k${index}`,
   }));
+  const rootNestedReplaceCount = Math.min(batchSize, rootReplaceCount);
+  const rootNestedReplaceOps = Array.from({ length: rootNestedReplaceCount }, (_, index) => ({
+    op: "replace",
+    path: `/k${index}/meta/rank`,
+    value: rootReplaceCount + index,
+  }));
   console.log(`\nroot keys=${rootReplaceCount}`);
   bench(`createJSONDocument root record init history=0`, Math.max(3, Math.ceil(rounds / 2)), () => {
     const doc = createJSONDocument(RootRecord, rootState, { history: 0 });
@@ -981,6 +1006,16 @@ for (const size of sizes) {
   });
   bench(`applyPatch root object replace batch ${rootReplaceCount}`, Math.max(3, Math.ceil(rounds / 2)), () =>
     applyPatch(RootRecord, rootState, rootReplaceOps).result);
+  {
+    let doc;
+    benchWithSetup(`doc.patch root nested replace batch ${rootNestedReplaceCount} history=0`, Math.max(3, Math.ceil(rounds / 2)), () => {
+      doc = createJSONDocument(RootRecord, rootState, { history: 0, trustedInitial: true });
+    }, () => doc.patch(rootNestedReplaceOps));
+  }
+  bench(`accepted root nested replace batch ${rootNestedReplaceCount}`, Math.max(3, Math.ceil(rounds / 2)), () =>
+    applyAcceptedPatch(rootState, rootNestedReplaceOps));
+  bench(`trusted root nested replace batch ${rootNestedReplaceCount}`, Math.max(3, Math.ceil(rounds / 2)), () =>
+    applyTrustedPatch(rootState, rootNestedReplaceOps, { valuesTrusted: true }));
   {
     const doc = createJSONDocument(RootRecord, rootState, { history: 0 });
     bench(`doc.patch root object replace batch ${rootReplaceCount} history=0`, Math.max(3, Math.ceil(rounds / 2)), () =>

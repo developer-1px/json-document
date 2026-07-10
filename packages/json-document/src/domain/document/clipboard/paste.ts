@@ -1,6 +1,6 @@
 import type * as z from "zod";
 import { readAt, tryParsePointer, type Pointer } from "../../../foundation/pointer/index.js";
-import type { ApplyResult, JSONPatchOperation, JSONResult } from "../../../foundation/patch/index.js";
+import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import { isPlainStructuralSchema } from "../../schema/model/schema.js";
 import {
   paste,
@@ -14,6 +14,7 @@ import {
   type CapabilityResult,
 } from "../capabilities/result.js";
 import type { JSONStateOps } from "../state/ops.js";
+import type { PreviewedDocumentPatchResult } from "../state/patch.js";
 import type {
   ClipboardBuffer,
   ClipboardPasteResult,
@@ -23,14 +24,14 @@ import type {
 interface CreateClipboardPasteRuntimeOptions<S extends z.ZodType> {
   schema: S;
   getState(): z.output<S>;
+  getRevision?: (() => number) | undefined;
   ops: JSONStateOps<z.output<S>>;
   previewPatch?: ((operations: ReadonlyArray<JSONPatchOperation>) => ApplyResult<S>) | undefined;
   previewTrustedValuesPatch?: ((operations: ReadonlyArray<JSONPatchOperation>) => ApplyResult<S>) | undefined;
   applyPreviewedPatch?: ((
-    next: z.output<S>,
+    prepared: ApplyResult<z.ZodTypeAny>,
     operations: ReadonlyArray<JSONPatchOperation>,
-    applied: ReadonlyArray<JSONPatchOperation>,
-  ) => JSONResult) | undefined;
+  ) => PreviewedDocumentPatchResult) | undefined;
   getSelectionTarget?: (() => Pointer | null) | undefined;
   getAppliedPatch?: (() => ReadonlyArray<JSONPatchOperation>) | undefined;
 }
@@ -63,6 +64,7 @@ export function createClipboardPasteRuntime<S extends z.ZodType>(
   const {
     schema,
     getState,
+    getRevision,
     ops,
     previewPatch,
     previewTrustedValuesPatch,
@@ -114,36 +116,43 @@ export function createClipboardPasteRuntime<S extends z.ZodType>(
 
   return {
     pastePayload(payload, targetOrSelectionTarget, options, spreadByDefault, trustedPayload) {
-      const resolved = resolvePasteTarget(targetOrSelectionTarget, options);
-      if (!resolved.ok) return resolved.result;
-      const result = paste(
-        schema,
-        getState(),
-        payload,
-        resolved.target,
-        resolved.args.mode,
-        pasteExecutionOptions(resolved.args.options, spreadByDefault, trustedPayload),
-      );
-      if (!result.ok) return result;
-      const patchResult = applyPreviewedPatch
-        ? applyPreviewedPatch(result.next as z.output<S>, result.patch, result.applied)
-        : ops.patch(result.patch);
-      if (!patchResult.ok) {
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const baseRevision = getRevision?.();
+        const resolved = resolvePasteTarget(targetOrSelectionTarget, options);
+        if (!resolved.ok) return resolved.result;
+        const result = paste(
+          schema,
+          getState(),
+          payload,
+          resolved.target,
+          resolved.args.mode,
+          pasteExecutionOptions(resolved.args.options, spreadByDefault, trustedPayload),
+        );
+        if (baseRevision !== undefined && getRevision?.() !== baseRevision) continue;
+        if (!result.ok) return result;
+        const publication: PreviewedDocumentPatchResult = applyPreviewedPatch
+          ? applyPreviewedPatch(result.prepared, result.patch)
+          : { status: "applied", result: ops.patch(result.patch) };
+        if (publication.status === "stale") continue;
+        const patchResult = publication.result;
+        if (!patchResult.ok) {
+          return {
+            ok: false,
+            code: patchResult.code,
+            reason: patchResult.reason ?? patchResult.code,
+          };
+        }
+        const applied = getAppliedPatch?.() ?? result.patch;
+        // target: 첫 착지 slot (applied 는 정규화된 concrete op — `/-` 없음).
+        const first = applied[0];
         return {
-          ok: false,
-          code: patchResult.code,
-          reason: patchResult.reason ?? patchResult.code,
+          ok: true,
+          value: getState(),
+          applied,
+          target: first !== undefined && first.op !== "remove" && first.op !== "test" ? first.path : null,
         };
       }
-      const applied = getAppliedPatch?.() ?? result.patch;
-      // target: 첫 착지 slot (applied 는 정규화된 concrete op — `/-` 없음).
-      const first = applied[0];
-      return {
-        ok: true,
-        value: getState(),
-        applied,
-        target: first !== undefined && first.op !== "remove" && first.op !== "test" ? first.path : null,
-      };
+      throw new Error("state changed repeatedly while preparing paste");
     },
 
     canPastePayload(payload, targetOrSelectionTarget, options, spreadByDefault, trustedPayload) {
