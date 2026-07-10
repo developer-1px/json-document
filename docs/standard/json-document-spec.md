@@ -385,7 +385,7 @@ History metadata는 앱이나 adapter가 document change에 붙이는 주석이�
 
 큰 문서의 hot path는 document facade인 `doc.patch`, `doc.commit`, `doc.canPatch`에 둔다. 공개 `applyPatch`는 외부 JSON 경계라서 입력 state 전체의 JSON 안전성을 확인한다. `applyPatchToTrustedState`는 호출자가 이미 state JSON 경계를 소유할 때 쓰는 pure core opt-in이다. Operation value와 schema validation은 여전히 실행되며 구조만 가진 schema는 document facade와 같은 trusted fast path를 사용할 수 있다.
 
-빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에서만 적용된다. 대상 schema는 refinement, transform, check가 없는 object, array, record, scalar validator다. 지원 edit는 independent non-root `replace`, array `add`/`remove`/`copy`/`move`, same-array `add`/`remove` batch다. `refine`, `superRefine`, transform, check가 있으면 의도적으로 전체 루트 schema 검증으로 돌아간다.
+빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에서만 적용된다. 대상 schema는 refinement, transform, check가 없는 object, array, record, scalar validator다. 지원 edit는 non-root `replace` batch(독립 경로와 순차 ancestor/descendant overlap 포함), array `add`/`remove`/`copy`/`move`, same-array `add`/`remove` batch다. Leading `test` assertion 뒤에 이 edit들이 오는 guarded batch도 assertion을 먼저 확인한 뒤 같은 mutation fast path를 사용한다. Overlapping `replace`의 history inverse도 operation별 이전 값과 역순을 유지하면서 같은 private copy-on-write 순회 구현을 사용한다. `refine`, `superRefine`, transform, check가 있으면 의도적으로 전체 루트 schema 검증으로 돌아간다.
 
 ```sh
 npm run perf:core

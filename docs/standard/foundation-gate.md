@@ -108,3 +108,11 @@ replace가 있어도 touched container를 commit당 한 번만 복제한다. 최
 경로와 동일하게 유지해야 한다. Plain structural schema의 overlapping replace는 각
 value가 target schema에 허용됨을 빠르게 증명할 수 있을 때만 이 bulk 경로로 승격하고,
 그 외 배치는 기존 validation/error-order 경로로 되돌린다.
+
+History inverse 계산도 같은 private sequential-replace COW seam을 재사용한다. 각 write
+직전 값을 캡처해 기존 operation별 inverse와 undo 순서를 유지하며, inverse를 상위 path
+하나로 압축하거나 public prepared/history 계약을 추가하지 않는다.
+
+Guarded change가 leading RFC 6902 `test` assertion을 붙여도 plain structural schema에서는
+assertion을 먼저 평가한 뒤 mutation suffix와 inverse를 같은 fast path에 위임한다. Assertion
+실패나 지원하지 않는 suffix는 기존 full validation/error-order 경로가 정본이다.

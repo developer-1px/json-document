@@ -44,12 +44,13 @@ describe("overlapping replace batch", () => {
       { op: "replace", path: "/items/0/meta/rank", value: 11 },
       { op: "replace", path: "/items/0/meta/tag", value: "final" },
     ];
+    const inverse: JSONPatchOperation[] = [
+      { op: "replace", path: "/items/0/meta/tag", value: "batch" },
+      { op: "replace", path: "/items/0/meta/rank", value: 10 },
+      { op: "replace", path: "/items/0/meta", value: { tag: "initial", rank: 0 } },
+    ];
     const observed: ReadonlyArray<JSONPatchOperation>[] = [];
-    const unsubscribe = doc.subscribe((patch) => {
-      observed.push(patch);
-      expect(doc.value.items[0]?.meta).toEqual({ tag: "final", rank: 11 });
-      expect(doc.lastPatch).toEqual(operations);
-    });
+    const unsubscribe = doc.subscribe((patch) => { observed.push(patch); });
 
     expect(doc.patch(operations)).toEqual({ ok: true });
 
@@ -63,21 +64,52 @@ describe("overlapping replace batch", () => {
     expect(doc.value.items[1]).toBe(before.items[1]);
     expect(doc.value.settings).toBe(before.settings);
     expect(doc.history.undoDepth).toBe(1);
+    expect(doc.history.redoDepth).toBe(0);
 
-    unsubscribe();
     expect(doc.undo()).toEqual({ ok: true });
     expect(doc.value).toEqual(initial);
+    expect(doc.lastPatch).toEqual(inverse);
+    expect(doc.history.undoDepth).toBe(0);
+    expect(doc.history.redoDepth).toBe(1);
     expect(doc.redo()).toEqual({ ok: true });
     expect(doc.value.items[0]?.meta).toEqual({ tag: "final", rank: 11 });
+    expect(doc.lastPatch).toEqual(operations);
+    expect(doc.history.undoDepth).toBe(1);
+    expect(doc.history.redoDepth).toBe(0);
+    expect(observed).toEqual([operations, inverse, operations]);
+    expect(replacement).toEqual({ tag: "batch", rank: 10 });
+    unsubscribe();
   });
 
   test("keeps ancestor and descendant operation order observable", () => {
     const descendantThenAncestor = createDocument();
-    expect(descendantThenAncestor.patch([
+    const descendantFirst: JSONPatchOperation[] = [
       { op: "replace", path: "/items/0/meta/rank", value: 20 },
       { op: "replace", path: "/items/0/meta", value: { tag: "ancestor", rank: 21 } },
-    ])).toEqual({ ok: true });
+    ];
+    const descendantFirstInverse: JSONPatchOperation[] = [
+      { op: "replace", path: "/items/0/meta", value: { tag: "initial", rank: 20 } },
+      { op: "replace", path: "/items/0/meta/rank", value: 0 },
+    ];
+    const observed: ReadonlyArray<JSONPatchOperation>[] = [];
+    const unsubscribe = descendantThenAncestor.subscribe((patch) => { observed.push(patch); });
+    expect(descendantThenAncestor.patch(descendantFirst)).toEqual({ ok: true });
     expect(descendantThenAncestor.value.items[0]?.meta).toEqual({ tag: "ancestor", rank: 21 });
+    expect(descendantThenAncestor.undo()).toEqual({ ok: true });
+    expect(descendantThenAncestor.value).toEqual(initial);
+    expect(descendantThenAncestor.lastPatch).toEqual(descendantFirstInverse);
+    expect(descendantThenAncestor.redo()).toEqual({ ok: true });
+    expect(descendantThenAncestor.lastPatch).toEqual(descendantFirst);
+    expect(descendantThenAncestor.undo()).toEqual({ ok: true });
+    expect(descendantThenAncestor.value).toEqual(initial);
+    expect(descendantThenAncestor.lastPatch).toEqual(descendantFirstInverse);
+    expect(observed).toEqual([
+      descendantFirst,
+      descendantFirstInverse,
+      descendantFirst,
+      descendantFirstInverse,
+    ]);
+    unsubscribe();
 
     const ancestorThenDescendant = createDocument();
     expect(ancestorThenDescendant.patch([
@@ -85,6 +117,82 @@ describe("overlapping replace batch", () => {
       { op: "replace", path: "/items/0/meta/rank", value: 22 },
     ])).toEqual({ ok: true });
     expect(ancestorThenDescendant.value.items[0]?.meta).toEqual({ tag: "ancestor", rank: 22 });
+  });
+
+  test("keeps leading test assertions in forward history without adding inverses", () => {
+    const doc = createDocument();
+    const operations: JSONPatchOperation[] = [
+      { op: "test", path: "/items/0/meta", value: { tag: "initial", rank: 0 } },
+      { op: "test", path: "/items/0/meta/rank", value: 0 },
+      { op: "replace", path: "/items/0/meta", value: { tag: "guarded", rank: 30 } },
+      { op: "replace", path: "/items/0/meta/rank", value: 31 },
+    ];
+
+    expect(doc.patch(operations)).toEqual({ ok: true });
+    expect(doc.value.items[0]?.meta).toEqual({ tag: "guarded", rank: 31 });
+    expect(doc.lastPatch).toEqual(operations);
+    expect(doc.undo()).toEqual({ ok: true });
+    expect(doc.value).toEqual(initial);
+    expect(doc.lastPatch).toEqual([
+      { op: "replace", path: "/items/0/meta/rank", value: 30 },
+      { op: "replace", path: "/items/0/meta", value: { tag: "initial", rank: 0 } },
+    ]);
+    expect(doc.redo()).toEqual({ ok: true });
+    expect(doc.value.items[0]?.meta).toEqual({ tag: "guarded", rank: 31 });
+    expect(doc.lastPatch).toEqual(operations);
+  });
+
+  test("preserves stable failure fields and atomicity for guarded replace batches", () => {
+    const cases: Array<{
+      operations: JSONPatchOperation[];
+      expected: Record<string, unknown>;
+    }> = [{
+      operations: [
+        { op: "test", path: "/items/0/meta/rank", value: 99 },
+        { op: "replace", path: "/items/0/meta/rank", value: 1 },
+      ],
+      expected: {
+        ok: false,
+        code: "test_failed",
+        pointer: "/items/0/meta/rank",
+      },
+    }, {
+      operations: [
+        { op: "test", path: "/items/0/meta/tag", value: "initial" },
+        { op: "test", path: "/items/0/meta/rank", value: 99 },
+        { op: "replace", path: "/items/0/meta/rank", value: 1 },
+      ],
+      expected: {
+        ok: false,
+        code: "test_failed",
+        pointer: "/items/0/meta/rank",
+      },
+    }, {
+      operations: [
+        { op: "test", path: "/items/0/meta/tag", value: "initial" },
+        { op: "test", path: "/items/0/meta/rank", value: 0 },
+        { op: "replace", path: "/items/0/meta/missing", value: 1 },
+        { op: "replace", path: "/items/0/meta/rank", value: 2 },
+      ],
+      expected: {
+        ok: false,
+        code: "path_not_found",
+        pointer: "/items/0/meta/missing",
+      },
+    }];
+
+    for (const { operations, expected } of cases) {
+      const doc = createDocument();
+      const before = doc.value;
+      const listener = vi.fn();
+      doc.subscribe(listener);
+
+      expect(doc.patch(operations)).toMatchObject(expected);
+      expect(doc.value).toBe(before);
+      expect(doc.lastPatch).toEqual([]);
+      expect(doc.history.undoDepth).toBe(0);
+      expect(listener).not.toHaveBeenCalled();
+    }
   });
 
   test("discards the prepared draft when a later operation fails", () => {
@@ -215,16 +323,34 @@ describe("overlapping replace batch", () => {
       configurable: true,
       writable: true,
     });
-    const doc = createJSONDocument(ProtoSchema, { container }, { trustedInitial: true });
-
-    expect(doc.patch([
-      { op: "replace", path: "/container/__proto__", value: { rank: 1 } },
+    const doc = createJSONDocument(ProtoSchema, { container }, { history: 10, trustedInitial: true });
+    const replacement = { rank: 1 };
+    const operations: JSONPatchOperation[] = [
+      { op: "replace", path: "/container/__proto__", value: replacement },
       { op: "replace", path: "/container/__proto__/rank", value: 2 },
-    ])).toEqual({ ok: true });
+    ];
+    const inverse: JSONPatchOperation[] = [
+      { op: "replace", path: "/container/__proto__/rank", value: 1 },
+      { op: "replace", path: "/container/__proto__", value: { rank: 0 } },
+    ];
+    const observed: ReadonlyArray<JSONPatchOperation>[] = [];
+    doc.subscribe((patch) => { observed.push(patch); });
+
+    expect(doc.patch(operations)).toEqual({ ok: true });
 
     expect(Object.prototype.hasOwnProperty.call(doc.value.container, "__proto__")).toBe(true);
     expect(doc.value.container.__proto__).toEqual({ rank: 2 });
     expect(Object.getPrototypeOf(doc.value.container)).toBe(Object.prototype);
     expect((Object.prototype as { rank?: number }).rank).toBeUndefined();
+    expect(doc.undo()).toEqual({ ok: true });
+    expect(Object.prototype.hasOwnProperty.call(doc.value.container, "__proto__")).toBe(true);
+    expect(doc.value.container.__proto__).toEqual({ rank: 0 });
+    expect(Object.getPrototypeOf(doc.value.container)).toBe(Object.prototype);
+    expect(doc.redo()).toEqual({ ok: true });
+    expect(doc.value.container.__proto__).toEqual({ rank: 2 });
+    expect(Object.getPrototypeOf(doc.value.container)).toBe(Object.prototype);
+    expect((Object.prototype as { rank?: number }).rank).toBeUndefined();
+    expect(replacement).toEqual({ rank: 1 });
+    expect(observed).toEqual([operations, inverse, operations]);
   });
 });

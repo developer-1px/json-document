@@ -6,6 +6,7 @@ import { cloneTrustedPlainJson } from "../json/trustedClone.js";
 import { applyOpRaw } from "./apply.js";
 import { getValueAt, resolveAppendPath } from "./container.js";
 import { objectHasOwn } from "./object.js";
+import { computeSequentialReplaceInverses } from "./sequentialReplace.js";
 import {
   arrayFieldText,
   arrayLocation,
@@ -84,6 +85,8 @@ export function computeInverses(
   if (arrayNestedReplace) return arrayNestedReplace;
   const replaceOnly = computeIndependentReplaceInverses(state, ops);
   if (replaceOnly) return replaceOnly;
+  const sequentialReplace = computeSequentialReplaceInverses(state, ops);
+  if (sequentialReplace !== null) return { ok: true, inverses: sequentialReplace };
   const arrayOnly = computeSameArrayStructuralInverses(state, ops);
   if (arrayOnly) return arrayOnly;
 

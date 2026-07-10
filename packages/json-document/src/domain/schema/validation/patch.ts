@@ -71,6 +71,9 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
   if (!isPlainStructuralSchema(schema)) return null;
   const valuesTrusted = options.valuesTrusted === true;
 
+  const leadingTests = applyLeadingTestsWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
+  if (leadingTests) return leadingTests;
+
   const singleReplace = applySingleReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (singleReplace) return singleReplace;
   const sameArrayFieldReplace = applySameArrayFieldReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
@@ -96,6 +99,37 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
   const arrayBatch = applySameArrayPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (arrayBatch) return arrayBatch;
   return applySequentialPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
+}
+
+function applyLeadingTestsWithLocalSchemaValidation<S extends z.ZodType>(
+  schema: S,
+  state: z.output<S>,
+  operations: ReadonlyArray<JSONPatchOperation>,
+  valuesTrusted: boolean,
+): ApplyResult<S> | null {
+  let testCount = 0;
+  while (testCount < operations.length && operations[testCount]?.op === "test") {
+    testCount += 1;
+  }
+  if (testCount === 0 || testCount === operations.length) return null;
+
+  const tests = operations.slice(0, testCount);
+  const asserted = valuesTrusted
+    ? applyAcceptedPatch(state, tests)
+    : applyTrustedPatch(state, tests);
+  if (!asserted.result.ok) return failedLocalSchemaValidation(state, asserted.result);
+
+  const mutation = applyPatchWithLocalSchemaValidation(
+    schema,
+    state,
+    operations.slice(testCount),
+    { valuesTrusted },
+  );
+  if (mutation === null || !mutation.result.ok) return null;
+  return okLocalSchemaValidation(mutation.state, [
+    ...asserted.applied,
+    ...mutation.applied,
+  ]);
 }
 
 // schema-인지 trusted-state patch 적용: 먼저 local schema validation 경로를 시도하고,
