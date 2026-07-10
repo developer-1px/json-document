@@ -75,6 +75,7 @@ const labExtensions = matches([
   ...rootDependency,
   ...ciWorkflow,
   ...coreDependency,
+  ...officialExtensionRuntime,
   ...labRuntime,
 ]);
 const site = matches([

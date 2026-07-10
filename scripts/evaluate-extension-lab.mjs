@@ -13,6 +13,8 @@ const fullVerificationPathPatterns = [
   /^packages\/json-document\/src\//,
   /^packages\/json-document\/dist\//,
   /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig\.json)$/,
+  /^packages\/(?!json-document\/)[^/]+\/(?:src|tests)\//,
+  /^packages\/(?!json-document\/)[^/]+\/(?:package\.json|tsconfig(?:\.test)?\.json|vitest\.config\.ts|eslint\.config\.js)$/,
   /^scripts\/evaluate-extension-lab\.mjs$/,
 ];
 const retiredLabNames = new Set([
@@ -78,6 +80,21 @@ function buildCorePackage() {
   });
   if (result.status !== 0) {
     throw new Error("@interactive-os/json-document build failed before lab verification.");
+  }
+}
+
+function buildOfficialDependencies(targets) {
+  const dependencies = new Set(
+    targets.flatMap((target) => target.officialDependencies),
+  );
+  for (const dependency of dependencies) {
+    const result = spawnSync("npm", ["run", "build", "-w", dependency], {
+      cwd: root,
+      stdio: "inherit",
+    });
+    if (result.status !== 0) {
+      throw new Error(`${dependency} build failed before lab verification.`);
+    }
   }
 }
 
@@ -267,8 +284,14 @@ for (const dir of labs) {
     for (const match of source.matchAll(/\bfrom\s+["']([^"']+)["']/g)) {
       const specifier = match[1];
       if (specifier === "@interactive-os/json-document") continue;
+      if (officialPackageNames.has(specifier)) {
+        if (pkg.peerDependencies?.[specifier] === undefined) {
+          fail(`${sourcePath}: official extension imports must be declared as peer dependencies (${specifier}).`);
+        }
+        continue;
+      }
       if (specifier.startsWith(".")) continue;
-      fail(`${sourcePath}: lab source must import json-document only through the public package entrypoint (${specifier}).`);
+      fail(`${sourcePath}: lab source may import only json-document or declared official extensions (${specifier}).`);
     }
     if (/src\/application|src\/domain|src\/foundation|\.\.\/json-document\/src/.test(source)) {
       fail(`${sourcePath}: lab source must not import json-document internals.`);
@@ -279,7 +302,12 @@ for (const dir of labs) {
   }
 
   if (verify && selectedVerification.dirs.has(dir)) {
-    verificationTargets.push({ dir, name: pkg.name });
+    verificationTargets.push({
+      dir,
+      name: pkg.name,
+      officialDependencies: Object.keys(pkg.peerDependencies ?? {})
+        .filter((dependency) => officialPackageNames.has(dependency)),
+    });
   }
 }
 
@@ -287,6 +315,7 @@ if (verify && process.exitCode !== 1) {
   console.log(`extension lab verify scope: ${verificationTargets.length}/${labs.length} package(s); ${selectedVerification.reason}`);
   if (verificationTargets.length > 0) {
     buildCorePackage();
+    buildOfficialDependencies(verificationTargets);
     await verifyPackages(verificationTargets);
   }
 }

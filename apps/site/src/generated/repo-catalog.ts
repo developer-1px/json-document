@@ -2914,6 +2914,36 @@ export const repoCatalog = {
       ]
     },
     {
+      "path": "labs/extensions/stable-id-rebase",
+      "name": "@interactive-os/json-document-stable-id-rebase",
+      "status": "lab-extension",
+      "private": true,
+      "publishable": false,
+      "version": "0.1.0",
+      "description": "Lab stable-id anchored delayed change planner for json-document documents.",
+      "license": "MIT",
+      "summary": "Lab planner for materializing one delayed field replacement against the current\nPointer of a host-owned stable id.",
+      "guidance": {
+        "useFor": "materialize one delayed field replacement against a current stable-id target",
+        "notFor": "id policy, structural patches, CRDT/OT protocols, transport, or merge UI"
+      },
+      "publicExports": [
+        "StableIdRebaseDiagnostic",
+        "StableIdRebaseResult",
+        "StableIdReplaceInput",
+        "StableIdTarget",
+        "rebaseStableChange"
+      ],
+      "publicExportCount": 5,
+      "keywords": [
+        "@interactive-os/json-document",
+        "conflict",
+        "headless",
+        "rebase",
+        "stable-id"
+      ]
+    },
+    {
       "path": "labs/extensions/swap-items",
       "name": "@interactive-os/json-document-swap-items",
       "status": "lab-extension",
@@ -3285,7 +3315,7 @@ export const repoCatalog = {
   "totals": {
     "packages": 20,
     "officialExtensions": 19,
-    "labExtensions": 39,
+    "labExtensions": 40,
     "apps": 12
   }
 } as const;

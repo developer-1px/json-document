@@ -102,6 +102,10 @@ const extensionGuidance = {
     useFor: "plan conservative optimistic rebases over ordered applied JSON Patch batches",
     notFor: "CRDT/OT protocols, transport, durable sync queues, or merge UI",
   },
+  "@interactive-os/json-document-stable-id-rebase": {
+    useFor: "materialize one delayed field replacement against a current stable-id target",
+    notFor: "id policy, structural patches, CRDT/OT protocols, transport, or merge UI",
+  },
   "@interactive-os/json-document-drag-drop": {
     useFor: "turn drag/drop intent into move or paste operations",
     notFor: "DOM drag/drop events, hit testing, or hover UI",
