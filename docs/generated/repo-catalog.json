@@ -2650,6 +2650,39 @@
       ]
     },
     {
+      "path": "labs/extensions/patch-rebase",
+      "name": "@interactive-os/json-document-patch-rebase",
+      "status": "lab-extension",
+      "private": true,
+      "publishable": false,
+      "version": "0.1.0",
+      "description": "Lab optimistic JSON Patch rebase planner for json-document documents.",
+      "license": "MIT",
+      "summary": "Lab optimistic JSON Patch rebase planner for `@interactive-os/json-document`\ndocuments.",
+      "guidance": {
+        "useFor": "plan conservative optimistic rebases over ordered applied JSON Patch batches",
+        "notFor": "CRDT/OT protocols, transport, durable sync queues, or merge UI"
+      },
+      "publicExports": [
+        "RebaseChangeInput",
+        "RebaseChangeResult",
+        "RebaseConflict",
+        "RebaseConflictCode",
+        "RebaseDiagnostic",
+        "RebaseDiagnosticCode",
+        "RebaseSchema",
+        "rebaseChange"
+      ],
+      "publicExportCount": 8,
+      "keywords": [
+        "@interactive-os/json-document",
+        "conflict",
+        "headless",
+        "patch",
+        "rebase"
+      ]
+    },
+    {
       "path": "labs/extensions/references",
       "name": "@interactive-os/json-document-references",
       "status": "lab-extension",
@@ -3251,7 +3284,7 @@
   "totals": {
     "packages": 20,
     "officialExtensions": 19,
-    "labExtensions": 38,
+    "labExtensions": 39,
     "apps": 12
   }
 }

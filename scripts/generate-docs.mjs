@@ -98,6 +98,10 @@ const extensionGuidance = {
     useFor: "produce and apply patch changes toward a target document",
     notFor: "visual diff UI or merge conflict resolution",
   },
+  "@interactive-os/json-document-patch-rebase": {
+    useFor: "plan conservative optimistic rebases over ordered applied JSON Patch batches",
+    notFor: "CRDT/OT protocols, transport, durable sync queues, or merge UI",
+  },
   "@interactive-os/json-document-drag-drop": {
     useFor: "turn drag/drop intent into move or paste operations",
     notFor: "DOM drag/drop events, hit testing, or hover UI",
