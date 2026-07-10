@@ -28,7 +28,7 @@ Official extensions: 19
 | `@interactive-os/json-document-search-replace` | 23 | find and replace text across document string fields | regex engines, rendered text extraction, or search UI | Official headless search and replace extension for text fields in `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-snippets` | 12 | insert reusable JSON payloads with schema-safe paste checks | slash palette UI or snippet storage | Official headless snippet insertion extension for `@interactive-os/json-document` documents. |
 
-Lab extensions: 38
+Lab extensions: 39
 
 Lab extensions are private candidates. They are listed to show product pressure, not as shipped packages.
 
@@ -61,6 +61,7 @@ Lab extensions are private candidates. They are listed to show product pressure,
 | `@interactive-os/json-document-pad-text` | lab-only | 9 | pad a string field to a minimum length (zero-padded codes/IDs) | number formatting or display-time alignment | Lab pad-text extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-paste-cells` | lab-only | 9 | paste a 2D value matrix onto a rectangular array-of-records region | TSV/CSV parsing, clipboard I/O, or auto-growing the array | Lab paste-cells extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-paste-special` | lab-only | 17 | adapt external payloads before schema-safe paste | browser clipboard I/O or autocomplete dropdowns | Lab extension for paste special. |
+| `@interactive-os/json-document-patch-rebase` | lab-only | 8 | plan conservative optimistic rebases over ordered applied JSON Patch batches | CRDT/OT protocols, transport, durable sync queues, or merge UI | Lab optimistic JSON Patch rebase planner for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-references` | lab-only | 21 | track stable references and backlinks over JSON documents | route state or rendered links | Lab extension for stable references and backlinks over JSON documents. |
 | `@interactive-os/json-document-renumber-items` | lab-only | 9 | sync an order/position field to each item array position after a reorder | reordering the array itself, or fractional/gap indexing | Lab renumber-items extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-round` | lab-only | 10 | round a number to a precision or nearest step (round/floor/ceil/trunc) | currency/locale formatting, or increment/clamp (see increment-number) | Lab round extension for `@interactive-os/json-document` documents. |
