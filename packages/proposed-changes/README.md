@@ -14,7 +14,7 @@ approval, or document cleanup suggestions.
 ## Scope
 
 - propose schema-safe document patches without mutating the document
-- accept an open proposed change through `doc.patch`
+- accept an open proposed change through one guarded `doc.patch` batch
 - reject an open proposed change without document mutation
 - detect stale changes by comparing guarded target values
 - restore persisted changes through `createProposedChanges(doc, { initial })`
@@ -77,6 +77,30 @@ move/copy           -> guard operation.from and parent(operation.path)
 
 `canAccept(id)` returns `stale_change` with the changed guard pointer when the
 guarded document value no longer matches the value captured at proposal time.
+Guard comparison follows JSON structural equality: array order matters, while
+object member insertion order does not.
+`canAccept(id)` is a capability probe, not a reservation. `accept(id)` converts
+the saved guards to RFC 6902 `test` operations and executes those assertions
+before the proposed operations in the same atomic patch. If schema validation
+reenters and changes the document, the core retries the whole batch against the
+latest revision, including the guard assertions.
+
+When the proposed operations publish a document state change, the generated
+`test` operations appear before them in `doc.lastPatch`, document subscriber
+events, and the history forward patch. Undo contains only mutation inverses;
+redo executes the guarded forward patch again. A test-only or otherwise
+non-publishing patch does not emit a document subscriber event.
+
+An id is reserved until its document publication is committed. Reentrant
+`accept` or `reject` calls for that id return `not_open`, `remove(id)` returns
+`false`, and `load` or `clear` preserves the accepting entry. This keeps
+document subscriber reentrancy from removing or replacing the proposal after
+its patch publishes. The reservation is released before accepted proposal
+listeners run.
+
+With a strict document, an execution-time guard failure follows the document's
+existing error policy and throws `JSONDocumentError`; the guarded batch still
+publishes no partial change and the proposal stays open.
 
 Audit metadata convention:
 
@@ -105,16 +129,17 @@ editor command / AI result
 -> host renders current({ status: "all" })
 -> host persists snapshot.changes if needed
 -> canAccept(id) controls disabled/reason UI
--> accept(id) applies doc.patch(...)
+-> accept(id) applies guard tests + proposed operations in one doc.patch(...)
 -> reject(id) closes without document mutation
 ```
 
 ## Contract
 
 - Core `canPatch` is enough to reject schema-invalid proposals before storage.
-- Core `patch` is enough to accept proposed changes atomically.
-- The extension needs local guard values to avoid accepting stale changes that
-  would otherwise still be patchable.
+- Core `patch` is enough to assert saved guard values and apply a proposed
+  change atomically when both are sent as one JSON Patch batch.
+- The extension keeps local guard values and reasserts them during `accept` so
+  schema-validation reentrancy cannot apply an old proposal to a newer state.
 - Persistence does not require a core change yet because serialized
   `ProposedChange` values can be restored at extension level.
 - `data` remains host-owned metadata. The exported `ProposedChangeAuditData`
