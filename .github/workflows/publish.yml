@@ -1,0 +1,54 @@
+name: Publish json-document prerelease
+
+on:
+  push:
+    tags:
+      - "json-document-v*-rc.*"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-json-document-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    environment: npm-publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Require a tagged main commit
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor "${GITHUB_SHA}^{commit}" origin/main
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - name: Verify prerelease identity
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module --eval '
+            import { readFileSync } from "node:fs";
+            const pkg = JSON.parse(readFileSync("packages/json-document/package.json", "utf8"));
+            const expectedTag = `json-document-v${pkg.version}`;
+            if (process.env.RELEASE_TAG !== expectedTag) {
+              throw new Error(`release tag ${process.env.RELEASE_TAG} does not match ${expectedTag}`);
+            }
+            if (!/^\d+\.\d+\.\d+-rc\.\d+$/.test(pkg.version)) {
+              throw new Error(`package version is not an rc prerelease: ${pkg.version}`);
+            }
+            if (pkg.publishConfig?.tag !== "next") {
+              throw new Error("publishConfig.tag must remain next for prereleases");
+            }
+          '
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Publish prerelease
+        run: npm publish -w @interactive-os/json-document --tag next --provenance

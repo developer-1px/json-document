@@ -6,10 +6,16 @@ All notable changes to this project are documented here.
 
 No unreleased changes.
 
-## 1.1.0 - 2026-07-05
+## 1.1.0-rc.0 - 2026-07-11
 
-This release adds the next additive public API surface for the core
-`@interactive-os/json-document` document facade while keeping 1.x compatibility.
+This prerelease lets sibling editors such as `editable` and `canvas` exercise
+the next `@interactive-os/json-document` document facade through an explicit
+npm opt-in. It is published under the `next` dist-tag while `latest` remains on
+`1.0.1`.
+
+The unified mutation success result described below changes the runtime shape
+published in `1.0.1`. Treat it as an integration experiment, not a stable 1.x
+compatibility promise. Its final shape must be decided before a stable release.
 
 ### Added
 
@@ -49,6 +55,20 @@ This release adds the next additive public API surface for the core
 - Fixed schema introspection traversal through wrapper schemas.
 - Fixed `readAt` so non-canonical array indices are rejected.
 - Fixed paste-into capability errors for absent targets.
+- Replanned prepared insert, paste, cut, and duplicate changes when schema
+  validation or a custom rekey callback changed the document revision before
+  publication.
+- Preserved atomic guard-test and mutation semantics for overlapping replace
+  batches and guarded proposed-change acceptance.
+
+### Performance
+
+- Added a copy-on-write sequential replace path for eligible overlapping
+  parent/child replacements on plain structural schemas.
+- Reused that path for history inverse capture and eligible guarded replace
+  batches, avoiding repeated whole-document cloning while preserving operation
+  order. Unsupported operations and schemas keep the canonical full-validation
+  path.
 
 ## 1.0.1 - 2026-06-19
 
