@@ -60,6 +60,22 @@ function createBoard() {
   });
 }
 
+function createSelectableBoard() {
+  return createJSONDocument(BoardSchema, {
+    nodes: [
+      { id: "a", kind: "item", title: "Alpha" },
+      { id: "b", kind: "item", title: "Beta" },
+      { id: "c", kind: "item", title: "Gamma" },
+    ],
+  }, {
+    history: 10,
+    selection: {
+      mode: "multiple",
+      initial: ["/nodes/0", "/nodes/1"],
+    },
+  });
+}
+
 describe("@interactive-os/json-document-grouping", () => {
   test("groups selected sibling items into one schema-valid group", () => {
     const doc = createBoard();
@@ -106,6 +122,51 @@ describe("@interactive-os/json-document-grouping", () => {
       selectionAfter: ["/nodes/0", "/nodes/1"],
     });
     expect(doc.value.nodes.map((node) => node.id)).toEqual(["a", "b", "c"]);
+  });
+
+  test("commits grouped selection atomically through undo and redo", () => {
+    const doc = createSelectableBoard();
+
+    expect(groupSelection(doc, groupingAdapter, ["/nodes/0", "/nodes/1"])).toMatchObject({
+      ok: true,
+      selectionAfter: ["/nodes/0"],
+    });
+    expect(doc.value.nodes.map((node) => node.id)).toEqual(["group-0", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/nodes/0"]);
+    expect(doc.selection?.primaryPointer).toBe("/nodes/0");
+
+    expect(doc.undo()).toEqual({ ok: true });
+    expect(doc.value.nodes.map((node) => node.id)).toEqual(["a", "b", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/nodes/0", "/nodes/1"]);
+    expect(doc.selection?.primaryPointer).toBe("/nodes/1");
+
+    expect(doc.redo()).toEqual({ ok: true });
+    expect(doc.value.nodes.map((node) => node.id)).toEqual(["group-0", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/nodes/0"]);
+    expect(doc.selection?.primaryPointer).toBe("/nodes/0");
+  });
+
+  test("commits ungrouped child selection atomically through undo and redo", () => {
+    const doc = createSelectableBoard();
+    expect(groupSelection(doc, groupingAdapter, ["/nodes/0", "/nodes/1"])).toMatchObject({ ok: true });
+
+    expect(ungroupSelection(doc, groupingAdapter, "/nodes/0")).toMatchObject({
+      ok: true,
+      selectionAfter: ["/nodes/0", "/nodes/1"],
+    });
+    expect(doc.value.nodes.map((node) => node.id)).toEqual(["a", "b", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/nodes/0", "/nodes/1"]);
+    expect(doc.selection?.primaryPointer).toBe("/nodes/1");
+
+    expect(doc.undo()).toEqual({ ok: true });
+    expect(doc.value.nodes.map((node) => node.id)).toEqual(["group-0", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/nodes/0"]);
+    expect(doc.selection?.primaryPointer).toBe("/nodes/0");
+
+    expect(doc.redo()).toEqual({ ok: true });
+    expect(doc.value.nodes.map((node) => node.id)).toEqual(["a", "b", "c"]);
+    expect(doc.selection?.selectedPointers).toEqual(["/nodes/0", "/nodes/1"]);
+    expect(doc.selection?.primaryPointer).toBe("/nodes/1");
   });
 
   test("deduplicates selected pointers and prunes nested descendants before grouping", () => {

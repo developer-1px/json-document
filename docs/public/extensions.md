@@ -12,6 +12,20 @@ Extension은 core에 plugin으로 등록하지 않습니다. public `JSONDocumen
 npm install @interactive-os/json-document @interactive-os/json-document-collection
 ```
 
+`1.1.0-rc.0` integration testing uses exact versions and the `next` dist-tag.
+The companion RC set for `canvas` is:
+
+```sh
+npm install --save-exact \
+  @interactive-os/json-document@1.1.0-rc.0 \
+  @interactive-os/json-document-grouping@0.1.1-rc.0 \
+  @interactive-os/json-document-patch-preview@0.1.1-rc.0 \
+  @interactive-os/json-document-search-replace@0.1.1-rc.0
+```
+
+This RC set is an opt-in integration graph. Stable consumers continue to use
+the packages' `latest` dist-tags.
+
 ## 공식 extension
 
 공식 extension 목록과 lab 후보 목록은 repo catalog에서 생성됩니다. `packages/*`에 있는 publishable `@interactive-os/json-document-*` package가 공식 extension이고, `labs/extensions/*`는 후보입니다. public 문서에서 lab package를 공식 extension이라고 부르지 않습니다.
