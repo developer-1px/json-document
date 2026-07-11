@@ -3,6 +3,10 @@
 Official headless search and replace extension for text fields in `@interactive-os/json-document`
 documents.
 
+> `0.1.1-rc.0` is a companion prerelease for
+> `@interactive-os/json-document@1.1.0-rc.0`. Pin both versions exactly while
+> the core mutation result contract is under integration testing.
+
 Use it when a product needs document-wide or subtree text search over JSON
 string fields: block documents, CMS copy review, generated admin editors,
 slide notes, import cleanup, or settings search.

@@ -2,6 +2,10 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
+const corePeerRanges = new Set([
+  "^1.0.0",
+  "^1.0.1 || ^1.1.0-rc.0",
+]);
 const officialExtensions = [
   {
     root: "packages/clipboard-web",
@@ -303,8 +307,8 @@ for (const extension of officialExtensions) {
   if (pkg.private === true) {
     fail(`${label}: official extension packages must be publishable.`);
   }
-  if (pkg.peerDependencies?.["@interactive-os/json-document"] !== "^1.0.0") {
-    fail(`${label}: json-document must stay a peer dependency.`);
+  if (!corePeerRanges.has(pkg.peerDependencies?.["@interactive-os/json-document"])) {
+    fail(`${label}: json-document must stay an approved peer dependency range.`);
   }
   if (pkg.dependencies?.["@interactive-os/json-document"]) {
     fail(`${label}: json-document must not be a runtime dependency.`);

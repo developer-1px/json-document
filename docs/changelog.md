@@ -17,6 +17,16 @@ The unified mutation success result described below changes the runtime shape
 published in `1.0.1`. Treat it as an integration experiment, not a stable 1.x
 compatibility promise. Its final shape must be decided before a stable release.
 
+Companion integration prereleases are published under the `next` dist-tag for
+`@interactive-os/json-document-grouping`,
+`@interactive-os/json-document-patch-preview`, and
+`@interactive-os/json-document-search-replace` at `0.1.1-rc.0`. They keep their
+stable `0.1.0` APIs and expand the core peer range to
+`^1.0.1 || ^1.1.0-rc.0`, allowing `canvas` to exercise a registry-only RC graph.
+The grouping RC also commits its documented `selectionAfter` atomically with
+the structural patch, so undo and redo restore the matching selection state.
+Each companion RC tarball now includes the repository MIT license text.
+
 ### Added
 
 - Added `doc.query(jsonpath)` and `doc.canQuery(jsonpath)` as the canonical
