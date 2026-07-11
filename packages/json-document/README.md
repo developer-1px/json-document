@@ -14,6 +14,16 @@ schema -> document -> pointer/query -> can* -> change -> result
 - 공식 사이트: https://developer-1px.github.io/json-document/
 - GitHub Wiki: https://github.com/developer-1px/json-document/wiki
 
+> `1.1.0-rc.0`은 `editable`, `canvas` 같은 sibling editor에서 통합 압력을
+> 확인하기 위한 prerelease입니다. npm `latest`는 계속 `1.0.1`을 가리킵니다.
+> 이 RC는 document mutation 성공을 `{ ok, value, applied, target }` 후보로
+> 통일하지만 low-level `patch`/`commit`은 `{ ok: true }`를 유지합니다. 이 shape는
+> stable 승격 전에 바뀔 수 있으므로 아래처럼 exact version으로 opt in합니다.
+>
+> ```sh
+> npm install @interactive-os/json-document@1.1.0-rc.0 zod
+> ```
+
 ## 왜 json-document인가
 
 JSON을 단순 data blob으로만 다루면 값 하나를 바꾸는 일은 쉽습니다. 하지만 실제

@@ -1,6 +1,6 @@
 # Result and Error Code Contract
 
-상태: 1.0 semantic freeze 기준.
+상태: 1.0 stable baseline과 1.1.0-rc.0 통합 후보를 함께 기록.
 
 이 문서는 public API가 반환하는 성공, 실패, error code, diagnostic shape를
 고정한다. 문서의 목적은 앱이 실패를 문자열로 추측하지 않고, 안정적인 코드와
@@ -13,6 +13,10 @@
 호환 구현체는 public entrypoint의 result shape와 error code를 이 문서와
 동일하게 유지해야 한다. 새 error code 추가는 minor일 수 있지만, 기존 code
 제거, 의미 변경, 성공/실패 discriminant 변경은 breaking change다.
+
+`1.1.0-rc.0` 후보라고 표시한 shape는 sibling editor의 통합 압력을 받기 위한
+opt-in prerelease다. npm `latest`의 1.0 stable 계약을 대체하지 않으며, stable
+승격 전에 호환성 또는 다음 major 계약으로 다시 판정해야 한다.
 
 ## 공통 Result Shape
 
@@ -143,6 +147,10 @@ Clipboard와 structural command result는 `ok` discriminant를 공유하지만 A
 Mutation verb의 성공은 통일 `EditOk` shape를 따른다. "duplicate는 새
 객체(위치)를 반환한다"는 정본을 전 verb로 일반화한 것이다.
 
+> `1.1.0-rc.0` 후보: 이 shape는 `1.0.1`의 성공 result에 필수 field를
+> 추가한다. prerelease 소비자는 exact version으로 opt in해야 하며 stable
+> 1.x 호환 shape로 간주하면 안 된다.
+
 ```ts
 type JSONDocumentEditOk<T> = {
   ok: true;
@@ -224,6 +232,7 @@ throw 여부가 아니라 result contract의 `code`로 실패를 분류해야 �
 - `violations[].path`를 JSON Pointer가 아닌 형식으로 변경.
 - `schema-slot`과 `document-result` violation path 기준 변경.
 - 성공 mutation result에서 `applied` 의미를 실제 commit patch가 아닌 것으로 변경.
+- 기존 성공 result의 필수 field 또는 exact key shape 변경.
 
 다음 변경은 호환 가능한 확장일 수 있다.
 
