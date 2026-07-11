@@ -28,7 +28,7 @@ Official extensions: 19
 | `@interactive-os/json-document-search-replace` | 23 | find and replace text across document string fields | regex engines, rendered text extraction, or search UI | Official headless search and replace extension for text fields in `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-snippets` | 12 | insert reusable JSON payloads with schema-safe paste checks | slash palette UI or snippet storage | Official headless snippet insertion extension for `@interactive-os/json-document` documents. |
 
-Lab extensions: 40
+Lab extensions: 41
 
 Lab extensions are private candidates. They are listed to show product pressure, not as shipped packages.
 
@@ -39,6 +39,7 @@ Lab extensions are private candidates. They are listed to show product pressure,
 | `@interactive-os/json-document-batch-update` | lab-only | 10 | set a field across a list of selected item pointers to a constant or computed value | selecting which items to edit, or JSONPath query-driven replacement | Lab batch-update extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-bookmarks` | lab-only | 8 | keep named JSON Pointer locations stable across edits | browser bookmarks or route state | Headless bookmark tracking extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-calculated-fields` | lab-only | 12 | sync host-computed derived JSON fields | formula languages or dependency runtimes | Lab calculated field extension for `@interactive-os/json-document` documents. |
+| `@interactive-os/json-document-causal-patch-inbox` | lab-only | 11 | queue and deduplicate dependency-declared envelopes, applying each as one core JSON Patch batch | CRDT/OT convergence, transport, persistence, ready-time rebase, or conflict resolution | Lab module for admitting dependency-declared JSON Patch envelopes, holding out-of-order work, and applying each ready envelope to one `JSONDocument`. |
 | `@interactive-os/json-document-change-case` | lab-only | 9 | apply case/whitespace transforms (upper, lower, trim, title) to a string field | locale-aware casing, rich text formatting toolbars, or find/replace | Lab change-case extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-checkpoints` | lab-only | 13 | name and restore document snapshots | durable version graphs or cloud backup | Lab checkpoint extension for `@interactive-os/json-document` documents. |
 | `@interactive-os/json-document-clear-contents` | lab-only | 10 | reset selected fields to schema-derived empty values, keeping structure | structural delete, caller-supplied bulk replace, or enum/object default policy | Lab clear-contents extension for `@interactive-os/json-document` documents. |

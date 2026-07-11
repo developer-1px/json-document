@@ -1836,6 +1836,42 @@ export const repoCatalog = {
       ]
     },
     {
+      "path": "labs/extensions/causal-patch-inbox",
+      "name": "@interactive-os/json-document-causal-patch-inbox",
+      "status": "lab-extension",
+      "private": true,
+      "publishable": false,
+      "version": "0.1.0",
+      "description": "Lab causal JSON Patch inbox for json-document documents.",
+      "license": "MIT",
+      "summary": "Lab module for admitting dependency-declared JSON Patch envelopes, holding\nout-of-order work, and applying each ready envelope to one `JSONDocument`.",
+      "guidance": {
+        "useFor": "queue and deduplicate dependency-declared envelopes, applying each as one core JSON Patch batch",
+        "notFor": "CRDT/OT convergence, transport, persistence, ready-time rebase, or conflict resolution"
+      },
+      "publicExports": [
+        "CausalPatchEnvelope",
+        "CausalPatchInbox",
+        "CausalPatchInboxSnapshot",
+        "CausalPatchIngestError",
+        "CausalPatchIngestErrorCode",
+        "CausalPatchIngestOk",
+        "CausalPatchIngestResult",
+        "FailedCausalPatch",
+        "FaultedCausalPatch",
+        "QueuedCausalPatch",
+        "createCausalPatchInbox"
+      ],
+      "publicExportCount": 11,
+      "keywords": [
+        "@interactive-os/json-document",
+        "causal",
+        "headless",
+        "inbox",
+        "patch"
+      ]
+    },
+    {
       "path": "labs/extensions/change-case",
       "name": "@interactive-os/json-document-change-case",
       "status": "lab-extension",
@@ -3315,7 +3351,7 @@ export const repoCatalog = {
   "totals": {
     "packages": 20,
     "officialExtensions": 19,
-    "labExtensions": 40,
+    "labExtensions": 41,
     "apps": 12
   }
 } as const;
