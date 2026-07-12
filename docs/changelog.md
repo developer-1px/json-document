@@ -20,7 +20,7 @@ compatibility promise. Its final shape must be decided before a stable release.
 Companion integration prereleases are published under the `next` dist-tag for
 `@interactive-os/json-document-grouping`,
 `@interactive-os/json-document-patch-preview`, and
-`@interactive-os/json-document-search-replace` at `0.1.1-rc.0`. They keep their
+`@interactive-os/json-document-search-replace` at `0.1.1-rc.1`. They keep their
 stable `0.1.0` APIs and expand the core peer range to
 `^1.0.1 || ^1.1.0-rc.0`, allowing `canvas` to exercise a registry-only RC graph.
 The grouping RC also commits its documented `selectionAfter` atomically with

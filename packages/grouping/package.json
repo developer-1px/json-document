@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document-grouping",
-  "version": "0.1.1-rc.0",
+  "version": "0.1.1-rc.1",
   "description": "Official structural group and ungroup extension functions for json-document documents.",
   "type": "module",
   "license": "MIT",
