@@ -941,6 +941,1012 @@ describe("@interactive-os/json-document-causal-patch-inbox", () => {
     });
   });
 
+  test("rebases a delayed selection point without losing caret metadata", () => {
+    const base = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "Before" },
+      ],
+    };
+    const doc = createJSONDocument(CollectionSchema, base, {
+      history: 10,
+      selection: { mode: "single", initial: ["/items/1/title"] },
+    });
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+    });
+
+    expect(inbox.ingest({
+      id: "remote-title",
+      dependsOn: ["parent"],
+      intent: {
+        kind: "positional",
+        base,
+        operations: [{
+          op: "replace",
+          path: "/items/1/title",
+          value: "Reviewed",
+        }],
+        selectionAfter: {
+          path: "/items/1/title",
+          offset: 4,
+          affinity: "forward",
+        },
+      },
+    })).toMatchObject({ ok: true, pending: ["remote-title"] });
+
+    expect(inbox.ingest([{
+      id: "concurrent",
+      dependsOn: [],
+      operations: [{
+        op: "add",
+        path: "/items/0",
+        value: { id: "x", title: "X" },
+      }],
+    }, {
+      id: "parent",
+      dependsOn: [],
+      operations: [],
+    }])).toMatchObject({
+      ok: true,
+      applied: ["concurrent", "parent", "remote-title"],
+    });
+    expect(doc.selection?.caret).toEqual({
+      path: "/items/2/title",
+      offset: 4,
+      affinity: "forward",
+    });
+  });
+
+  test("rejects malformed selection point data before admitting an intent", () => {
+    const invalidPoints = [
+      { path: "/items/0/title", offset: -1 },
+      { path: "/items/0/title", offset: 1.5 },
+      { path: "/items/0/title", edge: "inside" },
+      { path: "/items/0/title", affinity: "nearest" },
+      { path: "/items/0/title", decoration: true },
+    ];
+
+    for (const selectionAfter of invalidPoints) {
+      const base = { items: [{ id: "a", title: "A" }] };
+      const doc = createJSONDocument(CollectionSchema, base);
+      const inbox = createCausalPatchInbox(doc, {
+        positionalSchema: CollectionSchema,
+      });
+
+      expect(inbox.ingest({
+        id: "invalid-point",
+        dependsOn: [],
+        intent: {
+          kind: "positional",
+          base,
+          operations: [],
+          selectionAfter,
+        },
+      } as never)).toMatchObject({
+        ok: false,
+        code: "invalid_envelope",
+        id: "invalid-point",
+        applied: [],
+      });
+      expect(doc.value).toEqual(base);
+      expect(inbox.current().queued).toEqual([]);
+    }
+  });
+
+  test("integrates a host publication before applying one ready positional intent", () => {
+    const base = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    };
+    const doc = createJSONDocument(CollectionSchema, base);
+    let hostSequence = 0;
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+      host: {
+        ownsPublication: ({ metadata }) => metadata?.origin === "editable"
+          ? { sequence: hostSequence += 1 }
+          : false,
+        runReady: ({ apply }) => {
+          expect(doc.commit([{
+            op: "add",
+            path: "/items/0",
+            value: { id: "x", title: "X" },
+          }], { origin: "editable" })).toEqual({ ok: true });
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    const result = inbox.ingest({
+      id: "remote-title",
+      dependsOn: [],
+      intent: {
+        kind: "positional",
+        base,
+        baseRevision: 0,
+        operations: [{
+          op: "replace",
+          path: "/items/1/title",
+          value: "Reviewed",
+        }],
+      },
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      applied: ["remote-title"],
+      diagnostics: [{
+        id: "remote-title",
+        policy: "positional",
+        code: "pointer_shifted",
+        pointer: "/items/1/title",
+        rebasedPointer: "/items/2/title",
+      }],
+    });
+    expect(doc.value.items).toEqual([
+      { id: "x", title: "X" },
+      { id: "a", title: "A" },
+      { id: "b", title: "Reviewed" },
+    ]);
+    expect(inbox.current()).toMatchObject({
+      status: "active",
+      journalRevision: 2,
+      frontier: ["remote-title"],
+      queued: [],
+    });
+  });
+
+  test("journals an unpublished causal test as an empty projection batch", () => {
+    const base = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    };
+    const doc = createJSONDocument(CollectionSchema, base);
+    let hostSequence = 0;
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+      host: {
+        ownsPublication: ({ metadata }) => metadata?.origin === "editable"
+          ? { sequence: hostSequence += 1 }
+          : false,
+        runReady: ({ id, apply }) => {
+          if (id === "guard") {
+            expect(doc.commit([{
+              op: "add",
+              path: "/items/0",
+              value: { id: "x", title: "X" },
+            }], { origin: "editable" })).toEqual({ ok: true });
+          }
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "guard",
+      dependsOn: [],
+      operations: [{ op: "test", path: "/items/0/id", value: "x" }],
+    })).toMatchObject({ ok: true, applied: ["guard"] });
+    expect(inbox.ingest({
+      id: "remote-title",
+      dependsOn: ["guard"],
+      intent: {
+        kind: "positional",
+        base,
+        baseRevision: 0,
+        operations: [{
+          op: "replace",
+          path: "/items/1/title",
+          value: "Reviewed",
+        }],
+      },
+    })).toMatchObject({
+      ok: true,
+      applied: ["remote-title"],
+      diagnostics: [{
+        id: "remote-title",
+        code: "pointer_shifted",
+        pointer: "/items/1/title",
+        rebasedPointer: "/items/2/title",
+      }],
+    });
+    expect(doc.value.items).toEqual([
+      { id: "x", title: "X" },
+      { id: "a", title: "A" },
+      { id: "b", title: "Reviewed" },
+    ]);
+    expect(inbox.current()).toMatchObject({ journalRevision: 3 });
+  });
+
+  test("blocks a positional intent authored from a future journal revision", () => {
+    const base = {
+      items: [{ id: "a", title: "A" }],
+    };
+    const doc = createJSONDocument(CollectionSchema, base);
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote-title",
+      dependsOn: [],
+      intent: {
+        kind: "positional",
+        base,
+        baseRevision: 1,
+        operations: [{
+          op: "replace",
+          path: "/items/0/title",
+          value: "Reviewed",
+        }],
+      },
+    })).toMatchObject({
+      ok: false,
+      code: "materialization_failed",
+      id: "remote-title",
+      policy: "positional",
+      materialization: {
+        ok: false,
+        code: "base_revision_ahead",
+        baseRevision: 1,
+        journalRevision: 0,
+      },
+      applied: [],
+    });
+    expect(doc.value).toEqual(base);
+    expect(inbox.current()).toMatchObject({
+      status: "blocked",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote-title", missing: [] }],
+    });
+  });
+
+  test("blocks when a declared dependency is newer than the positional base", () => {
+    const base = {
+      items: [{ id: "a", title: "A" }],
+    };
+    const doc = createJSONDocument(CollectionSchema, base);
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(inbox.ingest([{
+      id: "parent",
+      dependsOn: [],
+      operations: [{
+        op: "add",
+        path: "/items/0",
+        value: { id: "x", title: "X" },
+      }],
+    }, {
+      id: "child",
+      dependsOn: ["parent"],
+      intent: {
+        kind: "positional",
+        base,
+        baseRevision: 0,
+        operations: [{
+          op: "replace",
+          path: "/items/0/title",
+          value: "Reviewed",
+        }],
+      },
+    }])).toMatchObject({
+      ok: false,
+      code: "materialization_failed",
+      id: "child",
+      policy: "positional",
+      materialization: {
+        ok: false,
+        code: "base_revision_mismatch",
+        baseRevision: 0,
+        dependency: "parent",
+        dependencyRevision: 1,
+      },
+      applied: ["parent"],
+    });
+    expect(doc.value.items).toEqual([
+      { id: "x", title: "X" },
+      { id: "a", title: "A" },
+    ]);
+    expect(inbox.current()).toMatchObject({
+      status: "blocked",
+      journalRevision: 1,
+      frontier: ["parent"],
+      queued: [{ id: "child", missing: [] }],
+    });
+  });
+
+  test("rebases only journal batches newer than the authored revision", () => {
+    const doc = createJSONDocument(CollectionSchema, {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    });
+    let hostSequence = 0;
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+      host: {
+        ownsPublication: ({ metadata }) => metadata?.origin === "editable"
+          ? { sequence: hostSequence += 1 }
+          : false,
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+    expect(doc.commit([{
+      op: "add",
+      path: "/items/0",
+      value: { id: "x", title: "X" },
+    }], { origin: "editable" })).toEqual({ ok: true });
+    const authoredBase = doc.value;
+    expect(inbox.current().journalRevision).toBe(1);
+    expect(doc.commit([{
+      op: "add",
+      path: "/items/0",
+      value: { id: "y", title: "Y" },
+    }], { origin: "editable" })).toEqual({ ok: true });
+
+    expect(inbox.ingest({
+      id: "remote-title",
+      dependsOn: [],
+      intent: {
+        kind: "positional",
+        base: authoredBase,
+        baseRevision: 1,
+        operations: [{
+          op: "replace",
+          path: "/items/2/title",
+          value: "Reviewed",
+        }],
+      },
+    })).toMatchObject({
+      ok: true,
+      applied: ["remote-title"],
+      diagnostics: [{
+        code: "pointer_shifted",
+        pointer: "/items/2/title",
+        rebasedPointer: "/items/3/title",
+      }],
+    });
+    expect(doc.value.items).toEqual([
+      { id: "y", title: "Y" },
+      { id: "x", title: "X" },
+      { id: "a", title: "A" },
+      { id: "b", title: "Reviewed" },
+    ]);
+    expect(inbox.current()).toMatchObject({ journalRevision: 3 });
+  });
+
+  test("faults when a host reports success without applying the ready envelope", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: () => ({ ok: true }),
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({
+      ok: false,
+      code: "faulted",
+      id: "remote",
+      phase: "host",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual([]);
+    expect(inbox.current()).toEqual({
+      status: "faulted",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+      fault: {
+        id: "remote",
+        reason: "causal host did not call ready apply exactly once",
+        phase: "host",
+      },
+    });
+  });
+
+  test("diverges when a host returns an invalid result after applying", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: (({ apply }: { apply(): void }) => {
+          apply();
+          return undefined;
+        }) as never,
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({
+      ok: false,
+      code: "projection_diverged",
+      reason: "causal host returned an invalid ready result",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual(["remote"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+  });
+
+  test("faults when a host returns an invalid result before applying", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: (() => Promise.resolve({ ok: true })) as never,
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({
+      ok: false,
+      code: "faulted",
+      reason: "causal host returned an invalid ready result",
+      id: "remote",
+      phase: "host",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual([]);
+    expect(inbox.current()).toMatchObject({
+      status: "faulted",
+      journalRevision: 0,
+      queued: [{ id: "remote", missing: [] }],
+      fault: {
+        id: "remote",
+        reason: "causal host returned an invalid ready result",
+        phase: "host",
+      },
+    });
+  });
+
+  test("diverges when a host calls ready apply more than once", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({
+      ok: false,
+      code: "projection_diverged",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual(["remote"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+  });
+
+  test("diverges when a host defers after applying a ready envelope", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          return {
+            ok: false,
+            code: "host_not_ready",
+            reason: "composition started while publishing",
+          };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({
+      ok: false,
+      code: "projection_diverged",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual(["remote"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+  });
+
+  test("preserves a patch failure when the host defers after apply", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          return {
+            ok: false,
+            code: "host_not_ready",
+            reason: "host observed the failed apply",
+          };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "replace", path: "/missing", value: true }],
+    })).toMatchObject({
+      ok: false,
+      code: "patch_failed",
+      id: "remote",
+      applied: [],
+    });
+    expect(inbox.current()).toMatchObject({
+      status: "blocked",
+      journalRevision: 0,
+      queued: [{ id: "remote", missing: [] }],
+      failure: { id: "remote" },
+    });
+    expect(inbox.current()).not.toHaveProperty("fault");
+  });
+
+  test("reports divergence over an earlier patch failure after host mutation", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          expect(doc.commit(
+            [{ op: "add", path: "/log/-", value: "external" }],
+            { origin: "editable" },
+          )).toEqual({ ok: true });
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "replace", path: "/missing", value: true }],
+    })).toMatchObject({
+      ok: false,
+      code: "projection_diverged",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual(["external"]);
+    expect(inbox.current()).toMatchObject({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+  });
+
+  test("does not advance the frontier after a nested publication diverges", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    let nested = false;
+    doc.subscribe(() => {
+      if (nested) return;
+      nested = true;
+      doc.commit(
+        [{ op: "add", path: "/log/-", value: "nested" }],
+        { origin: "external" },
+      );
+    });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({
+      ok: false,
+      code: "projection_diverged",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual(["remote", "nested"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+  });
+
+  test("diverges instead of reversing reentrant host publication order", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    let nested = false;
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => {
+          if (!nested) {
+            nested = true;
+            doc.commit(
+              [{ op: "add", path: "/log/-", value: "nested" }],
+              { origin: "editable" },
+            );
+          }
+          return { sequence: 1 };
+        },
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(doc.commit(
+      [{ op: "add", path: "/log/-", value: "outer" }],
+      { origin: "editable" },
+    )).toEqual({ ok: true });
+    expect(doc.value.log).toEqual(["outer", "nested"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [],
+    });
+  });
+
+  test("diverges when host publication callbacks arrive out of commit order", () => {
+    const OrderedSchema = z.object({
+      a: z.number(),
+      b: z.number(),
+      c: z.number(),
+    }).refine(({ a, b }) => b <= a);
+    const doc = createJSONDocument(OrderedSchema, { a: 0, b: 0, c: 0 });
+    const publicationStack: number[] = [];
+    let nextSequence = 0;
+    let nested = false;
+    const hostCommit = (
+      operations: Parameters<typeof doc.commit>[0],
+    ): ReturnType<typeof doc.commit> => {
+      const sequence = nextSequence += 1;
+      publicationStack.push(sequence);
+      try {
+        return doc.commit(operations, { origin: "editable" });
+      } finally {
+        publicationStack.pop();
+      }
+    };
+    doc.subscribe(() => {
+      if (nested) return;
+      nested = true;
+      expect(hostCommit([{
+        op: "replace",
+        path: "/b",
+        value: 1,
+      }])).toEqual({ ok: true });
+    });
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: OrderedSchema,
+      host: {
+        ownsPublication: () => ({
+          sequence: publicationStack.at(-1)!,
+        }),
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(hostCommit([{
+      op: "replace",
+      path: "/a",
+      value: 1,
+    }])).toEqual({ ok: true });
+    expect(doc.value).toEqual({ a: 1, b: 1, c: 0 });
+    expect(publicationStack).toEqual([]);
+    expect(inbox.current()).toMatchObject({ status: "diverged" });
+  });
+
+  test("rejects causal ingestion reentered from host publication ownership", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    let nestedResult: ReturnType<
+      ReturnType<typeof createCausalPatchInbox>["ingest"]
+    > | undefined;
+    let inbox: ReturnType<typeof createCausalPatchInbox>;
+    inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => {
+          nestedResult = inbox.ingest({
+            id: "nested",
+            dependsOn: [],
+            operations: [{ op: "add", path: "/log/-", value: "nested" }],
+          });
+          return { sequence: 1 };
+        },
+        runReady: ({ apply }) => {
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(doc.commit(
+      [{ op: "add", path: "/log/-", value: "outer" }],
+      { origin: "editable" },
+    )).toEqual({ ok: true });
+    expect(nestedResult).toMatchObject({
+      ok: false,
+      code: "busy",
+      applied: [],
+    });
+    expect(doc.value.log).toEqual(["outer"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [],
+    });
+  });
+
+  test("retries a host-deferred ready envelope on an empty ingestion", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    let ready = false;
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          if (!ready) {
+            return {
+              ok: false,
+              code: "host_not_ready",
+              reason: "composition is active",
+            };
+          }
+          apply();
+          return { ok: true };
+        },
+      },
+    });
+    const envelope = {
+      id: "remote",
+      dependsOn: [],
+      operations: [{
+        op: "add" as const,
+        path: "/log/-" as const,
+        value: "remote",
+      }],
+    };
+
+    expect(inbox.ingest(envelope)).toEqual({
+      ok: false,
+      code: "host_not_ready",
+      reason: "composition is active",
+      id: "remote",
+      applied: [],
+    });
+    expect(inbox.current()).toEqual({
+      status: "active",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+
+    ready = true;
+    expect(inbox.ingest([])).toEqual({
+      ok: true,
+      applied: ["remote"],
+      pending: [],
+      duplicates: [],
+    });
+    expect(doc.value.log).toEqual(["remote"]);
+    expect(inbox.current()).toEqual({
+      status: "active",
+      journalRevision: 1,
+      frontier: ["remote"],
+      queued: [],
+    });
+  });
+
+  test("faults and rethrows when a host throws before applying", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: () => {
+          throw new Error("host failed");
+        },
+      },
+    });
+
+    expect(() => inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toThrow("host failed");
+    expect(doc.value.log).toEqual([]);
+    expect(inbox.current()).toEqual({
+      status: "faulted",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+      fault: {
+        id: "remote",
+        reason: "host failed",
+        phase: "host",
+      },
+    });
+  });
+
+  test("diverges and rethrows when a host throws after applying", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          apply();
+          throw new Error("host cleanup failed");
+        },
+      },
+    });
+
+    expect(() => inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toThrow("host cleanup failed");
+    expect(doc.value.log).toEqual(["remote"]);
+    expect(inbox.current()).toEqual({
+      status: "diverged",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+    });
+  });
+
+  test("expires a ready apply closure when the host returns", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    let lateApply: (() => void) | undefined;
+    const inbox = createCausalPatchInbox(doc, {
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          lateApply = apply;
+          return {
+            ok: false,
+            code: "host_not_ready",
+            reason: "apply later",
+          };
+        },
+      },
+    });
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "remote" }],
+    })).toMatchObject({ ok: false, code: "host_not_ready" });
+    expect(() => lateApply?.()).toThrow(
+      "causal host called ready apply after runReady returned",
+    );
+    expect(doc.value.log).toEqual([]);
+    expect(inbox.current()).toEqual({
+      status: "faulted",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+      fault: {
+        id: "remote",
+        reason: "causal host called ready apply after runReady returned",
+        phase: "host",
+      },
+    });
+  });
+
+  test("preserves an apply failure that the host catches", () => {
+    const base = { items: [{ id: "a", title: "A" }] };
+    const doc = createJSONDocument(CollectionSchema, base);
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: {
+        safeParse() {
+          throw new Error("materialization schema failed");
+        },
+      },
+      host: {
+        ownsPublication: () => false,
+        runReady: ({ apply }) => {
+          try {
+            apply();
+          } catch {
+            // A host wrapper may observe an error, but cannot consume it.
+          }
+          return { ok: true };
+        },
+      },
+    });
+
+    expect(() => inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      intent: {
+        kind: "positional",
+        base,
+        operations: [{
+          op: "replace",
+          path: "/items/0/title",
+          value: "Remote",
+        }],
+      },
+    })).toThrow("materialization schema failed");
+    expect(doc.value).toEqual(base);
+    expect(inbox.current()).toEqual({
+      status: "faulted",
+      journalRevision: 0,
+      frontier: [],
+      queued: [{ id: "remote", missing: [] }],
+      fault: {
+        id: "remote",
+        reason: "materialization schema failed",
+        phase: "materialization",
+      },
+    });
+  });
+
   test("blocks a positional intent rather than overwriting a concurrent field", () => {
     const base = {
       items: [
@@ -1053,7 +2059,11 @@ describe("@interactive-os/json-document-causal-patch-inbox", () => {
         relativePath: "/title",
         expected: "B",
         value: "Reviewed",
-        relativeSelectionAfter: "/title",
+        relativeSelectionAfter: {
+          path: "/title",
+          offset: 4,
+          affinity: "backward",
+        },
       },
     })).toMatchObject({ ok: true, pending: ["z-local"] });
 
@@ -1081,7 +2091,11 @@ describe("@interactive-os/json-document-causal-patch-inbox", () => {
       id: "b",
       title: "Reviewed",
     }]);
-    expect(doc.selection?.primaryPointer).toBe("/columns/1/cards/0/title");
+    expect(doc.selection?.caret).toEqual({
+      path: "/columns/1/cards/0/title",
+      offset: 4,
+      affinity: "backward",
+    });
     expect(doc.history.undoDepth).toBe(2);
   });
 

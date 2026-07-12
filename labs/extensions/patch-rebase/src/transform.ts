@@ -3,12 +3,17 @@ import {
   trackPointer,
   type JSONPatchOperation,
   type Pointer,
+  type SelectionPoint,
 } from "@interactive-os/json-document";
 
 import {
   isArrayAtEither,
   pointerRelation,
 } from "./pointer.js";
+import {
+  selectionPointPath,
+  withSelectionPointPath,
+} from "./selection.js";
 import type {
   RebaseConflict,
   RebaseDiagnostic,
@@ -141,13 +146,14 @@ export function unsupportedConcurrentChange(
 }
 
 export function transformSelection(
-  selectionAfter: Pointer,
+  selectionAfter: SelectionPoint,
   concurrentSteps: ReadonlyArray<ConcurrentStep>,
 ): {
-  selectionAfter: Pointer | undefined;
+  selectionAfter: SelectionPoint | undefined;
   diagnostics: RebaseDiagnostic[];
 } {
-  let pointer: Pointer | null = selectionAfter;
+  const originalPath = selectionPointPath(selectionAfter);
+  let pointer: Pointer | null = originalPath;
   for (const step of concurrentSteps) {
     if (pointer === null) break;
     pointer = trackPointerForConcurrentStep(pointer, step);
@@ -158,10 +164,13 @@ export function transformSelection(
         diagnostics: [{
           code: "selection_dropped",
           reason: "selection target was removed by concurrent edits",
-          pointer: selectionAfter,
+          pointer: originalPath,
         }],
       }
-    : { selectionAfter: pointer, diagnostics: [] };
+    : {
+        selectionAfter: withSelectionPointPath(selectionAfter, pointer),
+        diagnostics: [],
+      };
 }
 
 function overlappingConcurrentChange(

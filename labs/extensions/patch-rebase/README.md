@@ -13,7 +13,11 @@ const planned = rebaseChange(DocumentSchema, {
   operations: [
     { op: "replace", path: "/items/1/title", value: "Reviewed" },
   ],
-  selectionAfter: "/items/1/title",
+  selectionAfter: {
+    path: "/items/1/title",
+    offset: 4,
+    affinity: "forward",
+  },
 });
 
 if (planned.ok) {
@@ -31,20 +35,25 @@ document. Persisted workflows must own their snapshot and patch-log format.
 Pass the same Zod-compatible schema that owns the document. The lab types only
 the `safeParse` slice of that schema to avoid installing a second Zod runtime;
 failed parses must expose an `error.issues` collection, as core `applyPatch`
-expects. The returned selection is authoritative even when its Pointer shifts;
-diagnostics describe shifted operation targets and dropped selections. URI
-fragment Pointers are accepted and canonicalized to ordinary RFC 6901 Pointers
-in the returned plan.
+expects. `selectionAfter` accepts a Pointer or one `SelectionPoint`. Its path is
+authoritative after rebasing while `offset`, `edge`, and `affinity` are
+preserved. Diagnostics describe shifted operation targets and dropped
+selections. URI fragment paths are accepted and canonicalized to ordinary RFC
+6901 Pointers in the returned plan. Point objects must be plain data and any
+offset must be a non-negative safe integer; the final document commit may clamp
+it to the selected string length.
 
 ## Scope
 
-- Replay ordered concurrent batches from a shared base through public
-  `applyPatch` semantics.
+- Replay ordered concurrent batches from a shared base through public patch
+  semantics. The first local preflight establishes the JSON boundary; later
+  replay and final validation use the trusted-state public path to avoid
+  rescanning the complete base for every batch.
 - Validate the local batch against that same base.
 - Rebase local non-root `replace` and `test` targets over concurrent `test`,
   `replace`, and object/array `add` or `remove` operations.
-- Shift local targets and one headless Pointer selection after concrete array
-  index changes.
+- Shift local targets and one headless Pointer or SelectionPoint path after
+  concrete array index changes while preserving caret metadata.
 - Treat numeric object keys as object members rather than array indexes.
 - Report same-path and ancestor/descendant writes as structured conflicts.
 - Revalidate the combined result so cross-field schema refinements can report a
@@ -63,8 +72,8 @@ in the returned plan.
 - No automatic rebase of concurrent `move`, `copy`, or root mutations.
 - No automatic rebase of structural local operations while concurrent changes
   exist; uncertain cases return `unsupported_operation` conflict.
-- No `SelectionSnap`, multi-range selection, text-offset transform, DOM focus,
-  rendering, keyboard, or UI policy.
+- No `SelectionSnap`, range/multi-range selection, same-string text-offset
+  transform, DOM focus, rendering, keyboard, or UI policy.
 - No plugin registration and no `@interactive-os/json-document` internal
   imports.
 

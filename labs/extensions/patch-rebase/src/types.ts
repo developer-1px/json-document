@@ -2,6 +2,7 @@ import type {
   JSONPatchOperation,
   JSONResult,
   Pointer,
+  SelectionPoint,
 } from "@interactive-os/json-document";
 
 export interface RebaseSchema<TDocument = unknown> {
@@ -17,11 +18,14 @@ export interface RebaseSchema<TDocument = unknown> {
     | { success: false; error: { issues: ReadonlyArray<unknown> } };
 }
 
-export interface RebaseChangeInput<TDocument> {
+export interface RebaseChangeInput<
+  TDocument,
+  TSelection extends SelectionPoint = Pointer,
+> {
   readonly base: TDocument;
   readonly concurrentBatches: ReadonlyArray<ReadonlyArray<JSONPatchOperation>>;
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly selectionAfter?: Pointer;
+  readonly selectionAfter?: TSelection;
 }
 
 export type RebaseDiagnosticCode =
@@ -53,11 +57,13 @@ export interface RebaseConflict {
   readonly concurrentOperationIndex?: number;
 }
 
-export type RebaseChangeResult =
+export type RebaseChangeResult<
+  TSelection extends SelectionPoint = Pointer,
+> =
   | {
       readonly ok: true;
       readonly operations: ReadonlyArray<JSONPatchOperation>;
-      readonly selectionAfter?: Pointer;
+      readonly selectionAfter?: TSelection;
       readonly diagnostics: ReadonlyArray<RebaseDiagnostic>;
     }
   | {

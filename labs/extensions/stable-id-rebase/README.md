@@ -18,7 +18,11 @@ const planned = rebaseStableChange(doc, {
   relativePath: "/title",
   expected: "Draft",
   value: "Reviewed",
-  relativeSelectionAfter: "/title",
+  relativeSelectionAfter: {
+    path: "/title",
+    offset: 4,
+    affinity: "backward",
+  },
 });
 
 if (planned.ok) {
@@ -29,12 +33,15 @@ if (planned.ok) {
 }
 ```
 
-`relativePath` and `relativeSelectionAfter` are RFC 6901 Pointers rooted at the
-stable entity. A successful result's `selectionAfter` is instead an absolute
-document Pointer. URI-fragment forms are accepted and returned as ordinary
-canonical Pointers. `expected` is the field value observed when the delayed
-input was authored; a different current value produces `target_changed` rather
-than an overwrite.
+`relativePath` is an RFC 6901 Pointer rooted at the stable entity.
+`relativeSelectionAfter` accepts a relative Pointer or one SelectionPoint. A
+successful result contains the corresponding absolute document Pointer or
+point; only `path` is joined while `offset`, `edge`, and `affinity` are
+preserved. URI-fragment paths are accepted and returned as ordinary canonical
+Pointers. `expected` is the field value observed when the delayed input was
+authored; a different current value produces `target_changed` rather than an
+overwrite. Point objects must be plain data and any offset must be a
+non-negative safe integer; core may clamp it to the final string length.
 
 ## Scope
 
@@ -48,8 +55,8 @@ than an overwrite.
   guard for one atomic `doc.commit`.
 - Re-run the target scope's `readId` against the preview entity and reject an
   `readId`-changing replacement.
-- Rebase one Pointer selection relative to the same stable entity, or report
-  that it was dropped when it will not exist after the change.
+- Rebase one Pointer or SelectionPoint path relative to the same stable entity,
+  or report that it was dropped when it will not exist after the change.
 - Preflight the complete guarded plan through public `doc.canPatch` semantics.
 
 ## Non-goals
@@ -64,7 +71,8 @@ than an overwrite.
 - No ABA detection when an identical entity disappears and reappears.
 - No scope-wide protection against a duplicate id introduced after planning;
   products needing that invariant must enforce it in their document schema.
-- No text offset, multi-range selection, DOM focus, render, or input policy.
+- No same-string offset transform, range/multi-range selection, DOM focus,
+  render, or input policy. Point offset and affinity are preserved as hints.
 - No mutation during planning and no plugin registration.
 
 ## Friction report

@@ -5,6 +5,8 @@ import {
   type JSONDocument,
   type JSONPatchOperation,
   type Pointer,
+  type SelectionPoint,
+  type SelectionPointObject,
 } from "@interactive-os/json-document";
 import {
   createIdResolver,
@@ -14,6 +16,11 @@ import type {
   StableIdReplaceInput,
   StableIdRebaseResult,
 } from "./types.js";
+import {
+  prepareSelectionPoint,
+  selectionPointPath,
+  withSelectionPointPath,
+} from "./selection.js";
 
 const PERMISSIVE_JSON_SCHEMA = {
   safeParse: (input: unknown) => ({ success: true as const, data: input }),
@@ -21,8 +28,25 @@ const PERMISSIVE_JSON_SCHEMA = {
 
 export function rebaseStableChange<TDocument>(
   doc: JSONDocument<TDocument>,
-  input: StableIdReplaceInput,
-): StableIdRebaseResult {
+  input: StableIdReplaceInput<Pointer>,
+): StableIdRebaseResult<Pointer>;
+export function rebaseStableChange<TDocument>(
+  doc: JSONDocument<TDocument>,
+  input: StableIdReplaceInput<SelectionPointObject>,
+): StableIdRebaseResult<SelectionPointObject>;
+export function rebaseStableChange<TDocument>(
+  doc: JSONDocument<TDocument>,
+  input: StableIdReplaceInput<SelectionPoint>,
+): StableIdRebaseResult<SelectionPoint>;
+// Keep the legacy Pointer signature last for Parameters/ReturnType consumers.
+export function rebaseStableChange<TDocument>(
+  doc: JSONDocument<TDocument>,
+  input: StableIdReplaceInput<Pointer>,
+): StableIdRebaseResult<Pointer>;
+export function rebaseStableChange<TDocument>(
+  doc: JSONDocument<TDocument>,
+  input: StableIdReplaceInput<SelectionPoint>,
+): StableIdRebaseResult<SelectionPoint> {
   const relativePath = canonicalPointer(input.relativePath);
   if (relativePath === null) {
     return {
@@ -96,18 +120,25 @@ export function rebaseStableChange<TDocument>(
   }
 
   const changePointer = joinPointers(targetPointer, relativePath);
-  let selectionAfter: Pointer | undefined;
+  let selectionAfter: SelectionPoint | undefined;
   if (input.relativeSelectionAfter !== undefined) {
-    const relativeSelection = canonicalPointer(input.relativeSelectionAfter);
-    if (relativeSelection === null) {
+    const relativeSelection = prepareSelectionPoint(
+      input.relativeSelectionAfter,
+    );
+    if (!relativeSelection.ok) {
       return {
         ok: false,
         code: "invalid_change",
-        reason: `invalid relative selection pointer: ${input.relativeSelectionAfter}`,
-        pointer: input.relativeSelectionAfter,
+        reason: relativeSelection.reason,
+        ...(relativeSelection.pointer === undefined
+          ? {}
+          : { pointer: relativeSelection.pointer }),
       };
     }
-    selectionAfter = joinPointers(targetPointer, relativeSelection);
+    selectionAfter = withSelectionPointPath(
+      relativeSelection.point,
+      joinPointers(targetPointer, relativeSelection.path),
+    );
   }
 
   const operations: JSONPatchOperation[] = [
@@ -183,11 +214,12 @@ export function rebaseStableChange<TDocument>(
 
   const diagnostics = [];
   if (selectionAfter !== undefined) {
-    if (!readPointerValue(applied.state, selectionAfter).ok) {
+    const selectionPath = selectionPointPath(selectionAfter);
+    if (!readPointerValue(applied.state, selectionPath).ok) {
       diagnostics.push({
         code: "selection_dropped" as const,
         reason: "stable selection target will not exist after the change",
-        pointer: selectionAfter,
+        pointer: selectionPath,
       });
       selectionAfter = undefined;
     }

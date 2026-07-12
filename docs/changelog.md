@@ -12,12 +12,29 @@ All notable changes to this project are documented here.
   declared dependencies are applied.
 - Added structured policy-specific materialization failures and successful
   rebase diagnostics without changing direct-operation result shapes.
+- Added an optional synchronous host coordination Adapter, an inbox-local
+  projection journal token, and structured `baseRevision` validation so DOM
+  input can be flushed before ready-time planning without giving up divergence
+  detection.
+- Added single SelectionPoint support across positional, stable-id, and causal
+  planners. Paths are rebased while offset, edge, and affinity metadata remain
+  intact for atomic document commit.
 
 ### Changed
 
 - Changed the causal patch inbox to commit each ready direct or materialized
   envelope once through `doc.commit`, including a rebased `selectionAfter`, and
   to advance its applied ledger and causal frontier only after success.
+
+### Performance
+
+- Indexed explicit `baseRevision` materialization directly into the dense
+  journal suffix, replaced full-ledger dependency lookup with id-to-revision
+  lookup, and removed duplicate/unneeded patch copies.
+- Reused the public trusted-state patch path after the initial rebase preflight
+  instead of rescanning a validated large base for every replay step.
+- Added `perf:causal` to compare revision-suffix materialization with the legacy
+  full-journal path at configurable journal sizes.
 
 ## 1.1.0-rc.0 - 2026-07-11
 

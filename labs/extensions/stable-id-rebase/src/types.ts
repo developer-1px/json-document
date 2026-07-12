@@ -2,6 +2,7 @@ import type {
   JSONCapabilityResult,
   JSONPatchOperation,
   Pointer,
+  SelectionPoint,
 } from "@interactive-os/json-document";
 import type {
   IdResolverScope,
@@ -13,13 +14,15 @@ export interface StableIdTarget {
   readonly id: string;
 }
 
-export interface StableIdReplaceInput {
+export interface StableIdReplaceInput<
+  TSelection extends SelectionPoint = Pointer,
+> {
   readonly scopes: ReadonlyArray<IdResolverScope>;
   readonly target: StableIdTarget;
   readonly relativePath: Pointer;
   readonly expected: unknown;
   readonly value: unknown;
-  readonly relativeSelectionAfter?: Pointer;
+  readonly relativeSelectionAfter?: TSelection;
 }
 
 export interface StableIdRebaseDiagnostic {
@@ -28,11 +31,13 @@ export interface StableIdRebaseDiagnostic {
   readonly pointer: Pointer;
 }
 
-export type StableIdRebaseResult =
+export type StableIdRebaseResult<
+  TSelection extends SelectionPoint = Pointer,
+> =
   | {
       readonly ok: true;
       readonly operations: ReadonlyArray<JSONPatchOperation>;
-      readonly selectionAfter?: Pointer;
+      readonly selectionAfter?: TSelection;
       readonly diagnostics: ReadonlyArray<StableIdRebaseDiagnostic>;
     }
   | {
