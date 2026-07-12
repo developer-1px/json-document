@@ -1,7 +1,9 @@
 import type {
+  JSONChangeMetadata,
   JSONPatchOperation,
   JSONResult,
   Pointer,
+  SelectionPoint,
 } from "@interactive-os/json-document";
 import type {
   RebaseChangeResult,
@@ -25,8 +27,16 @@ export interface CausalPatchEnvelope {
 export interface CausalPositionalIntent<TDocument> {
   readonly kind: "positional";
   readonly base: TDocument;
+  /**
+   * Inbox-local journal token captured with `base` from `current()` when a
+   * host is configured. When present, only later projection batches are
+   * replayed. Omit it on the legacy hostless path. A token from another inbox
+   * instance is invalid; this is not a transport clock and must already
+   * include every declared causal dependency.
+   */
+  readonly baseRevision?: number;
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly selectionAfter?: Pointer;
+  readonly selectionAfter?: SelectionPoint;
 }
 
 export interface CausalStableIdReplaceIntent {
@@ -35,7 +45,7 @@ export interface CausalStableIdReplaceIntent {
   readonly relativePath: Pointer;
   readonly expected: unknown;
   readonly value: unknown;
-  readonly relativeSelectionAfter?: Pointer;
+  readonly relativeSelectionAfter?: SelectionPoint;
 }
 
 export type CausalAuthoredIntent<TDocument> =
@@ -57,7 +67,51 @@ export type CausalMaterializationPolicy =
   | "positional"
   | "stable-id-replace";
 
+export interface CausalHostPublication {
+  readonly operations: ReadonlyArray<JSONPatchOperation>;
+  readonly metadata?: JSONChangeMetadata;
+}
+
+export type CausalHostPublicationOwnership =
+  | false
+  | { readonly sequence: number };
+
+export interface CausalHostReadyRequest {
+  readonly id: string;
+  /**
+   * Scope-bound synchronous application. Call exactly once before `runReady`
+   * returns success, or do not call it when returning `host_not_ready`.
+   */
+  apply(): void;
+}
+
+export type CausalHostReadyResult =
+  | { readonly ok: true }
+  | {
+      readonly ok: false;
+      readonly code: "host_not_ready";
+      readonly reason: string;
+    };
+
+export interface CausalPatchHost {
+  /**
+   * Classifies a synchronous host-owned publication. This callback must be
+   * pure and must not publish another document change. An owned publication
+   * returns the monotonic sequence assigned before its commit began; `false`
+   * rejects it.
+   */
+  ownsPublication(
+    publication: CausalHostPublication,
+  ): CausalHostPublicationOwnership;
+  /**
+   * Flushes host input and runs one ready envelope in the same call stack.
+   * The request cannot be retained for later use.
+   */
+  runReady(request: CausalHostReadyRequest): CausalHostReadyResult;
+}
+
 export interface CausalPatchInboxOptions<TDocument> {
+  readonly host?: CausalPatchHost;
   readonly positionalSchema?: RebaseSchema<TDocument>;
   readonly stableIdScopes?: StableIdReplaceInput["scopes"];
 }
@@ -72,11 +126,32 @@ export interface FailedCausalPatch {
   readonly result: Extract<JSONResult, { ok: false }>;
 }
 
+export type CausalBaseRevisionFailure =
+  | {
+      readonly ok: false;
+      readonly code: "base_revision_ahead";
+      readonly reason: string;
+      readonly baseRevision: number;
+      readonly journalRevision: number;
+    }
+  | {
+      readonly ok: false;
+      readonly code: "base_revision_mismatch";
+      readonly reason: string;
+      readonly baseRevision: number;
+      readonly dependency: string;
+      readonly dependencyRevision: number;
+    };
+
+export type CausalPositionalMaterializationFailure =
+  | Exclude<RebaseChangeResult, { ok: true }>
+  | CausalBaseRevisionFailure;
+
 export type FailedCausalMaterialization =
   | {
       readonly id: string;
       readonly policy: "positional";
-      readonly materialization: Exclude<RebaseChangeResult, { ok: true }>;
+      readonly materialization: CausalPositionalMaterializationFailure;
     }
   | {
       readonly id: string;
@@ -91,7 +166,7 @@ export type CausalPatchFailure =
 export interface FaultedCausalPatch {
   readonly id: string;
   readonly reason: string;
-  readonly phase?: "materialization";
+  readonly phase?: "host" | "materialization";
 }
 
 export type CausalMaterializationDiagnostic =
@@ -112,6 +187,8 @@ export interface CausalPatchIngestProgress {
 export interface CausalPatchInboxSnapshot {
   readonly status: "active" | "blocked" | "diverged" | "faulted" | "disposed";
   readonly frontier: ReadonlyArray<string>;
+  /** Inbox-local projection journal token, exposed only when a host exists. */
+  readonly journalRevision?: number;
   readonly queued: ReadonlyArray<QueuedCausalPatch>;
   readonly failure?: CausalPatchFailure;
   readonly fault?: FaultedCausalPatch;
@@ -129,6 +206,7 @@ export type CausalPatchIngestErrorCode =
   | "dependency_cycle"
   | "policy_not_configured"
   | "materialization_failed"
+  | "host_not_ready"
   | "patch_failed"
   | "blocked"
   | "projection_diverged"
@@ -163,6 +241,12 @@ export type CausalPatchIngestError = CausalPatchIngestProgress & (
       readonly id: string;
       readonly policy: CausalMaterializationPolicy;
     }
+  | {
+      readonly ok: false;
+      readonly code: "host_not_ready";
+      readonly reason: string;
+      readonly id: string;
+    }
   | ({
       readonly ok: false;
       readonly code: "materialization_failed" | "blocked";
@@ -185,7 +269,7 @@ export type CausalPatchIngestError = CausalPatchIngestProgress & (
       readonly code: "faulted";
       readonly reason: string;
       readonly id: string;
-      readonly phase?: "materialization";
+      readonly phase?: "host" | "materialization";
     }
 );
 

@@ -1,5 +1,6 @@
 import type {
   JSONPatchOperation,
+  SelectionPoint,
 } from "@interactive-os/json-document";
 import type {
   CausalAuthoredIntent,
@@ -38,6 +39,7 @@ const ENVELOPE_FIELDS = new Set(["id", "dependsOn", "operations", "intent"]);
 const POSITIONAL_INTENT_FIELDS = new Set([
   "kind",
   "base",
+  "baseRevision",
   "operations",
   "selectionAfter",
 ]);
@@ -50,6 +52,12 @@ const STABLE_ID_INTENT_FIELDS = new Set([
   "relativeSelectionAfter",
 ]);
 const STABLE_ID_TARGET_FIELDS = new Set(["scope", "id"]);
+const SELECTION_POINT_FIELDS = new Set([
+  "path",
+  "offset",
+  "edge",
+  "affinity",
+]);
 
 export function prepareEnvelope<TDocument = unknown>(
   input: unknown,
@@ -186,8 +194,15 @@ function preparePositionalIntent<TDocument>(
     || !hasOwn(input, "base")
     || !Array.isArray(input.operations)
     || (
+      hasOwn(input, "baseRevision")
+      && (
+        !Number.isSafeInteger(input.baseRevision)
+        || (input.baseRevision as number) < 0
+      )
+    )
+    || (
       hasOwn(input, "selectionAfter")
-      && typeof input.selectionAfter !== "string"
+      && !isSelectionPointData(input.selectionAfter)
     )
   ) {
     return {
@@ -199,8 +214,11 @@ function preparePositionalIntent<TDocument>(
   const intent: CausalPositionalIntent<TDocument> = {
     kind: "positional",
     base: input.base as TDocument,
+    ...(typeof input.baseRevision === "number"
+      ? { baseRevision: input.baseRevision }
+      : {}),
     operations: input.operations as ReadonlyArray<JSONPatchOperation>,
-    ...(typeof input.selectionAfter === "string"
+    ...(isSelectionPointData(input.selectionAfter)
       ? { selectionAfter: input.selectionAfter }
       : {}),
   };
@@ -219,7 +237,7 @@ function prepareStableIdIntent<TDocument>(
     || typeof input.relativePath !== "string"
     || (
       hasOwn(input, "relativeSelectionAfter")
-      && typeof input.relativeSelectionAfter !== "string"
+      && !isSelectionPointData(input.relativeSelectionAfter)
     )
     || !isPlainRecord(target)
     || !hasOnlyFields(target, STABLE_ID_TARGET_FIELDS)
@@ -240,7 +258,7 @@ function prepareStableIdIntent<TDocument>(
     relativePath: input.relativePath,
     expected: input.expected,
     value: input.value,
-    ...(typeof input.relativeSelectionAfter === "string"
+    ...(isSelectionPointData(input.relativeSelectionAfter)
       ? { relativeSelectionAfter: input.relativeSelectionAfter }
       : {}),
   };
@@ -331,6 +349,30 @@ function hasOwn(
   key: string,
 ): boolean {
   return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function isSelectionPointData(value: unknown): value is SelectionPoint {
+  if (typeof value === "string") return true;
+  if (!isPlainRecord(value) || !hasOnlyFields(value, SELECTION_POINT_FIELDS)) {
+    return false;
+  }
+  if (typeof value.path !== "string") return false;
+  if (
+    hasOwn(value, "offset")
+    && (!Number.isSafeInteger(value.offset) || (value.offset as number) < 0)
+  ) {
+    return false;
+  }
+  if (
+    hasOwn(value, "edge")
+    && value.edge !== "before"
+    && value.edge !== "after"
+  ) {
+    return false;
+  }
+  return !hasOwn(value, "affinity")
+    || value.affinity === "forward"
+    || value.affinity === "backward";
 }
 
 function cloneJsonValue(value: unknown, ancestors: Set<object>): unknown {

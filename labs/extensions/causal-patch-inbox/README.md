@@ -49,7 +49,11 @@ positional.ingest({
     operations: [
       { op: "replace", path: "/items/1/title", value: "Reviewed" },
     ],
-    selectionAfter: "/items/1/title",
+    selectionAfter: {
+      path: "/items/1/title",
+      offset: 4,
+      affinity: "forward",
+    },
   },
 });
 
@@ -72,11 +76,63 @@ stable.ingest({
 ```
 
 The positional `base` must represent the authored projection containing the
-transitive causal past declared by `dependsOn`. Once that envelope is ready,
-the inbox replays successful applied batches outside that causal past in their
-actual local commit order. Stable-id replacement instead resolves its target
-against the current projection with the host scopes supplied once at factory
-creation. Neither policy is run while its envelope is waiting.
+transitive causal past declared by `dependsOn`. Without a host, the inbox
+replays successful applied batches outside that causal past in their actual
+local commit order. With a host, capture `current().journalRevision` beside the
+base as `baseRevision`; materialization then reads only the later contiguous
+journal suffix. A future token is `base_revision_ahead`, and a declared causal
+dependency with a non-empty projection newer than the base is
+`base_revision_mismatch`. Tokens belong to one inbox instance and are not
+transport clocks.
+
+Stable-id replacement instead resolves its target against the current
+projection with the host scopes supplied once at factory creation. Both
+policies accept either a Pointer or one `SelectionPoint`. Only the point's
+`path` is rebased; `offset`, `edge`, and `affinity` are preserved for core to
+restore and clamp at commit time. Neither policy runs while its envelope is
+waiting. Point objects are strict plain data; an offset must be a non-negative
+safe integer, and core only clamps that valid offset to the final string
+length.
+
+## Host coordination
+
+An optional host Adapter lets an editor flush pending DOM input before a ready
+causal change and lets the inbox journal trusted local/native/history
+publications instead of treating all of them as divergence.
+
+```ts
+const inbox = createCausalPatchInbox(doc, {
+  positionalSchema: DocumentSchema,
+  host: {
+    ownsPublication: ({ metadata }) => {
+      const sequence = readEditableSequence(metadata);
+      return sequence === null ? false : { sequence };
+    },
+    runReady: ({ apply }) => {
+      if (compositionIsActive()) {
+        return {
+          ok: false,
+          code: "host_not_ready",
+          reason: "the browser still owns the composition island",
+        };
+      }
+      flushPendingInput();
+      apply();
+      return { ok: true };
+    },
+  },
+});
+```
+
+`runReady` is synchronous and scope-bound. It must call `apply()` exactly once
+before returning `{ ok: true }`, or zero times when returning
+`host_not_ready`. A deferred envelope remains ready and can be retried with
+`inbox.ingest([])` after the host becomes idle. The closure expires when
+`runReady` returns. `ownsPublication` must be pure and non-reentrant; nested
+publication or ingestion closes the inbox as diverged rather than guessing an
+order. The host assigns each owned publication's safe-integer sequence before
+calling `doc.commit`; a duplicate or decreasing callback sequence detects
+subscriber reordering and also closes as diverged.
 
 An `ingest` batch is preflighted and defensively copied before any new envelope
 is admitted. An exact duplicate compares the authored direct operations or
@@ -90,10 +146,12 @@ Ready envelopes currently known to one drain are applied by locale-independent
 id order. A direct envelope uses its operations unchanged. A delayed intent is
 materialized at that point, then the resulting operations and optional
 selection are passed to exactly one atomic `doc.commit`. The concrete
-`doc.lastPatch` is recorded only after success, and causal frontier state moves
-only after that commit. A batch is not one transaction: earlier envelopes
-remain applied when a later envelope fails. Patch or materialization failure
-globally blocks the inbox, preserving the failed envelope and descendants for
+subscription publication is recorded after success; a successful test-only or
+empty commit records an empty projection batch instead of reusing
+`doc.lastPatch`. Causal frontier state moves only after the host contract and
+commit both succeed. A batch is not one transaction: earlier envelopes remain
+applied when a later envelope fails. Patch or materialization failure globally
+blocks the inbox, preserving the failed envelope and descendants for
 inspection without an implicit retry.
 
 `current().frontier` is the maximal set in the declared dependency DAG. It is
@@ -102,8 +160,8 @@ that have not been applied by this inbox. Snapshot status `active` describes a
 usable inbox, including one that has pending dependencies; it does not mean
 that a ready envelope currently exists. `blocked` preserves a structured patch
 or policy-specific materialization failure. `faulted` preserves an unexpected
-thrown execution failure; a planner throw also records
-`phase: "materialization"`. Full queue snapshots are produced only by
+thrown execution or host protocol failure; `phase` distinguishes `host` from
+`materialization`. Full queue snapshots are produced only by
 `current()`. Successful `ingest` results report this call's `applied`,
 `pending`, and `duplicates` ids. A non-empty materialization diagnostic list is
 added as `diagnostics`; direct-only results remain unchanged.
@@ -122,6 +180,8 @@ added as `diagnostics`; direct-only results remain unchanged.
   whole queue after every successful patch.
 - Materialize positional edits from their authored base plus applied
   non-ancestor batches when they become ready.
+- Journal host-owned publications and use an inbox-local `baseRevision` to read
+  a gap-free suffix without scanning old journal entries.
 - Resolve stable-id replacements against the current projection using
   host-supplied resolver scopes when they become ready.
 - Commit one ready envelope through exactly one public `doc.commit`, including
@@ -133,10 +193,10 @@ added as `diagnostics`; direct-only results remain unchanged.
 - Move to terminal `faulted` state when materialization or commit execution
   throws without changing the projection and without supplying a structured
   `JSONDocumentError`.
-- Reject reentrant ingestion as `busy` while admission, materialization, or a
-  document commit is running.
+- Reject reentrant ingestion as `busy` while admission, materialization, a
+  document commit, or host-publication classification is running.
 - Detect direct document mutation and move the inbox to `diverged` rather than
-  inferring a causal envelope from an observed patch.
+  inferring ownership from metadata alone.
 - Dispose the document subscription explicitly.
 
 ## Performance
@@ -155,15 +215,22 @@ added as `diagnostics`; direct-only results remain unchanged.
 - `current()` sorts and defensively copies frontier and queue observations, so
   its cost grows with the exposed state. `ingest()` does not call `current()`;
   callers pay that observation cost only when they request a snapshot.
-- Ready positional materialization walks the envelope's transitive causal past
-  and filters the applied ledger before delegating to the rebase planner.
-  Stable-id materialization pays the configured resolver scan and document
-  preflight costs.
+- A positional intent with `baseRevision` indexes directly into the dense
+  journal suffix. Dependency validation walks only its causal ancestors. The
+  legacy tokenless path still walks the causal past and filters the complete
+  applied ledger.
+- Causal publications are copied only when positional journaling is enabled,
+  and the owned copy is transferred into the ledger once. Empty projection
+  batches share one immutable empty array. Stable-id materialization pays the
+  configured resolver scan and document preflight costs.
 - Exact dedup retains accepted authored payloads, and the causal ledger has no
   compaction in this lab. An inbox configured for positional materialization
   also retains its concrete applied-patch ledger. Memory therefore grows with
   accepted work, while direct-only and stable-id-only inboxes avoid the extra
   applied-patch copy.
+- `npm run perf:causal` reports p50/p90 materialization time for explicit
+  revision suffixes and the legacy full-journal path. It is an observational
+  benchmark; no machine-sensitive threshold is enforced yet.
 
 ## Non-goals
 
@@ -173,27 +240,28 @@ added as `diagnostics`; direct-only results remain unchanged.
   ready set known to the current drain is ordered deterministically.
 - No local submit/envelope generation, acknowledgement, transport, reconnect,
   offline queue, persistence, checkpoint, or compaction format.
-- No generic protocol or materialization Adapter interface. The two concrete
-  policies are deliberately a closed union.
+- No generic transport or materializer registry. The two concrete intent
+  policies remain a closed union; the host Adapter coordinates only local
+  publication ownership and ready execution.
 - No target repair beyond conservative positional rebase or one stable-id
   field replacement; no automatic retry, conflict resolution, or
   independent-branch skipping after failure.
-- No DOM Selection, multi-range or text-offset transform, presence, DOM input,
-  render scheduling, or focus policy beyond committing one headless Pointer
-  `selectionAfter` returned by a materializer.
+- No SelectionRange/Snap, multi-range transform, same-string offset OT,
+  presence, DOM input, render scheduling, or focus policy. One headless
+  SelectionPoint is path-rebased and its caret metadata is preserved.
 - No support for multiple causal owners mutating the same document projection.
 - No change to the `JSONDocument` public interface or core state.
 
 ## Friction report
 
 The public document subscription, active envelope id, metadata marker, and
-publication count distinguish this module's synchronous patch from ordinary
-host publications. Reusing a previously observed marker outside that active
-publication is rejected, and a nested patch that copies current metadata adds
-a second publication and causes divergence. The marker remains a cooperative
-in-process convention rather than a security boundary. Running another inbox
-against the same document makes the first one diverge instead of trying to
-merge two causal ledgers.
+publication count distinguish this module's synchronous patch from host
+publications. The host explicitly classifies its own local work; metadata alone
+does not grant ownership. Reusing a previously observed marker, reentrant
+classification, or a second publication during one apply causes divergence.
+The marker remains a cooperative in-process convention rather than a security
+boundary. Running another inbox against the same document makes the first one
+diverge instead of trying to merge two causal ledgers.
 
 Only mutations published through the public `JSONDocument` interface are
 observable. In-place mutation of an object reachable through `doc.value` emits
@@ -212,20 +280,20 @@ that publication back across modules. This lab detects the changed projection
 and halts as `diverged`; it does not claim crash-atomicity across arbitrary host
 callbacks.
 
-Ready-time materialization removes the known stale-planning gap without adding
-a protocol abstraction. Positional correctness still depends on the host
-supplying a base that corresponds to `dependsOn`; the inbox has no clock or
-checkpoint with which to prove that relationship. Stable-id recovery still
-inherits resolver scan cost, host scope correctness, and the planner's
-conservative entity guard.
+Ready-time materialization plus the host closure removes the known gap between
+flushing pending input and planning the causal commit. `baseRevision` proves a
+contiguous local journal suffix and checks dependency ordering, but it is still
+an inbox-local token with no cross-peer clock or checkpoint meaning. Stable-id
+recovery still inherits resolver scan cost, host scope correctness, and the
+planner's conservative entity guard.
 
-The positional planner also requires its concurrent batches to be ordered and
-gap-free from the supplied base. A causal past need not be a prefix of this
-inbox's local applied order, so filtering non-ancestors cannot prove that replay
-relationship. Planner conflicts and final commit guards prevent an unsafe
-overwrite, but a valid authored edit can conservatively become a false conflict
-or a commit-time `patch_failed`. This tracer makes that limitation observable;
-it does not claim a convergence protocol.
+The positional planner requires its concurrent batches to be ordered and
+gap-free from the supplied base. `baseRevision` provides that local suffix.
+The legacy tokenless path still filters non-ancestors, and a causal past need
+not be a prefix of local apply order, so it cannot prove the same relationship.
+Planner conflicts and final commit guards prevent an unsafe overwrite, but a
+valid legacy authored edit can conservatively become a false conflict or a
+commit-time `patch_failed`. This tracer does not claim a convergence protocol.
 
 The concrete rebase modules are in-process dependencies. Their results are
 preserved as structured failures rather than hidden behind a generic Adapter

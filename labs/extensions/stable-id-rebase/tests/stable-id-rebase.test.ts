@@ -1,8 +1,11 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import * as z from "zod";
 
 import {
   createJSONDocument,
+  type Pointer,
+  type SelectionPoint,
+  type SelectionPointObject,
 } from "@interactive-os/json-document";
 import {
   createIdResolver,
@@ -10,6 +13,7 @@ import {
 import {
   rebaseStableChange,
   type StableIdReplaceInput,
+  type StableIdRebaseResult,
 } from "../src/index.js";
 
 const Card = z.object({
@@ -63,7 +67,7 @@ function createCardIds(doc: ReturnType<typeof createBoard>) {
 
 function rebaseCardChange(
   doc: ReturnType<typeof createBoard>,
-  input: Omit<StableIdReplaceInput, "scopes">,
+  input: Omit<StableIdReplaceInput<SelectionPoint>, "scopes">,
 ) {
   return rebaseStableChange(doc, {
     scopes: CARD_SCOPES,
@@ -72,6 +76,38 @@ function rebaseCardChange(
 }
 
 describe("@interactive-os/json-document-stable-id-rebase", () => {
+  test("preserves pointer-only result types while adding point overloads", () => {
+    expectTypeOf<Parameters<typeof rebaseStableChange>[1]>()
+      .toEqualTypeOf<StableIdReplaceInput>();
+    expectTypeOf<ReturnType<typeof rebaseStableChange>>()
+      .toEqualTypeOf<StableIdRebaseResult>();
+    const doc = createBoard();
+    const pointerPlan = rebaseStableChange(doc, {
+      scopes: CARD_SCOPES,
+      target: { scope: "card", id: "b" },
+      relativePath: "/title",
+      expected: "B",
+      value: "Reviewed",
+      relativeSelectionAfter: "/title",
+    });
+    const pointPlan = rebaseStableChange(doc, {
+      scopes: CARD_SCOPES,
+      target: { scope: "card", id: "b" },
+      relativePath: "/title",
+      expected: "B",
+      value: "Reviewed",
+      relativeSelectionAfter: { path: "/title", offset: 1 },
+    });
+    if (pointerPlan.ok) {
+      expectTypeOf(pointerPlan.selectionAfter)
+        .toEqualTypeOf<Pointer | undefined>();
+    }
+    if (pointPlan.ok) {
+      expectTypeOf(pointPlan.selectionAfter)
+        .toEqualTypeOf<SelectionPointObject | undefined>();
+    }
+  });
+
   test("materializes a delayed field change at the stable target's current pointer", () => {
     const doc = createBoard();
     expect(doc.move(
@@ -121,6 +157,71 @@ describe("@interactive-os/json-document-stable-id-rebase", () => {
       title: "Reviewed",
     });
     expect(doc.selection?.primaryPointer).toBe("/columns/1/cards/1/title");
+  });
+
+  test("joins a relative selection point path and preserves caret metadata", () => {
+    const doc = createBoard();
+    expect(doc.move(
+      "/columns/0/cards/1",
+      "/columns/1/cards/-",
+    )).toMatchObject({ ok: true });
+
+    expect(rebaseCardChange(doc, {
+      target: { scope: "card", id: "b" },
+      relativePath: "/title",
+      expected: "B",
+      value: "Reviewed",
+      relativeSelectionAfter: {
+        path: "/title",
+        offset: 4,
+        affinity: "backward",
+      },
+    })).toEqual({
+      ok: true,
+      operations: [
+        {
+          op: "test",
+          path: "/columns/1/cards/1",
+          value: { id: "b", title: "B" },
+        },
+        {
+          op: "test",
+          path: "/columns/1/cards/1/title",
+          value: "B",
+        },
+        {
+          op: "replace",
+          path: "/columns/1/cards/1/title",
+          value: "Reviewed",
+        },
+      ],
+      selectionAfter: {
+        path: "/columns/1/cards/1/title",
+        offset: 4,
+        affinity: "backward",
+      },
+      diagnostics: [],
+    });
+  });
+
+  test("returns a structured failure for invalid relative point metadata", () => {
+    const doc = createBoard();
+
+    expect(rebaseCardChange(doc, {
+      target: { scope: "card", id: "b" },
+      relativePath: "/title",
+      expected: "B",
+      value: "Reviewed",
+      relativeSelectionAfter: {
+        path: "/title",
+        affinity: "sideways",
+      } as never,
+    })).toEqual({
+      ok: false,
+      code: "invalid_change",
+      reason: "invalid relative selection point",
+      pointer: "/title",
+    });
   });
 
   test("reports a conflict when the stable field changed while the input was delayed", () => {

@@ -1,12 +1,16 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, expectTypeOf, test, vi } from "vitest";
 import * as z from "zod";
 
 import {
   createJSONDocument,
   type JSONPatchOperation,
+  type Pointer,
+  type SelectionPointObject,
 } from "@interactive-os/json-document";
 import {
   rebaseChange,
+  type RebaseChangeInput,
+  type RebaseChangeResult,
 } from "../src/index.js";
 
 const Schema = z.object({
@@ -56,6 +60,33 @@ const NullableAncestorSchema = z.object({
 });
 
 describe("@interactive-os/json-document-patch-rebase", () => {
+  test("preserves pointer-only result types while adding point overloads", () => {
+    expectTypeOf<Parameters<typeof rebaseChange>[1]>()
+      .toEqualTypeOf<RebaseChangeInput<unknown>>();
+    expectTypeOf<ReturnType<typeof rebaseChange>>()
+      .toEqualTypeOf<RebaseChangeResult>();
+    const pointerPlan = rebaseChange(Schema, {
+      base: { title: "Draft", status: "draft" },
+      concurrentBatches: [],
+      operations: [],
+      selectionAfter: "/title",
+    });
+    const pointPlan = rebaseChange(Schema, {
+      base: { title: "Draft", status: "draft" },
+      concurrentBatches: [],
+      operations: [],
+      selectionAfter: { path: "/title", offset: 1 },
+    });
+    if (pointerPlan.ok) {
+      expectTypeOf(pointerPlan.selectionAfter)
+        .toEqualTypeOf<Pointer | undefined>();
+    }
+    if (pointPlan.ok) {
+      expectTypeOf(pointPlan.selectionAfter)
+        .toEqualTypeOf<SelectionPointObject | undefined>();
+    }
+  });
+
   test("preserves disjoint concurrent and local changes", () => {
     const base = {
       title: "Draft",
@@ -146,6 +177,52 @@ describe("@interactive-os/json-document-patch-rebase", () => {
       { id: "b", title: "B2" },
     ]);
     expect(doc.selection?.primaryPointer).toBe("/items/2/title");
+  });
+
+  test("shifts a selection point path without losing caret metadata", () => {
+    const base = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "Before" },
+      ],
+    };
+
+    expect(rebaseChange(CollectionSchema, {
+      base,
+      concurrentBatches: [[{
+        op: "add",
+        path: "/items/0",
+        value: { id: "x", title: "X" },
+      }]],
+      operations: [{
+        op: "replace",
+        path: "/items/1/title",
+        value: "Reviewed",
+      }],
+      selectionAfter: {
+        path: "/items/1/title",
+        offset: 4,
+        affinity: "forward",
+      },
+    })).toEqual({
+      ok: true,
+      operations: [
+        { op: "test", path: "/items/2/title", value: "Before" },
+        { op: "replace", path: "/items/2/title", value: "Reviewed" },
+      ],
+      selectionAfter: {
+        path: "/items/2/title",
+        offset: 4,
+        affinity: "forward",
+      },
+      diagnostics: [{
+        code: "pointer_shifted",
+        reason: "local pointer shifted by concurrent array edits",
+        pointer: "/items/1/title",
+        rebasedPointer: "/items/2/title",
+        operationIndex: 0,
+      }],
+    });
   });
 
   test("shifts a local target and selection after an earlier array removal", () => {
@@ -604,6 +681,26 @@ describe("@interactive-os/json-document-patch-rebase", () => {
         code: "invalid_selection",
         reason: "invalid selection pointer: title",
         pointer: "title",
+      }],
+    });
+  });
+
+  test("returns a structured conflict for invalid selection point metadata", () => {
+    expect(rebaseChange(Schema, {
+      base: { title: "Draft", status: "draft" },
+      concurrentBatches: [],
+      operations: [
+        { op: "replace", path: "/title", value: "Local" },
+      ],
+      selectionAfter: { path: "/title", offset: -1 },
+    })).toEqual({
+      ok: false,
+      code: "conflict",
+      reason: "invalid selection point",
+      conflicts: [{
+        code: "invalid_selection",
+        reason: "invalid selection point",
+        pointer: "/title",
       }],
     });
   });
