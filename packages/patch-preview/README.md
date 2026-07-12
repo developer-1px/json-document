@@ -2,7 +2,7 @@
 
 Official headless patch preview extension for `@interactive-os/json-document` documents.
 
-> `0.1.1-rc.0` is a companion prerelease for
+> `0.1.1-rc.1` is a companion prerelease for
 > `@interactive-os/json-document@1.1.0-rc.0`. Pin both versions exactly while
 > the core mutation result contract is under integration testing.
 

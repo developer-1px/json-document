@@ -18,9 +18,9 @@ The companion RC set for `canvas` is:
 ```sh
 npm install --save-exact \
   @interactive-os/json-document@1.1.0-rc.0 \
-  @interactive-os/json-document-grouping@0.1.1-rc.0 \
-  @interactive-os/json-document-patch-preview@0.1.1-rc.0 \
-  @interactive-os/json-document-search-replace@0.1.1-rc.0
+  @interactive-os/json-document-grouping@0.1.1-rc.1 \
+  @interactive-os/json-document-patch-preview@0.1.1-rc.1 \
+  @interactive-os/json-document-search-replace@0.1.1-rc.1
 ```
 
 This RC set is an opt-in integration graph. Stable consumers continue to use

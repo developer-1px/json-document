@@ -99,6 +99,9 @@ jobs:
           '
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
+      - name: Build core for extension verification
+        if: startsWith(github.ref_name, 'json-document-extensions-v')
+        run: npm run build -w @interactive-os/json-document
       - name: Verify extension prereleases
         if: startsWith(github.ref_name, 'json-document-extensions-v')
         run: |
