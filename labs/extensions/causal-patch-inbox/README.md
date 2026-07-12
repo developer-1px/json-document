@@ -268,6 +268,15 @@ observable. In-place mutation of an object reachable through `doc.value` emits
 no subscription event and cannot be detected here; callers must treat document
 values as owned projection state rather than a side channel for mutation.
 
+Direct and positional configurations accept the narrow
+`CausalPatchPublicationDocument` projection port: `value`, `commit`, and
+`subscribe`. A stable-id configuration accepts `CausalPatchDocument`, which
+adds `query`, `at`, and `canPatch`. The projection reference must change after
+a concrete commit, and the matching subscription must run synchronously before
+that commit returns. This lets a host validate external patches and hide
+unrelated editing, history, clipboard, and schema APIs while a full
+`JSONDocument` remains structurally compatible.
+
 Typed patch failure is a clean seam: core keeps the JSON projection atomic, so
 the inbox can leave its frontier unchanged. The first strict
 `JSONDocumentError` still propagates but its structured result is retained as

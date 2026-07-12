@@ -361,6 +361,7 @@
         "IdResolver",
         "IdResolverDiagnostic",
         "IdResolverDiagnosticCode",
+        "IdResolverDocument",
         "IdResolverEntry",
         "IdResolverOptions",
         "IdResolverScope",
@@ -369,7 +370,7 @@
         "ResolveIdResult",
         "createIdResolver"
       ],
-      "publicExportCount": 10,
+      "publicExportCount": 11,
       "keywords": [
         "@interactive-os/json-document",
         "editing",
@@ -1270,6 +1271,7 @@
         "IdResolver",
         "IdResolverDiagnostic",
         "IdResolverDiagnosticCode",
+        "IdResolverDocument",
         "IdResolverEntry",
         "IdResolverOptions",
         "IdResolverScope",
@@ -1278,7 +1280,7 @@
         "ResolveIdResult",
         "createIdResolver"
       ],
-      "publicExportCount": 10,
+      "publicExportCount": 11,
       "keywords": [
         "@interactive-os/json-document",
         "editing",
@@ -1859,6 +1861,7 @@
         "CausalIntentEnvelope",
         "CausalMaterializationDiagnostic",
         "CausalMaterializationPolicy",
+        "CausalPatchDocument",
         "CausalPatchEnvelope",
         "CausalPatchFailure",
         "CausalPatchHost",
@@ -1869,6 +1872,7 @@
         "CausalPatchIngestErrorCode",
         "CausalPatchIngestOk",
         "CausalPatchIngestResult",
+        "CausalPatchPublicationDocument",
         "CausalPositionalIntent",
         "CausalPositionalMaterializationFailure",
         "CausalStableIdReplaceIntent",
@@ -1878,7 +1882,7 @@
         "QueuedCausalPatch",
         "createCausalPatchInbox"
       ],
-      "publicExportCount": 28,
+      "publicExportCount": 30,
       "keywords": [
         "@interactive-os/json-document",
         "causal",
@@ -2981,12 +2985,13 @@
       },
       "publicExports": [
         "StableIdRebaseDiagnostic",
+        "StableIdRebaseDocument",
         "StableIdRebaseResult",
         "StableIdReplaceInput",
         "StableIdTarget",
         "rebaseStableChange"
       ],
-      "publicExportCount": 5,
+      "publicExportCount": 6,
       "keywords": [
         "@interactive-os/json-document",
         "conflict",

@@ -2,7 +2,6 @@ import {
   applyPatch,
   buildPointer,
   tryParsePointer,
-  type JSONDocument,
   type JSONPatchOperation,
   type Pointer,
   type SelectionPoint,
@@ -13,6 +12,7 @@ import {
 } from "@interactive-os/json-document-id-resolver";
 
 import type {
+  StableIdRebaseDocument,
   StableIdReplaceInput,
   StableIdRebaseResult,
 } from "./types.js";
@@ -27,24 +27,24 @@ const PERMISSIVE_JSON_SCHEMA = {
 };
 
 export function rebaseStableChange<TDocument>(
-  doc: JSONDocument<TDocument>,
+  doc: StableIdRebaseDocument<TDocument>,
   input: StableIdReplaceInput<Pointer>,
 ): StableIdRebaseResult<Pointer>;
 export function rebaseStableChange<TDocument>(
-  doc: JSONDocument<TDocument>,
+  doc: StableIdRebaseDocument<TDocument>,
   input: StableIdReplaceInput<SelectionPointObject>,
 ): StableIdRebaseResult<SelectionPointObject>;
 export function rebaseStableChange<TDocument>(
-  doc: JSONDocument<TDocument>,
+  doc: StableIdRebaseDocument<TDocument>,
   input: StableIdReplaceInput<SelectionPoint>,
 ): StableIdRebaseResult<SelectionPoint>;
 // Keep the legacy Pointer signature last for Parameters/ReturnType consumers.
 export function rebaseStableChange<TDocument>(
-  doc: JSONDocument<TDocument>,
+  doc: StableIdRebaseDocument<TDocument>,
   input: StableIdReplaceInput<Pointer>,
 ): StableIdRebaseResult<Pointer>;
 export function rebaseStableChange<TDocument>(
-  doc: JSONDocument<TDocument>,
+  doc: StableIdRebaseDocument<TDocument>,
   input: StableIdReplaceInput<SelectionPoint>,
 ): StableIdRebaseResult<SelectionPoint> {
   const relativePath = canonicalPointer(input.relativePath);

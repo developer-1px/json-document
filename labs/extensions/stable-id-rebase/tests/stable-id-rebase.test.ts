@@ -76,6 +76,33 @@ function rebaseCardChange(
 }
 
 describe("@interactive-os/json-document-stable-id-rebase", () => {
+  test("depends only on the stable-id current-projection port", () => {
+    const document = createBoard();
+    const port = {
+      at: document.at,
+      canPatch: document.canPatch,
+      query: document.query,
+      get value() {
+        return document.value;
+      },
+    };
+
+    expect(rebaseStableChange(port, {
+      scopes: CARD_SCOPES,
+      target: { scope: "card", id: "b" },
+      relativePath: "/title",
+      expected: "B",
+      value: "Reviewed",
+    })).toMatchObject({
+      ok: true,
+      operations: [
+        { op: "test", path: "/columns/0/cards/1" },
+        { op: "test", path: "/columns/0/cards/1/title", value: "B" },
+        { op: "replace", path: "/columns/0/cards/1/title", value: "Reviewed" },
+      ],
+    });
+  });
+
   test("preserves pointer-only result types while adding point overloads", () => {
     expectTypeOf<Parameters<typeof rebaseStableChange>[1]>()
       .toEqualTypeOf<StableIdReplaceInput>();

@@ -103,6 +103,11 @@ This tracer calls it once, but a broad scope is still linear in its match set.
 structural dry-run always verifies preview identity, and selection checking
 reuses that preview when requested.
 
+The planner accepts the narrow `StableIdRebaseDocument` current-projection
+port: `query`, `at`, `canPatch`, and `value`. A host can therefore guard those
+reads and preflight semantics without exposing unrelated document commands or
+history state. A full `JSONDocument` remains structurally compatible.
+
 The module intentionally handles one replacement. If multiple anchored edits,
 identity-based destinations, or structural operations become real callers,
 they should first prove a shared operation language rather than widening this

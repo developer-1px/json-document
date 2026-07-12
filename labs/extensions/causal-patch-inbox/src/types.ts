@@ -1,5 +1,6 @@
 import type {
   JSONChangeMetadata,
+  JSONDocument,
   JSONPatchOperation,
   JSONResult,
   Pointer,
@@ -11,6 +12,7 @@ import type {
   RebaseSchema,
 } from "@interactive-os/json-document-patch-rebase";
 import type {
+  StableIdRebaseDocument,
   StableIdRebaseDiagnostic,
   StableIdRebaseResult,
   StableIdReplaceInput,
@@ -66,6 +68,25 @@ export type CausalEnvelope<TDocument> =
 export type CausalMaterializationPolicy =
   | "positional"
   | "stable-id-replace";
+
+/**
+ * Publication port used by direct and positional inbox policies.
+ *
+ * `value` must return the same immutable reference while the projection is
+ * unchanged and a different reference after a concrete publication. `commit`
+ * must synchronously notify `subscribe` observers before returning, once for
+ * one concrete projection change and zero times for a successful
+ * no-op/test-only commit.
+ */
+export type CausalPatchPublicationDocument<TDocument> = Pick<
+  JSONDocument<TDocument>,
+  "commit" | "subscribe" | "value"
+>;
+
+/** Publication port plus the reads required by stable-id materialization. */
+export type CausalPatchDocument<TDocument> =
+  CausalPatchPublicationDocument<TDocument>
+  & StableIdRebaseDocument<TDocument>;
 
 export interface CausalHostPublication {
   readonly operations: ReadonlyArray<JSONPatchOperation>;

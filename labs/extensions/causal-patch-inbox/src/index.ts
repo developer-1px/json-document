@@ -11,6 +11,8 @@ export type {
   CausalMaterializationDiagnostic,
   CausalMaterializationPolicy,
   CausalPatchEnvelope,
+  CausalPatchDocument,
+  CausalPatchPublicationDocument,
   CausalPatchFailure,
   CausalPatchInbox,
   CausalPatchInboxOptions,

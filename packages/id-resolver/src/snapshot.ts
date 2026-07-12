@@ -1,19 +1,16 @@
-import type {
-  JSONDocument,
-} from "@interactive-os/json-document";
-
 import {
   findDuplicateIds,
 } from "./diagnostics.js";
 import type {
   IdResolverDiagnostic,
+  IdResolverDocument,
   IdResolverEntry,
   IdResolverScope,
   IdResolverSnapshot,
 } from "./types.js";
 
 export function readCurrentSnapshot<T>(
-  doc: JSONDocument<T>,
+  doc: IdResolverDocument<T>,
   scopes: ReadonlyArray<IdResolverScope>,
 ): IdResolverSnapshot {
   const entries: IdResolverEntry[] = [];

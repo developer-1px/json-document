@@ -362,6 +362,7 @@ export const repoCatalog = {
         "IdResolver",
         "IdResolverDiagnostic",
         "IdResolverDiagnosticCode",
+        "IdResolverDocument",
         "IdResolverEntry",
         "IdResolverOptions",
         "IdResolverScope",
@@ -370,7 +371,7 @@ export const repoCatalog = {
         "ResolveIdResult",
         "createIdResolver"
       ],
-      "publicExportCount": 10,
+      "publicExportCount": 11,
       "keywords": [
         "@interactive-os/json-document",
         "editing",
@@ -1271,6 +1272,7 @@ export const repoCatalog = {
         "IdResolver",
         "IdResolverDiagnostic",
         "IdResolverDiagnosticCode",
+        "IdResolverDocument",
         "IdResolverEntry",
         "IdResolverOptions",
         "IdResolverScope",
@@ -1279,7 +1281,7 @@ export const repoCatalog = {
         "ResolveIdResult",
         "createIdResolver"
       ],
-      "publicExportCount": 10,
+      "publicExportCount": 11,
       "keywords": [
         "@interactive-os/json-document",
         "editing",
@@ -1860,6 +1862,7 @@ export const repoCatalog = {
         "CausalIntentEnvelope",
         "CausalMaterializationDiagnostic",
         "CausalMaterializationPolicy",
+        "CausalPatchDocument",
         "CausalPatchEnvelope",
         "CausalPatchFailure",
         "CausalPatchHost",
@@ -1870,6 +1873,7 @@ export const repoCatalog = {
         "CausalPatchIngestErrorCode",
         "CausalPatchIngestOk",
         "CausalPatchIngestResult",
+        "CausalPatchPublicationDocument",
         "CausalPositionalIntent",
         "CausalPositionalMaterializationFailure",
         "CausalStableIdReplaceIntent",
@@ -1879,7 +1883,7 @@ export const repoCatalog = {
         "QueuedCausalPatch",
         "createCausalPatchInbox"
       ],
-      "publicExportCount": 28,
+      "publicExportCount": 30,
       "keywords": [
         "@interactive-os/json-document",
         "causal",
@@ -2982,12 +2986,13 @@ export const repoCatalog = {
       },
       "publicExports": [
         "StableIdRebaseDiagnostic",
+        "StableIdRebaseDocument",
         "StableIdRebaseResult",
         "StableIdReplaceInput",
         "StableIdTarget",
         "rebaseStableChange"
       ],
-      "publicExportCount": 5,
+      "publicExportCount": 6,
       "keywords": [
         "@interactive-os/json-document",
         "conflict",

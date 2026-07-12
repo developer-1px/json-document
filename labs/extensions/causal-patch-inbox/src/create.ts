@@ -1,6 +1,5 @@
 import {
   JSONDocumentError,
-  type JSONDocument,
   type JSONPatchOperation,
   type SelectionPoint,
 } from "@interactive-os/json-document";
@@ -22,6 +21,8 @@ import type {
   CausalPatchInboxOptions,
   CausalPatchInboxSnapshot,
   CausalPatchIngestResult,
+  CausalPatchDocument,
+  CausalPatchPublicationDocument,
   FailedCausalMaterialization,
   FaultedCausalPatch,
 } from "./types.js";
@@ -71,14 +72,32 @@ interface CommittedReadyEnvelope {
 let nextInboxInstance = 0;
 
 export function createCausalPatchInbox<TDocument>(
-  doc: JSONDocument<TDocument>,
-  options: CausalPatchInboxOptions<TDocument> = {},
+  doc: CausalPatchPublicationDocument<TDocument>,
+  options?: Omit<CausalPatchInboxOptions<TDocument>, "stableIdScopes"> & {
+    readonly stableIdScopes?: undefined;
+  },
+): CausalPatchInbox<TDocument>;
+// Keep the complete policy signature last for Parameters utility consumers.
+export function createCausalPatchInbox<TDocument>(
+  doc: CausalPatchDocument<TDocument>,
+  options?: CausalPatchInboxOptions<TDocument>,
+): CausalPatchInbox<TDocument>;
+export function createCausalPatchInbox<TDocument>(
+  doc: CausalPatchPublicationDocument<TDocument>,
+  options: CausalPatchInboxOptions<TDocument> | (
+    Omit<CausalPatchInboxOptions<TDocument>, "stableIdScopes"> & {
+      readonly stableIdScopes?: undefined;
+    }
+  ) = {},
 ): CausalPatchInbox<TDocument> {
   const positionalSchema = options.positionalSchema;
   const host = options.host;
   const stableIdScopes = options.stableIdScopes === undefined
     ? undefined
     : options.stableIdScopes.map((scope) => ({ ...scope }));
+  const stableIdDocument = stableIdScopes === undefined
+    ? undefined
+    : requireStableIdDocument(doc);
   const known = new Map<string, StoredEnvelope<TDocument>>();
   const queued = new Map<string, PendingEnvelope<TDocument>>();
   const dependents = new Map<string, Set<string>>();
@@ -343,6 +362,7 @@ export function createCausalPatchInbox<TDocument>(
           materialized = materializeReadyEnvelope(
             ready,
             doc,
+            stableIdDocument,
             positionalSchema,
             stableIdScopes,
             known,
@@ -729,7 +749,8 @@ export function createCausalPatchInbox<TDocument>(
 
 function materializeReadyEnvelope<TDocument>(
   ready: StoredEnvelope<TDocument>,
-  doc: JSONDocument<TDocument>,
+  doc: CausalPatchPublicationDocument<TDocument>,
+  stableIdDocument: CausalPatchDocument<TDocument> | undefined,
   positionalSchema: CausalPatchInboxOptions<TDocument>["positionalSchema"],
   stableIdScopes: CausalPatchInboxOptions<TDocument>["stableIdScopes"],
   known: ReadonlyMap<string, StoredEnvelope<TDocument>>,
@@ -845,7 +866,10 @@ function materializeReadyEnvelope<TDocument>(
   if (stableIdScopes === undefined) {
     throw new Error("stable-id materialization policy was not configured");
   }
-  const planned = rebaseStableChange(doc, {
+  if (stableIdDocument === undefined) {
+    throw new Error("stable-id materialization document port was not configured");
+  }
+  const planned = rebaseStableChange(stableIdDocument, {
     scopes: stableIdScopes,
     target: ready.intent.target,
     relativePath: ready.intent.relativePath,
@@ -875,6 +899,22 @@ function materializeReadyEnvelope<TDocument>(
       return stableIdDiagnostic(ready.id, diagnostic);
     }),
   };
+}
+
+function requireStableIdDocument<TDocument>(
+  doc: CausalPatchPublicationDocument<TDocument>,
+): CausalPatchDocument<TDocument> {
+  const candidate = doc as Partial<CausalPatchDocument<TDocument>>;
+  if (
+    typeof candidate.at !== "function"
+    || typeof candidate.canPatch !== "function"
+    || typeof candidate.query !== "function"
+  ) {
+    throw new TypeError(
+      "stable-id materialization requires query, at, and canPatch document ports",
+    );
+  }
+  return candidate as CausalPatchDocument<TDocument>;
 }
 
 function collectCausalPast<TDocument>(

@@ -1,6 +1,7 @@
 export { createIdResolver } from "./create.js";
 export type {
   IdResolver,
+  IdResolverDocument,
   IdResolverDiagnostic,
   IdResolverDiagnosticCode,
   IdResolverEntry,

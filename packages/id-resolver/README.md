@@ -44,10 +44,12 @@ ids.current();
 
 ## Contract
 
-`@interactive-os/json-document-id-resolver` accepts public `JSONDocument` plus scope descriptors. A
-scope descriptor owns the JSONPath query and the `readId(value, pointer)`
-function. The extension delegates all reads to the public `doc.query` and
-`doc.at` facade and never mutates the document.
+`@interactive-os/json-document-id-resolver` accepts either a public
+`JSONDocument` or the narrower `IdResolverDocument` read port plus scope
+descriptors. A scope descriptor owns the JSONPath query and the
+`readId(value, pointer)` function. The extension delegates all reads to
+`doc.query` and `doc.at`; it does not require or expose mutation, history,
+selection, clipboard, or schema capabilities.
 
 If the same id appears more than once in one scope, `resolve(scope, id)` returns
 `ambiguous_id` with every matching pointer. If a value has no id, return
