@@ -107,8 +107,8 @@ const extensionGuidance = {
     notFor: "id policy, structural patches, CRDT/OT protocols, transport, or merge UI",
   },
   "@interactive-os/json-document-causal-patch-inbox": {
-    useFor: "queue and deduplicate dependency-declared envelopes, applying each as one core JSON Patch batch",
-    notFor: "CRDT/OT convergence, transport, persistence, ready-time rebase, or conflict resolution",
+    useFor: "queue dependency-declared envelopes and materialize delayed positional or stable-id edits when causally ready",
+    notFor: "CRDT/OT convergence, transport, persistence, or automatic conflict resolution",
   },
   "@interactive-os/json-document-drag-drop": {
     useFor: "turn drag/drop intent into move or paste operations",

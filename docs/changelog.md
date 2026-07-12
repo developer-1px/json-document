@@ -4,7 +4,20 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
-No unreleased changes.
+### Added
+
+- Added lab-only ready-time materialization to the causal patch inbox for
+  delayed positional edits and stable-id field replacements. Authored intents
+  are admitted and deduplicated immutably, then materialized only after their
+  declared dependencies are applied.
+- Added structured policy-specific materialization failures and successful
+  rebase diagnostics without changing direct-operation result shapes.
+
+### Changed
+
+- Changed the causal patch inbox to commit each ready direct or materialized
+  envelope once through `doc.commit`, including a rebased `selectionAfter`, and
+  to advance its applied ledger and causal frontier only after success.
 
 ## 1.1.0-rc.0 - 2026-07-11
 

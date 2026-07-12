@@ -4,7 +4,10 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "labs/extensions/causal-patch-inbox",
+    "labs/extensions/patch-rebase",
+    "labs/extensions/stable-id-rebase"
   ],
   "scripts": {
     "dev": "npm run playground:dev",

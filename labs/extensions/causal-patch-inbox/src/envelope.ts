@@ -1,24 +1,59 @@
 import type {
   JSONPatchOperation,
 } from "@interactive-os/json-document";
+import type {
+  CausalAuthoredIntent,
+  CausalPositionalIntent,
+  CausalStableIdReplaceIntent,
+} from "./types.js";
 
 import {
   compareIds,
 } from "./ready.js";
 
-export interface StoredEnvelope {
+interface StoredEnvelopeFields {
   readonly id: string;
   readonly dependsOn: ReadonlyArray<string>;
-  readonly operations: ReadonlyArray<JSONPatchOperation>;
 }
 
-export type PreparedEnvelope =
-  | { readonly ok: true; readonly envelope: StoredEnvelope }
+export interface StoredPatchEnvelope extends StoredEnvelopeFields {
+  readonly operations: ReadonlyArray<JSONPatchOperation>;
+  readonly intent?: never;
+}
+
+export interface StoredIntentEnvelope<TDocument> extends StoredEnvelopeFields {
+  readonly intent: CausalAuthoredIntent<TDocument>;
+  readonly operations?: never;
+}
+
+export type StoredEnvelope<TDocument = unknown> =
+  | StoredPatchEnvelope
+  | StoredIntentEnvelope<TDocument>;
+
+export type PreparedEnvelope<TDocument = unknown> =
+  | { readonly ok: true; readonly envelope: StoredEnvelope<TDocument> }
   | { readonly ok: false; readonly reason: string; readonly id?: string };
 
-const ENVELOPE_FIELDS = new Set(["id", "dependsOn", "operations"]);
+const ENVELOPE_FIELDS = new Set(["id", "dependsOn", "operations", "intent"]);
+const POSITIONAL_INTENT_FIELDS = new Set([
+  "kind",
+  "base",
+  "operations",
+  "selectionAfter",
+]);
+const STABLE_ID_INTENT_FIELDS = new Set([
+  "kind",
+  "target",
+  "relativePath",
+  "expected",
+  "value",
+  "relativeSelectionAfter",
+]);
+const STABLE_ID_TARGET_FIELDS = new Set(["scope", "id"]);
 
-export function prepareEnvelope(input: unknown): PreparedEnvelope {
+export function prepareEnvelope<TDocument = unknown>(
+  input: unknown,
+): PreparedEnvelope<TDocument> {
   const fields = readEnvelopeFields(input);
   if (!fields.ok) return fields;
 
@@ -28,10 +63,10 @@ export function prepareEnvelope(input: unknown): PreparedEnvelope {
   }
 
   let dependsOn: unknown;
-  let operations: unknown;
+  let payload: unknown;
   try {
     dependsOn = copyJson(fields.dependsOn);
-    operations = copyJson(fields.operations);
+    payload = copyJson(fields.payload);
   } catch {
     return {
       ok: false,
@@ -72,30 +107,144 @@ export function prepareEnvelope(input: unknown): PreparedEnvelope {
     }
     dependencies.add(dependency);
   }
-  if (!Array.isArray(operations)) {
+  const envelopeFields = {
+    id,
+    dependsOn: [...dependencies].sort(compareIds),
+  };
+  if (fields.kind === "operations") {
+    if (!Array.isArray(payload)) {
+      return {
+        ok: false,
+        reason: `causal envelope operations must be an array: ${id}`,
+        id,
+      };
+    }
     return {
-      ok: false,
-      reason: `causal envelope operations must be an array: ${id}`,
-      id,
+      ok: true,
+      envelope: {
+        ...envelopeFields,
+        operations: payload as ReadonlyArray<JSONPatchOperation>,
+      },
     };
   }
 
-  return {
-    ok: true,
-    envelope: {
+  const intent = prepareIntent<TDocument>(payload, id);
+  return intent.ok
+    ? {
+        ok: true,
+        envelope: {
+          ...envelopeFields,
+          intent: intent.intent,
+        },
+      }
+    : intent;
+}
+
+export function envelopesEqual<TDocument>(
+  left: StoredEnvelope<TDocument>,
+  right: StoredEnvelope<TDocument>,
+): boolean {
+  if (!jsonEqual(left.dependsOn, right.dependsOn)) return false;
+  if ("operations" in left) {
+    return "operations" in right
+      && jsonEqual(left.operations, right.operations);
+  }
+  return "intent" in right && jsonEqual(left.intent, right.intent);
+}
+
+type PreparedIntent<TDocument> =
+  | { readonly ok: true; readonly intent: CausalAuthoredIntent<TDocument> }
+  | { readonly ok: false; readonly reason: string; readonly id: string };
+
+function prepareIntent<TDocument>(
+  input: unknown,
+  id: string,
+): PreparedIntent<TDocument> {
+  if (!isPlainRecord(input)) {
+    return {
+      ok: false,
+      reason: `causal envelope intent must be an object: ${id}`,
       id,
-      dependsOn: [...dependencies].sort(compareIds),
-      operations: operations as ReadonlyArray<JSONPatchOperation>,
-    },
+    };
+  }
+  const kind = input.kind;
+  if (kind === "positional") return preparePositionalIntent(input, id);
+  if (kind === "stable-id-replace") return prepareStableIdIntent(input, id);
+  return {
+    ok: false,
+    reason: `causal envelope intent kind is unsupported: ${id}`,
+    id,
   };
 }
 
-export function envelopesEqual(
-  left: StoredEnvelope,
-  right: StoredEnvelope,
-): boolean {
-  return jsonEqual(left.dependsOn, right.dependsOn)
-    && jsonEqual(left.operations, right.operations);
+function preparePositionalIntent<TDocument>(
+  input: Readonly<Record<string, unknown>>,
+  id: string,
+): PreparedIntent<TDocument> {
+  if (
+    !hasOnlyFields(input, POSITIONAL_INTENT_FIELDS)
+    || !hasOwn(input, "base")
+    || !Array.isArray(input.operations)
+    || (
+      hasOwn(input, "selectionAfter")
+      && typeof input.selectionAfter !== "string"
+    )
+  ) {
+    return {
+      ok: false,
+      reason: `causal positional intent is invalid: ${id}`,
+      id,
+    };
+  }
+  const intent: CausalPositionalIntent<TDocument> = {
+    kind: "positional",
+    base: input.base as TDocument,
+    operations: input.operations as ReadonlyArray<JSONPatchOperation>,
+    ...(typeof input.selectionAfter === "string"
+      ? { selectionAfter: input.selectionAfter }
+      : {}),
+  };
+  return { ok: true, intent };
+}
+
+function prepareStableIdIntent<TDocument>(
+  input: Readonly<Record<string, unknown>>,
+  id: string,
+): PreparedIntent<TDocument> {
+  const target = input.target;
+  if (
+    !hasOnlyFields(input, STABLE_ID_INTENT_FIELDS)
+    || !hasOwn(input, "expected")
+    || !hasOwn(input, "value")
+    || typeof input.relativePath !== "string"
+    || (
+      hasOwn(input, "relativeSelectionAfter")
+      && typeof input.relativeSelectionAfter !== "string"
+    )
+    || !isPlainRecord(target)
+    || !hasOnlyFields(target, STABLE_ID_TARGET_FIELDS)
+    || typeof target.scope !== "string"
+    || target.scope.trim().length === 0
+    || typeof target.id !== "string"
+    || target.id.trim().length === 0
+  ) {
+    return {
+      ok: false,
+      reason: `causal stable-id intent is invalid: ${id}`,
+      id,
+    };
+  }
+  const intent: CausalStableIdReplaceIntent = {
+    kind: "stable-id-replace",
+    target: { scope: target.scope, id: target.id },
+    relativePath: input.relativePath,
+    expected: input.expected,
+    value: input.value,
+    ...(typeof input.relativeSelectionAfter === "string"
+      ? { relativeSelectionAfter: input.relativeSelectionAfter }
+      : {}),
+  };
+  return { ok: true, intent };
 }
 
 export function copyJson<T>(value: T): T {
@@ -107,7 +256,8 @@ type EnvelopeFields =
       readonly ok: true;
       readonly id: unknown;
       readonly dependsOn: unknown;
-      readonly operations: unknown;
+      readonly kind: "operations" | "intent";
+      readonly payload: unknown;
     }
   | { readonly ok: false; readonly reason: string };
 
@@ -139,15 +289,48 @@ function readEnvelopeFields(input: unknown): EnvelopeFields {
   const id = descriptors.get("id");
   const dependsOn = descriptors.get("dependsOn");
   const operations = descriptors.get("operations");
-  if (id === undefined || dependsOn === undefined || operations === undefined) {
-    return { ok: false, reason: "causal envelope requires id, dependsOn, and operations" };
+  const intent = descriptors.get("intent");
+  if (
+    id === undefined
+    || dependsOn === undefined
+    || (operations === undefined) === (intent === undefined)
+  ) {
+    return {
+      ok: false,
+      reason: "causal envelope requires id, dependsOn, and exactly one of operations or intent",
+    };
   }
   return {
     ok: true,
     id: id.value,
     dependsOn: dependsOn.value,
-    operations: operations.value,
+    kind: operations === undefined ? "intent" : "operations",
+    payload: (operations ?? intent)!.value,
   };
+}
+
+function isPlainRecord(
+  value: unknown,
+): value is Readonly<Record<string, unknown>> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const prototype = Object.getPrototypeOf(value) as unknown;
+  return prototype === Object.prototype || prototype === null;
+}
+
+function hasOnlyFields(
+  value: Readonly<Record<string, unknown>>,
+  supported: ReadonlySet<string>,
+): boolean {
+  return Object.keys(value).every((key) => supported.has(key));
+}
+
+function hasOwn(
+  value: Readonly<Record<string, unknown>>,
+  key: string,
+): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
 }
 
 function cloneJsonValue(value: unknown, ancestors: Set<object>): unknown {

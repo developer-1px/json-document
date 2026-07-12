@@ -1,13 +1,26 @@
 import {
   JSONDocumentError,
   type JSONDocument,
+  type JSONPatchOperation,
+  type Pointer,
 } from "@interactive-os/json-document";
+import {
+  rebaseChange,
+  type RebaseDiagnostic,
+} from "@interactive-os/json-document-patch-rebase";
+import {
+  rebaseStableChange,
+  type StableIdRebaseDiagnostic,
+} from "@interactive-os/json-document-stable-id-rebase";
 
 import type {
+  CausalMaterializationDiagnostic,
   CausalPatchInbox,
+  CausalPatchFailure,
+  CausalPatchInboxOptions,
   CausalPatchInboxSnapshot,
   CausalPatchIngestResult,
-  FailedCausalPatch,
+  FailedCausalMaterialization,
   FaultedCausalPatch,
 } from "./types.js";
 import {
@@ -24,24 +37,47 @@ import {
   compareIds,
 } from "./ready.js";
 
-interface PendingEnvelope {
-  readonly envelope: StoredEnvelope;
+interface PendingEnvelope<TDocument> {
+  readonly envelope: StoredEnvelope<TDocument>;
   readonly missing: Set<string>;
 }
+
+interface AppliedEnvelope {
+  readonly id: string;
+  readonly operations: ReadonlyArray<JSONPatchOperation>;
+}
+
+type ReadyMaterialization =
+  | {
+      readonly ok: true;
+      readonly operations: ReadonlyArray<JSONPatchOperation>;
+      readonly selectionAfter?: Pointer;
+      readonly diagnostics: ReadonlyArray<CausalMaterializationDiagnostic>;
+    }
+  | {
+      readonly ok: false;
+      readonly failure: FailedCausalMaterialization;
+    };
 
 let nextInboxInstance = 0;
 
 export function createCausalPatchInbox<TDocument>(
   doc: JSONDocument<TDocument>,
-): CausalPatchInbox {
-  const known = new Map<string, StoredEnvelope>();
-  const queued = new Map<string, PendingEnvelope>();
+  options: CausalPatchInboxOptions<TDocument> = {},
+): CausalPatchInbox<TDocument> {
+  const positionalSchema = options.positionalSchema;
+  const stableIdScopes = options.stableIdScopes === undefined
+    ? undefined
+    : options.stableIdScopes.map((scope) => ({ ...scope }));
+  const known = new Map<string, StoredEnvelope<TDocument>>();
+  const queued = new Map<string, PendingEnvelope<TDocument>>();
   const dependents = new Map<string, Set<string>>();
   const readyIds = new ReadyIdHeap();
   const applied = new Set<string>();
+  const appliedEnvelopes: AppliedEnvelope[] = [];
   const frontier = new Set<string>();
   const origin = `causal-patch-inbox:${nextInboxInstance += 1}`;
-  let failure: FailedCausalPatch | undefined;
+  let failure: CausalPatchFailure | undefined;
   let fault: FaultedCausalPatch | undefined;
   let diverged = false;
   let disposed = false;
@@ -93,11 +129,11 @@ export function createCausalPatchInbox<TDocument>(
   });
 
   const ingestWhileBusy = (
-    input: Parameters<CausalPatchInbox["ingest"]>[0],
+    input: Parameters<CausalPatchInbox<TDocument>["ingest"]>[0],
   ): CausalPatchIngestResult => {
-    const envelopes: StoredEnvelope[] = [];
+    const envelopes: StoredEnvelope<TDocument>[] = [];
     for (const candidate of Array.isArray(input) ? input : [input]) {
-      const prepared = prepareEnvelope(candidate);
+      const prepared = prepareEnvelope<TDocument>(candidate);
       if (!prepared.ok) {
         return {
           ok: false,
@@ -126,8 +162,26 @@ export function createCausalPatchInbox<TDocument>(
       };
     }
 
+    for (const envelope of envelopes) {
+      if (!("intent" in envelope)) continue;
+      const policy = envelope.intent.kind;
+      const configured = policy === "positional"
+        ? positionalSchema !== undefined
+        : stableIdScopes !== undefined;
+      if (!configured) {
+        return {
+          ok: false,
+          code: "policy_not_configured",
+          reason: `causal materialization policy is not configured: ${policy}`,
+          id: envelope.id,
+          policy,
+          applied: [],
+        };
+      }
+    }
+
     const duplicates = new Set<string>();
-    const additions = new Map<string, StoredEnvelope>();
+    const additions = new Map<string, StoredEnvelope<TDocument>>();
     for (const envelope of envelopes) {
       const existing = known.get(envelope.id) ?? additions.get(envelope.id);
       if (existing !== undefined) {
@@ -180,6 +234,7 @@ export function createCausalPatchInbox<TDocument>(
     }
 
     const integrated: string[] = [];
+    const diagnostics: CausalMaterializationDiagnostic[] = [];
     while (true) {
       const readyId = readyIds.pop();
       if (readyId === undefined) break;
@@ -187,14 +242,72 @@ export function createCausalPatchInbox<TDocument>(
       if (pending === undefined) continue;
       const ready = pending.envelope;
 
+      const beforeMaterialization = doc.value;
+      let materialized: ReadyMaterialization;
+      try {
+        materialized = materializeReadyEnvelope(
+          ready,
+          doc,
+          positionalSchema,
+          stableIdScopes,
+          known,
+          appliedEnvelopes,
+        );
+      } catch (error) {
+        if (doc.value !== beforeMaterialization) diverged = true;
+        if (!diverged) {
+          fault = {
+            id: ready.id,
+            reason: error instanceof Error
+              ? error.message
+              : "causal materialization threw an unknown value",
+            phase: "materialization",
+          };
+        }
+        throw error;
+      }
+      if (doc.value !== beforeMaterialization) diverged = true;
+      if (disposed) {
+        return {
+          ok: false,
+          code: "disposed",
+          reason: "causal inbox was disposed while materializing an envelope",
+          ...ingestProgress(integrated, diagnostics),
+        };
+      }
+      if (diverged) {
+        return {
+          ok: false,
+          code: "projection_diverged",
+          reason: "document projection changed while materializing a causal envelope",
+          ...ingestProgress(integrated, diagnostics),
+        };
+      }
+      if (!materialized.ok) {
+        const failedMaterialization = copyMaterializationFailure(
+          materialized.failure,
+        );
+        failure = failedMaterialization;
+        return {
+          ok: false,
+          code: "materialization_failed",
+          reason: materialized.failure.materialization.reason,
+          ...failedMaterialization,
+          ...ingestProgress(integrated, diagnostics),
+        };
+      }
+
       const beforeProjection = doc.value;
-      let result: ReturnType<typeof doc.patch>;
+      let result: ReturnType<typeof doc.commit>;
       publicationCount = 0;
       applyingId = ready.id;
       try {
-        result = doc.patch(ready.operations, {
+        result = doc.commit(materialized.operations, {
           origin,
           mergeKey: ready.id,
+          ...(materialized.selectionAfter === undefined
+            ? {}
+            : { selectionAfter: materialized.selectionAfter }),
         });
       } catch (error) {
         if (doc.value !== beforeProjection) diverged = true;
@@ -223,7 +336,7 @@ export function createCausalPatchInbox<TDocument>(
             ok: false,
             code: "disposed",
             reason: "causal inbox was disposed while applying an envelope",
-            applied: integrated,
+            ...ingestProgress(integrated, diagnostics),
           };
         }
         if (diverged) {
@@ -231,7 +344,7 @@ export function createCausalPatchInbox<TDocument>(
             ok: false,
             code: "projection_diverged",
             reason: "document projection changed while applying a causal envelope",
-            applied: integrated,
+            ...ingestProgress(integrated, diagnostics),
           };
         }
         failure = { id: ready.id, result: copyJson(result) };
@@ -241,10 +354,17 @@ export function createCausalPatchInbox<TDocument>(
           reason: result.reason ?? `causal patch failed: ${ready.id}`,
           id: ready.id,
           result: copyJson(result),
-          applied: integrated,
+          ...ingestProgress(integrated, diagnostics),
         };
       }
 
+      if (positionalSchema !== undefined) {
+        appliedEnvelopes.push({
+          id: ready.id,
+          operations: copyJson(doc.lastPatch),
+        });
+      }
+      diagnostics.push(...materialized.diagnostics);
       queued.delete(ready.id);
       applied.add(ready.id);
       for (const dependency of ready.dependsOn) frontier.delete(dependency);
@@ -265,7 +385,7 @@ export function createCausalPatchInbox<TDocument>(
           ok: false,
           code: "disposed",
           reason: "causal inbox was disposed while applying an envelope",
-          applied: integrated,
+          ...ingestProgress(integrated, diagnostics),
         };
       }
       if (diverged) {
@@ -273,7 +393,7 @@ export function createCausalPatchInbox<TDocument>(
           ok: false,
           code: "projection_diverged",
           reason: "document projection changed while applying a causal envelope",
-          applied: integrated,
+          ...ingestProgress(integrated, diagnostics),
         };
       }
     }
@@ -281,13 +401,13 @@ export function createCausalPatchInbox<TDocument>(
     const inputIds = new Set(envelopes.map(({ id }) => id));
     return {
       ok: true,
-      applied: integrated,
+      ...ingestProgress(integrated, diagnostics),
       pending: [...inputIds].filter((id) => queued.has(id)).sort(compareIds),
       duplicates: [...duplicates],
     };
   };
 
-  const ingest: CausalPatchInbox["ingest"] = (input) => {
+  const ingest: CausalPatchInbox<TDocument>["ingest"] = (input) => {
     if (disposed) {
       return {
         ok: false,
@@ -313,6 +433,16 @@ export function createCausalPatchInbox<TDocument>(
       };
     }
     if (failure !== undefined) {
+      if ("materialization" in failure) {
+        const failedMaterialization = copyMaterializationFailure(failure);
+        return {
+          ok: false,
+          code: "blocked",
+          reason: `causal inbox is blocked by failed materialization: ${failure.id}`,
+          ...failedMaterialization,
+          applied: [],
+        };
+      }
       return {
         ok: false,
         code: "blocked",
@@ -328,6 +458,7 @@ export function createCausalPatchInbox<TDocument>(
         code: "faulted",
         reason: `causal inbox faulted while applying envelope: ${fault.id}`,
         id: fault.id,
+        ...(fault.phase === undefined ? {} : { phase: fault.phase }),
         applied: [],
       };
     }
@@ -352,9 +483,159 @@ export function createCausalPatchInbox<TDocument>(
   };
 }
 
-function copyFailure(failure: FailedCausalPatch): FailedCausalPatch {
+function materializeReadyEnvelope<TDocument>(
+  ready: StoredEnvelope<TDocument>,
+  doc: JSONDocument<TDocument>,
+  positionalSchema: CausalPatchInboxOptions<TDocument>["positionalSchema"],
+  stableIdScopes: CausalPatchInboxOptions<TDocument>["stableIdScopes"],
+  known: ReadonlyMap<string, StoredEnvelope<TDocument>>,
+  appliedEnvelopes: ReadonlyArray<AppliedEnvelope>,
+): ReadyMaterialization {
+  if ("operations" in ready) {
+    return {
+      ok: true,
+      operations: ready.operations,
+      diagnostics: [],
+    };
+  }
+
+  if (ready.intent.kind === "positional") {
+    if (positionalSchema === undefined) {
+      throw new Error("positional materialization policy was not configured");
+    }
+    const causalPast = collectCausalPast(ready.dependsOn, known);
+    const planned = rebaseChange(positionalSchema, {
+      base: ready.intent.base,
+      concurrentBatches: appliedEnvelopes
+        .filter(({ id }) => !causalPast.has(id))
+        .map(({ operations }) => operations),
+      operations: ready.intent.operations,
+      ...(ready.intent.selectionAfter === undefined
+        ? {}
+        : { selectionAfter: ready.intent.selectionAfter }),
+    });
+    if (!planned.ok) {
+      return {
+        ok: false,
+        failure: {
+          id: ready.id,
+          policy: "positional",
+          materialization: copyJson(planned),
+        },
+      };
+    }
+    return {
+      ok: true,
+      operations: planned.operations,
+      ...(planned.selectionAfter === undefined
+        ? {}
+        : { selectionAfter: planned.selectionAfter }),
+      diagnostics: planned.diagnostics.map((diagnostic) => {
+        return positionalDiagnostic(ready.id, diagnostic);
+      }),
+    };
+  }
+
+  if (stableIdScopes === undefined) {
+    throw new Error("stable-id materialization policy was not configured");
+  }
+  const planned = rebaseStableChange(doc, {
+    scopes: stableIdScopes,
+    target: ready.intent.target,
+    relativePath: ready.intent.relativePath,
+    expected: ready.intent.expected,
+    value: ready.intent.value,
+    ...(ready.intent.relativeSelectionAfter === undefined
+      ? {}
+      : { relativeSelectionAfter: ready.intent.relativeSelectionAfter }),
+  });
+  if (!planned.ok) {
+    return {
+      ok: false,
+      failure: {
+        id: ready.id,
+        policy: "stable-id-replace",
+        materialization: copyJson(planned),
+      },
+    };
+  }
+  return {
+    ok: true,
+    operations: planned.operations,
+    ...(planned.selectionAfter === undefined
+      ? {}
+      : { selectionAfter: planned.selectionAfter }),
+    diagnostics: planned.diagnostics.map((diagnostic) => {
+      return stableIdDiagnostic(ready.id, diagnostic);
+    }),
+  };
+}
+
+function collectCausalPast<TDocument>(
+  dependencies: ReadonlyArray<string>,
+  known: ReadonlyMap<string, StoredEnvelope<TDocument>>,
+): Set<string> {
+  const past = new Set<string>();
+  const pending = [...dependencies];
+  while (pending.length > 0) {
+    const id = pending.pop()!;
+    if (past.has(id)) continue;
+    past.add(id);
+    const dependency = known.get(id);
+    if (dependency !== undefined) pending.push(...dependency.dependsOn);
+  }
+  return past;
+}
+
+function positionalDiagnostic(
+  id: string,
+  diagnostic: RebaseDiagnostic,
+): CausalMaterializationDiagnostic {
+  return { id, policy: "positional", ...copyJson(diagnostic) };
+}
+
+function stableIdDiagnostic(
+  id: string,
+  diagnostic: StableIdRebaseDiagnostic,
+): CausalMaterializationDiagnostic {
+  return { id, policy: "stable-id-replace", ...copyJson(diagnostic) };
+}
+
+function ingestProgress(
+  applied: ReadonlyArray<string>,
+  diagnostics: ReadonlyArray<CausalMaterializationDiagnostic>,
+): {
+  readonly applied: ReadonlyArray<string>;
+  readonly diagnostics?: ReadonlyArray<CausalMaterializationDiagnostic>;
+} {
+  return diagnostics.length === 0
+    ? { applied }
+    : { applied, diagnostics };
+}
+
+function copyFailure(failure: CausalPatchFailure): CausalPatchFailure {
+  if ("materialization" in failure) {
+    return copyMaterializationFailure(failure);
+  }
   return {
     id: failure.id,
     result: copyJson(failure.result),
+  };
+}
+
+function copyMaterializationFailure(
+  failure: FailedCausalMaterialization,
+): FailedCausalMaterialization {
+  if (failure.policy === "positional") {
+    return {
+      id: failure.id,
+      policy: "positional",
+      materialization: copyJson(failure.materialization),
+    };
+  }
+  return {
+    id: failure.id,
+    policy: "stable-id-replace",
+    materialization: copyJson(failure.materialization),
   };
 }
