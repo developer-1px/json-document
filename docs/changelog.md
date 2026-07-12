@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+- Narrowed the id resolver, stable-id rebase, and causal inbox inputs to their
+  actual read/preflight/publication ports. Full `JSONDocument` values remain
+  compatible, while host adapters can guard a projection without exposing the
+  complete document command and history surface.
+
 ### Added
 
 - Added lab-only ready-time materialization to the causal patch inbox for

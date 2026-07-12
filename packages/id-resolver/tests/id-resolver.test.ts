@@ -46,6 +46,25 @@ function createBoard() {
 }
 
 describe("@interactive-os/json-document-id-resolver", () => {
+  test("depends only on the current document read port", () => {
+    const document = createBoard();
+    const ids = createIdResolver({
+      at: document.at,
+      query: document.query,
+    }, {
+      scopes: [{
+        scope: "card",
+        query: "$.columns[*].cards[*]",
+        readId: (value) => Card.safeParse(value).data?.id,
+      }],
+    });
+
+    expect(ids.resolve("card", "b")).toMatchObject({
+      ok: true,
+      pointer: "/columns/0/cards/1",
+    });
+  });
+
   test("resolves a stable id to the current JSON Pointer", () => {
     const doc = createBoard();
     const ids = createIdResolver(doc, {

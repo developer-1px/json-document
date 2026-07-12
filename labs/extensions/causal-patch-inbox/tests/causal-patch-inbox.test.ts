@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import * as z from "zod";
 
 import {
@@ -8,6 +8,7 @@ import {
 } from "@interactive-os/json-document";
 import {
   createCausalPatchInbox,
+  type CausalPatchInboxOptions,
 } from "../src/index.js";
 
 const LogSchema = z.object({
@@ -38,6 +39,38 @@ const CardScopes = [{
 }];
 
 describe("@interactive-os/json-document-causal-patch-inbox", () => {
+  test("depends only on the document patch publication port", () => {
+    expectTypeOf<Parameters<typeof createCausalPatchInbox>[1]>()
+      .toEqualTypeOf<CausalPatchInboxOptions<unknown> | undefined>();
+
+    const document = createJSONDocument(LogSchema, { log: [] });
+    const port = {
+      get value() {
+        return document.value;
+      },
+      commit: document.commit,
+      subscribe: document.subscribe,
+    };
+    const inbox = createCausalPatchInbox(port);
+
+    if (false) {
+      // @ts-expect-error stable-id policy requires the extended read/preflight port
+      createCausalPatchInbox(port, { stableIdScopes: [] });
+    }
+    expect(() => createCausalPatchInbox(port as never, {
+      stableIdScopes: [],
+    })).toThrow(
+      "stable-id materialization requires query, at, and canPatch document ports",
+    );
+
+    expect(inbox.ingest({
+      id: "remote",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "applied" }],
+    })).toMatchObject({ ok: true, applied: ["remote"] });
+    expect(port.value.log).toEqual(["applied"]);
+  });
+
   test("queues a child until its parent is applied, then drains in causal order", () => {
     const doc = createJSONDocument(LogSchema, { log: [] });
     const inbox = createCausalPatchInbox(doc);

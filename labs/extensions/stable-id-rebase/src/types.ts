@@ -1,13 +1,22 @@
 import type {
   JSONCapabilityResult,
+  JSONDocument,
   JSONPatchOperation,
   Pointer,
   SelectionPoint,
 } from "@interactive-os/json-document";
 import type {
+  IdResolverDocument,
   IdResolverScope,
   ResolveIdErrorCode,
 } from "@interactive-os/json-document-id-resolver";
+
+/** Minimal current-projection port required by stable-id materialization. */
+export type StableIdRebaseDocument<TDocument> =
+  IdResolverDocument<TDocument> & Pick<
+    JSONDocument<TDocument>,
+    "canPatch" | "value"
+  >;
 
 export interface StableIdTarget {
   readonly scope: string;

@@ -1,6 +1,13 @@
 import type {
+  JSONDocument,
   Pointer,
 } from "@interactive-os/json-document";
+
+/** Minimal read port required to resolve stable ids. */
+export type IdResolverDocument<TDocument> = Pick<
+  JSONDocument<TDocument>,
+  "at" | "query"
+>;
 
 export type IdResolverDiagnosticCode =
   | "invalid_query"
