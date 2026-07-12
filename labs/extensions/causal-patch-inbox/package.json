@@ -37,6 +37,10 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
+  "dependencies": {
+    "@interactive-os/json-document-patch-rebase": "0.1.0",
+    "@interactive-os/json-document-stable-id-rebase": "0.1.0"
+  },
   "peerDependencies": {
     "@interactive-os/json-document": "^1.0.0"
   },

@@ -7,14 +7,14 @@ export interface IntroducedDependencyCycle {
   readonly cycle: ReadonlyArray<string>;
 }
 
-export function findIntroducedDependencyCycle(
-  additions: ReadonlyMap<string, StoredEnvelope>,
-  existing: (id: string) => StoredEnvelope | undefined,
+export function findIntroducedDependencyCycle<TDocument>(
+  additions: ReadonlyMap<string, StoredEnvelope<TDocument>>,
+  existing: (id: string) => StoredEnvelope<TDocument> | undefined,
   hasExistingDependent: (id: string) => boolean,
 ): IntroducedDependencyCycle | null {
-  const admitted = new Map<string, StoredEnvelope>();
+  const admitted = new Map<string, StoredEnvelope<TDocument>>();
   const admittedDependencyTargets = new Set<string>();
-  const lookup = (id: string): StoredEnvelope | undefined => {
+  const lookup = (id: string): StoredEnvelope<TDocument> | undefined => {
     return admitted.get(id) ?? existing(id);
   };
 
@@ -41,10 +41,10 @@ export function findIntroducedDependencyCycle(
   return null;
 }
 
-function findDependencyPath(
+function findDependencyPath<TDocument>(
   start: string,
   target: string,
-  lookup: (id: string) => StoredEnvelope | undefined,
+  lookup: (id: string) => StoredEnvelope<TDocument> | undefined,
 ): string[] | null {
   if (start === target) return [start];
 

@@ -68,6 +68,18 @@ function files(dir) {
   });
 }
 
+function importedSpecifiers(source) {
+  const specifiers = new Set();
+  for (const pattern of [
+    /\bfrom\s+["']([^"']+)["']/g,
+    /\bimport\s+["']([^"']+)["']/g,
+    /\b(?:import|require)\s*\(\s*["']([^"']+)["']/g,
+  ]) {
+    for (const match of source.matchAll(pattern)) specifiers.add(match[1]);
+  }
+  return specifiers;
+}
+
 function formatCommand(command, args, cwd = root) {
   const relativeCwd = cwd === root ? "." : cwd.slice(root.length).replace(/^\//, "");
   return `$ ${command} ${args.join(" ")}  # cwd=${relativeCwd}`;
@@ -167,7 +179,7 @@ function labDirFromPath(path) {
   return `${labRoot}/${parts[2]}`;
 }
 
-function verificationSelection(labs) {
+function verificationSelection(labs, labDependencies) {
   if (!verifyChanged) {
     return { dirs: new Set(labs), reason: "full verification requested" };
   }
@@ -188,7 +200,61 @@ function verificationSelection(labs) {
       selectedLabs.add(labDir);
     }
   }
-  return { dirs: selectedLabs, reason };
+  const reverseDependencies = new Map(labs.map((dir) => [dir, new Set()]));
+  for (const [dir, dependencies] of labDependencies) {
+    for (const dependency of dependencies) {
+      reverseDependencies.get(dependency)?.add(dir);
+    }
+  }
+
+  const withDependents = transitiveLabClosure(selectedLabs, reverseDependencies);
+  const withDependencies = transitiveLabClosure(withDependents, labDependencies);
+  return { dirs: withDependencies, reason };
+}
+
+function transitiveLabClosure(initial, edges) {
+  const selected = new Set(initial);
+  const pending = [...initial];
+  while (pending.length > 0) {
+    const dir = pending.pop();
+    for (const related of edges.get(dir) ?? []) {
+      if (selected.has(related)) continue;
+      selected.add(related);
+      pending.push(related);
+    }
+  }
+  return selected;
+}
+
+function findLabDependencyCycle(labs, labDependencies) {
+  const complete = new Set();
+  const visiting = new Set();
+  const path = [];
+
+  function visit(dir) {
+    if (complete.has(dir)) return null;
+    if (visiting.has(dir)) {
+      const start = path.indexOf(dir);
+      return [...path.slice(start), dir];
+    }
+
+    visiting.add(dir);
+    path.push(dir);
+    for (const dependency of labDependencies.get(dir) ?? []) {
+      const cycle = visit(dependency);
+      if (cycle !== null) return cycle;
+    }
+    path.pop();
+    visiting.delete(dir);
+    complete.add(dir);
+    return null;
+  }
+
+  for (const dir of labs) {
+    const cycle = visit(dir);
+    if (cycle !== null) return cycle;
+  }
+  return null;
 }
 
 async function verifyPackage({ dir, name }) {
@@ -201,9 +267,9 @@ async function verifyPackage({ dir, name }) {
   console.log(`[ok] ${name}`);
 }
 
-async function verifyPackages(targets) {
+async function verifyPackages(targets, levelLabel) {
   const concurrency = Math.min(verifyConcurrency(), targets.length);
-  console.log(`extension lab verify concurrency: ${concurrency}`);
+  console.log(`extension lab verify ${levelLabel} concurrency: ${concurrency}`);
 
   let cursor = 0;
   const failures = [];
@@ -223,6 +289,49 @@ async function verifyPackages(targets) {
   for (const failure of failures) {
     fail(failure.message);
   }
+  return failures.length === 0;
+}
+
+function verificationLevels(targets) {
+  const targetByDir = new Map(targets.map((target) => [target.dir, target]));
+  const unresolved = new Map();
+  const dependents = new Map(targets.map((target) => [target.dir, new Set()]));
+
+  for (const target of targets) {
+    const dependencies = target.labDependencies.filter((dir) => targetByDir.has(dir));
+    unresolved.set(target.dir, dependencies.length);
+    for (const dependency of dependencies) {
+      dependents.get(dependency)?.add(target.dir);
+    }
+  }
+
+  let ready = targets
+    .filter((target) => unresolved.get(target.dir) === 0)
+    .sort((left, right) => left.dir.localeCompare(right.dir));
+  const levels = [];
+  let scheduled = 0;
+
+  while (ready.length > 0) {
+    const level = ready;
+    levels.push(level);
+    scheduled += level.length;
+    const next = [];
+    for (const target of level) {
+      for (const dependentDir of dependents.get(target.dir) ?? []) {
+        const remaining = (unresolved.get(dependentDir) ?? 0) - 1;
+        unresolved.set(dependentDir, remaining);
+        if (remaining === 0) next.push(targetByDir.get(dependentDir));
+      }
+    }
+    ready = next
+      .filter((target) => target !== undefined)
+      .sort((left, right) => left.dir.localeCompare(right.dir));
+  }
+
+  if (scheduled !== targets.length) {
+    throw new Error("extension lab dependency cycle prevented verification scheduling.");
+  }
+  return levels;
 }
 
 const labs = packages();
@@ -230,11 +339,42 @@ if (labs.length === 0) {
   fail("extension lab: no lab packages found.");
 }
 const officialPackageNames = new Set(officialPackages().map((pkg) => pkg.name));
-const selectedVerification = verify ? verificationSelection(labs) : { dirs: new Set(), reason: "check only" };
+const labPackages = labs.map((dir) => ({
+  dir,
+  pkg: JSON.parse(read(`${dir}/package.json`)),
+}));
+const labPackageByDir = new Map(labPackages.map((target) => [target.dir, target]));
+const labPackageByName = new Map();
+for (const target of labPackages) {
+  if (typeof target.pkg.name !== "string") continue;
+  const existing = labPackageByName.get(target.pkg.name);
+  if (existing !== undefined) {
+    fail(`${target.pkg.name}: lab package name is duplicated by ${existing.dir} and ${target.dir}.`);
+    continue;
+  }
+  labPackageByName.set(target.pkg.name, target);
+}
+
+const labDependencies = new Map(labPackages.map(({ dir, pkg }) => [
+  dir,
+  new Set(
+    Object.keys(pkg.dependencies ?? {})
+      .map((name) => labPackageByName.get(name)?.dir)
+      .filter((dependencyDir) => dependencyDir !== undefined),
+  ),
+]));
+const dependencyCycle = findLabDependencyCycle(labs, labDependencies);
+if (dependencyCycle !== null) {
+  const names = dependencyCycle.map((dir) => labPackageByDir.get(dir)?.pkg.name ?? dir);
+  fail(`extension lab dependency cycle: ${names.join(" -> ")}`);
+}
+
+const selectedVerification = verify
+  ? verificationSelection(labs, labDependencies)
+  : { dirs: new Set(), reason: "check only" };
 const verificationTargets = [];
 
-for (const dir of labs) {
-  const pkg = JSON.parse(read(`${dir}/package.json`));
+for (const { dir, pkg } of labPackages) {
   const label = pkg.name ?? dir;
   const folderName = dir.slice(dir.lastIndexOf("/") + 1);
   const packageName = typeof pkg.name === "string" && pkg.name.startsWith("@interactive-os/json-document-")
@@ -262,6 +402,16 @@ for (const dir of labs) {
   if (pkg.dependencies?.["@interactive-os/json-document"]) {
     fail(`${label}: json-document must not be a runtime dependency.`);
   }
+  for (const dependencyName of Object.keys(pkg.dependencies ?? {})) {
+    const dependency = labPackageByName.get(dependencyName);
+    if (dependency === undefined) continue;
+    if (dependency.pkg.private !== true) {
+      fail(`${label}: lab runtime dependency must target another private lab (${dependencyName}).`);
+    }
+    if (pkg.dependencies[dependencyName] !== dependency.pkg.version) {
+      fail(`${label}: lab runtime dependency must use the target lab version ${dependency.pkg.version} (${dependencyName}).`);
+    }
+  }
   if (pkg.sideEffects !== false) {
     fail(`${label}: sideEffects must be false.`);
   }
@@ -281,9 +431,17 @@ for (const dir of labs) {
 
   for (const sourcePath of files(`${dir}/src`)) {
     const source = read(sourcePath);
-    for (const match of source.matchAll(/\bfrom\s+["']([^"']+)["']/g)) {
-      const specifier = match[1];
+    for (const specifier of importedSpecifiers(source)) {
       if (specifier === "@interactive-os/json-document") continue;
+      const labDependency = labPackageByName.get(specifier);
+      if (labDependency !== undefined) {
+        if (labDependency.pkg.private !== true) {
+          fail(`${sourcePath}: lab source imports must target another private lab (${specifier}).`);
+        } else if (pkg.dependencies?.[specifier] !== labDependency.pkg.version) {
+          fail(`${sourcePath}: lab imports must be declared in dependencies at target version ${labDependency.pkg.version} (${specifier}).`);
+        }
+        continue;
+      }
       if (officialPackageNames.has(specifier)) {
         if (pkg.peerDependencies?.[specifier] === undefined) {
           fail(`${sourcePath}: official extension imports must be declared as peer dependencies (${specifier}).`);
@@ -291,7 +449,7 @@ for (const dir of labs) {
         continue;
       }
       if (specifier.startsWith(".")) continue;
-      fail(`${sourcePath}: lab source may import only json-document or declared official extensions (${specifier}).`);
+      fail(`${sourcePath}: lab source may import only json-document, declared official extensions, or declared private lab dependencies (${specifier}).`);
     }
     if (/src\/application|src\/domain|src\/foundation|\.\.\/json-document\/src/.test(source)) {
       fail(`${sourcePath}: lab source must not import json-document internals.`);
@@ -307,6 +465,7 @@ for (const dir of labs) {
       name: pkg.name,
       officialDependencies: Object.keys(pkg.peerDependencies ?? {})
         .filter((dependency) => officialPackageNames.has(dependency)),
+      labDependencies: [...(labDependencies.get(dir) ?? [])],
     });
   }
 }
@@ -316,7 +475,12 @@ if (verify && process.exitCode !== 1) {
   if (verificationTargets.length > 0) {
     buildCorePackage();
     buildOfficialDependencies(verificationTargets);
-    await verifyPackages(verificationTargets);
+    const levels = verificationLevels(verificationTargets);
+    console.log(`extension lab dependency levels: ${levels.length}`);
+    for (let index = 0; index < levels.length; index += 1) {
+      const levelOk = await verifyPackages(levels[index], `level ${index + 1}/${levels.length}`);
+      if (!levelOk) break;
+    }
   }
 }
 

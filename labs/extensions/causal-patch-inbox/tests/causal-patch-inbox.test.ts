@@ -14,6 +14,29 @@ const LogSchema = z.object({
   log: z.array(z.string()),
 });
 
+const CollectionSchema = z.object({
+  items: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+  })),
+});
+
+const CardSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+});
+const BoardSchema = z.object({
+  columns: z.array(z.object({
+    id: z.string(),
+    cards: z.array(CardSchema),
+  })),
+});
+const CardScopes = [{
+  scope: "card",
+  query: "$.columns[*].cards[*]",
+  readId: (value: unknown) => CardSchema.safeParse(value).data?.id,
+}];
+
 describe("@interactive-os/json-document-causal-patch-inbox", () => {
   test("queues a child until its parent is applied, then drains in causal order", () => {
     const doc = createJSONDocument(LogSchema, { log: [] });
@@ -843,5 +866,503 @@ describe("@interactive-os/json-document-causal-patch-inbox", () => {
     });
     expect(doc.value.log).toEqual(["parent"]);
     unsubscribe();
+  });
+
+  test("materializes a positional intent when it becomes causally ready", () => {
+    const base = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    };
+    const doc = createJSONDocument(CollectionSchema, base, {
+      history: 10,
+      selection: { mode: "single", initial: ["/items/1/title"] },
+    });
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+    });
+
+    expect(inbox.ingest({
+      id: "z-local",
+      dependsOn: ["b-parent"],
+      intent: {
+        kind: "positional",
+        base,
+        operations: [{
+          op: "replace",
+          path: "/items/1/title",
+          value: "B2",
+        }],
+        selectionAfter: "/items/1/title",
+      },
+    })).toMatchObject({
+      ok: true,
+      applied: [],
+      pending: ["z-local"],
+    });
+
+    const result = inbox.ingest([{
+      id: "a-concurrent",
+      dependsOn: [],
+      operations: [{
+        op: "add",
+        path: "/items/0",
+        value: { id: "x", title: "X" },
+      }],
+    }, {
+      id: "b-parent",
+      dependsOn: [],
+      operations: [],
+    }]);
+
+    expect(result).toMatchObject({
+      ok: true,
+      applied: ["a-concurrent", "b-parent", "z-local"],
+      diagnostics: [{
+        id: "z-local",
+        policy: "positional",
+        code: "pointer_shifted",
+        pointer: "/items/1/title",
+        rebasedPointer: "/items/2/title",
+      }],
+    });
+    expect(doc.value.items).toEqual([
+      { id: "x", title: "X" },
+      { id: "a", title: "A" },
+      { id: "b", title: "B2" },
+    ]);
+    expect(doc.selection?.primaryPointer).toBe("/items/2/title");
+    expect(doc.history.undoDepth).toBe(2);
+    expect(inbox.current()).toMatchObject({
+      status: "active",
+      frontier: ["a-concurrent", "z-local"],
+      queued: [],
+    });
+  });
+
+  test("blocks a positional intent rather than overwriting a concurrent field", () => {
+    const base = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    };
+    const doc = createJSONDocument(CollectionSchema, base, { history: 10 });
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+    });
+
+    expect(inbox.ingest({
+      id: "z-local",
+      dependsOn: ["b-parent"],
+      intent: {
+        kind: "positional",
+        base,
+        operations: [{
+          op: "replace",
+          path: "/items/1/title",
+          value: "Local",
+        }],
+      },
+    })).toMatchObject({ ok: true, pending: ["z-local"] });
+
+    const result = inbox.ingest([{
+      id: "a-concurrent",
+      dependsOn: [],
+      operations: [{
+        op: "replace",
+        path: "/items/1/title",
+        value: "Remote",
+      }],
+    }, {
+      id: "b-parent",
+      dependsOn: [],
+      operations: [],
+    }]);
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "materialization_failed",
+      id: "z-local",
+      policy: "positional",
+      applied: ["a-concurrent", "b-parent"],
+      materialization: {
+        ok: false,
+        code: "conflict",
+        conflicts: [{ code: "target_changed" }],
+      },
+    });
+    expect(doc.value.items[1]?.title).toBe("Remote");
+    expect(doc.history.undoDepth).toBe(1);
+    expect(inbox.current()).toMatchObject({
+      status: "blocked",
+      frontier: ["a-concurrent", "b-parent"],
+      queued: [{ id: "z-local", missing: [] }],
+      failure: {
+        id: "z-local",
+        policy: "positional",
+        materialization: {
+          ok: false,
+          code: "conflict",
+        },
+      },
+    });
+    expect(inbox.ingest({
+      id: "later",
+      dependsOn: [],
+      operations: [],
+    })).toMatchObject({
+      ok: false,
+      code: "blocked",
+      id: "z-local",
+      policy: "positional",
+      applied: [],
+    });
+  });
+
+  test("resolves a stable-id intent against the projection when it becomes ready", () => {
+    const doc = createJSONDocument(BoardSchema, {
+      columns: [{
+        id: "todo",
+        cards: [
+          { id: "a", title: "A" },
+          { id: "b", title: "B" },
+        ],
+      }, {
+        id: "done",
+        cards: [],
+      }],
+    }, {
+      history: 10,
+      selection: {
+        mode: "single",
+        initial: ["/columns/0/cards/1/title"],
+      },
+    });
+    const inbox = createCausalPatchInbox(doc, {
+      stableIdScopes: CardScopes,
+    });
+
+    expect(inbox.ingest({
+      id: "z-local",
+      dependsOn: ["b-parent"],
+      intent: {
+        kind: "stable-id-replace",
+        target: { scope: "card", id: "b" },
+        relativePath: "/title",
+        expected: "B",
+        value: "Reviewed",
+        relativeSelectionAfter: "/title",
+      },
+    })).toMatchObject({ ok: true, pending: ["z-local"] });
+
+    const result = inbox.ingest([{
+      id: "a-concurrent",
+      dependsOn: [],
+      operations: [{
+        op: "move",
+        from: "/columns/0/cards/1",
+        path: "/columns/1/cards/-",
+      }],
+    }, {
+      id: "b-parent",
+      dependsOn: [],
+      operations: [],
+    }]);
+
+    expect(result).toEqual({
+      ok: true,
+      applied: ["a-concurrent", "b-parent", "z-local"],
+      pending: [],
+      duplicates: [],
+    });
+    expect(doc.value.columns[1]?.cards).toEqual([{
+      id: "b",
+      title: "Reviewed",
+    }]);
+    expect(doc.selection?.primaryPointer).toBe("/columns/1/cards/0/title");
+    expect(doc.history.undoDepth).toBe(2);
+  });
+
+  test("blocks a stable-id intent when its authored field changed", () => {
+    const doc = createJSONDocument(BoardSchema, {
+      columns: [{
+        id: "todo",
+        cards: [{ id: "b", title: "B" }],
+      }],
+    }, { history: 10 });
+    const inbox = createCausalPatchInbox(doc, {
+      stableIdScopes: CardScopes,
+    });
+
+    expect(inbox.ingest({
+      id: "z-local",
+      dependsOn: ["b-parent"],
+      intent: {
+        kind: "stable-id-replace",
+        target: { scope: "card", id: "b" },
+        relativePath: "/title",
+        expected: "B",
+        value: "Local",
+      },
+    })).toMatchObject({ ok: true, pending: ["z-local"] });
+
+    const result = inbox.ingest([{
+      id: "a-concurrent",
+      dependsOn: [],
+      operations: [{
+        op: "replace",
+        path: "/columns/0/cards/0/title",
+        value: "Remote",
+      }],
+    }, {
+      id: "b-parent",
+      dependsOn: [],
+      operations: [],
+    }]);
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "materialization_failed",
+      id: "z-local",
+      policy: "stable-id-replace",
+      applied: ["a-concurrent", "b-parent"],
+      materialization: {
+        ok: false,
+        code: "target_changed",
+        pointer: "/columns/0/cards/0/title",
+        capability: { ok: false, code: "test_failed" },
+      },
+    });
+    expect(doc.value.columns[0]?.cards[0]?.title).toBe("Remote");
+    expect(doc.history.undoDepth).toBe(1);
+    expect(inbox.current()).toMatchObject({
+      status: "blocked",
+      frontier: ["a-concurrent", "b-parent"],
+      queued: [{ id: "z-local", missing: [] }],
+      failure: {
+        id: "z-local",
+        policy: "stable-id-replace",
+        materialization: { ok: false, code: "target_changed" },
+      },
+    });
+  });
+
+  test("deduplicates the immutable authored intent and owns its data", () => {
+    const originalBase = {
+      items: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    };
+    const doc = createJSONDocument(CollectionSchema, originalBase);
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: CollectionSchema,
+    });
+    const operation = {
+      op: "replace" as const,
+      path: "/items/1/title" as const,
+      value: "B2",
+    };
+
+    expect(inbox.ingest({
+      id: "local",
+      dependsOn: ["parent"],
+      intent: {
+        kind: "positional",
+        base: originalBase,
+        operations: [operation],
+      },
+    })).toMatchObject({ ok: true, pending: ["local"], duplicates: [] });
+
+    originalBase.items[1]!.title = "tampered-base";
+    operation.value = "tampered-operation";
+
+    expect(inbox.ingest({
+      id: "local",
+      dependsOn: ["parent"],
+      intent: {
+        kind: "positional",
+        base: {
+          items: [
+            { id: "a", title: "A" },
+            { id: "b", title: "B" },
+          ],
+        },
+        operations: [{
+          op: "replace",
+          path: "/items/1/title",
+          value: "B2",
+        }],
+      },
+    })).toMatchObject({
+      ok: true,
+      pending: ["local"],
+      duplicates: ["local"],
+    });
+
+    expect(inbox.ingest({
+      id: "parent",
+      dependsOn: [],
+      operations: [],
+    })).toMatchObject({ ok: true, applied: ["parent", "local"] });
+    expect(doc.value.items[1]?.title).toBe("B2");
+  });
+
+  test("rejects an unconfigured intent policy before admitting its batch", () => {
+    const base = {
+      items: [{ id: "a", title: "A" }],
+    };
+    const doc = createJSONDocument(CollectionSchema, base);
+    const inbox = createCausalPatchInbox(doc);
+
+    const result = inbox.ingest([{
+      id: "direct",
+      dependsOn: [],
+      operations: [{
+        op: "replace",
+        path: "/items/0/title",
+        value: "must-not-apply",
+      }],
+    }, {
+      id: "local",
+      dependsOn: [],
+      intent: {
+        kind: "positional",
+        base,
+        operations: [{
+          op: "replace",
+          path: "/items/0/title",
+          value: "Local",
+        }],
+      },
+    }]);
+
+    expect(result).toEqual({
+      ok: false,
+      code: "policy_not_configured",
+      reason: "causal materialization policy is not configured: positional",
+      id: "local",
+      policy: "positional",
+      applied: [],
+    });
+    expect(doc.value.items[0]?.title).toBe("A");
+    expect(inbox.current()).toEqual({
+      status: "active",
+      frontier: [],
+      queued: [],
+    });
+  });
+
+  test("drains a mixed direct-intent-direct dependency chain", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: LogSchema,
+    });
+
+    expect(inbox.ingest({
+      id: "c-child",
+      dependsOn: ["b-intent"],
+      operations: [{ op: "add", path: "/log/-", value: "child" }],
+    })).toMatchObject({ ok: true, pending: ["c-child"] });
+    expect(inbox.ingest({
+      id: "b-intent",
+      dependsOn: ["a-root"],
+      intent: {
+        kind: "positional",
+        base: { log: ["root"] },
+        operations: [{ op: "add", path: "/log/-", value: "intent" }],
+      },
+    })).toMatchObject({ ok: true, pending: ["b-intent"] });
+
+    expect(inbox.ingest({
+      id: "a-root",
+      dependsOn: [],
+      operations: [{ op: "add", path: "/log/-", value: "root" }],
+    })).toEqual({
+      ok: true,
+      applied: ["a-root", "b-intent", "c-child"],
+      pending: [],
+      duplicates: [],
+    });
+    expect(doc.value.log).toEqual(["root", "intent", "child"]);
+    expect(inbox.current()).toEqual({
+      status: "active",
+      frontier: ["c-child"],
+      queued: [],
+    });
+  });
+
+  test("rejects an envelope that mixes direct operations with an intent", () => {
+    const doc = createJSONDocument(LogSchema, { log: [] });
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: LogSchema,
+    });
+
+    expect(inbox.ingest({
+      id: "mixed",
+      dependsOn: [],
+      operations: [],
+      intent: {
+        kind: "positional",
+        base: { log: [] },
+        operations: [],
+      },
+    } as never)).toMatchObject({
+      ok: false,
+      code: "invalid_envelope",
+      applied: [],
+    });
+    expect(inbox.current()).toEqual({
+      status: "active",
+      frontier: [],
+      queued: [],
+    });
+  });
+
+  test("faults with the materialization phase when a planner dependency throws", () => {
+    const base = { items: [{ id: "a", title: "A" }] };
+    const doc = createJSONDocument(CollectionSchema, base);
+    const inbox = createCausalPatchInbox(doc, {
+      positionalSchema: {
+        safeParse() {
+          throw new Error("materialization schema failed");
+        },
+      },
+    });
+    const intent = {
+      id: "local",
+      dependsOn: [],
+      intent: {
+        kind: "positional" as const,
+        base,
+        operations: [{
+          op: "replace" as const,
+          path: "/items/0/title" as const,
+          value: "Local",
+        }],
+      },
+    };
+
+    expect(() => inbox.ingest(intent)).toThrow("materialization schema failed");
+    expect(inbox.current()).toEqual({
+      status: "faulted",
+      frontier: [],
+      queued: [{ id: "local", missing: [] }],
+      fault: {
+        id: "local",
+        reason: "materialization schema failed",
+        phase: "materialization",
+      },
+    });
+    expect(inbox.ingest(intent)).toMatchObject({
+      ok: false,
+      code: "faulted",
+      id: "local",
+      phase: "materialization",
+      applied: [],
+    });
+    expect(doc.value).toEqual(base);
   });
 });
