@@ -35,7 +35,6 @@ interface DocumentMutationOps {
   applyDocumentPatch(
     operations: ReadonlyArray<JSONPatchOperation>,
     metadata?: JSONChangeMetadata,
-    operationsOwned?: boolean,
   ): JSONResult;
 }
 
@@ -45,26 +44,32 @@ interface CreateDocumentStateOpsInput<T> {
   historyState: DocumentHistoryRuntimeState;
   patchState: DocumentPatchRuntimeState;
   snapSelection: () => SelectionSnap;
-  syncLastPatch: () => void;
+  selectionAfterForApplied: (applied: ReadonlyArray<JSONPatchOperation>) => SelectionSnap | undefined;
 }
 
 export function createDocumentStateOps<T>(
   input: CreateDocumentStateOpsInput<T>,
 ): JSONStateOps<T> {
-  const { rawOps, mutation, historyState, patchState, snapSelection, syncLastPatch } = input;
+  const {
+    rawOps,
+    mutation,
+    historyState,
+    patchState,
+    snapSelection,
+    selectionAfterForApplied,
+  } = input;
 
   return {
-    add: (path, value) => mutation.applyDocumentPatch([{ op: "add", path, value }], undefined, true),
-    remove: (path) => mutation.applyDocumentPatch([{ op: "remove", path }], undefined, true),
-    replace: (path, value) => mutation.applyDocumentPatch([{ op: "replace", path, value }], undefined, true),
-    move: (from, path) => mutation.applyDocumentPatch([{ op: "move", from, path }], undefined, true),
-    copy: (from, path) => mutation.applyDocumentPatch([{ op: "copy", from, path }], undefined, true),
+    add: (path, value) => mutation.applyDocumentPatch([{ op: "add", path, value }]),
+    remove: (path) => mutation.applyDocumentPatch([{ op: "remove", path }]),
+    replace: (path, value) => mutation.applyDocumentPatch([{ op: "replace", path, value }]),
+    move: (from, path) => mutation.applyDocumentPatch([{ op: "move", from, path }]),
+    copy: (from, path) => mutation.applyDocumentPatch([{ op: "copy", from, path }]),
     test: rawOps.test,
     patch: mutation.applyDocumentPatch,
     load(value, loadOptions?: { preserveHistory?: boolean }) {
       const r = rawOps.load(value);
       if (r.ok) {
-        syncLastPatch();
         if (loadOptions?.preserveHistory !== true) resetDocumentHistoryRuntimeState(historyState);
       }
       return r;
@@ -72,7 +77,6 @@ export function createDocumentStateOps<T>(
     reset(value) {
       const r = rawOps.reset(value);
       if (r.ok) {
-        syncLastPatch();
         resetDocumentHistoryRuntimeState(historyState);
       }
       return r;
@@ -80,10 +84,11 @@ export function createDocumentStateOps<T>(
     subscribe(listener) {
       patchState.documentSubscriberCount += 1;
       const unsubscribe = rawOps.subscribe((applied, metadata) => {
-        patchState.lastPatch = applied;
         listener(applied, {
           ...metadata,
-          selectionAfter: metadata?.selectionAfter ?? snapSelection(),
+          selectionAfter: metadata?.selectionAfter
+            ?? selectionAfterForApplied(applied)
+            ?? snapSelection(),
         });
       });
       let subscribed = true;

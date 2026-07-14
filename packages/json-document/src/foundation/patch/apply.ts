@@ -1,6 +1,6 @@
 // applyOpRaw — RFC 6902 6 op 의 raw 적용 (schema 검증 없음). public 노출은 patch.ts.
 
-import { isPrefix, type Pointer } from "../pointer/index.js";
+import { isPrefix, parsePointer, type Pointer } from "../pointer/index.js";
 import { cloneJson } from "../json/clone.js";
 import { jsonSerializableError } from "../json/serializable.js";
 import type { ErrorCode, JSONPatchOperation } from "./contract.js";
@@ -42,6 +42,60 @@ export function validateOperationShape(op: JSONPatchOperation): { error: ErrorCo
   }
 }
 
+type PatchPointerError = { error: "invalid_pointer"; reason: string; pointer: Pointer };
+type PatchValidationError = { error: ErrorCode; reason: string; pointer?: Pointer };
+
+export function validateOperationPointers(op: JSONPatchOperation): PatchPointerError | null {
+  const pathError = validatePatchPointer(op.path, "path");
+  if (pathError !== null) return pathError;
+  if (op.op !== "move" && op.op !== "copy") return null;
+  return validatePatchPointer(op.from, "from");
+}
+
+export function validatePatchOperations(
+  operations: ReadonlyArray<JSONPatchOperation>,
+): PatchValidationError | null {
+  for (let index = 0; index < operations.length; index += 1) {
+    if (!(index in operations)) {
+      return { error: "invalid_pointer", reason: `op[${index}]: op must be object` };
+    }
+    const operation = operations[index]!;
+    const shape = validateOperationShape(operation);
+    if (shape !== null) {
+      return { error: shape.error, reason: `op[${index}]: ${shape.reason}` };
+    }
+    const pointerError = validateOperationPointers(operation);
+    if (pointerError !== null) {
+      return {
+        error: pointerError.error,
+        reason: `op[${index}]: ${pointerError.reason}`,
+        pointer: pointerError.pointer,
+      };
+    }
+  }
+  return null;
+}
+
+function validatePatchPointer(pointer: Pointer, field: "path" | "from"): PatchPointerError | null {
+  if (pointer[0] === "#") {
+    return {
+      error: "invalid_pointer",
+      reason: `JSON Patch ${field} must use JSON Pointer string representation, not a URI fragment`,
+      pointer,
+    };
+  }
+  try {
+    parsePointer(pointer);
+    return null;
+  } catch (error) {
+    return {
+      error: "invalid_pointer",
+      reason: error instanceof Error ? error.message : `Invalid JSON Patch ${field}`,
+      pointer,
+    };
+  }
+}
+
 function validateSerializableOpValue(op: JSONPatchOperation): { error: ErrorCode; reason: string } | null {
   if (op.op !== "add" && op.op !== "replace" && op.op !== "test") return null;
   const reason = jsonSerializableError(op.value);
@@ -51,6 +105,8 @@ function validateSerializableOpValue(op: JSONPatchOperation): { error: ErrorCode
 export function applyOpRaw(state: unknown, op: JSONPatchOperation): RawResult {
   const shape = validateOperationShape(op);
   if (shape) return shape;
+  const pointerError = validateOperationPointers(op);
+  if (pointerError) return pointerError;
   const serializable = validateSerializableOpValue(op);
   if (serializable) return serializable;
 

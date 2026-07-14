@@ -30,9 +30,36 @@ All notable changes to this project are documented here.
 - Changed the causal patch inbox to commit each ready direct or materialized
   envelope once through `doc.commit`, including a rebased `selectionAfter`, and
   to advance its applied ledger and causal frontier only after success.
+- Changed document publication to expose transitively immutable snapshots and
+  immutable canonical patch records. Mutable ingress values are owned before
+  commit; pre-frozen `trustedInitial` snapshots retain the identity-preserving
+  zero-copy path, while only statically known-JSON schemas skip the JSON scan.
+
+### Fixed
+
+- Rejected non-JSON Zod outputs instead of admitting a poisoned document.
+  Construction throws a `TypeError`; load/reset failures follow strict/onError
+  execution policy.
+- Restored parsed transform outputs correctly from `reset()` and treated an
+  explicit `reset(null)` as a real JSON root value.
+- Rejected undefined RFC 6901 tilde escapes, encoded URI fragment pointers as
+  UTF-8, and limited RFC 6902 `path`/`from` to JSON Pointer string form rather
+  than URI fragment form.
+- Prevented retained payload/operation references and early subscribers from
+  mutating published state, `lastPatch`, or undo/redo records.
+- Isolated schema validation candidates so mutating custom checks cannot change
+  live state, failed previews, or capability probes.
+- Kept publication-local patch records and revision order across reentrant
+  subscribers, and stopped test-only/no-op patches from creating stale history.
 
 ### Performance
 
+- Added separate mutable and pre-frozen `trustedInitial` benchmark cases and
+  separate commit-only versus commit-plus-snapshot measurements. Immutable
+  snapshots are materialized on first public read when needed; an already
+  immutable base carries provenance through COW changes by sealing path-local
+  containers or identity-diffed structural changes. Repeated reads reuse the
+  ownership cache.
 - Indexed explicit `baseRevision` materialization directly into the dense
   journal suffix, replaced full-ledger dependency lookup with id-to-revision
   lookup, and removed duplicate/unneeded patch copies.

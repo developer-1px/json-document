@@ -57,7 +57,6 @@ interface CreateClipboardOptions<S extends z.ZodType> {
   ) => PreviewedDocumentPatchResult;
   getSelectionSource?: () => SelectionSource | null;
   getSelectionTarget?: () => Pointer | null;
-  getAppliedPatch?: () => ReadonlyArray<JSONPatchOperation>;
   getStateJsonTrusted?: () => boolean;
   onChange?: () => void;
 }
@@ -75,7 +74,6 @@ export function createClipboard<S extends z.ZodType>(
     applyPreviewedPatch,
     getSelectionSource,
     getSelectionTarget,
-    getAppliedPatch,
     getStateJsonTrusted,
     onChange,
   } = args;
@@ -89,7 +87,6 @@ export function createClipboard<S extends z.ZodType>(
     previewTrustedValuesPatch,
     applyPreviewedPatch,
     getSelectionTarget,
-    getAppliedPatch,
   });
 
   const setBuffer = (next: ClipboardBuffer | null): void => {
@@ -170,14 +167,14 @@ export function createClipboard<S extends z.ZodType>(
         if (!result.ok) return result;
         const publication: PreviewedDocumentPatchResult = applyPreviewedPatch
           ? applyPreviewedPatch(result.prepared, result.patch)
-          : { status: "applied", result: ops.patch(result.patch) };
+          : { status: "applied", result: ops.patch(result.patch), applied: result.patch };
         if (publication.status === "stale") continue;
         const patchResult = publication.result;
         const applyResult: ClipboardCutResult<z.output<S>> = patchResult.ok
           ? {
               ok: true,
               value: getState(),
-              applied: getAppliedPatch?.() ?? result.patch,
+              applied: publication.applied,
               target: null,
               payload: result.payload,
               source: result.source,

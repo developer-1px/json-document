@@ -4,6 +4,7 @@ import type { SelectionSource } from "../../selection/read.js";
 import type { DuplicateError as DomainDuplicateError, DuplicateOpts } from "../../editing/duplicate.js";
 import type { CapabilityResult } from "../capabilities/result.js";
 import type { SelectionState } from "../selection/create.js";
+import type { DetailedDocumentPatchResult } from "../state/patch.js";
 import type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,
@@ -43,8 +44,7 @@ export type JSONDocumentDuplicateResult<T> =
   | Extract<JSONResult, { ok: false }>;
 
 interface DocumentEditMutation<T> {
-  patch(operations: ReadonlyArray<JSONPatchOperation>): JSONResult;
-  lastApplied(): ReadonlyArray<JSONPatchOperation>;
+  applyDocumentPatchDetailed(operations: ReadonlyArray<JSONPatchOperation>): DetailedDocumentPatchResult;
   duplicate(source: Pointer, options?: JSONDocumentDuplicateOptions): JSONDocumentDuplicateResult<T>;
 }
 
@@ -83,9 +83,9 @@ export function createDocumentEditActions<T>(
   // 계획 실행 + 통일 성공 shape 구성 (#219 EditOk).
   const applyPlan = (plan: ReturnType<typeof planDocumentReplace>): JSONDocumentEditResult<T> => {
     if (!plan.ok) return plan;
-    const r = mutation.patch(plan.operations);
-    if (!r.ok) return r;
-    return { ok: true, value: getState(), applied: mutation.lastApplied(), target: plan.target };
+    const execution = mutation.applyDocumentPatchDetailed(plan.operations);
+    if (!execution.result.ok) return execution.result;
+    return { ok: true, value: getState(), applied: execution.applied, target: plan.target };
   };
 
   function insert(target: JSONDocumentInsertTarget, value: unknown, options?: JSONDocumentInsertOptions): JSONDocumentEditResult<T>;

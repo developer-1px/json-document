@@ -1,5 +1,6 @@
 export {
   applyOpRaw,
+  validatePatchOperations,
   validateOperationShape,
 } from "./apply.js";
 export type { RawResult } from "./apply.js";

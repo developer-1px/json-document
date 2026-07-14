@@ -7,6 +7,7 @@ import {
   applyPatch,
   applySingleTrustedValuePatchToTrustedState,
   applyPatchToTrustedState as applyPatchToTrustedStateCore,
+  validatePatchOperations,
 } from "../../../foundation/patch/index.js";
 import { applyAcceptedPatch } from "../../../foundation/patch/index.js";
 import type {
@@ -24,6 +25,7 @@ import type {
   JSONStateOps,
 } from "./ops.js";
 import type { JSONChangeMetadata } from "../history/metadata.js";
+import { createJSONStateOwnership } from "./ownership.js";
 
 type JSONChangeListener = (
   applied: ReadonlyArray<JSONPatchOperation>,
@@ -36,15 +38,21 @@ interface CreateJSONStateOptions extends ErrorPolicy {
 }
 
 export interface TrustedJSONStateOps<T> extends JSONStateOps<T> {
-  readonly lastApplied: ReadonlyArray<JSONPatchOperation>;
+  readonly snapshot: T;
   readonly revision: number;
   readonly stateJsonTrusted: boolean;
+  sequenceForApplied(applied: ReadonlyArray<JSONPatchOperation>): number | undefined;
+  executePatch(
+    operations: ReadonlyArray<JSONPatchOperation>,
+    metadata?: JSONChangeMetadata,
+  ): JSONStatePatchExecution<T>;
   previewPatch(operations: ReadonlyArray<JSONPatchOperation>): PreparedJSONStateChange<T>;
+  previewOwnedPatch(operations: ReadonlyArray<JSONPatchOperation>): PreparedJSONStateChange<T>;
   previewTrustedValuesPatch(operations: ReadonlyArray<JSONPatchOperation>): PreparedJSONStateChange<T>;
   publishPreparedPatch(
     change: PreparedJSONStateChange<T>,
     metadata?: JSONChangeMetadata,
-  ): PreparedJSONStatePublication | { status: "stale" };
+  ): PreparedJSONStatePublication<T> | { status: "stale" };
   applyTrustedPatch(operations: ReadonlyArray<JSONPatchOperation>, metadata?: JSONChangeMetadata): JSONResult;
   trustedApply(state: T, applied: ReadonlyArray<JSONPatchOperation>, metadata?: JSONChangeMetadata): JSONResult;
 }
@@ -55,12 +63,22 @@ export interface PreparedJSONStateChange<T> {
   readonly state: T;
   readonly result: JSONResult;
   readonly applied: ReadonlyArray<JSONPatchOperation>;
+  readonly valuesOwned: boolean;
 }
 
-export interface PreparedJSONStatePublication {
+export interface PreparedJSONStatePublication<T> {
   readonly status: "published";
+  readonly sequence: number;
   readonly revision: number;
   readonly changed: boolean;
+  readonly before: T;
+  readonly state: T;
+  readonly applied: ReadonlyArray<JSONPatchOperation>;
+}
+
+export interface JSONStatePatchExecution<T> {
+  readonly result: JSONResult;
+  readonly publication: PreparedJSONStatePublication<T> | null;
 }
 
 const ROOT_REPLACE = (value: unknown): JSONPatchOperation => ({ op: "replace", path: "", value });
@@ -72,6 +90,7 @@ export function createJSONState<S extends z.ZodType>(
   initial: z.input<S> | z.output<S>,
   options: CreateJSONStateOptions = {},
 ): TrustedJSONStateOps<z.output<S>> {
+  const ownership = createJSONStateOwnership();
   const schemaOutputJsonTrusted = schemaOutputIsKnownJson(schema);
   let state: z.output<S>;
   if (options.trustedInitial === true) {
@@ -81,38 +100,66 @@ export function createJSONState<S extends z.ZodType>(
     if (!parsed.success) throw parsed.error;
     state = parsed.data as z.output<S>;
   }
-  let stateJsonTrusted = schemaOutputJsonTrusted || jsonSerializableError(state) === null;
+  const trustedFrozenRoot = options.trustedInitial === true
+    && state !== null
+    && typeof state === "object"
+    && Object.isFrozen(state);
+  const initialJsonError = schemaOutputJsonTrusted
+    && (options.trustedInitial !== true || trustedFrozenRoot)
+    ? null
+    : jsonSerializableError(state);
+  if (initialJsonError !== null) {
+    throw new TypeError(`Initial document value is not JSON-serializable: ${initialJsonError}`);
+  }
+  if (options.trustedInitial === true) {
+    state = ownership.ownTrustedInitial(state);
+  } else {
+    state = ownership.ownParsedState(state, !schemaOutputJsonTrusted);
+  }
+  let stateJsonTrusted = true;
   const initialState = state;
   const policy: ErrorPolicy = options;
   const listeners = new Set<JSONChangeListener>();
-  let lastApplied: ReadonlyArray<JSONPatchOperation> = [];
+  const sequenceByApplied = new WeakMap<object, number>();
   let revision = 0;
+  let publicationSequence = 0;
 
   const notify = (
     applied: ReadonlyArray<JSONPatchOperation>,
     metadata?: JSONChangeMetadata,
+    sequence = ++publicationSequence,
   ): void => {
     if (applied.length === 0) return;
-    lastApplied = applied;
-    options.onChange?.();
+    sequenceByApplied.set(applied as object, sequence);
     for (const listener of listeners) listener(applied, metadata);
+    options.onChange?.();
   };
 
+  const executePatch = (
+    label: JSONPatchOperation | "patch",
+    operations: ReadonlyArray<JSONPatchOperation>,
+    metadata?: JSONChangeMetadata,
+  ): JSONStatePatchExecution<z.output<S>> => {
+    for (let attempt = 0; attempt < MAX_PREPARE_RETRIES; attempt += 1) {
+      const prepared = prepareOwnedPatch(operations);
+      if (prepared.baseRevision !== revision || prepared.before !== state) continue;
+      if (!prepared.result.ok) {
+        return {
+          result: handleResult(policy, label, prepared.result),
+          publication: null,
+        };
+      }
+      const publication = publishPreparedPatch(prepared, metadata);
+      if (publication.status === "stale") continue;
+      return { result: prepared.result, publication };
+    }
+    throw new Error(STALE_PREPARED_CHANGE_MESSAGE);
+  };
   const dispatch = (
     label: JSONPatchOperation | "patch",
     operations: ReadonlyArray<JSONPatchOperation>,
     metadata?: JSONChangeMetadata,
-  ): JSONResult => {
-    for (let attempt = 0; attempt < MAX_PREPARE_RETRIES; attempt += 1) {
-      const prepared = preparePatch(operations);
-      if (prepared.baseRevision !== revision || prepared.before !== state) continue;
-      if (!prepared.result.ok) return handleResult(policy, label, prepared.result);
-      const publication = publishPreparedPatch(prepared, metadata);
-      if (publication.status === "stale") continue;
-      return prepared.result;
-    }
-    throw new Error(STALE_PREPARED_CHANGE_MESSAGE);
-  };
+  ): JSONResult => executePatch(label, operations, metadata).result;
   const dispatchTrusted = (
     operations: ReadonlyArray<JSONPatchOperation>,
     metadata?: JSONChangeMetadata,
@@ -121,6 +168,8 @@ export function createJSONState<S extends z.ZodType>(
     const applied = applyAcceptedPatch(before, operations);
     if (!applied.result.ok) return handleResult(policy, "patch", applied.result);
     if (applied.state === before) return applied.result;
+    ownership.freeze(applied.applied);
+    ownership.freezePatchResult(before, applied.state, applied.applied);
     stateJsonTrusted = stateJsonTrusted
       ? true
       : schemaOutputJsonTrusted || jsonSerializableError(applied.state) === null;
@@ -135,6 +184,7 @@ export function createJSONState<S extends z.ZodType>(
     metadata?: JSONChangeMetadata,
   ): JSONResult => {
     if (next === state) return { ok: true };
+    ownership.freeze(applied);
     stateJsonTrusted = true;
     state = next;
     revision += 1;
@@ -147,6 +197,7 @@ export function createJSONState<S extends z.ZodType>(
     sourceJsonTrusted: boolean,
     operations: ReadonlyArray<JSONPatchOperation>,
     valuesTrusted: boolean,
+    valuesOwned: boolean,
   ): PreparedJSONStateChange<z.output<S>> => {
     const applied = !sourceJsonTrusted
       ? applyPatch(schema, from, operations)
@@ -161,6 +212,7 @@ export function createJSONState<S extends z.ZodType>(
       state: applied.state as z.output<S>,
       result: applied.result,
       applied: applied.applied,
+      valuesOwned,
     };
   };
   const preparePatch = (
@@ -169,38 +221,81 @@ export function createJSONState<S extends z.ZodType>(
     const from = state;
     const baseRevision = revision;
     const sourceJsonTrusted = stateJsonTrusted;
-    return preparePatchFrom(from, baseRevision, sourceJsonTrusted, operations, false);
+    return preparePatchFrom(from, baseRevision, sourceJsonTrusted, operations, false, false);
+  };
+  const prepareOwnedPatch = (
+    operations: ReadonlyArray<JSONPatchOperation>,
+  ): PreparedJSONStateChange<z.output<S>> => {
+    if (!Array.isArray(operations) || validatePatchOperations(operations) !== null) {
+      return preparePatch(operations);
+    }
+    const owned = ownership.ownPatch(operations);
+    const from = state;
+    const baseRevision = revision;
+    const sourceJsonTrusted = stateJsonTrusted;
+    return preparePatchFrom(
+      from,
+      baseRevision,
+      sourceJsonTrusted,
+      owned.operations,
+      owned.valuesTrusted,
+      owned.valuesTrusted,
+    );
   };
   const prepareTrustedValuesPatch = (
     operations: ReadonlyArray<JSONPatchOperation>,
   ): PreparedJSONStateChange<z.output<S>> => {
+    if (!Array.isArray(operations) || validatePatchOperations(operations) !== null) {
+      return preparePatch(operations);
+    }
+    const owned = ownership.ownPatch(operations, true);
     const from = state;
     const baseRevision = revision;
     const sourceJsonTrusted = stateJsonTrusted;
-    return preparePatchFrom(from, baseRevision, sourceJsonTrusted, operations, true);
+    return preparePatchFrom(from, baseRevision, sourceJsonTrusted, owned.operations, true, true);
   };
   const publishPreparedPatch = (
     prepared: PreparedJSONStateChange<z.output<S>>,
     metadata?: JSONChangeMetadata,
-  ): PreparedJSONStatePublication | { status: "stale" } => {
+  ): PreparedJSONStatePublication<z.output<S>> | { status: "stale" } => {
     if (prepared.baseRevision !== revision || prepared.before !== state) return { status: "stale" };
+    const sequence = ++publicationSequence;
     if (!prepared.result.ok || prepared.state === prepared.before) {
-      const publication: PreparedJSONStatePublication = {
+      const publication: PreparedJSONStatePublication<z.output<S>> = {
         status: "published",
+        sequence,
         revision,
         changed: false,
+        before: prepared.before,
+        state: prepared.before,
+        applied: [],
       };
       return publication;
     }
+    let next = prepared.state;
+    let applied = prepared.applied;
+    if (!prepared.valuesOwned) {
+      const owned = ownership.ownPatch(applied, true);
+      const replayed = applyAcceptedPatch(prepared.before, owned.operations);
+      if (!replayed.result.ok) throw new Error("prepared patch could not be replayed");
+      next = replayed.state as z.output<S>;
+      applied = replayed.applied;
+    }
+    ownership.freeze(applied);
+    ownership.freezePatchResult(prepared.before, next, applied);
     stateJsonTrusted = true;
-    state = prepared.state;
+    state = next;
     revision += 1;
-    const publication: PreparedJSONStatePublication = {
+    const publication: PreparedJSONStatePublication<z.output<S>> = {
       status: "published",
+      sequence,
       revision,
       changed: true,
+      before: prepared.before,
+      state: next,
+      applied,
     };
-    notify(prepared.applied, metadata);
+    notify(applied, metadata, sequence);
     return publication;
   };
 
@@ -215,10 +310,27 @@ export function createJSONState<S extends z.ZodType>(
         reason: JSON.stringify(parsed.error.issues),
       });
     }
-    state = parsed.data as z.output<S>;
-    stateJsonTrusted = schemaOutputJsonTrusted || jsonSerializableError(state) === null;
+    const next = parsed.data as z.output<S>;
+    const nextJsonError = schemaOutputJsonTrusted ? null : jsonSerializableError(next);
+    if (nextJsonError !== null) {
+      return handleResult(policy, label, {
+        ok: false,
+        code: "not_serializable",
+        reason: nextJsonError,
+      });
+    }
+    state = ownership.ownParsedState(next, !schemaOutputJsonTrusted);
+    stateJsonTrusted = true;
     revision += 1;
-    notify([ROOT_REPLACE(state)]);
+    notify(ownership.ownPatch([ROOT_REPLACE(state)]).operations);
+    return { ok: true };
+  };
+
+  const restoreInitial = (): JSONResult => {
+    state = initialState;
+    stateJsonTrusted = true;
+    revision += 1;
+    notify(ownership.ownPatch([ROOT_REPLACE(state)]).operations);
     return { ok: true };
   };
 
@@ -244,21 +356,24 @@ export function createJSONState<S extends z.ZodType>(
       return handleResult(policy, op, result.result);
     },
     patch: (operations, metadata) => dispatch("patch", operations, metadata),
+    executePatch: (operations, metadata) => executePatch("patch", operations, metadata),
     previewPatch: preparePatch,
+    previewOwnedPatch: prepareOwnedPatch,
     previewTrustedValuesPatch: prepareTrustedValuesPatch,
     publishPreparedPatch,
     applyTrustedPatch: (operations, metadata) => dispatchTrusted(operations, metadata),
     trustedApply: (next, applied, metadata) => applyTrustedState(next, applied, metadata),
     load: (value) => replaceRoot("load", value),
-    reset: (value) => replaceRoot("reset", value ?? initialState),
+    reset: (value) => value === undefined ? restoreInitial() : replaceRoot("reset", value),
     subscribe(listener) {
       listeners.add(listener);
       return () => { listeners.delete(listener); };
     },
     get state() { return state; },
-    get lastApplied() { return lastApplied; },
+    get snapshot() { return ownership.freeze(state); },
     get revision() { return revision; },
     get stateJsonTrusted() { return stateJsonTrusted; },
+    sequenceForApplied: (applied) => sequenceByApplied.get(applied as object),
   };
   return ops;
 }

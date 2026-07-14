@@ -631,38 +631,25 @@ describe("createJSONDocument public interface", () => {
     expect(doc.clipboard.hasData).toBe(false);
   });
 
-  test("optional undefined schema output keeps the document JSON guard", () => {
+  test("rejects optional undefined schema output at the document boundary", () => {
     const OptionalSchema = z.object({
       item: z.object({
         maybe: z.string().optional(),
       }),
     });
-    const doc = createJSONDocument(OptionalSchema, {
+    expect(() => createJSONDocument(OptionalSchema, {
       item: { maybe: undefined },
-    });
-
-    expect(doc.canPatch({ op: "replace", path: "/item/maybe", value: "next" })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    })).toThrow("/item/maybe: undefined is not JSON");
   });
 
-  test("record and catchall unknown schema outputs keep the document JSON guard", () => {
+  test("rejects non-JSON record and catchall outputs at creation", () => {
     const RecordSchema = z.record(z.string(), z.unknown());
-    const recordDoc = createJSONDocument(RecordSchema, { item: () => "bad" });
-
-    expect(recordDoc.canPatch({ op: "replace", path: "/item", value: "next" })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    expect(() => createJSONDocument(RecordSchema, { item: () => "bad" }))
+      .toThrow("/item: function is not JSON");
 
     const CatchallSchema = z.object({}).catchall(z.unknown());
-    const catchallDoc = createJSONDocument(CatchallSchema, { item: () => "bad" });
-
-    expect(catchallDoc.canPatch({ op: "replace", path: "/item", value: "next" })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    expect(() => createJSONDocument(CatchallSchema, { item: () => "bad" }))
+      .toThrow("/item: function is not JSON");
   });
 
   test("known-JSON record and catchall schema outputs drop prototype keys before trust", () => {
@@ -713,16 +700,12 @@ describe("createJSONDocument public interface", () => {
     expect(readonlyDoc.patch({ op: "replace", path: "/item/id", value: "b" })).toEqual({ ok: true });
   });
 
-  test("default schema output keeps the document JSON guard", () => {
+  test("rejects a non-JSON default output at creation", () => {
     const DefaultSchema = z.object({
       value: z.number().default(() => Number.NaN),
     });
-    const doc = createJSONDocument(DefaultSchema, {});
-
-    expect(doc.canPatch({ op: "replace", path: "/value", value: 1 })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    expect(() => createJSONDocument(DefaultSchema, {}))
+      .toThrow("/value: non-finite number");
   });
 
   test("known-JSON lazy recursive schema outputs can be trusted", () => {
@@ -742,7 +725,7 @@ describe("createJSONDocument public interface", () => {
     expect(doc.patch({ op: "replace", path: "/children/0/id", value: "next" })).toEqual({ ok: true });
   });
 
-  test("lazy recursive schema with unknown output keeps the document JSON guard", () => {
+  test("rejects non-JSON output from a lazy recursive schema at creation", () => {
     interface BadNode {
       value: unknown;
       children: BadNode[];
@@ -751,15 +734,10 @@ describe("createJSONDocument public interface", () => {
       value: z.any(),
       children: z.array(BadTree),
     }));
-    const doc = createJSONDocument(BadTree, {
+    expect(() => createJSONDocument(BadTree, {
       value: () => "bad",
       children: [],
-    });
-
-    expect(doc.canPatch({ op: "replace", path: "/value", value: 1 })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    })).toThrow("/value: function is not JSON");
   });
 
   test("mutual lazy recursion does not cache an unsafe branch as JSON", () => {
@@ -778,21 +756,16 @@ describe("createJSONDocument public interface", () => {
       a: A.nullable(),
     }));
 
-    createJSONDocument(A, {
+    expect(() => createJSONDocument(A, {
       b: { a: null },
       bad: () => "bad",
-    });
-    const doc = createJSONDocument(B, {
+    })).toThrow("/bad: function is not JSON");
+    expect(() => createJSONDocument(B, {
       a: {
         b: { a: null },
         bad: () => "bad",
       },
-    });
-
-    expect(doc.canPatch({ op: "replace", path: "/a/b/a", value: null })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    })).toThrow("/a/bad: function is not JSON");
   });
 
   test("known-JSON nonoptional, prefault, and pipe schema outputs can be trusted", () => {
@@ -816,24 +789,18 @@ describe("createJSONDocument public interface", () => {
     expect(pipeDoc.patch({ op: "replace", path: "/value", value: "b" })).toEqual({ ok: true });
   });
 
-  test("catch and transform outputs keep the document JSON guard", () => {
+  test("rejects non-JSON catch and transform outputs at creation", () => {
     const CatchSchema = z.object({
       value: z.number().catch(() => Number.NaN),
     });
-    const catchDoc = createJSONDocument(CatchSchema, { value: "bad" } as never);
-    expect(catchDoc.canPatch({ op: "replace", path: "/value", value: 1 })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    expect(() => createJSONDocument(CatchSchema, { value: "bad" } as never))
+      .toThrow("/value: non-finite number");
 
     const TransformSchema = z.object({
       value: z.string().transform(() => () => "bad"),
     });
-    const transformDoc = createJSONDocument(TransformSchema, { value: "bad" });
-    expect(transformDoc.canPatch({ op: "replace", path: "/value", value: 1 })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    expect(() => createJSONDocument(TransformSchema, { value: "bad" }))
+      .toThrow("/value: function is not JSON");
   });
 
   test("known-JSON intersection schema outputs can be trusted", () => {
@@ -849,20 +816,15 @@ describe("createJSONDocument public interface", () => {
     expect(doc.patch({ op: "replace", path: "/value", value: 2 })).toEqual({ ok: true });
   });
 
-  test("intersection schema with unknown output keeps the document JSON guard", () => {
+  test("rejects non-JSON intersection output at creation", () => {
     const IntersectionSchema = z.intersection(
       z.object({ id: z.string() }),
       z.object({ value: z.any() }),
     );
-    const doc = createJSONDocument(IntersectionSchema, {
+    expect(() => createJSONDocument(IntersectionSchema, {
       id: "a",
       value: () => "bad",
-    });
-
-    expect(doc.canPatch({ op: "replace", path: "/id", value: "b" })).toMatchObject({
-      ok: false,
-      code: "not_serializable",
-    });
+    })).toThrow("/value: function is not JSON");
   });
 
   test("clipboard write rejects invalid sources before payload cloning", () => {

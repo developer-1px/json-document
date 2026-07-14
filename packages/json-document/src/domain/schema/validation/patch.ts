@@ -1,7 +1,7 @@
 import type * as z from "zod";
 import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/index.js";
-import { validateOperationShape } from "../../../foundation/patch/index.js";
+import { validateOperationShape, validatePatchOperations } from "../../../foundation/patch/index.js";
 import { applyPatchToTrustedState as applyPatchToTrustedStateCore } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import {
@@ -139,8 +139,11 @@ export function applyPatchToTrustedState<S extends z.ZodTypeAny>(
   state: z.output<S>,
   ops: ReadonlyArray<JSONPatchOperation>,
 ): ApplyResult<S> {
-  return applyPatchWithLocalSchemaValidation(schema, state, ops)
-    ?? applyPatchToTrustedStateCore(schema, state, ops);
+  if (Array.isArray(ops) && validatePatchOperations(ops) === null) {
+    const local = applyPatchWithLocalSchemaValidation(schema, state, ops);
+    if (local !== null) return local;
+  }
+  return applyPatchToTrustedStateCore(schema, state, ops);
 }
 
 export function applySameArrayPatchWithLocalSchemaValidation<S extends z.ZodType>(

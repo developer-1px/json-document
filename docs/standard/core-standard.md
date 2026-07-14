@@ -54,6 +54,10 @@ React 적합성은 별도로 주장할 수 있으며, `@interactive-os/json-docu
 
 document state는 RFC 8259와 ECMA-404의 JSON data여야 한다.
 
+구현체가 publish한 document state snapshot은 transitively immutable해야 한다.
+Caller가 initial, load, patch payload reference를 나중에 수정해도 state, history,
+subscriber가 관측하는 patch record가 바뀌면 안 된다.
+
 patch operation, clipboard payload, selection snapshot, history metadata는
 명시적인 trusted boundary API를 사용하지 않는 한 JSON-serializable이어야
 한다.
@@ -81,6 +85,11 @@ schema는 document가 받아들일 수 있는 shape를 정의한다.
 
 초기 document 생성은 caller가 explicit trusted-initial boundary를 사용하지
 않는 한 초기 값을 검증해야 한다.
+
+trusted-initial boundary는 schema parse를 생략한다는 caller assertion이다. JSON state
+요건을 해제하지 않으며, zero-copy reuse를 요구하려면 caller가 transitively immutable
+snapshot을 제공해야 한다. O(1) 생성은 schema output을 정적으로 JSON으로 판별할 수 있는
+경우에만 보장하며, custom/refined schema는 frozen snapshot도 JSON boundary를 검사한다.
 
 mutation API는 성공 결과를 commit하기 전에 결과 document를 schema로
 검증해야 한다.

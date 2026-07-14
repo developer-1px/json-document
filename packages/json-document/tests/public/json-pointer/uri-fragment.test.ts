@@ -52,6 +52,14 @@ describe("RFC 6901 §6 — URI fragment 형 Pointer", () => {
     }
   });
 
+  test("URI fragment는 Unicode segment를 UTF-8 octet으로 인코딩한다", () => {
+    const segments = ["한글", "😀", "slash/tilde~"];
+    const fragment = "#/%ED%95%9C%EA%B8%80/%F0%9F%98%80/slash~1tilde~0";
+
+    expect(buildPointer(segments, { uriFragment: true })).toBe(fragment);
+    expect(parsePointer(fragment)).toEqual(segments);
+  });
+
   test("# 단독 = 빈 fragment = root", () => {
     expect(parsePointer("#")).toEqual([]);
   });
@@ -68,5 +76,13 @@ describe("RFC 6901 §6 — URI fragment 형 Pointer", () => {
     expect(tryParsePointer("#/%E0%A4%A")).toBeNull();
     expect(tryParsePointer("foo")).toBeNull();
     expect(tryParsePointer("#/foo")).toEqual(["foo"]);
+  });
+
+  test("정의되지 않은 tilde escape를 거부한다", () => {
+    for (const pointer of ["/~", "/~2", "/a~2b", "#/~2"]) {
+      expect(() => parsePointer(pointer)).toThrow("Invalid JSON Pointer escape");
+      expect(tryParsePointer(pointer)).toBeNull();
+    }
+    expect(parsePointer("/~01")).toEqual(["~1"]);
   });
 });

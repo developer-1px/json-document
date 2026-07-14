@@ -39,6 +39,7 @@ UI rendering, DOM event mapping, visual selection drawing, system clipboard acce
 - Query output은 Pointer다.
 - JSONPath는 patch target이 아니다.
 - State, patch operation, selection snapshot, clipboard payload, history metadata는 JSON-serializable이어야 한다.
+- Published State와 applied patch record는 immutable snapshot이어야 하며 retained caller reference나 subscriber가 이를 바꿀 수 없어야 한다.
 
 ## 2. 공개 Entry Point
 
@@ -295,6 +296,7 @@ doc.query("$.items[*].id");
 ```
 
 JSONPath는 검색 언어다. `find`는 편집 feature verb이고, `query`는 같은 JSONPath engine을 노출하는 lower-level read primitive다. Mutation input은 JSON Pointer `path`와 `from`을 가진 JSON Patch operation으로 유지한다.
+RFC 6902 `path`와 `from`은 URI fragment가 아니라 JSON Pointer의 JSON string 표현인 `""` 또는 `/...`를 사용한다. URL이나 `$ref`에서 받은 `#`/`#/...`는 adapter가 parse한 뒤 canonical string 표현으로 변환한다.
 
 ```ts
 const found = doc.find("$.items[?(@.done==false)]");
@@ -384,6 +386,21 @@ History metadata는 앱이나 adapter가 document change에 붙이는 주석이�
 ## 9. 성능
 
 큰 문서의 hot path는 document facade인 `doc.patch`, `doc.commit`, `doc.canPatch`에 둔다. 공개 `applyPatch`는 외부 JSON 경계라서 입력 state 전체의 JSON 안전성을 확인한다. `applyPatchToTrustedState`는 호출자가 이미 state JSON 경계를 소유할 때 쓰는 pure core opt-in이다. Operation value와 schema validation은 여전히 실행되며 구조만 가진 schema는 document facade와 같은 trusted fast path를 사용할 수 있다.
+
+Document facade는 accepted payload를 ingress에서 소유한다. 아직 immutable provenance가
+없는 COW state는 `value`, read result, EditOk처럼 외부로 처음 노출될 때 container graph를
+한 번 freeze한다. 이미 publish되었거나 신뢰된 immutable base의 단일 mutation 및
+replace-only batch는 변경 경로의 COW container만 seal한다. 구조가 이동하는 batch는
+immutable base와의 identity diff로 상속 subtree를 건너뛰고 새 container만 freeze한다.
+같은 snapshot의 반복 읽기는 ownership cache를 재사용한다. 따라서 input/commit hot path와 render/read
+snapshot materialization 비용을 각각 측정할 수 있다. `trustedInitial: true`의 mutable
+value는 clone fallback을 사용하며, pre-frozen root는 caller의 transitive immutability
+assertion으로 같은 identity를 재사용할 수 있다. Schema output이 정적으로 JSON임을
+판별할 수 있을 때만 JSON scan도 생략되어 O(1) 생성이 된다. Custom/refined schema는
+frozen root도 JSON boundary를 한 번 검사한다. 이 경로에서 caller는 schema-valid JSON
+output도 함께 보증한다. Pure
+`applyPatch*` helper는 state owner가 아니므로 이 runtime ownership 정책의
+대상이 아니다.
 
 빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에서만 적용된다. 대상 schema는 refinement, transform, check가 없는 object, array, record, scalar validator다. 지원 edit는 non-root `replace` batch(독립 경로와 순차 ancestor/descendant overlap 포함), array `add`/`remove`/`copy`/`move`, same-array `add`/`remove` batch다. Leading `test` assertion 뒤에 이 edit들이 오는 guarded batch도 assertion을 먼저 확인한 뒤 같은 mutation fast path를 사용한다. Overlapping `replace`의 history inverse도 operation별 이전 값과 역순을 유지하면서 같은 private copy-on-write 순회 구현을 사용한다. `refine`, `superRefine`, transform, check가 있으면 의도적으로 전체 루트 schema 검증으로 돌아간다.
 
