@@ -54,6 +54,19 @@ All notable changes to this project are documented here.
 
 ### Performance
 
+- Added serial CPU-time p95 readiness gates, with wall-time p95 diagnostics, for
+  a single-node replacement and 100-node replacement batch in a Canvas-shaped
+  5,000-node document plus an Editable-shaped 5,000-block refined text commit
+  with extended selection publication.
+- Added recursive `lazy`/`union` structural inspection and local non-root
+  replace validation for Zod's declarative string/number constraints and
+  built-in string trim. Custom refinements and container checks retain full-root
+  validation.
+- Kept the isolated whole-candidate clone for full-root schema validation,
+  including custom checks and error callbacks. Checked structural schemas avoid
+  that root clone only when a supported single or independent replacement can be
+  validated at its changed value; object payloads are cloned before local Zod
+  validation so schema/global error callbacks cannot mutate caller-owned input.
 - Added separate mutable and pre-frozen `trustedInitial` benchmark cases and
   separate commit-only versus commit-plus-snapshot measurements. Immutable
   snapshots are materialized on first public read when needed; an already

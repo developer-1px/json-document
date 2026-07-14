@@ -1,4 +1,5 @@
 import type * as z from "zod";
+import { cloneTrustedPlainJson } from "../../../foundation/json/index.js";
 import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import { applyAcceptedPatch, applyTrustedPatch } from "../../../foundation/patch/index.js";
 import { validateOperationShape, validatePatchOperations } from "../../../foundation/patch/index.js";
@@ -17,6 +18,7 @@ import {
 import {
   cachedSchemaAtPointer,
   isPlainStructuralSchema,
+  supportsLocalReplaceSchemaValidation,
 } from "../model/schema.js";
 import { arrayElementSchemaAtPath } from "./schema.js";
 import {
@@ -68,7 +70,8 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
   ops: ReadonlyArray<JSONPatchOperation>,
   options: LocalSchemaValidationOptions = {},
 ): LocalSchemaValidationResult<S> {
-  if (!isPlainStructuralSchema(schema)) return null;
+  const supportsAllLocalValidation = isPlainStructuralSchema(schema);
+  if (!supportsAllLocalValidation && !supportsLocalReplaceSchemaValidation(schema)) return null;
   const valuesTrusted = options.valuesTrusted === true;
 
   const leadingTests = applyLeadingTestsWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
@@ -76,6 +79,12 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
 
   const singleReplace = applySingleReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (singleReplace) return singleReplace;
+  if (!supportsAllLocalValidation) {
+    return planIndependentReplacePatch(ops)
+      ? applyReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted)
+      : null;
+  }
+
   const sameArrayFieldReplace = applySameArrayFieldReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (sameArrayFieldReplace) return sameArrayFieldReplace;
   const sameArrayElementReplace = applyKnownJsonSameArrayElementReplacePatchWithLocalSchemaValidation(schema, state, ops);
@@ -84,13 +93,14 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
   if (sameArrayNestedReplace) return sameArrayNestedReplace;
   const rootObjectReplace = applyRootObjectReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (rootObjectReplace) return rootObjectReplace;
+  const knownJsonReplace = applyKnownJsonReplacePatchWithLocalSchemaValidation(schema, state, ops);
+  if (knownJsonReplace?.result.ok) return knownJsonReplace;
+  if (planIndependentReplacePatch(ops)) return applyReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
+
   const rootRecordAdd = applyRootRecordAddPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (rootRecordAdd) return rootRecordAdd;
   const rootRecordRemove = applyRootRecordRemovePatchWithLocalSchemaValidation(schema, state, ops);
   if (rootRecordRemove) return rootRecordRemove;
-  const knownJsonReplace = applyKnownJsonReplacePatchWithLocalSchemaValidation(schema, state, ops);
-  if (knownJsonReplace?.result.ok) return knownJsonReplace;
-  if (planIndependentReplacePatch(ops)) return applyReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
 
   const appendOnlyAdd = applyAppendOnlyAddPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (appendOnlyAdd) return appendOnlyAdd;
@@ -290,7 +300,7 @@ export function evaluateAppliedLocalOpValidationPlan<S extends z.ZodType>(
   plan: AppliedLocalOpValidationPlan,
 ): ApplyResult<S> {
   if (plan.kind === "presence") return okLocalSchemaValidation(state, [appliedOp]);
-  const parsed = plan.schema.safeParse(plan.value);
+  const parsed = plan.schema.safeParse(cloneTrustedPlainJson(plan.value));
   return parsed.success ? okLocalSchemaValidation(state, [appliedOp]) : schemaViolation(state, plan.path, parsed.error.issues);
 }
 

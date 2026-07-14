@@ -255,7 +255,7 @@ import { applyOperation, applyPatch, applyPatchToTrustedState } from "@interacti
 
 큰 document에서는 hot UI path를 document facade에 둔다: `doc.patch`, `doc.commit`, `doc.canPatch`.
 
-빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에서만 적용된다. `refine`, `superRefine`, transform, check가 있는 schema는 전체 루트 schema 검증을 사용한다.
+빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에 적용된다. 선언적 string/number constraint와 built-in `trim()`만 primitive leaf에 있는 schema도 단일 또는 독립 non-root `replace`를 위치별로 검증한다. `refine`, `superRefine`, custom check/error callback, transform이 있는 schema와 지원하지 않는 batch는 격리용 candidate clone 뒤 전체 루트 schema 검증을 사용한다.
 
 ## 트리 편집
 

@@ -371,16 +371,17 @@ export function evaluateArrayIndexReplaceValues<
     if (op.index < 0 || op.index >= array.length) return { ok: false, result: null };
     const replacement = replacementValue(op, array[op.index]);
     if (!replacement.ok) return { ok: false, result: null };
-    const valueFailure = evaluateAppliedReplaceValueValidationPlan(
-      state,
-      [op],
-      valueSchema,
-      (value) => acceptsKnownJsonValueWithValidator(valueValidator, value),
-      valuesTrusted,
-    );
-    if (valueFailure) return { ok: false, result: valueFailure };
     replacements[opIndex] = { index: op.index, value: replacement.value };
   }
+
+  const valueFailure = evaluateAppliedReplaceValueValidationPlan(
+    state,
+    operations,
+    valueSchema,
+    (value) => acceptsKnownJsonValueWithValidator(valueValidator, value),
+    valuesTrusted,
+  );
+  if (valueFailure) return { ok: false, result: valueFailure };
 
   return { ok: true, replacements };
 }

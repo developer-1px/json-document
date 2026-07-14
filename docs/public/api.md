@@ -328,7 +328,11 @@ doc.schema.accepts("/lists/0/cards/-", candidateCard, "insert");
 
 큰 문서의 hot path는 document facade인 `doc.patch`, `doc.commit`, `doc.canPatch`를 기준으로 둡니다. 공개 `applyPatch`는 외부 JSON 경계입니다.
 
-Document 내부 state는 신뢰된 document state입니다. schema가 구조만 가진 Zod schema이고 edit가 non-root `replace` batch(독립 경로와 순차 ancestor/descendant overlap 포함) 또는 지원되는 array edit에 해당하면 document path는 더 좁은 검증 경로를 쓸 수 있습니다. Leading `test` assertion이 붙은 guarded batch도 assertion 확인 뒤 같은 mutation 경로를 사용합니다. Overlapping `replace`의 history inverse도 operation별 이전 값과 undo 순서를 그대로 유지하는 copy-on-write 순회 구현을 사용합니다. Refinement, transform, check가 있는 schema는 전체 루트 schema 검증으로 돌아갑니다.
+Document 내부 state는 신뢰된 document state입니다. 구조만 가진 Zod schema(check가 없는 구조 schema)의 지원 edit는 더 좁은 검증 경로를 씁니다. Zod의 선언적 string/number constraint와 built-in `trim()`만 leaf에 있는 schema도 non-root `replace`와 독립 replace batch를 변경 위치에서 검증합니다. Array 구조 edit는 check가 없는 schema에서만 이 경로를 사용합니다. Leading `test` assertion이 붙은 guarded batch도 assertion 확인 뒤 같은 mutation 경로를 사용합니다. Overlapping `replace`의 history inverse도 operation별 이전 값과 undo 순서를 그대로 유지하는 copy-on-write 순회 구현을 사용합니다.
+
+`refine`, `superRefine`, custom check/overwrite, custom error callback, container check, coercion, pipe transform은 전체 루트 schema 검증으로 돌아갑니다. 전체 검증과 validation 격리용 candidate clone을 생략하지 않습니다. 위치별 검증에서도 object payload는 local Zod 검증 전에 clone하므로 schema-level 또는 global error callback이 caller input을 변경할 수 없습니다.
+
+`npm run perf:adapters`는 다른 process의 descheduling 영향을 제외하면서 json-document 자체 계산과 GC를 포함하는 process CPU-time p95를 hard gate로 사용합니다. 같은 실행의 wall-time p50/p95/max도 진단값으로 출력합니다. 사용자 체감 wall latency의 최종 판정은 Canvas/Editable 전용 또는 idle runner에서 수행해야 합니다.
 
 ## 트리 편집 cookbook
 

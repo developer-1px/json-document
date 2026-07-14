@@ -2,6 +2,9 @@ import type * as z from "zod";
 
 export interface ZodInternalDef {
   type?: string;
+  check?: string;
+  fn?: unknown;
+  error?: unknown;
   coerce?: boolean;
   checks?: unknown[];
   shape?: unknown;

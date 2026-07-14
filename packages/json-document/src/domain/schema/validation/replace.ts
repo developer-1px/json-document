@@ -19,7 +19,7 @@ import {
   readRootRecordForLocalSchemaValidation,
 } from "../object/replace.js";
 import {
-  evaluateLocalSchemaValidationValueValidationPlan,
+  evaluateLocalSchemaValidationValueValidationPlans,
   planLocalSchemaValidationValueValidation,
 } from "../model/value.js";
 
@@ -55,13 +55,14 @@ export function evaluateAppliedReplaceOperations<S extends z.ZodType>(
   operations: ReadonlyArray<JSONPatchOperation>,
   valuesTrusted: boolean,
 ): { ok: true } | { ok: false; result: ApplyResult<S> | null } {
+  const validationPlans: ReturnType<typeof planLocalSchemaValidationValueValidation>[] = [];
   for (const op of operations) {
     const valueValidation = planAppliedReplaceValueValidation(schema, op, valuesTrusted);
     if (valueValidation === null) return { ok: false, result: null };
-    const valueFailure = evaluateLocalSchemaValidationValueValidationPlan(state, valueValidation);
-    if (valueFailure) return { ok: false, result: valueFailure };
+    validationPlans.push(valueValidation);
   }
-  return { ok: true };
+  const valueFailure = evaluateLocalSchemaValidationValueValidationPlans(state, validationPlans);
+  return valueFailure ? { ok: false, result: valueFailure } : { ok: true };
 }
 
 export function planAppliedReplaceValueValidation(schema: z.ZodType, operation: JSONPatchOperation, valuesTrusted: boolean) {

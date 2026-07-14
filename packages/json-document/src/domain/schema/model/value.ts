@@ -1,9 +1,13 @@
 import type * as z from "zod";
 import type { ApplyResult, JSONPatchOperation } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
-import { jsonSerializableError } from "../../../foundation/json/index.js";
+import {
+  cloneJsonSerializable,
+  cloneTrustedPlainJson,
+} from "../../../foundation/json/index.js";
 import { appendArrayIndexPath } from "../../../foundation/patch/index.js";
 import { operationFailure, schemaViolation } from "./result.js";
+import { prefixIssues } from "./schema.js";
 
 export interface PlanLocalSchemaValidationValueValidationInput {
   path: Pointer;
@@ -44,23 +48,38 @@ export function planLocalSchemaValidationValueValidation(
   input: PlanLocalSchemaValidationValueValidationInput,
 ): LocalSchemaValidationValueValidationPlan {
   if (input.knownJsonAccepted) return { kind: "accepted" };
-  if (!input.valuesTrusted) {
-    const jsonError = jsonSerializableError(input.value);
-    if (jsonError !== null) return { kind: "notSerializable", reason: jsonError };
+  let value: unknown;
+  if (input.valuesTrusted) {
+    value = cloneTrustedPlainJson(input.value);
+  } else {
+    const cloned = cloneJsonSerializable(input.value);
+    if (!cloned.ok) return { kind: "notSerializable", reason: cloned.reason };
+    value = cloned.value;
   }
-  return { kind: "parse", path: input.path, schema: input.schema, value: input.value };
+  return { kind: "parse", path: input.path, schema: input.schema, value };
 }
 
 export function evaluateLocalSchemaValidationValueValidationPlan<S extends z.ZodType>(
   state: z.output<S>,
   plan: LocalSchemaValidationValueValidationPlan,
 ): ApplyResult<S> | null {
-  if (plan.kind === "notSerializable") return operationFailure(state, "not_serializable", plan.reason);
-  if (plan.kind === "parse") {
+  return evaluateLocalSchemaValidationValueValidationPlans(state, [plan]);
+}
+
+export function evaluateLocalSchemaValidationValueValidationPlans<S extends z.ZodType>(
+  state: z.output<S>,
+  plans: ReadonlyArray<LocalSchemaValidationValueValidationPlan>,
+): ApplyResult<S> | null {
+  const issues: z.ZodError["issues"] = [];
+  for (const plan of plans) {
+    if (plan.kind === "notSerializable") {
+      return operationFailure(state, "not_serializable", plan.reason);
+    }
+    if (plan.kind !== "parse") continue;
     const result = plan.schema.safeParse(plan.value);
-    if (!result.success) return schemaViolation(state, plan.path, result.error.issues);
+    if (!result.success) issues.push(...prefixIssues(plan.path, result.error.issues));
   }
-  return null;
+  return issues.length === 0 ? null : schemaViolation(state, "", issues);
 }
 
 export function planArrayAddAppliedOperations(input: {
@@ -103,18 +122,17 @@ export function evaluateAppliedValueValidationPlan<
   knownJsonAccepted: (value: unknown) => boolean;
   valuesTrusted: boolean;
 }): ApplyResult<S> | null {
+  const plans: LocalSchemaValidationValueValidationPlan[] = [];
   for (const op of input.operations) {
-    const valueValidation = planLocalSchemaValidationValueValidation({
+    plans.push(planLocalSchemaValidationValueValidation({
       path: op.path,
       schema: input.schema,
       value: op.value,
       knownJsonAccepted: input.knownJsonAccepted(op.value),
       valuesTrusted: input.valuesTrusted,
-    });
-    const valueFailure = evaluateLocalSchemaValidationValueValidationPlan(input.state, valueValidation);
-    if (valueFailure) return valueFailure;
+    }));
   }
-  return null;
+  return evaluateLocalSchemaValidationValueValidationPlans(input.state, plans);
 }
 
 export function evaluateAppliedAddValueValidationPlan<S extends z.ZodType>(
