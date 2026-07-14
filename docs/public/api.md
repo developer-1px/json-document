@@ -60,7 +60,7 @@ function Editor() {
 
 | 작업 | 진입점 | 알아야 하는 규칙 |
 | --- | --- | --- |
-| 현재 값 읽기 | `doc.value` | schema-valid JSON 값입니다. |
+| 현재 값 읽기 | `doc.value` | schema-valid, transitively immutable JSON snapshot입니다. |
 | 한 위치 읽기 | `doc.at(pointer)` | raw value가 아니라 `ReadResult`를 반환합니다. |
 | 하위 항목 나열 | `doc.entries(pointer)` | object, record, array entry를 Pointer와 함께 돌려줍니다. |
 | 여러 위치 찾기 | `doc.find(jsonPath)`, `doc.query(jsonPath)` | JSONPath는 변경 언어가 아닙니다. 결과 Pointer로 patch를 만듭니다. |
@@ -84,6 +84,18 @@ doc.subscribe((patch, metadata) => {
   console.log(patch, metadata);
 });
 ```
+
+`doc.value`와 `doc.at`/`doc.entries`가 가리키는 document subtree는 같은 immutable
+snapshot입니다. 값을 직접 수정하지 말고 `patch`, `commit`, high-level edit API를
+사용합니다. Document는 accepted initial/load/patch payload를 소유하므로 caller가 원본
+객체를 나중에 바꿔도 published state나 history가 바뀌지 않습니다.
+
+`trustedInitial: true`는 initial schema parse를 생략합니다. Mutable input은 안전하게
+clone하고, public snapshot으로 처음 노출될 때 freeze합니다. 이미 deep-freeze된 root는
+같은 identity로 재사용합니다. Schema output이 정적으로 JSON임을 판별할 수 있을 때만
+JSON scan까지 생략되어 생성 비용이 O(1)이 됩니다. Custom/refined schema는 frozen root도
+JSON boundary를 한 번 검사합니다. Frozen root를 전달할 때 caller는 전체 graph가
+schema-valid JSON이고 transitively immutable임을 보증합니다.
 
 읽기는 document에 직접 둡니다.
 
@@ -109,10 +121,11 @@ doc.canReplace("", nextDocument);
 앱 adapter에서 plain string path를 받으면 json-document 경계에서 한 번 확인합니다.
 
 ```ts
-import { tryParsePointer, type Pointer } from "@interactive-os/json-document";
+import { buildPointer, tryParsePointer, type Pointer } from "@interactive-os/json-document";
 
 function asPointer(path: string): Pointer | null {
-  return tryParsePointer(path) === null ? null : path as Pointer;
+  const segments = tryParsePointer(path);
+  return segments === null ? null : buildPointer(segments);
 }
 ```
 
@@ -136,7 +149,9 @@ doc.commit([
 ], { label: "rename" });
 ```
 
-Patch의 `path`와 `from`은 JSON Pointer입니다. JSONPath를 patch에 직접 넣지 않습니다.
+Patch의 `path`와 `from`은 JSON Pointer의 JSON string 표현인 `""` 또는 `/...`입니다.
+URI fragment 표현인 `#`/`#/...`는 `$ref`나 URL adapter에서 parse한 뒤 위 예제처럼
+canonical Pointer로 바꿉니다. JSONPath를 patch에 직접 넣지 않습니다.
 
 구조 편집 후 앱이 정확한 다음 선택 위치를 알고 있으면 `selectionAfter`를 같이 넘깁니다. 기본 편집은 document가 selection을 자동 복구하지만, group, unwrap, bulk edit처럼 결과 focus가 command 의미에 속하는 경우에는 command가 최종 selection을 명시합니다.
 

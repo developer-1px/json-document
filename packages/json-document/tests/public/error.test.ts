@@ -118,6 +118,46 @@ describe("JSONDocumentError", () => {
     expect(onError).not.toHaveBeenCalled();
   });
 
+  test("non-JSON initial outputs throw TypeError without onError", () => {
+    const onError = vi.fn();
+
+    expect(() => createJSONDocument(
+      z.object({ value: z.unknown() }),
+      { value: new Date("2026-07-14T00:00:00.000Z") },
+      { onError },
+    )).toThrow(TypeError);
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  test("load and reset route non-JSON outputs through the execution error policy", () => {
+    const onError = vi.fn();
+    const doc = createJSONDocument(z.object({ value: z.unknown() }), { value: "ok" }, {
+      strict: false,
+      onError,
+    });
+
+    expect(doc.load({ value: new Date("2026-07-14T00:00:00.000Z") })).toMatchObject({
+      ok: false,
+      code: "not_serializable",
+    });
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError.mock.calls[0]?.[0]).toMatchObject({
+      name: "JSONDocumentError",
+      op: "load",
+      result: { ok: false, code: "not_serializable" },
+    });
+
+    const strictDoc = createJSONDocument(z.object({ value: z.unknown() }), { value: "ok" }, {
+      strict: true,
+      onError,
+    });
+    expect(() => strictDoc.reset({ value: new Date("2026-07-14T00:00:00.000Z") }))
+      .toThrow(JSONDocumentError);
+    expect(onError).toHaveBeenCalledTimes(2);
+    expect(onError.mock.calls[1]?.[0]).toMatchObject({ op: "reset" });
+    expect(strictDoc.value).toEqual({ value: "ok" });
+  });
+
   test("default strict policy returns document execution failures unless strict overrides", () => {
     const doc = createJSONDocument(z.object({ name: z.string() }), { name: "ok" });
 

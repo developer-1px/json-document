@@ -135,7 +135,6 @@ export function createDocumentRuntime<S extends z.ZodType>(
     onChange: options.onChange,
   });
   const selectionState = selectionRuntime.state;
-  const syncLastPatch = (): void => { patchState.lastPatch = rawOps.lastApplied; };
   const mutation = createDocumentMutationRuntime({
     schema: zodSchema,
     rawOps,
@@ -148,7 +147,6 @@ export function createDocumentRuntime<S extends z.ZodType>(
     rawOps,
     historyState,
     selection: selectionRuntime.access,
-    syncLastPatch,
   });
 
   const ops = createDocumentStateOps({
@@ -157,19 +155,18 @@ export function createDocumentRuntime<S extends z.ZodType>(
     historyState,
     patchState,
     snapSelection: selectionRuntime.access.snapSelection,
-    syncLastPatch,
+    selectionAfterForApplied: mutation.selectionAfterForApplied,
   });
 
   const insertPasteRuntime = createClipboardPasteRuntime({
     schema: zodSchema,
-    getState: () => rawOps.state,
+    getState: () => rawOps.snapshot,
     getRevision: () => rawOps.revision,
     ops,
-    previewPatch: rawOps.previewPatch,
+    previewPatch: rawOps.previewOwnedPatch,
     previewTrustedValuesPatch: rawOps.previewTrustedValuesPatch,
     applyPreviewedPatch: mutation.applyPreviewedDocumentPatch,
     getSelectionTarget: () => selectionState?.primaryPointer ?? null,
-    getAppliedPatch: () => patchState.lastPatch,
   });
   const insertRuntime = {
     insertPayload(
@@ -200,15 +197,14 @@ export function createDocumentRuntime<S extends z.ZodType>(
   });
   const clipboardOptions = {
     schema: zodSchema,
-    getState: () => rawOps.state,
+    getState: () => rawOps.snapshot,
     getRevision: () => rawOps.revision,
     ops,
-    previewPatch: rawOps.previewPatch,
+    previewPatch: rawOps.previewOwnedPatch,
     previewTrustedValuesPatch: rawOps.previewTrustedValuesPatch,
     applyPreviewedPatch: mutation.applyPreviewedDocumentPatch,
     getSelectionSource: () => selectionState?.selectedSource ?? null,
     getSelectionTarget: () => selectionState?.primaryPointer ?? null,
-    getAppliedPatch: () => patchState.lastPatch,
     getStateJsonTrusted: () => rawOps.stateJsonTrusted,
   };
   const clipboard = createClipboard(options.onChange === undefined ? clipboardOptions : { ...clipboardOptions, onChange: options.onChange });
@@ -224,17 +220,17 @@ export function createDocumentRuntime<S extends z.ZodType>(
           reason: `${direction} failed to apply history entry`,
         };
   };
-  const read = createDocumentRead(zodSchema, () => rawOps.state);
+  const read = createDocumentRead(zodSchema, () => rawOps.snapshot);
   const schemaState = createSchemaState(zodSchema);
   const edit = createDocumentEditActions({
-    getState: () => rawOps.state,
+    getState: () => rawOps.snapshot,
     selection: selectionState,
     mutation,
     insertRuntime,
   });
 
   return {
-    get value() { return rawOps.state; },
+    get value() { return rawOps.snapshot; },
     get lastPatch() { return [...patchState.lastPatch]; },
     get selection() { return selectionRuntime.enabled ? selectionState : undefined; },
     history,

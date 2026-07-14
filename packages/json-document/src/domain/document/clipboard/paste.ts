@@ -33,7 +33,6 @@ interface CreateClipboardPasteRuntimeOptions<S extends z.ZodType> {
     operations: ReadonlyArray<JSONPatchOperation>,
   ) => PreviewedDocumentPatchResult) | undefined;
   getSelectionTarget?: (() => Pointer | null) | undefined;
-  getAppliedPatch?: (() => ReadonlyArray<JSONPatchOperation>) | undefined;
 }
 
 export interface ClipboardPasteRuntime<T> {
@@ -70,7 +69,6 @@ export function createClipboardPasteRuntime<S extends z.ZodType>(
     previewTrustedValuesPatch,
     applyPreviewedPatch,
     getSelectionTarget,
-    getAppliedPatch,
   } = options;
 
   function pasteExecutionOptions(
@@ -132,7 +130,7 @@ export function createClipboardPasteRuntime<S extends z.ZodType>(
         if (!result.ok) return result;
         const publication: PreviewedDocumentPatchResult = applyPreviewedPatch
           ? applyPreviewedPatch(result.prepared, result.patch)
-          : { status: "applied", result: ops.patch(result.patch) };
+          : { status: "applied", result: ops.patch(result.patch), applied: result.patch };
         if (publication.status === "stale") continue;
         const patchResult = publication.result;
         if (!patchResult.ok) {
@@ -142,7 +140,7 @@ export function createClipboardPasteRuntime<S extends z.ZodType>(
             reason: patchResult.reason ?? patchResult.code,
           };
         }
-        const applied = getAppliedPatch?.() ?? result.patch;
+        const applied = publication.applied;
         // target: 첫 착지 slot (applied 는 정규화된 concrete op — `/-` 없음).
         const first = applied[0];
         return {

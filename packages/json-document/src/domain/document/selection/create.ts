@@ -2,6 +2,7 @@
 // React hook and JSONDocument use this same implementation.
 
 import type { JSONStateOps } from "../state/ops.js";
+import type { JSONPatchOperation } from "../../../foundation/patch/index.js";
 import type { Pointer } from "../../../foundation/pointer/index.js";
 import { jsonEqual } from "../../../foundation/json/index.js";
 import {
@@ -86,6 +87,10 @@ interface CreateSelectionOptions extends SelectionOptions {
 
 interface InternalCreateSelectionOptions extends CreateSelectionOptions {
   applyMetadataSelectionAfter?: boolean;
+  onPatchSelection?: (
+    applied: ReadonlyArray<JSONPatchOperation>,
+    selection: SelectionSnap,
+  ) => void;
 }
 
 type SelectionChangeListener = (
@@ -199,14 +204,19 @@ export function createSelection<T>(
     }
   };
   const hasObservers = (): boolean => options.onChange !== undefined || listeners.size > 0;
-  const setSnap = (next: SelectionSnap): void => {
+  const setSnap = (next: SelectionSnap, beforeEmit?: (selection: SelectionSnap) => void): void => {
     if (!hasObservers()) {
       snap = next;
+      beforeEmit?.(selectionSnapshot(snap));
       return;
     }
     const previous = selectionSnapshot(snap);
-    if (sameSelectionSnapshot(previous, next)) return;
+    if (sameSelectionSnapshot(previous, next)) {
+      beforeEmit?.(selectionSnapshot(snap));
+      return;
+    }
     snap = next;
+    beforeEmit?.(selectionSnapshot(snap));
     emit(previous);
   };
   const dispatch = (action: SelectionAction): void => {
@@ -221,7 +231,8 @@ export function createSelection<T>(
   ops.subscribe((applied, metadata) => {
     setSnap(applyMetadataSelectionAfter && metadata?.selectionAfter
       ? restoreSelection(metadata.selectionAfter, mode, ops.state)
-      : applySelectionAutoRules(snap, applied, ops.state, mode));
+      : applySelectionAutoRules(snap, applied, ops.state, mode),
+    (selection) => (options as InternalCreateSelectionOptions).onPatchSelection?.(applied, selection));
   });
 
   return {

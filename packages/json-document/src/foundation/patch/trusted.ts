@@ -1,5 +1,5 @@
 import { jsonSerializableError } from "../json/serializable.js";
-import { applyOpRaw, validateOperationShape } from "./apply.js";
+import { applyOpRaw, validateOperationPointers, validateOperationShape } from "./apply.js";
 import { normalizeAppliedOp, normalizeOp } from "./container.js";
 import { acceptedStrategies, applyFastPatchStrategies, trustedStrategies } from "./fast/apply.js";
 import { fail, ok } from "./result.js";
@@ -29,6 +29,18 @@ export function applyTrustedPatch<T>(
     if (!(i in ops)) return { state, result: fail("invalid_pointer", `op[${i}]: op must be object`), applied: [] };
     const shape = validateOperationShape(ops[i]!);
     if (shape) return { state, result: fail(shape.error, `op[${i}]: ${shape.reason}`), applied: [] };
+    const pointerError = validateOperationPointers(ops[i]!);
+    if (pointerError) {
+      return {
+        state,
+        result: fail(
+          pointerError.error,
+          `op[${i}]: ${pointerError.reason}`,
+          pointerError.pointer,
+        ),
+        applied: [],
+      };
+    }
     const n = normalizeOp(ops[i]!, cur);
     const r = applyOpRaw(cur, n);
     if ("error" in r) {
@@ -70,6 +82,14 @@ function applySingleTrustedValuePatch(
 
   const shape = validateOperationShape(op);
   if (shape) return { state, result: fail(shape.error, `op[0]: ${shape.reason}`), applied: [] };
+  const pointerError = validateOperationPointers(op);
+  if (pointerError) {
+    return {
+      state,
+      result: fail(pointerError.error, `op[0]: ${pointerError.reason}`, pointerError.pointer),
+      applied: [],
+    };
+  }
   if (!valuesTrusted && jsonSerializableError(op.value) !== null) return null;
 
   const normalized = op.op === "add" && op.path.endsWith("/-") ? normalizeOp(op, state) : op;
@@ -89,6 +109,14 @@ function applyAcceptedSingleTrustedValuePatch(
 ): TrustedApplyResult<unknown> | null {
   if (op === null || typeof op !== "object" || (op.op !== "add" && op.op !== "replace") || typeof op.path !== "string" || !("value" in op)) {
     return null;
+  }
+  const pointerError = validateOperationPointers(op);
+  if (pointerError) {
+    return {
+      state,
+      result: fail(pointerError.error, `op[0]: ${pointerError.reason}`, pointerError.pointer),
+      applied: [],
+    };
   }
   const normalized = op.op === "add" && op.path.endsWith("/-") ? normalizeOp(op, state) : op;
   if (normalized.op !== "add" && normalized.op !== "replace") return null;

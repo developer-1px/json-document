@@ -96,6 +96,12 @@ const batchSize = envNumber("PERF_BATCH", 1000);
 const individualCount = envNumber("PERF_INDIVIDUAL", 100);
 const jsonpathRepeats = envNumber("PERF_JSONPATH_REPEATS", 10000);
 const rounds = envNumber("PERF_ROUNDS", 5);
+const leafCommitP50BudgetMs = envNumber("PERF_LEAF_COMMIT_P50_BUDGET_MS", 0.75);
+const leafSnapshotP50BudgetMs = envNumber("PERF_LEAF_SNAPSHOT_P50_BUDGET_MS", 4);
+const frozenTrustedSnapshotP50BudgetMs = envNumber("PERF_FROZEN_TRUSTED_SNAPSHOT_P50_BUDGET_MS", 4);
+const copyBatchP50BudgetPerThousandMs = envNumber("PERF_COPY_BATCH_P50_BUDGET_PER_1000_MS", 15);
+const frozenTrustedCopySnapshotP50BudgetPerThousandMs = envNumber("PERF_FROZEN_TRUSTED_COPY_SNAPSHOT_P50_BUDGET_PER_1000_MS", 15);
+const warmRootReplaceP50BudgetPerThousandMs = envNumber("PERF_WARM_ROOT_REPLACE_P50_BUDGET_PER_1000_MS", 20);
 const overlappingReplaceRounds = Math.max(15, rounds);
 const forceGc = process.env.PERF_GC === "1";
 const runtimeGc = typeof globalThis.gc === "function" ? globalThis.gc.bind(globalThis) : null;
@@ -108,6 +114,7 @@ if (forceGc) {
 
 for (const size of sizes) {
   const state = Schema.parse(makeState(size));
+  const frozenTrustedState = deepFreezeJson(Schema.parse(makeState(size)));
   const optionalItemsState = OptionalItemsSchema.parse(state);
   const nestedState = NestedSchema.parse({ wrapper: { items: state.items } });
   const escapedSelectionState = EscapedSelectionSchema.parse({
@@ -195,6 +202,11 @@ for (const size of sizes) {
     })),
   ];
   const copyMoveCount = Math.min(individualCount, size);
+  const copyBatchOps = Array.from({ length: Math.min(batchSize, size) }, () => ({
+    op: "copy",
+    from: "/items/0",
+    path: "/items/-",
+  }));
   const copyMoveOps = [
     ...Array.from({ length: Math.floor(copyMoveCount / 2) }, (_, index) => ({
       op: "copy",
@@ -217,9 +229,13 @@ for (const size of sizes) {
     const doc = createJSONDocument(Schema, state, { history: 0 });
     return { ok: doc.value.items.length === size };
   });
-  bench("createJSONDocument init trustedInitial history=0", Math.max(3, Math.ceil(rounds / 2)), () => {
+  bench("createJSONDocument init mutable trustedInitial history=0", Math.max(3, Math.ceil(rounds / 2)), () => {
     const doc = createJSONDocument(Schema, state, { history: 0, trustedInitial: true });
     return { ok: doc.value.items.length === size };
+  });
+  bench("createJSONDocument init frozen trustedInitial history=0", Math.max(3, Math.ceil(rounds / 2)), () => {
+    const doc = createJSONDocument(Schema, frozenTrustedState, { history: 0, trustedInitial: true });
+    return { ok: doc.value === frozenTrustedState };
   });
   bench("createJSONDocument init history=100", Math.max(3, Math.ceil(rounds / 2)), () => {
     const doc = createJSONDocument(Schema, state, { history: 100 });
@@ -250,12 +266,52 @@ for (const size of sizes) {
 
   {
     const doc = createJSONDocument(Schema, state, { history: 100 });
-    bench("doc.patch single leaf + history", rounds, (index) =>
+    const stats = bench("doc.patch single leaf + history", rounds, (index) =>
       doc.patch({
         op: "replace",
         path: `/items/${middle}/done`,
         value: index % 2 === 0,
       }));
+    assertP50Budget("leaf commit", stats, leafCommitP50BudgetMs);
+  }
+
+  {
+    const doc = createJSONDocument(Schema, state, { history: 100 });
+    void doc.value;
+    const stats = bench("doc.patch single leaf + history + snapshot", rounds, (index) => {
+      const result = doc.patch({
+        op: "replace",
+        path: `/items/${middle}/done`,
+        value: index % 2 === 0,
+      });
+      void doc.value;
+      return result;
+    });
+    assertP50Budget("leaf commit + snapshot", stats, leafSnapshotP50BudgetMs);
+  }
+
+  {
+    let doc;
+    const stats = benchWithSetup(
+      "doc.patch frozen trustedInitial leaf + first snapshot",
+      rounds,
+      () => {
+        doc = createJSONDocument(Schema, frozenTrustedState, {
+          history: 100,
+          trustedInitial: true,
+        });
+      },
+      () => {
+        const result = doc.patch({
+          op: "replace",
+          path: `/items/${middle}/done`,
+          value: true,
+        });
+        void doc.value;
+        return result;
+      },
+    );
+    assertP50Budget("frozen trustedInitial leaf + first snapshot", stats, frozenTrustedSnapshotP50BudgetMs);
   }
 
   {
@@ -954,6 +1010,41 @@ for (const size of sizes) {
 
   {
     const doc = createJSONDocument(Schema, state, { history: 0 });
+    const stats = bench(`doc.patch copy array batch ${copyBatchOps.length} history=0`, Math.max(3, Math.ceil(rounds / 2)), () =>
+      doc.patch(copyBatchOps));
+    assertP50Budget(
+      `copy batch ${copyBatchOps.length}`,
+      stats,
+      copyBatchP50BudgetPerThousandMs * Math.max(1, copyBatchOps.length / 1000),
+    );
+  }
+
+  {
+    let doc;
+    const stats = benchWithSetup(
+      `doc.patch frozen trustedInitial copy batch ${copyBatchOps.length} + first snapshot`,
+      Math.max(3, Math.ceil(rounds / 2)),
+      () => {
+        doc = createJSONDocument(Schema, frozenTrustedState, {
+          history: 0,
+          trustedInitial: true,
+        });
+      },
+      () => {
+        const result = doc.patch(copyBatchOps);
+        void doc.value;
+        return result;
+      },
+    );
+    assertP50Budget(
+      `frozen trustedInitial copy batch ${copyBatchOps.length} + first snapshot`,
+      stats,
+      frozenTrustedCopySnapshotP50BudgetPerThousandMs * Math.max(1, copyBatchOps.length / 1000),
+    );
+  }
+
+  {
+    const doc = createJSONDocument(Schema, state, { history: 0 });
     bench(`doc.patch copy/move array batch ${copyMoveOps.length} history=0`, Math.max(3, Math.ceil(rounds / 2)), () =>
       doc.patch(copyMoveOps));
   }
@@ -1042,6 +1133,14 @@ for (const size of sizes) {
     path: `/k${index}/meta/rank`,
     value: rootReplaceCount + index,
   }));
+  const wideRootKeyCount = envNumber("PERF_WIDE_ROOT_KEYS", Math.max(...sizes));
+  const wideRootState = makeRootObjectState(wideRootKeyCount);
+  const wideRootReplaceCount = Math.min(batchSize, wideRootKeyCount);
+  const wideRootReplaceOps = Array.from({ length: wideRootReplaceCount }, (_, index) => ({
+    op: "replace",
+    path: `/k${index}`,
+    value: makeRootObjectValue(wideRootKeyCount + index),
+  }));
   console.log(`\nroot keys=${rootReplaceCount}`);
   bench(`createJSONDocument root record init history=0`, Math.max(3, Math.ceil(rounds / 2)), () => {
     const doc = createJSONDocument(RootRecord, rootState, { history: 0 });
@@ -1063,6 +1162,23 @@ for (const size of sizes) {
     const doc = createJSONDocument(RootRecord, rootState, { history: 0 });
     bench(`doc.patch root object replace batch ${rootReplaceCount} history=0`, Math.max(3, Math.ceil(rounds / 2)), () =>
       doc.patch(rootReplaceOps));
+  }
+  {
+    let doc;
+    const stats = benchWithSetup(
+      `doc.patch warm wide root ${wideRootKeyCount} replace batch ${wideRootReplaceCount}`,
+      Math.max(3, Math.ceil(rounds / 2)),
+      () => {
+        doc = createJSONDocument(RootRecord, wideRootState, { history: 0 });
+        void doc.value;
+      },
+      () => doc.patch(wideRootReplaceOps),
+    );
+    assertP50Budget(
+      `warm wide root replace batch ${wideRootReplaceCount}`,
+      stats,
+      warmRootReplaceP50BudgetPerThousandMs * Math.max(1, wideRootReplaceCount / 1000),
+    );
   }
   {
     const doc = createJSONDocument(RootRecord, rootState, { history: 100 });
@@ -1301,6 +1417,21 @@ function makeRecursiveState(size) {
   };
 }
 
+function deepFreezeJson(value) {
+  if (value === null || typeof value !== "object") return value;
+  const stack = [value];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (Object.isFrozen(current)) continue;
+    for (const key of Object.keys(current)) {
+      const child = current[key];
+      if (child !== null && typeof child === "object") stack.push(child);
+    }
+    Object.freeze(current);
+  }
+  return value;
+}
+
 function makeRootObjectState(size) {
   return Object.fromEntries(
     Array.from({ length: size }, (_, index) => [`k${index}`, makeRootObjectValue(index)]),
@@ -1359,6 +1490,13 @@ function bench(label, sampleCount, fn) {
   const { avg, min, p50, p90, max } = sampleStats(samples);
   const ok = resultOk(last);
   console.log(`${label}: avg=${avg.toFixed(2)}ms min=${min.toFixed(2)}ms p50=${p50.toFixed(2)}ms p90=${p90.toFixed(2)}ms max=${max.toFixed(2)}ms ok=${ok}`);
+  return { avg, min, p50, p90, max, ok };
+}
+
+function assertP50Budget(label, stats, limitMs) {
+  const pass = stats.p50 <= limitMs;
+  console.log(`budget ${label}: p50=${stats.p50.toFixed(2)}ms limit=${limitMs.toFixed(2)}ms pass=${pass}`);
+  if (!pass) process.exitCode = 1;
 }
 
 function benchWithSetup(label, sampleCount, setup, fn) {
@@ -1374,6 +1512,7 @@ function benchWithSetup(label, sampleCount, setup, fn) {
   const { avg, min, p50, p90, max } = sampleStats(samples);
   const ok = resultOk(last);
   console.log(`${label}: avg=${avg.toFixed(2)}ms min=${min.toFixed(2)}ms p50=${p50.toFixed(2)}ms p90=${p90.toFixed(2)}ms max=${max.toFixed(2)}ms ok=${ok}`);
+  return { avg, min, p50, p90, max, ok };
 }
 
 function benchHeapRetained(label, sampleCount, fn) {

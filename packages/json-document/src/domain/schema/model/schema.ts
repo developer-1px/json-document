@@ -102,7 +102,7 @@ export function schemaOutputIsKnownJson(schema: z.ZodType, seen?: WeakSet<object
   activeSeen.add(schema as object);
 
   const def = getDef(schema);
-  if (def.coerce) return finish(false);
+  if (def.coerce || hasPotentiallyOutputChangingChecks(def.checks)) return finish(false);
 
   switch (def.type) {
     case "object": {
@@ -164,6 +164,15 @@ export function schemaOutputIsKnownJson(schema: z.ZodType, seen?: WeakSet<object
     default:
       return finish(false);
   }
+}
+
+function hasPotentiallyOutputChangingChecks(checks: unknown[] | undefined): boolean {
+  if (!Array.isArray(checks)) return false;
+  return checks.some((check) => {
+    if (check === null || typeof check !== "object") return true;
+    const kind = (check as { _zod?: { def?: { check?: unknown } } })._zod?.def?.check;
+    return kind === "custom" || kind === "overwrite" || typeof kind !== "string";
+  });
 }
 
 export function prefixIssues(path: Pointer, issues: z.ZodError["issues"]): z.ZodError["issues"] {

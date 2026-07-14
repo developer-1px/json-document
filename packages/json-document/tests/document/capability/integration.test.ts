@@ -42,17 +42,20 @@ describe("JSONDocument can* interface", () => {
   });
 
   test("canFind validates query syntax without traversing the document", () => {
-    const doc = createJSONDocument(z.any(), {
-      items: [
-        Object.defineProperty({ id: "a" }, "computed", {
-          get: () => {
-            throw new Error("canFind should not read values");
-          },
-          enumerable: true,
-          configurable: true,
-        }),
-      ],
+    const QuerySchema = z.object({
+      items: z.array(z.object({ id: z.string(), computed: z.string() })),
     });
+    const item = Object.freeze(Object.defineProperty({ id: "a" }, "computed", {
+      get: () => {
+        throw new Error("canFind should not read values");
+      },
+      enumerable: true,
+      configurable: true,
+    })) as { id: string; computed: string };
+    const trusted: z.output<typeof QuerySchema> = { items: [item] };
+    Object.freeze(trusted.items);
+    Object.freeze(trusted);
+    const doc = createJSONDocument(QuerySchema, trusted, { trustedInitial: true });
 
     expect(doc.canFind("$..computed")).toEqual({ ok: true });
   });

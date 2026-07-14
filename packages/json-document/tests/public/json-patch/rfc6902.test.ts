@@ -8,6 +8,7 @@ import {
   applyPatch,
   applyPatchToTrustedState,
   buildPointer,
+  createJSONDocument,
   parsePointer,
   type JSONPatchOperation,
 } from "@interactive-os/json-document";
@@ -44,6 +45,90 @@ describe("RFC 6901 — JSON Pointer", () => {
     const r = applyOperation(Any, { x: 1 }, { op: "replace", path: "x", value: 2 });
     expect(r.result.ok).toBe(false);
     if (!r.result.ok) expect(r.result.code).toBe("invalid_pointer");
+  });
+
+  it("rejects URI fragment representation in JSON Patch paths", () => {
+    const initial = { x: 1 };
+    const r = applyOperation(Any, initial, { op: "replace", path: "#/x", value: 2 });
+
+    expect(r.result).toEqual({
+      ok: false,
+      code: "invalid_pointer",
+      reason: "JSON Patch path must use JSON Pointer string representation, not a URI fragment",
+      pointer: "#/x",
+    });
+    expect(r.state).toBe(initial);
+    expect(r.applied).toEqual([]);
+  });
+
+  it("rejects URI fragment paths before trusted-state optimizers", () => {
+    const Schema = z.object({ x: z.number() });
+    const initial = { x: 1 };
+    const r = applyPatchToTrustedState(Schema, initial, [
+      { op: "replace", path: "#/x", value: 2 },
+    ]);
+
+    expect(r.result).toMatchObject({
+      ok: false,
+      code: "invalid_pointer",
+      pointer: "#/x",
+    });
+    expect(r.state).toBe(initial);
+    expect(r.applied).toEqual([]);
+  });
+
+  it("rejects URI fragment representation in JSON Patch from", () => {
+    const initial = { a: 1, b: 2 };
+    const r = applyPatch(Any, initial, [
+      { op: "move", from: "#/a", path: "/b" },
+    ]);
+
+    expect(r.result).toMatchObject({
+      ok: false,
+      code: "invalid_pointer",
+      pointer: "#/a",
+    });
+    expect(r.state).toBe(initial);
+    expect(r.applied).toEqual([]);
+  });
+
+  it("rejects undefined tilde escapes in patch pointers", () => {
+    const initial = { "a~2b": 1 };
+    const r = applyOperation(Any, initial, { op: "replace", path: "/a~2b", value: 2 });
+
+    expect(r.result).toMatchObject({
+      ok: false,
+      code: "invalid_pointer",
+      pointer: "/a~2b",
+    });
+    expect(r.state).toBe(initial);
+  });
+
+  it("returns invalid_pointer for malformed append parents instead of throwing", () => {
+    const Schema = z.object({ items: z.array(z.number()) });
+    const initial = { items: [1] };
+    const operation = { op: "add", path: "/items~2/-", value: 2 } as const;
+
+    for (const result of [
+      applyPatch(Schema, initial, [operation]),
+      applyPatchToTrustedState(Schema, initial, [operation]),
+    ]) {
+      expect(result.result).toMatchObject({
+        ok: false,
+        code: "invalid_pointer",
+        pointer: "/items~2/-",
+      });
+      expect(result.state).toBe(initial);
+      expect(result.applied).toEqual([]);
+    }
+
+    const doc = createJSONDocument(Schema, initial);
+    expect(doc.patch(operation)).toMatchObject({
+      ok: false,
+      code: "invalid_pointer",
+      pointer: "/items~2/-",
+    });
+    expect(doc.value).toEqual(initial);
   });
 });
 
@@ -276,6 +361,58 @@ describe("RFC 6902 — batch atomicity (G8)", () => {
       expect(r.result.reason).toBe("op[1]: op must be object");
     }
     expect(r.state).toBe(initial);
+  });
+
+  it("rejects fragment paths before a fast batch can partially apply", () => {
+    const initial = { a: 1, b: 2 };
+    const r = applyPatch(Any, initial, [
+      { op: "replace", path: "/a", value: 10 },
+      { op: "replace", path: "#/b", value: 20 },
+    ]);
+
+    expect(r.result).toEqual({
+      ok: false,
+      code: "invalid_pointer",
+      reason: "op[1]: JSON Patch path must use JSON Pointer string representation, not a URI fragment",
+      pointer: "#/b",
+    });
+    expect(r.state).toBe(initial);
+    expect(r.applied).toEqual([]);
+  });
+
+  it("reports an earlier operation failure before a later malformed pointer", () => {
+    const initial = { a: 1, b: 2 };
+    const r = applyPatch(Any, initial, [
+      { op: "test", path: "/a", value: 999 },
+      { op: "replace", path: "#/b", value: 20 },
+    ]);
+
+    expect(r.result).toEqual({
+      ok: false,
+      code: "test_failed",
+      reason: "op[0]: value mismatch",
+      pointer: "/a",
+    });
+    expect(r.state).toBe(initial);
+    expect(r.applied).toEqual([]);
+  });
+
+  it("preserves operation failure order through trusted-state optimizers", () => {
+    const Schema = z.object({ a: z.number(), b: z.number() });
+    const initial = { a: 1, b: 2 };
+    const r = applyPatchToTrustedState(Schema, initial, [
+      { op: "test", path: "/a", value: 999 },
+      { op: "replace", path: "#/b", value: 20 },
+    ]);
+
+    expect(r.result).toEqual({
+      ok: false,
+      code: "test_failed",
+      reason: "op[0]: value mismatch",
+      pointer: "/a",
+    });
+    expect(r.state).toBe(initial);
+    expect(r.applied).toEqual([]);
   });
 
   it("rolls back on mid-batch failure", () => {

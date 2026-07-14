@@ -7,6 +7,11 @@ Zod schema로 보호되는 JSON state를 읽고, 바꾸고, 선택하고, 복사
 아닙니다. Form, CMS block, kanban board, outliner, settings editor처럼 서로
 다른 제품이 반복해서 구현하는 document editing core를 제공합니다.
 
+Published `doc.value`는 transitively immutable JSON snapshot입니다. Document가
+accepted input과 patch record를 소유하므로 caller-held payload나 subscriber가
+state/history를 notification 없이 바꿀 수 없습니다. 모든 변경은 document mutation
+API를 통과합니다.
+
 ```txt
 schema -> document -> pointer/query -> can* -> change -> result
 ```

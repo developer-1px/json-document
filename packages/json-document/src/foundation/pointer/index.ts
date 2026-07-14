@@ -31,9 +31,16 @@ export function buildPointer(
 }
 
 function parsePointerSegments(body: string): string[] {
-  return body.includes("~")
-    ? body.split("/").map(unescapeSegment)
-    : body.split("/");
+  if (!body.includes("~")) return body.split("/");
+  return body.split("/").map((segment) => {
+    for (let index = segment.indexOf("~"); index !== -1; index = segment.indexOf("~", index + 2)) {
+      const escaped = segment[index + 1];
+      if (escaped !== "0" && escaped !== "1") {
+        throw new PointerSyntaxError(`Invalid JSON Pointer escape in segment: ${JSON.stringify(segment)}`);
+      }
+    }
+    return unescapeSegment(segment);
+  });
 }
 
 export function parsePointer(pointer: Pointer): string[] {
@@ -43,8 +50,9 @@ export function parsePointer(pointer: Pointer): string[] {
     if (pointer[1] !== "/") {
       throw new PointerSyntaxError(`JSON Pointer URI fragment must be '#' or start with '#/': ${JSON.stringify(pointer)}`);
     }
+    let decoded: string;
     try {
-      return parsePointerSegments(decodeURIComponent(pointer.slice(2)));
+      decoded = decodeURIComponent(pointer.slice(2));
     } catch (error) {
       throw new PointerSyntaxError(
         error instanceof Error
@@ -52,6 +60,7 @@ export function parsePointer(pointer: Pointer): string[] {
           : "Invalid JSON Pointer URI fragment encoding",
       );
     }
+    return parsePointerSegments(decoded);
   }
   if (pointer[0] !== "/") {
     throw new PointerSyntaxError(`JSON Pointer must be empty or start with '/': ${JSON.stringify(pointer)}`);
@@ -70,16 +79,19 @@ export function tryParsePointer(pointer: Pointer): string[] | null {
     }
   }
   if (pointer[0] !== "/") return null;
-  return parsePointerSegments(pointer.slice(1));
+  try {
+    return parsePointerSegments(pointer.slice(1));
+  } catch {
+    return null;
+  }
 }
 
 // RFC 3986 + 6901 §6: fragment 안에서 안전하지 않은 문자 percent-encode.
 // JSON Pointer 자체의 escape (~0, ~1) 는 이미 처리됐으므로 fragment 의 추가 제약만.
 function encodePointerForFragment(s: string): string {
-  // %, " ", '"', '<', '>', '\\', '^', '`', '{', '|', '}' 등을 인코딩.
-  return s.replace(/[^A-Za-z0-9\-._~!$&'()*+,;=:@/?]/g, (c) =>
-    "%" + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0"),
-  );
+  // encodeURI는 Unicode를 UTF-8 octet으로 바꾼 뒤 percent-encode한다.
+  // Fragment delimiter인 #만 JSON Pointer 본문에 남지 않도록 추가 인코드한다.
+  return encodeURI(s).replace(/#/g, "%23");
 }
 
 export class PointerSyntaxError extends Error {

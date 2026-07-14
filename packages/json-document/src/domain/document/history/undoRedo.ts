@@ -28,6 +28,7 @@ export interface DocumentHistoryRuntimeState {
   isRestoring: boolean;
   activeHistoryMetadata: HistoryTransactionOptions | undefined;
   activeTransactionStartDepth: number | undefined;
+  activeTransactionToken: object | undefined;
 }
 
 export function createDocumentHistoryRuntimeState(): DocumentHistoryRuntimeState {
@@ -36,6 +37,7 @@ export function createDocumentHistoryRuntimeState(): DocumentHistoryRuntimeState
     isRestoring: false,
     activeHistoryMetadata: undefined,
     activeTransactionStartDepth: undefined,
+    activeTransactionToken: undefined,
   };
 }
 
@@ -61,7 +63,6 @@ interface CreateDocumentHistoryRuntimeInput<T> {
   rawOps: TrustedJSONStateOps<T>;
   historyState: DocumentHistoryRuntimeState;
   selection: SelectionRuntimeAccess;
-  syncLastPatch: () => void;
 }
 
 export function createDocumentHistoryRuntime<T>(
@@ -75,7 +76,7 @@ export function createDocumentHistoryRuntime<T>(
     canRedo: () => boolean;
   };
 } {
-  const { rawOps, historyState, selection, syncLastPatch } = input;
+  const { rawOps, historyState, selection } = input;
 
   const restore = (direction: "undo" | "redo"): boolean => {
     const restoreStack = direction === "undo" ? historyState.stack.undo : historyState.stack.redo;
@@ -95,7 +96,6 @@ export function createDocumentHistoryRuntime<T>(
         : rawOps.trustedApply(plan.state as T, plan.patch);
       if (!result.ok) return false;
       if (direction === "redo") restoreStack[restoreStack.length - 1] = plan.entry;
-      syncLastPatch();
     } catch {
       return false;
     } finally {
@@ -129,17 +129,6 @@ export function createDocumentHistoryRuntime<T>(
     return true;
   };
 
-  const mergeTransactionEntries = (depthBefore: number): void => {
-    if (historyDepth(historyState.stack) <= depthBefore + 1) return;
-    const start = historyState.stack.undoStart + depthBefore;
-    const end = historyState.stack.undo.length;
-    if (start < historyState.stack.undoStart || end - start <= 1) return;
-    const merged = mergeTransactionHistoryRange(historyState.stack.undo, start, end);
-    if (merged === null) return;
-    historyState.stack.undo[start] = merged;
-    historyState.stack.undo.length = start + 1;
-  };
-
   const withHistoryMetadata = (metadata: HistoryTransactionOptions | undefined, fn: () => void): void => {
     const previous = historyState.activeHistoryMetadata;
     historyState.activeHistoryMetadata = metadata === undefined ? previous : { ...previous, ...metadata };
@@ -159,13 +148,16 @@ export function createDocumentHistoryRuntime<T>(
     const metadata = typeof optionsOrFn === "function" ? undefined : optionsOrFn;
     const depthBefore = historyDepth(historyState.stack);
     const previousTransactionStartDepth = historyState.activeTransactionStartDepth;
+    const previousTransactionToken = historyState.activeTransactionToken;
     historyState.activeTransactionStartDepth = previousTransactionStartDepth ?? depthBefore;
+    historyState.activeTransactionToken = previousTransactionToken ?? {};
     try {
       withHistoryMetadata(metadata, fn);
     } finally {
       historyState.activeTransactionStartDepth = previousTransactionStartDepth;
+      historyState.activeTransactionToken = previousTransactionToken;
     }
-    mergeTransactionEntries(depthBefore);
+    mergeDocumentHistoryEntriesSince(historyState, depthBefore);
   };
 
   const history: JSONDocumentHistory = {
@@ -181,6 +173,20 @@ export function createDocumentHistoryRuntime<T>(
   };
 
   return { history, historyControls };
+}
+
+export function mergeDocumentHistoryEntriesSince(
+  historyState: DocumentHistoryRuntimeState,
+  depthBefore: number,
+): void {
+  if (historyDepth(historyState.stack) <= depthBefore + 1) return;
+  const start = historyState.stack.undoStart + depthBefore;
+  const end = historyState.stack.undo.length;
+  if (start < historyState.stack.undoStart || end - start <= 1) return;
+  const merged = mergeTransactionHistoryRange(historyState.stack.undo, start, end);
+  if (merged === null) return;
+  historyState.stack.undo[start] = merged;
+  historyState.stack.undo.length = start + 1;
 }
 
 function mergeTransactionHistoryRange(

@@ -38,7 +38,7 @@ describe("RFC 9535 JSONPath CTS — jsonpath-standard vendor", () => {
     let passed = 0;
 
     for (const c of suite.tests) {
-      const doc = createJSONDocument(Any, c.document);
+      const doc = createJSONDocument(Any, "document" in c ? c.document : null);
       const queried = doc.query(c.selector);
       if (c.invalid_selector) {
         invalidSelectors += 1;
