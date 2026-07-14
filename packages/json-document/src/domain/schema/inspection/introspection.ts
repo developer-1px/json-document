@@ -56,7 +56,7 @@ function schemaAtPointerUncached(schema: z.ZodType, pointer: Pointer, mode: "val
     }
 
     const shape = getObjectShape(container);
-    if (shape && segment in shape) {
+    if (shape && Object.prototype.hasOwnProperty.call(shape, segment)) {
       current = shape[segment] ?? null;
       continue;
     }

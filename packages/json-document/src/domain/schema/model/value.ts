@@ -31,14 +31,6 @@ export interface AppliedAddValueValidationOperation extends AppliedValueValidati
   op: "add";
 }
 
-export interface AppliedReplaceValueValidationOperation extends AppliedValueValidationOperation {
-  op: "replace";
-}
-
-export interface IndexedReplaceValueValidationOperation extends AppliedReplaceValueValidationOperation {
-  index: number;
-}
-
 export interface AppliedRemoveOperation {
   op: "remove";
   path: Pointer;
@@ -100,12 +92,6 @@ export function toAppliedAddOperations(
   return operations.map((op) => ({ op: "add", path: op.path, value: op.value }));
 }
 
-export function toAppliedReplaceOperations(
-  operations: ReadonlyArray<AppliedReplaceValueValidationOperation>,
-): Extract<JSONPatchOperation, { op: "replace" }>[] {
-  return operations.map((op) => ({ op: "replace", path: op.path, value: op.value }));
-}
-
 export function toAppliedRemoveOperations(
   operations: ReadonlyArray<AppliedRemoveOperation>,
 ): Extract<JSONPatchOperation, { op: "remove" }>[] {
@@ -138,16 +124,6 @@ export function evaluateAppliedValueValidationPlan<
 export function evaluateAppliedAddValueValidationPlan<S extends z.ZodType>(
   state: z.output<S>,
   operations: ReadonlyArray<AppliedAddValueValidationOperation>,
-  schema: z.ZodType,
-  knownJsonAccepted: (value: unknown) => boolean,
-  valuesTrusted: boolean,
-): ApplyResult<S> | null {
-  return evaluateAppliedValueValidationPlan({ state, operations, schema, knownJsonAccepted, valuesTrusted });
-}
-
-export function evaluateAppliedReplaceValueValidationPlan<S extends z.ZodType>(
-  state: z.output<S>,
-  operations: ReadonlyArray<AppliedReplaceValueValidationOperation>,
   schema: z.ZodType,
   knownJsonAccepted: (value: unknown) => boolean,
   valuesTrusted: boolean,

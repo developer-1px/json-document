@@ -418,6 +418,16 @@ describe("structural schema validation isolation", () => {
     });
     expect(record.value).toEqual({ ok: 1 });
 
+    const formattedRecord = createJSONDocument(
+      z.record(z.stringFormat("x-key", (key) => key.startsWith("x")), z.number()),
+      { xgood: 1 },
+    );
+    expect(formattedRecord.patch({ op: "add", path: "/bad", value: 2 })).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+    });
+    expect(formattedRecord.value).toEqual({ xgood: 1 });
+
     const array = createJSONDocument(
       z.object({ items: z.array(z.string()).min(1) }),
       { items: ["kept"] },

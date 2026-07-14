@@ -11,27 +11,19 @@ import {
   applyIncreasingArrayAddPatchWithLocalSchemaValidation,
 } from "../array/add.js";
 import {
-  applyKnownJsonSameArrayElementReplacePatchWithLocalSchemaValidation,
-  applySameArrayFieldReplacePatchWithLocalSchemaValidation,
-  applySameArrayNestedReplacePatchWithLocalSchemaValidation,
-} from "../array/replace.js";
-import {
   cachedSchemaAtPointer,
   isPlainStructuralSchema,
   supportsLocalReplaceSchemaValidation,
 } from "../model/schema.js";
 import { arrayElementSchemaAtPath } from "./schema.js";
 import {
-  applyKnownJsonReplacePatchWithLocalSchemaValidation,
-  applyReplacePatchWithLocalSchemaValidation,
+  applyFinalStateReplacePatchWithLocalSchemaValidation,
   applySingleReplacePatchWithLocalSchemaValidation,
-  planIndependentReplacePatch,
 } from "./replace.js";
 import {
   applyRootRecordAddPatchWithLocalSchemaValidation,
   applyRootRecordRemovePatchWithLocalSchemaValidation,
 } from "../object/record.js";
-import { applyRootObjectReplacePatchWithLocalSchemaValidation } from "../object/replace.js";
 import {
   arrayIndexInParent,
   arrayIndexPathLocation,
@@ -79,23 +71,15 @@ export function applyPatchWithLocalSchemaValidation<S extends z.ZodType>(
 
   const singleReplace = applySingleReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (singleReplace) return singleReplace;
-  if (!supportsAllLocalValidation) {
-    return planIndependentReplacePatch(ops)
-      ? applyReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted)
+
+  const replaceBatch = applyFinalStateReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
+  if (replaceBatch.kind === "handled") return replaceBatch.result;
+  if (replaceBatch.kind === "operationFailure") {
+    return supportsAllLocalValidation
+      ? applySequentialPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted)
       : null;
   }
-
-  const sameArrayFieldReplace = applySameArrayFieldReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
-  if (sameArrayFieldReplace) return sameArrayFieldReplace;
-  const sameArrayElementReplace = applyKnownJsonSameArrayElementReplacePatchWithLocalSchemaValidation(schema, state, ops);
-  if (sameArrayElementReplace) return sameArrayElementReplace;
-  const sameArrayNestedReplace = applySameArrayNestedReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
-  if (sameArrayNestedReplace) return sameArrayNestedReplace;
-  const rootObjectReplace = applyRootObjectReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
-  if (rootObjectReplace) return rootObjectReplace;
-  const knownJsonReplace = applyKnownJsonReplacePatchWithLocalSchemaValidation(schema, state, ops);
-  if (knownJsonReplace?.result.ok) return knownJsonReplace;
-  if (planIndependentReplacePatch(ops)) return applyReplacePatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
+  if (replaceBatch.kind === "requiresFullValidation" || !supportsAllLocalValidation) return null;
 
   const rootRecordAdd = applyRootRecordAddPatchWithLocalSchemaValidation(schema, state, ops, valuesTrusted);
   if (rootRecordAdd) return rootRecordAdd;

@@ -105,9 +105,11 @@ Remote transport와 conflict policy는 계속 core 밖에 둔다.
 성능상 prepare 단계의 private draft는 같은 batch에서 겹치는 ancestor/descendant
 replace가 있어도 touched container를 commit당 한 번만 복제한다. 최적화 경로는
 순차 RFC 6902 결과, 실패 atomicity, applied order, structural sharing을 reference
-경로와 동일하게 유지해야 한다. Plain structural schema의 overlapping replace는 각
-value가 target schema에 허용됨을 빠르게 증명할 수 있을 때만 이 bulk 경로로 승격하고,
-그 외 배치는 기존 validation/error-order 경로로 되돌린다.
+경로와 동일하게 유지해야 한다. Plain structural schema의 overlapping replace는 batch를
+한 번 적용한 뒤 실제로 남은 final target만 검증한다. 따라서 중간의 invalid value가 뒤의
+ancestor/descendant replace로 복구되면 성공할 수 있다. Batch 적용 실패, 지원하지 않는
+schema 경로, 기존 진단 순서를 보존해야 하는 형태는 canonical full validation 또는 기존
+sequential error-order 경로로 되돌린다.
 
 History inverse 계산도 같은 private sequential-replace COW seam을 재사용한다. 각 write
 직전 값을 캡처해 기존 operation별 inverse와 undo 순서를 유지하며, inverse를 상위 path

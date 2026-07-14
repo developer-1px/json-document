@@ -34,6 +34,10 @@ All notable changes to this project are documented here.
   immutable canonical patch records. Mutable ingress values are owned before
   commit; pre-frozen `trustedInitial` snapshots retain the identity-preserving
   zero-copy path, while only statically known-JSON schemas skip the JSON scan.
+- Changed overlapping replacement validation to inspect the effective final
+  targets after one atomic batch apply. A later descendant or ancestor replace
+  may repair an intermediate invalid value; legacy failure ordering remains the
+  fallback when the batch itself cannot be applied.
 
 ### Fixed
 
@@ -51,6 +55,8 @@ All notable changes to this project are documented here.
   live state, failed previews, or capability probes.
 - Kept publication-local patch records and revision order across reentrant
   subscribers, and stopped test-only/no-op patches from creating stale history.
+- Rejected inherited prototype properties during schema pointer introspection
+  and custom standalone string checks used as record-key schemas.
 
 ### Performance
 
@@ -80,6 +86,9 @@ All notable changes to this project are documented here.
   instead of rescanning a validated large base for every replay step.
 - Added `perf:causal` to compare revision-suffix materialization with the legacy
   full-journal path at configurable journal sizes.
+- Consolidated root-object, same-array, independent, and overlapping replace
+  schema validation behind one final-target planner and the foundation patch
+  executor, removing the duplicate schema-side replace executors.
 
 ## 1.1.0-rc.0 - 2026-07-11
 

@@ -191,6 +191,9 @@ export function isPlainStringKeySchema(schema: z.ZodType): boolean {
   const def = getDef(schema);
   return def.type === "string"
     && !def.coerce
+    && def.check === undefined
+    && def.fn === undefined
+    && typeof def.error !== "function"
     && (!Array.isArray(def.checks) || def.checks.length === 0);
 }
 

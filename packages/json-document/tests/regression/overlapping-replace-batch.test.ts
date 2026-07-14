@@ -119,6 +119,22 @@ describe("overlapping replace batch", () => {
     expect(ancestorThenDescendant.value.items[0]?.meta).toEqual({ tag: "ancestor", rank: 22 });
   });
 
+  test("validates the final state after overlapping replacements repair intermediate values", () => {
+    const descendantThenAncestor = createDocument();
+    expect(descendantThenAncestor.patch([
+      { op: "replace", path: "/items/0/meta/rank", value: "temporarily-invalid" },
+      { op: "replace", path: "/items/0/meta", value: { tag: "ancestor", rank: 21 } },
+    ])).toEqual({ ok: true });
+    expect(descendantThenAncestor.value.items[0]?.meta).toEqual({ tag: "ancestor", rank: 21 });
+
+    const ancestorThenDescendant = createDocument();
+    expect(ancestorThenDescendant.patch([
+      { op: "replace", path: "/items/0/meta", value: { tag: "ancestor", rank: "temporarily-invalid" } },
+      { op: "replace", path: "/items/0/meta/rank", value: 22 },
+    ])).toEqual({ ok: true });
+    expect(ancestorThenDescendant.value.items[0]?.meta).toEqual({ tag: "ancestor", rank: 22 });
+  });
+
   test("keeps leading test assertions in forward history without adding inverses", () => {
     const doc = createDocument();
     const operations: JSONPatchOperation[] = [
@@ -247,6 +263,272 @@ describe("overlapping replace batch", () => {
     expect(pathFirst.value).toBe(pathFirstBefore);
   });
 
+  test("preserves whole-batch failure priority and indexes for independent replacements", () => {
+    const ErrorSchema = z.object({
+      first: z.string().min(1),
+      second: z.string(),
+    });
+
+    const nonSerializable = createJSONDocument(ErrorSchema, { first: "ok", second: "ok" });
+    const serializationFailure = nonSerializable.patch([
+      { op: "replace", path: "/first", value: "" },
+      { op: "replace", path: "/second", value: () => "invalid" } as never,
+    ]);
+    expect(serializationFailure).toMatchObject({ ok: false, code: "not_serializable" });
+    if (!serializationFailure.ok) expect(serializationFailure.reason).toContain("op[1]");
+
+    const missingPath = createJSONDocument(ErrorSchema, { first: "ok", second: "ok" });
+    expect(missingPath.patch([
+      { op: "replace", path: "/first", value: "" },
+      { op: "replace", path: "/missing", value: "value" },
+    ])).toMatchObject({
+      ok: false,
+      code: "path_not_found",
+      pointer: "/missing",
+      reason: expect.stringContaining("op[1]"),
+    });
+  });
+
+  test("preserves the first violation for flat root replacement batches", () => {
+    const FlatSchema = z.object({ first: z.number(), second: z.number() });
+    const doc = createJSONDocument(FlatSchema, { first: 1, second: 2 });
+    const result = doc.canPatch([
+      { op: "replace", path: "/second", value: "invalid" },
+      { op: "replace", path: "/first", value: "invalid" },
+    ]);
+
+    expect(result).toMatchObject({ ok: false, code: "schema_violation" });
+    if (!result.ok) {
+      expect(result.violations).toEqual([
+        { path: "/second", message: expect.any(String) },
+      ]);
+    }
+  });
+
+  test("preserves pre-apply validation precedence for legacy root and array batches", () => {
+    const RootSchema = z.object({ first: z.number(), second: z.string() });
+    const invalidFirst = createJSONDocument(RootSchema, { first: 1, second: "ok" });
+    expect(invalidFirst.canPatch([
+      { op: "replace", path: "/first", value: "invalid" },
+      { op: "replace", path: "/second", value: () => "invalid" } as never,
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/first", message: expect.any(String) }],
+    });
+
+    const invalidSecond = createJSONDocument(RootSchema, { first: 1, second: "ok" });
+    const rootSerialization = invalidSecond.patch([
+      { op: "replace", path: "/first", value: 2 },
+      { op: "replace", path: "/second", value: () => "invalid" } as never,
+    ]);
+    expect(rootSerialization).toMatchObject({ ok: false, code: "not_serializable" });
+    if (!rootSerialization.ok) expect(rootSerialization.reason).not.toContain("op[1]");
+
+    const ArraySchema = z.object({
+      items: z.array(z.object({ value: z.number() })),
+    });
+    const array = createJSONDocument(ArraySchema, {
+      items: [{ value: 1 }, { value: 2 }],
+    });
+    const arraySerialization = array.patch([
+      { op: "replace", path: "/items/0/value", value: 3 },
+      { op: "replace", path: "/items/1/value", value: () => 4 } as never,
+    ]);
+    expect(arraySerialization).toMatchObject({ ok: false, code: "not_serializable" });
+    if (!arraySerialization.ok) expect(arraySerialization.reason).not.toContain("op[1]");
+  });
+
+  test("preserves root pre-validation before an unsupported existing key", () => {
+    const CatchallSchema = z.object({ a: z.number() }).catchall(z.number());
+    const doc = createJSONDocument(CatchallSchema, { a: 1, extra: 2 });
+    const result = doc.canPatch([
+      { op: "replace", path: "/a", value: "invalid" },
+      { op: "replace", path: "/extra", value: () => 2 } as never,
+    ]);
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/a", message: expect.any(String) }],
+    });
+  });
+
+  test("keeps full violation aggregation for wrapped root objects", () => {
+    const BaseSchema = z.object({ a: z.number(), b: z.number() });
+    const schemas = [
+      BaseSchema.optional(),
+      BaseSchema.nullable(),
+      z.lazy(() => BaseSchema),
+    ];
+
+    for (const schema of schemas) {
+      const doc = createJSONDocument(schema, { a: 1, b: 2 });
+      const result = doc.canPatch([
+        { op: "replace", path: "/a", value: "invalid" },
+        { op: "replace", path: "/b", value: "invalid" },
+      ]);
+
+      expect(result).toMatchObject({ ok: false, code: "schema_violation" });
+      if (!result.ok) {
+        expect(result.violations?.map((violation) => violation.path)).toEqual([
+          "/a",
+          "/b",
+        ]);
+      }
+    }
+  });
+
+  test("preserves array pre-validation before a later missing leaf", () => {
+    const FieldSchema = z.object({
+      items: z.array(z.object({ value: z.number().optional() })),
+    });
+    const field = createJSONDocument(FieldSchema, { items: [{ value: 1 }, {}] });
+    expect(field.canPatch([
+      { op: "replace", path: "/items/0/value", value: "invalid" },
+      { op: "replace", path: "/items/1/value", value: 2 },
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/items/0/value", message: expect.any(String) }],
+    });
+
+    const NestedSchema = z.object({
+      items: z.array(z.object({
+        nested: z.object({ x: z.number().optional() }),
+      })),
+    });
+    const nested = createJSONDocument(NestedSchema, {
+      items: [{ nested: { x: 1 } }, { nested: {} }],
+    });
+    expect(nested.canPatch([
+      { op: "replace", path: "/items/0/nested/x", value: "invalid" },
+      { op: "replace", path: "/items/1/nested/x", value: 2 },
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/items/0/nested/x", message: expect.any(String) }],
+    });
+  });
+
+  test("does not widen legacy aggregation past the first nested array", () => {
+    const InnerArraySchema = z.object({
+      rows: z.array(z.object({
+        cells: z.array(z.object({ nested: z.object({ x: z.number() }) })),
+      })),
+    });
+    const doc = createJSONDocument(InnerArraySchema, {
+      rows: [{
+        cells: [
+          { nested: { x: 1 } },
+          { nested: { x: 2 } },
+        ],
+      }],
+    });
+    const result = doc.patch([
+      { op: "replace", path: "/rows/0/cells/0/nested/x", value: 3 },
+      { op: "replace", path: "/rows/0/cells/1/nested/x", value: () => 4 } as never,
+    ]);
+
+    expect(result).toMatchObject({ ok: false, code: "not_serializable" });
+    if (!result.ok) expect(result.reason).toContain("op[1]");
+  });
+
+  test("handles independent mixed-depth replacements without entering array batching", () => {
+    const MixedSchema = z.object({
+      items: z.array(z.object({ field: z.number().optional() })),
+      other: z.number(),
+    });
+    const doc = createJSONDocument(MixedSchema, {
+      items: [{ field: 1 }],
+      other: 2,
+    });
+
+    expect(doc.patch([
+      { op: "replace", path: "/items/0/field", value: 3 },
+      { op: "replace", path: "/other", value: 4 },
+    ])).toEqual({ ok: true });
+    expect(doc.value).toEqual({ items: [{ field: 3 }], other: 4 });
+  });
+
+  test("keeps checked root aggregation and whole-batch failure priority", () => {
+    const CheckedRootSchema = z.object({
+      first: z.number().min(0),
+      second: z.number().min(0),
+    });
+    const checked = createJSONDocument(CheckedRootSchema, { first: 1, second: 2 });
+    const checkedResult = checked.canPatch([
+      { op: "replace", path: "/first", value: -1 },
+      { op: "replace", path: "/second", value: -2 },
+    ]);
+    expect(checkedResult).toMatchObject({ ok: false, code: "schema_violation" });
+    if (!checkedResult.ok) {
+      expect(checkedResult.violations?.map((violation) => violation.path)).toEqual([
+        "/first",
+        "/second",
+      ]);
+    }
+
+    const NestedCheckedSchema = z.object({
+      item: z.object({ count: z.number().min(0) }),
+    });
+    const missing = createJSONDocument(NestedCheckedSchema, { item: { count: 1 } });
+    expect(missing.patch([
+      { op: "replace", path: "/item", value: { count: -1 } },
+      { op: "replace", path: "/item/missing", value: 2 },
+    ])).toMatchObject({
+      ok: false,
+      code: "path_not_found",
+      pointer: "/item/missing",
+      reason: expect.stringContaining("op[1]"),
+    });
+
+    const nonSerializable = createJSONDocument(NestedCheckedSchema, { item: { count: 1 } });
+    expect(nonSerializable.patch([
+      { op: "replace", path: "/item", value: { count: -1 } },
+      { op: "replace", path: "/item/count", value: () => 2 } as never,
+    ])).toMatchObject({
+      ok: false,
+      code: "not_serializable",
+      reason: expect.stringContaining("op[1]"),
+    });
+  });
+
+  test("keeps canonical violation order for checked overlapping replacements", () => {
+    const CheckedObject = z.object({
+      a: z.number().min(0),
+      b: z.number().min(0),
+    });
+    const object = createJSONDocument(CheckedObject, { a: 1, b: 2 });
+    const objectResult = object.canPatch([
+      { op: "replace", path: "/b", value: 3 },
+      { op: "replace", path: "/a", value: -1 },
+      { op: "replace", path: "/b", value: -2 },
+    ]);
+    expect(objectResult).toMatchObject({ ok: false, code: "schema_violation" });
+    if (!objectResult.ok) {
+      expect(objectResult.violations?.map((violation) => violation.path)).toEqual([
+        "/a",
+        "/b",
+      ]);
+    }
+
+    const CheckedArray = z.array(z.number().min(0));
+    const array = createJSONDocument(CheckedArray, [1, 2]);
+    const arrayResult = array.canPatch([
+      { op: "replace", path: "/1", value: 3 },
+      { op: "replace", path: "/0", value: -1 },
+      { op: "replace", path: "/1", value: -2 },
+    ]);
+    expect(arrayResult).toMatchObject({ ok: false, code: "schema_violation" });
+    if (!arrayResult.ok) {
+      expect(arrayResult.violations?.map((violation) => violation.path)).toEqual([
+        "/0",
+        "/1",
+      ]);
+    }
+  });
+
   test("falls back to the legacy singleton error wording when a known value removes a later path", () => {
     const OptionalSchema = z.object({
       a: z.object({ x: z.number().optional() }),
@@ -352,5 +634,114 @@ describe("overlapping replace batch", () => {
     expect((Object.prototype as { rank?: number }).rank).toBeUndefined();
     expect(replacement).toEqual({ rank: 1 });
     expect(observed).toEqual([operations, inverse, operations]);
+  });
+
+  test("preserves root dash-key validation precedence", () => {
+    const doc = createJSONDocument(
+      z.record(z.string(), z.number()),
+      { "-": 1, stable: 2 },
+    );
+    const before = doc.value;
+
+    expect(doc.canPatch([
+      { op: "replace", path: "/-", value: "invalid" },
+      { op: "replace", path: "/stable", value: () => 3 } as never,
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/-", message: expect.any(String) }],
+    });
+    expect(doc.value).toBe(before);
+  });
+
+  test("preserves singleton error indexing for an unsupported root dash key", () => {
+    const doc = createJSONDocument(
+      z.object({ a: z.number() }).catchall(z.number()),
+      { a: 1, extra: 2, "-": 3 },
+    );
+    const result = doc.patch([
+      { op: "replace", path: "/a", value: 0 },
+      { op: "replace", path: "/extra", value: undefined } as never,
+      { op: "replace", path: "/-", value: 4 },
+    ]);
+
+    expect(result).toMatchObject({ ok: false, code: "not_serializable" });
+    if (!result.ok) expect(result.reason).toContain("op[0]");
+  });
+
+  test("preserves fallback precedence for nested and array dash segments", () => {
+    const NestedSchema = z.object({
+      value: z.number(),
+      nested: z.record(z.string(), z.number()),
+      items: z.array(z.number()),
+    });
+
+    const nested = createJSONDocument(NestedSchema, {
+      value: 1,
+      nested: { "-": 2 },
+      items: [3],
+    });
+    expect(nested.canPatch([
+      { op: "replace", path: "/value", value: "invalid" },
+      { op: "replace", path: "/nested/-", value: () => 2 } as never,
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/value", message: expect.any(String) }],
+    });
+
+    const array = createJSONDocument(NestedSchema, {
+      value: 1,
+      nested: { "-": 2 },
+      items: [3],
+    });
+    expect(array.canPatch([
+      { op: "replace", path: "/value", value: "invalid" },
+      { op: "replace", path: "/items/-", value: 4 },
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/value", message: expect.any(String) }],
+    });
+  });
+
+  test("preserves sequential failure precedence when a root replacement cannot be applied", () => {
+    const doc = createJSONDocument(z.object({ value: z.number() }), { value: 1 });
+
+    expect(doc.canPatch([
+      { op: "replace", path: "/value", value: "invalid" },
+      { op: "replace", path: "", value: () => ({ value: 2 }) } as never,
+    ])).toMatchObject({
+      ok: false,
+      code: "schema_violation",
+      violations: [{ path: "/value", message: expect.any(String) }],
+    });
+  });
+
+  test("keeps escaped segments distinct from nested paths in replacement targets", () => {
+    const EscapedSchema = z.object({
+      records: z.object({
+        "a/b": z.object({ value: z.number() }),
+        a: z.object({ b: z.object({ value: z.number() }) }),
+      }),
+    });
+    const doc = createJSONDocument(EscapedSchema, {
+      records: {
+        "a/b": { value: 1 },
+        a: { b: { value: 2 } },
+      },
+    });
+    const result = doc.canPatch([
+      { op: "replace", path: "/records/a~1b/value", value: "invalid" },
+      { op: "replace", path: "/records/a/b/value", value: "invalid" },
+    ]);
+
+    expect(result).toMatchObject({ ok: false, code: "schema_violation" });
+    if (!result.ok) {
+      expect(result.violations?.map((violation) => violation.path)).toEqual([
+        "/records/a~1b/value",
+        "/records/a/b/value",
+      ]);
+    }
   });
 });

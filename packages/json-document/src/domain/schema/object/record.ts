@@ -13,10 +13,10 @@ import {
   createDataKeySet,
   objectHasOwn,
   removedRootKeysMatchSuffix,
+  readRootRecordForLocalSchemaValidation,
   writeObjectDataValue,
 } from "./value.js";
 import { okLocalSchemaValidation } from "../model/result.js";
-import { readRootRecordForLocalSchemaValidation } from "./replace.js";
 import {
   evaluateLocalSchemaValidationValueValidationPlan,
   planLocalSchemaValidationValueValidation,

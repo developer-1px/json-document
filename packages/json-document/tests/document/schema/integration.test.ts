@@ -166,4 +166,21 @@ describe("doc.schema — schema introspection facade", () => {
       pointer: "/missing",
     });
   });
+
+  test("rejects inherited Object.prototype properties as schema paths", () => {
+    const doc = createJSONDocument(Schema, initial);
+
+    for (const key of ["constructor", "toString", "__proto__"]) {
+      const path = `/${key}`;
+      const expected = {
+        ok: false,
+        code: "path_not_found",
+        reason: `schema path not found: ${path}`,
+        pointer: path,
+      };
+
+      expect(doc.schema.at(path)).toEqual(expected);
+      expect(doc.schema.accepts(path, "value")).toEqual(expected);
+    }
+  });
 });
