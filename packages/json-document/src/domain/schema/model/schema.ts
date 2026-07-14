@@ -9,7 +9,9 @@ interface LocalSchemaCache {
   pointerSchemas: Map<string, z.ZodType | null>;
 }
 
-const plainStructuralSchemaCache = new WeakMap<object, boolean>();
+type LocalSchemaValidationCapability = "none" | "replace" | "all";
+
+const localSchemaValidationCapabilityCache = new WeakMap<object, LocalSchemaValidationCapability>();
 const knownJsonOutputSchemaCache = new WeakMap<object, boolean>();
 const localSchemaCaches = new WeakMap<object, LocalSchemaCache>();
 
@@ -37,40 +39,89 @@ export function cachedSchemaAtPointer(
 }
 
 export function isPlainStructuralSchema(schema: z.ZodType, seen?: WeakSet<object>): boolean {
-  const cached = plainStructuralSchemaCache.get(schema as object);
+  return localSchemaValidationCapability(schema, seen) === "all";
+}
+
+export function supportsLocalReplaceSchemaValidation(schema: z.ZodType): boolean {
+  return localSchemaValidationCapability(schema) !== "none";
+}
+
+function localSchemaValidationCapability(
+  schema: z.ZodType,
+  seen?: WeakSet<object>,
+): LocalSchemaValidationCapability {
+  const cached = localSchemaValidationCapabilityCache.get(schema as object);
   if (cached !== undefined) return cached;
+  const shouldCache = seen === undefined;
   const activeSeen = seen ?? new WeakSet<object>();
-  if (activeSeen.has(schema as object)) return true;
+  if (activeSeen.has(schema as object)) return "all";
   activeSeen.add(schema as object);
+  const finish = (capability: LocalSchemaValidationCapability): LocalSchemaValidationCapability => {
+    activeSeen.delete(schema as object);
+    if (shouldCache) localSchemaValidationCapabilityCache.set(schema as object, capability);
+    return capability;
+  };
 
   const def = getDef(schema);
-  if (Array.isArray(def.checks) && def.checks.length > 0) return cachePlainStructuralSchema(schema, false);
+  if (def.coerce || typeof def.error === "function") return finish("none");
+  // Standalone checks such as `z.stringFormat(name, fn)` keep their check on
+  // the schema definition instead of `def.checks`. Keep these on full-root
+  // validation; otherwise a dynamic custom check can be skipped by an edit to
+  // an unrelated path. Chained declarative checks are classified below.
+  if (typeof def.check === "string" || typeof def.fn === "function") {
+    return finish("none");
+  }
+  const hasChecks = Array.isArray(def.checks) && def.checks.length > 0;
 
   switch (def.type) {
     case "object": {
+      if (hasChecks) return finish("none");
       const shape = getObjectShape(schema);
-      if (!shape) return cachePlainStructuralSchema(schema, false);
-      if (!Object.values(shape).every((child) => isPlainStructuralSchema(child, activeSeen))) {
-        return cachePlainStructuralSchema(schema, false);
-      }
-      return cachePlainStructuralSchema(schema, def.catchall ? isPlainStructuralSchema(def.catchall, activeSeen) : true);
+      if (!shape) return finish("none");
+      const children = Object.values(shape);
+      if (def.catchall) children.push(def.catchall);
+      return finish(combineLocalSchemaValidationCapabilities(children, activeSeen));
     }
     case "array": {
+      if (hasChecks) return finish("none");
       const element = getArrayElement(schema);
-      return cachePlainStructuralSchema(schema, element ? isPlainStructuralSchema(element, activeSeen) : false);
+      return finish(element ? localSchemaValidationCapability(element, activeSeen) : "none");
     }
     case "record":
-      return cachePlainStructuralSchema(
-        schema,
-        (!def.keyType || isPlainStructuralSchema(def.keyType, activeSeen))
-          && !!def.valueType
-          && isPlainStructuralSchema(def.valueType, activeSeen),
+      return finish(
+        !hasChecks && (!def.keyType || isPlainStringKeySchema(def.keyType)) && def.valueType
+          ? localSchemaValidationCapability(def.valueType, activeSeen)
+          : "none",
       );
+    case "union":
+      return finish(
+        !hasChecks && Array.isArray(def.options) && def.options.length > 0
+          ? combineLocalSchemaValidationCapabilities(def.options, activeSeen)
+          : "none",
+      );
+    case "lazy": {
+      if (hasChecks || !def.getter) return finish("none");
+      try {
+        return finish(localSchemaValidationCapability(def.getter(), activeSeen));
+      } catch {
+        return finish("none");
+      }
+    }
     case "optional":
     case "nullable":
-      return cachePlainStructuralSchema(schema, !!def.innerType && isPlainStructuralSchema(def.innerType, activeSeen));
-    case "string":
-    case "number":
+      return finish(
+        !hasChecks && def.innerType
+          ? localSchemaValidationCapability(def.innerType, activeSeen)
+          : "none",
+      );
+    case "string": {
+      if (!hasChecks) return finish("all");
+      return finish(scalarChecksSupportLocalValidation("string", def.checks) ? "replace" : "none");
+    }
+    case "number": {
+      if (!hasChecks) return finish("all");
+      return finish(scalarChecksSupportLocalValidation("number", def.checks) ? "replace" : "none");
+    }
     case "boolean":
     case "null":
     case "literal":
@@ -78,15 +129,65 @@ export function isPlainStructuralSchema(schema: z.ZodType, seen?: WeakSet<object
     case "unknown":
     case "any":
     case "never":
-      return cachePlainStructuralSchema(schema, true);
+      return finish(hasChecks ? "none" : "all");
     default:
-      return cachePlainStructuralSchema(schema, false);
+      return finish("none");
   }
 }
 
-function cachePlainStructuralSchema(schema: z.ZodType, value: boolean): boolean {
-  plainStructuralSchemaCache.set(schema as object, value);
-  return value;
+function combineLocalSchemaValidationCapabilities(
+  schemas: ReadonlyArray<z.ZodType>,
+  seen: WeakSet<object>,
+): LocalSchemaValidationCapability {
+  let combined: LocalSchemaValidationCapability = "all";
+  for (const schema of schemas) {
+    const capability = localSchemaValidationCapability(schema, seen);
+    if (capability === "none") return "none";
+    if (capability === "replace") combined = "replace";
+  }
+  return combined;
+}
+
+function scalarChecksSupportLocalValidation(
+  scalar: "string" | "number",
+  checks: unknown[] | undefined,
+): boolean {
+  if (!Array.isArray(checks) || checks.length === 0) return true;
+  return checks.every((check) => {
+    if (check === null || typeof check !== "object") return false;
+    const checkDef = (check as {
+      _zod?: { def?: { check?: unknown; fn?: unknown; tx?: unknown; error?: unknown } };
+    })._zod?.def;
+    if (
+      !checkDef
+      || typeof checkDef.check !== "string"
+      || typeof checkDef.fn === "function"
+      || typeof checkDef.error === "function"
+    ) {
+      return false;
+    }
+    if (scalar === "number") {
+      return checkDef.check === "less_than"
+        || checkDef.check === "greater_than"
+        || checkDef.check === "multiple_of"
+        || checkDef.check === "number_format";
+    }
+    if (checkDef.check === "overwrite") return isBuiltinTrimOverwrite(checkDef.tx);
+    return checkDef.check === "min_length"
+      || checkDef.check === "max_length"
+      || checkDef.check === "length_equals"
+      || checkDef.check === "string_format";
+  });
+}
+
+function isBuiltinTrimOverwrite(transform: unknown): boolean {
+  if (typeof transform !== "function") return false;
+  try {
+    return Function.prototype.toString.call(transform).replace(/\s+/g, " ")
+      === "(input) => input.trim()";
+  } catch {
+    return false;
+  }
 }
 
 export function schemaOutputIsKnownJson(schema: z.ZodType, seen?: WeakSet<object>): boolean {

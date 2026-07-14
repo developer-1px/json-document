@@ -402,9 +402,14 @@ output도 함께 보증한다. Pure
 `applyPatch*` helper는 state owner가 아니므로 이 runtime ownership 정책의
 대상이 아니다.
 
-빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에서만 적용된다. 대상 schema는 refinement, transform, check가 없는 object, array, record, scalar validator다. 지원 edit는 non-root `replace` batch(독립 경로와 순차 ancestor/descendant overlap 포함), array `add`/`remove`/`copy`/`move`, same-array `add`/`remove` batch다. Leading `test` assertion 뒤에 이 edit들이 오는 guarded batch도 assertion을 먼저 확인한 뒤 같은 mutation fast path를 사용한다. Overlapping `replace`의 history inverse도 operation별 이전 값과 역순을 유지하면서 같은 private copy-on-write 순회 구현을 사용한다. `refine`, `superRefine`, transform, check가 있으면 의도적으로 전체 루트 schema 검증으로 돌아간다.
+빠른 document path는 신뢰된 document state와 구조를 정적으로 해석할 수 있는 Zod schema에 적용된다. Check가 없는 object, array, record, scalar validator는 기존 non-root `replace` batch(독립 경로와 순차 ancestor/descendant overlap 포함), array `add`/`remove`/`copy`/`move`, same-array `add`/`remove` batch를 지원한다. Zod의 선언적 string/number constraint와 built-in `trim()`이 primitive leaf에만 있는 schema는 non-root 단일/독립 `replace` batch만 위치별로 검증한다. Leading `test` assertion 뒤에 이 edit들이 오는 guarded batch도 assertion을 먼저 확인한 뒤 같은 mutation fast path를 사용한다. Overlapping `replace`의 history inverse도 operation별 이전 값과 역순을 유지하면서 같은 private copy-on-write 순회 구현을 사용한다.
+
+`refine`, `superRefine`, custom check/overwrite, custom error callback, container check, coercion, pipe transform은 의도적으로 전체 루트 schema 검증으로 돌아간다. 전체 루트 검증은 Zod check와 schema/global error callback이 실패한 input까지 관찰할 수 있으므로 candidate를 전체 JSON clone한 뒤 수행한다. 지원되는 위치별 `replace` 검증도 object payload만 먼저 clone해 caller-owned input과 live state를 격리한다.
+
+Adapter readiness benchmark의 hard gate는 process CPU-time p95다. 이는 json-document process의 계산과 GC CPU는 포함하고 다른 process 때문에 deschedule된 시간은 제외한다. 같은 run의 wall-time p50/p95/max는 진단값이며, 사용자 체감 wall latency는 Canvas/Editable 전용 또는 idle runner에서 별도로 확인한다.
 
 ```sh
+npm run perf:adapters
 npm run perf:core
 ```
 
