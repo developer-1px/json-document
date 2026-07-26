@@ -4,7 +4,7 @@ import type {
   JSONDocumentInsertOptions,
   JSONDocumentInsertTarget,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type SnippetInsertOptions = JSONDocumentInsertOptions;
 

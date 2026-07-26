@@ -5,7 +5,7 @@ import {
   JSONDocumentError,
   createJSONDocument,
   type JSONChangeMetadata,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import {
   createCausalPatchInbox,
   type CausalPatchInboxOptions,

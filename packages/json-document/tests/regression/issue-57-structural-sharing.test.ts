@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { applyPatch } from "@interactive-os/json-document";
+import { applyPatch } from "@interactive-os/json-document/session";
 
 describe("#57 structural sharing", () => {
   const Schema = z.object({

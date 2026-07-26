@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canTransform } from "./plan.js";
 import type { CaseTransform, ChangeCaseResult } from "./types.js";
 

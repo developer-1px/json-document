@@ -1,7 +1,7 @@
 import type {
   JSONDocument,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 /** Minimal read port required to resolve stable ids. */
 export type IdResolverDocument<TDocument> = Pick<

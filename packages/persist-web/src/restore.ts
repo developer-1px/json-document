@@ -2,7 +2,7 @@ import {
   JSONDocumentError,
   type JSONDocument,
   type JSONResult,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   persistenceError,

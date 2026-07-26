@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { applyPatch, applyPatchToTrustedState } from "@interactive-os/json-document";
+import { applyPatch, applyPatchToTrustedState } from "@interactive-os/json-document/session";
 
 describe("applyPatch public contract", () => {
   test("validates the whole resulting state", () => {

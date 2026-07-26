@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 import { canEnsure, createApplyDefaults, type ApplyDefaultsResult } from "../src/index.js";
 
 // apply-defaults is meaningful when the defaultable keys are schema-optional, so

@@ -1,4 +1,4 @@
-import { appendSegment, type JSONCapabilityResult, type JSONDocument, type JSONPatchOperation, type JSONResult, type Pointer } from "@interactive-os/json-document";
+import { appendSegment, type JSONCapabilityResult, type JSONDocument, type JSONPatchOperation, type JSONResult, type Pointer } from "@interactive-os/json-document/session";
 import type { InvalidReferenceValue, NormalizedReference, ReferenceDiagnostic, ReferenceDiagnosticCode, ReferenceError, ReferenceErrorCode, ReferenceFieldDescriptor, ReferenceIndex, ReferenceLink, ReferencesDescriptor, ReferenceSetInput, ReferenceSetPlanResult, ReferenceSnapshot, ReferenceTarget, ReferenceTargetDescriptor } from "./types.js";
 
 export function canSetReference<TDocument>(

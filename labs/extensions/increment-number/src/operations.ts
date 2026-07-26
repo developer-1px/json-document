@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canStep } from "./plan.js";
 import type { IncrementNumberOptions, IncrementNumberResult } from "./types.js";
 

@@ -4,7 +4,7 @@
 //   click        = collapse
 
 import { useCallback } from "react";
-import type { Pointer, SelectionState } from "@interactive-os/json-document";
+import type { Pointer, SelectionState } from "@interactive-os/json-document/session";
 import type { Mode } from "../keymap.js";
 
 export function useClickPolicy(

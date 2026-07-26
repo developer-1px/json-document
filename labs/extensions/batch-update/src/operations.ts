@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canBatchUpdate } from "./plan.js";
 import type { BatchUpdateOptions, BatchUpdateResult, BatchUpdateValue } from "./types.js";
 

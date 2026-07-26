@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
+import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document/session";
 
 const Schema = z.object({
   items: z.array(z.object({ id: z.string(), name: z.string() })),

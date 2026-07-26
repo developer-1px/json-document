@@ -1,4 +1,4 @@
-import type { JSONChangeMetadata, JSONDocument } from "@interactive-os/json-document";
+import type { JSONChangeMetadata, JSONDocument } from "@interactive-os/json-document/session";
 import { diffDocument } from "./plan.js";
 import type { DocumentDiffApplyResult } from "./types.js";
 

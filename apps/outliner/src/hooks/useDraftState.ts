@@ -5,7 +5,7 @@ import {
   type DocumentPersistenceRestoreResult,
   type DocumentPersistenceSaveResult,
 } from "@interactive-os/json-document-persist-web";
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import type { OutlineNode } from "../schema.js";
 
 const DRAFT_KEY = "json-document.outliner.draft";

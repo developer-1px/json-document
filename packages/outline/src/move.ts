@@ -7,7 +7,7 @@ import {
   type JSONPatchOperation,
   type JSONResult,
   type Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   copyChange,

@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canTrimText } from "./plan.js";
 import type { TrimTextOptions, TrimTextResult } from "./types.js";
 

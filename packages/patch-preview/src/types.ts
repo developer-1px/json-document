@@ -3,9 +3,9 @@ import type {
   JSONPatchOperation,
   JSONResult,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
-export type PatchPreviewSchema = Parameters<typeof import("@interactive-os/json-document").applyPatch>[0];
+export type PatchPreviewSchema = Parameters<typeof import("@interactive-os/json-document/session").applyPatch>[0];
 
 export type PatchPreviewErrorCode =
   | "patch_rejected"

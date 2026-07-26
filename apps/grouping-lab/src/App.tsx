@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createGrouping, type GroupingAdapter, type GroupingChangeResult } from "@interactive-os/json-document-grouping";
-import type { Pointer } from "@interactive-os/json-document";
+import type { Pointer } from "@interactive-os/json-document/session";
 import { useJSONDocument } from "@interactive-os/json-document/react";
 import { z } from "zod";
 import "./grouping-lab.css";

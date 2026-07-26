@@ -1,7 +1,7 @@
 import type {
   JSONChangeMetadata,
   JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import type {
   PatchLogEntry,

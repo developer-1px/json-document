@@ -6,7 +6,7 @@ import {
   type TextSurfaceFragment,
   type TextSurfaceRange,
   textSurfaceFragment,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export function selectedTextSurfaceFragment<T>(
   document: JSONDocument<T>,

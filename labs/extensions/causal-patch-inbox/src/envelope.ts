@@ -1,7 +1,7 @@
 import type {
   JSONPatchOperation,
   SelectionPoint,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import type {
   CausalAuthoredIntent,
   CausalPositionalIntent,

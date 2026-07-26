@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 import { canFill, createFillSeries, type FillSeriesResult } from "../src/index.js";
 
 const Row = z.object({

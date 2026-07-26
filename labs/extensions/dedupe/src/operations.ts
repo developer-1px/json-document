@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canDedupe } from "./plan.js";
 import type { DedupeOptions, DedupeResult } from "./types.js";
 

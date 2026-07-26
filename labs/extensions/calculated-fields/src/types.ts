@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONDocument, JSONPatchOperation, JSONResult, Pointer, ReadResult } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocument, JSONPatchOperation, JSONResult, Pointer, ReadResult } from "@interactive-os/json-document/session";
 
 export type CalculatedFieldErrorCode =
   | "read_failed"

@@ -4,7 +4,7 @@ import {
   type JSONPatchOperation,
   type Pointer,
   type SelectionPoint,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   isArrayAtEither,

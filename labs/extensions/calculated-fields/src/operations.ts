@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { planCalculatedFields } from "./plan.js";
 import type { CalculatedFieldDefinition, CalculatedFieldError, CalculatedFieldsSyncResult } from "./types.js";
 

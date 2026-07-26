@@ -4,7 +4,7 @@ import type {
   JSONDocumentDuplicateResult,
   JSONResult,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type CollectionErrorCode =
   | "empty_selection"

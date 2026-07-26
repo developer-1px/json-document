@@ -6,7 +6,7 @@ import {
   type Comments,
 } from "@interactive-os/json-document-comments";
 import { useJSONDocument } from "@interactive-os/json-document/react";
-import { type Pointer } from "@interactive-os/json-document";
+import { type Pointer } from "@interactive-os/json-document/session";
 import { z } from "zod";
 import "./review-comments-lab.css";
 

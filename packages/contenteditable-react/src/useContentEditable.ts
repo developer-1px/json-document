@@ -3,7 +3,7 @@ import {
   type ContentEditableAdapter,
   type TextSurfaceResolver,
 } from "@interactive-os/json-document-contenteditable-web";
-import type { JSONDocument, SelectionSnap } from "@interactive-os/json-document";
+import type { JSONDocument, SelectionSnap } from "@interactive-os/json-document/session";
 import {
   useCallback,
   useLayoutEffect,

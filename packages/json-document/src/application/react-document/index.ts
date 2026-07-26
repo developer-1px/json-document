@@ -2,16 +2,16 @@
 
 import { useMemo, useReducer, useRef } from "react";
 
-import { createJSONDocument } from "../document/create.js";
+import { createJSONDocument } from "../session/create.js";
 import type {
   JSONDocument,
   JSONDocumentOptions,
-} from "../document/contract.js";
+} from "../session/contract.js";
 import type {
   JSONDocumentSchemaInput,
   JSONDocumentSchemaLike,
   JSONDocumentSchemaOutput,
-} from "../document/create.js";
+} from "../session/create.js";
 
 type TrustedInitialDocumentOptions = JSONDocumentOptions & { trustedInitial: true };
 type UntrustedInitialDocumentOptions = JSONDocumentOptions & { trustedInitial?: false | undefined };

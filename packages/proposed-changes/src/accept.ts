@@ -3,7 +3,7 @@ import type {
   JSONDocument,
   JSONPatchOperation,
   JSONResult,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   cloneJson,

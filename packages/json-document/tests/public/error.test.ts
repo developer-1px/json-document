@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument, JSONDocumentError } from "@interactive-os/json-document";
+import { createJSONDocument, JSONDocumentError } from "@interactive-os/json-document/session";
 
 describe("JSONDocumentError", () => {
   test("exposes op, result, name, and operation-specific message", () => {

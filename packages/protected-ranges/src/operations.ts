@@ -6,7 +6,7 @@ import type {
   JSONPatchOperation,
   JSONResult,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   protectedPasteTarget,

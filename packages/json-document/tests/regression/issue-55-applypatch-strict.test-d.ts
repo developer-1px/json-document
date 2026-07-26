@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { applyPatch, applyPatchToTrustedState } from "@interactive-os/json-document";
+import { applyPatch, applyPatchToTrustedState } from "@interactive-os/json-document/session";
 
 const Doc = z.object({
   blocks: z.array(z.discriminatedUnion("kind", [

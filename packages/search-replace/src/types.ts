@@ -3,7 +3,7 @@ import type {
   JSONPatchOperation,
   JSONResult,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type SearchReplaceErrorCode =
   | "empty_search"

@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { step } from "./operations.js";
 import { canStep } from "./plan.js";
 import type { IncrementNumber } from "./types.js";

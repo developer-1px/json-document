@@ -11,7 +11,7 @@ import {
   createJSONDocument,
   parsePointer,
   type JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 const Any = z.any();
 

@@ -47,6 +47,10 @@ export function jsonDocumentSourceAliases(options: JsonDocumentSourceAliasOption
       replacement: sourceFile("packages/json-document/src/application/react-document/index.ts"),
     },
     {
+      find: "@interactive-os/json-document/session",
+      replacement: sourceFile("packages/json-document/src/application/session/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document",
       replacement: sourceFile("packages/json-document/src/application/document/index.ts"),
     },

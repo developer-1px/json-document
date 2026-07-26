@@ -1,4 +1,4 @@
-import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document/session";
 import type { ToggleValueError, ToggleValueErrorCode, ToggleValueOptions, ToggleValueResult } from "./types.js";
 
 export function canToggleValue<TDocument, TValue = unknown>(

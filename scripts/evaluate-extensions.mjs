@@ -3,8 +3,7 @@ import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
 const corePeerRanges = new Set([
-  "^1.0.0",
-  "^1.0.1 || ^1.1.0-rc.0",
+  "^2.0.0-rc.0",
 ]);
 const officialExtensions = [
   {
@@ -289,6 +288,9 @@ if (!tsconfigPathAliases["@interactive-os/json-document-*"]?.includes("labs/exte
 if (tsconfigPathAliases["@interactive-os/json-document/react"]?.[0] !== "packages/json-document/src/application/react-document/index.ts") {
   fail("tsconfig.json-document-paths.json: missing @interactive-os/json-document/react source path.");
 }
+if (tsconfigPathAliases["@interactive-os/json-document/session"]?.[0] !== "packages/json-document/src/application/session/index.ts") {
+  fail("tsconfig.json-document-paths.json: missing @interactive-os/json-document/session source path.");
+}
 if (tsconfigPathAliases["@interactive-os/json-document"]?.[0] !== "packages/json-document/src/application/document/index.ts") {
   fail("tsconfig.json-document-paths.json: missing json-document source path.");
 }
@@ -321,10 +323,13 @@ for (const extension of officialExtensions) {
     const source = read(sourcePath);
     for (const match of source.matchAll(/\bfrom\s+["']([^"']+)["']/g)) {
       const specifier = match[1];
-      if (specifier === "@interactive-os/json-document") continue;
+      if (
+        specifier === "@interactive-os/json-document"
+        || specifier === "@interactive-os/json-document/session"
+      ) continue;
       if (extension.allowedImports?.includes(specifier)) continue;
       if (specifier.startsWith(".") && !specifier.includes("../json-document")) continue;
-      fail(`${sourcePath}: extension source must import json-document only through the package entrypoint (${specifier}).`);
+      fail(`${sourcePath}: extension source must import json-document only through public package entrypoints (${specifier}).`);
     }
     if (/src\/application|src\/domain|src\/foundation|\.\.\/json-document\/src/.test(source)) {
       fail(`${sourcePath}: extension source must not import json-document internals.`);

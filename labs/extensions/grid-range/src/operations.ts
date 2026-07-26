@@ -1,4 +1,4 @@
-import type { JSONChangeMetadata, JSONDocument, JSONDocumentCommitOptions, JSONResult } from "@interactive-os/json-document";
+import type { JSONChangeMetadata, JSONDocument, JSONDocumentCommitOptions, JSONResult } from "@interactive-os/json-document/session";
 import { canFillGridRange, canPasteGridRange } from "./plan.js";
 import type { GridRangeError, GridRangeFillInput, GridRangeOptions, GridRangePasteInput, GridRangeResolvedCell, GridRangeResult } from "./types.js";
 

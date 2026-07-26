@@ -5,7 +5,7 @@ import {
   applyPatch,
   createJSONDocument,
   type JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 describe("JSON document state invariants", () => {
   test("rejects a non-JSON schema output before creating a document", () => {

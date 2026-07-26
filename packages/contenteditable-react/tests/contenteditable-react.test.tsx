@@ -8,7 +8,7 @@ import {
 import { createRoot } from "react-dom/client";
 import { act } from "react";
 
-import { createJSONDocument, type JSONDocument, type TextSurface } from "@interactive-os/json-document";
+import { createJSONDocument, type JSONDocument, type TextSurface } from "@interactive-os/json-document/session";
 import {
   JSON_TEXT_ATTRIBUTE,
 } from "@interactive-os/json-document-contenteditable-web";

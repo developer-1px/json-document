@@ -1,6 +1,6 @@
 import type {
   JSONDocument,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   canDemoteOutline,

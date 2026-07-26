@@ -1,4 +1,4 @@
-import { type JSONDocument, type Pointer, trackPointer } from "@interactive-os/json-document";
+import { type JSONDocument, type Pointer, trackPointer } from "@interactive-os/json-document/session";
 import type { Bookmark, Bookmarks, BookmarksListener, BookmarksSnapshot } from "./types.js";
 
 export function createBookmarks<T>(

@@ -1,6 +1,6 @@
 import type {
   SchemaKind,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export function valueKind(value: unknown): SchemaKind {
   if (value === null) return "null";

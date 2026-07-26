@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canClearContents } from "./plan.js";
 import type { ClearContentsOptions, ClearContentsResult } from "./types.js";
 

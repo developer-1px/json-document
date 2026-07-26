@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document",
-  "version": "1.1.0-rc.0",
-  "description": "Headless JSON editing primitives guarded by Zod schemas.",
+  "version": "2.0.0-rc.0",
+  "description": "Provider-neutral JSON editing protocol and headless document projection.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -22,16 +22,14 @@
     "tag": "next"
   },
   "keywords": [
-    "zod",
     "json",
-    "crud",
-    "schema",
-    "tree",
-    "treegrid",
-    "clipboard",
-    "undo",
-    "redo",
-    "headless"
+    "json-patch",
+    "json-pointer",
+    "jsonpath",
+    "document",
+    "editor",
+    "headless",
+    "protocol"
   ],
   "files": [
     "dist",
@@ -43,6 +41,10 @@
     ".": {
       "types": "./dist/application/document/index.d.ts",
       "import": "./dist/application/document/index.js"
+    },
+    "./session": {
+      "types": "./dist/application/session/index.d.ts",
+      "import": "./dist/application/session/index.js"
     },
     "./react": {
       "types": "./dist/application/react-document/index.d.ts",
@@ -66,6 +68,9 @@
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "zod": {
       "optional": true
     }
   },

@@ -1,4 +1,4 @@
-import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document/session";
 import type { FillBlanksError, FillBlanksErrorCode, FillBlanksOptions, FillBlanksResult, FillBlanksValue } from "./types.js";
 
 export function canFillBlanks<TDocument, TValue = unknown>(

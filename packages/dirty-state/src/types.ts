@@ -1,6 +1,6 @@
 import type {
   JSONResult,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export interface DirtyStateSnapshot<T> {
   dirty: boolean;

@@ -7,7 +7,7 @@ import {
   type JSONDocumentCommitOptions,
   type JSONPatchOperation,
   type SelectionSnap,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import { createPatchLog } from "../src/index.js";
 
 const Item = z.object({

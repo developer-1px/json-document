@@ -4,7 +4,7 @@ import * as z from "zod";
 import {
   createJSONDocument,
   type JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 const Schema = z.object({
   items: z.array(z.object({

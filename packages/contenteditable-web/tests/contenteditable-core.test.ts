@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 import * as ts from "typescript";
 import * as z from "zod";
 
-import { createJSONDocument, type SelectionSnap, type TextSurface } from "@interactive-os/json-document";
+import { createJSONDocument, type SelectionSnap, type TextSurface } from "@interactive-os/json-document/session";
 import {
   JSON_ATOM_REPLACEMENT,
   createContentEditableCore,

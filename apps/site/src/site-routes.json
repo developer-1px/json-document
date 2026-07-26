@@ -3,28 +3,28 @@
     "path": "/",
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
-    "description": "json-document is a Zod-guarded headless JSON editing engine for JSON Patch, JSON Pointer, JSONPath, selection, clipboard, and history.",
+    "description": "Provider-neutral JSON editing protocol and six-member headless document projection for JSON Patch, JSON Pointer, and JSONPath.",
     "group": "Start"
   },
   {
     "path": "/docs",
     "label": "Docs",
     "title": "json-document Docs - json-document",
-    "description": "User guide to json-document's schema-first editing flow, can* checks, changes, results, and project model.",
+    "description": "User guide to the v2 Kernel, Pure Protocol, Document Projection, optional Editing Session, and host boundaries.",
     "group": "Start"
   },
   {
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
-    "description": "Step-by-step json-document tutorial for building a small card editor with schema checks, selection, clipboard, and history.",
+    "description": "Step-by-step guide to reading, probing, committing, and subscribing to provider-neutral JSON document changes.",
     "group": "Start"
   },
   {
     "path": "/docs/api",
     "label": "API reference",
     "title": "json-document API - json-document",
-    "description": "Public json-document API reference for document changes, can* checks, selection, clipboard, history, Pointer, and JSONPath.",
+    "description": "Public v2 Kernel API reference for the exact root surface, six-member Projection, JSON Patch, Pointer, and JSONPath.",
     "group": "Start"
   },
   {

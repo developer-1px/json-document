@@ -43,7 +43,7 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
-    "@interactive-os/json-document": "^1.0.0",
+    "@interactive-os/json-document": "^2.0.0-rc.0",
     "@interactive-os/json-document-contenteditable-web": "^0.1.0",
     "react": ">=18"
   },

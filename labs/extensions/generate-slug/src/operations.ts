@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canGenerateSlug } from "./plan.js";
 import type { GenerateSlugOptions, GenerateSlugResult } from "./types.js";
 

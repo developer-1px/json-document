@@ -12,7 +12,7 @@ import { renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { z } from "zod";
 import { Outliner, OutlineSchema, SAMPLE } from "../src/index.js";
-import type { JSONDocumentError } from "@interactive-os/json-document";
+import type { JSONDocumentError } from "@interactive-os/json-document/session";
 import { useJSONDocument } from "@interactive-os/json-document/react";
 
 afterEach(cleanup);

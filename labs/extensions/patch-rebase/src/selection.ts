@@ -4,7 +4,7 @@ import {
   type Pointer,
   type SelectionPoint,
   type SelectionPointObject,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 const POINT_FIELDS = new Set(["path", "offset", "edge", "affinity"]);
 

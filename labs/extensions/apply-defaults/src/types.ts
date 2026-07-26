@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONPatchOperation, JSONResult, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONPatchOperation, JSONResult, Pointer } from "@interactive-os/json-document/session";
 
 export type ApplyDefaultsErrorCode =
   | "invalid_pointer"

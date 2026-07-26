@@ -5,7 +5,7 @@ import type {
   JSONResult,
   Pointer,
   SchemaKind,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type OutlineErrorCode =
   | "invalid_pointer"

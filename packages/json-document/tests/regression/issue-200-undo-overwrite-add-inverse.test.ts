@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 
 describe("#200 undo restores value overwritten by add/copy", () => {
   it("add overwriting an existing object member restores the prior value on undo", () => {

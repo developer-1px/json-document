@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { reverse, sort } from "./operations.js";
 import { canReverse, canSort } from "./plan.js";
 import type { SortItems } from "./types.js";

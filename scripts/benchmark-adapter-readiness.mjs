@@ -4,19 +4,19 @@ import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import * as z from "zod";
 
-const distEntry = new URL(
-  "../packages/json-document/dist/application/document/index.js",
+const distSessionEntry = new URL(
+  "../packages/json-document/dist/application/session/index.js",
   import.meta.url,
 );
 
-if (!existsSync(distEntry)) {
+if (!existsSync(distSessionEntry)) {
   console.error(
     "Missing package dist. Run `npm run build -w @interactive-os/json-document` first.",
   );
   process.exit(1);
 }
 
-const { createJSONDocument } = await import(distEntry.href);
+const { createJSONDocument } = await import(distSessionEntry.href);
 
 const warmups = envPositiveInteger("PERF_ADAPTER_WARMUPS", 20);
 const samples = envPositiveInteger("PERF_ADAPTER_SAMPLES", 300);

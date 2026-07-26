@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { applyDocumentDiff } from "./operations.js";
 import { canApplyDocumentDiff, diffDocument } from "./plan.js";
 import type { DocumentDiff } from "./types.js";

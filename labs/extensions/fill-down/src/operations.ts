@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canFillDown } from "./plan.js";
 import type { FillDownOptions, FillDownResult } from "./types.js";
 

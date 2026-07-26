@@ -1,4 +1,4 @@
-import type { Pointer, SelectionRange } from "@interactive-os/json-document";
+import type { Pointer, SelectionRange } from "@interactive-os/json-document/session";
 
 export type PresenceCursorErrorCode =
   | "empty_peer_id"

@@ -7,7 +7,7 @@ import {
   type SelectionSnap,
   type TextSurface,
   type TextSurfaceFragment,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import {
   isTextSurfaceFragment,
   selectedTextSurfaceFragment,

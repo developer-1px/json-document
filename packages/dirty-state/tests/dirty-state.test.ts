@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument, type JSONDocumentOptions } from "@interactive-os/json-document";
+import { createJSONDocument, type JSONDocumentOptions } from "@interactive-os/json-document/session";
 import { createDirtyState } from "../src/index.js";
 
 const Draft = z.object({

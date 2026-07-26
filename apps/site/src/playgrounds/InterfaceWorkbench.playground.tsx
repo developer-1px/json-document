@@ -22,7 +22,7 @@ import {
   type JSONCapabilityResult,
   type Pointer,
   type SelectionSnap,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import { useJSONDocument } from "@interactive-os/json-document/react";
 
 const Card = z.object({

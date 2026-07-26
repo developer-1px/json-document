@@ -1,4 +1,4 @@
-import { appendSegment, type JSONDocument, type JSONPatchOperation, lastSegmentIndex, parentPointer, type Pointer, resolveSiblingRange, type SiblingRangeErrorCode, tryParsePointer } from "@interactive-os/json-document";
+import { appendSegment, type JSONDocument, type JSONPatchOperation, lastSegmentIndex, parentPointer, type Pointer, resolveSiblingRange, type SiblingRangeErrorCode, tryParsePointer } from "@interactive-os/json-document/session";
 import type { MoveSelectedError, MoveSelectedErrorCode, MoveSelectedResult, MoveSelectedTarget, NormalizedRange } from "./types.js";
 
 export function canMoveSelected<TDocument>(

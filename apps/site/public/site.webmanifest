@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document",
   "short_name": "@interactive-os/json-document",
-  "description": "Zod-guarded headless JSON editing.",
+  "description": "Provider-neutral JSON editing protocol and headless document projection.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fafaf9",
