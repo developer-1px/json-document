@@ -1,4 +1,4 @@
-import { buildPointer } from "../pointer/index.js";
+import { buildPointer } from "../pointer/core.js";
 import { cloneTrustedPlainJson } from "./trustedClone.js";
 import { jsonSerializableErrorFast } from "./serializable.js";
 

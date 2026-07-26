@@ -118,6 +118,9 @@ jobs:
             npm run verify -w "$package"
             npm pack -w "$package" --dry-run --cache "${RUNNER_TEMP}/npm-cache"
           done
+      - name: Verify core prerelease
+        if: startsWith(github.ref_name, 'json-document-v')
+        run: npm run release:check
       - name: Publish core prerelease
         if: startsWith(github.ref_name, 'json-document-v')
         run: npm publish -w @interactive-os/json-document --tag next --provenance

@@ -41,14 +41,6 @@
     ".": {
       "types": "./dist/application/document/index.d.ts",
       "import": "./dist/application/document/index.js"
-    },
-    "./session": {
-      "types": "./dist/application/session/index.d.ts",
-      "import": "./dist/application/session/index.js"
-    },
-    "./react": {
-      "types": "./dist/application/react-document/index.d.ts",
-      "import": "./dist/application/react-document/index.js"
     }
   },
   "scripts": {
@@ -61,18 +53,6 @@
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run layers:check && npm run typecheck && npm test && npm run build && npm run smoke:package"
-  },
-  "peerDependencies": {
-    "react": ">=18",
-    "zod": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "zod": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@types/node": "^25.9.0",

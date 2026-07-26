@@ -1,4 +1,4 @@
-import type { Pointer } from "../pointer/index.js";
+import type { Pointer } from "../pointer/core.js";
 import {
   mutateContainer,
   parseSafe,

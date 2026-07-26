@@ -6,9 +6,7 @@ lookup 같은 앱별 책임은 extension이나 host code에서 조립합니다.
 
 Extension은 core에 plugin으로 등록하지 않습니다. Portable extension은 public
 `JSONDocument` 여섯 member를 받아 함수로 compose합니다. Selection, clipboard,
-history 또는 high-level edit verb를 요구하는 기존 rich extension은 Candidate
-`@interactive-os/json-document/session`에 의존할 수 있으므로 package별 입력
-contract를 확인합니다.
+history 또는 high-level edit verb는 extension이나 host가 소유합니다.
 
 ## 설치
 
@@ -102,7 +100,9 @@ const persistence = createDocumentPersistence(doc, { key: "article-draft" });
 editorView.dispatch(editorTransaction);
 doc.commit([
   { op: "replace", path: "/doc", value: prosemirrorToJson(editorView.state.doc) },
-], { label: "edit rich text", origin: "prosemirror" });
+], {
+  metadata: { label: "edit rich text", origin: "prosemirror" },
+});
 
 await persistence.save();
 ```

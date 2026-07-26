@@ -3,8 +3,6 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import * as rootApi from "@interactive-os/json-document";
-import * as reactApi from "@interactive-os/json-document/react";
-import * as sessionApi from "@interactive-os/json-document/session";
 
 const packageRoot = resolve(__dirname, "..", "..");
 const packageJson = JSON.parse(readFileSync(resolve(packageRoot, "package.json"), "utf8")) as {
@@ -12,14 +10,10 @@ const packageJson = JSON.parse(readFileSync(resolve(packageRoot, "package.json")
 };
 const publicContract = JSON.parse(readFileSync(resolve(packageRoot, "public-contract.json"), "utf8")) as {
   root: { values: string[]; types: string[] };
-  session: { values: string[]; types: string[] };
-  react: { values: string[]; types: string[] };
 };
 
 const publicEntrypoints = {
   root: { subpath: ".", runtime: rootApi },
-  session: { subpath: "./session", runtime: sessionApi },
-  react: { subpath: "./react", runtime: reactApi },
 } as const;
 
 describe("package exports", () => {
@@ -40,6 +34,8 @@ describe("package exports", () => {
     expect(Object.keys(packageJson.exports).sort()).toEqual(
       Object.values(publicEntrypoints).map(({ subpath }) => subpath).sort(),
     );
+    expect(packageJson.exports).not.toHaveProperty("./session");
+    expect(packageJson.exports).not.toHaveProperty("./react");
   });
 
   test("runtime value exports match public-contract.json", () => {

@@ -8,9 +8,7 @@ Patch만 전제로 합니다. UI framework, schema provider, history, selection,
 clipboard는 core 계약이 아닙니다.
 
 ```txt
-Pure Protocol
-  |-> Document Projection -> host adapter
-  `-> Candidate Editing Session -> React / rich host adapter
+Pure Protocol -> Document Projection -> host adapter
 ```
 
 현재 버전은 `2.0.0-rc.0`입니다. root v2 binding은 구현됐지만, 독립 구현과 다섯
@@ -27,15 +25,6 @@ Core만 쓸 때 필수 dependency가 없습니다.
 ```sh
 npm install @interactive-os/json-document@2.0.0-rc.0
 ```
-
-기존의 Zod 기반 selection, clipboard, history 편집기는 optional Session
-binding입니다.
-
-```sh
-npm install @interactive-os/json-document@2.0.0-rc.0 zod
-```
-
-React는 Session을 사용할 때만 필요합니다.
 
 ## 60초 시작
 
@@ -137,69 +126,10 @@ types
   ReadResult, QueryResult, JSONDocument
 ```
 
-`JSONDocument`는 application-owned structural contract입니다. Candidate
-Session은 아직 이 구조의 subtype이라고 약속하지 않는 별도 변경 경계입니다.
-
-## Editing Session
-
-Selection, clipboard, history, schema introspection과 `insert`, `replace`,
-`delete`, `move`, `duplicate`, `copy`, `cut`, `paste`, `undo`, `redo`는 optional
-Editing Session입니다.
-
-```ts
-import { z } from "zod";
-import { createJSONDocument } from "@interactive-os/json-document/session";
-
-const Schema = z.object({
-  title: z.string(),
-  tasks: z.array(z.object({ id: z.string(), done: z.boolean() })),
-});
-
-const session = createJSONDocument(
-  Schema,
-  { title: "Draft", tasks: [] },
-  { history: 100, selection: true },
-);
-
-session.insert("/tasks/-", { id: "a", done: false });
-session.undo();
-```
-
-`/session`은 rich editor 기능의 별도 변경 경계입니다. portable Core consumer는
-이 subpath에 의존하지 않습니다.
-
-## React — `useJSONDocument`
-
-```tsx
-import { z } from "zod";
-import { useJSONDocument } from "@interactive-os/json-document/react";
-
-const Schema = z.object({
-  title: z.string(),
-});
-
-export function App() {
-  const document = useJSONDocument(
-    Schema,
-    { title: "Draft" },
-    { history: 20 },
-  );
-
-  return (
-    <input
-      value={document.value.title}
-      onChange={(event) => {
-        document.commit([
-          { op: "replace", path: "/title", value: event.target.value },
-        ]);
-      }}
-    />
-  );
-}
-```
-
-Root import graph에는 React와 Zod가 없습니다. React hook은 Editing Session
-binding에만 연결됩니다.
+`JSONDocument`는 application-owned structural contract입니다. Selection,
+history, clipboard, DOM lifecycle과 framework binding은 별도 host 또는 adapter가
+이 여섯 member를 조합합니다. 패키지는 `/session`이나 `/react` subpath를
+공개하지 않습니다.
 
 ## 순수 core
 

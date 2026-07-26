@@ -10,7 +10,7 @@
     "path": "/docs",
     "label": "Docs",
     "title": "json-document Docs - json-document",
-    "description": "User guide to the v2 Kernel, Pure Protocol, Document Projection, optional Editing Session, and host boundaries.",
+    "description": "User guide to the v2 Kernel, Pure Protocol, Document Projection, and host adapter boundaries.",
     "group": "Start"
   },
   {

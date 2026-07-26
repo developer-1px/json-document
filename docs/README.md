@@ -17,8 +17,8 @@ docs
 |   |-- extensions.md          # 공식 extension 사용법
 |   `-- recipes.md             # 제품별 feature coverage 지도
 `-- standard
-    |-- core-standard.md        # 1.x Editing Session migration baseline
-    |-- conformance-profile.md  # 1.x compatibility profile
+    |-- core-standard.md        # archived 1.x baseline
+    |-- conformance-profile.md  # archived 1.x profile
     |-- contract-pressure-register.md
     |-- extension-delegation-standard.md
     |-- foundation-gate.md      # foundation 판정 기준
@@ -27,8 +27,8 @@ docs
     |-- selection-contract.md   # headless selection 의미론
     |-- self-improvement-loop-report.md
     |-- v2-projection-profile.md # 현재 v2 root 규범 profile
-    |-- v2-public-surface.json   # v2 공개 binding과 migration disposition
-    `-- json-document-spec.md    # 1.x Editing Session 의미론 baseline
+    |-- v2-public-surface.json   # v2 공개 binding
+    `-- json-document-spec.md    # archived 1.x 의미론
 ```
 
 ## 규범 우선순위
@@ -36,10 +36,9 @@ docs
 현재 v2 portable root의 정본은 `v2-projection-profile.md`,
 `v2-public-surface.json`, 그리고 profile이 지정한 conformance vector와
 language binding이다. `core-standard.md`, `conformance-profile.md`,
-`json-document-spec.md`와 selection/schema/result 세부 계약은 1.x rich
-runtime을 `/session` Candidate 경계로 옮기기 위한 migration baseline이다.
-이전 문서의 root 또는 core 표현은 v2 exact 20-symbol·six-member 계약을
-확장하지 않으며, 충돌하면 v2 artifact가 우선한다.
+`json-document-spec.md`와 selection/schema/result 세부 계약은 archived 1.x
+기록이다. 이전 문서의 root 또는 core 표현은 v2 exact
+20-symbol·six-member 계약을 확장하지 않으며, 충돌하면 v2 artifact가 우선한다.
 
 ## 책임 기준
 
@@ -48,7 +47,7 @@ runtime을 `/session` Candidate 경계로 옮기기 위한 migration baseline이
 | `changelog.md` | 사용자 영향 중심 변경 기록 | 외부 사용자, 릴리스 확인자 |
 | `generated/` | repo scan으로 만든 reference data. 직접 편집하지 않는다. | 사이트, evaluator |
 | `public/` | 사용법과 프로젝트 이해를 위한 공식 문서 원천 | 외부 사용자, LLM, 사이트 방문자 |
-| `standard/` | v2 root 정본과 1.x Session migration baseline | 표준화 검토자, 대체 구현 작성자 |
+| `standard/` | v2 root 정본과 archived 1.x baseline | 표준화 검토자, 대체 구현 작성자 |
 
 ## 작성 원칙
 

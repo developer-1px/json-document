@@ -81,6 +81,18 @@ const publicContract = JSON.parse(read("packages/json-document/public-contract.j
 const officialExtensions = officialExtensionNames();
 const generatedOfficialExtensions = generatedDocs.repoCatalog.officialExtensions.map((item) => item.name).sort();
 
+for (const [name, source] of Object.entries({
+  rootReadme: surfaces.rootReadme,
+  readme: surfaces.readme,
+  llms: surfaces.llms,
+  ...publicDocs,
+  siteHome,
+})) {
+  if (/@interactive-os\/json-document\/(?:session|react)\b/.test(source)) {
+    fail(`${name}: removed v2 package entrypoint is still documented.`);
+  }
+}
+
 for (const removedPath of [
   "docs/release/evaluation-loop.md",
   "docs/release/notes.md",
@@ -221,20 +233,13 @@ const required = [
   ["overview", /## 이걸로 할 수 있는 것들/],
   ["quickstart", /튜토리얼: 작은 카드 편집기 만들기/],
   ["quickstart", /JSONPath는 변경 언어가 아닙니다/],
-  ["quickstart", /Pointer 배열을 copy하면 clipboard payload도 배열/],
+  ["quickstart", /Selection, clipboard, history, DOM lifecycle/],
   ["api", /## 작업별 진입점/],
   ["api", /ReadResult/],
-  ["api", /canFind/],
-  ["api", /violations\[\]\.path/],
-  ["api", /schema-slot/],
-  ["api", /document-result/],
   ["api", /Root document Pointer는 빈 문자열 `""`/],
   ["api", /function asPointer/],
   ["api", /applyPatch[\s\S]*외부 JSON 경계/],
-  ["api", /신뢰된 document state/],
-  ["api", /구조만 가진 Zod schema/],
-  ["api", /전체 루트 schema 검증/],
-  ["api", /기본값은 `strict: false`/],
+  ["api", /## Host와 adapter/],
   ["extensions", /@interactive-os\/json-document-collection/],
   ["extensions", /@interactive-os\/json-document-clipboard-web/],
   ["extensions", /@interactive-os\/json-document-outline/],
@@ -265,11 +270,11 @@ const required = [
   ["rootReadme", /labs\/extensions/],
   ["rootReadme", /provider-neutral/],
   ["rootReadme", /docs\/standard\/v2-projection-profile\.md/],
-  ["rootReadme", /Candidate Editing Session/],
+  ["rootReadme", /selection, clipboard, history, framework lifecycle/],
   ["docsReadme", /## 규범 우선순위/],
   ["docsReadme", /현재 v2 portable root의 정본/],
   ["coreStandard", /1\.x Candidate Editing Session migration baseline/],
-  ["v2Profile", /provider-neutral Projection construction boundary/],
+  ["v2Profile", /root entrypoint 하나와 20개 Kernel symbol/],
   ["v2Profile", /Acceptance callback[\s\S]*`canPatch`[\s\S]*`commit`/],
   ["clipboardReadme", /@interactive-os\/json-document\/session/],
   ["clipboardReadme", /six-member v2 Root\s+Projection adapter/],
@@ -277,8 +282,7 @@ const required = [
   ["readme", /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/],
   ["readme", /provider-neutral/],
   ["readme", /## 공개 root/],
-  ["readme", /## Editing Session/],
-  ["readme", /React — `useJSONDocument`/],
+  ["readme", /패키지는 `\/session`이나 `\/react` subpath를\s*공개하지 않습니다/],
   ["readme", /순수 core/],
   ["readme", /직렬화/],
   ["llms", /2\.0\.0-rc\.0.*Candidate/],
@@ -288,7 +292,7 @@ const required = [
   ["llms", /`value`는 항상\s+`JSONValue`/],
   ["llms", /not_serializable/],
   ["llms", /Acceptance는 initial state와 commit candidate/],
-  ["llms", /Root `JSONDocument`의 subtype이라고 가정하지 않는다/],
+  ["llms", /패키지는 root entrypoint만 공개한다/],
   ["llms", /Tree[\s\S]*제품\s+의도는 host/],
   ["llms", /docs\/standard\/v2-projection-profile\.md/],
   ["llms", /docs\/standard\/v2-public-surface\.json/],
@@ -343,8 +347,13 @@ for (const [name, pattern] of required) {
   if (!pattern.test(source)) fail(`${name}: missing ${pattern}.`);
 }
 
-if (!publicContract.root.values.includes("createJSONDocument") || !publicContract.react.values.includes("useJSONDocument")) {
-  fail("public contract: missing required root or react value export.");
+if (
+  JSON.stringify(Object.keys(publicContract)) !== JSON.stringify(["root"])
+  || publicContract.root.values.length !== 8
+  || publicContract.root.types.length !== 12
+  || !publicContract.root.values.includes("createJSONDocument")
+) {
+  fail("public contract: v2 root must be the only 20-symbol entrypoint.");
 }
 
 if (
@@ -372,7 +381,7 @@ for (const pattern of [
   /Provider-neutral JSON editing/,
   /six-member document projection/,
   /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/,
-  /@interactive-os\/json-document\/session/,
+  /Rich editing belongs to host adapters/,
 ]) {
   if (!pattern.test(siteHome)) fail(`site home: missing ${pattern}.`);
 }

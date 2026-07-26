@@ -7,13 +7,11 @@ All notable changes to this project are documented here.
 - **Breaking (`2.0.0-rc.0`):** Replaced the package root with the
   provider-neutral v2 Kernel: exactly 8 runtime values and 12 public types, with
   a non-generic six-member `JSONDocument` projection.
-- Moved the Zod-based 1.x rich editing runtime, including selection, clipboard,
-  history, schema introspection, and high-level edit verbs, to the Candidate
-  `@interactive-os/json-document/session` entrypoint. The React entrypoint
-  continues to adapt that Candidate Session.
-- Marked the package's React and Zod peers optional so Root Protocol and
-  Projection consumers have no framework or schema-provider installation
-  requirement.
+- Removed the 1.x `/session` and `/react` package entrypoints. Their source and
+  regression tests remain archived in the repository but are not compiled or
+  shipped by the production package.
+- Removed React and Zod peer dependencies. Root Protocol and Projection
+  consumers install no runtime or peer dependencies.
 - Narrowed the id resolver, stable-id rebase, and causal inbox inputs to their
   actual read/preflight/publication ports. Full `JSONDocument` values remain
   compatible, while host adapters can guard a projection without exposing the

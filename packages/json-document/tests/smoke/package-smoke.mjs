@@ -1,38 +1,28 @@
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const monorepoRoot = resolve(repoRoot, "..", "..");
-const workspace = await mkdtemp(join(tmpdir(), "json-document-package-"));
+const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const workspace = await mkdtemp(join(tmpdir(), "json-document-v2-package-"));
 const npmCache = join(workspace, ".npm-cache");
 const npmEnv = {
   ...process.env,
   npm_config_cache: npmCache,
-  npm_config_dry_run: "false",
   npm_config_package_lock: "false",
 };
-const lockfilePath = join(monorepoRoot, "package-lock.json");
-const lockfileSnapshot = existsSync(lockfilePath) ? await readFile(lockfilePath) : null;
-const packageJson = JSON.parse(await readFile(join(repoRoot, "package.json"), "utf8"));
-const publicContract = JSON.parse(await readFile(join(repoRoot, "public-contract.json"), "utf8"));
-const readmeSource = await readFile(join(repoRoot, "README.md"), "utf8");
+const packageJson = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
+const publicContract = JSON.parse(
+  await readFile(join(packageRoot, "public-contract.json"), "utf8"),
+);
 const rootValueExports = publicContract.root.values;
 const rootTypeExports = publicContract.root.types;
-const sessionValueExports = publicContract.session.values;
-const sessionTypeExports = publicContract.session.types;
-const reactValueExports = publicContract.react.values;
-const reactTypeExports = publicContract.react.types;
-const rootPublicExports = [...rootValueExports, ...rootTypeExports];
-const sessionPublicExports = [...sessionValueExports, ...sessionTypeExports];
-const reactPublicExports = [...reactValueExports, ...reactTypeExports];
-const rootTypeOnlyExports = [...rootTypeExports];
-const sessionTypeOnlyExports = [...sessionTypeExports];
-const reactTypeOnlyExports = [...reactTypeExports];
-const removedPublicSubpaths = [
+const rootExports = [...rootValueExports, ...rootTypeExports];
+const removedSubpaths = [
+  "@interactive-os/json-document/session",
+  "@interactive-os/json-document/react",
   "@interactive-os/json-document/patch",
   "@interactive-os/json-document/pointer",
   "@interactive-os/json-document/selection",
@@ -43,756 +33,136 @@ const removedPublicSubpaths = [
 
 function run(command, args, cwd) {
   try {
-    execFileSync(command, args, {
+    return execFileSync(command, args, {
       cwd,
       env: npmEnv,
-      stdio: "pipe",
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
     });
   } catch (error) {
-    throw new Error(formatCommandFailure(command, args, cwd, error), { cause: error });
-  }
-}
-
-function expectCommandFailure(command, args, cwd, expectedText) {
-  try {
-    execFileSync(command, args, {
-      cwd,
-      env: npmEnv,
-      stdio: "pipe",
-    });
-  } catch (error) {
-    const stdout = bufferToString(error.stdout);
-    const stderr = bufferToString(error.stderr);
-    const output = `${stdout}\n${stderr}`;
-    if (!output.includes(expectedText)) {
-      throw new Error(formatCommandFailure(command, args, cwd, error), { cause: error });
-    }
-    return;
-  }
-
-  throw new Error(`Command unexpectedly succeeded in package smoke: ${[command, ...args].join(" ")}`);
-}
-
-function formatCommandFailure(command, args, cwd, error) {
-  const output = [];
-  output.push(`Command failed in package smoke: ${[command, ...args].join(" ")}`);
-  output.push(`cwd: ${cwd}`);
-  const stdout = bufferToString(error.stdout);
-  const stderr = bufferToString(error.stderr);
-  if (stdout) output.push(`stdout:\n${stdout}`);
-  if (stderr) output.push(`stderr:\n${stderr}`);
-  return output.join("\n\n");
-}
-
-function bufferToString(value) {
-  if (Buffer.isBuffer(value)) return value.toString("utf8").trim();
-  if (typeof value === "string") return value.trim();
-  return "";
-}
-
-function existingZodPackage() {
-  return existingPath([
-    join(repoRoot, "node_modules", "zod"),
-    join(repoRoot, "..", "..", "node_modules", "zod"),
-  ]);
-}
-
-function existingTypeScriptBin() {
-  return existingPath([
-    join(repoRoot, "node_modules", "typescript", "bin", "tsc"),
-    join(repoRoot, "..", "..", "node_modules", "typescript", "bin", "tsc"),
-  ]);
-}
-
-function existingReactPackage() {
-  return existingPath([
-    join(repoRoot, "node_modules", "react"),
-    join(repoRoot, "..", "..", "node_modules", "react"),
-  ]);
-}
-
-function existingReactTypesPackage() {
-  return existingPath([
-    join(repoRoot, "node_modules", "@types", "react"),
-    join(repoRoot, "..", "..", "node_modules", "@types", "react"),
-  ]);
-}
-
-function existingPath(candidates) {
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return null;
-}
-
-function markdownCodeBlockAfterHeading(source, heading, language) {
-  const rest = markdownSection(source, heading);
-  const match = rest.match(new RegExp(`\`\`\`${language}\\n([\\s\\S]*?)\\n\`\`\``));
-  if (!match?.[1]) throw new Error(`README ${heading} ${language} code block missing`);
-  return match[1];
-}
-
-function markdownSection(source, heading) {
-  const headingIndex = source.indexOf(`## ${heading}`);
-  if (headingIndex === -1) throw new Error(`README heading missing: ${heading}`);
-  const rest = source.slice(headingIndex);
-  const nextHeadingIndex = rest.slice(1).search(/\n## /);
-  return nextHeadingIndex === -1 ? rest : rest.slice(0, nextHeadingIndex + 1);
-}
-
-function markdownCodeBlocksAfterHeading(source, heading, language) {
-  const section = markdownSection(source, heading);
-  const blocks = Array.from(
-    section.matchAll(new RegExp(`\`\`\`${language}\\n([\\s\\S]*?)\\n\`\`\``, "g")),
-    (match) => {
-      const block = match[1];
-      if (block === undefined) throw new Error(`README ${heading} ${language} code block capture failed`);
-      return block;
-    },
-  );
-  if (blocks.length === 0) throw new Error(`README ${heading} has no ${language} code blocks`);
-  return blocks;
-}
-
-function assertDeclarationExports(declarationSource, expectedNames, label) {
-  const actualNames = declarationExportNames(declarationSource).sort();
-  const sortedExpectedNames = [...expectedNames].sort();
-  if (JSON.stringify(actualNames) !== JSON.stringify(sortedExpectedNames)) {
+    const stdout = Buffer.isBuffer(error.stdout)
+      ? error.stdout.toString("utf8")
+      : String(error.stdout ?? "");
+    const stderr = Buffer.isBuffer(error.stderr)
+      ? error.stderr.toString("utf8")
+      : String(error.stderr ?? "");
     throw new Error(
-      `${label} declaration exports mismatch:\nexpected ${sortedExpectedNames.join(", ")}\nactual ${actualNames.join(", ")}`,
+      [
+        `Command failed: ${[command, ...args].join(" ")}`,
+        `cwd: ${cwd}`,
+        stdout.trim() && `stdout:\n${stdout.trim()}`,
+        stderr.trim() && `stderr:\n${stderr.trim()}`,
+      ].filter(Boolean).join("\n\n"),
+      { cause: error },
     );
   }
+}
 
-  for (const name of expectedNames) {
-    const exportNamePattern = new RegExp(`(^|[^A-Za-z0-9_$])${name}([^A-Za-z0-9_$]|$)`);
-    if (!exportNamePattern.test(declarationSource)) {
-      throw new Error(`${label} declaration export missing: ${name}`);
+function expectImportFailure(specifier) {
+  try {
+    run(
+      "node",
+      ["--input-type=module", "--eval", `await import(${JSON.stringify(specifier)})`],
+      workspace,
+    );
+  } catch (error) {
+    if (String(error).includes("ERR_PACKAGE_PATH_NOT_EXPORTED")) return;
+    throw error;
+  }
+  throw new Error(`Private package path unexpectedly resolved: ${specifier}`);
+}
+
+async function filesUnder(root, base = root) {
+  const result = [];
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) {
+      result.push(...await filesUnder(path, base));
+    } else if (entry.isFile()) {
+      result.push(relative(base, path));
     }
   }
-}
-
-function declarationExportNames(declarationSource) {
-  const names = [];
-
-  for (const match of declarationSource.matchAll(/\bexport\s+(?:type\s+)?\{([^}]*)\}/g)) {
-    const list = match[1];
-    if (list === undefined) throw new Error("Declaration export list capture failed");
-    names.push(...exportListNames(list));
-  }
-
-  for (const match of declarationSource.matchAll(/\bexport\s+declare\s+(?:function|class|const|let|var|interface|type|enum)\s+([A-Za-z_$][\w$]*)/g)) {
-    const name = match[1];
-    if (name === undefined) throw new Error("Declaration export declaration capture failed");
-    names.push(name);
-  }
-
-  return [...new Set(names)].sort();
-}
-
-function exportListNames(list) {
-  return list
-    .split(",")
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0)
-    .map((part) => {
-      const withoutType = part.replace(/^type\s+/, "");
-      const aliasMatch = /\s+as\s+([A-Za-z_$][\w$]*)$/.exec(withoutType);
-      if (aliasMatch?.[1]) return aliasMatch[1];
-      const [name] = withoutType.split(/\s+/);
-      if (!name) throw new Error(`Declaration export name parse failed: ${part}`);
-      return name;
-    });
-}
-
-async function assertDeclarationSpecifiers(installedPackageRoot) {
-  const distRoot = join(installedPackageRoot, "dist");
-  const declarationPaths = await declarationModulePaths(distRoot);
-  const declarationSet = new Set(declarationPaths);
-  const allowedBareSpecifiers = new Set(["react", "zod"]);
-
-  for (const declarationPath of declarationPaths) {
-    const source = await readFile(join(distRoot, declarationPath), "utf8");
-    const specifiers = moduleSpecifiers(source);
-
-    for (const specifier of specifiers) {
-      if (specifier === undefined) throw new Error(`Declaration specifier capture failed: ${declarationPath}`);
-      if (specifier.startsWith(".")) {
-        const resolved = resolve(dirname(join(distRoot, declarationPath)), specifier)
-          .replace(/\.js$/, ".d.ts")
-          .slice(distRoot.length + 1);
-        if (!declarationSet.has(resolved)) {
-          throw new Error(`Declaration import does not resolve inside package: ${declarationPath} -> ${specifier}`);
-        }
-      } else if (!allowedBareSpecifiers.has(specifier)) {
-        throw new Error(`Declaration imports unexpected bare specifier: ${declarationPath} -> ${specifier}`);
-      }
-    }
-  }
-}
-
-async function assertRuntimeSpecifiers(installedPackageRoot) {
-  const distRoot = join(installedPackageRoot, "dist");
-  const runtimePaths = await runtimeModulePaths(distRoot);
-  const runtimeSet = new Set(runtimePaths);
-  const allowedBareSpecifiers = new Set(["react", "zod"]);
-
-  for (const runtimePath of runtimePaths) {
-    const source = await readFile(join(distRoot, runtimePath), "utf8");
-    const specifiers = moduleSpecifiers(source);
-
-    for (const specifier of specifiers) {
-      if (specifier === undefined) throw new Error(`Runtime specifier capture failed: ${runtimePath}`);
-      if (specifier.startsWith(".")) {
-        const resolved = resolve(dirname(join(distRoot, runtimePath)), specifier)
-          .slice(distRoot.length + 1);
-        if (!runtimeSet.has(resolved)) {
-          throw new Error(`Runtime import does not resolve inside package: ${runtimePath} -> ${specifier}`);
-        }
-      } else if (!allowedBareSpecifiers.has(specifier)) {
-        throw new Error(`Runtime imports unexpected bare specifier: ${runtimePath} -> ${specifier}`);
-      }
-    }
-  }
+  return result.sort();
 }
 
 function moduleSpecifiers(source) {
   return [
-    ...Array.from(source.matchAll(/\b(?:import|export)\s+[^;"']*\s+from\s+["']([^"']+)["']/g), (match) => match[1]),
-    ...Array.from(source.matchAll(/\bimport\s+["']([^"']+)["']/g), (match) => match[1]),
-  ];
+    ...source.matchAll(/\b(?:import|export)\s+(?:type\s+)?[^;"']*?\s+from\s+["']([^"']+)["']/g),
+    ...source.matchAll(/\bimport\s+["']([^"']+)["']/g),
+  ].map((match) => match[1]);
 }
 
-async function declarationModulePaths(dir, prefix = "") {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const paths = [];
-  for (const entry of entries) {
-    const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
-    const absolutePath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      paths.push(...await declarationModulePaths(absolutePath, relativePath));
-    } else if (entry.isFile() && entry.name.endsWith(".d.ts")) {
-      paths.push(relativePath);
-    }
+function declarationExportNames(source) {
+  const names = [];
+  for (const match of source.matchAll(/\bexport\s+(?:type\s+)?\{([^}]*)\}/g)) {
+    names.push(
+      ...match[1]
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .map((part) => {
+          const normalized = part.replace(/^type\s+/, "");
+          return normalized.match(/\s+as\s+([A-Za-z_$][\w$]*)$/)?.[1]
+            ?? normalized.split(/\s+/)[0];
+        }),
+    );
   }
-
-  return paths.sort();
-}
-
-async function runtimeModulePaths(dir, prefix = "") {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const paths = [];
-  for (const entry of entries) {
-    const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
-    const absolutePath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      paths.push(...await runtimeModulePaths(absolutePath, relativePath));
-    } else if (entry.isFile() && entry.name.endsWith(".js")) {
-      paths.push(relativePath);
-    }
-  }
-
-  return paths.sort();
-}
-
-function assertInstalledPackageJson(pkg) {
-  const expectedFields = [
-    "name",
-    "version",
-    "description",
-    "type",
-    "license",
-    "sideEffects",
-    "main",
-    "types",
-    "homepage",
-    "repository",
-    "bugs",
-    "publishConfig",
-    "keywords",
-    "exports",
-    "peerDependencies",
-    "peerDependenciesMeta",
-  ];
-  for (const field of expectedFields) {
-    if (JSON.stringify(pkg[field]) !== JSON.stringify(packageJson[field])) {
-      throw new Error(`Installed package.json field mismatch: ${field}`);
-    }
-  }
-  const forbiddenFields = [
-    "bin",
-    "config",
-    "dependencies",
-    "optionalDependencies",
-    "overrides",
-    "private",
-    "workspaces",
-  ];
-  for (const field of forbiddenFields) {
-    if (pkg[field] !== undefined) {
-      throw new Error(`Installed package.json must not include ${field}`);
-    }
-  }
-  const installLifecycleScripts = ["preinstall", "install", "postinstall", "prepare"];
-  for (const script of installLifecycleScripts) {
-    if (pkg.scripts?.[script] !== undefined) {
-      throw new Error(`Installed package.json must not include install lifecycle script: ${script}`);
-    }
-  }
-}
-
-function namedImportLine(names, specifier, options = {}) {
-  if (names.length === 0) return null;
-  const { prefix = "", typeOnly = false } = options;
-  const keyword = typeOnly ? "import type" : "import";
-  const imports = names
-    .map((name) => prefix ? `${name} as ${prefix}${name}` : name)
-    .join(", ");
-  return `${keyword} { ${imports} } from "${specifier}";`;
-}
-
-async function assertInstalledTextFiles(installedPackageRoot) {
-  const files = packageJson.files.filter((file) => file !== "dist");
-  for (const file of files) {
-    const source = await readFile(join(repoRoot, file), "utf8");
-    const installed = await readFile(join(installedPackageRoot, file), "utf8");
-    if (installed !== source) {
-      throw new Error(`Installed package text file differs from source: ${file}`);
-    }
-  }
+  return [...new Set(names)].sort();
 }
 
 try {
-  const packOutput = execFileSync(
+  if (Object.keys(packageJson.exports).join(",") !== ".") {
+    throw new Error("The published package must expose only the root entrypoint.");
+  }
+  if (packageJson.peerDependencies !== undefined) {
+    throw new Error("The v2 kernel must not publish peer dependencies.");
+  }
+  if (packageJson.peerDependenciesMeta !== undefined) {
+    throw new Error("The v2 kernel must not publish peer dependency metadata.");
+  }
+  if (packageJson.dependencies !== undefined) {
+    throw new Error("The v2 kernel must not publish runtime dependencies.");
+  }
+  if (rootValueExports.length !== 8 || rootTypeExports.length !== 12) {
+    throw new Error("The root contract must contain exactly 8 values and 12 types.");
+  }
+
+  const packResult = JSON.parse(run(
     "npm",
     ["pack", "--json", "--pack-destination", workspace],
-    {
-      cwd: repoRoot,
-      encoding: "utf8",
-      env: npmEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
-  const [packResult] = JSON.parse(packOutput);
+    packageRoot,
+  ))[0];
   const tarball = isAbsolute(packResult.filename)
     ? packResult.filename
     : join(workspace, packResult.filename);
-  const zodPackage = existingZodPackage();
-  const typeScriptBin = existingTypeScriptBin();
-  const reactPackage = existingReactPackage();
-  const reactTypesPackage = existingReactTypesPackage();
-
-  if (packResult.name !== packageJson.name) {
-    throw new Error(`Packed package name mismatch: ${packResult.name}`);
-  }
-  if (packResult.version !== packageJson.version) {
-    throw new Error(`Packed package version mismatch: ${packResult.version}`);
-  }
-  const expectedTarballName = `${packageJson.name.replace(/^@/, "").replace("/", "-")}-${packageJson.version}.tgz`;
-  if (packResult.filename !== expectedTarballName) {
-    throw new Error(`Packed tarball filename mismatch: ${packResult.filename}`);
-  }
-  if (typeof packResult.integrity !== "string" || !packResult.integrity.startsWith("sha512-")) {
-    throw new Error(`Packed tarball must include sha512 integrity: ${packResult.integrity}`);
-  }
-  if (typeof packResult.size !== "number" || packResult.size <= 0) {
-    throw new Error(`Packed tarball must report a positive compressed size: ${packResult.size}`);
-  }
-  if (typeof packResult.unpackedSize !== "number" || packResult.unpackedSize <= packResult.size) {
-    throw new Error(`Packed tarball must report an unpacked size larger than compressed size: ${packResult.unpackedSize}`);
-  }
-
-  if (!existsSync(tarball)) {
-    throw new Error(`Packed tarball was not created: ${tarball}`);
-  }
-
-  // #62 guard — published tarball 에 node_modules 가 포함되면 소비자 측 zod type 중복으로 generic 추론이 깨진다.
-  if (!Array.isArray(packResult.files) || packResult.files.length === 0) {
-    throw new Error("Packed tarball must report a non-empty files list");
+  if (!existsSync(tarball)) throw new Error(`Tarball missing: ${tarball}`);
+  if (packResult.name !== packageJson.name || packResult.version !== packageJson.version) {
+    throw new Error("Packed identity does not match package.json.");
   }
   if (packResult.entryCount !== packResult.files.length) {
-    throw new Error(`Packed tarball entryCount mismatch: ${packResult.entryCount} !== ${packResult.files.length}`);
+    throw new Error("Packed file count does not match npm metadata.");
   }
-  if (!Array.isArray(packResult.bundled) || packResult.bundled.length !== 0) {
-    throw new Error(`Packed tarball must not bundle dependencies: ${JSON.stringify(packResult.bundled)}`);
-  }
-  const reportedUnpackedSize = packResult.files.reduce((total, file) => {
-    if (typeof file.path !== "string" || file.path.length === 0) {
-      throw new Error(`Packed file entry must include a path: ${JSON.stringify(file)}`);
-    }
-    if (typeof file.size !== "number" || file.size <= 0) {
-      throw new Error(`Packed file must report a positive size: ${file.path}`);
-    }
-    if (file.mode !== 0o644) {
-      throw new Error(`Packed file must use regular read/write file mode 0644: ${file.path}`);
-    }
-    return total + file.size;
-  }, 0);
-  if (reportedUnpackedSize !== packResult.unpackedSize) {
-    throw new Error(`Packed tarball unpackedSize mismatch: ${reportedUnpackedSize} !== ${packResult.unpackedSize}`);
-  }
-  const packedFiles = packResult.files.map((f) => f.path);
-  const offenders = packedFiles.filter((p) => p.includes("node_modules/"));
-  if (offenders.length > 0) {
-    throw new Error(`Tarball must not include node_modules: ${offenders.slice(0, 3).join(", ")}`);
-  }
-  const requiredPackageFiles = packageJson.files.filter((file) => file !== "dist");
-  requiredPackageFiles.push("package.json");
-  for (const required of requiredPackageFiles) {
-    if (!packedFiles.includes(required)) {
-      throw new Error(`Tarball is missing required package file: ${required}`);
-    }
-  }
-  const allowedPackedRoots = new Set([...packageJson.files, "package.json"]);
-  const unexpectedPackedFiles = packedFiles.filter((file) => {
-    const [root] = file.split("/");
-    return !allowedPackedRoots.has(root);
-  });
-  if (unexpectedPackedFiles.length > 0) {
-    throw new Error(`Tarball includes unexpected files: ${unexpectedPackedFiles.slice(0, 3).join(", ")}`);
-  }
-  const developmentArtifacts = packedFiles.filter((file) => {
-    const name = basename(file);
-    if (file.endsWith(".d.ts")) return false;
-    return (
-      file.endsWith(".ts") ||
-      file.endsWith(".tsx") ||
-      file.endsWith(".map") ||
-      name.endsWith(".test.js") ||
-      name.endsWith(".test.ts") ||
-      name.endsWith(".test-d.ts") ||
-      name === "tsconfig.json" ||
-      name.startsWith("tsconfig.") ||
-      name === "vitest.config.ts"
-    );
-  });
-  if (developmentArtifacts.length > 0) {
-    throw new Error(`Tarball includes development artifacts: ${developmentArtifacts.slice(0, 3).join(", ")}`);
-  }
-  if (packageJson.type !== "module") {
-    throw new Error('Package must publish as ESM with "type": "module"');
-  }
-  if (packageJson.sideEffects !== false) {
-    throw new Error('Package must declare "sideEffects": false');
-  }
-  if (packageJson.dependencies !== undefined && Object.keys(packageJson.dependencies).length > 0) {
-    throw new Error(`Package must not publish runtime dependencies: ${Object.keys(packageJson.dependencies).join(",")}`);
-  }
-  const expectedPeers = { react: ">=18", zod: "^4.0.0" };
-  if (JSON.stringify(packageJson.peerDependencies) !== JSON.stringify(expectedPeers)) {
-    throw new Error(
-      `Package peerDependencies must be ${JSON.stringify(expectedPeers)}: ${JSON.stringify(packageJson.peerDependencies)}`,
-    );
-  }
-  if (packageJson.peerDependenciesMeta?.react?.optional !== true) {
-    throw new Error("React peer dependency must be optional");
-  }
-  if (packageJson.peerDependenciesMeta?.zod?.optional !== true) {
-    throw new Error("Zod peer dependency must be optional");
-  }
-  const unexpectedPeerMeta = Object.keys(packageJson.peerDependenciesMeta ?? {})
-    .filter((name) => name !== "react" && name !== "zod");
-  if (unexpectedPeerMeta.length > 0) {
-    throw new Error(`Package has unexpected peer dependency metadata: ${unexpectedPeerMeta.join(",")}`);
-  }
-  if (packageJson.main !== packageJson.exports["."].import) {
-    throw new Error(`Package main must match root import export: ${packageJson.main}`);
-  }
-  if (packageJson.types !== packageJson.exports["."].types) {
-    throw new Error(`Package types must match root types export: ${packageJson.types}`);
-  }
-  for (const [subpath, exportMap] of Object.entries(packageJson.exports)) {
-    const conditions = Object.keys(exportMap);
-    const expectedConditions = ["types", "import"];
-    if (JSON.stringify(conditions) !== JSON.stringify(expectedConditions)) {
-      throw new Error(`Export ${subpath} conditions must be ${expectedConditions.join(",")}: ${conditions.join(",")}`);
-    }
-    for (const condition of expectedConditions) {
-      const target = exportMap[condition];
-      const packedPath = target.replace(/^\.\//, "");
-      if (!packedFiles.includes(packedPath)) {
-        throw new Error(`Export ${subpath}.${condition} target is missing from tarball: ${target}`);
-      }
-    }
-  }
-  if (zodPackage === null) {
-    throw new Error("Local zod dependency is missing. Run npm install first.");
+  if (packResult.bundled.length !== 0) {
+    throw new Error("The v2 kernel must not bundle dependencies.");
   }
 
-  if (typeScriptBin === null) {
-    throw new Error("Local TypeScript dependency is missing. Run npm install first.");
+  const packedFiles = packResult.files.map((file) => file.path);
+  const allowedRoots = new Set([...packageJson.files, "package.json"]);
+  for (const file of packedFiles) {
+    if (!allowedRoots.has(file.split("/")[0])) {
+      throw new Error(`Unexpected packed file: ${file}`);
+    }
+    if (
+      file.includes("node_modules/")
+      || file.endsWith(".map")
+      || (file.endsWith(".ts") && !file.endsWith(".d.ts"))
+    ) {
+      throw new Error(`Development artifact was packed: ${file}`);
+    }
   }
-
-  if (reactPackage === null) {
-    throw new Error("Local react dependency is missing. Run npm install first.");
+  for (const required of ["README.md", "LICENSE", "public-contract.json", "package.json"]) {
+    if (!packedFiles.includes(required)) throw new Error(`Packed file missing: ${required}`);
   }
-
-  if (reactTypesPackage === null) {
-    throw new Error("Local @types/react dependency is missing. Run npm install first.");
-  }
-
-  await writeFile(
-    join(workspace, "package.json"),
-    JSON.stringify({ private: true }, null, 2),
-  );
-  await writeFile(
-    join(workspace, "root-smoke.mjs"),
-    [
-      'import * as core from "@interactive-os/json-document";',
-      'import { applyPatch, createJSONDocument } from "@interactive-os/json-document";',
-      `const expectedRootValueExports = ${JSON.stringify(rootValueExports)};`,
-      `const expectedRootTypeOnlyExports = ${JSON.stringify(rootTypeOnlyExports)};`,
-      'const actualRootValueExports = Object.keys(core).sort();',
-      'if (JSON.stringify(actualRootValueExports) !== JSON.stringify([...expectedRootValueExports].sort())) {',
-      '  throw new Error(`root runtime exports mismatch: ${actualRootValueExports.join(", ")}`);',
-      '}',
-      'for (const name of expectedRootTypeOnlyExports) {',
-      '  if (name in core) throw new Error(`${name} type-only root export leaked at runtime`);',
-      '}',
-      'const initial = { title: "draft", tags: [] };',
-      'const patched = applyPatch(initial, [{ op: "add", path: "/tags/-", value: "core" }]);',
-      'if (!patched.ok || patched.value.tags[0] !== "core") throw new Error("root applyPatch failed");',
-      'if (patched.change.applied[0]?.path !== "/tags/0") throw new Error("root canonical patch failed");',
-      'const document = createJSONDocument(initial);',
-      'const changes = [];',
-      'document.subscribe((change) => changes.push(change));',
-      'const committed = document.commit([{ op: "replace", path: "/title", value: "ready" }]);',
-      'if (!committed.ok || document.value.title !== "ready") throw new Error("root commit failed");',
-      'if (changes.length !== 1) throw new Error("root publication failed");',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "session-smoke.mjs"),
-    [
-      'import * as z from "zod";',
-      'import * as zc from "@interactive-os/json-document/session";',
-      'import { applyOperation, applyPatch, applyPatchToTrustedState, createJSONDocument, parsePointer, tryParsePointer, buildPointer, parentPointer, lastSegment, lastSegmentIndex, appendSegment, withLastSegment } from "@interactive-os/json-document/session";',
-      `const expectedSessionValueExports = ${JSON.stringify(sessionValueExports)};`,
-      `const expectedSessionTypeOnlyExports = ${JSON.stringify(sessionTypeOnlyExports)};`,
-      'const actualSessionValueExports = Object.keys(zc).sort();',
-      'if (JSON.stringify(actualSessionValueExports) !== JSON.stringify([...expectedSessionValueExports].sort())) {',
-      '  throw new Error(`session runtime exports mismatch: ${actualSessionValueExports.join(", ")}`);',
-      '}',
-      'for (const name of expectedSessionValueExports) {',
-      '  if (!(name in zc)) throw new Error(`${name} session runtime export missing`);',
-      '}',
-      'for (const name of expectedSessionTypeOnlyExports) {',
-      '  if (name in zc) throw new Error(`${name} type-only root export leaked at runtime`);',
-      '}',
-      'const schema = z.object({ name: z.string(), tags: z.array(z.string()) });',
-      'const initial = { name: "ok", tags: [] };',
-      'const r = applyOperation(schema, initial, { op: "replace", path: "/name", value: "next" });',
-      'if (!r.result.ok) throw new Error("applyOperation failed");',
-      'if (r.state.name !== "next") throw new Error("state mismatch");',
-      'const r2 = applyPatch(schema, initial, [',
-      '  { op: "add", path: "/tags/-", value: "a" },',
-      '  { op: "replace", path: "/name", value: "x" },',
-      ']);',
-      'if (!r2.result.ok) throw new Error("applyPatch failed");',
-      'if (r2.state.tags.length !== 1) throw new Error("batch tags failed");',
-      'const r3 = applyPatchToTrustedState(schema, initial, [{ op: "replace", path: "/name", value: "trusted" }]);',
-      'if (!r3.result.ok || r3.state.name !== "trusted") throw new Error("applyPatchToTrustedState failed");',
-      'if (parsePointer("/a/0").length !== 2) throw new Error("parsePointer failed");',
-      'if (tryParsePointer("/a/0")?.length !== 2) throw new Error("tryParsePointer valid failed");',
-      'if (tryParsePointer("a/0") !== null) throw new Error("tryParsePointer invalid failed");',
-      'if (buildPointer(["a", 0]) !== "/a/0") throw new Error("buildPointer failed");',
-      'if (parentPointer("/a/0") !== "/a") throw new Error("parentPointer failed");',
-      'if (lastSegment("/a/0") !== "0") throw new Error("lastSegment failed");',
-      'if (lastSegmentIndex("/a/0") !== 0) throw new Error("lastSegmentIndex failed");',
-      'if (appendSegment("/a", "b/c") !== "/a/b~1c") throw new Error("appendSegment failed");',
-      'if (withLastSegment("/a/0", 1) !== "/a/1") throw new Error("withLastSegment failed");',
-      'if (typeof createJSONDocument !== "function") throw new Error("createJSONDocument export failed");',
-      'const jsonDoc = createJSONDocument(schema, initial);',
-      'const jsonPatch = jsonDoc.patch({ op: "replace", path: "/name", value: "json" });',
-      'if (!jsonPatch.ok || jsonDoc.value.name !== "json") throw new Error("createJSONDocument runtime failed");',
-      'if (!jsonDoc.at("/name").ok) throw new Error("createJSONDocument read facade failed");',
-      'const BoardSchema = z.object({ lists: z.array(z.object({ cards: z.array(z.object({ id: z.string(), title: z.string(), done: z.boolean() })) })) });',
-      'const boardDoc = createJSONDocument(BoardSchema, { lists: [{ cards: [{ id: "a", title: "A", done: false }, { id: "b", title: "B", done: false }] }] }, { history: 10, selection: { mode: "extended", initial: ["/lists/0/cards/0"] } });',
-      'const foundCards = boardDoc.find("$.lists[*].cards[*]");',
-      'if (!foundCards.ok || foundCards.pointers.length !== 2) throw new Error("public interface query failed");',
-      'if (!boardDoc.canInsert("/lists/0/cards/-", { id: "c", title: "C", done: false }).ok) throw new Error("public interface canInsert failed");',
-      'const insertedCard = boardDoc.insert("/lists/0/cards/-", { id: "c", title: "C", done: false });',
-      'if (!insertedCard.ok || boardDoc.value.lists[0]?.cards.length !== 3) throw new Error("public interface insert failed");',
-      'boardDoc.selection?.selectRanges(foundCards.pointers);',
-      'if (boardDoc.selection?.selectedPointers.length !== 2) throw new Error("public interface selection failed");',
-      'if (!boardDoc.canCopy(boardDoc.selection?.selectedPointers ?? []).ok) throw new Error("public interface canCopy failed");',
-      'const copiedCards = boardDoc.copy(boardDoc.selection?.selectedPointers ?? []);',
-      'if (!copiedCards.ok || !boardDoc.clipboard.hasData) throw new Error("public interface clipboard copy failed");',
-      'const pastedCards = boardDoc.paste("/lists/0/cards/-", { spread: true, rekey: { fields: ["id"], strategy: "suffix" } });',
-      'if (!pastedCards.ok || boardDoc.value.lists[0]?.cards.length !== 5) throw new Error("public interface clipboard paste failed");',
-      'const duplicatedCard = boardDoc.duplicate("/lists/0/cards/0", { rekey: { fields: ["id"], strategy: "suffix" } });',
-      'if (!duplicatedCard.ok || boardDoc.value.lists[0]?.cards.length !== 6) throw new Error("public interface duplicate failed");',
-      'if (!boardDoc.canDelete("/lists/0/cards/0").ok) throw new Error("public interface canDelete failed");',
-      'const deletedCard = boardDoc.delete("/lists/0/cards/0");',
-      'if (!deletedCard.ok || boardDoc.value.lists[0]?.cards.length !== 5) throw new Error("public interface delete failed");',
-      'if (!boardDoc.canUndo().ok || !boardDoc.undo()) throw new Error("public interface history failed");',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "smoke.ts"),
-    [
-      'import * as z from "zod";',
-      'import { applyOperation, applyPatch, applyPatchToTrustedState, tryParsePointer, parentPointer, lastSegment, lastSegmentIndex, appendSegment, withLastSegment, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document/session";',
-      'import type { HistoryTransactionOptions, JSONCapabilityResult, JSONChangeMetadata, JSONDocument, JSONDocumentCommitOptions, JSONDocumentDuplicateError, JSONDocumentDuplicateOptions, JSONDocumentDuplicateResult, JSONDocumentEditError, JSONDocumentEditResult, JSONDocumentHistory, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentOptions, JSONDocumentPasteOptions, JSONDocumentPasteTarget, JSONDocumentSelectionTarget, JSONPatchInput, SelectionPoint, JSONResult } from "@interactive-os/json-document/session";',
-      'import type { ClipboardCopyError, ClipboardCopyOk, ClipboardCopyOptions, ClipboardCopyResult, ClipboardCutError, ClipboardCutOk, ClipboardCutOptions, ClipboardCutResult, ClipboardEmpty, ClipboardMutationOk, ClipboardPasteDiscriminatorMismatch, ClipboardPasteError, ClipboardPasteResult, ClipboardReadOk, ClipboardReadOptions, ClipboardReadResult, ClipboardState, ClipboardWriteOptions, ClipboardSource } from "@interactive-os/json-document/session";',
-      'import type { EntriesResult, EntryKind, QueryResult, ReadEntry, ReadResult, SchemaDescription, SchemaDescriptionResult, SchemaErrorCode, SchemaErrorResult, SchemaKind, SchemaKindResult, SchemaPathMode, SchemaQueryResult, SchemaState } from "@interactive-os/json-document/session";',
-      'import type { DeleteSelectionTextResult, SelectionPointObject, SelectionOrderedRange, SelectionOrderedRangeEntry, ReplaceSelectionTextResult, SelectionAffinity, SelectionContext, SelectionCursorDirection, SelectionCursorErrorCode, SelectionCursorOptions, SelectionCursorResult, SelectionCursorTarget, SelectionDirection, SelectionEdge, SelectionMode, SelectionOptions, SelectionOrderErrorCode, SelectionOrderOptions, SelectionPointOrderResult, SelectionPointerSpan, SelectionPointerSpansResult, SelectionRange, SelectionRangeInput, SelectionRangeOrderResult, SelectionRangesOrderResult, SelectionScopeErrorCode, SelectionScopeOptions, SelectionScopeResult, SelectionScopeTarget, SelectionSource, SelectionSpanOptions, SelectionSnap, SelectionState, SelectionTextDeleteDirection, SelectionTextDeleteOptions, SelectionTextEdit, SelectionTextEditErrorCode, SelectionTextEditOptions, SelectionTextEditsResult, SelectionType } from "@interactive-os/json-document/session";',
-      'const schema = z.object({ name: z.string() });',
-      'type Row = z.output<typeof schema>;',
-      'type PublicRootTypes = [HistoryTransactionOptions, JSONCapabilityResult, JSONChangeMetadata, JSONDocument<Row>, JSONDocumentCommitOptions, JSONDocumentDuplicateError, JSONDocumentDuplicateOptions, JSONDocumentDuplicateResult<Row>, JSONDocumentEditError, JSONDocumentEditResult, JSONDocumentHistory, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentOptions, JSONDocumentPasteOptions, JSONDocumentPasteTarget, JSONDocumentSelectionTarget, JSONPatchInput, JSONPatchOperation, SelectionPoint, JSONResult, Pointer, ClipboardCopyError, ClipboardCopyOk, ClipboardCopyOptions, ClipboardCopyResult, ClipboardCutError, ClipboardCutOk<Row>, ClipboardCutOptions, ClipboardCutResult<Row>, ClipboardEmpty, ClipboardMutationOk<Row>, ClipboardPasteDiscriminatorMismatch, ClipboardPasteError, ClipboardPasteResult<Row>, ClipboardReadOk, ClipboardReadOptions, ClipboardReadResult, ClipboardState<Row>, ClipboardWriteOptions, ClipboardSource, EntriesResult, EntryKind, QueryResult, ReadEntry, ReadResult, SchemaDescription, SchemaDescriptionResult, SchemaErrorCode, SchemaErrorResult, SchemaKind, SchemaKindResult, SchemaPathMode, SchemaQueryResult, SchemaState, DeleteSelectionTextResult, SelectionPointObject, SelectionOrderedRange, SelectionOrderedRangeEntry, ReplaceSelectionTextResult, SelectionAffinity, SelectionContext, SelectionCursorDirection, SelectionCursorErrorCode, SelectionCursorOptions, SelectionCursorResult, SelectionCursorTarget, SelectionDirection, SelectionEdge, SelectionMode, SelectionOptions, SelectionOrderErrorCode, SelectionOrderOptions, SelectionPointOrderResult, SelectionPointerSpan, SelectionPointerSpansResult, SelectionRange, SelectionRangeInput, SelectionRangeOrderResult, SelectionRangesOrderResult, SelectionScopeErrorCode, SelectionScopeOptions, SelectionScopeResult, SelectionScopeTarget, SelectionSource, SelectionSpanOptions, SelectionSnap, SelectionState, SelectionTextDeleteDirection, SelectionTextDeleteOptions, SelectionTextEdit, SelectionTextEditErrorCode, SelectionTextEditOptions, SelectionTextEditsResult, SelectionType];',
-      'declare const publicRootTypes: PublicRootTypes;',
-      'publicRootTypes satisfies readonly unknown[];',
-      'const r = applyOperation(schema, { name: "ok" }, { op: "replace", path: "/name", value: "next" });',
-      'r.state.name satisfies string;',
-      'const ops: JSONPatchOperation[] = [{ op: "replace", path: "/name", value: "y" }];',
-      'const r2 = applyPatch(schema, { name: "ok" }, ops);',
-      'r2.state.name satisfies string;',
-      'const r3 = applyPatchToTrustedState(schema, { name: "ok" }, ops);',
-      'r3.state.name satisfies string;',
-      'const _selection = null as unknown as SelectionState;',
-      '_selection.subscribe((_snapshot, _previous) => undefined) satisfies () => void;',
-      '_selection.togglePointer("/name") satisfies void;',
-      '_selection.selectionRanges satisfies readonly SelectionRange[];',
-      '_selection.type satisfies "None" | "Caret" | "Range";',
-      'const pasteTargetPointer: JSONDocumentPasteTarget = "/items/-";',
-      'const pasteTargetAfter: JSONDocumentPasteTarget = { after: "/items/0" };',
-      'const pasteTargetBefore: JSONDocumentPasteTarget = { before: "/items/0" };',
-      'const pasteTargetReplace: JSONDocumentPasteTarget = { replace: "/items/0" };',
-      'const insertTargetInto: JSONDocumentInsertTarget = { into: "/items" };',
-      'const moveTargetAfter: JSONDocumentMoveTarget = { after: "/items/0" };',
-      'pasteTargetPointer satisfies string;',
-      'pasteTargetAfter satisfies { after: string };',
-      'pasteTargetBefore satisfies { before: string };',
-      'pasteTargetReplace satisfies { replace: string };',
-      'insertTargetInto satisfies { into: string };',
-      'moveTargetAfter satisfies { after: string };',
-      '// @ts-expect-error { at } is intentionally not a public paste target; pass the insertion pointer directly.',
-      'const pasteTargetAt: JSONDocumentPasteTarget = { at: "/items/-" };',
-      'const p: Pointer = "/name";',
-      'p satisfies string;',
-      'const parsedPointer = tryParsePointer(p);',
-      'parsedPointer satisfies string[] | null;',
-      'parentPointer(p) satisfies string | null;',
-      'lastSegment(p) satisfies string | null;',
-      'lastSegmentIndex(p) satisfies number | null;',
-      'appendSegment(p, "next") satisfies string;',
-      'withLastSegment(p, "other") satisfies string | null;',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "subpath-smoke.mjs"),
-    [
-      `const removedPublicSubpaths = ${JSON.stringify(removedPublicSubpaths)};`,
-      'for (const specifier of removedPublicSubpaths) {',
-      '  try {',
-      '    await import(specifier);',
-      '  } catch (error) {',
-      '    const output = `${error?.code ?? ""}\\n${error?.message ?? ""}`;',
-      '    if (!output.includes("ERR_PACKAGE_PATH_NOT_EXPORTED")) throw error;',
-      '    continue;',
-      '  }',
-      '  throw new Error(`${specifier} unexpectedly resolved`);',
-      '}',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "named-imports-smoke.ts"),
-    [
-      namedImportLine(rootValueExports, "@interactive-os/json-document", { prefix: "RootValue_" }),
-      namedImportLine(rootTypeExports, "@interactive-os/json-document", { prefix: "RootType_", typeOnly: true }),
-      namedImportLine(sessionValueExports, "@interactive-os/json-document/session", { prefix: "SessionValue_" }),
-      namedImportLine(sessionTypeExports, "@interactive-os/json-document/session", { prefix: "SessionType_", typeOnly: true }),
-      namedImportLine(reactValueExports, "@interactive-os/json-document/react", { prefix: "ReactValue_" }),
-      namedImportLine(reactTypeExports, "@interactive-os/json-document/react", { prefix: "ReactType_", typeOnly: true }),
-      "const rootValues = {",
-      ...rootValueExports.map((name) => `  ${name}: RootValue_${name},`),
-      "};",
-      "const sessionValues = {",
-      ...sessionValueExports.map((name) => `  ${name}: SessionValue_${name},`),
-      "};",
-      "const reactValues = {",
-      ...reactValueExports.map((name) => `  ${name}: ReactValue_${name},`),
-      "};",
-      "rootValues satisfies Record<string, unknown>;",
-      "sessionValues satisfies Record<string, unknown>;",
-      "reactValues satisfies Record<string, unknown>;",
-    ].filter((line) => line !== null).join("\n"),
-  );
-  await writeFile(
-    join(workspace, "react-smoke.mjs"),
-    [
-      'import * as zcr from "@interactive-os/json-document/react";',
-      'import { useJSONDocument } from "@interactive-os/json-document/react";',
-      `const expectedReactValueExports = ${JSON.stringify(reactValueExports)};`,
-      `const expectedReactTypeOnlyExports = ${JSON.stringify(reactTypeOnlyExports)};`,
-      'const actualReactValueExports = Object.keys(zcr).sort();',
-      'if (JSON.stringify(actualReactValueExports) !== JSON.stringify([...expectedReactValueExports].sort())) {',
-      '  throw new Error(`react runtime exports mismatch: ${actualReactValueExports.join(", ")}`);',
-      '}',
-      'for (const name of expectedReactValueExports) {',
-      '  if (!(name in zcr)) throw new Error(`${name} react runtime export missing`);',
-      '}',
-      'for (const name of expectedReactTypeOnlyExports) {',
-      '  if (name in zcr) throw new Error(`${name} type-only react export leaked at runtime`);',
-      '}',
-      'if (typeof useJSONDocument !== "function") throw new Error("useJSONDocument export failed");',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "react-smoke.ts"),
-    [
-      'import * as z from "zod";',
-      'import type { JSONDocument } from "@interactive-os/json-document/session";',
-      'import { useJSONDocument } from "@interactive-os/json-document/react";',
-      'const Schema = z.object({ name: z.string() });',
-      'type Value = z.output<typeof Schema>;',
-      'type Doc = JSONDocument<Value>;',
-      'const doc = useJSONDocument(Schema, { name: "ok" }, { history: 1 });',
-      'doc satisfies Doc;',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "readme-react-example.tsx"),
-    markdownCodeBlockAfterHeading(readmeSource, "React — `useJSONDocument`", "tsx"),
-  );
-  const readmeTypeScriptExamplePaths = [];
-  const readmePureCoreExamples = markdownCodeBlocksAfterHeading(readmeSource, "순수 core", "ts");
-  const readmeSerializationExamples = markdownCodeBlocksAfterHeading(readmeSource, "직렬화", "ts");
-  if (readmePureCoreExamples.length !== 1 || readmeSerializationExamples.length !== 2) {
-    throw new Error(
-      `README package smoke must cover 1 pure core and 2 serialization TypeScript examples: pure=${readmePureCoreExamples.length} serialization=${readmeSerializationExamples.length}`,
-    );
-  }
-  const readmeTypeScriptExamples = [...readmePureCoreExamples, ...readmeSerializationExamples];
-  for (const [index, block] of readmeTypeScriptExamples.entries()) {
-    const filename = `readme-typescript-example-${index + 1}.ts`;
-    readmeTypeScriptExamplePaths.push(filename);
-    await writeFile(join(workspace, filename), block);
-  }
-  const [readmePureCoreExample] = readmePureCoreExamples;
-  const [readmeSerializationExample] = readmeSerializationExamples;
-  if (readmePureCoreExample === undefined || readmeSerializationExample === undefined) {
-    throw new Error("README runtime examples missing from package smoke");
-  }
-  await writeFile(
-    join(workspace, "readme-pure-core-example.mjs"),
-    [
-      readmePureCoreExample,
-      'if (!r.ok) throw new Error("README pure core example did not apply");',
-      'if (r.value.title !== "final" || r.value.tags[0] !== "docs") throw new Error("README pure core example state mismatch");',
-    ].join("\n"),
-  );
-  await writeFile(
-    join(workspace, "readme-serialization-example.mjs"),
-    [
-      readmeSerializationExample,
-      'if (json !== JSON.stringify(state)) throw new Error("README serialization example JSON mismatch");',
-      'if (restored.title !== "draft") throw new Error("README serialization example parse mismatch");',
-      'if (!safe.success || safe.data.title !== "draft") throw new Error("README serialization example safeParse mismatch");',
-    ].join("\n"),
-  );
 
   await writeFile(
     join(workspace, "package.json"),
@@ -804,79 +174,116 @@ try {
       },
     }, null, 2),
   );
+  run(
+    "npm",
+    ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--no-package-lock"],
+    workspace,
+  );
 
-  run("npm", ["install", "--legacy-peer-deps", "--ignore-scripts", "--no-audit", "--no-fund", "--no-package-lock"], workspace);
-  await mkdir(join(workspace, "node_modules"), { recursive: true });
-  const installedPackageRoot = join(workspace, "node_modules", "@interactive-os/json-document");
-  assertInstalledPackageJson(
-    JSON.parse(await readFile(join(installedPackageRoot, "package.json"), "utf8")),
+  const installedRoot = join(
+    workspace,
+    "node_modules",
+    "@interactive-os",
+    "json-document",
   );
-  await assertInstalledTextFiles(installedPackageRoot);
-  assertDeclarationExports(
-    await readFile(join(installedPackageRoot, packageJson.exports["."].types.replace(/^\.\//, "")), "utf8"),
-    rootPublicExports,
-    "root",
+  const installedPackage = JSON.parse(
+    await readFile(join(installedRoot, "package.json"), "utf8"),
   );
-  assertDeclarationExports(
-    await readFile(join(installedPackageRoot, packageJson.exports["./session"].types.replace(/^\.\//, "")), "utf8"),
-    sessionPublicExports,
-    "session",
-  );
-  assertDeclarationExports(
-    await readFile(join(installedPackageRoot, packageJson.exports["./react"].types.replace(/^\.\//, "")), "utf8"),
-    reactPublicExports,
-    "react",
-  );
-  await assertDeclarationSpecifiers(installedPackageRoot);
-  await assertRuntimeSpecifiers(installedPackageRoot);
-
-  if (existsSync(join(workspace, "node_modules", "zod"))) {
-    throw new Error("Optional Zod peer must not be installed for the root smoke.");
+  if (Object.keys(installedPackage.exports).join(",") !== ".") {
+    throw new Error("Installed package exposed a non-root entrypoint.");
   }
-  run("node", ["root-smoke.mjs"], workspace);
-
-  if (!existsSync(join(workspace, "node_modules", "zod"))) {
-    await symlink(zodPackage, join(workspace, "node_modules", "zod"), "dir");
-  }
-  if (existsSync(join(workspace, "node_modules", "react"))) {
-    throw new Error("Root package smoke must run before React is installed so the root entrypoint stays headless");
+  if (
+    installedPackage.dependencies !== undefined
+    || installedPackage.peerDependencies !== undefined
+    || installedPackage.peerDependenciesMeta !== undefined
+  ) {
+    throw new Error("Installed package contains runtime or peer dependencies.");
   }
 
-  const privateSubpaths = [
-    "package.json",
-    ...Object.values(packageJson.exports).map((exportMap) => exportMap.import.replace(/^\.\//, "")),
-  ];
-  for (const privateSubpath of privateSubpaths) {
-    expectCommandFailure(
-      "node",
-      ["--input-type=module", "--eval", `await import("@interactive-os/json-document/${privateSubpath}")`],
-      workspace,
-      "ERR_PACKAGE_PATH_NOT_EXPORTED",
+  const distRoot = join(installedRoot, "dist");
+  const distFiles = await filesUnder(distRoot);
+  for (const file of distFiles) {
+    if (
+      file.startsWith("application/session/")
+      || file.startsWith("application/react-document/")
+      || /^domain\/(?:clipboard|document|editing|schema|selection|text-surface)\//.test(file)
+      || file === "foundation/patch/schema.js"
+      || file === "foundation/patch/schema.d.ts"
+      || file === "foundation/patch/schema-contract.d.ts"
+    ) {
+      throw new Error(`Archived implementation leaked into dist: ${file}`);
+    }
+    const source = await readFile(join(distRoot, file), "utf8");
+    for (const specifier of moduleSpecifiers(source)) {
+      if (!specifier.startsWith(".")) {
+        throw new Error(`External dependency leaked into dist: ${file} -> ${specifier}`);
+      }
+    }
+  }
+
+  const rootDeclaration = await readFile(
+    join(installedRoot, packageJson.exports["."].types),
+    "utf8",
+  );
+  const declaredExports = declarationExportNames(rootDeclaration);
+  if (JSON.stringify(declaredExports) !== JSON.stringify([...rootExports].sort())) {
+    throw new Error(
+      `Root declarations drifted:\nexpected ${[...rootExports].sort().join(", ")}\nactual ${declaredExports.join(", ")}`,
     );
   }
 
-  run("node", ["session-smoke.mjs"], workspace);
-  run("node", ["subpath-smoke.mjs"], workspace);
-  run("node", ["readme-pure-core-example.mjs"], workspace);
-  run("node", ["readme-serialization-example.mjs"], workspace);
-  run(
-    "node",
+  await writeFile(
+    join(workspace, "runtime-smoke.mjs"),
     [
-      typeScriptBin,
-      "--noEmit",
-      "--target",
-      "ES2022",
-      "--module",
-      "NodeNext",
-      "--moduleResolution",
-      "NodeNext",
-      "--strict",
-      "--exactOptionalPropertyTypes",
-      "--noUncheckedIndexedAccess",
-      ...readmeTypeScriptExamplePaths,
-      "smoke.ts",
-    ],
-    workspace,
+      'import * as api from "@interactive-os/json-document";',
+      `const expected = ${JSON.stringify([...rootValueExports].sort())};`,
+      'const actual = Object.keys(api).sort();',
+      'if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`runtime exports: ${actual}`);',
+      'const document = api.createJSONDocument({ title: "draft", tags: [] });',
+      'if (JSON.stringify(Object.keys(document).sort()) !== JSON.stringify(["at", "canPatch", "commit", "query", "subscribe", "value"])) throw new Error("document surface drifted");',
+      'const changes = [];',
+      'document.subscribe((change) => changes.push(change));',
+      'const result = document.commit([{ op: "add", path: "/tags/-", value: "v2" }]);',
+      'if (!result.ok || document.value.tags[0] !== "v2" || changes.length !== 1) throw new Error("commit failed");',
+      'const patched = api.applyPatch(document.value, [{ op: "replace", path: "/title", value: "stable" }]);',
+      'if (!patched.ok || patched.value.title !== "stable") throw new Error("pure patch failed");',
+    ].join("\n"),
+  );
+  run("node", ["runtime-smoke.mjs"], workspace);
+
+  for (const subpath of removedSubpaths) expectImportFailure(subpath);
+  const rootImportTarget = packageJson.exports["."].import.replace(/^\.\//, "");
+  expectImportFailure(`@interactive-os/json-document/${rootImportTarget}`);
+  expectImportFailure("@interactive-os/json-document/package.json");
+
+  await writeFile(
+    join(workspace, "type-smoke.ts"),
+    [
+      `import { ${rootValueExports.join(", ")} } from "@interactive-os/json-document";`,
+      `import type { ${rootTypeExports.join(", ")} } from "@interactive-os/json-document";`,
+      'const document: JSONDocument = createJSONDocument({ text: "a" });',
+      'type Members = keyof JSONDocument;',
+      'const members: Members[] = ["value", "at", "query", "canPatch", "commit", "subscribe"];',
+      'const operation: JSONPatchOperation = { op: "replace", path: "/text", value: "b" };',
+      'const metadata: JSONChangeMetadata = { source: "type-smoke" };',
+      'const result: JSONDocumentCommitResult = document.commit([operation], { metadata });',
+      'const pure: JSONPatchResult = applyPatch(document.value, [operation]);',
+      'const pointer: Pointer = appendSegment(buildPointer(["text"]), 0);',
+      'const values: JSONValue[] = [document.value, pointer, null];',
+      'void [members, result, pure, values, parsePointer, tryParsePointer, parentPointer, trackPointer];',
+      'type Remaining = JSONAppliedChange | JSONCapabilityResult | JSONDocumentCommitOptions | QueryResult | ReadResult;',
+      'declare const remaining: Remaining;',
+      'void remaining;',
+    ].join("\n"),
+  );
+  const typeScriptBin = resolve(
+    packageRoot,
+    "..",
+    "..",
+    "node_modules",
+    "typescript",
+    "bin",
+    "tsc",
   );
   run(
     "node",
@@ -892,121 +299,16 @@ try {
       "--strict",
       "--exactOptionalPropertyTypes",
       "--noUncheckedIndexedAccess",
-      "named-imports-smoke.ts",
-    ],
-    workspace,
-  );
-  run(
-    "node",
-    [
-      typeScriptBin,
-      "--noEmit",
-      "--target",
-      "ES2022",
-      "--module",
-      "ESNext",
-      "--moduleResolution",
-      "Bundler",
-      "--strict",
-      "--exactOptionalPropertyTypes",
-      "--noUncheckedIndexedAccess",
-      ...readmeTypeScriptExamplePaths,
-      "smoke.ts",
-      "named-imports-smoke.ts",
+      "type-smoke.ts",
     ],
     workspace,
   );
 
-  if (!existsSync(join(workspace, "node_modules", "react"))) {
-    await symlink(reactPackage, join(workspace, "node_modules", "react"), "dir");
-  }
-  await mkdir(join(workspace, "node_modules", "@types"), { recursive: true });
-  if (!existsSync(join(workspace, "node_modules", "@types", "react"))) {
-    await symlink(reactTypesPackage, join(workspace, "node_modules", "@types", "react"), "dir");
-  }
-
-  run("node", ["react-smoke.mjs"], workspace);
-  run(
-    "node",
-    [
-      typeScriptBin,
-      "--noEmit",
-      "--target",
-      "ES2022",
-      "--module",
-      "NodeNext",
-      "--moduleResolution",
-      "NodeNext",
-      "--strict",
-      "--exactOptionalPropertyTypes",
-      "--noUncheckedIndexedAccess",
-      "react-smoke.ts",
-    ],
-    workspace,
-  );
-  run(
-    "node",
-    [
-      typeScriptBin,
-      "--noEmit",
-      "--target",
-      "ES2022",
-      "--module",
-      "NodeNext",
-      "--moduleResolution",
-      "NodeNext",
-      "--jsx",
-      "react-jsx",
-      "--strict",
-      "--exactOptionalPropertyTypes",
-      "--noUncheckedIndexedAccess",
-      "readme-react-example.tsx",
-    ],
-    workspace,
-  );
-  run(
-    "node",
-    [
-      typeScriptBin,
-      "--noEmit",
-      "--target",
-      "ES2022",
-      "--module",
-      "ESNext",
-      "--moduleResolution",
-      "Bundler",
-      "--strict",
-      "--exactOptionalPropertyTypes",
-      "--noUncheckedIndexedAccess",
-      "react-smoke.ts",
-    ],
-    workspace,
-  );
-  run(
-    "node",
-    [
-      typeScriptBin,
-      "--noEmit",
-      "--target",
-      "ES2022",
-      "--module",
-      "ESNext",
-      "--moduleResolution",
-      "Bundler",
-      "--jsx",
-      "react-jsx",
-      "--strict",
-      "--exactOptionalPropertyTypes",
-      "--noUncheckedIndexedAccess",
-      "readme-react-example.tsx",
-    ],
-    workspace,
+  console.log(
+    `json-document package smoke ok: ${packResult.entryCount} files, `
+      + `${(packResult.size / 1000).toFixed(1)} kB packed, `
+      + `${(packResult.unpackedSize / 1000).toFixed(1)} kB unpacked`,
   );
 } finally {
-  if (lockfileSnapshot === null) {
-    await rm(lockfilePath, { force: true });
-  } else {
-    await writeFile(lockfilePath, lockfileSnapshot);
-  }
   await rm(workspace, { force: true, recursive: true });
 }

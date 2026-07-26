@@ -1,5 +1,5 @@
 import { trackPointer as trackPointerInternal } from "../patch/track.js";
-import type { Pointer } from "../pointer/index.js";
+import type { Pointer } from "../pointer/core.js";
 import type { JSONPatchOperation } from "./contract.js";
 
 export {
@@ -37,8 +37,8 @@ export {
   parsePointer,
   readAt,
   tryParsePointer,
-} from "../pointer/index.js";
-export type { Pointer } from "../pointer/index.js";
+} from "../pointer/core.js";
+export type { Pointer } from "../pointer/core.js";
 
 export function trackPointer(
   pointer: Pointer,

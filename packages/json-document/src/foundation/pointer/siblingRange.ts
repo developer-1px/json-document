@@ -12,7 +12,7 @@ import {
   parentPointer,
   tryParsePointer,
   type Pointer,
-} from "./index.js";
+} from "./core.js";
 
 export type SiblingRangeErrorCode =
   | "empty_selection"

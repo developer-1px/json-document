@@ -1,7 +1,6 @@
 # json-document API
 
-이 문서는 v2 루트 Kernel의 정본 API와 선택적인 Candidate Editing Session을
-분리해서 설명합니다.
+이 문서는 v2 루트 Kernel의 정본 API를 설명합니다.
 
 ```txt
 @interactive-os/json-document
@@ -9,12 +8,6 @@
 |-- applyPatch
 |-- Pointer helpers
 `-- six-member JSONDocument
-
-@interactive-os/json-document/session
-`-- Candidate rich editing runtime
-
-@interactive-os/json-document/react
-`-- Candidate Editing Session React adapter
 ```
 
 ## 기준
@@ -25,7 +18,6 @@
 - JSONPath는 query 전용이며 결과를 Pointer 배열로 돌려줍니다.
 - `canPatch`는 side effect 없는 probe이고 `commit`만 state를 변경합니다.
 - 실패는 boolean `ok`와 stable string `code`를 가진 Result입니다.
-- `/session`과 `/react`는 optional Candidate이며 Core 적합성에 필요하지 않습니다.
 
 ## 작업별 진입점
 
@@ -41,8 +33,8 @@
 | Pointer 조합 | `buildPointer`, `appendSegment`, `parentPointer` | `Pointer` |
 | 변경 뒤 Pointer 추적 | `trackPointer` | `Pointer | null` |
 
-Selection, clipboard, history와 high-level edit verb는 Candidate Editing Session
-항목을 봅니다.
+Selection, clipboard, history와 high-level edit verb는 host 또는 adapter가
+`JSONDocument` 위에서 소유합니다.
 
 ## 시작
 
@@ -314,68 +306,8 @@ types
   ReadResult, QueryResult, JSONDocument
 ```
 
-## Candidate Editing Session
+## Host와 adapter
 
-`@interactive-os/json-document/session`은 Zod 기반 rich editing runtime을 보존한
-선택 표면입니다. 현재 Candidate이므로 portable Core consumer는 이 subpath나
-세부 signature에 의존하지 않습니다.
-
-```ts
-import * as z from "zod";
-import {
-  createJSONDocument as createJSONEditingSession,
-} from "@interactive-os/json-document/session";
-
-const Schema = z.object({
-  title: z.string(),
-  cards: z.array(z.object({ id: z.string() })),
-});
-
-const session = createJSONEditingSession(
-  Schema,
-  { title: "Draft", cards: [] },
-  { history: 100, selection: true },
-);
-```
-
-Candidate Session에는 다음과 같은 기능이 있습니다.
-
-```txt
-patch, insert, replace, delete, move, duplicate
-find, canFind, entries
-selection, copy, cut, paste
-history, undo, redo
-schema introspection
-```
-
-이 이름은 root `JSONDocument`의 필수 member가 아닙니다. Session의
-`violations[].path`는 JSON Pointer이며 schema 검사의 기준은 `schema-slot`,
-mutation preflight의 기준은 `document-result`입니다.
-
-Session execution의 기본값은 `strict: false`입니다. `strict: true`를 선택한
-Session에서 처리된 실행 실패는 error로 승격될 수 있지만 Core `commit`의
-expected input failure는 Result입니다.
-
-Session 최적화 문맥에서 내부 snapshot을 신뢰된 document state라고 부릅니다.
-구조만 가진 Zod schema는 좁은 validation 경로를 사용할 수 있고, refine,
-transform 또는 custom check가 있으면 전체 루트 schema 검증으로 돌아갑니다.
-이 최적화 어휘와 provider detail은 v2 Core 계약이 아닙니다.
-
-## Candidate React adapter
-
-현재 `@interactive-os/json-document/react`의 `useJSONDocument`는 Candidate
-Editing Session을 React lifecycle에 연결합니다.
-
-```tsx
-import { useJSONDocument } from "@interactive-os/json-document/react";
-
-const session = useJSONDocument(
-  Schema,
-  { title: "Draft", cards: [] },
-  { history: 20 },
-);
-```
-
-Provider-neutral six-member Projection만 필요한 React app은 Core document를
-별도 lifecycle wrapper에 보관할 수 있습니다. 현재 hook을 portable Core
-adapter로 가정하지 않습니다.
+패키지는 `/session`이나 `/react` subpath를 공개하지 않습니다. Selection,
+clipboard, history, schema introspection, DOM lifecycle과 framework binding은
+host 또는 별도 adapter가 여섯-member `JSONDocument`를 조합해 구현합니다.

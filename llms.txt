@@ -43,9 +43,7 @@ React hook, host service를 추가하지 않는다.
 ## Pure Protocol과 Projection
 
 ```txt
-Pure Protocol
-  |-> Document Projection -> host adapter
-  `-> Candidate Editing Session -> React / rich host adapter
+Pure Protocol -> Document Projection -> host adapter
 ```
 
 Pure Protocol은 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
@@ -187,42 +185,16 @@ Public Result는 boolean `ok` discriminant를 가진다. Failure는 stable strin
 Consumer는 exact key 집합이나 exhaustive error-code union에 의존하지 않는다.
 Minor release에서 optional diagnostic field와 새 code가 추가될 수 있다.
 
-## Candidate Editing Session
+## Host adapter
 
-`@interactive-os/json-document/session`은 selection, clipboard, history, schema
-introspection과 고수준 edit verb를 가진 Zod 기반 Candidate 표면이다.
-
-```ts
-import { z } from "zod";
-import {
-  createJSONDocument as createJSONEditingSession,
-} from "@interactive-os/json-document/session";
-
-const Schema = z.object({
-  title: z.string(),
-  items: z.array(z.object({ id: z.string() })),
-});
-
-const session = createJSONEditingSession(
-  Schema,
-  { title: "Draft", items: [] },
-  { history: 100, selection: true },
-);
-```
-
-이 subpath의 기존 이름과 signature는 v2 stable contract가 아니다. 현재 Session은
-Root `JSONDocument`의 subtype이라고 가정하지 않는다. Portable consumer는
-`/session`에 의존하지 않는다.
-
-`@interactive-os/json-document/react`의 `useJSONDocument`도 현재 Candidate
-Editing Session adapter다. Provider-neutral Projection React adapter로 가정하지
-않는다.
+패키지는 root entrypoint만 공개한다. Selection, clipboard, history, schema
+introspection, DOM과 framework lifecycle은 host 또는 별도 adapter가
+여섯-member `JSONDocument`를 조합해 소유한다.
 
 ## Official extensions
 
-공식 extension은 plugin registry 없이 함수로 조립한다. 현재 package들은
-Candidate Session migration 경계를 사용하며 Root Projection port로의 수렴은
-각 package에서 별도로 검증한다.
+공식 extension은 plugin registry 없이 함수로 조립한다. Portable extension은
+Root Projection port를 입력으로 받고, 제품별 기능은 host가 별도로 조합한다.
 
 - `@interactive-os/json-document-bulk-edit`
 - `@interactive-os/json-document-clipboard-web`
