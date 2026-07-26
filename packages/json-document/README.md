@@ -76,6 +76,10 @@ Document의 필수 member는 여섯 개뿐입니다.
 | `commit(operations, options?)` | 유일한 stateful mutation |
 | `subscribe(listener)` | publish된 change 구독 |
 
+subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `commit`
+밖으로 전파되거나 성공 result를 바꾸지 않으며, 뒤 subscriber의 전달도 막지
+않는다.
+
 실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 돌아옵니다.
 새 error code와 optional field가 추가될 수 있으므로 consumer는 exact key 집합에
 의존하지 않아야 합니다.

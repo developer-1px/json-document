@@ -1,14 +1,22 @@
 {
   "formatVersion": 1,
   "status": "candidate",
-  "sourceContract": "packages/json-document/public-contract.json#session",
+  "sourceContract": "packages/json-document/public-contract.json#root",
+  "migrationBaselineContract": "packages/json-document/public-contract.json#session",
   "conformance": {
     "projectionVectors": "packages/json-document/tests/conformance/v2/projection-vectors.json",
     "projectionSuite": "packages/json-document/tests/conformance/v2/projection-suite.ts",
     "projectionBinding": "packages/json-document/tests/public/v2-projection-standard-conformance.test.ts",
     "protocolVectors": "packages/json-document/tests/conformance/v2/protocol-vectors.json",
     "protocolSuite": "packages/json-document/tests/conformance/v2/protocol-suite.ts",
-    "protocolBinding": "packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts"
+    "protocolBinding": "packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts",
+    "pointerVectors": "packages/json-document/tests/conformance/v2/pointer-vectors.json",
+    "pointerSuite": "packages/json-document/tests/conformance/v2/pointer-suite.ts",
+    "pointerBinding": "packages/json-document/tests/public/v2-pointer-standard-conformance.test.ts",
+    "rfc6902Suite": "packages/json-document/tests/conformance/v2/rfc6902-suite.ts",
+    "rfc6902Binding": "packages/json-document/tests/public/v2-rfc6902-standard-conformance.test.ts",
+    "jsonPathSuite": "packages/json-document/tests/conformance/v2/jsonpath-suite.ts",
+    "jsonPathBinding": "packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts"
   },
   "requirements": [
     "JD2-GOV-001",

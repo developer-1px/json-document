@@ -133,6 +133,18 @@ interface UnsubscribeVector extends VectorBase {
   };
 }
 
+interface UnsubscribeDuringPublicationVector extends VectorBase {
+  readonly kind: "unsubscribe-during-publication";
+  readonly operations: ReadonlyArray<JSONPatchOperation>;
+  readonly metadata?: ProjectionMetadata;
+  readonly expect: {
+    readonly commit: ExpectedObject;
+    readonly firstSubscriber: ReadonlyArray<ExpectedObject>;
+    readonly secondSubscriber: ReadonlyArray<ExpectedObject>;
+    readonly value: JSONValue;
+  };
+}
+
 interface MutationAttempt {
   readonly pointer: string;
   readonly value: JSONValue;
@@ -173,13 +185,46 @@ interface NonJSONVector extends VectorBase {
   };
 }
 
+interface ReentrantPublicationVector extends VectorBase {
+  readonly kind: "reentrant-publication";
+  readonly outer: {
+    readonly operations: ReadonlyArray<JSONPatchOperation>;
+    readonly metadata?: ProjectionMetadata;
+  };
+  readonly nested: {
+    readonly operations: ReadonlyArray<JSONPatchOperation>;
+    readonly metadata?: ProjectionMetadata;
+  };
+  readonly expect: {
+    readonly outer: ExpectedObject;
+    readonly nested: ExpectedObject;
+    readonly firstSubscriber: ReadonlyArray<ExpectedObject>;
+    readonly secondSubscriber: ReadonlyArray<ExpectedObject>;
+    readonly value: JSONValue;
+  };
+}
+
+interface SubscriberErrorVector extends VectorBase {
+  readonly kind: "subscriber-error";
+  readonly operations: ReadonlyArray<JSONPatchOperation>;
+  readonly metadata?: ProjectionMetadata;
+  readonly expect: {
+    readonly commit: ExpectedObject;
+    readonly delivered: ReadonlyArray<ExpectedObject>;
+    readonly value: JSONValue;
+  };
+}
+
 type ProjectionVector =
   | SurfaceVector
   | ReadVector
   | CommitVector
   | UnsubscribeVector
+  | UnsubscribeDuringPublicationVector
   | IsolationVector
-  | NonJSONVector;
+  | NonJSONVector
+  | ReentrantPublicationVector
+  | SubscriberErrorVector;
 
 interface ProjectionManifest {
   readonly initial: JSONValue;
@@ -326,6 +371,34 @@ function runUnsubscribeVector(
   expectNotifications(observation.changes, vector.expect.notifications);
 }
 
+function runUnsubscribeDuringPublicationVector(
+  harness: ProjectionHarness,
+  vector: UnsubscribeDuringPublicationVector,
+): void {
+  const projection = harness.create("json", cloneJSON(manifest.initial));
+  const firstSubscriber: ProjectionChange[] = [];
+  const secondSubscriber: ProjectionChange[] = [];
+  let unsubscribeSecond = (): void => undefined;
+
+  projection.subscribe((change) => {
+    firstSubscriber.push(change);
+    unsubscribeSecond();
+  });
+  unsubscribeSecond = projection.subscribe((change) => {
+    secondSubscriber.push(change);
+  });
+
+  const result = projection.commit(
+    cloneJSON(vector.operations),
+    commitOptions(vector.metadata),
+  );
+
+  expectRequired(result, vector.expect.commit);
+  expectNotifications(firstSubscriber, vector.expect.firstSubscriber);
+  expectNotifications(secondSubscriber, vector.expect.secondSubscriber);
+  expect(projection.value).toEqual(vector.expect.value);
+}
+
 function runIsolationVector(
   harness: ProjectionHarness,
   vector: IsolationVector,
@@ -388,6 +461,80 @@ function runNonJSONVector(
   expectNotifications(observation.changes, vector.expect.notifications);
 }
 
+function commitOptions(
+  metadata: ProjectionMetadata | undefined,
+): ProjectionCommitOptions | undefined {
+  return metadata === undefined
+    ? undefined
+    : { metadata: cloneJSON(metadata) };
+}
+
+function runReentrantPublicationVector(
+  harness: ProjectionHarness,
+  vector: ReentrantPublicationVector,
+): void {
+  const projection = harness.create("json", cloneJSON(manifest.initial));
+  const firstSubscriber: ProjectionChange[] = [];
+  const secondSubscriber: ProjectionChange[] = [];
+  let nestedResult: ProjectionCommitResult | undefined;
+
+  projection.subscribe((change) => {
+    firstSubscriber.push(change);
+    if (firstSubscriber.length === 1) {
+      nestedResult = projection.commit(
+        cloneJSON(vector.nested.operations),
+        commitOptions(vector.nested.metadata),
+      );
+    }
+  });
+  projection.subscribe((change) => {
+    secondSubscriber.push(change);
+  });
+
+  const outerResult = projection.commit(
+    cloneJSON(vector.outer.operations),
+    commitOptions(vector.outer.metadata),
+  );
+
+  expectRequired(outerResult, vector.expect.outer);
+  expectRequired(nestedResult, vector.expect.nested);
+  expectNotifications(
+    firstSubscriber,
+    vector.expect.firstSubscriber,
+  );
+  expectNotifications(
+    secondSubscriber,
+    vector.expect.secondSubscriber,
+  );
+  expect(projection.value).toEqual(vector.expect.value);
+}
+
+function runSubscriberErrorVector(
+  harness: ProjectionHarness,
+  vector: SubscriberErrorVector,
+): void {
+  const projection = harness.create("json", cloneJSON(manifest.initial));
+  const delivered: ProjectionChange[] = [];
+  let commitResult: ProjectionCommitResult | undefined;
+
+  projection.subscribe(() => {
+    throw new Error("subscriber failed");
+  });
+  projection.subscribe((change) => {
+    delivered.push(change);
+  });
+
+  expect(() => {
+    commitResult = projection.commit(
+      cloneJSON(vector.operations),
+      commitOptions(vector.metadata),
+    );
+  }).not.toThrow();
+  expectRequired(commitResult, vector.expect.commit);
+  expectNotifications(delivered, vector.expect.delivered);
+  expect(projection.value).toEqual(vector.expect.value);
+}
+
 function runVector(
   harness: ProjectionHarness,
   vector: ProjectionVector,
@@ -405,11 +552,20 @@ function runVector(
     case "unsubscribe":
       runUnsubscribeVector(harness, vector);
       return;
+    case "unsubscribe-during-publication":
+      runUnsubscribeDuringPublicationVector(harness, vector);
+      return;
     case "isolation":
       runIsolationVector(harness, vector);
       return;
     case "non-json":
       runNonJSONVector(harness, vector);
+      return;
+    case "reentrant-publication":
+      runReentrantPublicationVector(harness, vector);
+      return;
+    case "subscriber-error":
+      runSubscriberErrorVector(harness, vector);
   }
 }
 

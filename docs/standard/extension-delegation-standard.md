@@ -1,6 +1,12 @@
 # json-document extension delegation standard
 
-상태: 표준화 트랙 초안.
+상태: 1.x Candidate Editing Session migration baseline. v2 portable root에는
+비정본이다.
+
+이 문서의 selection, clipboard, history와 `selectionAfter` 서술은
+`@interactive-os/json-document/session` 후보 표면을 설명한다. v2 root의 규범
+계약은 [`v2-projection-profile.md`](./v2-projection-profile.md)가 우선하며,
+v2 extension은 여섯-member `JSONDocument`와 JSON-safe metadata를 조합해야 한다.
 
 이 문서는 `@interactive-os/json-document` official extension이 무엇이어야 하는지 정의한다.
 핵심은 패키지 수를 늘리는 것이 아니다. `@interactive-os/json-document`의 목표는 FE 편집 도구에서
@@ -18,9 +24,10 @@ official extension
 
 ## 1. 철학
 
-`@interactive-os/json-document` core는 primitive foundation이다. core는 schema로 보호되는 JSON
+`@interactive-os/json-document/session`은 1.x rich foundation이다. 이 Session은 schema로 보호되는 JSON
 document, pointer, patch, query, selection, clipboard, history, capability를
-제공한다. core는 UI, DOM, keyboard, focus, storage lifecycle, system
+제공한다. v2 root Core는 JSON, Pointer, Patch, query와 여섯-member Projection만
+필수로 제공한다. 둘 다 UI, DOM, keyboard, focus, storage lifecycle, system
 clipboard permission, product command naming을 소유하지 않는다.
 
 extension은 core보다 편한 wrapper가 아니다. extension은 app과 core 사이에서
@@ -251,7 +258,12 @@ extension은 feature의 절차를 충분히 소유해야 한다.
 
 extension은 core implementation detail에 기대면 안 된다.
 
-- MUST: `@interactive-os/json-document` public package entrypoint만 import해야 한다.
+- MUST: 대상으로 삼은 profile의 public package entrypoint만 import해야 한다.
+  v2 portable extension은 `@interactive-os/json-document` root를 사용하고, 아직
+  migration 중인 1.x Session extension은
+  `@interactive-os/json-document/session`을 사용할 수 있다.
+- MUST: `/session`에 의존한 extension을 여섯-member v2 Core 적합 구현으로
+  표시하면 안 된다.
 - MUST NOT: `src/application`, `src/domain`, `src/foundation` 같은 internal path를 import하면 안 된다.
 - MUST NOT: private symbol, test helper, implementation-only type을 public contract처럼 사용하면 안 된다.
 - SHOULD: extension evaluator로 import boundary를 검사해야 한다.
@@ -281,7 +293,10 @@ extension은 필요할 때 함수로 조립한다. 다만 official extension은 
 
 구조 편집 command는 JSON document의 모양, sibling order, group, outline,
 range, grid-like region을 바꾼다. 이 계열은 core API를 새로 요구하지 않는다.
-Core에는 이미 JSON Patch batch와 `commit(..., { selectionAfter })`가 있다.
+1.x Candidate Session에는 JSON Patch batch와
+`commit(..., { selectionAfter })`가 있다. v2 root Core는
+`commit(operations, { metadata })`만 제공하므로 v2 extension의
+`selectionAfter`는 extension 또는 rich host가 해석하는 JSON-safe metadata다.
 따라서 extension은 같은 의미를 새 이름으로 다시 만들지 말고, 다음 어휘로
 수렴해야 한다.
 
@@ -311,12 +326,16 @@ structural command
 |-- plan/can 단계에서 operations를 노출한다
 |-- command가 다음 focus를 알면 selectionAfter를 노출한다
 |-- 실행을 막지 않는 정보는 diagnostics에 둔다
-`-- 실제 commit은 core doc.commit(..., { selectionAfter })를 사용한다
+`-- v2 root commit은 selectionAfter를 namespaced metadata로 전달한다
 ```
 
 `selectionAfter`는 DOM focus가 아니다. JSON Pointer, selection range input,
 또는 `SelectionSnap`으로 복원할 수 있는 headless selection이다. Visual focus,
 keyboard roving tabindex, scroll position은 host app 책임으로 남는다.
+위 command result의 `unknown`은 Session별 selection model을 허용하는 local
+boundary다. v2 root metadata로 넘길 때에는 extension 또는 host가 이를
+`JSONValue`로 encode하고 자기 namespace 아래에 넣어야 하며, core가
+`selectionAfter`라는 예약 field를 해석한다고 가정하면 안 된다.
 
 `diagnostics`는 실패 result를 대체하지 않는다. 실행을 막는 문제는 stable `code`를
 가진 실패 result여야 한다. `diagnostics`는 import/paste/review처럼 host가
@@ -700,7 +719,7 @@ official 승격 전에는 다음 표를 작성해야 한다.
 | Residual app responsibility | 앱에 남아야 하는 UX/product 책임은 무엇인가? |
 | Cross-app evidence | outliner 외 어느 편집도구에서도 같은 이름으로 필요한가? |
 | can/execute parity | `can*`와 실행 method가 같은 feature semantics를 공유하는가? |
-| Public facade | public `@interactive-os/json-document` entrypoint만으로 구현되는가? |
+| Public facade | target profile의 public entrypoint만으로 구현되는가? |
 | Non-goals | UI, focus, keyboard, product workflow를 명시적으로 제외했는가? |
 | Failure model | structured result와 error code가 충분한가? |
 | Tests | feature 규칙이 app test가 아니라 extension test에 있는가? |

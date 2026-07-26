@@ -161,25 +161,22 @@ export function createProjection(
     if (publishing) return;
 
     publishing = true;
-    const errors: unknown[] = [];
     try {
       while (publicationQueue.length > 0) {
         const next = publicationQueue.shift() as JSONAppliedChange;
         for (const listener of [...listeners]) {
+          if (!listeners.has(listener)) continue;
           try {
             listener(next);
-          } catch (error) {
-            errors.push(error);
+          } catch {
+            // A subscriber runs after the state change is committed. Its failure
+            // cannot turn that successful commit into an apparent failed write,
+            // nor can it prevent delivery to the remaining subscribers.
           }
         }
       }
     } finally {
       publishing = false;
-    }
-
-    if (errors.length === 1) throw errors[0];
-    if (errors.length > 1) {
-      throw new AggregateError(errors, "JSONDocument subscribers failed");
     }
   }
 }

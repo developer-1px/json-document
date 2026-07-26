@@ -92,6 +92,13 @@ function validateV2Conformance(
   protocolVectors,
   protocolSuiteSource,
   protocolReferenceSource,
+  pointerVectors,
+  pointerSuiteSource,
+  pointerReferenceSource,
+  rfc6902SuiteSource,
+  rfc6902ReferenceSource,
+  jsonPathSuiteSource,
+  jsonPathReferenceSource,
   requirementSet,
 ) {
   const expectedArtifacts = {
@@ -101,6 +108,13 @@ function validateV2Conformance(
     protocolVectors: "packages/json-document/tests/conformance/v2/protocol-vectors.json",
     protocolSuite: "packages/json-document/tests/conformance/v2/protocol-suite.ts",
     protocolBinding: "packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts",
+    pointerVectors: "packages/json-document/tests/conformance/v2/pointer-vectors.json",
+    pointerSuite: "packages/json-document/tests/conformance/v2/pointer-suite.ts",
+    pointerBinding: "packages/json-document/tests/public/v2-pointer-standard-conformance.test.ts",
+    rfc6902Suite: "packages/json-document/tests/conformance/v2/rfc6902-suite.ts",
+    rfc6902Binding: "packages/json-document/tests/public/v2-rfc6902-standard-conformance.test.ts",
+    jsonPathSuite: "packages/json-document/tests/conformance/v2/jsonpath-suite.ts",
+    jsonPathBinding: "packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts",
   };
   if (JSON.stringify(draft.conformance) !== JSON.stringify(expectedArtifacts)) {
     fail("v2 conformance: artifact paths changed without updating the evaluator.");
@@ -133,8 +147,11 @@ function validateV2Conformance(
     "read",
     "commit",
     "unsubscribe",
+    "unsubscribe-during-publication",
     "isolation",
     "non-json",
+    "reentrant-publication",
+    "subscriber-error",
   ]);
   if (!Array.isArray(projectionVectors.vectors)) {
     fail("v2 conformance vectors: vectors must be an array.");
@@ -307,6 +324,83 @@ function validateV2Conformance(
     protocolReferenceSource,
     /applyPatch[\s\S]*runProtocolConformance/,
   );
+
+  if (
+    pointerVectors.formatVersion !== 1
+    || pointerVectors.status !== "candidate"
+    || pointerVectors.profile !== "docs/standard/v2-projection-profile.md"
+    || JSON.stringify(pointerVectors.requirements)
+      !== JSON.stringify(["JD2-ADDRESS-001", "JD2-PATCH-001"])
+  ) {
+    fail("v2 Pointer vectors: metadata drifted.");
+  }
+  for (const group of ["parse", "invalid", "build", "append", "parent", "track"]) {
+    if (!Array.isArray(pointerVectors[group]) || pointerVectors[group].length === 0) {
+      fail(`v2 Pointer vectors: ${group} must be a non-empty array.`);
+    }
+  }
+  if (
+    /@interactive-os\/json-document|\/src\//.test(pointerSuiteSource)
+    || !/PointerHarness[\s\S]*runPointerConformance/.test(pointerSuiteSource)
+  ) {
+    fail("v2 Pointer suite must be an implementation-independent injected harness.");
+  }
+  if (
+    !/from "@interactive-os\/json-document"/.test(pointerReferenceSource)
+    || /\/src\/|domain\/|foundation\//.test(pointerReferenceSource)
+  ) {
+    fail("v2 Pointer binding must import only the public root package.");
+  }
+  for (const symbol of [
+    "appendSegment",
+    "buildPointer",
+    "parentPointer",
+    "parsePointer",
+    "trackPointer",
+    "tryParsePointer",
+  ]) {
+    requirePattern(
+      `v2 Pointer binding ${symbol}`,
+      pointerReferenceSource,
+      new RegExp(`\\b${symbol}\\b`),
+    );
+  }
+
+  if (
+    /@interactive-os\/json-document|\/src\//.test(rfc6902SuiteSource)
+    || !/RFC6902Harness[\s\S]*runRFC6902Conformance/.test(rfc6902SuiteSource)
+  ) {
+    fail("v2 RFC 6902 suite must be an implementation-independent injected harness.");
+  }
+  if (
+    !/from "@interactive-os\/json-document"/.test(rfc6902ReferenceSource)
+    || /\/src\/|domain\/|foundation\//.test(rfc6902ReferenceSource)
+  ) {
+    fail("v2 RFC 6902 binding must import only the public root package.");
+  }
+  requirePattern(
+    "v2 RFC 6902 binding",
+    rfc6902ReferenceSource,
+    /applyPatch[\s\S]*runRFC6902Conformance/,
+  );
+
+  if (
+    /@interactive-os\/json-document|\/src\//.test(jsonPathSuiteSource)
+    || !/JSONPathHarness[\s\S]*runJSONPathConformance/.test(jsonPathSuiteSource)
+  ) {
+    fail("v2 RFC 9535 suite must be an implementation-independent injected harness.");
+  }
+  if (
+    !/from "@interactive-os\/json-document"/.test(jsonPathReferenceSource)
+    || /\/src\/|domain\/|foundation\//.test(jsonPathReferenceSource)
+  ) {
+    fail("v2 RFC 9535 binding must import only the public root package.");
+  }
+  requirePattern(
+    "v2 RFC 9535 binding",
+    jsonPathReferenceSource,
+    /createJSONDocument[\s\S]*runJSONPathConformance/,
+  );
 }
 
 function validateV2PublicSurface(
@@ -321,6 +415,13 @@ function validateV2PublicSurface(
   protocolVectors,
   protocolSuiteSource,
   protocolReferenceSource,
+  pointerVectors,
+  pointerSuiteSource,
+  pointerReferenceSource,
+  rfc6902SuiteSource,
+  rfc6902ReferenceSource,
+  jsonPathSuiteSource,
+  jsonPathReferenceSource,
   packageVersion,
 ) {
   if (draft.formatVersion !== 1) {
@@ -329,8 +430,16 @@ function validateV2PublicSurface(
   if (draft.status !== "candidate") {
     fail("v2 public surface: status must be candidate before the stability gate passes.");
   }
-  if (draft.sourceContract !== "packages/json-document/public-contract.json#session") {
-    fail("v2 public surface: sourceContract must point to the preserved 1.x Session baseline.");
+  if (draft.sourceContract !== "packages/json-document/public-contract.json#root") {
+    fail("v2 public surface: sourceContract must point to the v2 root contract.");
+  }
+  if (
+    draft.migrationBaselineContract
+    !== "packages/json-document/public-contract.json#session"
+  ) {
+    fail(
+      "v2 public surface: migrationBaselineContract must point to the 1.x Session baseline.",
+    );
   }
 
   const requirementIds = Array.isArray(draft.requirements) ? draft.requirements : [];
@@ -634,6 +743,13 @@ function validateV2PublicSurface(
     protocolVectors,
     protocolSuiteSource,
     protocolReferenceSource,
+    pointerVectors,
+    pointerSuiteSource,
+    pointerReferenceSource,
+    rfc6902SuiteSource,
+    rfc6902ReferenceSource,
+    jsonPathSuiteSource,
+    jsonPathReferenceSource,
     requirementSet,
   );
 }
@@ -656,6 +772,15 @@ const v2ProtocolVectors = JSON.parse(
 );
 const v2ProtocolSuite = read(v2PublicSurface.conformance.protocolSuite);
 const v2ProtocolReference = read(v2PublicSurface.conformance.protocolBinding);
+const v2PointerVectors = JSON.parse(
+  read(v2PublicSurface.conformance.pointerVectors),
+);
+const v2PointerSuite = read(v2PublicSurface.conformance.pointerSuite);
+const v2PointerReference = read(v2PublicSurface.conformance.pointerBinding);
+const v2RFC6902Suite = read(v2PublicSurface.conformance.rfc6902Suite);
+const v2RFC6902Reference = read(v2PublicSurface.conformance.rfc6902Binding);
+const v2JSONPathSuite = read(v2PublicSurface.conformance.jsonPathSuite);
+const v2JSONPathReference = read(v2PublicSurface.conformance.jsonPathBinding);
 const v2SignatureContract = read(
   "packages/json-document/tests/public/v2-signature-contract.test-d.ts",
 );
@@ -845,6 +970,13 @@ validateV2PublicSurface(
   v2ProtocolVectors,
   v2ProtocolSuite,
   v2ProtocolReference,
+  v2PointerVectors,
+  v2PointerSuite,
+  v2PointerReference,
+  v2RFC6902Suite,
+  v2RFC6902Reference,
+  v2JSONPathSuite,
+  v2JSONPathReference,
   libraryPackage.version,
 );
 
