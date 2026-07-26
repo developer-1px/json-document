@@ -25,7 +25,7 @@ Core는 다음만 소유합니다.
 - immutable snapshot, capability result, atomic commit, publication
 
 DOM, focus, keyboard, geometry, system clipboard, filesystem, network, formula,
-CRDT와 OT는 host 또는 extension 책임입니다.
+CRDT와 OT는 host 또는 adapter 책임입니다.
 
 ## 핵심 개념
 
@@ -113,6 +113,19 @@ if (result.ok) {
 루트 `JSONDocument` 여섯 member에만 의존하고, 편집 UX와 framework lifecycle은
 host 또는 별도 adapter가 소유합니다.
 
+## Host adapter와 companion
+
+Host adapter는 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
+JSON Patch로 번역합니다. Selection, history, clipboard, persistence, focus와
+remote protocol은 Core member를 늘리지 않고 adapter 쪽에 둡니다. Adapter를
+별도 package로 배포할 때는 Core와 독립적으로 version과 compatibility를
+검증해야 합니다.
+
+`@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
+예시입니다. `JSONDocument`는 canonical headless JSON state로 남고, editable은
+contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결합니다.
+이 companion은 json-document v2 release catalog에 포함되지 않습니다.
+
 ## 자주 쓰는 작업
 
 | 하고 싶은 일 | 먼저 보는 API |
@@ -137,5 +150,5 @@ host 또는 별도 adapter가 소유합니다.
 - Slide와 whiteboard: object property와 layer state를 headless JSON으로 관리
 - 저장과 협업 adapter: subscribed canonical change를 외부 log로 전달
 
-제품별 selection, clipboard, history는 host 또는 작은 extension에서
+제품별 selection, clipboard, history는 host 또는 별도 adapter에서
 조합합니다. Core Projection은 그 기능을 필수 member로 요구하지 않습니다.

@@ -17,15 +17,6 @@ const coreRuntime = [
   /^packages\/json-document\/tests\//,
   /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig(?:\.test)?\.json|vitest\.config\.ts|eslint\.config\.js)$/,
 ];
-const coreDependency = [
-  /^packages\/json-document\/src\//,
-  /^packages\/json-document\/dist\//,
-  /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig\.json)$/,
-];
-const officialExtensionRuntime = [
-  /^packages\/(?!json-document\/)[^/]+\/(?:src|tests)\//,
-  /^packages\/(?!json-document\/)[^/]+\/(?:package\.json|tsconfig(?:\.test)?\.json|vitest\.config\.ts|eslint\.config\.js)$/,
-];
 const packageDocs = [
   /^docs\//,
   /^llms\.txt$/,
@@ -38,14 +29,11 @@ const packageSmoke = [
   /^packages\/json-document\/tests\/smoke\//,
 ];
 const packageTooling = [
-  /^scripts\/(?:run-workspace-scripts|evaluate-extensions)\.mjs$/,
-];
-const labRuntime = [
-  /^labs\/extensions\//,
-  /^scripts\/evaluate-extension-lab\.mjs$/,
+  /^scripts\/(?:evaluate-archive-isolation|evaluate-standardization)\.mjs$/,
 ];
 const siteRuntime = [
   /^apps\/site\//,
+  /^config\//,
   /^docs\//,
   /^llms\.txt$/,
   /^packages\/[^/]+\/README\.md$/,
@@ -54,44 +42,26 @@ const siteRuntime = [
 const browserRuntime = [
   /^tests\/browser\//,
   /^playwright\.config\.ts$/,
+  /^config\//,
   /^apps\/site\/(?:src\/(?!generated\/)|tests\/)/,
   /^apps\/site\/(?:package\.json|vite\.config\.ts|tsconfig(?:\.node)?\.json)$/,
 ];
-const playgroundRuntime = [
-  /^apps\/(?!site\/)[^/]+\//,
-];
-
 const packageFull = matches([
   ...rootDependency,
   ...ciWorkflow,
   ...coreRuntime,
-  ...officialExtensionRuntime,
   ...packageTooling,
 ]);
 const packageDocsChanged = matches(packageDocs);
 const packageSmokeChanged = matches(packageSmoke);
 const packageAny = packageFull || packageDocsChanged || packageSmokeChanged;
-const labExtensions = matches([
-  ...rootDependency,
-  ...ciWorkflow,
-  ...coreDependency,
-  ...officialExtensionRuntime,
-  ...labRuntime,
-]);
 const site = matches([
   ...ciWorkflow,
   ...siteRuntime,
 ]);
-const playground = matches([
-  ...ciWorkflow,
-  ...coreRuntime,
-  ...officialExtensionRuntime,
-  ...playgroundRuntime,
-]);
 const browser = matches([
   ...ciWorkflow,
   ...coreRuntime,
-  ...officialExtensionRuntime,
   ...browserRuntime,
 ]);
 
@@ -100,9 +70,7 @@ const outputs = {
   package_docs: packageDocsChanged,
   package_smoke: packageSmokeChanged,
   package_any: packageAny,
-  lab_extensions: labExtensions,
   site,
-  playground,
   browser,
 };
 

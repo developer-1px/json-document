@@ -26,40 +26,5 @@
     "title": "json-document API - json-document",
     "description": "Public v2 Kernel API reference for the exact root surface, six-member Projection, JSON Patch, Pointer, and JSONPath.",
     "group": "Start"
-  },
-  {
-    "path": "/docs/extensions",
-    "label": "Extensions",
-    "title": "Extensions - json-document",
-    "description": "Official json-document extension packages for collection editing, outline movement, schema forms, dirty state, bulk edit, patch logs, persistence, and web clipboard.",
-    "group": "Start"
-  },
-  {
-    "path": "/docs/recipes",
-    "label": "Recipes",
-    "title": "Product Recipes - json-document",
-    "description": "Product-centered json-document feature recipes for Kanban, grid tables, slide object editors, and block docs editors.",
-    "group": "Start"
-  },
-  {
-    "path": "/playground",
-    "label": "Workbench",
-    "title": "Workbench - json-document",
-    "description": "Interactive json-document workbench for trying document operations, can* checks, selection, clipboard, history, schema guards, and JSONPath search.",
-    "group": "Demos"
-  },
-  {
-    "path": "/playground/outliner",
-    "label": "Outliner",
-    "title": "Outliner demo - json-document",
-    "description": "Keyboard-first outliner demo showing json-document selection, clipboard, history, structure edits, and JSON document movement.",
-    "group": "Demos"
-  },
-  {
-    "path": "/playground/mobile-cms",
-    "label": "Mobile CMS",
-    "title": "Mobile CMS demo - json-document",
-    "description": "Mobile CMS demo showing schema-guarded page editing, content block movement, paste targets, and json-document document history.",
-    "group": "Demos"
   }
 ]

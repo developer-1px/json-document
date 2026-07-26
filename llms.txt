@@ -185,43 +185,26 @@ Public Result는 boolean `ok` discriminant를 가진다. Failure는 stable strin
 Consumer는 exact key 집합이나 exhaustive error-code union에 의존하지 않는다.
 Minor release에서 optional diagnostic field와 새 code가 추가될 수 있다.
 
-## Host adapter
+## Host adapter와 companion
 
 패키지는 root entrypoint만 공개한다. Selection, clipboard, history, schema
 introspection, DOM과 framework lifecycle은 host 또는 별도 adapter가
 여섯-member `JSONDocument`를 조합해 소유한다.
 
-## Official extensions
+이 저장소의 v2 release는 Core package 하나만 포함한다. Host adapter는 공개
+Root Projection만 입력으로 받고 제품 의도를 Pointer와 JSON Patch로 번역한다.
+별도 package로 배포하는 adapter는 독립적으로 version과 compatibility를
+검증한다.
 
-공식 extension은 plugin registry 없이 함수로 조립한다. Portable extension은
-Root Projection port를 입력으로 받고, 제품별 기능은 host가 별도로 조합한다.
-
-- `@interactive-os/json-document-bulk-edit`
-- `@interactive-os/json-document-clipboard-web`
-- `@interactive-os/json-document-collection`
-- `@interactive-os/json-document-comments`
-- `@interactive-os/json-document-contenteditable-react`
-- `@interactive-os/json-document-contenteditable-web`
-- `@interactive-os/json-document-dirty-state`
-- `@interactive-os/json-document-form-draft`
-- `@interactive-os/json-document-grouping`
-- `@interactive-os/json-document-id-resolver`
-- `@interactive-os/json-document-outline`
-- `@interactive-os/json-document-patch-log`
-- `@interactive-os/json-document-patch-preview`
-- `@interactive-os/json-document-persist-web`
-- `@interactive-os/json-document-proposed-changes`
-- `@interactive-os/json-document-protected-ranges`
-- `@interactive-os/json-document-schema-form`
-- `@interactive-os/json-document-search-replace`
-- `@interactive-os/json-document-snippets`
-
-`labs/extensions/*`는 후보이고 공식 extension이라고 부르지 않는다.
+`@interactive-os/editable`은 DOM과 Input Events 정규화를 맡는 별도 companion
+예시다. `JSONDocument`는 canonical headless JSON state로 남고, editable은
+contenteditable lifecycle을 소유하며, 문서 의미는 adapter가 연결한다.
+Companion은 json-document package export나 release catalog의 일부가 아니다.
 
 ## Host 책임
 
 Rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem,
-network, formula engine, CRDT와 OT는 host 또는 extension이 소유한다. Tree
+network, formula engine, CRDT와 OT는 host 또는 adapter가 소유한다. Tree
 indent/outdent, visible-row focus, slide selection box, grid coordinate와 같은 제품
 의도는 host가 Pointer와 Patch operation으로 번역한다.
 

@@ -14,7 +14,7 @@ function exists(path: string): boolean {
 
 function markdownFiles(dir = "."): string[] {
   return readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
-    if (["node_modules", "dist", "build", "coverage"].includes(entry.name)) return [];
+    if (["archive", "node_modules", "dist", "build", "coverage"].includes(entry.name)) return [];
 
     const path = dir === "." ? entry.name : `${dir}/${entry.name}`;
     if (entry.isDirectory()) return markdownFiles(path);
@@ -26,48 +26,68 @@ const publicDocs = {
   overview: read("docs/public/overview.md"),
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
-  extensions: read("docs/public/extensions.md"),
-};
-const generatedExtensionsCatalog = read("docs/generated/extensions-catalog.md");
-const generatedRepoCatalog = JSON.parse(read("docs/generated/repo-catalog.json")) as {
-  officialExtensions: { name: string; path: string; publicExports: string[] }[];
-  labExtensions: { name: string; path: string; publicExports: string[] }[];
-  totals: { officialExtensions: number; labExtensions: number };
 };
 const docs = {
   rootReadme: read("README.md"),
   readme: read("packages/json-document/README.md"),
-  spec: read("docs/standard/json-document-spec.md"),
+  profile: read("docs/standard/v2-projection-profile.md"),
   llms: read("llms.txt"),
-  site: [...Object.values(publicDocs), generatedExtensionsCatalog].join("\n\n"),
+  site: Object.values(publicDocs).join("\n\n"),
   ...publicDocs,
-  generatedExtensionsCatalog,
 };
 const publicContract = JSON.parse(read("packages/json-document/public-contract.json")) as {
   root: { values: string[]; types: string[] };
-  session: { values: string[]; types: string[] };
-  react: { values: string[]; types: string[] };
 };
-
-function officialExtensionNames(): string[] {
-  return readdirSync(join(root, "packages"), { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name !== "json-document")
-    .map((entry) => JSON.parse(read(`packages/${entry.name}/package.json`)) as { name: string })
-    .map((pkg) => pkg.name)
-    .filter((name) => name.startsWith("@interactive-os/json-document-"))
-    .sort();
-}
+const siteRoutes = JSON.parse(read("apps/site/src/site-routes.json")) as Array<{
+  path: string;
+  label: string;
+  group: string;
+}>;
 
 describe("public docs consistency", () => {
-  test("uses docs/public as the official markdown source", () => {
-    expect(exists("docs/public/overview.md")).toBe(true);
-    expect(exists("docs/public/quickstart.md")).toBe(true);
-    expect(exists("docs/public/api.md")).toBe(true);
-    expect(exists("docs/public/extensions.md")).toBe(true);
+  test("uses the three core documents as the official site source", () => {
+    expect(readdirSync(join(root, "docs/public")).sort()).toEqual([
+      "api.md",
+      "overview.md",
+      "quickstart.md",
+    ]);
+    expect(readdirSync(join(root, "docs/standard")).sort()).toEqual([
+      "v2-projection-profile.md",
+      "v2-public-surface.json",
+    ]);
 
     expect(exists("apps/site/src/docs/json-document-concepts.md")).toBe(false);
     expect(exists("apps/site/src/docs/json-document-tutorial.md")).toBe(false);
     expect(exists("apps/site/src/docs/json-document-api.md")).toBe(false);
+    expect(exists("docs/public/extensions.md")).toBe(false);
+    expect(exists("docs/public/recipes.md")).toBe(false);
+    expect(exists("docs/standard/json-document-spec.md")).toBe(false);
+  });
+
+  test("keeps the active site on the v2 core routes", () => {
+    expect(siteRoutes.map((route) => route.path)).toEqual([
+      "/",
+      "/docs",
+      "/docs/tutorial",
+      "/docs/api",
+    ]);
+    expect(siteRoutes.every((route) => route.group === "Start")).toBe(true);
+    expect(siteRoutes.map((route) => route.label)).toEqual([
+      "Overview",
+      "Docs",
+      "Quickstart",
+      "API reference",
+    ]);
+
+    const activeSite = [
+      read("apps/site/package.json"),
+      read("apps/site/src/App.tsx"),
+      read("apps/site/src/routes/Docs.tsx"),
+      read("apps/site/src/routes/Home.tsx"),
+    ].join("\n");
+    expect(activeSite).not.toMatch(/json-document-(?:outliner|mobile-cms)/);
+    expect(activeSite).not.toMatch(/@interactive-os\/json-document\/(?:session|react)/);
+    expect(activeSite).not.toMatch(/\/playground|\/docs\/extensions|\/docs\/recipes/);
   });
 
   test("keeps non-README markdown under docs", () => {
@@ -80,14 +100,7 @@ describe("public docs consistency", () => {
   });
 
   test("keeps maintainer history out of external docs", () => {
-    for (const [name, source] of Object.entries({
-      readme: docs.readme,
-      llms: docs.llms,
-      overview: docs.overview,
-      quickstart: docs.quickstart,
-      api: docs.api,
-      extensions: docs.extensions,
-    })) {
+    for (const [name, source] of Object.entries({ ...publicDocs, llms: docs.llms })) {
       expect(source, name).not.toMatch(/관리자 메모/);
       expect(source, name).not.toMatch(/docs:evaluate/);
       expect(source, name).not.toMatch(/release:check/);
@@ -97,7 +110,7 @@ describe("public docs consistency", () => {
     }
   });
 
-  test("keeps usage and project understanding in public docs", () => {
+  test("keeps core usage and project understanding in public docs", () => {
     expect(docs.rootReadme).toMatch(/## 문서 지도/);
     expect(docs.rootReadme).toMatch(/docs\/public\/overview\.md/);
     expect(docs.rootReadme).toMatch(/## 코드 지도/);
@@ -105,56 +118,17 @@ describe("public docs consistency", () => {
     expect(docs.overview).toMatch(/## 배경/);
     expect(docs.overview).toMatch(/## 핵심 개념/);
     expect(docs.overview).toMatch(/검색: JSONPath -> Pointer\[\]/);
-    expect(docs.overview).toMatch(/## 자주 쓰는 작업/);
     expect(docs.quickstart).toMatch(/튜토리얼: 작은 카드 편집기 만들기/);
     expect(docs.api).toMatch(/## 작업별 진입점/);
     expect(docs.api).toMatch(/ReadResult/);
-    expect(docs.extensions).toMatch(/@interactive-os\/json-document-collection/);
-    expect(docs.extensions).toMatch(/@interactive-os\/json-document-clipboard-web/);
-    expect(docs.generatedExtensionsCatalog).toMatch(/Generated extension catalog/);
-    expect(docs.generatedExtensionsCatalog).toMatch(/Official extensions: \d+/);
     expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@2\.0\.0-rc\.0/);
     expect(docs.readme).toMatch(/provider-neutral/);
     expect(docs.llms).toMatch(/2\.0\.0-rc\.0.*Candidate/);
   });
 
-  test("keeps generated repo catalog aligned with package directories", () => {
-    const generatedOfficialNames = generatedRepoCatalog.officialExtensions.map((item) => item.name).sort();
-    const packageOfficialNames = officialExtensionNames();
-
-    expect(generatedOfficialNames).toEqual(packageOfficialNames);
-    expect(generatedRepoCatalog.totals.officialExtensions).toBe(packageOfficialNames.length);
-    expect(generatedRepoCatalog.totals.labExtensions).toBeGreaterThan(0);
-
-    for (const name of packageOfficialNames) {
-      expect(generatedExtensionsCatalog).toContain(`\`${name}\``);
-    }
-  });
-
-  test("describe paste targets without legacy target aliases", () => {
-    for (const [name, source] of Object.entries(docs)) {
-      if (name !== "llms") {
-        expect(source, name).not.toMatch(/zod-crud/);
-        expect(source, name).not.toMatch(/@json-document\//);
-      }
-      expect(source, name).not.toMatch(/\{\s*at\s*:/);
-      expect(source, name).not.toMatch(/JSONDocumentPasteMode|PasteMode/);
-      expect(source, name).not.toMatch(/\bUseJSONDocumentOptions\b|\bUseSelectionOptions\b/);
-      expect(source, name).not.toMatch(/\bPasteOptions\b|\bPasteTarget\b/);
-      expect(source, name).not.toMatch(/\bSelectionAction\b/);
-      expect(source, name).not.toMatch(/\bCopyOk\b|\bCopyError\b|\bCutOk\b|\bCutError\b|\bDuplicateOk\b|\bDuplicateError\b|\bPasteError\b|\bPasteDiscriminatorMismatch\b/);
-    }
-
-    expect(docs.api).toMatch(/mutation target은 JSON Pointer/);
-    expect(docs.llms).toMatch(/Array append는 `\/items\/-`/);
-    expect(docs.llms).toMatch(/공개 Root는 정확히 다음 20개 symbol/);
-    expect(docs.llms).toMatch(/`value`는 항상\s+`JSONValue`/);
-    expect(docs.llms).toMatch(/Root `JSONDocument`의 subtype이라고 가정하지 않는다/);
-  });
-
-  test("keep JSONPath scoped to search and JSON Pointer scoped to mutation", () => {
+  test("keeps JSONPath scoped to search and JSON Pointer scoped to mutation", () => {
     expect(docs.readme).toMatch(/query\(jsonPath\).*Pointer 배열/);
-    expect(docs.spec).toMatch(/JSONPath는 검색 언어/);
+    expect(docs.profile).toMatch(/JSONPath를 mutation target으로 받아들이면 안 되며/);
     expect(docs.site).toMatch(/JSONPath는 변경 언어가 아닙니다/);
     expect(docs.llms).toMatch(/JSONPath는 검색 전용/);
   });
@@ -178,9 +152,8 @@ describe("public docs consistency", () => {
     }
   });
 
-  test("keeps the documented API model complete enough for users", () => {
-    expect(publicContract.root.values).toContain("createJSONDocument");
-    expect(publicContract.react.values).toContain("useJSONDocument");
+  test("locks the documented v2 root contract", () => {
+    expect(Object.keys(publicContract)).toEqual(["root"]);
     expect(publicContract.root.values).toEqual([
       "appendSegment",
       "applyPatch",
@@ -191,16 +164,26 @@ describe("public docs consistency", () => {
       "trackPointer",
       "tryParsePointer",
     ]);
-    expect(publicContract.root.types).toHaveLength(12);
-    expect(publicContract.session.values).toContain("createJSONDocument");
-    expect(docs.api).toContain("canFind");
+    expect(publicContract.root.types).toEqual([
+      "JSONAppliedChange",
+      "JSONCapabilityResult",
+      "JSONChangeMetadata",
+      "JSONDocument",
+      "JSONDocumentCommitOptions",
+      "JSONDocumentCommitResult",
+      "JSONPatchOperation",
+      "JSONPatchResult",
+      "JSONValue",
+      "Pointer",
+      "QueryResult",
+      "ReadResult",
+    ]);
 
-    expect(docs.api).toMatch(/violations\[\]\.path/);
-    expect(docs.api).toMatch(/schema-slot/);
-    expect(docs.api).toMatch(/document-result/);
-    expect(docs.api).toMatch(/applyPatch[\s\S]*외부 JSON 경계/);
-    expect(docs.api).toMatch(/신뢰된 document state/);
-    expect(docs.api).toMatch(/구조만 가진 Zod schema/);
-    expect(docs.api).toMatch(/전체 루트 schema 검증/);
+    for (const member of ["value", "at", "query", "canPatch", "commit", "subscribe"]) {
+      expect(docs.api).toContain(member);
+    }
+    expect(docs.api).toMatch(/applyPatch[\s\S]*RFC 6902/);
+    expect(docs.api).toMatch(/JSONPath.*query 전용/);
+    expect(docs.api).toMatch(/mutation target은 JSON Pointer/);
   });
 });

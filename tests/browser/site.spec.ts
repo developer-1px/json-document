@@ -1,17 +1,19 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test("official overview defers demo and engine code until a demo route opens", async ({ page }) => {
+test("official overview exposes only the v2 core documentation", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
 
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "json-document" })).toBeVisible();
-  await expect(page.getByText("Interface bench")).toHaveCount(0);
-  expect(requests.some(isDemoOrEngineRequest)).toBe(false);
-
-  await page.getByRole("link", { name: "Workbench" }).first().click();
-  await expect(page.getByText("Interface bench")).toBeVisible();
-  expect(requests.some((url) => url.includes("InterfaceWorkbench.playground"))).toBe(true);
+  const navigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(navigation.getByRole("link", { name: "Docs" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Quickstart" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "API reference" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "Recipes" })).toHaveCount(0);
+  expect(requests.some(isLegacyRequest)).toBe(false);
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -48,13 +50,14 @@ test("official site uses window scroll with sticky desktop navigation", async ({
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-function isDemoOrEngineRequest(url: string): boolean {
+function isLegacyRequest(url: string): boolean {
   return [
-    "/src/playgrounds/InterfaceWorkbench.playground",
+    "/src/playgrounds/",
     "/apps/outliner/src/",
     "/apps/mobile-cms/src/",
-    "/packages/json-document/src/application/document/index.ts",
+    "/archive/v1/",
     "/packages/json-document/src/application/react-document/index.ts",
+    "/packages/json-document/src/application/session/index.ts",
   ].some((part) => url.includes(part));
 }
 

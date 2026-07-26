@@ -1,11 +1,8 @@
 import { useMemo } from "react";
 import { MarkdownViewer, markdownHeadings } from "../components/MarkdownViewer";
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
-import extensionsMarkdown from "../../../../docs/public/extensions.md?raw";
-import extensionsCatalogMarkdown from "../../../../docs/generated/extensions-catalog.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
 import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
-import recipesMarkdown from "../../../../docs/public/recipes.md?raw";
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -28,18 +25,6 @@ const docPages = [
     title: "json-document API",
     source: apiReferenceMarkdown,
   },
-  {
-    path: "/docs/extensions",
-    label: "Extensions",
-    title: "json-document Extensions",
-    source: `${extensionsMarkdown}\n\n${extensionsCatalogMarkdown}`,
-  },
-  {
-    path: "/docs/recipes",
-    label: "Recipes",
-    title: "Product Recipes",
-    source: recipesMarkdown,
-  },
 ] as const;
 
 type DocPage = (typeof docPages)[number];
@@ -58,14 +43,6 @@ export function DocsTutorial() {
 
 export function DocsApiReference() {
   return <DocsPage page={docPages[2]} />;
-}
-
-export function DocsExtensions() {
-  return <DocsPage page={docPages[3]} />;
-}
-
-export function DocsRecipes() {
-  return <DocsPage page={docPages[4]} />;
 }
 
 function DocsPage({ page }: { page: DocPage }) {

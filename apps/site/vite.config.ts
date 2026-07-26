@@ -105,7 +105,7 @@ export default defineConfig({
   base: process.env.SITE_BASE ?? "/",
   plugins: [react(), rootLlmsTxt(), productionSiteAssets()],
   resolve: {
-    alias: jsonDocumentSourceAliases({ officialExtensions: true }),
+    alias: jsonDocumentSourceAliases(),
     dedupe: ["react", "react-dom"],
   },
   server: {
@@ -123,8 +123,6 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("/node_modules/react/") || id.includes("/node_modules/react-dom/")) return "react";
           if (id.includes("/packages/json-document/src/")) return "@interactive-os/json-document";
-          if (id.includes("/apps/outliner/src/")) return "playground-outliner";
-          if (id.includes("/apps/mobile-cms/src/")) return "playground-mobile-cms";
         },
       },
     },
