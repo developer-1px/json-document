@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 
 describe("prepared document changes", () => {
   test("captures the base revision before schema validation can reenter", () => {

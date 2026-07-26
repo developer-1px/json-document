@@ -2,7 +2,7 @@ import type {
   JSONDocument,
   JSONPatchOperation,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   capabilityError,

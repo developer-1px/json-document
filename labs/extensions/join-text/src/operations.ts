@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canJoin } from "./plan.js";
 import type { JoinTextOptions, JoinTextResult } from "./types.js";
 

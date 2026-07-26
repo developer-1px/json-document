@@ -2,7 +2,7 @@ import {
   trackPointer,
   type JSONDocument,
   type JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import type {
   Comment,

@@ -6,7 +6,7 @@ import type {
   JSONPatchInput,
   JSONResult,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export interface ProtectedRange {
   id: string;

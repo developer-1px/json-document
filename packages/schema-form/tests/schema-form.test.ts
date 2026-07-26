@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 import { createSchemaForm, createSchemaFormTree } from "../src/index.js";
 
 const Settings = z.object({

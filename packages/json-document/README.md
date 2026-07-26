@@ -1,246 +1,168 @@
 # json-document
 
-Zod schema로 보호되는 JSON state를 읽고, 바꾸고, 선택하고, 복사하고,
-붙여넣고, 되돌리기 위한 headless document layer입니다.
+문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는 provider-neutral
+JSON 편집 protocol과 headless document projection입니다.
 
-`json-document`는 UI component library, CRUD framework, app state manager가
-아닙니다. Form, CMS block, kanban board, outliner, settings editor처럼 서로
-다른 제품이 반복해서 구현하는 document editing core를 제공합니다.
-
-Published `doc.value`는 transitively immutable JSON snapshot입니다. Document가
-accepted input과 patch record를 소유하므로 caller-held payload나 subscriber가
-state/history를 notification 없이 바꿀 수 없습니다. 모든 변경은 document mutation
-API를 통과합니다.
+v2 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
+Patch만 전제로 합니다. UI framework, schema provider, history, selection,
+clipboard는 core 계약이 아닙니다.
 
 ```txt
-schema -> document -> pointer/query -> can* -> change -> result
+Pure Protocol
+  |-> Document Projection -> host adapter
+  `-> Candidate Editing Session -> React / rich host adapter
 ```
 
+현재 버전은 `2.0.0-rc.0`입니다. root v2 binding은 구현됐지만, 독립 구현과 다섯
+편집 vertical의 conformance gate를 통과하기 전까지 표준 profile은 Candidate로
+유지합니다.
+
 - 공식 사이트: https://developer-1px.github.io/json-document/
-- GitHub Wiki: https://github.com/developer-1px/json-document/wiki
-
-> `1.1.0-rc.0`은 `editable`, `canvas` 같은 sibling editor에서 통합 압력을
-> 확인하기 위한 prerelease입니다. npm `latest`는 계속 `1.0.1`을 가리킵니다.
-> 이 RC는 document mutation 성공을 `{ ok, value, applied, target }` 후보로
-> 통일하지만 low-level `patch`/`commit`은 `{ ok: true }`를 유지합니다. 이 shape는
-> stable 승격 전에 바뀔 수 있으므로 아래처럼 exact version으로 opt in합니다.
->
-> ```sh
-> npm install @interactive-os/json-document@1.1.0-rc.0 zod
-> ```
-
-## 왜 json-document인가
-
-JSON을 단순 data blob으로만 다루면 값 하나를 바꾸는 일은 쉽습니다. 하지만 실제
-제품에서는 곧 더 많은 질문이 생깁니다.
-
-- 이 변경이 schema를 통과하는가?
-- 실행 전에 버튼이나 command palette에서 가능 여부를 알 수 있는가?
-- 실패하면 어떤 `code`, `pointer`, `violations`로 설명할 수 있는가?
-- 선택된 항목을 삭제, 이동, 복제할 때 source는 어떻게 정해지는가?
-- 여러 항목을 copy/cut/paste하면 array insertion target에서 어떻게 들어가는가?
-- undo/redo는 value뿐 아니라 selection도 함께 복원하는가?
-- React 밖에서도 같은 document behavior를 쓸 수 있는가?
-
-`json-document`는 이 질문들을 UI 밖의 stable core로 옮깁니다. 앱은 rendering,
-focus, keyboard, drag/drop, network sync를 계속 소유하고, `json-document`는
-schema-safe JSON document semantics를 소유합니다.
+- 표준 profile: `docs/standard/v2-projection-profile.md`
 
 ## 설치
 
+Core만 쓸 때 필수 dependency가 없습니다.
+
 ```sh
-npm install @interactive-os/json-document zod
+npm install @interactive-os/json-document@2.0.0-rc.0
 ```
 
-`zod`는 peer dependency입니다. React 앱에서만
-`@interactive-os/json-document/react`를 import합니다. JSON Patch, JSON Pointer,
-selection, text surface 같은 저수준 도구는 core document 표면과 분리된 subpath에서
-가져올 수 있습니다.
+기존의 Zod 기반 selection, clipboard, history 편집기는 optional Session
+binding입니다.
+
+```sh
+npm install @interactive-os/json-document@2.0.0-rc.0 zod
+```
+
+React는 Session을 사용할 때만 필요합니다.
 
 ## 60초 시작
+
+```ts
+import { createJSONDocument } from "@interactive-os/json-document";
+
+const document = createJSONDocument({
+  title: "Draft",
+  tasks: [{ id: "a", done: false }],
+});
+
+const capability = document.canPatch([
+  { op: "replace", path: "/tasks/0/done", value: true },
+]);
+
+if (capability.ok) {
+  const result = document.commit([
+    { op: "replace", path: "/tasks/0/done", value: true },
+  ], {
+    metadata: { origin: "task-toggle" },
+  });
+
+  if (result.ok) {
+    result.change.applied;
+    document.value;
+  }
+}
+```
+
+Document의 필수 member는 여섯 개뿐입니다.
+
+| Member | 책임 |
+| --- | --- |
+| `value` | immutable current snapshot |
+| `at(pointer)` | 정확한 JSON Pointer 한 곳 읽기 |
+| `query(jsonPath)` | JSONPath를 Pointer 배열로 환원 |
+| `canPatch(operations)` | state를 바꾸지 않는 동일 의미 probe |
+| `commit(operations, options?)` | 유일한 stateful mutation |
+| `subscribe(listener)` | publish된 change 구독 |
+
+실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 돌아옵니다.
+새 error code와 optional field가 추가될 수 있으므로 consumer는 exact key 집합에
+의존하지 않아야 합니다.
+
+## Schema acceptance
+
+Core는 특정 schema object를 받지 않습니다. provider를 작은 acceptance 함수로
+연결합니다. 반환된 parse value를 받지 않으므로 commit-time transform이 state에
+몰래 들어갈 수 없습니다.
 
 ```ts
 import { z } from "zod";
 import { createJSONDocument } from "@interactive-os/json-document";
 
-const Card = z.object({
-  id: z.string(),
-  title: z.string().min(1),
-  status: z.enum(["todo", "doing", "done"]),
+const Schema = z.object({
+  title: z.string(),
+  tasks: z.array(z.object({ id: z.string(), done: z.boolean() })),
 });
 
-const doc = createJSONDocument(Card, {
-  id: "c1",
-  title: "Write docs",
-  status: "todo",
-}, {
-  history: 100,
-  selection: true,
-});
-
-const canChange = doc.canReplace("/status", "doing");
-
-if (canChange.ok) {
-  doc.replace("/status", "doing");
-}
+const document = createJSONDocument(
+  { title: "Draft", tasks: [] },
+  {
+    accepts(candidate) {
+      const result = Schema.safeParse(candidate);
+      return result.success
+        ? { ok: true }
+        : {
+            ok: false,
+            code: "schema_violation",
+            reason: JSON.stringify(result.error.issues),
+          };
+    },
+  },
+);
 ```
 
-모든 실행 API는 성공 또는 실패 result를 반환합니다. UI는 같은 `can*` result를
-사용해 button disabled, command availability, validation message를 만들 수
-있습니다.
+initial value와 patch payload, metadata, published snapshot/change는 document가
+소유합니다. caller reference나 subscriber가 committed state를 우회해 바꿀 수
+없습니다.
 
-```ts
-const result = doc.canReplace("/title", "");
+## 공개 root
 
-if (!result.ok) {
-  result.code;
-  result.reason;
-  result.violations;
-}
-```
-
-## 작업별 진입점
-
-| 하고 싶은 일 | 공개 API |
-| --- | --- |
-| headless document 만들기 | `createJSONDocument(schema, initial, options?)` |
-| React에서 같은 표면 쓰기 | `useJSONDocument(schema, initial, options?)` |
-| 현재 값 읽기 | `doc.value`, `doc.lastPatch` |
-| 한 위치 읽기 | `doc.at(pointer)` |
-| 하위 항목 나열 | `doc.entries(pointer)` |
-| 여러 위치 찾기 | `doc.find(jsonPath)`, `doc.query(jsonPath)` |
-| 값 삽입, 교체, 삭제, 이동 | `doc.insert(...)`, `doc.replace(...)`, `doc.delete(...)`, `doc.move(...)` |
-| 실행 전 확인 | `doc.canPatch`, `doc.canFind`, `doc.canInsert`, `doc.canReplace`, `doc.canDelete`, `doc.canMove`, `doc.canDuplicate`, `doc.canCopy`, `doc.canCut`, `doc.canPaste`, `doc.canUndo`, `doc.canRedo` |
-| sibling 복제 | `doc.duplicate(pointer?, options)` |
-| 선택 상태 저장 | `doc.selection` |
-| copy, cut, paste | `doc.copy(...)`, `doc.cut(...)`, `doc.paste(...)` |
-| 외부 payload 삽입 | `doc.insert(target, value, options?)` |
-| undo, redo | `doc.undo()`, `doc.redo()`, `doc.history` |
-| 위치별 schema 확인 | `doc.schema.at`, `doc.schema.kind`, `doc.schema.describe`, `doc.schema.accepts` |
-
-## Import 표면
-
-대부분의 앱 코드는 root와 React entrypoint만 기억하면 됩니다.
+Root는 20개 Kernel symbol만 공개합니다.
 
 ```txt
-@interactive-os/json-document
-├─ createJSONDocument
-├─ JSONDocument / JSONDocumentOptions
-└─ doc.* facade
+values
+  applyPatch, createJSONDocument
+  appendSegment, buildPointer, parentPointer, parsePointer
+  trackPointer, tryParsePointer
 
-@interactive-os/json-document/react
-└─ useJSONDocument
+types
+  JSONValue, Pointer, JSONPatchOperation
+  JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
+  JSONCapabilityResult, JSONChangeMetadata, JSONDocumentCommitOptions
+  ReadResult, QueryResult, JSONDocument
 ```
 
-저수준 도구나 고급 편집기 adapter용 helper도 root document facade에서 노출합니다.
-소비자는 package subpath가 아니라 `@interactive-os/json-document`와
-`@interactive-os/json-document/react`만 기억합니다.
+`JSONDocument`는 application-owned structural contract입니다. Candidate
+Session은 아직 이 구조의 subtype이라고 약속하지 않는 별도 변경 경계입니다.
 
-## 1.0 public contract
+## Editing Session
 
-1.x에서 고정되는 것은 export 이름만이 아닙니다. 사용자 코드가 의존하는 result
-shape, error code, signature/call shape, selection/history semantics도 public
-contract입니다.
-
-- public import는 `@interactive-os/json-document`와
-  `@interactive-os/json-document/react`가 1차 core입니다.
-- advanced subpath는 공개 계약이 아닙니다. package export는 layer 구조 위의
-  routing table이며, root facade와 React adapter만 노출합니다.
-- 실패 분기는 `reason` 문구가 아니라 stable `code`와 구조로 합니다.
-- 기본값은 `strict: false`입니다. 실패는 throw가 아니라 result로 돌아옵니다.
-- `doc.undo()`와 `doc.redo()`는 top-level command이며
-  `JSONCapabilityResult`를 반환합니다.
-- `createJSONDocument`와 `useJSONDocument`는 trusted/untrusted initial overload를
-  유지합니다.
-- `doc.insert(value)`, `doc.insert(target, value, options)`,
-  `doc.move(source, target)`, `doc.move(target)`,
-  `doc.paste(target, options)` call shape는 public API입니다.
-- `commit(..., { selectionAfter })`는 patch와 final selection을 같은 history
-  entry에 기록합니다.
-
-상세 API와 method reference는 GitHub Wiki에 있습니다.
-
-- Core API Reference: https://github.com/developer-1px/json-document/wiki/Core-API-Reference
-- JSONDocument Method Reference: https://github.com/developer-1px/json-document/wiki/JSONDocument-Method-Reference
-- 1.0 Semantic Contract: https://github.com/developer-1px/json-document/wiki/1.0-Semantic-Contract
-
-## 핵심 규칙
-
-- Patch path와 source는 JSON Pointer입니다.
-- JSONPath는 값을 찾는 언어이며 직접 변경하지 않습니다.
-- `doc.at(pointer)`는 raw value가 아니라 `ReadResult`를 반환합니다.
-- `can*`는 boolean이 아니라 이유 있는 capability result입니다.
-- `doc.duplicate`, `doc.cut`, `doc.paste`는 성공하면 즉시 적용됩니다.
-- 성공 결과의 `applied` patch는 이미 적용된 record이므로 다시 `commit`하지 않습니다.
-- Pointer 배열을 copy/cut하면 clipboard payload도 배열입니다.
-- Multi-source clipboard payload를 array insertion target에 paste하면 기본적으로
-  item별 sibling insert가 됩니다.
-- Tree semantics는 app-owned입니다. json-document는 JSON을 검증하고 mutate합니다.
-
-## Selection, clipboard, history
-
-Selection은 DOM focus가 아니라 JSON-safe document state입니다.
+Selection, clipboard, history, schema introspection과 `insert`, `replace`,
+`delete`, `move`, `duplicate`, `copy`, `cut`, `paste`, `undo`, `redo`는 optional
+Editing Session입니다.
 
 ```ts
-doc.selection?.selectRanges([
-  "/lists/0/cards/0",
-  "/lists/0/cards/1",
-]);
+import { z } from "zod";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 
-doc.copy(doc.selection?.selectedPointers ?? []);
-doc.paste("/lists/1/cards/-");
-```
-
-Clipboard는 browser clipboard가 아니라 document instance 안의 headless JSON
-payload buffer입니다. Browser system clipboard는
-`@interactive-os/json-document-clipboard-web` extension에서 조립합니다.
-
-History는 사용자 의도 단위로 묶을 수 있습니다.
-
-```ts
-doc.history.transaction({ label: "bulk status change" }, () => {
-  doc.replace("/status", "doing");
-  doc.replace("/title", "In progress");
+const Schema = z.object({
+  title: z.string(),
+  tasks: z.array(z.object({ id: z.string(), done: z.boolean() })),
 });
 
-doc.undo();
-doc.redo();
+const session = createJSONDocument(
+  Schema,
+  { title: "Draft", tasks: [] },
+  { history: 100, selection: true },
+);
+
+session.insert("/tasks/-", { id: "a", done: false });
+session.undo();
 ```
 
-구조 편집 후 다음 selection을 command가 정확히 알고 있으면 `selectionAfter`를
-명시합니다.
-
-```ts
-doc.commit([
-  { op: "replace", path: "/status", value: "done" },
-], {
-  label: "complete card",
-  selectionAfter: "/status",
-});
-```
-
-## Placement targets
-
-삽입/이동 위치를 이미 알고 있으면 `/items/-`나 `/lists/1/cards/-` 같은 exact
-Pointer를 그대로 넘깁니다.
-
-```ts
-doc.insert("/items/-", item);
-doc.move("/items/0", "/items/2");
-```
-
-Array container 안에 append할 때는 `{ into }`, array item 기준으로 배치할 때는
-`{ before }`, `{ after }`를 사용합니다. 기존 값을 바꾸는 작업은 `replace`이고,
-document clipboard paste만 `{ replace: pointer }`를 추가로 지원합니다.
-
-```ts
-doc.insert({ into: "/items" }, item);
-doc.move("/items/0", { after: "/items/2" });
-doc.paste({ replace: "/items/0" });
-```
-
-삽입 위치를 직접 지정하려면 placement object를 만들지 말고 pointer 문자열을
-그대로 넘깁니다.
+`/session`은 rich editor 기능의 별도 변경 경계입니다. portable Core consumer는
+이 subpath에 의존하지 않습니다.
 
 ## React — `useJSONDocument`
 
@@ -250,89 +172,57 @@ import { useJSONDocument } from "@interactive-os/json-document/react";
 
 const Schema = z.object({
   title: z.string(),
-  tasks: z.array(z.object({ id: z.string(), done: z.boolean() })),
 });
 
 export function App() {
-  const doc = useJSONDocument(Schema, { title: "", tasks: [] }, { history: 50 });
+  const document = useJSONDocument(
+    Schema,
+    { title: "Draft" },
+    { history: 20 },
+  );
 
   return (
-    <>
-      <input
-        value={doc.value.title}
-        onChange={(event) =>
-          doc.patch({ op: "replace", path: "/title", value: event.target.value })
-        }
-      />
-      <button
-        onClick={() =>
-          doc.insert("/tasks/-", { id: "task-1", done: false })
-        }
-      >
-        insert task
-      </button>
-      <button onClick={() => doc.undo()} disabled={!doc.canUndo().ok}>
-        undo
-      </button>
-    </>
+    <input
+      value={document.value.title}
+      onChange={(event) => {
+        document.commit([
+          { op: "replace", path: "/title", value: event.target.value },
+        ]);
+      }}
+    />
   );
 }
 ```
 
-Root package는 React-free입니다. React hook은 별도 entrypoint에만 있습니다.
-
-## Official extensions
-
-공식 extension은 core에 plugin 등록하지 않고 public `JSONDocument` surface를
-함수로 조립합니다.
-
-```ts
-import { createCollection } from "@interactive-os/json-document-collection";
-import { createOutline } from "@interactive-os/json-document-outline";
-import { createSchemaForm } from "@interactive-os/json-document-schema-form";
-import { createFormDraft } from "@interactive-os/json-document-form-draft";
-import { createProtectedRanges } from "@interactive-os/json-document-protected-ranges";
-import { createSnippets } from "@interactive-os/json-document-snippets";
-import { createDirtyState } from "@interactive-os/json-document-dirty-state";
-import { createBulkEdit } from "@interactive-os/json-document-bulk-edit";
-import { createPatchLog } from "@interactive-os/json-document-patch-log";
-import { createDocumentPersistence } from "@interactive-os/json-document-persist-web";
-import { createIdResolver } from "@interactive-os/json-document-id-resolver";
-import { createPatchPreview } from "@interactive-os/json-document-patch-preview";
-import { createSearchReplace } from "@interactive-os/json-document-search-replace";
-import { createGrouping } from "@interactive-os/json-document-grouping";
-import { createProposedChanges } from "@interactive-os/json-document-proposed-changes";
-import { createComments } from "@interactive-os/json-document-comments";
-import { createWebClipboard } from "@interactive-os/json-document-clipboard-web";
-import { createContentEditableAdapter } from "@interactive-os/json-document-contenteditable-web";
-import { useContentEditable } from "@interactive-os/json-document-contenteditable-react";
-```
-
-공식 package는 현재 `packages/*`에 있는 extension만 뜻합니다.
-`labs/extensions/*`는 후보이며 public API로 약속하지 않습니다.
-
-Extension guide: https://github.com/developer-1px/json-document/wiki/Labs-and-Extensions
+Root import graph에는 React와 Zod가 없습니다. React hook은 Editing Session
+binding에만 연결됩니다.
 
 ## 순수 core
 
-Root helper는 React-free이며 외부 JSON 경계에서 유용합니다.
+`applyPatch`는 schema, session, UI 없이 ordered atomic JSON Patch를 적용합니다.
 
 ```ts
-import * as z from "zod";
 import { applyPatch } from "@interactive-os/json-document";
 
-const Schema = z.object({ title: z.string(), tags: z.array(z.string()) });
 const initial = { title: "draft", tags: [] };
 
-const r = applyPatch(Schema, initial, [
+const r = applyPatch(initial, [
   { op: "add", path: "/tags/-", value: "docs" },
   { op: "replace", path: "/title", value: "final" },
 ]);
+
+if (r.ok) {
+  r.value;
+  r.change.applied;
+}
 ```
+
+성공한 `applied`는 `/-`를 실제 index로 바꾸고 RFC operation field만 보존합니다.
+실패하면 partial value나 partial applied patch를 노출하지 않습니다.
 
 ## 직렬화
 
-State, operation, selection snapshot, patch record는 JSON입니다.
+State, operation, metadata와 change는 JSON입니다.
 
 ```ts
 import * as z from "zod";
@@ -341,23 +231,27 @@ const Schema = z.object({ title: z.string() });
 const state = { title: "draft" };
 
 const json = JSON.stringify(state);
-const restored = Schema.parse(JSON.parse(json));
-const safe = Schema.safeParse(JSON.parse(json));
+const restored = JSON.parse(json);
+const safe = Schema.safeParse(restored);
 ```
 
-Operation은 `application/json-patch+json`으로 보낼 수 있습니다.
+Operation batch는 `application/json-patch+json`으로 전송할 수 있습니다.
 
 ```ts
-const operations = [{ op: "replace", path: "/title", value: "final" }];
+const operations = [
+  { op: "replace", path: "/title", value: "final" },
+];
 const body = JSON.stringify(operations);
 
 body satisfies string;
 ```
 
-## 문서
+## Extension과 host 경계
 
-- Overview: https://developer-1px.github.io/json-document/docs
-- Tutorial: https://developer-1px.github.io/json-document/docs/tutorial
-- API reference: https://developer-1px.github.io/json-document/docs/api
-- Recipes: https://developer-1px.github.io/json-document/docs/recipes
-- Wiki: https://github.com/developer-1px/json-document/wiki
+Form, data-grid, outliner, rich text, persistence/collaboration extension은 여섯
+member `JSONDocument`를 포트로 받는 것이 권장됩니다. DOM focus, geometry,
+keyboard, system clipboard, filesystem, network, formula, CRDT와 OT는 host가
+소유합니다.
+
+- GitHub Wiki: https://github.com/developer-1px/json-document/wiki
+- Extension guide: https://github.com/developer-1px/json-document/wiki/Labs-and-Extensions

@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import * as z from "zod";
 
-import { applyPatch, createJSONDocument } from "@interactive-os/json-document";
+import { applyPatch, createJSONDocument } from "@interactive-os/json-document/session";
 
 describe("structural schema validation isolation", () => {
   test("keeps full validation isolated while preserving committed COW branches", () => {

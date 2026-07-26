@@ -1,0 +1,457 @@
+{
+  "formatVersion": 1,
+  "status": "candidate",
+  "sourceContract": "packages/json-document/public-contract.json#session",
+  "conformance": {
+    "projectionVectors": "packages/json-document/tests/conformance/v2/projection-vectors.json",
+    "projectionSuite": "packages/json-document/tests/conformance/v2/projection-suite.ts",
+    "projectionBinding": "packages/json-document/tests/public/v2-projection-standard-conformance.test.ts",
+    "protocolVectors": "packages/json-document/tests/conformance/v2/protocol-vectors.json",
+    "protocolSuite": "packages/json-document/tests/conformance/v2/protocol-suite.ts",
+    "protocolBinding": "packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts"
+  },
+  "requirements": [
+    "JD2-GOV-001",
+    "JD2-DATA-001",
+    "JD2-DATA-002",
+    "JD2-PROJECTION-001",
+    "JD2-ADDRESS-001",
+    "JD2-QUERY-001",
+    "JD2-PATCH-001",
+    "JD2-PATCH-002",
+    "JD2-CAPABILITY-001",
+    "JD2-COMMIT-001",
+    "JD2-COMMIT-002",
+    "JD2-PUBLISH-001",
+    "JD2-RESULT-001",
+    "JD2-RESULT-002",
+    "JD2-SCHEMA-001",
+    "JD2-SCHEMA-002",
+    "JD2-SESSION-001",
+    "JD2-HOST-001",
+    "JD2-CONFORMANCE-001",
+    "JD2-CONFORMANCE-002",
+    "JD2-BINDING-001"
+  ],
+  "counts": {
+    "dispositions": {
+      "kernel": 16,
+      "session": 20,
+      "compat": 14,
+      "remove": 89
+    },
+    "documentDispositions": {
+      "kernel": 6,
+      "session": 28,
+      "compat": 5,
+      "remove": 0
+    },
+    "baselinePackageSymbols": 139,
+    "baselineDocumentMembers": 39
+  },
+  "projectionMembers": [
+    "value",
+    "at",
+    "query",
+    "canPatch",
+    "commit",
+    "subscribe"
+  ],
+  "documentMembers": {
+    "kernel": [
+      "value",
+      "at",
+      "query",
+      "canPatch",
+      "commit",
+      "subscribe"
+    ],
+    "session": [
+      "selection",
+      "history",
+      "clipboard",
+      "schema",
+      "insert",
+      "replace",
+      "delete",
+      "move",
+      "duplicate",
+      "copy",
+      "cut",
+      "paste",
+      "undo",
+      "redo",
+      "load",
+      "reset",
+      "exists",
+      "entries",
+      "canInsert",
+      "canReplace",
+      "canDelete",
+      "canMove",
+      "canDuplicate",
+      "canCopy",
+      "canCut",
+      "canPaste",
+      "canUndo",
+      "canRedo"
+    ],
+    "compat": [
+      "lastPatch",
+      "patch",
+      "find",
+      "canFind",
+      "canQuery"
+    ],
+    "remove": []
+  },
+  "dispositions": {
+    "kernel": {
+      "root": {
+        "values": [
+          "appendSegment",
+          "applyPatch",
+          "buildPointer",
+          "createJSONDocument",
+          "parentPointer",
+          "parsePointer",
+          "trackPointer",
+          "tryParsePointer"
+        ],
+        "types": [
+          "JSONCapabilityResult",
+          "JSONChangeMetadata",
+          "JSONDocument",
+          "JSONDocumentCommitOptions",
+          "JSONPatchOperation",
+          "Pointer",
+          "QueryResult",
+          "ReadResult"
+        ]
+      },
+      "react": {
+        "values": [],
+        "types": []
+      }
+    },
+    "session": {
+      "root": {
+        "values": [
+          "resolveSiblingRange"
+        ],
+        "types": [
+          "ClipboardCopyResult",
+          "ClipboardCutResult",
+          "ClipboardPasteResult",
+          "ClipboardState",
+          "JSONDocumentDuplicateOptions",
+          "JSONDocumentEditResult",
+          "JSONDocumentHistory",
+          "JSONDocumentInsertOptions",
+          "JSONDocumentOptions",
+          "JSONDocumentPasteOptions",
+          "JSONDocumentPasteTarget",
+          "SelectionMode",
+          "SelectionOptions",
+          "SelectionPoint",
+          "SelectionRange",
+          "SelectionSource",
+          "SelectionState",
+          "SiblingRangeResult"
+        ]
+      },
+      "react": {
+        "values": [
+          "useJSONDocument"
+        ],
+        "types": []
+      }
+    },
+    "compat": {
+      "root": {
+        "values": [
+          "JSONDocumentError",
+          "applyOperation",
+          "applyPatchToTrustedState",
+          "lastSegmentIndex",
+          "withLastSegment"
+        ],
+        "types": [
+          "ClipboardSource",
+          "JSONDocumentDuplicateResult",
+          "JSONDocumentInsertTarget",
+          "JSONDocumentMoveTarget",
+          "JSONDocumentSchemaLike",
+          "JSONDocumentSelectionTarget",
+          "JSONPatchInput",
+          "JSONResult",
+          "SelectionSnap"
+        ]
+      },
+      "react": {
+        "values": [],
+        "types": []
+      }
+    },
+    "remove": {
+      "root": {
+        "values": [
+          "PointerSyntaxError",
+          "escapeSegment",
+          "lastSegment",
+          "replaceTextSurfaceSelection",
+          "syncTextSurfaceMutation",
+          "textSurfaceFragment",
+          "unescapeSegment"
+        ],
+        "types": [
+          "ClipboardCopyError",
+          "ClipboardCopyOk",
+          "ClipboardCopyOptions",
+          "ClipboardCutError",
+          "ClipboardCutOk",
+          "ClipboardCutOptions",
+          "ClipboardEmpty",
+          "ClipboardMutationOk",
+          "ClipboardPasteDiscriminatorMismatch",
+          "ClipboardPasteError",
+          "ClipboardReadOk",
+          "ClipboardReadOptions",
+          "ClipboardReadResult",
+          "ClipboardWriteOptions",
+          "DeleteSelectionTextResult",
+          "EntriesResult",
+          "EntryKind",
+          "HistoryTransactionOptions",
+          "JSONDocumentDuplicateError",
+          "JSONDocumentEditError",
+          "JSONDocumentEditOk",
+          "JSONDocumentSchemaInput",
+          "JSONDocumentSchemaOutput",
+          "ReadEntry",
+          "ReplaceSelectionTextResult",
+          "ResolveSiblingRangeOptions",
+          "SchemaDescription",
+          "SchemaDescriptionResult",
+          "SchemaErrorCode",
+          "SchemaErrorResult",
+          "SchemaKind",
+          "SchemaKindResult",
+          "SchemaPathMode",
+          "SchemaQueryResult",
+          "SchemaState",
+          "SelectionAffinity",
+          "SelectionContext",
+          "SelectionCursorDirection",
+          "SelectionCursorErrorCode",
+          "SelectionCursorOptions",
+          "SelectionCursorResult",
+          "SelectionCursorTarget",
+          "SelectionDirection",
+          "SelectionEdge",
+          "SelectionOrderErrorCode",
+          "SelectionOrderOptions",
+          "SelectionOrderedRange",
+          "SelectionOrderedRangeEntry",
+          "SelectionPointObject",
+          "SelectionPointOrderResult",
+          "SelectionPointerSpan",
+          "SelectionPointerSpansResult",
+          "SelectionRangeInput",
+          "SelectionRangeOrderResult",
+          "SelectionRangesOrderResult",
+          "SelectionScopeErrorCode",
+          "SelectionScopeOptions",
+          "SelectionScopeResult",
+          "SelectionScopeTarget",
+          "SelectionSpanOptions",
+          "SelectionTextDeleteDirection",
+          "SelectionTextDeleteOptions",
+          "SelectionTextEdit",
+          "SelectionTextEditErrorCode",
+          "SelectionTextEditOptions",
+          "SelectionTextEditsResult",
+          "SelectionType",
+          "SiblingLocation",
+          "SiblingRangeErrorCode",
+          "TextSurface",
+          "TextSurfaceAtom",
+          "TextSurfaceError",
+          "TextSurfaceErrorCode",
+          "TextSurfaceFragment",
+          "TextSurfaceFragmentResult",
+          "TextSurfaceMutationRange",
+          "TextSurfaceMutationResult",
+          "TextSurfaceRange",
+          "TextSurfaceReplaceOptions",
+          "TextSurfaceReplaceResult",
+          "TextSurfaceReplacement",
+          "TextSurfaceSelectionRange"
+        ]
+      },
+      "react": {
+        "values": [],
+        "types": []
+      }
+    }
+  },
+  "compatReplacements": {
+    "root:values:JSONDocumentError": {
+      "replacement": "result code plus an optional binding-owned throw helper",
+      "reason": "Expected execution failure has one canonical result channel."
+    },
+    "root:values:applyOperation": {
+      "replacement": "root:values:applyPatch",
+      "reason": "A one-operation batch does not need a second mutation primitive."
+    },
+    "root:values:applyPatchToTrustedState": {
+      "replacement": "root:values:applyPatch",
+      "reason": "Trust is an internal optimization and must not create a second public patch meaning."
+    },
+    "root:values:lastSegmentIndex": {
+      "replacement": "root:values:tryParsePointer plus validation against the addressed container",
+      "reason": "A numeric final token is not an array index without document context."
+    },
+    "root:values:withLastSegment": {
+      "replacement": "root:values:parentPointer plus root:values:appendSegment",
+      "reason": "The operation is a composition of canonical Pointer primitives."
+    },
+    "root:types:ClipboardSource": {
+      "replacement": "root:types:SelectionSource",
+      "reason": "Clipboard commands do not need a second name for the same selected source."
+    },
+    "root:types:JSONDocumentDuplicateResult": {
+      "replacement": "root:types:JSONDocumentEditResult",
+      "reason": "Duplicate uses the same applied-change result and a non-null target."
+    },
+    "root:types:JSONDocumentInsertTarget": {
+      "replacement": "proposed:types:JSONDocumentPlacementTarget",
+      "reason": "Insert and move currently alias the same placement union."
+    },
+    "root:types:JSONDocumentMoveTarget": {
+      "replacement": "proposed:types:JSONDocumentPlacementTarget",
+      "reason": "Insert and move currently alias the same placement union."
+    },
+    "root:types:JSONDocumentSchemaLike": {
+      "replacement": "an unfrozen provider-neutral schema boundary",
+      "reason": "The current structural name still exposes a Zod-specific contract."
+    },
+    "root:types:JSONDocumentSelectionTarget": {
+      "replacement": "proposed:types:SelectionSnapshot or root:types:SelectionRange",
+      "reason": "Commit options should use canonical selection data instead of a document-specific alias."
+    },
+    "root:types:JSONPatchInput": {
+      "replacement": "ReadonlyArray<JSONPatchOperation>",
+      "reason": "The canonical mutation unit is one ordered batch."
+    },
+    "root:types:JSONResult": {
+      "replacement": "proposed:types:JSONPatchResult or proposed:types:JSONDocumentCommitResult",
+      "reason": "Pure patch and stateful commit need distinct success payloads instead of one context-free name."
+    },
+    "root:types:SelectionSnap": {
+      "replacement": "proposed:types:SelectionSnapshot",
+      "reason": "The durable public name should not abbreviate the established snapshot concept."
+    }
+  },
+  "documentCompatReplacements": {
+    "lastPatch": "commit result or subscribed applied change",
+    "patch": "commit",
+    "find": "query",
+    "canFind": "query result",
+    "canQuery": "query result"
+  },
+  "binding": {
+    "version": "2.0.0-rc.0",
+    "contract": "packages/json-document/public-contract.json#root",
+    "entrypoint": ".",
+    "values": [
+      "appendSegment",
+      "applyPatch",
+      "buildPointer",
+      "createJSONDocument",
+      "parentPointer",
+      "parsePointer",
+      "trackPointer",
+      "tryParsePointer"
+    ],
+    "types": [
+      "JSONAppliedChange",
+      "JSONCapabilityResult",
+      "JSONChangeMetadata",
+      "JSONDocument",
+      "JSONDocumentCommitOptions",
+      "JSONDocumentCommitResult",
+      "JSONPatchOperation",
+      "JSONPatchResult",
+      "JSONValue",
+      "Pointer",
+      "QueryResult",
+      "ReadResult"
+    ],
+    "sessionEntrypoint": "./session"
+  },
+  "introducedSymbols": [
+    {
+      "entrypoint": "root",
+      "kind": "types",
+      "name": "JSONValue",
+      "disposition": "kernel",
+      "replaces": [],
+      "implemented": true
+    },
+    {
+      "entrypoint": "root",
+      "kind": "types",
+      "name": "JSONAppliedChange",
+      "disposition": "kernel",
+      "replaces": [
+        "root:types:ClipboardMutationOk",
+        "root:types:JSONDocumentEditOk",
+        "document:lastPatch"
+      ],
+      "implemented": true
+    },
+    {
+      "entrypoint": "root",
+      "kind": "types",
+      "name": "JSONDocumentCommitResult",
+      "disposition": "kernel",
+      "replaces": [
+        "root:types:JSONResult"
+      ],
+      "implemented": true
+    },
+    {
+      "entrypoint": "root",
+      "kind": "types",
+      "name": "JSONPatchResult",
+      "disposition": "kernel",
+      "replaces": [
+        "root:types:JSONResult"
+      ],
+      "implemented": true
+    },
+    {
+      "entrypoint": "root",
+      "kind": "types",
+      "name": "JSONDocumentPlacementTarget",
+      "disposition": "session",
+      "replaces": [
+        "root:types:JSONDocumentInsertTarget",
+        "root:types:JSONDocumentMoveTarget"
+      ],
+      "implemented": false
+    },
+    {
+      "entrypoint": "root",
+      "kind": "types",
+      "name": "SelectionSnapshot",
+      "disposition": "session",
+      "replaces": [
+        "root:types:JSONDocumentSelectionTarget",
+        "root:types:SelectionSnap"
+      ],
+      "implemented": false
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canToggleValue } from "./plan.js";
 import type { ToggleValueOptions, ToggleValueResult } from "./types.js";
 

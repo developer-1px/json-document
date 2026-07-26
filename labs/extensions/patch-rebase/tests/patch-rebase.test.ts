@@ -6,7 +6,7 @@ import {
   type JSONPatchOperation,
   type Pointer,
   type SelectionPointObject,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import {
   rebaseChange,
   type RebaseChangeInput,

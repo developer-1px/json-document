@@ -42,7 +42,7 @@
     "@interactive-os/json-document-stable-id-rebase": "0.1.0"
   },
   "peerDependencies": {
-    "@interactive-os/json-document": "^1.0.0"
+    "@interactive-os/json-document": "^2.0.0-rc.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

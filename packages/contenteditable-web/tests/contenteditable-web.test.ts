@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument, type TextSurface } from "@interactive-os/json-document";
+import { createJSONDocument, type TextSurface } from "@interactive-os/json-document/session";
 import {
   JSON_ATOM_ATTRIBUTE,
   JSON_ATOM_REPLACEMENT,

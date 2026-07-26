@@ -5,7 +5,7 @@ import type {
   JSONDocumentCommitOptions,
   JSONPatchOperation,
   JSONResult,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export interface PatchLogEntry {
   readonly applied: ReadonlyArray<JSONPatchOperation>;

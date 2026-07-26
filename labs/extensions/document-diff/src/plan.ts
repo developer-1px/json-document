@@ -1,4 +1,4 @@
-import { appendSegment, type JSONDocument, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document";
+import { appendSegment, type JSONDocument, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document/session";
 import type { DocumentDiffChangeResult } from "./types.js";
 
 export function diffDocument<TDocument, TValue = unknown>(

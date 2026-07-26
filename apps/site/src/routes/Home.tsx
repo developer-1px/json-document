@@ -1,9 +1,9 @@
 const modelRows = [
-  ["document", "value, patch, duplicate, read/query"],
-  ["selection", "anchor, focus, ranges, text plans"],
-  ["clipboard", "copy, cut, paste, payload insertion"],
-  ["history", "undo, redo, transaction metadata"],
-  ["can*", "reasoned checks for UI and tests"],
+  ["protocol", "provider-neutral JSON Patch application"],
+  ["projection", "value, at, query, canPatch, commit, subscribe"],
+  ["acceptance", "optional provider-neutral candidate validation"],
+  ["session", "optional selection, clipboard, history, rich edit verbs"],
+  ["host", "rendering, focus, keyboard, persistence, collaboration"],
 ] as const;
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -19,14 +19,14 @@ export function Home() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
           <div>
             <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">
-              Zod-guarded JSON editing
+              Provider-neutral JSON editing
             </p>
             <h1 className="mb-4 mt-2 text-4xl font-semibold tracking-normal text-stone-950">
               json-document
             </h1>
             <p className="m-0 max-w-2xl text-base leading-7 text-stone-600">
-              A headless document facade for JSON Patch, JSON Pointer, JSONPath,
-              selection, clipboard, history, and reasoned capability checks.
+              A headless JSON protocol and six-member document projection for
+              documents, tables, slides, canvases, and notes.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               <a className="rounded bg-stone-950 px-3 py-2 text-sm font-medium text-white no-underline hover:bg-stone-800" href={sitePath("/docs")}>
@@ -49,7 +49,7 @@ export function Home() {
 
           <div className="rounded border border-stone-200 bg-stone-950 p-3 text-stone-100">
             <div className="mb-2 text-xs font-medium text-stone-400">Install</div>
-            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>npm install @interactive-os/json-document zod</code></pre>
+            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>npm install @interactive-os/json-document@2.0.0-rc.0</code></pre>
             <div className="mt-4 border-t border-stone-800 pt-3 text-xs font-medium text-stone-400">Start</div>
             <pre className="m-0 mt-2 overflow-x-auto text-sm leading-6"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
           </div>
@@ -82,8 +82,8 @@ export function Home() {
         <aside className="rounded border border-stone-200 bg-white p-4">
           <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
           <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
-            <li>Root package is React-free.</li>
-            <li>React lives under <code className="rounded bg-stone-100 px-1 py-0.5 font-mono text-xs">@interactive-os/json-document/react</code>.</li>
+            <li>Root Kernel is React- and Zod-free.</li>
+            <li>Rich editing lives under the optional <code className="rounded bg-stone-100 px-1 py-0.5 font-mono text-xs">@interactive-os/json-document/session</code> boundary.</li>
             <li>Mutation inputs are JSON Patch with JSON Pointer paths.</li>
             <li>JSONPath is search-only and returns pointers.</li>
           </ul>

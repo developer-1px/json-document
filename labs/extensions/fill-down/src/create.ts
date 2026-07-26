@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { fillDown } from "./operations.js";
 import { canFillDown } from "./plan.js";
 import type { FillDown } from "./types.js";

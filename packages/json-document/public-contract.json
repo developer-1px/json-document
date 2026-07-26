@@ -1,6 +1,32 @@
 {
   "root": {
     "values": [
+      "appendSegment",
+      "applyPatch",
+      "buildPointer",
+      "createJSONDocument",
+      "parentPointer",
+      "parsePointer",
+      "trackPointer",
+      "tryParsePointer"
+    ],
+    "types": [
+      "JSONAppliedChange",
+      "JSONCapabilityResult",
+      "JSONChangeMetadata",
+      "JSONDocument",
+      "JSONDocumentCommitOptions",
+      "JSONDocumentCommitResult",
+      "JSONPatchOperation",
+      "JSONPatchResult",
+      "JSONValue",
+      "Pointer",
+      "QueryResult",
+      "ReadResult"
+    ]
+  },
+  "session": {
+    "values": [
       "JSONDocumentError",
       "PointerSyntaxError",
       "appendSegment",

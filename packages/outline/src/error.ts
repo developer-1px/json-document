@@ -1,6 +1,6 @@
 import type {
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import type {
   OutlineEditError,

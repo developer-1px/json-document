@@ -3,7 +3,7 @@ import type {
   Pointer,
   SelectionPoint,
   SelectionSnap,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export function normalizeSelection(value: unknown): SelectionSnap | null {
   if (!isSelectionSnap(value)) return null;

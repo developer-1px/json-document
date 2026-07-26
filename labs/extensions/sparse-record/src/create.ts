@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { editSparseRecords } from "./operations.js";
 import { canEditSparseRecords } from "./plan.js";
 import type { SparseRecord } from "./types.js";

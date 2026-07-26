@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 
 const Schema = z.object({
   user: z.object({ name: z.string() }).optional(),

@@ -8,7 +8,7 @@ import {
   textSurfaceFragment,
   type SelectionSnap,
   type TextSurface,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 const ATOM = "\uFFFC";
 

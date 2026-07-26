@@ -16,18 +16,19 @@ product feature
 `-- app-owned responsibility
 ```
 
-Core는 JSON 구조 변경, schema validation, Pointer/Patch, `can*`, selection,
-clipboard payload, history를 맡습니다. Rendering, focus, keyboard, parser,
-auth, remote sync는 앱 책임입니다.
+v2 Core는 JSON value, Pointer, Patch, query, `canPatch`, `commit`과 publication을
+맡습니다. Schema provider는 acceptance adapter로 연결합니다. Selection,
+clipboard, history와 high-level edit verb는 Candidate Editing Session입니다.
+Rendering, focus, keyboard, parser, auth, remote sync는 앱 책임입니다.
 
 ## Kanban
 
 | Feature | Use | App-owned |
 | --- | --- | --- |
-| Board/card schema | core `createJSONDocument` | schema 설계 |
-| Card field edit | core `replace`, `patch`, `canReplace` | field UI |
+| Board/card state | Core `createJSONDocument` + acceptance | schema 설계 |
+| Card field edit | Core `canPatch`, `commit` | field UI |
 | Card/list reorder | `@interactive-os/json-document-collection` | drag target 계산 |
-| Duplicate card | core `duplicate`, paste `rekey` | id 정책 |
+| Duplicate card | Candidate Session `duplicate` 또는 explicit Patch | id 정책 |
 | Browser clipboard | `@interactive-os/json-document-clipboard-web` | native shortcut UI |
 | Card form | `@interactive-os/json-document-schema-form` | widget rendering |
 | Dirty/save | `@interactive-os/json-document-dirty-state`, `@interactive-os/json-document-persist-web` | server sync |
@@ -42,9 +43,9 @@ Kanban에서 stable id에서 JSON Pointer를 찾는 일은 core primitive가 아
 
 | Feature | Use | App-owned |
 | --- | --- | --- |
-| Row schema | core `createJSONDocument` | column model |
-| Cell edit | core `replace`, `canReplace` | active cell UI |
-| Row add/delete/move | core + `@interactive-os/json-document-collection` | row handles |
+| Row state | Core `createJSONDocument` + acceptance | column model |
+| Cell edit | Core `canPatch`, `commit` | active cell UI |
+| Row add/delete/move | Core Patch + `@interactive-os/json-document-collection` | row handles |
 | Batch edit | `@interactive-os/json-document-bulk-edit` | selection policy |
 | Field descriptor | `@interactive-os/json-document-schema-form` | grid column rendering |
 | Sort rows | lab `sort-items` | view state |
@@ -59,8 +60,8 @@ Kanban에서 stable id에서 JSON Pointer를 찾는 일은 core primitive가 아
 
 | Feature | Use | App-owned |
 | --- | --- | --- |
-| Form definition JSON | core `createJSONDocument` | form schema |
-| Field/section edit | core `replace`, `patch`, `canReplace` | property panel UI |
+| Form definition JSON | Core `createJSONDocument` + acceptance | form schema |
+| Field/section edit | Core `canPatch`, `commit` | property panel UI |
 | Field descriptors | `@interactive-os/json-document-schema-form` | rendered inputs, labels, layout |
 | Field/option reorder | `@interactive-os/json-document-collection` | drag target, keyboard policy |
 | Stable field id lookup | `@interactive-os/json-document-id-resolver` | id scope and routing |
@@ -94,9 +95,9 @@ json-document 쪽 후보는 dry-run, proposed patch, guard reason, stable target
 
 | Feature | Use | App-owned |
 | --- | --- | --- |
-| Slide JSON document | core `createJSONDocument` | object schema |
-| Object create/delete/move | core + `@interactive-os/json-document-collection` | command labels |
-| Shape property edit | core `replace`, `patch` | geometry semantics |
+| Slide JSON document | Core `createJSONDocument` + acceptance | object schema |
+| Object create/delete/move | Core Patch + `@interactive-os/json-document-collection` | command labels |
+| Shape property edit | Core `commit` | geometry semantics |
 | Layer order | lab `layer-order` | layer panel UI |
 | Group/ungroup | lab `grouping`, lab `wrap-selection` | group value factory |
 | Drag/drop | lab `drag-drop` | pointer events |
@@ -111,8 +112,8 @@ Canvas rendering, zoom, pan, export, rich text editing, snapping, handles는
 
 | Feature | Use | App-owned |
 | --- | --- | --- |
-| Shape JSON document | core `createJSONDocument` | object schema |
-| Shape CRUD/property edit | core + `@interactive-os/json-document-schema-form` | geometry semantics |
+| Shape JSON document | Core `createJSONDocument` + acceptance | object schema |
+| Shape CRUD/property edit | Core Patch + `@interactive-os/json-document-schema-form` | geometry semantics |
 | Layer stack | lab `layer-order` | layer panel, rendering |
 | Object group/ungroup | lab `grouping` | group factory, bounds policy |
 | Frame/container wrap | lab `wrap-selection` | frame semantics |
@@ -130,7 +131,7 @@ stay outside json-document.
 
 | Feature | Use | App-owned |
 | --- | --- | --- |
-| Block JSON truth | core `createJSONDocument` | block schema |
+| Block JSON truth | Core `createJSONDocument` + acceptance | block schema |
 | Tree movement | `@interactive-os/json-document-outline`, `@interactive-os/json-document-collection` | keyboard focus |
 | Snippet insertion | `@interactive-os/json-document-snippets` | slash palette UI |
 | Mention/reference | lab `references` | entity source, autocomplete |

@@ -1,4 +1,4 @@
-import type { JSONDocument, JSONDocumentMoveTarget, JSONDocumentPasteTarget } from "@interactive-os/json-document";
+import type { JSONDocument, JSONDocumentMoveTarget, JSONDocumentPasteTarget } from "@interactive-os/json-document/session";
 import { applyPayload, canDrop, insertOptions, readCopyPayload } from "./plan.js";
 import type { DragDropInput, DragDropPerformError, DragDropPerformResult } from "./types.js";
 

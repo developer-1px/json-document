@@ -2,7 +2,8 @@ import { existsSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import * as z from "zod";
 
-const distEntry = new URL("../packages/json-document/dist/application/document/index.js", import.meta.url);
+const distKernelEntry = new URL("../packages/json-document/dist/application/document/index.js", import.meta.url);
+const distSessionEntry = new URL("../packages/json-document/dist/application/session/index.js", import.meta.url);
 const distJsonCloneEntry = new URL("../packages/json-document/dist/foundation/json/clone.js", import.meta.url);
 const distJsonSerializableEntry = new URL("../packages/json-document/dist/foundation/json/serializable.js", import.meta.url);
 const distJsonPathEntry = new URL("../packages/json-document/dist/foundation/jsonpath/index.js", import.meta.url);
@@ -13,7 +14,8 @@ const distPatchInverseEntry = new URL("../packages/json-document/dist/foundation
 const distHistoryEntry = new URL("../packages/json-document/dist/foundation/history/index.js", import.meta.url);
 
 if (
-  !existsSync(distEntry)
+  !existsSync(distKernelEntry)
+  || !existsSync(distSessionEntry)
   || !existsSync(distJsonCloneEntry)
   || !existsSync(distJsonSerializableEntry)
   || !existsSync(distJsonPathEntry)
@@ -27,7 +29,11 @@ if (
   process.exit(1);
 }
 
-const { applyPatch, applyPatchToTrustedState, createJSONDocument } = await import(distEntry.href);
+const {
+  applyPatch: applyKernelPatch,
+  createJSONDocument: createKernelDocument,
+} = await import(distKernelEntry.href);
+const { applyPatch, applyPatchToTrustedState, createJSONDocument } = await import(distSessionEntry.href);
 const { cloneJsonSerializable } = await import(distJsonCloneEntry.href);
 const { jsonSerializableError } = await import(distJsonSerializableEntry.href);
 const { query: jsonpathQuery, queryMatches: jsonpathQueryMatches } = await import(distJsonPathEntry.href);
@@ -96,6 +102,10 @@ const batchSize = envNumber("PERF_BATCH", 1000);
 const individualCount = envNumber("PERF_INDIVIDUAL", 100);
 const jsonpathRepeats = envNumber("PERF_JSONPATH_REPEATS", 10000);
 const rounds = envNumber("PERF_ROUNDS", 5);
+const kernelCommitP50BudgetPerTenThousandMs = envNumber(
+  "PERF_KERNEL_COMMIT_P50_BUDGET_PER_10000_MS",
+  6,
+);
 const leafCommitP50BudgetMs = envNumber("PERF_LEAF_COMMIT_P50_BUDGET_MS", 0.75);
 const leafSnapshotP50BudgetMs = envNumber("PERF_LEAF_SNAPSHOT_P50_BUDGET_MS", 4);
 const frozenTrustedSnapshotP50BudgetMs = envNumber("PERF_FROZEN_TRUSTED_SNAPSHOT_P50_BUDGET_MS", 4);
@@ -221,6 +231,30 @@ for (const size of sizes) {
   ];
 
   console.log(`\nitems=${size}`);
+  bench("kernel createJSONDocument", Math.max(3, Math.ceil(rounds / 2)), () => {
+    const doc = createKernelDocument(state);
+    return { ok: doc.value.items.length === size };
+  });
+  bench("kernel applyPatch single leaf replace", rounds, (index) =>
+    applyKernelPatch(state, [{
+      op: "replace",
+      path: `/items/${middle}/done`,
+      value: index % 2 === 0,
+    }]));
+  {
+    const doc = createKernelDocument(state);
+    const stats = bench("kernel commit single leaf replace", rounds, (index) =>
+      doc.commit([{
+        op: "replace",
+        path: `/items/${middle}/done`,
+        value: index % 2 === 0,
+      }]));
+    assertP50Budget(
+      "kernel commit single leaf replace",
+      stats,
+      kernelCommitP50BudgetPerTenThousandMs * (size / 10000),
+    );
+  }
   bench("jsonSerializableError state", rounds, () => ({ ok: jsonSerializableError(state) === null }));
   bench("cloneJsonSerializable state", Math.max(3, Math.ceil(rounds / 2)), () => cloneJsonSerializable(state));
   bench("cloneJsonSerializable primitive array", Math.max(3, Math.ceil(rounds / 2)), () =>

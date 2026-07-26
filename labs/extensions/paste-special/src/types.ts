@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONDocumentEditResult, JSONDocumentInsertOptions, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocumentEditResult, JSONDocumentInsertOptions, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document/session";
 
 export type PasteSpecialOptions = JSONDocumentInsertOptions;
 

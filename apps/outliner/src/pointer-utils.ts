@@ -1,6 +1,6 @@
 // Outliner-local Pointer helpers. RFC 6901 위에서 outline 트리를 다루는 식별 함수들.
 
-import { parentPointer, lastSegmentIndex, withLastSegment, type Pointer } from "@interactive-os/json-document";
+import { parentPointer, lastSegmentIndex, withLastSegment, type Pointer } from "@interactive-os/json-document/session";
 import type { OutlineNode } from "./schema.js";
 
 // Outliner-local 별칭 — json-document 의 path arithmetic 헬퍼를 짧은 이름으로.

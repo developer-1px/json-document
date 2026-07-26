@@ -1,8 +1,14 @@
 # json-document Extensions
 
-json-document core는 JSON editing foundation만 소유합니다. UI, persistence, system clipboard, collection command, stable id lookup 같은 앱별 책임은 extension이나 host code에서 조립합니다.
+json-document v2 Core는 여섯-member `JSONDocument`와 Pure Protocol만
+소유합니다. UI, persistence, system clipboard, collection command, stable id
+lookup 같은 앱별 책임은 extension이나 host code에서 조립합니다.
 
-Extension은 core에 plugin으로 등록하지 않습니다. public `JSONDocument` surface를 받아 함수로 compose합니다.
+Extension은 core에 plugin으로 등록하지 않습니다. Portable extension은 public
+`JSONDocument` 여섯 member를 받아 함수로 compose합니다. Selection, clipboard,
+history 또는 high-level edit verb를 요구하는 기존 rich extension은 Candidate
+`@interactive-os/json-document/session`에 의존할 수 있으므로 package별 입력
+contract를 확인합니다.
 
 ## 설치
 
@@ -12,19 +18,19 @@ Extension은 core에 plugin으로 등록하지 않습니다. public `JSONDocumen
 npm install @interactive-os/json-document @interactive-os/json-document-collection
 ```
 
-`1.1.0-rc.0` integration testing uses exact versions and the `next` dist-tag.
-The companion RC set for `canvas` is:
+`2.0.0-rc.0` Candidate integration testing uses exact versions. The companion
+RC set for `canvas` is:
 
 ```sh
 npm install --save-exact \
-  @interactive-os/json-document@1.1.0-rc.0 \
+  @interactive-os/json-document@2.0.0-rc.0 \
   @interactive-os/json-document-grouping@0.1.1-rc.1 \
   @interactive-os/json-document-patch-preview@0.1.1-rc.1 \
   @interactive-os/json-document-search-replace@0.1.1-rc.1
 ```
 
-This RC set is an opt-in integration graph. Stable consumers continue to use
-the packages' `latest` dist-tags.
+This RC set is an opt-in integration graph. It is not a stable compatibility
+promise.
 
 ## 공식 extension
 
@@ -37,7 +43,7 @@ package로 안내하지 않고, 제품별 조합은 Recipes에서 먼저 확인�
 
 | 상황 | 먼저 쓰는 표면 |
 | --- | --- |
-| 한 위치를 정확히 바꿈 | core `doc.insert`, `doc.replace`, `doc.delete`, `doc.move` |
+| 한 위치를 정확히 바꿈 | Core `doc.canPatch` + `doc.commit` |
 | ordered array item UX | `@interactive-os/json-document-collection` |
 | outliner promote/demote | `@interactive-os/json-document-outline` |
 | JSONPath 결과 일괄 변경 | `@interactive-os/json-document-bulk-edit` |

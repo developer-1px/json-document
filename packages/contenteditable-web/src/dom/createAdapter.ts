@@ -3,7 +3,7 @@ import type {
   Pointer,
   SelectionSnap,
   TextSurfaceFragment,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import {
   JSON_ATOM_ATTRIBUTE,
   JSON_DOCUMENT_CONTENTEDITABLE_MIME,

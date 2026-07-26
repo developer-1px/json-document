@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import * as z from "zod";
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 import { canConvertType, createConvertType, type ConvertTypeResult } from "../src/index.js";
 
 // convert-type is meaningful on permissive (union) fields, where changing the runtime

@@ -1,4 +1,4 @@
-import type { Pointer } from "@interactive-os/json-document";
+import type { Pointer } from "@interactive-os/json-document/session";
 
 export type BookmarkErrorCode =
   | "invalid_pointer"

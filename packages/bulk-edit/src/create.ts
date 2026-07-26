@@ -1,7 +1,7 @@
 import type {
   JSONChangeMetadata,
   JSONDocument,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   canDeleteAll,

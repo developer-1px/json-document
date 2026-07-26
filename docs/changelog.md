@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+- **Breaking (`2.0.0-rc.0`):** Replaced the package root with the
+  provider-neutral v2 Kernel: exactly 8 runtime values and 12 public types, with
+  a non-generic six-member `JSONDocument` projection.
+- Moved the Zod-based 1.x rich editing runtime, including selection, clipboard,
+  history, schema introspection, and high-level edit verbs, to the Candidate
+  `@interactive-os/json-document/session` entrypoint. The React entrypoint
+  continues to adapt that Candidate Session.
+- Marked the package's React and Zod peers optional so Root Protocol and
+  Projection consumers have no framework or schema-provider installation
+  requirement.
 - Narrowed the id resolver, stable-id rebase, and causal inbox inputs to their
   actual read/preflight/publication ports. Full `JSONDocument` values remain
   compatible, while host adapters can guard a projection without exposing the
@@ -11,6 +21,9 @@ All notable changes to this project are documented here.
 
 ### Added
 
+- Added versioned v2 Projection and Pure Protocol profiles, machine-readable
+  vectors, public-root black-box bindings, and exact signature/package-surface
+  conformance checks.
 - Added lab-only ready-time materialization to the causal patch inbox for
   delayed positional edits and stable-id field replacements. Authored intents
   are admitted and deduplicated immutably, then materialized only after their

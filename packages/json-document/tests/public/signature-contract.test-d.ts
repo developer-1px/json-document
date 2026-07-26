@@ -41,7 +41,7 @@ import {
   type SchemaState,
   type SelectionSource,
   type SelectionState,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import { useJSONDocument } from "@interactive-os/json-document/react";
 
 type Expect<T extends true> = T;

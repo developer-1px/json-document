@@ -1,6 +1,15 @@
-# json-document 표준 명세
+# json-document 1.x Editing Session 기준 명세
 
-상태: 살아 있는 명세. 현재 코드 동작이 정본이며, 코드, 문서, 테스트가 충돌하면 코드 동작을 확인하고 문서를 갱신한다.
+상태: 1.x Candidate Editing Session migration baseline. 이 문서는 현재
+`@interactive-os/json-document/session`으로 이동한 Zod 기반 rich editing
+surface의 의미론을 기록하며, v2 portable root의 정본이 아니다.
+
+v2 root의 규범 계약은
+[`v2-projection-profile.md`](./v2-projection-profile.md), 기계 판독
+[`v2-public-surface.json`](./v2-public-surface.json), 그리고 그 문서가 지정한
+conformance vector와 binding이다. 이 문서와 v2 artifact가 충돌하면 v2 artifact가
+우선한다. 아래의 root 및 React entrypoint 서술은 1.x baseline으로 읽어야 하며
+v2 root의 exact 20-symbol 또는 six-member 계약을 확장하지 않는다.
 
 ## 0. 정체성
 

@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONChangeMetadata, JSONPatchOperation, JSONResult, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONChangeMetadata, JSONPatchOperation, JSONResult, Pointer } from "@interactive-os/json-document/session";
 
 export type ReferenceDiagnosticCode =
   | "ambiguous_target_id"

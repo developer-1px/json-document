@@ -1,4 +1,4 @@
-import { type JSONCapabilityResult, type JSONDocument, type JSONDocumentInsertOptions, type JSONDocumentInsertTarget, type JSONDocumentMoveTarget, type JSONDocumentPasteTarget, type Pointer, type ReadResult } from "@interactive-os/json-document";
+import { type JSONCapabilityResult, type JSONDocument, type JSONDocumentInsertOptions, type JSONDocumentInsertTarget, type JSONDocumentMoveTarget, type JSONDocumentPasteTarget, type Pointer, type ReadResult } from "@interactive-os/json-document/session";
 import type { DragDropError, DragDropInput, DragDropPlanResult, DragDropSource, DragDropTarget } from "./types.js";
 
 export function canDrop<TDocument>(

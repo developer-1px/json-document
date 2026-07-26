@@ -1,6 +1,14 @@
-# json-document 코어 표준
+# json-document 1.x Editing Session 코어 기준
 
-상태: 표준화 트랙 초안.
+상태: 1.x Candidate Editing Session migration baseline. v2 portable root에는
+비정본이다.
+
+이 문서의 schema, selection, clipboard, history와 high-level edit verb는 현재
+`@interactive-os/json-document/session` 후보 표면을 설명한다. v2 root의 규범
+계약은 [`v2-projection-profile.md`](./v2-projection-profile.md), 기계 판독
+[`v2-public-surface.json`](./v2-public-surface.json), 그리고 연결된 conformance
+artifact가 우선한다. 이 문서는 1.x 설계 판단과 Session migration을 보존하지만
+v2 root의 exact 20-symbol 또는 six-member 계약을 변경하지 않는다.
 
 이 문서는 `@interactive-os/json-document` 공개 API가 특정 구현체의 사용 설명을 넘어,
 headless JSON 편집 도구의 foundation 계약으로 쓰일 수 있는지를 정의한다.

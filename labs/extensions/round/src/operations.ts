@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canRound } from "./plan.js";
 import type { RoundOptions, RoundResult } from "./types.js";
 

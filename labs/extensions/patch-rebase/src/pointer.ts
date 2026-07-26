@@ -3,7 +3,7 @@ import {
   parsePointer,
   tryParsePointer,
   type Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type PointerRelation = "same" | "ancestor" | "descendant" | "disjoint";
 

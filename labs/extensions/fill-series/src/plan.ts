@@ -1,4 +1,4 @@
-import { appendSegment, type JSONDocument, type JSONPatchOperation, type Pointer, resolveSiblingRange, type SiblingRangeErrorCode } from "@interactive-os/json-document";
+import { appendSegment, type JSONDocument, type JSONPatchOperation, type Pointer, resolveSiblingRange, type SiblingRangeErrorCode } from "@interactive-os/json-document/session";
 import type { FillCell, FillOptions, FillSeriesError, FillSeriesErrorCode, FillSeriesResult, FillSource, NormalizedRange } from "./types.js";
 
 export function canFill<TDocument, TValue = unknown>(

@@ -1,4 +1,4 @@
-import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document/session";
 import type { ConvertTypeError, ConvertTypeErrorCode, ConvertTypeResult, ConvertTypeTarget } from "./types.js";
 
 export function canConvertType<TDocument>(

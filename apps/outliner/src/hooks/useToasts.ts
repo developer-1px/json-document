@@ -1,7 +1,7 @@
 // Toast 상태. error 는 클릭 시까지 유지 (zod 메시지가 길어서), info 는 2.5s.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { JSONDocumentError } from "@interactive-os/json-document";
+import type { JSONDocumentError } from "@interactive-os/json-document/session";
 
 export interface ToastMessage {
   id: number;

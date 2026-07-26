@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { z } from "zod";
 
-import { createJSONDocument, type Pointer } from "@interactive-os/json-document";
+import { createJSONDocument, type Pointer } from "@interactive-os/json-document/session";
 import {
   canGroupSelection,
   canUngroupSelection,

@@ -1,4 +1,4 @@
-import type { Pointer, SelectionPoint, SelectionSnap } from "@interactive-os/json-document";
+import type { Pointer, SelectionPoint, SelectionSnap } from "@interactive-os/json-document/session";
 import {
   closestAttributeElement,
   findElementByAttribute,

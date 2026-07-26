@@ -1,4 +1,4 @@
-import type { JSONChangeMetadata, JSONDocument, JSONPatchOperation, JSONResult } from "@interactive-os/json-document";
+import type { JSONChangeMetadata, JSONDocument, JSONPatchOperation, JSONResult } from "@interactive-os/json-document/session";
 import { canConvertBlockType, cloneJson, conversionError } from "./plan.js";
 import type { BlockTypeConversionDescriptor, BlockTypeConversionError, BlockTypeConversionInput, BlockTypeConversionPlan, BlockTypeConversionResult } from "./types.js";
 

@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONDocument, JSONDocumentEditResult, JSONDocumentInsertTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocument, JSONDocumentEditResult, JSONDocumentInsertTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document/session";
 import type { PasteSpecialAdapter, PasteSpecialAdapterResult, PasteSpecialDiagnostic, PasteSpecialError, PasteSpecialErrorCode, PasteSpecialInput, PasteSpecialOptions, PasteSpecialPlanResult } from "./types.js";
 
 export function canPasteSpecial<TDocument>(

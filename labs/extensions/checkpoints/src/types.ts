@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONResult } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONResult } from "@interactive-os/json-document/session";
 
 export type CheckpointErrorCode =
   | "missing_checkpoint"

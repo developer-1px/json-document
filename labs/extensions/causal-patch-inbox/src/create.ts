@@ -2,7 +2,7 @@ import {
   JSONDocumentError,
   type JSONPatchOperation,
   type SelectionPoint,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import {
   rebaseChange,
   type RebaseDiagnostic,

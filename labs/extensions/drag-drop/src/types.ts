@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document/session";
 
 export type DragDropPayloadOptions = JSONDocumentInsertOptions;
 

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createSnippets, type Snippet, type SnippetInsertOptions } from "@interactive-os/json-document-snippets";
 import { useJSONDocument } from "@interactive-os/json-document/react";
-import type { JSONCapabilityResult, JSONDocumentInsertTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocumentInsertTarget, Pointer } from "@interactive-os/json-document/session";
 import { z } from "zod";
 import "./snippet-composer-lab.css";
 

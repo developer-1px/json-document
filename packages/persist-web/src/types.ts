@@ -4,7 +4,7 @@ import type {
   JSONPatchOperation,
   JSONResult,
   SelectionSnap,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import type {
   WEB_PERSISTENCE_KIND,

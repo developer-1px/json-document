@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canLimitItems } from "./plan.js";
 import type { LimitItemsOptions, LimitItemsResult } from "./types.js";
 

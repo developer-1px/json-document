@@ -51,6 +51,13 @@ const generatedDocs = {
   extensionsCatalog: read("docs/generated/extensions-catalog.md"),
   siteRepoCatalog: read("apps/site/src/generated/repo-catalog.ts"),
 };
+const migrationDocs = {
+  docsReadme: read("docs/README.md"),
+  coreStandard: read("docs/standard/core-standard.md"),
+  v2Profile: read("docs/standard/v2-projection-profile.md"),
+  clipboardReadme: read("packages/clipboard-web/README.md"),
+  changelog: read("docs/changelog.md"),
+};
 const surfaces = {
   rootReadme: read("README.md"),
   readme: read("packages/json-document/README.md"),
@@ -65,6 +72,9 @@ const surfaces = {
   ...publicDocs,
 };
 const siteRoutes = JSON.parse(read("apps/site/src/site-routes.json"));
+const siteHome = read("apps/site/src/routes/Home.tsx");
+const siteIndex = read("apps/site/index.html");
+const siteManifest = JSON.parse(read("apps/site/public/site.webmanifest"));
 const docsRoute = read("apps/site/src/routes/Docs.tsx");
 const packageJson = JSON.parse(read("packages/json-document/package.json"));
 const publicContract = JSON.parse(read("packages/json-document/public-contract.json"));
@@ -186,9 +196,6 @@ for (const extensionName of officialExtensions) {
   if (!generatedDocs.siteRepoCatalog.includes(`"name": "${extensionName}"`)) {
     fail(`site repo catalog: shipped official extension missing: ${extensionName}.`);
   }
-  if (!surfaces.readme.includes(extensionName)) {
-    fail(`readme: shipped official extension missing from README import list: ${extensionName}.`);
-  }
   if (!surfaces.llms.includes(extensionName)) {
     fail(`llms: shipped official extension missing from LLM import list: ${extensionName}.`);
   }
@@ -256,26 +263,38 @@ const required = [
   ["rootReadme", /packages\/json-document/],
   ["rootReadme", /apps\/site/],
   ["rootReadme", /labs\/extensions/],
-  ["readme", /npm install @interactive-os\/json-document zod/],
-  ["readme", /왜 json-document인가/],
-  ["readme", /작업별 진입점/],
+  ["rootReadme", /provider-neutral/],
+  ["rootReadme", /docs\/standard\/v2-projection-profile\.md/],
+  ["rootReadme", /Candidate Editing Session/],
+  ["docsReadme", /## 규범 우선순위/],
+  ["docsReadme", /현재 v2 portable root의 정본/],
+  ["coreStandard", /1\.x Candidate Editing Session migration baseline/],
+  ["v2Profile", /provider-neutral Projection construction boundary/],
+  ["v2Profile", /Acceptance callback[\s\S]*`canPatch`[\s\S]*`commit`/],
+  ["clipboardReadme", /@interactive-os\/json-document\/session/],
+  ["clipboardReadme", /six-member v2 Root\s+Projection adapter/],
+  ["changelog", /2\.0\.0-rc\.0[\s\S]*exactly 8 runtime values/],
+  ["readme", /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/],
+  ["readme", /provider-neutral/],
+  ["readme", /## 공개 root/],
+  ["readme", /## Editing Session/],
   ["readme", /React — `useJSONDocument`/],
   ["readme", /순수 core/],
   ["readme", /직렬화/],
-  ["llms", /왜 \/ 핵심 \/ 튜토리얼 맥락/],
+  ["llms", /2\.0\.0-rc\.0.*Candidate/],
+  ["llms", /공개 Root는 정확히 다음 20개 symbol/],
   ["llms", /JSONPath는 검색 전용/],
   ["llms", /ReadResult/],
-  ["llms", /Pointer array copy\/cut은 array payload/],
-  ["llms", /Tree semantics는 app-owned/],
-  ["llms", /docs\/standard\/result-contract\.md/],
-  ["llms", /docs\/standard\/selection-contract\.md/],
-  ["llms", /docs\/standard\/schema-introspection-contract\.md/],
-  ["llms", /1\.0 Signature contract/],
-  ["llms", /trustedInitial: true/],
-  ["llms", /selectionAfter/],
-  ["llms", /signature-contract\.test-d\.ts/],
-  ["llms", /semantic-contract\.test\.ts/],
-  ["llms", /다음 이름은 쓰지 않는다[\s\S]*zod-crud[\s\S]*@json-document\/\*/],
+  ["llms", /`value`는 항상\s+`JSONValue`/],
+  ["llms", /not_serializable/],
+  ["llms", /Acceptance는 initial state와 commit candidate/],
+  ["llms", /Root `JSONDocument`의 subtype이라고 가정하지 않는다/],
+  ["llms", /Tree[\s\S]*제품\s+의도는 host/],
+  ["llms", /docs\/standard\/v2-projection-profile\.md/],
+  ["llms", /docs\/standard\/v2-public-surface\.json/],
+  ["llms", /v2-signature-contract\.test-d\.ts/],
+  ["llms", /v2-projection-standard-conformance\.test\.ts/],
+  ["llms", /v2-protocol-standard-conformance\.test\.ts/],
   ["spec", /JSONPath는 검색 언어/],
   ["spec", /duplicate\(pointer, options\)/],
   ["spec", /public-contract\.json/],
@@ -320,7 +339,7 @@ const required = [
 ];
 
 for (const [name, pattern] of required) {
-  const source = surfaces[name] ?? generatedDocs[name];
+  const source = surfaces[name] ?? generatedDocs[name] ?? migrationDocs[name];
   if (!pattern.test(source)) fail(`${name}: missing ${pattern}.`);
 }
 
@@ -347,6 +366,34 @@ for (const route of [
   if (!siteRoutes.some((item) => item.path === route[0] && item.title === route[1])) {
     fail(`site routes: missing ${route[0]} ${route[1]} metadata.`);
   }
+}
+
+for (const pattern of [
+  /Provider-neutral JSON editing/,
+  /six-member document projection/,
+  /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/,
+  /@interactive-os\/json-document\/session/,
+]) {
+  if (!pattern.test(siteHome)) fail(`site home: missing ${pattern}.`);
+}
+for (const pattern of [
+  /Zod-guarded JSON editing/,
+  /npm install @interactive-os\/json-document zod/,
+]) {
+  if (pattern.test(siteHome)) fail(`site home: stale v1 root wording found: ${pattern}.`);
+}
+const rootRoute = siteRoutes.find((route) => route.path === "/");
+if (
+  !rootRoute?.description.includes("Provider-neutral JSON editing protocol")
+  || !rootRoute.description.includes("six-member headless document projection")
+) {
+  fail("site routes: root metadata must describe the v2 Kernel and Projection.");
+}
+if (
+  siteIndex.split(rootRoute.description).length - 1 !== 3
+  || siteManifest.description !== "Provider-neutral JSON editing protocol and headless document projection."
+) {
+  fail("site metadata: base HTML and manifest must describe the v2 Kernel and Projection.");
 }
 
 for (const pattern of [

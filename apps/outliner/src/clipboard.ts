@@ -10,7 +10,7 @@ import {
   type WebClipboardCutResult,
   type WebClipboardPasteResult,
 } from "@interactive-os/json-document-clipboard-web";
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import type { OutlineNode } from "./schema.js";
 
 export type ClipboardMode = "empty" | "copy" | "cut";

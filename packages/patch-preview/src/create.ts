@@ -1,7 +1,7 @@
 import type {
   JSONDocument,
   JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import { previewPatch } from "./preview.js";
 import type {

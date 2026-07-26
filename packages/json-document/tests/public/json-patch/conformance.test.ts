@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from "vitest";
 import { z } from "zod";
-import { applyPatch, type JSONPatchOperation } from "@interactive-os/json-document";
+import { applyPatch, type JSONPatchOperation } from "@interactive-os/json-document/session";
 import tests from "./conformance/tests.json" with { type: "json" };
 import specTests from "./conformance/spec_tests.json" with { type: "json" };
 

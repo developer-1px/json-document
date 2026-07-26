@@ -1,4 +1,4 @@
-import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document/session";
 import type { CaseTransform, ChangeCaseError, ChangeCaseErrorCode, ChangeCaseResult } from "./types.js";
 
 export function canTransform<TDocument>(

@@ -1,4 +1,4 @@
-import { appendSegment, type JSONDocument, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document";
+import { appendSegment, type JSONDocument, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document/session";
 import type { RenumberItemsError, RenumberItemsErrorCode, RenumberItemsOptions, RenumberItemsResult } from "./types.js";
 
 export function canRenumberItems<TDocument>(

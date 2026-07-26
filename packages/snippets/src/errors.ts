@@ -2,7 +2,7 @@ import type {
   JSONCapabilityResult,
   JSONDocumentEditResult,
   JSONDocumentInsertTarget,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import type {
   SnippetError,

@@ -1,168 +1,229 @@
 # 튜토리얼: 작은 카드 편집기 만들기
 
-작은 board state를 만들고, 추가, 변경, 검색, 선택, 붙여넣기, 검증, undo를 한 번씩 연결합니다. 앱 코드는 `@interactive-os/json-document` 또는 `@interactive-os/json-document/react`만 import합니다.
+작은 board state를 여섯-member v2 Core로 읽고, 검증하고, 변경하고, 구독합니다.
+루트 package에는 schema provider나 UI framework가 필요하지 않습니다.
 
-## 1. schema와 document 만들기
+## 1. JSON document 만들기
 
 ```ts
-import { z } from "zod";
 import { createJSONDocument } from "@interactive-os/json-document";
 
-const Card = z.object({
-  id: z.string(),
-  title: z.string().min(1),
-  status: z.enum(["todo", "doing", "done"]),
+const initialBoard = {
+  lists: [{
+    id: "inbox",
+    title: "Inbox",
+    cards: [{
+      id: "c1",
+      title: "Write docs",
+      status: "todo",
+    }],
+  }],
+};
+
+const document = createJSONDocument(initialBoard);
+```
+
+입력은 caller와 격리된 immutable JSON snapshot으로 소유됩니다. 이후 변경은
+직접 대입하지 않고 `commit`으로만 수행합니다.
+
+## 2. Pointer로 읽고 JSONPath로 찾기
+
+정확한 한 위치는 JSON Pointer로 읽습니다.
+
+```ts
+const title = document.at("/lists/0/cards/0/title");
+
+if (title.ok) {
+  title.value;
+}
+```
+
+여러 위치는 JSONPath로 찾습니다.
+
+```ts
+const todos = document.query(
+  "$..cards[?(@.status=='todo')]",
+);
+```
+
+JSONPath는 변경 언어가 아닙니다. Query 결과의 Pointer를 JSON Patch path로
+사용합니다.
+
+## 3. 변경 전에 확인하고 commit하기
+
+```ts
+const operations = [{
+  op: "replace",
+  path: "/lists/0/cards/0/status",
+  value: "doing",
+}] as const;
+
+const capability = document.canPatch(operations);
+
+if (capability.ok) {
+  const result = document.commit(operations, {
+    metadata: {
+      origin: "card-status",
+      label: "Start card",
+    },
+  });
+
+  if (result.ok) {
+    result.change.applied;
+    document.value;
+  }
+}
+```
+
+`canPatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 ordered batch
+전체를 적용하거나 아무것도 적용하지 않습니다.
+
+## 4. 변경 구독하기
+
+```ts
+const unsubscribe = document.subscribe((change) => {
+  console.log(change.applied);
+  console.log(change.metadata);
 });
+
+document.commit([
+  {
+    op: "replace",
+    path: "/lists/0/title",
+    value: "Doing",
+  },
+]);
+
+unsubscribe();
+```
+
+실패하거나 최종 state가 같은 no-op commit은 notification을 만들지 않습니다.
+
+## 5. 순수 patch 적용하기
+
+저장 전 preview나 import 검토처럼 document instance가 필요 없는 경우에는
+`applyPatch`를 씁니다.
+
+```ts
+import { applyPatch } from "@interactive-os/json-document";
+
+const preview = applyPatch(initialBoard, [{
+  op: "add",
+  path: "/lists/0/cards/-",
+  value: {
+    id: "c2",
+    title: "Review API",
+    status: "todo",
+  },
+}]);
+
+if (preview.ok) {
+  preview.value;
+  preview.change.applied;
+}
+```
+
+입력 state와 operation은 변경되지 않으며, 성공 result는 caller input과 격리됩니다.
+
+## 6. 선택한 provider로 acceptance 연결하기
+
+Core는 Zod를 요구하지 않습니다. 어떤 validator든 작은 acceptance callback으로
+연결할 수 있습니다.
+
+```ts
+import * as z from "zod";
+import {
+  createJSONDocument,
+  type JSONCapabilityResult,
+  type JSONValue,
+} from "@interactive-os/json-document";
 
 const Board = z.object({
   lists: z.array(z.object({
     id: z.string(),
     title: z.string(),
-    cards: z.array(Card),
+    cards: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      status: z.enum(["todo", "doing", "done"]),
+    })),
   })),
 });
 
-const doc = createJSONDocument(Board, {
-  lists: [{
-    id: "inbox",
-    title: "Inbox",
-    cards: [{ id: "c1", title: "Write docs", status: "todo" }],
-  }],
-}, {
-  history: 100,
-  selection: true,
+function acceptsBoard(candidate: JSONValue): JSONCapabilityResult {
+  const result = Board.safeParse(candidate);
+  return result.success
+    ? { ok: true }
+    : {
+        ok: false,
+        code: "schema_violation",
+        reason: JSON.stringify(result.error.issues),
+      };
+}
+
+const acceptedDocument = createJSONDocument(initialBoard, {
+  accepts: acceptsBoard,
 });
 ```
 
-schema는 허용 구조이고, document는 현재 value와 변경 API를 들고 있으며, path는 JSON Pointer입니다.
+Acceptance는 candidate를 허용하거나 거부할 뿐 commit-time transform을 몰래
+state에 적용하지 않습니다.
 
-## 2. 변경 전에 확인하기
+## 7. Candidate Editing Session
 
-사용자 action은 실행 전에 `can*`로 확인합니다.
-
-```ts
-const card = { id: "c2", title: "Review API", status: "todo" };
-const canInsert = doc.canInsert("/lists/0/cards/-", card);
-
-if (canInsert.ok) {
-  doc.insert("/lists/0/cards/-", card);
-}
-```
-
-실패하면 결과 객체에서 UI 메시지를 만들 수 있습니다.
+Selection, clipboard, history와 `insert`, `replace`, `delete`, `move`,
+`duplicate`, `copy`, `cut`, `paste`, `undo`, `redo`가 필요하면 선택적인
+`/session` binding을 사용할 수 있습니다.
 
 ```ts
-const candidate = { id: "c3", title: "", status: "todo" };
-const canPaste = doc.canInsert("/lists/0/cards/-", candidate);
+import * as z from "zod";
+import {
+  createJSONDocument as createJSONEditingSession,
+} from "@interactive-os/json-document/session";
 
-if (!canPaste.ok) {
-  canPaste.code;
-  canPaste.reason;
-  canPaste.violations;
-}
-```
-
-## 3. patch로 값 바꾸기
-
-값을 바꿀 때는 JSON Patch를 적용합니다. `path`는 JSON Pointer입니다.
-
-```ts
-doc.patch({
-  op: "replace",
-  path: "/lists/0/cards/0/status",
-  value: "doing",
+const Board = z.object({
+  lists: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    cards: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      status: z.enum(["todo", "doing", "done"]),
+    })),
+  })),
 });
-```
 
-연속 변경을 하나의 document change로 묶어야 하면 `doc.commit([...], metadata)`를 씁니다.
+const session = createJSONEditingSession(
+  Board,
+  initialBoard,
+  { history: 100, selection: true },
+);
 
-```ts
-doc.commit([
-  { op: "replace", path: "/lists/0/cards/0/title", value: "Write final docs" },
-  { op: "replace", path: "/lists/0/cards/0/status", value: "done" },
-], { label: "finish card" });
-```
-
-편집 후 focus가 어디로 가야 하는지 command가 알고 있으면 `selectionAfter`를 같이 넘깁니다.
-
-```ts
-doc.commit([
-  { op: "add", path: "/lists/0/cards/1", value: card },
-], {
-  label: "insert card",
-  selectionAfter: "/lists/0/cards/1",
+session.insert("/lists/0/cards/-", {
+  id: "c2",
+  title: "Review API",
+  status: "todo",
 });
+session.undo();
 ```
 
-## 4. JSONPath로 찾고 Pointer로 바꾸기
+위 `createJSONEditingSession`은 현재 동명 export를 구분하기 위한 local import
+alias입니다. `/session`은 Candidate이며 portable v2 Core 계약이 아닙니다.
+Pointer 배열을 copy하면 clipboard payload도 배열이라는 규칙 역시 이 Session
+계층의 계약입니다.
 
-여러 위치를 찾을 때는 JSONPath로 검색하고, 반환된 Pointer로 patch를 만듭니다.
+## 8. React에서 쓰기
 
-```ts
-const todos = doc.find("$..cards[?(@.status=='todo')]");
-
-if (todos.ok) {
-  doc.patch(todos.pointers.map((path) => ({
-    op: "replace",
-    path: `${path}/status`,
-    value: "done",
-  })));
-}
-```
-
-```txt
-검색: JSONPath -> Pointer[]
-변경: Pointer -> JSON Patch
-```
-
-JSONPath는 변경 언어가 아닙니다.
-
-## 5. selection과 clipboard 연결하기
-
-Selection은 무엇이 선택됐는지 보관하고, clipboard가 payload 흐름을 맡습니다.
-
-```ts
-doc.selection?.selectRanges(["/lists/0/cards/0"]);
-
-const source = doc.selection?.selectedPointers ?? [];
-doc.copy(source);
-
-doc.paste("/lists/0/cards/-", {
-  spread: true,
-  rekey: { fields: ["id"], strategy: "suffix" },
-});
-```
-
-Pointer 배열을 copy하면 clipboard payload도 배열입니다. 한 항목만 복사해도 붙여넣을 때 sibling으로 펼치려면 `spread: true`를 넘깁니다.
-여러 source를 담은 clipboard buffer는 array 삽입 target에서 기본으로 펼쳐집니다.
-직접 array payload를 `doc.insert(target, payload, { spread: true })`로 넘기면 item별
-sibling insert가 됩니다.
-
-이미 `/cards/-` 같은 삽입 위치가 있으면 pointer를 그대로 넘깁니다. 기존 항목을 기준으로 붙일 때는 `{ after: "/lists/0/cards/0" }`처럼 씁니다.
-
-## 6. history로 되돌리기
-
-되돌리기는 document history에 둡니다.
-
-```ts
-if (doc.canUndo().ok) {
-  doc.undo();
-}
-```
-
-알고 있는 여러 변경은 operation 배열로 한 번 commit합니다. `history.transaction`은 history entry를 묶지만 반복 `doc.patch(...)` 호출을 한 번의 schema validation으로 바꾸지는 않습니다.
-
-## 7. React에서 쓰기
-
-React에서는 같은 document 표면을 hook으로 받습니다.
+현재 `/react`의 `useJSONDocument`는 Candidate Editing Session adapter입니다.
 
 ```tsx
 import { useJSONDocument } from "@interactive-os/json-document/react";
 
-const doc = useJSONDocument(Board, initialBoard, {
+const session = useJSONDocument(Board, initialBoard, {
   history: 100,
   selection: true,
 });
 ```
 
-Root package는 React-free입니다. React 앱에서만 `@interactive-os/json-document/react`를 import합니다.
+React 없이 Core를 쓰는 코드는 루트 `createJSONDocument`를 사용합니다. `/react`
+hook을 여섯-member provider-neutral Projection adapter로 가정하지 않습니다.

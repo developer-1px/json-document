@@ -22,11 +22,15 @@ const publicContract = JSON.parse(await readFile(join(repoRoot, "public-contract
 const readmeSource = await readFile(join(repoRoot, "README.md"), "utf8");
 const rootValueExports = publicContract.root.values;
 const rootTypeExports = publicContract.root.types;
+const sessionValueExports = publicContract.session.values;
+const sessionTypeExports = publicContract.session.types;
 const reactValueExports = publicContract.react.values;
 const reactTypeExports = publicContract.react.types;
 const rootPublicExports = [...rootValueExports, ...rootTypeExports];
+const sessionPublicExports = [...sessionValueExports, ...sessionTypeExports];
 const reactPublicExports = [...reactValueExports, ...reactTypeExports];
 const rootTypeOnlyExports = [...rootTypeExports];
+const sessionTypeOnlyExports = [...sessionTypeExports];
 const reactTypeOnlyExports = [...reactTypeExports];
 const removedPublicSubpaths = [
   "@interactive-os/json-document/patch",
@@ -485,7 +489,11 @@ try {
   if (packageJson.peerDependenciesMeta?.react?.optional !== true) {
     throw new Error("React peer dependency must be optional");
   }
-  const unexpectedPeerMeta = Object.keys(packageJson.peerDependenciesMeta ?? {}).filter((name) => name !== "react");
+  if (packageJson.peerDependenciesMeta?.zod?.optional !== true) {
+    throw new Error("Zod peer dependency must be optional");
+  }
+  const unexpectedPeerMeta = Object.keys(packageJson.peerDependenciesMeta ?? {})
+    .filter((name) => name !== "react" && name !== "zod");
   if (unexpectedPeerMeta.length > 0) {
     throw new Error(`Package has unexpected peer dependency metadata: ${unexpectedPeerMeta.join(",")}`);
   }
@@ -530,21 +538,47 @@ try {
     JSON.stringify({ private: true }, null, 2),
   );
   await writeFile(
-    join(workspace, "smoke.mjs"),
+    join(workspace, "root-smoke.mjs"),
     [
-      'import * as z from "zod";',
-      'import * as zc from "@interactive-os/json-document";',
-      'import { applyOperation, applyPatch, applyPatchToTrustedState, createJSONDocument, parsePointer, tryParsePointer, buildPointer, parentPointer, lastSegment, lastSegmentIndex, appendSegment, withLastSegment } from "@interactive-os/json-document";',
+      'import * as core from "@interactive-os/json-document";',
+      'import { applyPatch, createJSONDocument } from "@interactive-os/json-document";',
       `const expectedRootValueExports = ${JSON.stringify(rootValueExports)};`,
       `const expectedRootTypeOnlyExports = ${JSON.stringify(rootTypeOnlyExports)};`,
-      'const actualRootValueExports = Object.keys(zc).sort();',
+      'const actualRootValueExports = Object.keys(core).sort();',
       'if (JSON.stringify(actualRootValueExports) !== JSON.stringify([...expectedRootValueExports].sort())) {',
       '  throw new Error(`root runtime exports mismatch: ${actualRootValueExports.join(", ")}`);',
       '}',
-      'for (const name of expectedRootValueExports) {',
-      '  if (!(name in zc)) throw new Error(`${name} root runtime export missing`);',
-      '}',
       'for (const name of expectedRootTypeOnlyExports) {',
+      '  if (name in core) throw new Error(`${name} type-only root export leaked at runtime`);',
+      '}',
+      'const initial = { title: "draft", tags: [] };',
+      'const patched = applyPatch(initial, [{ op: "add", path: "/tags/-", value: "core" }]);',
+      'if (!patched.ok || patched.value.tags[0] !== "core") throw new Error("root applyPatch failed");',
+      'if (patched.change.applied[0]?.path !== "/tags/0") throw new Error("root canonical patch failed");',
+      'const document = createJSONDocument(initial);',
+      'const changes = [];',
+      'document.subscribe((change) => changes.push(change));',
+      'const committed = document.commit([{ op: "replace", path: "/title", value: "ready" }]);',
+      'if (!committed.ok || document.value.title !== "ready") throw new Error("root commit failed");',
+      'if (changes.length !== 1) throw new Error("root publication failed");',
+    ].join("\n"),
+  );
+  await writeFile(
+    join(workspace, "session-smoke.mjs"),
+    [
+      'import * as z from "zod";',
+      'import * as zc from "@interactive-os/json-document/session";',
+      'import { applyOperation, applyPatch, applyPatchToTrustedState, createJSONDocument, parsePointer, tryParsePointer, buildPointer, parentPointer, lastSegment, lastSegmentIndex, appendSegment, withLastSegment } from "@interactive-os/json-document/session";',
+      `const expectedSessionValueExports = ${JSON.stringify(sessionValueExports)};`,
+      `const expectedSessionTypeOnlyExports = ${JSON.stringify(sessionTypeOnlyExports)};`,
+      'const actualSessionValueExports = Object.keys(zc).sort();',
+      'if (JSON.stringify(actualSessionValueExports) !== JSON.stringify([...expectedSessionValueExports].sort())) {',
+      '  throw new Error(`session runtime exports mismatch: ${actualSessionValueExports.join(", ")}`);',
+      '}',
+      'for (const name of expectedSessionValueExports) {',
+      '  if (!(name in zc)) throw new Error(`${name} session runtime export missing`);',
+      '}',
+      'for (const name of expectedSessionTypeOnlyExports) {',
       '  if (name in zc) throw new Error(`${name} type-only root export leaked at runtime`);',
       '}',
       'const schema = z.object({ name: z.string(), tags: z.array(z.string()) });',
@@ -600,11 +634,11 @@ try {
     join(workspace, "smoke.ts"),
     [
       'import * as z from "zod";',
-      'import { applyOperation, applyPatch, applyPatchToTrustedState, tryParsePointer, parentPointer, lastSegment, lastSegmentIndex, appendSegment, withLastSegment, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document";',
-      'import type { HistoryTransactionOptions, JSONCapabilityResult, JSONChangeMetadata, JSONDocument, JSONDocumentCommitOptions, JSONDocumentDuplicateError, JSONDocumentDuplicateOptions, JSONDocumentDuplicateResult, JSONDocumentEditError, JSONDocumentEditResult, JSONDocumentHistory, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentOptions, JSONDocumentPasteOptions, JSONDocumentPasteTarget, JSONDocumentSelectionTarget, JSONPatchInput, SelectionPoint, JSONResult } from "@interactive-os/json-document";',
-      'import type { ClipboardCopyError, ClipboardCopyOk, ClipboardCopyOptions, ClipboardCopyResult, ClipboardCutError, ClipboardCutOk, ClipboardCutOptions, ClipboardCutResult, ClipboardEmpty, ClipboardMutationOk, ClipboardPasteDiscriminatorMismatch, ClipboardPasteError, ClipboardPasteResult, ClipboardReadOk, ClipboardReadOptions, ClipboardReadResult, ClipboardState, ClipboardWriteOptions, ClipboardSource } from "@interactive-os/json-document";',
-      'import type { EntriesResult, EntryKind, QueryResult, ReadEntry, ReadResult, SchemaDescription, SchemaDescriptionResult, SchemaErrorCode, SchemaErrorResult, SchemaKind, SchemaKindResult, SchemaPathMode, SchemaQueryResult, SchemaState } from "@interactive-os/json-document";',
-      'import type { DeleteSelectionTextResult, SelectionPointObject, SelectionOrderedRange, SelectionOrderedRangeEntry, ReplaceSelectionTextResult, SelectionAffinity, SelectionContext, SelectionCursorDirection, SelectionCursorErrorCode, SelectionCursorOptions, SelectionCursorResult, SelectionCursorTarget, SelectionDirection, SelectionEdge, SelectionMode, SelectionOptions, SelectionOrderErrorCode, SelectionOrderOptions, SelectionPointOrderResult, SelectionPointerSpan, SelectionPointerSpansResult, SelectionRange, SelectionRangeInput, SelectionRangeOrderResult, SelectionRangesOrderResult, SelectionScopeErrorCode, SelectionScopeOptions, SelectionScopeResult, SelectionScopeTarget, SelectionSource, SelectionSpanOptions, SelectionSnap, SelectionState, SelectionTextDeleteDirection, SelectionTextDeleteOptions, SelectionTextEdit, SelectionTextEditErrorCode, SelectionTextEditOptions, SelectionTextEditsResult, SelectionType } from "@interactive-os/json-document";',
+      'import { applyOperation, applyPatch, applyPatchToTrustedState, tryParsePointer, parentPointer, lastSegment, lastSegmentIndex, appendSegment, withLastSegment, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document/session";',
+      'import type { HistoryTransactionOptions, JSONCapabilityResult, JSONChangeMetadata, JSONDocument, JSONDocumentCommitOptions, JSONDocumentDuplicateError, JSONDocumentDuplicateOptions, JSONDocumentDuplicateResult, JSONDocumentEditError, JSONDocumentEditResult, JSONDocumentHistory, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentOptions, JSONDocumentPasteOptions, JSONDocumentPasteTarget, JSONDocumentSelectionTarget, JSONPatchInput, SelectionPoint, JSONResult } from "@interactive-os/json-document/session";',
+      'import type { ClipboardCopyError, ClipboardCopyOk, ClipboardCopyOptions, ClipboardCopyResult, ClipboardCutError, ClipboardCutOk, ClipboardCutOptions, ClipboardCutResult, ClipboardEmpty, ClipboardMutationOk, ClipboardPasteDiscriminatorMismatch, ClipboardPasteError, ClipboardPasteResult, ClipboardReadOk, ClipboardReadOptions, ClipboardReadResult, ClipboardState, ClipboardWriteOptions, ClipboardSource } from "@interactive-os/json-document/session";',
+      'import type { EntriesResult, EntryKind, QueryResult, ReadEntry, ReadResult, SchemaDescription, SchemaDescriptionResult, SchemaErrorCode, SchemaErrorResult, SchemaKind, SchemaKindResult, SchemaPathMode, SchemaQueryResult, SchemaState } from "@interactive-os/json-document/session";',
+      'import type { DeleteSelectionTextResult, SelectionPointObject, SelectionOrderedRange, SelectionOrderedRangeEntry, ReplaceSelectionTextResult, SelectionAffinity, SelectionContext, SelectionCursorDirection, SelectionCursorErrorCode, SelectionCursorOptions, SelectionCursorResult, SelectionCursorTarget, SelectionDirection, SelectionEdge, SelectionMode, SelectionOptions, SelectionOrderErrorCode, SelectionOrderOptions, SelectionPointOrderResult, SelectionPointerSpan, SelectionPointerSpansResult, SelectionRange, SelectionRangeInput, SelectionRangeOrderResult, SelectionRangesOrderResult, SelectionScopeErrorCode, SelectionScopeOptions, SelectionScopeResult, SelectionScopeTarget, SelectionSource, SelectionSpanOptions, SelectionSnap, SelectionState, SelectionTextDeleteDirection, SelectionTextDeleteOptions, SelectionTextEdit, SelectionTextEditErrorCode, SelectionTextEditOptions, SelectionTextEditsResult, SelectionType } from "@interactive-os/json-document/session";',
       'const schema = z.object({ name: z.string() });',
       'type Row = z.output<typeof schema>;',
       'type PublicRootTypes = [HistoryTransactionOptions, JSONCapabilityResult, JSONChangeMetadata, JSONDocument<Row>, JSONDocumentCommitOptions, JSONDocumentDuplicateError, JSONDocumentDuplicateOptions, JSONDocumentDuplicateResult<Row>, JSONDocumentEditError, JSONDocumentEditResult, JSONDocumentHistory, JSONDocumentInsertOptions, JSONDocumentInsertTarget, JSONDocumentMoveTarget, JSONDocumentOptions, JSONDocumentPasteOptions, JSONDocumentPasteTarget, JSONDocumentSelectionTarget, JSONPatchInput, JSONPatchOperation, SelectionPoint, JSONResult, Pointer, ClipboardCopyError, ClipboardCopyOk, ClipboardCopyOptions, ClipboardCopyResult, ClipboardCutError, ClipboardCutOk<Row>, ClipboardCutOptions, ClipboardCutResult<Row>, ClipboardEmpty, ClipboardMutationOk<Row>, ClipboardPasteDiscriminatorMismatch, ClipboardPasteError, ClipboardPasteResult<Row>, ClipboardReadOk, ClipboardReadOptions, ClipboardReadResult, ClipboardState<Row>, ClipboardWriteOptions, ClipboardSource, EntriesResult, EntryKind, QueryResult, ReadEntry, ReadResult, SchemaDescription, SchemaDescriptionResult, SchemaErrorCode, SchemaErrorResult, SchemaKind, SchemaKindResult, SchemaPathMode, SchemaQueryResult, SchemaState, DeleteSelectionTextResult, SelectionPointObject, SelectionOrderedRange, SelectionOrderedRangeEntry, ReplaceSelectionTextResult, SelectionAffinity, SelectionContext, SelectionCursorDirection, SelectionCursorErrorCode, SelectionCursorOptions, SelectionCursorResult, SelectionCursorTarget, SelectionDirection, SelectionEdge, SelectionMode, SelectionOptions, SelectionOrderErrorCode, SelectionOrderOptions, SelectionPointOrderResult, SelectionPointerSpan, SelectionPointerSpansResult, SelectionRange, SelectionRangeInput, SelectionRangeOrderResult, SelectionRangesOrderResult, SelectionScopeErrorCode, SelectionScopeOptions, SelectionScopeResult, SelectionScopeTarget, SelectionSource, SelectionSpanOptions, SelectionSnap, SelectionState, SelectionTextDeleteDirection, SelectionTextDeleteOptions, SelectionTextEdit, SelectionTextEditErrorCode, SelectionTextEditOptions, SelectionTextEditsResult, SelectionType];',
@@ -668,15 +702,21 @@ try {
     [
       namedImportLine(rootValueExports, "@interactive-os/json-document", { prefix: "RootValue_" }),
       namedImportLine(rootTypeExports, "@interactive-os/json-document", { prefix: "RootType_", typeOnly: true }),
+      namedImportLine(sessionValueExports, "@interactive-os/json-document/session", { prefix: "SessionValue_" }),
+      namedImportLine(sessionTypeExports, "@interactive-os/json-document/session", { prefix: "SessionType_", typeOnly: true }),
       namedImportLine(reactValueExports, "@interactive-os/json-document/react", { prefix: "ReactValue_" }),
       namedImportLine(reactTypeExports, "@interactive-os/json-document/react", { prefix: "ReactType_", typeOnly: true }),
       "const rootValues = {",
       ...rootValueExports.map((name) => `  ${name}: RootValue_${name},`),
       "};",
+      "const sessionValues = {",
+      ...sessionValueExports.map((name) => `  ${name}: SessionValue_${name},`),
+      "};",
       "const reactValues = {",
       ...reactValueExports.map((name) => `  ${name}: ReactValue_${name},`),
       "};",
       "rootValues satisfies Record<string, unknown>;",
+      "sessionValues satisfies Record<string, unknown>;",
       "reactValues satisfies Record<string, unknown>;",
     ].filter((line) => line !== null).join("\n"),
   );
@@ -704,7 +744,7 @@ try {
     join(workspace, "react-smoke.ts"),
     [
       'import * as z from "zod";',
-      'import type { JSONDocument } from "@interactive-os/json-document";',
+      'import type { JSONDocument } from "@interactive-os/json-document/session";',
       'import { useJSONDocument } from "@interactive-os/json-document/react";',
       'const Schema = z.object({ name: z.string() });',
       'type Value = z.output<typeof Schema>;',
@@ -740,8 +780,8 @@ try {
     join(workspace, "readme-pure-core-example.mjs"),
     [
       readmePureCoreExample,
-      'if (!r.result.ok) throw new Error("README pure core example did not apply");',
-      'if (r.state.title !== "final" || r.state.tags[0] !== "docs") throw new Error("README pure core example state mismatch");',
+      'if (!r.ok) throw new Error("README pure core example did not apply");',
+      'if (r.value.title !== "final" || r.value.tags[0] !== "docs") throw new Error("README pure core example state mismatch");',
     ].join("\n"),
   );
   await writeFile(
@@ -778,12 +818,22 @@ try {
     "root",
   );
   assertDeclarationExports(
+    await readFile(join(installedPackageRoot, packageJson.exports["./session"].types.replace(/^\.\//, "")), "utf8"),
+    sessionPublicExports,
+    "session",
+  );
+  assertDeclarationExports(
     await readFile(join(installedPackageRoot, packageJson.exports["./react"].types.replace(/^\.\//, "")), "utf8"),
     reactPublicExports,
     "react",
   );
   await assertDeclarationSpecifiers(installedPackageRoot);
   await assertRuntimeSpecifiers(installedPackageRoot);
+
+  if (existsSync(join(workspace, "node_modules", "zod"))) {
+    throw new Error("Optional Zod peer must not be installed for the root smoke.");
+  }
+  run("node", ["root-smoke.mjs"], workspace);
 
   if (!existsSync(join(workspace, "node_modules", "zod"))) {
     await symlink(zodPackage, join(workspace, "node_modules", "zod"), "dir");
@@ -805,7 +855,7 @@ try {
     );
   }
 
-  run("node", ["smoke.mjs"], workspace);
+  run("node", ["session-smoke.mjs"], workspace);
   run("node", ["subpath-smoke.mjs"], workspace);
   run("node", ["readme-pure-core-example.mjs"], workspace);
   run("node", ["readme-serialization-example.mjs"], workspace);

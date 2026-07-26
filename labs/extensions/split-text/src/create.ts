@@ -1,4 +1,4 @@
-import type { JSONDocument } from "@interactive-os/json-document";
+import type { JSONDocument } from "@interactive-os/json-document/session";
 import { split } from "./operations.js";
 import { canSplit } from "./plan.js";
 import type { SplitText } from "./types.js";

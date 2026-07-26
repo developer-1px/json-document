@@ -1,262 +1,268 @@
-# json-document
+# json-document v2
 
-json-document는 Zod schema로 보호되는 headless JSON 편집 엔진이다. UI component library가 아니다. 앱은 rendering, focus, button, shortcut, drag/drop, 제품별 command 이름을 소유한다. json-document는 JSON Pointer 주소, JSON Patch 변경, JSONPath 검색, schema validation, selection state, clipboard payload flow, undo/redo history를 소유한다.
+json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 사용할 수
+있는 provider-neutral JSON 편집 Kernel이다. UI component library가 아니다.
 
-공식 사이트와 데모: https://developer-1px.github.io/json-document/
+현재 package version과 표준 상태는 `2.0.0-rc.0` Candidate다. Root binding은
+구현됐지만 독립 구현과 다섯 pressure vertical의 conformance gate가 남아 있으므로
+stable이라고 부르지 않는다.
 
-## Import 경계
+공식 사이트: https://developer-1px.github.io/json-document/
 
-사용자는 package entrypoint만 import한다.
+## 정본 경계
 
-```ts
-import { createJSONDocument } from "@interactive-os/json-document";
-import { useJSONDocument } from "@interactive-os/json-document/react";
-```
-
-`@interactive-os/json-document/react` 외의 package subpath는 import하지 않는다. Core 내부 경로도 import하지 않는다.
-
-Optional extension은 core에 plugin 등록하지 않고 함수로 조립한다.
+Portable consumer는 Root만 import한다.
 
 ```ts
-import { createCollection } from "@interactive-os/json-document-collection";
-import { createOutline } from "@interactive-os/json-document-outline";
-import { createSchemaForm } from "@interactive-os/json-document-schema-form";
-import { createFormDraft } from "@interactive-os/json-document-form-draft";
-import { createProtectedRanges } from "@interactive-os/json-document-protected-ranges";
-import { createSnippets } from "@interactive-os/json-document-snippets";
-import { createDirtyState } from "@interactive-os/json-document-dirty-state";
-import { createBulkEdit } from "@interactive-os/json-document-bulk-edit";
-import { createPatchLog } from "@interactive-os/json-document-patch-log";
-import { createDocumentPersistence } from "@interactive-os/json-document-persist-web";
-import { createIdResolver } from "@interactive-os/json-document-id-resolver";
-import { createPatchPreview } from "@interactive-os/json-document-patch-preview";
-import { createSearchReplace } from "@interactive-os/json-document-search-replace";
-import { createGrouping } from "@interactive-os/json-document-grouping";
-import { createProposedChanges } from "@interactive-os/json-document-proposed-changes";
-import { createComments } from "@interactive-os/json-document-comments";
-import { createWebClipboard } from "@interactive-os/json-document-clipboard-web";
-import { createContentEditableAdapter } from "@interactive-os/json-document-contenteditable-web";
-import { useContentEditable } from "@interactive-os/json-document-contenteditable-react";
+import {
+  applyPatch,
+  createJSONDocument,
+  type JSONDocument,
+  type JSONValue,
+} from "@interactive-os/json-document";
 ```
 
-Official extension은 현재 shipped `packages/*`만이다. `labs/extensions/*`는 후보이고 공식 package로 안내하지 않는다. `calculated-fields`, `paste-special`, `autosave`는 1.0에서 lab 유지이며 official 승격을 보류한다.
-
-Structural command extension은 `operations`, `selectionAfter`, `diagnostics` 어휘로 수렴한다. 외부 extension에는 SHOULD convention이고, 이 repo의 official/lab에는 MUST convention이다. 이것은 core `JSONDocument` method 추가가 아니다.
-
-다음 이름은 쓰지 않는다.
-
-- `zod-crud`
-- `@json-document/*`
-- `@interactive-os/json-document/*` 내부 subpath. 예외는 `@interactive-os/json-document/react`뿐이다.
-- `src/*`, `application/*`, `domain/*`, `foundation/*` 같은 source path import
-
-## 왜 / 핵심 / 튜토리얼 맥락
-
-프론트엔드 편집기는 보통 JSON state를 바꾼다. Form, CMS block, kanban board, outliner, settings screen은 모두 insert, replace, delete, move, duplicate, select, copy, paste, undo, redo를 다룬다.
-
-json-document는 이 편집 규칙을 UI component 밖에 둔다.
+Root는 React, Zod, selection, clipboard, history, DOM을 import하지 않는다.
+공개 Root는 정확히 다음 20개 symbol이다.
 
 ```txt
-schema -> document -> pointer/query -> can* -> change -> result
+values
+  appendSegment, applyPatch, buildPointer, createJSONDocument
+  parentPointer, parsePointer, trackPointer, tryParsePointer
+
+types
+  JSONAppliedChange, JSONCapabilityResult, JSONChangeMetadata
+  JSONDocument, JSONDocumentCommitOptions, JSONDocumentCommitResult
+  JSONPatchOperation, JSONPatchResult, JSONValue, Pointer
+  QueryResult, ReadResult
 ```
 
-공식 onboarding은 외부 사용자 관점으로 유지한다.
+구현 내부 경로를 import하지 않는다. Root에 새 edit verb, schema provider object,
+React hook, host service를 추가하지 않는다.
 
-1. 개념: schema, JSON value, Pointer, JSONPath, Patch, can*, Result.
-2. Quickstart: 작은 card board editor 만들기.
-3. API reference: 정확한 method와 type.
-4. Extensions: 공식 extension 조립법.
+## Pure Protocol과 Projection
 
-1.0 public contract를 검토할 때는 다음 표준 문서를 함께 본다.
+```txt
+Pure Protocol
+  |-> Document Projection -> host adapter
+  `-> Candidate Editing Session -> React / rich host adapter
+```
 
-- Result/error code: `docs/standard/result-contract.md`
-- Selection semantics: `docs/standard/selection-contract.md`
-- Schema introspection: `docs/standard/schema-introspection-contract.md`
-- Conformance profile: `docs/standard/conformance-profile.md`
-- Signature/call shape: `packages/json-document/tests/public/signature-contract.test-d.ts`
-- Semantic fixture: `packages/json-document/tests/public/semantic-contract.test.ts`
+Pure Protocol은 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
+RFC 6902 JSON Patch, Result 의미를 소유한다. Projection은 현재 snapshot과
+publication을 연결한다.
 
-## 작업별 진입점
-
-Application code는 document facade를 우선 사용한다.
-
-| 작업 | API |
-| --- | --- |
-| headless document 만들기 | `createJSONDocument(schema, initial, options?)` |
-| React에서 같은 표면 쓰기 | `useJSONDocument(schema, initial, options?)` |
-| 현재 state 읽기 | `doc.value`, `doc.lastPatch` |
-| 한 위치 읽기 | `doc.at(pointer)` |
-| child 나열 | `doc.entries(pointer)` |
-| 여러 위치 찾기 | `doc.find(jsonPath)`, `doc.query(jsonPath)` |
-| 값 삽입, 교체, 삭제, 이동 | `doc.insert(...)`, `doc.replace(...)`, `doc.delete(...)`, `doc.move(...)` |
-| 실행 전 확인 | `doc.canPatch`, `doc.canFind`, `doc.canInsert`, `doc.canReplace`, `doc.canDelete`, `doc.canMove`, `doc.canDuplicate`, `doc.canCopy`, `doc.canCut`, `doc.canPaste`, `doc.canUndo`, `doc.canRedo` |
-| sibling 복제 | `doc.duplicate(pointer, options)` |
-| selected pointer 저장 | `doc.selection` |
-| copy, cut, paste | `doc.copy(...)`, `doc.cut(...)`, `doc.paste(...)` |
-| external payload insert | `doc.insert(target, value, options?)` |
-| undo, redo | `doc.undo()`, `doc.redo()`, `doc.history` |
-| 위치별 schema 확인 | `doc.schema.at`, `doc.schema.kind`, `doc.schema.describe`, `doc.schema.accepts` |
-
-## 최소 예제
+`JSONDocument`의 필수 member는 정확히 여섯 개다.
 
 ```ts
-import { z } from "zod";
-import { createJSONDocument } from "@interactive-os/json-document";
-
-const Card = z.object({
-  id: z.string(),
-  title: z.string().min(1),
-  status: z.enum(["todo", "doing", "done"]),
-});
-
-const doc = createJSONDocument(Card, {
-  id: "c1",
-  title: "Write docs",
-  status: "todo",
-}, {
-  history: 100,
-  selection: true,
-});
-
-const patch = [{ op: "replace", path: "/status", value: "doing" }] as const;
-
-if (doc.canPatch(patch).ok) {
-  doc.commit(patch, {
-    label: "change status",
-    selectionAfter: "/status",
-  });
+interface JSONDocument {
+  readonly value: JSONValue;
+  at(pointer: Pointer): ReadResult;
+  query(jsonPath: string): QueryResult;
+  canPatch(
+    operations: ReadonlyArray<JSONPatchOperation>,
+  ): JSONCapabilityResult;
+  commit(
+    operations: ReadonlyArray<JSONPatchOperation>,
+    options?: JSONDocumentCommitOptions,
+  ): JSONDocumentCommitResult;
+  subscribe(listener: (change: JSONAppliedChange) => void): () => void;
 }
 ```
 
-`selectionAfter`는 patch 적용 후 최종 selection을 command가 알고 있을 때 쓴다.
-Patch, history entry, subscriber metadata, 현재 selection이 같은 최종 선택을 본다.
-실패한 commit은 value, selection, history를 부분 변경 상태로 남기지 않는다.
+임의 JSON Patch는 root shape까지 바꿀 수 있으므로 Root document가 initial
+TypeScript shape를 계속 보존한다고 가정하지 않는다. `value`는 항상
+`JSONValue`다.
+
+## 최소 사용법
+
+```ts
+import { createJSONDocument } from "@interactive-os/json-document";
+
+const document = createJSONDocument({
+  title: "Draft",
+  items: [{ id: "a", done: false }],
+});
+
+const operations = [
+  { op: "replace", path: "/items/0/done", value: true },
+] as const;
+
+if (document.canPatch(operations).ok) {
+  const committed = document.commit(operations, {
+    metadata: { origin: "toggle" },
+  });
+
+  if (committed.ok) {
+    committed.change.applied;
+    document.value;
+  }
+}
+```
+
+`commit`만 document state를 변경한다. 실패와 state-equivalent no-op은
+notification을 만들지 않는다. 재진입 commit도 모든 subscriber가 같은 인과
+순서로 받아야 하며 한 listener의 예외가 다른 listener 전달을 막으면 안 된다.
 
 ## Patch, Pointer, JSONPath
 
-Patch path와 source는 JSON Pointer다. `insert`와 `move` target은 exact Pointer 또는 `{ before }`, `{ after }`, `{ into }`를 받는다.
+JSONPath는 검색 전용이다. `query(jsonPath)`가 반환한 Pointer를 JSON Patch의
+`path` 또는 `from`에 사용한다. JSONPath 문자열을 mutation target으로 쓰지
+않는다.
+
+Root document Pointer는 빈 문자열 `""`이다. Array append는 `/items/-`다.
 
 ```ts
-doc.patch({ op: "replace", path: "/title", value: "Ready" });
-doc.patch([
-  { op: "replace", path: "/settings/owner", value: "editor" },
-  { op: "add", path: "/lists/0/cards/-", value: card },
-]);
-```
+const result = document.query("$.items[*].id");
 
-JSONPath는 검색 전용이다. 편집 feature에서는 `doc.find(jsonPath)`를 쓰고, lower-level read primitive로는 `doc.query(jsonPath)`를 쓴다. 받은 JSON Pointer를 `doc.patch(...)`나 `doc.replace(...)`에 사용한다.
-
-`doc.at(pointer)`는 raw value가 아니라 `ReadResult`를 반환한다.
-
-Burst edit은 operation 배열을 만들고 `doc.patch(...)`나 `doc.commit(...)`을 한 번 호출한다. `history.transaction`은 history entry를 묶지만 반복 `doc.patch(...)` 호출을 한 번의 schema validation으로 바꾸지는 않는다.
-
-## can* Result
-
-`can*` method는 boolean이 아니다. UI, test, command palette가 같은 disabled reason을 공유할 수 있도록 reasoned capability result를 반환한다.
-
-```ts
-const can = doc.canInsert("/lists/0/cards/-", candidateCard);
-
-if (!can.ok) {
-  can.code;
-  can.reason;
-  can.violations;
+if (result.ok) {
+  result.pointers;
 }
 ```
 
-`violations[].path`는 RFC 6901 JSON Pointer다. `schema.accepts(path, value, mode)`는 요청한 schema 위치 기준인 `schema-slot` path를 보고한다. `canPatch`, `canPaste`, `canDuplicate` 같은 mutation preflight는 patch planning 뒤 실제 document 위치 기준인 `document-result` path를 보고한다.
+## Pure applyPatch
 
-기본값은 `strict: false`다. 실패는 throw가 아니라 `{ ok: false, code, ... }` result로 분기한다. `strict: true`는 execution API에서 `JSONDocumentError`를 throw할 수 있지만, 앱의 안정적인 분기 기준은 `reason` 문구가 아니라 `code`, `pointer`, `violations` 같은 구조다.
-
-## 1.0 Signature contract
-
-1.0에서 고정되는 것은 export 이름만이 아니다. 다음 overload와 call shape도 public API다.
+`applyPatch`는 schema, session, UI 없이 ordered atomic batch를 적용한다.
+외부 입력이 JSON이 아니면 throw 대신 `not_serializable` failure를 반환한다.
 
 ```ts
-createJSONDocument(Schema, input);
-createJSONDocument(Schema, output, { trustedInitial: true });
+import { applyPatch } from "@interactive-os/json-document";
 
-useJSONDocument(Schema, input);
-useJSONDocument(Schema, output, { trustedInitial: true });
+const result = applyPatch(
+  { title: "Draft", tags: [] },
+  [
+    { op: "add", path: "/tags/-", value: "docs" },
+    { op: "replace", path: "/title", value: "Ready" },
+  ],
+);
 
-doc.insert(value);
-doc.insert(target, value, options);
-
-doc.move(source, target);
-doc.move(target);
-
-doc.paste(target, options);
-doc.canPaste(target, options);
+if (result.ok) {
+  result.value;
+  result.change.applied;
+}
 ```
 
-`trustedInitial: true`는 초기값 parse를 건너뛰므로 caller가 이미 schema output 경계를 소유할 때만 쓴다. Zod transform처럼 input과 output이 다른 schema에서는 trusted/untrusted overload 구분이 중요하다.
+성공한 `applied`는 `/-`를 실제 index로 canonicalize하고 RFC operation field만
+보존한다. 입력 state, operation payload, 성공 value와 change는 서로 격리된다.
 
-## Duplicate
+## Acceptance
 
-Sibling 복제 의도는 raw RFC 6902 `copy`가 아니라 `doc.duplicate(pointer?, options)`로 표현한다.
+Schema provider는 Root contract가 아니다. 필요하면 작은 acceptance callback으로
+조합한다.
 
 ```ts
-const duplicated = doc.duplicate("/lists/0/cards/0", {
-  rekey: { fields: ["id", "slug"], strategy: "suffix" },
+import { z } from "zod";
+import {
+  createJSONDocument,
+  type JSONCapabilityResult,
+  type JSONValue,
+} from "@interactive-os/json-document";
+
+const Schema = z.object({ title: z.string().min(1) });
+
+function accepts(candidate: JSONValue): JSONCapabilityResult {
+  const parsed = Schema.safeParse(candidate);
+  return parsed.success
+    ? { ok: true }
+    : {
+        ok: false,
+        code: "schema_violation",
+        reason: JSON.stringify(parsed.error.issues),
+      };
+}
+
+const document = createJSONDocument({ title: "Draft" }, { accepts });
+```
+
+Acceptance는 initial state와 commit candidate를 publication 전에 검사한다.
+Provider parse 결과로 candidate를 몰래 변환하지 않는다. Normalization은
+applied JSON Patch에 명시한다.
+
+## Result 규칙
+
+Public Result는 boolean `ok` discriminant를 가진다. Failure는 stable string
+`code`를 가진다. Expected read, query, patch, commit failure를 exception으로만
+표현하지 않는다.
+
+Consumer는 exact key 집합이나 exhaustive error-code union에 의존하지 않는다.
+Minor release에서 optional diagnostic field와 새 code가 추가될 수 있다.
+
+## Candidate Editing Session
+
+`@interactive-os/json-document/session`은 selection, clipboard, history, schema
+introspection과 고수준 edit verb를 가진 Zod 기반 Candidate 표면이다.
+
+```ts
+import { z } from "zod";
+import {
+  createJSONDocument as createJSONEditingSession,
+} from "@interactive-os/json-document/session";
+
+const Schema = z.object({
+  title: z.string(),
+  items: z.array(z.object({ id: z.string() })),
 });
+
+const session = createJSONEditingSession(
+  Schema,
+  { title: "Draft", items: [] },
+  { history: 100, selection: true },
+);
 ```
 
-`duplicate`, `doc.cut`, `doc.paste`는 즉시 mutate한다. 성공 결과의 `applied`는 이미 적용된 patch record이므로 다시 `commit`하지 않는다.
-`insert`, `replace`, `delete`, `move`, `patch`, `commit`의 성공 result는 `JSONResult` family인 `{ ok: true }`다. 실제 applied patch는 `doc.lastPatch`, subscriber, history entry에서 읽는다.
-`copy` 성공 result는 `{ ok: true, payload, source, sources }`다.
-`cut` 성공 result는 `{ ok: true, value, applied, payload, source, sources }`다.
-`paste` 성공 result는 `{ ok: true, value, applied }`다.
-`duplicate` 성공 result는 `{ ok: true, value, applied, duplicatedTo }`다.
+이 subpath의 기존 이름과 signature는 v2 stable contract가 아니다. 현재 Session은
+Root `JSONDocument`의 subtype이라고 가정하지 않는다. Portable consumer는
+`/session`에 의존하지 않는다.
 
-## 선택
-
-Selection은 DOM focus가 아니라 JSON-safe state다. Bulk work에는 selected pointer를 explicit source로 넘긴다.
-
-```ts
-doc.selection?.selectRanges([
-  "/lists/0/cards/0",
-  "/lists/0/cards/1",
-]);
-
-const source = doc.selection?.selectedPointers ?? [];
-doc.copy(source);
-```
-
-## 클립보드
-
-Clipboard는 copy/cut/paste payload flow를 소유한다. Selection은 무엇이 선택되었는지만 기록한다.
-
-```ts
-const copied = doc.copy(["/lists/0/cards/0"]);
-if (copied.ok) {
-  doc.paste("/lists/1/cards/-");
-}
-```
-
-삽입/이동 위치에는 `/items/-`나 `/lists/1/cards/-` 같은 exact Pointer를 사용할 수 있다. Array container 안에 append할 때는 `{ into: "/items" }`, array item 기준으로 배치할 때는 `{ before: "/items/0" }`, `{ after: "/items/0" }`를 사용한다. Object member 추가는 `/record/key` 같은 exact Pointer를 쓴다. 기존 값을 바꾸는 작업은 `replace`이고, document clipboard paste만 `{ replace: pointer }`를 추가로 지원한다.
-
-Pointer array copy/cut은 array payload를 저장한다. Multi-source buffer를 array insertion target에 paste하면 기본적으로 spread된다. Array payload 자체를 하나의 값으로 넣어야 할 때만 `{ spread: false }`를 넘긴다.
+`@interactive-os/json-document/react`의 `useJSONDocument`도 현재 Candidate
+Editing Session adapter다. Provider-neutral Projection React adapter로 가정하지
+않는다.
 
 ## Official extensions
 
-공식 extension은 public `JSONDocument` surface만 사용한다. 내부 경로, plugin registry, `doc.use(...)`가 필요 없다.
+공식 extension은 plugin registry 없이 함수로 조립한다. 현재 package들은
+Candidate Session migration 경계를 사용하며 Root Projection port로의 수렴은
+각 package에서 별도로 검증한다.
 
-## 순수 Root helper
+- `@interactive-os/json-document-bulk-edit`
+- `@interactive-os/json-document-clipboard-web`
+- `@interactive-os/json-document-collection`
+- `@interactive-os/json-document-comments`
+- `@interactive-os/json-document-contenteditable-react`
+- `@interactive-os/json-document-contenteditable-web`
+- `@interactive-os/json-document-dirty-state`
+- `@interactive-os/json-document-form-draft`
+- `@interactive-os/json-document-grouping`
+- `@interactive-os/json-document-id-resolver`
+- `@interactive-os/json-document-outline`
+- `@interactive-os/json-document-patch-log`
+- `@interactive-os/json-document-patch-preview`
+- `@interactive-os/json-document-persist-web`
+- `@interactive-os/json-document-proposed-changes`
+- `@interactive-os/json-document-protected-ranges`
+- `@interactive-os/json-document-schema-form`
+- `@interactive-os/json-document-search-replace`
+- `@interactive-os/json-document-snippets`
 
-Root helper는 React-free이며 외부 JSON 경계에서 유용하다.
+`labs/extensions/*`는 후보이고 공식 extension이라고 부르지 않는다.
 
-```ts
-import { applyOperation, applyPatch, applyPatchToTrustedState } from "@interactive-os/json-document";
-```
+## Host 책임
 
-`applyOperation`과 `applyPatch`는 pure하다. `applyPatch`는 외부 JSON 경계라서 입력 state 전체의 JSON 안전성을 확인한다. `applyPatchToTrustedState`는 caller가 이미 state JSON boundary를 소유할 때만 사용한다.
+Rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem,
+network, formula engine, CRDT와 OT는 host 또는 extension이 소유한다. Tree
+indent/outdent, visible-row focus, slide selection box, grid coordinate와 같은 제품
+의도는 host가 Pointer와 Patch operation으로 번역한다.
 
-## 성능 경계
+## 표준과 검증
 
-큰 document에서는 hot UI path를 document facade에 둔다: `doc.patch`, `doc.commit`, `doc.canPatch`.
+- v2 profile: `docs/standard/v2-projection-profile.md`
+- machine manifest: `docs/standard/v2-public-surface.json`
+- v2 signature fixture:
+  `packages/json-document/tests/public/v2-signature-contract.test-d.ts`
+- Projection black-box binding:
+  `packages/json-document/tests/public/v2-projection-standard-conformance.test.ts`
+- Pure Protocol black-box binding:
+  `packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts`
 
-빠른 document path는 신뢰된 document state와 구조만 가진 Zod schema에 적용된다. 선언적 string/number constraint와 built-in `trim()`만 primitive leaf에 있는 schema도 단일 또는 독립 non-root `replace`를 위치별로 검증한다. `refine`, `superRefine`, custom check/error callback, transform이 있는 schema와 지원하지 않는 batch는 격리용 candidate clone 뒤 전체 루트 schema 검증을 사용한다.
-
-## 트리 편집
-
-Tree semantics는 app-owned다. json-document는 JSON을 검증하고 mutate한다. 앱은 indent, outdent, visible-row focus, toolbar command를 JSON Pointer와 JSON Patch operation으로 번역한다.
+Reference implementation의 우연한 동작이 profile과 conformance vector보다 높은
+정본이 되지 않게 한다.

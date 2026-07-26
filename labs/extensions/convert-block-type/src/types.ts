@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONChangeMetadata, JSONPatchOperation, JSONResult, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONChangeMetadata, JSONPatchOperation, JSONResult, Pointer } from "@interactive-os/json-document/session";
 
 export type BlockTypeConversionErrorCode =
   | "factory_failed"

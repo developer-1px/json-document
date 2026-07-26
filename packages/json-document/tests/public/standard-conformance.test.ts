@@ -5,7 +5,7 @@ import {
   createJSONDocument,
   type JSONPatchOperation,
   type SelectionSnap,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 const Card = z.object({
   id: z.string(),

@@ -4,6 +4,7 @@
     "paths": {
       "@interactive-os/json-document-*": ["packages/*/src/index.ts", "labs/extensions/*/src/index.ts"],
       "@interactive-os/json-document/react": ["packages/json-document/src/application/react-document/index.ts"],
+      "@interactive-os/json-document/session": ["packages/json-document/src/application/session/index.ts"],
       "@interactive-os/json-document": ["packages/json-document/src/application/document/index.ts"]
     }
   }

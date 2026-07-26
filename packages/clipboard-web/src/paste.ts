@@ -3,7 +3,7 @@ import type {
   JSONDocumentInsertTarget,
   JSONDocumentPasteOptions,
   JSONDocumentPasteTarget,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   decodeText,

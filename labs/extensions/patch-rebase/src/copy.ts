@@ -1,6 +1,6 @@
 import type {
   JSONPatchOperation,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export function copyOperations(
   operations: ReadonlyArray<JSONPatchOperation>,

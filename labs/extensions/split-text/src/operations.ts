@@ -1,4 +1,4 @@
-import type { JSONDocument, Pointer } from "@interactive-os/json-document";
+import type { JSONDocument, Pointer } from "@interactive-os/json-document/session";
 import { canSplit } from "./plan.js";
 import type { SplitTextOptions, SplitTextResult } from "./types.js";
 

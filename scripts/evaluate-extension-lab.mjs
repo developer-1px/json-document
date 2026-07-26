@@ -396,7 +396,7 @@ for (const { dir, pkg } of labPackages) {
   if (pkg.private !== true) {
     fail(`${label}: lab packages must be private until promoted.`);
   }
-  if (pkg.peerDependencies?.["@interactive-os/json-document"] !== "^1.0.0") {
+  if (pkg.peerDependencies?.["@interactive-os/json-document"] !== "^2.0.0-rc.0") {
     fail(`${label}: json-document must stay a peer dependency.`);
   }
   if (pkg.dependencies?.["@interactive-os/json-document"]) {
@@ -432,7 +432,10 @@ for (const { dir, pkg } of labPackages) {
   for (const sourcePath of files(`${dir}/src`)) {
     const source = read(sourcePath);
     for (const specifier of importedSpecifiers(source)) {
-      if (specifier === "@interactive-os/json-document") continue;
+      if (
+        specifier === "@interactive-os/json-document"
+        || specifier === "@interactive-os/json-document/session"
+      ) continue;
       const labDependency = labPackageByName.get(specifier);
       if (labDependency !== undefined) {
         if (labDependency.pkg.private !== true) {

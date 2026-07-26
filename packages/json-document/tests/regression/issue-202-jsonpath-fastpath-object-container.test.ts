@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 
 function pointers(state: unknown, query: string): string[] {
   const doc = createJSONDocument(z.unknown(), state);

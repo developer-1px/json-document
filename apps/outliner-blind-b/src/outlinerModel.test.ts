@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document/session";
 import {
   addChild,
   addSibling,

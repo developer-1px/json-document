@@ -4,7 +4,7 @@ import type {
   JSONResult,
   Pointer,
   SchemaKind,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type FormDraftErrorCode =
   | "invalid_pointer"

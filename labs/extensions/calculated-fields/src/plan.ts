@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocument, JSONPatchOperation, Pointer } from "@interactive-os/json-document/session";
 import type { CalculatedFieldChange, CalculatedFieldDefinition, CalculatedFieldError, CalculatedFieldsPlanResult } from "./types.js";
 
 export function planCalculatedFields<TDocument>(

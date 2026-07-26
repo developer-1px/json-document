@@ -1,4 +1,4 @@
-import type { JSONCapabilityResult, JSONDocument, JSONDocumentEditResult, JSONDocumentInsertTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document";
+import type { JSONCapabilityResult, JSONDocument, JSONDocumentEditResult, JSONDocumentInsertTarget, JSONDocumentPasteTarget, Pointer } from "@interactive-os/json-document/session";
 import { canPasteSpecial, copyDiagnostics, copyInput, copyOptions, copyPayload, isReplaceTarget, pasteSpecialError } from "./plan.js";
 import type { PasteSpecialAdapter, PasteSpecialApplyResult, PasteSpecialDiagnostic, PasteSpecialError, PasteSpecialInput, PasteSpecialPlan } from "./types.js";
 

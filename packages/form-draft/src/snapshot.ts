@@ -3,7 +3,7 @@ import type {
   JSONDocument,
   Pointer,
   SchemaKind,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 import {
   capabilityError,

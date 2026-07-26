@@ -1,4 +1,4 @@
-import { appendSegment, type JSONDocument, type JSONPatchOperation, lastSegmentIndex, parentPointer, type Pointer, tryParsePointer } from "@interactive-os/json-document";
+import { appendSegment, type JSONDocument, type JSONPatchOperation, lastSegmentIndex, parentPointer, type Pointer, tryParsePointer } from "@interactive-os/json-document/session";
 import type { PasteCellsError, PasteCellsErrorCode, PasteCellsResult, PasteCellsTarget } from "./types.js";
 
 export function canPasteGrid<TDocument>(

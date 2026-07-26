@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   createJSONDocument,
   JSONDocumentError,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 import {
   canAcceptChange,
   canProposeChange,

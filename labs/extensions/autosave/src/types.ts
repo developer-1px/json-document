@@ -1,4 +1,4 @@
-import type { JSONChangeMetadata, JSONPatchOperation } from "@interactive-os/json-document";
+import type { JSONChangeMetadata, JSONPatchOperation } from "@interactive-os/json-document/session";
 
 export type MaybePromise<T> = T | Promise<T>;
 

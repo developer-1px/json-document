@@ -45,6 +45,7 @@ const docs = {
 };
 const publicContract = JSON.parse(read("packages/json-document/public-contract.json")) as {
   root: { values: string[]; types: string[] };
+  session: { values: string[]; types: string[] };
   react: { values: string[]; types: string[] };
 };
 
@@ -112,9 +113,9 @@ describe("public docs consistency", () => {
     expect(docs.extensions).toMatch(/@interactive-os\/json-document-clipboard-web/);
     expect(docs.generatedExtensionsCatalog).toMatch(/Generated extension catalog/);
     expect(docs.generatedExtensionsCatalog).toMatch(/Official extensions: \d+/);
-    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document zod/);
-    expect(docs.readme).toMatch(/왜 json-document인가/);
-    expect(docs.llms).toMatch(/왜 \/ 핵심 \/ 튜토리얼 맥락/);
+    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@2\.0\.0-rc\.0/);
+    expect(docs.readme).toMatch(/provider-neutral/);
+    expect(docs.llms).toMatch(/2\.0\.0-rc\.0.*Candidate/);
   });
 
   test("keeps generated repo catalog aligned with package directories", () => {
@@ -144,16 +145,15 @@ describe("public docs consistency", () => {
       expect(source, name).not.toMatch(/\bCopyOk\b|\bCopyError\b|\bCutOk\b|\bCutError\b|\bDuplicateOk\b|\bDuplicateError\b|\bPasteError\b|\bPasteDiscriminatorMismatch\b/);
     }
 
-    expect(docs.api).toMatch(/\{ after: pointer \}|\{ after: "\/lists\/0\/cards\/0" \}/);
-    expect(docs.llms).toMatch(/삽입\/이동 위치에는 `\/items\/-`/);
-    expect(docs.llms).toMatch(/1\.0 Signature contract/);
-    expect(docs.llms).toMatch(/trustedInitial: true/);
-    expect(docs.llms).toMatch(/selectionAfter/);
-    expect(docs.llms).toMatch(/다음 이름은 쓰지 않는다[\s\S]*zod-crud[\s\S]*@json-document\/\*/);
+    expect(docs.api).toMatch(/mutation target은 JSON Pointer/);
+    expect(docs.llms).toMatch(/Array append는 `\/items\/-`/);
+    expect(docs.llms).toMatch(/공개 Root는 정확히 다음 20개 symbol/);
+    expect(docs.llms).toMatch(/`value`는 항상\s+`JSONValue`/);
+    expect(docs.llms).toMatch(/Root `JSONDocument`의 subtype이라고 가정하지 않는다/);
   });
 
   test("keep JSONPath scoped to search and JSON Pointer scoped to mutation", () => {
-    expect(docs.readme).toMatch(/JSONPath는 값을 찾는 언어이며 직접 변경하지 않습니다/);
+    expect(docs.readme).toMatch(/query\(jsonPath\).*Pointer 배열/);
     expect(docs.spec).toMatch(/JSONPath는 검색 언어/);
     expect(docs.site).toMatch(/JSONPath는 변경 언어가 아닙니다/);
     expect(docs.llms).toMatch(/JSONPath는 검색 전용/);
@@ -181,15 +181,19 @@ describe("public docs consistency", () => {
   test("keeps the documented API model complete enough for users", () => {
     expect(publicContract.root.values).toContain("createJSONDocument");
     expect(publicContract.react.values).toContain("useJSONDocument");
-
-    for (const [name, source] of Object.entries({
-      readme: docs.readme,
-      spec: docs.spec,
-      llms: docs.llms,
-      api: docs.api,
-    })) {
-      expect(source, `${name} missing canFind`).toContain("canFind");
-    }
+    expect(publicContract.root.values).toEqual([
+      "appendSegment",
+      "applyPatch",
+      "buildPointer",
+      "createJSONDocument",
+      "parentPointer",
+      "parsePointer",
+      "trackPointer",
+      "tryParsePointer",
+    ]);
+    expect(publicContract.root.types).toHaveLength(12);
+    expect(publicContract.session.values).toContain("createJSONDocument");
+    expect(docs.api).toContain("canFind");
 
     expect(docs.api).toMatch(/violations\[\]\.path/);
     expect(docs.api).toMatch(/schema-slot/);

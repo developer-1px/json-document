@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { trackPointer, type JSONPatchOperation } from "@interactive-os/json-document";
+import { trackPointer, type JSONPatchOperation } from "@interactive-os/json-document/session";
 
 describe("trackPointer — add", () => {
   it("shifts later siblings on insert", () => {
@@ -112,7 +112,7 @@ describe("trackPointer — sequence", () => {
 
 describe("applyPatch — applied field", () => {
   it("returns the input ops on success", async () => {
-    const { applyPatch } = await import("@interactive-os/json-document");
+    const { applyPatch } = await import("@interactive-os/json-document/session");
     const z = await import("zod");
     const schema = z.z.any();
     const ops: JSONPatchOperation[] = [
@@ -124,7 +124,7 @@ describe("applyPatch — applied field", () => {
   });
 
   it("returns empty applied on failure", async () => {
-    const { applyPatch } = await import("@interactive-os/json-document");
+    const { applyPatch } = await import("@interactive-os/json-document/session");
     const z = await import("zod");
     const schema = z.z.any();
     const r = applyPatch(schema, {}, [{ op: "remove", path: "/missing" }]);

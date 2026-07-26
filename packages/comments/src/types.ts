@@ -1,7 +1,7 @@
 import type {
   JSONDocument,
   Pointer,
-} from "@interactive-os/json-document";
+} from "@interactive-os/json-document/session";
 
 export type CommentStatus = "open" | "resolved";
 
