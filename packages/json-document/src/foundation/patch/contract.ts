@@ -1,5 +1,4 @@
-import type * as z from "zod";
-import type { Pointer } from "../pointer/index.js";
+import type { Pointer } from "../pointer/core.js";
 
 export type JSONPatchOperation =
   | { op: "add";     path: Pointer; value: unknown }
@@ -20,12 +19,6 @@ export type ErrorCode =
 export type JSONResult =
   | { ok: true }
   | { ok: false; code: ErrorCode; reason?: string; pointer?: Pointer };
-
-export interface ApplyResult<S extends z.ZodTypeAny> {
-  state: z.output<S>;
-  result: JSONResult;
-  applied: ReadonlyArray<JSONPatchOperation>;
-}
 
 export interface TrustedApplyResult<T> {
   state: T;

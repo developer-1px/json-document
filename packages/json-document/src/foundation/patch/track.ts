@@ -2,7 +2,7 @@
 // 입력: 적용된 op + 기존 Pointer
 // 출력: 새 Pointer (또는 null = cascading drop)
 
-import { tryParsePointer, buildPointer, isPrefix, parentPointer, lastSegmentIndex, withLastSegment, readAt, type Pointer } from "../pointer/index.js";
+import { tryParsePointer, buildPointer, isPrefix, parentPointer, lastSegmentIndex, withLastSegment, readAt, type Pointer } from "../pointer/core.js";
 import type { JSONPatchOperation } from "./contract.js";
 import { arrayIndexValue } from "../pointer/array.js";
 

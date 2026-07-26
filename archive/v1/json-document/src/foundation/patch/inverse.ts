@@ -1,7 +1,7 @@
 // computeInverses — undo 용 RFC 6902 inverse op 계산.
 
 import type { JSONPatchOperation } from "./contract.js";
-import { appendSegment, parsePointer, readAt } from "../pointer/index.js";
+import { appendSegment, parsePointer, readAt } from "../pointer/core.js";
 import { cloneTrustedPlainJson } from "../json/trustedClone.js";
 import { applyOpRaw } from "./apply.js";
 import { getValueAt, resolveAppendPath } from "./container.js";

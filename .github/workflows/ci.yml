@@ -29,9 +29,9 @@ jobs:
       - name: Install dependencies
         if: steps.scope.outputs.package_any == 'true'
         run: npm ci --no-audit --no-fund
-      - name: Verify package and official extensions
+      - name: Verify v2 package
         if: steps.scope.outputs.package_full == 'true'
-        run: npm run typecheck && npm test && npm run build && npm run smoke:package && npm run extensions:verify && npm run docs:evaluate
+        run: npm run archive:check && npm run verify -w @interactive-os/json-document && npm run standard:check && npm run docs:evaluate
       - name: Verify package documentation
         if: steps.scope.outputs.package_full != 'true' && (steps.scope.outputs.package_docs == 'true' || steps.scope.outputs.package_smoke == 'true')
         run: |
@@ -48,33 +48,18 @@ jobs:
         run: npm pack -w @interactive-os/json-document --dry-run
 
   lab-extensions:
-    name: Lab extensions
+    name: Archive isolation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Detect changed scope
-        id: scope
-        env:
-          CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          CI_HEAD_SHA: ${{ github.sha }}
-        run: node scripts/ci-scope.mjs
-      - name: Install dependencies
-        if: steps.scope.outputs.lab_extensions == 'true'
-        run: npm ci --no-audit --no-fund
-      - name: Verify changed lab extension dist imports
-        if: steps.scope.outputs.lab_extensions == 'true'
-        env:
-          LAB_EXTENSIONS_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          LAB_EXTENSIONS_HEAD: ${{ github.sha }}
-        run: npm run labs:extensions:verify:changed
+      - name: Verify archived 1.x isolation
+        run: npm run archive:check
 
   playground-site:
-    name: Playgrounds and site
+    name: Site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -90,14 +75,11 @@ jobs:
           CI_HEAD_SHA: ${{ github.sha }}
         run: node scripts/ci-scope.mjs
       - name: Install dependencies
-        if: steps.scope.outputs.site == 'true' || steps.scope.outputs.playground == 'true' || steps.scope.outputs.browser == 'true'
+        if: steps.scope.outputs.site == 'true' || steps.scope.outputs.browser == 'true'
         run: npm ci --no-audit --no-fund
-      - name: Verify playgrounds and site
-        if: steps.scope.outputs.playground == 'true'
-        run: npm run playground:typecheck && npm run playground:test && npm run playground:build
       - name: Verify site
         if: steps.scope.outputs.site == 'true'
-        run: npm run site:verify:pages
+        run: npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages
       - name: Verify browser behavior
         if: steps.scope.outputs.browser == 'true'
         run: npm run browser:test

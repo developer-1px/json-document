@@ -1,4 +1,4 @@
-import { buildPointer, tryParsePointer, type Pointer } from "./index.js";
+import { buildPointer, tryParsePointer, type Pointer } from "./core.js";
 
 export function arrayIndexValue(seg: string): number | null {
   if (seg === "0") return 0;

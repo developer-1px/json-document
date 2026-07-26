@@ -11,12 +11,6 @@
     "paths": {
       "@interactive-os/json-document": [
         "./src/application/document/index.ts"
-      ],
-      "@interactive-os/json-document/session": [
-        "./src/application/session/index.ts"
-      ],
-      "@interactive-os/json-document/react": [
-        "./src/application/react-document/index.ts"
       ]
     },
     "types": [

@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - "json-document-v*-rc.*"
-      - "json-document-extensions-v*-rc.*"
 
 permissions:
   contents: read
@@ -50,84 +49,9 @@ jobs:
               throw new Error("publishConfig.tag must remain next for prereleases");
             }
           '
-      - name: Verify extension prerelease identity
-        if: startsWith(github.ref_name, 'json-document-extensions-v')
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          node --input-type=module --eval '
-            import { readFileSync } from "node:fs";
-            const packagePaths = [
-              "packages/grouping/package.json",
-              "packages/patch-preview/package.json",
-              "packages/search-replace/package.json",
-            ];
-            const expectedNames = [
-              "@interactive-os/json-document-grouping",
-              "@interactive-os/json-document-patch-preview",
-              "@interactive-os/json-document-search-replace",
-            ];
-            const packages = packagePaths.map((path) =>
-              JSON.parse(readFileSync(path, "utf8"))
-            );
-            const versions = new Set(packages.map((pkg) => pkg.version));
-            if (versions.size !== 1) {
-              throw new Error("extension prerelease versions must match");
-            }
-            const [version] = versions;
-            const expectedTag = `json-document-extensions-v${version}`;
-            if (process.env.RELEASE_TAG !== expectedTag) {
-              throw new Error(`release tag ${process.env.RELEASE_TAG} does not match ${expectedTag}`);
-            }
-            if (!/^\d+\.\d+\.\d+-rc\.\d+$/.test(version)) {
-              throw new Error(`extension version is not an rc prerelease: ${version}`);
-            }
-            for (const [index, pkg] of packages.entries()) {
-              if (pkg.name !== expectedNames[index]) {
-                throw new Error(`${packagePaths[index]} has unexpected name ${pkg.name}`);
-              }
-              if (pkg.publishConfig?.tag !== "next") {
-                throw new Error(`${pkg.name} publishConfig.tag must remain next`);
-              }
-              if (pkg.publishConfig?.access !== "public" || pkg.publishConfig?.provenance !== true) {
-                throw new Error(`${pkg.name} must publish publicly with provenance`);
-              }
-              if (pkg.peerDependencies?.["@interactive-os/json-document"] !== "^1.0.1 || ^1.1.0-rc.0") {
-                throw new Error(`${pkg.name} does not accept the core integration RC`);
-              }
-            }
-          '
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Build core for extension verification
-        if: startsWith(github.ref_name, 'json-document-extensions-v')
-        run: npm run build -w @interactive-os/json-document
-      - name: Verify extension prereleases
-        if: startsWith(github.ref_name, 'json-document-extensions-v')
-        run: |
-          version=$(node -p 'require("./packages/grouping/package.json").version')
-          for package in \
-            @interactive-os/json-document-grouping \
-            @interactive-os/json-document-patch-preview \
-            @interactive-os/json-document-search-replace
-          do
-            if npm view "$package@$version" version >/dev/null 2>&1; then
-              echo "::error::$package@$version is already published"
-              exit 1
-            fi
-            npm run verify -w "$package"
-            npm pack -w "$package" --dry-run --cache "${RUNNER_TEMP}/npm-cache"
-          done
+      - name: Verify core prerelease
+        run: npm run release:check
       - name: Publish core prerelease
-        if: startsWith(github.ref_name, 'json-document-v')
         run: npm publish -w @interactive-os/json-document --tag next --provenance
-      - name: Publish extension prereleases
-        if: startsWith(github.ref_name, 'json-document-extensions-v')
-        run: |
-          for package in \
-            @interactive-os/json-document-grouping \
-            @interactive-os/json-document-patch-preview \
-            @interactive-os/json-document-search-replace
-          do
-            npm publish -w "$package" --tag next --provenance
-          done

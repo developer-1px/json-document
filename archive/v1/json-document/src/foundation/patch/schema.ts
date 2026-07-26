@@ -9,9 +9,12 @@ import {
 } from "./apply.js";
 import { normalizeAppliedOp, normalizeOp } from "./container.js";
 import { applyFastPatchStrategies, publicTrustedStateStrategies } from "./fast/apply.js";
-import { fail, ok, zodIssuesReason } from "./result.js";
+import { fail, ok } from "./result.js";
 import { applyTrustedValueMutation } from "./value.js";
-import type { ApplyResult, JSONPatchOperation } from "./contract.js";
+import type { JSONPatchOperation } from "./contract.js";
+import type { ApplyResult } from "./schema-contract.js";
+
+const zodIssuesReason = (error: z.ZodError): string => JSON.stringify(error.issues);
 
 export function applyOperation<S extends z.ZodTypeAny>(
   schema: S,

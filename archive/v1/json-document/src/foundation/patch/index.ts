@@ -5,7 +5,6 @@ export {
 } from "./apply.js";
 export type { RawResult } from "./apply.js";
 export type {
-  ApplyResult,
   ErrorCode,
   FastPatchResult,
   JSONPatchOperation,
@@ -13,6 +12,7 @@ export type {
   TrustedApplyResult,
   TrustedPatchOptions,
 } from "./contract.js";
+export type { ApplyResult } from "./schema-contract.js";
 export { computeInverses } from "./inverse.js";
 export {
   copyRootObject,
@@ -42,7 +42,6 @@ export { replaceValueAtSegments } from "./replaceValue.js";
 export {
   fail,
   ok,
-  zodIssuesReason,
 } from "./result.js";
 export {
   applyOperation,

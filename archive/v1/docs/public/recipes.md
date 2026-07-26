@@ -18,7 +18,7 @@ product feature
 
 v2 Core는 JSON value, Pointer, Patch, query, `canPatch`, `commit`과 publication을
 맡습니다. Schema provider는 acceptance adapter로 연결합니다. Selection,
-clipboard, history와 high-level edit verb는 Candidate Editing Session입니다.
+clipboard, history와 high-level edit verb는 host 또는 extension 책임입니다.
 Rendering, focus, keyboard, parser, auth, remote sync는 앱 책임입니다.
 
 ## Kanban
@@ -28,7 +28,7 @@ Rendering, focus, keyboard, parser, auth, remote sync는 앱 책임입니다.
 | Board/card state | Core `createJSONDocument` + acceptance | schema 설계 |
 | Card field edit | Core `canPatch`, `commit` | field UI |
 | Card/list reorder | `@interactive-os/json-document-collection` | drag target 계산 |
-| Duplicate card | Candidate Session `duplicate` 또는 explicit Patch | id 정책 |
+| Duplicate card | explicit Patch 또는 collection extension | id 정책 |
 | Browser clipboard | `@interactive-os/json-document-clipboard-web` | native shortcut UI |
 | Card form | `@interactive-os/json-document-schema-form` | widget rendering |
 | Dirty/save | `@interactive-os/json-document-dirty-state`, `@interactive-os/json-document-persist-web` | server sync |

@@ -1,5 +1,5 @@
 import type { JSONPatchOperation } from "./contract.js";
-import { tryParsePointer, type Pointer } from "../pointer/index.js";
+import { tryParsePointer, type Pointer } from "../pointer/core.js";
 import {
   normalizePointerSources,
   type PointerSource,

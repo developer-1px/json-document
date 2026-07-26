@@ -5,70 +5,13 @@ export interface SourceAlias {
   replacement: string;
 }
 
-export const officialExtensionPackages = [
-  "clipboard-web",
-  "contenteditable-web",
-  "contenteditable-react",
-  "collection",
-  "outline",
-  "schema-form",
-  "dirty-state",
-  "bulk-edit",
-  "patch-log",
-  "persist-web",
-  "id-resolver",
-  "patch-preview",
-  "search-replace",
-  "proposed-changes",
-  "comments",
-  "form-draft",
-  "grouping",
-  "protected-ranges",
-  "snippets",
-] as const;
-
-export type OfficialExtensionPackage = (typeof officialExtensionPackages)[number];
-
-export interface JsonDocumentSourceAliasOptions {
-  officialExtensions?: boolean | ReadonlyArray<OfficialExtensionPackage>;
-  extra?: ReadonlyArray<SourceAlias>;
-}
-
-export function jsonDocumentSourceAliases(options: JsonDocumentSourceAliasOptions = {}): SourceAlias[] {
-  const extensionPackages = options.officialExtensions === true
-    ? officialExtensionPackages
-    : options.officialExtensions || [];
-
+export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
-    ...extensionPackages.map(extensionPackageAlias),
-    ...(options.extra ?? []),
-    {
-      find: "@interactive-os/json-document/react",
-      replacement: sourceFile("packages/json-document/src/application/react-document/index.ts"),
-    },
-    {
-      find: "@interactive-os/json-document/session",
-      replacement: sourceFile("packages/json-document/src/application/session/index.ts"),
-    },
     {
       find: "@interactive-os/json-document",
       replacement: sourceFile("packages/json-document/src/application/document/index.ts"),
     },
   ];
-}
-
-export function labExtensionSourceAlias(name: string): SourceAlias {
-  return {
-    find: `@interactive-os/json-document-${name}`,
-    replacement: sourceFile(`labs/extensions/${name}/src/index.ts`),
-  };
-}
-
-function extensionPackageAlias(name: OfficialExtensionPackage): SourceAlias {
-  return {
-    find: `@interactive-os/json-document-${name}`,
-    replacement: sourceFile(`packages/${name}/src/index.ts`),
-  };
 }
 
 function sourceFile(path: string): string {

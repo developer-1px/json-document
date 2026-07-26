@@ -687,6 +687,72 @@
       }
     },
     {
+      "id": "unsubscribe-during-publication-stops-current-delivery",
+      "kind": "unsubscribe-during-publication",
+      "requirements": [
+        "JD2-COMMIT-001",
+        "JD2-PUBLISH-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Ready"
+        }
+      ],
+      "metadata": {
+        "origin": "intra-publication-unsubscribe"
+      },
+      "expect": {
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              }
+            ],
+            "metadata": {
+              "origin": "intra-publication-unsubscribe"
+            }
+          }
+        },
+        "firstSubscriber": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              }
+            ],
+            "metadata": {
+              "origin": "intra-publication-unsubscribe"
+            }
+          }
+        ],
+        "secondSubscriber": [],
+        "value": {
+          "title": "Ready",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        }
+      }
+    },
+    {
       "id": "references-are-isolated",
       "kind": "isolation",
       "requirements": [
@@ -859,6 +925,205 @@
           }
         },
         "notifications": []
+      }
+    },
+    {
+      "id": "reentrant-publication-preserves-causal-order",
+      "kind": "reentrant-publication",
+      "requirements": [
+        "JD2-COMMIT-001",
+        "JD2-COMMIT-002",
+        "JD2-PUBLISH-001"
+      ],
+      "outer": {
+        "operations": [
+          {
+            "op": "replace",
+            "path": "/title",
+            "value": "Outer"
+          }
+        ],
+        "metadata": {
+          "origin": "outer"
+        }
+      },
+      "nested": {
+        "operations": [
+          {
+            "op": "replace",
+            "path": "/title",
+            "value": "Nested"
+          }
+        ],
+        "metadata": {
+          "origin": "nested"
+        }
+      },
+      "expect": {
+        "outer": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Outer"
+              }
+            ],
+            "metadata": {
+              "origin": "outer"
+            }
+          }
+        },
+        "nested": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Nested"
+              }
+            ],
+            "metadata": {
+              "origin": "nested"
+            }
+          }
+        },
+        "firstSubscriber": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Outer"
+              }
+            ],
+            "metadata": {
+              "origin": "outer"
+            }
+          },
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Nested"
+              }
+            ],
+            "metadata": {
+              "origin": "nested"
+            }
+          }
+        ],
+        "secondSubscriber": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Outer"
+              }
+            ],
+            "metadata": {
+              "origin": "outer"
+            }
+          },
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Nested"
+              }
+            ],
+            "metadata": {
+              "origin": "nested"
+            }
+          }
+        ],
+        "value": {
+          "title": "Nested",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        }
+      }
+    },
+    {
+      "id": "subscriber-errors-do-not-escape-commit",
+      "kind": "subscriber-error",
+      "requirements": [
+        "JD2-COMMIT-001",
+        "JD2-COMMIT-002",
+        "JD2-PUBLISH-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Delivered"
+        }
+      ],
+      "metadata": {
+        "origin": "subscriber-error"
+      },
+      "expect": {
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Delivered"
+              }
+            ],
+            "metadata": {
+              "origin": "subscriber-error"
+            }
+          }
+        },
+        "delivered": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Delivered"
+              }
+            ],
+            "metadata": {
+              "origin": "subscriber-error"
+            }
+          }
+        ],
+        "value": {
+          "title": "Delivered",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        }
       }
     }
   ],

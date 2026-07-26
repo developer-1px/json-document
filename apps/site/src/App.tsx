@@ -7,7 +7,7 @@ type SiteRoute = {
   label: string;
   title: string;
   description: string;
-  group: "Start" | "Demos";
+  group: "Start";
 };
 type Route = SiteRoute & { Component: ComponentType };
 
@@ -16,21 +16,11 @@ const SITE_URL = (import.meta.env.VITE_SITE_URL ?? "https://developer-1px.github
 const Docs = lazy(() => import("./routes/Docs").then((module) => ({ default: module.Docs })));
 const DocsTutorial = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsTutorial })));
 const DocsApiReference = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsApiReference })));
-const DocsExtensions = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsExtensions })));
-const DocsRecipes = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsRecipes })));
-const Playground = lazy(() => import("./routes/Playground").then((module) => ({ default: module.Playground })));
-const Outliner = lazy(() => import("@interactive-os/json-document-outliner").then((module) => ({ default: module.Outliner })));
-const MobileCms = lazy(() => import("@interactive-os/json-document-mobile-cms").then((module) => ({ default: module.App })));
 const routeComponents: Record<string, ComponentType> = {
   "/": Home,
   "/docs": Docs,
   "/docs/tutorial": DocsTutorial,
   "/docs/api": DocsApiReference,
-  "/docs/extensions": DocsExtensions,
-  "/docs/recipes": DocsRecipes,
-  "/playground": Playground,
-  "/playground/outliner": Outliner,
-  "/playground/mobile-cms": MobileCms,
 };
 const ROUTES: Route[] = (siteRoutes as SiteRoute[]).map((route) => ({
   ...route,
@@ -148,7 +138,6 @@ export function App() {
   const Page = route.Component;
   const groupedRoutes = {
     Start: ROUTES.filter((item) => item.group === "Start"),
-    Demos: ROUTES.filter((item) => item.group === "Demos"),
   };
 
   useEffect(() => {

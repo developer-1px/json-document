@@ -1,6 +1,6 @@
 import { jsonSerializableError } from "../../json/serializable.js";
 import { cloneTrustedPlainJson } from "../../json/trustedClone.js";
-import { appendSegment, type Pointer } from "../../pointer/index.js";
+import { appendSegment, type Pointer } from "../../pointer/core.js";
 import { getValueAt, parseSafe } from "../container.js";
 import { appendArrayIndexPath, arrayLocation, arrayRemoveLocation } from "../path.js";
 import { replaceValueAtSegments } from "../replaceValue.js";

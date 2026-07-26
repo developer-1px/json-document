@@ -1,4 +1,4 @@
-import { buildPointer, parentPointer, type Pointer } from "../pointer/index.js";
+import { buildPointer, parentPointer, type Pointer } from "../pointer/core.js";
 import { getValueAt, parseSafe } from "./container.js";
 
 export interface ArrayFieldPath {

@@ -32,21 +32,29 @@ describe("official site shell", () => {
     expect(screen.getByText('import { createJSONDocument } from "@interactive-os/json-document";')).toBeTruthy();
     expect(screen.getByRole("link", { name: "npm" }).getAttribute("href")).toBe("https://www.npmjs.com/package/@interactive-os/json-document");
     expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/developer-1px/json-document");
-    expect(screen.queryByText("Interface bench")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Workbench" })).toBeNull();
   });
 
-  test("navigates from the official site to docs, API reference, and demos", async () => {
+  test("navigates across the core documentation routes", async () => {
     render(<App />);
     const user = userEvent.setup();
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
+    expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
+    expect(nav.queryByRole("link", { name: "Recipes" })).toBeNull();
+    expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
+
     await user.click(nav.getByRole("link", { name: "Docs" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("User guide to the v2 Kernel, Pure Protocol, Document Projection, optional Editing Session, and host boundaries.");
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("User guide to the v2 Kernel, Pure Protocol, Document Projection, and host adapter boundaries.");
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Docs" }, { timeout: 10000 })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "배경" })).toBeTruthy();
     expect(screen.getAllByRole("navigation", { name: "Documentation pages" }).length).toBeGreaterThan(0);
+
+    await user.click(nav.getByRole("link", { name: "Quickstart" }));
+    await waitFor(() => expect(document.title).toBe("Tutorial - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "작은 카드 편집기 만들기" })).toBeTruthy();
 
     await user.click(nav.getByRole("link", { name: "API reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
@@ -62,11 +70,6 @@ describe("official site shell", () => {
     expect(screen.getAllByRole("table").length).toBeGreaterThan(0);
     const mobileSections = within(screen.getByRole("navigation", { name: "Documentation sections" }));
     expect(mobileSections.getByRole("link", { name: "작업별 진입점" }).getAttribute("href")).toBe("#작업별-진입점");
-
-    await user.click(nav.getByRole("link", { name: "Workbench" }));
-    expect(await screen.findByText("Interface bench", {}, { timeout: 10000 })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Board setup" })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "json-document API" })).toBeNull();
   });
 
   test("supports direct route entry for static-hosting fallbacks", async () => {

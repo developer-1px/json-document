@@ -82,7 +82,7 @@ test("nested commits preserve one causal publication order for every subscriber"
   expect(second).toEqual([1, 2]);
 });
 
-test("a throwing subscriber cannot prevent delivery to later subscribers", () => {
+test("a throwing subscriber cannot escape commit or prevent later delivery", () => {
   const document = createJSONDocument({ value: 0 });
   const delivered: JSONValue[] = [];
 
@@ -95,9 +95,16 @@ test("a throwing subscriber cannot prevent delivery to later subscribers", () =>
       : null);
   });
 
-  expect(() => {
-    document.commit([{ op: "replace", path: "/value", value: 1 }]);
-  }).toThrow("subscriber failed");
+  const result = document.commit([
+    { op: "replace", path: "/value", value: 1 },
+  ]);
+
+  expect(result).toMatchObject({
+    ok: true,
+    change: {
+      applied: [{ op: "replace", path: "/value", value: 1 }],
+    },
+  });
   expect(delivered).toEqual([1]);
   expect(document.value).toEqual({ value: 1 });
 });
@@ -240,6 +247,42 @@ test("initial and acceptance boundaries fail without publishing invalid state", 
     reason: "provider failed",
   });
   expect(throwingAcceptance.value).toEqual({ value: 0 });
+  expect(observed).toEqual([]);
+});
+
+test("malformed acceptance results fail closed without changing state", () => {
+  expect(() => createJSONDocument(
+    { value: 0 },
+    { accepts: () => undefined as never },
+  )).toThrow(TypeError);
+
+  const document = createJSONDocument(
+    { value: 0 },
+    {
+      accepts(candidate) {
+        return isRecord(candidate) && candidate.value === 1
+          ? undefined as never
+          : { ok: true };
+      },
+    },
+  );
+  const observed: unknown[] = [];
+  document.subscribe((change) => observed.push(change));
+  const operations = [{
+    op: "replace",
+    path: "/value",
+    value: 1,
+  }] as const;
+
+  expect(document.canPatch(operations)).toMatchObject({
+    ok: false,
+    code: "schema_violation",
+  });
+  expect(document.commit(operations)).toMatchObject({
+    ok: false,
+    code: "schema_violation",
+  });
+  expect(document.value).toEqual({ value: 0 });
   expect(observed).toEqual([]);
 });
 

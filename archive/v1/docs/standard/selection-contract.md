@@ -193,4 +193,3 @@ Selection contract는 다음을 제공하지 않는다.
 - mutation failure가 selection을 변경하도록 변경.
 - explicit `selectionAfter`보다 auto tracking을 우선하도록 변경.
 - selection error code 제거, rename, 의미 변경.
-

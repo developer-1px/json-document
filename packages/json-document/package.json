@@ -41,14 +41,6 @@
     ".": {
       "types": "./dist/application/document/index.d.ts",
       "import": "./dist/application/document/index.js"
-    },
-    "./session": {
-      "types": "./dist/application/session/index.d.ts",
-      "import": "./dist/application/session/index.js"
-    },
-    "./react": {
-      "types": "./dist/application/react-document/index.d.ts",
-      "import": "./dist/application/react-document/index.js"
     }
   },
   "scripts": {
@@ -62,26 +54,9 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run layers:check && npm run typecheck && npm test && npm run build && npm run smoke:package"
   },
-  "peerDependencies": {
-    "react": ">=18",
-    "zod": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "zod": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@types/node": "^25.9.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^4.1.7",
-    "zod": "^4.0.0"
+    "vitest": "^4.1.7"
   }
 }

@@ -1,4 +1,4 @@
-name: Lab Extension Catalog
+name: Archived 1.x Isolation
 
 on:
   workflow_dispatch:
@@ -10,14 +10,12 @@ permissions:
 
 jobs:
   lab-extensions:
-    name: Full lab extension verification
+    name: Archive isolation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Install dependencies
-        run: npm ci --no-audit --no-fund
-      - name: Verify all lab extension dist imports
-        run: npm run build && npm run labs:extensions:verify
+      - name: Verify archived code is outside the v2 release graph
+        run: npm run archive:check

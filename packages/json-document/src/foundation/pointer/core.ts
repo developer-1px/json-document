@@ -177,26 +177,3 @@ export function readAt(state: unknown, segs: ReadonlyArray<string>): { ok: true;
   }
   return { ok: true, value: cur };
 }
-
-export {
-  appendArrayIndexes,
-  arrayElementLocation,
-  arrayIndexValue,
-} from "./array.js";
-export {
-  resolveSiblingRange,
-} from "./siblingRange.js";
-export type {
-  ResolveSiblingRangeOptions,
-  SiblingLocation,
-  SiblingRangeErrorCode,
-  SiblingRangeResult,
-} from "./siblingRange.js";
-export {
-  normalizePointerSources,
-} from "./source.js";
-export type {
-  NormalizePointerSourcesResult,
-  PointerSource,
-  PointerSourceError,
-} from "./source.js";

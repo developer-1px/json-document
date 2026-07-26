@@ -2,8 +2,7 @@ const modelRows = [
   ["protocol", "provider-neutral JSON Patch application"],
   ["projection", "value, at, query, canPatch, commit, subscribe"],
   ["acceptance", "optional provider-neutral candidate validation"],
-  ["session", "optional selection, clipboard, history, rich edit verbs"],
-  ["host", "rendering, focus, keyboard, persistence, collaboration"],
+  ["host", "selection, history, rendering, focus, persistence, collaboration"],
 ] as const;
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -34,9 +33,6 @@ export function Home() {
               </a>
               <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs/api")}>
                 API reference
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/playground")}>
-                Workbench
               </a>
               <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href="https://www.npmjs.com/package/@interactive-os/json-document">
                 npm
@@ -83,7 +79,7 @@ export function Home() {
           <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
           <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
             <li>Root Kernel is React- and Zod-free.</li>
-            <li>Rich editing lives under the optional <code className="rounded bg-stone-100 px-1 py-0.5 font-mono text-xs">@interactive-os/json-document/session</code> boundary.</li>
+            <li>Rich editing belongs to host adapters composed over the six-member document.</li>
             <li>Mutation inputs are JSON Patch with JSON Pointer paths.</li>
             <li>JSONPath is search-only and returns pointers.</li>
           </ul>
