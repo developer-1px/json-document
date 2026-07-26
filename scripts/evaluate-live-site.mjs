@@ -66,14 +66,20 @@ async function checkOnce() {
 
   const llms = await fetchText("/llms.txt");
   if (
-    !/Import 경계/.test(llms)
-    || !/@interactive-os\/json-document-id-resolver/.test(llms)
-    || !/다음 이름은 쓰지 않는다[\s\S]*zod-crud[\s\S]*@json-document\/\*/.test(llms)
-    || !/1\.0 Signature contract/.test(llms)
-    || !/trustedInitial: true/.test(llms)
-    || !/selectionAfter/.test(llms)
+    !/^# json-document v2$/m.test(llms)
+    || !/공개 Root는 정확히 다음 20개 symbol/.test(llms)
+    || !/`JSONDocument`의 필수 member는 정확히 여섯 개다/.test(llms)
+    || !/## Host adapter와 companion/.test(llms)
+    || !/@interactive-os\/editable/.test(llms)
   ) {
-    fail("live llms.txt is missing expected content.");
+    fail("live llms.txt is missing the v2 Core contract.");
+  }
+  if (
+    /@interactive-os\/json-document-(?:[a-z0-9-]+)/.test(llms)
+    || /@interactive-os\/json-document\/(?:session|react)\b/.test(llms)
+    || /\blabs\/extensions\b/.test(llms)
+  ) {
+    fail("live llms.txt still exposes an archived 1.x surface.");
   }
 
   const manifest = JSON.parse(await fetchText("/site.webmanifest"));
