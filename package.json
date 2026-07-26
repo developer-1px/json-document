@@ -34,5 +34,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "0.27.7",
+    "@rollup/rollup-linux-x64-gnu": "4.60.2"
   }
 }

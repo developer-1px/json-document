@@ -29,5 +29,8 @@
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
     "vitest": "^4.1.7"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "0.25.12"
   }
 }
