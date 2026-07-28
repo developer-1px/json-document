@@ -12,6 +12,7 @@ import {
   type ProjectionAcceptance,
   type ProjectionHarness,
 } from "../conformance/v2/projection-suite.js";
+import { runPressureConformance } from "../conformance/v2/pressure-suite.js";
 
 function taskListAcceptance(candidate: JSONValue): JSONCapabilityResult {
   const valid = isRecord(candidate)
@@ -37,12 +38,24 @@ function createReferenceProjection(
   acceptance: ProjectionAcceptance,
   initial: JSONValue,
 ): Projection {
+  const accepts = acceptance === "task-list"
+    ? taskListAcceptance
+    : acceptance === "attempt-transform"
+      ? attemptTransformAcceptance
+      : undefined;
   return createJSONDocument(
     initial,
-    acceptance === "task-list"
-      ? { accepts: taskListAcceptance }
-      : {},
+    accepts === undefined ? {} : { accepts },
   );
+}
+
+function attemptTransformAcceptance(
+  candidate: JSONValue,
+): JSONCapabilityResult {
+  if (isRecord(candidate)) {
+    Reflect.set(candidate, "title", "Implicit");
+  }
+  return { ok: true };
 }
 
 function isRecord(
@@ -56,6 +69,7 @@ const referenceHarness: ProjectionHarness = {
 };
 
 runProjectionConformance(referenceHarness);
+runPressureConformance(referenceHarness);
 
 test("nested commits preserve one causal publication order for every subscriber", () => {
   const document = createJSONDocument({ value: 0 });

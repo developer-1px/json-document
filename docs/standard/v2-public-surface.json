@@ -1,10 +1,10 @@
 {
   "formatVersion": 1,
-  "status": "candidate",
+  "status": "stable",
   "sourceContract": "packages/json-document/public-contract.json#root",
   "package": {
     "name": "@interactive-os/json-document",
-    "version": "2.0.0-rc.0",
+    "version": "2.0.0",
     "entrypoint": ".",
     "excludedEntrypoints": [
       "./session",
@@ -26,7 +26,13 @@
     "rfc6902Suite": "packages/json-document/tests/conformance/v2/rfc6902-suite.ts",
     "rfc6902Binding": "packages/json-document/tests/public/v2-rfc6902-standard-conformance.test.ts",
     "jsonPathSuite": "packages/json-document/tests/conformance/v2/jsonpath-suite.ts",
-    "jsonPathBinding": "packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts"
+    "jsonPathBinding": "packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts",
+    "foundationVectors": "packages/json-document/tests/conformance/v2/foundation-vectors.json",
+    "pressureVectors": "packages/json-document/tests/conformance/v2/pressure-vectors.json",
+    "pressureSuite": "packages/json-document/tests/conformance/v2/pressure-suite.ts",
+    "independentProjectionImplementation": "packages/json-document/tests/independent/v2-projection.ts",
+    "independentProjectionBinding": "packages/json-document/tests/independent/v2-projection-independent-conformance.test.ts",
+    "collaborationProjectionBinding": "packages/json-document-collaboration/tests/projection-conformance.test.ts"
   },
   "requirements": [
     "JD2-GOV-001",

@@ -5,6 +5,9 @@
     "paths": {
       "@interactive-os/json-document": [
         "../json-document/src/application/document/index.ts"
+      ],
+      "@interactive-os/json-document-collaboration": [
+        "./src/index.ts"
       ]
     },
     "types": [
@@ -19,6 +22,7 @@
     "src/**/*.ts",
     "tests/**/*.ts",
     "../json-document/tests/conformance/v2/projection-suite.ts",
+    "../json-document/tests/conformance/v2/pressure-suite.ts",
     "vitest.config.ts"
   ]
 }

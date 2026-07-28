@@ -51,6 +51,12 @@ const EXPECTED_CONFORMANCE = {
   rfc6902Binding: "packages/json-document/tests/public/v2-rfc6902-standard-conformance.test.ts",
   jsonPathSuite: "packages/json-document/tests/conformance/v2/jsonpath-suite.ts",
   jsonPathBinding: "packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts",
+  foundationVectors: "packages/json-document/tests/conformance/v2/foundation-vectors.json",
+  pressureVectors: "packages/json-document/tests/conformance/v2/pressure-vectors.json",
+  pressureSuite: "packages/json-document/tests/conformance/v2/pressure-suite.ts",
+  independentProjectionImplementation: "packages/json-document/tests/independent/v2-projection.ts",
+  independentProjectionBinding: "packages/json-document/tests/independent/v2-projection-independent-conformance.test.ts",
+  collaborationProjectionBinding: "packages/json-document-collaboration/tests/projection-conformance.test.ts",
 };
 
 function read(path) {
@@ -186,8 +192,8 @@ const signatureSource = read(
 const packageSmoke = read("packages/json-document/tests/smoke/package-smoke.mjs");
 const coreBenchmark = read("scripts/benchmark-core.mjs");
 
-if (manifest.formatVersion !== 1 || manifest.status !== "candidate") {
-  fail("v2 manifest: expected formatVersion 1 and candidate status.");
+if (manifest.formatVersion !== 1 || manifest.status !== "stable") {
+  fail("v2 manifest: expected formatVersion 1 and stable status.");
 }
 if (manifest.sourceContract !== "packages/json-document/public-contract.json#root") {
   fail("v2 manifest: sourceContract must point to the root public contract.");
@@ -322,15 +328,29 @@ const rfc6902Suite = read(manifest.conformance.rfc6902Suite);
 const rfc6902Binding = read(manifest.conformance.rfc6902Binding);
 const jsonPathSuite = read(manifest.conformance.jsonPathSuite);
 const jsonPathBinding = read(manifest.conformance.jsonPathBinding);
+const foundationVectors = json(manifest.conformance.foundationVectors);
+const pressureVectors = json(manifest.conformance.pressureVectors);
+const pressureSuite = read(manifest.conformance.pressureSuite);
+const independentProjectionImplementation = read(
+  manifest.conformance.independentProjectionImplementation,
+);
+const independentProjectionBinding = read(
+  manifest.conformance.independentProjectionBinding,
+);
+const collaborationProjectionBinding = read(
+  manifest.conformance.collaborationProjectionBinding,
+);
 
 for (const [label, vectors] of [
   ["projection", projectionVectors],
   ["protocol", protocolVectors],
   ["pointer", pointerVectors],
+  ["foundation", foundationVectors],
+  ["pressure", pressureVectors],
 ]) {
   if (
     vectors.formatVersion !== 1
-    || vectors.status !== "candidate"
+    || vectors.status !== "stable"
     || vectors.profile !== "docs/standard/v2-projection-profile.md"
   ) {
     fail(`${label} vectors: metadata drifted.`);
@@ -401,6 +421,42 @@ for (const [suiteName, vectors] of [
     }
   }
 }
+const pressureVerticals = pressureVectors.verticals ?? [];
+setEqual(
+  "pressure verticals",
+  pressureVerticals.map((vertical) => vertical.id),
+  [
+    "form",
+    "table-data-grid",
+    "outliner-tree",
+    "rich-text",
+    "storage-collaboration",
+  ],
+);
+for (const vertical of pressureVerticals) {
+  if (
+    !Array.isArray(vertical.requirements)
+    || !vertical.requirements.includes("JD2-CONFORMANCE-002")
+  ) {
+    fail(`pressure vectors: ${vertical.id} must trace JD2-CONFORMANCE-002.`);
+  }
+  for (const id of vertical.requirements ?? []) {
+    if (!requirementSet.has(id)) {
+      fail(`pressure vectors: ${vertical.id} references unknown ${id}.`);
+    }
+    runtimeRequirements.add(id);
+  }
+}
+if (
+  !Array.isArray(foundationVectors.arrayIndexes)
+  || foundationVectors.arrayIndexes.length === 0
+  || !Array.isArray(foundationVectors.equalities)
+  || foundationVectors.equalities.length === 0
+  || !Array.isArray(foundationVectors.jsonValues)
+  || foundationVectors.jsonValues.length === 0
+) {
+  fail("foundation vectors: array index, equality, and JSON boundary fixtures are required.");
+}
 
 const nonRuntimeRequirements = new Map();
 const nonRuntimeCounts = { static: 0, deferred: 0 };
@@ -460,6 +516,11 @@ assertPublicBinding(
 requirePattern(
   "projection binding",
   projectionBinding,
+  /runPressureConformance\(referenceHarness\)/,
+);
+requirePattern(
+  "projection binding",
+  projectionBinding,
   /return createJSONDocument\(/,
 );
 if (/\.(?:lastPatch|patch|find|canFind|canQuery)\b/.test(projectionBinding)) {
@@ -478,6 +539,68 @@ assertPublicBinding(
   protocolBinding,
   /applyPatch[\s\S]*runProtocolConformance/,
 );
+assertGenericSuite(
+  "pressure suite",
+  pressureSuite,
+  /ProjectionHarness[\s\S]*runPressureConformance/,
+);
+for (const vertical of [
+  "form",
+  "table-data-grid",
+  "outliner-tree",
+  "rich-text",
+  "storage-collaboration",
+]) {
+  requirePattern(
+    "pressure vectors",
+    JSON.stringify(pressureVectors),
+    new RegExp(vertical),
+  );
+}
+if (
+  /@interactive-os\/json-document|\/src\//.test(
+    independentProjectionImplementation,
+  )
+) {
+  fail("independent projection: reference package or private source import leaked.");
+}
+for (const pattern of [
+  /get value\(\)/,
+  /\bat\(/,
+  /\bquery\(/,
+  /\bcanPatch\(/,
+  /\bcommit\(/,
+  /\bsubscribe\(/,
+]) {
+  requirePattern(
+    "independent projection",
+    independentProjectionImplementation,
+    pattern,
+  );
+}
+if (
+  /@interactive-os\/json-document|\/src\//.test(independentProjectionBinding)
+) {
+  fail("independent projection binding must not import the reference implementation.");
+}
+for (const pattern of [
+  /createIndependentProjection/,
+  /runProjectionConformance\(independentHarness\)/,
+  /runPressureConformance\(independentHarness\)/,
+]) {
+  requirePattern("independent projection binding", independentProjectionBinding, pattern);
+}
+for (const pattern of [
+  /from "@interactive-os\/json-document-collaboration"/,
+  /runProjectionConformance\(harness\)/,
+  /runPressureConformance\(harness\)/,
+]) {
+  requirePattern(
+    "collaboration projection binding",
+    collaborationProjectionBinding,
+    pattern,
+  );
+}
 assertGenericSuite(
   "pointer suite",
   pointerSuite,
