@@ -57,6 +57,7 @@ import {
 } from "@interactive-os/json-document-collaboration/text";
 
 const runtime = createCollaborationTextRuntime(initial, options);
+runtime.history.undo();
 
 // Ordinary editor code keeps using the same document API. String-to-string
 // replace operations compile to collaborative text splices in this profile.
@@ -71,7 +72,11 @@ if (captured.ok) {
     value: finalDOMText,
     selection: { anchor: 6, focus: 6 },
   });
-  if (planned.ok) runtime.text.commit(planned.plan);
+  if (planned.ok) {
+    runtime.text.commit(planned.plan, {
+      metadata: { editor: { transactionId } },
+    });
+  }
 }
 ```
 
@@ -80,6 +85,11 @@ Change still uses the capture-time causal frontier, so unseen remote input stays
 concurrent and merges by stable text atoms. Any graph change after `plan`
 returns `stale_text_plan`; adapters recover by rendering the latest model
 instead of silently rebasing an already observed DOM result.
+
+The text profile includes the same actor-local selective `history` sidecar as
+the history profile. A successful text commit returns the canonical
+`JSONAppliedChange`, including owned metadata, so editor transaction tracking
+does not need a second publication protocol.
 
 `runtime.collaboration.subscribe` publishes one deeply immutable snapshot when
 an ingest adds causal state, even if it only changes pending/conflict metadata.

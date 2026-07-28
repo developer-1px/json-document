@@ -1,6 +1,8 @@
 import type {
+  JSONAppliedChange,
   JSONCapabilityResult,
   JSONDocument,
+  JSONDocumentCommitOptions,
   JSONValue,
 } from "@interactive-os/json-document";
 
@@ -224,6 +226,9 @@ export interface CollaborationControl {
 export interface CollaborationHistorySnapshot {
   readonly undoTarget: ChangeId | null;
   readonly redoTarget: ChangeId | null;
+  readonly undoDepth: number;
+  readonly redoDepth: number;
+  readonly revision: number;
 }
 
 export type CollaborationHistoryResult =
@@ -304,6 +309,7 @@ export type CollaborationTextPlanResult =
 export type CollaborationTextCommitResult =
   | {
       readonly ok: true;
+      readonly change: JSONAppliedChange;
       readonly changeId: ChangeId | null;
       readonly projectionChanged: boolean;
       readonly value: string;
@@ -321,10 +327,13 @@ export interface CollaborationTextControl {
     capture: CollaborationTextCapture,
     observation: CollaborationTextObservation,
   ): CollaborationTextPlanResult;
-  commit(plan: CollaborationTextPlan): CollaborationTextCommitResult;
+  commit(
+    plan: CollaborationTextPlan,
+    options?: JSONDocumentCommitOptions,
+  ): CollaborationTextCommitResult;
 }
 
-export interface CollaborationTextRuntime extends CollaborationRuntime {
+export interface CollaborationTextRuntime extends CollaborationHistoryRuntime {
   readonly text: CollaborationTextControl;
 }
 

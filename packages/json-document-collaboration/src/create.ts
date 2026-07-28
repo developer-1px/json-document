@@ -169,6 +169,7 @@ export function createCollaborationTextRuntime(
   return Object.freeze({
     document: runtime.document,
     collaboration: runtime.collaboration,
+    history: runtime.history,
     text: runtime.text,
   });
 }
@@ -200,6 +201,7 @@ export function createRestoredTextRuntime(
   return Object.freeze({
     document: runtime.document,
     collaboration: runtime.collaboration,
+    history: runtime.history,
     text: runtime.text,
   });
 }
@@ -781,7 +783,10 @@ function createRuntime(
           }));
           return Object.freeze({ ok: true, plan });
         },
-        commit(plan: CollaborationTextPlan): CollaborationTextCommitResult {
+        commit(
+          plan: CollaborationTextPlan,
+          commitOptions?: JSONDocumentCommitOptions,
+        ): CollaborationTextCommitResult {
           if (evaluatingAcceptance) {
             return textFailure(
               "acceptance_reentrancy",
@@ -818,6 +823,13 @@ function createRuntime(
           if (!current.ok) {
             return textFailure(current.code, current.reason);
           }
+          const metadataProbe = projection.commit([], commitOptions);
+          if (!metadataProbe.ok) {
+            return textFailure(
+              metadataProbe.code,
+              metadataProbe.reason ?? metadataProbe.code,
+            );
+          }
           if (planned.operation === null) {
             const textState = materialized.tree.texts.get(
               planned.capture.capture.textNode,
@@ -827,6 +839,7 @@ function createRuntime(
               : projectText(textState);
             return Object.freeze({
               ok: true,
+              change: metadataProbe.change,
               changeId: null,
               projectionChanged: false,
               value,
@@ -885,7 +898,11 @@ function createRuntime(
               op: "replace",
               path: "",
               value: materialized.value,
-            }]);
+            }], {
+              ...(metadataProbe.change.metadata === undefined
+                ? {}
+                : { metadata: metadataProbe.change.metadata }),
+            });
             if (!publication.ok) {
               throw new Error(
                 `text projection publication failed: ${publication.reason ?? publication.code}`,
@@ -906,6 +923,7 @@ function createRuntime(
           }
           return Object.freeze({
             ok: true,
+            change: documentChange ?? metadataProbe.change,
             changeId: freezeChangeId(changeId),
             projectionChanged,
             value: projectText(textState),
@@ -924,6 +942,7 @@ function createRuntime(
 
   function resolveHistoryState(): ResolvedHistoryState {
     let undoTarget: ChangeId | null = null;
+    let undoDepth = 0;
     let latestOwnDataIndex = -1;
     for (let index = graph.ordered.length - 1; index >= 0; index -= 1) {
       const change = graph.ordered[index];
@@ -938,13 +957,14 @@ function createRuntime(
           materialized.history.appliedKeys.has(key)
           && !materialized.history.disabledByTarget.has(key)
         ) {
-          undoTarget = freezeChangeId(change.changeId);
-          break;
+          undoDepth += 1;
+          undoTarget ??= freezeChangeId(change.changeId);
         }
       }
     }
 
     let redoTarget: ChangeId | null = null;
+    let redoDepth = 0;
     let effectiveUndo: ChangeId | null = null;
     for (let index = graph.ordered.length - 1; index >= 0; index -= 1) {
       if (index <= latestOwnDataIndex) break;
@@ -966,14 +986,22 @@ function createRuntime(
         activeUndo !== undefined
         && changeIdKey(activeUndo) === changeIdKey(change.changeId)
       ) {
-        redoTarget = freezeChangeId(operation.target);
-        effectiveUndo = freezeChangeId(change.changeId);
-        break;
+        redoDepth += 1;
+        if (redoTarget === null) {
+          redoTarget = freezeChangeId(operation.target);
+          effectiveUndo = freezeChangeId(change.changeId);
+        }
       }
     }
 
     return {
-      snapshot: Object.freeze({ undoTarget, redoTarget }),
+      snapshot: Object.freeze({
+        undoTarget,
+        redoTarget,
+        undoDepth,
+        redoDepth,
+        revision: graphRevision,
+      }),
       effectiveUndo,
     };
   }
