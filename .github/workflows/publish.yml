@@ -1,16 +1,18 @@
-name: Publish json-document prerelease
+name: Publish v2 prerelease package
 
 on:
   push:
     tags:
       - "json-document-v*-rc.*"
+      - "json-document-collaboration-v*-rc.*"
+      - "json-document-contenteditable-collaboration-v*-rc.*"
 
 permissions:
   contents: read
   id-token: write
 
 concurrency:
-  group: npm-json-document-${{ github.ref }}
+  group: npm-v2-package-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -30,15 +32,39 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
-      - name: Verify core prerelease identity
-        if: startsWith(github.ref_name, 'json-document-v')
+      - name: Resolve prerelease package
+        id: release
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           node --input-type=module --eval '
-            import { readFileSync } from "node:fs";
-            const pkg = JSON.parse(readFileSync("packages/json-document/package.json", "utf8"));
-            const expectedTag = `json-document-v${pkg.version}`;
+            import { appendFileSync, readFileSync } from "node:fs";
+
+            const releases = [
+              {
+                prefix: "json-document-contenteditable-collaboration-v",
+                packageFile: "packages/contenteditable-collaboration/package.json",
+                workspace: "@interactive-os/json-document-contenteditable-collaboration",
+              },
+              {
+                prefix: "json-document-collaboration-v",
+                packageFile: "packages/json-document-collaboration/package.json",
+                workspace: "@interactive-os/json-document-collaboration",
+              },
+              {
+                prefix: "json-document-v",
+                packageFile: "packages/json-document/package.json",
+                workspace: "@interactive-os/json-document",
+              },
+            ];
+
+            const release = releases.find(({ prefix }) => process.env.RELEASE_TAG.startsWith(prefix));
+            if (release === undefined) {
+              throw new Error(`unsupported release tag ${process.env.RELEASE_TAG}`);
+            }
+
+            const pkg = JSON.parse(readFileSync(release.packageFile, "utf8"));
+            const expectedTag = `${release.prefix}${pkg.version}`;
             if (process.env.RELEASE_TAG !== expectedTag) {
               throw new Error(`release tag ${process.env.RELEASE_TAG} does not match ${expectedTag}`);
             }
@@ -48,10 +74,13 @@ jobs:
             if (pkg.publishConfig?.tag !== "next") {
               throw new Error("publishConfig.tag must remain next for prereleases");
             }
+            appendFileSync(process.env.GITHUB_OUTPUT, `workspace=${release.workspace}\n`);
           '
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Verify core prerelease
+      - name: Verify v2 prerelease graph
         run: npm run release:check
-      - name: Publish core prerelease
-        run: npm publish -w @interactive-os/json-document --tag next --provenance
+      - name: Publish prerelease package
+        env:
+          RELEASE_WORKSPACE: ${{ steps.release.outputs.workspace }}
+        run: npm publish -w "$RELEASE_WORKSPACE" --tag next --access public --provenance

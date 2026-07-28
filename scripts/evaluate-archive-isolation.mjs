@@ -48,7 +48,7 @@ if (
   ] !== "^2.0.0-rc.0"
   || contenteditableCollaborationPackage.peerDependencies?.[
     "@interactive-os/json-document-collaboration"
-  ] !== "^0.1.0"
+  ] !== "^0.1.0-rc.0"
 ) {
   failures.push("the contenteditable collaboration companion surface is invalid");
 }

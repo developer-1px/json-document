@@ -193,7 +193,8 @@
   { "op": "add", "path": "/baz", "value": "qux", "op": "remove" }
 ],
     "error": "operation has two 'op' members",
-    "disabled": true
+    "disabled": true,
+    "disabledReason": "JSON parsing collapses the duplicate op member before the operation reaches the public API"
   },
 
   {

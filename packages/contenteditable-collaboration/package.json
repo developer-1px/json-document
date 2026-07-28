@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document-contenteditable-collaboration",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.0",
   "description": "IME-safe contenteditable publication lease for json-document collaboration text.",
   "type": "module",
   "license": "MIT",
@@ -47,7 +47,7 @@
   },
   "peerDependencies": {
     "@interactive-os/json-document": "^2.0.0-rc.0",
-    "@interactive-os/json-document-collaboration": "^0.1.0"
+    "@interactive-os/json-document-collaboration": "^0.1.0-rc.0"
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",

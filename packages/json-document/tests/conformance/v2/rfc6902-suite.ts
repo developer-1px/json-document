@@ -14,6 +14,7 @@ interface RFC6902Case {
   readonly expected?: unknown;
   readonly error?: string;
   readonly disabled?: boolean;
+  readonly disabledReason?: string;
 }
 
 export interface RFC6902Harness {
@@ -35,7 +36,7 @@ export function runRFC6902Conformance(harness: RFC6902Harness): void {
     for (const [index, testCase] of allCases.entries()) {
       const label = `[${index}] ${testCase.comment ?? "(no comment)"}`;
       if (testCase.disabled) {
-        test.skip(label, () => undefined);
+        test.skip(`${label} — ${testCase.disabledReason ?? "no reason recorded"}`, () => undefined);
         continue;
       }
 
@@ -58,8 +59,13 @@ export function runRFC6902Conformance(harness: RFC6902Harness): void {
 
     test("vendored suite size is intentional", () => {
       expect(allCases).toHaveLength(112);
-      expect(allCases.length - disabled).toBe(108);
-      expect(disabled).toBe(4);
+      expect(allCases.length - disabled).toBe(110);
+      expect(disabled).toBe(2);
+      expect(
+        allCases
+          .filter((testCase) => testCase.disabled)
+          .every((testCase) => testCase.disabledReason !== undefined),
+      ).toBe(true);
     });
   });
 }

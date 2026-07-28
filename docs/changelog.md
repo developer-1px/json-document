@@ -5,6 +5,12 @@ All notable changes to the active v2 packages are documented here. The complete
 
 ## Unreleased
 
+- Added independent prerelease tag publishing for the Core and both optional
+  collaboration packages, and kept the live-site archive gate aware of the two
+  supported v2 companions.
+- Enabled the two root-value cases that the active RFC 6902 implementation
+  already conforms to and documented the two vendored duplicate-member cases
+  that JSON module parsing cannot represent.
 - Added the independently versioned, transport-free
   `@interactive-os/json-document-collaboration` provider. Local and
   collaborative runtimes expose the same six-member `JSONDocument` Projection;
