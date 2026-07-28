@@ -39,6 +39,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     expect(Object.keys(shared).sort()).toEqual([
       "collaboration",
       "document",
+      "history",
       "text",
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
@@ -263,12 +264,60 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     local.collaboration.subscribe(listener);
     expect(local.text.commit(planned.plan)).toEqual({
       ok: true,
+      change: { applied: [] },
       changeId: null,
       projectionChanged: false,
       value: "aXb",
       selection: { anchor: 1, focus: 1 },
     });
     expect(listener).not.toHaveBeenCalled();
+  });
+
+  test("publishes owned editor metadata and fails before causal mutation when metadata is invalid", () => {
+    const shared = textRuntime("actor-a");
+    const captured = shared.text.capture("/title");
+    if (!captured.ok) throw new Error(captured.reason);
+    const planned = shared.text.plan(captured.capture, {
+      value: "aXb",
+      selection: { anchor: 2, focus: 2 },
+    });
+    if (!planned.ok) throw new Error(planned.reason);
+
+    const metadata = {
+      editor: {
+        transactionId: "editor-1",
+      },
+    };
+    const listener = vi.fn();
+    shared.document.subscribe(listener);
+    const committed = shared.text.commit(planned.plan, { metadata });
+    expect(committed).toMatchObject({
+      ok: true,
+      change: {
+        metadata,
+      },
+    });
+    if (!committed.ok) throw new Error(committed.reason);
+    expect(Object.isFrozen(committed.change.metadata)).toBe(true);
+    expect(listener).toHaveBeenCalledWith(committed.change);
+
+    const nextCapture = shared.text.capture("/title");
+    if (!nextCapture.ok) throw new Error(nextCapture.reason);
+    const nextPlan = shared.text.plan(nextCapture.capture, {
+      value: "aXYb",
+    });
+    if (!nextPlan.ok) throw new Error(nextPlan.reason);
+    const before = shared.collaboration.exportBundle();
+    const circular: { self?: unknown } = {};
+    circular.self = circular;
+    expect(shared.text.commit(nextPlan.plan, {
+      metadata: circular as never,
+    })).toMatchObject({
+      ok: false,
+      code: "not_serializable",
+    });
+    expect(shared.collaboration.exportBundle()).toEqual(before);
+    expect(shared.document.value).toEqual({ title: "aXb" });
   });
 
   test("restores text authoring and selective history from the same checkpoint", () => {

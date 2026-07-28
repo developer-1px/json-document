@@ -257,6 +257,9 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     expect(author.history.current()).toEqual({
       undoTarget: { actorId: "actor-a", counter: 1 },
       redoTarget: null,
+      undoDepth: 1,
+      redoDepth: 0,
+      revision: 4,
     });
   });
 
@@ -482,6 +485,9 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     expect(shared.history.current()).toEqual({
       undoTarget: null,
       redoTarget: { actorId: "actor-a", counter: 1 },
+      undoDepth: 0,
+      redoDepth: 2,
+      revision: 5,
     });
   });
 });

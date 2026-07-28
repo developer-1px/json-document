@@ -5,6 +5,9 @@ All notable changes to the active v2 packages are documented here. The complete
 
 ## Unreleased
 
+- Made the collaborative text profile include actor-local selective history,
+  and made capture-time text commits return the canonical owned
+  `JSONAppliedChange` with optional commit metadata for editor integration.
 - Declared the `2.0.0` Projection Profile Stable after the same black-box suite
   passed the public reference binding and a reference-free independent
   implementation across form, table/data-grid, outliner/tree, rich text, and
