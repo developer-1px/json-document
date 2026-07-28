@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document-collaboration",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0-rc.1",
   "description": "Transport-free causal collaboration provider for @interactive-os/json-document.",
   "type": "module",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
-    "@interactive-os/json-document": "^2.0.0-rc.0"
+    "@interactive-os/json-document": "^2.0.0"
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",

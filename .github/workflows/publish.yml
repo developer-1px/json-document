@@ -1,11 +1,11 @@
-name: Publish v2 prerelease package
+name: Publish v2 package
 
 on:
   push:
     tags:
-      - "json-document-v*-rc.*"
-      - "json-document-collaboration-v*-rc.*"
-      - "json-document-contenteditable-collaboration-v*-rc.*"
+      - "json-document-v*"
+      - "json-document-collaboration-v*"
+      - "json-document-contenteditable-collaboration-v*"
 
 permissions:
   contents: read
@@ -32,7 +32,7 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
-      - name: Resolve prerelease package
+      - name: Resolve release package
         id: release
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -68,19 +68,24 @@ jobs:
             if (process.env.RELEASE_TAG !== expectedTag) {
               throw new Error(`release tag ${process.env.RELEASE_TAG} does not match ${expectedTag}`);
             }
-            if (!/^\d+\.\d+\.\d+-rc\.\d+$/.test(pkg.version)) {
-              throw new Error(`package version is not an rc prerelease: ${pkg.version}`);
+            const prerelease = /^\d+\.\d+\.\d+-rc\.\d+$/.test(pkg.version);
+            const stable = /^\d+\.\d+\.\d+$/.test(pkg.version);
+            if (!prerelease && !stable) {
+              throw new Error(`package version is not a supported stable or rc version: ${pkg.version}`);
             }
-            if (pkg.publishConfig?.tag !== "next") {
-              throw new Error("publishConfig.tag must remain next for prereleases");
+            const distTag = prerelease ? "next" : "latest";
+            if (pkg.publishConfig?.tag !== distTag) {
+              throw new Error(`publishConfig.tag must be ${distTag} for ${pkg.version}`);
             }
             appendFileSync(process.env.GITHUB_OUTPUT, `workspace=${release.workspace}\n`);
+            appendFileSync(process.env.GITHUB_OUTPUT, `dist_tag=${distTag}\n`);
           '
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Verify v2 prerelease graph
+      - name: Verify v2 release graph
         run: npm run release:check
-      - name: Publish prerelease package
+      - name: Publish package
         env:
           RELEASE_WORKSPACE: ${{ steps.release.outputs.workspace }}
-        run: npm publish -w "$RELEASE_WORKSPACE" --tag next --access public --provenance
+          RELEASE_DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+        run: npm publish -w "$RELEASE_WORKSPACE" --tag "$RELEASE_DIST_TAG" --access public --provenance

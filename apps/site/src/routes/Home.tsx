@@ -45,7 +45,7 @@ export function Home() {
 
           <div className="rounded border border-stone-200 bg-stone-950 p-3 text-stone-100">
             <div className="mb-2 text-xs font-medium text-stone-400">Install</div>
-            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>npm install @interactive-os/json-document@2.0.0-rc.0</code></pre>
+            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>npm install @interactive-os/json-document@2.0.0</code></pre>
             <div className="mt-4 border-t border-stone-800 pt-3 text-xs font-medium text-stone-400">Start</div>
             <pre className="m-0 mt-2 overflow-x-auto text-sm leading-6"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
           </div>

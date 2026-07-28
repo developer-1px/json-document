@@ -28,7 +28,7 @@ describe("official site shell", () => {
     expect(screen.getByRole("link", { name: "Skip to content" }).getAttribute("href")).toBe("#main-content");
     expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
     expect(screen.getByText(/Provider-neutral JSON editing/)).toBeTruthy();
-    expect(screen.getByText("npm install @interactive-os/json-document@2.0.0-rc.0")).toBeTruthy();
+    expect(screen.getByText("npm install @interactive-os/json-document@2.0.0")).toBeTruthy();
     expect(screen.getByText('import { createJSONDocument } from "@interactive-os/json-document";')).toBeTruthy();
     expect(screen.getByRole("link", { name: "npm" }).getAttribute("href")).toBe("https://www.npmjs.com/package/@interactive-os/json-document");
     expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/developer-1px/json-document");

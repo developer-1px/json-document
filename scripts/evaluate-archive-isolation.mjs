@@ -32,7 +32,7 @@ if (
   || JSON.stringify(Object.keys(collaborationPackage.exports ?? {}))
     !== JSON.stringify([".", "./history", "./text"])
   || collaborationPackage.peerDependencies?.["@interactive-os/json-document"]
-    !== "^2.0.0-rc.0"
+    !== "^2.0.0"
 ) {
   failures.push("the collaboration companion package surface is invalid");
 }
@@ -45,10 +45,10 @@ if (
   ) !== JSON.stringify(["."])
   || contenteditableCollaborationPackage.peerDependencies?.[
     "@interactive-os/json-document"
-  ] !== "^2.0.0-rc.0"
+  ] !== "^2.0.0"
   || contenteditableCollaborationPackage.peerDependencies?.[
     "@interactive-os/json-document-collaboration"
-  ] !== "^0.1.0-rc.0"
+  ] !== "^0.1.0-rc.1"
 ) {
   failures.push("the contenteditable collaboration companion surface is invalid");
 }

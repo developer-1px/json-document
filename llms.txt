@@ -3,9 +3,9 @@
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 사용할 수
 있는 provider-neutral JSON 편집 Kernel이다. UI component library가 아니다.
 
-현재 package version과 표준 상태는 `2.0.0-rc.0` Candidate다. Root binding은
-구현됐지만 독립 구현과 다섯 pressure vertical의 conformance gate가 남아 있으므로
-stable이라고 부르지 않는다.
+현재 package version과 표준 상태는 `2.0.0` Stable이다. Reference와 독립
+implementation이 같은 conformance suite를 통과하고, 다섯 pressure vertical을
+reference·독립·collaboration binding에서 검증한다.
 
 공식 사이트: https://developer-1px.github.io/json-document/
 
