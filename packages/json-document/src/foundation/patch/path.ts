@@ -1,4 +1,5 @@
 import { buildPointer, parentPointer, type Pointer } from "../pointer/core.js";
+import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import { getValueAt, parseSafe } from "./container.js";
 
 export interface ArrayFieldPath {
@@ -28,7 +29,7 @@ export function arrayLocation(path: Pointer): { parent: Pointer; index: number |
   if (!("ok" in parsed)) return null;
   const segment = parsed.segs[parsed.segs.length - 1];
   if (segment === undefined) return null;
-  const index = segment === "-" ? "-" : numericSegment(segment);
+  const index = segment === "-" ? "-" : parseArrayIndex(segment);
   return index === null ? null : { parent, index };
 }
 
@@ -40,18 +41,6 @@ export function arrayRemoveLocation(path: Pointer): { parent: Pointer; index: nu
   return location === null || location.index === "-"
     ? null
     : { parent: location.parent, index: location.index };
-}
-
-export function numericSegment(segment: string): number | null {
-  if (segment.length === 0) return null;
-  const first = segment.charCodeAt(0);
-  if (first === 48) return segment.length === 1 ? 0 : null;
-  if (first < 49 || first > 57) return null;
-  for (let index = 1; index < segment.length; index += 1) {
-    const code = segment.charCodeAt(index);
-    if (code < 48 || code > 57) return null;
-  }
-  return Number(segment);
 }
 
 export function appendArrayIndexPath(parent: Pointer, index: number): Pointer {
@@ -69,7 +58,7 @@ export function parseArrayFieldPath(path: Pointer): ArrayFieldPath | null {
   const parsed = parseSafe(path);
   if (!("ok" in parsed) || parsed.segs.length < 2) return null;
   const key = parsed.segs[parsed.segs.length - 1]!;
-  const index = numericSegment(parsed.segs[parsed.segs.length - 2]!);
+  const index = parseArrayIndex(parsed.segs[parsed.segs.length - 2]!);
   return index === null
     ? null
     : { arrayPath: buildPointer(parsed.segs.slice(0, -2)), index, key };
@@ -91,7 +80,7 @@ export function parseKnownArrayFieldIndex(path: Pointer, text: ArrayFieldText): 
   if (!path.startsWith(text.prefixText) || !path.endsWith(text.suffixText)) return null;
   const indexEnd = path.length - text.suffixText.length;
   const indexText = path.slice(text.prefixText.length, indexEnd);
-  return indexText.includes("/") ? null : numericSegment(indexText);
+  return indexText.includes("/") ? null : parseArrayIndex(indexText);
 }
 
 export function parseFirstArrayNestedPath(state: unknown, path: Pointer): ArrayNestedPath | null {
@@ -99,7 +88,7 @@ export function parseFirstArrayNestedPath(state: unknown, path: Pointer): ArrayN
   if (!("ok" in parsed) || parsed.segs.length < 3) return null;
 
   for (let index = 0; index < parsed.segs.length - 1; index += 1) {
-    const rowIndex = numericSegment(parsed.segs[index]!);
+    const rowIndex = parseArrayIndex(parsed.segs[index]!);
     if (rowIndex === null) continue;
 
     const arraySegments = parsed.segs.slice(0, index);
@@ -142,7 +131,7 @@ export function parseKnownArrayNestedIndex(
   const arraySegments = parsed.segs.slice(0, arraySegmentsLength);
   if (buildPointer(arraySegments) !== arrayPath) return null;
 
-  return numericSegment(parsed.segs[arraySegmentsLength]!);
+  return parseArrayIndex(parsed.segs[arraySegmentsLength]!);
 }
 
 function parseKnownArrayNestedIndexText(
@@ -153,7 +142,7 @@ function parseKnownArrayNestedIndexText(
   if (!path.startsWith(prefixText) || !path.endsWith(suffixText)) return null;
   const indexEnd = path.length - suffixText.length;
   const indexText = path.slice(prefixText.length, indexEnd);
-  return indexText.includes("/") ? null : numericSegment(indexText);
+  return indexText.includes("/") ? null : parseArrayIndex(indexText);
 }
 
 function parseSimpleArrayFieldPath(path: Pointer): ArrayFieldPath | null {
@@ -163,7 +152,7 @@ function parseSimpleArrayFieldPath(path: Pointer): ArrayFieldPath | null {
   const indexSlash = path.lastIndexOf("/", keySlash - 1);
   if (indexSlash < 0) return null;
 
-  const index = numericSegment(path.slice(indexSlash + 1, keySlash));
+  const index = parseArrayIndex(path.slice(indexSlash + 1, keySlash));
   if (index === null) return null;
 
   return { arrayPath: path.slice(0, indexSlash), index, key: path.slice(keySlash + 1) };
@@ -174,7 +163,7 @@ function parseSimpleArrayElementPath(path: Pointer): { parent: Pointer; index: n
   const indexSlash = path.lastIndexOf("/");
   if (indexSlash < 0) return null;
 
-  const index = numericSegment(path.slice(indexSlash + 1));
+  const index = parseArrayIndex(path.slice(indexSlash + 1));
   return index === null
     ? null
     : { parent: path.slice(0, indexSlash), index };

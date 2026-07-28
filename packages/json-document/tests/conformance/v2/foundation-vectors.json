@@ -1,0 +1,63 @@
+{
+  "formatVersion": 1,
+  "status": "stable",
+  "profile": "docs/standard/v2-projection-profile.md",
+  "arrayIndexes": [
+    { "segment": "0", "value": 0 },
+    { "segment": "1", "value": 1 },
+    { "segment": "42", "value": 42 },
+    { "segment": "9007199254740991", "value": 9007199254740991 },
+    { "segment": "", "value": null },
+    { "segment": "-", "value": null },
+    { "segment": "00", "value": null },
+    { "segment": "01", "value": null },
+    { "segment": "+1", "value": null },
+    { "segment": "-1", "value": null },
+    { "segment": "1.0", "value": null },
+    { "segment": " 1", "value": null },
+    { "segment": "1 ", "value": null },
+    { "segment": "9007199254740992", "value": null }
+  ],
+  "equalities": [
+    {
+      "left": { "title": "same", "nested": { "count": 1 } },
+      "right": { "nested": { "count": 1 }, "title": "same" },
+      "equal": true
+    },
+    {
+      "left": ["a", { "done": false }],
+      "right": ["a", { "done": false }],
+      "equal": true
+    },
+    {
+      "left": ["a", "b"],
+      "right": ["b", "a"],
+      "equal": false
+    },
+    {
+      "left": { "value": null },
+      "right": {},
+      "equal": false
+    },
+    {
+      "left": { "nested": { "count": 1 } },
+      "right": { "nested": { "count": 2 } },
+      "equal": false
+    },
+    {
+      "left": [],
+      "right": {},
+      "equal": false
+    }
+  ],
+  "jsonValues": [
+    null,
+    true,
+    0,
+    "text",
+    [],
+    {},
+    [1, "two", null, { "nested": [false] }],
+    { "items": [{ "id": "a" }] }
+  ]
+}

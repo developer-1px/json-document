@@ -1,6 +1,8 @@
 // RFC 6901 — JSON Pointer.
 // 정본: docs/standard/json-document-spec.md §2. 변환은 lossless.
 
+import { parseArrayIndex } from "./arrayIndex.js";
+
 export type Pointer = string;
 
 export function escapeSegment(s: string): string {
@@ -119,21 +121,7 @@ export function lastSegment(pointer: Pointer): string | null {
 /** 마지막 segment 가 array index 면 그 정수, 아니면 `null` (record key 또는 root). */
 export function lastSegmentIndex(pointer: Pointer): number | null {
   const seg = lastSegment(pointer);
-  if (seg === null) return null;
-  if (!isArrayIndexSegment(seg)) return null;
-  return Number(seg);
-}
-
-function isArrayIndexSegment(segment: string): boolean {
-  if (segment === "") return false;
-  if (segment === "0") return true;
-  const first = segment.charCodeAt(0);
-  if (first < 49 || first > 57) return false;
-  for (let index = 1; index < segment.length; index += 1) {
-    const code = segment.charCodeAt(index);
-    if (code < 48 || code > 57) return false;
-  }
-  return true;
+  return seg === null ? null : parseArrayIndex(seg);
 }
 
 /** Pointer 끝에 segment 추가. `appendSegment("/a", 0)` → `"/a/0"`, escape 자동. */
@@ -166,8 +154,8 @@ export function readAt(state: unknown, segs: ReadonlyArray<string>): { ok: true;
     if (Array.isArray(cur)) {
       // RFC 6901 §4: 배열 인덱스는 `0` 또는 `[1-9][0-9]*` 만 허용. write path 와
       // 동일한 strict 파서를 써서 1.0/01/+1/"-" 같은 non-canonical 토큰을 거부한다.
-      if (!isArrayIndexSegment(seg)) return { ok: false };
-      const i = Number(seg);
+      const i = parseArrayIndex(seg);
+      if (i === null) return { ok: false };
       if (i >= cur.length) return { ok: false };
       cur = cur[i];
     } else {

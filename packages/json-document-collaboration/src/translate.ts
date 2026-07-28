@@ -4,6 +4,7 @@ import {
 } from "@interactive-os/json-document";
 
 import { changeIdKey } from "./change.js";
+import { parseArrayIndex } from "./arrayIndex.js";
 import {
   applyAuthoredOperation,
   arrayMembers,
@@ -402,12 +403,6 @@ function authoredMemberId(
   opIndex: number,
 ): MemberId {
   return `member:${changeIdKey(changeId)}:${opIndex}`;
-}
-
-function parseArrayIndex(segment: string): number | null {
-  if (!/^(0|[1-9]\d*)$/.test(segment)) return null;
-  const index = Number(segment);
-  return Number.isSafeInteger(index) ? index : null;
 }
 
 function failure(code: string, reason: string): TreeFailure {

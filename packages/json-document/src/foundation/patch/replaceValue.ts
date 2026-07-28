@@ -1,5 +1,5 @@
+import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import { objectHasOwn } from "./object.js";
-import { numericSegment } from "./path.js";
 
 export function replaceValueAtSegments(
   current: unknown,
@@ -12,7 +12,7 @@ export function replaceValueAtSegments(
 
   const segment = segments[index]!;
   if (Array.isArray(current)) {
-    const childIndex = numericSegment(segment);
+    const childIndex = parseArrayIndex(segment);
     if (childIndex === null || childIndex >= current.length) return null;
     const child = replaceValueAtSegments(current[childIndex], segments, index + 1, value);
     if (child === null) return null;

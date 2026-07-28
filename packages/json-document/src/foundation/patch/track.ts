@@ -3,8 +3,8 @@
 // 출력: 새 Pointer (또는 null = cascading drop)
 
 import { tryParsePointer, buildPointer, isPrefix, parentPointer, lastSegmentIndex, withLastSegment, readAt, type Pointer } from "../pointer/core.js";
+import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import type { JSONPatchOperation } from "./contract.js";
-import { arrayIndexValue } from "../pointer/array.js";
 
 export function exists(state: unknown, pointer: Pointer): boolean {
   const segments = tryParsePointer(pointer);
@@ -42,7 +42,7 @@ export function recoverLostPointer(
 }
 
 function isArrayIndex(seg: string): boolean {
-  return arrayIndexValue(seg) !== null;
+  return parseArrayIndex(seg) !== null;
 }
 
 // at = parent + [pivotSeg]. target 이 같은 array 부모를 공유하고 그 위치의 인덱스가

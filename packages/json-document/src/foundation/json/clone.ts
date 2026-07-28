@@ -1,4 +1,5 @@
 import { buildPointer } from "../pointer/core.js";
+import { isJsonArrayIndexKey } from "./classification.js";
 import { cloneTrustedPlainJson } from "./trustedClone.js";
 import { jsonSerializableErrorFast } from "./serializable.js";
 
@@ -202,7 +203,7 @@ function cloneJsonSerializableDetailed<T>(value: T): CloneJsonResult<T> {
 
       if (Object.getOwnPropertyNames(v).length !== v.length + 1) {
         for (const key of Object.getOwnPropertyNames(v)) {
-          if (key === "length" || isArrayIndexKey(key)) continue;
+          if (key === "length" || isJsonArrayIndexKey(key)) continue;
           path.push(key);
           const reason = `${at()}: non-index array property is not JSON`;
           path.pop();
@@ -256,10 +257,4 @@ function cloneJsonSerializableDetailed<T>(value: T): CloneJsonResult<T> {
 
   const cloned = visit(value);
   return error === null ? { ok: true, value: cloned as T } : { ok: false, reason: error };
-}
-
-function isArrayIndexKey(key: string): boolean {
-  if (key === "") return false;
-  const index = Number(key);
-  return Number.isInteger(index) && index >= 0 && index < 2 ** 32 - 1 && String(index) === key;
 }

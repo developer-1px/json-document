@@ -1,9 +1,9 @@
 import { jsonSerializableError } from "../json/serializable.js";
+import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import { applyOpRaw, validateOperationShape } from "./apply.js";
 import { parseSafe } from "./container.js";
 import type { FastPatchResult, JSONPatchOperation } from "./contract.js";
 import { objectHasOwn } from "./object.js";
-import { numericSegment } from "./path.js";
 
 type ReplaceOperation = Extract<JSONPatchOperation, { op: "replace" }>;
 
@@ -170,7 +170,7 @@ function readDraftChild(
   segment: string,
 ): { ok: true; key: number | string; value: unknown } | { ok: false } {
   if (Array.isArray(container)) {
-    const index = numericSegment(segment);
+    const index = parseArrayIndex(segment);
     return index === null || index >= container.length
       ? { ok: false }
       : { ok: true, key: index, value: container[index] };

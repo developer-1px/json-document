@@ -29,6 +29,7 @@ import {
   prepareGraph,
   type PreparedGraph,
 } from "./change.js";
+import { jsonEqual } from "./jsonEqual.js";
 import { createCheckpoint } from "./checkpoint.js";
 import {
   acceptCandidate,
@@ -1453,10 +1454,6 @@ function textFailure(
   readonly reason: string;
 } {
   return Object.freeze({ ok: false, code, reason });
-}
-
-function jsonEqual(left: JSONValue, right: JSONValue): boolean {
-  return canonicalStringify(left) === canonicalStringify(right);
 }
 
 function failure(
