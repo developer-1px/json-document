@@ -39,7 +39,23 @@ if (stale.length > 0) {
 
 function createReleaseCatalog() {
   const rootPackage = readJson("package.json");
-  const core = packageDoc("packages/json-document");
+  const packages = [
+    packageDoc(
+      "packages/json-document",
+      "core",
+      "src/application/document/index.ts",
+    ),
+    packageDoc(
+      "packages/json-document-collaboration",
+      "companion",
+      "src/index.ts",
+    ),
+    packageDoc(
+      "packages/contenteditable-collaboration",
+      "companion",
+      "src/index.ts",
+    ),
+  ];
 
   return {
     schemaVersion: 1,
@@ -48,28 +64,31 @@ function createReleaseCatalog() {
       private: rootPackage.private === true,
       summary: summaryFromReadme(read("README.md")),
     },
-    packages: [core],
+    packages,
     totals: {
-      packages: 1,
+      packages: packages.length,
+      core: packages.filter((item) => item.status === "core").length,
+      companions: packages.filter((item) => item.status === "companion").length,
     },
   };
 }
 
-function packageDoc(path) {
+function packageDoc(path, status, sourcePath) {
   const pkg = readJson(`${path}/package.json`);
-  const source = read(`${path}/src/application/document/index.ts`);
+  const source = read(`${path}/${sourcePath}`);
   const publicExports = extractExports(source);
 
   return {
     path,
     name: stringValue(pkg.name),
-    status: "core",
+    status,
     private: pkg.private === true,
     publishable: pkg.private !== true,
     version: stringValue(pkg.version),
     description: stringValue(pkg.description),
     license: stringValue(pkg.license),
     summary: summaryFromReadme(read(`${path}/README.md`)) ?? stringValue(pkg.description),
+    entrypoints: Object.keys(pkg.exports ?? {}),
     publicExports,
     publicExportCount: publicExports.length,
     keywords: Array.isArray(pkg.keywords)

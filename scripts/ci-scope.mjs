@@ -17,6 +17,10 @@ const coreRuntime = [
   /^packages\/json-document\/tests\//,
   /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig(?:\.test)?\.json|vitest\.config\.ts|eslint\.config\.js)$/,
 ];
+const companionRuntime = [
+  /^packages\/json-document-collaboration\//,
+  /^packages\/contenteditable-collaboration\//,
+];
 const packageDocs = [
   /^docs\//,
   /^llms\.txt$/,
@@ -50,6 +54,7 @@ const packageFull = matches([
   ...rootDependency,
   ...ciWorkflow,
   ...coreRuntime,
+  ...companionRuntime,
   ...packageTooling,
 ]);
 const packageDocsChanged = matches(packageDocs);

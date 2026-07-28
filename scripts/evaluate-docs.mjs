@@ -40,6 +40,10 @@ const publicDocs = {
 const surfaces = {
   rootReadme: read("README.md"),
   packageReadme: read("packages/json-document/README.md"),
+  collaborationReadme: read("packages/json-document-collaboration/README.md"),
+  contenteditableCollaborationReadme: read(
+    "packages/contenteditable-collaboration/README.md",
+  ),
   llms: read("llms.txt"),
   ...publicDocs,
 };
@@ -76,6 +80,10 @@ const expectedPublicTypes = [
   "QueryResult",
   "ReadResult",
 ];
+const activeCompanionPackages = new Set([
+  "@interactive-os/json-document-collaboration",
+  "@interactive-os/json-document-contenteditable-collaboration",
+]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "api.md",
@@ -138,8 +146,16 @@ for (const [name, source] of Object.entries({
   if (/@interactive-os\/json-document\/(?:session|react)\b/.test(source)) {
     fail(`${name}: removed package subpath is still documented.`);
   }
-  if (/@interactive-os\/json-document-[a-z0-9-]+\b/.test(source)) {
-    fail(`${name}: archived json-document extension is still documented as current.`);
+  for (
+    const match of source.matchAll(
+      /@interactive-os\/json-document-[a-z0-9-]+\b/g,
+    )
+  ) {
+    if (!activeCompanionPackages.has(match[0])) {
+      fail(
+        `${name}: archived json-document extension is still documented as current: ${match[0]}.`,
+      );
+    }
   }
   if (/\blabs\/extensions\b/.test(source)) {
     fail(`${name}: archived lab path is still documented as current.`);
@@ -189,11 +205,15 @@ const required = [
   ["rootReadme", surfaces.rootReadme, /docs\/public\/api\.md/],
   ["rootReadme", surfaces.rootReadme, /## 코드 지도/],
   ["rootReadme", surfaces.rootReadme, /packages\/json-document/],
+  ["rootReadme", surfaces.rootReadme, /packages\/json-document-collaboration/],
+  ["rootReadme", surfaces.rootReadme, /packages\/contenteditable-collaboration/],
   ["rootReadme", surfaces.rootReadme, /@interactive-os\/editable/],
   ["overview", surfaces.overview, /## 배경/],
   ["overview", surfaces.overview, /## 핵심 개념/],
   ["overview", surfaces.overview, /검색: JSONPath -> Pointer\[\]/],
   ["overview", surfaces.overview, /## Host adapter와 companion/],
+  ["overview", surfaces.overview, /@interactive-os\/json-document-collaboration/],
+  ["overview", surfaces.overview, /@interactive-os\/json-document-contenteditable-collaboration/],
   ["overview", surfaces.overview, /@interactive-os\/editable/],
   ["quickstart", surfaces.quickstart, /튜토리얼: 작은 카드 편집기 만들기/],
   ["quickstart", surfaces.quickstart, /JSONPath는 변경 언어가 아닙니다/],
@@ -205,9 +225,15 @@ const required = [
   ["api", surfaces.api, /## Host와 adapter/],
   ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/],
   ["packageReadme", surfaces.packageReadme, /패키지는 `\/session`이나 `\/react` subpath를\s*공개하지 않습니다/],
+  ["collaborationReadme", surfaces.collaborationReadme, /same six-member Projection API/],
+  ["collaborationReadme", surfaces.collaborationReadme, /contains no transport, presence,\s*storage, DOM, React, or server dependency/],
+  ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe DOM publication lease/],
+  ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
   ["llms", surfaces.llms, /2\.0\.0-rc\.0.*Candidate/],
   ["llms", surfaces.llms, /공개 Root는 정확히 다음 20개 symbol/],
   ["llms", surfaces.llms, /## Host adapter와 companion/],
+  ["llms", surfaces.llms, /@interactive-os\/json-document-collaboration/],
+  ["llms", surfaces.llms, /@interactive-os\/json-document-contenteditable-collaboration/],
   ["llms", surfaces.llms, /@interactive-os\/editable/],
   ["profile", profile, /root entrypoint 하나와 20개 Kernel symbol/],
   ["profile", profile, /Acceptance callback[\s\S]*`canPatch`[\s\S]*`commit`/],
@@ -242,23 +268,43 @@ if (
 }
 
 const generatedCore = generatedCatalog.packages?.[0];
+const generatedCollaboration = generatedCatalog.packages?.[1];
+const generatedContenteditableCollaboration = generatedCatalog.packages?.[2];
 const generatedExports = [...expectedPublicValues, ...expectedPublicTypes].sort();
 if (
   generatedCatalog.schemaVersion !== 1
-  || generatedCatalog.packages?.length !== 1
+  || generatedCatalog.packages?.length !== 3
   || generatedCore?.path !== "packages/json-document"
   || generatedCore?.name !== "@interactive-os/json-document"
   || generatedCore?.status !== "core"
+  || JSON.stringify(generatedCore?.entrypoints) !== JSON.stringify(["."])
   || JSON.stringify(generatedCore?.publicExports) !== JSON.stringify(generatedExports)
   || generatedCore?.publicExportCount !== 20
+  || generatedCollaboration?.path !== "packages/json-document-collaboration"
+  || generatedCollaboration?.name
+    !== "@interactive-os/json-document-collaboration"
+  || generatedCollaboration?.status !== "companion"
+  || JSON.stringify(generatedCollaboration?.entrypoints)
+    !== JSON.stringify([".", "./history", "./text"])
+  || generatedCollaboration?.publicExportCount !== 40
+  || generatedContenteditableCollaboration?.path
+    !== "packages/contenteditable-collaboration"
+  || generatedContenteditableCollaboration?.name
+    !== "@interactive-os/json-document-contenteditable-collaboration"
+  || generatedContenteditableCollaboration?.status !== "companion"
+  || JSON.stringify(generatedContenteditableCollaboration?.entrypoints)
+    !== JSON.stringify(["."])
+  || generatedContenteditableCollaboration?.publicExportCount !== 7
   || generatedCatalog.officialExtensions !== undefined
   || generatedCatalog.labExtensions !== undefined
   || generatedCatalog.apps !== undefined
   || JSON.stringify(generatedCatalog.totals) !== JSON.stringify({
-    packages: 1,
+    packages: 3,
+    core: 1,
+    companions: 2,
   })
 ) {
-  fail("generated catalog: release scope must contain the v2 core package only.");
+  fail("generated catalog: active scope must contain one v2 Core and two exact companions.");
 }
 
 const expectedRoutePaths = ["/", "/docs", "/docs/tutorial", "/docs/api"];

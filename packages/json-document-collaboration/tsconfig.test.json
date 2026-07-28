@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@interactive-os/json-document": [
+        "../json-document/src/application/document/index.ts"
+      ]
+    },
+    "types": [
+      "node"
+    ],
+    "noEmit": true,
+    "rootDir": "..",
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "../json-document/tests/conformance/v2/projection-suite.ts",
+    "vitest.config.ts"
+  ]
+}
