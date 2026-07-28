@@ -161,7 +161,10 @@ conformance corpus의 public-root binding을 서로 분리한다.
 | `packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts` | public root Projection의 전체 RFC 9535 CTS binding |
 
 suite가 export하는 structural type은 test harness 내부 계약이며 package public
-export가 아니다.
+export가 아니다. Vendored RFC 6902 corpus 112건 중 110건을 실행한다. 남은 2건은
+원본 JSON에 중복 `op` member가 있지만 JSON module parsing 단계에서 마지막
+member만 남아 public operation object로는 그 입력을 표현할 수 없어, 각 fixture에
+명시적인 `disabledReason`을 기록한다.
 
 21개 요구사항의 현재 증거 상태는 runtime 13개, static 6개, deferred 2개다.
 schema-free `applyPatch`는 구현됐다. transform identity의 two-provider 검증,

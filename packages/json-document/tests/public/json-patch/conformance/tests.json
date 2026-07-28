@@ -52,8 +52,7 @@
     { "comment": "Toplevel scalar values OK?",
       "doc": "foo",
       "patch": [{"op": "replace", "path": "", "value": "bar"}],
-      "expected": "bar",
-      "disabled": true },
+      "expected": "bar" },
 
     { "comment": "replace object document with array document?",
       "doc": {},
@@ -264,7 +263,7 @@
     { "comment": "Whole document",
       "doc": { "foo": 1 },
       "patch": [{"op": "test", "path": "", "value": {"foo": 1}}],
-      "disabled": true },
+      "expected": { "foo": 1 } },
 
     { "comment": "Empty-string element",
       "doc": { "": 1 },
@@ -443,7 +442,8 @@
       "patch": [ { "op": "add", "path": "/baz", "value": "qux",
                    "op": "move", "from":"/foo" } ],
       "error": "patch has two 'op' members",
-      "disabled": true },
+      "disabled": true,
+      "disabledReason": "JSON parsing collapses the duplicate op member before the operation reaches the public API" },
 
     { "comment": "unrecognized op should fail",
       "doc": {"foo": 1},

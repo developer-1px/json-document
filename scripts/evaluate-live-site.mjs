@@ -5,6 +5,10 @@ const siteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-d
 const attempts = Number(process.env.SITE_LIVE_ATTEMPTS ?? "18");
 const delayMs = Number(process.env.SITE_LIVE_DELAY_MS ?? "10000");
 const routes = JSON.parse(readFileSync(new URL("../apps/site/src/site-routes.json", import.meta.url), "utf8"));
+const v2CompanionPackages = new Set([
+  "@interactive-os/json-document-collaboration",
+  "@interactive-os/json-document-contenteditable-collaboration",
+]);
 validateSiteRoutes(routes, fail);
 
 function fail(message) {
@@ -74,8 +78,9 @@ async function checkOnce() {
   ) {
     fail("live llms.txt is missing the v2 Core contract.");
   }
+  const packageReferences = llms.match(/@interactive-os\/json-document-[a-z0-9-]+/g) ?? [];
   if (
-    /@interactive-os\/json-document-(?:[a-z0-9-]+)/.test(llms)
+    packageReferences.some((packageName) => !v2CompanionPackages.has(packageName))
     || /@interactive-os\/json-document\/(?:session|react)\b/.test(llms)
     || /\blabs\/extensions\b/.test(llms)
   ) {

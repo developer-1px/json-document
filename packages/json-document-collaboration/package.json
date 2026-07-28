@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document-collaboration",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.0",
   "description": "Transport-free causal collaboration provider for @interactive-os/json-document.",
   "type": "module",
   "license": "MIT",
