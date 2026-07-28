@@ -29,9 +29,9 @@ jobs:
       - name: Install dependencies
         if: steps.scope.outputs.package_any == 'true'
         run: npm ci --no-audit --no-fund
-      - name: Verify v2 package
+      - name: Verify active v2 packages
         if: steps.scope.outputs.package_full == 'true'
-        run: npm run archive:check && npm run verify -w @interactive-os/json-document && npm run standard:check && npm run docs:evaluate
+        run: npm run archive:check && npm run verify -w @interactive-os/json-document && npm run verify:companions && npm run standard:check && npm run docs:evaluate
       - name: Verify package documentation
         if: steps.scope.outputs.package_full != 'true' && (steps.scope.outputs.package_docs == 'true' || steps.scope.outputs.package_smoke == 'true')
         run: |
@@ -45,7 +45,9 @@ jobs:
         if: steps.scope.outputs.package_full == 'true' || steps.scope.outputs.package_smoke == 'true'
         env:
           npm_config_cache: ${{ runner.temp }}/npm-cache
-        run: npm pack -w @interactive-os/json-document --dry-run
+        run: |
+          npm run pack:library
+          npm run pack:companions
 
   lab-extensions:
     name: Archive isolation

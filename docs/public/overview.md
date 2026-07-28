@@ -6,7 +6,11 @@ json-document v2는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 �
 React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
 
 ```txt
-Pure Protocol -> Document Projection -> host adapter
+Pure Protocol
+  |-> local provider -----------\
+  |                              > same six-member Document Projection
+  `-> collaboration provider --/    |-> optional history/text authoring
+                                    `-> optional DOM/IME lease
 ```
 
 ## 배경
@@ -108,18 +112,23 @@ if (result.ok) {
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
 | `@interactive-os/json-document` | v2 Kernel | Pure Protocol과 여섯-member Projection |
+| `@interactive-os/json-document-collaboration` | optional companion | 같은 Projection 뒤의 transport-free causal merge |
+| `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 DOM/IME publication lease |
 
 패키지는 `/session`과 `/react`를 공개하지 않습니다. 구현 간 교환 가능한 코드는
 루트 `JSONDocument` 여섯 member에만 의존하고, 편집 UX와 framework lifecycle은
-host 또는 별도 adapter가 소유합니다.
+host 또는 별도 adapter가 소유합니다. Local-only consumer는 Core만 설치하며,
+collaboration provider로 바꿔도 editor가 사용하는 `JSONDocument` API는
+변하지 않습니다.
 
 ## Host adapter와 companion
 
 Host adapter는 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
 JSON Patch로 번역합니다. Selection, history, clipboard, persistence, focus와
-remote protocol은 Core member를 늘리지 않고 adapter 쪽에 둡니다. Adapter를
-별도 package로 배포할 때는 Core와 독립적으로 version과 compatibility를
-검증해야 합니다.
+remote protocol은 Core member를 늘리지 않고 adapter 쪽에 둡니다.
+Collaboration companion도 transport, authentication, presence, persistence를
+소유하지 않습니다. Adapter와 companion은 Core와 독립적으로 version과
+compatibility를 검증합니다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
 예시입니다. `JSONDocument`는 canonical headless JSON state로 남고, editable은

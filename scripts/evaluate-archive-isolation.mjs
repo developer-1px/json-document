@@ -2,9 +2,20 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
-const expectedWorkspaces = ["packages/json-document", "apps/site"];
+const expectedWorkspaces = [
+  "packages/json-document",
+  "packages/json-document-collaboration",
+  "packages/contenteditable-collaboration",
+  "apps/site",
+];
 const rootPackage = json("package.json");
 const kernelPackage = json("packages/json-document/package.json");
+const collaborationPackage = json(
+  "packages/json-document-collaboration/package.json",
+);
+const contenteditableCollaborationPackage = json(
+  "packages/contenteditable-collaboration/package.json",
+);
 const failures = [];
 
 if (JSON.stringify(rootPackage.workspaces) !== JSON.stringify(expectedWorkspaces)) {
@@ -13,6 +24,33 @@ if (JSON.stringify(rootPackage.workspaces) !== JSON.stringify(expectedWorkspaces
 
 if (JSON.stringify(Object.keys(kernelPackage.exports ?? {})) !== JSON.stringify(["."])) {
   failures.push("the v2 package must expose only its root entrypoint");
+}
+
+if (
+  collaborationPackage.name
+    !== "@interactive-os/json-document-collaboration"
+  || JSON.stringify(Object.keys(collaborationPackage.exports ?? {}))
+    !== JSON.stringify([".", "./history", "./text"])
+  || collaborationPackage.peerDependencies?.["@interactive-os/json-document"]
+    !== "^2.0.0-rc.0"
+) {
+  failures.push("the collaboration companion package surface is invalid");
+}
+
+if (
+  contenteditableCollaborationPackage.name
+    !== "@interactive-os/json-document-contenteditable-collaboration"
+  || JSON.stringify(
+    Object.keys(contenteditableCollaborationPackage.exports ?? {}),
+  ) !== JSON.stringify(["."])
+  || contenteditableCollaborationPackage.peerDependencies?.[
+    "@interactive-os/json-document"
+  ] !== "^2.0.0-rc.0"
+  || contenteditableCollaborationPackage.peerDependencies?.[
+    "@interactive-os/json-document-collaboration"
+  ] !== "^0.1.0"
+) {
+  failures.push("the contenteditable collaboration companion surface is invalid");
 }
 
 for (const requiredPath of [
@@ -31,6 +69,8 @@ const forbiddenImport =
   /@interactive-os\/json-document\/(?:session|react)\b|src\/application\/(?:session|react-document)\b/;
 for (const activePath of [
   "packages/json-document/src",
+  "packages/json-document-collaboration/src",
+  "packages/contenteditable-collaboration/src",
   "apps/site/src",
   "config",
 ]) {
@@ -59,7 +99,7 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    "v2 archive isolation ok: 2 active workspaces, 1 publishable entrypoint",
+    "v2 archive isolation ok: 4 active workspaces, 1 Kernel and 2 optional companions",
   );
 }
 

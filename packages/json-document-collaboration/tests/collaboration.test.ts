@@ -1,0 +1,1054 @@
+import { describe, expect, test, vi } from "vitest";
+
+import {
+  createCollaborationRuntime,
+  type CollaborationBundle,
+  type CollaborationRuntimeOptions,
+} from "../src/index.js";
+
+const baseOptions = {
+  epochId: "shared-document/v1",
+  ruleset: {
+    id: "test/json-tree",
+    digest: "test/json-tree/v1",
+  },
+} as const;
+
+function runtime(
+  actorId: string,
+  initial: unknown = {
+    title: "Draft",
+    done: false,
+    items: ["a", "b"],
+  },
+  overrides: Partial<CollaborationRuntimeOptions> = {},
+) {
+  return createCollaborationRuntime(initial, {
+    ...baseOptions,
+    actorId,
+    ...overrides,
+  });
+}
+
+describe("@interactive-os/json-document-collaboration", () => {
+  test("uses a canonical SHA-256 checkpoint fingerprint", () => {
+    const shared = runtime("actor-a", null);
+
+    expect(shared.collaboration.epoch.baseDigest).toBe(
+      "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+    );
+  });
+
+  test("keeps the editor-facing document on the six-member Projection API", () => {
+    const shared = runtime("actor-a");
+
+    expect(Object.keys(shared).sort()).toEqual([
+      "collaboration",
+      "document",
+    ]);
+    expect(Object.keys(shared.document).sort()).toEqual([
+      "at",
+      "canPatch",
+      "commit",
+      "query",
+      "subscribe",
+      "value",
+    ]);
+    expect("ingest" in shared.document).toBe(false);
+    expect(typeof shared.collaboration.ingest).toBe("function");
+  });
+
+  test("merges concurrent edits to different members independent of arrival order", () => {
+    const left = runtime("actor-a");
+    const right = runtime("actor-b");
+
+    expect(left.document.commit([
+      { op: "replace", path: "/title", value: "Left" },
+    ])).toMatchObject({ ok: true });
+    expect(right.document.commit([
+      { op: "replace", path: "/done", value: true },
+    ])).toMatchObject({ ok: true });
+
+    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+      .toMatchObject({ ok: true });
+    expect(right.collaboration.ingest(left.collaboration.exportBundle()))
+      .toMatchObject({ ok: true });
+
+    expect(left.document.value).toEqual({
+      title: "Left",
+      done: true,
+      items: ["a", "b"],
+    });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().conflicts).toEqual([]);
+  });
+
+  test("keeps concurrent alternatives outside the ordinary JSON projection", () => {
+    const left = runtime("actor-a");
+    const right = runtime("actor-b");
+
+    left.document.commit([
+      { op: "replace", path: "/title", value: "Left" },
+    ]);
+    right.document.commit([
+      { op: "replace", path: "/title", value: "Right" },
+    ]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual(right.document.value);
+    expect(left.document.value).toMatchObject({ title: "Right" });
+    expect(left.collaboration.current().conflicts).toMatchObject([
+      {
+        kind: "member-value",
+        winner: { actorId: "actor-b", counter: 1 },
+        alternatives: [{ actorId: "actor-a", counter: 1 }],
+      },
+    ]);
+  });
+
+  test("orders concurrent array insertions by causal change identity", () => {
+    const left = runtime("actor-a");
+    const right = runtime("actor-b");
+
+    left.document.commit([
+      { op: "add", path: "/items/1", value: "left" },
+    ]);
+    right.document.commit([
+      { op: "add", path: "/items/1", value: "right" },
+    ]);
+
+    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.collaboration.ingest(right.collaboration.exportBundle());
+
+    expect(left.document.value).toMatchObject({
+      items: ["a", "left", "right", "b"],
+    });
+    expect(right.document.value).toEqual(left.document.value);
+  });
+
+  test("retains an array anchor when a concurrent move relocates that member", () => {
+    const initial = {
+      left: ["a", "b"],
+      right: [] as string[],
+    };
+    const left = runtime("actor-a", initial);
+    const right = runtime("actor-b", initial);
+
+    left.document.commit([{
+      op: "move",
+      from: "/left/1",
+      path: "/right/0",
+    }]);
+    right.document.commit([{
+      op: "add",
+      path: "/left/1",
+      value: "x",
+    }]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      left: ["a", "x"],
+      right: ["b"],
+    });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().suppressed).toEqual([]);
+  });
+
+  test("retains start and end gap insertions when their only anchor moves away", () => {
+    for (const path of ["/left/0", "/left/1"]) {
+      const initial = {
+        left: ["b"],
+        right: [] as string[],
+      };
+      const mover = runtime("actor-a", initial);
+      const inserter = runtime("actor-b", initial);
+
+      expect(mover.document.commit([{
+        op: "move",
+        from: "/left/0",
+        path: "/right/0",
+      }])).toMatchObject({ ok: true });
+      expect(inserter.document.commit([{
+        op: "add",
+        path,
+        value: "x",
+      }])).toMatchObject({ ok: true });
+
+      expect(mover.collaboration.ingest(
+        inserter.collaboration.exportBundle(),
+      )).toMatchObject({ ok: true });
+      expect(inserter.collaboration.ingest(
+        mover.collaboration.exportBundle(),
+      )).toMatchObject({ ok: true });
+
+      expect(mover.document.value).toEqual({
+        left: ["x"],
+        right: ["b"],
+      });
+      expect(inserter.document.value).toEqual(mover.document.value);
+      expect(mover.collaboration.current().suppressed).toEqual([]);
+      expect(inserter.collaboration.current().suppressed).toEqual([]);
+    }
+  });
+
+  test("keeps an old array position anchor after a same-array move", () => {
+    const initial = { items: ["a", "b"] };
+    const mover = runtime("actor-a", initial);
+    const inserter = runtime("actor-b", initial);
+
+    expect(mover.document.commit([{
+      op: "move",
+      from: "/items/1",
+      path: "/items/0",
+    }])).toMatchObject({ ok: true });
+    expect(inserter.document.commit([{
+      op: "add",
+      path: "/items/2",
+      value: "x",
+    }])).toMatchObject({ ok: true });
+
+    expect(mover.collaboration.ingest(
+      inserter.collaboration.exportBundle(),
+    )).toMatchObject({ ok: true });
+    expect(inserter.collaboration.ingest(
+      mover.collaboration.exportBundle(),
+    )).toMatchObject({ ok: true });
+
+    expect(mover.document.value).toEqual({ items: ["b", "a", "x"] });
+    expect(inserter.document.value).toEqual(mover.document.value);
+    expect(mover.collaboration.current().suppressed).toEqual([]);
+  });
+
+  test("preserves member identity across rename while merging a concurrent child edit", () => {
+    const initial = {
+      cards: {
+        draft: {
+          title: "Draft",
+        },
+      },
+    };
+    const left = runtime("actor-a", initial);
+    const right = runtime("actor-b", initial);
+
+    left.document.commit([{
+      op: "move",
+      from: "/cards/draft",
+      path: "/cards/published",
+    }]);
+    right.document.commit([{
+      op: "replace",
+      path: "/cards/draft/title",
+      value: "Ready",
+    }]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      cards: {
+        published: {
+          title: "Ready",
+        },
+      },
+    });
+    expect(right.document.value).toEqual(left.document.value);
+  });
+
+  test("gives copied subtrees fresh identities", () => {
+    const initial = {
+      cards: {
+        source: {
+          title: "Draft",
+        },
+      },
+    };
+    const left = runtime("actor-a", initial);
+    const right = runtime("actor-b", initial);
+
+    left.document.commit([{
+      op: "copy",
+      from: "/cards/source",
+      path: "/cards/copy",
+    }]);
+    right.document.commit([{
+      op: "replace",
+      path: "/cards/source/title",
+      value: "Changed",
+    }]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      cards: {
+        copy: {
+          title: "Draft",
+        },
+        source: {
+          title: "Changed",
+        },
+      },
+    });
+    expect(right.document.value).toEqual(left.document.value);
+  });
+
+  test("does not retarget an edit across delete and same-key re-add", () => {
+    const initial = {
+      cards: {
+        draft: {
+          title: "Old",
+        },
+      },
+    };
+    const left = runtime("actor-a", initial);
+    const right = runtime("actor-b", initial);
+
+    left.document.commit([
+      { op: "remove", path: "/cards/draft" },
+      {
+        op: "add",
+        path: "/cards/draft",
+        value: { title: "New" },
+      },
+    ]);
+    right.document.commit([{
+      op: "replace",
+      path: "/cards/draft/title",
+      value: "Edited old member",
+    }]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      cards: {
+        draft: {
+          title: "New",
+        },
+      },
+    });
+    expect(right.document.value).toEqual(left.document.value);
+  });
+
+  test("queues out-of-order changes and integrates the unlocked causal chain once", () => {
+    const source = runtime("actor-a");
+    const target = runtime("actor-b");
+
+    source.document.commit([
+      { op: "replace", path: "/title", value: "First" },
+    ]);
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Second" },
+    ]);
+    const exported = source.collaboration.exportBundle();
+    const first = exported.changes[0];
+    const second = exported.changes[1];
+    if (first === undefined || second === undefined) {
+      throw new Error("expected two changes");
+    }
+
+    const secondOnly: CollaborationBundle = {
+      epoch: exported.epoch,
+      changes: [second],
+    };
+    expect(target.collaboration.ingest(secondOnly)).toMatchObject({
+      ok: true,
+      integrated: [],
+      pending: [{ actorId: "actor-a", counter: 2 }],
+    });
+    expect(target.document.value).toMatchObject({ title: "Draft" });
+
+    const publications: unknown[] = [];
+    target.document.subscribe((change) => publications.push(change));
+    expect(target.collaboration.ingest({
+      epoch: exported.epoch,
+      changes: [first],
+    })).toMatchObject({
+      ok: true,
+      integrated: [
+        { actorId: "actor-a", counter: 1 },
+        { actorId: "actor-a", counter: 2 },
+      ],
+      pending: [],
+    });
+    expect(target.document.value).toMatchObject({ title: "Second" });
+    expect(publications).toHaveLength(1);
+  });
+
+  test("publishes immutable collaboration snapshots once per state-adding ingest", () => {
+    const source = runtime("actor-a");
+    const target = runtime("actor-b");
+    source.document.commit([
+      { op: "replace", path: "/title", value: "First" },
+    ]);
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Second" },
+    ]);
+    const bundle = source.collaboration.exportBundle();
+    const first = bundle.changes[0];
+    const second = bundle.changes[1];
+    if (first === undefined || second === undefined) {
+      throw new Error("expected two changes");
+    }
+
+    const snapshots: ReturnType<typeof target.collaboration.current>[] = [];
+    const unsubscribe = target.collaboration.subscribe((snapshot) => {
+      snapshots.push(snapshot);
+    });
+    target.collaboration.ingest({
+      epoch: bundle.epoch,
+      changes: [second],
+    });
+
+    expect(snapshots).toHaveLength(1);
+    const pendingSnapshot = snapshots[0];
+    expect(Object.isFrozen(pendingSnapshot)).toBe(true);
+    expect(Object.isFrozen(pendingSnapshot?.pending)).toBe(true);
+    expect(Object.isFrozen(pendingSnapshot?.pending[0])).toBe(true);
+    expect(Object.isFrozen(pendingSnapshot?.pending[0]?.missing)).toBe(true);
+
+    target.collaboration.ingest({
+      epoch: bundle.epoch,
+      changes: [second],
+    });
+    expect(snapshots).toHaveLength(1);
+
+    unsubscribe();
+    target.collaboration.ingest({
+      epoch: bundle.epoch,
+      changes: [first],
+    });
+    expect(snapshots).toHaveLength(1);
+    expect(target.document.value).toMatchObject({ title: "Second" });
+  });
+
+  test("queues reentrant collaboration publications in causal order", () => {
+    const source = runtime("actor-a");
+    const target = runtime("actor-b");
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Remote" },
+    ]);
+
+    let reentered = false;
+    const publishedHeads: string[] = [];
+    target.collaboration.subscribe(() => {
+      if (reentered) return;
+      reentered = true;
+      expect(target.document.commit([
+        { op: "replace", path: "/done", value: true },
+      ])).toMatchObject({ ok: true });
+    });
+    target.collaboration.subscribe((snapshot) => {
+      const head = snapshot.heads[0];
+      if (head !== undefined) {
+        publishedHeads.push(`${head.actorId}:${head.counter}`);
+      }
+    });
+
+    expect(target.collaboration.ingest(
+      source.collaboration.exportBundle(),
+    )).toMatchObject({ ok: true });
+    expect(publishedHeads).toEqual(["actor-a:1", "actor-b:1"]);
+    expect(target.document.value).toMatchObject({
+      title: "Remote",
+      done: true,
+    });
+  });
+
+  test("isolates collaboration listener failures after committing state", () => {
+    const source = runtime("actor-a");
+    const target = runtime("actor-b");
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Integrated" },
+    ]);
+
+    let laterListenerCalls = 0;
+    target.collaboration.subscribe(() => {
+      throw new Error("listener failed");
+    });
+    target.collaboration.subscribe(() => {
+      laterListenerCalls += 1;
+    });
+
+    expect(() => target.collaboration.ingest(
+      source.collaboration.exportBundle(),
+    )).not.toThrow();
+    expect(laterListenerCalls).toBe(1);
+    expect(target.document.value).toMatchObject({ title: "Integrated" });
+  });
+
+  test("skips a collaboration listener unsubscribed during publication", () => {
+    const source = runtime("actor-a");
+    const target = runtime("actor-b");
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Integrated" },
+    ]);
+
+    const firstListener = vi.fn();
+    const secondListener = vi.fn();
+    let unsubscribeSecond = (): void => undefined;
+    target.collaboration.subscribe((snapshot) => {
+      firstListener(snapshot);
+      unsubscribeSecond();
+    });
+    unsubscribeSecond = target.collaboration.subscribe(secondListener);
+
+    expect(target.collaboration.ingest(
+      source.collaboration.exportBundle(),
+    )).toMatchObject({ ok: true });
+    expect(firstListener).toHaveBeenCalledOnce();
+    expect(secondListener).not.toHaveBeenCalled();
+  });
+
+  test("suppresses a whole concurrent Change when the combined projection is invalid", () => {
+    const accepts = (candidate: unknown) => {
+      const value = candidate as {
+        readonly local: boolean;
+        readonly remote: boolean;
+      };
+      return value.local && value.remote
+        ? {
+            ok: false as const,
+            code: "schema_violation",
+            reason: "local and remote are mutually exclusive",
+            pointer: "/remote",
+          }
+        : { ok: true as const };
+    };
+    const options = {
+      ruleset: {
+        id: "test/exclusive-flags",
+        digest: "test/exclusive-flags/v1",
+      },
+      accepts,
+    };
+    const left = runtime(
+      "actor-a",
+      { local: false, remote: false },
+      options,
+    );
+    const right = runtime(
+      "actor-b",
+      { local: false, remote: false },
+      options,
+    );
+
+    left.document.commit([
+      { op: "replace", path: "/local", value: true },
+    ]);
+    right.document.commit([
+      { op: "replace", path: "/remote", value: true },
+    ]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      local: true,
+      remote: false,
+    });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().suppressed).toEqual([
+      {
+        changeId: { actorId: "actor-b", counter: 1 },
+        code: "schema_violation",
+        reason: "local and remote are mutually exclusive",
+        pointer: "/remote",
+      },
+    ]);
+  });
+
+  test("preserves explicit test preconditions when an ancestor Change is suppressed", () => {
+    const accepts = (candidate: unknown) => {
+      const value = candidate as {
+        readonly local: boolean;
+        readonly remote: boolean;
+      };
+      return value.local && value.remote
+        ? { ok: false as const, code: "schema_violation" }
+        : { ok: true as const };
+    };
+    const overrides = {
+      ruleset: {
+        id: "test/causal-precondition",
+        digest: "test/causal-precondition/v1",
+      },
+      accepts,
+    };
+    const left = runtime(
+      "actor-a",
+      { local: false, remote: false },
+      overrides,
+    );
+    const right = runtime(
+      "actor-b",
+      { local: false, remote: false },
+      overrides,
+    );
+
+    left.document.commit([
+      { op: "replace", path: "/local", value: true },
+    ]);
+    right.document.commit([
+      { op: "replace", path: "/remote", value: true },
+    ]);
+    right.document.commit([
+      { op: "test", path: "/remote", value: true },
+      { op: "add", path: "/note", value: "ready" },
+    ]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      local: true,
+      remote: false,
+    });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().suppressed).toMatchObject([
+      {
+        changeId: { actorId: "actor-b", counter: 1 },
+        code: "schema_violation",
+      },
+      {
+        changeId: { actorId: "actor-b", counter: 2 },
+        code: "test_failed",
+      },
+    ]);
+  });
+
+  test("isolates acceptance candidates from mutation during remote materialization", () => {
+    const mutatingAcceptance = (candidate: unknown) => {
+      const value = candidate as { readonly forbidden: boolean };
+      if (value.forbidden) {
+        Reflect.set(value, "forbidden", false);
+      }
+      return value.forbidden
+        ? { ok: false as const, code: "schema_violation" }
+        : { ok: true as const };
+    };
+    const overrides = {
+      ruleset: {
+        id: "test/immutable-acceptance",
+        digest: "test/immutable-acceptance/v1",
+      },
+    };
+    expect(() => runtime(
+      "invalid-initial",
+      { forbidden: true },
+      { ...overrides, accepts: mutatingAcceptance },
+    )).toThrow("Initial document value was rejected");
+
+    const source = runtime("actor-a", { forbidden: false }, overrides);
+    const target = runtime("actor-b", { forbidden: false }, {
+      ...overrides,
+      accepts: mutatingAcceptance,
+    });
+    source.document.commit([
+      { op: "replace", path: "/forbidden", value: true },
+    ]);
+
+    const untrusted = source.collaboration.exportBundle();
+    expect(target.collaboration.ingest({
+      epoch: target.collaboration.epoch,
+      changes: untrusted.changes,
+    }))
+      .toMatchObject({ ok: true });
+    expect(target.document.value).toEqual({ forbidden: false });
+    expect(target.collaboration.current().suppressed).toMatchObject([
+      {
+        changeId: { actorId: "actor-a", counter: 1 },
+        code: "schema_violation",
+      },
+    ]);
+  });
+
+  test("retains both same-key insertions while projecting one deterministic winner", () => {
+    const left = runtime("actor-a", { fields: {} });
+    const right = runtime("actor-b", { fields: {} });
+
+    left.document.commit([
+      { op: "add", path: "/fields/name", value: "Left" },
+    ]);
+    right.document.commit([
+      { op: "add", path: "/fields/name", value: "Right" },
+    ]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({ fields: { name: "Right" } });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().conflicts).toMatchObject([
+      {
+        kind: "object-key",
+        key: "name",
+      },
+    ]);
+
+    const removal = [{ op: "remove", path: "/fields/name" }] as const;
+    expect(left.document.canPatch(removal)).toEqual({ ok: true });
+    expect(left.document.commit(removal)).toMatchObject({ ok: true });
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({ fields: {} });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().conflicts).toEqual([]);
+  });
+
+  test("retains concurrent moves that replace the same destination member", () => {
+    const initial = {
+      x: "X",
+      y: "Y",
+      z: "Z",
+    };
+    const left = runtime("actor-a", initial);
+    const right = runtime("actor-b", initial);
+
+    left.document.commit([{
+      op: "move",
+      from: "/x",
+      path: "/y",
+    }]);
+    right.document.commit([{
+      op: "move",
+      from: "/z",
+      path: "/y",
+    }]);
+
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({ y: "Z" });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().suppressed).toEqual([]);
+    expect(left.collaboration.current().conflicts).toMatchObject([
+      {
+        kind: "object-key",
+        key: "y",
+      },
+    ]);
+  });
+
+  test("moves a projected object-key winner without revealing its hidden alternative", () => {
+    const left = runtime("actor-a", { fields: {} });
+    const right = runtime("actor-b", { fields: {} });
+    left.document.commit([
+      { op: "add", path: "/fields/name", value: "Left" },
+    ]);
+    right.document.commit([
+      { op: "add", path: "/fields/name", value: "Right" },
+    ]);
+    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    const move = [{
+      op: "move",
+      from: "/fields/name",
+      path: "/fields/other",
+    }] as const;
+    expect(left.document.canPatch(move)).toEqual({ ok: true });
+    expect(left.document.commit(move)).toMatchObject({ ok: true });
+    right.collaboration.ingest(left.collaboration.exportBundle());
+
+    expect(left.document.value).toEqual({
+      fields: {
+        other: "Right",
+      },
+    });
+    expect(right.document.value).toEqual(left.document.value);
+    expect(left.collaboration.current().conflicts).toEqual([]);
+  });
+
+  test("keeps conflict cleanup effective when an alternative was concurrently removed", () => {
+    const initial = { fields: {}, sequence: 0 };
+    const left = runtime("actor-a", initial);
+    const right = runtime("actor-b", initial);
+    const resolver = runtime("actor-c", initial);
+
+    left.document.commit([
+      { op: "add", path: "/fields/name", value: "Left" },
+    ]);
+    right.document.commit([
+      { op: "add", path: "/fields/name", value: "Right" },
+    ]);
+    resolver.document.commit([
+      { op: "replace", path: "/sequence", value: 1 },
+    ]);
+    resolver.document.commit([
+      { op: "replace", path: "/sequence", value: 2 },
+    ]);
+    resolver.collaboration.ingest(left.collaboration.exportBundle());
+    resolver.collaboration.ingest(right.collaboration.exportBundle());
+
+    left.document.commit([
+      { op: "remove", path: "/fields/name" },
+    ]);
+    resolver.document.commit([
+      { op: "remove", path: "/fields/name" },
+    ]);
+
+    const receiver = runtime("receiver", initial);
+    receiver.collaboration.ingest(left.collaboration.exportBundle());
+    receiver.collaboration.ingest(right.collaboration.exportBundle());
+    receiver.collaboration.ingest(resolver.collaboration.exportBundle());
+
+    expect(receiver.document.value).toEqual({
+      fields: {},
+      sequence: 2,
+    });
+    expect(receiver.collaboration.current().suppressed).toEqual([]);
+  });
+
+  test("does not report causally superseded writes as concurrent conflicts", () => {
+    const shared = runtime("actor-a");
+
+    shared.document.commit([
+      { op: "replace", path: "/title", value: "First" },
+    ]);
+    shared.document.commit([
+      { op: "replace", path: "/title", value: "Second" },
+    ]);
+
+    expect(shared.document.value).toMatchObject({ title: "Second" });
+    expect(shared.collaboration.current().conflicts).toEqual([]);
+  });
+
+  test("converges after receiving the same three branches in different orders", () => {
+    const authors = ["actor-a", "actor-b", "actor-c"].map((actorId) => (
+      runtime(actorId)
+    ));
+    authors[0]?.document.commit([
+      { op: "replace", path: "/title", value: "A" },
+    ]);
+    authors[1]?.document.commit([
+      { op: "add", path: "/items/1", value: "B" },
+    ]);
+    authors[2]?.document.commit([
+      { op: "replace", path: "/done", value: true },
+    ]);
+    const bundles = authors.map((author) => author.collaboration.exportBundle());
+    const first = runtime("receiver-a");
+    const second = runtime("receiver-b");
+
+    for (const index of [0, 1, 2]) {
+      first.collaboration.ingest(bundles[index]);
+    }
+    for (const index of [2, 0, 1]) {
+      second.collaboration.ingest(bundles[index]);
+    }
+
+    expect(first.document.value).toEqual(second.document.value);
+    expect(first.collaboration.current()).toEqual(
+      second.collaboration.current(),
+    );
+  });
+
+  test("rejects a mismatched ruleset before changing causal or projected state", () => {
+    const left = runtime("actor-a");
+    const right = runtime("actor-b", undefined, {
+      ruleset: {
+        id: "test/other",
+        digest: "test/other/v1",
+      },
+    });
+    right.document.commit([
+      { op: "replace", path: "/title", value: "Other" },
+    ]);
+    const before = left.collaboration.current();
+
+    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+      .toEqual({
+        ok: false,
+        code: "ruleset_mismatch",
+        reason: "bundle ruleset does not match this document epoch",
+      });
+    expect(left.document.value).toMatchObject({ title: "Draft" });
+    expect(left.collaboration.current()).toEqual(before);
+  });
+
+  test("treats identical delivery as idempotent and rejects changed duplicate payloads", () => {
+    const source = runtime("actor-a");
+    const target = runtime("actor-b");
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Once" },
+    ]);
+    const bundle = source.collaboration.exportBundle();
+
+    expect(target.collaboration.ingest(bundle)).toMatchObject({ ok: true });
+    expect(target.collaboration.ingest(bundle)).toMatchObject({
+      ok: true,
+      duplicates: [{ actorId: "actor-a", counter: 1 }],
+    });
+
+    const change = bundle.changes[0];
+    if (change === undefined) throw new Error("expected one change");
+    expect(target.collaboration.ingest({
+      epoch: bundle.epoch,
+      changes: [{
+        ...change,
+        ops: [{
+          kind: "set",
+          target: change.ops[0]?.kind === "set"
+            ? change.ops[0].target
+            : "different",
+          value: "tampered",
+        }],
+      }],
+    })).toMatchObject({
+      ok: false,
+      code: "duplicate_mismatch",
+      changeId: { actorId: "actor-a", counter: 1 },
+    });
+    expect(target.document.value).toMatchObject({ title: "Once" });
+  });
+
+  test("rejects a non-initial actor counter before it can poison history", () => {
+    const shared = runtime("actor-a");
+    const before = shared.collaboration.current();
+    const exhausted: CollaborationBundle = {
+      epoch: shared.collaboration.epoch,
+      changes: [{
+        changeId: {
+          actorId: "actor-a",
+          counter: Number.MAX_SAFE_INTEGER,
+        },
+        deps: [],
+        ops: [],
+      }],
+    };
+    expect(shared.collaboration.ingest(exhausted)).toEqual({
+      ok: false,
+      code: "actor_fork",
+      reason: "one actorId must form one contiguous causal change chain",
+      changeId: {
+        actorId: "actor-a",
+        counter: Number.MAX_SAFE_INTEGER,
+      },
+    });
+    expect(shared.collaboration.current()).toEqual(before);
+    expect(shared.collaboration.exportBundle().changes).toEqual([]);
+    expect(shared.document.value).toMatchObject({ title: "Draft" });
+  });
+
+  test("rejects a non-causal fork within one actor lineage transactionally", () => {
+    const target = runtime("peer");
+    const before = target.collaboration.current();
+    const forked: CollaborationBundle = {
+      epoch: target.collaboration.epoch,
+      changes: [
+        {
+          changeId: { actorId: "actor-a", counter: 1 },
+          deps: [],
+          ops: [],
+        },
+        {
+          changeId: { actorId: "actor-a", counter: 2 },
+          deps: [],
+          ops: [],
+        },
+      ],
+    };
+
+    expect(target.collaboration.ingest(forked)).toEqual({
+      ok: false,
+      code: "actor_fork",
+      reason: "one actorId must form one contiguous causal change chain",
+      changeId: { actorId: "actor-a", counter: 2 },
+    });
+    expect(target.collaboration.current()).toEqual(before);
+    expect(target.collaboration.exportBundle().changes).toEqual([]);
+  });
+
+  test("rejects a pending actor fork before it can poison later dependencies", () => {
+    const target = runtime("peer");
+    const fork: CollaborationBundle = {
+      epoch: target.collaboration.epoch,
+      changes: [{
+        changeId: { actorId: "actor-a", counter: 2 },
+        deps: [{ actorId: "actor-b", counter: 1 }],
+        ops: [],
+      }],
+    };
+
+    expect(target.collaboration.ingest(fork)).toEqual({
+      ok: false,
+      code: "actor_fork",
+      reason: "one actorId must form one contiguous causal change chain",
+      changeId: { actorId: "actor-a", counter: 2 },
+    });
+    expect(target.collaboration.exportBundle().changes).toEqual([]);
+  });
+
+  test("rejects a first Change that depends on its own future counter", () => {
+    const target = runtime("peer");
+    const poisoned: CollaborationBundle = {
+      epoch: target.collaboration.epoch,
+      changes: [{
+        changeId: { actorId: "actor-a", counter: 1 },
+        deps: [{ actorId: "actor-a", counter: 2 }],
+        ops: [],
+      }],
+    };
+
+    expect(target.collaboration.ingest(poisoned)).toEqual({
+      ok: false,
+      code: "actor_fork",
+      reason: "one actorId must form one contiguous causal change chain",
+      changeId: { actorId: "actor-a", counter: 1 },
+    });
+    expect(target.collaboration.exportBundle().changes).toEqual([]);
+    expect(target.collaboration.current().pending).toEqual([]);
+  });
+
+  test("does not let a restored actor fork while its own history is pending", () => {
+    const source = runtime("actor-a");
+    source.document.commit([
+      { op: "replace", path: "/title", value: "First" },
+    ]);
+    source.document.commit([
+      { op: "replace", path: "/title", value: "Second" },
+    ]);
+    const bundle = source.collaboration.exportBundle();
+    const first = bundle.changes[0];
+    const second = bundle.changes[1];
+    if (first === undefined || second === undefined) {
+      throw new Error("expected two changes");
+    }
+
+    const restored = runtime("actor-a");
+    expect(restored.collaboration.ingest({
+      epoch: bundle.epoch,
+      changes: [second],
+    })).toMatchObject({
+      ok: true,
+      pending: [{ actorId: "actor-a", counter: 2 }],
+    });
+    const operation = [{
+      op: "replace",
+      path: "/title",
+      value: "Fork",
+    }] as const;
+    expect(restored.document.canPatch(operation)).toEqual({
+      ok: false,
+      code: "actor_history_pending",
+      reason: "cannot author while this actor has pending causal history",
+    });
+
+    expect(restored.collaboration.ingest({
+      epoch: bundle.epoch,
+      changes: [first],
+    })).toMatchObject({ ok: true, pending: [] });
+    expect(restored.document.commit(operation)).toMatchObject({ ok: true });
+
+    const peer = runtime("peer");
+    expect(peer.collaboration.ingest(restored.collaboration.exportBundle()))
+      .toMatchObject({ ok: true });
+    expect(peer.document.value).toMatchObject({ title: "Fork" });
+    expect(peer.collaboration.current().conflicts).toEqual([]);
+  });
+});

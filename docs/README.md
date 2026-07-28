@@ -8,7 +8,7 @@
 docs
 |-- changelog.md              # 사용자 영향 중심 변경 기록
 |-- generated
-|   `-- repo-catalog.json      # v2 Core release catalog
+|   `-- repo-catalog.json      # v2 Core와 optional companion catalog
 |-- public
 |   |-- overview.md            # 프로젝트 이해
 |   |-- quickstart.md          # 사용 시작
@@ -34,7 +34,7 @@ language binding입니다. Archive의 1.x 문서는 v2 exact 20-symbol·six-memb
 | 위치 | 책임 | 독자 |
 | --- | --- | --- |
 | `changelog.md` | 사용자 영향 중심 변경 기록 | 외부 사용자, 릴리스 확인자 |
-| `generated/` | v2 Core release 표면으로 만든 reference data. 직접 편집하지 않는다. | evaluator |
+| `generated/` | v2 Core와 명시적으로 등록한 companion 표면으로 만든 reference data. 직접 편집하지 않는다. | evaluator |
 | `public/` | 사용법과 프로젝트 이해를 위한 공식 문서 원천 | 외부 사용자, LLM, 사이트 방문자 |
 | `standard/` | v2 root 정본 | 표준화 검토자, 대체 구현 작성자 |
 
@@ -45,7 +45,7 @@ language binding입니다. Archive의 1.x 문서는 v2 exact 20-symbol·six-memb
 - public 문서는 usage와 프로젝트 이해만 다룬다.
 - 릴리스 history, 검토 loop, maintainer-only gate는 public 문서에 쓰지 않는다.
 - 내부 구현 경로는 public 문서에 쓰지 않는다.
-- generated catalog는 `packages/json-document`만 읽으며 archive, app, sibling
-  companion을 release package로 추론하지 않는다.
+- generated catalog는 Core와 두 collaboration companion의 exact 경로만 읽으며
+  archive, app, 그 밖의 sibling package를 active package로 추론하지 않는다.
 - 새 문서는 기존 책임 폴더 중 하나에 들어가야 한다.
 - 새 책임 폴더가 필요하면 먼저 이 파일의 책임 표를 갱신한다.

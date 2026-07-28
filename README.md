@@ -7,8 +7,16 @@ v2 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 하며 Zod, Rea
 selection, clipboard, history를 필수 계약에 넣지 않습니다.
 
 ```txt
-Pure Protocol -> Document Projection -> host adapter
+Pure Protocol
+  |-> local provider -----------\
+  |                              > same six-member Document Projection
+  `-> collaboration provider --/    |-> optional history/text authoring
+                                    `-> optional DOM/IME lease
 ```
+
+로컬 전용 사용자는 Core만 설치합니다. 협업으로 전환해도 편집기가 받는
+`JSONDocument` 포트는 바뀌지 않고, causal merge와 DOM publication lease만
+독립 package로 추가합니다.
 
 공식 사이트: https://developer-1px.github.io/json-document/
 
@@ -30,14 +38,17 @@ Pure Protocol -> Document Projection -> host adapter
 | 위치 | 역할 |
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v2 Kernel |
+| [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal multi-writer provider |
+| [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional DOM/IME publication lease |
 | [apps/site](apps/site) | v2 Core 공개 문서 사이트 |
 | [archive/v1](archive/v1) | 배포·workspace·검증에서 분리된 1.x 기록 |
 
-이 저장소가 배포하는 package는 `@interactive-os/json-document` 하나입니다.
-Selection, history, clipboard, persistence와 DOM lifecycle은 host adapter가
-여섯-member `JSONDocument` 위에서 조합합니다. DOM과 Input Events 정규화가
-필요한 제품은 별도 수명 주기를 가진 companion `@interactive-os/editable`을
-검토할 수 있으며, companion은 이 저장소의 배포물이나 v2 Core API가 아닙니다.
+v2 Kernel release는 `@interactive-os/json-document` 하나이며 dependency-free
+Core로 남습니다. 두 collaboration package는 독립 version과 release lifecycle을
+가진 optional companion입니다. Selection, clipboard, persistence와 제품별 DOM
+lifecycle은 host adapter가 여섯-member `JSONDocument` 위에서 조합합니다.
+일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
+`@interactive-os/editable`도 검토할 수 있습니다.
 
 ## 경계
 
