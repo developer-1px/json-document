@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "status": "candidate",
+  "status": "stable",
   "profile": "docs/standard/v2-projection-profile.md",
   "projectionMembers": [
     "value",
@@ -11,9 +11,9 @@
     "subscribe"
   ],
   "coverage": {
-    "runtime": 13,
+    "runtime": 15,
     "static": 6,
-    "deferred": 2
+    "deferred": 0
   },
   "initial": {
     "title": "Draft",
@@ -406,6 +406,65 @@
           }
         },
         "notifications": []
+      }
+    },
+    {
+      "id": "acceptance-cannot-transform-the-candidate",
+      "kind": "commit",
+      "requirements": [
+        "JD2-SCHEMA-002"
+      ],
+      "acceptance": "attempt-transform",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Explicit"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Explicit"
+              }
+            ]
+          }
+        },
+        "value": {
+          "title": "Explicit",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Explicit"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1139,11 +1198,6 @@
       "reason": "The generic runner matches required fields only and never exact result keys."
     },
     {
-      "id": "JD2-SCHEMA-002",
-      "mode": "deferred",
-      "reason": "Transform identity needs a provider-neutral acceptance harness and a second provider."
-    },
-    {
       "id": "JD2-SESSION-001",
       "mode": "static",
       "reason": "The generic runner depends on only the six Projection members."
@@ -1157,11 +1211,6 @@
       "id": "JD2-CONFORMANCE-001",
       "mode": "static",
       "reason": "The vectors run through an injected structural harness without private implementation imports."
-    },
-    {
-      "id": "JD2-CONFORMANCE-002",
-      "mode": "deferred",
-      "reason": "An independent implementation and all five pressure verticals have not passed this suite yet."
     },
     {
       "id": "JD2-BINDING-001",

@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0",
   "description": "Provider-neutral JSON editing protocol and headless document projection.",
   "type": "module",
   "license": "MIT",
@@ -19,7 +19,7 @@
   "publishConfig": {
     "access": "public",
     "provenance": true,
-    "tag": "next"
+    "tag": "latest"
   },
   "keywords": [
     "json",

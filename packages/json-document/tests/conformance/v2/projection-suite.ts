@@ -18,7 +18,10 @@ export type JSONPatchOperation =
   | { readonly op: "copy"; readonly from: string; readonly path: string }
   | { readonly op: "test"; readonly path: string; readonly value: JSONValue };
 
-export type ProjectionAcceptance = "json" | "task-list";
+export type ProjectionAcceptance =
+  | "json"
+  | "task-list"
+  | "attempt-transform";
 export type ProjectionMetadata = Readonly<Record<string, JSONValue>>;
 
 export interface ProjectionChange {

@@ -223,13 +223,13 @@ const required = [
   ["api", surfaces.api, /Root document Pointer는 빈 문자열 `""`/],
   ["api", surfaces.api, /function asPointer/],
   ["api", surfaces.api, /## Host와 adapter/],
-  ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/],
+  ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@2\.0\.0/],
   ["packageReadme", surfaces.packageReadme, /패키지는 `\/session`이나 `\/react` subpath를\s*공개하지 않습니다/],
   ["collaborationReadme", surfaces.collaborationReadme, /same six-member Projection API/],
   ["collaborationReadme", surfaces.collaborationReadme, /contains no transport, presence,\s*storage, DOM, React, or server dependency/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe DOM publication lease/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
-  ["llms", surfaces.llms, /2\.0\.0-rc\.0.*Candidate/],
+  ["llms", surfaces.llms, /2\.0\.0.*Stable/],
   ["llms", surfaces.llms, /공개 Root는 정확히 다음 20개 symbol/],
   ["llms", surfaces.llms, /## Host adapter와 companion/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-collaboration/],
@@ -338,7 +338,7 @@ for (const pattern of [
 for (const pattern of [
   /Provider-neutral JSON editing/,
   /six-member document projection/,
-  /npm install @interactive-os\/json-document@2\.0\.0-rc\.0/,
+  /npm install @interactive-os\/json-document@2\.0\.0/,
   /Rich editing belongs to host adapters/,
 ]) {
   requirePattern("site home", siteHome, pattern);

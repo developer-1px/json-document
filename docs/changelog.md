@@ -5,6 +5,14 @@ All notable changes to the active v2 packages are documented here. The complete
 
 ## Unreleased
 
+- Declared the `2.0.0` Projection Profile Stable after the same black-box suite
+  passed the public reference binding and a reference-free independent
+  implementation across form, table/data-grid, outliner/tree, rich text, and
+  storage/collaboration pressure vectors.
+- Converged Core JSON equality and canonical array-index parsing to one
+  primitive each, locked collaboration package-local equivalents to shared
+  vectors, and recorded the intentional validation/owning-clone/trusted-clone
+  responsibility split.
 - Added independent prerelease tag publishing for the Core and both optional
   collaboration packages, and kept the live-site archive gate aware of the two
   supported v2 companions.

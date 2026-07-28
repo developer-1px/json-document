@@ -121,9 +121,9 @@ describe("public docs consistency", () => {
     expect(docs.quickstart).toMatch(/튜토리얼: 작은 카드 편집기 만들기/);
     expect(docs.api).toMatch(/## 작업별 진입점/);
     expect(docs.api).toMatch(/ReadResult/);
-    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@2\.0\.0-rc\.0/);
+    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@2\.0\.0/);
     expect(docs.readme).toMatch(/provider-neutral/);
-    expect(docs.llms).toMatch(/2\.0\.0-rc\.0.*Candidate/);
+    expect(docs.llms).toMatch(/2\.0\.0.*Stable/);
   });
 
   test("keeps JSONPath scoped to search and JSON Pointer scoped to mutation", () => {

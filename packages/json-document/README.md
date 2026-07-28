@@ -11,9 +11,9 @@ clipboard는 core 계약이 아닙니다.
 Pure Protocol -> Document Projection -> host adapter
 ```
 
-현재 버전은 `2.0.0-rc.0`입니다. root v2 binding은 구현됐지만, 독립 구현과 다섯
-편집 vertical의 conformance gate를 통과하기 전까지 표준 profile은 Candidate로
-유지합니다.
+현재 버전은 `2.0.0`입니다. reference와 독립 구현이 같은 conformance suite를
+통과했고, form·table/data-grid·outliner/tree·rich text·storage/collaboration
+pressure gate까지 검증한 Stable profile입니다.
 
 - 공식 사이트: https://developer-1px.github.io/json-document/
 - 표준 profile: `docs/standard/v2-projection-profile.md`
@@ -23,7 +23,7 @@ Pure Protocol -> Document Projection -> host adapter
 Core만 쓸 때 필수 dependency가 없습니다.
 
 ```sh
-npm install @interactive-os/json-document@2.0.0-rc.0
+npm install @interactive-os/json-document@2.0.0
 ```
 
 ## 60초 시작

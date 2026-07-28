@@ -1,11 +1,11 @@
 import type { Pointer } from "../pointer/core.js";
+import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import {
   mutateContainer,
   parseSafe,
   withMutated,
 } from "./container.js";
 import { objectHasOwn } from "./object.js";
-import { numericSegment } from "./path.js";
 import type { ErrorCode, JSONPatchOperation } from "./contract.js";
 
 export function applyTrustedValueMutation(
@@ -74,7 +74,7 @@ function applyObjectArrayElementTrustedValueMutation(
   if (arrayKeySlash === -1 || path.indexOf("/", arrayKeySlash + 1) !== -1) return null;
 
   const arrayKey = path.slice(1, arrayKeySlash);
-  const itemIndex = numericSegment(path.slice(arrayKeySlash + 1));
+  const itemIndex = parseArrayIndex(path.slice(arrayKeySlash + 1));
   if (itemIndex === null) return null;
 
   if (state === null || typeof state !== "object" || Array.isArray(state)) return null;
@@ -110,7 +110,7 @@ function applyObjectArrayFieldTrustedValueMutation(
   if (fieldSlash === -1 || path.indexOf("/", fieldSlash + 1) !== -1) return null;
 
   const arrayKey = path.slice(1, arrayKeySlash);
-  const rowIndex = numericSegment(path.slice(arrayKeySlash + 1, fieldSlash));
+  const rowIndex = parseArrayIndex(path.slice(arrayKeySlash + 1, fieldSlash));
   if (rowIndex === null) return null;
   const field = path.slice(fieldSlash + 1);
   if (field === "") return null;

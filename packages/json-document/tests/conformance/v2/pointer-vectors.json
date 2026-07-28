@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "status": "candidate",
+  "status": "stable",
   "profile": "docs/standard/v2-projection-profile.md",
   "requirements": ["JD2-ADDRESS-001", "JD2-PATCH-001"],
   "parse": [

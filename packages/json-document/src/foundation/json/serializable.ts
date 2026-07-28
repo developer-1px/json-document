@@ -1,4 +1,5 @@
 import { buildPointer } from "../pointer/core.js";
+import { isJsonArrayIndexKey } from "./classification.js";
 
 export function jsonSerializableError(value: unknown): string | null {
   return jsonSerializableErrorFast(value) === null ? null : jsonSerializableErrorDetailed(value);
@@ -130,7 +131,7 @@ function jsonSerializableErrorDetailed(value: unknown): string | null {
       }
       if (Object.getOwnPropertyNames(v).length !== v.length + 1) {
         for (const key of Object.getOwnPropertyNames(v)) {
-          if (key === "length" || isArrayIndexKey(key)) continue;
+          if (key === "length" || isJsonArrayIndexKey(key)) continue;
           path.push(key);
           const message = `${at()}: non-index array property is not JSON`;
           path.pop();
@@ -170,10 +171,4 @@ function jsonSerializableErrorDetailed(value: unknown): string | null {
   };
 
   return visit(value);
-}
-
-function isArrayIndexKey(key: string): boolean {
-  if (key === "") return false;
-  const index = Number(key);
-  return Number.isInteger(index) && index >= 0 && index < 2 ** 32 - 1 && String(index) === key;
 }

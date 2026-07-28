@@ -2,11 +2,11 @@
 
 import { isPrefix, parsePointer, type Pointer } from "../pointer/core.js";
 import { cloneJson } from "../json/clone.js";
+import { jsonEqual } from "../json/equal.js";
 import { jsonSerializableError } from "../json/serializable.js";
 import type { ErrorCode, JSONPatchOperation } from "./contract.js";
 import {
   attachPointer,
-  deepEqual,
   getValueAt,
   mutateContainer,
   parseSafe,
@@ -133,7 +133,7 @@ export function applyOpRaw(state: unknown, op: JSONPatchOperation): RawResult {
     case "test": {
       const got = getValueAt(state, segments);
       if (!got.ok) return attachPointer(got, op.path);
-      if (!deepEqual(got.value, op.value)) return { error: "test_failed", reason: "value mismatch", pointer: op.path };
+      if (!jsonEqual(got.value, op.value)) return { error: "test_failed", reason: "value mismatch", pointer: op.path };
       return { state };
     }
     case "copy":

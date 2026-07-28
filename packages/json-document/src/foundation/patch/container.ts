@@ -1,6 +1,7 @@
 // patch.ts 내부 헬퍼 — public API 아님. docs/standard/json-document-spec.md §3 의 RFC 6902 구현 디테일.
 
 import { parsePointer, readAt, type Pointer, PointerSyntaxError } from "../pointer/core.js";
+import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import type { ErrorCode, JSONPatchOperation } from "./contract.js";
 
 // RFC 6902 §4.1: `/-` 는 array append marker. 적용 시점의 array 길이로 concrete index 정규화.
@@ -47,39 +48,6 @@ export function normalizeAppliedOp(op: JSONPatchOperation, after: unknown): JSON
 export type ContainerError = { error: ErrorCode; reason?: string };
 export type ParseSafeResult = { ok: true; segs: string[] } | { error: ErrorCode; reason: string; pointer: Pointer };
 
-export function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
-  if (Array.isArray(a) !== Array.isArray(b)) return false;
-  if (Array.isArray(a)) {
-    if (a.length !== (b as unknown[]).length) return false;
-    for (let i = 0; i < a.length; i++) if (!deepEqual(a[i], (b as unknown[])[i])) return false;
-    return true;
-  }
-  const ao = a as Record<string, unknown>;
-  const bo = b as Record<string, unknown>;
-  const ak = Object.keys(ao);
-  if (ak.length !== Object.keys(bo).length) return false;
-  for (const k of ak) {
-    if (!Object.prototype.hasOwnProperty.call(bo, k)) return false;
-    if (!deepEqual(ao[k], bo[k])) return false;
-  }
-  return true;
-}
-
-function parseArrayIndex(seg: string): number | null {
-  if (seg === "-") return -1; // RFC 6901 §4 append marker
-  if (seg.length === 0) return null;
-  const first = seg.charCodeAt(0);
-  if (first === 48) return seg.length === 1 ? 0 : null;
-  if (first < 49 || first > 57) return null;
-  for (let index = 1; index < seg.length; index += 1) {
-    const code = seg.charCodeAt(index);
-    if (code < 48 || code > 57) return null;
-  }
-  return Number(seg);
-}
-
 export function attachPointer(e: ContainerError, pointer: Pointer): ContainerError & { pointer: Pointer } {
   return { ...e, pointer };
 }
@@ -100,7 +68,7 @@ export function getValueAt(state: unknown, segments: string[]): { ok: true; valu
     if (cur === null || cur === undefined) return fail(`segment ${i}: ${seg}`);
     if (Array.isArray(cur)) {
       const idx = parseArrayIndex(seg);
-      if (idx === null || idx === -1 || idx >= cur.length) return fail(`segment ${i}: ${seg}`);
+      if (idx === null || idx >= cur.length) return fail(`segment ${i}: ${seg}`);
       cur = cur[idx];
     } else if (typeof cur === "object") {
       if (!Object.prototype.hasOwnProperty.call(cur, seg)) return fail(`segment ${i}: ${seg}`);
@@ -127,7 +95,7 @@ export function withMutated(
     if (cur === null || cur === undefined) return { error: "path_not_found", reason: `segment ${i}` };
     if (Array.isArray(cur)) {
       const idx = parseArrayIndex(seg);
-      if (idx === null || idx === -1 || idx >= cur.length) return { error: "path_not_found", reason: `segment ${i}: ${seg}` };
+      if (idx === null || idx >= cur.length) return { error: "path_not_found", reason: `segment ${i}: ${seg}` };
       parents.push({ container: cur, key: String(idx) });
       cur = cur[idx];
     } else if (typeof cur === "object") {
@@ -160,7 +128,7 @@ export function mutateContainer(parent: unknown, key: string, verb: Verb, value?
   if (Array.isArray(parent)) {
     if (verb === "set" && key === "-") return { value: parent.concat([value]) };
     const idx = parseArrayIndex(key);
-    if (idx === null || idx === -1) return { error: "path_not_found", reason: `array index: ${key}` };
+    if (idx === null) return { error: "path_not_found", reason: `array index: ${key}` };
     if (verb === "set") {
       if (idx > parent.length) return { error: "path_not_found", reason: `out of range: ${key}` };
       if (idx === parent.length) return { value: parent.concat([value]) };

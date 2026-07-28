@@ -1,7 +1,7 @@
 # json-document v2 Projection Profile
 
-상태: Candidate (`2.0.0-rc.0`). TypeScript root binding과 reference
-implementation은 구현됐지만 stable gate는 아직 통과하지 않았다.
+상태: Stable (`2.0.0`). TypeScript root binding, reference implementation,
+독립 test implementation, 다섯 pressure vertical이 stable gate를 통과했다.
 
 이 profile은 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 의존할
 수 있는 최소 JSON 편집 계약을 정의한다. 구현체는 더 많은 기능을 제공할 수
@@ -159,6 +159,12 @@ conformance corpus의 public-root binding을 서로 분리한다.
 | `packages/json-document/tests/public/v2-rfc6902-standard-conformance.test.ts` | public root `applyPatch`의 전체 RFC 6902 corpus binding |
 | `packages/json-document/tests/conformance/v2/jsonpath-suite.ts` | vendored RFC 9535 CTS를 `query`와 `at`으로 검증하는 runner |
 | `packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts` | public root Projection의 전체 RFC 9535 CTS binding |
+| `packages/json-document/tests/conformance/v2/foundation-vectors.json` | Core와 collaboration package-local primitive의 array index·equality parity 및 JSON boundary fixture |
+| `packages/json-document/tests/conformance/v2/pressure-vectors.json` | form, table/data-grid, outliner/tree, rich text, storage/collaboration 시나리오 |
+| `packages/json-document/tests/conformance/v2/pressure-suite.ts` | 여섯 member만으로 다섯 vertical을 실행하는 injected runner |
+| `packages/json-document/tests/independent/v2-projection.ts` | reference runtime을 import하지 않는 독립 6-member test implementation |
+| `packages/json-document/tests/independent/v2-projection-independent-conformance.test.ts` | 독립 구현에 Projection과 pressure suite를 함께 주입하는 binding |
+| `packages/json-document-collaboration/tests/projection-conformance.test.ts` | collaboration public root에 같은 두 suite를 주입하는 추가 binding |
 
 suite가 export하는 structural type은 test harness 내부 계약이며 package public
 export가 아니다. Vendored RFC 6902 corpus 112건 중 110건을 실행한다. 남은 2건은
@@ -166,10 +172,28 @@ export가 아니다. Vendored RFC 6902 corpus 112건 중 110건을 실행한다.
 member만 남아 public operation object로는 그 입력을 표현할 수 없어, 각 fixture에
 명시적인 `disabledReason`을 기록한다.
 
-21개 요구사항의 현재 증거 상태는 runtime 13개, static 6개, deferred 2개다.
-schema-free `applyPatch`는 구현됐다. transform identity의 two-provider 검증,
-독립 구현과 다섯 pressure vertical 통과는 아직 deferred이므로 Candidate를
-stable이라고 선언할 수 없다.
+21개 요구사항의 현재 증거 상태는 runtime 15개, static 6개, deferred 0개다.
+schema-free `applyPatch`와 acceptance transform identity는 reference와 독립
+구현에서 같은 vector로 검증한다. 같은 Projection suite와 pressure suite는
+reference와 독립 구현을 모두 통과하며, collaboration public binding도 같은
+다섯 vertical을 통과한다. collaboration 구현은 Core protocol을 조합하므로
+독립 구현 수에는 포함하지 않는다.
+
+## Durability primitive boundary
+
+Core의 JSON equality는 하나의 equality leaf가 소유한다. canonical array index
+`[0]|[1-9][0-9]*`와 JavaScript safe-integer 경계도 하나의 Pointer leaf가
+소유하며, RFC 6902 append marker `-`는 write 문맥에서만 별도로 처리한다.
+collaboration package는 Core private path를 deep import하지 않고 package-local
+두 primitive를 유지하며 `foundation-vectors.json`을 함께 실행해 의미 차이를
+드러낸다.
+
+JSON validation, owning clone, trusted clone은 하나의 traversal abstraction으로
+합치지 않는다. validation은 오류 위치를 설명하고, owning clone은 검증과
+reference 격리를 함께 수행하며, trusted clone은 이미 검증된 값만 받는
+precondition을 가진다. validation과 owning clone이 공유해야 하는
+array-property 분류만 공통 leaf에 두고, parity test가 untrusted boundary의
+동일한 성공·실패와 trusted clone의 소유권 분리를 고정한다.
 
 ## Package binding
 

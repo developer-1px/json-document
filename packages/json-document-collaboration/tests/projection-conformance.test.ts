@@ -3,18 +3,24 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 
-import { createCollaborationRuntime } from "../src/index.js";
+import { createCollaborationRuntime } from "@interactive-os/json-document-collaboration";
 import {
   runProjectionConformance,
   type Projection,
   type ProjectionAcceptance,
   type ProjectionHarness,
 } from "../../json-document/tests/conformance/v2/projection-suite.js";
+import { runPressureConformance } from "../../json-document/tests/conformance/v2/pressure-suite.js";
 
 function createProjection(
   acceptance: ProjectionAcceptance,
   initial: JSONValue,
 ): Projection {
+  const accepts = acceptance === "task-list"
+    ? taskListAcceptance
+    : acceptance === "attempt-transform"
+      ? attemptTransformAcceptance
+      : undefined;
   return createCollaborationRuntime(initial, {
     actorId: "conformance",
     epochId: "projection-conformance/v1",
@@ -22,10 +28,17 @@ function createProjection(
       id: `projection-conformance/${acceptance}`,
       digest: `projection-conformance/${acceptance}/v1`,
     },
-    ...(acceptance === "task-list"
-      ? { accepts: taskListAcceptance }
-      : {}),
+    ...(accepts === undefined ? {} : { accepts }),
   }).document;
+}
+
+function attemptTransformAcceptance(
+  candidate: JSONValue,
+): JSONCapabilityResult {
+  if (isRecord(candidate)) {
+    Reflect.set(candidate, "title", "Implicit");
+  }
+  return { ok: true };
 }
 
 function taskListAcceptance(candidate: JSONValue): JSONCapabilityResult {
@@ -59,3 +72,4 @@ const harness: ProjectionHarness = {
 };
 
 runProjectionConformance(harness);
+runPressureConformance(harness);

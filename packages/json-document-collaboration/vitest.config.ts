@@ -7,6 +7,10 @@ export default defineConfig({
         "../json-document/src/application/document/index.ts",
         import.meta.url,
       ).pathname,
+      "@interactive-os/json-document-collaboration": new URL(
+        "./src/index.ts",
+        import.meta.url,
+      ).pathname,
     },
   },
   test: {
