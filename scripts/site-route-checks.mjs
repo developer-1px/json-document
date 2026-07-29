@@ -1,5 +1,4 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
-const validGroups = new Set(["Start", "Demos"]);
 
 export function validateSiteRoutes(routes, fail) {
   if (!Array.isArray(routes) || routes.length === 0) {
@@ -34,7 +33,7 @@ export function validateSiteRoutes(routes, fail) {
     if (typeof route.description !== "string" || route.description.trim() === "") {
       fail(`site route ${route.path} is missing a description.`);
     }
-    if (!validGroups.has(route.group)) {
+    if (route.group !== "Start") {
       fail(`site route ${route.path} has an invalid group.`);
     }
 

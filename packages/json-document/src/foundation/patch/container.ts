@@ -1,4 +1,4 @@
-// patch.ts 내부 헬퍼 — public API 아님. docs/standard/json-document-spec.md §3 의 RFC 6902 구현 디테일.
+// RFC 6902 patch 적용을 위한 내부 container helper.
 
 import { parsePointer, readAt, type Pointer, PointerSyntaxError } from "../pointer/core.js";
 import { parseArrayIndex } from "../pointer/arrayIndex.js";
@@ -6,7 +6,7 @@ import type { ErrorCode, JSONPatchOperation } from "./contract.js";
 
 // RFC 6902 §4.1: `/-` 는 array append marker. 적용 시점의 array 길이로 concrete index 정규화.
 // 비-array 부모거나 path 가 `/-` 가 아니면 원본 path 유지.
-export function resolveAppendPath(path: Pointer, before: unknown): Pointer {
+function resolveAppendPath(path: Pointer, before: unknown): Pointer {
   if (!path.endsWith("/-")) return path;
   const parent = path.slice(0, -2);
   const segs = parent === "" ? [] : parsePointer(parent);
@@ -18,7 +18,7 @@ export function resolveAppendPath(path: Pointer, before: unknown): Pointer {
 // move to `/-` is resolved after the source has been removed. The applied
 // record must point at the concrete inserted element so selection/history can
 // track it.
-export function resolveAppliedAppendPath(path: Pointer, after: unknown): Pointer {
+function resolveAppliedAppendPath(path: Pointer, after: unknown): Pointer {
   if (!path.endsWith("/-")) return path;
   const parent = path.slice(0, -2);
   const segs = parent === "" ? [] : parsePointer(parent);
@@ -45,8 +45,8 @@ export function normalizeAppliedOp(op: JSONPatchOperation, after: unknown): JSON
   return path === op.path ? op : { op: "move", from: op.from, path };
 }
 
-export type ContainerError = { error: ErrorCode; reason?: string };
-export type ParseSafeResult = { ok: true; segs: string[] } | { error: ErrorCode; reason: string; pointer: Pointer };
+type ContainerError = { error: ErrorCode; reason?: string };
+type ParseSafeResult = { ok: true; segs: string[] } | { error: ErrorCode; reason: string; pointer: Pointer };
 
 export function attachPointer(e: ContainerError, pointer: Pointer): ContainerError & { pointer: Pointer } {
   return { ...e, pointer };
@@ -118,7 +118,7 @@ export function withMutated(
   return { state: next };
 }
 
-export type Verb = "set" | "replace" | "remove";
+type Verb = "set" | "replace" | "remove";
 
 // container mutation 정본. set/replace/remove 의 array vs object 분기 통합.
 export function mutateContainer(parent: unknown, key: string, verb: Verb, value?: unknown): { value: unknown } | ContainerError {

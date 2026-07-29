@@ -1,21 +1,21 @@
 // RFC 6901 — JSON Pointer.
-// 정본: docs/standard/json-document-spec.md §2. 변환은 lossless.
+// 문자열과 segment 배열 사이의 변환은 lossless다.
 
 import { parseArrayIndex } from "./arrayIndex.js";
 
 export type Pointer = string;
 
-export function escapeSegment(s: string): string {
+function escapeSegment(s: string): string {
   if (!s.includes("~") && !s.includes("/")) return s;
   return s.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 
-export function unescapeSegment(s: string): string {
+function unescapeSegment(s: string): string {
   if (!s.includes("~")) return s;
   return s.replace(/~1/g, "/").replace(/~0/g, "~");
 }
 
-export interface BuildPointerOptions {
+interface BuildPointerOptions {
   /** RFC 6901 §6 — URI fragment 표현 (`#` prefix + percent-encoding). default false. */
   uriFragment?: boolean;
 }
@@ -101,7 +101,7 @@ export class PointerSyntaxError extends Error {
 }
 
 // ── Path arithmetic (state-free, schema-free) ───────────────────────────────
-// SPEC §5.6. RFC 6901 위에서 순수 path 조작. state·schema 모름. 모든 editor 가 공유.
+// RFC 6901 위의 순수 path 조작으로 state와 schema를 알지 못한다.
 
 /** Parent pointer. `""` (root) 는 `null`. `"/a"` → `""`, `"/a/b"` → `"/a"`. */
 export function parentPointer(pointer: Pointer): Pointer | null {
@@ -110,31 +110,9 @@ export function parentPointer(pointer: Pointer): Pointer | null {
   return i <= 0 ? "" : pointer.slice(0, i);
 }
 
-/** 마지막 segment (이스케이프 디코드된). `""` 또는 `null`. */
-export function lastSegment(pointer: Pointer): string | null {
-  if (pointer === "") return null;
-  const i = pointer.lastIndexOf("/");
-  if (i < 0) return null;
-  return unescapeSegment(pointer.slice(i + 1));
-}
-
-/** 마지막 segment 가 array index 면 그 정수, 아니면 `null` (record key 또는 root). */
-export function lastSegmentIndex(pointer: Pointer): number | null {
-  const seg = lastSegment(pointer);
-  return seg === null ? null : parseArrayIndex(seg);
-}
-
 /** Pointer 끝에 segment 추가. `appendSegment("/a", 0)` → `"/a/0"`, escape 자동. */
 export function appendSegment(pointer: Pointer, seg: string | number): Pointer {
   return pointer + "/" + escapeSegment(String(seg));
-}
-
-/** Pointer 의 마지막 segment 를 교체. root 면 `null`. */
-export function withLastSegment(pointer: Pointer, seg: string | number): Pointer | null {
-  if (pointer === "") return null;
-  const i = pointer.lastIndexOf("/");
-  if (i < 0) return null;
-  return pointer.slice(0, i + 1) + escapeSegment(String(seg));
 }
 
 // ── Internal helpers (not in public index) ──────────────────────────────────

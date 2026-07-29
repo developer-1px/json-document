@@ -1,6 +1,6 @@
 import { jsonSerializableError } from "../json/serializable.js";
 import { parseArrayIndex } from "../pointer/arrayIndex.js";
-import { applyOpRaw, validateOperationShape } from "./apply.js";
+import { validateOperationShape } from "./apply.js";
 import { parseSafe } from "./container.js";
 import type { FastPatchResult, JSONPatchOperation } from "./contract.js";
 import { objectHasOwn } from "./object.js";
@@ -14,8 +14,7 @@ interface PreparedSequentialReplace {
 
 interface SequentialReplaceRun {
   state: unknown;
-  applied: ReplaceOperation[] | null;
-  inverses: JSONPatchOperation[] | null;
+  applied: ReplaceOperation[];
 }
 
 /**
@@ -28,53 +27,21 @@ export function applySequentialReplacePatch(
   operations: ReadonlyArray<JSONPatchOperation>,
   valuesTrusted = false,
 ): FastPatchResult {
-  const run = runSequentialReplaceBatch(state, operations, valuesTrusted, false);
-  return run === null || run.applied === null
+  const run = runSequentialReplaceBatch(state, operations, valuesTrusted);
+  return run === null
     ? { handled: false }
     : { handled: true, state: run.state, applied: run.applied };
-}
-
-/**
- * Captures the value immediately before each sequential write and returns
- * inverse operations in undo order. A null result delegates to the generic
- * inverse path, preserving its existing success and failure semantics.
- */
-export function computeSequentialReplaceInverses(
-  state: unknown,
-  operations: ReadonlyArray<JSONPatchOperation>,
-): JSONPatchOperation[] | null {
-  let firstReplace = 0;
-  while (
-    firstReplace < operations.length
-    && firstReplace in operations
-    && operations[firstReplace]!.op === "test"
-  ) {
-    const asserted = applyOpRaw(state, operations[firstReplace]!);
-    if ("error" in asserted) return null;
-    state = asserted.state;
-    firstReplace += 1;
-  }
-  if (firstReplace === operations.length) return null;
-
-  const replaceOperations = firstReplace === 0
-    ? operations
-    : operations.slice(firstReplace);
-  const run = runSequentialReplaceBatch(state, replaceOperations, false, true);
-  return run?.inverses ?? null;
 }
 
 function runSequentialReplaceBatch(
   state: unknown,
   operations: ReadonlyArray<JSONPatchOperation>,
   valuesTrusted: boolean,
-  captureInverses: boolean,
 ): SequentialReplaceRun | null {
   if (operations.length < 2) return null;
 
   const prepared = new Array<PreparedSequentialReplace>(operations.length);
-  const applied = captureInverses
-    ? null
-    : new Array<ReplaceOperation>(operations.length);
+  const applied = new Array<ReplaceOperation>(operations.length);
   for (let index = 0; index < operations.length; index += 1) {
     if (!(index in operations)) return null;
     const operation = operations[index]!;
@@ -89,12 +56,9 @@ function runSequentialReplaceBatch(
     const parsed = parseSafe(operation.path);
     if (!("ok" in parsed)) return null;
     prepared[index] = { operation, segments: parsed.segs };
-    if (applied !== null) applied[index] = operation;
+    applied[index] = operation;
   }
 
-  const inverses = captureInverses
-    ? new Array<JSONPatchOperation>(operations.length)
-    : null;
   const draftContainers = new WeakSet<object>();
   let draft = state;
   for (let index = 0; index < prepared.length; index += 1) {
@@ -104,14 +68,12 @@ function runSequentialReplaceBatch(
       item.segments,
       item.operation,
       draftContainers,
-      inverses,
-      operations.length - index - 1,
     );
     if (replaced === null) return null;
     draft = replaced;
   }
 
-  return { state: draft, applied, inverses };
+  return { state: draft, applied };
 }
 
 function replaceDraftValue(
@@ -119,8 +81,6 @@ function replaceDraftValue(
   segments: ReadonlyArray<string>,
   operation: ReplaceOperation,
   draftContainers: WeakSet<object>,
-  inverses: JSONPatchOperation[] | null,
-  inverseIndex: number,
 ): unknown | null {
   if (segments.length === 0) return null;
   const root = ensureDraftContainer(state, draftContainers);
@@ -139,13 +99,6 @@ function replaceDraftValue(
 
   const target = readDraftChild(current, segments[segments.length - 1]!);
   if (!target.ok) return null;
-  if (inverses !== null) {
-    inverses[inverseIndex] = {
-      op: "replace",
-      path: operation.path,
-      value: target.value,
-    };
-  }
   writeDraftChild(current, target.key, operation.value);
   return root;
 }

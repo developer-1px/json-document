@@ -44,7 +44,6 @@ import {
   projectTree,
   resolveTextMemberSnapshot,
   resolveTextSnapshot,
-  type TreeState,
 } from "./tree.js";
 import {
   authoredTextAtomId,

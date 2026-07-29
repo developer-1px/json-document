@@ -5,20 +5,15 @@
 //   ✓ filter [?<expr>] — comparisons (==/!=/</<=/>/>=) + logical (&&/||/!) + exists
 //   ✓ RFC 9535 function extensions — length/count/match/search/value
 //
-// API:
-//   query(query, root) → Pointer[]      // shorthand
-//   queryMatches(query, root) → Match[] // pointer + value 쌍
-//
-// SPEC §0.3 (2) 표준 Path: RFC 6901 + RFC 9535. JSONPath query → Pointer[] 환원.
+// API: query(query, root) → Pointer[]
+// RFC 9535 JSONPath 결과를 RFC 6901 Pointer 배열로 환원한다.
 
 import { parse as parseJsonPath } from "./parse.js";
 import { evaluate, matchPointers } from "./evaluate.js";
 import { matchPointersForSimpleQuery } from "./simple.js";
 import type { Pointer } from "../pointer/core.js";
-import type { Match, Query } from "./ast.js";
-export { parse } from "./parse.js";
+import type { Query } from "./ast.js";
 export { JSONPathSyntaxError } from "./tokenize.js";
-export type { Match, Query } from "./ast.js";
 
 const QUERY_CACHE_LIMIT = 128;
 const queryCache = new Map<string, Query>();
@@ -31,12 +26,6 @@ export function query(jsonpath: string, root: unknown): Pointer[] {
   const simplePointers = matchPointersForSimpleQuery(ast, root);
   if (simplePointers !== null) return simplePointers;
   return matchPointers(evaluate(ast, root));
-}
-
-/** shorthand with values: query string + root → Match[]. */
-export function queryMatches(jsonpath: string, root: unknown): Match[] {
-  const ast = cachedParse(jsonpath);
-  return evaluate(ast, root);
 }
 
 function cachedParse(jsonpath: string): Query {

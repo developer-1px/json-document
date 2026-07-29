@@ -19,11 +19,11 @@ import {
   type ReadResult,
 } from "../../foundation/protocol/index.js";
 
-export interface ProjectionOptions {
+interface ProjectionOptions {
   readonly accepts?: (candidate: JSONValue) => JSONCapabilityResult;
 }
 
-export interface ProjectionDocument {
+interface ProjectionDocument {
   readonly value: JSONValue;
   at(pointer: string): ReadResult;
   query(jsonPath: string): QueryResult;

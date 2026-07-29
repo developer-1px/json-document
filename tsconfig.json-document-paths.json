@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@interactive-os/json-document": ["packages/json-document/src/application/document/index.ts"]
-    }
-  }
-}

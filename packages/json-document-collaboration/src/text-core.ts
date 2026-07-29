@@ -6,7 +6,7 @@ import type {
   TextSpliceOperation,
 } from "./types.js";
 
-export interface TextAtom {
+interface TextAtom {
   readonly id: TextAtomId;
   readonly value: string;
   deleted: boolean;
@@ -19,7 +19,7 @@ export interface TextState {
   atoms?: Map<TextAtomId, TextAtom>;
 }
 
-export interface TextCoreFailure {
+interface TextCoreFailure {
   readonly ok: false;
   readonly code: string;
   readonly reason: string;
@@ -30,13 +30,13 @@ export interface TextAtomSnapshot {
   readonly value: string;
 }
 
-export interface TextSnapshot {
+interface TextSnapshot {
   readonly textNode: TextNodeId;
   readonly value: string;
   readonly atoms: ReadonlyArray<TextAtomSnapshot>;
 }
 
-export interface MinimalTextSplice {
+interface MinimalTextSplice {
   readonly left: TextAtomId | null;
   readonly right: TextAtomId | null;
   readonly removed: ReadonlyArray<TextAtomId>;

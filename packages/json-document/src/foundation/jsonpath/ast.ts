@@ -48,7 +48,7 @@ export interface FunctionExpr {
   args: FunctionArgument[];
 }
 
-export type FunctionArgument = Comparable;
+type FunctionArgument = Comparable;
 
 /** evaluate 결과 — query 가 매칭한 location 들의 Pointer + value. */
 export interface Match {

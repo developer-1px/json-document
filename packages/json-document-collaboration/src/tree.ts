@@ -23,7 +23,6 @@ import type {
   ContainerNodeId,
   MemberId,
   MemberPlacement,
-  ObjectPlacement,
   PositionId,
   SemanticOperation,
   TextNodeId,
@@ -93,23 +92,23 @@ export interface TreeFailure {
   readonly reason: string;
 }
 
-export interface ProjectedTree {
+interface ProjectedTree {
   readonly ok: true;
   readonly value: JSONValue;
   readonly conflicts: ReadonlyArray<CollaborationConflict>;
 }
 
-export interface ResolvedMember {
+interface ResolvedMember {
   readonly memberId: MemberId;
   readonly member: TreeMember;
 }
 
-export interface ResolvedParent {
+interface ResolvedParent {
   readonly container: TreeContainer;
   readonly segment: string;
 }
 
-export interface ResolvedTextSnapshot {
+interface ResolvedTextSnapshot {
   readonly target: MemberId;
   readonly textNode: TextNodeId;
   readonly value: string;
@@ -411,14 +410,6 @@ export function projectMemberValue(
   return projected.ok
     ? { ok: true, value: projected.value }
     : projected;
-}
-
-export function objectMemberAt(
-  tree: TreeState,
-  container: TreeContainer,
-  key: string,
-): TreeMember | null {
-  return objectMembersAt(tree, container, key).at(-1) ?? null;
 }
 
 export function objectMembersAt(
@@ -1240,7 +1231,4 @@ function failure(code: string, reason: string): TreeFailure {
   return { ok: false, code, reason };
 }
 
-export type {
-  TreeContainer,
-  TreeMember,
-};
+export type { TreeContainer };

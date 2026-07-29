@@ -1,14 +1,16 @@
 import {
   canonicalStringify,
 } from "./change.js";
-import { prepareCheckpoint } from "./checkpoint.js";
+import {
+  prepareCheckpoint,
+  verifyCheckpointProof,
+} from "./checkpoint.js";
 import {
   createRestoredRuntime,
   createRestoredTextRuntime,
 } from "./create.js";
 import type { JSONValue } from "@interactive-os/json-document";
 import type {
-  CollaborationCheckpoint,
   CollaborationHistoryRestoreResult,
   CollaborationHistoryRuntime,
   CollaborationRestoreOptions,
@@ -30,7 +32,7 @@ export function restoreCollaborationRuntime(
   input: unknown,
   options: CollaborationRestoreOptions,
 ): CollaborationRestoreResult {
-  const restored = restoreHistoryRuntime(input, options);
+  const restored = restoreCollaborationHistoryRuntime(input, options);
   if (!restored.ok) return restored;
   const runtime: CollaborationRuntime = Object.freeze({
     document: restored.runtime.document,
@@ -61,13 +63,6 @@ export function restoreCollaborationTextRuntime(
     ok: true,
     runtime: restored.runtime as CollaborationTextRuntime,
   });
-}
-
-function restoreHistoryRuntime(
-  input: unknown,
-  options: CollaborationRestoreOptions,
-): CollaborationHistoryRestoreResult {
-  return restoreCollaborationHistoryRuntime(input, options);
 }
 
 function restoreProfileRuntime(
@@ -109,7 +104,7 @@ function restoreProfileRuntime(
       "restore ruleset does not match the checkpoint epoch",
     );
   }
-  const verification = verifyCheckpoint(checkpoint, options);
+  const verification = verifyCheckpointProof(checkpoint, options.verify);
   if (verification !== null) return verification;
 
   try {
@@ -148,34 +143,6 @@ function restoreProfileRuntime(
     return failure(
       "checkpoint_restore_failed",
       error instanceof Error ? error.message : "checkpoint restore failed",
-    );
-  }
-}
-
-function verifyCheckpoint(
-  checkpoint: CollaborationCheckpoint,
-  options: CollaborationRestoreOptions,
-): Extract<CollaborationHistoryRestoreResult, { readonly ok: false }> | null {
-  if (options.verify === undefined) return null;
-  try {
-    const result = options.verify(checkpoint);
-    if (result?.ok === true) return null;
-    if (result?.ok === false && typeof result.code === "string") {
-      return failure(
-        result.code,
-        result.reason ?? "checkpoint proof verification failed",
-      );
-    }
-    return failure(
-      "checkpoint_verification_failed",
-      "checkpoint verifier must return a capability result",
-    );
-  } catch (error) {
-    return failure(
-      "checkpoint_verification_failed",
-      error instanceof Error
-        ? error.message
-        : "checkpoint proof verification failed",
     );
   }
 }

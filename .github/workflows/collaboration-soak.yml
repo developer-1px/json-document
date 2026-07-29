@@ -1,0 +1,23 @@
+name: Collaboration Soak
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 19 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  collaboration-soak:
+    name: Deterministic causal convergence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run the extended collaboration profile
+        run: npm run test:collaboration:soak

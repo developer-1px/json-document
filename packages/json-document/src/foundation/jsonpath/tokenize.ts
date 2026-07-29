@@ -1,7 +1,7 @@
 // foundation/jsonpath/tokenizer — RFC 9535 §2 JSONPath tokenizer.
 // 출력: Token[]. parser 가 소비한다.
 
-export type TokenKind =
+type TokenKind =
   | "$" | "@"
   | "." | ".." | "*"
   | "[" | "]" | ","

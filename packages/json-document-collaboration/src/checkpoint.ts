@@ -1,5 +1,6 @@
 import {
   applyPatch,
+  type JSONCapabilityResult,
   type JSONValue,
 } from "@interactive-os/json-document";
 
@@ -20,6 +21,16 @@ import type {
 type PreparedCheckpoint =
   | { readonly ok: true; readonly checkpoint: CollaborationCheckpoint }
   | { readonly ok: false; readonly reason: string };
+
+type CheckpointVerifier = (
+  checkpoint: CollaborationCheckpoint,
+) => JSONCapabilityResult;
+
+type CheckpointVerificationFailure = {
+  readonly ok: false;
+  readonly code: string;
+  readonly reason: string;
+};
 
 export function createCheckpoint(
   base: JSONValue,
@@ -162,6 +173,34 @@ export function prepareCheckpoint(input: unknown): PreparedCheckpoint {
   };
 }
 
+export function verifyCheckpointProof(
+  checkpoint: CollaborationCheckpoint,
+  verify: CheckpointVerifier | undefined,
+): CheckpointVerificationFailure | null {
+  if (verify === undefined) return null;
+  try {
+    const result = verify(checkpoint);
+    if (result?.ok === true) return null;
+    if (result?.ok === false && typeof result.code === "string") {
+      return verificationFailure(
+        result.code,
+        result.reason ?? "checkpoint proof verification failed",
+      );
+    }
+    return verificationFailure(
+      "checkpoint_verification_failed",
+      "checkpoint verifier must return a capability result",
+    );
+  } catch (error) {
+    return verificationFailure(
+      "checkpoint_verification_failed",
+      error instanceof Error
+        ? error.message
+        : "checkpoint proof verification failed",
+    );
+  }
+}
+
 function prepareMembership(
   input: unknown,
 ):
@@ -204,6 +243,13 @@ function prepareMembership(
 
 function invalid(reason: string): { readonly ok: false; readonly reason: string } {
   return { ok: false, reason };
+}
+
+function verificationFailure(
+  code: string,
+  reason: string,
+): CheckpointVerificationFailure {
+  return Object.freeze({ ok: false, code, reason });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

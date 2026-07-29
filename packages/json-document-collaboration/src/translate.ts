@@ -28,12 +28,12 @@ import type {
   TextSpliceOperation,
 } from "./types.js";
 
-export interface CompiledOperations {
+interface CompiledOperations {
   readonly ops: ReadonlyArray<SemanticOperation>;
   readonly tree: TreeState;
 }
 
-export interface CompilePatchOperationsOptions {
+interface CompilePatchOperationsOptions {
   readonly collaborativeText?: boolean;
 }
 

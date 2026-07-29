@@ -34,20 +34,6 @@ const rootObjectReplaceWhenValuesTrusted: FastPatchStrategy = (state, ops, value
     ? applyRootObjectReplacePatch(state, ops, true)
     : { handled: false };
 
-export const publicTrustedStateStrategies: readonly FastPatchStrategy[] = [
-  applyAppendOnlyAddPatch,
-  applyTailRemovePatch,
-  applyRootObjectRemovePatch,
-  applyRootObjectAddPatch,
-  applyRootObjectReplacePatch,
-  applySameArrayFieldReplacePatch,
-  applySameArrayNestedReplacePatch,
-  applySameArrayElementReplacePatch,
-  applyIndependentReplacePatch,
-  applySequentialReplacePatch,
-  applySameArrayStructuralPatch,
-];
-
 export const trustedStrategies: readonly FastPatchStrategy[] = [
   applyAppendOnlyAddPatch,
   applyTailRemovePatch,

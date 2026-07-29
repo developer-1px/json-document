@@ -1,45 +1,15 @@
-// SPEC §0.2 — RFC 6902 op 적용 시 Pointer 좌표를 자동 추적한다.
+// RFC 6902 op 적용 시 Pointer 좌표를 자동 추적한다.
 // 입력: 적용된 op + 기존 Pointer
 // 출력: 새 Pointer (또는 null = cascading drop)
 
-import { tryParsePointer, buildPointer, isPrefix, parentPointer, lastSegmentIndex, withLastSegment, readAt, type Pointer } from "../pointer/core.js";
+import {
+  buildPointer,
+  isPrefix,
+  tryParsePointer,
+  type Pointer,
+} from "../pointer/core.js";
 import { parseArrayIndex } from "../pointer/arrayIndex.js";
 import type { JSONPatchOperation } from "./contract.js";
-
-export function exists(state: unknown, pointer: Pointer): boolean {
-  const segments = tryParsePointer(pointer);
-  return segments !== null && readAt(state, segments).ok;
-}
-
-// SPEC §5.7 rule 2 / §5.8 rule 2 — lost pointer 복구: nextSibling → prevSibling → 가장 가까운 존재 ancestor.
-// array container 는 좌표 의미가 없는 "항목 컨테이너" 라 fallback 시 건너뛰고 한 단계 더 climb.
-export function recoverLostPointer(
-  lost: Pointer,
-  applied: ReadonlyArray<JSONPatchOperation>,
-  after: unknown,
-): Pointer | null {
-  const idx = lastSegmentIndex(lost);
-  const parent = parentPointer(lost);
-  if (idx === null || parent === null) return null;
-  const trackedParent = trackPointer(parent, applied);
-  if (trackedParent === null) return null;
-  const nextCandidate = withLastSegment(`${trackedParent}/${idx}`, idx);
-  if (nextCandidate !== null && exists(after, nextCandidate)) return nextCandidate;
-  if (idx > 0) {
-    const prevCandidate = `${trackedParent}/${idx - 1}`;
-    if (exists(after, prevCandidate)) return prevCandidate;
-  }
-  // array container 를 건너뛰며 가장 가까운 non-array ancestor 로 fallback.
-  let cur: Pointer | null = trackedParent;
-  while (cur !== null && cur !== "") {
-    const segments = tryParsePointer(cur);
-    if (segments === null) return null;
-    const r = readAt(after, segments);
-    if (r.ok && !Array.isArray(r.value)) return cur;
-    cur = parentPointer(cur);
-  }
-  return null;
-}
 
 function isArrayIndex(seg: string): boolean {
   return parseArrayIndex(seg) !== null;
@@ -141,7 +111,7 @@ export function trackPointer(
   return trackPointerFrom(pointer, applied, 0);
 }
 
-export function trackPointerFrom(
+function trackPointerFrom(
   pointer: Pointer,
   applied: ReadonlyArray<JSONPatchOperation>,
   startIndex: number,
