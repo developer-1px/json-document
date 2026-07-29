@@ -15,7 +15,7 @@ const coreRuntime = [
   /^packages\/json-document\/src\//,
   /^packages\/json-document\/dist\//,
   /^packages\/json-document\/tests\//,
-  /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig(?:\.test)?\.json|vitest\.config\.ts|eslint\.config\.js)$/,
+  /^packages\/json-document\/(?:package\.json|public-contract\.json|tsconfig(?:\.test)?\.json|vitest\.config\.ts)$/,
 ];
 const companionRuntime = [
   /^packages\/json-document-collaboration\//,

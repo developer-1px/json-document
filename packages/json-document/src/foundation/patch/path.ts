@@ -8,7 +8,7 @@ export interface ArrayFieldPath {
   key: string;
 }
 
-export interface ArrayNestedPath {
+interface ArrayNestedPath {
   arrayPath: Pointer;
   arraySegments: string[];
   index: number;

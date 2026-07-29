@@ -1,8 +1,3 @@
-import type {
-  JSONCapabilityResult,
-  JSONValue,
-} from "@interactive-os/json-document";
-
 import {
   canonicalMembership,
   changeIdKey,
@@ -16,6 +11,7 @@ import {
 import {
   createCheckpoint,
   prepareCheckpoint,
+  verifyCheckpointProof,
 } from "./checkpoint.js";
 import {
   acceptCandidate,
@@ -67,7 +63,7 @@ export function compactCollaborationCheckpoint(
   const invalidOptions = validateOptions(checkpoint, options);
   if (invalidOptions !== null) return invalidOptions;
 
-  const verification = verifyCheckpoint(checkpoint, options);
+  const verification = verifyCheckpointProof(checkpoint, options.verify);
   if (verification !== null) return verification;
 
   const changes = new Map<string, CollaborationChange>();
@@ -132,10 +128,7 @@ export function compactCollaborationCheckpoint(
       initialProjection.reason ?? "checkpoint base is not materializable",
     );
   }
-  const initialAcceptance = safeAccept(
-    options.accepts,
-    initialProjection.value,
-  );
+  const initialAcceptance = acceptCandidate(options.accepts, initialProjection.value);
   if (!initialAcceptance.ok) {
     return failure(
       initialAcceptance.code,
@@ -149,7 +142,7 @@ export function compactCollaborationCheckpoint(
     materialized = materializeChanges(
       initialTree,
       graph.ordered,
-      (candidate) => safeAccept(options.accepts, candidate),
+      (candidate) => acceptCandidate(options.accepts, candidate),
     );
   } catch (error) {
     return failure(
@@ -160,10 +153,7 @@ export function compactCollaborationCheckpoint(
     );
   }
   const nextAccepts = effectiveNextAcceptance(checkpoint, options);
-  const nextAcceptance = safeAccept(
-    nextAccepts,
-    materialized.value,
-  );
+  const nextAcceptance = acceptCandidate(nextAccepts, materialized.value);
   if (!nextAcceptance.ok) {
     return failure(
       nextAcceptance.code,
@@ -306,41 +296,6 @@ function effectiveNextAcceptance(
   )
     ? options.accepts
     : undefined;
-}
-
-function verifyCheckpoint(
-  checkpoint: CollaborationCheckpoint,
-  options: CollaborationCompactionOptions,
-): Extract<CollaborationCompactionResult, { readonly ok: false }> | null {
-  if (options.verify === undefined) return null;
-  try {
-    const result = options.verify(checkpoint);
-    if (result?.ok === true) return null;
-    if (result?.ok === false && typeof result.code === "string") {
-      return failure(
-        result.code,
-        result.reason ?? "checkpoint proof verification failed",
-      );
-    }
-    return failure(
-      "checkpoint_verification_failed",
-      "checkpoint verifier must return a capability result",
-    );
-  } catch (error) {
-    return failure(
-      "checkpoint_verification_failed",
-      error instanceof Error
-        ? error.message
-        : "checkpoint proof verification failed",
-    );
-  }
-}
-
-function safeAccept(
-  accepts: ((candidate: JSONValue) => JSONCapabilityResult) | undefined,
-  candidate: JSONValue,
-): JSONCapabilityResult {
-  return acceptCandidate(accepts, candidate);
 }
 
 function unauthorizedReference(

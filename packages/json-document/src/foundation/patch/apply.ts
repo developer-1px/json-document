@@ -1,4 +1,4 @@
-// applyOpRaw — RFC 6902 6 op 의 raw 적용 (schema 검증 없음). public 노출은 patch.ts.
+// applyOpRaw — RFC 6902 6 op 의 raw 적용. 공개 경계는 protocol layer가 소유한다.
 
 import { isPrefix, parsePointer, type Pointer } from "../pointer/core.js";
 import { cloneJson } from "../json/clone.js";
@@ -13,7 +13,7 @@ import {
   withMutated,
 } from "./container.js";
 
-export type RawResult = { state: unknown } | { error: ErrorCode; reason?: string; pointer?: Pointer };
+type RawResult = { state: unknown } | { error: ErrorCode; reason?: string; pointer?: Pointer };
 
 export function validateOperationShape(op: JSONPatchOperation): { error: ErrorCode; reason: string } | null {
   if (!op || typeof op !== "object") return { error: "invalid_pointer", reason: "op must be object" };
@@ -43,37 +43,12 @@ export function validateOperationShape(op: JSONPatchOperation): { error: ErrorCo
 }
 
 type PatchPointerError = { error: "invalid_pointer"; reason: string; pointer: Pointer };
-type PatchValidationError = { error: ErrorCode; reason: string; pointer?: Pointer };
 
 export function validateOperationPointers(op: JSONPatchOperation): PatchPointerError | null {
   const pathError = validatePatchPointer(op.path, "path");
   if (pathError !== null) return pathError;
   if (op.op !== "move" && op.op !== "copy") return null;
   return validatePatchPointer(op.from, "from");
-}
-
-export function validatePatchOperations(
-  operations: ReadonlyArray<JSONPatchOperation>,
-): PatchValidationError | null {
-  for (let index = 0; index < operations.length; index += 1) {
-    if (!(index in operations)) {
-      return { error: "invalid_pointer", reason: `op[${index}]: op must be object` };
-    }
-    const operation = operations[index]!;
-    const shape = validateOperationShape(operation);
-    if (shape !== null) {
-      return { error: shape.error, reason: `op[${index}]: ${shape.reason}` };
-    }
-    const pointerError = validateOperationPointers(operation);
-    if (pointerError !== null) {
-      return {
-        error: pointerError.error,
-        reason: `op[${index}]: ${pointerError.reason}`,
-        pointer: pointerError.pointer,
-      };
-    }
-  }
-  return null;
 }
 
 function validatePatchPointer(pointer: Pointer, field: "path" | "from"): PatchPointerError | null {

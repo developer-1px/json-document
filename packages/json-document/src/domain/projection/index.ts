@@ -1,10 +1,6 @@
 export {
   createProjection,
 } from "./create.js";
-export type {
-  ProjectionDocument,
-  ProjectionOptions,
-} from "./create.js";
 
 export {
   appendSegment,

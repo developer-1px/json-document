@@ -26,7 +26,7 @@ type HistoryOperation = Extract<
   { readonly kind: "undo-change" | "redo-change" }
 >;
 
-export interface MaterializedHistoryState {
+interface MaterializedHistoryState {
   readonly disabledByTarget: ReadonlyMap<string, ChangeId>;
   readonly appliedKeys: ReadonlySet<string>;
   readonly appliedUndoTargets: ReadonlyMap<string, ChangeId>;

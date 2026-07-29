@@ -12,7 +12,6 @@ export type {
   JSONChangeMetadata,
   JSONDocumentCommitOptions,
   JSONDocumentCommitResult,
-  JSONPatchFailure,
   JSONPatchOperation,
   JSONPatchResult,
   JSONValue,
@@ -22,7 +21,6 @@ export type {
 
 export {
   cloneJsonSerializable,
-  cloneTrustedPlainJson,
   jsonEqual,
 } from "../json/index.js";
 export {
@@ -30,7 +28,6 @@ export {
   query as queryJSONPath,
 } from "../jsonpath/index.js";
 export {
-  PointerSyntaxError,
   appendSegment,
   buildPointer,
   parentPointer,
@@ -38,7 +35,6 @@ export {
   readAt,
   tryParsePointer,
 } from "../pointer/core.js";
-export type { Pointer } from "../pointer/core.js";
 
 export function trackPointer(
   pointer: Pointer,

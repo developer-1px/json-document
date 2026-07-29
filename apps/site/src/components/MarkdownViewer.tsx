@@ -2,7 +2,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 
-export type MarkdownHeading = { id: string; level: number; text: string };
+type MarkdownHeading = { id: string; level: number; text: string };
 
 export function MarkdownViewer({ source, hideTitle = false }: { source: string; hideTitle?: boolean }) {
   return (
