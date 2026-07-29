@@ -162,6 +162,33 @@ DOM/native-input publication leasing is likewise separate in
 ingesting model Changes during composition and gates only rendering for the
 leased surface.
 
+## Release evidence
+
+The ordinary package suite includes a provider-neutral task-board host that
+depends only on the six-member `JSONDocument`. The same host commands run
+unchanged against the local and collaboration providers, including a
+concurrent card edit that follows a structural move by stable identity.
+
+It also runs a small deterministic convergence soak on every verification.
+Three replicas author randomized task-board commands and selective
+undo/redo while bundles are partially, out of order, and repeatedly
+delivered. Each case must converge before and after checkpoint restore,
+continue the restored actor lineage without a fork, export one canonical
+checkpoint, and survive new-epoch compaction.
+
+Run the deeper reproducible profile with:
+
+```sh
+npm run test:collaboration:soak
+```
+
+The soak reports its seed in every failure so the exact schedule can be
+replayed with `JSON_DOCUMENT_COLLABORATION_SOAK_SEED` and a case count of one.
+This evidence protects the architecture but does not turn an RC into
+production proof by itself. Stable promotion still requires sustained
+external use, large-document performance evidence, and successful
+offline/checkpoint/epoch operations under a real transport and storage host.
+
 ## Protocol v3 profile
 
 The implemented profile includes:

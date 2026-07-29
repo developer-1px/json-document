@@ -12,6 +12,7 @@
     "dev": "npm run dev -w @interactive-os/json-document-site",
     "build": "npm run build -w @interactive-os/json-document",
     "test": "npm test -w @interactive-os/json-document",
+    "test:collaboration:soak": "npm run test:soak -w @interactive-os/json-document-collaboration",
     "typecheck": "npm run typecheck -w @interactive-os/json-document",
     "smoke:package": "npm run smoke:package -w @interactive-os/json-document",
     "perf:core": "npm run build -w @interactive-os/json-document && node scripts/benchmark-core.mjs",
