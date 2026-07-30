@@ -8,7 +8,6 @@ import {
   trackPointer,
   tryParsePointer,
   type JSONAppliedChange,
-  type JSONCapabilityResult,
   type JSONChangeMetadata,
   type JSONDocument,
   type JSONDocumentOptions,
@@ -33,7 +32,7 @@ type Expect<T extends true> = T;
 type DocumentMembers = keyof JSONDocument;
 type _DocumentMembersAreExact = Expect<Equal<
   DocumentMembers,
-  "value" | "at" | "query" | "validatePatch" | "canPatch" | "commit" | "subscribe"
+  "value" | "at" | "query" | "validatePatch" | "commit" | "subscribe"
 >>;
 
 interface Row {
@@ -58,8 +57,6 @@ const operations: ReadonlyArray<JSONPatchOperation> = [
 const pureResult = applyPatch(initial, operations);
 pureResult satisfies JSONPatchResult;
 document.validatePatch(operations) satisfies JSONPatchValidationResult;
-// Stable v2 compatibility aliases remain callable.
-document.canPatch(operations) satisfies JSONCapabilityResult;
 document.commit(operations, {
   metadata: { origin: "signature" },
 }) satisfies JSONDocumentCommitResult;
@@ -92,7 +89,7 @@ const futureFailure = {
 const forwardCompatibleResult: JSONPatchResult = futureFailure;
 forwardCompatibleResult satisfies JSONPatchResult;
 
-// @ts-expect-error v2 patch payloads are JSON data, not arbitrary host values.
+// @ts-expect-error v3 patch payloads are JSON data, not arbitrary host values.
 const callablePatch: JSONPatchOperation = { op: "add", path: "/run", value: () => undefined };
 
 // @ts-expect-error Editing Session controls are not part of JSONDocument.

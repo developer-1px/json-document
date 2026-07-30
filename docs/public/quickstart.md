@@ -1,6 +1,6 @@
 # 튜토리얼: 작은 카드 편집기 만들기
 
-작은 board state를 일곱-member Core로 읽고, 검증하고, 변경하고, 구독합니다.
+작은 board state를 여섯-member Core로 읽고, 검증하고, 변경하고, 구독합니다.
 루트 package에는 schema provider나 UI framework가 필요하지 않습니다.
 
 ## 1. JSON document 만들기
@@ -128,8 +128,7 @@ if (preview.ok) {
 ## 6. 선택한 validator 연결하기
 
 Core는 Zod를 요구하지 않습니다. 어떤 validator든 canonical `validate`
-callback으로 연결할 수 있습니다. Stable v2 `accepts`는 deprecated
-compatibility identifier입니다.
+callback으로 연결할 수 있습니다.
 
 ```ts
 import * as z from "zod";

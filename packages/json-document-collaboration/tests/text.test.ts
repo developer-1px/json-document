@@ -37,7 +37,6 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     const shared = textRuntime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
-      "collaboration",
       "document",
       "history",
       "replica",
@@ -45,7 +44,6 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
-      "canPatch",
       "commit",
       "query",
       "subscribe",

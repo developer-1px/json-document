@@ -5,7 +5,7 @@ import { jsonEqual } from "../../src/foundation/json/equal.js";
 import { jsonSerializableError } from "../../src/foundation/json/serializable.js";
 import { cloneTrustedPlainJson } from "../../src/foundation/json/trusted-clone.js";
 import { parseArrayIndex } from "../../src/foundation/pointer/array-index.js";
-import rawVectors from "../conformance/v2/foundation-vectors.json" with { type: "json" };
+import rawVectors from "../conformance/v3/foundation-vectors.json" with { type: "json" };
 
 interface FoundationVectors {
   readonly arrayIndexes: ReadonlyArray<{
@@ -22,7 +22,7 @@ interface FoundationVectors {
 
 const vectors = rawVectors as FoundationVectors;
 
-describe("v2 durability primitive parity", () => {
+describe("v3 durability primitive parity", () => {
   test("one Core parser owns canonical array-index classification", () => {
     for (const vector of vectors.arrayIndexes) {
       expect(parseArrayIndex(vector.segment), vector.segment)

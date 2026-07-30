@@ -99,7 +99,7 @@ afterEach(() => {
 });
 
 describe("@interactive-os/json-document-contenteditable-collaboration", () => {
-  test("ingests remote text immediately while leasing only DOM publication", () => {
+  test("ingests remote text immediately while leasing only DOM notification", () => {
     vi.useFakeTimers();
     const local = textRuntime("actor-a");
     const remote = textRuntime("actor-b");
@@ -298,7 +298,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     });
   }
 
-  test("leases one surface without delaying publication to another", () => {
+  test("leases one surface without delaying notification to another", () => {
     const initial = { title: "ab", note: "cd" };
     const local = textRuntime("actor-a", initial);
     const remote = textRuntime("actor-b", initial);
@@ -336,7 +336,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     expect(titleRoot.textContent).toBe("ab");
   });
 
-  test("clamps selection direction and surrogate boundaries after publication", () => {
+  test("clamps selection direction and surrogate boundaries after notification", () => {
     const local = textRuntime("actor-a", { title: "A😀B" });
     const remote = atomicRuntime("actor-b", { title: "A😀B" });
     const root = createRoot();

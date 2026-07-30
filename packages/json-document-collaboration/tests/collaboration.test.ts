@@ -39,17 +39,15 @@ describe("@interactive-os/json-document-collaboration", () => {
     );
   });
 
-  test("exposes the canonical seven-member JSON Document API", () => {
+  test("exposes the canonical six-member JSON Document API", () => {
     const shared = runtime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
-      "collaboration",
       "document",
       "replica",
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
-      "canPatch",
       "commit",
       "query",
       "subscribe",
@@ -364,8 +362,8 @@ describe("@interactive-os/json-document-collaboration", () => {
     });
     expect(target.document.value).toMatchObject({ title: "Draft" });
 
-    const publications: unknown[] = [];
-    target.document.subscribe((change) => publications.push(change));
+    const notifications: unknown[] = [];
+    target.document.subscribe((change) => notifications.push(change));
     expect(target.replica.ingest({
       epoch: exported.epoch,
       changes: [first],
@@ -378,7 +376,7 @@ describe("@interactive-os/json-document-collaboration", () => {
       pending: [],
     });
     expect(target.document.value).toMatchObject({ title: "Second" });
-    expect(publications).toHaveLength(1);
+    expect(notifications).toHaveLength(1);
   });
 
   test("publishes immutable collaboration snapshots once per state-adding ingest", () => {
@@ -397,7 +395,7 @@ describe("@interactive-os/json-document-collaboration", () => {
       throw new Error("expected two changes");
     }
 
-    const snapshots: ReturnType<typeof target.replica.current>[] = [];
+    const snapshots: ReturnType<typeof target.replica.status>[] = [];
     const unsubscribe = target.replica.subscribe((snapshot) => {
       snapshots.push(snapshot);
     });
@@ -428,7 +426,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     expect(target.document.value).toMatchObject({ title: "Second" });
   });
 
-  test("queues reentrant collaboration publications in causal order", () => {
+  test("queues reentrant collaboration notifications in causal order", () => {
     const source = runtime("actor-a");
     const target = runtime("actor-b");
     source.document.commit([
@@ -623,8 +621,8 @@ describe("@interactive-os/json-document-collaboration", () => {
     ]);
   });
 
-  test("isolates acceptance candidates from mutation during remote materialization", () => {
-    const mutatingAcceptance = (candidate: unknown) => {
+  test("isolates validation candidates from mutation during remote materialization", () => {
+    const mutatingValidation = (candidate: unknown) => {
       const value = candidate as { readonly forbidden: boolean };
       if (value.forbidden) {
         Reflect.set(value, "forbidden", false);
@@ -635,20 +633,20 @@ describe("@interactive-os/json-document-collaboration", () => {
     };
     const overrides = {
       ruleset: {
-        id: "test/immutable-acceptance",
-        digest: "test/immutable-acceptance/v1",
+        id: "test/immutable-validation",
+        digest: "test/immutable-validation/v1",
       },
     };
     expect(() => runtime(
       "invalid-initial",
       { forbidden: true },
-      { ...overrides, validate: mutatingAcceptance },
+      { ...overrides, validate: mutatingValidation },
     )).toThrow("Initial document value was rejected");
 
     const source = runtime("actor-a", { forbidden: false }, overrides);
     const target = runtime("actor-b", { forbidden: false }, {
       ...overrides,
-      validate: mutatingAcceptance,
+      validate: mutatingValidation,
     });
     source.document.commit([
       { op: "replace", path: "/forbidden", value: true },

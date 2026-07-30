@@ -4,14 +4,13 @@ IME-safe native-input DOM lease for
 `@interactive-os/json-document-collaboration/text`.
 
 The adapter binds one collaborative string pointer to one contenteditable
-root. Collaboration ingestion and the seven-member document model always update
+root. Collaboration ingestion and the six-member document model always update
 immediately. While the browser owns native input or IME composition, only
 rendering back into that root is delayed.
 
 Canonical DOM adapter와 lease vocabulary는
 [Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
-정의합니다. `TextDOMAdapter`는 canonical public identifier이고
-`CollaborationTextDOM`은 deprecated compatibility alias입니다.
+정의합니다. Public API는 `TextDOMAdapter`와 `DOMObservation`을 사용합니다.
 
 ```ts
 import {

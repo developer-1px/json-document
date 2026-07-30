@@ -63,7 +63,7 @@ export function taskBoardInitialValue(): JSONValue {
 }
 
 /**
- * A product-shaped consumer which knows only the seven-member JSONDocument
+ * A product-shaped consumer which knows only the six-member JSONDocument
  * contract. Provider construction, collaboration, transport, and history stay
  * outside this module.
  */

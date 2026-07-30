@@ -342,7 +342,7 @@ function runVector(
 export function runProtocolConformance(
   harness: ProtocolHarness,
 ): void {
-  describe("json-document v2 pure Protocol black-box conformance", () => {
+  describe("json-document v3 pure Protocol black-box conformance", () => {
     for (const vector of manifest.vectors) {
       test(`[${vector.id}]`, () => runVector(harness, vector));
     }

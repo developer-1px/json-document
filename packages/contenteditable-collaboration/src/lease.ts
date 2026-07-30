@@ -255,7 +255,6 @@ export function createContentEditableAdapter({
       kind: "committed",
       changeId: committed.changeId,
       didChangeDocument: committed.didChangeDocument,
-      projectionChanged: committed.didChangeDocument,
       selection: committed.selection,
     });
   };

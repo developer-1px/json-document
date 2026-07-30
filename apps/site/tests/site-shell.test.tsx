@@ -28,7 +28,7 @@ describe("official site shell", () => {
     expect(screen.getByRole("link", { name: "Skip to content" }).getAttribute("href")).toBe("#main-content");
     expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
     expect(screen.getByText(/Implementation-neutral JSON editing/)).toBeTruthy();
-    expect(screen.getByText("npm install @interactive-os/json-document@2.0.0")).toBeTruthy();
+    expect(screen.getByText("npm install @interactive-os/json-document@3.0.0")).toBeTruthy();
     expect(screen.getByText('import { createJSONDocument } from "@interactive-os/json-document";')).toBeTruthy();
     expect(screen.getByRole("link", { name: "npm" }).getAttribute("href")).toBe("https://www.npmjs.com/package/@interactive-os/json-document");
     expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/developer-1px/json-document");
@@ -46,7 +46,7 @@ describe("official site shell", () => {
 
     await user.click(nav.getByRole("link", { name: "Docs" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("User guide to stateless JSON Patch, the v2 JSON Document, validation, and host adapter boundaries.");
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.");
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Docs" }, { timeout: 10000 })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "배경" })).toBeTruthy();
@@ -58,11 +58,11 @@ describe("official site shell", () => {
 
     await user.click(nav.getByRole("link", { name: "API reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v2 Kernel API reference for the exact six-member JSON Document compatibility surface, JSON Patch, Pointer, and JSONPath.");
-    expect(document.head.querySelector('meta[property="og:description"]')?.getAttribute("content")).toBe("Public v2 Kernel API reference for the exact six-member JSON Document compatibility surface, JSON Patch, Pointer, and JSONPath.");
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
+    expect(document.head.querySelector('meta[property="og:description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs/api");
     expect(document.head.querySelector('meta[name="twitter:title"]')?.getAttribute("content")).toBe("json-document API - json-document");
-    expect(document.head.querySelector('meta[name="twitter:description"]')?.getAttribute("content")).toBe("Public v2 Kernel API reference for the exact six-member JSON Document compatibility surface, JSON Patch, Pointer, and JSONPath.");
+    expect(document.head.querySelector('meta[name="twitter:description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
     expect(document.head.querySelector('meta[property="og:url"]')?.getAttribute("content")).toBe("https://developer-1px.github.io/json-document/docs/api");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "작업별 진입점" })).toBeTruthy();

@@ -30,9 +30,6 @@ interface JSONDocumentState {
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
-  canPatch(
-    operations: ReadonlyArray<JSONPatchOperation>,
-  ): JSONPatchValidationResult;
   commit(
     operations: ReadonlyArray<JSONPatchOperation>,
     options?: JSONDocumentCommitOptions,
@@ -123,13 +120,6 @@ export function createJSONDocumentState(
       const result = prepare(operations);
       return result.ok ? OK : result;
     },
-    canPatch(
-      operations: ReadonlyArray<JSONPatchOperation>,
-    ): JSONPatchValidationResult {
-      if (evaluatingValidation) return VALIDATION_REENTRANCY_FAILURE;
-      const result = prepare(operations);
-      return result.ok ? OK : result;
-    },
     commit(
       operations: ReadonlyArray<JSONPatchOperation>,
       commitOptions?: JSONDocumentCommitOptions,
@@ -194,7 +184,7 @@ export function createJSONDocumentState(
 const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
 const VALIDATION_REENTRANCY_FAILURE = failure(
   "acceptance_reentrancy",
-  "acceptance callback cannot call canPatch or commit",
+  "validation callback cannot call validatePatch or commit",
 );
 
 function validateCandidate(
@@ -215,12 +205,12 @@ function validateCandidate(
     }
     return failure(
       "schema_violation",
-      "acceptance callback must return a result with an ok discriminant",
+      "validation callback must return a result with an ok discriminant",
     );
   } catch (error) {
     return failure(
       "schema_violation",
-      error instanceof Error ? error.message : "acceptance callback failed",
+      error instanceof Error ? error.message : "validation callback failed",
     );
   }
 }

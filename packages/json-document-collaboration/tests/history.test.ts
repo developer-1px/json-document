@@ -53,14 +53,12 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     const shared = runtime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
-      "collaboration",
       "document",
       "history",
       "replica",
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
-      "canPatch",
       "commit",
       "query",
       "subscribe",

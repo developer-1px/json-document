@@ -36,13 +36,8 @@ export type JSONPatchValidationResult =
       readonly pointer?: Pointer;
     };
 
-/** @deprecated Use JSONPatchValidationResult. */
-export type JSONCapabilityResult = JSONPatchValidationResult;
-
 export interface JSONDocumentOptions {
   readonly validate?: (candidate: JSONValue) => JSONPatchValidationResult;
-  /** @deprecated Use validate. */
-  readonly accepts?: (candidate: JSONValue) => JSONCapabilityResult;
 }
 
 export type ReadResult =
@@ -90,10 +85,6 @@ export interface JSONDocument {
   validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchValidationResult;
-  /** @deprecated Use validatePatch. */
-  canPatch(
-    operations: ReadonlyArray<JSONPatchOperation>,
-  ): JSONCapabilityResult;
   commit(
     operations: ReadonlyArray<JSONPatchOperation>,
     options?: JSONDocumentCommitOptions,

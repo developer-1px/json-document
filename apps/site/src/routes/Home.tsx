@@ -24,7 +24,7 @@ export function Home() {
               json-document
             </h1>
             <p className="m-0 max-w-2xl text-base leading-7 text-stone-600">
-              A headless JSON API and seven-member JSON Document for
+              A headless JSON API and six-member JSON Document for
               documents, tables, slides, canvases, and notes.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
@@ -45,7 +45,7 @@ export function Home() {
 
           <div className="rounded border border-stone-200 bg-stone-950 p-3 text-stone-100">
             <div className="mb-2 text-xs font-medium text-stone-400">Install</div>
-            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>npm install @interactive-os/json-document@2.0.0</code></pre>
+            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>npm install @interactive-os/json-document@3.0.0</code></pre>
             <div className="mt-4 border-t border-stone-800 pt-3 text-xs font-medium text-stone-400">Start</div>
             <pre className="m-0 mt-2 overflow-x-auto text-sm leading-6"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
           </div>
@@ -79,7 +79,7 @@ export function Home() {
           <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
           <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
             <li>Root Kernel is React- and Zod-free.</li>
-            <li>Rich editing belongs to host adapters composed over the seven-member document.</li>
+            <li>Rich editing belongs to host adapters composed over the six-member document.</li>
             <li>Mutation inputs are JSON Patch with JSON Pointer paths.</li>
             <li>JSONPath is search-only and returns pointers.</li>
           </ul>

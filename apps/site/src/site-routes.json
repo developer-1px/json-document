@@ -3,14 +3,14 @@
     "path": "/",
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
-    "description": "Implementation-neutral JSON editing and a seven-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
+    "description": "Implementation-neutral JSON editing and a six-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
     "group": "Start"
   },
   {
     "path": "/docs",
     "label": "Docs",
     "title": "json-document Docs - json-document",
-    "description": "User guide to stateless JSON Patch, the v2 JSON Document, validation, and host adapter boundaries.",
+    "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
     "group": "Start"
   },
   {
@@ -24,7 +24,7 @@
     "path": "/docs/api",
     "label": "API reference",
     "title": "json-document API - json-document",
-    "description": "Public v2 Kernel API reference for the exact six-member JSON Document compatibility surface, JSON Patch, Pointer, and JSONPath.",
+    "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
     "group": "Start"
   }
 ]

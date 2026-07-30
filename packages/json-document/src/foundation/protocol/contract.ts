@@ -50,9 +50,6 @@ export type JSONPatchValidationResult =
   | { readonly ok: true }
   | JSONPatchFailure;
 
-/** @deprecated Compatibility alias for the stable v2 public name. */
-export type JSONCapabilityResult = JSONPatchValidationResult;
-
 export type ReadResult =
   | {
       readonly ok: true;

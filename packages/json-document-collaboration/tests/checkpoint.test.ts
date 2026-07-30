@@ -357,7 +357,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(checkpoint, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-suppressed/missing-acceptance/v2",
+      nextEpochId: "checkpoint-suppressed/missing-validation/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -483,7 +483,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       receiver.replica.exportCheckpoint(),
       {
         mode: "new-epoch",
-        nextEpochId: "checkpoint-pending-compaction/v2",
+        nextEpochId: "checkpoint-pending-compaction/v3",
         nextRuleset: ruleset,
       },
     )).toMatchObject({
@@ -516,7 +516,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(forged, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-member-laundering/v2",
+      nextEpochId: "checkpoint-member-laundering/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -571,7 +571,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
 
     expect(compactCollaborationCheckpoint(forged, {
       mode: "new-epoch",
-      nextEpochId: `checkpoint-member-reference-compaction/v2/${name}`,
+      nextEpochId: `checkpoint-member-reference-compaction/v3/${name}`,
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -605,7 +605,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
 
     expect(compactCollaborationCheckpoint(forged, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-duplicate/v2",
+      nextEpochId: "checkpoint-duplicate/v3",
       nextRuleset: ruleset,
     })).toMatchObject({ ok: false });
   });
@@ -640,7 +640,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(reordered, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-change-order/v2",
+      nextEpochId: "checkpoint-change-order/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -675,7 +675,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(duplicated, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-change-duplicate/v2",
+      nextEpochId: "checkpoint-change-duplicate/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -699,7 +699,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       source.replica.exportCheckpoint(),
       {
         mode: "new-epoch",
-        nextEpochId: "checkpoint-compaction/v2",
+        nextEpochId: "checkpoint-compaction/v3",
         nextRuleset: ruleset,
       },
     );
@@ -713,7 +713,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     ));
     expect(restored.document.value).toEqual(source.document.value);
     expect(restored.replica.epoch.epochId).toBe(
-      "checkpoint-compaction/v2",
+      "checkpoint-compaction/v3",
     );
     expect(restored.replica.exportBundle().changes).toEqual([]);
 

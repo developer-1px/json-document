@@ -1,16 +1,16 @@
 import type {
   JSONPatchOperation,
   JSONValue,
-  Projection,
-  ProjectionAcceptance,
-  ProjectionCapabilityResult,
-  ProjectionChange,
-  ProjectionCommitOptions,
-  ProjectionCommitResult,
-  ProjectionMetadata,
-  ProjectionQueryResult,
-  ProjectionReadResult,
-} from "../conformance/v2/projection-suite.js";
+  JSONDocument,
+  JSONDocumentValidation,
+  JSONDocumentValidationResult,
+  JSONDocumentChange,
+  JSONDocumentCommitOptions,
+  JSONDocumentCommitResult,
+  JSONDocumentMetadata,
+  JSONDocumentQueryResult,
+  JSONDocumentReadResult,
+} from "../conformance/v3/json-document-suite.js";
 
 interface PreparedCommit {
   readonly value: JSONValue;
@@ -22,21 +22,21 @@ interface OperationResult {
   readonly applied: JSONPatchOperation;
 }
 
-export function createIndependentProjection(
-  acceptance: ProjectionAcceptance,
+export function createIndependentJSONDocument(
+  validation: JSONDocumentValidation,
   initial: JSONValue,
-): Projection {
+): JSONDocument {
   let state = freezeJSON(cloneJSON(initial));
-  accept(acceptance, state);
+  accept(validation, state);
 
-  const listeners = new Set<(change: ProjectionChange) => void>();
-  const publicationQueue: ProjectionChange[] = [];
+  const listeners = new Set<(change: JSONDocumentChange) => void>();
+  const notificationQueue: JSONDocumentChange[] = [];
   let publishing = false;
-  let evaluatingAcceptance = false;
+  let evaluatingValidation = false;
 
   const prepare = (
     operations: ReadonlyArray<JSONPatchOperation>,
-  ): PreparedCommit | ProjectionFailure => {
+  ): PreparedCommit | JSONDocumentFailure => {
     try {
       let value = cloneJSON(state);
       const applied: JSONPatchOperation[] = [];
@@ -48,11 +48,11 @@ export function createIndependentProjection(
         );
       }
       value = freezeJSON(value);
-      evaluatingAcceptance = true;
+      evaluatingValidation = true;
       try {
-        accept(acceptance, value);
+        accept(validation, value);
       } finally {
-        evaluatingAcceptance = false;
+        evaluatingValidation = false;
       }
       return { value, applied };
     } catch (error) {
@@ -60,11 +60,11 @@ export function createIndependentProjection(
     }
   };
 
-  const projection: Projection = {
+  const document: JSONDocument = {
     get value() {
       return state;
     },
-    at(pointer: string): ProjectionReadResult {
+    at(pointer: string): JSONDocumentReadResult {
       try {
         const value = readAt(state, parsePointer(pointer));
         return Object.freeze({ ok: true, path: pointer, value });
@@ -75,7 +75,7 @@ export function createIndependentProjection(
           : Object.freeze({ ...failed, pointer });
       }
     },
-    query(jsonPath: string): ProjectionQueryResult {
+    query(jsonPath: string): JSONDocumentQueryResult {
       try {
         return Object.freeze({
           ok: true,
@@ -93,24 +93,24 @@ export function createIndependentProjection(
         });
       }
     },
-    canPatch(
+    validatePatch(
       operations: ReadonlyArray<JSONPatchOperation>,
-    ): ProjectionCapabilityResult {
-      if (evaluatingAcceptance) return ACCEPTANCE_REENTRANCY_FAILURE;
+    ): JSONDocumentValidationResult {
+      if (evaluatingValidation) return VALIDATION_REENTRANCY_FAILURE;
       const prepared = prepare(operations);
       return "ok" in prepared ? prepared : OK;
     },
     commit(
       operations: ReadonlyArray<JSONPatchOperation>,
-      options?: ProjectionCommitOptions,
-    ): ProjectionCommitResult {
-      if (evaluatingAcceptance) return ACCEPTANCE_REENTRANCY_FAILURE;
+      options?: JSONDocumentCommitOptions,
+    ): JSONDocumentCommitResult {
+      if (evaluatingValidation) return VALIDATION_REENTRANCY_FAILURE;
 
-      let metadata: ProjectionMetadata | undefined;
+      let metadata: JSONDocumentMetadata | undefined;
       try {
         metadata = options?.metadata === undefined
           ? undefined
-          : freezeJSON(cloneJSON(options.metadata)) as ProjectionMetadata;
+          : freezeJSON(cloneJSON(options.metadata)) as JSONDocumentMetadata;
       } catch (error) {
         return failureFrom(error);
       }
@@ -129,7 +129,7 @@ export function createIndependentProjection(
       publish(change);
       return Object.freeze({ ok: true, change });
     },
-    subscribe(listener: (change: ProjectionChange) => void): () => void {
+    subscribe(listener: (change: JSONDocumentChange) => void): () => void {
       listeners.add(listener);
       let active = true;
       return () => {
@@ -140,22 +140,22 @@ export function createIndependentProjection(
     },
   };
 
-  return Object.freeze(projection);
+  return Object.freeze(document);
 
-  function publish(change: ProjectionChange): void {
-    publicationQueue.push(change);
+  function publish(change: JSONDocumentChange): void {
+    notificationQueue.push(change);
     if (publishing) return;
 
     publishing = true;
     try {
-      while (publicationQueue.length > 0) {
-        const next = publicationQueue.shift() as ProjectionChange;
+      while (notificationQueue.length > 0) {
+        const next = notificationQueue.shift() as JSONDocumentChange;
         for (const listener of [...listeners]) {
           if (!listeners.has(listener)) continue;
           try {
             listener(next);
           } catch {
-            // Publication is post-commit. A listener cannot roll state back or
+            // Notification is post-commit. A listener cannot roll state back or
             // prevent delivery to the remaining listeners.
           }
         }
@@ -166,7 +166,7 @@ export function createIndependentProjection(
   }
 }
 
-interface ProjectionFailure {
+interface JSONDocumentFailure {
   readonly ok: false;
   readonly code: string;
   readonly reason?: string;
@@ -184,13 +184,13 @@ class IndependentError extends Error {
 }
 
 const OK = Object.freeze({ ok: true as const });
-const ACCEPTANCE_REENTRANCY_FAILURE = Object.freeze({
+const VALIDATION_REENTRANCY_FAILURE = Object.freeze({
   ok: false as const,
   code: "acceptance_reentrancy",
-  reason: "acceptance callback cannot call canPatch or commit",
+  reason: "validation callback cannot call validatePatch or commit",
 });
 
-function failureFrom(error: unknown): ProjectionFailure {
+function failureFrom(error: unknown): JSONDocumentFailure {
   if (error instanceof IndependentError) {
     return Object.freeze({
       ok: false,
@@ -207,11 +207,11 @@ function failureFrom(error: unknown): ProjectionFailure {
 }
 
 function accept(
-  acceptance: ProjectionAcceptance,
+  validation: JSONDocumentValidation,
   candidate: JSONValue,
 ): void {
-  if (acceptance === "json") return;
-  if (acceptance === "attempt-transform") {
+  if (validation === "json") return;
+  if (validation === "attempt-transform") {
     if (isRecord(candidate)) {
       Reflect.set(candidate, "title", "Implicit");
     }
@@ -233,7 +233,7 @@ function accept(
   }
   throw new IndependentError(
     "schema_violation",
-    "candidate does not satisfy the task-list acceptance rule",
+    "candidate does not satisfy the task-list validation rule",
   );
 }
 
@@ -618,8 +618,8 @@ function parseQuery(query: string): string[] {
 
 function createChange(
   applied: ReadonlyArray<JSONPatchOperation>,
-  metadata: ProjectionMetadata | undefined,
-): ProjectionChange {
+  metadata: JSONDocumentMetadata | undefined,
+): JSONDocumentChange {
   const ownedApplied = freezeJSON(
     cloneJSON(applied) as unknown as JSONValue,
   ) as unknown as ReadonlyArray<JSONPatchOperation>;

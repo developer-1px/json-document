@@ -10,7 +10,7 @@ export function createJSONDocument(
   initial: unknown,
   options: JSONDocumentOptions = {},
 ): JSONDocument {
-  const validate = options.validate ?? options.accepts;
+  const validate = options.validate;
   return createJSONDocumentState(initial, {
     ...(validate === undefined ? {} : {
       validate: (candidate: JSONValue): JSONPatchValidationResult =>

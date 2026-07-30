@@ -12,7 +12,7 @@
       "status": "core",
       "private": false,
       "publishable": true,
-      "version": "2.0.0",
+      "version": "3.0.0",
       "description": "Implementation-neutral JSON Patch API and headless JSON Document.",
       "license": "MIT",
       "summary": "문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는\nimplementation-neutral JSON 편집 API와 headless JSON Document입니다.",
@@ -21,7 +21,6 @@
       ],
       "publicExports": [
         "JSONAppliedChange",
-        "JSONCapabilityResult",
         "JSONChangeMetadata",
         "JSONDocument",
         "JSONDocumentCommitOptions",
@@ -43,7 +42,7 @@
         "trackPointer",
         "tryParsePointer"
       ],
-      "publicExportCount": 22,
+      "publicExportCount": 21,
       "keywords": [
         "document",
         "editor",
@@ -61,10 +60,10 @@
       "status": "companion",
       "private": false,
       "publishable": true,
-      "version": "0.1.0-rc.2",
+      "version": "0.2.0-rc.1",
       "description": "Transport-free causal collaboration engine for @interactive-os/json-document.",
       "license": "MIT",
-      "summary": "Transport-free causal collaboration engine for the seven-member\n`@interactive-os/json-document` JSON Document contract.",
+      "summary": "Transport-free causal collaboration engine for the six-member\n`@interactive-os/json-document` JSON Document contract.",
       "entrypoints": [
         ".",
         "./history",
@@ -74,7 +73,6 @@
         "ActorId",
         "ArrayPlacement",
         "ChangeId",
-        "CollaborationAcceptance",
         "CollaborationBundle",
         "CollaborationChange",
         "CollaborationCheckpoint",
@@ -83,7 +81,6 @@
         "CollaborationCompactionReport",
         "CollaborationCompactionResult",
         "CollaborationConflict",
-        "CollaborationControl",
         "CollaborationEpoch",
         "CollaborationEpochParent",
         "CollaborationIngestFailure",
@@ -97,7 +94,6 @@
         "CollaborationRulesetIdentity",
         "CollaborationRuntime",
         "CollaborationRuntimeOptions",
-        "CollaborationSnapshot",
         "CollaborationValidation",
         "ContainerNodeId",
         "MemberId",
@@ -115,7 +111,7 @@
         "createCollaborationRuntime",
         "restoreCollaborationRuntime"
       ],
-      "publicExportCount": 43,
+      "publicExportCount": 40,
       "keywords": []
     },
     {
@@ -124,7 +120,7 @@
       "status": "companion",
       "private": false,
       "publishable": true,
-      "version": "0.1.0-rc.1",
+      "version": "0.2.0-rc.1",
       "description": "IME-safe native-input DOM lease for json-document collaboration text.",
       "license": "MIT",
       "summary": "IME-safe native-input DOM lease for\n`@interactive-os/json-document-collaboration/text`.",
@@ -132,22 +128,15 @@
         "."
       ],
       "publicExports": [
-        "CollaborationContentEditableAdapter",
-        "CollaborationContentEditableOptions",
-        "CollaborationContentEditableResult",
-        "CollaborationTextDOM",
-        "CollaborationTextDOMObservation",
         "ContentEditableAdapter",
         "ContentEditableOptions",
         "ContentEditableResult",
         "DOMObservation",
         "TextDOMAdapter",
-        "createCollaborationContentEditableAdapter",
         "createContentEditableAdapter",
-        "plainTextCollaborationDOM",
         "plainTextDOMAdapter"
       ],
-      "publicExportCount": 14,
+      "publicExportCount": 7,
       "keywords": [
         "@interactive-os/json-document",
         "collaboration",

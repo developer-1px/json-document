@@ -37,7 +37,6 @@ export function restoreCollaborationRuntime(
   const runtime: CollaborationRuntime = Object.freeze({
     document: restored.runtime.document,
     replica: restored.runtime.replica,
-    collaboration: restored.runtime.collaboration,
   });
   return Object.freeze({ ok: true, runtime });
 }
@@ -76,7 +75,7 @@ function restoreProfileRuntime(
     return failure("invalid_checkpoint", prepared.reason);
   }
   const checkpoint = prepared.checkpoint;
-  const validate = options.validate ?? options.accepts;
+  const validate = options.validate;
   if (
     checkpoint.payload.epoch.acceptance === "custom"
     && validate === undefined
@@ -132,7 +131,7 @@ function restoreProfileRuntime(
           restoreOptions,
           checkpoint.payload.epoch,
         );
-    const ingested = restored.collaboration.ingest({
+    const ingested = restored.replica.ingest({
       epoch: checkpoint.payload.epoch,
       changes: checkpoint.payload.changes,
     });

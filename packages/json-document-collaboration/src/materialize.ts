@@ -279,12 +279,12 @@ export function validateCandidate(
     }
     return failure(
       "schema_violation",
-      "acceptance callback must return a result with an ok discriminant",
+      "validation callback must return a result with an ok discriminant",
     );
   } catch (error) {
     return failure(
       "schema_violation",
-      error instanceof Error ? error.message : "acceptance callback failed",
+      error instanceof Error ? error.message : "validation callback failed",
     );
   }
 }

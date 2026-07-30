@@ -26,7 +26,7 @@ const commitBudgetPerTenThousandMs = envPositiveNumber(
   6,
 );
 
-console.log("json-document v2 public-root benchmark");
+console.log("json-document v3 public-root benchmark");
 console.log(`items=${sizes.join(",")} rounds=${rounds} warmups=${warmups}`);
 
 for (const size of sizes) {

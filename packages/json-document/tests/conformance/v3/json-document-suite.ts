@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import rawVectors from "./projection-vectors.json" with { type: "json" };
+import rawVectors from "./json-document-vectors.json" with { type: "json" };
 
 export type JSONValue =
   | null
@@ -18,71 +18,71 @@ export type JSONPatchOperation =
   | { readonly op: "copy"; readonly from: string; readonly path: string }
   | { readonly op: "test"; readonly path: string; readonly value: JSONValue };
 
-export type ProjectionAcceptance =
+export type JSONDocumentValidation =
   | "json"
   | "task-list"
   | "attempt-transform";
-export type ProjectionMetadata = Readonly<Record<string, JSONValue>>;
+export type JSONDocumentMetadata = Readonly<Record<string, JSONValue>>;
 
-export interface ProjectionChange {
+export interface JSONDocumentChange {
   readonly applied: ReadonlyArray<JSONPatchOperation>;
-  readonly metadata?: ProjectionMetadata;
+  readonly metadata?: JSONDocumentMetadata;
 }
 
-export interface ProjectionCommitOptions {
-  readonly metadata?: ProjectionMetadata;
+export interface JSONDocumentCommitOptions {
+  readonly metadata?: JSONDocumentMetadata;
 }
 
-export interface ProjectionSuccessResult {
+export interface JSONDocumentSuccessResult {
   readonly ok: true;
 }
 
-export interface ProjectionFailureResult {
+export interface JSONDocumentFailureResult {
   readonly ok: false;
   readonly code: string;
   readonly reason?: string;
   readonly pointer?: string;
 }
 
-export type ProjectionCapabilityResult =
-  | ProjectionSuccessResult
-  | ProjectionFailureResult;
+export type JSONDocumentValidationResult =
+  | JSONDocumentSuccessResult
+  | JSONDocumentFailureResult;
 
-export type ProjectionReadResult =
+export type JSONDocumentReadResult =
   | { readonly ok: true; readonly path: string; readonly value: JSONValue }
-  | ProjectionFailureResult;
+  | JSONDocumentFailureResult;
 
-export type ProjectionQueryResult =
+export type JSONDocumentQueryResult =
   | {
       readonly ok: true;
       readonly query: string;
       readonly pointers: ReadonlyArray<string>;
     }
-  | ProjectionFailureResult;
+  | JSONDocumentFailureResult;
 
-export type ProjectionCommitResult =
-  | (ProjectionSuccessResult & { readonly change: ProjectionChange })
-  | ProjectionFailureResult;
+export type JSONDocumentCommitResult =
+  | (JSONDocumentSuccessResult & { readonly change: JSONDocumentChange })
+  | JSONDocumentFailureResult;
 
-export interface Projection {
+export interface JSONDocument {
   readonly value: JSONValue;
-  at(pointer: string): ProjectionReadResult;
-  query(jsonPath: string): ProjectionQueryResult;
-  canPatch(
+  at(pointer: string): JSONDocumentReadResult;
+  query(jsonPath: string): JSONDocumentQueryResult;
+  validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
-  ): ProjectionCapabilityResult;
+  ): JSONDocumentValidationResult;
   commit(
     operations: ReadonlyArray<JSONPatchOperation>,
-    options?: ProjectionCommitOptions,
-  ): ProjectionCommitResult;
-  subscribe(listener: (change: ProjectionChange) => void): () => void;
+    options?: JSONDocumentCommitOptions,
+  ): JSONDocumentCommitResult;
+  subscribe(listener: (change: JSONDocumentChange) => void): () => void;
 }
 
-export interface ProjectionHarness {
+export interface JSONDocumentHarness {
   create(
-    acceptance: ProjectionAcceptance,
+    validation: JSONDocumentValidation,
     initial: JSONValue,
-  ): Projection;
+  ): JSONDocument;
 }
 
 type ExpectedObject = Readonly<Record<string, unknown>>;
@@ -111,9 +111,9 @@ interface ReadVector extends VectorBase {
 
 interface CommitVector extends VectorBase {
   readonly kind: "commit";
-  readonly acceptance?: ProjectionAcceptance;
+  readonly validation?: JSONDocumentValidation;
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly metadata?: ProjectionMetadata;
+  readonly metadata?: JSONDocumentMetadata;
   readonly expect: {
     readonly probe: ExpectedObject;
     readonly commit: ExpectedObject;
@@ -126,7 +126,7 @@ interface UnsubscribeVector extends VectorBase {
   readonly kind: "unsubscribe";
   readonly commits: ReadonlyArray<{
     readonly operations: ReadonlyArray<JSONPatchOperation>;
-    readonly metadata?: ProjectionMetadata;
+    readonly metadata?: JSONDocumentMetadata;
     readonly expect: ExpectedObject;
   }>;
   readonly unsubscribeAfter: number;
@@ -136,10 +136,10 @@ interface UnsubscribeVector extends VectorBase {
   };
 }
 
-interface UnsubscribeDuringPublicationVector extends VectorBase {
-  readonly kind: "unsubscribe-during-publication";
+interface UnsubscribeDuringNotificationVector extends VectorBase {
+  readonly kind: "unsubscribe-during-notification";
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly metadata?: ProjectionMetadata;
+  readonly metadata?: JSONDocumentMetadata;
   readonly expect: {
     readonly commit: ExpectedObject;
     readonly firstSubscriber: ReadonlyArray<ExpectedObject>;
@@ -156,7 +156,7 @@ interface MutationAttempt {
 interface IsolationVector extends VectorBase {
   readonly kind: "isolation";
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly metadata: ProjectionMetadata;
+  readonly metadata: JSONDocumentMetadata;
   readonly nextOperations: ReadonlyArray<JSONPatchOperation>;
   readonly mutations: {
     readonly initial: MutationAttempt;
@@ -188,15 +188,15 @@ interface NonJSONVector extends VectorBase {
   };
 }
 
-interface ReentrantPublicationVector extends VectorBase {
-  readonly kind: "reentrant-publication";
+interface ReentrantNotificationVector extends VectorBase {
+  readonly kind: "reentrant-notification";
   readonly outer: {
     readonly operations: ReadonlyArray<JSONPatchOperation>;
-    readonly metadata?: ProjectionMetadata;
+    readonly metadata?: JSONDocumentMetadata;
   };
   readonly nested: {
     readonly operations: ReadonlyArray<JSONPatchOperation>;
-    readonly metadata?: ProjectionMetadata;
+    readonly metadata?: JSONDocumentMetadata;
   };
   readonly expect: {
     readonly outer: ExpectedObject;
@@ -210,7 +210,7 @@ interface ReentrantPublicationVector extends VectorBase {
 interface SubscriberErrorVector extends VectorBase {
   readonly kind: "subscriber-error";
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly metadata?: ProjectionMetadata;
+  readonly metadata?: JSONDocumentMetadata;
   readonly expect: {
     readonly commit: ExpectedObject;
     readonly delivered: ReadonlyArray<ExpectedObject>;
@@ -218,29 +218,29 @@ interface SubscriberErrorVector extends VectorBase {
   };
 }
 
-type ProjectionVector =
+type JSONDocumentVector =
   | SurfaceVector
   | ReadVector
   | CommitVector
   | UnsubscribeVector
-  | UnsubscribeDuringPublicationVector
+  | UnsubscribeDuringNotificationVector
   | IsolationVector
   | NonJSONVector
-  | ReentrantPublicationVector
+  | ReentrantNotificationVector
   | SubscriberErrorVector;
 
-interface ProjectionManifest {
+interface JSONDocumentManifest {
   readonly initial: JSONValue;
-  readonly vectors: ReadonlyArray<ProjectionVector>;
+  readonly vectors: ReadonlyArray<JSONDocumentVector>;
 }
 
 interface Observation {
-  readonly changes: ProjectionChange[];
+  readonly changes: JSONDocumentChange[];
   readonly values: JSONValue[];
   readonly unsubscribe: () => void;
 }
 
-const manifest = rawVectors as unknown as ProjectionManifest;
+const manifest = rawVectors as unknown as JSONDocumentManifest;
 
 function cloneJSON<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -250,18 +250,18 @@ function expectRequired(actual: unknown, expected: ExpectedObject): void {
   expect(actual).toMatchObject(expected);
 }
 
-function observe(projection: Projection): Observation {
-  const changes: ProjectionChange[] = [];
+function observe(document: JSONDocument): Observation {
+  const changes: JSONDocumentChange[] = [];
   const values: JSONValue[] = [];
-  const unsubscribe = projection.subscribe((change) => {
+  const unsubscribe = document.subscribe((change) => {
     changes.push(change);
-    values.push(cloneJSON(projection.value));
+    values.push(cloneJSON(document.value));
   });
   return { changes, values, unsubscribe };
 }
 
 function expectNotifications(
-  actual: ReadonlyArray<ProjectionChange>,
+  actual: ReadonlyArray<JSONDocumentChange>,
   expected: ReadonlyArray<ExpectedObject>,
 ): void {
   expect(actual).toHaveLength(expected.length);
@@ -295,11 +295,11 @@ function attemptMutation(
 }
 
 function runSurfaceVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: SurfaceVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const surface = projection as unknown as Record<string, unknown>;
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const surface = document as unknown as Record<string, unknown>;
   for (const member of vector.members) {
     expect(member in surface).toBe(true);
     if (member !== "value") expect(typeof surface[member]).toBe("function");
@@ -307,46 +307,46 @@ function runSurfaceVector(
 }
 
 function runReadVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: ReadVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const before = cloneJSON(projection.value);
-  const observation = observe(projection);
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const before = cloneJSON(document.value);
+  const observation = observe(document);
   for (const row of vector.at) {
-    expectRequired(projection.at(row.pointer), row.expect);
+    expectRequired(document.at(row.pointer), row.expect);
   }
   for (const row of vector.query) {
-    expectRequired(projection.query(row.jsonPath), row.expect);
+    expectRequired(document.query(row.jsonPath), row.expect);
   }
-  expect(projection.value).toEqual(before);
+  expect(document.value).toEqual(before);
   expect(observation.changes).toEqual([]);
 }
 
 function runCommitVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: CommitVector,
 ): void {
-  const projection = harness.create(
-    vector.acceptance ?? "json",
+  const document = harness.create(
+    vector.validation ?? "json",
     cloneJSON(manifest.initial),
   );
-  const observation = observe(projection);
-  const beforeProbe = cloneJSON(projection.value);
+  const observation = observe(document);
+  const beforeProbe = cloneJSON(document.value);
   const operations = cloneJSON(vector.operations);
-  const probe = projection.canPatch(operations);
+  const probe = document.validatePatch(operations);
   expectRequired(probe, vector.expect.probe);
-  expect(projection.value).toEqual(beforeProbe);
+  expect(document.value).toEqual(beforeProbe);
   expect(observation.changes).toEqual([]);
 
-  const commit = projection.commit(
+  const commit = document.commit(
     operations,
     vector.metadata === undefined
       ? undefined
       : { metadata: cloneJSON(vector.metadata) },
   );
   expectRequired(commit, vector.expect.commit);
-  expect(projection.value).toEqual(vector.expect.value);
+  expect(document.value).toEqual(vector.expect.value);
   expectNotifications(observation.changes, vector.expect.notifications);
   for (const observedValue of observation.values) {
     expect(observedValue).toEqual(vector.expect.value);
@@ -355,13 +355,13 @@ function runCommitVector(
 }
 
 function runUnsubscribeVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: UnsubscribeVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const observation = observe(projection);
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const observation = observe(document);
   for (const [index, row] of vector.commits.entries()) {
-    const result = projection.commit(
+    const result = document.commit(
       cloneJSON(row.operations),
       row.metadata === undefined
         ? undefined
@@ -370,28 +370,28 @@ function runUnsubscribeVector(
     expectRequired(result, row.expect);
     if (index === vector.unsubscribeAfter) observation.unsubscribe();
   }
-  expect(projection.value).toEqual(vector.expect.value);
+  expect(document.value).toEqual(vector.expect.value);
   expectNotifications(observation.changes, vector.expect.notifications);
 }
 
-function runUnsubscribeDuringPublicationVector(
-  harness: ProjectionHarness,
-  vector: UnsubscribeDuringPublicationVector,
+function runUnsubscribeDuringNotificationVector(
+  harness: JSONDocumentHarness,
+  vector: UnsubscribeDuringNotificationVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const firstSubscriber: ProjectionChange[] = [];
-  const secondSubscriber: ProjectionChange[] = [];
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const firstSubscriber: JSONDocumentChange[] = [];
+  const secondSubscriber: JSONDocumentChange[] = [];
   let unsubscribeSecond = (): void => undefined;
 
-  projection.subscribe((change) => {
+  document.subscribe((change) => {
     firstSubscriber.push(change);
     unsubscribeSecond();
   });
-  unsubscribeSecond = projection.subscribe((change) => {
+  unsubscribeSecond = document.subscribe((change) => {
     secondSubscriber.push(change);
   });
 
-  const result = projection.commit(
+  const result = document.commit(
     cloneJSON(vector.operations),
     commitOptions(vector.metadata),
   );
@@ -399,28 +399,28 @@ function runUnsubscribeDuringPublicationVector(
   expectRequired(result, vector.expect.commit);
   expectNotifications(firstSubscriber, vector.expect.firstSubscriber);
   expectNotifications(secondSubscriber, vector.expect.secondSubscriber);
-  expect(projection.value).toEqual(vector.expect.value);
+  expect(document.value).toEqual(vector.expect.value);
 }
 
 function runIsolationVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: IsolationVector,
 ): void {
   const initial = cloneJSON(manifest.initial);
-  const projection = harness.create("json", initial);
-  const previousSnapshot = projection.value;
+  const document = harness.create("json", initial);
+  const previousSnapshot = document.value;
   attemptMutation(initial, vector.mutations.initial);
-  expect(projection.value).toEqual(vector.expect.previousSnapshot);
+  expect(document.value).toEqual(vector.expect.previousSnapshot);
 
   const operations = cloneJSON(vector.operations);
   const metadata = cloneJSON(vector.metadata);
-  const observation = observe(projection);
-  const first = projection.commit(operations, { metadata });
+  const observation = observe(document);
+  const first = document.commit(operations, { metadata });
   expectRequired(first, { ok: true });
-  expect(projection.value).toEqual(vector.expect.afterFirst);
+  expect(document.value).toEqual(vector.expect.afterFirst);
   expectNotifications(observation.changes, [vector.expect.firstChange]);
 
-  const read = projection.at(vector.readPointer);
+  const read = document.at(vector.readPointer);
   expectRequired(read, { ok: true, path: vector.readPointer });
   attemptMutation(operations, vector.mutations.operations);
   attemptMutation(metadata, vector.mutations.metadata);
@@ -428,24 +428,24 @@ function runIsolationVector(
   if (read.ok) attemptMutation(read.value, vector.mutations.read);
   attemptMutation(observation.changes[0], vector.mutations.change);
 
-  expect(projection.value).toEqual(vector.expect.afterFirst);
+  expect(document.value).toEqual(vector.expect.afterFirst);
   expect(previousSnapshot).toEqual(vector.expect.previousSnapshot);
   expectRequired(observation.changes[0], vector.expect.firstChange);
 
-  const second = projection.commit(cloneJSON(vector.nextOperations));
+  const second = document.commit(cloneJSON(vector.nextOperations));
   expectRequired(second, { ok: true });
-  expect(projection.value).toEqual(vector.expect.afterSecond);
+  expect(document.value).toEqual(vector.expect.afterSecond);
   expect(previousSnapshot).toEqual(vector.expect.previousSnapshot);
   expectRequired(observation.changes[0], vector.expect.firstChange);
   expect(observation.changes).toHaveLength(vector.expect.notificationCount);
 }
 
 function runNonJSONVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: NonJSONVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const observation = observe(projection);
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const observation = observe(document);
   const hostValue = vector.hostValue === "callable"
     ? () => undefined
     : undefined;
@@ -455,46 +455,46 @@ function runNonJSONVector(
     value: hostValue,
   }] as unknown as ReadonlyArray<JSONPatchOperation>;
 
-  const probe = projection.canPatch(operations);
+  const probe = document.validatePatch(operations);
   expectRequired(probe, vector.expect.probe);
-  const commit = projection.commit(operations);
+  const commit = document.commit(operations);
   expectRequired(commit, vector.expect.commit);
   if (!probe.ok && !commit.ok) expect(commit.code).toBe(probe.code);
-  expect(projection.value).toEqual(vector.expect.value);
+  expect(document.value).toEqual(vector.expect.value);
   expectNotifications(observation.changes, vector.expect.notifications);
 }
 
 function commitOptions(
-  metadata: ProjectionMetadata | undefined,
-): ProjectionCommitOptions | undefined {
+  metadata: JSONDocumentMetadata | undefined,
+): JSONDocumentCommitOptions | undefined {
   return metadata === undefined
     ? undefined
     : { metadata: cloneJSON(metadata) };
 }
 
-function runReentrantPublicationVector(
-  harness: ProjectionHarness,
-  vector: ReentrantPublicationVector,
+function runReentrantNotificationVector(
+  harness: JSONDocumentHarness,
+  vector: ReentrantNotificationVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const firstSubscriber: ProjectionChange[] = [];
-  const secondSubscriber: ProjectionChange[] = [];
-  let nestedResult: ProjectionCommitResult | undefined;
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const firstSubscriber: JSONDocumentChange[] = [];
+  const secondSubscriber: JSONDocumentChange[] = [];
+  let nestedResult: JSONDocumentCommitResult | undefined;
 
-  projection.subscribe((change) => {
+  document.subscribe((change) => {
     firstSubscriber.push(change);
     if (firstSubscriber.length === 1) {
-      nestedResult = projection.commit(
+      nestedResult = document.commit(
         cloneJSON(vector.nested.operations),
         commitOptions(vector.nested.metadata),
       );
     }
   });
-  projection.subscribe((change) => {
+  document.subscribe((change) => {
     secondSubscriber.push(change);
   });
 
-  const outerResult = projection.commit(
+  const outerResult = document.commit(
     cloneJSON(vector.outer.operations),
     commitOptions(vector.outer.metadata),
   );
@@ -509,38 +509,38 @@ function runReentrantPublicationVector(
     secondSubscriber,
     vector.expect.secondSubscriber,
   );
-  expect(projection.value).toEqual(vector.expect.value);
+  expect(document.value).toEqual(vector.expect.value);
 }
 
 function runSubscriberErrorVector(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vector: SubscriberErrorVector,
 ): void {
-  const projection = harness.create("json", cloneJSON(manifest.initial));
-  const delivered: ProjectionChange[] = [];
-  let commitResult: ProjectionCommitResult | undefined;
+  const document = harness.create("json", cloneJSON(manifest.initial));
+  const delivered: JSONDocumentChange[] = [];
+  let commitResult: JSONDocumentCommitResult | undefined;
 
-  projection.subscribe(() => {
+  document.subscribe(() => {
     throw new Error("subscriber failed");
   });
-  projection.subscribe((change) => {
+  document.subscribe((change) => {
     delivered.push(change);
   });
 
   expect(() => {
-    commitResult = projection.commit(
+    commitResult = document.commit(
       cloneJSON(vector.operations),
       commitOptions(vector.metadata),
     );
   }).not.toThrow();
   expectRequired(commitResult, vector.expect.commit);
   expectNotifications(delivered, vector.expect.delivered);
-  expect(projection.value).toEqual(vector.expect.value);
+  expect(document.value).toEqual(vector.expect.value);
 }
 
 function runVector(
-  harness: ProjectionHarness,
-  vector: ProjectionVector,
+  harness: JSONDocumentHarness,
+  vector: JSONDocumentVector,
 ): void {
   switch (vector.kind) {
     case "surface":
@@ -555,8 +555,8 @@ function runVector(
     case "unsubscribe":
       runUnsubscribeVector(harness, vector);
       return;
-    case "unsubscribe-during-publication":
-      runUnsubscribeDuringPublicationVector(harness, vector);
+    case "unsubscribe-during-notification":
+      runUnsubscribeDuringNotificationVector(harness, vector);
       return;
     case "isolation":
       runIsolationVector(harness, vector);
@@ -564,18 +564,18 @@ function runVector(
     case "non-json":
       runNonJSONVector(harness, vector);
       return;
-    case "reentrant-publication":
-      runReentrantPublicationVector(harness, vector);
+    case "reentrant-notification":
+      runReentrantNotificationVector(harness, vector);
       return;
     case "subscriber-error":
       runSubscriberErrorVector(harness, vector);
   }
 }
 
-export function runProjectionConformance(
-  harness: ProjectionHarness,
+export function runJSONDocumentConformance(
+  harness: JSONDocumentHarness,
 ): void {
-  describe("json-document v2 Projection black-box conformance", () => {
+  describe("json-document v3 JSONDocument black-box conformance", () => {
     for (const vector of manifest.vectors) {
       test(`[${vector.id}]`, () => runVector(harness, vector));
     }

@@ -3,9 +3,9 @@ import { describe, expect, test } from "vitest";
 import cts from "../../public/jsonpath/conformance/jsonpath-cts.json" with { type: "json" };
 import type { JSONValue } from "./protocol-suite.js";
 import type {
-  ProjectionQueryResult,
-  ProjectionReadResult,
-} from "./projection-suite.js";
+  JSONDocumentQueryResult,
+  JSONDocumentReadResult,
+} from "./json-document-suite.js";
 
 interface JSONPathCase {
   readonly name: string;
@@ -24,13 +24,13 @@ interface JSONPathFailure {
   readonly tags?: ReadonlyArray<string>;
 }
 
-interface JSONPathProjection {
-  at(pointer: string): ProjectionReadResult;
-  query(jsonPath: string): ProjectionQueryResult;
+interface JSONPathJSONDocument {
+  at(pointer: string): JSONDocumentReadResult;
+  query(jsonPath: string): JSONDocumentQueryResult;
 }
 
 export interface JSONPathHarness {
-  create(initial: JSONValue): JSONPathProjection;
+  create(initial: JSONValue): JSONPathJSONDocument;
 }
 
 const EXPECTED_TOTAL = 703;
@@ -65,17 +65,17 @@ const pointerCases = [
 }>;
 
 export function runJSONPathConformance(harness: JSONPathHarness): void {
-  describe("json-document v2 RFC 9535 JSONPath CTS black-box conformance", () => {
+  describe("json-document v3 RFC 9535 JSONPath CTS black-box conformance", () => {
     test("full conformance does not regress", () => {
       const failures: JSONPathFailure[] = [];
       let invalidSelectors = 0;
       let passed = 0;
 
       for (const testCase of suite.tests) {
-        const projection = harness.create(
+        const document = harness.create(
           "document" in testCase ? testCase.document ?? null : null,
         );
-        const queried = projection.query(testCase.selector);
+        const queried = document.query(testCase.selector);
         if (testCase.invalid_selector) {
           invalidSelectors += 1;
           if (!queried.ok) {
@@ -95,7 +95,7 @@ export function runJSONPathConformance(harness: JSONPathHarness): void {
         }
 
         const result = queried.pointers.map((pointer) => {
-          const read = projection.at(pointer);
+          const read = document.at(pointer);
           if (!read.ok) {
             throw new Error(`query returned unreadable pointer: ${pointer}`);
           }

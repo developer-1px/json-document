@@ -1,6 +1,5 @@
 import type {
   JSONAppliedChange,
-  JSONCapabilityResult,
   JSONDocument,
   JSONDocumentCommitOptions,
   JSONPatchValidationResult,
@@ -187,9 +186,6 @@ export interface ReplicaStatus {
   readonly suppressed: ReadonlyArray<SuppressedChange>;
 }
 
-/** @deprecated Use ReplicaStatus. */
-export type CollaborationSnapshot = ReplicaStatus;
-
 export interface CollaborationIngestSuccess {
   readonly ok: true;
   readonly integrated: ReadonlyArray<ChangeId>;
@@ -221,16 +217,11 @@ export type CollaborationIngestResult =
 export interface CollaborationReplica {
   readonly epoch: CollaborationEpoch;
   status(): ReplicaStatus;
-  /** @deprecated Use status. */
-  current(): ReplicaStatus;
   exportBundle(): CollaborationBundle;
   exportCheckpoint(): CollaborationCheckpoint;
   ingest(bundle: unknown): CollaborationIngestResult;
   subscribe(listener: (status: ReplicaStatus) => void): () => void;
 }
-
-/** @deprecated Use CollaborationReplica. */
-export type CollaborationControl = CollaborationReplica;
 
 export interface HistoryStatus {
   readonly undoTarget: ChangeId | null;
@@ -240,17 +231,12 @@ export interface HistoryStatus {
   readonly revision: number;
 }
 
-/** @deprecated Use HistoryStatus. */
-export type CollaborationHistorySnapshot = HistoryStatus;
-
 export type HistoryResult =
   | {
       readonly ok: true;
       readonly changeId: ChangeId;
       readonly target: ChangeId;
       readonly didChangeDocument: boolean;
-      /** @deprecated Use didChangeDocument. */
-      readonly projectionChanged: boolean;
     }
   | {
       readonly ok: false;
@@ -258,51 +244,32 @@ export type HistoryResult =
       readonly reason?: string;
     };
 
-/** @deprecated Use HistoryResult. */
-export type CollaborationHistoryResult = HistoryResult;
-
 export interface History {
   status(): HistoryStatus;
-  /** @deprecated Use status. */
-  current(): HistoryStatus;
   canUndo(): JSONPatchValidationResult;
   undo(): HistoryResult;
   canRedo(): JSONPatchValidationResult;
   redo(): HistoryResult;
 }
 
-/** @deprecated Use History. */
-export type CollaborationHistoryControl = History;
-
 export interface CollaborationRuntime {
   readonly document: JSONDocument;
   readonly replica: CollaborationReplica;
-  /** @deprecated Use replica. */
-  readonly collaboration: CollaborationReplica;
 }
 
 export interface HistoryRuntime extends CollaborationRuntime {
   readonly history: History;
 }
 
-/** @deprecated Import HistoryRuntime from the /history subpath. */
-export type CollaborationHistoryRuntime = HistoryRuntime;
-
 export interface TextSelection {
   readonly anchor: number;
   readonly focus: number;
 }
 
-/** @deprecated Use TextSelection from the /text subpath. */
-export type CollaborationTextSelection = TextSelection;
-
 export interface TextObservation {
   readonly value: string;
   readonly selection?: TextSelection;
 }
-
-/** @deprecated Use TextObservation from the /text subpath. */
-export type CollaborationTextObservation = TextObservation;
 
 export interface TextCapture {
   readonly pointer: string;
@@ -311,17 +278,11 @@ export interface TextCapture {
   readonly value: string;
 }
 
-/** @deprecated Use TextCapture from the /text subpath. */
-export type CollaborationTextCapture = TextCapture;
-
 export interface TextPlan {
   readonly pointer: string;
   readonly value: string;
   readonly selection?: TextSelection;
 }
-
-/** @deprecated Use TextPlan from the /text subpath. */
-export type CollaborationTextPlan = TextPlan;
 
 export type TextCaptureResult =
   | {
@@ -334,9 +295,6 @@ export type TextCaptureResult =
       readonly reason: string;
     };
 
-/** @deprecated Use TextCaptureResult from the /text subpath. */
-export type CollaborationTextCaptureResult = TextCaptureResult;
-
 export type TextPlanResult =
   | {
       readonly ok: true;
@@ -348,17 +306,12 @@ export type TextPlanResult =
       readonly reason: string;
     };
 
-/** @deprecated Use TextPlanResult from the /text subpath. */
-export type CollaborationTextPlanResult = TextPlanResult;
-
 export type TextCommitResult =
   | {
       readonly ok: true;
       readonly change: JSONAppliedChange;
       readonly changeId: ChangeId | null;
       readonly didChangeDocument: boolean;
-      /** @deprecated Use didChangeDocument. */
-      readonly projectionChanged: boolean;
       readonly value: string;
       readonly selection: TextSelection | null;
     }
@@ -367,9 +320,6 @@ export type TextCommitResult =
       readonly code: string;
       readonly reason: string;
     };
-
-/** @deprecated Use TextCommitResult from the /text subpath. */
-export type CollaborationTextCommitResult = TextCommitResult;
 
 export interface Text {
   capture(pointer: string): TextCaptureResult;
@@ -383,15 +333,9 @@ export interface Text {
   ): TextCommitResult;
 }
 
-/** @deprecated Use Text from the /text subpath. */
-export type CollaborationTextControl = Text;
-
 export interface TextRuntime extends HistoryRuntime {
   readonly text: Text;
 }
-
-/** @deprecated Use TextRuntime from the /text subpath. */
-export type CollaborationTextRuntime = TextRuntime;
 
 /**
  * A convergence-critical validation rule.
@@ -405,28 +349,21 @@ export type CollaborationValidation = (
   candidate: JSONValue,
 ) => JSONPatchValidationResult;
 
-/** @deprecated Use CollaborationValidation. */
-export type CollaborationAcceptance = CollaborationValidation;
-
 export interface CollaborationRuntimeOptions {
   readonly actorId: ActorId;
   readonly epochId: string;
   readonly ruleset: CollaborationRulesetIdentity;
   readonly membership?: CollaborationMembership;
   readonly validate?: CollaborationValidation;
-  /** @deprecated Use validate. */
-  readonly accepts?: CollaborationAcceptance;
 }
 
 export interface CollaborationRestoreOptions {
   readonly actorId: ActorId;
   readonly ruleset: CollaborationRulesetIdentity;
   readonly validate?: CollaborationValidation;
-  /** @deprecated Use validate. */
-  readonly accepts?: CollaborationAcceptance;
   readonly verify?: (
     checkpoint: CollaborationCheckpoint,
-  ) => JSONCapabilityResult;
+  ) => JSONPatchValidationResult;
 }
 
 export type CollaborationRestoreResult =
@@ -451,9 +388,6 @@ export type HistoryRestoreResult =
       readonly reason: string;
     };
 
-/** @deprecated Use HistoryRestoreResult from the /history subpath. */
-export type CollaborationHistoryRestoreResult = HistoryRestoreResult;
-
 export type TextRestoreResult =
   | {
       readonly ok: true;
@@ -465,9 +399,6 @@ export type TextRestoreResult =
       readonly reason: string;
     };
 
-/** @deprecated Use TextRestoreResult from the /text subpath. */
-export type CollaborationTextRestoreResult = TextRestoreResult;
-
 export interface CollaborationCompactionOptions {
   readonly mode: "new-epoch";
   readonly nextEpochId: string;
@@ -477,14 +408,10 @@ export interface CollaborationCompactionOptions {
    */
   readonly nextMembership?: CollaborationMembership | null;
   readonly validate?: CollaborationValidation;
-  /** @deprecated Use validate. */
-  readonly accepts?: CollaborationAcceptance;
   readonly nextValidate?: CollaborationValidation;
-  /** @deprecated Use nextValidate. */
-  readonly nextAccepts?: CollaborationAcceptance;
   readonly verify?: (
     checkpoint: CollaborationCheckpoint,
-  ) => JSONCapabilityResult;
+  ) => JSONPatchValidationResult;
 }
 
 export interface CollaborationCompactionReport {
@@ -492,8 +419,6 @@ export interface CollaborationCompactionReport {
   readonly discardedConflicts: number;
   readonly discardedSuppressed: number;
   readonly discardedHistoryChanges: number;
-  /** @deprecated Use discardedHistoryChanges. */
-  readonly discardedHistoryControls: number;
 }
 
 export type CollaborationCompactionResult =

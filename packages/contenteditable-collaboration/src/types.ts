@@ -10,9 +10,6 @@ export interface DOMObservation {
   readonly selection: TextSelection | null;
 }
 
-/** @deprecated Use DOMObservation. */
-export type CollaborationTextDOMObservation = DOMObservation;
-
 /**
  * The DOM adapter for one collaborative string field.
  *
@@ -28,9 +25,6 @@ export interface TextDOMAdapter {
   ): boolean;
 }
 
-/** @deprecated Use TextDOMAdapter. */
-export type CollaborationTextDOM = TextDOMAdapter;
-
 export interface ContentEditableOptions {
   readonly runtime: TextRuntime;
   readonly pointer: Pointer;
@@ -40,9 +34,6 @@ export interface ContentEditableOptions {
     result: ContentEditableResult,
   ) => void;
 }
-
-/** @deprecated Use ContentEditableOptions. */
-export type CollaborationContentEditableOptions = ContentEditableOptions;
 
 export type ContentEditableResult =
   | {
@@ -58,8 +49,6 @@ export type ContentEditableResult =
       readonly kind: "committed";
       readonly changeId: ChangeId | null;
       readonly didChangeDocument: boolean;
-      /** @deprecated Use didChangeDocument. */
-      readonly projectionChanged: boolean;
       readonly selection: TextSelection | null;
     }
   | {
@@ -68,15 +57,9 @@ export type ContentEditableResult =
       readonly reason: string;
     };
 
-/** @deprecated Use ContentEditableResult. */
-export type CollaborationContentEditableResult = ContentEditableResult;
-
 export interface ContentEditableAdapter {
   bind(): () => void;
   handle(event: Event): ContentEditableResult;
   cancel(): ContentEditableResult;
   reset(): void;
 }
-
-/** @deprecated Use ContentEditableAdapter. */
-export type CollaborationContentEditableAdapter = ContentEditableAdapter;

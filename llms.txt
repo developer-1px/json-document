@@ -1,9 +1,9 @@
-# json-document v2
+# json-document v3
 
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 사용할 수
 있는 implementation-neutral JSON 편집 Kernel이다. UI component library가 아니다.
 
-현재 package version과 표준 상태는 `2.0.0` Stable이다. Reference와 독립
+현재 package version과 표준 상태는 `3.0.0` Stable이다. Reference와 독립
 implementation이 같은 conformance suite를 통과하고, 다섯 pressure vertical을
 reference·독립·collaboration binding에서 검증한다.
 
@@ -23,7 +23,7 @@ import {
 ```
 
 Root는 React, Zod, selection, clipboard, history, DOM을 import하지 않는다.
-공개 Root는 정확히 다음 22개 symbol이다.
+공개 Root는 정확히 다음 21개 symbol이다.
 
 ```txt
 values
@@ -31,7 +31,7 @@ values
   parentPointer, parsePointer, trackPointer, tryParsePointer
 
 types
-  JSONAppliedChange, JSONPatchValidationResult, JSONCapabilityResult
+  JSONAppliedChange, JSONPatchValidationResult
   JSONChangeMetadata, JSONDocument, JSONDocumentOptions
   JSONDocumentCommitOptions, JSONDocumentCommitResult
   JSONPatchOperation, JSONPatchResult, JSONValue, Pointer
@@ -46,7 +46,7 @@ React hook, host service를 추가하지 않는다.
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
-  |                               > same seven-member JSON Document
+  |                               > same six-member JSON Document
   `-> collaboration engine -----/    |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
@@ -55,7 +55,7 @@ Stateless JSON Patch는 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
 RFC 6902 JSON Patch, Result 의미를 소유한다. JSON Document는 현재 document
 value와 change notification을 연결한다.
 
-Canonical concept와 stable v2 compatibility identifier의 관계는
+Canonical concept와 identifier 문법은
 `docs/standard/concept-and-naming-standard.md`가 정의한다.
 
 `JSONDocument`의 필수 member는 정확히 여섯 개다.
@@ -153,9 +153,8 @@ if (result.ok) {
 
 ## Validation
 
-Schema provider는 Root contract가 아니다. 필요하면 validator를 canonical
-`validate` callback으로 조합한다. `accepts`는 deprecated stable v2
-compatibility alias다.
+Schema provider는 Root contract가 아니다. 필요하면 validator를
+`validate` callback으로 조합한다.
 
 ```ts
 import { z } from "zod";
@@ -198,9 +197,9 @@ Minor release에서 optional diagnostic field와 새 code가 추가될 수 있�
 
 패키지는 root entrypoint만 공개한다. Selection, clipboard, history, schema
 introspection, DOM과 framework lifecycle은 host 또는 별도 adapter가
-일곱-member `JSONDocument`를 조합해 소유한다.
+여섯-member `JSONDocument`를 조합해 소유한다.
 
-v2 Kernel release는 dependency-free Core package 하나다. Local-only consumer는
+v3 Kernel release는 dependency-free Core package 하나다. Local-only consumer는
 Core만 설치한다. 이 저장소의
 `@interactive-os/json-document-collaboration`은 같은 canonical JSON Document을
 제공하는 independently versioned, transport-free provider이고,
@@ -228,14 +227,14 @@ indent/outdent, visible-row focus, slide selection box, grid coordinate와 같�
 
 ## 표준과 검증
 
-- v2 profile: `docs/standard/v2-projection-profile.md`
-- machine manifest: `docs/standard/v2-public-surface.json`
-- v2 signature fixture:
-  `packages/json-document/tests/public/v2-signature-contract.test-d.ts`
-- Projection black-box binding:
-  `packages/json-document/tests/public/v2-projection-standard-conformance.test.ts`
-- Stateless JSON Patch black-box binding (v2 Pure Protocol compatibility artifact):
-  `packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts`
+- v3 profile: `docs/standard/v3-json-document-profile.md`
+- machine manifest: `docs/standard/v3-public-surface.json`
+- v3 signature fixture:
+  `packages/json-document/tests/public/v3-signature-contract.test-d.ts`
+- JSON Document black-box binding:
+  `packages/json-document/tests/public/v3-json-document-standard-conformance.test.ts`
+- Stateless JSON Patch black-box binding:
+  `packages/json-document/tests/public/v3-protocol-standard-conformance.test.ts`
 
 Reference implementation의 우연한 동작이 profile과 conformance vector보다 높은
 정본이 되지 않게 한다.

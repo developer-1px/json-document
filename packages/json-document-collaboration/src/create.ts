@@ -154,7 +154,6 @@ export function createCollaborationRuntime(
   return Object.freeze({
     document: runtime.document,
     replica: runtime.replica,
-    collaboration: runtime.collaboration,
   });
 }
 
@@ -169,7 +168,6 @@ export function createTextRuntime(
   return Object.freeze({
     document: runtime.document,
     replica: runtime.replica,
-    collaboration: runtime.collaboration,
     history: runtime.history,
     text: runtime.text,
   });
@@ -202,7 +200,6 @@ export function createRestoredTextRuntime(
   return Object.freeze({
     document: runtime.document,
     replica: runtime.replica,
-    collaboration: runtime.collaboration,
     history: runtime.history,
     text: runtime.text,
   });
@@ -244,7 +241,7 @@ function createRuntime(
   }
 
   let evaluatingValidation = false;
-  const validate = options.validate ?? options.accepts;
+  const validate = options.validate;
   const evaluateValidation = (
     candidate: JSONValue,
   ): JSONPatchValidationResult => {
@@ -266,7 +263,7 @@ function createRuntime(
   const documentStore = createJSONDocument(initialProjected.value);
   const actorId = options.actorId;
   const documentListeners = new Set<(change: JSONAppliedChange) => void>();
-  const collaborationListeners = new Set<
+  const replicaStatusListeners = new Set<
     (status: ReplicaStatus) => void
   >();
   const notificationQueue: NotificationEvent[] = [];
@@ -384,12 +381,6 @@ function createRuntime(
       const prepared = prepareLocal(operations);
       return prepared.ok ? OK : prepared;
     },
-    canPatch(
-      operations: ReadonlyArray<JSONPatchOperation>,
-    ): JSONPatchValidationResult {
-      const prepared = prepareLocal(operations);
-      return prepared.ok ? OK : prepared;
-    },
     commit(
       operations: ReadonlyArray<JSONPatchOperation>,
       commitOptions?: JSONDocumentCommitOptions,
@@ -427,10 +418,9 @@ function createRuntime(
     },
   } satisfies JSONDocument);
 
-  const collaboration = Object.freeze({
+  const replica = Object.freeze({
     epoch,
     status: currentReplicaStatus,
-    current: currentReplicaStatus,
     exportBundle(): CollaborationBundle {
       return Object.freeze({
         epoch,
@@ -450,7 +440,7 @@ function createRuntime(
         return {
           ok: false,
           code: "acceptance_reentrancy",
-          reason: "acceptance callback cannot ingest collaboration changes",
+          reason: "validation callback cannot ingest collaboration changes",
         };
       }
       const prepared = prepareBundle(input);
@@ -569,7 +559,7 @@ function createRuntime(
         }]);
         if (!documentCommit.ok) {
           throw new Error(
-            `collaboration projection publication failed: ${documentCommit.reason ?? documentCommit.code}`,
+            `collaboration document commit failed: ${documentCommit.reason ?? documentCommit.code}`,
           );
         }
         documentChange = documentCommit.change;
@@ -593,21 +583,18 @@ function createRuntime(
     subscribe(
       listener: (status: ReplicaStatus) => void,
     ): () => void {
-      collaborationListeners.add(listener);
+      replicaStatusListeners.add(listener);
       let active = true;
       return () => {
         if (!active) return;
         active = false;
-        collaborationListeners.delete(listener);
+        replicaStatusListeners.delete(listener);
       };
     },
   } satisfies CollaborationReplica);
 
   const history = Object.freeze({
     status(): HistoryStatus {
-      return resolveHistoryState().status;
-    },
-    current(): HistoryStatus {
       return resolveHistoryState().status;
     },
     canUndo(): JSONPatchValidationResult {
@@ -632,7 +619,7 @@ function createRuntime(
           if (evaluatingValidation) {
             return textFailure(
               "acceptance_reentrancy",
-              "acceptance callback cannot capture collaborative text",
+              "validation callback cannot capture collaborative text",
             );
           }
           let segments: string[];
@@ -673,7 +660,7 @@ function createRuntime(
           if (evaluatingValidation) {
             return textFailure(
               "acceptance_reentrancy",
-              "acceptance callback cannot plan collaborative text",
+              "validation callback cannot plan collaborative text",
             );
           }
           const captured = textCaptures.get(capture);
@@ -805,7 +792,7 @@ function createRuntime(
           if (evaluatingValidation) {
             return textFailure(
               "acceptance_reentrancy",
-              "acceptance callback cannot commit collaborative text",
+              "validation callback cannot commit collaborative text",
             );
           }
           const planned = textPlans.get(plan);
@@ -857,7 +844,6 @@ function createRuntime(
               change: metadataProbe.change,
               changeId: null,
               didChangeDocument: false,
-              projectionChanged: false,
               value,
               selection: resolvePlannedSelection(planned, textState),
             });
@@ -921,7 +907,7 @@ function createRuntime(
             });
             if (!documentCommit.ok) {
               throw new Error(
-                `text projection publication failed: ${documentCommit.reason ?? documentCommit.code}`,
+                `text document commit failed: ${documentCommit.reason ?? documentCommit.code}`,
               );
             }
             documentChange = documentCommit.change;
@@ -942,7 +928,6 @@ function createRuntime(
             change: documentChange ?? metadataProbe.change,
             changeId: freezeChangeId(changeId),
             didChangeDocument,
-            projectionChanged: didChangeDocument,
             value: projectText(textState),
             selection: resolvePlannedSelection(planned, textState),
           });
@@ -952,8 +937,7 @@ function createRuntime(
 
   return Object.freeze({
     document,
-    replica: collaboration,
-    collaboration,
+    replica,
     history,
     ...(text === undefined ? {} : { text }),
   });
@@ -1030,7 +1014,7 @@ function createRuntime(
     if (evaluatingValidation) {
       return failure(
         "acceptance_reentrancy",
-        "acceptance callback cannot author history changes",
+        "validation callback cannot author history changes",
       );
     }
     if (graph.pending.some((row) => row.changeId.actorId === actorId)) {
@@ -1136,7 +1120,7 @@ function createRuntime(
       }]);
       if (!documentCommit.ok) {
         throw new Error(
-          `history projection publication failed: ${documentCommit.reason ?? documentCommit.code}`,
+          `history document commit failed: ${documentCommit.reason ?? documentCommit.code}`,
         );
       }
       documentChange = documentCommit.change;
@@ -1151,7 +1135,6 @@ function createRuntime(
       changeId: freezeChangeId(prepared.value.change.changeId),
       target: freezeChangeId(prepared.value.target),
       didChangeDocument: prepared.value.didChangeDocument,
-      projectionChanged: prepared.value.didChangeDocument,
     });
   }
 
@@ -1185,8 +1168,8 @@ function createRuntime(
             }
           }
         }
-        for (const listener of [...collaborationListeners]) {
-          if (!collaborationListeners.has(listener)) continue;
+        for (const listener of [...replicaStatusListeners]) {
+          if (!replicaStatusListeners.has(listener)) continue;
           try {
             listener(next.replicaStatus);
           } catch {
@@ -1517,5 +1500,5 @@ function failure(
 const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
 const ACCEPTANCE_REENTRANCY_FAILURE = failure(
   "acceptance_reentrancy",
-  "acceptance callback cannot call canPatch or commit",
+  "validation callback cannot call validatePatch or commit",
 );

@@ -1,6 +1,6 @@
 # json-document Docs
 
-json-document v2는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수
+json-document v3는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수
 있는 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 루트 package는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 하며 Zod,
 React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
@@ -8,7 +8,7 @@ React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
-  |                               > same seven-member JSON Document
+  |                               > same six-member JSON Document
   `-> collaboration engine -----/    |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
@@ -40,16 +40,13 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 | JSONPath | 여러 위치를 찾는 query. 결과는 Pointer 목록 |
 | JSON Patch | ordered atomic mutation 형식 |
 | Stateless JSON Patch | 현재 document instance 없이 JSON Patch를 적용하는 함수 |
-| JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 일곱-member port |
+| JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 여섯-member port |
 | validation | Candidate document를 commit 전에 검사하는 implementation-neutral callback |
 | Host adapter | selection, clipboard, history, DOM과 고수준 편집 동사를 소유하는 별도 계층 |
 
-전체 canonical concept, 접두어·접미어·동사·boolean 규칙과 stable v2 이름의
-compatibility map은
+전체 canonical concept, 접두어·접미어·동사·boolean 규칙은
 [Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)가
-정의합니다. `Projection`, `canPatch`, `JSONCapabilityResult`, `accepts`는
-deprecated stable v2 identifier 또는 compatibility label이며 별도 canonical
-concept가 아닙니다.
+정의합니다. Public API는 canonical identifier만 제공합니다.
 
 가장 중요한 경계는 query와 mutation을 섞지 않는 것입니다.
 
@@ -118,7 +115,7 @@ if (result.ok) {
 
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
-| `@interactive-os/json-document` | v2 Kernel | Stateless JSON Patch와 일곱-member JSON Document |
+| `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
 | `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
 
@@ -140,7 +137,7 @@ compatibility를 검증합니다.
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
 예시입니다. `JSONDocument`는 canonical headless JSON state로 남고, editable은
 contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결합니다.
-이 companion은 json-document v2 release catalog에 포함되지 않습니다.
+이 companion은 json-document v3 release catalog에 포함되지 않습니다.
 
 ## 자주 쓰는 작업
 

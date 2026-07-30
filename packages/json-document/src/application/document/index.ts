@@ -10,7 +10,6 @@ export {
 } from "./protocol.js";
 export type {
   JSONAppliedChange,
-  JSONCapabilityResult,
   JSONChangeMetadata,
   JSONDocument,
   JSONDocumentOptions,

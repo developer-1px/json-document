@@ -1,9 +1,9 @@
 # @interactive-os/json-document-collaboration
 
-Transport-free causal collaboration engine for the seven-member
+Transport-free causal collaboration engine for the six-member
 `@interactive-os/json-document` JSON Document contract.
 
-Local and collaborative implementations expose the same seven-member
+Local and collaborative implementations expose the same six-member
 `JSONDocument` API.
 
 Canonical concept와 stable compatibility identifier의 관계는
@@ -124,13 +124,13 @@ const restored = restoreCollaborationRuntime(checkpoint, {
 
 const compacted = compactCollaborationCheckpoint(checkpoint, {
   mode: "new-epoch",
-  nextEpochId: "document-42/v2",
+  nextEpochId: "document-42/v3",
   nextRuleset: options.ruleset,
 });
 ```
 
 Compaction is deliberately destructive and therefore only produces a new
-epoch. It requires no pending Changes, uses the current valid JSON projection
+epoch. It requires no pending Changes, uses the current valid JSON document
 as the next base, resets actor counters, reports the discarded causal
 diagnostics, and binds the new epoch to the source checkpoint digest. Hosts
 must quiesce writers and coordinate the epoch switch; the transport-free core
@@ -159,7 +159,7 @@ built-in wire operations that every base peer can materialize.
 
 A concrete ProseMirror, Lexical, or custom-schema resolver belongs in its own
 adapter package. It may expose higher-level commands, but it must commit
-ordinary patches through the seven-member `document` port and keep its schema,
+ordinary patches through the six-member `document` port and keep its schema,
 DOM, marks, and selection policy out of this package. If a rich model genuinely
 needs a new wire protocol, every materializing participant must install that
 separate protocol; an unconfigured base document must never pretend it can
@@ -173,7 +173,7 @@ leased surface.
 ## Release evidence
 
 The ordinary package suite includes an implementation-neutral task-board host that
-depends only on the seven-member `JSONDocument`. The same host commands run
+depends only on the six-member `JSONDocument`. The same host commands run
 unchanged against the local implementation and collaboration engine, including a
 concurrent card edit that follows a structural move by stable identity.
 
@@ -216,7 +216,7 @@ The implemented profile includes:
 - opt-in actor-local selective undo/redo with causal history reconstruction;
 - whole-Change validation and deterministic suppression;
 - canonical membership, SHA-256 checkpoints, restore, and new-epoch compaction;
-- valid JSON change notification through the standard seven-member `JSONDocument`;
+- valid JSON change notification through the standard six-member `JSONDocument`;
 - conflict and suppression sidecars outside `document.value`.
 
 Transport, presence, storage, signing keys, server coordination, and concrete

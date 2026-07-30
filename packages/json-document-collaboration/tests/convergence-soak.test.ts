@@ -146,7 +146,7 @@ function runCase(seed: number): void {
   };
   const compacted = compactCollaborationCheckpoint(checkpoint, {
     mode: "new-epoch",
-    nextEpochId: `task-board-soak/${seed}/v2`,
+    nextEpochId: `task-board-soak/${seed}/v3`,
     nextRuleset,
   });
   if (!compacted.ok) {

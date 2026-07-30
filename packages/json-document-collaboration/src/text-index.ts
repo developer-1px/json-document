@@ -1,26 +1,7 @@
 export * from "./index.js";
-export {
-  createTextRuntime,
-  createTextRuntime as createCollaborationTextRuntime,
-} from "./create.js";
-export {
-  restoreTextRuntime,
-  restoreTextRuntime as restoreCollaborationTextRuntime,
-} from "./restore.js";
+export { createTextRuntime } from "./create.js";
+export { restoreTextRuntime } from "./restore.js";
 export type {
-  CollaborationHistoryControl,
-  CollaborationHistoryResult,
-  CollaborationHistorySnapshot,
-  CollaborationTextCapture,
-  CollaborationTextCaptureResult,
-  CollaborationTextCommitResult,
-  CollaborationTextControl,
-  CollaborationTextObservation,
-  CollaborationTextPlan,
-  CollaborationTextPlanResult,
-  CollaborationTextRestoreResult,
-  CollaborationTextRuntime,
-  CollaborationTextSelection,
   History,
   HistoryResult,
   HistoryStatus,

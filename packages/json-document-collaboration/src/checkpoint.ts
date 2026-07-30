@@ -1,6 +1,6 @@
 import {
   applyPatch,
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONValue,
 } from "@interactive-os/json-document";
 
@@ -24,7 +24,7 @@ type PreparedCheckpoint =
 
 type CheckpointVerifier = (
   checkpoint: CollaborationCheckpoint,
-) => JSONCapabilityResult;
+) => JSONPatchValidationResult;
 
 type CheckpointVerificationFailure = {
   readonly ok: false;
@@ -189,7 +189,7 @@ export function verifyCheckpointProof(
     }
     return verificationFailure(
       "checkpoint_verification_failed",
-      "checkpoint verifier must return a capability result",
+      "checkpoint verifier must return a validation result",
     );
   } catch (error) {
     return verificationFailure(

@@ -39,7 +39,7 @@ export function createEpoch(
       id: options.ruleset.id,
       digest: options.ruleset.digest,
     }),
-    acceptance: (options.validate ?? options.accepts) === undefined
+    acceptance: options.validate === undefined
       ? "none"
       : "custom",
     baseDigest: fingerprintJSON(initial),

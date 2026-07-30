@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import { parseArrayIndex } from "../src/array-index.js";
 import { jsonEqual } from "../src/json-equal.js";
-import rawVectors from "../../json-document/tests/conformance/v2/foundation-vectors.json" with { type: "json" };
+import rawVectors from "../../json-document/tests/conformance/v3/foundation-vectors.json" with { type: "json" };
 
 interface FoundationVectors {
   readonly arrayIndexes: ReadonlyArray<{

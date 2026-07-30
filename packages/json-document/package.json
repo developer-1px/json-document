@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Implementation-neutral JSON Patch API and headless JSON Document.",
   "type": "module",
   "license": "MIT",

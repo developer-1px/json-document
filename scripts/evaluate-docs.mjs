@@ -58,8 +58,8 @@ const surfaces = {
   llms: read("llms.txt"),
   ...publicDocs,
 };
-const profile = read("docs/standard/v2-projection-profile.md");
-const publicSurface = readJson("docs/standard/v2-public-surface.json");
+const profile = read("docs/standard/v3-json-document-profile.md");
+const publicSurface = readJson("docs/standard/v3-public-surface.json");
 const publicContract = readJson("packages/json-document/public-contract.json");
 const packageJson = readJson("packages/json-document/package.json");
 const generatedCatalog = readJson("docs/generated/repo-catalog.json");
@@ -103,7 +103,6 @@ const expectedPublicValues = [
 ];
 const expectedPublicTypes = [
   "JSONAppliedChange",
-  "JSONCapabilityResult",
   "JSONChangeMetadata",
   "JSONDocument",
   "JSONDocumentOptions",
@@ -127,15 +126,15 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "overview.md",
   "quickstart.md",
 ])) {
-  fail("docs/public: only the three active v2 guides may remain.");
+  fail("docs/public: only the three active v3 guides may remain.");
 }
 
 if (JSON.stringify(fileNames("docs/standard")) !== JSON.stringify([
   "concept-and-naming-standard.md",
-  "v2-projection-profile.md",
-  "v2-public-surface.json",
+  "v3-json-document-profile.md",
+  "v3-public-surface.json",
 ])) {
-  fail("docs/standard: naming SSOT, v2 profile, and machine-readable surface must be the only active standards.");
+  fail("docs/standard: naming SSOT, v3 profile, and machine-readable surface must be the only active standards.");
 }
 
 if (JSON.stringify(fileNames("docs/generated")) !== JSON.stringify([
@@ -263,22 +262,22 @@ const required = [
   ["api", surfaces.api, /Root document Pointer는 빈 문자열 `""`/],
   ["api", surfaces.api, /function asPointer/],
   ["api", surfaces.api, /## Host와 adapter/],
-  ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@2\.0\.0/],
+  ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@3\.0\.0/],
   ["packageReadme", surfaces.packageReadme, /패키지는 `\/session`이나 `\/react` subpath를\s*공개하지 않습니다/],
-  ["collaborationReadme", surfaces.collaborationReadme, /same seven-member\s+`JSONDocument` API/],
+  ["collaborationReadme", surfaces.collaborationReadme, /same six-member\s+`JSONDocument` API/],
   ["collaborationReadme", surfaces.collaborationReadme, /Concept and Naming Standard/],
   ["collaborationReadme", surfaces.collaborationReadme, /contains no transport, presence,\s*storage, DOM, React, or server dependency/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe native-input DOM lease/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /Concept and Naming Standard/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
-  ["llms", surfaces.llms, /2\.0\.0.*Stable/],
-  ["llms", surfaces.llms, /공개 Root는 정확히 다음 22개 symbol/],
+  ["llms", surfaces.llms, /3\.0\.0.*Stable/],
+  ["llms", surfaces.llms, /공개 Root는 정확히 다음 21개 symbol/],
   ["llms", surfaces.llms, /## Host adapter와 companion/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-collaboration/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-contenteditable-collaboration/],
   ["llms", surfaces.llms, /@interactive-os\/editable/],
-  ["profile", profile, /root entrypoint 하나와 22개 symbol/],
-  ["profile", profile, /Acceptance callback[\s\S]*`canPatch`[\s\S]*`commit`/],
+  ["profile", profile, /root entrypoint 하나와 21개 symbol/],
+  ["profile", profile, /Validation callback[\s\S]*`validatePatch`[\s\S]*`commit`/],
   ["profile", profile, /Concept and Naming Standard/],
   ["docsReadme", docsReadme, /concept-and-naming-standard\.md/],
   ["namingStandard", namingStandard, /상태: Canonical/],
@@ -292,7 +291,7 @@ const required = [
   ["namingStandard", namingStandard, /## Collection과 축약/],
   ["namingStandard", namingStandard, /## 파일과 경로/],
   ["namingStandard", namingStandard, /## 현재 이름 평가/],
-  ["namingStandard", namingStandard, /## v2 compatibility map/],
+  ["namingStandard", namingStandard, /## Protocol vocabulary boundary/],
   ["namingStandard", namingStandard, /## 새 concept admission/],
   ["namingStandard", namingStandard, /runtime logic, protocol semantics 또는 wire behavior/],
 ];
@@ -381,6 +380,30 @@ for (const path of filesUnder("packages")) {
   }
 }
 
+const forbiddenLegacyIdentifiers = [
+  "JSONCapabilityResult",
+  "canPatch",
+  "accepts",
+  "CollaborationControl",
+  "CollaborationSnapshot",
+  "CollaborationAcceptance",
+  "CollaborationHistory",
+  "CollaborationText",
+  "CollaborationContentEditable",
+  "projectionChanged",
+  "nextAccepts",
+  "discardedHistoryControls",
+];
+for (const path of filesUnder("packages")) {
+  if (!path.includes("/src/") || !path.endsWith(".ts")) continue;
+  const source = read(path);
+  for (const identifier of forbiddenLegacyIdentifiers) {
+    if (source.includes(identifier)) {
+      fail(`naming implementation: legacy identifier remains in ${path}: ${identifier}.`);
+    }
+  }
+}
+
 for (const [name, source] of Object.entries(namingImplementation)) {
   for (const forbiddenInternal of [
     "createProjection",
@@ -424,14 +447,14 @@ if (
   || JSON.stringify(publicContract.root.values) !== JSON.stringify(expectedPublicValues)
   || JSON.stringify(publicContract.root.types) !== JSON.stringify(expectedPublicTypes)
 ) {
-  fail("public contract: root must be the only exact 22-symbol entrypoint.");
+  fail("public contract: root must be the only exact 21-symbol entrypoint.");
 }
 
 if (
   JSON.stringify(publicSurface.binding?.values) !== JSON.stringify(expectedPublicValues)
   || JSON.stringify(publicSurface.binding?.types) !== JSON.stringify(expectedPublicTypes)
 ) {
-  fail("v2 machine surface: package contract and standard manifest disagree.");
+  fail("v3 machine surface: package contract and standard manifest disagree.");
 }
 
 if (
@@ -440,7 +463,7 @@ if (
   || packageJson.homepage !== "https://developer-1px.github.io/json-document/"
   || packageJson.repository?.directory !== "packages/json-document"
 ) {
-  fail("package metadata: v2 must ship one dependency-free root entrypoint.");
+  fail("package metadata: v3 must ship one dependency-free root entrypoint.");
 }
 
 const generatedCore = generatedCatalog.packages?.[0];
@@ -455,14 +478,14 @@ if (
   || generatedCore?.status !== "core"
   || JSON.stringify(generatedCore?.entrypoints) !== JSON.stringify(["."])
   || JSON.stringify(generatedCore?.publicExports) !== JSON.stringify(generatedExports)
-  || generatedCore?.publicExportCount !== 22
+  || generatedCore?.publicExportCount !== 21
   || generatedCollaboration?.path !== "packages/json-document-collaboration"
   || generatedCollaboration?.name
     !== "@interactive-os/json-document-collaboration"
   || generatedCollaboration?.status !== "companion"
   || JSON.stringify(generatedCollaboration?.entrypoints)
     !== JSON.stringify([".", "./history", "./text"])
-  || generatedCollaboration?.publicExportCount !== 43
+  || generatedCollaboration?.publicExportCount !== 40
   || generatedContenteditableCollaboration?.path
     !== "packages/contenteditable-collaboration"
   || generatedContenteditableCollaboration?.name
@@ -470,7 +493,7 @@ if (
   || generatedContenteditableCollaboration?.status !== "companion"
   || JSON.stringify(generatedContenteditableCollaboration?.entrypoints)
     !== JSON.stringify(["."])
-  || generatedContenteditableCollaboration?.publicExportCount !== 14
+  || generatedContenteditableCollaboration?.publicExportCount !== 7
   || generatedCatalog.officialExtensions !== undefined
   || generatedCatalog.labExtensions !== undefined
   || generatedCatalog.apps !== undefined
@@ -480,7 +503,7 @@ if (
     companions: 2,
   })
 ) {
-  fail("generated catalog: active scope must contain one v2 Core and two exact companions.");
+  fail("generated catalog: active scope must contain one v3 Core and two exact companions.");
 }
 
 const expectedRoutePaths = ["/", "/docs", "/docs/tutorial", "/docs/api"];
@@ -488,7 +511,7 @@ if (
   JSON.stringify(siteRoutes.map((route) => route.path)) !== JSON.stringify(expectedRoutePaths)
   || siteRoutes.some((route) => route.group !== "Start")
 ) {
-  fail("site routes: the public site must expose only the v2 core routes.");
+  fail("site routes: the public site must expose only the v3 core routes.");
 }
 
 for (const pattern of [
@@ -513,8 +536,8 @@ for (const pattern of [
 
 for (const pattern of [
   /Implementation-neutral JSON editing/,
-  /seven-member JSON Document/,
-  /npm install @interactive-os\/json-document@2\.0\.0/,
+  /six-member JSON Document/,
+  /npm install @interactive-os\/json-document@3\.0\.0/,
   /Rich editing belongs to host adapters/,
 ]) {
   requirePattern("site home", siteHome, pattern);

@@ -23,7 +23,7 @@ if (JSON.stringify(rootPackage.workspaces) !== JSON.stringify(expectedWorkspaces
 }
 
 if (JSON.stringify(Object.keys(kernelPackage.exports ?? {})) !== JSON.stringify(["."])) {
-  failures.push("the v2 package must expose only its root entrypoint");
+  failures.push("the v3 package must expose only its root entrypoint");
 }
 
 if (
@@ -32,7 +32,7 @@ if (
   || JSON.stringify(Object.keys(collaborationPackage.exports ?? {}))
     !== JSON.stringify([".", "./history", "./text"])
   || collaborationPackage.peerDependencies?.["@interactive-os/json-document"]
-    !== "^2.0.0"
+    !== "^3.0.0"
 ) {
   failures.push("the collaboration companion package surface is invalid");
 }
@@ -45,10 +45,10 @@ if (
   ) !== JSON.stringify(["."])
   || contenteditableCollaborationPackage.peerDependencies?.[
     "@interactive-os/json-document"
-  ] !== "^2.0.0"
+  ] !== "^3.0.0"
   || contenteditableCollaborationPackage.peerDependencies?.[
     "@interactive-os/json-document-collaboration"
-  ] !== "^0.1.0-rc.1"
+  ] !== "^0.2.0-rc.1"
 ) {
   failures.push("the contenteditable collaboration companion surface is invalid");
 }
@@ -92,14 +92,14 @@ if (
 
 if (failures.length > 0) {
   console.error(
-    `v2 archive isolation failed:\n${failures
+    `v3 archive isolation failed:\n${failures
       .map((failure) => `- ${failure}`)
       .join("\n")}`,
   );
   process.exitCode = 1;
 } else {
   console.log(
-    "v2 archive isolation ok: 4 active workspaces, 1 Kernel and 2 optional companions",
+    "v3 archive isolation ok: 4 active workspaces, 1 Kernel and 2 optional companions",
   );
 }
 

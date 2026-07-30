@@ -3,7 +3,7 @@
 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
-v2 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
+v3 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
 Patch만 전제로 합니다. UI framework, schema provider, history, selection,
 clipboard는 core 계약이 아닙니다.
 
@@ -11,23 +11,23 @@ clipboard는 core 계약이 아닙니다.
 stateless JSON Patch -> JSON Document -> host adapter
 ```
 
-Canonical concept와 stable v2 identifier의 관계는
+Canonical concept와 stable v3 identifier의 관계는
 [Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
 정의합니다.
 
-현재 버전은 `2.0.0`입니다. reference와 독립 구현이 같은 conformance suite를
+현재 버전은 `3.0.0`입니다. reference와 독립 구현이 같은 conformance suite를
 통과했고, form·table/data-grid·outliner/tree·rich text·storage/collaboration
 pressure gate까지 검증한 Stable profile입니다.
 
 - 공식 사이트: https://developer-1px.github.io/json-document/
-- 표준 profile: `docs/standard/v2-projection-profile.md`
+- 표준 profile: `docs/standard/v3-json-document-profile.md`
 
 ## 설치
 
 Core만 쓸 때 필수 dependency가 없습니다.
 
 ```sh
-npm install @interactive-os/json-document@2.0.0
+npm install @interactive-os/json-document@3.0.0
 ```
 
 ## 60초 시작
@@ -79,9 +79,8 @@ subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `
 
 ## Validation
 
-Core는 특정 schema object를 받지 않습니다. Validator를 canonical `validate`
-callback으로 연결합니다. Stable v2 `accepts`는 deprecated compatibility
-alias입니다. 반환된 parse value를 받지 않으므로 commit-time
+Core는 특정 schema object를 받지 않습니다. Validator를 `validate`
+callback으로 연결합니다. 반환된 parse value를 받지 않으므로 commit-time
 transform이 state에 몰래 들어갈 수 없습니다.
 
 ```ts
@@ -116,7 +115,7 @@ Initial value와 patch payload, metadata, exposed document value/change는 docum
 
 ## 공개 root
 
-Root는 22개 public symbol만 공개합니다.
+Root는 21개 public symbol만 공개합니다.
 
 ```txt
 values
@@ -127,14 +126,14 @@ values
 types
   JSONValue, Pointer, JSONPatchOperation
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
-  JSONPatchValidationResult, JSONCapabilityResult, JSONChangeMetadata
+  JSONPatchValidationResult, JSONChangeMetadata
   JSONDocumentOptions, JSONDocumentCommitOptions
   ReadResult, QueryResult, JSONDocument
 ```
 
 `JSONDocument`는 application-owned structural contract입니다. Selection,
 history, clipboard, DOM lifecycle과 framework binding은 별도 host 또는 adapter가
-이 일곱 member를 조합합니다. 패키지는 `/session`이나 `/react` subpath를
+이 여섯 member를 조합합니다. 패키지는 `/session`이나 `/react` subpath를
 공개하지 않습니다.
 
 ## 순수 core

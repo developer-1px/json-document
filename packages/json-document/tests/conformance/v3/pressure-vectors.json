@@ -1,15 +1,15 @@
 {
   "formatVersion": 1,
   "status": "stable",
-  "profile": "docs/standard/v2-projection-profile.md",
+  "profile": "docs/standard/v3-json-document-profile.md",
   "verticals": [
     {
       "id": "form",
       "requirements": [
-        "JD2-SCHEMA-001",
-        "JD2-CONFORMANCE-002"
+        "JD3-SCHEMA-001",
+        "JD3-CONFORMANCE-002"
       ],
-      "acceptance": "task-list",
+      "validation": "task-list",
       "initial": {
         "title": "Draft",
         "items": [
@@ -70,10 +70,10 @@
     {
       "id": "table-data-grid",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-CONFORMANCE-002"
+        "JD3-PATCH-001",
+        "JD3-CONFORMANCE-002"
       ],
-      "acceptance": "json",
+      "validation": "json",
       "initial": {
         "rows": [
           { "id": "a", "cells": { "score": 1 } },
@@ -156,11 +156,11 @@
     {
       "id": "outliner-tree",
       "requirements": [
-        "JD2-ADDRESS-001",
-        "JD2-PATCH-001",
-        "JD2-CONFORMANCE-002"
+        "JD3-ADDRESS-001",
+        "JD3-PATCH-001",
+        "JD3-CONFORMANCE-002"
       ],
-      "acceptance": "json",
+      "validation": "json",
       "initial": {
         "nodes": [
           {
@@ -234,10 +234,10 @@
     {
       "id": "rich-text",
       "requirements": [
-        "JD2-COMMIT-002",
-        "JD2-CONFORMANCE-002"
+        "JD3-COMMIT-002",
+        "JD3-CONFORMANCE-002"
       ],
-      "acceptance": "json",
+      "validation": "json",
       "initial": {
         "doc": {
           "blocks": [
@@ -301,12 +301,12 @@
     {
       "id": "storage-collaboration",
       "requirements": [
-        "JD2-DATA-002",
-        "JD2-COMMIT-002",
-        "JD2-PUBLISH-001",
-        "JD2-CONFORMANCE-002"
+        "JD3-DATA-002",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001",
+        "JD3-CONFORMANCE-002"
       ],
-      "acceptance": "json",
+      "validation": "json",
       "initial": {
         "counter": 0,
         "notes": []

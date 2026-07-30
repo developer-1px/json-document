@@ -42,7 +42,7 @@ export function compactCollaborationCheckpoint(
   if (typeof options !== "object" || options === null) {
     return failure("invalid_options", "compaction options must be an object");
   }
-  const validate = options.validate ?? options.accepts;
+  const validate = options.validate;
   if (
     checkpoint.payload.epoch.acceptance === "custom"
     && validate === undefined
@@ -213,7 +213,6 @@ export function compactCollaborationCheckpoint(
       discardedConflicts: materialized.conflicts.length,
       discardedSuppressed: materialized.suppressed.length,
       discardedHistoryChanges,
-      discardedHistoryControls: discardedHistoryChanges,
     }),
   });
 }
@@ -292,12 +291,11 @@ function effectiveNextValidation(
   options: CollaborationCompactionOptions,
 ): CollaborationCompactionOptions["nextValidate"] {
   if (options.nextValidate !== undefined) return options.nextValidate;
-  if (options.nextAccepts !== undefined) return options.nextAccepts;
   return (
     options.nextRuleset.id === checkpoint.payload.epoch.ruleset.id
     && options.nextRuleset.digest === checkpoint.payload.epoch.ruleset.digest
   )
-    ? options.validate ?? options.accepts
+    ? options.validate
     : undefined;
 }
 

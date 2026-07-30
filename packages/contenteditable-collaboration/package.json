@@ -1,6 +1,6 @@
 {
   "name": "@interactive-os/json-document-contenteditable-collaboration",
-  "version": "0.1.0-rc.1",
+  "version": "0.2.0-rc.1",
   "description": "IME-safe native-input DOM lease for json-document collaboration text.",
   "type": "module",
   "license": "MIT",
@@ -46,8 +46,8 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
-    "@interactive-os/json-document": "^2.0.0",
-    "@interactive-os/json-document-collaboration": "^0.1.0-rc.1"
+    "@interactive-os/json-document": "^3.0.0",
+    "@interactive-os/json-document-collaboration": "^0.2.0-rc.1"
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",

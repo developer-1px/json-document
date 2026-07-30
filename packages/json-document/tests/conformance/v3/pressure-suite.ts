@@ -3,18 +3,18 @@ import { describe, expect, test } from "vitest";
 import type {
   JSONPatchOperation,
   JSONValue,
-  ProjectionAcceptance,
-  ProjectionChange,
-  ProjectionHarness,
-  ProjectionMetadata,
-} from "./projection-suite.js";
+  JSONDocumentValidation,
+  JSONDocumentChange,
+  JSONDocumentHarness,
+  JSONDocumentMetadata,
+} from "./json-document-suite.js";
 import rawVectors from "./pressure-vectors.json" with { type: "json" };
 
 type ExpectedObject = Readonly<Record<string, unknown>>;
 
 interface PressureStep {
   readonly operations: ReadonlyArray<JSONPatchOperation>;
-  readonly metadata?: ProjectionMetadata;
+  readonly metadata?: JSONDocumentMetadata;
   readonly expect: {
     readonly probe: ExpectedObject;
     readonly commit: ExpectedObject;
@@ -26,7 +26,7 @@ interface PressureStep {
 interface PressureVertical {
   readonly id: string;
   readonly requirements: ReadonlyArray<string>;
-  readonly acceptance: ProjectionAcceptance;
+  readonly validation: JSONDocumentValidation;
   readonly initial: JSONValue;
   readonly steps: ReadonlyArray<PressureStep>;
   readonly replay?: boolean;
@@ -47,9 +47,9 @@ interface PressureManifest {
 const manifest = rawVectors as unknown as PressureManifest;
 
 export function runPressureConformance(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
 ): void {
-  describe("json-document v2 pressure verticals", () => {
+  describe("json-document v3 pressure verticals", () => {
     for (const vertical of manifest.verticals) {
       test(`[${vertical.id}]`, () => runVertical(harness, vertical));
     }
@@ -57,13 +57,13 @@ export function runPressureConformance(
 }
 
 function runVertical(
-  harness: ProjectionHarness,
+  harness: JSONDocumentHarness,
   vertical: PressureVertical,
 ): void {
   const initial = cloneJSON(vertical.initial);
-  const projection = harness.create(vertical.acceptance, initial);
-  const changes: ProjectionChange[] = [];
-  projection.subscribe((change) => {
+  const document = harness.create(vertical.validation, initial);
+  const changes: JSONDocumentChange[] = [];
+  document.subscribe((change) => {
     changes.push(cloneJSON(change));
   });
 
@@ -72,26 +72,26 @@ function runVertical(
     const metadata = step.metadata === undefined
       ? undefined
       : cloneJSON(step.metadata);
-    const probe = projection.canPatch(operations);
+    const probe = document.validatePatch(operations);
     expect(probe).toMatchObject(step.expect.probe);
-    const committed = projection.commit(
+    const committed = document.commit(
       operations,
       metadata === undefined ? undefined : { metadata },
     );
     expect(committed).toMatchObject(step.expect.commit);
-    expect(projection.value).toEqual(step.expect.value);
+    expect(document.value).toEqual(step.expect.value);
     expect(changes).toHaveLength(step.expect.notificationCount);
   }
 
   for (const read of vertical.reads ?? []) {
-    expect(projection.at(read.pointer)).toMatchObject(read.expect);
+    expect(document.at(read.pointer)).toMatchObject(read.expect);
   }
   for (const query of vertical.queries ?? []) {
-    expect(projection.query(query.jsonPath)).toMatchObject(query.expect);
+    expect(document.query(query.jsonPath)).toMatchObject(query.expect);
   }
 
   if (vertical.replay === true) {
-    const replay = harness.create(vertical.acceptance, cloneJSON(vertical.initial));
+    const replay = harness.create(vertical.validation, cloneJSON(vertical.initial));
     for (const change of changes) {
       const result = replay.commit(
         cloneJSON(change.applied),
@@ -101,7 +101,7 @@ function runVertical(
       );
       expect(result).toMatchObject({ ok: true });
     }
-    expect(replay.value).toEqual(projection.value);
+    expect(replay.value).toEqual(document.value);
   }
 }
 

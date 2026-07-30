@@ -3,13 +3,12 @@
 상태: Canonical
 
 이 문서는 현재 `json-document` repository의 개념과 이름 문법을 정의하는 유일한
-사람 작성 정본이다. 개요, API 문서, v2 compatibility profile, package README,
+사람 작성 정본이다. 개요, API 문서, versioned profile, package README,
 generated catalog와 구현 이름은 이 문서를 참조한다. Generated artifact와 현재
 구현은 이 문서의 개념 의미를 덮어쓸 수 없다.
 
-이 문서는 runtime 동작, protocol 의미, wire 형식과 stable v2 public API를
-변경하지 않는다. Canonical term과 v2 compatibility identifier가 다르면 문서는
-canonical term을 먼저 설명하고 실제 identifier를 code font로 병기한다.
+이 문서는 runtime 동작, protocol 의미와 wire 형식을 변경하지 않는다. Public
+TypeScript API와 내부 identifier는 canonical term만 사용한다.
 
 ## 이름 권위
 
@@ -44,9 +43,8 @@ position, text splice, adapter와 transport-agnostic engine이다.
 | JSON Patch | RFC 6902 ordered operation batch | Merge Patch, semantic operation |
 | Patch application | JSON value에 JSON Patch를 원자적으로 적용하는 stateless 연산 | Stateful commit, notification, collaboration |
 
-`Pure Protocol`은 별도 canonical concept가 아니다. v2 문맥에서 이 이름을
-인용해야 할 때는 **v2 Pure Protocol compatibility label**이라고 쓰고, 일반
-설명에서는 **stateless JSON Patch application**을 쓴다.
+`Pure Protocol`은 retired vocabulary이며 별도 canonical concept가 아니다.
+일반 설명과 identifier에서는 **stateless JSON Patch application**을 쓴다.
 
 ### JSON Document
 
@@ -74,9 +72,9 @@ publication
   -> change notification
 ```
 
-`Projection`, `canPatch`, `JSONCapabilityResult`, `accepts`는 deprecated stable
-v2 compatibility identifier로만 남는다. Canonical code는 `JSONDocument`,
-`validatePatch`, `JSONPatchValidationResult`, `validate`를 사용한다.
+`Projection`, capability probe, acceptance callback 같은 이전 synonym은 public
+identifier로 남기지 않는다. Canonical code는 `JSONDocument`, `validatePatch`,
+`JSONPatchValidationResult`, `validate`만 사용한다.
 
 ### Collaboration
 
@@ -99,8 +97,7 @@ v2 compatibility identifier로만 남는다. Canonical code는 `JSONDocument`,
 `provider`는 실제 network, storage, schema 또는 host provider에만 쓴다.
 Transport를 소유하지 않는 collaboration package는 **collaboration engine**이다.
 
-`CollaborationSnapshot`은 deprecated compatibility alias다. Canonical type은
-`ReplicaStatus`이며 snapshot이나 checkpoint로 설명하지 않는다.
+Canonical type은 `ReplicaStatus`이며 snapshot이나 checkpoint로 설명하지 않는다.
 
 ### Lifecycle
 
@@ -212,7 +209,7 @@ History, text, status, DOM type마다 반복하지 않는다.
 ```text
 prefer TextRuntime from /text
 next   CollaborativeTextRuntime
-avoid  CollaborationTextRuntime
+avoid  TextRuntime
 ```
 
 ### `DOM`
@@ -277,8 +274,7 @@ Data
 Info
 ```
 
-`Data`가 JSON data처럼 정확한 표준 용어일 때는 예외다. 기존 compatibility
-identifier는 versioned migration 없이 제거하지 않는다.
+`Data`가 JSON data처럼 정확한 표준 용어일 때는 예외다.
 
 책임 이름으로 대체한다.
 
@@ -351,13 +347,7 @@ didChangeDocument
 `ok`는 Result discriminant이므로 유지한다. `active`, `available`, `valid`,
 `accepted`, `changed` 같은 무접두 public boolean은 새로 만들지 않는다.
 
-Canonical replacement:
-
-```text
-projectionChanged (deprecated alias) -> didChangeDocument
-```
-
-Canonical field와 compatibility field는 같은 boolean을 반환한다.
+Completed operation의 document 변화 여부는 `didChangeDocument`만 사용한다.
 
 ## Collection과 축약
 
@@ -392,8 +382,8 @@ Identifier의 `Id`는 앞선 TypeScript casing 규칙을 따른다.
   `PascalCase`를 허용한다.
 - Package entrypoint는 export subpath와 맞춘 `index.ts` 또는
   `<subpath>-index.ts`를 사용한다.
-- Compatibility profile, vector, fixture와 test file은 호환 대상의 기존 이름을
-  포함할 수 있지만 경로 자체가 compatibility artifact임을 드러내야 한다.
+- Versioned profile, vector, fixture와 test file도 해당 버전의 canonical
+  vocabulary를 사용한다.
 - Canonical domain path는 `domain/json-document`다.
   `domain/projection`은 사용하지 않는다.
 
@@ -404,89 +394,34 @@ Identifier의 `Id`는 앞선 TypeScript casing 규칙을 따른다.
 | `JSONDocument` | Stateful document API | Exact domain | 없음 | keep | `JSONDocument` |
 | Document Projection | 같은 stateful document API | Weak/local | DB projection과 충돌 | merge | JSON Document |
 | Pure Protocol | Stateless Patch application | Weak/local | Wire protocol과 충돌 | merge | stateless JSON Patch |
-| `canPatch` | Patch와 candidate validation | Near | Capability/probe synonym | compatibility alias | `validatePatch` |
-| `JSONCapabilityResult` | Patch validation result | None | 지나치게 넓음 | compatibility alias | `JSONPatchValidationResult` |
-| `accepts` | Candidate validator | Near | Boolean처럼 보이나 Result 반환 | compatibility alias | `validate` |
+| `validatePatch` | Patch와 candidate validation | Exact responsibility | 없음 | keep | `validatePatch` |
+| `JSONPatchValidationResult` | Patch validation result | Exact responsibility | 없음 | keep | `JSONPatchValidationResult` |
+| `validate` | Candidate validator | Exact responsibility | 없음 | keep | `validate` |
 | acceptance | Candidate validation | Near | Validation과 중복 | merge | validation |
 | publication | Subscriber notification | Near | Process/mechanism 모호 | merge | change notification |
 | `JSONAppliedChange` | Applied canonical operations | Exact | 없음 | keep | `JSONAppliedChange` |
 | collaboration provider | Transport-free causal engine | Mismatch | Provider는 connector를 암시 | rename prose | collaboration engine |
-| `CollaborationControl` | Replica status/sync/checkpoint API | None | Vague responsibility | compatibility alias | `CollaborationReplica` |
-| `runtime.collaboration` | Replica surface | Near | Package 이름이지 역할이 아님 | compatibility alias | `runtime.replica` |
-| `CollaborationSnapshot` | Current causal diagnostics | Mismatch | Snapshot/checkpoint 충돌 | compatibility alias | `ReplicaStatus` |
-| `current()` | Replica status 반환 | Weak | Return 의미가 숨음 | compatibility alias | `status()` |
+| `CollaborationReplica` | Replica status/sync/checkpoint API | Exact responsibility | 없음 | keep | `CollaborationReplica` |
+| `runtime.replica` | Replica surface | Exact responsibility | 없음 | keep | `runtime.replica` |
+| `ReplicaStatus` | Current causal diagnostics | Exact responsibility | 없음 | keep | `ReplicaStatus` |
+| `status()` | Replica status 반환 | Exact responsibility | 없음 | keep | `status()` |
 | `CollaborationBundle` | Epoch/change exchange artifact | Near | Full/incremental 불명확 | keep | `CollaborationBundle` |
 | `SuppressedChange` | Known inactive contribution | Exact local | Rejection과 구분 필요 | keep | `SuppressedChange` |
 | `materializeChanges` | DAG에서 current document 파생 | Exact de-facto | 없음 | keep | `materializeChanges` |
-| `projectionChanged` | Visible document change outcome | Weak | 제거할 concept 누출 | compatibility alias | `didChangeDocument` |
-| `CollaborationTextDOM` | DOM observe/render/selection boundary | Mismatch | DOM state처럼 보임 | compatibility alias | `TextDOMAdapter` |
+| `didChangeDocument` | Visible document change outcome | Exact predicate | 없음 | keep | `didChangeDocument` |
+| `TextDOMAdapter` | DOM observe/render/selection boundary | Exact responsibility | 없음 | keep | `TextDOMAdapter` |
 | publication lease | Native input 중 DOM rendering 유예 | Local | Sync lock으로 오해 | rename prose | native-input DOM lease |
 
-## v2 compatibility map
+## Protocol vocabulary boundary
 
-| Canonical term | Stable v2 identifier 또는 label | 사용 규칙 |
-| --- | --- | --- |
-| JSON Document | `JSONDocument`, Document Projection, Projection | `JSONDocument`는 유지하고 Projection은 v2 compatibility 문맥에서만 사용 |
-| Stateless JSON Patch | Pure Protocol, `applyPatch` | `applyPatch`는 유지하고 Pure Protocol을 새 canonical concept로 사용하지 않음 |
-| Patch validation | `canPatch`, `JSONCapabilityResult` | Deprecated alias; code는 `validatePatch`, `JSONPatchValidationResult` 사용 |
-| Validation | acceptance, `accepts` | Wire label과 deprecated alias; code는 `validate` 사용 |
-| Applied change | `JSONAppliedChange` | 그대로 사용 |
-| Change notification | publication, `subscribe` | `subscribe`는 유지하고 publication을 notification으로 설명 |
-| Collaboration engine | collaboration provider package description | Transport-free engine으로 설명 |
-| Replica | `CollaborationControl`, `runtime.collaboration` | Deprecated alias; `CollaborationReplica`, `runtime.replica` 사용 |
-| Replica status | `CollaborationSnapshot`, `current()` | Deprecated alias; `ReplicaStatus`, `status()` 사용 |
-| History status | `CollaborationHistorySnapshot` | Deprecated alias; `HistoryStatus` 사용 |
-| Native-input DOM lease | DOM/IME publication lease | Rendering만 유예한다고 명시 |
-| DOM adapter | `CollaborationTextDOM` | Deprecated alias; `TextDOMAdapter` 사용 |
+Wire fields와 error code인 `acceptance`, `acceptance_required`,
+`acceptance_reentrancy`, `deps`, `ops`는 versioned protocol 영역이므로
+TypeScript identifier 문법과 별도로 유지한다. Public TypeScript API와 내부
+identifier에는 canonical vocabulary만 사용한다.
 
 ## Current public surface decisions
 
-## Compatibility migration
-
-Compatibility alias는 기존 runtime object 또는 export와 같은 값을 가리키며 별도
-동작이나 개념을 만들지 않는다.
-
-```text
-Core
-  canPatch                         -> validatePatch
-  JSONCapabilityResult             -> JSONPatchValidationResult
-  options.accepts                  -> options.validate
-
-Collaboration
-  runtime.collaboration            -> runtime.replica
-  CollaborationControl             -> CollaborationReplica
-  CollaborationSnapshot            -> ReplicaStatus
-  replica.current()                -> replica.status()
-  CollaborationAcceptance          -> CollaborationValidation
-
-History subpath
-  CollaborationHistory*            -> History*
-  createCollaborationHistoryRuntime -> createHistoryRuntime
-  restoreCollaborationHistoryRuntime -> restoreHistoryRuntime
-  history.current()                -> history.status()
-
-Text subpath
-  CollaborationText*               -> Text*
-  createCollaborationTextRuntime    -> createTextRuntime
-  restoreCollaborationTextRuntime   -> restoreTextRuntime
-
-Contenteditable package
-  CollaborationContentEditable*        -> ContentEditable*
-  createCollaborationContentEditableAdapter -> createContentEditableAdapter
-  CollaborationTextDOM*                -> TextDOMAdapter / DOMObservation
-  plainTextCollaborationDOM             -> plainTextDOMAdapter
-
-Boolean result
-  projectionChanged                -> didChangeDocument
-```
-
-Wire fields와 error code인 `acceptance`, `acceptance_required`,
-`acceptance_reentrancy`, `deps`, `ops`는 protocol compatibility 영역이므로
-이 migration의 identifier 대상이 아니다.
-
-아래 표는 현재 public export를 canonical 또는 compatibility alias로 분류한다.
-Canonical 이름은 새 코드와 문서가 사용한다. Compatibility alias는 기존 소비자를
-보호하지만 새 코드에서 사용하지 않으며 `@deprecated`로 표시한다.
+아래 표는 현재 public export를 canonical vocabulary로 분류한다.
 
 ### Core root
 
@@ -495,7 +430,6 @@ Canonical 이름은 새 코드와 문서가 사용한다. Compatibility alias는
 | keep | `JSONValue`, `Pointer`, `JSONPatchOperation`, `JSONAppliedChange`, `JSONPatchResult`, `JSONDocument`, `JSONDocumentOptions`, `JSONDocumentCommitOptions`, `JSONDocumentCommitResult`, `JSONPatchValidationResult`, `ReadResult`, `QueryResult` | Standard JSON 또는 책임 suffix와 일치 |
 | keep | `createJSONDocument`, `applyPatch`, `parsePointer`, `tryParsePointer`, `buildPointer`, `parentPointer`, `appendSegment`, `trackPointer` | Function verb grammar와 일치 |
 | merge | `JSONChangeMetadata` | Applied change의 metadata이며 별도 domain concept를 만들지 않음 |
-| compatibility alias | `JSONCapabilityResult`, `canPatch`, `accepts` | 각각 `JSONPatchValidationResult`, `validatePatch`, `validate`로 대체 |
 
 ### Collaboration root
 
@@ -510,28 +444,24 @@ Canonical 이름은 새 코드와 문서가 사용한다. Compatibility alias는
 | keep | `CollaborationIngestSuccess`, `CollaborationIngestFailure`, `CollaborationIngestResult` | Result variant grammar와 일치 |
 | keep | `CollaborationRuntime`, `CollaborationRuntimeOptions`, `CollaborationRestoreOptions`, `CollaborationRestoreResult`, `CollaborationCompactionOptions`, `CollaborationCompactionReport`, `CollaborationCompactionResult`, `CollaborationReplica`, `ReplicaStatus`, `CollaborationValidation` | Runtime/Options/Result/Report/Replica/Status grammar와 일치 |
 | keep | `createCollaborationRuntime`, `restoreCollaborationRuntime`, `compactCollaborationCheckpoint` | Function verb grammar와 일치 |
-| compatibility alias | `CollaborationAcceptance`, `CollaborationControl`, `CollaborationSnapshot`, `runtime.collaboration`, `current()` | 각각 `CollaborationValidation`, `CollaborationReplica`, `ReplicaStatus`, `runtime.replica`, `status()`로 대체 |
 
 ### History subpath
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
 | keep | `History`, `HistoryStatus`, `HistoryResult`, `HistoryRuntime`, `HistoryRestoreResult`, `createHistoryRuntime`, `restoreHistoryRuntime` | Subpath namespace와 책임 suffix가 일치 |
-| compatibility alias | `CollaborationHistoryControl`, `CollaborationHistorySnapshot`, `CollaborationHistoryResult`, `CollaborationHistoryRuntime`, `CollaborationHistoryRestoreResult`, `createCollaborationHistoryRuntime`, `restoreCollaborationHistoryRuntime`, `current()` | Canonical `History*`, `createHistoryRuntime`, `restoreHistoryRuntime`, `status()`로 대체 |
 
 ### Text subpath
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
 | keep | `Text`, `TextSelection`, `TextObservation`, `TextCapture`, `TextCaptureResult`, `TextPlan`, `TextPlanResult`, `TextCommitResult`, `TextRuntime`, `TextRestoreResult`, `createTextRuntime`, `restoreTextRuntime` | Subpath namespace와 capture/plan/commit 책임이 일치 |
-| compatibility alias | `CollaborationTextControl`, `CollaborationTextSelection`, `CollaborationTextObservation`, `CollaborationTextCapture`, `CollaborationTextCaptureResult`, `CollaborationTextPlan`, `CollaborationTextPlanResult`, `CollaborationTextCommitResult`, `CollaborationTextRuntime`, `CollaborationTextRestoreResult`, `createCollaborationTextRuntime`, `restoreCollaborationTextRuntime` | Canonical `Text*`, `createTextRuntime`, `restoreTextRuntime`로 대체 |
 
 ### Contenteditable package
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
 | keep | `ContentEditableAdapter`, `ContentEditableOptions`, `ContentEditableResult`, `createContentEditableAdapter`, `TextDOMAdapter`, `DOMObservation`, `plainTextDOMAdapter` | Package namespace와 DOM Adapter 책임이 일치 |
-| compatibility alias | `CollaborationContentEditableAdapter`, `CollaborationContentEditableOptions`, `CollaborationContentEditableResult`, `CollaborationTextDOM`, `CollaborationTextDOMObservation`, `createCollaborationContentEditableAdapter`, `plainTextCollaborationDOM` | Canonical 이름으로 대체 |
 
 ## Target vocabulary
 
@@ -607,10 +537,10 @@ Contenteditable package
 ## 변경 절차
 
 1. Naming evaluation table에 책임, 근거, 안정성, 일관성, 모호성, concept
-   reduction과 compatibility 영향을 기록한다.
+   reduction과 public/wire 영향을 기록한다.
 2. Canonical prose 변경과 code identifier 변경을 분리한다.
-3. Stable identifier나 wire field 변경은 별도 versioned migration으로 승인받는다.
-4. Overview, API, compatibility profile, collaboration/history/text,
+3. Public identifier나 wire field 변경은 별도 versioned evolution으로 승인받는다.
+4. Overview, API, versioned profile, collaboration/history/text,
    contenteditable와 contributor 문서를 함께 갱신한다.
 5. Generated artifact는 이 정본을 복제하지 않고 참조 또는 검증한다.
 6. Naming drift check와 관련 test를 통과한다.
@@ -633,7 +563,7 @@ Contenteditable package
 11. Public boolean은 `is`, `has`, `can`, `should`, `did`로 읽히게 한다.
 12. 새 public field를 불필요하게 축약하지 않는다.
 13. 같은 validation 책임에는 하나의 동사를 사용한다.
-14. Public canonical concept는 JSON Document이며 Projection은 v2
-    compatibility label로만 남긴다.
+14. Public canonical concept는 JSON Document이며 Projection은 public 또는
+    internal identifier로 사용하지 않는다.
 15. 이름 변경은 runtime logic, protocol semantics 또는 wire behavior 변경을
     승인하지 않는다.

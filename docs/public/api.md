@@ -1,13 +1,13 @@
 # json-document API
 
-이 문서는 v2 루트 Kernel의 정본 API를 설명합니다.
+이 문서는 v3 루트 Kernel의 정본 API를 설명합니다.
 
 ```txt
 @interactive-os/json-document
 |-- createJSONDocument
 |-- applyPatch
 |-- Pointer helpers
-`-- seven-member JSONDocument
+`-- six-member JSONDocument
 ```
 
 ## 기준
@@ -237,9 +237,8 @@ Subscriber는 이미 publish된 `JSONAppliedChange`를 받습니다. Unsubscribe
 
 ## Validation
 
-`createJSONDocument`의 canonical `validate` option은 특정 schema object를
-요구하지 않는 implementation-neutral validation boundary입니다. Stable v2
-`accepts`는 deprecated compatibility alias입니다.
+`createJSONDocument`의 `validate` option은 특정 schema object를 요구하지 않는
+implementation-neutral validation boundary입니다.
 
 ```ts
 import * as z from "zod";
@@ -275,8 +274,7 @@ parse한 변환값은 Core state로 채택되지 않으며, normalization이 필
 변경을 JSON Patch에 명시합니다.
 
 Canonical concept와 result는 validation과 `JSONPatchValidationResult`입니다.
-`accepts`와 `JSONCapabilityResult`는 deprecated stable v2 compatibility
-identifier입니다. Naming 기준은
+Naming 기준은
 [Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)를
 따릅니다.
 
@@ -298,7 +296,7 @@ exact key 집합이나 exhaustive code union에 의존하지 않습니다.
 
 ## 공개 root
 
-Root는 22개 public symbol만 공개합니다.
+Root는 21개 public symbol만 공개합니다.
 
 ```txt
 values
@@ -309,7 +307,7 @@ values
 types
   JSONValue, Pointer, JSONPatchOperation
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
-  JSONPatchValidationResult, JSONCapabilityResult, JSONChangeMetadata
+  JSONPatchValidationResult, JSONChangeMetadata
   JSONDocumentOptions, JSONDocumentCommitOptions
   ReadResult, QueryResult, JSONDocument
 ```
@@ -318,4 +316,4 @@ types
 
 패키지는 `/session`이나 `/react` subpath를 공개하지 않습니다. Selection,
 clipboard, history, schema introspection, DOM lifecycle과 framework binding은
-host 또는 별도 adapter가 일곱-member `JSONDocument`를 조합해 구현합니다.
+host 또는 별도 adapter가 여섯-member `JSONDocument`를 조합해 구현합니다.

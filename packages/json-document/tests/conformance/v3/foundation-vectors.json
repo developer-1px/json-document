@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "status": "stable",
-  "profile": "docs/standard/v2-projection-profile.md",
+  "profile": "docs/standard/v3-json-document-profile.md",
   "arrayIndexes": [
     { "segment": "0", "value": 0 },
     { "segment": "1", "value": 1 },

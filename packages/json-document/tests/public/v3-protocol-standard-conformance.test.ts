@@ -3,7 +3,7 @@ import { applyPatch } from "@interactive-os/json-document";
 import {
   runProtocolConformance,
   type ProtocolHarness,
-} from "../conformance/v2/protocol-suite.js";
+} from "../conformance/v3/protocol-suite.js";
 
 const referenceHarness: ProtocolHarness = {
   applyPatch,
