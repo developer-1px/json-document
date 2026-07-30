@@ -1,15 +1,15 @@
 # @interactive-os/json-document-collaboration
 
-Transport-free causal collaboration engine for the six-member
+Transport-free causal collaboration engine for the seven-member
 `@interactive-os/json-document` JSON Document contract.
 
-Local and collaborative implementations expose the same six-member
+Local and collaborative implementations expose the same seven-member
 `JSONDocument` API.
 
 Canonical concept와 stable compatibility identifier의 관계는
 [Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
-정의합니다. `runtime.collaboration`, `CollaborationControl`과
-`CollaborationSnapshot`은 현재 API 이름이며 canonical prose에서는 각각 replica
+정의합니다. `runtime.replica`, `CollaborationReplica`과
+`ReplicaStatus`은 현재 API 이름이며 canonical prose에서는 각각 replica
 surface와 replica status로 설명합니다.
 
 ```ts
@@ -30,40 +30,40 @@ runtime.document.commit([
   { op: "replace", path: "/title", value: "Shared title" },
 ]);
 
-send(runtime.collaboration.exportBundle());
-receive((bundle) => runtime.collaboration.ingest(bundle));
+send(runtime.replica.exportBundle());
+receive((bundle) => runtime.replica.ingest(bundle));
 ```
 
 The editor receives only `runtime.document`, whose required API is identical to
-the local-only provider. Causal state, conflicts, bundles, and sync controls
-remain on `runtime.collaboration`. The package contains no transport, presence,
+the local-only implementation. Causal state, conflicts, bundles, and sync capabilities
+remain on `runtime.replica`. The package contains no transport, presence,
 storage, DOM, React, or server dependency.
 
 Actor-local selective history is an opt-in authoring surface:
 
 ```ts
 import {
-  createCollaborationHistoryRuntime,
+  createHistoryRuntime,
 } from "@interactive-os/json-document-collaboration/history";
 
-const runtime = createCollaborationHistoryRuntime(initial, options);
+const runtime = createHistoryRuntime(initial, options);
 runtime.history.undo();
 runtime.history.redo();
 ```
 
 The base runtime still ingests, materializes, and forwards history wire
 operations so peers converge, but it does not expose history authoring
-controls. History withdraws or reinstates the original Change contribution; it
+capabilities. History withdraws or reinstates the original Change contribution; it
 does not write an inverse value over another actor's work.
 
 Fine-grained JSON string collaboration is also opt-in:
 
 ```ts
 import {
-  createCollaborationTextRuntime,
+  createTextRuntime,
 } from "@interactive-os/json-document-collaboration/text";
 
-const runtime = createCollaborationTextRuntime(initial, options);
+const runtime = createTextRuntime(initial, options);
 runtime.history.undo();
 
 // Ordinary editor code keeps using the same document API. String-to-string
@@ -98,17 +98,17 @@ the history profile. A successful text commit returns the canonical
 `JSONAppliedChange`, including owned metadata, so editor transaction tracking
 does not need a second change-notification protocol.
 
-`runtime.collaboration.subscribe` publishes one deeply immutable replica status
+`runtime.replica.subscribe` publishes one deeply immutable replica status
 when an ingest adds causal state, even if it only changes pending/conflict metadata.
-Duplicate-only delivery publishes nothing. Unsubscribe follows the Projection
+Duplicate-only delivery publishes nothing. Unsubscribe follows the JSON Document
 subscription contract.
 
 ## Checkpoints, membership, and epochs
 
 `exportCheckpoint()` is a lossless same-epoch artifact. It retains every ready
 and pending Change, history control, conflict input, and suppressed Change
-input. Restore replays the causal state rather than trusting a cached
-projection:
+input. Restore replays the causal state rather than trusting a cached document
+value:
 
 ```ts
 import {
@@ -116,7 +116,7 @@ import {
   restoreCollaborationRuntime,
 } from "@interactive-os/json-document-collaboration";
 
-const checkpoint = runtime.collaboration.exportCheckpoint();
+const checkpoint = runtime.replica.exportCheckpoint();
 const restored = restoreCollaborationRuntime(checkpoint, {
   actorId: "browser-a",
   ruleset: options.ruleset,
@@ -143,7 +143,8 @@ are lineage identifiers, not authentication. A host may attach a proof and
 must pass `verify` on restore/compaction when authenticity matters.
 
 The checkpoint checksum is canonical SHA-256 tamper detection. It is not a
-signature. A custom `accepts` resolver is explicitly recorded in the epoch;
+signature. A custom `validate` resolver is recorded by the epoch's
+wire-compatible `acceptance` mode;
 restore and compaction fail with `acceptance_required` if that resolver is
 omitted.
 
@@ -158,7 +159,7 @@ built-in wire operations that every base peer can materialize.
 
 A concrete ProseMirror, Lexical, or custom-schema resolver belongs in its own
 adapter package. It may expose higher-level commands, but it must commit
-ordinary patches through the six-member `document` port and keep its schema,
+ordinary patches through the seven-member `document` port and keep its schema,
 DOM, marks, and selection policy out of this package. If a rich model genuinely
 needs a new wire protocol, every materializing participant must install that
 separate protocol; an unconfigured base document must never pretend it can
@@ -172,7 +173,7 @@ leased surface.
 ## Release evidence
 
 The ordinary package suite includes an implementation-neutral task-board host that
-depends only on the six-member `JSONDocument`. The same host commands run
+depends only on the seven-member `JSONDocument`. The same host commands run
 unchanged against the local implementation and collaboration engine, including a
 concurrent card edit that follows a structural move by stable identity.
 
@@ -215,7 +216,7 @@ The implemented profile includes:
 - opt-in actor-local selective undo/redo with causal history reconstruction;
 - whole-Change validation and deterministic suppression;
 - canonical membership, SHA-256 checkpoints, restore, and new-epoch compaction;
-- valid JSON change notification through the standard six-member `JSONDocument`;
+- valid JSON change notification through the standard seven-member `JSONDocument`;
 - conflict and suppression sidecars outside `document.value`.
 
 Transport, presence, storage, signing keys, server coordination, and concrete
@@ -227,7 +228,7 @@ A mismatched bundle is rejected before any state changes.
 `baseDigest`, membership, acceptance mode, and protocol version are immutable
 within an epoch.
 
-Convergence requires `accepts` to be synchronous, total, side-effect-free, and
+Convergence requires `validate` to be synchronous, total, side-effect-free, and
 referentially transparent. For the same candidate, every replica and every
 invocation must return the same complete result, including `code`, `reason`,
 and `pointer`. It must not read clocks, randomness, mutable closure state, or

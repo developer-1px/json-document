@@ -23,6 +23,14 @@ function fileNames(path) {
     .sort();
 }
 
+function filesUnder(path) {
+  return readdirSync(join(root, path), { withFileTypes: true })
+    .flatMap((entry) => {
+      const child = `${path}/${entry.name}`;
+      return entry.isDirectory() ? filesUnder(child) : [child];
+    });
+}
+
 function fail(message) {
   console.error(message);
   process.exitCode = 1;
@@ -58,6 +66,30 @@ const generatedCatalog = readJson("docs/generated/repo-catalog.json");
 const siteRoutes = readJson("apps/site/src/site-routes.json");
 const siteHome = read("apps/site/src/routes/Home.tsx");
 const docsRoute = read("apps/site/src/routes/Docs.tsx");
+const namingImplementation = {
+  coreDocument: read("packages/json-document/src/domain/json-document/create.ts"),
+  coreContract: read(
+    "packages/json-document/src/application/document/contract.ts",
+  ),
+  collaborationTypes: read(
+    "packages/json-document-collaboration/src/types.ts",
+  ),
+  collaborationRuntime: read(
+    "packages/json-document-collaboration/src/create.ts",
+  ),
+  historyEntrypoint: read(
+    "packages/json-document-collaboration/src/history-index.ts",
+  ),
+  textEntrypoint: read(
+    "packages/json-document-collaboration/src/text-index.ts",
+  ),
+  contenteditableTypes: read(
+    "packages/contenteditable-collaboration/src/types.ts",
+  ),
+  contenteditableEntrypoint: read(
+    "packages/contenteditable-collaboration/src/index.ts",
+  ),
+};
 
 const expectedPublicValues = [
   "appendSegment",
@@ -74,10 +106,12 @@ const expectedPublicTypes = [
   "JSONCapabilityResult",
   "JSONChangeMetadata",
   "JSONDocument",
+  "JSONDocumentOptions",
   "JSONDocumentCommitOptions",
   "JSONDocumentCommitResult",
   "JSONPatchOperation",
   "JSONPatchResult",
+  "JSONPatchValidationResult",
   "JSONValue",
   "Pointer",
   "QueryResult",
@@ -231,19 +265,19 @@ const required = [
   ["api", surfaces.api, /## Host와 adapter/],
   ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@2\.0\.0/],
   ["packageReadme", surfaces.packageReadme, /패키지는 `\/session`이나 `\/react` subpath를\s*공개하지 않습니다/],
-  ["collaborationReadme", surfaces.collaborationReadme, /same six-member\s+`JSONDocument` API/],
+  ["collaborationReadme", surfaces.collaborationReadme, /same seven-member\s+`JSONDocument` API/],
   ["collaborationReadme", surfaces.collaborationReadme, /Concept and Naming Standard/],
   ["collaborationReadme", surfaces.collaborationReadme, /contains no transport, presence,\s*storage, DOM, React, or server dependency/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe native-input DOM lease/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /Concept and Naming Standard/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
   ["llms", surfaces.llms, /2\.0\.0.*Stable/],
-  ["llms", surfaces.llms, /공개 Root는 정확히 다음 20개 symbol/],
+  ["llms", surfaces.llms, /공개 Root는 정확히 다음 22개 symbol/],
   ["llms", surfaces.llms, /## Host adapter와 companion/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-collaboration/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-contenteditable-collaboration/],
   ["llms", surfaces.llms, /@interactive-os\/editable/],
-  ["profile", profile, /root entrypoint 하나와 20개 Kernel symbol/],
+  ["profile", profile, /root entrypoint 하나와 22개 symbol/],
   ["profile", profile, /Acceptance callback[\s\S]*`canPatch`[\s\S]*`commit`/],
   ["profile", profile, /Concept and Naming Standard/],
   ["docsReadme", docsReadme, /concept-and-naming-standard\.md/],
@@ -256,6 +290,7 @@ const required = [
   ["namingStandard", namingStandard, /## 함수 동사/],
   ["namingStandard", namingStandard, /## Boolean/],
   ["namingStandard", namingStandard, /## Collection과 축약/],
+  ["namingStandard", namingStandard, /## 파일과 경로/],
   ["namingStandard", namingStandard, /## 현재 이름 평가/],
   ["namingStandard", namingStandard, /## v2 compatibility map/],
   ["namingStandard", namingStandard, /## 새 concept admission/],
@@ -323,6 +358,57 @@ for (const restrictedSuffix of [
   }
 }
 
+for (const [path, forbiddenName] of [
+  ["packages/json-document/src/domain/projection/index.ts", "projection path"],
+  ["packages/json-document/src/domain/json-document", null],
+]) {
+  if (forbiddenName === null && !exists(path)) {
+    fail(`naming implementation: missing canonical path ${path}.`);
+  }
+  if (forbiddenName !== null && exists(path)) {
+    fail(`naming implementation: deprecated ${forbiddenName} remains at ${path}.`);
+  }
+}
+
+for (const path of filesUnder("packages")) {
+  const name = path.split("/").at(-1);
+  if (
+    path.includes("/src/")
+    && name?.endsWith(".ts")
+    && /[a-z][A-Z]/.test(name)
+  ) {
+    fail(`naming implementation: module filename must be kebab-case: ${path}.`);
+  }
+}
+
+for (const [name, source] of Object.entries(namingImplementation)) {
+  for (const forbiddenInternal of [
+    "createProjection",
+    "publicationQueue",
+    "enqueuePublication",
+    "acceptCandidate",
+    "evaluatingAcceptance",
+  ]) {
+    if (source.includes(forbiddenInternal)) {
+      fail(`${name}: deprecated internal identifier remains: ${forbiddenInternal}.`);
+    }
+  }
+}
+
+for (const [name, source, pattern] of [
+  ["core contract", namingImplementation.coreContract, /JSONPatchValidationResult/],
+  ["core contract", namingImplementation.coreContract, /validatePatch/],
+  ["collaboration types", namingImplementation.collaborationTypes, /CollaborationReplica/],
+  ["collaboration types", namingImplementation.collaborationTypes, /ReplicaStatus/],
+  ["collaboration runtime", namingImplementation.collaborationRuntime, /replica:/],
+  ["history entrypoint", namingImplementation.historyEntrypoint, /createHistoryRuntime/],
+  ["text entrypoint", namingImplementation.textEntrypoint, /createTextRuntime/],
+  ["contenteditable types", namingImplementation.contenteditableTypes, /TextDOMAdapter/],
+  ["contenteditable entrypoint", namingImplementation.contenteditableEntrypoint, /createContentEditableAdapter/],
+]) {
+  requirePattern(name, source, pattern);
+}
+
 for (const packageEntry of generatedCatalog.packages ?? []) {
   for (const publicExport of packageEntry.publicExports ?? []) {
     if (!namingStandard.includes(`\`${publicExport}\``)) {
@@ -338,7 +424,7 @@ if (
   || JSON.stringify(publicContract.root.values) !== JSON.stringify(expectedPublicValues)
   || JSON.stringify(publicContract.root.types) !== JSON.stringify(expectedPublicTypes)
 ) {
-  fail("public contract: v2 root must be the only exact 20-symbol entrypoint.");
+  fail("public contract: root must be the only exact 22-symbol entrypoint.");
 }
 
 if (
@@ -369,14 +455,14 @@ if (
   || generatedCore?.status !== "core"
   || JSON.stringify(generatedCore?.entrypoints) !== JSON.stringify(["."])
   || JSON.stringify(generatedCore?.publicExports) !== JSON.stringify(generatedExports)
-  || generatedCore?.publicExportCount !== 20
+  || generatedCore?.publicExportCount !== 22
   || generatedCollaboration?.path !== "packages/json-document-collaboration"
   || generatedCollaboration?.name
     !== "@interactive-os/json-document-collaboration"
   || generatedCollaboration?.status !== "companion"
   || JSON.stringify(generatedCollaboration?.entrypoints)
     !== JSON.stringify([".", "./history", "./text"])
-  || generatedCollaboration?.publicExportCount !== 40
+  || generatedCollaboration?.publicExportCount !== 43
   || generatedContenteditableCollaboration?.path
     !== "packages/contenteditable-collaboration"
   || generatedContenteditableCollaboration?.name
@@ -384,7 +470,7 @@ if (
   || generatedContenteditableCollaboration?.status !== "companion"
   || JSON.stringify(generatedContenteditableCollaboration?.entrypoints)
     !== JSON.stringify(["."])
-  || generatedContenteditableCollaboration?.publicExportCount !== 7
+  || generatedContenteditableCollaboration?.publicExportCount !== 14
   || generatedCatalog.officialExtensions !== undefined
   || generatedCatalog.labExtensions !== undefined
   || generatedCatalog.apps !== undefined
@@ -427,7 +513,7 @@ for (const pattern of [
 
 for (const pattern of [
   /Implementation-neutral JSON editing/,
-  /six-member JSON Document/,
+  /seven-member JSON Document/,
   /npm install @interactive-os\/json-document@2\.0\.0/,
   /Rich editing belongs to host adapters/,
 ]) {

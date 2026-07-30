@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest";
 import { cloneJsonSerializable } from "../../src/foundation/json/clone.js";
 import { jsonEqual } from "../../src/foundation/json/equal.js";
 import { jsonSerializableError } from "../../src/foundation/json/serializable.js";
-import { cloneTrustedPlainJson } from "../../src/foundation/json/trustedClone.js";
-import { parseArrayIndex } from "../../src/foundation/pointer/arrayIndex.js";
+import { cloneTrustedPlainJson } from "../../src/foundation/json/trusted-clone.js";
+import { parseArrayIndex } from "../../src/foundation/pointer/array-index.js";
 import rawVectors from "../conformance/v2/foundation-vectors.json" with { type: "json" };
 
 interface FoundationVectors {

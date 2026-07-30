@@ -1,15 +1,20 @@
-import { createProjection } from "../../domain/projection/index.js";
+import { createJSONDocumentState } from "../../domain/json-document/index.js";
 import type {
-  JSONCapabilityResult,
   JSONDocument,
+  JSONDocumentOptions,
+  JSONPatchValidationResult,
   JSONValue,
 } from "./contract.js";
 
 export function createJSONDocument(
   initial: unknown,
-  options: {
-    readonly accepts?: (candidate: JSONValue) => JSONCapabilityResult;
-  } = {},
+  options: JSONDocumentOptions = {},
 ): JSONDocument {
-  return createProjection(initial, options);
+  const validate = options.validate ?? options.accepts;
+  return createJSONDocumentState(initial, {
+    ...(validate === undefined ? {} : {
+      validate: (candidate: JSONValue): JSONPatchValidationResult =>
+        validate(candidate),
+    }),
+  });
 }

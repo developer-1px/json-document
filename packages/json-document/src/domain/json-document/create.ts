@@ -8,7 +8,7 @@ import {
   queryJSONPath,
   readAt,
   type JSONAppliedChange,
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONChangeMetadata,
   type JSONDocumentCommitOptions,
   type JSONDocumentCommitResult,
@@ -19,17 +19,20 @@ import {
   type ReadResult,
 } from "../../foundation/protocol/index.js";
 
-interface ProjectionOptions {
-  readonly accepts?: (candidate: JSONValue) => JSONCapabilityResult;
+interface JSONDocumentStateOptions {
+  readonly validate?: (candidate: JSONValue) => JSONPatchValidationResult;
 }
 
-interface ProjectionDocument {
+interface JSONDocumentState {
   readonly value: JSONValue;
   at(pointer: string): ReadResult;
   query(jsonPath: string): QueryResult;
+  validatePatch(
+    operations: ReadonlyArray<JSONPatchOperation>,
+  ): JSONPatchValidationResult;
   canPatch(
     operations: ReadonlyArray<JSONPatchOperation>,
-  ): JSONCapabilityResult;
+  ): JSONPatchValidationResult;
   commit(
     operations: ReadonlyArray<JSONPatchOperation>,
     options?: JSONDocumentCommitOptions,
@@ -37,10 +40,10 @@ interface ProjectionDocument {
   subscribe(listener: (change: JSONAppliedChange) => void): () => void;
 }
 
-export function createProjection(
+export function createJSONDocumentState(
   initial: unknown,
-  options: ProjectionOptions = {},
-): ProjectionDocument {
+  options: JSONDocumentStateOptions = {},
+): JSONDocumentState {
   const initialized = applyProtocolPatch(initial, []);
   if (!initialized.ok) {
     throw new TypeError(
@@ -49,29 +52,29 @@ export function createProjection(
   }
 
   let state = initialized.value;
-  const initialAcceptance = acceptCandidate(options.accepts, state);
-  if (!initialAcceptance.ok) {
+  const initialValidation = validateCandidate(options.validate, state);
+  if (!initialValidation.ok) {
     throw new TypeError(
-      `Initial document value was rejected: ${initialAcceptance.reason ?? initialAcceptance.code}`,
+      `Initial document value was rejected: ${initialValidation.reason ?? initialValidation.code}`,
     );
   }
 
   const listeners = new Set<(change: JSONAppliedChange) => void>();
-  const publicationQueue: JSONAppliedChange[] = [];
-  let publishing = false;
-  let evaluatingAcceptance = false;
+  const notificationQueue: JSONAppliedChange[] = [];
+  let notifying = false;
+  let evaluatingValidation = false;
 
   const prepare = (
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONPatchResult => {
     const patched = applyOwnedProtocolPatch(state, operations);
     if (!patched.ok) return patched;
-    evaluatingAcceptance = true;
+    evaluatingValidation = true;
     try {
-      const accepted = acceptCandidate(options.accepts, patched.value);
-      return accepted.ok ? patched : accepted;
+      const validation = validateCandidate(options.validate, patched.value);
+      return validation.ok ? patched : validation;
     } finally {
-      evaluatingAcceptance = false;
+      evaluatingValidation = false;
     }
   };
 
@@ -113,10 +116,17 @@ export function createProjection(
         throw error;
       }
     },
+    validatePatch(
+      operations: ReadonlyArray<JSONPatchOperation>,
+    ): JSONPatchValidationResult {
+      if (evaluatingValidation) return VALIDATION_REENTRANCY_FAILURE;
+      const result = prepare(operations);
+      return result.ok ? OK : result;
+    },
     canPatch(
       operations: ReadonlyArray<JSONPatchOperation>,
-    ): JSONCapabilityResult {
-      if (evaluatingAcceptance) return ACCEPTANCE_REENTRANCY_FAILURE;
+    ): JSONPatchValidationResult {
+      if (evaluatingValidation) return VALIDATION_REENTRANCY_FAILURE;
       const result = prepare(operations);
       return result.ok ? OK : result;
     },
@@ -124,7 +134,7 @@ export function createProjection(
       operations: ReadonlyArray<JSONPatchOperation>,
       commitOptions?: JSONDocumentCommitOptions,
     ): JSONDocumentCommitResult {
-      if (evaluatingAcceptance) return ACCEPTANCE_REENTRANCY_FAILURE;
+      if (evaluatingValidation) return VALIDATION_REENTRANCY_FAILURE;
       const metadata = ownMetadata(commitOptions?.metadata);
       if (!metadata.ok) return metadata;
 
@@ -140,7 +150,7 @@ export function createProjection(
 
       state = result.value;
       const change = createChange(result.change.applied, metadata.value);
-      publish(change);
+      notify(change);
       return Object.freeze({ ok: true, change });
     },
     subscribe(listener: (change: JSONAppliedChange) => void): () => void {
@@ -152,18 +162,18 @@ export function createProjection(
         listeners.delete(listener);
       };
     },
-  } satisfies ProjectionDocument;
+  } satisfies JSONDocumentState;
 
   return Object.freeze(document);
 
-  function publish(change: JSONAppliedChange): void {
-    publicationQueue.push(change);
-    if (publishing) return;
+  function notify(change: JSONAppliedChange): void {
+    notificationQueue.push(change);
+    if (notifying) return;
 
-    publishing = true;
+    notifying = true;
     try {
-      while (publicationQueue.length > 0) {
-        const next = publicationQueue.shift() as JSONAppliedChange;
+      while (notificationQueue.length > 0) {
+        const next = notificationQueue.shift() as JSONAppliedChange;
         for (const listener of [...listeners]) {
           if (!listeners.has(listener)) continue;
           try {
@@ -176,24 +186,24 @@ export function createProjection(
         }
       }
     } finally {
-      publishing = false;
+      notifying = false;
     }
   }
 }
 
-const OK: JSONCapabilityResult = Object.freeze({ ok: true });
-const ACCEPTANCE_REENTRANCY_FAILURE = failure(
+const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
+const VALIDATION_REENTRANCY_FAILURE = failure(
   "acceptance_reentrancy",
   "acceptance callback cannot call canPatch or commit",
 );
 
-function acceptCandidate(
-  accepts: ProjectionOptions["accepts"],
+function validateCandidate(
+  validate: JSONDocumentStateOptions["validate"],
   candidate: JSONValue,
-): JSONCapabilityResult {
-  if (accepts === undefined) return OK;
+): JSONPatchValidationResult {
+  if (validate === undefined) return OK;
   try {
-    const result = accepts(candidate);
+    const result = validate(candidate);
     if (result?.ok === true) return OK;
     if (result?.ok === false && typeof result.code === "string") {
       return Object.freeze({

@@ -9,7 +9,7 @@ selection, clipboard, history를 필수 계약에 넣지 않습니다.
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
-  |                               > same six-member JSON Document
+  |                               > same seven-member JSON Document
   `-> collaboration engine -----/    |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
@@ -47,7 +47,7 @@ stateless JSON Patch
 v2 Kernel release는 `@interactive-os/json-document` 하나이며 dependency-free
 Core로 남습니다. 두 collaboration package는 독립 version과 release lifecycle을
 가진 optional companion입니다. Selection, clipboard, persistence와 제품별 DOM
-lifecycle은 host adapter가 여섯-member `JSONDocument` 위에서 조합합니다.
+lifecycle은 host adapter가 일곱-member `JSONDocument` 위에서 조합합니다.
 일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
 `@interactive-os/editable`도 검토할 수 있습니다.
 
@@ -57,7 +57,7 @@ v2 Kernel이 제공하는 최소 계약:
 
 - immutable document value
 - JSON Pointer read와 JSONPath query
-- state를 바꾸지 않는 `canPatch`
+- state를 바꾸지 않는 `validatePatch`
 - ordered atomic JSON Patch commit
 - canonical applied change notification
 

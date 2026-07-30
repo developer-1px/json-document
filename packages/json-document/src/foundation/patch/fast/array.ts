@@ -1,9 +1,9 @@
 import { jsonSerializableError } from "../../json/serializable.js";
-import { cloneTrustedPlainJson } from "../../json/trustedClone.js";
+import { cloneTrustedPlainJson } from "../../json/trusted-clone.js";
 import { appendSegment, type Pointer } from "../../pointer/core.js";
 import { getValueAt, parseSafe } from "../container.js";
 import { appendArrayIndexPath, arrayLocation, arrayRemoveLocation } from "../path.js";
-import { replaceValueAtSegments } from "../replaceValue.js";
+import { replaceValueAtSegments } from "../replace-value.js";
 import { validateOperationShape } from "../apply.js";
 import type { FastPatchResult, JSONPatchOperation } from "../contract.js";
 

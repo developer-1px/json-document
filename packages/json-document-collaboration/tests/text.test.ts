@@ -5,11 +5,11 @@ import {
   type CollaborationRuntimeOptions,
 } from "../src/index.js";
 import {
-  restoreCollaborationHistoryRuntime,
+  restoreHistoryRuntime,
 } from "../src/history-index.js";
 import {
-  createCollaborationTextRuntime,
-  restoreCollaborationTextRuntime,
+  createTextRuntime,
+  restoreTextRuntime,
 } from "../src/text-index.js";
 
 const baseOptions = {
@@ -25,7 +25,7 @@ function textRuntime(
   initial: unknown = { title: "ab" },
   overrides: Partial<CollaborationRuntimeOptions> = {},
 ) {
-  return createCollaborationTextRuntime(initial, {
+  return createTextRuntime(initial, {
     ...baseOptions,
     actorId,
     ...overrides,
@@ -33,13 +33,14 @@ function textRuntime(
 }
 
 describe("@interactive-os/json-document-collaboration/text", () => {
-  test("adds text authoring beside the unchanged six-member document", () => {
+  test("adds text authoring beside the canonical JSON Document", () => {
     const shared = textRuntime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
       "collaboration",
       "document",
       "history",
+      "replica",
       "text",
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
@@ -48,6 +49,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       "commit",
       "query",
       "subscribe",
+      "validatePatch",
       "value",
     ]);
     expect(Object.keys(shared.text).sort()).toEqual([
@@ -75,9 +77,9 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       value: "aXb",
     }])).toMatchObject({ ok: true });
 
-    expect(atomic.collaboration.exportBundle().changes[0]?.ops)
+    expect(atomic.replica.exportBundle().changes[0]?.ops)
       .toMatchObject([{ kind: "set" }]);
-    expect(collaborative.collaboration.exportBundle().changes[0]?.ops)
+    expect(collaborative.replica.exportBundle().changes[0]?.ops)
       .toMatchObject([{ kind: "text-splice" }]);
   });
 
@@ -100,14 +102,14 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       value: "aYb",
     }])).toMatchObject({ ok: true });
 
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toMatchObject({ ok: true });
-    expect(right.collaboration.ingest(left.collaboration.exportBundle()))
+    expect(right.replica.ingest(left.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(left.document.value).toEqual({ title: "aXYb" });
     expect(right.document.value).toEqual(left.document.value);
 
-    expect(relay.collaboration.ingest(left.collaboration.exportBundle()))
+    expect(relay.replica.ingest(left.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(relay.document.value).toEqual(left.document.value);
   });
@@ -123,7 +125,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       path: "/title",
       value: "aXb",
     }])).toMatchObject({ ok: true });
-    expect(local.collaboration.ingest(remote.collaboration.exportBundle()))
+    expect(local.replica.ingest(remote.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     const planned = local.text.plan(captured.capture, {
@@ -134,15 +136,15 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     const documentListener = vi.fn();
     const collaborationListener = vi.fn();
     local.document.subscribe(documentListener);
-    local.collaboration.subscribe(collaborationListener);
+    local.replica.subscribe(collaborationListener);
 
     expect(local.text.commit(planned.plan)).toMatchObject({
       ok: true,
-      projectionChanged: true,
+      didChangeDocument: true,
       value: "aYXb",
       selection: { anchor: 2, focus: 2 },
     });
-    const localChange = local.collaboration.exportBundle().changes.find(
+    const localChange = local.replica.exportBundle().changes.find(
       (change) => change.changeId.actorId === "actor-a",
     );
     expect(localChange?.deps).toEqual([]);
@@ -150,7 +152,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     expect(documentListener).toHaveBeenCalledTimes(1);
     expect(collaborationListener).toHaveBeenCalledTimes(1);
 
-    expect(remote.collaboration.ingest(local.collaboration.exportBundle()))
+    expect(remote.replica.ingest(local.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(remote.document.value).toEqual(local.document.value);
   });
@@ -167,7 +169,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       path: "/title",
       value: "aXb",
     }]);
-    local.collaboration.ingest(firstRemote.collaboration.exportBundle());
+    local.replica.ingest(firstRemote.replica.exportBundle());
     const planned = local.text.plan(captured.capture, { value: "aYb" });
     if (!planned.ok) throw new Error(planned.reason);
 
@@ -176,13 +178,13 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       path: "/title",
       value: "aZb",
     }]);
-    local.collaboration.ingest(secondRemote.collaboration.exportBundle());
+    local.replica.ingest(secondRemote.replica.exportBundle());
     expect(local.text.commit(planned.plan)).toMatchObject({
       ok: false,
       code: "stale_text_plan",
     });
     expect(
-      local.collaboration.exportBundle().changes.some(
+      local.replica.exportBundle().changes.some(
         (change) => change.changeId.actorId === "actor-a",
       ),
     ).toBe(false);
@@ -219,7 +221,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       path: "/title",
       value: "reset",
     }]);
-    local.collaboration.ingest(resetter.collaboration.exportBundle());
+    local.replica.ingest(resetter.replica.exportBundle());
 
     expect(local.text.plan(captured.capture, { value: "aXb" }))
       .toMatchObject({
@@ -253,7 +255,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       path: "/title",
       value: "aXb",
     }]);
-    local.collaboration.ingest(remote.collaboration.exportBundle());
+    local.replica.ingest(remote.replica.exportBundle());
 
     const planned = local.text.plan(captured.capture, {
       value: "ab",
@@ -261,12 +263,12 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     });
     if (!planned.ok) throw new Error(planned.reason);
     const listener = vi.fn();
-    local.collaboration.subscribe(listener);
-    expect(local.text.commit(planned.plan)).toEqual({
+    local.replica.subscribe(listener);
+    expect(local.text.commit(planned.plan)).toMatchObject({
       ok: true,
       change: { applied: [] },
       changeId: null,
-      projectionChanged: false,
+      didChangeDocument: false,
       value: "aXb",
       selection: { anchor: 1, focus: 1 },
     });
@@ -307,7 +309,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       value: "aXYb",
     });
     if (!nextPlan.ok) throw new Error(nextPlan.reason);
-    const before = shared.collaboration.exportBundle();
+    const before = shared.replica.exportBundle();
     const circular: { self?: unknown } = {};
     circular.self = circular;
     expect(shared.text.commit(nextPlan.plan, {
@@ -316,7 +318,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       ok: false,
       code: "not_serializable",
     });
-    expect(shared.collaboration.exportBundle()).toEqual(before);
+    expect(shared.replica.exportBundle()).toEqual(before);
     expect(shared.document.value).toEqual({ title: "aXb" });
   });
 
@@ -333,10 +335,10 @@ describe("@interactive-os/json-document-collaboration/text", () => {
       path: "/title",
       value: "aYb",
     }]);
-    local.collaboration.ingest(remote.collaboration.exportBundle());
-    const checkpoint = local.collaboration.exportCheckpoint();
+    local.replica.ingest(remote.replica.exportBundle());
+    const checkpoint = local.replica.exportCheckpoint();
 
-    const textRestored = restoreCollaborationTextRuntime(checkpoint, {
+    const textRestored = restoreTextRuntime(checkpoint, {
       actorId: "actor-a",
       ruleset: baseOptions.ruleset,
     });
@@ -344,7 +346,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     expect(textRestored.runtime.text.capture("/title"))
       .toMatchObject({ ok: true });
 
-    const historyRestored = restoreCollaborationHistoryRuntime(checkpoint, {
+    const historyRestored = restoreHistoryRuntime(checkpoint, {
       actorId: "actor-a",
       ruleset: baseOptions.ruleset,
     });

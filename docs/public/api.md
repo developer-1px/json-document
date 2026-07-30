@@ -7,7 +7,7 @@
 |-- createJSONDocument
 |-- applyPatch
 |-- Pointer helpers
-`-- six-member JSONDocument
+`-- seven-member JSONDocument
 ```
 
 ## 기준
@@ -16,7 +16,7 @@
 - Core state, patch payload와 metadata는 JSON data입니다.
 - 정확한 주소와 mutation target은 JSON Pointer입니다.
 - JSONPath는 query 전용이며 결과를 Pointer 배열로 돌려줍니다.
-- `canPatch`는 side effect 없는 probe이고 `commit`만 state를 변경합니다.
+- `validatePatch`는 side effect 없는 validation이고 `commit`만 state를 변경합니다.
 - 실패는 boolean `ok`와 stable string `code`를 가진 Result입니다.
 
 ## 작업별 진입점
@@ -26,7 +26,7 @@
 | 현재 snapshot 읽기 | `document.value` | immutable JSON value |
 | 한 위치 읽기 | `document.at(pointer)` | `ReadResult` |
 | 여러 위치 찾기 | `document.query(jsonPath)` | `QueryResult` |
-| patch 가능성 확인 | `document.canPatch(operations)` | `JSONCapabilityResult` |
+| patch 가능성 확인 | `document.validatePatch(operations)` | `JSONPatchValidationResult` |
 | state 변경 | `document.commit(operations, options?)` | `JSONDocumentCommitResult` |
 | 변경 구독 | `document.subscribe(listener)` | unsubscribe function |
 | instance 없는 patch | `applyPatch(value, operations)` | `JSONPatchResult` |
@@ -68,9 +68,9 @@ interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: Pointer): ReadResult;
   query(jsonPath: string): QueryResult;
-  canPatch(
+  validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
-  ): JSONCapabilityResult;
+  ): JSONPatchValidationResult;
   commit(
     operations: ReadonlyArray<JSONPatchOperation>,
     options?: JSONDocumentCommitOptions,
@@ -189,7 +189,7 @@ if (result.ok) {
 `change.applied`는 `/-`를 concrete index로 바꾸고 RFC operation field만 남긴
 canonical sequence입니다.
 
-## canPatch와 commit
+## validatePatch와 commit
 
 두 method는 같은 JSON, Pointer, Patch와 validation 의미를 사용합니다.
 
@@ -198,9 +198,9 @@ const operations = [
   { op: "replace", path: "/title", value: "Ready" },
 ] as const;
 
-const capability = document.canPatch(operations);
+const validation = document.validatePatch(operations);
 
-if (capability.ok) {
+if (validation.ok) {
   const committed = document.commit(operations, {
     metadata: {
       origin: "title-field",
@@ -215,7 +215,7 @@ if (capability.ok) {
 }
 ```
 
-`canPatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 batch 전체를
+`validatePatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 batch 전체를
 동기적·원자적으로 적용합니다. 실패와 state-equivalent no-op은 change notification을
 만들지 않습니다.
 
@@ -237,14 +237,15 @@ Subscriber는 이미 publish된 `JSONAppliedChange`를 받습니다. Unsubscribe
 
 ## Validation
 
-`createJSONDocument`의 stable v2 `accepts` option은 특정 schema object를
-요구하지 않는 implementation-neutral validation boundary입니다.
+`createJSONDocument`의 canonical `validate` option은 특정 schema object를
+요구하지 않는 implementation-neutral validation boundary입니다. Stable v2
+`accepts`는 deprecated compatibility alias입니다.
 
 ```ts
 import * as z from "zod";
 import {
   createJSONDocument,
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONValue,
 } from "@interactive-os/json-document";
 
@@ -252,7 +253,7 @@ const Schema = z.object({
   title: z.string().min(1),
 });
 
-function accepts(candidate: JSONValue): JSONCapabilityResult {
+function validate(candidate: JSONValue): JSONPatchValidationResult {
   const parsed = Schema.safeParse(candidate);
   return parsed.success
     ? { ok: true }
@@ -265,7 +266,7 @@ function accepts(candidate: JSONValue): JSONCapabilityResult {
 
 const acceptedDocument = createJSONDocument(
   { title: "Draft" },
-  { accepts },
+  { validate },
 );
 ```
 
@@ -273,8 +274,9 @@ Initial state와 commit candidate 모두 commit notification 전에 검사됩니
 parse한 변환값은 Core state로 채택되지 않으며, normalization이 필요하면 그
 변경을 JSON Patch에 명시합니다.
 
-Canonical concept는 validation이고 `accepts`와 `JSONCapabilityResult`는 stable
-v2 compatibility identifier입니다. Naming 기준과 vNext 후보는
+Canonical concept와 result는 validation과 `JSONPatchValidationResult`입니다.
+`accepts`와 `JSONCapabilityResult`는 deprecated stable v2 compatibility
+identifier입니다. Naming 기준은
 [Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)를
 따릅니다.
 
@@ -296,7 +298,7 @@ exact key 집합이나 exhaustive code union에 의존하지 않습니다.
 
 ## 공개 root
 
-Root는 20개 Kernel symbol만 공개합니다.
+Root는 22개 public symbol만 공개합니다.
 
 ```txt
 values
@@ -307,7 +309,8 @@ values
 types
   JSONValue, Pointer, JSONPatchOperation
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
-  JSONCapabilityResult, JSONChangeMetadata, JSONDocumentCommitOptions
+  JSONPatchValidationResult, JSONCapabilityResult, JSONChangeMetadata
+  JSONDocumentOptions, JSONDocumentCommitOptions
   ReadResult, QueryResult, JSONDocument
 ```
 
@@ -315,4 +318,4 @@ types
 
 패키지는 `/session`이나 `/react` subpath를 공개하지 않습니다. Selection,
 clipboard, history, schema introspection, DOM lifecycle과 framework binding은
-host 또는 별도 adapter가 여섯-member `JSONDocument`를 조합해 구현합니다.
+host 또는 별도 adapter가 일곱-member `JSONDocument`를 조합해 구현합니다.

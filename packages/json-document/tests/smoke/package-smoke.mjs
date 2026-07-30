@@ -123,8 +123,8 @@ try {
   if (packageJson.dependencies !== undefined) {
     throw new Error("The v2 kernel must not publish runtime dependencies.");
   }
-  if (rootValueExports.length !== 8 || rootTypeExports.length !== 12) {
-    throw new Error("The root contract must contain exactly 8 values and 12 types.");
+  if (rootValueExports.length !== 8 || rootTypeExports.length !== 14) {
+    throw new Error("The root contract must contain exactly 8 values and 14 types.");
   }
 
   const packResult = JSON.parse(run(
@@ -240,7 +240,7 @@ try {
       'const actual = Object.keys(api).sort();',
       'if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`runtime exports: ${actual}`);',
       'const document = api.createJSONDocument({ title: "draft", tags: [] });',
-      'if (JSON.stringify(Object.keys(document).sort()) !== JSON.stringify(["at", "canPatch", "commit", "query", "subscribe", "value"])) throw new Error("document surface drifted");',
+      'if (JSON.stringify(Object.keys(document).sort()) !== JSON.stringify(["at", "canPatch", "commit", "query", "subscribe", "validatePatch", "value"])) throw new Error("document surface drifted");',
       'const changes = [];',
       'document.subscribe((change) => changes.push(change));',
       'const result = document.commit([{ op: "add", path: "/tags/-", value: "v2" }]);',
@@ -263,7 +263,7 @@ try {
       `import type { ${rootTypeExports.join(", ")} } from "@interactive-os/json-document";`,
       'const document: JSONDocument = createJSONDocument({ text: "a" });',
       'type Members = keyof JSONDocument;',
-      'const members: Members[] = ["value", "at", "query", "canPatch", "commit", "subscribe"];',
+      'const members: Members[] = ["value", "at", "query", "validatePatch", "canPatch", "commit", "subscribe"];',
       'const operation: JSONPatchOperation = { op: "replace", path: "/text", value: "b" };',
       'const metadata: JSONChangeMetadata = { source: "type-smoke" };',
       'const result: JSONDocumentCommitResult = document.commit([operation], { metadata });',
@@ -271,7 +271,7 @@ try {
       'const pointer: Pointer = appendSegment(buildPointer(["text"]), 0);',
       'const values: JSONValue[] = [document.value, pointer, null];',
       'void [members, result, pure, values, parsePointer, tryParsePointer, parentPointer, trackPointer];',
-      'type Remaining = JSONAppliedChange | JSONCapabilityResult | JSONDocumentCommitOptions | QueryResult | ReadResult;',
+      'type Remaining = JSONAppliedChange | JSONCapabilityResult | JSONDocumentOptions | JSONPatchValidationResult | JSONDocumentCommitOptions | QueryResult | ReadResult;',
       'declare const remaining: Remaining;',
       'void remaining;',
     ].join("\n"),

@@ -5,7 +5,7 @@ import {
   type CollaborationBundle,
   type CollaborationRuntimeOptions,
 } from "../src/index.js";
-import { createCollaborationHistoryRuntime } from "../src/history-index.js";
+import { createHistoryRuntime } from "../src/history-index.js";
 
 const baseOptions = {
   epochId: "shared-history-document/v1",
@@ -23,7 +23,7 @@ function runtime(
   },
   overrides: Partial<CollaborationRuntimeOptions> = {},
 ) {
-  return createCollaborationHistoryRuntime(initial, {
+  return createHistoryRuntime(initial, {
     ...baseOptions,
     actorId,
     ...overrides,
@@ -49,13 +49,14 @@ function oneChangeBundle(
 }
 
 describe("@interactive-os/json-document-collaboration/history", () => {
-  test("adds history outside the unchanged six-member document", () => {
+  test("adds history outside the canonical JSON Document", () => {
     const shared = runtime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
       "collaboration",
       "document",
       "history",
+      "replica",
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
@@ -63,6 +64,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       "commit",
       "query",
       "subscribe",
+      "validatePatch",
       "value",
     ]);
   });
@@ -82,10 +84,10 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       value: "Right",
     }])).toMatchObject({ ok: true });
 
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(left.document.value).toMatchObject({ title: "Right" });
-    expect(left.history.current().undoTarget).toEqual({
+    expect(left.history.status().undoTarget).toEqual({
       actorId: "actor-a",
       counter: 1,
     });
@@ -93,27 +95,27 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     const documentListener = vi.fn();
     const collaborationListener = vi.fn();
     left.document.subscribe(documentListener);
-    left.collaboration.subscribe(collaborationListener);
+    left.replica.subscribe(collaborationListener);
 
     expect(left.history.canUndo()).toMatchObject({ ok: true });
     expect(left.history.undo()).toMatchObject({ ok: true });
     expect(left.document.value).toMatchObject({ title: "Right" });
-    expect(left.history.current().redoTarget).toEqual({
+    expect(left.history.status().redoTarget).toEqual({
       actorId: "actor-a",
       counter: 1,
     });
-    expect(left.collaboration.exportBundle().changes).toHaveLength(3);
+    expect(left.replica.exportBundle().changes).toHaveLength(3);
     expect(documentListener).not.toHaveBeenCalled();
     expect(collaborationListener).toHaveBeenCalledTimes(1);
 
     expect(left.history.canRedo()).toMatchObject({ ok: true });
     expect(left.history.redo()).toMatchObject({ ok: true });
     expect(left.document.value).toMatchObject({ title: "Right" });
-    expect(left.collaboration.exportBundle().changes).toHaveLength(4);
+    expect(left.replica.exportBundle().changes).toHaveLength(4);
     expect(documentListener).not.toHaveBeenCalled();
     expect(collaborationListener).toHaveBeenCalledTimes(2);
 
-    expect(right.collaboration.ingest(left.collaboration.exportBundle()))
+    expect(right.replica.ingest(left.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(right.document.value).toEqual(left.document.value);
   });
@@ -127,29 +129,29 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       path: "/cards/draft",
       value: { title: "Draft" },
     }])).toMatchObject({ ok: true });
-    expect(right.collaboration.ingest(left.collaboration.exportBundle()))
+    expect(right.replica.ingest(left.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(right.document.commit([{
       op: "replace",
       path: "/cards/draft/title",
       value: "Reviewed",
     }])).toMatchObject({ ok: true });
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
-    const before = left.collaboration.exportBundle();
-    expect(left.history.current().undoTarget).toEqual({
+    const before = left.replica.exportBundle();
+    expect(left.history.status().undoTarget).toEqual({
       actorId: "actor-a",
       counter: 1,
     });
     expect(left.history.canUndo()).toMatchObject({ ok: false });
     expect(left.history.undo()).toMatchObject({ ok: false });
 
-    expect(left.collaboration.exportBundle()).toEqual(before);
-    expect(left.history.current()).toMatchObject({
+    expect(left.replica.exportBundle()).toEqual(before);
+    expect(left.history.status()).toMatchObject({
       undoTarget: { actorId: "actor-a", counter: 1 },
     });
-    expect(left.history.current().redoTarget).toBeNull();
+    expect(left.history.status().redoTarget).toBeNull();
     expect(left.document.value).toEqual({
       cards: {
         draft: {
@@ -160,7 +162,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
   });
 
   test("re-evaluates a schema-suppressed remote Change after undo", () => {
-    const accepts = (candidate: unknown) => {
+    const validate = (candidate: unknown) => {
       const value = candidate as {
         readonly local: boolean;
         readonly remote: boolean;
@@ -178,7 +180,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
         id: "test/exclusive-history-flags",
         digest: "test/exclusive-history-flags/v1",
       },
-      accepts,
+      validate,
     };
     const left = runtime(
       "actor-a",
@@ -201,14 +203,14 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       path: "/remote",
       value: true,
     }])).toMatchObject({ ok: true });
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     expect(left.document.value).toEqual({
       local: true,
       remote: false,
     });
-    expect(left.collaboration.current().suppressed).toMatchObject([{
+    expect(left.replica.status().suppressed).toMatchObject([{
       changeId: { actorId: "actor-b", counter: 1 },
       code: "schema_violation",
     }]);
@@ -218,13 +220,13 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       local: false,
       remote: true,
     });
-    expect(left.collaboration.current().suppressed).toEqual([]);
+    expect(left.replica.status().suppressed).toEqual([]);
 
-    expect(right.collaboration.ingest(left.collaboration.exportBundle()))
+    expect(right.replica.ingest(left.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(right.document.value).toEqual(left.document.value);
-    expect(right.collaboration.current()).toEqual(
-      left.collaboration.current(),
+    expect(right.replica.status()).toEqual(
+      left.replica.status(),
     );
   });
 
@@ -246,15 +248,15 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     expect(author.history.redo()).toMatchObject({ ok: true });
     expect(author.document.value).toEqual({});
 
-    expect(author.collaboration.ingest(remote.collaboration.exportBundle()))
+    expect(author.replica.ingest(remote.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     expect(author.document.value).toEqual({});
-    expect(author.collaboration.current().suppressed).toMatchObject([{
+    expect(author.replica.status().suppressed).toMatchObject([{
       changeId: { actorId: "actor-b", counter: 1 },
       code: "target_not_found",
     }]);
-    expect(author.history.current()).toEqual({
+    expect(author.history.status()).toEqual({
       undoTarget: { actorId: "actor-a", counter: 1 },
       redoTarget: null,
       undoDepth: 1,
@@ -279,7 +281,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     expect(author.document.value).toEqual({
       items: ["A", "C", "D", "B"],
     });
-    expect(remote.collaboration.ingest(author.collaboration.exportBundle()))
+    expect(remote.replica.ingest(author.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     expect(author.history.undo()).toMatchObject({ ok: true });
@@ -296,19 +298,19 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       items: ["A", "C", "D", "X", "B"],
     });
 
-    expect(author.collaboration.ingest(remote.collaboration.exportBundle()))
+    expect(author.replica.ingest(remote.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     expect(author.document.value).toEqual({
       items: ["A", "B", "C", "D", "X"],
     });
-    expect(author.collaboration.current().suppressed).toEqual([]);
+    expect(author.replica.status().suppressed).toEqual([]);
 
-    expect(remote.collaboration.ingest(author.collaboration.exportBundle()))
+    expect(remote.replica.ingest(author.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(remote.document.value).toEqual(author.document.value);
-    expect(remote.collaboration.current()).toEqual(
-      author.collaboration.current(),
+    expect(remote.replica.status()).toEqual(
+      author.replica.status(),
     );
   });
 
@@ -326,35 +328,35 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       path: "/done",
       value: true,
     }])).toMatchObject({ ok: true });
-    expect(author.collaboration.ingest(remote.collaboration.exportBundle()))
+    expect(author.replica.ingest(remote.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(author.history.undo()).toMatchObject({ ok: true });
 
-    const complete = author.collaboration.exportBundle();
+    const complete = author.replica.exportBundle();
     const localEdit = oneChangeBundle(complete, "actor-a", 1);
     const undo = oneChangeBundle(complete, "actor-a", 2);
     const remoteEdit = oneChangeBundle(complete, "actor-b", 1);
     const inOrder = runtime("receiver-a");
     const outOfOrder = runtime("receiver-b");
 
-    expect(inOrder.collaboration.ingest(complete))
+    expect(inOrder.replica.ingest(complete))
       .toMatchObject({ ok: true });
-    expect(outOfOrder.collaboration.ingest(undo))
+    expect(outOfOrder.replica.ingest(undo))
       .toMatchObject({
         ok: true,
         pending: [{ actorId: "actor-a", counter: 2 }],
       });
-    expect(outOfOrder.collaboration.ingest(remoteEdit))
+    expect(outOfOrder.replica.ingest(remoteEdit))
       .toMatchObject({ ok: true });
-    expect(outOfOrder.collaboration.ingest(localEdit))
+    expect(outOfOrder.replica.ingest(localEdit))
       .toMatchObject({ ok: true, pending: [] });
 
     expect(outOfOrder.document.value).toEqual(inOrder.document.value);
-    expect(outOfOrder.collaboration.current()).toEqual(
-      inOrder.collaboration.current(),
+    expect(outOfOrder.replica.status()).toEqual(
+      inOrder.replica.status(),
     );
-    expect(outOfOrder.collaboration.exportBundle()).toEqual(
-      inOrder.collaboration.exportBundle(),
+    expect(outOfOrder.replica.exportBundle()).toEqual(
+      inOrder.replica.exportBundle(),
     );
   });
 
@@ -372,18 +374,18 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       { ...baseOptions, actorId: "relay" },
     );
     expect("history" in relay).toBe(false);
-    expect(relay.collaboration.ingest(
-      author.collaboration.exportBundle(),
+    expect(relay.replica.ingest(
+      author.replica.exportBundle(),
     )).toMatchObject({ ok: true });
     expect(relay.document.value).toEqual(author.document.value);
 
     const receiver = runtime("receiver");
-    expect(receiver.collaboration.ingest(
-      relay.collaboration.exportBundle(),
+    expect(receiver.replica.ingest(
+      relay.replica.exportBundle(),
     )).toMatchObject({ ok: true });
     expect(receiver.document.value).toEqual(author.document.value);
-    expect(receiver.collaboration.current()).toEqual(
-      author.collaboration.current(),
+    expect(receiver.replica.status()).toEqual(
+      author.replica.status(),
     );
   });
 
@@ -400,7 +402,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     shared.document.subscribe(() => {
       documentValues.push(shared.document.value);
     });
-    shared.collaboration.subscribe(collaborationListener);
+    shared.replica.subscribe(collaborationListener);
 
     expect(shared.history.canUndo()).toMatchObject({ ok: true });
     expect(shared.history.undo()).toMatchObject({ ok: true });
@@ -422,7 +424,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       value: "First",
     }]);
     expect(shared.history.undo()).toMatchObject({ ok: true });
-    expect(shared.history.current().redoTarget).toEqual({
+    expect(shared.history.status().redoTarget).toEqual({
       actorId: "actor-a",
       counter: 1,
     });
@@ -433,7 +435,7 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       value: true,
     }]);
 
-    expect(shared.history.current().redoTarget).toBeNull();
+    expect(shared.history.status().redoTarget).toBeNull();
     expect(shared.history.canRedo()).toMatchObject({
       ok: false,
       code: "nothing_to_redo",
@@ -458,8 +460,8 @@ describe("@interactive-os/json-document-collaboration/history", () => {
     expect(shared.history.undo()).toMatchObject({ ok: true });
     expect(shared.history.undo()).toMatchObject({ ok: true });
 
-    const epoch = shared.collaboration.epoch;
-    expect(shared.collaboration.ingest({
+    const epoch = shared.replica.epoch;
+    expect(shared.replica.ingest({
       epoch,
       changes: [{
         changeId: { actorId: "actor-a", counter: 5 },
@@ -478,11 +480,11 @@ describe("@interactive-os/json-document-collaboration/history", () => {
       first: 0,
       second: 0,
     });
-    expect(shared.collaboration.current().suppressed).toMatchObject([{
+    expect(shared.replica.status().suppressed).toMatchObject([{
       changeId: { actorId: "actor-a", counter: 5 },
       code: "redo_target_invalid",
     }]);
-    expect(shared.history.current()).toEqual({
+    expect(shared.history.status()).toEqual({
       undoTarget: null,
       redoTarget: { actorId: "actor-a", counter: 1 },
       undoDepth: 0,

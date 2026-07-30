@@ -30,16 +30,20 @@ adapter가 Projection과 조합한다.
 Pure Protocol -> Projection -> host adapter
 ```
 
-## 여섯 member
+## Canonical 일곱 member와 v2 여섯-member compatibility
 
 아래 TypeScript는 root package가 공개하는 application-owned 구조 계약이다.
 
 ```ts
-interface Projection {
+interface JSONDocument {
   readonly value: JSONValue;
 
   at(pointer: Pointer): ReadResult;
   query(jsonPath: string): QueryResult;
+  validatePatch(
+    operations: ReadonlyArray<JSONPatchOperation>,
+  ): JSONPatchValidationResult;
+  /** @deprecated Use validatePatch. */
   canPatch(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONCapabilityResult;
@@ -51,8 +55,9 @@ interface Projection {
 }
 ```
 
-`at`은 정확한 주소 한 곳을 읽고, `query`는 여러 주소를 찾는다. `canPatch`는
-같은 mutation을 실행하지 않고 검증하며, `commit`만 core state를 바꾼다.
+`at`은 정확한 주소 한 곳을 읽고, `query`는 여러 주소를 찾는다.
+`validatePatch`는 같은 mutation을 실행하지 않고 검증하며, `commit`만 core
+state를 바꾼다. `canPatch`는 v2 portable consumer를 위한 deprecated alias다.
 `subscribe`는 이미 publish된 변경만 전달한다.
 
 아직 result를 돌려줄 document가 없는 construction 단계에서 initial value가
@@ -205,13 +210,14 @@ array-property 분류만 공통 leaf에 두고, parity test가 untrusted boundar
 
 ## Package binding
 
-`@interactive-os/json-document`는 root entrypoint 하나와 20개 Kernel symbol만
-공개한다. `JSONDocument`의 member는 여섯 개다.
+`@interactive-os/json-document`는 root entrypoint 하나와 22개 symbol을
+공개한다. `JSONDocument`의 canonical member는 일곱 개이며, 기존 v2 portable
+consumer가 의존하는 여섯 member는 그대로 유지된다.
 
 ```txt
 values  8
-types  12
-total  20
+types  14
+total  22
 ```
 
 패키지는 runtime dependency와 peer dependency가 없다. `/session`과 `/react`는

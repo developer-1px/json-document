@@ -6,7 +6,7 @@ import {
   parsePointer as parsePointerInternal,
   trackPointer as trackPointerInternal,
   tryParsePointer as tryParsePointerInternal,
-} from "../../domain/projection/index.js";
+} from "../../domain/json-document/index.js";
 import type {
   JSONPatchOperation,
   JSONPatchResult,

@@ -50,7 +50,7 @@ function initialTextIds(
   segments: ReadonlyArray<string>,
   value: string,
 ) {
-  const seed = `initial:${shared.collaboration.epoch.baseDigest}`;
+  const seed = `initial:${shared.replica.epoch.baseDigest}`;
   const path = [
     "value",
     ...segments.map((segment) => `${segment.length}:${segment}`),
@@ -58,7 +58,7 @@ function initialTextIds(
   const textNode = createTextNodeId(seed, path);
   return {
     member: segments.length === 0
-      ? `root:${shared.collaboration.epoch.baseDigest}`
+      ? `root:${shared.replica.epoch.baseDigest}`
       : `${seed}:member:${path}`,
     textNode,
     atoms: Array.from(value, (_, unitIndex) => (
@@ -85,7 +85,7 @@ function bundle(
   changes: ReadonlyArray<CollaborationChange>,
 ): CollaborationBundle {
   return {
-    epoch: shared.collaboration.epoch,
+    epoch: shared.replica.epoch,
     changes,
   };
 }
@@ -126,14 +126,14 @@ describe("protocol v3 text-splice wire materialization", () => {
       }),
     ]);
 
-    expect(receiver.collaboration.ingest(bundle(receiver, [textChange])))
+    expect(receiver.replica.ingest(bundle(receiver, [textChange])))
       .toMatchObject({ ok: true });
     expect(receiver.document.value).toEqual({ title: "aXb" });
-    expect(receiver.collaboration.exportBundle().changes[0]).toEqual(
+    expect(receiver.replica.exportBundle().changes[0]).toEqual(
       textChange,
     );
 
-    expect(relay.collaboration.ingest(receiver.collaboration.exportBundle()))
+    expect(relay.replica.ingest(receiver.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(relay.document.value).toEqual(receiver.document.value);
   });
@@ -152,11 +152,11 @@ describe("protocol v3 text-splice wire materialization", () => {
     for (const arrival of [[left, right], [right, left]]) {
       const shared = runtime(`receiver-${arrival[0]?.changeId.actorId}`, initial);
       for (const candidate of arrival) {
-        expect(shared.collaboration.ingest(bundle(shared, [candidate])))
+        expect(shared.replica.ingest(bundle(shared, [candidate])))
           .toMatchObject({ ok: true });
       }
       expect(shared.document.value).toEqual({ title: "aXYb" });
-      expect(shared.collaboration.current().suppressed).toEqual([]);
+      expect(shared.replica.status().suppressed).toEqual([]);
     }
   });
 
@@ -182,11 +182,11 @@ describe("protocol v3 text-splice wire materialization", () => {
 
     const first = runtime("receiver-a", initial);
     const second = runtime("receiver-b", initial);
-    expect(first.collaboration.ingest(bundle(first, [
+    expect(first.replica.ingest(bundle(first, [
       replacement,
       concurrentInsert,
     ]))).toMatchObject({ ok: true });
-    expect(second.collaboration.ingest(bundle(second, [
+    expect(second.replica.ingest(bundle(second, [
       concurrentInsert,
       replacement,
     ]))).toMatchObject({ ok: true });
@@ -208,12 +208,12 @@ describe("protocol v3 text-splice wire materialization", () => {
     ]);
     const shared = runtime("receiver", initial);
 
-    expect(shared.collaboration.ingest(bundle(shared, [
+    expect(shared.replica.ingest(bundle(shared, [
       remove("actor-a"),
       remove("actor-b"),
     ]))).toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({ title: "ac" });
-    expect(shared.collaboration.current().suppressed).toEqual([]);
+    expect(shared.replica.status().suppressed).toEqual([]);
   });
 
   test("uses lossless scalar units without normalization or surrogate splitting", () => {
@@ -231,7 +231,7 @@ describe("protocol v3 text-splice wire materialization", () => {
       }),
     ]);
 
-    expect(shared.collaboration.ingest(bundle(shared, [unicodeChange])))
+    expect(shared.replica.ingest(bundle(shared, [unicodeChange])))
       .toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({ title: `A${inserted}B` });
     expect((shared.document.value as { title: string }).title).not.toBe(
@@ -266,15 +266,15 @@ describe("protocol v3 text-splice wire materialization", () => {
       2,
     );
 
-    expect(shared.collaboration.ingest(bundle(shared, [remove])))
+    expect(shared.replica.ingest(bundle(shared, [remove])))
       .toMatchObject({
         ok: true,
         pending: [{ actorId: "actor-a", counter: 2 }],
       });
-    expect(shared.collaboration.ingest(bundle(shared, [insert])))
+    expect(shared.replica.ingest(bundle(shared, [insert])))
       .toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({ title: "X" });
-    expect(shared.collaboration.current().pending).toEqual([]);
+    expect(shared.replica.status().pending).toEqual([]);
   });
 
   test("preserves text identity through an object rename", () => {
@@ -291,8 +291,8 @@ describe("protocol v3 text-splice wire materialization", () => {
     ]);
 
     const shared = runtime("receiver", initial);
-    expect(shared.collaboration.ingest(bundle(shared, [
-      ...mover.collaboration.exportBundle().changes,
+    expect(shared.replica.ingest(bundle(shared, [
+      ...mover.replica.exportBundle().changes,
       textChange,
     ]))).toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({ renamed: "aXb" });
@@ -312,12 +312,12 @@ describe("protocol v3 text-splice wire materialization", () => {
     ]);
 
     const shared = runtime("receiver", initial);
-    expect(shared.collaboration.ingest(bundle(shared, [
-      ...mover.collaboration.exportBundle().changes,
+    expect(shared.replica.ingest(bundle(shared, [
+      ...mover.replica.exportBundle().changes,
       textChange,
     ]))).toMatchObject({ ok: true });
     expect(shared.document.value).toBe("aXb");
-    expect(shared.collaboration.current().suppressed).toEqual([]);
+    expect(shared.replica.status().suppressed).toEqual([]);
   });
 
   test("gives copied text a fresh generation", () => {
@@ -334,8 +334,8 @@ describe("protocol v3 text-splice wire materialization", () => {
     ]);
 
     const shared = runtime("receiver", initial);
-    expect(shared.collaboration.ingest(bundle(shared, [
-      ...copier.collaboration.exportBundle().changes,
+    expect(shared.replica.ingest(bundle(shared, [
+      ...copier.replica.exportBundle().changes,
       textChange,
     ]))).toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({
@@ -357,12 +357,12 @@ describe("protocol v3 text-splice wire materialization", () => {
     ]);
 
     const shared = runtime("receiver", initial);
-    expect(shared.collaboration.ingest(bundle(shared, [
-      ...remover.collaboration.exportBundle().changes,
+    expect(shared.replica.ingest(bundle(shared, [
+      ...remover.replica.exportBundle().changes,
       textChange,
     ]))).toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({});
-    expect(shared.collaboration.current().suppressed).toMatchObject([{
+    expect(shared.replica.status().suppressed).toMatchObject([{
       changeId: { actorId: "actor-b", counter: 1 },
       code: "text_target_deleted",
     }]);
@@ -382,12 +382,12 @@ describe("protocol v3 text-splice wire materialization", () => {
     ]);
 
     const shared = runtime("receiver", initial);
-    expect(shared.collaboration.ingest(bundle(shared, [
-      ...setter.collaboration.exportBundle().changes,
+    expect(shared.replica.ingest(bundle(shared, [
+      ...setter.replica.exportBundle().changes,
       textChange,
     ]))).toMatchObject({ ok: true });
     expect(shared.document.value).toEqual({ title: "reset" });
-    expect(shared.collaboration.current().suppressed).toMatchObject([{
+    expect(shared.replica.status().suppressed).toMatchObject([{
       changeId: { actorId: "actor-b", counter: 1 },
       code: "text_generation_mismatch",
     }]);
@@ -412,15 +412,15 @@ describe("protocol v3 text-splice wire materialization", () => {
       }],
     };
 
-    expect(shared.collaboration.ingest({
-      epoch: shared.collaboration.epoch,
+    expect(shared.replica.ingest({
+      epoch: shared.replica.epoch,
       changes: [malformed],
     })).toMatchObject({
       ok: false,
       code: "invalid_bundle",
     });
     expect(shared.document.value).toEqual(initial);
-    expect(shared.collaboration.exportBundle().changes).toEqual([]);
+    expect(shared.replica.exportBundle().changes).toEqual([]);
   });
 });
 
@@ -429,7 +429,7 @@ describe("collaborative text authoring helpers", () => {
     const shared = runtime("basis", { title: "A😀B" });
     const tree = createInitialTree(
       shared.document.value,
-      shared.collaboration.epoch.baseDigest,
+      shared.replica.epoch.baseDigest,
     );
     const snapshot = resolveTextSnapshot(tree, ["title"]);
     expect(snapshot.ok).toBe(true);
@@ -457,7 +457,7 @@ describe("collaborative text authoring helpers", () => {
     const shared = runtime("basis", { title: "A😀B" });
     const tree = createInitialTree(
       shared.document.value,
-      shared.collaboration.epoch.baseDigest,
+      shared.replica.epoch.baseDigest,
     );
     const snapshot = resolveTextSnapshot(tree, ["title"]);
     if (!snapshot.ok) throw new Error(snapshot.reason);
@@ -485,7 +485,7 @@ describe("collaborative text authoring helpers", () => {
     const shared = runtime("basis", initial);
     const initialTree = createInitialTree(
       shared.document.value,
-      shared.collaboration.epoch.baseDigest,
+      shared.replica.epoch.baseDigest,
     );
     const captured = resolveTextSnapshot(initialTree, ["title"]);
     if (!captured.ok) throw new Error(captured.reason);
@@ -547,7 +547,7 @@ describe("collaborative text authoring helpers", () => {
     const shared = runtime("basis", { title: "ab" });
     const tree = createInitialTree(
       shared.document.value,
-      shared.collaboration.epoch.baseDigest,
+      shared.replica.epoch.baseDigest,
     );
     const patch = [{
       op: "replace" as const,
@@ -586,7 +586,7 @@ describe("collaborative text authoring helpers", () => {
     const shared = runtime("basis", { title: "ab" });
     const tree = createInitialTree(
       shared.document.value,
-      shared.collaboration.epoch.baseDigest,
+      shared.replica.epoch.baseDigest,
     );
     const compiled = compilePatchOperations(
       tree,
@@ -633,7 +633,7 @@ describe("collaborative text authoring helpers", () => {
     });
     const tree = createInitialTree(
       shared.document.value,
-      shared.collaboration.epoch.baseDigest,
+      shared.replica.epoch.baseDigest,
     );
     const compiled = compilePatchOperations(
       tree,

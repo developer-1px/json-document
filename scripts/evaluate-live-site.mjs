@@ -71,7 +71,7 @@ async function checkOnce() {
   const llms = await fetchText("/llms.txt");
   if (
     !/^# json-document v2$/m.test(llms)
-    || !/공개 Root는 정확히 다음 20개 symbol/.test(llms)
+    || !/공개 Root는 정확히 다음 22개 symbol/.test(llms)
     || !/`JSONDocument`의 필수 member는 정확히 여섯 개다/.test(llms)
     || !/## Host adapter와 companion/.test(llms)
     || !/@interactive-os\/editable/.test(llms)

@@ -16,6 +16,36 @@ requires an explicit, append-only contract-delta comment with the user's
 authorization and reason. Context summaries and implementation plans are not
 scope authority; after context loss, reread this issue and the current diff.
 
+## Contract delta — repository-wide application
+
+Authorized by the user on 2026-07-30: “응 이거 전수 적용이 goal이야.”
+
+Reason: the original Done condition classified current names and established the
+canonical vocabulary, but did not require the implementation, paths, tests, and
+public surfaces to use that vocabulary. The user clarified that repository-wide
+application—not classification alone—is the intended outcome.
+
+### Before
+
+- Outcome: establish the durable concept and naming source of truth.
+- Done: publish the dictionary and grammar, classify public concepts, map v2
+  compatibility names, and make future names mechanically evaluable.
+- Don't: do not change stable v2 public API names.
+
+### After
+
+- Outcome: apply the canonical concept dictionary and naming grammar throughout
+  public APIs, internal identifiers, file and folder names, tests, documentation,
+  site copy, and package metadata.
+- Done: every in-scope repository name either uses the canonical vocabulary or is
+  an explicitly marked compatibility alias; automated checks reject reintroduction
+  of superseded vocabulary; the complete test and build surface proves behavior
+  unchanged.
+- Don't: do not change runtime behavior, protocol semantics, wire formats, or
+  package boundaries. Preserve existing stable v2 consumers through explicit
+  compatibility aliases and a documented migration path rather than silently
+  removing their identifiers.
+
 ## Why
 
 The repository currently has a sound implementation model, but its vocabulary is

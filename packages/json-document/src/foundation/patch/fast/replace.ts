@@ -11,7 +11,7 @@ import {
   parseKnownArrayNestedIndex,
   parseKnownArrayFieldIndex,
 } from "../path.js";
-import { replaceValueAtSegments } from "../replaceValue.js";
+import { replaceValueAtSegments } from "../replace-value.js";
 import { validateOperationShape } from "../apply.js";
 import type { FastPatchResult, JSONPatchOperation } from "../contract.js";
 import type { ArrayFieldPath, ArrayFieldText } from "../path.js";

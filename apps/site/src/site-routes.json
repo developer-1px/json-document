@@ -3,7 +3,7 @@
     "path": "/",
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
-    "description": "Implementation-neutral JSON editing and a six-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
+    "description": "Implementation-neutral JSON editing and a seven-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
     "group": "Start"
   },
   {

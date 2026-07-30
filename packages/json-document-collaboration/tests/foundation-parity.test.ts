@@ -1,8 +1,8 @@
 import type { JSONValue } from "@interactive-os/json-document";
 import { describe, expect, test } from "vitest";
 
-import { parseArrayIndex } from "../src/arrayIndex.js";
-import { jsonEqual } from "../src/jsonEqual.js";
+import { parseArrayIndex } from "../src/array-index.js";
+import { jsonEqual } from "../src/json-equal.js";
 import rawVectors from "../../json-document/tests/conformance/v2/foundation-vectors.json" with { type: "json" };
 
 interface FoundationVectors {

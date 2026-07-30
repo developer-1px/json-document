@@ -4,24 +4,24 @@ IME-safe native-input DOM lease for
 `@interactive-os/json-document-collaboration/text`.
 
 The adapter binds one collaborative string pointer to one contenteditable
-root. Collaboration ingestion and the six-member document model always update
+root. Collaboration ingestion and the seven-member document model always update
 immediately. While the browser owns native input or IME composition, only
 rendering back into that root is delayed.
 
 Canonical DOM adapter와 lease vocabulary는
 [Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
-정의합니다. `CollaborationTextDOM`은 stable compatibility identifier이고
-canonical concept는 DOM adapter입니다.
+정의합니다. `TextDOMAdapter`는 canonical public identifier이고
+`CollaborationTextDOM`은 deprecated compatibility alias입니다.
 
 ```ts
 import {
-  createCollaborationTextRuntime,
+  createTextRuntime,
 } from "@interactive-os/json-document-collaboration/text";
 import {
-  createCollaborationContentEditableAdapter,
+  createContentEditableAdapter,
 } from "@interactive-os/json-document-contenteditable-collaboration";
 
-const runtime = createCollaborationTextRuntime(
+const runtime = createTextRuntime(
   { title: "Shared title" },
   {
     actorId: "browser-a",
@@ -33,7 +33,7 @@ const runtime = createCollaborationTextRuntime(
   },
 );
 
-const adapter = createCollaborationContentEditableAdapter({
+const adapter = createContentEditableAdapter({
   runtime,
   pointer: "/title",
   root: document.querySelector("[contenteditable]") as HTMLElement,
@@ -74,7 +74,7 @@ controls are not consumed by the parent adapter.
 Wrappers or rich DOM can provide an adapter:
 
 ```ts
-const adapter = createCollaborationContentEditableAdapter({
+const adapter = createContentEditableAdapter({
   runtime,
   pointer: "/title",
   root,

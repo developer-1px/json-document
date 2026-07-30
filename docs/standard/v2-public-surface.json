@@ -82,10 +82,12 @@
       "JSONCapabilityResult",
       "JSONChangeMetadata",
       "JSONDocument",
+      "JSONDocumentOptions",
       "JSONDocumentCommitOptions",
       "JSONDocumentCommitResult",
       "JSONPatchOperation",
       "JSONPatchResult",
+      "JSONPatchValidationResult",
       "JSONValue",
       "Pointer",
       "QueryResult",
@@ -94,8 +96,8 @@
   },
   "counts": {
     "values": 8,
-    "types": 12,
-    "exports": 20,
+    "types": 14,
+    "exports": 22,
     "projectionMembers": 6
   }
 }

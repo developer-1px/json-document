@@ -40,11 +40,11 @@ const document = createJSONDocument({
   tasks: [{ id: "a", done: false }],
 });
 
-const capability = document.canPatch([
+const validation = document.validatePatch([
   { op: "replace", path: "/tasks/0/done", value: true },
 ]);
 
-if (capability.ok) {
+if (validation.ok) {
   const result = document.commit([
     { op: "replace", path: "/tasks/0/done", value: true },
   ], {
@@ -65,7 +65,7 @@ Document의 필수 member는 여섯 개뿐입니다.
 | `value` | immutable current document value |
 | `at(pointer)` | 정확한 JSON Pointer 한 곳 읽기 |
 | `query(jsonPath)` | JSONPath를 Pointer 배열로 환원 |
-| `canPatch(operations)` | state를 바꾸지 않는 patch validation |
+| `validatePatch(operations)` | state를 바꾸지 않는 patch validation |
 | `commit(operations, options?)` | 유일한 stateful mutation |
 | `subscribe(listener)` | change notification 구독 |
 
@@ -79,8 +79,9 @@ subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `
 
 ## Validation
 
-Core는 특정 schema object를 받지 않습니다. Validator를 stable v2 `accepts`
-callback으로 연결합니다. 반환된 parse value를 받지 않으므로 commit-time
+Core는 특정 schema object를 받지 않습니다. Validator를 canonical `validate`
+callback으로 연결합니다. Stable v2 `accepts`는 deprecated compatibility
+alias입니다. 반환된 parse value를 받지 않으므로 commit-time
 transform이 state에 몰래 들어갈 수 없습니다.
 
 ```ts
@@ -95,7 +96,7 @@ const Schema = z.object({
 const document = createJSONDocument(
   { title: "Draft", tasks: [] },
   {
-    accepts(candidate) {
+    validate(candidate) {
       const result = Schema.safeParse(candidate);
       return result.success
         ? { ok: true }
@@ -115,7 +116,7 @@ Initial value와 patch payload, metadata, exposed document value/change는 docum
 
 ## 공개 root
 
-Root는 20개 Kernel symbol만 공개합니다.
+Root는 22개 public symbol만 공개합니다.
 
 ```txt
 values
@@ -126,13 +127,14 @@ values
 types
   JSONValue, Pointer, JSONPatchOperation
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
-  JSONCapabilityResult, JSONChangeMetadata, JSONDocumentCommitOptions
+  JSONPatchValidationResult, JSONCapabilityResult, JSONChangeMetadata
+  JSONDocumentOptions, JSONDocumentCommitOptions
   ReadResult, QueryResult, JSONDocument
 ```
 
 `JSONDocument`는 application-owned structural contract입니다. Selection,
 history, clipboard, DOM lifecycle과 framework binding은 별도 host 또는 adapter가
-이 여섯 member를 조합합니다. 패키지는 `/session`이나 `/react` subpath를
+이 일곱 member를 조합합니다. 패키지는 `/session`이나 `/react` subpath를
 공개하지 않습니다.
 
 ## 순수 core

@@ -1,7 +1,7 @@
 import { jsonSerializableError } from "../json/serializable.js";
 import { applyOpRaw, validateOperationPointers, validateOperationShape } from "./apply.js";
 import { normalizeAppliedOp, normalizeOp } from "./container.js";
-import { acceptedStrategies, applyFastPatchStrategies, trustedStrategies } from "./fast/apply.js";
+import { validatedStrategies, applyFastPatchStrategies, trustedStrategies } from "./fast/apply.js";
 import { fail, ok } from "./result.js";
 import { applyTrustedValueMutation } from "./value.js";
 import type {
@@ -52,18 +52,18 @@ export function applyTrustedPatch<T>(
   return { state: cur as T, result: ok, applied: normalized };
 }
 
-export function applyAcceptedPatch<T>(
+export function applyValidatedPatch<T>(
   state: T,
   ops: ReadonlyArray<JSONPatchOperation>,
 ): TrustedApplyResult<T> {
   if (!Array.isArray(ops)) return { state, result: fail("invalid_pointer", "patch must be an array"), applied: [] };
 
   if (ops.length === 1 && 0 in ops) {
-    const single = applyAcceptedSingleTrustedValuePatch(state, ops[0]!);
+    const single = applyValidatedSingleTrustedValuePatch(state, ops[0]!);
     if (single !== null) return single as TrustedApplyResult<T>;
   }
 
-  const fast = applyFastPatchStrategies(state, ops, acceptedStrategies, true);
+  const fast = applyFastPatchStrategies(state, ops, validatedStrategies, true);
   if (fast !== null) return { state: fast.state as T, result: ok, applied: fast.applied };
 
   return applyTrustedPatch(state, ops, { valuesTrusted: true });
@@ -103,7 +103,7 @@ function applySingleTrustedValuePatch(
   return { state: applied.state, result: ok, applied: [normalized] };
 }
 
-function applyAcceptedSingleTrustedValuePatch(
+function applyValidatedSingleTrustedValuePatch(
   state: unknown,
   op: JSONPatchOperation,
 ): TrustedApplyResult<unknown> | null {

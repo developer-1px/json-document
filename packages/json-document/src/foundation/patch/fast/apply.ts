@@ -7,7 +7,7 @@ import {
   removedRootKeysMatchSuffix,
 } from "../object.js";
 import { validateOperationShape } from "../apply.js";
-import { applySequentialReplacePatch } from "../sequentialReplace.js";
+import { applySequentialReplacePatch } from "../sequential-replace.js";
 import {
   applyAppendOnlyAddPatch,
   applySameArrayStructuralPatch,
@@ -48,7 +48,7 @@ export const trustedStrategies: readonly FastPatchStrategy[] = [
   applySameArrayStructuralPatch,
 ];
 
-export const acceptedStrategies: readonly FastPatchStrategy[] = [
+export const validatedStrategies: readonly FastPatchStrategy[] = [
   applyRootObjectRemovePatch,
   applyRootObjectAddPatch,
   applyRootObjectReplacePatch,

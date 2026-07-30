@@ -8,7 +8,7 @@ React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
-  |                               > same six-member JSON Document
+  |                               > same seven-member JSON Document
   `-> collaboration engine -----/    |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
@@ -40,7 +40,7 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 | JSONPath | 여러 위치를 찾는 query. 결과는 Pointer 목록 |
 | JSON Patch | ordered atomic mutation 형식 |
 | Stateless JSON Patch | 현재 document instance 없이 JSON Patch를 적용하는 함수 |
-| JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 여섯-member port |
+| JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 일곱-member port |
 | validation | Candidate document를 commit 전에 검사하는 implementation-neutral callback |
 | Host adapter | selection, clipboard, history, DOM과 고수준 편집 동사를 소유하는 별도 계층 |
 
@@ -48,8 +48,8 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 compatibility map은
 [Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)가
 정의합니다. `Projection`, `canPatch`, `JSONCapabilityResult`, `accepts`는
-stable v2 identifier 또는 compatibility label이며 별도 canonical concept가
-아닙니다.
+deprecated stable v2 identifier 또는 compatibility label이며 별도 canonical
+concept가 아닙니다.
 
 가장 중요한 경계는 query와 mutation을 섞지 않는 것입니다.
 
@@ -75,7 +75,7 @@ const patch = [
   { op: "replace", path: "/status", value: "doing" },
 ] as const;
 
-if (document.canPatch(patch).ok) {
+if (document.validatePatch(patch).ok) {
   const result = document.commit(patch, {
     metadata: { origin: "status-control" },
   });
@@ -93,7 +93,7 @@ if (document.canPatch(patch).ok) {
 value
 at
 query
-canPatch
+validatePatch
 commit
 subscribe
 ```
@@ -118,7 +118,7 @@ if (result.ok) {
 
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
-| `@interactive-os/json-document` | v2 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
+| `@interactive-os/json-document` | v2 Kernel | Stateless JSON Patch와 일곱-member JSON Document |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
 | `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
 
@@ -148,7 +148,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | --- | --- |
 | 현재 값 읽기 | `document.value`, `document.at(pointer)` |
 | 여러 위치 찾기 | `document.query(jsonPath)` |
-| 변경 가능성 확인 | `document.canPatch(operations)` |
+| 변경 가능성 확인 | `document.validatePatch(operations)` |
 | 상태 변경 | `document.commit(operations, options?)` |
 | 변경 구독 | `document.subscribe(listener)` |
 | instance 없는 patch 적용 | `applyPatch(value, operations)` |

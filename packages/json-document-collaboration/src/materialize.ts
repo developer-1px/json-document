@@ -1,5 +1,5 @@
 import type {
-  JSONCapabilityResult,
+  JSONPatchValidationResult,
   JSONValue,
 } from "@interactive-os/json-document";
 
@@ -30,7 +30,7 @@ interface MaterializedHistoryState {
   readonly disabledByTarget: ReadonlyMap<string, ChangeId>;
   readonly appliedKeys: ReadonlySet<string>;
   readonly appliedUndoTargets: ReadonlyMap<string, ChangeId>;
-  readonly appliedControlKeys: ReadonlySet<string>;
+  readonly appliedHistoryKeys: ReadonlySet<string>;
 }
 
 export interface MaterializedDocument {
@@ -44,7 +44,7 @@ export interface MaterializedDocument {
 export function materializeChanges(
   initialTree: TreeState,
   ordered: ReadonlyArray<CollaborationChange>,
-  accepts: ((candidate: JSONValue) => JSONCapabilityResult) | undefined,
+  validate: ((candidate: JSONValue) => JSONPatchValidationResult) | undefined,
 ): MaterializedDocument {
   const isAncestor = createAncestry(ordered);
   const changes = new Map(
@@ -52,42 +52,42 @@ export function materializeChanges(
   );
   const disabledByTarget = new Map<string, ChangeId>();
   const appliedUndoTargets = new Map<string, ChangeId>();
-  const appliedControlKeys = new Set<string>();
-  const controlSuppressed: SuppressedChange[] = [];
+  const appliedHistoryKeys = new Set<string>();
+  const historySuppressed: SuppressedChange[] = [];
   let replay = replayDataChanges(
     initialTree,
     ordered,
     disabledByTarget,
-    accepts,
+    validate,
     isAncestor,
   );
 
   for (const change of ordered) {
-    const control = classifyHistoryChange(change);
-    if (control.kind === "none") continue;
-    if (control.kind === "invalid") {
-      controlSuppressed.push(freezeSuppressed(
+    const historyChange = classifyHistoryChange(change);
+    if (historyChange.kind === "none") continue;
+    if (historyChange.kind === "invalid") {
+      historySuppressed.push(freezeSuppressed(
         change.changeId,
         "invalid_history_change",
-        control.reason,
+        historyChange.reason,
       ));
       continue;
     }
 
     const changeKey = changeIdKey(change.changeId);
-    if (control.operation.kind === "undo-change") {
-      const targetKey = changeIdKey(control.operation.target);
+    if (historyChange.operation.kind === "undo-change") {
+      const targetKey = changeIdKey(historyChange.operation.target);
       const target = changes.get(targetKey);
       const invalidReason = validateUndoTarget(
         change,
         target,
-        control.operation.target,
+        historyChange.operation.target,
         replay,
         disabledByTarget,
         isAncestor,
       );
       if (invalidReason !== null) {
-        controlSuppressed.push(freezeSuppressed(
+        historySuppressed.push(freezeSuppressed(
           change.changeId,
           invalidReason.code,
           invalidReason.reason,
@@ -101,7 +101,7 @@ export function materializeChanges(
         initialTree,
         ordered,
         candidateDisabled,
-        accepts,
+        validate,
         isAncestor,
       );
       const dependency = newlySuppressedAppliedChange(
@@ -113,7 +113,7 @@ export function materializeChanges(
         targetKey,
       );
       if (dependency !== null) {
-        controlSuppressed.push(freezeSuppressed(
+        historySuppressed.push(freezeSuppressed(
           change.changeId,
           "undo_dependency_conflict",
           `undo would suppress another accepted Change: ${dependency}`,
@@ -126,12 +126,12 @@ export function materializeChanges(
         disabledByTarget.set(key, value);
       }
       replay = candidate;
-      appliedUndoTargets.set(changeKey, freezeChangeId(control.operation.target));
-      appliedControlKeys.add(changeKey);
+      appliedUndoTargets.set(changeKey, freezeChangeId(historyChange.operation.target));
+      appliedHistoryKeys.add(changeKey);
       continue;
     }
 
-    const undoKey = changeIdKey(control.operation.undo);
+    const undoKey = changeIdKey(historyChange.operation.undo);
     const target = appliedUndoTargets.get(undoKey);
     const targetKey = target === undefined ? null : changeIdKey(target);
     const currentUndo = targetKey === null
@@ -147,16 +147,16 @@ export function materializeChanges(
       && changeIdKey(currentUndo) === undoKey
       && latestActorUndo !== null
       && changeIdKey(latestActorUndo) === undoKey
-      && change.changeId.actorId === control.operation.undo.actorId
-      && isAncestor(control.operation.undo, change.changeId)
+      && change.changeId.actorId === historyChange.operation.undo.actorId
+      && isAncestor(historyChange.operation.undo, change.changeId)
       && !hasInterveningActorData(
         ordered,
-        control.operation.undo,
+        historyChange.operation.undo,
         change.changeId,
       )
     );
     if (!validRedo || targetKey === null) {
-      controlSuppressed.push(freezeSuppressed(
+      historySuppressed.push(freezeSuppressed(
         change.changeId,
         "redo_target_invalid",
         "redo must reference the currently effective causal undo from the same actor",
@@ -170,7 +170,7 @@ export function materializeChanges(
       initialTree,
       ordered,
       candidateDisabled,
-      accepts,
+      validate,
       isAncestor,
     );
     const dependency = newlySuppressedAppliedChange(
@@ -184,7 +184,7 @@ export function materializeChanges(
       dependency !== null
       || !candidate.appliedKeys.has(targetKey)
     ) {
-      controlSuppressed.push(freezeSuppressed(
+      historySuppressed.push(freezeSuppressed(
         change.changeId,
         "redo_dependency_conflict",
         dependency === null
@@ -199,13 +199,13 @@ export function materializeChanges(
       disabledByTarget.set(key, value);
     }
     replay = candidate;
-    appliedControlKeys.add(changeKey);
+    appliedHistoryKeys.add(changeKey);
   }
 
   const orderByKey = new Map(
     ordered.map((change, order) => [changeIdKey(change.changeId), order]),
   );
-  const suppressed = [...replay.suppressed, ...controlSuppressed]
+  const suppressed = [...replay.suppressed, ...historySuppressed]
     .sort((left, right) => (
       (orderByKey.get(changeIdKey(left.changeId)) ?? Number.MAX_SAFE_INTEGER)
       - (orderByKey.get(changeIdKey(right.changeId)) ?? Number.MAX_SAFE_INTEGER)
@@ -219,30 +219,30 @@ export function materializeChanges(
       disabledByTarget,
       appliedKeys: replay.appliedKeys,
       appliedUndoTargets,
-      appliedControlKeys,
+      appliedHistoryKeys,
     },
   };
 }
 
-export function projectAcceptedTree(
+export function materializeTree(
   tree: TreeState,
   ordered: ReadonlyArray<CollaborationChange>,
   suppressed: ReadonlyArray<SuppressedChange>,
 ): MaterializedDocument {
-  const projected = projectTree(tree, createAncestry(ordered));
-  if (!projected.ok) {
-    throw new Error(`materialized tree is invalid: ${projected.reason}`);
+  const materializedDocument = projectTree(tree, createAncestry(ordered));
+  if (!materializedDocument.ok) {
+    throw new Error(`materialized tree is invalid: ${materializedDocument.reason}`);
   }
   return {
     tree,
-    value: projected.value,
-    conflicts: Object.freeze(projected.conflicts.map(freezeConflict)),
+    value: materializedDocument.value,
+    conflicts: Object.freeze(materializedDocument.conflicts.map(freezeConflict)),
     suppressed,
     history: {
       disabledByTarget: new Map(),
       appliedKeys: new Set(),
       appliedUndoTargets: new Map(),
-      appliedControlKeys: new Set(),
+      appliedHistoryKeys: new Set(),
     },
   };
 }
@@ -261,13 +261,13 @@ export function isUndoableChange(change: CollaborationChange): boolean {
   );
 }
 
-export function acceptCandidate(
-  accepts: ((candidate: JSONValue) => JSONCapabilityResult) | undefined,
+export function validateCandidate(
+  validate: ((candidate: JSONValue) => JSONPatchValidationResult) | undefined,
   candidate: JSONValue,
-): JSONCapabilityResult {
-  if (accepts === undefined) return OK;
+): JSONPatchValidationResult {
+  if (validate === undefined) return OK;
   try {
-    const result = accepts(freezeJSON(candidate));
+    const result = validate(freezeJSON(candidate));
     if (result?.ok === true) return OK;
     if (result?.ok === false && typeof result.code === "string") {
       return Object.freeze({
@@ -355,7 +355,7 @@ function freezeSuppressed(
 function failure(
   code: string,
   reason?: string,
-): Extract<JSONCapabilityResult, { readonly ok: false }> {
+): Extract<JSONPatchValidationResult, { readonly ok: false }> {
   return Object.freeze({
     ok: false,
     code,
@@ -363,7 +363,7 @@ function failure(
   });
 }
 
-const OK: JSONCapabilityResult = Object.freeze({ ok: true });
+const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
 
 interface DataReplay {
   readonly tree: TreeState;
@@ -377,7 +377,7 @@ function replayDataChanges(
   initialTree: TreeState,
   ordered: ReadonlyArray<CollaborationChange>,
   disabledByTarget: ReadonlyMap<string, ChangeId>,
-  accepts: ((candidate: JSONValue) => JSONCapabilityResult) | undefined,
+  validate: ((candidate: JSONValue) => JSONPatchValidationResult) | undefined,
   isAncestor: (left: ChangeId, right: ChangeId) => boolean,
 ): DataReplay {
   let tree = cloneTree(initialTree);
@@ -401,23 +401,23 @@ function replayDataChanges(
       continue;
     }
 
-    const projected = projectTree(candidate, isAncestor);
-    if (!projected.ok) {
+    const materializedDocument = projectTree(candidate, isAncestor);
+    if (!materializedDocument.ok) {
       suppressed.push(freezeSuppressed(
         change.changeId,
-        projected.code,
-        projected.reason,
+        materializedDocument.code,
+        materializedDocument.reason,
       ));
       continue;
     }
 
-    const accepted = acceptCandidate(accepts, projected.value);
-    if (!accepted.ok) {
+    const validation = validateCandidate(validate, materializedDocument.value);
+    if (!validation.ok) {
       suppressed.push(freezeSuppressed(
         change.changeId,
-        accepted.code,
-        accepted.reason,
-        accepted.pointer,
+        validation.code,
+        validation.reason,
+        validation.pointer,
       ));
       continue;
     }
@@ -425,14 +425,14 @@ function replayDataChanges(
     appliedKeys.add(key);
   }
 
-  const projected = projectTree(tree, isAncestor);
-  if (!projected.ok) {
-    throw new Error(`materialized tree is invalid: ${projected.reason}`);
+  const materializedDocument = projectTree(tree, isAncestor);
+  if (!materializedDocument.ok) {
+    throw new Error(`materialized tree is invalid: ${materializedDocument.reason}`);
   }
   return {
     tree,
-    value: projected.value,
-    conflicts: Object.freeze(projected.conflicts.map(freezeConflict)),
+    value: materializedDocument.value,
+    conflicts: Object.freeze(materializedDocument.conflicts.map(freezeConflict)),
     suppressed: Object.freeze(suppressed),
     appliedKeys,
   };
@@ -499,7 +499,7 @@ function validateUndoTarget(
 function newlySuppressedAppliedChange(
   previous: DataReplay,
   candidate: DataReplay,
-  control: ChangeId,
+  historyChange: ChangeId,
   changes: ReadonlyMap<string, CollaborationChange>,
   isAncestor: (left: ChangeId, right: ChangeId) => boolean,
   ignoredKey?: string,
@@ -510,7 +510,7 @@ function newlySuppressedAppliedChange(
     if (
       !candidate.appliedKeys.has(key)
       && disappeared !== undefined
-      && isAncestor(disappeared.changeId, control)
+      && isAncestor(disappeared.changeId, historyChange)
     ) {
       return key;
     }

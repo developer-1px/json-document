@@ -3,7 +3,7 @@ import {
   createJSONDocument,
   parsePointer,
   type JSONAppliedChange,
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONDocument,
   type JSONDocumentCommitOptions,
   type JSONDocumentCommitResult,
@@ -29,14 +29,14 @@ import {
   prepareGraph,
   type PreparedGraph,
 } from "./change.js";
-import { jsonEqual } from "./jsonEqual.js";
+import { jsonEqual } from "./json-equal.js";
 import { createCheckpoint } from "./checkpoint.js";
 import {
-  acceptCandidate,
+  validateCandidate,
   historyOperationFor,
   isUndoableChange,
   materializeChanges,
-  projectAcceptedTree,
+  materializeTree,
   type MaterializedDocument,
 } from "./materialize.js";
 import {
@@ -60,25 +60,25 @@ import type {
   CollaborationBundle,
   CollaborationChange,
   CollaborationConflict,
-  CollaborationControl,
+  CollaborationReplica,
   CollaborationEpoch,
-  CollaborationHistoryControl,
-  CollaborationHistoryResult,
-  CollaborationHistoryRuntime,
-  CollaborationHistorySnapshot,
+  History,
+  HistoryResult,
+  HistoryRuntime,
+  HistoryStatus,
   CollaborationIngestResult,
   CollaborationRuntime,
   CollaborationRuntimeOptions,
-  CollaborationSnapshot,
+  ReplicaStatus,
   CollaborationMembership,
-  CollaborationTextCapture,
-  CollaborationTextCommitResult,
-  CollaborationTextControl,
-  CollaborationTextObservation,
-  CollaborationTextPlan,
-  CollaborationTextPlanResult,
-  CollaborationTextRuntime,
-  CollaborationTextSelection,
+  TextCapture,
+  Text,
+  TextCommitResult,
+  TextObservation,
+  TextPlan,
+  TextPlanResult,
+  TextRuntime,
+  TextSelection,
   PendingChange,
   SuppressedChange,
   TextAtomId,
@@ -97,9 +97,9 @@ type PreparedLocalResult =
   | { readonly ok: true; readonly value: PreparedLocalChange }
   | Extract<JSONDocumentCommitResult, { readonly ok: false }>;
 
-interface PublicationEvent {
+interface NotificationEvent {
   readonly documentChange?: JSONAppliedChange;
-  readonly collaborationSnapshot: CollaborationSnapshot;
+  readonly replicaStatus: ReplicaStatus;
 }
 
 interface PreparedHistoryChange {
@@ -108,24 +108,24 @@ interface PreparedHistoryChange {
   readonly known: ReadonlyMap<string, CollaborationChange>;
   readonly graph: PreparedGraph;
   readonly materialized: MaterializedDocument;
-  readonly projectionChanged: boolean;
+  readonly didChangeDocument: boolean;
 }
 
 type PreparedHistoryResult =
   | { readonly ok: true; readonly value: PreparedHistoryChange }
-  | Extract<CollaborationHistoryResult, { readonly ok: false }>;
+  | Extract<HistoryResult, { readonly ok: false }>;
 
 interface ResolvedHistoryState {
-  readonly snapshot: CollaborationHistorySnapshot;
+  readonly status: HistoryStatus;
   readonly effectiveUndo: ChangeId | null;
 }
 
-interface InternalRuntime extends CollaborationHistoryRuntime {
-  readonly text?: CollaborationTextControl;
+interface InternalRuntime extends HistoryRuntime {
+  readonly text?: Text;
 }
 
 interface TextCaptureState {
-  readonly capture: CollaborationTextCapture;
+  readonly capture: TextCapture;
   readonly atoms: ReadonlyArray<TextAtomSnapshot>;
   readonly deps: ReadonlyArray<ChangeId>;
   readonly actorCounter: number;
@@ -138,7 +138,7 @@ interface TextSelectionGap {
 }
 
 interface TextPlanState {
-  readonly plan: CollaborationTextPlan;
+  readonly plan: TextPlan;
   readonly capture: TextCaptureState;
   readonly operation: TextSpliceOperation | null;
   readonly graphRevision: number;
@@ -153,30 +153,32 @@ export function createCollaborationRuntime(
   const runtime = createRuntime(initial, options);
   return Object.freeze({
     document: runtime.document,
+    replica: runtime.replica,
     collaboration: runtime.collaboration,
   });
 }
 
-export function createCollaborationTextRuntime(
+export function createTextRuntime(
   initial: unknown,
   options: CollaborationRuntimeOptions,
-): CollaborationTextRuntime {
+): TextRuntime {
   const runtime = createRuntime(initial, options, undefined, "text");
   if (runtime.text === undefined) {
     throw new Error("collaborative text profile was not initialized");
   }
   return Object.freeze({
     document: runtime.document,
+    replica: runtime.replica,
     collaboration: runtime.collaboration,
     history: runtime.history,
     text: runtime.text,
   });
 }
 
-export function createCollaborationHistoryRuntime(
+export function createHistoryRuntime(
   initial: unknown,
   options: CollaborationRuntimeOptions,
-): CollaborationHistoryRuntime {
+): HistoryRuntime {
   return createRuntime(initial, options);
 }
 
@@ -184,7 +186,7 @@ export function createRestoredRuntime(
   initial: unknown,
   options: CollaborationRuntimeOptions,
   expectedEpoch: CollaborationEpoch,
-): CollaborationHistoryRuntime {
+): HistoryRuntime {
   return createRuntime(initial, options, expectedEpoch);
 }
 
@@ -192,13 +194,14 @@ export function createRestoredTextRuntime(
   initial: unknown,
   options: CollaborationRuntimeOptions,
   expectedEpoch: CollaborationEpoch,
-): CollaborationTextRuntime {
+): TextRuntime {
   const runtime = createRuntime(initial, options, expectedEpoch, "text");
   if (runtime.text === undefined) {
     throw new Error("collaborative text profile was not initialized");
   }
   return Object.freeze({
     document: runtime.document,
+    replica: runtime.replica,
     collaboration: runtime.collaboration,
     history: runtime.history,
     text: runtime.text,
@@ -240,53 +243,56 @@ function createRuntime(
     throw new TypeError(`Initial collaboration tree is invalid: ${initialProjected.reason}`);
   }
 
-  let evaluatingAcceptance = false;
-  const evaluateAcceptance = (candidate: JSONValue): JSONCapabilityResult => {
-    if (evaluatingAcceptance) return ACCEPTANCE_REENTRANCY_FAILURE;
-    evaluatingAcceptance = true;
+  let evaluatingValidation = false;
+  const validate = options.validate ?? options.accepts;
+  const evaluateValidation = (
+    candidate: JSONValue,
+  ): JSONPatchValidationResult => {
+    if (evaluatingValidation) return ACCEPTANCE_REENTRANCY_FAILURE;
+    evaluatingValidation = true;
     try {
-      return acceptCandidate(options.accepts, candidate);
+      return validateCandidate(validate, candidate);
     } finally {
-      evaluatingAcceptance = false;
+      evaluatingValidation = false;
     }
   };
-  const initialAcceptance = evaluateAcceptance(initialProjected.value);
-  if (!initialAcceptance.ok) {
+  const initialValidation = evaluateValidation(initialProjected.value);
+  if (!initialValidation.ok) {
     throw new TypeError(
-      `Initial document value was rejected: ${initialAcceptance.reason ?? initialAcceptance.code}`,
+      `Initial document value was rejected: ${initialValidation.reason ?? initialValidation.code}`,
     );
   }
 
-  const projection = createJSONDocument(initialProjected.value);
+  const documentStore = createJSONDocument(initialProjected.value);
   const actorId = options.actorId;
   const documentListeners = new Set<(change: JSONAppliedChange) => void>();
   const collaborationListeners = new Set<
-    (snapshot: CollaborationSnapshot) => void
+    (status: ReplicaStatus) => void
   >();
-  const publicationQueue: PublicationEvent[] = [];
-  let publishing = false;
+  const notificationQueue: NotificationEvent[] = [];
+  let notifying = false;
   let localCounter = 0;
   let known = new Map<string, CollaborationChange>();
   let graph = prepareGraph(known);
-  let materialized = projectAcceptedTree(initialTree, [], Object.freeze([]));
+  let materialized = materializeTree(initialTree, [], Object.freeze([]));
   let graphRevision = 0;
   const textCaptures = new WeakMap<
-    CollaborationTextCapture,
+    TextCapture,
     TextCaptureState
   >();
-  const textPlans = new WeakMap<CollaborationTextPlan, TextPlanState>();
+  const textPlans = new WeakMap<TextPlan, TextPlanState>();
 
   const prepareLocal = (
     operations: ReadonlyArray<JSONPatchOperation>,
   ): PreparedLocalResult => {
-    if (evaluatingAcceptance) return ACCEPTANCE_REENTRANCY_FAILURE;
-    const patched = applyPatch(projection.value, operations);
+    if (evaluatingValidation) return ACCEPTANCE_REENTRANCY_FAILURE;
+    const patched = applyPatch(documentStore.value, operations);
     if (!patched.ok) return patched;
 
-    const accepted = evaluateAcceptance(patched.value);
-    if (!accepted.ok) return accepted;
+    const validation = evaluateValidation(patched.value);
+    if (!validation.ok) return validation;
 
-    if (jsonEqual(projection.value, patched.value)) {
+    if (jsonEqual(documentStore.value, patched.value)) {
       return {
         ok: true,
         value: {
@@ -341,7 +347,7 @@ function createRuntime(
     const nextMaterialized = materializeChanges(
       initialTree,
       nextGraph.ordered,
-      (candidate) => evaluateAcceptance(candidate),
+      (candidate) => evaluateValidation(candidate),
     );
     if (!jsonEqual(nextMaterialized.value, patched.value)) {
       return failure(
@@ -364,17 +370,23 @@ function createRuntime(
 
   const document = Object.freeze({
     get value(): JSONValue {
-      return projection.value;
+      return documentStore.value;
     },
     at(pointer: string) {
-      return projection.at(pointer);
+      return documentStore.at(pointer);
     },
     query(jsonPath: string) {
-      return projection.query(jsonPath);
+      return documentStore.query(jsonPath);
+    },
+    validatePatch(
+      operations: ReadonlyArray<JSONPatchOperation>,
+    ): JSONPatchValidationResult {
+      const prepared = prepareLocal(operations);
+      return prepared.ok ? OK : prepared;
     },
     canPatch(
       operations: ReadonlyArray<JSONPatchOperation>,
-    ): JSONCapabilityResult {
+    ): JSONPatchValidationResult {
       const prepared = prepareLocal(operations);
       return prepared.ok ? OK : prepared;
     },
@@ -385,7 +397,7 @@ function createRuntime(
       const prepared = prepareLocal(operations);
       if (!prepared.ok) return prepared;
 
-      const committed = projection.commit(operations, commitOptions);
+      const committed = documentStore.commit(operations, commitOptions);
       if (!committed.ok) return committed;
 
       if (prepared.value.change !== null) {
@@ -397,9 +409,9 @@ function createRuntime(
       }
 
       if (committed.change.applied.length > 0) {
-        enqueuePublication({
+        enqueueNotification({
           documentChange: committed.change,
-          collaborationSnapshot: currentSnapshot(),
+          replicaStatus: currentReplicaStatus(),
         });
       }
       return committed;
@@ -417,7 +429,8 @@ function createRuntime(
 
   const collaboration = Object.freeze({
     epoch,
-    current: currentSnapshot,
+    status: currentReplicaStatus,
+    current: currentReplicaStatus,
     exportBundle(): CollaborationBundle {
       return Object.freeze({
         epoch,
@@ -433,7 +446,7 @@ function createRuntime(
       );
     },
     ingest(input: unknown): CollaborationIngestResult {
-      if (evaluatingAcceptance) {
+      if (evaluatingValidation) {
         return {
           ok: false,
           code: "acceptance_reentrancy",
@@ -530,9 +543,9 @@ function createRuntime(
       const nextMaterialized = materializeChanges(
         initialTree,
         nextGraph.ordered,
-        (candidate) => evaluateAcceptance(candidate),
+        (candidate) => evaluateValidation(candidate),
       );
-      const changed = !jsonEqual(projection.value, nextMaterialized.value);
+      const changed = !jsonEqual(documentStore.value, nextMaterialized.value);
 
       known = nextKnown;
       graph = nextGraph;
@@ -549,21 +562,21 @@ function createRuntime(
 
       let documentChange: JSONAppliedChange | undefined;
       if (changed) {
-        const publication = projection.commit([{
+        const documentCommit = documentStore.commit([{
           op: "replace",
           path: "",
           value: materialized.value,
         }]);
-        if (!publication.ok) {
+        if (!documentCommit.ok) {
           throw new Error(
-            `collaboration projection publication failed: ${publication.reason ?? publication.code}`,
+            `collaboration projection publication failed: ${documentCommit.reason ?? documentCommit.code}`,
           );
         }
-        documentChange = publication.change;
+        documentChange = documentCommit.change;
       }
-      enqueuePublication({
+      enqueueNotification({
         ...(documentChange === undefined ? {} : { documentChange }),
-        collaborationSnapshot: currentSnapshot(),
+        replicaStatus: currentReplicaStatus(),
       });
 
       return {
@@ -578,7 +591,7 @@ function createRuntime(
       };
     },
     subscribe(
-      listener: (snapshot: CollaborationSnapshot) => void,
+      listener: (status: ReplicaStatus) => void,
     ): () => void {
       collaborationListeners.add(listener);
       let active = true;
@@ -588,32 +601,35 @@ function createRuntime(
         collaborationListeners.delete(listener);
       };
     },
-  } satisfies CollaborationControl);
+  } satisfies CollaborationReplica);
 
   const history = Object.freeze({
-    current(): CollaborationHistorySnapshot {
-      return resolveHistoryState().snapshot;
+    status(): HistoryStatus {
+      return resolveHistoryState().status;
     },
-    canUndo(): JSONCapabilityResult {
+    current(): HistoryStatus {
+      return resolveHistoryState().status;
+    },
+    canUndo(): JSONPatchValidationResult {
       const prepared = prepareHistoryChange("undo");
       return prepared.ok ? OK : prepared;
     },
-    undo(): CollaborationHistoryResult {
+    undo(): HistoryResult {
       return commitHistoryChange("undo");
     },
-    canRedo(): JSONCapabilityResult {
+    canRedo(): JSONPatchValidationResult {
       const prepared = prepareHistoryChange("redo");
       return prepared.ok ? OK : prepared;
     },
-    redo(): CollaborationHistoryResult {
+    redo(): HistoryResult {
       return commitHistoryChange("redo");
     },
-  } satisfies CollaborationHistoryControl);
+  } satisfies History);
 
   const text = profile === "text"
     ? Object.freeze({
         capture(pointer: string) {
-          if (evaluatingAcceptance) {
+          if (evaluatingValidation) {
             return textFailure(
               "acceptance_reentrancy",
               "acceptance callback cannot capture collaborative text",
@@ -651,10 +667,10 @@ function createRuntime(
           return Object.freeze({ ok: true, capture });
         },
         plan(
-          capture: CollaborationTextCapture,
-          observation: CollaborationTextObservation,
-        ): CollaborationTextPlanResult {
-          if (evaluatingAcceptance) {
+          capture: TextCapture,
+          observation: TextObservation,
+        ): TextPlanResult {
+          if (evaluatingValidation) {
             return textFailure(
               "acceptance_reentrancy",
               "acceptance callback cannot plan collaborative text",
@@ -783,10 +799,10 @@ function createRuntime(
           return Object.freeze({ ok: true, plan });
         },
         commit(
-          plan: CollaborationTextPlan,
+          plan: TextPlan,
           commitOptions?: JSONDocumentCommitOptions,
-        ): CollaborationTextCommitResult {
-          if (evaluatingAcceptance) {
+        ): TextCommitResult {
+          if (evaluatingValidation) {
             return textFailure(
               "acceptance_reentrancy",
               "acceptance callback cannot commit collaborative text",
@@ -822,7 +838,7 @@ function createRuntime(
           if (!current.ok) {
             return textFailure(current.code, current.reason);
           }
-          const metadataProbe = projection.commit([], commitOptions);
+          const metadataProbe = documentStore.commit([], commitOptions);
           if (!metadataProbe.ok) {
             return textFailure(
               metadataProbe.code,
@@ -840,6 +856,7 @@ function createRuntime(
               ok: true,
               change: metadataProbe.change,
               changeId: null,
+              didChangeDocument: false,
               projectionChanged: false,
               value,
               selection: resolvePlannedSelection(planned, textState),
@@ -867,7 +884,7 @@ function createRuntime(
           const nextMaterialized = materializeChanges(
             initialTree,
             nextGraph.ordered,
-            (candidate) => evaluateAcceptance(candidate),
+            (candidate) => evaluateValidation(candidate),
           );
           const changeKey = changeIdKey(changeId);
           if (!nextMaterialized.history.appliedKeys.has(changeKey)) {
@@ -881,8 +898,8 @@ function createRuntime(
             );
           }
 
-          const projectionChanged = !jsonEqual(
-            projection.value,
+          const didChangeDocument = !jsonEqual(
+            documentStore.value,
             nextMaterialized.value,
           );
           known = nextKnown;
@@ -892,8 +909,8 @@ function createRuntime(
           graphRevision += 1;
 
           let documentChange: JSONAppliedChange | undefined;
-          if (projectionChanged) {
-            const publication = projection.commit([{
+          if (didChangeDocument) {
+            const documentCommit = documentStore.commit([{
               op: "replace",
               path: "",
               value: materialized.value,
@@ -902,16 +919,16 @@ function createRuntime(
                 ? {}
                 : { metadata: metadataProbe.change.metadata }),
             });
-            if (!publication.ok) {
+            if (!documentCommit.ok) {
               throw new Error(
-                `text projection publication failed: ${publication.reason ?? publication.code}`,
+                `text projection publication failed: ${documentCommit.reason ?? documentCommit.code}`,
               );
             }
-            documentChange = publication.change;
+            documentChange = documentCommit.change;
           }
-          enqueuePublication({
+          enqueueNotification({
             ...(documentChange === undefined ? {} : { documentChange }),
-            collaborationSnapshot: currentSnapshot(),
+            replicaStatus: currentReplicaStatus(),
           });
 
           const textState = materialized.tree.texts.get(
@@ -924,16 +941,18 @@ function createRuntime(
             ok: true,
             change: documentChange ?? metadataProbe.change,
             changeId: freezeChangeId(changeId),
-            projectionChanged,
+            didChangeDocument,
+            projectionChanged: didChangeDocument,
             value: projectText(textState),
             selection: resolvePlannedSelection(planned, textState),
           });
         },
-      } satisfies CollaborationTextControl)
+      } satisfies Text)
     : undefined;
 
   return Object.freeze({
     document,
+    replica: collaboration,
     collaboration,
     history,
     ...(text === undefined ? {} : { text }),
@@ -971,7 +990,7 @@ function createRuntime(
       if (
         change === undefined
         || change.changeId.actorId !== actorId
-        || !materialized.history.appliedControlKeys.has(
+        || !materialized.history.appliedHistoryKeys.has(
           changeIdKey(change.changeId),
         )
       ) {
@@ -994,7 +1013,7 @@ function createRuntime(
     }
 
     return {
-      snapshot: Object.freeze({
+      status: Object.freeze({
         undoTarget,
         redoTarget,
         undoDepth,
@@ -1008,7 +1027,7 @@ function createRuntime(
   function prepareHistoryChange(
     direction: "undo" | "redo",
   ): PreparedHistoryResult {
-    if (evaluatingAcceptance) {
+    if (evaluatingValidation) {
       return failure(
         "acceptance_reentrancy",
         "acceptance callback cannot author history changes",
@@ -1029,8 +1048,8 @@ function createRuntime(
 
     const resolved = resolveHistoryState();
     const target = direction === "undo"
-      ? resolved.snapshot.undoTarget
-      : resolved.snapshot.redoTarget;
+      ? resolved.status.undoTarget
+      : resolved.status.redoTarget;
     if (target === null) {
       return failure(
         direction === "undo" ? "nothing_to_undo" : "nothing_to_redo",
@@ -1067,10 +1086,10 @@ function createRuntime(
     const nextMaterialized = materializeChanges(
       initialTree,
       nextGraph.ordered,
-      (candidate) => evaluateAcceptance(candidate),
+      (candidate) => evaluateValidation(candidate),
     );
     const controlKey = changeIdKey(changeId);
-    if (!nextMaterialized.history.appliedControlKeys.has(controlKey)) {
+    if (!nextMaterialized.history.appliedHistoryKeys.has(controlKey)) {
       const suppressed = nextMaterialized.suppressed.find((entry) => (
         changeIdKey(entry.changeId) === controlKey
       ));
@@ -1088,8 +1107,8 @@ function createRuntime(
         known: nextKnown,
         graph: nextGraph,
         materialized: nextMaterialized,
-        projectionChanged: !jsonEqual(
-          projection.value,
+        didChangeDocument: !jsonEqual(
+          documentStore.value,
           nextMaterialized.value,
         ),
       },
@@ -1098,7 +1117,7 @@ function createRuntime(
 
   function commitHistoryChange(
     direction: "undo" | "redo",
-  ): CollaborationHistoryResult {
+  ): HistoryResult {
     const prepared = prepareHistoryChange(direction);
     if (!prepared.ok) return prepared;
 
@@ -1109,33 +1128,34 @@ function createRuntime(
     graphRevision += 1;
 
     let documentChange: JSONAppliedChange | undefined;
-    if (prepared.value.projectionChanged) {
-      const publication = projection.commit([{
+    if (prepared.value.didChangeDocument) {
+      const documentCommit = documentStore.commit([{
         op: "replace",
         path: "",
         value: materialized.value,
       }]);
-      if (!publication.ok) {
+      if (!documentCommit.ok) {
         throw new Error(
-          `history projection publication failed: ${publication.reason ?? publication.code}`,
+          `history projection publication failed: ${documentCommit.reason ?? documentCommit.code}`,
         );
       }
-      documentChange = publication.change;
+      documentChange = documentCommit.change;
     }
-    enqueuePublication({
+    enqueueNotification({
       ...(documentChange === undefined ? {} : { documentChange }),
-      collaborationSnapshot: currentSnapshot(),
+      replicaStatus: currentReplicaStatus(),
     });
 
     return Object.freeze({
       ok: true,
       changeId: freezeChangeId(prepared.value.change.changeId),
       target: freezeChangeId(prepared.value.target),
-      projectionChanged: prepared.value.projectionChanged,
+      didChangeDocument: prepared.value.didChangeDocument,
+      projectionChanged: prepared.value.didChangeDocument,
     });
   }
 
-  function currentSnapshot(): CollaborationSnapshot {
+  function currentReplicaStatus(): ReplicaStatus {
     return Object.freeze({
       epoch,
       heads: graph.heads,
@@ -1145,21 +1165,21 @@ function createRuntime(
     });
   }
 
-  function enqueuePublication(event: PublicationEvent): void {
-    publicationQueue.push(event);
-    if (publishing) return;
+  function enqueueNotification(event: NotificationEvent): void {
+    notificationQueue.push(event);
+    if (notifying) return;
 
-    publishing = true;
+    notifying = true;
     try {
-      while (publicationQueue.length > 0) {
-        const next = publicationQueue.shift() as PublicationEvent;
+      while (notificationQueue.length > 0) {
+        const next = notificationQueue.shift() as NotificationEvent;
         if (next.documentChange !== undefined) {
           for (const listener of [...documentListeners]) {
             if (!documentListeners.has(listener)) continue;
             try {
               listener(next.documentChange);
             } catch {
-              // Publication follows a committed state change. A listener
+              // Notification follows a committed state change. A listener
               // failure cannot turn that write into an apparent failure or
               // prevent delivery to the remaining active listeners.
             }
@@ -1168,15 +1188,15 @@ function createRuntime(
         for (const listener of [...collaborationListeners]) {
           if (!collaborationListeners.has(listener)) continue;
           try {
-            listener(next.collaborationSnapshot);
+            listener(next.replicaStatus);
           } catch {
-            // Collaboration snapshots follow committed causal state and use
-            // the same failure-isolation rule as the document Projection.
+            // Replica status follows committed causal state and uses the same
+            // failure-isolation rule as JSON Document notifications.
           }
         }
       }
     } finally {
-      publishing = false;
+      notifying = false;
     }
   }
 }
@@ -1330,12 +1350,12 @@ function authorDependencies(
 }
 
 function prepareTextSelection(
-  input: CollaborationTextSelection | undefined,
+  input: TextSelection | undefined,
   value: string,
 ):
   | {
       readonly ok: true;
-      readonly value: CollaborationTextSelection | null;
+      readonly value: TextSelection | null;
     }
   | {
       readonly ok: false;
@@ -1424,7 +1444,7 @@ function scalarBoundaryIndex(value: string, offset: number): number | null {
 function resolvePlannedSelection(
   planned: TextPlanState,
   state: TextState | undefined,
-): CollaborationTextSelection | null {
+): TextSelection | null {
   if (
     planned.plan.selection === undefined
     || planned.anchorGap === null
@@ -1494,7 +1514,7 @@ function failure(
   });
 }
 
-const OK: JSONCapabilityResult = Object.freeze({ ok: true });
+const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
 const ACCEPTANCE_REENTRANCY_FAILURE = failure(
   "acceptance_reentrancy",
   "acceptance callback cannot call canPatch or commit",

@@ -4,7 +4,7 @@ import {
 } from "../json/index.js";
 import type { JSONPatchOperation as AppliedPatchOperation } from "../patch/contract.js";
 import {
-  applyAcceptedPatch,
+  applyValidatedPatch,
   applyTrustedPatch,
 } from "../patch/trusted.js";
 import type {
@@ -82,17 +82,17 @@ export function applyOwnedProtocolPatch(
     });
   }
 
-  // Canonical operations own their payloads. Replaying only these accepted
-  // operations prevents caller-owned values from entering Projection state.
+  // Canonical operations own their payloads. Replaying only these validated
+  // operations prevents caller-owned values from entering JSON Document state.
   const applied = prepared.applied.map(ownAppliedOperation);
   Object.freeze(applied);
-  const accepted = applyAcceptedPatch(
+  const validated = applyValidatedPatch(
     value,
     applied as ReadonlyArray<AppliedPatchOperation>,
   );
-  const ownedValue = accepted.result.ok
-    ? freezeJSON(accepted.state as JSONValue)
-    // The accepted replay should be equivalent by construction. Keep a safe
+  const ownedValue = validated.result.ok
+    ? freezeJSON(validated.state as JSONValue)
+    // The validated replay should be equivalent by construction. Keep a safe
     // isolation fallback if an internal optimization ever disagrees.
     : ownJSON(prepared.state as JSONValue);
   const change: JSONAppliedChange = Object.freeze({ applied });

@@ -1,5 +1,5 @@
 export {
-  createProjection,
+  createJSONDocumentState,
 } from "./create.js";
 
 export {

@@ -20,19 +20,30 @@ const EXPECTED_TYPES = [
   "JSONCapabilityResult",
   "JSONChangeMetadata",
   "JSONDocument",
+  "JSONDocumentOptions",
   "JSONDocumentCommitOptions",
   "JSONDocumentCommitResult",
   "JSONPatchOperation",
   "JSONPatchResult",
+  "JSONPatchValidationResult",
   "JSONValue",
   "Pointer",
   "QueryResult",
   "ReadResult",
 ];
-const EXPECTED_MEMBERS = [
+const V2_COMPATIBILITY_MEMBERS = [
   "value",
   "at",
   "query",
+  "canPatch",
+  "commit",
+  "subscribe",
+];
+const CURRENT_DOCUMENT_MEMBERS = [
+  "value",
+  "at",
+  "query",
+  "validatePatch",
   "canPatch",
   "commit",
   "subscribe",
@@ -198,14 +209,18 @@ if (manifest.formatVersion !== 1 || manifest.status !== "stable") {
 if (manifest.sourceContract !== "packages/json-document/public-contract.json#root") {
   fail("v2 manifest: sourceContract must point to the root public contract.");
 }
-equal("v2 manifest projection members", manifest.projectionMembers, EXPECTED_MEMBERS);
+equal(
+  "v2 manifest projection members",
+  manifest.projectionMembers,
+  V2_COMPATIBILITY_MEMBERS,
+);
 equal("v2 manifest conformance paths", manifest.conformance, EXPECTED_CONFORMANCE);
 equal("v2 manifest binding values", manifest.binding?.values, EXPECTED_VALUES);
 equal("v2 manifest binding types", manifest.binding?.types, EXPECTED_TYPES);
 equal("v2 manifest counts", manifest.counts, {
   values: 8,
-  types: 12,
-  exports: 20,
+  types: 14,
+  exports: 22,
   projectionMembers: 6,
 });
 equal("v2 package identity", {
@@ -235,7 +250,7 @@ equal("root source types", sourceExports.types, [...EXPECTED_TYPES].sort());
 equal(
   "JSONDocument members",
   interfaceMembers(contractSource, "JSONDocument"),
-  EXPECTED_MEMBERS,
+  CURRENT_DOCUMENT_MEMBERS,
 );
 
 equal("package entrypoints", Object.keys(packageManifest.exports ?? {}), ["."]);
@@ -286,7 +301,7 @@ for (const word of ["MUST", "SHOULD", "MAY"]) {
 }
 for (const pattern of [
   /Pure Protocol -> Projection -> host adapter/,
-  /root entrypoint 하나와 20개 Kernel symbol/,
+  /root entrypoint 하나와 22개 symbol/,
   /runtime dependency와 peer dependency가 없다/,
   /archived 1\.x implementation은 production build와 tarball에\s*포함하지 않는다/,
 ]) {
@@ -296,7 +311,7 @@ for (const pattern of [
 requirePattern(
   "v2 signature exact document",
   signatureSource,
-  /"value" \| "at" \| "query" \| "canPatch" \| "commit" \| "subscribe"/,
+  /"value" \| "at" \| "query" \| "validatePatch" \| "canPatch" \| "commit" \| "subscribe"/,
 );
 requirePattern(
   "v2 signature JSON boundary",
@@ -356,7 +371,11 @@ for (const [label, vectors] of [
     fail(`${label} vectors: metadata drifted.`);
   }
 }
-equal("projection vector members", projectionVectors.projectionMembers, EXPECTED_MEMBERS);
+equal(
+  "projection vector members",
+  projectionVectors.projectionMembers,
+  V2_COMPATIBILITY_MEMBERS,
+);
 if (protocolVectors.function !== "applyPatch") {
   fail("protocol vectors: function must be applyPatch.");
 }
@@ -670,6 +689,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    "json-document v2 standardization ok: 1 entrypoint, 20 exports, 6 document members, 0 runtime peers",
+    "json-document standardization ok: 1 entrypoint, 22 current exports, 6 v2 compatibility members, 0 runtime peers",
   );
 }

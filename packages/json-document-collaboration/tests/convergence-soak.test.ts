@@ -2,11 +2,11 @@ import { describe, expect, test } from "vitest";
 
 import {
   compactCollaborationCheckpoint,
-  createCollaborationHistoryRuntime,
-  restoreCollaborationHistoryRuntime,
+  createHistoryRuntime,
+  restoreHistoryRuntime,
   type CollaborationBundle,
   type CollaborationChange,
-  type CollaborationHistoryRuntime,
+  type HistoryRuntime,
   type CollaborationRulesetIdentity,
 } from "../src/history-index.js";
 import {
@@ -44,8 +44,8 @@ function runCase(seed: number): void {
     digest: "test/task-board-soak/v1",
   };
   const epochId = `task-board-soak/${seed}/v1`;
-  const runtimes: CollaborationHistoryRuntime[] = actorIds.map((actorId) => (
-    createCollaborationHistoryRuntime(taskBoardInitialValue(), {
+  const runtimes: HistoryRuntime[] = actorIds.map((actorId) => (
+    createHistoryRuntime(taskBoardInitialValue(), {
       actorId,
       epochId,
       ruleset,
@@ -58,7 +58,7 @@ function runCase(seed: number): void {
   for (let step = 0; step < stepCount; step += 1) {
     const actorIndex = integer(random, runtimes.length);
     authorRandomCommand(
-      runtimes[actorIndex] as CollaborationHistoryRuntime,
+      runtimes[actorIndex] as HistoryRuntime,
       hosts[actorIndex] as TaskBoardHost,
       actorIds[actorIndex] as string,
       step,
@@ -73,11 +73,11 @@ function runCase(seed: number): void {
   converge(runtimes, random, seed, "before-restore");
   assertConverged(runtimes, seed, "before-restore");
 
-  const crashCheckpoint = runtimes[0]?.collaboration.exportCheckpoint();
+  const crashCheckpoint = runtimes[0]?.replica.exportCheckpoint();
   if (crashCheckpoint === undefined) {
     throw new Error(`seed ${seed}: missing crash checkpoint`);
   }
-  const restored = restoreCollaborationHistoryRuntime(crashCheckpoint, {
+  const restored = restoreHistoryRuntime(crashCheckpoint, {
     actorId: actorIds[0],
     ruleset,
   });
@@ -98,7 +98,7 @@ function runCase(seed: number): void {
   assertConverged(runtimes, seed, "after-restore");
 
   const checkpoints = runtimes.map(
-    (runtime) => runtime.collaboration.exportCheckpoint(),
+    (runtime) => runtime.replica.exportCheckpoint(),
   );
   for (const checkpoint of checkpoints.slice(1)) {
     expect(
@@ -112,7 +112,7 @@ function runCase(seed: number): void {
     if (checkpoint === undefined) {
       throw new Error(`seed ${seed}: checkpoint ${index} is missing`);
     }
-    const roundTrip = restoreCollaborationHistoryRuntime(checkpoint, {
+    const roundTrip = restoreHistoryRuntime(checkpoint, {
       actorId: actorIds[index] as string,
       ruleset,
     });
@@ -124,16 +124,16 @@ function runCase(seed: number): void {
     }
     expect(
       roundTrip.runtime.document.value,
-      `seed ${seed}: checkpoint projection ${index}`,
+      `seed ${seed}: checkpoint document ${index}`,
     ).toEqual(runtimes[0]?.document.value);
     expect(
-      roundTrip.runtime.collaboration.current(),
+      roundTrip.runtime.replica.status(),
       `seed ${seed}: checkpoint causal snapshot ${index}`,
-    ).toEqual(runtimes[0]?.collaboration.current());
+    ).toEqual(runtimes[0]?.replica.status());
     expect(
       stableHistory(roundTrip.runtime),
       `seed ${seed}: checkpoint history ${index}`,
-    ).toEqual(stableHistory(runtimes[index] as CollaborationHistoryRuntime));
+    ).toEqual(stableHistory(runtimes[index] as HistoryRuntime));
   }
 
   const checkpoint = checkpoints[0];
@@ -158,7 +158,7 @@ function runCase(seed: number): void {
   expect(compacted.report.discardedChanges).toBeGreaterThan(0);
   expect(compacted.checkpoint.payload.changes).toEqual([]);
 
-  const compactedRestore = restoreCollaborationHistoryRuntime(
+  const compactedRestore = restoreHistoryRuntime(
     compacted.checkpoint,
     {
       actorId: "post-compaction",
@@ -173,13 +173,13 @@ function runCase(seed: number): void {
   }
   expect(
     compactedRestore.runtime.document.value,
-    `seed ${seed}: compacted projection`,
+    `seed ${seed}: compacted document`,
   ).toEqual(runtimes[0]?.document.value);
-  expect(compactedRestore.runtime.collaboration.current().pending).toEqual([]);
+  expect(compactedRestore.runtime.replica.status().pending).toEqual([]);
 }
 
 function authorRandomCommand(
-  runtime: CollaborationHistoryRuntime,
+  runtime: HistoryRuntime,
   host: TaskBoardHost,
   actorId: string,
   step: number,
@@ -265,7 +265,7 @@ function authorRandomCommand(
 }
 
 function deliverRandomSubset(
-  runtimes: ReadonlyArray<CollaborationHistoryRuntime>,
+  runtimes: ReadonlyArray<HistoryRuntime>,
   random: () => number,
   seed: number,
   step: number,
@@ -274,9 +274,9 @@ function deliverRandomSubset(
   const targetIndex = (
     sourceIndex + 1 + integer(random, runtimes.length - 1)
   ) % runtimes.length;
-  const source = runtimes[sourceIndex] as CollaborationHistoryRuntime;
-  const target = runtimes[targetIndex] as CollaborationHistoryRuntime;
-  const exported = source.collaboration.exportBundle();
+  const source = runtimes[sourceIndex] as HistoryRuntime;
+  const target = runtimes[targetIndex] as HistoryRuntime;
+  const exported = source.replica.exportBundle();
   if (exported.changes.length === 0) return;
 
   let selected = exported.changes.filter(() => random() < 0.45);
@@ -292,13 +292,13 @@ function deliverRandomSubset(
     changes: shuffle(selected, random),
   };
   requireIngest(
-    target.collaboration.ingest(bundle),
+    target.replica.ingest(bundle),
     seed,
     `step ${step}: ${sourceIndex}->${targetIndex}`,
   );
   if (random() < 0.25) {
     requireIngest(
-      target.collaboration.ingest(bundle),
+      target.replica.ingest(bundle),
       seed,
       `step ${step}: duplicate ${sourceIndex}->${targetIndex}`,
     );
@@ -306,16 +306,16 @@ function deliverRandomSubset(
 }
 
 function converge(
-  runtimes: ReadonlyArray<CollaborationHistoryRuntime>,
+  runtimes: ReadonlyArray<HistoryRuntime>,
   random: () => number,
   seed: number,
   phase: string,
 ): void {
   const union = unionChanges(runtimes, seed);
   for (let index = 0; index < runtimes.length; index += 1) {
-    const runtime = runtimes[index] as CollaborationHistoryRuntime;
-    const result = runtime.collaboration.ingest({
-      epoch: runtime.collaboration.epoch,
+    const runtime = runtimes[index] as HistoryRuntime;
+    const result = runtime.replica.ingest({
+      epoch: runtime.replica.epoch,
       changes: shuffle(union, random),
     });
     requireIngest(result, seed, `${phase}: converge replica ${index}`);
@@ -328,12 +328,12 @@ function converge(
 }
 
 function unionChanges(
-  runtimes: ReadonlyArray<CollaborationHistoryRuntime>,
+  runtimes: ReadonlyArray<HistoryRuntime>,
   seed: number,
 ): ReadonlyArray<CollaborationChange> {
   const changes = new Map<string, CollaborationChange>();
   for (const runtime of runtimes) {
-    for (const change of runtime.collaboration.exportBundle().changes) {
+    for (const change of runtime.replica.exportBundle().changes) {
       const key = `${change.changeId.actorId}:${change.changeId.counter}`;
       const existing = changes.get(key);
       if (
@@ -349,7 +349,7 @@ function unionChanges(
 }
 
 function assertConverged(
-  runtimes: ReadonlyArray<CollaborationHistoryRuntime>,
+  runtimes: ReadonlyArray<HistoryRuntime>,
   seed: number,
   phase: string,
 ): void {
@@ -358,25 +358,25 @@ function assertConverged(
     throw new Error(`seed ${seed}: no replicas`);
   }
   for (let index = 1; index < runtimes.length; index += 1) {
-    const runtime = runtimes[index] as CollaborationHistoryRuntime;
+    const runtime = runtimes[index] as HistoryRuntime;
     expect(
       runtime.document.value,
-      `seed ${seed}: ${phase}: projection ${index}`,
+      `seed ${seed}: ${phase}: document ${index}`,
     ).toEqual(expected.document.value);
     expect(
-      runtime.collaboration.current(),
+      runtime.replica.status(),
       `seed ${seed}: ${phase}: causal snapshot ${index}`,
-    ).toEqual(expected.collaboration.current());
+    ).toEqual(expected.replica.status());
   }
 }
 
-function stableHistory(runtime: CollaborationHistoryRuntime): {
+function stableHistory(runtime: HistoryRuntime): {
   readonly undoTarget: unknown;
   readonly redoTarget: unknown;
   readonly undoDepth: number;
   readonly redoDepth: number;
 } {
-  const history = runtime.history.current();
+  const history = runtime.history.status();
   return {
     undoTarget: history.undoTarget,
     redoTarget: history.redoTarget,

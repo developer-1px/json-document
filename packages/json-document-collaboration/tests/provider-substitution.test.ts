@@ -50,16 +50,16 @@ describe("provider-neutral task-board host", () => {
     expect(left.moveCard("base", "doing")).toMatchObject({ ok: true });
     expect(right.updateCardText("base", "Edited on the other replica"))
       .toMatchObject({ ok: true });
-    const leftBundle = leftRuntime.collaboration.exportBundle();
-    const rightBundle = rightRuntime.collaboration.exportBundle();
-    expect(leftRuntime.collaboration.ingest(rightBundle))
+    const leftBundle = leftRuntime.replica.exportBundle();
+    const rightBundle = rightRuntime.replica.exportBundle();
+    expect(leftRuntime.replica.ingest(rightBundle))
       .toMatchObject({ ok: true, pending: [] });
-    expect(rightRuntime.collaboration.ingest(leftBundle))
+    expect(rightRuntime.replica.ingest(leftBundle))
       .toMatchObject({ ok: true, pending: [] });
 
     expect(rightRuntime.document.value).toEqual(leftRuntime.document.value);
-    expect(rightRuntime.collaboration.current()).toEqual(
-      leftRuntime.collaboration.current(),
+    expect(rightRuntime.replica.status()).toEqual(
+      leftRuntime.replica.status(),
     );
     expect(left.card("base")).toEqual({
       id: "base",

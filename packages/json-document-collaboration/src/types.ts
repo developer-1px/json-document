@@ -3,6 +3,7 @@ import type {
   JSONCapabilityResult,
   JSONDocument,
   JSONDocumentCommitOptions,
+  JSONPatchValidationResult,
   JSONValue,
 } from "@interactive-os/json-document";
 
@@ -178,13 +179,16 @@ export interface PendingChange {
   readonly missing: ReadonlyArray<ChangeId>;
 }
 
-export interface CollaborationSnapshot {
+export interface ReplicaStatus {
   readonly epoch: CollaborationEpoch;
   readonly heads: ReadonlyArray<ChangeId>;
   readonly pending: ReadonlyArray<PendingChange>;
   readonly conflicts: ReadonlyArray<CollaborationConflict>;
   readonly suppressed: ReadonlyArray<SuppressedChange>;
 }
+
+/** @deprecated Use ReplicaStatus. */
+export type CollaborationSnapshot = ReplicaStatus;
 
 export interface CollaborationIngestSuccess {
   readonly ok: true;
@@ -214,16 +218,21 @@ export type CollaborationIngestResult =
   | CollaborationIngestSuccess
   | CollaborationIngestFailure;
 
-export interface CollaborationControl {
+export interface CollaborationReplica {
   readonly epoch: CollaborationEpoch;
-  current(): CollaborationSnapshot;
+  status(): ReplicaStatus;
+  /** @deprecated Use status. */
+  current(): ReplicaStatus;
   exportBundle(): CollaborationBundle;
   exportCheckpoint(): CollaborationCheckpoint;
   ingest(bundle: unknown): CollaborationIngestResult;
-  subscribe(listener: (snapshot: CollaborationSnapshot) => void): () => void;
+  subscribe(listener: (status: ReplicaStatus) => void): () => void;
 }
 
-export interface CollaborationHistorySnapshot {
+/** @deprecated Use CollaborationReplica. */
+export type CollaborationControl = CollaborationReplica;
+
+export interface HistoryStatus {
   readonly undoTarget: ChangeId | null;
   readonly redoTarget: ChangeId | null;
   readonly undoDepth: number;
@@ -231,11 +240,16 @@ export interface CollaborationHistorySnapshot {
   readonly revision: number;
 }
 
-export type CollaborationHistoryResult =
+/** @deprecated Use HistoryStatus. */
+export type CollaborationHistorySnapshot = HistoryStatus;
+
+export type HistoryResult =
   | {
       readonly ok: true;
       readonly changeId: ChangeId;
       readonly target: ChangeId;
+      readonly didChangeDocument: boolean;
+      /** @deprecated Use didChangeDocument. */
       readonly projectionChanged: boolean;
     }
   | {
@@ -244,50 +258,75 @@ export type CollaborationHistoryResult =
       readonly reason?: string;
     };
 
-export interface CollaborationHistoryControl {
-  current(): CollaborationHistorySnapshot;
-  canUndo(): JSONCapabilityResult;
-  undo(): CollaborationHistoryResult;
-  canRedo(): JSONCapabilityResult;
-  redo(): CollaborationHistoryResult;
+/** @deprecated Use HistoryResult. */
+export type CollaborationHistoryResult = HistoryResult;
+
+export interface History {
+  status(): HistoryStatus;
+  /** @deprecated Use status. */
+  current(): HistoryStatus;
+  canUndo(): JSONPatchValidationResult;
+  undo(): HistoryResult;
+  canRedo(): JSONPatchValidationResult;
+  redo(): HistoryResult;
 }
+
+/** @deprecated Use History. */
+export type CollaborationHistoryControl = History;
 
 export interface CollaborationRuntime {
   readonly document: JSONDocument;
-  readonly collaboration: CollaborationControl;
+  readonly replica: CollaborationReplica;
+  /** @deprecated Use replica. */
+  readonly collaboration: CollaborationReplica;
 }
 
-export interface CollaborationHistoryRuntime extends CollaborationRuntime {
-  readonly history: CollaborationHistoryControl;
+export interface HistoryRuntime extends CollaborationRuntime {
+  readonly history: History;
 }
 
-export interface CollaborationTextSelection {
+/** @deprecated Import HistoryRuntime from the /history subpath. */
+export type CollaborationHistoryRuntime = HistoryRuntime;
+
+export interface TextSelection {
   readonly anchor: number;
   readonly focus: number;
 }
 
-export interface CollaborationTextObservation {
+/** @deprecated Use TextSelection from the /text subpath. */
+export type CollaborationTextSelection = TextSelection;
+
+export interface TextObservation {
   readonly value: string;
-  readonly selection?: CollaborationTextSelection;
+  readonly selection?: TextSelection;
 }
 
-export interface CollaborationTextCapture {
+/** @deprecated Use TextObservation from the /text subpath. */
+export type CollaborationTextObservation = TextObservation;
+
+export interface TextCapture {
   readonly pointer: string;
   readonly target: MemberId;
   readonly textNode: TextNodeId;
   readonly value: string;
 }
 
-export interface CollaborationTextPlan {
+/** @deprecated Use TextCapture from the /text subpath. */
+export type CollaborationTextCapture = TextCapture;
+
+export interface TextPlan {
   readonly pointer: string;
   readonly value: string;
-  readonly selection?: CollaborationTextSelection;
+  readonly selection?: TextSelection;
 }
 
-export type CollaborationTextCaptureResult =
+/** @deprecated Use TextPlan from the /text subpath. */
+export type CollaborationTextPlan = TextPlan;
+
+export type TextCaptureResult =
   | {
       readonly ok: true;
-      readonly capture: CollaborationTextCapture;
+      readonly capture: TextCapture;
     }
   | {
       readonly ok: false;
@@ -295,10 +334,13 @@ export type CollaborationTextCaptureResult =
       readonly reason: string;
     };
 
-export type CollaborationTextPlanResult =
+/** @deprecated Use TextCaptureResult from the /text subpath. */
+export type CollaborationTextCaptureResult = TextCaptureResult;
+
+export type TextPlanResult =
   | {
       readonly ok: true;
-      readonly plan: CollaborationTextPlan;
+      readonly plan: TextPlan;
     }
   | {
       readonly ok: false;
@@ -306,14 +348,19 @@ export type CollaborationTextPlanResult =
       readonly reason: string;
     };
 
-export type CollaborationTextCommitResult =
+/** @deprecated Use TextPlanResult from the /text subpath. */
+export type CollaborationTextPlanResult = TextPlanResult;
+
+export type TextCommitResult =
   | {
       readonly ok: true;
       readonly change: JSONAppliedChange;
       readonly changeId: ChangeId | null;
+      readonly didChangeDocument: boolean;
+      /** @deprecated Use didChangeDocument. */
       readonly projectionChanged: boolean;
       readonly value: string;
-      readonly selection: CollaborationTextSelection | null;
+      readonly selection: TextSelection | null;
     }
   | {
       readonly ok: false;
@@ -321,45 +368,61 @@ export type CollaborationTextCommitResult =
       readonly reason: string;
     };
 
-export interface CollaborationTextControl {
-  capture(pointer: string): CollaborationTextCaptureResult;
+/** @deprecated Use TextCommitResult from the /text subpath. */
+export type CollaborationTextCommitResult = TextCommitResult;
+
+export interface Text {
+  capture(pointer: string): TextCaptureResult;
   plan(
-    capture: CollaborationTextCapture,
-    observation: CollaborationTextObservation,
-  ): CollaborationTextPlanResult;
+    capture: TextCapture,
+    observation: TextObservation,
+  ): TextPlanResult;
   commit(
-    plan: CollaborationTextPlan,
+    plan: TextPlan,
     options?: JSONDocumentCommitOptions,
-  ): CollaborationTextCommitResult;
+  ): TextCommitResult;
 }
 
-export interface CollaborationTextRuntime extends CollaborationHistoryRuntime {
-  readonly text: CollaborationTextControl;
+/** @deprecated Use Text from the /text subpath. */
+export type CollaborationTextControl = Text;
+
+export interface TextRuntime extends HistoryRuntime {
+  readonly text: Text;
 }
+
+/** @deprecated Use TextRuntime from the /text subpath. */
+export type CollaborationTextRuntime = TextRuntime;
 
 /**
- * A convergence-critical acceptance rule.
+ * A convergence-critical validation rule.
  *
  * It must be synchronous, total, side-effect-free, and referentially
  * transparent. Every replica and every invocation must return the same
  * complete result, including code, reason, and pointer, for the same JSON
  * candidate.
  */
-export type CollaborationAcceptance = (
+export type CollaborationValidation = (
   candidate: JSONValue,
-) => JSONCapabilityResult;
+) => JSONPatchValidationResult;
+
+/** @deprecated Use CollaborationValidation. */
+export type CollaborationAcceptance = CollaborationValidation;
 
 export interface CollaborationRuntimeOptions {
   readonly actorId: ActorId;
   readonly epochId: string;
   readonly ruleset: CollaborationRulesetIdentity;
   readonly membership?: CollaborationMembership;
+  readonly validate?: CollaborationValidation;
+  /** @deprecated Use validate. */
   readonly accepts?: CollaborationAcceptance;
 }
 
 export interface CollaborationRestoreOptions {
   readonly actorId: ActorId;
   readonly ruleset: CollaborationRulesetIdentity;
+  readonly validate?: CollaborationValidation;
+  /** @deprecated Use validate. */
   readonly accepts?: CollaborationAcceptance;
   readonly verify?: (
     checkpoint: CollaborationCheckpoint,
@@ -377,10 +440,10 @@ export type CollaborationRestoreResult =
       readonly reason: string;
     };
 
-export type CollaborationHistoryRestoreResult =
+export type HistoryRestoreResult =
   | {
       readonly ok: true;
-      readonly runtime: CollaborationHistoryRuntime;
+      readonly runtime: HistoryRuntime;
     }
   | {
       readonly ok: false;
@@ -388,16 +451,22 @@ export type CollaborationHistoryRestoreResult =
       readonly reason: string;
     };
 
-export type CollaborationTextRestoreResult =
+/** @deprecated Use HistoryRestoreResult from the /history subpath. */
+export type CollaborationHistoryRestoreResult = HistoryRestoreResult;
+
+export type TextRestoreResult =
   | {
       readonly ok: true;
-      readonly runtime: CollaborationTextRuntime;
+      readonly runtime: TextRuntime;
     }
   | {
       readonly ok: false;
       readonly code: string;
       readonly reason: string;
     };
+
+/** @deprecated Use TextRestoreResult from the /text subpath. */
+export type CollaborationTextRestoreResult = TextRestoreResult;
 
 export interface CollaborationCompactionOptions {
   readonly mode: "new-epoch";
@@ -407,7 +476,11 @@ export interface CollaborationCompactionOptions {
    * Omit to preserve the checkpoint membership. Use null to open membership.
    */
   readonly nextMembership?: CollaborationMembership | null;
+  readonly validate?: CollaborationValidation;
+  /** @deprecated Use validate. */
   readonly accepts?: CollaborationAcceptance;
+  readonly nextValidate?: CollaborationValidation;
+  /** @deprecated Use nextValidate. */
   readonly nextAccepts?: CollaborationAcceptance;
   readonly verify?: (
     checkpoint: CollaborationCheckpoint,
@@ -418,6 +491,8 @@ export interface CollaborationCompactionReport {
   readonly discardedChanges: number;
   readonly discardedConflicts: number;
   readonly discardedSuppressed: number;
+  readonly discardedHistoryChanges: number;
+  /** @deprecated Use discardedHistoryChanges. */
   readonly discardedHistoryControls: number;
 }
 

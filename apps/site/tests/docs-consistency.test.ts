@@ -203,17 +203,26 @@ describe("public docs consistency", () => {
       "JSONCapabilityResult",
       "JSONChangeMetadata",
       "JSONDocument",
+      "JSONDocumentOptions",
       "JSONDocumentCommitOptions",
       "JSONDocumentCommitResult",
       "JSONPatchOperation",
       "JSONPatchResult",
+      "JSONPatchValidationResult",
       "JSONValue",
       "Pointer",
       "QueryResult",
       "ReadResult",
     ]);
 
-    for (const member of ["value", "at", "query", "canPatch", "commit", "subscribe"]) {
+    for (const member of [
+      "value",
+      "at",
+      "query",
+      "validatePatch",
+      "commit",
+      "subscribe",
+    ]) {
       expect(docs.api).toContain(member);
     }
     expect(docs.api).toMatch(/applyPatch[\s\S]*RFC 6902/);

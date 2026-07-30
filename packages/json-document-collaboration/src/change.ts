@@ -39,7 +39,9 @@ export function createEpoch(
       id: options.ruleset.id,
       digest: options.ruleset.digest,
     }),
-    acceptance: options.accepts === undefined ? "none" : "custom",
+    acceptance: (options.validate ?? options.accepts) === undefined
+      ? "none"
+      : "custom",
     baseDigest: fingerprintJSON(initial),
     membershipDigest: fingerprintJSON(
       membership as unknown as JSONValue,
