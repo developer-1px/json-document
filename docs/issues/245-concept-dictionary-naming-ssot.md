@@ -46,6 +46,72 @@ application—not classification alone—is the intended outcome.
   compatibility aliases and a documented migration path rather than silently
   removing their identifiers.
 
+## Contract delta — canonical-only breaking public surface
+
+Authorized by the user on 2026-07-30: “싹 고치자 npm에 배포하긴 했지만 나 말고
+쓰는 사람도 없고 이게 이후 만들 editable과 canvas와 ppt sheet등의 모든 베이스가
+되는 라이브러리라서.”
+
+Reason: preserving deprecated aliases kept the duplicate concepts that this work
+was intended to remove. The user explicitly accepted a breaking public rename so
+future editor, canvas, presentation, and sheet systems can start from one
+canonical vocabulary.
+
+### Before
+
+- Canonical names are primary.
+- Previously published names remain as deprecated compatibility aliases.
+- Stable v2 public API names are preserved.
+
+### After
+
+- Canonical names are the only public and internal code vocabulary.
+- Deprecated public type, function, member, property, and option aliases are
+  removed.
+- Compatibility-only tests and manifests are replaced with canonical-surface
+  assertions.
+- Historical issue records and necessary version-history prose may retain old
+  spellings only as migration evidence.
+
+### Invariants
+
+- Runtime algorithms and state transitions do not change.
+- Protocol meaning, serialized wire fields, error codes, and package boundaries
+  do not change.
+- Existing wire labels such as `acceptance`, `deps`, and `ops` remain versioned
+  protocol terms.
+- npm publication and merge require separate authorization.
+
+## Contract delta — canonical-only v3 version boundary
+
+Authorized by the same user direction to remove the published v2 aliases as the
+foundation for future packages.
+
+Reason: removing stable v2 public identifiers is a breaking API change. Calling
+the resulting surface v2 would violate SemVer and make the versioned profile
+ambiguous.
+
+### Before
+
+- Core and its active profile are versioned as v2.
+- Companion peer ranges accept Core v2.
+
+### After
+
+- Core source release version and active profile are `3.0.0` and v3/JD3.
+- Collaboration and contenteditable companion source releases are
+  `0.2.0-rc.1` and require Core `^3.0.0`.
+- Active manifests, conformance suites, fixtures, and requirement IDs use the
+  same v3 boundary.
+- Package publication remains out of scope; these versions are release
+  preparation metadata until their tags are explicitly published.
+
+### Invariants
+
+- The collaboration wire protocol version does not change.
+- Runtime behavior, protocol meaning, serialized fields, error codes, package
+  boundaries, and `archive/v1` do not change.
+
 ## Why
 
 The repository currently has a sound implementation model, but its vocabulary is

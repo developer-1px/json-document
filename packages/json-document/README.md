@@ -15,16 +15,18 @@ Canonical concept와 stable v3 identifier의 관계는
 [Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
 정의합니다.
 
-현재 버전은 `3.0.0`입니다. reference와 독립 구현이 같은 conformance suite를
+v3 표준 상태는 Stable입니다. 현재 source release version은 `3.0.0`이며 npm에는
+아직 배포되지 않았습니다. reference와 독립 구현이 같은 conformance suite를
 통과했고, form·table/data-grid·outliner/tree·rich text·storage/collaboration
-pressure gate까지 검증한 Stable profile입니다.
+pressure gate까지 검증했습니다.
 
 - 공식 사이트: https://developer-1px.github.io/json-document/
 - 표준 profile: `docs/standard/v3-json-document-profile.md`
 
 ## 설치
 
-Core만 쓸 때 필수 dependency가 없습니다.
+Core만 쓸 때 필수 dependency가 없습니다. `3.0.0`이 npm에 배포된 뒤 다음
+명령을 사용합니다.
 
 ```sh
 npm install @interactive-os/json-document@3.0.0

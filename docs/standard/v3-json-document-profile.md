@@ -1,7 +1,8 @@
 # json-document v3 JSON Document Profile
 
-상태: Stable candidate (`3.0.0`). TypeScript root binding, reference implementation,
-독립 test implementation, 다섯 pressure vertical이 stable gate를 통과했다.
+표준 상태: Stable. TypeScript root binding, reference implementation, 독립 test
+implementation, 다섯 pressure vertical이 stable gate를 통과했다. 대응하는 package
+source release는 `3.0.0`이며 npm publication 전까지 release-prepared 상태다.
 
 이 profile은 JSON Document, stateless JSON Patch, validation과 change
 notification이라는 canonical vocabulary만 사용한다. Repository 전체의 concept와

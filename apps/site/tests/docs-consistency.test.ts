@@ -127,7 +127,9 @@ describe("public docs consistency", () => {
     expect(docs.api).toMatch(/ReadResult/);
     expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@3\.0\.0/);
     expect(docs.readme).toMatch(/implementation-neutral/);
-    expect(docs.llms).toMatch(/3\.0\.0.*Stable/);
+    expect(docs.llms).toMatch(/v3 표준 상태는 Stable/);
+    expect(docs.llms).toMatch(/source release version은 `3\.0\.0`/);
+    expect(docs.llms).toMatch(/npm에는\s+아직 publication되지 않았다/);
   });
 
   test("locks one canonical concept and naming standard", () => {

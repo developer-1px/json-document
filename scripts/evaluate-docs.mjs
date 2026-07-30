@@ -47,6 +47,9 @@ const publicDocs = {
 };
 const docsReadme = read("docs/README.md");
 const namingStandard = read("docs/standard/concept-and-naming-standard.md");
+const namingIssueRaw = read(
+  "docs/issues/245-concept-dictionary-naming-ssot.md",
+);
 const surfaces = {
   rootReadme: read("README.md"),
   docsReadme,
@@ -90,6 +93,15 @@ const namingImplementation = {
     "packages/contenteditable-collaboration/src/index.ts",
   ),
 };
+
+for (const pattern of [
+  /Contract delta — canonical-only breaking public surface/,
+  /Canonical names are the only public and internal code vocabulary/,
+  /Contract delta — canonical-only v3 version boundary/,
+  /Package publication remains out of scope/,
+]) {
+  requirePattern("naming issue raw", namingIssueRaw, pattern);
+}
 
 const expectedPublicValues = [
   "appendSegment",
@@ -270,7 +282,9 @@ const required = [
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe native-input DOM lease/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /Concept and Naming Standard/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
-  ["llms", surfaces.llms, /3\.0\.0.*Stable/],
+  ["llms", surfaces.llms, /v3 표준 상태는 Stable/],
+  ["llms", surfaces.llms, /source release version은 `3\.0\.0`/],
+  ["llms", surfaces.llms, /npm에는\s+아직 publication되지 않았다/],
   ["llms", surfaces.llms, /공개 Root는 정확히 다음 21개 symbol/],
   ["llms", surfaces.llms, /## Host adapter와 companion/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-collaboration/],
@@ -537,7 +551,7 @@ for (const pattern of [
 for (const pattern of [
   /Implementation-neutral JSON editing/,
   /six-member JSON Document/,
-  /npm install @interactive-os\/json-document@3\.0\.0/,
+  /3\.0\.0 · npm publication pending/,
   /Rich editing belongs to host adapters/,
 ]) {
   requirePattern("site home", siteHome, pattern);
