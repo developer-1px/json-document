@@ -1,21 +1,21 @@
 # json-document
 
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
-provider-neutral JSON 편집 protocol과 headless document projection입니다.
+implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
 v2 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 하며 Zod, React,
 selection, clipboard, history를 필수 계약에 넣지 않습니다.
 
 ```txt
-Pure Protocol
-  |-> local provider -----------\
-  |                              > same six-member Document Projection
-  `-> collaboration provider --/    |-> optional history/text authoring
-                                    `-> optional DOM/IME lease
+stateless JSON Patch
+  |-> local implementation -----\
+  |                               > same six-member JSON Document
+  `-> collaboration engine -----/    |-> optional history/text authoring
+                                     `-> optional native-input DOM lease
 ```
 
 로컬 전용 사용자는 Core만 설치합니다. 협업으로 전환해도 편집기가 받는
-`JSONDocument` 포트는 바뀌지 않고, causal merge와 DOM publication lease만
+`JSONDocument` 포트는 바뀌지 않고, causal merge와 native-input DOM lease만
 독립 package로 추가합니다.
 
 공식 사이트: https://developer-1px.github.io/json-document/
@@ -29,7 +29,8 @@ Pure Protocol
 | 공개 API | [docs/public/api.md](docs/public/api.md) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
-| v2 Projection 표준 | [docs/standard/v2-projection-profile.md](docs/standard/v2-projection-profile.md) |
+| 개념·이름 정본 | [docs/standard/concept-and-naming-standard.md](docs/standard/concept-and-naming-standard.md) |
+| v2 compatibility profile | [docs/standard/v2-projection-profile.md](docs/standard/v2-projection-profile.md) |
 | v2 공개 표면 manifest | [docs/standard/v2-public-surface.json](docs/standard/v2-public-surface.json) |
 | 1.x 기록 | [archive/v1/docs](archive/v1/docs) |
 
@@ -38,8 +39,8 @@ Pure Protocol
 | 위치 | 역할 |
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v2 Kernel |
-| [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal multi-writer provider |
-| [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional DOM/IME publication lease |
+| [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
+| [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [apps/site](apps/site) | v2 Core 공개 문서 사이트 |
 | [archive/v1](archive/v1) | 배포·workspace·검증에서 분리된 1.x 기록 |
 
@@ -54,11 +55,11 @@ lifecycle은 host adapter가 여섯-member `JSONDocument` 위에서 조합합니
 
 v2 Kernel이 제공하는 최소 계약:
 
-- immutable JSON snapshot
+- immutable document value
 - JSON Pointer read와 JSONPath query
 - state를 바꾸지 않는 `canPatch`
 - ordered atomic JSON Patch commit
-- canonical applied change publication
+- canonical applied change notification
 
 편집 툴이 계속 소유하는 것:
 

@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document-contenteditable-collaboration",
   "version": "0.1.0-rc.1",
-  "description": "IME-safe contenteditable publication lease for json-document collaboration text.",
+  "description": "IME-safe native-input DOM lease for json-document collaboration text.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

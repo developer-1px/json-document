@@ -125,10 +125,11 @@ if (preview.ok) {
 
 입력 state와 operation은 변경되지 않으며, 성공 result는 caller input과 격리됩니다.
 
-## 6. 선택한 provider로 acceptance 연결하기
+## 6. 선택한 validator 연결하기
 
-Core는 Zod를 요구하지 않습니다. 어떤 validator든 작은 acceptance callback으로
-연결할 수 있습니다.
+Core는 Zod를 요구하지 않습니다. 어떤 validator든 stable v2 `accepts`
+callback으로 연결할 수 있습니다. Canonical concept는 validation이며
+`accepts`는 compatibility identifier입니다.
 
 ```ts
 import * as z from "zod";

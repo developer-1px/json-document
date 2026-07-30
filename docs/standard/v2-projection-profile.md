@@ -3,6 +3,14 @@
 상태: Stable (`2.0.0`). TypeScript root binding, reference implementation,
 독립 test implementation, 다섯 pressure vertical이 stable gate를 통과했다.
 
+`Projection`, Pure Protocol, acceptance, capability와 publication은 이 stable
+v2 compatibility profile의 기존 label이다. Repository 전체의 canonical
+concept와 naming grammar는
+[Concept and Naming Standard](concept-and-naming-standard.md)가 정의한다.
+이 profile의 identifier와 requirement wording은 v2 compatibility를 위해
+유지하며, 새 문서에서는 각각 JSON Document, stateless JSON Patch, validation과
+change notification으로 설명한다.
+
 이 profile은 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 의존할
 수 있는 최소 JSON 편집 계약을 정의한다. 구현체는 더 많은 기능을 제공할 수
 있지만 portable consumer는 이 계약만으로 동작할 수 있어야 한다.

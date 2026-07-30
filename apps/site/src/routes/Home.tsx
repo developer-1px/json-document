@@ -1,7 +1,7 @@
 const modelRows = [
-  ["protocol", "provider-neutral JSON Patch application"],
-  ["projection", "value, at, query, canPatch, commit, subscribe"],
-  ["acceptance", "optional provider-neutral candidate validation"],
+  ["patch", "stateless JSON Patch application"],
+  ["document", "value, at, query, canPatch, commit, subscribe"],
+  ["validation", "optional implementation-neutral candidate validation"],
   ["host", "selection, history, rendering, focus, persistence, collaboration"],
 ] as const;
 
@@ -18,13 +18,13 @@ export function Home() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
           <div>
             <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">
-              Provider-neutral JSON editing
+              Implementation-neutral JSON editing
             </p>
             <h1 className="mb-4 mt-2 text-4xl font-semibold tracking-normal text-stone-950">
               json-document
             </h1>
             <p className="m-0 max-w-2xl text-base leading-7 text-stone-600">
-              A headless JSON protocol and six-member document projection for
+              A headless JSON API and six-member JSON Document for
               documents, tables, slides, canvases, and notes.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">

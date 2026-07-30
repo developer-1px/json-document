@@ -3,7 +3,7 @@
   "repo": {
     "name": "@interactive-os/json-document-monorepo",
     "private": true,
-    "summary": "json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는\nprovider-neutral JSON 편집 protocol과 headless document projection입니다."
+    "summary": "json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는\nimplementation-neutral JSON 편집 API와 headless JSON Document입니다."
   },
   "packages": [
     {
@@ -13,9 +13,9 @@
       "private": false,
       "publishable": true,
       "version": "2.0.0",
-      "description": "Provider-neutral JSON editing protocol and headless document projection.",
+      "description": "Implementation-neutral JSON Patch API and headless JSON Document.",
       "license": "MIT",
-      "summary": "문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는 provider-neutral\nJSON 편집 protocol과 headless document projection입니다.",
+      "summary": "문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는\nimplementation-neutral JSON 편집 API와 headless JSON Document입니다.",
       "entrypoints": [
         "."
       ],
@@ -60,9 +60,9 @@
       "private": false,
       "publishable": true,
       "version": "0.1.0-rc.2",
-      "description": "Transport-free causal collaboration provider for @interactive-os/json-document.",
+      "description": "Transport-free causal collaboration engine for @interactive-os/json-document.",
       "license": "MIT",
-      "summary": "Transport-free causal collaboration provider for the six-member\n`@interactive-os/json-document` Projection contract.",
+      "summary": "Transport-free causal collaboration engine for the six-member\n`@interactive-os/json-document` JSON Document contract.",
       "entrypoints": [
         ".",
         "./history",
@@ -120,9 +120,9 @@
       "private": false,
       "publishable": true,
       "version": "0.1.0-rc.1",
-      "description": "IME-safe contenteditable publication lease for json-document collaboration text.",
+      "description": "IME-safe native-input DOM lease for json-document collaboration text.",
       "license": "MIT",
-      "summary": "IME-safe DOM publication lease for\n`@interactive-os/json-document-collaboration/text`.",
+      "summary": "IME-safe native-input DOM lease for\n`@interactive-os/json-document-collaboration/text`.",
       "entrypoints": [
         "."
       ],

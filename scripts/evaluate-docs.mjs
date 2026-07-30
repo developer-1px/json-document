@@ -37,8 +37,11 @@ const publicDocs = {
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
 };
+const docsReadme = read("docs/README.md");
+const namingStandard = read("docs/standard/concept-and-naming-standard.md");
 const surfaces = {
   rootReadme: read("README.md"),
+  docsReadme,
   packageReadme: read("packages/json-document/README.md"),
   collaborationReadme: read("packages/json-document-collaboration/README.md"),
   contenteditableCollaborationReadme: read(
@@ -94,10 +97,11 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
 }
 
 if (JSON.stringify(fileNames("docs/standard")) !== JSON.stringify([
+  "concept-and-naming-standard.md",
   "v2-projection-profile.md",
   "v2-public-surface.json",
 ])) {
-  fail("docs/standard: only the v2 profile and machine-readable surface may remain active.");
+  fail("docs/standard: naming SSOT, v2 profile, and machine-readable surface must be the only active standards.");
 }
 
 if (JSON.stringify(fileNames("docs/generated")) !== JSON.stringify([
@@ -200,6 +204,7 @@ for (const [name, source] of Object.entries({
 }
 
 const required = [
+  ["rootReadme", surfaces.rootReadme, /docs\/standard\/concept-and-naming-standard\.md/],
   ["rootReadme", surfaces.rootReadme, /## 문서 지도/],
   ["rootReadme", surfaces.rootReadme, /docs\/public\/overview\.md/],
   ["rootReadme", surfaces.rootReadme, /docs\/public\/api\.md/],
@@ -210,6 +215,7 @@ const required = [
   ["rootReadme", surfaces.rootReadme, /@interactive-os\/editable/],
   ["overview", surfaces.overview, /## 배경/],
   ["overview", surfaces.overview, /## 핵심 개념/],
+  ["overview", surfaces.overview, /Concept and Naming Standard/],
   ["overview", surfaces.overview, /검색: JSONPath -> Pointer\[\]/],
   ["overview", surfaces.overview, /## Host adapter와 companion/],
   ["overview", surfaces.overview, /@interactive-os\/json-document-collaboration/],
@@ -225,9 +231,11 @@ const required = [
   ["api", surfaces.api, /## Host와 adapter/],
   ["packageReadme", surfaces.packageReadme, /npm install @interactive-os\/json-document@2\.0\.0/],
   ["packageReadme", surfaces.packageReadme, /패키지는 `\/session`이나 `\/react` subpath를\s*공개하지 않습니다/],
-  ["collaborationReadme", surfaces.collaborationReadme, /same six-member Projection API/],
+  ["collaborationReadme", surfaces.collaborationReadme, /same six-member\s+`JSONDocument` API/],
+  ["collaborationReadme", surfaces.collaborationReadme, /Concept and Naming Standard/],
   ["collaborationReadme", surfaces.collaborationReadme, /contains no transport, presence,\s*storage, DOM, React, or server dependency/],
-  ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe DOM publication lease/],
+  ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe native-input DOM lease/],
+  ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /Concept and Naming Standard/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
   ["llms", surfaces.llms, /2\.0\.0.*Stable/],
   ["llms", surfaces.llms, /공개 Root는 정확히 다음 20개 symbol/],
@@ -237,10 +245,92 @@ const required = [
   ["llms", surfaces.llms, /@interactive-os\/editable/],
   ["profile", profile, /root entrypoint 하나와 20개 Kernel symbol/],
   ["profile", profile, /Acceptance callback[\s\S]*`canPatch`[\s\S]*`commit`/],
+  ["profile", profile, /Concept and Naming Standard/],
+  ["docsReadme", docsReadme, /concept-and-naming-standard\.md/],
+  ["namingStandard", namingStandard, /상태: Canonical/],
+  ["namingStandard", namingStandard, /## 이름 권위/],
+  ["namingStandard", namingStandard, /## 개념 경계/],
+  ["namingStandard", namingStandard, /## 접두어와 casing/],
+  ["namingStandard", namingStandard, /## 접미어/],
+  ["namingStandard", namingStandard, /## Operation과 Change/],
+  ["namingStandard", namingStandard, /## 함수 동사/],
+  ["namingStandard", namingStandard, /## Boolean/],
+  ["namingStandard", namingStandard, /## Collection과 축약/],
+  ["namingStandard", namingStandard, /## 현재 이름 평가/],
+  ["namingStandard", namingStandard, /## v2 compatibility map/],
+  ["namingStandard", namingStandard, /## 새 concept admission/],
+  ["namingStandard", namingStandard, /runtime logic, protocol semantics 또는 wire behavior/],
 ];
 
 for (const [name, source, pattern] of required) {
   requirePattern(name, source, pattern);
+}
+
+for (const [name, source] of Object.entries({
+  rootReadme: surfaces.rootReadme,
+  overview: surfaces.overview,
+  packageReadme: surfaces.packageReadme,
+  siteHome,
+})) {
+  for (const deprecatedConcept of [
+    "Pure Protocol",
+    "Document Projection",
+    "document projection",
+    "local provider",
+    "collaboration provider",
+    "DOM publication lease",
+  ]) {
+    if (source.includes(deprecatedConcept)) {
+      fail(`${name}: deprecated canonical concept remains: ${deprecatedConcept}.`);
+    }
+  }
+}
+
+for (const term of [
+  "JSON value",
+  "JSON Pointer",
+  "JSONPath",
+  "JSON Patch",
+  "JSON Document",
+  "patch validation",
+  "change notification",
+  "collaboration engine",
+  "replica status",
+  "checkpoint",
+  "compaction",
+  "selective undo",
+  "text splice",
+  "DOM adapter",
+  "native-input DOM lease",
+]) {
+  if (!namingStandard.includes(term)) {
+    fail(`naming standard: missing canonical term ${term}.`);
+  }
+}
+
+for (const restrictedSuffix of [
+  "Control",
+  "Manager",
+  "Helper",
+  "Util",
+  "Common",
+  "Misc",
+  "Data",
+  "Info",
+]) {
+  if (!namingStandard.includes(restrictedSuffix)) {
+    fail(`naming standard: missing restricted suffix ${restrictedSuffix}.`);
+  }
+}
+
+for (const packageEntry of generatedCatalog.packages ?? []) {
+  for (const publicExport of packageEntry.publicExports ?? []) {
+    if (!namingStandard.includes(`\`${publicExport}\``)) {
+      fail(
+        `naming standard: ${packageEntry.name} public export is unclassified: ${publicExport}.`,
+      );
+    }
+  }
 }
 
 if (
@@ -336,8 +426,8 @@ for (const pattern of [
 }
 
 for (const pattern of [
-  /Provider-neutral JSON editing/,
-  /six-member document projection/,
+  /Implementation-neutral JSON editing/,
+  /six-member JSON Document/,
   /npm install @interactive-os\/json-document@2\.0\.0/,
   /Rich editing belongs to host adapters/,
 ]) {

@@ -29,7 +29,9 @@ const publicDocs = {
 };
 const docs = {
   rootReadme: read("README.md"),
+  docsReadme: read("docs/README.md"),
   readme: read("packages/json-document/README.md"),
+  naming: read("docs/standard/concept-and-naming-standard.md"),
   profile: read("docs/standard/v2-projection-profile.md"),
   llms: read("llms.txt"),
   site: Object.values(publicDocs).join("\n\n"),
@@ -52,6 +54,7 @@ describe("public docs consistency", () => {
       "quickstart.md",
     ]);
     expect(readdirSync(join(root, "docs/standard")).sort()).toEqual([
+      "concept-and-naming-standard.md",
       "v2-projection-profile.md",
       "v2-public-surface.json",
     ]);
@@ -113,6 +116,7 @@ describe("public docs consistency", () => {
   test("keeps core usage and project understanding in public docs", () => {
     expect(docs.rootReadme).toMatch(/## 문서 지도/);
     expect(docs.rootReadme).toMatch(/docs\/public\/overview\.md/);
+    expect(docs.rootReadme).toMatch(/docs\/standard\/concept-and-naming-standard\.md/);
     expect(docs.rootReadme).toMatch(/## 코드 지도/);
     expect(docs.rootReadme).toMatch(/packages\/json-document/);
     expect(docs.overview).toMatch(/## 배경/);
@@ -122,8 +126,38 @@ describe("public docs consistency", () => {
     expect(docs.api).toMatch(/## 작업별 진입점/);
     expect(docs.api).toMatch(/ReadResult/);
     expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@2\.0\.0/);
-    expect(docs.readme).toMatch(/provider-neutral/);
+    expect(docs.readme).toMatch(/implementation-neutral/);
     expect(docs.llms).toMatch(/2\.0\.0.*Stable/);
+  });
+
+  test("locks one canonical concept and naming standard", () => {
+    expect(docs.naming).toMatch(/상태: Canonical/);
+    expect(docs.naming).toMatch(/## 이름 권위/);
+    expect(docs.naming).toMatch(/## 개념 경계/);
+    expect(docs.naming).toMatch(/## 접두어와 casing/);
+    expect(docs.naming).toMatch(/## 접미어/);
+    expect(docs.naming).toMatch(/## 함수 동사/);
+    expect(docs.naming).toMatch(/## Boolean/);
+    expect(docs.naming).toMatch(/## v2 compatibility map/);
+    expect(docs.naming).toMatch(/## Current public surface decisions/);
+    expect(docs.naming).toMatch(/## 새 concept admission/);
+
+    for (const term of [
+      "JSON Document",
+      "patch validation",
+      "change notification",
+      "collaboration engine",
+      "replica status",
+      "native-input DOM lease",
+    ]) {
+      expect(docs.naming).toContain(term);
+    }
+
+    for (const source of [docs.rootReadme, docs.overview, docs.readme]) {
+      expect(source).not.toMatch(
+        /Pure Protocol|Document Projection|document projection|local provider|collaboration provider|DOM publication lease/,
+      );
+    }
   });
 
   test("keeps JSONPath scoped to search and JSON Pointer scoped to mutation", () => {

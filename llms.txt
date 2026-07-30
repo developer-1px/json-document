@@ -1,7 +1,7 @@
 # json-document v2
 
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 공통으로 사용할 수
-있는 provider-neutral JSON 편집 Kernel이다. UI component library가 아니다.
+있는 implementation-neutral JSON 편집 Kernel이다. UI component library가 아니다.
 
 현재 package version과 표준 상태는 `2.0.0` Stable이다. Reference와 독립
 implementation이 같은 conformance suite를 통과하고, 다섯 pressure vertical을
@@ -40,19 +40,22 @@ types
 구현 내부 경로를 import하지 않는다. Root에 새 edit verb, schema provider object,
 React hook, host service를 추가하지 않는다.
 
-## Pure Protocol과 Projection
+## Stateless JSON Patch와 JSON Document
 
 ```txt
-Pure Protocol
-  |-> local provider -----------\
-  |                              > same six-member Document Projection
-  `-> collaboration provider --/    |-> optional history/text authoring
-                                    `-> optional DOM/IME lease
+stateless JSON Patch
+  |-> local implementation -----\
+  |                               > same six-member JSON Document
+  `-> collaboration engine -----/    |-> optional history/text authoring
+                                     `-> optional native-input DOM lease
 ```
 
-Pure Protocol은 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
-RFC 6902 JSON Patch, Result 의미를 소유한다. Projection은 현재 snapshot과
-publication을 연결한다.
+Stateless JSON Patch는 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
+RFC 6902 JSON Patch, Result 의미를 소유한다. JSON Document는 현재 document
+value와 change notification을 연결한다.
+
+Canonical concept와 stable v2 compatibility identifier의 관계는
+`docs/standard/concept-and-naming-standard.md`가 정의한다.
 
 `JSONDocument`의 필수 member는 정확히 여섯 개다.
 
@@ -149,8 +152,8 @@ if (result.ok) {
 
 ## Acceptance
 
-Schema provider는 Root contract가 아니다. 필요하면 작은 acceptance callback으로
-조합한다.
+Schema provider는 Root contract가 아니다. 필요하면 validator를 stable v2
+`accepts` callback으로 조합한다.
 
 ```ts
 import { z } from "zod";
@@ -176,7 +179,7 @@ function accepts(candidate: JSONValue): JSONCapabilityResult {
 const document = createJSONDocument({ title: "Draft" }, { accepts });
 ```
 
-Acceptance는 initial state와 commit candidate를 publication 전에 검사한다.
+Validation은 initial state와 commit candidate를 change notification 전에 검사한다.
 Provider parse 결과로 candidate를 몰래 변환하지 않는다. Normalization은
 applied JSON Patch에 명시한다.
 
@@ -200,7 +203,7 @@ Core만 설치한다. 이 저장소의
 `@interactive-os/json-document-collaboration`은 같은 여섯-member Projection을
 제공하는 independently versioned, transport-free provider이고,
 `@interactive-os/json-document-contenteditable-collaboration`은 collaborative
-string을 위한 optional DOM/IME publication lease다. 두 companion을 사용해도
+string을 위한 optional native-input DOM lease다. 두 companion을 사용해도
 Core Root API와 editor가 받는 `JSONDocument` port는 바뀌지 않는다.
 
 Host adapter는 공개 Root Projection만 입력으로 받고 제품 의도를 Pointer와
@@ -229,7 +232,7 @@ indent/outdent, visible-row focus, slide selection box, grid coordinate와 같�
   `packages/json-document/tests/public/v2-signature-contract.test-d.ts`
 - Projection black-box binding:
   `packages/json-document/tests/public/v2-projection-standard-conformance.test.ts`
-- Pure Protocol black-box binding:
+- Stateless JSON Patch black-box binding (v2 Pure Protocol compatibility artifact):
   `packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts`
 
 Reference implementation의 우연한 동작이 profile과 conformance vector보다 높은

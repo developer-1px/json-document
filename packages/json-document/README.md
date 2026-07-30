@@ -1,15 +1,19 @@
 # json-document
 
-문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는 provider-neutral
-JSON 편집 protocol과 headless document projection입니다.
+문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
+implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
 v2 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
 Patch만 전제로 합니다. UI framework, schema provider, history, selection,
 clipboard는 core 계약이 아닙니다.
 
 ```txt
-Pure Protocol -> Document Projection -> host adapter
+stateless JSON Patch -> JSON Document -> host adapter
 ```
+
+Canonical concept와 stable v2 identifier의 관계는
+[Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
+정의합니다.
 
 현재 버전은 `2.0.0`입니다. reference와 독립 구현이 같은 conformance suite를
 통과했고, form·table/data-grid·outliner/tree·rich text·storage/collaboration
@@ -58,12 +62,12 @@ Document의 필수 member는 여섯 개뿐입니다.
 
 | Member | 책임 |
 | --- | --- |
-| `value` | immutable current snapshot |
+| `value` | immutable current document value |
 | `at(pointer)` | 정확한 JSON Pointer 한 곳 읽기 |
 | `query(jsonPath)` | JSONPath를 Pointer 배열로 환원 |
-| `canPatch(operations)` | state를 바꾸지 않는 동일 의미 probe |
+| `canPatch(operations)` | state를 바꾸지 않는 patch validation |
 | `commit(operations, options?)` | 유일한 stateful mutation |
-| `subscribe(listener)` | publish된 change 구독 |
+| `subscribe(listener)` | change notification 구독 |
 
 subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `commit`
 밖으로 전파되거나 성공 result를 바꾸지 않으며, 뒤 subscriber의 전달도 막지
@@ -73,11 +77,11 @@ subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `
 새 error code와 optional field가 추가될 수 있으므로 consumer는 exact key 집합에
 의존하지 않아야 합니다.
 
-## Schema acceptance
+## Validation
 
-Core는 특정 schema object를 받지 않습니다. provider를 작은 acceptance 함수로
-연결합니다. 반환된 parse value를 받지 않으므로 commit-time transform이 state에
-몰래 들어갈 수 없습니다.
+Core는 특정 schema object를 받지 않습니다. Validator를 stable v2 `accepts`
+callback으로 연결합니다. 반환된 parse value를 받지 않으므로 commit-time
+transform이 state에 몰래 들어갈 수 없습니다.
 
 ```ts
 import { z } from "zod";
@@ -105,7 +109,7 @@ const document = createJSONDocument(
 );
 ```
 
-initial value와 patch payload, metadata, published snapshot/change는 document가
+Initial value와 patch payload, metadata, exposed document value/change는 document가
 소유합니다. caller reference나 subscriber가 committed state를 우회해 바꿀 수
 없습니다.
 

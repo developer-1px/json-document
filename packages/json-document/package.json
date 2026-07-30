@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document",
   "version": "2.0.0",
-  "description": "Provider-neutral JSON editing protocol and headless document projection.",
+  "description": "Implementation-neutral JSON Patch API and headless JSON Document.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

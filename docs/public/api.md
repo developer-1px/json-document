@@ -85,7 +85,7 @@ interface JSONDocument {
 
 ## value와 ownership
 
-`value`는 현재 immutable snapshot입니다. Initial value, patch payload,
+`value`는 현재 immutable document value입니다. Initial value, patch payload,
 metadata, 이전 snapshot, read result와 published change는 caller의 mutable
 reference와 격리됩니다.
 
@@ -165,7 +165,7 @@ function asPointer(path: string): Pointer | null {
 ## applyPatch
 
 `applyPatch`는 schema provider, mutable session, UI 없이 ordered RFC 6902
-batch를 적용하는 Pure Protocol 함수입니다.
+batch를 적용하는 stateless JSON Patch 함수입니다.
 
 ```ts
 import { applyPatch } from "@interactive-os/json-document";
@@ -191,7 +191,7 @@ canonical sequence입니다.
 
 ## canPatch와 commit
 
-두 method는 같은 JSON, Pointer, Patch, acceptance 의미를 사용합니다.
+두 method는 같은 JSON, Pointer, Patch와 validation 의미를 사용합니다.
 
 ```ts
 const operations = [
@@ -216,7 +216,7 @@ if (capability.ok) {
 ```
 
 `canPatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 batch 전체를
-동기적·원자적으로 적용합니다. 실패와 state-equivalent no-op은 publication을
+동기적·원자적으로 적용합니다. 실패와 state-equivalent no-op은 change notification을
 만들지 않습니다.
 
 성공 commit은 post-commit snapshot을 중복 반환하지 않습니다.
@@ -235,10 +235,10 @@ unsubscribe();
 Subscriber는 이미 publish된 `JSONAppliedChange`를 받습니다. Unsubscribe 뒤의
 변경은 전달되지 않습니다.
 
-## acceptance
+## Validation
 
-`createJSONDocument`의 `accepts` option은 특정 schema object를 요구하지 않는
-provider-neutral boundary입니다.
+`createJSONDocument`의 stable v2 `accepts` option은 특정 schema object를
+요구하지 않는 implementation-neutral validation boundary입니다.
 
 ```ts
 import * as z from "zod";
@@ -269,9 +269,14 @@ const acceptedDocument = createJSONDocument(
 );
 ```
 
-Initial state와 commit candidate 모두 publication 전에 검사됩니다. Callback이
+Initial state와 commit candidate 모두 commit notification 전에 검사됩니다. Callback이
 parse한 변환값은 Core state로 채택되지 않으며, normalization이 필요하면 그
 변경을 JSON Patch에 명시합니다.
+
+Canonical concept는 validation이고 `accepts`와 `JSONCapabilityResult`는 stable
+v2 compatibility identifier입니다. Naming 기준과 vNext 후보는
+[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)를
+따릅니다.
 
 ## Result
 

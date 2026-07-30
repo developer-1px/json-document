@@ -1,12 +1,17 @@
 # json-document-contenteditable-collaboration
 
-IME-safe DOM publication lease for
+IME-safe native-input DOM lease for
 `@interactive-os/json-document-collaboration/text`.
 
 The adapter binds one collaborative string pointer to one contenteditable
 root. Collaboration ingestion and the six-member document model always update
 immediately. While the browser owns native input or IME composition, only
 rendering back into that root is delayed.
+
+Canonical DOM adapter와 lease vocabulary는
+[Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
+정의합니다. `CollaborationTextDOM`은 stable compatibility identifier이고
+canonical concept는 DOM adapter입니다.
 
 ```ts
 import {
@@ -49,24 +54,24 @@ tail state and resynchronizes the root.
 - Intermediate composing `input` events never author Changes.
 - `compositionend` performs one plan and one commit.
 - A browser's trailing composition `input` is consumed without a second
-  commit; a timer releases publication when that event is absent.
+  commit; a timer releases the native-input DOM lease when that event is absent.
 - A cancelled `beforeinput` that produces no `input` releases its native lease
-  on the next task instead of leaving publication stuck.
+  on the next task instead of leaving DOM rendering stuck.
 - Remote Changes update the model immediately but cannot replace the leased
   DOM root.
-- Tail publication rebases the local selection through remote text merges
+- Tail rendering rebases the local selection through remote text merges
   before restoring it.
 - Atomic reset, deleted target, stale capture/plan, and invalid UTF-16
   selection offsets fail closed and render the latest model instead of
   resurrecting observed DOM.
 
-The default DOM projection stores plain text, serializes `<br>` and ordinary
+The default DOM adapter stores plain text, serializes `<br>` and ordinary
 block boundaries as deterministic `\n`, and preserves anchor/focus direction.
 Restored offsets are clamped to the current string without landing inside a
 surrogate pair. Events owned by nested editable roots or independent form
 controls are not consumed by the parent adapter.
 
-Wrappers or rich DOM can provide a projection:
+Wrappers or rich DOM can provide an adapter:
 
 ```ts
 const adapter = createCollaborationContentEditableAdapter({
@@ -90,7 +95,7 @@ const adapter = createCollaborationContentEditableAdapter({
 });
 ```
 
-The custom projection must use DOM/JavaScript UTF-16 offsets and must not
+The custom DOM adapter must use DOM/JavaScript UTF-16 offsets and must not
 author document changes while rendering.
 
 ## Package boundary

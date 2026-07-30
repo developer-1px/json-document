@@ -1,16 +1,16 @@
 # json-document Docs
 
 json-document v2는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수
-있는 provider-neutral JSON 편집 protocol과 headless document projection입니다.
+있는 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 루트 package는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 하며 Zod,
 React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
 
 ```txt
-Pure Protocol
-  |-> local provider -----------\
-  |                              > same six-member Document Projection
-  `-> collaboration provider --/    |-> optional history/text authoring
-                                    `-> optional DOM/IME lease
+stateless JSON Patch
+  |-> local implementation -----\
+  |                               > same six-member JSON Document
+  `-> collaboration engine -----/    |-> optional history/text authoring
+                                     `-> optional native-input DOM lease
 ```
 
 ## 배경
@@ -26,7 +26,7 @@ Core는 다음만 소유합니다.
 - RFC 6901 JSON Pointer
 - RFC 9535 JSONPath query
 - RFC 6902 JSON Patch
-- immutable snapshot, capability result, atomic commit, publication
+- immutable document value, patch validation, atomic commit, change notification
 
 DOM, focus, keyboard, geometry, system clipboard, filesystem, network, formula,
 CRDT와 OT는 host 또는 adapter 책임입니다.
@@ -39,18 +39,25 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 | JSON Pointer | 한 위치를 정확히 가리키는 주소. 예: `/lists/0/cards/0/title` |
 | JSONPath | 여러 위치를 찾는 query. 결과는 Pointer 목록 |
 | JSON Patch | ordered atomic mutation 형식 |
-| Pure Protocol | 현재 document instance 없이 JSON Patch를 적용하는 함수 |
-| Document Projection | 현재 snapshot에 read, probe, commit, publication을 연결한 여섯-member port |
-| acceptance | candidate state를 publish 전에 검사하는 provider-neutral callback |
+| Stateless JSON Patch | 현재 document instance 없이 JSON Patch를 적용하는 함수 |
+| JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 여섯-member port |
+| validation | Candidate document를 commit 전에 검사하는 implementation-neutral callback |
 | Host adapter | selection, clipboard, history, DOM과 고수준 편집 동사를 소유하는 별도 계층 |
+
+전체 canonical concept, 접두어·접미어·동사·boolean 규칙과 stable v2 이름의
+compatibility map은
+[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)가
+정의합니다. `Projection`, `canPatch`, `JSONCapabilityResult`, `accepts`는
+stable v2 identifier 또는 compatibility label이며 별도 canonical concept가
+아닙니다.
 
 가장 중요한 경계는 query와 mutation을 섞지 않는 것입니다.
 
 ```txt
 검색: JSONPath -> Pointer[]
 변경: Pointer -> JSON Patch
-검증: JSON candidate -> acceptance result
-상태: immutable JSON snapshot
+검증: JSON candidate -> validation result
+상태: immutable document value
 ```
 
 ## 기본 사용 흐름
@@ -111,14 +118,14 @@ if (result.ok) {
 
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
-| `@interactive-os/json-document` | v2 Kernel | Pure Protocol과 여섯-member Projection |
-| `@interactive-os/json-document-collaboration` | optional companion | 같은 Projection 뒤의 transport-free causal merge |
-| `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 DOM/IME publication lease |
+| `@interactive-os/json-document` | v2 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
+| `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
+| `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
 
 패키지는 `/session`과 `/react`를 공개하지 않습니다. 구현 간 교환 가능한 코드는
 루트 `JSONDocument` 여섯 member에만 의존하고, 편집 UX와 framework lifecycle은
 host 또는 별도 adapter가 소유합니다. Local-only consumer는 Core만 설치하며,
-collaboration provider로 바꿔도 editor가 사용하는 `JSONDocument` API는
+collaboration engine으로 바꿔도 editor가 사용하는 `JSONDocument` API는
 변하지 않습니다.
 
 ## Host adapter와 companion
@@ -153,11 +160,11 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 
 ## 이걸로 할 수 있는 것들
 
-- Form과 settings editor: acceptance로 publish 가능한 JSON 구조 제한
+- Form과 settings editor: validation으로 commit 가능한 JSON 구조 제한
 - Data grid: cell과 row 변경을 ordered JSON Patch로 표현
 - Outliner와 block docs: tree command를 Pointer와 Patch로 환원
 - Slide와 whiteboard: object property와 layer state를 headless JSON으로 관리
 - 저장과 협업 adapter: subscribed canonical change를 외부 log로 전달
 
 제품별 selection, clipboard, history는 host 또는 별도 adapter에서
-조합합니다. Core Projection은 그 기능을 필수 member로 요구하지 않습니다.
+조합합니다. Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다.
