@@ -1,4 +1,4 @@
-name: Publish v2 package
+name: Publish v3 package
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: npm-v2-package-${{ github.ref }}
+  group: npm-v3-package-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -82,7 +82,7 @@ jobs:
           '
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Verify v2 release graph
+      - name: Verify v3 release graph
         run: npm run release:check
       - name: Publish package
         env:
