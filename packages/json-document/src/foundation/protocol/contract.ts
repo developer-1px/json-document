@@ -46,7 +46,7 @@ export type JSONDocumentCommitResult =
   | { readonly ok: true; readonly change: JSONAppliedChange }
   | JSONPatchFailure;
 
-export type JSONCapabilityResult =
+export type JSONPatchValidationResult =
   | { readonly ok: true }
   | JSONPatchFailure;
 

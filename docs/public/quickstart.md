@@ -1,6 +1,6 @@
 # 튜토리얼: 작은 카드 편집기 만들기
 
-작은 board state를 여섯-member v2 Core로 읽고, 검증하고, 변경하고, 구독합니다.
+작은 board state를 여섯-member Core로 읽고, 검증하고, 변경하고, 구독합니다.
 루트 package에는 schema provider나 UI framework가 필요하지 않습니다.
 
 ## 1. JSON document 만들기
@@ -58,9 +58,9 @@ const operations = [{
   value: "doing",
 }] as const;
 
-const capability = document.canPatch(operations);
+const validation = document.validatePatch(operations);
 
-if (capability.ok) {
+if (validation.ok) {
   const result = document.commit(operations, {
     metadata: {
       origin: "card-status",
@@ -75,7 +75,7 @@ if (capability.ok) {
 }
 ```
 
-`canPatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 ordered batch
+`validatePatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 ordered batch
 전체를 적용하거나 아무것도 적용하지 않습니다.
 
 ## 4. 변경 구독하기
@@ -125,16 +125,16 @@ if (preview.ok) {
 
 입력 state와 operation은 변경되지 않으며, 성공 result는 caller input과 격리됩니다.
 
-## 6. 선택한 provider로 acceptance 연결하기
+## 6. 선택한 validator 연결하기
 
-Core는 Zod를 요구하지 않습니다. 어떤 validator든 작은 acceptance callback으로
-연결할 수 있습니다.
+Core는 Zod를 요구하지 않습니다. 어떤 validator든 canonical `validate`
+callback으로 연결할 수 있습니다.
 
 ```ts
 import * as z from "zod";
 import {
   createJSONDocument,
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONValue,
 } from "@interactive-os/json-document";
 
@@ -150,7 +150,7 @@ const Board = z.object({
   })),
 });
 
-function acceptsBoard(candidate: JSONValue): JSONCapabilityResult {
+function validateBoard(candidate: JSONValue): JSONPatchValidationResult {
   const result = Board.safeParse(candidate);
   return result.success
     ? { ok: true }
@@ -162,7 +162,7 @@ function acceptsBoard(candidate: JSONValue): JSONCapabilityResult {
 }
 
 const acceptedDocument = createJSONDocument(initialBoard, {
-  accepts: acceptsBoard,
+  validate: validateBoard,
 });
 ```
 

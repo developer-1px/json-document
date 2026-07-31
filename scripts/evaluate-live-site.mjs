@@ -70,13 +70,13 @@ async function checkOnce() {
 
   const llms = await fetchText("/llms.txt");
   if (
-    !/^# json-document v2$/m.test(llms)
-    || !/공개 Root는 정확히 다음 20개 symbol/.test(llms)
+    !/^# json-document v3$/m.test(llms)
+    || !/공개 Root는 정확히 다음 21개 symbol/.test(llms)
     || !/`JSONDocument`의 필수 member는 정확히 여섯 개다/.test(llms)
     || !/## Host adapter와 companion/.test(llms)
     || !/@interactive-os\/editable/.test(llms)
   ) {
-    fail("live llms.txt is missing the v2 Core contract.");
+    fail("live llms.txt is missing the v3 Core contract.");
   }
   const packageReferences = llms.match(/@interactive-os\/json-document-[a-z0-9-]+/g) ?? [];
   if (

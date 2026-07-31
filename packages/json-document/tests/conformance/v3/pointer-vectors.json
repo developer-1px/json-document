@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "status": "stable",
-  "profile": "docs/standard/v2-projection-profile.md",
-  "requirements": ["JD2-ADDRESS-001", "JD2-PATCH-001"],
+  "profile": "docs/standard/v3-json-document-profile.md",
+  "requirements": ["JD3-ADDRESS-001", "JD3-PATCH-001"],
   "parse": [
     { "id": "pointer-root", "pointer": "", "segments": [] },
     { "id": "pointer-empty-member", "pointer": "/", "segments": [""] },

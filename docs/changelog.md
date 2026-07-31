@@ -1,9 +1,22 @@
 # Changelog
 
-All notable changes to the active v2 packages are documented here. The complete
+All notable changes to the active v3 packages are documented here. The complete
 1.x history is preserved under `archive/v1/docs/changelog.md`.
 
-## Unreleased
+## 3.0.0 — Unreleased
+
+- **Breaking:** Removed every deprecated public naming alias and option fallback.
+  The canonical API now exclusively uses `validatePatch`,
+  `JSONPatchValidationResult`, `validate`, `CollaborationReplica`,
+  `ReplicaStatus`, `History*`, `Text*`, `didChangeDocument`,
+  `ContentEditable*`, `TextDOMAdapter`, and `DOMObservation`.
+- Replaced Projection-named active standards and conformance artifacts with the
+  v3 JSON Document profile, 21-symbol root manifest, and six-member
+  `JSONDocument` contract.
+- Raised companion peer ranges to Core `^3.0.0`; no wire field, protocol
+  meaning, runtime algorithm, or package boundary changed.
+
+## 2.0.0
 
 - Made the collaborative text profile include actor-local selective history,
   and made capture-time text commits return the canonical owned

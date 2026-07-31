@@ -3,28 +3,28 @@
     "path": "/",
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
-    "description": "Provider-neutral JSON editing protocol and six-member headless document projection for JSON Patch, JSON Pointer, and JSONPath.",
+    "description": "Implementation-neutral JSON editing and a six-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
     "group": "Start"
   },
   {
     "path": "/docs",
     "label": "Docs",
     "title": "json-document Docs - json-document",
-    "description": "User guide to the v2 Kernel, Pure Protocol, Document Projection, and host adapter boundaries.",
+    "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
     "group": "Start"
   },
   {
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
-    "description": "Step-by-step guide to reading, probing, committing, and subscribing to provider-neutral JSON document changes.",
+    "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
     "group": "Start"
   },
   {
     "path": "/docs/api",
     "label": "API reference",
     "title": "json-document API - json-document",
-    "description": "Public v2 Kernel API reference for the exact root surface, six-member Projection, JSON Patch, Pointer, and JSONPath.",
+    "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
     "group": "Start"
   }
 ]

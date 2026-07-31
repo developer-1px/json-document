@@ -1,12 +1,12 @@
-import type { CollaborationTextSelection } from
+import type { TextSelection } from
   "@interactive-os/json-document-collaboration/text";
 import type {
-  CollaborationTextDOM,
-  CollaborationTextDOMObservation,
+  TextDOMAdapter,
+  DOMObservation,
 } from "../types.js";
 
-export const plainTextCollaborationDOM: CollaborationTextDOM = Object.freeze({
-  observe(root: HTMLElement): CollaborationTextDOMObservation {
+export const plainTextDOMAdapter: TextDOMAdapter = Object.freeze({
+  observe(root: HTMLElement): DOMObservation {
     return {
       value: plainTextFromChildren(root),
       selection: selectionInRoot(root),
@@ -17,7 +17,7 @@ export const plainTextCollaborationDOM: CollaborationTextDOM = Object.freeze({
   },
   restoreSelection(
     root: HTMLElement,
-    selection: CollaborationTextSelection,
+    selection: TextSelection,
   ): boolean {
     if (!root.isConnected) return false;
     const value = root.textContent ?? "";
@@ -45,7 +45,7 @@ export const plainTextCollaborationDOM: CollaborationTextDOM = Object.freeze({
 
 function selectionInRoot(
   root: HTMLElement,
-): CollaborationTextSelection | null {
+): TextSelection | null {
   const selection = root.ownerDocument.getSelection();
   if (
     selection === null
@@ -79,8 +79,8 @@ function textOffsetForPosition(
   target: Node,
   targetOffset: number,
 ): number {
-  const projection = projectPlainText(root, target, targetOffset);
-  return projection.offset ?? projection.value.length;
+  const observation = projectPlainText(root, target, targetOffset);
+  return observation.offset ?? observation.value.length;
 }
 
 function plainTextFromChildren(node: Node): string {
@@ -213,8 +213,8 @@ function domPositionForOffset(
 
 function clampSelectionToScalarBoundaries(
   value: string,
-  selection: CollaborationTextSelection,
-): CollaborationTextSelection {
+  selection: TextSelection,
+): TextSelection {
   const direction = selection.anchor === selection.focus
     ? "collapsed"
     : selection.anchor < selection.focus

@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "status": "stable",
-  "profile": "docs/standard/v2-projection-profile.md",
+  "profile": "docs/standard/v3-json-document-profile.md",
   "function": "applyPatch",
   "initial": {
     "title": "Draft",
@@ -24,9 +24,9 @@
       "id": "ordered-patch-canonicalizes-append",
       "kind": "patch",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-PATCH-002",
-        "JD2-RESULT-001"
+        "JD3-PATCH-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
       ],
       "operations": [
         {
@@ -98,8 +98,8 @@
       "id": "mid-batch-failure-is-atomic",
       "kind": "patch",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-RESULT-001"
+        "JD3-PATCH-001",
+        "JD3-RESULT-001"
       ],
       "operations": [
         {
@@ -128,9 +128,9 @@
       "id": "jsonpath-is-not-a-patch-target",
       "kind": "patch",
       "requirements": [
-        "JD2-ADDRESS-001",
-        "JD2-PATCH-002",
-        "JD2-RESULT-001"
+        "JD3-ADDRESS-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
       ],
       "operations": [
         {
@@ -149,8 +149,8 @@
       "id": "successful-test-is-preserved",
       "kind": "patch",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-PATCH-002"
+        "JD3-PATCH-001",
+        "JD3-PATCH-002"
       ],
       "operations": [
         {
@@ -192,8 +192,8 @@
       "id": "same-value-pure-operation-is-preserved",
       "kind": "patch",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-PATCH-002"
+        "JD3-PATCH-001",
+        "JD3-PATCH-002"
       ],
       "operations": [
         {
@@ -235,8 +235,8 @@
       "id": "canonical-operation-drops-extra-fields",
       "kind": "extra-fields",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-DATA-001"
+        "JD3-PATCH-001",
+        "JD3-DATA-001"
       ],
       "operations": [
         {
@@ -287,9 +287,9 @@
       "id": "non-json-state-is-rejected",
       "kind": "non-json-state",
       "requirements": [
-        "JD2-DATA-001",
-        "JD2-PATCH-002",
-        "JD2-RESULT-001"
+        "JD3-DATA-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
       ],
       "property": "callback",
       "hostValue": "callable",
@@ -302,9 +302,9 @@
       "id": "non-json-payload-is-rejected",
       "kind": "non-json-payload",
       "requirements": [
-        "JD2-DATA-001",
-        "JD2-PATCH-002",
-        "JD2-RESULT-001"
+        "JD3-DATA-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
       ],
       "operation": {
         "op": "add",
@@ -320,9 +320,9 @@
       "id": "earlier-runtime-failure-wins-over-later-callable",
       "kind": "precedence",
       "requirements": [
-        "JD2-DATA-001",
-        "JD2-PATCH-001",
-        "JD2-RESULT-001"
+        "JD3-DATA-001",
+        "JD3-PATCH-001",
+        "JD3-RESULT-001"
       ],
       "operations": [
         {
@@ -346,8 +346,8 @@
       "id": "input-operation-and-result-are-isolated",
       "kind": "isolation",
       "requirements": [
-        "JD2-DATA-002",
-        "JD2-PATCH-002"
+        "JD3-DATA-002",
+        "JD3-PATCH-002"
       ],
       "operations": [
         {

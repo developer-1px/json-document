@@ -72,8 +72,8 @@ export function createTaskBoardHost(document: JSONDocument): TaskBoardHost {
     command: string,
     operations: ReadonlyArray<JSONPatchOperation>,
   ): JSONDocumentCommitResult => {
-    const capability = document.canPatch(operations);
-    if (!capability.ok) return capability;
+    const validation = document.validatePatch(operations);
+    if (!validation.ok) return validation;
     return document.commit(operations, {
       metadata: {
         host: "task-board",

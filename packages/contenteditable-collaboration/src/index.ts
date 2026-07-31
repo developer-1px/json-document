@@ -1,9 +1,9 @@
-export { createCollaborationContentEditableAdapter } from "./lease.js";
-export { plainTextCollaborationDOM } from "./dom/plainText.js";
+export { createContentEditableAdapter } from "./lease.js";
+export { plainTextDOMAdapter } from "./dom/plain-text.js";
 export type {
-  CollaborationContentEditableAdapter,
-  CollaborationContentEditableOptions,
-  CollaborationContentEditableResult,
-  CollaborationTextDOM,
-  CollaborationTextDOMObservation,
+  ContentEditableAdapter,
+  ContentEditableOptions,
+  ContentEditableResult,
+  DOMObservation,
+  TextDOMAdapter,
 } from "./types.js";

@@ -1,7 +1,7 @@
 // RFC 6901 — JSON Pointer.
 // 문자열과 segment 배열 사이의 변환은 lossless다.
 
-import { parseArrayIndex } from "./arrayIndex.js";
+import { parseArrayIndex } from "./array-index.js";
 
 export type Pointer = string;
 

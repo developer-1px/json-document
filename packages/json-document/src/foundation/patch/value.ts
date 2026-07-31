@@ -1,5 +1,5 @@
 import type { Pointer } from "../pointer/core.js";
-import { parseArrayIndex } from "../pointer/arrayIndex.js";
+import { parseArrayIndex } from "../pointer/array-index.js";
 import {
   mutateContainer,
   parseSafe,

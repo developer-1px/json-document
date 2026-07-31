@@ -1,29 +1,35 @@
 # json-document
 
-문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는 provider-neutral
-JSON 편집 protocol과 headless document projection입니다.
+문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
+implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
-v2 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
+v3 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
 Patch만 전제로 합니다. UI framework, schema provider, history, selection,
 clipboard는 core 계약이 아닙니다.
 
 ```txt
-Pure Protocol -> Document Projection -> host adapter
+stateless JSON Patch -> JSON Document -> host adapter
 ```
 
-현재 버전은 `2.0.0`입니다. reference와 독립 구현이 같은 conformance suite를
+Canonical concept와 stable v3 identifier의 관계는
+[Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
+정의합니다.
+
+v3 표준 상태는 Stable입니다. 현재 source release version은 `3.0.0`이며 npm에는
+아직 배포되지 않았습니다. reference와 독립 구현이 같은 conformance suite를
 통과했고, form·table/data-grid·outliner/tree·rich text·storage/collaboration
-pressure gate까지 검증한 Stable profile입니다.
+pressure gate까지 검증했습니다.
 
 - 공식 사이트: https://developer-1px.github.io/json-document/
-- 표준 profile: `docs/standard/v2-projection-profile.md`
+- 표준 profile: `docs/standard/v3-json-document-profile.md`
 
 ## 설치
 
-Core만 쓸 때 필수 dependency가 없습니다.
+Core만 쓸 때 필수 dependency가 없습니다. `3.0.0`이 npm에 배포된 뒤 다음
+명령을 사용합니다.
 
 ```sh
-npm install @interactive-os/json-document@2.0.0
+npm install @interactive-os/json-document@3.0.0
 ```
 
 ## 60초 시작
@@ -36,11 +42,11 @@ const document = createJSONDocument({
   tasks: [{ id: "a", done: false }],
 });
 
-const capability = document.canPatch([
+const validation = document.validatePatch([
   { op: "replace", path: "/tasks/0/done", value: true },
 ]);
 
-if (capability.ok) {
+if (validation.ok) {
   const result = document.commit([
     { op: "replace", path: "/tasks/0/done", value: true },
   ], {
@@ -58,12 +64,12 @@ Document의 필수 member는 여섯 개뿐입니다.
 
 | Member | 책임 |
 | --- | --- |
-| `value` | immutable current snapshot |
+| `value` | immutable current document value |
 | `at(pointer)` | 정확한 JSON Pointer 한 곳 읽기 |
 | `query(jsonPath)` | JSONPath를 Pointer 배열로 환원 |
-| `canPatch(operations)` | state를 바꾸지 않는 동일 의미 probe |
+| `validatePatch(operations)` | state를 바꾸지 않는 patch validation |
 | `commit(operations, options?)` | 유일한 stateful mutation |
-| `subscribe(listener)` | publish된 change 구독 |
+| `subscribe(listener)` | change notification 구독 |
 
 subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `commit`
 밖으로 전파되거나 성공 result를 바꾸지 않으며, 뒤 subscriber의 전달도 막지
@@ -73,11 +79,11 @@ subscriber는 state가 commit된 뒤 호출된다. 한 subscriber의 예외는 `
 새 error code와 optional field가 추가될 수 있으므로 consumer는 exact key 집합에
 의존하지 않아야 합니다.
 
-## Schema acceptance
+## Validation
 
-Core는 특정 schema object를 받지 않습니다. provider를 작은 acceptance 함수로
-연결합니다. 반환된 parse value를 받지 않으므로 commit-time transform이 state에
-몰래 들어갈 수 없습니다.
+Core는 특정 schema object를 받지 않습니다. Validator를 `validate`
+callback으로 연결합니다. 반환된 parse value를 받지 않으므로 commit-time
+transform이 state에 몰래 들어갈 수 없습니다.
 
 ```ts
 import { z } from "zod";
@@ -91,7 +97,7 @@ const Schema = z.object({
 const document = createJSONDocument(
   { title: "Draft", tasks: [] },
   {
-    accepts(candidate) {
+    validate(candidate) {
       const result = Schema.safeParse(candidate);
       return result.success
         ? { ok: true }
@@ -105,13 +111,13 @@ const document = createJSONDocument(
 );
 ```
 
-initial value와 patch payload, metadata, published snapshot/change는 document가
+Initial value와 patch payload, metadata, exposed document value/change는 document가
 소유합니다. caller reference나 subscriber가 committed state를 우회해 바꿀 수
 없습니다.
 
 ## 공개 root
 
-Root는 20개 Kernel symbol만 공개합니다.
+Root는 21개 public symbol만 공개합니다.
 
 ```txt
 values
@@ -122,7 +128,8 @@ values
 types
   JSONValue, Pointer, JSONPatchOperation
   JSONAppliedChange, JSONPatchResult, JSONDocumentCommitResult
-  JSONCapabilityResult, JSONChangeMetadata, JSONDocumentCommitOptions
+  JSONPatchValidationResult, JSONChangeMetadata
+  JSONDocumentOptions, JSONDocumentCommitOptions
   ReadResult, QueryResult, JSONDocument
 ```
 

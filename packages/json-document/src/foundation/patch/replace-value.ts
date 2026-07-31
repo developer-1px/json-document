@@ -1,4 +1,4 @@
-import { parseArrayIndex } from "../pointer/arrayIndex.js";
+import { parseArrayIndex } from "../pointer/array-index.js";
 import { objectHasOwn } from "./object.js";
 
 export function replaceValueAtSegments(

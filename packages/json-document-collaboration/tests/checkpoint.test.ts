@@ -14,8 +14,8 @@ import {
   type CollaborationRuntimeOptions,
 } from "../src/index.js";
 import {
-  createCollaborationHistoryRuntime,
-  restoreCollaborationHistoryRuntime,
+  createHistoryRuntime,
+  restoreHistoryRuntime,
 } from "../src/history-index.js";
 
 const ruleset: CollaborationRulesetIdentity = {
@@ -129,21 +129,21 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/done",
       value: true,
     }])).toMatchObject({ ok: true });
-    expect(source.collaboration.ingest(remote.collaboration.exportBundle()))
+    expect(source.replica.ingest(remote.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
-    const checkpoint = source.collaboration.exportCheckpoint();
+    const checkpoint = source.replica.exportCheckpoint();
     const restored = restoredRuntime(restoreCollaborationRuntime(checkpoint, {
       actorId: "actor-a",
       ruleset,
     }));
 
     expect(restored.document.value).toEqual(source.document.value);
-    expect(restored.collaboration.current()).toEqual(
-      source.collaboration.current(),
+    expect(restored.replica.status()).toEqual(
+      source.replica.status(),
     );
-    expect(restored.collaboration.exportBundle()).toEqual(
-      source.collaboration.exportBundle(),
+    expect(restored.replica.exportBundle()).toEqual(
+      source.replica.exportBundle(),
     );
 
     expect(restored.document.commit([{
@@ -152,7 +152,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       value: "Restored",
     }])).toMatchObject({ ok: true });
     expect(
-      restored.collaboration.exportBundle().changes.at(-1)?.changeId,
+      restored.replica.exportBundle().changes.at(-1)?.changeId,
     ).toEqual({
       actorId: "actor-a",
       counter: 2,
@@ -177,30 +177,30 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       value: "Second",
     }])).toMatchObject({ ok: true });
 
-    const complete = author.collaboration.exportBundle();
+    const complete = author.replica.exportBundle();
     const first = changeBundle(complete, "actor-a", 1);
     const second = changeBundle(complete, "actor-a", 2);
     const receiver = createCollaborationRuntime(
       initial,
       options("receiver", "checkpoint-pending/v1", members),
     );
-    expect(receiver.collaboration.ingest(second)).toMatchObject({
+    expect(receiver.replica.ingest(second)).toMatchObject({
       ok: true,
       pending: [{ actorId: "actor-a", counter: 2 }],
     });
 
     const restored = restoredRuntime(restoreCollaborationRuntime(
-      receiver.collaboration.exportCheckpoint(),
+      receiver.replica.exportCheckpoint(),
       { actorId: "receiver", ruleset },
     ));
-    expect(restored.collaboration.current().pending).toEqual([
+    expect(restored.replica.status().pending).toEqual([
       {
         changeId: { actorId: "actor-a", counter: 2 },
         missing: [{ actorId: "actor-a", counter: 1 }],
       },
     ]);
 
-    expect(restored.collaboration.ingest(first)).toMatchObject({
+    expect(restored.replica.ingest(first)).toMatchObject({
       ok: true,
       pending: [],
     });
@@ -208,13 +208,13 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       initial,
       options("receiver", "checkpoint-pending/v1", members),
     );
-    expect(reference.collaboration.ingest(complete)).toMatchObject({ ok: true });
+    expect(reference.replica.ingest(complete)).toMatchObject({ ok: true });
     expect(restored.document.value).toEqual(reference.document.value);
-    expect(restored.collaboration.current()).toEqual(
-      reference.collaboration.current(),
+    expect(restored.replica.status()).toEqual(
+      reference.replica.status(),
     );
-    expect(restored.collaboration.exportBundle()).toEqual(
-      reference.collaboration.exportBundle(),
+    expect(restored.replica.exportBundle()).toEqual(
+      reference.replica.exportBundle(),
     );
   });
 
@@ -224,7 +224,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       title: "Draft",
       flag: false,
     };
-    const left = createCollaborationHistoryRuntime(
+    const left = createHistoryRuntime(
       initial,
       options("actor-a", "checkpoint-history/v1", members),
     );
@@ -243,7 +243,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/title",
       value: "Right",
     }])).toMatchObject({ ok: true });
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(left.document.commit([{
       op: "replace",
@@ -254,32 +254,32 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       ok: true,
       target: { actorId: "actor-a", counter: 2 },
     });
-    expect(left.collaboration.current().conflicts).not.toEqual([]);
-    expect(left.history.current().redoTarget).toEqual({
+    expect(left.replica.status().conflicts).not.toEqual([]);
+    expect(left.history.status().redoTarget).toEqual({
       actorId: "actor-a",
       counter: 2,
     });
 
     const restored = restoredRuntime(restoreCollaborationRuntime(
-      left.collaboration.exportCheckpoint(),
+      left.replica.exportCheckpoint(),
       { actorId: "actor-a", ruleset },
     ));
 
     expect(restored.document.value).toEqual(left.document.value);
-    expect(restored.collaboration.current()).toEqual(
-      left.collaboration.current(),
+    expect(restored.replica.status()).toEqual(
+      left.replica.status(),
     );
-    expect(restored.collaboration.exportBundle()).toEqual(
-      left.collaboration.exportBundle(),
+    expect(restored.replica.exportBundle()).toEqual(
+      left.replica.exportBundle(),
     );
     expect(
-      restored.collaboration.exportBundle().changes.some((change) => (
+      restored.replica.exportBundle().changes.some((change) => (
         change.ops.some((operation) => operation.kind === "undo-change")
       )),
     ).toBe(true);
 
-    const restoredHistory = restoreCollaborationHistoryRuntime(
-      left.collaboration.exportCheckpoint(),
+    const restoredHistory = restoreHistoryRuntime(
+      left.replica.exportCheckpoint(),
       { actorId: "actor-a", ruleset },
     );
     if (!restoredHistory.ok) {
@@ -287,7 +287,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
         `history restore failed: ${restoredHistory.code}: ${restoredHistory.reason}`,
       );
     }
-    expect(restoredHistory.runtime.history.current().redoTarget).toEqual({
+    expect(restoredHistory.runtime.history.status().redoTarget).toEqual({
       actorId: "actor-a",
       counter: 2,
     });
@@ -318,7 +318,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       value: 2,
     }])).toMatchObject({ ok: true });
 
-    const accepts: CollaborationRuntimeOptions["accepts"] = (candidate) => {
+    const validate: CollaborationRuntimeOptions["validate"] = (candidate) => {
       const object = candidate as { readonly value?: unknown };
       return typeof object.value === "number" && object.value <= 1
         ? { ok: true }
@@ -331,23 +331,23 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     };
     const receiver = createCollaborationRuntime(
       initial,
-      options("receiver", "checkpoint-suppressed/v1", members, { accepts }),
+      options("receiver", "checkpoint-suppressed/v1", members, { validate }),
     );
-    const untrusted = author.collaboration.exportBundle();
-    expect(receiver.collaboration.ingest({
-      epoch: receiver.collaboration.epoch,
+    const untrusted = author.replica.exportBundle();
+    expect(receiver.replica.ingest({
+      epoch: receiver.replica.epoch,
       changes: untrusted.changes,
     }))
       .toMatchObject({ ok: true });
     expect(receiver.document.value).toEqual(initial);
-    expect(receiver.collaboration.current().suppressed).toEqual([{
+    expect(receiver.replica.status().suppressed).toEqual([{
       changeId: { actorId: "author", counter: 1 },
       code: "maximum_exceeded",
       reason: "value must be at most one",
       pointer: "/value",
     }]);
 
-    const checkpoint = receiver.collaboration.exportCheckpoint();
+    const checkpoint = receiver.replica.exportCheckpoint();
     expect(restoreCollaborationRuntime(checkpoint, {
       actorId: "receiver",
       ruleset,
@@ -357,7 +357,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(checkpoint, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-suppressed/missing-acceptance/v2",
+      nextEpochId: "checkpoint-suppressed/missing-validation/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -366,14 +366,14 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
 
     const restored = restoredRuntime(restoreCollaborationRuntime(
       checkpoint,
-      { actorId: "receiver", ruleset, accepts },
+      { actorId: "receiver", ruleset, validate },
     ));
     expect(restored.document.value).toEqual(receiver.document.value);
-    expect(restored.collaboration.current()).toEqual(
-      receiver.collaboration.current(),
+    expect(restored.replica.status()).toEqual(
+      receiver.replica.status(),
     );
-    expect(restored.collaboration.exportBundle()).toEqual(
-      receiver.collaboration.exportBundle(),
+    expect(restored.replica.exportBundle()).toEqual(
+      receiver.replica.exportBundle(),
     );
   });
 
@@ -384,12 +384,12 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       options("receiver", "checkpoint-membership/v1", members),
     );
     const beforeValue = receiver.document.value;
-    const beforeSnapshot = receiver.collaboration.current();
+    const beforeSnapshot = receiver.replica.status();
     const listener = vi.fn();
-    receiver.collaboration.subscribe(listener);
+    receiver.replica.subscribe(listener);
 
-    const result = receiver.collaboration.ingest({
-      epoch: receiver.collaboration.epoch,
+    const result = receiver.replica.ingest({
+      epoch: receiver.replica.epoch,
       changes: [
         {
           changeId: { actorId: "allowed", counter: 1 },
@@ -406,8 +406,8 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
 
     expect(result).toMatchObject({ ok: false });
     expect(receiver.document.value).toBe(beforeValue);
-    expect(receiver.collaboration.current()).toEqual(beforeSnapshot);
-    expect(receiver.collaboration.exportBundle().changes).toEqual([]);
+    expect(receiver.replica.status()).toEqual(beforeSnapshot);
+    expect(receiver.replica.exportBundle().changes).toEqual([]);
     expect(listener).not.toHaveBeenCalled();
   });
 
@@ -434,10 +434,10 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       { value: 0 },
       options("receiver", "checkpoint-member-reference/v1", members),
     );
-    const before = receiver.collaboration.current();
+    const before = receiver.replica.status();
 
-    expect(receiver.collaboration.ingest({
-      epoch: receiver.collaboration.epoch,
+    expect(receiver.replica.ingest({
+      epoch: receiver.replica.epoch,
       changes: [{
         changeId: { actorId: "allowed", counter: 1 },
         deps,
@@ -449,8 +449,8 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       changeId: { actorId: "allowed", counter: 1 },
     });
     expect(receiver.document.value).toEqual({ value: 0 });
-    expect(receiver.collaboration.current()).toEqual(before);
-    expect(receiver.collaboration.exportBundle().changes).toEqual([]);
+    expect(receiver.replica.status()).toEqual(before);
+    expect(receiver.replica.exportBundle().changes).toEqual([]);
   });
 
   test("refuses to compact a checkpoint with pending causal history", () => {
@@ -470,20 +470,20 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/title",
       value: "Second",
     }])).toMatchObject({ ok: true });
-    const complete = author.collaboration.exportBundle();
+    const complete = author.replica.exportBundle();
     const receiver = createCollaborationRuntime(
       initial,
       options("receiver", "checkpoint-pending-compaction/v1", members),
     );
-    expect(receiver.collaboration.ingest(
+    expect(receiver.replica.ingest(
       changeBundle(complete, "author", 2),
     )).toMatchObject({ ok: true });
 
     expect(compactCollaborationCheckpoint(
-      receiver.collaboration.exportCheckpoint(),
+      receiver.replica.exportCheckpoint(),
       {
         mode: "new-epoch",
-        nextEpochId: "checkpoint-pending-compaction/v2",
+        nextEpochId: "checkpoint-pending-compaction/v3",
         nextRuleset: ruleset,
       },
     )).toMatchObject({
@@ -509,14 +509,14 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       value: 1,
     }])).toMatchObject({ ok: true });
 
-    const original = allowed.collaboration.exportCheckpoint();
+    const original = allowed.replica.exportCheckpoint();
     const forged = checkpointWithIntegrity({
       ...original.payload,
-      changes: intruder.collaboration.exportBundle().changes,
+      changes: intruder.replica.exportBundle().changes,
     });
     expect(compactCollaborationCheckpoint(forged, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-member-laundering/v2",
+      nextEpochId: "checkpoint-member-laundering/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -559,7 +559,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
         membership("allowed"),
       ),
     );
-    const original = source.collaboration.exportCheckpoint();
+    const original = source.replica.exportCheckpoint();
     const forged = checkpointWithIntegrity({
       ...original.payload,
       changes: [{
@@ -571,7 +571,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
 
     expect(compactCollaborationCheckpoint(forged, {
       mode: "new-epoch",
-      nextEpochId: `checkpoint-member-reference-compaction/v2/${name}`,
+      nextEpochId: `checkpoint-member-reference-compaction/v3/${name}`,
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -589,7 +589,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/value",
       value: 1,
     }])).toMatchObject({ ok: true });
-    const original = source.collaboration.exportCheckpoint();
+    const original = source.replica.exportCheckpoint();
     const change = original.payload.changes[0];
     if (change === undefined) throw new Error("missing authored Change");
     const forged = checkpointWithIntegrity({
@@ -605,7 +605,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
 
     expect(compactCollaborationCheckpoint(forged, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-duplicate/v2",
+      nextEpochId: "checkpoint-duplicate/v3",
       nextRuleset: ruleset,
     })).toMatchObject({ ok: false });
   });
@@ -625,7 +625,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/value",
       value: 2,
     }])).toMatchObject({ ok: true });
-    const original = source.collaboration.exportCheckpoint();
+    const original = source.replica.exportCheckpoint();
     const reordered = checkpointWithIntegrity({
       ...original.payload,
       changes: [...original.payload.changes].reverse(),
@@ -640,7 +640,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(reordered, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-change-order/v2",
+      nextEpochId: "checkpoint-change-order/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -658,7 +658,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/value",
       value: 1,
     }])).toMatchObject({ ok: true });
-    const original = source.collaboration.exportCheckpoint();
+    const original = source.replica.exportCheckpoint();
     const change = original.payload.changes[0];
     if (change === undefined) throw new Error("missing authored Change");
     const duplicated = checkpointWithIntegrity({
@@ -675,7 +675,7 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
     });
     expect(compactCollaborationCheckpoint(duplicated, {
       mode: "new-epoch",
-      nextEpochId: "checkpoint-change-duplicate/v2",
+      nextEpochId: "checkpoint-change-duplicate/v3",
       nextRuleset: ruleset,
     })).toMatchObject({
       ok: false,
@@ -694,12 +694,12 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       path: "/title",
       value: "Compacted",
     }])).toMatchObject({ ok: true });
-    const oldBundle = source.collaboration.exportBundle();
+    const oldBundle = source.replica.exportBundle();
     const compacted = compactCollaborationCheckpoint(
-      source.collaboration.exportCheckpoint(),
+      source.replica.exportCheckpoint(),
       {
         mode: "new-epoch",
-        nextEpochId: "checkpoint-compaction/v2",
+        nextEpochId: "checkpoint-compaction/v3",
         nextRuleset: ruleset,
       },
     );
@@ -712,18 +712,18 @@ describe("@interactive-os/json-document-collaboration checkpoints", () => {
       { actorId: "actor-a", ruleset },
     ));
     expect(restored.document.value).toEqual(source.document.value);
-    expect(restored.collaboration.epoch.epochId).toBe(
-      "checkpoint-compaction/v2",
+    expect(restored.replica.epoch.epochId).toBe(
+      "checkpoint-compaction/v3",
     );
-    expect(restored.collaboration.exportBundle().changes).toEqual([]);
+    expect(restored.replica.exportBundle().changes).toEqual([]);
 
-    const before = restored.collaboration.current();
-    expect(restored.collaboration.ingest(oldBundle)).toMatchObject({
+    const before = restored.replica.status();
+    expect(restored.replica.ingest(oldBundle)).toMatchObject({
       ok: false,
       code: "epoch_mismatch",
     });
     expect(restored.document.value).toEqual(source.document.value);
-    expect(restored.collaboration.current()).toEqual(before);
-    expect(restored.collaboration.exportBundle().changes).toEqual([]);
+    expect(restored.replica.status()).toEqual(before);
+    expect(restored.replica.exportBundle().changes).toEqual([]);
   });
 });

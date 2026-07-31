@@ -8,13 +8,14 @@ import {
   trackPointer,
   tryParsePointer,
   type JSONAppliedChange,
-  type JSONCapabilityResult,
   type JSONChangeMetadata,
   type JSONDocument,
+  type JSONDocumentOptions,
   type JSONDocumentCommitOptions,
   type JSONDocumentCommitResult,
   type JSONPatchOperation,
   type JSONPatchResult,
+  type JSONPatchValidationResult,
   type JSONValue,
   type Pointer,
   type QueryResult,
@@ -28,10 +29,10 @@ type Equal<Left, Right> =
     : false;
 type Expect<T extends true> = T;
 
-type ProjectionMembers = keyof JSONDocument;
-type _ProjectionMembersAreExact = Expect<Equal<
-  ProjectionMembers,
-  "value" | "at" | "query" | "canPatch" | "commit" | "subscribe"
+type DocumentMembers = keyof JSONDocument;
+type _DocumentMembersAreExact = Expect<Equal<
+  DocumentMembers,
+  "value" | "at" | "query" | "validatePatch" | "commit" | "subscribe"
 >>;
 
 interface Row {
@@ -41,7 +42,7 @@ interface Row {
 
 const initial: Row = { id: "a", done: false };
 const document = createJSONDocument(initial, {
-  accepts(candidate): JSONCapabilityResult {
+  validate(candidate): JSONPatchValidationResult {
     return typeof candidate === "object" && candidate !== null
       ? { ok: true }
       : { ok: false, code: "schema_violation" };
@@ -55,7 +56,7 @@ const operations: ReadonlyArray<JSONPatchOperation> = [
 ];
 const pureResult = applyPatch(initial, operations);
 pureResult satisfies JSONPatchResult;
-document.canPatch(operations) satisfies JSONCapabilityResult;
+document.validatePatch(operations) satisfies JSONPatchValidationResult;
 document.commit(operations, {
   metadata: { origin: "signature" },
 }) satisfies JSONDocumentCommitResult;
@@ -68,6 +69,10 @@ document.subscribe((change: JSONAppliedChange) => {
 const metadata: JSONChangeMetadata = { nested: { stable: true } };
 const options: JSONDocumentCommitOptions = { metadata };
 options satisfies JSONDocumentCommitOptions;
+const documentOptions: JSONDocumentOptions = {
+  validate: () => ({ ok: true }),
+};
+documentOptions satisfies JSONDocumentOptions;
 
 const pointer: Pointer = appendSegment("", "items");
 buildPointer(["items", 0]) satisfies Pointer;
@@ -84,8 +89,8 @@ const futureFailure = {
 const forwardCompatibleResult: JSONPatchResult = futureFailure;
 forwardCompatibleResult satisfies JSONPatchResult;
 
-// @ts-expect-error v2 patch payloads are JSON data, not arbitrary host values.
+// @ts-expect-error v3 patch payloads are JSON data, not arbitrary host values.
 const callablePatch: JSONPatchOperation = { op: "add", path: "/run", value: () => undefined };
 
-// @ts-expect-error Editing Session controls are not part of the six-member Kernel.
+// @ts-expect-error Editing Session controls are not part of JSONDocument.
 document.undo();

@@ -1,47 +1,47 @@
 import {
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONValue,
 } from "@interactive-os/json-document";
 
 import { createCollaborationRuntime } from "@interactive-os/json-document-collaboration";
 import {
-  runProjectionConformance,
-  type Projection,
-  type ProjectionAcceptance,
-  type ProjectionHarness,
-} from "../../json-document/tests/conformance/v2/projection-suite.js";
-import { runPressureConformance } from "../../json-document/tests/conformance/v2/pressure-suite.js";
+  runJSONDocumentConformance,
+  type JSONDocument,
+  type JSONDocumentValidation,
+  type JSONDocumentHarness,
+} from "../../json-document/tests/conformance/v3/json-document-suite.js";
+import { runPressureConformance } from "../../json-document/tests/conformance/v3/pressure-suite.js";
 
-function createProjection(
-  acceptance: ProjectionAcceptance,
+function createJSONDocument(
+  validation: JSONDocumentValidation,
   initial: JSONValue,
-): Projection {
-  const accepts = acceptance === "task-list"
-    ? taskListAcceptance
-    : acceptance === "attempt-transform"
-      ? attemptTransformAcceptance
+): JSONDocument {
+  const validate = validation === "task-list"
+    ? taskListValidation
+    : validation === "attempt-transform"
+      ? attemptTransformValidation
       : undefined;
   return createCollaborationRuntime(initial, {
     actorId: "conformance",
-    epochId: "projection-conformance/v1",
+    epochId: "document-conformance/v1",
     ruleset: {
-      id: `projection-conformance/${acceptance}`,
-      digest: `projection-conformance/${acceptance}/v1`,
+      id: `document-conformance/${validation}`,
+      digest: `document-conformance/${validation}/v1`,
     },
-    ...(accepts === undefined ? {} : { accepts }),
+    ...(validate === undefined ? {} : { validate }),
   }).document;
 }
 
-function attemptTransformAcceptance(
+function attemptTransformValidation(
   candidate: JSONValue,
-): JSONCapabilityResult {
+): JSONPatchValidationResult {
   if (isRecord(candidate)) {
     Reflect.set(candidate, "title", "Implicit");
   }
   return { ok: true };
 }
 
-function taskListAcceptance(candidate: JSONValue): JSONCapabilityResult {
+function taskListValidation(candidate: JSONValue): JSONPatchValidationResult {
   const valid = isRecord(candidate)
     && typeof candidate.title === "string"
     && Array.isArray(candidate.items)
@@ -57,7 +57,7 @@ function taskListAcceptance(candidate: JSONValue): JSONCapabilityResult {
     : {
         ok: false,
         code: "schema_violation",
-        reason: "candidate does not satisfy the task-list acceptance rule",
+        reason: "candidate does not satisfy the task-list validation rule",
       };
 }
 
@@ -67,9 +67,9 @@ function isRecord(
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-const harness: ProjectionHarness = {
-  create: createProjection,
+const harness: JSONDocumentHarness = {
+  create: createJSONDocument,
 };
 
-runProjectionConformance(harness);
+runJSONDocumentConformance(harness);
 runPressureConformance(harness);

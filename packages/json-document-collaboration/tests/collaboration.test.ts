@@ -34,28 +34,28 @@ describe("@interactive-os/json-document-collaboration", () => {
   test("uses a canonical SHA-256 checkpoint fingerprint", () => {
     const shared = runtime("actor-a", null);
 
-    expect(shared.collaboration.epoch.baseDigest).toBe(
+    expect(shared.replica.epoch.baseDigest).toBe(
       "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
     );
   });
 
-  test("keeps the editor-facing document on the six-member Projection API", () => {
+  test("exposes the canonical six-member JSON Document API", () => {
     const shared = runtime("actor-a");
 
     expect(Object.keys(shared).sort()).toEqual([
-      "collaboration",
       "document",
+      "replica",
     ]);
     expect(Object.keys(shared.document).sort()).toEqual([
       "at",
-      "canPatch",
       "commit",
       "query",
       "subscribe",
+      "validatePatch",
       "value",
     ]);
     expect("ingest" in shared.document).toBe(false);
-    expect(typeof shared.collaboration.ingest).toBe("function");
+    expect(typeof shared.replica.ingest).toBe("function");
   });
 
   test("merges concurrent edits to different members independent of arrival order", () => {
@@ -69,9 +69,9 @@ describe("@interactive-os/json-document-collaboration", () => {
       { op: "replace", path: "/done", value: true },
     ])).toMatchObject({ ok: true });
 
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toMatchObject({ ok: true });
-    expect(right.collaboration.ingest(left.collaboration.exportBundle()))
+    expect(right.replica.ingest(left.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     expect(left.document.value).toEqual({
@@ -80,10 +80,10 @@ describe("@interactive-os/json-document-collaboration", () => {
       items: ["a", "b"],
     });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().conflicts).toEqual([]);
+    expect(left.replica.status().conflicts).toEqual([]);
   });
 
-  test("keeps concurrent alternatives outside the ordinary JSON projection", () => {
+  test("keeps concurrent alternatives outside the ordinary JSON document", () => {
     const left = runtime("actor-a");
     const right = runtime("actor-b");
 
@@ -94,12 +94,12 @@ describe("@interactive-os/json-document-collaboration", () => {
       { op: "replace", path: "/title", value: "Right" },
     ]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual(right.document.value);
     expect(left.document.value).toMatchObject({ title: "Right" });
-    expect(left.collaboration.current().conflicts).toMatchObject([
+    expect(left.replica.status().conflicts).toMatchObject([
       {
         kind: "member-value",
         winner: { actorId: "actor-b", counter: 1 },
@@ -119,8 +119,8 @@ describe("@interactive-os/json-document-collaboration", () => {
       { op: "add", path: "/items/1", value: "right" },
     ]);
 
-    right.collaboration.ingest(left.collaboration.exportBundle());
-    left.collaboration.ingest(right.collaboration.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
 
     expect(left.document.value).toMatchObject({
       items: ["a", "left", "right", "b"],
@@ -147,15 +147,15 @@ describe("@interactive-os/json-document-collaboration", () => {
       value: "x",
     }]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       left: ["a", "x"],
       right: ["b"],
     });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().suppressed).toEqual([]);
+    expect(left.replica.status().suppressed).toEqual([]);
   });
 
   test("retains start and end gap insertions when their only anchor moves away", () => {
@@ -178,11 +178,11 @@ describe("@interactive-os/json-document-collaboration", () => {
         value: "x",
       }])).toMatchObject({ ok: true });
 
-      expect(mover.collaboration.ingest(
-        inserter.collaboration.exportBundle(),
+      expect(mover.replica.ingest(
+        inserter.replica.exportBundle(),
       )).toMatchObject({ ok: true });
-      expect(inserter.collaboration.ingest(
-        mover.collaboration.exportBundle(),
+      expect(inserter.replica.ingest(
+        mover.replica.exportBundle(),
       )).toMatchObject({ ok: true });
 
       expect(mover.document.value).toEqual({
@@ -190,8 +190,8 @@ describe("@interactive-os/json-document-collaboration", () => {
         right: ["b"],
       });
       expect(inserter.document.value).toEqual(mover.document.value);
-      expect(mover.collaboration.current().suppressed).toEqual([]);
-      expect(inserter.collaboration.current().suppressed).toEqual([]);
+      expect(mover.replica.status().suppressed).toEqual([]);
+      expect(inserter.replica.status().suppressed).toEqual([]);
     }
   });
 
@@ -211,16 +211,16 @@ describe("@interactive-os/json-document-collaboration", () => {
       value: "x",
     }])).toMatchObject({ ok: true });
 
-    expect(mover.collaboration.ingest(
-      inserter.collaboration.exportBundle(),
+    expect(mover.replica.ingest(
+      inserter.replica.exportBundle(),
     )).toMatchObject({ ok: true });
-    expect(inserter.collaboration.ingest(
-      mover.collaboration.exportBundle(),
+    expect(inserter.replica.ingest(
+      mover.replica.exportBundle(),
     )).toMatchObject({ ok: true });
 
     expect(mover.document.value).toEqual({ items: ["b", "a", "x"] });
     expect(inserter.document.value).toEqual(mover.document.value);
-    expect(mover.collaboration.current().suppressed).toEqual([]);
+    expect(mover.replica.status().suppressed).toEqual([]);
   });
 
   test("preserves member identity across rename while merging a concurrent child edit", () => {
@@ -245,8 +245,8 @@ describe("@interactive-os/json-document-collaboration", () => {
       value: "Ready",
     }]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       cards: {
@@ -280,8 +280,8 @@ describe("@interactive-os/json-document-collaboration", () => {
       value: "Changed",
     }]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       cards: {
@@ -321,8 +321,8 @@ describe("@interactive-os/json-document-collaboration", () => {
       value: "Edited old member",
     }]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       cards: {
@@ -344,7 +344,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     source.document.commit([
       { op: "replace", path: "/title", value: "Second" },
     ]);
-    const exported = source.collaboration.exportBundle();
+    const exported = source.replica.exportBundle();
     const first = exported.changes[0];
     const second = exported.changes[1];
     if (first === undefined || second === undefined) {
@@ -355,16 +355,16 @@ describe("@interactive-os/json-document-collaboration", () => {
       epoch: exported.epoch,
       changes: [second],
     };
-    expect(target.collaboration.ingest(secondOnly)).toMatchObject({
+    expect(target.replica.ingest(secondOnly)).toMatchObject({
       ok: true,
       integrated: [],
       pending: [{ actorId: "actor-a", counter: 2 }],
     });
     expect(target.document.value).toMatchObject({ title: "Draft" });
 
-    const publications: unknown[] = [];
-    target.document.subscribe((change) => publications.push(change));
-    expect(target.collaboration.ingest({
+    const notifications: unknown[] = [];
+    target.document.subscribe((change) => notifications.push(change));
+    expect(target.replica.ingest({
       epoch: exported.epoch,
       changes: [first],
     })).toMatchObject({
@@ -376,7 +376,7 @@ describe("@interactive-os/json-document-collaboration", () => {
       pending: [],
     });
     expect(target.document.value).toMatchObject({ title: "Second" });
-    expect(publications).toHaveLength(1);
+    expect(notifications).toHaveLength(1);
   });
 
   test("publishes immutable collaboration snapshots once per state-adding ingest", () => {
@@ -388,18 +388,18 @@ describe("@interactive-os/json-document-collaboration", () => {
     source.document.commit([
       { op: "replace", path: "/title", value: "Second" },
     ]);
-    const bundle = source.collaboration.exportBundle();
+    const bundle = source.replica.exportBundle();
     const first = bundle.changes[0];
     const second = bundle.changes[1];
     if (first === undefined || second === undefined) {
       throw new Error("expected two changes");
     }
 
-    const snapshots: ReturnType<typeof target.collaboration.current>[] = [];
-    const unsubscribe = target.collaboration.subscribe((snapshot) => {
+    const snapshots: ReturnType<typeof target.replica.status>[] = [];
+    const unsubscribe = target.replica.subscribe((snapshot) => {
       snapshots.push(snapshot);
     });
-    target.collaboration.ingest({
+    target.replica.ingest({
       epoch: bundle.epoch,
       changes: [second],
     });
@@ -411,14 +411,14 @@ describe("@interactive-os/json-document-collaboration", () => {
     expect(Object.isFrozen(pendingSnapshot?.pending[0])).toBe(true);
     expect(Object.isFrozen(pendingSnapshot?.pending[0]?.missing)).toBe(true);
 
-    target.collaboration.ingest({
+    target.replica.ingest({
       epoch: bundle.epoch,
       changes: [second],
     });
     expect(snapshots).toHaveLength(1);
 
     unsubscribe();
-    target.collaboration.ingest({
+    target.replica.ingest({
       epoch: bundle.epoch,
       changes: [first],
     });
@@ -426,7 +426,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     expect(target.document.value).toMatchObject({ title: "Second" });
   });
 
-  test("queues reentrant collaboration publications in causal order", () => {
+  test("queues reentrant collaboration notifications in causal order", () => {
     const source = runtime("actor-a");
     const target = runtime("actor-b");
     source.document.commit([
@@ -435,22 +435,22 @@ describe("@interactive-os/json-document-collaboration", () => {
 
     let reentered = false;
     const publishedHeads: string[] = [];
-    target.collaboration.subscribe(() => {
+    target.replica.subscribe(() => {
       if (reentered) return;
       reentered = true;
       expect(target.document.commit([
         { op: "replace", path: "/done", value: true },
       ])).toMatchObject({ ok: true });
     });
-    target.collaboration.subscribe((snapshot) => {
+    target.replica.subscribe((snapshot) => {
       const head = snapshot.heads[0];
       if (head !== undefined) {
         publishedHeads.push(`${head.actorId}:${head.counter}`);
       }
     });
 
-    expect(target.collaboration.ingest(
-      source.collaboration.exportBundle(),
+    expect(target.replica.ingest(
+      source.replica.exportBundle(),
     )).toMatchObject({ ok: true });
     expect(publishedHeads).toEqual(["actor-a:1", "actor-b:1"]);
     expect(target.document.value).toMatchObject({
@@ -467,21 +467,21 @@ describe("@interactive-os/json-document-collaboration", () => {
     ]);
 
     let laterListenerCalls = 0;
-    target.collaboration.subscribe(() => {
+    target.replica.subscribe(() => {
       throw new Error("listener failed");
     });
-    target.collaboration.subscribe(() => {
+    target.replica.subscribe(() => {
       laterListenerCalls += 1;
     });
 
-    expect(() => target.collaboration.ingest(
-      source.collaboration.exportBundle(),
+    expect(() => target.replica.ingest(
+      source.replica.exportBundle(),
     )).not.toThrow();
     expect(laterListenerCalls).toBe(1);
     expect(target.document.value).toMatchObject({ title: "Integrated" });
   });
 
-  test("skips a collaboration listener unsubscribed during publication", () => {
+  test("skips a collaboration listener unsubscribed during notification", () => {
     const source = runtime("actor-a");
     const target = runtime("actor-b");
     source.document.commit([
@@ -491,21 +491,21 @@ describe("@interactive-os/json-document-collaboration", () => {
     const firstListener = vi.fn();
     const secondListener = vi.fn();
     let unsubscribeSecond = (): void => undefined;
-    target.collaboration.subscribe((snapshot) => {
+    target.replica.subscribe((snapshot) => {
       firstListener(snapshot);
       unsubscribeSecond();
     });
-    unsubscribeSecond = target.collaboration.subscribe(secondListener);
+    unsubscribeSecond = target.replica.subscribe(secondListener);
 
-    expect(target.collaboration.ingest(
-      source.collaboration.exportBundle(),
+    expect(target.replica.ingest(
+      source.replica.exportBundle(),
     )).toMatchObject({ ok: true });
     expect(firstListener).toHaveBeenCalledOnce();
     expect(secondListener).not.toHaveBeenCalled();
   });
 
-  test("suppresses a whole concurrent Change when the combined projection is invalid", () => {
-    const accepts = (candidate: unknown) => {
+  test("suppresses a whole concurrent Change when the combined document is invalid", () => {
+    const validate = (candidate: unknown) => {
       const value = candidate as {
         readonly local: boolean;
         readonly remote: boolean;
@@ -524,7 +524,7 @@ describe("@interactive-os/json-document-collaboration", () => {
         id: "test/exclusive-flags",
         digest: "test/exclusive-flags/v1",
       },
-      accepts,
+      validate,
     };
     const left = runtime(
       "actor-a",
@@ -544,15 +544,15 @@ describe("@interactive-os/json-document-collaboration", () => {
       { op: "replace", path: "/remote", value: true },
     ]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       local: true,
       remote: false,
     });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().suppressed).toEqual([
+    expect(left.replica.status().suppressed).toEqual([
       {
         changeId: { actorId: "actor-b", counter: 1 },
         code: "schema_violation",
@@ -563,7 +563,7 @@ describe("@interactive-os/json-document-collaboration", () => {
   });
 
   test("preserves explicit test preconditions when an ancestor Change is suppressed", () => {
-    const accepts = (candidate: unknown) => {
+    const validate = (candidate: unknown) => {
       const value = candidate as {
         readonly local: boolean;
         readonly remote: boolean;
@@ -577,7 +577,7 @@ describe("@interactive-os/json-document-collaboration", () => {
         id: "test/causal-precondition",
         digest: "test/causal-precondition/v1",
       },
-      accepts,
+      validate,
     };
     const left = runtime(
       "actor-a",
@@ -601,15 +601,15 @@ describe("@interactive-os/json-document-collaboration", () => {
       { op: "add", path: "/note", value: "ready" },
     ]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       local: true,
       remote: false,
     });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().suppressed).toMatchObject([
+    expect(left.replica.status().suppressed).toMatchObject([
       {
         changeId: { actorId: "actor-b", counter: 1 },
         code: "schema_violation",
@@ -621,8 +621,8 @@ describe("@interactive-os/json-document-collaboration", () => {
     ]);
   });
 
-  test("isolates acceptance candidates from mutation during remote materialization", () => {
-    const mutatingAcceptance = (candidate: unknown) => {
+  test("isolates validation candidates from mutation during remote materialization", () => {
+    const mutatingValidation = (candidate: unknown) => {
       const value = candidate as { readonly forbidden: boolean };
       if (value.forbidden) {
         Reflect.set(value, "forbidden", false);
@@ -633,33 +633,33 @@ describe("@interactive-os/json-document-collaboration", () => {
     };
     const overrides = {
       ruleset: {
-        id: "test/immutable-acceptance",
-        digest: "test/immutable-acceptance/v1",
+        id: "test/immutable-validation",
+        digest: "test/immutable-validation/v1",
       },
     };
     expect(() => runtime(
       "invalid-initial",
       { forbidden: true },
-      { ...overrides, accepts: mutatingAcceptance },
+      { ...overrides, validate: mutatingValidation },
     )).toThrow("Initial document value was rejected");
 
     const source = runtime("actor-a", { forbidden: false }, overrides);
     const target = runtime("actor-b", { forbidden: false }, {
       ...overrides,
-      accepts: mutatingAcceptance,
+      validate: mutatingValidation,
     });
     source.document.commit([
       { op: "replace", path: "/forbidden", value: true },
     ]);
 
-    const untrusted = source.collaboration.exportBundle();
-    expect(target.collaboration.ingest({
-      epoch: target.collaboration.epoch,
+    const untrusted = source.replica.exportBundle();
+    expect(target.replica.ingest({
+      epoch: target.replica.epoch,
       changes: untrusted.changes,
     }))
       .toMatchObject({ ok: true });
     expect(target.document.value).toEqual({ forbidden: false });
-    expect(target.collaboration.current().suppressed).toMatchObject([
+    expect(target.replica.status().suppressed).toMatchObject([
       {
         changeId: { actorId: "actor-a", counter: 1 },
         code: "schema_violation",
@@ -678,12 +678,12 @@ describe("@interactive-os/json-document-collaboration", () => {
       { op: "add", path: "/fields/name", value: "Right" },
     ]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({ fields: { name: "Right" } });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().conflicts).toMatchObject([
+    expect(left.replica.status().conflicts).toMatchObject([
       {
         kind: "object-key",
         key: "name",
@@ -691,13 +691,13 @@ describe("@interactive-os/json-document-collaboration", () => {
     ]);
 
     const removal = [{ op: "remove", path: "/fields/name" }] as const;
-    expect(left.document.canPatch(removal)).toEqual({ ok: true });
+    expect(left.document.validatePatch(removal)).toEqual({ ok: true });
     expect(left.document.commit(removal)).toMatchObject({ ok: true });
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({ fields: {} });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().conflicts).toEqual([]);
+    expect(left.replica.status().conflicts).toEqual([]);
   });
 
   test("retains concurrent moves that replace the same destination member", () => {
@@ -720,13 +720,13 @@ describe("@interactive-os/json-document-collaboration", () => {
       path: "/y",
     }]);
 
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({ y: "Z" });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().suppressed).toEqual([]);
-    expect(left.collaboration.current().conflicts).toMatchObject([
+    expect(left.replica.status().suppressed).toEqual([]);
+    expect(left.replica.status().conflicts).toMatchObject([
       {
         kind: "object-key",
         key: "y",
@@ -743,17 +743,17 @@ describe("@interactive-os/json-document-collaboration", () => {
     right.document.commit([
       { op: "add", path: "/fields/name", value: "Right" },
     ]);
-    left.collaboration.ingest(right.collaboration.exportBundle());
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    left.replica.ingest(right.replica.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     const move = [{
       op: "move",
       from: "/fields/name",
       path: "/fields/other",
     }] as const;
-    expect(left.document.canPatch(move)).toEqual({ ok: true });
+    expect(left.document.validatePatch(move)).toEqual({ ok: true });
     expect(left.document.commit(move)).toMatchObject({ ok: true });
-    right.collaboration.ingest(left.collaboration.exportBundle());
+    right.replica.ingest(left.replica.exportBundle());
 
     expect(left.document.value).toEqual({
       fields: {
@@ -761,7 +761,7 @@ describe("@interactive-os/json-document-collaboration", () => {
       },
     });
     expect(right.document.value).toEqual(left.document.value);
-    expect(left.collaboration.current().conflicts).toEqual([]);
+    expect(left.replica.status().conflicts).toEqual([]);
   });
 
   test("keeps conflict cleanup effective when an alternative was concurrently removed", () => {
@@ -782,8 +782,8 @@ describe("@interactive-os/json-document-collaboration", () => {
     resolver.document.commit([
       { op: "replace", path: "/sequence", value: 2 },
     ]);
-    resolver.collaboration.ingest(left.collaboration.exportBundle());
-    resolver.collaboration.ingest(right.collaboration.exportBundle());
+    resolver.replica.ingest(left.replica.exportBundle());
+    resolver.replica.ingest(right.replica.exportBundle());
 
     left.document.commit([
       { op: "remove", path: "/fields/name" },
@@ -793,15 +793,15 @@ describe("@interactive-os/json-document-collaboration", () => {
     ]);
 
     const receiver = runtime("receiver", initial);
-    receiver.collaboration.ingest(left.collaboration.exportBundle());
-    receiver.collaboration.ingest(right.collaboration.exportBundle());
-    receiver.collaboration.ingest(resolver.collaboration.exportBundle());
+    receiver.replica.ingest(left.replica.exportBundle());
+    receiver.replica.ingest(right.replica.exportBundle());
+    receiver.replica.ingest(resolver.replica.exportBundle());
 
     expect(receiver.document.value).toEqual({
       fields: {},
       sequence: 2,
     });
-    expect(receiver.collaboration.current().suppressed).toEqual([]);
+    expect(receiver.replica.status().suppressed).toEqual([]);
   });
 
   test("does not report causally superseded writes as concurrent conflicts", () => {
@@ -815,7 +815,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     ]);
 
     expect(shared.document.value).toMatchObject({ title: "Second" });
-    expect(shared.collaboration.current().conflicts).toEqual([]);
+    expect(shared.replica.status().conflicts).toEqual([]);
   });
 
   test("converges after receiving the same three branches in different orders", () => {
@@ -831,20 +831,20 @@ describe("@interactive-os/json-document-collaboration", () => {
     authors[2]?.document.commit([
       { op: "replace", path: "/done", value: true },
     ]);
-    const bundles = authors.map((author) => author.collaboration.exportBundle());
+    const bundles = authors.map((author) => author.replica.exportBundle());
     const first = runtime("receiver-a");
     const second = runtime("receiver-b");
 
     for (const index of [0, 1, 2]) {
-      first.collaboration.ingest(bundles[index]);
+      first.replica.ingest(bundles[index]);
     }
     for (const index of [2, 0, 1]) {
-      second.collaboration.ingest(bundles[index]);
+      second.replica.ingest(bundles[index]);
     }
 
     expect(first.document.value).toEqual(second.document.value);
-    expect(first.collaboration.current()).toEqual(
-      second.collaboration.current(),
+    expect(first.replica.status()).toEqual(
+      second.replica.status(),
     );
   });
 
@@ -859,16 +859,16 @@ describe("@interactive-os/json-document-collaboration", () => {
     right.document.commit([
       { op: "replace", path: "/title", value: "Other" },
     ]);
-    const before = left.collaboration.current();
+    const before = left.replica.status();
 
-    expect(left.collaboration.ingest(right.collaboration.exportBundle()))
+    expect(left.replica.ingest(right.replica.exportBundle()))
       .toEqual({
         ok: false,
         code: "ruleset_mismatch",
         reason: "bundle ruleset does not match this document epoch",
       });
     expect(left.document.value).toMatchObject({ title: "Draft" });
-    expect(left.collaboration.current()).toEqual(before);
+    expect(left.replica.status()).toEqual(before);
   });
 
   test("treats identical delivery as idempotent and rejects changed duplicate payloads", () => {
@@ -877,17 +877,17 @@ describe("@interactive-os/json-document-collaboration", () => {
     source.document.commit([
       { op: "replace", path: "/title", value: "Once" },
     ]);
-    const bundle = source.collaboration.exportBundle();
+    const bundle = source.replica.exportBundle();
 
-    expect(target.collaboration.ingest(bundle)).toMatchObject({ ok: true });
-    expect(target.collaboration.ingest(bundle)).toMatchObject({
+    expect(target.replica.ingest(bundle)).toMatchObject({ ok: true });
+    expect(target.replica.ingest(bundle)).toMatchObject({
       ok: true,
       duplicates: [{ actorId: "actor-a", counter: 1 }],
     });
 
     const change = bundle.changes[0];
     if (change === undefined) throw new Error("expected one change");
-    expect(target.collaboration.ingest({
+    expect(target.replica.ingest({
       epoch: bundle.epoch,
       changes: [{
         ...change,
@@ -909,9 +909,9 @@ describe("@interactive-os/json-document-collaboration", () => {
 
   test("rejects a non-initial actor counter before it can poison history", () => {
     const shared = runtime("actor-a");
-    const before = shared.collaboration.current();
+    const before = shared.replica.status();
     const exhausted: CollaborationBundle = {
-      epoch: shared.collaboration.epoch,
+      epoch: shared.replica.epoch,
       changes: [{
         changeId: {
           actorId: "actor-a",
@@ -921,7 +921,7 @@ describe("@interactive-os/json-document-collaboration", () => {
         ops: [],
       }],
     };
-    expect(shared.collaboration.ingest(exhausted)).toEqual({
+    expect(shared.replica.ingest(exhausted)).toEqual({
       ok: false,
       code: "actor_fork",
       reason: "one actorId must form one contiguous causal change chain",
@@ -930,16 +930,16 @@ describe("@interactive-os/json-document-collaboration", () => {
         counter: Number.MAX_SAFE_INTEGER,
       },
     });
-    expect(shared.collaboration.current()).toEqual(before);
-    expect(shared.collaboration.exportBundle().changes).toEqual([]);
+    expect(shared.replica.status()).toEqual(before);
+    expect(shared.replica.exportBundle().changes).toEqual([]);
     expect(shared.document.value).toMatchObject({ title: "Draft" });
   });
 
   test("rejects a non-causal fork within one actor lineage transactionally", () => {
     const target = runtime("peer");
-    const before = target.collaboration.current();
+    const before = target.replica.status();
     const forked: CollaborationBundle = {
-      epoch: target.collaboration.epoch,
+      epoch: target.replica.epoch,
       changes: [
         {
           changeId: { actorId: "actor-a", counter: 1 },
@@ -954,20 +954,20 @@ describe("@interactive-os/json-document-collaboration", () => {
       ],
     };
 
-    expect(target.collaboration.ingest(forked)).toEqual({
+    expect(target.replica.ingest(forked)).toEqual({
       ok: false,
       code: "actor_fork",
       reason: "one actorId must form one contiguous causal change chain",
       changeId: { actorId: "actor-a", counter: 2 },
     });
-    expect(target.collaboration.current()).toEqual(before);
-    expect(target.collaboration.exportBundle().changes).toEqual([]);
+    expect(target.replica.status()).toEqual(before);
+    expect(target.replica.exportBundle().changes).toEqual([]);
   });
 
   test("rejects a pending actor fork before it can poison later dependencies", () => {
     const target = runtime("peer");
     const fork: CollaborationBundle = {
-      epoch: target.collaboration.epoch,
+      epoch: target.replica.epoch,
       changes: [{
         changeId: { actorId: "actor-a", counter: 2 },
         deps: [{ actorId: "actor-b", counter: 1 }],
@@ -975,19 +975,19 @@ describe("@interactive-os/json-document-collaboration", () => {
       }],
     };
 
-    expect(target.collaboration.ingest(fork)).toEqual({
+    expect(target.replica.ingest(fork)).toEqual({
       ok: false,
       code: "actor_fork",
       reason: "one actorId must form one contiguous causal change chain",
       changeId: { actorId: "actor-a", counter: 2 },
     });
-    expect(target.collaboration.exportBundle().changes).toEqual([]);
+    expect(target.replica.exportBundle().changes).toEqual([]);
   });
 
   test("rejects a first Change that depends on its own future counter", () => {
     const target = runtime("peer");
     const poisoned: CollaborationBundle = {
-      epoch: target.collaboration.epoch,
+      epoch: target.replica.epoch,
       changes: [{
         changeId: { actorId: "actor-a", counter: 1 },
         deps: [{ actorId: "actor-a", counter: 2 }],
@@ -995,14 +995,14 @@ describe("@interactive-os/json-document-collaboration", () => {
       }],
     };
 
-    expect(target.collaboration.ingest(poisoned)).toEqual({
+    expect(target.replica.ingest(poisoned)).toEqual({
       ok: false,
       code: "actor_fork",
       reason: "one actorId must form one contiguous causal change chain",
       changeId: { actorId: "actor-a", counter: 1 },
     });
-    expect(target.collaboration.exportBundle().changes).toEqual([]);
-    expect(target.collaboration.current().pending).toEqual([]);
+    expect(target.replica.exportBundle().changes).toEqual([]);
+    expect(target.replica.status().pending).toEqual([]);
   });
 
   test("does not let a restored actor fork while its own history is pending", () => {
@@ -1013,7 +1013,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     source.document.commit([
       { op: "replace", path: "/title", value: "Second" },
     ]);
-    const bundle = source.collaboration.exportBundle();
+    const bundle = source.replica.exportBundle();
     const first = bundle.changes[0];
     const second = bundle.changes[1];
     if (first === undefined || second === undefined) {
@@ -1021,7 +1021,7 @@ describe("@interactive-os/json-document-collaboration", () => {
     }
 
     const restored = runtime("actor-a");
-    expect(restored.collaboration.ingest({
+    expect(restored.replica.ingest({
       epoch: bundle.epoch,
       changes: [second],
     })).toMatchObject({
@@ -1033,22 +1033,22 @@ describe("@interactive-os/json-document-collaboration", () => {
       path: "/title",
       value: "Fork",
     }] as const;
-    expect(restored.document.canPatch(operation)).toEqual({
+    expect(restored.document.validatePatch(operation)).toEqual({
       ok: false,
       code: "actor_history_pending",
       reason: "cannot author while this actor has pending causal history",
     });
 
-    expect(restored.collaboration.ingest({
+    expect(restored.replica.ingest({
       epoch: bundle.epoch,
       changes: [first],
     })).toMatchObject({ ok: true, pending: [] });
     expect(restored.document.commit(operation)).toMatchObject({ ok: true });
 
     const peer = runtime("peer");
-    expect(peer.collaboration.ingest(restored.collaboration.exportBundle()))
+    expect(peer.replica.ingest(restored.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(peer.document.value).toMatchObject({ title: "Fork" });
-    expect(peer.collaboration.current().conflicts).toEqual([]);
+    expect(peer.replica.status().conflicts).toEqual([]);
   });
 });

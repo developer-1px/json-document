@@ -21,8 +21,8 @@
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
-    "../json-document/tests/conformance/v2/projection-suite.ts",
-    "../json-document/tests/conformance/v2/pressure-suite.ts",
+    "../json-document/tests/conformance/v3/json-document-suite.ts",
+    "../json-document/tests/conformance/v3/pressure-suite.ts",
     "vitest.config.ts"
   ]
 }

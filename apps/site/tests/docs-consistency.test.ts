@@ -29,8 +29,10 @@ const publicDocs = {
 };
 const docs = {
   rootReadme: read("README.md"),
+  docsReadme: read("docs/README.md"),
   readme: read("packages/json-document/README.md"),
-  profile: read("docs/standard/v2-projection-profile.md"),
+  naming: read("docs/standard/concept-and-naming-standard.md"),
+  profile: read("docs/standard/v3-json-document-profile.md"),
   llms: read("llms.txt"),
   site: Object.values(publicDocs).join("\n\n"),
   ...publicDocs,
@@ -52,8 +54,9 @@ describe("public docs consistency", () => {
       "quickstart.md",
     ]);
     expect(readdirSync(join(root, "docs/standard")).sort()).toEqual([
-      "v2-projection-profile.md",
-      "v2-public-surface.json",
+      "concept-and-naming-standard.md",
+      "v3-json-document-profile.md",
+      "v3-public-surface.json",
     ]);
 
     expect(exists("apps/site/src/docs/json-document-concepts.md")).toBe(false);
@@ -64,7 +67,7 @@ describe("public docs consistency", () => {
     expect(exists("docs/standard/json-document-spec.md")).toBe(false);
   });
 
-  test("keeps the active site on the v2 core routes", () => {
+  test("keeps the active site on the v3 core routes", () => {
     expect(siteRoutes.map((route) => route.path)).toEqual([
       "/",
       "/docs",
@@ -113,6 +116,7 @@ describe("public docs consistency", () => {
   test("keeps core usage and project understanding in public docs", () => {
     expect(docs.rootReadme).toMatch(/## 문서 지도/);
     expect(docs.rootReadme).toMatch(/docs\/public\/overview\.md/);
+    expect(docs.rootReadme).toMatch(/docs\/standard\/concept-and-naming-standard\.md/);
     expect(docs.rootReadme).toMatch(/## 코드 지도/);
     expect(docs.rootReadme).toMatch(/packages\/json-document/);
     expect(docs.overview).toMatch(/## 배경/);
@@ -121,9 +125,41 @@ describe("public docs consistency", () => {
     expect(docs.quickstart).toMatch(/튜토리얼: 작은 카드 편집기 만들기/);
     expect(docs.api).toMatch(/## 작업별 진입점/);
     expect(docs.api).toMatch(/ReadResult/);
-    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@2\.0\.0/);
-    expect(docs.readme).toMatch(/provider-neutral/);
-    expect(docs.llms).toMatch(/2\.0\.0.*Stable/);
+    expect(docs.readme).toMatch(/npm install @interactive-os\/json-document@3\.0\.0/);
+    expect(docs.readme).toMatch(/implementation-neutral/);
+    expect(docs.llms).toMatch(/v3 표준 상태는 Stable/);
+    expect(docs.llms).toMatch(/source release version은 `3\.0\.0`/);
+    expect(docs.llms).toMatch(/npm에는\s+아직 publication되지 않았다/);
+  });
+
+  test("locks one canonical concept and naming standard", () => {
+    expect(docs.naming).toMatch(/상태: Canonical/);
+    expect(docs.naming).toMatch(/## 이름 권위/);
+    expect(docs.naming).toMatch(/## 개념 경계/);
+    expect(docs.naming).toMatch(/## 접두어와 casing/);
+    expect(docs.naming).toMatch(/## 접미어/);
+    expect(docs.naming).toMatch(/## 함수 동사/);
+    expect(docs.naming).toMatch(/## Boolean/);
+    expect(docs.naming).toMatch(/## Protocol vocabulary boundary/);
+    expect(docs.naming).toMatch(/## Current public surface decisions/);
+    expect(docs.naming).toMatch(/## 새 concept admission/);
+
+    for (const term of [
+      "JSON Document",
+      "patch validation",
+      "change notification",
+      "collaboration engine",
+      "replica status",
+      "native-input DOM lease",
+    ]) {
+      expect(docs.naming).toContain(term);
+    }
+
+    for (const source of [docs.rootReadme, docs.overview, docs.readme]) {
+      expect(source).not.toMatch(
+        /Pure Protocol|Document Projection|document projection|local provider|collaboration provider|DOM publication lease/,
+      );
+    }
   });
 
   test("keeps JSONPath scoped to search and JSON Pointer scoped to mutation", () => {
@@ -152,7 +188,7 @@ describe("public docs consistency", () => {
     }
   });
 
-  test("locks the documented v2 root contract", () => {
+  test("locks the documented v3 root contract", () => {
     expect(Object.keys(publicContract)).toEqual(["root"]);
     expect(publicContract.root.values).toEqual([
       "appendSegment",
@@ -166,20 +202,28 @@ describe("public docs consistency", () => {
     ]);
     expect(publicContract.root.types).toEqual([
       "JSONAppliedChange",
-      "JSONCapabilityResult",
       "JSONChangeMetadata",
       "JSONDocument",
+      "JSONDocumentOptions",
       "JSONDocumentCommitOptions",
       "JSONDocumentCommitResult",
       "JSONPatchOperation",
       "JSONPatchResult",
+      "JSONPatchValidationResult",
       "JSONValue",
       "Pointer",
       "QueryResult",
       "ReadResult",
     ]);
 
-    for (const member of ["value", "at", "query", "canPatch", "commit", "subscribe"]) {
+    for (const member of [
+      "value",
+      "at",
+      "query",
+      "validatePatch",
+      "commit",
+      "subscribe",
+    ]) {
       expect(docs.api).toContain(member);
     }
     expect(docs.api).toMatch(/applyPatch[\s\S]*RFC 6902/);

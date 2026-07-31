@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document",
   "short_name": "@interactive-os/json-document",
-  "description": "Provider-neutral JSON editing protocol and headless document projection.",
+  "description": "Implementation-neutral JSON editing and a headless JSON Document.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fafaf9",

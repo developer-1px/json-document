@@ -4,7 +4,7 @@ import {
 } from "@interactive-os/json-document";
 
 import { changeIdKey } from "./change.js";
-import { parseArrayIndex } from "./arrayIndex.js";
+import { parseArrayIndex } from "./array-index.js";
 import {
   applyAuthoredOperation,
   arrayMembers,

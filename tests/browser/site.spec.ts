@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test("official overview exposes only the v2 core documentation", async ({ page }) => {
+test("official overview exposes only the v3 core documentation", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
 

@@ -10,7 +10,7 @@ import {
 import {
   runPointerConformance,
   type PointerHarness,
-} from "../conformance/v2/pointer-suite.js";
+} from "../conformance/v3/pointer-suite.js";
 
 const referenceHarness: PointerHarness = {
   appendSegment,

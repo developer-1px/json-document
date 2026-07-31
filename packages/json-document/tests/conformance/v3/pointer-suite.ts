@@ -56,7 +56,7 @@ interface PointerManifest {
 const manifest = rawVectors as unknown as PointerManifest;
 
 export function runPointerConformance(harness: PointerHarness): void {
-  describe("json-document v2 Pointer black-box conformance", () => {
+  describe("json-document v3 Pointer black-box conformance", () => {
     for (const vector of manifest.parse) {
       test(`[${vector.id}]`, () => {
         expect(harness.parsePointer(vector.pointer)).toEqual(vector.segments);

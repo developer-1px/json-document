@@ -27,7 +27,7 @@ export interface JSONDocumentCommitOptions {
   readonly metadata?: JSONChangeMetadata;
 }
 
-export type JSONCapabilityResult =
+export type JSONPatchValidationResult =
   | { readonly ok: true }
   | {
       readonly ok: false;
@@ -35,6 +35,10 @@ export type JSONCapabilityResult =
       readonly reason?: string;
       readonly pointer?: Pointer;
     };
+
+export interface JSONDocumentOptions {
+  readonly validate?: (candidate: JSONValue) => JSONPatchValidationResult;
+}
 
 export type ReadResult =
   | { readonly ok: true; readonly path: Pointer; readonly value: JSONValue }
@@ -78,9 +82,9 @@ export interface JSONDocument {
   readonly value: JSONValue;
   at(pointer: Pointer): ReadResult;
   query(jsonPath: string): QueryResult;
-  canPatch(
+  validatePatch(
     operations: ReadonlyArray<JSONPatchOperation>,
-  ): JSONCapabilityResult;
+  ): JSONPatchValidationResult;
   commit(
     operations: ReadonlyArray<JSONPatchOperation>,
     options?: JSONDocumentCommitOptions,

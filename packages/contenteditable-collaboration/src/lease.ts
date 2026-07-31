@@ -1,33 +1,33 @@
 import type {
-  CollaborationTextCapture,
-  CollaborationTextSelection,
+  TextCapture,
+  TextSelection,
 } from "@interactive-os/json-document-collaboration/text";
-import { plainTextCollaborationDOM } from "./dom/plainText.js";
+import { plainTextDOMAdapter } from "./dom/plain-text.js";
 import type {
-  CollaborationContentEditableAdapter,
-  CollaborationContentEditableOptions,
-  CollaborationContentEditableResult,
+  ContentEditableAdapter,
+  ContentEditableOptions,
+  ContentEditableResult,
 } from "./types.js";
 
 interface ActiveLease {
-  readonly capture: CollaborationTextCapture;
+  readonly capture: TextCapture;
   phase: "native" | "composing";
   nativeFallback: ReturnType<typeof setTimeout> | null;
 }
 
-interface TailPublication {
+interface TailReconciliation {
   readonly token: number;
   readonly basis: TailSelectionBasis | null;
-  readonly selection: CollaborationTextSelection | null;
+  readonly selection: TextSelection | null;
   readonly timer: ReturnType<typeof setTimeout>;
 }
 
 interface TailSelectionBasis {
-  readonly capture: CollaborationTextCapture;
-  readonly selection: CollaborationTextSelection;
+  readonly capture: TextCapture;
+  readonly selection: TextSelection;
 }
 
-interface PublishedProjection {
+interface RenderedDocument {
   readonly available: boolean;
   readonly value: string;
 }
@@ -36,43 +36,43 @@ interface PublishedProjection {
  * Binds one contenteditable root to one collaborative string pointer.
  *
  * Collaboration ingestion is never paused. While native input owns the root,
- * only DOM publication is leased; release always renders the latest model.
+ * only DOM rendering is leased; release always renders the latest model.
  */
-export function createCollaborationContentEditableAdapter({
-  dom = plainTextCollaborationDOM,
+export function createContentEditableAdapter({
+  dom = plainTextDOMAdapter,
   onResult,
   pointer,
   root,
   runtime,
-}: CollaborationContentEditableOptions): CollaborationContentEditableAdapter {
+}: ContentEditableOptions): ContentEditableAdapter {
   let activeLease: ActiveLease | null = null;
-  let tail: TailPublication | null = null;
+  let tail: TailReconciliation | null = null;
   let tailSequence = 0;
-  let published: PublishedProjection | null = null;
+  let renderedDocument: RenderedDocument | null = null;
   let bound = false;
   let unsubscribeDocument: (() => void) | null = null;
 
   const report = (
-    result: CollaborationContentEditableResult,
-  ): CollaborationContentEditableResult => {
+    result: ContentEditableResult,
+  ): ContentEditableResult => {
     onResult?.(result);
     return result;
   };
 
-  const currentDOMSelection = (): CollaborationTextSelection | null =>
+  const currentDOMSelection = (): TextSelection | null =>
     dom.observe(root).selection;
 
-  const publishLatest = (
-    requestedSelection: CollaborationTextSelection | null | undefined,
+  const renderLatest = (
+    requestedSelection: TextSelection | null | undefined,
     force: boolean,
-  ): CollaborationContentEditableResult => {
+  ): ContentEditableResult => {
     const read = runtime.document.at(pointer);
     const available = read.ok && typeof read.value === "string";
     const value = available ? read.value as string : "";
     const unchanged = (
-      published !== null
-      && published.available === available
-      && published.value === value
+      renderedDocument !== null
+      && renderedDocument.available === available
+      && renderedDocument.value === value
     );
     if (!force && unchanged) {
       return NO_CHANGE;
@@ -82,7 +82,7 @@ export function createCollaborationContentEditableAdapter({
       ? currentDOMSelection()
       : requestedSelection;
     dom.render(root, value);
-    published = { available, value };
+    renderedDocument = { available, value };
     if (selection !== null && available) {
       dom.restoreSelection(root, selection);
     }
@@ -103,7 +103,7 @@ export function createCollaborationContentEditableAdapter({
 
   const finishTail = (
     expectedToken?: number,
-  ): CollaborationContentEditableResult => {
+  ): ContentEditableResult => {
     if (
       tail === null
       || (
@@ -116,27 +116,27 @@ export function createCollaborationContentEditableAdapter({
     const basis = tail.basis;
     const selection = tail.selection;
     clearTail();
-    if (basis === null) return publishLatest(selection, true);
+    if (basis === null) return renderLatest(selection, true);
 
     const planned = runtime.text.plan(basis.capture, {
       value: basis.capture.value,
       selection: basis.selection,
     });
     if (!planned.ok) {
-      publishLatest(basis.selection, true);
+      renderLatest(basis.selection, true);
       return failure(planned.code, planned.reason);
     }
     const committed = runtime.text.commit(planned.plan);
     if (!committed.ok) {
-      publishLatest(basis.selection, true);
+      renderLatest(basis.selection, true);
       return failure(committed.code, committed.reason);
     }
-    return publishLatest(committed.selection, true);
+    return renderLatest(committed.selection, true);
   };
 
   const enterTail = (
     basis: TailSelectionBasis | null,
-    selection: CollaborationTextSelection | null,
+    selection: TextSelection | null,
   ): void => {
     clearTail();
     const token = tailSequence + 1;
@@ -150,17 +150,17 @@ export function createCollaborationContentEditableAdapter({
 
   const recover = (
     failure: Extract<
-      CollaborationContentEditableResult,
+      ContentEditableResult,
       { readonly ok: false }
     >,
-    selection: CollaborationTextSelection | null,
+    selection: TextSelection | null,
     composition: boolean,
-  ): CollaborationContentEditableResult => {
+  ): ContentEditableResult => {
     clearActiveLease();
     if (composition) {
       enterTail(null, selection);
     } else {
-      publishLatest(selection, true);
+      renderLatest(selection, true);
     }
     return failure;
   };
@@ -168,7 +168,7 @@ export function createCollaborationContentEditableAdapter({
   const begin = (
     phase: ActiveLease["phase"],
     event: Event,
-  ): CollaborationContentEditableResult => {
+  ): ContentEditableResult => {
     if (tail !== null) finishTail();
     if (activeLease !== null) {
       if (phase === "composing") {
@@ -183,7 +183,7 @@ export function createCollaborationContentEditableAdapter({
     const captured = runtime.text.capture(pointer);
     if (!captured.ok) {
       if (event.cancelable) event.preventDefault();
-      publishLatest(undefined, true);
+      renderLatest(undefined, true);
       return failure(captured.code, captured.reason);
     }
     activeLease = {
@@ -196,7 +196,7 @@ export function createCollaborationContentEditableAdapter({
       lease.nativeFallback = setTimeout(() => {
         if (activeLease !== lease || lease.phase !== "native") return;
         clearActiveLease();
-        publishLatest(undefined, true);
+        renderLatest(undefined, true);
         report(CANCELLED);
       }, 0);
     }
@@ -205,7 +205,7 @@ export function createCollaborationContentEditableAdapter({
 
   const finalize = (
     composition: boolean,
-  ): CollaborationContentEditableResult => {
+  ): ContentEditableResult => {
     const lease = activeLease;
     if (lease === null) return NO_CHANGE;
     if (lease.nativeFallback !== null) {
@@ -248,29 +248,29 @@ export function createCollaborationContentEditableAdapter({
         committed.selection,
       );
     } else {
-      publishLatest(committed.selection, true);
+      renderLatest(committed.selection, true);
     }
     return Object.freeze({
       ok: true,
       kind: "committed",
       changeId: committed.changeId,
-      projectionChanged: committed.projectionChanged,
+      didChangeDocument: committed.didChangeDocument,
       selection: committed.selection,
     });
   };
 
-  const cancelInternal = (): CollaborationContentEditableResult => {
+  const cancelInternal = (): ContentEditableResult => {
     const changed = activeLease !== null || tail !== null;
     if (!changed) return NO_CHANGE;
     clearActiveLease();
     clearTail();
-    publishLatest(undefined, true);
+    renderLatest(undefined, true);
     return CANCELLED;
   };
 
   const handleInternal = (
     event: Event,
-  ): CollaborationContentEditableResult => {
+  ): ContentEditableResult => {
     if (event.type === "blur") return cancelInternal();
 
     if (event.type === "beforeinput") {
@@ -301,7 +301,7 @@ export function createCollaborationContentEditableAdapter({
         "missing_text_capture",
         "native input arrived without a capture-time text basis",
       );
-      publishLatest(undefined, true);
+      renderLatest(undefined, true);
       return result;
     }
 
@@ -317,7 +317,7 @@ export function createCollaborationContentEditableAdapter({
     if (activeLease !== null || tail !== null) {
       return;
     }
-    publishLatest(undefined, false);
+    renderLatest(undefined, false);
   };
 
   const unbind = (): void => {
@@ -340,7 +340,7 @@ export function createCollaborationContentEditableAdapter({
         root.addEventListener(type, boundHandle, true);
       }
       unsubscribeDocument = runtime.document.subscribe(onDocumentChange);
-      const initial = publishLatest(undefined, true);
+      const initial = renderLatest(undefined, true);
       if (!initial.ok) report(initial);
       let active = true;
       return () => {
@@ -349,16 +349,16 @@ export function createCollaborationContentEditableAdapter({
         unbind();
       };
     },
-    handle(event: Event): CollaborationContentEditableResult {
+    handle(event: Event): ContentEditableResult {
       return report(handleInternal(event));
     },
-    cancel(): CollaborationContentEditableResult {
+    cancel(): ContentEditableResult {
       return report(cancelInternal());
     },
     reset(): void {
       clearActiveLease();
       clearTail();
-      publishLatest(undefined, true);
+      renderLatest(undefined, true);
     },
   });
 }
@@ -423,7 +423,7 @@ function failure(
   code: string,
   reason: string,
 ): Extract<
-  CollaborationContentEditableResult,
+  ContentEditableResult,
   { readonly ok: false }
 > {
   return Object.freeze({ ok: false, code, reason });
@@ -437,22 +437,22 @@ const ROOT_EVENTS = Object.freeze([
   "blur",
 ] as const);
 
-const NO_CHANGE: CollaborationContentEditableResult = Object.freeze({
+const NO_CHANGE: ContentEditableResult = Object.freeze({
   ok: true,
   kind: "no-change",
 });
 
-const LEASE_STARTED: CollaborationContentEditableResult = Object.freeze({
+const LEASE_STARTED: ContentEditableResult = Object.freeze({
   ok: true,
   kind: "lease-started",
 });
 
-const RENDERED: CollaborationContentEditableResult = Object.freeze({
+const RENDERED: ContentEditableResult = Object.freeze({
   ok: true,
   kind: "rendered",
 });
 
-const CANCELLED: CollaborationContentEditableResult = Object.freeze({
+const CANCELLED: ContentEditableResult = Object.freeze({
   ok: true,
   kind: "cancelled",
 });

@@ -10,13 +10,14 @@ export {
 } from "./protocol.js";
 export type {
   JSONAppliedChange,
-  JSONCapabilityResult,
   JSONChangeMetadata,
   JSONDocument,
+  JSONDocumentOptions,
   JSONDocumentCommitOptions,
   JSONDocumentCommitResult,
   JSONPatchOperation,
   JSONPatchResult,
+  JSONPatchValidationResult,
   JSONValue,
   Pointer,
   QueryResult,

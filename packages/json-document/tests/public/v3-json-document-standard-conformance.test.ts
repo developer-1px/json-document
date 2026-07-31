@@ -1,20 +1,20 @@
 import {
   createJSONDocument,
-  type JSONCapabilityResult,
+  type JSONPatchValidationResult,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
 import { expect, test } from "vitest";
 
 import {
-  runProjectionConformance,
-  type Projection,
-  type ProjectionAcceptance,
-  type ProjectionHarness,
-} from "../conformance/v2/projection-suite.js";
-import { runPressureConformance } from "../conformance/v2/pressure-suite.js";
+  runJSONDocumentConformance,
+  type JSONDocument,
+  type JSONDocumentValidation,
+  type JSONDocumentHarness,
+} from "../conformance/v3/json-document-suite.js";
+import { runPressureConformance } from "../conformance/v3/pressure-suite.js";
 
-function taskListAcceptance(candidate: JSONValue): JSONCapabilityResult {
+function taskListValidation(candidate: JSONValue): JSONPatchValidationResult {
   const valid = isRecord(candidate)
     && typeof candidate.title === "string"
     && Array.isArray(candidate.items)
@@ -30,28 +30,28 @@ function taskListAcceptance(candidate: JSONValue): JSONCapabilityResult {
     : {
         ok: false,
         code: "schema_violation",
-        reason: "candidate does not satisfy the task-list acceptance rule",
+        reason: "candidate does not satisfy the task-list validation rule",
       };
 }
 
-function createReferenceProjection(
-  acceptance: ProjectionAcceptance,
+function createReferenceJSONDocument(
+  validation: JSONDocumentValidation,
   initial: JSONValue,
-): Projection {
-  const accepts = acceptance === "task-list"
-    ? taskListAcceptance
-    : acceptance === "attempt-transform"
-      ? attemptTransformAcceptance
+): JSONDocument {
+  const validate = validation === "task-list"
+    ? taskListValidation
+    : validation === "attempt-transform"
+      ? attemptTransformValidation
       : undefined;
   return createJSONDocument(
     initial,
-    accepts === undefined ? {} : { accepts },
+    validate === undefined ? {} : { validate },
   );
 }
 
-function attemptTransformAcceptance(
+function attemptTransformValidation(
   candidate: JSONValue,
-): JSONCapabilityResult {
+): JSONPatchValidationResult {
   if (isRecord(candidate)) {
     Reflect.set(candidate, "title", "Implicit");
   }
@@ -64,14 +64,14 @@ function isRecord(
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-const referenceHarness: ProjectionHarness = {
-  create: createReferenceProjection,
+const referenceHarness: JSONDocumentHarness = {
+  create: createReferenceJSONDocument,
 };
 
-runProjectionConformance(referenceHarness);
+runJSONDocumentConformance(referenceHarness);
 runPressureConformance(referenceHarness);
 
-test("nested commits preserve one causal publication order for every subscriber", () => {
+test("nested commits preserve one causal notification order for every subscriber", () => {
   const document = createJSONDocument({ value: 0 });
   const first: JSONValue[] = [];
   const second: JSONValue[] = [];
@@ -205,10 +205,10 @@ test("owned preparation keeps earlier failure precedence and commit atomicity", 
     { op: "test", path: "/value", value: 2 },
     { op: "add", path: "/callback", value: () => undefined },
   ] as unknown as ReadonlyArray<JSONPatchOperation>;
-  const publications: JSONValue[] = [];
-  document.subscribe(() => publications.push(document.value));
+  const notifications: JSONValue[] = [];
+  document.subscribe(() => notifications.push(document.value));
 
-  expect(document.canPatch(operations)).toMatchObject({
+  expect(document.validatePatch(operations)).toMatchObject({
     ok: false,
     code: "test_failed",
     pointer: "/value",
@@ -219,25 +219,25 @@ test("owned preparation keeps earlier failure precedence and commit atomicity", 
     pointer: "/value",
   });
   expect(document.value).toEqual({ value: 1 });
-  expect(publications).toEqual([]);
+  expect(notifications).toEqual([]);
 });
 
-test("initial and acceptance boundaries fail without publishing invalid state", () => {
+test("initial and validation boundaries fail without publishing invalid state", () => {
   expect(() => createJSONDocument(() => undefined)).toThrow(TypeError);
   expect(() => createJSONDocument(
     { value: 0 },
     {
-      accepts: () => ({
+      validate: () => ({
         ok: false,
         code: "schema_violation",
       }),
     },
   )).toThrow(TypeError);
 
-  const throwingAcceptance = createJSONDocument(
+  const throwingValidationDocument = createJSONDocument(
     { value: 0 },
     {
-      accepts(candidate) {
+      validate(candidate) {
         if (
           typeof candidate === "object"
           && candidate !== null
@@ -251,29 +251,29 @@ test("initial and acceptance boundaries fail without publishing invalid state", 
     },
   );
   const observed: unknown[] = [];
-  throwingAcceptance.subscribe((change) => observed.push(change));
+  throwingValidationDocument.subscribe((change) => observed.push(change));
 
-  expect(throwingAcceptance.commit([
+  expect(throwingValidationDocument.commit([
     { op: "replace", path: "/value", value: 1 },
   ])).toMatchObject({
     ok: false,
     code: "schema_violation",
     reason: "provider failed",
   });
-  expect(throwingAcceptance.value).toEqual({ value: 0 });
+  expect(throwingValidationDocument.value).toEqual({ value: 0 });
   expect(observed).toEqual([]);
 });
 
-test("malformed acceptance results fail closed without changing state", () => {
+test("malformed validation results fail closed without changing state", () => {
   expect(() => createJSONDocument(
     { value: 0 },
-    { accepts: () => undefined as never },
+    { validate: () => undefined as never },
   )).toThrow(TypeError);
 
   const document = createJSONDocument(
     { value: 0 },
     {
-      accepts(candidate) {
+      validate(candidate) {
         return isRecord(candidate) && candidate.value === 1
           ? undefined as never
           : { ok: true };
@@ -288,7 +288,7 @@ test("malformed acceptance results fail closed without changing state", () => {
     value: 1,
   }] as const;
 
-  expect(document.canPatch(operations)).toMatchObject({
+  expect(document.validatePatch(operations)).toMatchObject({
     ok: false,
     code: "schema_violation",
   });
@@ -300,10 +300,10 @@ test("malformed acceptance results fail closed without changing state", () => {
   expect(observed).toEqual([]);
 });
 
-test("acceptance evaluation blocks reentrant probes and commits without changing state", () => {
+test("validation evaluation blocks reentrant probes and commits without changing state", () => {
   let document: ReturnType<typeof createJSONDocument> | undefined;
   const nestedResults: unknown[] = [];
-  const publications: Array<{
+  const notifications: Array<{
     readonly change: unknown;
     readonly value: JSONValue;
   }> = [];
@@ -311,13 +311,13 @@ test("acceptance evaluation blocks reentrant probes and commits without changing
   document = createJSONDocument(
     { a: 0, b: 0 },
     {
-      accepts(candidate) {
+      validate(candidate) {
         if (
           document !== undefined
           && isRecord(candidate)
           && candidate.a === 1
         ) {
-          nestedResults.push(document.canPatch([
+          nestedResults.push(document.validatePatch([
             { op: "replace", path: "/b", value: 2 },
           ]));
           nestedResults.push(document.commit([
@@ -329,14 +329,14 @@ test("acceptance evaluation blocks reentrant probes and commits without changing
     },
   );
   document.subscribe((change) => {
-    publications.push({ change, value: document!.value });
+    notifications.push({ change, value: document!.value });
   });
 
-  expect(document.canPatch([
+  expect(document.validatePatch([
     { op: "replace", path: "/a", value: 1 },
   ])).toEqual({ ok: true });
   expect(document.value).toEqual({ a: 0, b: 0 });
-  expect(publications).toEqual([]);
+  expect(notifications).toEqual([]);
 
   expect(document.commit([
     { op: "replace", path: "/a", value: 1 },
@@ -352,11 +352,11 @@ test("acceptance evaluation blocks reentrant probes and commits without changing
     expect(result).toEqual({
       ok: false,
       code: "acceptance_reentrancy",
-      reason: "acceptance callback cannot call canPatch or commit",
+      reason: "validation callback cannot call validatePatch or commit",
     });
   }
   expect(document.value).toEqual({ a: 1, b: 0 });
-  expect(publications).toEqual([{
+  expect(notifications).toEqual([{
     change: {
       applied: [{ op: "replace", path: "/a", value: 1 }],
     },
@@ -366,8 +366,8 @@ test("acceptance evaluation blocks reentrant probes and commits without changing
 
 test("state-equivalent commits expose a frozen empty applied list", () => {
   const document = createJSONDocument({ value: 1 });
-  const publications: unknown[] = [];
-  document.subscribe((change) => publications.push(change));
+  const notifications: unknown[] = [];
+  document.subscribe((change) => notifications.push(change));
 
   const result = document.commit([
     { op: "replace", path: "/value", value: 1 },
@@ -387,5 +387,5 @@ test("state-equivalent commits expose a frozen empty applied list", () => {
   )).toBe(false);
   expect(result.change.applied).toEqual([]);
   expect(document.value).toEqual({ value: 1 });
-  expect(publications).toEqual([]);
+  expect(notifications).toEqual([]);
 });

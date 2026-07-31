@@ -1,6 +1,6 @@
 import { buildPointer } from "../pointer/core.js";
 import { isJsonArrayIndexKey } from "./classification.js";
-import { cloneTrustedPlainJson } from "./trustedClone.js";
+import { cloneTrustedPlainJson } from "./trusted-clone.js";
 import { jsonSerializableErrorFast } from "./serializable.js";
 
 type CloneJsonResult<T> =

@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         if: steps.scope.outputs.package_any == 'true'
         run: npm ci --no-audit --no-fund
-      - name: Verify active v2 packages
+      - name: Verify active v3 packages
         if: steps.scope.outputs.package_full == 'true'
         run: npm run verify -w @interactive-os/json-document && npm run verify:companions && npm run standard:check && npm run docs:evaluate
       - name: Verify package documentation

@@ -1,5 +1,5 @@
 import { buildPointer, parentPointer, type Pointer } from "../pointer/core.js";
-import { parseArrayIndex } from "../pointer/arrayIndex.js";
+import { parseArrayIndex } from "../pointer/array-index.js";
 import { getValueAt, parseSafe } from "./container.js";
 
 export interface ArrayFieldPath {

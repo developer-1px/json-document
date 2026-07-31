@@ -1,41 +1,41 @@
 import type { Pointer } from "@interactive-os/json-document";
 import type {
   ChangeId,
-  CollaborationTextRuntime,
-  CollaborationTextSelection,
+  TextRuntime,
+  TextSelection,
 } from "@interactive-os/json-document-collaboration/text";
 
-export interface CollaborationTextDOMObservation {
+export interface DOMObservation {
   readonly value: string;
-  readonly selection: CollaborationTextSelection | null;
+  readonly selection: TextSelection | null;
 }
 
 /**
- * The DOM projection for one collaborative string field.
+ * The DOM adapter for one collaborative string field.
  *
  * Implementations may render wrappers, but observed and restored offsets must
  * use JavaScript/DOM UTF-16 offsets.
  */
-export interface CollaborationTextDOM {
-  observe(root: HTMLElement): CollaborationTextDOMObservation;
+export interface TextDOMAdapter {
+  observe(root: HTMLElement): DOMObservation;
   render(root: HTMLElement, value: string): void;
   restoreSelection(
     root: HTMLElement,
-    selection: CollaborationTextSelection,
+    selection: TextSelection,
   ): boolean;
 }
 
-export interface CollaborationContentEditableOptions {
-  readonly runtime: CollaborationTextRuntime;
+export interface ContentEditableOptions {
+  readonly runtime: TextRuntime;
   readonly pointer: Pointer;
   readonly root: HTMLElement;
-  readonly dom?: CollaborationTextDOM;
+  readonly dom?: TextDOMAdapter;
   readonly onResult?: (
-    result: CollaborationContentEditableResult,
+    result: ContentEditableResult,
   ) => void;
 }
 
-export type CollaborationContentEditableResult =
+export type ContentEditableResult =
   | {
       readonly ok: true;
       readonly kind:
@@ -48,8 +48,8 @@ export type CollaborationContentEditableResult =
       readonly ok: true;
       readonly kind: "committed";
       readonly changeId: ChangeId | null;
-      readonly projectionChanged: boolean;
-      readonly selection: CollaborationTextSelection | null;
+      readonly didChangeDocument: boolean;
+      readonly selection: TextSelection | null;
     }
   | {
       readonly ok: false;
@@ -57,9 +57,9 @@ export type CollaborationContentEditableResult =
       readonly reason: string;
     };
 
-export interface CollaborationContentEditableAdapter {
+export interface ContentEditableAdapter {
   bind(): () => void;
-  handle(event: Event): CollaborationContentEditableResult;
-  cancel(): CollaborationContentEditableResult;
+  handle(event: Event): ContentEditableResult;
+  cancel(): ContentEditableResult;
   reset(): void;
 }

@@ -8,7 +8,7 @@ export {
 } from "./apply.js";
 export type {
   JSONAppliedChange,
-  JSONCapabilityResult,
+  JSONPatchValidationResult,
   JSONChangeMetadata,
   JSONDocumentCommitOptions,
   JSONDocumentCommitResult,

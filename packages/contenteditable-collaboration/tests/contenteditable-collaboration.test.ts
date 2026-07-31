@@ -11,11 +11,11 @@ import {
   type CollaborationRuntimeOptions,
 } from "@interactive-os/json-document-collaboration";
 import {
-  createCollaborationTextRuntime,
+  createTextRuntime,
 } from "@interactive-os/json-document-collaboration/text";
 import {
-  createCollaborationContentEditableAdapter,
-  plainTextCollaborationDOM,
+  createContentEditableAdapter,
+  plainTextDOMAdapter,
 } from "../src/index.js";
 
 const baseOptions = {
@@ -31,7 +31,7 @@ function textRuntime(
   initial: unknown = { title: "ab" },
   overrides: Partial<CollaborationRuntimeOptions> = {},
 ) {
-  return createCollaborationTextRuntime(initial, {
+  return createTextRuntime(initial, {
     ...baseOptions,
     actorId,
     ...overrides,
@@ -87,7 +87,7 @@ function ownChanges(
   runtime: ReturnType<typeof textRuntime>,
   actorId: string,
 ) {
-  return runtime.collaboration.exportBundle().changes.filter(
+  return runtime.replica.exportBundle().changes.filter(
     (change) => change.changeId.actorId === actorId,
   );
 }
@@ -99,12 +99,12 @@ afterEach(() => {
 });
 
 describe("@interactive-os/json-document-contenteditable-collaboration", () => {
-  test("ingests remote text immediately while leasing only DOM publication", () => {
+  test("ingests remote text immediately while leasing only DOM notification", () => {
     vi.useFakeTimers();
     const local = textRuntime("actor-a");
     const remote = textRuntime("actor-b");
     const root = createRoot();
-    const adapter = createCollaborationContentEditableAdapter({
+    const adapter = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -120,7 +120,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       path: "/title",
       value: "aXb",
     }])).toMatchObject({ ok: true });
-    expect(local.collaboration.ingest(remote.collaboration.exportBundle()))
+    expect(local.replica.ingest(remote.replica.exportBundle()))
       .toMatchObject({ ok: true });
 
     expect(local.document.value).toEqual({ title: "aXb" });
@@ -140,7 +140,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     expect(root.textContent).toBe("aYXb");
     expect(document.getSelection()?.anchorOffset).toBe(2);
 
-    expect(remote.collaboration.ingest(local.collaboration.exportBundle()))
+    expect(remote.replica.ingest(local.replica.exportBundle()))
       .toMatchObject({ ok: true });
     expect(remote.document.value).toEqual(local.document.value);
     unbind();
@@ -149,7 +149,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("captures before native input and commits through the text profile", () => {
     const local = textRuntime("actor-a");
     const root = createRoot();
-    const adapter = createCollaborationContentEditableAdapter({
+    const adapter = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -175,7 +175,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       vi.useFakeTimers();
       const local = textRuntime("actor-a");
       const root = createRoot();
-      const adapter = createCollaborationContentEditableAdapter({
+      const adapter = createContentEditableAdapter({
         runtime: local,
         pointer: "/title",
         root,
@@ -214,7 +214,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     for (const action of ["cancel", "reset"] as const) {
       const local = textRuntime(`actor-${action}`);
       const root = createRoot();
-      const adapter = createCollaborationContentEditableAdapter({
+      const adapter = createContentEditableAdapter({
         runtime: local,
         pointer: "/title",
         root,
@@ -270,7 +270,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       const local = textRuntime("actor-a");
       const remote = atomicRuntime("actor-b");
       const root = createRoot();
-      const adapter = createCollaborationContentEditableAdapter({
+      const adapter = createContentEditableAdapter({
         runtime: local,
         pointer: "/title",
         root,
@@ -283,7 +283,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
 
       expect(remote.document.commit(scenario.patch))
         .toMatchObject({ ok: true });
-      expect(local.collaboration.ingest(remote.collaboration.exportBundle()))
+      expect(local.replica.ingest(remote.replica.exportBundle()))
         .toMatchObject({ ok: true });
       expect(local.document.value).toEqual(scenario.value);
       expect(root.textContent).toBe("aXb");
@@ -298,18 +298,18 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     });
   }
 
-  test("leases one surface without delaying publication to another", () => {
+  test("leases one surface without delaying notification to another", () => {
     const initial = { title: "ab", note: "cd" };
     const local = textRuntime("actor-a", initial);
     const remote = textRuntime("actor-b", initial);
     const titleRoot = createRoot();
     const noteRoot = createRoot();
-    const title = createCollaborationContentEditableAdapter({
+    const title = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root: titleRoot,
     });
-    const note = createCollaborationContentEditableAdapter({
+    const note = createContentEditableAdapter({
       runtime: local,
       pointer: "/note",
       root: noteRoot,
@@ -326,7 +326,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       path: "/note",
       value: "cYd",
     }]);
-    local.collaboration.ingest(remote.collaboration.exportBundle());
+    local.replica.ingest(remote.replica.exportBundle());
 
     expect(local.document.value).toEqual({ title: "ab", note: "cYd" });
     expect(titleRoot.textContent).toBe("aXb");
@@ -336,11 +336,11 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     expect(titleRoot.textContent).toBe("ab");
   });
 
-  test("clamps selection direction and surrogate boundaries after publication", () => {
+  test("clamps selection direction and surrogate boundaries after notification", () => {
     const local = textRuntime("actor-a", { title: "A😀B" });
     const remote = atomicRuntime("actor-b", { title: "A😀B" });
     const root = createRoot();
-    const adapter = createCollaborationContentEditableAdapter({
+    const adapter = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -353,7 +353,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       path: "/title",
       value: "A😀",
     }]);
-    local.collaboration.ingest(remote.collaboration.exportBundle());
+    local.replica.ingest(remote.replica.exportBundle());
 
     expect(root.textContent).toBe("A😀");
     expect(document.getSelection()?.anchorOffset).toBe(3);
@@ -362,7 +362,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const backwardLocal = textRuntime("actor-c", { title: "abcdef" });
     const backwardRemote = atomicRuntime("actor-d", { title: "abcdef" });
     const backwardRoot = createRoot();
-    createCollaborationContentEditableAdapter({
+    createContentEditableAdapter({
       runtime: backwardLocal,
       pointer: "/title",
       root: backwardRoot,
@@ -373,8 +373,8 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       path: "/title",
       value: "abc",
     }]);
-    backwardLocal.collaboration.ingest(
-      backwardRemote.collaboration.exportBundle(),
+    backwardLocal.replica.ingest(
+      backwardRemote.replica.exportBundle(),
     );
 
     expect(document.getSelection()?.anchorOffset).toBe(3);
@@ -385,7 +385,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     vi.useFakeTimers();
     const local = textRuntime("actor-a", { title: "A😀B" });
     const root = createRoot();
-    const adapter = createCollaborationContentEditableAdapter({
+    const adapter = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -412,7 +412,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("fails closed when the same actor changes causal history mid-lease", () => {
     const local = textRuntime("actor-a");
     const root = createRoot();
-    const adapter = createCollaborationContentEditableAdapter({
+    const adapter = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -443,7 +443,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("scopes bound events to this editing host", () => {
     const local = textRuntime("actor-a", { title: "ab" });
     const root = createRoot();
-    createCollaborationContentEditableAdapter({
+    createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -479,7 +479,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
   test("serializes line breaks and block boundaries as plain text", () => {
     const local = textRuntime("actor-a");
     const root = createRoot();
-    createCollaborationContentEditableAdapter({
+    createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -491,7 +491,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
 
     expect(local.document.value).toEqual({ title: "a\nb\nc" });
     expect(root.textContent).toBe("a\nb\nc");
-    expect(plainTextCollaborationDOM.observe(root).value).toBe("a\nb\nc");
+    expect(plainTextDOMAdapter.observe(root).value).toBe("a\nb\nc");
   });
 
   test("uses the same block serialization for value and selection offsets", () => {
@@ -503,20 +503,20 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     selection?.removeAllRanges();
     selection?.collapse(secondText, 1);
 
-    const observed = plainTextCollaborationDOM.observe(root);
+    const observed = plainTextDOMAdapter.observe(root);
     expect(observed).toEqual({
       value: "a\nb",
       selection: { anchor: 3, focus: 3 },
     });
 
-    plainTextCollaborationDOM.render(root, observed.value);
+    plainTextDOMAdapter.render(root, observed.value);
     expect(root.childNodes).toHaveLength(1);
     expect(root.firstChild).toBeInstanceOf(Text);
-    expect(plainTextCollaborationDOM.restoreSelection(
+    expect(plainTextDOMAdapter.restoreSelection(
       root,
       observed.selection!,
     )).toBe(true);
-    expect(plainTextCollaborationDOM.observe(root)).toEqual(observed);
+    expect(plainTextDOMAdapter.observe(root)).toEqual(observed);
   });
 
   test("rebases the composition tail selection through a remote merge", () => {
@@ -524,7 +524,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const local = textRuntime("actor-a");
     const remote = textRuntime("actor-b");
     const root = createRoot();
-    const adapter = createCollaborationContentEditableAdapter({
+    const adapter = createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -541,7 +541,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       path: "/title",
       value: "Yab",
     }]);
-    local.collaboration.ingest(remote.collaboration.exportBundle());
+    local.replica.ingest(remote.replica.exportBundle());
     adapter.handle(input("input", "insertCompositionText"));
 
     expect(local.document.value).toEqual({ title: "YaXb" });
@@ -571,7 +571,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       const local = textRuntime("actor-a");
       const remote = atomicRuntime("actor-b");
       const root = createRoot();
-      const adapter = createCollaborationContentEditableAdapter({
+      const adapter = createContentEditableAdapter({
         runtime: local,
         pointer: "/title",
         root,
@@ -583,7 +583,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       setEditableText(root, "aXb", 2);
       adapter.handle(new CompositionEvent("compositionend"));
       remote.document.commit(scenario.patch);
-      local.collaboration.ingest(remote.collaboration.exportBundle());
+      local.replica.ingest(remote.replica.exportBundle());
 
       expect(adapter.handle(input("input", "insertCompositionText")))
         .toMatchObject({ ok: false });
@@ -598,7 +598,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
     const remote = textRuntime("actor-b");
     const root = createRoot();
     const results: unknown[] = [];
-    createCollaborationContentEditableAdapter({
+    createContentEditableAdapter({
       runtime: local,
       pointer: "/title",
       root,
@@ -612,7 +612,7 @@ describe("@interactive-os/json-document-contenteditable-collaboration", () => {
       path: "/title",
       value: "aYb",
     }]);
-    local.collaboration.ingest(remote.collaboration.exportBundle());
+    local.replica.ingest(remote.replica.exportBundle());
     expect(root.textContent).toBe("ab");
 
     vi.runOnlyPendingTimers();

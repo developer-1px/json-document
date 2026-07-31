@@ -17,46 +17,47 @@ const EXPECTED_VALUES = [
 ];
 const EXPECTED_TYPES = [
   "JSONAppliedChange",
-  "JSONCapabilityResult",
   "JSONChangeMetadata",
   "JSONDocument",
+  "JSONDocumentOptions",
   "JSONDocumentCommitOptions",
   "JSONDocumentCommitResult",
   "JSONPatchOperation",
   "JSONPatchResult",
+  "JSONPatchValidationResult",
   "JSONValue",
   "Pointer",
   "QueryResult",
   "ReadResult",
 ];
-const EXPECTED_MEMBERS = [
+const DOCUMENT_MEMBERS = [
   "value",
   "at",
   "query",
-  "canPatch",
+  "validatePatch",
   "commit",
   "subscribe",
 ];
 const EXPECTED_CONFORMANCE = {
-  projectionVectors: "packages/json-document/tests/conformance/v2/projection-vectors.json",
-  projectionSuite: "packages/json-document/tests/conformance/v2/projection-suite.ts",
-  projectionBinding: "packages/json-document/tests/public/v2-projection-standard-conformance.test.ts",
-  protocolVectors: "packages/json-document/tests/conformance/v2/protocol-vectors.json",
-  protocolSuite: "packages/json-document/tests/conformance/v2/protocol-suite.ts",
-  protocolBinding: "packages/json-document/tests/public/v2-protocol-standard-conformance.test.ts",
-  pointerVectors: "packages/json-document/tests/conformance/v2/pointer-vectors.json",
-  pointerSuite: "packages/json-document/tests/conformance/v2/pointer-suite.ts",
-  pointerBinding: "packages/json-document/tests/public/v2-pointer-standard-conformance.test.ts",
-  rfc6902Suite: "packages/json-document/tests/conformance/v2/rfc6902-suite.ts",
-  rfc6902Binding: "packages/json-document/tests/public/v2-rfc6902-standard-conformance.test.ts",
-  jsonPathSuite: "packages/json-document/tests/conformance/v2/jsonpath-suite.ts",
-  jsonPathBinding: "packages/json-document/tests/public/v2-jsonpath-standard-conformance.test.ts",
-  foundationVectors: "packages/json-document/tests/conformance/v2/foundation-vectors.json",
-  pressureVectors: "packages/json-document/tests/conformance/v2/pressure-vectors.json",
-  pressureSuite: "packages/json-document/tests/conformance/v2/pressure-suite.ts",
-  independentProjectionImplementation: "packages/json-document/tests/independent/v2-projection.ts",
-  independentProjectionBinding: "packages/json-document/tests/independent/v2-projection-independent-conformance.test.ts",
-  collaborationProjectionBinding: "packages/json-document-collaboration/tests/projection-conformance.test.ts",
+  jsonDocumentVectors: "packages/json-document/tests/conformance/v3/json-document-vectors.json",
+  jsonDocumentSuite: "packages/json-document/tests/conformance/v3/json-document-suite.ts",
+  jsonDocumentBinding: "packages/json-document/tests/public/v3-json-document-standard-conformance.test.ts",
+  protocolVectors: "packages/json-document/tests/conformance/v3/protocol-vectors.json",
+  protocolSuite: "packages/json-document/tests/conformance/v3/protocol-suite.ts",
+  protocolBinding: "packages/json-document/tests/public/v3-protocol-standard-conformance.test.ts",
+  pointerVectors: "packages/json-document/tests/conformance/v3/pointer-vectors.json",
+  pointerSuite: "packages/json-document/tests/conformance/v3/pointer-suite.ts",
+  pointerBinding: "packages/json-document/tests/public/v3-pointer-standard-conformance.test.ts",
+  rfc6902Suite: "packages/json-document/tests/conformance/v3/rfc6902-suite.ts",
+  rfc6902Binding: "packages/json-document/tests/public/v3-rfc6902-standard-conformance.test.ts",
+  jsonPathSuite: "packages/json-document/tests/conformance/v3/jsonpath-suite.ts",
+  jsonPathBinding: "packages/json-document/tests/public/v3-jsonpath-standard-conformance.test.ts",
+  foundationVectors: "packages/json-document/tests/conformance/v3/foundation-vectors.json",
+  pressureVectors: "packages/json-document/tests/conformance/v3/pressure-vectors.json",
+  pressureSuite: "packages/json-document/tests/conformance/v3/pressure-suite.ts",
+  independentJSONDocumentImplementation: "packages/json-document/tests/independent/v3-json-document.ts",
+  independentJSONDocumentBinding: "packages/json-document/tests/independent/v3-json-document-independent-conformance.test.ts",
+  collaborationJSONDocumentBinding: "packages/json-document-collaboration/tests/json-document-conformance.test.ts",
 };
 
 function read(path) {
@@ -179,36 +180,40 @@ function assertPublicBinding(label, source, pattern) {
   requirePattern(label, source, pattern);
 }
 
-const manifest = json("docs/standard/v2-public-surface.json");
-const profile = read("docs/standard/v2-projection-profile.md");
+const manifest = json("docs/standard/v3-public-surface.json");
+const profile = read("docs/standard/v3-json-document-profile.md");
 const packageContract = json("packages/json-document/public-contract.json");
 const packageManifest = json("packages/json-document/package.json");
 const buildConfig = json("packages/json-document/tsconfig.json");
 const rootSource = read("packages/json-document/src/application/document/index.ts");
 const contractSource = read("packages/json-document/src/application/document/contract.ts");
 const signatureSource = read(
-  "packages/json-document/tests/public/v2-signature-contract.test-d.ts",
+  "packages/json-document/tests/public/v3-signature-contract.test-d.ts",
 );
 const packageSmoke = read("packages/json-document/tests/smoke/package-smoke.mjs");
 const coreBenchmark = read("scripts/benchmark-core.mjs");
 
 if (manifest.formatVersion !== 1 || manifest.status !== "stable") {
-  fail("v2 manifest: expected formatVersion 1 and stable status.");
+  fail("v3 manifest: expected formatVersion 1 and stable status.");
 }
 if (manifest.sourceContract !== "packages/json-document/public-contract.json#root") {
-  fail("v2 manifest: sourceContract must point to the root public contract.");
+  fail("v3 manifest: sourceContract must point to the root public contract.");
 }
-equal("v2 manifest projection members", manifest.projectionMembers, EXPECTED_MEMBERS);
-equal("v2 manifest conformance paths", manifest.conformance, EXPECTED_CONFORMANCE);
-equal("v2 manifest binding values", manifest.binding?.values, EXPECTED_VALUES);
-equal("v2 manifest binding types", manifest.binding?.types, EXPECTED_TYPES);
-equal("v2 manifest counts", manifest.counts, {
+equal(
+  "v3 manifest JSON Document members",
+  manifest.documentMembers,
+  DOCUMENT_MEMBERS,
+);
+equal("v3 manifest conformance paths", manifest.conformance, EXPECTED_CONFORMANCE);
+equal("v3 manifest binding values", manifest.binding?.values, EXPECTED_VALUES);
+equal("v3 manifest binding types", manifest.binding?.types, EXPECTED_TYPES);
+equal("v3 manifest counts", manifest.counts, {
   values: 8,
-  types: 12,
-  exports: 20,
-  projectionMembers: 6,
+  types: 13,
+  exports: 21,
+  documentMembers: 6,
 });
-equal("v2 package identity", {
+equal("v3 package identity", {
   name: manifest.package?.name,
   version: manifest.package?.version,
   entrypoint: manifest.package?.entrypoint,
@@ -218,12 +223,12 @@ equal("v2 package identity", {
   entrypoint: ".",
 });
 equal(
-  "v2 excluded entrypoints",
+  "v3 excluded entrypoints",
   manifest.package?.excludedEntrypoints,
   ["./session", "./react"],
 );
-equal("v2 runtime dependencies", manifest.package?.runtimeDependencies, []);
-equal("v2 peer dependencies", manifest.package?.peerDependencies, []);
+equal("v3 runtime dependencies", manifest.package?.runtimeDependencies, []);
+equal("v3 peer dependencies", manifest.package?.peerDependencies, []);
 
 equal("public contract entrypoints", Object.keys(packageContract), ["root"]);
 equal("public contract values", packageContract.root?.values, EXPECTED_VALUES);
@@ -235,7 +240,7 @@ equal("root source types", sourceExports.types, [...EXPECTED_TYPES].sort());
 equal(
   "JSONDocument members",
   interfaceMembers(contractSource, "JSONDocument"),
-  EXPECTED_MEMBERS,
+  DOCUMENT_MEMBERS,
 );
 
 equal("package entrypoints", Object.keys(packageManifest.exports ?? {}), ["."]);
@@ -256,7 +261,7 @@ for (const field of [
   "peerDependenciesMeta",
 ]) {
   if (packageManifest[field] !== undefined) {
-    fail(`package: ${field} must be absent from the v2 kernel.`);
+    fail(`package: ${field} must be absent from the v3 kernel.`);
   }
 }
 equal(
@@ -271,35 +276,35 @@ equal(
 );
 
 const documentedRequirements = [
-  ...profile.matchAll(/\bJD2-[A-Z]+-\d{3}\b/g),
+  ...profile.matchAll(/\bJD3-[A-Z]+-\d{3}\b/g),
 ].map((match) => match[0]);
 if (documentedRequirements.length !== new Set(documentedRequirements).size) {
-  fail("v2 profile: every requirement ID must appear exactly once.");
+  fail("v3 profile: every requirement ID must appear exactly once.");
 }
 setEqual(
-  "v2 requirements",
+  "v3 requirements",
   documentedRequirements,
   manifest.requirements ?? [],
 );
 for (const word of ["MUST", "SHOULD", "MAY"]) {
-  requirePattern("v2 profile normative language", profile, new RegExp(`\\b${word}\\b`));
+  requirePattern("v3 profile normative language", profile, new RegExp(`\\b${word}\\b`));
 }
 for (const pattern of [
-  /Pure Protocol -> Projection -> host adapter/,
-  /root entrypoint 하나와 20개 Kernel symbol/,
+  /stateless JSON Patch -> JSON Document -> host adapter/,
+  /root entrypoint 하나와 21개 symbol/,
   /runtime dependency와 peer dependency가 없다/,
   /archived 1\.x implementation은 production build와 tarball에\s*포함하지 않는다/,
 ]) {
-  requirePattern("v2 profile package closure", profile, pattern);
+  requirePattern("v3 profile package closure", profile, pattern);
 }
 
 requirePattern(
-  "v2 signature exact document",
+  "v3 signature exact document",
   signatureSource,
-  /"value" \| "at" \| "query" \| "canPatch" \| "commit" \| "subscribe"/,
+  /"value" \| "at" \| "query" \| "validatePatch" \| "commit" \| "subscribe"/,
 );
 requirePattern(
-  "v2 signature JSON boundary",
+  "v3 signature JSON boundary",
   signatureSource,
   /document\.value satisfies JSONValue/,
 );
@@ -308,18 +313,18 @@ if (
     signatureSource,
   )
 ) {
-  fail("v2 signature: archived entrypoint or unsound document generic leaked.");
+  fail("v3 signature: archived entrypoint or unsound document generic leaked.");
 }
 
 for (const path of Object.values(EXPECTED_CONFORMANCE)) {
-  if (!existsSync(join(repoRoot, path))) fail(`v2 conformance artifact missing: ${path}.`);
+  if (!existsSync(join(repoRoot, path))) fail(`v3 conformance artifact missing: ${path}.`);
 }
 
-const projectionVectors = json(manifest.conformance.projectionVectors);
+const jsonDocumentVectors = json(manifest.conformance.jsonDocumentVectors);
 const protocolVectors = json(manifest.conformance.protocolVectors);
 const pointerVectors = json(manifest.conformance.pointerVectors);
-const projectionSuite = read(manifest.conformance.projectionSuite);
-const projectionBinding = read(manifest.conformance.projectionBinding);
+const jsonDocumentSuite = read(manifest.conformance.jsonDocumentSuite);
+const jsonDocumentBinding = read(manifest.conformance.jsonDocumentBinding);
 const protocolSuite = read(manifest.conformance.protocolSuite);
 const protocolBinding = read(manifest.conformance.protocolBinding);
 const pointerSuite = read(manifest.conformance.pointerSuite);
@@ -331,18 +336,18 @@ const jsonPathBinding = read(manifest.conformance.jsonPathBinding);
 const foundationVectors = json(manifest.conformance.foundationVectors);
 const pressureVectors = json(manifest.conformance.pressureVectors);
 const pressureSuite = read(manifest.conformance.pressureSuite);
-const independentProjectionImplementation = read(
-  manifest.conformance.independentProjectionImplementation,
+const independentJSONDocumentImplementation = read(
+  manifest.conformance.independentJSONDocumentImplementation,
 );
-const independentProjectionBinding = read(
-  manifest.conformance.independentProjectionBinding,
+const independentJSONDocumentBinding = read(
+  manifest.conformance.independentJSONDocumentBinding,
 );
-const collaborationProjectionBinding = read(
-  manifest.conformance.collaborationProjectionBinding,
+const collaborationJSONDocumentBinding = read(
+  manifest.conformance.collaborationJSONDocumentBinding,
 );
 
 for (const [label, vectors] of [
-  ["projection", projectionVectors],
+  ["json-document", jsonDocumentVectors],
   ["protocol", protocolVectors],
   ["pointer", pointerVectors],
   ["foundation", foundationVectors],
@@ -351,19 +356,23 @@ for (const [label, vectors] of [
   if (
     vectors.formatVersion !== 1
     || vectors.status !== "stable"
-    || vectors.profile !== "docs/standard/v2-projection-profile.md"
+    || vectors.profile !== "docs/standard/v3-json-document-profile.md"
   ) {
     fail(`${label} vectors: metadata drifted.`);
   }
 }
-equal("projection vector members", projectionVectors.projectionMembers, EXPECTED_MEMBERS);
+equal(
+  "json-document vector members",
+  jsonDocumentVectors.documentMembers,
+  DOCUMENT_MEMBERS,
+);
 if (protocolVectors.function !== "applyPatch") {
   fail("protocol vectors: function must be applyPatch.");
 }
 equal(
   "pointer vector requirements",
   pointerVectors.requirements,
-  ["JD2-ADDRESS-001", "JD2-PATCH-001"],
+  ["JD3-ADDRESS-001", "JD3-PATCH-001"],
 );
 for (const group of ["parse", "invalid", "build", "append", "parent", "track"]) {
   if (!Array.isArray(pointerVectors[group]) || pointerVectors[group].length === 0) {
@@ -374,15 +383,15 @@ for (const group of ["parse", "invalid", "build", "append", "parent", "track"]) 
 const requirementSet = new Set(manifest.requirements ?? []);
 const runtimeRequirements = new Set();
 const allowedVectorKinds = {
-  projection: new Set([
+  "json-document": new Set([
     "surface",
     "read",
     "commit",
     "unsubscribe",
-    "unsubscribe-during-publication",
+    "unsubscribe-during-notification",
     "isolation",
     "non-json",
-    "reentrant-publication",
+    "reentrant-notification",
     "subscriber-error",
   ]),
   protocol: new Set([
@@ -395,7 +404,7 @@ const allowedVectorKinds = {
   ]),
 };
 for (const [suiteName, vectors] of [
-  ["projection", projectionVectors.vectors ?? []],
+  ["json-document", jsonDocumentVectors.vectors ?? []],
   ["protocol", protocolVectors.vectors ?? []],
 ]) {
   const vectorIds = new Set();
@@ -436,9 +445,9 @@ setEqual(
 for (const vertical of pressureVerticals) {
   if (
     !Array.isArray(vertical.requirements)
-    || !vertical.requirements.includes("JD2-CONFORMANCE-002")
+    || !vertical.requirements.includes("JD3-CONFORMANCE-002")
   ) {
-    fail(`pressure vectors: ${vertical.id} must trace JD2-CONFORMANCE-002.`);
+    fail(`pressure vectors: ${vertical.id} must trace JD3-CONFORMANCE-002.`);
   }
   for (const id of vertical.requirements ?? []) {
     if (!requirementSet.has(id)) {
@@ -460,71 +469,71 @@ if (
 
 const nonRuntimeRequirements = new Map();
 const nonRuntimeCounts = { static: 0, deferred: 0 };
-for (const entry of projectionVectors.nonRuntimeRequirements ?? []) {
+for (const entry of jsonDocumentVectors.nonRuntimeRequirements ?? []) {
   if (!requirementSet.has(entry.id)) {
-    fail(`v2 vectors: unknown non-runtime requirement ${entry.id}.`);
+    fail(`v3 vectors: unknown non-runtime requirement ${entry.id}.`);
   }
   if (runtimeRequirements.has(entry.id) || nonRuntimeRequirements.has(entry.id)) {
-    fail(`v2 vectors: duplicate requirement coverage ${entry.id}.`);
+    fail(`v3 vectors: duplicate requirement coverage ${entry.id}.`);
   }
   if (!(entry.mode in nonRuntimeCounts)) {
-    fail(`v2 vectors: invalid coverage mode ${entry.mode}.`);
+    fail(`v3 vectors: invalid coverage mode ${entry.mode}.`);
   } else {
     nonRuntimeCounts[entry.mode] += 1;
   }
   if (typeof entry.reason !== "string" || entry.reason.trim() === "") {
-    fail(`v2 vectors: ${entry.id} needs a reason.`);
+    fail(`v3 vectors: ${entry.id} needs a reason.`);
   }
   nonRuntimeRequirements.set(entry.id, entry.mode);
 }
 setEqual(
-  "v2 requirement coverage",
+  "v3 requirement coverage",
   [...runtimeRequirements, ...nonRuntimeRequirements.keys()],
   manifest.requirements,
 );
-equal("v2 coverage", projectionVectors.coverage, {
+equal("v3 coverage", jsonDocumentVectors.coverage, {
   runtime: runtimeRequirements.size,
   static: nonRuntimeCounts.static,
   deferred: nonRuntimeCounts.deferred,
 });
 if (/"_zod"\s*:|"safeParse"\s*:/.test(JSON.stringify([
-  projectionVectors,
+  jsonDocumentVectors,
   protocolVectors,
 ]))) {
-  fail("v2 vectors: provider object leaked.");
+  fail("v3 vectors: provider object leaked.");
 }
 
 assertGenericSuite(
-  "projection suite",
-  projectionSuite,
-  /ProjectionHarness[\s\S]*runProjectionConformance/,
+  "json-document suite",
+  jsonDocumentSuite,
+  /JSONDocumentHarness[\s\S]*runJSONDocumentConformance/,
 );
 for (const pattern of [
-  /readonly value[\s\S]*at\([\s\S]*query\([\s\S]*canPatch\([\s\S]*commit\([\s\S]*subscribe\(/,
+  /readonly value[\s\S]*at\([\s\S]*query\([\s\S]*validatePatch\([\s\S]*commit\([\s\S]*subscribe\(/,
   /toMatchObject/,
 ]) {
-  requirePattern("projection suite", projectionSuite, pattern);
+  requirePattern("json-document suite", jsonDocumentSuite, pattern);
 }
-if (/Object\.keys\([^)]*(?:result|change)/.test(projectionSuite)) {
-  fail("projection suite: exact result or change keys must not be asserted.");
+if (/Object\.keys\([^)]*(?:result|change)/.test(jsonDocumentSuite)) {
+  fail("json-document suite: exact result or change keys must not be asserted.");
 }
 assertPublicBinding(
-  "projection binding",
-  projectionBinding,
-  /createJSONDocument[\s\S]*runProjectionConformance/,
+  "json-document binding",
+  jsonDocumentBinding,
+  /createJSONDocument[\s\S]*runJSONDocumentConformance/,
 );
 requirePattern(
-  "projection binding",
-  projectionBinding,
+  "json-document binding",
+  jsonDocumentBinding,
   /runPressureConformance\(referenceHarness\)/,
 );
 requirePattern(
-  "projection binding",
-  projectionBinding,
+  "json-document binding",
+  jsonDocumentBinding,
   /return createJSONDocument\(/,
 );
-if (/\.(?:lastPatch|patch|find|canFind|canQuery)\b/.test(projectionBinding)) {
-  fail("projection binding: archived compatibility member leaked.");
+if (/\.(?:lastPatch|patch|find|canFind|canQuery)\b/.test(jsonDocumentBinding)) {
+  fail("json-document binding: non-canonical member leaked.");
 }
 assertGenericSuite(
   "protocol suite",
@@ -542,7 +551,7 @@ assertPublicBinding(
 assertGenericSuite(
   "pressure suite",
   pressureSuite,
-  /ProjectionHarness[\s\S]*runPressureConformance/,
+  /JSONDocumentHarness[\s\S]*runPressureConformance/,
 );
 for (const vertical of [
   "form",
@@ -559,45 +568,45 @@ for (const vertical of [
 }
 if (
   /@interactive-os\/json-document|\/src\//.test(
-    independentProjectionImplementation,
+    independentJSONDocumentImplementation,
   )
 ) {
-  fail("independent projection: reference package or private source import leaked.");
+  fail("independent JSON Document: reference package or private source import leaked.");
 }
 for (const pattern of [
   /get value\(\)/,
   /\bat\(/,
   /\bquery\(/,
-  /\bcanPatch\(/,
+  /\bvalidatePatch\(/,
   /\bcommit\(/,
   /\bsubscribe\(/,
 ]) {
   requirePattern(
-    "independent projection",
-    independentProjectionImplementation,
+    "independent JSON Document",
+    independentJSONDocumentImplementation,
     pattern,
   );
 }
 if (
-  /@interactive-os\/json-document|\/src\//.test(independentProjectionBinding)
+  /@interactive-os\/json-document|\/src\//.test(independentJSONDocumentBinding)
 ) {
-  fail("independent projection binding must not import the reference implementation.");
+  fail("independent JSON Document binding must not import the reference implementation.");
 }
 for (const pattern of [
-  /createIndependentProjection/,
-  /runProjectionConformance\(independentHarness\)/,
+  /createIndependentJSONDocument/,
+  /runJSONDocumentConformance\(independentHarness\)/,
   /runPressureConformance\(independentHarness\)/,
 ]) {
-  requirePattern("independent projection binding", independentProjectionBinding, pattern);
+  requirePattern("independent JSON Document binding", independentJSONDocumentBinding, pattern);
 }
 for (const pattern of [
   /from "@interactive-os\/json-document-collaboration"/,
-  /runProjectionConformance\(harness\)/,
+  /runJSONDocumentConformance\(harness\)/,
   /runPressureConformance\(harness\)/,
 ]) {
   requirePattern(
-    "collaboration projection binding",
-    collaborationProjectionBinding,
+    "collaboration JSON Document binding",
+    collaborationJSONDocumentBinding,
     pattern,
   );
 }
@@ -649,7 +658,7 @@ for (const pattern of [
   /application\/react-document/,
   /Archived implementation leaked into dist/,
 ]) {
-  requirePattern("package smoke v2 closure", packageSmoke, pattern);
+  requirePattern("package smoke v3 closure", packageSmoke, pattern);
 }
 for (const pattern of [
   /dist\/application\/document\/index\.js/,
@@ -657,19 +666,19 @@ for (const pattern of [
   /applyPatch/,
   /commit single leaf replace/,
 ]) {
-  requirePattern("v2 core benchmark", coreBenchmark, pattern);
+  requirePattern("v3 core benchmark", coreBenchmark, pattern);
 }
 if (/application\/session|from\s+["']zod["']/.test(coreBenchmark)) {
-  fail("v2 core benchmark: archived session or schema provider leaked.");
+  fail("v3 core benchmark: archived session or schema provider leaked.");
 }
 
 if (failures.length > 0) {
   console.error(
-    `json-document v2 standardization failed:\n${failures.map((failure) => `- ${failure}`).join("\n")}`,
+    `json-document v3 standardization failed:\n${failures.map((failure) => `- ${failure}`).join("\n")}`,
   );
   process.exitCode = 1;
 } else {
   console.log(
-    "json-document v2 standardization ok: 1 entrypoint, 20 exports, 6 document members, 0 runtime peers",
+    "json-document standardization ok: 1 entrypoint, 21 exports, 6 JSON Document members, 0 runtime peers",
   );
 }

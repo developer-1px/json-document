@@ -1,7 +1,7 @@
 // RFC 6902 patch 적용을 위한 내부 container helper.
 
 import { parsePointer, readAt, type Pointer, PointerSyntaxError } from "../pointer/core.js";
-import { parseArrayIndex } from "../pointer/arrayIndex.js";
+import { parseArrayIndex } from "../pointer/array-index.js";
 import type { ErrorCode, JSONPatchOperation } from "./contract.js";
 
 // RFC 6902 §4.1: `/-` 는 array append marker. 적용 시점의 array 길이로 concrete index 정규화.

@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "status": "stable",
-  "profile": "docs/standard/v2-projection-profile.md",
-  "projectionMembers": [
+  "profile": "docs/standard/v3-json-document-profile.md",
+  "documentMembers": [
     "value",
     "at",
     "query",
-    "canPatch",
+    "validatePatch",
     "commit",
     "subscribe"
   ],
@@ -33,16 +33,16 @@
   },
   "vectors": [
     {
-      "id": "projection-members",
+      "id": "document-members",
       "kind": "surface",
       "requirements": [
-        "JD2-PROJECTION-001"
+        "JD3-DOCUMENT-001"
       ],
       "members": [
         "value",
         "at",
         "query",
-        "canPatch",
+        "validatePatch",
         "commit",
         "subscribe"
       ]
@@ -51,9 +51,9 @@
       "id": "pointer-read-and-jsonpath-query",
       "kind": "read",
       "requirements": [
-        "JD2-ADDRESS-001",
-        "JD2-QUERY-001",
-        "JD2-RESULT-001"
+        "JD3-ADDRESS-001",
+        "JD3-QUERY-001",
+        "JD3-RESULT-001"
       ],
       "at": [
         {
@@ -103,16 +103,16 @@
       ]
     },
     {
-      "id": "ordered-commit-and-publication",
+      "id": "ordered-commit-and-notification",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-CAPABILITY-001",
-        "JD2-COMMIT-001",
-        "JD2-COMMIT-002",
-        "JD2-PUBLISH-001"
+        "JD3-PATCH-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
       ],
-      "acceptance": "task-list",
+      "validation": "task-list",
       "operations": [
         {
           "op": "replace",
@@ -224,11 +224,11 @@
       "id": "failed-batch-is-atomic",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-CAPABILITY-001",
-        "JD2-COMMIT-001",
-        "JD2-PUBLISH-001",
-        "JD2-RESULT-001"
+        "JD3-PATCH-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001",
+        "JD3-RESULT-001"
       ],
       "operations": [
         {
@@ -279,10 +279,10 @@
       "id": "jsonpath-is-not-a-mutation-target",
       "kind": "commit",
       "requirements": [
-        "JD2-ADDRESS-001",
-        "JD2-CAPABILITY-001",
-        "JD2-COMMIT-001",
-        "JD2-RESULT-001"
+        "JD3-ADDRESS-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-RESULT-001"
       ],
       "operations": [
         {
@@ -320,15 +320,15 @@
       }
     },
     {
-      "id": "acceptance-rejection-has-probe-commit-parity",
+      "id": "validation-rejection-has-probe-commit-parity",
       "kind": "commit",
       "requirements": [
-        "JD2-CAPABILITY-001",
-        "JD2-COMMIT-001",
-        "JD2-RESULT-001",
-        "JD2-SCHEMA-001"
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-RESULT-001",
+        "JD3-SCHEMA-001"
       ],
-      "acceptance": "task-list",
+      "validation": "task-list",
       "operations": [
         {
           "op": "replace",
@@ -365,12 +365,12 @@
       }
     },
     {
-      "id": "state-equivalent-commit-does-not-publish",
+      "id": "state-equivalent-commit-does-not-notify",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-COMMIT-002",
-        "JD2-PUBLISH-001"
+        "JD3-PATCH-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -409,12 +409,12 @@
       }
     },
     {
-      "id": "acceptance-cannot-transform-the-candidate",
+      "id": "validation-cannot-transform-the-candidate",
       "kind": "commit",
       "requirements": [
-        "JD2-SCHEMA-002"
+        "JD3-SCHEMA-002"
       ],
-      "acceptance": "attempt-transform",
+      "validation": "attempt-transform",
       "operations": [
         {
           "op": "replace",
@@ -468,11 +468,11 @@
       }
     },
     {
-      "id": "same-scalar-replace-does-not-publish",
+      "id": "same-scalar-replace-does-not-notify",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-PUBLISH-001"
+        "JD3-PATCH-001",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -511,11 +511,11 @@
       }
     },
     {
-      "id": "same-object-replace-does-not-publish",
+      "id": "same-object-replace-does-not-notify",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-PUBLISH-001"
+        "JD3-PATCH-001",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -556,12 +556,12 @@
       }
     },
     {
-      "id": "canceling-batch-does-not-publish",
+      "id": "canceling-batch-does-not-notify",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-COMMIT-001",
-        "JD2-PUBLISH-001"
+        "JD3-PATCH-001",
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -605,11 +605,11 @@
       }
     },
     {
-      "id": "same-path-move-does-not-publish",
+      "id": "same-path-move-does-not-notify",
       "kind": "commit",
       "requirements": [
-        "JD2-PATCH-001",
-        "JD2-PUBLISH-001"
+        "JD3-PATCH-001",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -648,12 +648,12 @@
       }
     },
     {
-      "id": "unsubscribe-stops-future-publication",
+      "id": "unsubscribe-stops-future-notification",
       "kind": "unsubscribe",
       "requirements": [
-        "JD2-COMMIT-001",
-        "JD2-COMMIT-002",
-        "JD2-PUBLISH-001"
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
       ],
       "commits": [
         {
@@ -746,11 +746,11 @@
       }
     },
     {
-      "id": "unsubscribe-during-publication-stops-current-delivery",
-      "kind": "unsubscribe-during-publication",
+      "id": "unsubscribe-during-notification-stops-current-delivery",
+      "kind": "unsubscribe-during-notification",
       "requirements": [
-        "JD2-COMMIT-001",
-        "JD2-PUBLISH-001"
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -760,7 +760,7 @@
         }
       ],
       "metadata": {
-        "origin": "intra-publication-unsubscribe"
+        "origin": "intra-notification-unsubscribe"
       },
       "expect": {
         "commit": {
@@ -774,7 +774,7 @@
               }
             ],
             "metadata": {
-              "origin": "intra-publication-unsubscribe"
+              "origin": "intra-notification-unsubscribe"
             }
           }
         },
@@ -788,7 +788,7 @@
               }
             ],
             "metadata": {
-              "origin": "intra-publication-unsubscribe"
+              "origin": "intra-notification-unsubscribe"
             }
           }
         ],
@@ -815,9 +815,9 @@
       "id": "references-are-isolated",
       "kind": "isolation",
       "requirements": [
-        "JD2-DATA-002",
-        "JD2-COMMIT-001",
-        "JD2-PUBLISH-001"
+        "JD3-DATA-002",
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -951,10 +951,10 @@
       "id": "non-json-payload-is-rejected",
       "kind": "non-json",
       "requirements": [
-        "JD2-DATA-001",
-        "JD2-CAPABILITY-001",
-        "JD2-COMMIT-001",
-        "JD2-RESULT-001"
+        "JD3-DATA-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-RESULT-001"
       ],
       "path": "/meta/callback",
       "hostValue": "callable",
@@ -987,12 +987,12 @@
       }
     },
     {
-      "id": "reentrant-publication-preserves-causal-order",
-      "kind": "reentrant-publication",
+      "id": "reentrant-notification-preserves-causal-order",
+      "kind": "reentrant-notification",
       "requirements": [
-        "JD2-COMMIT-001",
-        "JD2-COMMIT-002",
-        "JD2-PUBLISH-001"
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
       ],
       "outer": {
         "operations": [
@@ -1123,9 +1123,9 @@
       "id": "subscriber-errors-do-not-escape-commit",
       "kind": "subscriber-error",
       "requirements": [
-        "JD2-COMMIT-001",
-        "JD2-COMMIT-002",
-        "JD2-PUBLISH-001"
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
       ],
       "operations": [
         {
@@ -1188,32 +1188,32 @@
   ],
   "nonRuntimeRequirements": [
     {
-      "id": "JD2-GOV-001",
+      "id": "JD3-GOV-001",
       "mode": "static",
       "reason": "The standard evaluator locks the profile, manifest, vectors, and reference test together."
     },
     {
-      "id": "JD2-RESULT-002",
+      "id": "JD3-RESULT-002",
       "mode": "static",
       "reason": "The generic runner matches required fields only and never exact result keys."
     },
     {
-      "id": "JD2-SESSION-001",
+      "id": "JD3-SESSION-001",
       "mode": "static",
-      "reason": "The generic runner depends on only the six Projection members."
+      "reason": "The generic runner depends on only the six JSON Document members."
     },
     {
-      "id": "JD2-HOST-001",
+      "id": "JD3-HOST-001",
       "mode": "static",
       "reason": "The generic runner has no DOM, geometry, clipboard, storage, network, formula, CRDT, or OT dependency."
     },
     {
-      "id": "JD2-CONFORMANCE-001",
+      "id": "JD3-CONFORMANCE-001",
       "mode": "static",
       "reason": "The vectors run through an injected structural harness without private implementation imports."
     },
     {
-      "id": "JD2-BINDING-001",
+      "id": "JD3-BINDING-001",
       "mode": "static",
       "reason": "Both reference bindings import only the public package root."
     }

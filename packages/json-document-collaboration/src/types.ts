@@ -1,8 +1,8 @@
 import type {
   JSONAppliedChange,
-  JSONCapabilityResult,
   JSONDocument,
   JSONDocumentCommitOptions,
+  JSONPatchValidationResult,
   JSONValue,
 } from "@interactive-os/json-document";
 
@@ -178,7 +178,7 @@ export interface PendingChange {
   readonly missing: ReadonlyArray<ChangeId>;
 }
 
-export interface CollaborationSnapshot {
+export interface ReplicaStatus {
   readonly epoch: CollaborationEpoch;
   readonly heads: ReadonlyArray<ChangeId>;
   readonly pending: ReadonlyArray<PendingChange>;
@@ -214,16 +214,16 @@ export type CollaborationIngestResult =
   | CollaborationIngestSuccess
   | CollaborationIngestFailure;
 
-export interface CollaborationControl {
+export interface CollaborationReplica {
   readonly epoch: CollaborationEpoch;
-  current(): CollaborationSnapshot;
+  status(): ReplicaStatus;
   exportBundle(): CollaborationBundle;
   exportCheckpoint(): CollaborationCheckpoint;
   ingest(bundle: unknown): CollaborationIngestResult;
-  subscribe(listener: (snapshot: CollaborationSnapshot) => void): () => void;
+  subscribe(listener: (status: ReplicaStatus) => void): () => void;
 }
 
-export interface CollaborationHistorySnapshot {
+export interface HistoryStatus {
   readonly undoTarget: ChangeId | null;
   readonly redoTarget: ChangeId | null;
   readonly undoDepth: number;
@@ -231,12 +231,12 @@ export interface CollaborationHistorySnapshot {
   readonly revision: number;
 }
 
-export type CollaborationHistoryResult =
+export type HistoryResult =
   | {
       readonly ok: true;
       readonly changeId: ChangeId;
       readonly target: ChangeId;
-      readonly projectionChanged: boolean;
+      readonly didChangeDocument: boolean;
     }
   | {
       readonly ok: false;
@@ -244,50 +244,50 @@ export type CollaborationHistoryResult =
       readonly reason?: string;
     };
 
-export interface CollaborationHistoryControl {
-  current(): CollaborationHistorySnapshot;
-  canUndo(): JSONCapabilityResult;
-  undo(): CollaborationHistoryResult;
-  canRedo(): JSONCapabilityResult;
-  redo(): CollaborationHistoryResult;
+export interface History {
+  status(): HistoryStatus;
+  canUndo(): JSONPatchValidationResult;
+  undo(): HistoryResult;
+  canRedo(): JSONPatchValidationResult;
+  redo(): HistoryResult;
 }
 
 export interface CollaborationRuntime {
   readonly document: JSONDocument;
-  readonly collaboration: CollaborationControl;
+  readonly replica: CollaborationReplica;
 }
 
-export interface CollaborationHistoryRuntime extends CollaborationRuntime {
-  readonly history: CollaborationHistoryControl;
+export interface HistoryRuntime extends CollaborationRuntime {
+  readonly history: History;
 }
 
-export interface CollaborationTextSelection {
+export interface TextSelection {
   readonly anchor: number;
   readonly focus: number;
 }
 
-export interface CollaborationTextObservation {
+export interface TextObservation {
   readonly value: string;
-  readonly selection?: CollaborationTextSelection;
+  readonly selection?: TextSelection;
 }
 
-export interface CollaborationTextCapture {
+export interface TextCapture {
   readonly pointer: string;
   readonly target: MemberId;
   readonly textNode: TextNodeId;
   readonly value: string;
 }
 
-export interface CollaborationTextPlan {
+export interface TextPlan {
   readonly pointer: string;
   readonly value: string;
-  readonly selection?: CollaborationTextSelection;
+  readonly selection?: TextSelection;
 }
 
-export type CollaborationTextCaptureResult =
+export type TextCaptureResult =
   | {
       readonly ok: true;
-      readonly capture: CollaborationTextCapture;
+      readonly capture: TextCapture;
     }
   | {
       readonly ok: false;
@@ -295,10 +295,10 @@ export type CollaborationTextCaptureResult =
       readonly reason: string;
     };
 
-export type CollaborationTextPlanResult =
+export type TextPlanResult =
   | {
       readonly ok: true;
-      readonly plan: CollaborationTextPlan;
+      readonly plan: TextPlan;
     }
   | {
       readonly ok: false;
@@ -306,14 +306,14 @@ export type CollaborationTextPlanResult =
       readonly reason: string;
     };
 
-export type CollaborationTextCommitResult =
+export type TextCommitResult =
   | {
       readonly ok: true;
       readonly change: JSONAppliedChange;
       readonly changeId: ChangeId | null;
-      readonly projectionChanged: boolean;
+      readonly didChangeDocument: boolean;
       readonly value: string;
-      readonly selection: CollaborationTextSelection | null;
+      readonly selection: TextSelection | null;
     }
   | {
       readonly ok: false;
@@ -321,49 +321,49 @@ export type CollaborationTextCommitResult =
       readonly reason: string;
     };
 
-export interface CollaborationTextControl {
-  capture(pointer: string): CollaborationTextCaptureResult;
+export interface Text {
+  capture(pointer: string): TextCaptureResult;
   plan(
-    capture: CollaborationTextCapture,
-    observation: CollaborationTextObservation,
-  ): CollaborationTextPlanResult;
+    capture: TextCapture,
+    observation: TextObservation,
+  ): TextPlanResult;
   commit(
-    plan: CollaborationTextPlan,
+    plan: TextPlan,
     options?: JSONDocumentCommitOptions,
-  ): CollaborationTextCommitResult;
+  ): TextCommitResult;
 }
 
-export interface CollaborationTextRuntime extends CollaborationHistoryRuntime {
-  readonly text: CollaborationTextControl;
+export interface TextRuntime extends HistoryRuntime {
+  readonly text: Text;
 }
 
 /**
- * A convergence-critical acceptance rule.
+ * A convergence-critical validation rule.
  *
  * It must be synchronous, total, side-effect-free, and referentially
  * transparent. Every replica and every invocation must return the same
  * complete result, including code, reason, and pointer, for the same JSON
  * candidate.
  */
-export type CollaborationAcceptance = (
+export type CollaborationValidation = (
   candidate: JSONValue,
-) => JSONCapabilityResult;
+) => JSONPatchValidationResult;
 
 export interface CollaborationRuntimeOptions {
   readonly actorId: ActorId;
   readonly epochId: string;
   readonly ruleset: CollaborationRulesetIdentity;
   readonly membership?: CollaborationMembership;
-  readonly accepts?: CollaborationAcceptance;
+  readonly validate?: CollaborationValidation;
 }
 
 export interface CollaborationRestoreOptions {
   readonly actorId: ActorId;
   readonly ruleset: CollaborationRulesetIdentity;
-  readonly accepts?: CollaborationAcceptance;
+  readonly validate?: CollaborationValidation;
   readonly verify?: (
     checkpoint: CollaborationCheckpoint,
-  ) => JSONCapabilityResult;
+  ) => JSONPatchValidationResult;
 }
 
 export type CollaborationRestoreResult =
@@ -377,10 +377,10 @@ export type CollaborationRestoreResult =
       readonly reason: string;
     };
 
-export type CollaborationHistoryRestoreResult =
+export type HistoryRestoreResult =
   | {
       readonly ok: true;
-      readonly runtime: CollaborationHistoryRuntime;
+      readonly runtime: HistoryRuntime;
     }
   | {
       readonly ok: false;
@@ -388,10 +388,10 @@ export type CollaborationHistoryRestoreResult =
       readonly reason: string;
     };
 
-export type CollaborationTextRestoreResult =
+export type TextRestoreResult =
   | {
       readonly ok: true;
-      readonly runtime: CollaborationTextRuntime;
+      readonly runtime: TextRuntime;
     }
   | {
       readonly ok: false;
@@ -407,18 +407,18 @@ export interface CollaborationCompactionOptions {
    * Omit to preserve the checkpoint membership. Use null to open membership.
    */
   readonly nextMembership?: CollaborationMembership | null;
-  readonly accepts?: CollaborationAcceptance;
-  readonly nextAccepts?: CollaborationAcceptance;
+  readonly validate?: CollaborationValidation;
+  readonly nextValidate?: CollaborationValidation;
   readonly verify?: (
     checkpoint: CollaborationCheckpoint,
-  ) => JSONCapabilityResult;
+  ) => JSONPatchValidationResult;
 }
 
 export interface CollaborationCompactionReport {
   readonly discardedChanges: number;
   readonly discardedConflicts: number;
   readonly discardedSuppressed: number;
-  readonly discardedHistoryControls: number;
+  readonly discardedHistoryChanges: number;
 }
 
 export type CollaborationCompactionResult =

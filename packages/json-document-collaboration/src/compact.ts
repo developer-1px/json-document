@@ -14,7 +14,7 @@ import {
   verifyCheckpointProof,
 } from "./checkpoint.js";
 import {
-  acceptCandidate,
+  validateCandidate,
   materializeChanges,
 } from "./materialize.js";
 import {
@@ -42,9 +42,10 @@ export function compactCollaborationCheckpoint(
   if (typeof options !== "object" || options === null) {
     return failure("invalid_options", "compaction options must be an object");
   }
+  const validate = options.validate;
   if (
     checkpoint.payload.epoch.acceptance === "custom"
-    && options.accepts === undefined
+    && validate === undefined
   ) {
     return failure(
       "acceptance_required",
@@ -53,7 +54,7 @@ export function compactCollaborationCheckpoint(
   }
   if (
     checkpoint.payload.epoch.acceptance === "none"
-    && options.accepts !== undefined
+    && validate !== undefined
   ) {
     return failure(
       "ruleset_mismatch",
@@ -121,18 +122,18 @@ export function compactCollaborationCheckpoint(
     checkpoint.payload.base,
     checkpoint.payload.epoch.baseDigest,
   );
-  const initialProjection = projectTree(initialTree, () => false);
-  if (!initialProjection.ok) {
+  const initialDocument = projectTree(initialTree, () => false);
+  if (!initialDocument.ok) {
     return failure(
       "invalid_checkpoint",
-      initialProjection.reason ?? "checkpoint base is not materializable",
+      initialDocument.reason ?? "checkpoint base is not materializable",
     );
   }
-  const initialAcceptance = acceptCandidate(options.accepts, initialProjection.value);
-  if (!initialAcceptance.ok) {
+  const initialValidation = validateCandidate(validate, initialDocument.value);
+  if (!initialValidation.ok) {
     return failure(
-      initialAcceptance.code,
-      initialAcceptance.reason
+      initialValidation.code,
+      initialValidation.reason
         ?? "checkpoint base was rejected by the source ruleset",
     );
   }
@@ -142,7 +143,7 @@ export function compactCollaborationCheckpoint(
     materialized = materializeChanges(
       initialTree,
       graph.ordered,
-      (candidate) => acceptCandidate(options.accepts, candidate),
+      (candidate) => validateCandidate(validate, candidate),
     );
   } catch (error) {
     return failure(
@@ -152,12 +153,12 @@ export function compactCollaborationCheckpoint(
         : "checkpoint materialization failed",
     );
   }
-  const nextAccepts = effectiveNextAcceptance(checkpoint, options);
-  const nextAcceptance = acceptCandidate(nextAccepts, materialized.value);
-  if (!nextAcceptance.ok) {
+  const nextValidate = effectiveNextValidation(checkpoint, options);
+  const nextValidation = validateCandidate(nextValidate, materialized.value);
+  if (!nextValidation.ok) {
     return failure(
-      nextAcceptance.code,
-      nextAcceptance.reason
+      nextValidation.code,
+      nextValidation.reason
         ?? "compacted base was rejected by the next ruleset",
     );
   }
@@ -183,9 +184,9 @@ export function compactCollaborationCheckpoint(
       epochId: options.nextEpochId,
       ruleset: options.nextRuleset,
       ...(nextMembership === null ? {} : { membership: nextMembership }),
-      ...(nextAccepts === undefined
+      ...(nextValidate === undefined
         ? {}
-        : { accepts: nextAccepts }),
+        : { validate: nextValidate }),
     },
     {
       epochId: checkpoint.payload.epoch.epochId,
@@ -198,7 +199,7 @@ export function compactCollaborationCheckpoint(
     nextEpoch,
     [],
   );
-  const discardedHistoryControls = checkpoint.payload.changes.filter(
+  const discardedHistoryChanges = checkpoint.payload.changes.filter(
     (change) => change.ops.some((operation) => (
       operation.kind === "undo-change" || operation.kind === "redo-change"
     )),
@@ -211,7 +212,7 @@ export function compactCollaborationCheckpoint(
       discardedChanges: checkpoint.payload.changes.length,
       discardedConflicts: materialized.conflicts.length,
       discardedSuppressed: materialized.suppressed.length,
-      discardedHistoryControls,
+      discardedHistoryChanges,
     }),
   });
 }
@@ -267,7 +268,7 @@ function validateOptions(
     options.nextRuleset.id === checkpoint.payload.epoch.ruleset.id
     && options.nextRuleset.digest === checkpoint.payload.epoch.ruleset.digest
   );
-  const nextAcceptance = effectiveNextAcceptance(
+  const nextValidation = effectiveNextValidation(
     checkpoint,
     options,
   ) === undefined
@@ -275,7 +276,7 @@ function validateOptions(
     : "custom";
   if (
     sameRuleset
-    && nextAcceptance !== checkpoint.payload.epoch.acceptance
+    && nextValidation !== checkpoint.payload.epoch.acceptance
   ) {
     return failure(
       "ruleset_mismatch",
@@ -285,16 +286,16 @@ function validateOptions(
   return null;
 }
 
-function effectiveNextAcceptance(
+function effectiveNextValidation(
   checkpoint: CollaborationCheckpoint,
   options: CollaborationCompactionOptions,
-): CollaborationCompactionOptions["nextAccepts"] {
-  if (options.nextAccepts !== undefined) return options.nextAccepts;
+): CollaborationCompactionOptions["nextValidate"] {
+  if (options.nextValidate !== undefined) return options.nextValidate;
   return (
     options.nextRuleset.id === checkpoint.payload.epoch.ruleset.id
     && options.nextRuleset.digest === checkpoint.payload.epoch.ruleset.digest
   )
-    ? options.accepts
+    ? options.validate
     : undefined;
 }
 

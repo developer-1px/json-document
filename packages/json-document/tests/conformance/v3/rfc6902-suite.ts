@@ -30,7 +30,7 @@ const allCases = [
 ];
 
 export function runRFC6902Conformance(harness: RFC6902Harness): void {
-  describe("json-document v2 RFC 6902 vendor black-box conformance", () => {
+  describe("json-document v3 RFC 6902 vendor black-box conformance", () => {
     const disabled = allCases.filter((testCase) => testCase.disabled).length;
 
     for (const [index, testCase] of allCases.entries()) {

@@ -11,18 +11,18 @@ import {
 } from "./create.js";
 import type { JSONValue } from "@interactive-os/json-document";
 import type {
-  CollaborationHistoryRestoreResult,
-  CollaborationHistoryRuntime,
+  HistoryRestoreResult,
+  HistoryRuntime,
   CollaborationRestoreOptions,
   CollaborationRestoreResult,
   CollaborationRuntime,
-  CollaborationTextRestoreResult,
-  CollaborationTextRuntime,
+  TextRestoreResult,
+  TextRuntime,
 } from "./types.js";
 
 type RestoredProfileRuntime =
-  | CollaborationHistoryRuntime
-  | CollaborationTextRuntime;
+  | HistoryRuntime
+  | TextRuntime;
 
 type RestoredProfileResult =
   | { readonly ok: true; readonly runtime: RestoredProfileRuntime }
@@ -32,36 +32,36 @@ export function restoreCollaborationRuntime(
   input: unknown,
   options: CollaborationRestoreOptions,
 ): CollaborationRestoreResult {
-  const restored = restoreCollaborationHistoryRuntime(input, options);
+  const restored = restoreHistoryRuntime(input, options);
   if (!restored.ok) return restored;
   const runtime: CollaborationRuntime = Object.freeze({
     document: restored.runtime.document,
-    collaboration: restored.runtime.collaboration,
+    replica: restored.runtime.replica,
   });
   return Object.freeze({ ok: true, runtime });
 }
 
-export function restoreCollaborationHistoryRuntime(
+export function restoreHistoryRuntime(
   input: unknown,
   options: CollaborationRestoreOptions,
-): CollaborationHistoryRestoreResult {
+): HistoryRestoreResult {
   const restored = restoreProfileRuntime(input, options, "history");
   if (!restored.ok) return restored;
   return Object.freeze({
     ok: true,
-    runtime: restored.runtime as CollaborationHistoryRuntime,
+    runtime: restored.runtime as HistoryRuntime,
   });
 }
 
-export function restoreCollaborationTextRuntime(
+export function restoreTextRuntime(
   input: unknown,
   options: CollaborationRestoreOptions,
-): CollaborationTextRestoreResult {
+): TextRestoreResult {
   const restored = restoreProfileRuntime(input, options, "text");
   if (!restored.ok) return restored;
   return Object.freeze({
     ok: true,
-    runtime: restored.runtime as CollaborationTextRuntime,
+    runtime: restored.runtime as TextRuntime,
   });
 }
 
@@ -75,9 +75,10 @@ function restoreProfileRuntime(
     return failure("invalid_checkpoint", prepared.reason);
   }
   const checkpoint = prepared.checkpoint;
+  const validate = options.validate;
   if (
     checkpoint.payload.epoch.acceptance === "custom"
-    && options.accepts === undefined
+    && validate === undefined
   ) {
     return failure(
       "acceptance_required",
@@ -86,7 +87,7 @@ function restoreProfileRuntime(
   }
   if (
     checkpoint.payload.epoch.acceptance === "none"
-    && options.accepts !== undefined
+    && validate !== undefined
   ) {
     return failure(
       "ruleset_mismatch",
@@ -115,9 +116,9 @@ function restoreProfileRuntime(
       ...(checkpoint.payload.membership === null
         ? {}
         : { membership: checkpoint.payload.membership }),
-      ...(options.accepts === undefined
+      ...(validate === undefined
         ? {}
-        : { accepts: options.accepts }),
+        : { validate }),
     };
     const restored = profile === "text"
       ? createRestoredTextRuntime(
@@ -130,7 +131,7 @@ function restoreProfileRuntime(
           restoreOptions,
           checkpoint.payload.epoch,
         );
-    const ingested = restored.collaboration.ingest({
+    const ingested = restored.replica.ingest({
       epoch: checkpoint.payload.epoch,
       changes: checkpoint.payload.changes,
     });

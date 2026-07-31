@@ -1,5 +1,5 @@
 import { jsonSerializableError } from "../json/serializable.js";
-import { parseArrayIndex } from "../pointer/arrayIndex.js";
+import { parseArrayIndex } from "../pointer/array-index.js";
 import { validateOperationShape } from "./apply.js";
 import { parseSafe } from "./container.js";
 import type { FastPatchResult, JSONPatchOperation } from "./contract.js";
