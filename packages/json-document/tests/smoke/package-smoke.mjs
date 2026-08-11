@@ -211,7 +211,7 @@ try {
       || file === "foundation/patch/schema.d.ts"
       || file === "foundation/patch/schema-contract.d.ts"
     ) {
-      throw new Error(`Archived implementation leaked into dist: ${file}`);
+      throw new Error(`Removed implementation leaked into dist: ${file}`);
     }
     const source = await readFile(join(distRoot, file), "utf8");
     for (const specifier of moduleSpecifiers(source)) {

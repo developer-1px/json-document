@@ -32,7 +32,6 @@ stateless JSON Patch
 | 개념·이름 정본 | [docs/standard/concept-and-naming-standard.md](docs/standard/concept-and-naming-standard.md) |
 | v3 JSON Document profile | [docs/standard/v3-json-document-profile.md](docs/standard/v3-json-document-profile.md) |
 | v3 공개 표면 manifest | [docs/standard/v3-public-surface.json](docs/standard/v3-public-surface.json) |
-| 1.x 기록 | [archive/v1/docs](archive/v1/docs) |
 
 ## 코드 지도
 
@@ -42,7 +41,6 @@ stateless JSON Patch
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [apps/site](apps/site) | v3 Core 공개 문서 사이트 |
-| [archive/v1](archive/v1) | 배포·workspace·검증에서 분리된 1.x 기록 |
 
 v3 Kernel release는 `@interactive-os/json-document` 하나이며 dependency-free
 Core로 남습니다. 두 collaboration package는 독립 version과 release lifecycle을

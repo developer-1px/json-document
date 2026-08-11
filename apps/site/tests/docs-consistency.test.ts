@@ -14,7 +14,7 @@ function exists(path: string): boolean {
 
 function markdownFiles(dir = "."): string[] {
   return readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
-    if (["archive", "node_modules", "dist", "build", "coverage"].includes(entry.name)) return [];
+    if (["node_modules", "dist", "build", "coverage"].includes(entry.name)) return [];
 
     const path = dir === "." ? entry.name : `${dir}/${entry.name}`;
     if (entry.isDirectory()) return markdownFiles(path);

@@ -55,7 +55,6 @@ function isLegacyRequest(url: string): boolean {
     "/src/playgrounds/",
     "/apps/outliner/src/",
     "/apps/mobile-cms/src/",
-    "/archive/v1/",
     "/packages/json-document/src/application/react-document/index.ts",
     "/packages/json-document/src/application/session/index.ts",
   ].some((part) => url.includes(part));

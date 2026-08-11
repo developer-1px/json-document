@@ -40,6 +40,19 @@ function requirePattern(name, source, pattern) {
   if (!pattern.test(source)) fail(`${name}: missing ${pattern}.`);
 }
 
+function exportNames(source) {
+  const names = new Set();
+
+  for (const match of source.matchAll(/export\s+(?:type\s+)?\{([\s\S]*?)\}/g)) {
+    for (const raw of match[1].split(",")) {
+      const name = raw.trim().split(/\s+as\s+/).pop()?.trim();
+      if (name) names.add(name);
+    }
+  }
+
+  return [...names].sort();
+}
+
 const publicDocs = {
   overview: read("docs/public/overview.md"),
   quickstart: read("docs/public/quickstart.md"),
@@ -47,9 +60,6 @@ const publicDocs = {
 };
 const docsReadme = read("docs/README.md");
 const namingStandard = read("docs/standard/concept-and-naming-standard.md");
-const namingIssueRaw = read(
-  "docs/issues/245-concept-dictionary-naming-ssot.md",
-);
 const surfaces = {
   rootReadme: read("README.md"),
   docsReadme,
@@ -64,8 +74,23 @@ const surfaces = {
 const profile = read("docs/standard/v3-json-document-profile.md");
 const publicSurface = readJson("docs/standard/v3-public-surface.json");
 const publicContract = readJson("packages/json-document/public-contract.json");
-const packageJson = readJson("packages/json-document/package.json");
-const generatedCatalog = readJson("docs/generated/repo-catalog.json");
+const rootPackageJson = readJson("package.json");
+const corePackageJson = readJson("packages/json-document/package.json");
+const collaborationPackageJson = readJson(
+  "packages/json-document-collaboration/package.json",
+);
+const contenteditablePackageJson = readJson(
+  "packages/contenteditable-collaboration/package.json",
+);
+const coreExports = exportNames(
+  read("packages/json-document/src/application/document/index.ts"),
+);
+const collaborationExports = exportNames(
+  read("packages/json-document-collaboration/src/index.ts"),
+);
+const contenteditableExports = exportNames(
+  read("packages/contenteditable-collaboration/src/index.ts"),
+);
 const siteRoutes = readJson("apps/site/src/site-routes.json");
 const siteHome = read("apps/site/src/routes/Home.tsx");
 const docsRoute = read("apps/site/src/routes/Docs.tsx");
@@ -93,15 +118,6 @@ const namingImplementation = {
     "packages/contenteditable-collaboration/src/index.ts",
   ),
 };
-
-for (const pattern of [
-  /Contract delta — canonical-only breaking public surface/,
-  /Canonical names are the only public and internal code vocabulary/,
-  /Contract delta — canonical-only v3 version boundary/,
-  /Package publication remains out of scope/,
-]) {
-  requirePattern("naming issue raw", namingIssueRaw, pattern);
-}
 
 const expectedPublicValues = [
   "appendSegment",
@@ -149,32 +165,6 @@ if (JSON.stringify(fileNames("docs/standard")) !== JSON.stringify([
   fail("docs/standard: naming SSOT, v3 profile, and machine-readable surface must be the only active standards.");
 }
 
-if (JSON.stringify(fileNames("docs/generated")) !== JSON.stringify([
-  "repo-catalog.json",
-])) {
-  fail("docs/generated: unexpected generated artifact.");
-}
-
-for (const path of [
-  "archive/v1/docs/changelog.md",
-  "archive/v1/docs/public/extensions.md",
-  "archive/v1/docs/public/recipes.md",
-  "archive/v1/docs/research/de-facto-editing-feature-taxonomy.md",
-  "archive/v1/docs/standard/conformance-profile.md",
-  "archive/v1/docs/standard/contract-pressure-register.md",
-  "archive/v1/docs/standard/core-standard.md",
-  "archive/v1/docs/standard/extension-delegation-standard.md",
-  "archive/v1/docs/standard/foundation-gate.md",
-  "archive/v1/docs/standard/json-document-spec.md",
-  "archive/v1/docs/standard/public-api-layering.md",
-  "archive/v1/docs/standard/result-contract.md",
-  "archive/v1/docs/standard/schema-introspection-contract.md",
-  "archive/v1/docs/standard/selection-contract.md",
-  "archive/v1/docs/standard/self-improvement-loop-report.md",
-]) {
-  if (!exists(path)) fail(`archive: missing preserved v1 document ${path}.`);
-}
-
 for (const path of [
   "docs/public/extensions.md",
   "docs/public/recipes.md",
@@ -182,7 +172,6 @@ for (const path of [
   "docs/standard/conformance-profile.md",
   "docs/standard/core-standard.md",
   "docs/standard/json-document-spec.md",
-  "apps/site/src/generated/repo-catalog.ts",
 ]) {
   if (exists(path)) fail(`core-only docs: legacy surface still active at ${path}.`);
 }
@@ -202,12 +191,12 @@ for (const [name, source] of Object.entries({
   ) {
     if (!activeCompanionPackages.has(match[0])) {
       fail(
-        `${name}: archived json-document extension is still documented as current: ${match[0]}.`,
+        `${name}: removed json-document extension is still documented as current: ${match[0]}.`,
       );
     }
   }
   if (/\blabs\/extensions\b/.test(source)) {
-    fail(`${name}: archived lab path is still documented as current.`);
+    fail(`${name}: removed lab path is still documented as current.`);
   }
 }
 
@@ -281,7 +270,6 @@ const required = [
   ["collaborationReadme", surfaces.collaborationReadme, /contains no transport, presence,\s*storage, DOM, React, or server dependency/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe native-input DOM lease/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /Concept and Naming Standard/],
-  ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /does not activate or depend on the archived 1\.x DOM adapters/],
   ["llms", surfaces.llms, /v3 표준 상태는 Stable/],
   ["llms", surfaces.llms, /source release version은 `3\.0\.0`/],
   ["llms", surfaces.llms, /npm에는\s+아직 publication되지 않았다/],
@@ -446,8 +434,12 @@ for (const [name, source, pattern] of [
   requirePattern(name, source, pattern);
 }
 
-for (const packageEntry of generatedCatalog.packages ?? []) {
-  for (const publicExport of packageEntry.publicExports ?? []) {
+for (const packageEntry of [
+  { name: corePackageJson.name, publicExports: coreExports },
+  { name: collaborationPackageJson.name, publicExports: collaborationExports },
+  { name: contenteditablePackageJson.name, publicExports: contenteditableExports },
+]) {
+  for (const publicExport of packageEntry.publicExports) {
     if (!namingStandard.includes(`\`${publicExport}\``)) {
       fail(
         `naming standard: ${packageEntry.name} public export is unclassified: ${publicExport}.`,
@@ -472,52 +464,44 @@ if (
 }
 
 if (
-  JSON.stringify(Object.keys(packageJson.exports ?? {})) !== JSON.stringify(["."])
-  || packageJson.peerDependencies !== undefined
-  || packageJson.homepage !== "https://developer-1px.github.io/json-document/"
-  || packageJson.repository?.directory !== "packages/json-document"
+  JSON.stringify(rootPackageJson.workspaces) !== JSON.stringify([
+    "packages/json-document",
+    "packages/json-document-collaboration",
+    "packages/contenteditable-collaboration",
+    "apps/site",
+  ])
+  || corePackageJson.name !== "@interactive-os/json-document"
+  || JSON.stringify(Object.keys(corePackageJson.exports ?? {}))
+    !== JSON.stringify(["."])
+  || corePackageJson.peerDependencies !== undefined
+  || corePackageJson.homepage !== "https://developer-1px.github.io/json-document/"
+  || corePackageJson.repository?.directory !== "packages/json-document"
 ) {
-  fail("package metadata: v3 must ship one dependency-free root entrypoint.");
+  fail("package metadata: active workspaces and the dependency-free v3 Core drifted.");
 }
 
-const generatedCore = generatedCatalog.packages?.[0];
-const generatedCollaboration = generatedCatalog.packages?.[1];
-const generatedContenteditableCollaboration = generatedCatalog.packages?.[2];
-const generatedExports = [...expectedPublicValues, ...expectedPublicTypes].sort();
+const expectedCoreExports = [...expectedPublicValues, ...expectedPublicTypes].sort();
 if (
-  generatedCatalog.schemaVersion !== 1
-  || generatedCatalog.packages?.length !== 3
-  || generatedCore?.path !== "packages/json-document"
-  || generatedCore?.name !== "@interactive-os/json-document"
-  || generatedCore?.status !== "core"
-  || JSON.stringify(generatedCore?.entrypoints) !== JSON.stringify(["."])
-  || JSON.stringify(generatedCore?.publicExports) !== JSON.stringify(generatedExports)
-  || generatedCore?.publicExportCount !== 21
-  || generatedCollaboration?.path !== "packages/json-document-collaboration"
-  || generatedCollaboration?.name
+  JSON.stringify(coreExports) !== JSON.stringify(expectedCoreExports)
+  || collaborationPackageJson.name
     !== "@interactive-os/json-document-collaboration"
-  || generatedCollaboration?.status !== "companion"
-  || JSON.stringify(generatedCollaboration?.entrypoints)
+  || JSON.stringify(Object.keys(collaborationPackageJson.exports ?? {}))
     !== JSON.stringify([".", "./history", "./text"])
-  || generatedCollaboration?.publicExportCount !== 40
-  || generatedContenteditableCollaboration?.path
-    !== "packages/contenteditable-collaboration"
-  || generatedContenteditableCollaboration?.name
+  || collaborationPackageJson.peerDependencies?.["@interactive-os/json-document"]
+    !== "^3.0.0"
+  || collaborationExports.length !== 40
+  || contenteditablePackageJson.name
     !== "@interactive-os/json-document-contenteditable-collaboration"
-  || generatedContenteditableCollaboration?.status !== "companion"
-  || JSON.stringify(generatedContenteditableCollaboration?.entrypoints)
+  || JSON.stringify(Object.keys(contenteditablePackageJson.exports ?? {}))
     !== JSON.stringify(["."])
-  || generatedContenteditableCollaboration?.publicExportCount !== 7
-  || generatedCatalog.officialExtensions !== undefined
-  || generatedCatalog.labExtensions !== undefined
-  || generatedCatalog.apps !== undefined
-  || JSON.stringify(generatedCatalog.totals) !== JSON.stringify({
-    packages: 3,
-    core: 1,
-    companions: 2,
-  })
+  || contenteditablePackageJson.peerDependencies?.["@interactive-os/json-document"]
+    !== "^3.0.0"
+  || contenteditablePackageJson.peerDependencies?.[
+    "@interactive-os/json-document-collaboration"
+  ] !== "^0.2.0-rc.1"
+  || contenteditableExports.length !== 7
 ) {
-  fail("generated catalog: active scope must contain one v3 Core and two exact companions.");
+  fail("package surfaces: active scope must contain one v3 Core and two exact companions.");
 }
 
 const expectedRoutePaths = ["/", "/docs", "/docs/tutorial", "/docs/api"];
@@ -541,11 +525,10 @@ for (const pattern of [
 for (const pattern of [
   /docs\/public\/extensions\.md/,
   /docs\/public\/recipes\.md/,
-  /docs\/generated/,
   /\/docs\/extensions/,
   /\/docs\/recipes/,
 ]) {
-  if (pattern.test(docsRoute)) fail(`site docs route: archived surface remains: ${pattern}.`);
+  if (pattern.test(docsRoute)) fail(`site docs route: removed surface remains: ${pattern}.`);
 }
 
 for (const pattern of [
