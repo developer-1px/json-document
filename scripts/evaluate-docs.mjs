@@ -26,7 +26,14 @@ function fileNames(path) {
 function filesUnder(path) {
   return readdirSync(join(root, path), { withFileTypes: true })
     .flatMap((entry) => {
-      const child = `${path}/${entry.name}`;
+      if (
+        entry.isDirectory()
+        && [".git", ".npm-cache", "node_modules", "dist", "build", "coverage"].includes(entry.name)
+      ) {
+        return [];
+      }
+
+      const child = path === "" ? entry.name : `${path}/${entry.name}`;
       return entry.isDirectory() ? filesUnder(child) : [child];
     });
 }
@@ -72,6 +79,7 @@ const surfaces = {
   ...publicDocs,
 };
 const profile = read("docs/standard/v3-json-document-profile.md");
+const publicSurface = readJson("docs/standard/v3-public-surface.json");
 const publicContract = readJson("packages/json-document/public-contract.json");
 const rootPackageJson = readJson("package.json");
 const corePackageJson = readJson("packages/json-document/package.json");
@@ -137,6 +145,14 @@ if (JSON.stringify(fileNames("docs/standard")) !== JSON.stringify([
   "v3-public-surface.json",
 ])) {
   fail("docs/standard: naming SSOT, v3 profile, and machine-readable surface must be the only active standards.");
+}
+
+const misplacedMarkdown = filesUnder("").filter((path) => {
+  const name = path.split("/").at(-1);
+  return path.endsWith(".md") && !path.startsWith("docs/") && name !== "README.md";
+});
+if (misplacedMarkdown.length > 0) {
+  fail(`docs layout: non-README markdown must live under docs/: ${misplacedMarkdown.join(", ")}.`);
 }
 
 for (const path of [
@@ -429,6 +445,20 @@ if (
   || new Set(publicContract.root.types).size !== publicContract.root.types.length
 ) {
   fail("public contract: root must be the only entrypoint with unique value and type symbols.");
+}
+
+for (const symbol of [
+  ...publicContract.root.values,
+  ...publicContract.root.types,
+]) {
+  if (!publicDocs.api.includes(symbol)) {
+    fail(`public API docs: missing root symbol ${symbol}.`);
+  }
+}
+for (const member of publicSurface.documentMembers) {
+  if (!publicDocs.api.includes(member)) {
+    fail(`public API docs: missing JSON Document member ${member}.`);
+  }
 }
 
 if (

@@ -15,62 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Detect changed scope
-        id: scope
-        env:
-          CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          CI_HEAD_SHA: ${{ github.sha }}
-        run: node scripts/ci-scope.mjs
       - name: Install dependencies
-        if: steps.scope.outputs.package_any == 'true'
         run: npm ci --no-audit --no-fund
-      - name: Verify active v3 packages
-        if: steps.scope.outputs.package_full == 'true'
-        run: npm run verify -w @interactive-os/json-document && npm run verify:companions && npm run standard:check && npm run docs:evaluate
-      - name: Verify package documentation
-        if: steps.scope.outputs.package_full != 'true' && (steps.scope.outputs.package_docs == 'true' || steps.scope.outputs.package_smoke == 'true')
-        run: |
-          if [ "${{ steps.scope.outputs.package_docs }}" = "true" ]; then
-            npm run docs:evaluate
-          fi
-          if [ "${{ steps.scope.outputs.package_smoke }}" = "true" ]; then
-            npm run smoke:package
-          fi
-      - name: Check package contents
-        if: steps.scope.outputs.package_full == 'true' || steps.scope.outputs.package_smoke == 'true'
+      - name: Verify release graph
         env:
           npm_config_cache: ${{ runner.temp }}/npm-cache
-        run: |
-          npm run pack:library
-          npm run pack:companions
+        run: npm run release:check
 
   playground-site:
     name: Site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Detect changed scope
-        id: scope
-        env:
-          CI_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          CI_HEAD_SHA: ${{ github.sha }}
-        run: node scripts/ci-scope.mjs
       - name: Install dependencies
-        if: steps.scope.outputs.site == 'true' || steps.scope.outputs.browser == 'true'
         run: npm ci --no-audit --no-fund
       - name: Verify site
-        if: steps.scope.outputs.site == 'true'
         run: npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages
       - name: Verify browser behavior
-        if: steps.scope.outputs.browser == 'true'
         run: npm run browser:test
