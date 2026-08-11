@@ -18,7 +18,7 @@
     "perf:core": "npm run build -w @interactive-os/json-document && node scripts/benchmark-core.mjs",
     "release:check": "npm run verify -w @interactive-os/json-document && npm run verify:companions && npm run standard:check && npm run docs:evaluate && npm run perf:core && npm run pack:library && npm run pack:companions",
     "standard:check": "node scripts/evaluate-standardization.mjs && npm test -w @interactive-os/json-document -- v3-",
-    "verify": "npm run typecheck && npm test && npm run build && npm run smoke:package && npm run verify:companions && npm run docs:evaluate && npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages && npm run browser:test",
+    "verify": "npm run verify -w @interactive-os/json-document && npm run verify:companions && npm run docs:evaluate && npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages && npm run browser:test",
     "verify:companions": "npm run verify -w @interactive-os/json-document-collaboration && npm run verify -w @interactive-os/json-document-contenteditable-collaboration",
     "pack:library": "npm pack -w @interactive-os/json-document --dry-run --cache ./.npm-cache",
     "pack:companions": "npm pack -w @interactive-os/json-document-collaboration --dry-run --cache ./.npm-cache && npm pack -w @interactive-os/json-document-contenteditable-collaboration --dry-run --cache ./.npm-cache",
