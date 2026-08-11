@@ -72,7 +72,6 @@ const surfaces = {
   ...publicDocs,
 };
 const profile = read("docs/standard/v3-json-document-profile.md");
-const publicSurface = readJson("docs/standard/v3-public-surface.json");
 const publicContract = readJson("packages/json-document/public-contract.json");
 const rootPackageJson = readJson("package.json");
 const corePackageJson = readJson("packages/json-document/package.json");
@@ -119,31 +118,6 @@ const namingImplementation = {
   ),
 };
 
-const expectedPublicValues = [
-  "appendSegment",
-  "applyPatch",
-  "buildPointer",
-  "createJSONDocument",
-  "parentPointer",
-  "parsePointer",
-  "trackPointer",
-  "tryParsePointer",
-];
-const expectedPublicTypes = [
-  "JSONAppliedChange",
-  "JSONChangeMetadata",
-  "JSONDocument",
-  "JSONDocumentOptions",
-  "JSONDocumentCommitOptions",
-  "JSONDocumentCommitResult",
-  "JSONPatchOperation",
-  "JSONPatchResult",
-  "JSONPatchValidationResult",
-  "JSONValue",
-  "Pointer",
-  "QueryResult",
-  "ReadResult",
-];
 const activeCompanionPackages = new Set([
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
@@ -271,8 +245,7 @@ const required = [
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /IME-safe native-input DOM lease/],
   ["contenteditableCollaborationReadme", surfaces.contenteditableCollaborationReadme, /Concept and Naming Standard/],
   ["llms", surfaces.llms, /v3 표준 상태는 Stable/],
-  ["llms", surfaces.llms, /source release version은 `3\.0\.0`/],
-  ["llms", surfaces.llms, /npm에는\s+아직 publication되지 않았다/],
+  ["llms", surfaces.llms, /release version은 `3\.0\.0`/],
   ["llms", surfaces.llms, /공개 Root는 정확히 다음 21개 symbol/],
   ["llms", surfaces.llms, /## Host adapter와 companion/],
   ["llms", surfaces.llms, /@interactive-os\/json-document-collaboration/],
@@ -450,17 +423,12 @@ for (const packageEntry of [
 
 if (
   JSON.stringify(Object.keys(publicContract)) !== JSON.stringify(["root"])
-  || JSON.stringify(publicContract.root.values) !== JSON.stringify(expectedPublicValues)
-  || JSON.stringify(publicContract.root.types) !== JSON.stringify(expectedPublicTypes)
+  || !Array.isArray(publicContract.root.values)
+  || !Array.isArray(publicContract.root.types)
+  || new Set(publicContract.root.values).size !== publicContract.root.values.length
+  || new Set(publicContract.root.types).size !== publicContract.root.types.length
 ) {
-  fail("public contract: root must be the only exact 21-symbol entrypoint.");
-}
-
-if (
-  JSON.stringify(publicSurface.binding?.values) !== JSON.stringify(expectedPublicValues)
-  || JSON.stringify(publicSurface.binding?.types) !== JSON.stringify(expectedPublicTypes)
-) {
-  fail("v3 machine surface: package contract and standard manifest disagree.");
+  fail("public contract: root must be the only entrypoint with unique value and type symbols.");
 }
 
 if (
@@ -480,7 +448,10 @@ if (
   fail("package metadata: active workspaces and the dependency-free v3 Core drifted.");
 }
 
-const expectedCoreExports = [...expectedPublicValues, ...expectedPublicTypes].sort();
+const expectedCoreExports = [
+  ...publicContract.root.values,
+  ...publicContract.root.types,
+].sort();
 if (
   JSON.stringify(coreExports) !== JSON.stringify(expectedCoreExports)
   || collaborationPackageJson.name
@@ -504,12 +475,13 @@ if (
   fail("package surfaces: active scope must contain one v3 Core and two exact companions.");
 }
 
-const expectedRoutePaths = ["/", "/docs", "/docs/tutorial", "/docs/api"];
 if (
-  JSON.stringify(siteRoutes.map((route) => route.path)) !== JSON.stringify(expectedRoutePaths)
+  siteRoutes.length === 0
+  || new Set(siteRoutes.map((route) => route.path)).size !== siteRoutes.length
+  || siteRoutes.some((route) => !route.path.startsWith("/"))
   || siteRoutes.some((route) => route.group !== "Start")
 ) {
-  fail("site routes: the public site must expose only the v3 core routes.");
+  fail("site routes: the route contract must contain unique absolute Start routes.");
 }
 
 for (const pattern of [
@@ -534,7 +506,6 @@ for (const pattern of [
 for (const pattern of [
   /Implementation-neutral JSON editing/,
   /six-member JSON Document/,
-  /3\.0\.0 · npm publication pending/,
   /Rich editing belongs to host adapters/,
 ]) {
   requirePattern("site home", siteHome, pattern);

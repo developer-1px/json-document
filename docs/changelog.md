@@ -3,7 +3,7 @@
 All notable changes to the active v3 packages are documented here. Earlier
 source and release history remains available from Git commits and version tags.
 
-## 3.0.0 — Unreleased
+## 3.0.0
 
 - **Breaking:** Removed every deprecated public naming alias and option fallback.
   The canonical API now exclusively uses `validatePatch`,
