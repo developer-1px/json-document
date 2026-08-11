@@ -85,7 +85,7 @@ JSON이 아니거나 validation에 거부되면 TypeScript reference binding은
 | JD3-HOST-001 | rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem, network, formula engine, CRDT와 OT는 host 또는 extension이 소유해야 하며 Core JSON Document의 필수 data나 member가 되어서는 안 된다. |
 | JD3-CONFORMANCE-001 | conformance는 public factory 또는 injected harness만 사용하는 machine-readable black-box vector로 성공, 실패, atomicity, immutability, probe/commit parity, change notification을 검증해야 한다. private source path, provider object, 특정 dist layout을 요구하면 안 된다. |
 | JD3-CONFORMANCE-002 | 이 profile을 stable이라고 선언하려면 같은 suite가 reference implementation과 최소 한 개의 독립 구현을 통과하고 form, table/data-grid, outliner/tree, rich text, storage/collaboration의 다섯 pressure vertical에서 같은 제약이 확인되어야 한다. |
-| JD3-BINDING-001 | package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 package는 root entrypoint와 21개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 archived session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. |
+| JD3-BINDING-001 | package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 package는 root entrypoint와 21개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. |
 
 ## Result 초안
 
@@ -214,8 +214,7 @@ types  13
 total  21
 ```
 
-패키지는 runtime dependency와 peer dependency가 없다. `/session`과 `/react`는
-export가 아니며, archived 1.x implementation은 production build와 tarball에
-포함하지 않는다. 저장소에 남은 archived source와 regression test는 공개 계약이
-아니다. 별도 `JSON Document` public type은 외부 구현에서 같은 structural port가
-반복되기 전에는 추가하지 않는다.
+패키지는 runtime dependency와 peer dependency가 없다. 제거된 `/session`과
+`/react` implementation은 export가 아니며 production build와 tarball에
+포함하지 않는다. 별도 `JSON Document` public type은 외부 구현에서 같은
+structural port가 반복되기 전에는 추가하지 않는다.

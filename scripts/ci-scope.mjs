@@ -25,15 +25,14 @@ const packageDocs = [
   /^docs\//,
   /^llms\.txt$/,
   /^packages\/[^/]+\/README\.md$/,
-  /^apps\/site\/src\/generated\//,
-  /^scripts\/(?:generate-docs|evaluate-docs)\.mjs$/,
+  /^scripts\/evaluate-docs\.mjs$/,
 ];
 const packageSmoke = [
   /^packages\/json-document\/README\.md$/,
   /^packages\/json-document\/tests\/smoke\//,
 ];
 const packageTooling = [
-  /^scripts\/(?:evaluate-archive-isolation|evaluate-standardization)\.mjs$/,
+  /^scripts\/evaluate-standardization\.mjs$/,
 ];
 const siteRuntime = [
   /^apps\/site\//,
@@ -41,13 +40,13 @@ const siteRuntime = [
   /^docs\//,
   /^llms\.txt$/,
   /^packages\/[^/]+\/README\.md$/,
-  /^scripts\/(?:generate-docs|evaluate-docs|evaluate-site|evaluate-site-http|evaluate-live-site)\.mjs$/,
+  /^scripts\/(?:evaluate-docs|evaluate-site|evaluate-site-http|evaluate-live-site)\.mjs$/,
 ];
 const browserRuntime = [
   /^tests\/browser\//,
   /^playwright\.config\.ts$/,
   /^config\//,
-  /^apps\/site\/(?:src\/(?!generated\/)|tests\/)/,
+  /^apps\/site\/(?:src|tests)\//,
   /^apps\/site\/(?:package\.json|vite\.config\.ts|tsconfig(?:\.node)?\.json)$/,
 ];
 const packageFull = matches([

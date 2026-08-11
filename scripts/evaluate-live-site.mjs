@@ -84,7 +84,7 @@ async function checkOnce() {
     || /@interactive-os\/json-document\/(?:session|react)\b/.test(llms)
     || /\blabs\/extensions\b/.test(llms)
   ) {
-    fail("live llms.txt still exposes an archived 1.x surface.");
+    fail("live llms.txt still exposes a removed legacy surface.");
   }
 
   const manifest = JSON.parse(await fetchText("/site.webmanifest"));

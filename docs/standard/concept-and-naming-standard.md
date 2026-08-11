@@ -4,8 +4,8 @@
 
 이 문서는 현재 `json-document` repository의 개념과 이름 문법을 정의하는 유일한
 사람 작성 정본이다. 개요, API 문서, versioned profile, package README,
-generated catalog와 구현 이름은 이 문서를 참조한다. Generated artifact와 현재
-구현은 이 문서의 개념 의미를 덮어쓸 수 없다.
+package metadata와 구현 이름은 이 문서를 참조한다. 현재 구현은 이 문서의 개념
+의미를 덮어쓸 수 없다.
 
 이 문서는 runtime 동작, protocol 의미와 wire 형식을 변경하지 않는다. Public
 TypeScript API와 내부 identifier는 canonical term만 사용한다.

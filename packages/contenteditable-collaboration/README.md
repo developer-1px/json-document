@@ -99,7 +99,6 @@ author document changes while rendering.
 
 ## Package boundary
 
-This package does not activate or depend on the archived 1.x DOM adapters. It
-does not own transport, presence, clipboard, shared selection, rich-text schema
-semantics, or React rendering. A framework renderer must not replace the same
-root independently while this adapter owns it.
+This package does not own transport, presence, clipboard, shared selection,
+rich-text schema semantics, or React rendering. A framework renderer must not
+replace the same root independently while this adapter owns it.

@@ -1,7 +1,7 @@
 # Changelog
 
-All notable changes to the active v3 packages are documented here. The complete
-1.x history is preserved under `archive/v1/docs/changelog.md`.
+All notable changes to the active v3 packages are documented here. Earlier
+source and release history remains available from Git commits and version tags.
 
 ## 3.0.0 — Unreleased
 
@@ -30,7 +30,7 @@ All notable changes to the active v3 packages are documented here. The complete
   vectors, and recorded the intentional validation/owning-clone/trusted-clone
   responsibility split.
 - Added independent prerelease tag publishing for the Core and both optional
-  collaboration packages, and kept the live-site archive gate aware of the two
+  collaboration packages, and kept the live-site package gate aware of the two
   supported v2 companions.
 - Enabled the two root-value cases that the active RFC 6902 implementation
   already conforms to and documented the two vendored duplicate-member cases
@@ -52,9 +52,8 @@ All notable changes to the active v3 packages are documented here. The complete
   a non-generic six-member `JSONDocument` projection.
 - Removed the 1.x `/session` and `/react` entrypoints, React and Zod peer
   dependencies, and all 1.x non-Core packages from the v2 release scope.
-- Archived the 1.x editing session, extensions, labs, demos, and their
-  documentation. Archive contents are not compiled, tested, cataloged, or
-  published as v2-compatible packages.
+- Removed the 1.x editing session, extensions, labs, demos, and their
+  documentation from the active release graph.
 - Added the v2 Projection Profile, machine-readable public surface, black-box
   conformance vectors, and exact signature/package-surface checks.
 - Reduced generated documentation to the single shipped Core package and made

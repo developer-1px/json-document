@@ -293,7 +293,7 @@ for (const pattern of [
   /stateless JSON Patch -> JSON Document -> host adapter/,
   /root entrypoint 하나와 21개 symbol/,
   /runtime dependency와 peer dependency가 없다/,
-  /archived 1\.x implementation은 production build와 tarball에\s*포함하지 않는다/,
+  /제거된 `\/session`과\s*`\/react` implementation은 export가 아니며 production build와 tarball에\s*포함하지 않는다/,
 ]) {
   requirePattern("v3 profile package closure", profile, pattern);
 }
@@ -313,7 +313,7 @@ if (
     signatureSource,
   )
 ) {
-  fail("v3 signature: archived entrypoint or unsound document generic leaked.");
+  fail("v3 signature: removed entrypoint or unsound document generic leaked.");
 }
 
 for (const path of Object.values(EXPECTED_CONFORMANCE)) {
@@ -656,7 +656,7 @@ for (const pattern of [
   /packageJson\.peerDependencies !== undefined/,
   /application\/session/,
   /application\/react-document/,
-  /Archived implementation leaked into dist/,
+  /Removed implementation leaked into dist/,
 ]) {
   requirePattern("package smoke v3 closure", packageSmoke, pattern);
 }
@@ -669,7 +669,7 @@ for (const pattern of [
   requirePattern("v3 core benchmark", coreBenchmark, pattern);
 }
 if (/application\/session|from\s+["']zod["']/.test(coreBenchmark)) {
-  fail("v3 core benchmark: archived session or schema provider leaked.");
+  fail("v3 core benchmark: removed session or schema provider leaked.");
 }
 
 if (failures.length > 0) {

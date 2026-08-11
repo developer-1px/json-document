@@ -49,17 +49,6 @@ jobs:
           npm run pack:library
           npm run pack:companions
 
-  lab-extensions:
-    name: Archive isolation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-      - name: Verify archived 1.x isolation
-        run: npm run archive:check
-
   playground-site:
     name: Site
     runs-on: ubuntu-latest
