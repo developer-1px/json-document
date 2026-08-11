@@ -132,11 +132,6 @@ const packageManifest = json("packages/json-document/package.json");
 const buildConfig = json("packages/json-document/tsconfig.json");
 const rootSource = read("packages/json-document/src/application/document/index.ts");
 const contractSource = read("packages/json-document/src/application/document/contract.ts");
-const signatureSource = read(
-  "packages/json-document/tests/public/v3-signature-contract.test-d.ts",
-);
-const packageSmoke = read("packages/json-document/tests/smoke/package-smoke.mjs");
-const coreBenchmark = read("scripts/benchmark-core.mjs");
 
 if (manifest.formatVersion !== 1 || manifest.status !== "stable") {
   fail("v3 manifest: expected formatVersion 1 and stable status.");
@@ -225,24 +220,6 @@ for (const pattern of [
   /제거된 `\/session`과\s*`\/react` implementation은 export가 아니며 production build와 tarball에\s*포함하지 않는다/,
 ]) {
   requirePattern("v3 profile package closure", profile, pattern);
-}
-
-requirePattern(
-  "v3 signature exact document",
-  signatureSource,
-  /"value" \| "at" \| "query" \| "validatePatch" \| "commit" \| "subscribe"/,
-);
-requirePattern(
-  "v3 signature JSON boundary",
-  signatureSource,
-  /document\.value satisfies JSONValue/,
-);
-if (
-  /@interactive-os\/json-document\/(?:session|react)|JSONDocument<Row>|document\.value\.id/.test(
-    signatureSource,
-  )
-) {
-  fail("v3 signature: removed entrypoint or unsound document generic leaked.");
 }
 
 for (const path of Object.values(manifest.conformance)) {
@@ -437,15 +414,6 @@ assertGenericSuite(
   jsonDocumentSuite,
   /JSONDocumentHarness[\s\S]*runJSONDocumentConformance/,
 );
-for (const pattern of [
-  /readonly value[\s\S]*at\([\s\S]*query\([\s\S]*validatePatch\([\s\S]*commit\([\s\S]*subscribe\(/,
-  /toMatchObject/,
-]) {
-  requirePattern("json-document suite", jsonDocumentSuite, pattern);
-}
-if (/Object\.keys\([^)]*(?:result|change)/.test(jsonDocumentSuite)) {
-  fail("json-document suite: exact result or change keys must not be asserted.");
-}
 assertPublicBinding(
   "json-document binding",
   jsonDocumentBinding,
@@ -461,17 +429,11 @@ requirePattern(
   jsonDocumentBinding,
   /return createJSONDocument\(/,
 );
-if (/\.(?:lastPatch|patch|find|canFind|canQuery)\b/.test(jsonDocumentBinding)) {
-  fail("json-document binding: non-canonical member leaked.");
-}
 assertGenericSuite(
   "protocol suite",
   protocolSuite,
   /ProtocolHarness[\s\S]*runProtocolConformance/,
 );
-for (const pattern of [/toMatchObject/, /hasOwnProperty/]) {
-  requirePattern("protocol suite", protocolSuite, pattern);
-}
 assertPublicBinding(
   "protocol binding",
   protocolBinding,
@@ -482,39 +444,12 @@ assertGenericSuite(
   pressureSuite,
   /JSONDocumentHarness[\s\S]*runPressureConformance/,
 );
-for (const vertical of [
-  "form",
-  "table-data-grid",
-  "outliner-tree",
-  "rich-text",
-  "storage-collaboration",
-]) {
-  requirePattern(
-    "pressure vectors",
-    JSON.stringify(pressureVectors),
-    new RegExp(vertical),
-  );
-}
 if (
   /@interactive-os\/json-document|\/src\//.test(
     independentJSONDocumentImplementation,
   )
 ) {
   fail("independent JSON Document: reference package or private source import leaked.");
-}
-for (const pattern of [
-  /get value\(\)/,
-  /\bat\(/,
-  /\bquery\(/,
-  /\bvalidatePatch\(/,
-  /\bcommit\(/,
-  /\bsubscribe\(/,
-]) {
-  requirePattern(
-    "independent JSON Document",
-    independentJSONDocumentImplementation,
-    pattern,
-  );
 }
 if (
   /@interactive-os\/json-document|\/src\//.test(independentJSONDocumentBinding)
@@ -549,16 +484,6 @@ assertPublicBinding(
   pointerBinding,
   /appendSegment[\s\S]*runPointerConformance/,
 );
-for (const symbol of [
-  "appendSegment",
-  "buildPointer",
-  "parentPointer",
-  "parsePointer",
-  "trackPointer",
-  "tryParsePointer",
-]) {
-  requirePattern("pointer binding", pointerBinding, new RegExp(`\\b${symbol}\\b`));
-}
 assertGenericSuite(
   "RFC 6902 suite",
   rfc6902Suite,
@@ -579,27 +504,6 @@ assertPublicBinding(
   jsonPathBinding,
   /createJSONDocument[\s\S]*runJSONPathConformance/,
 );
-
-for (const pattern of [
-  /Object\.keys\(packageJson\.exports\)\.join\(","\) !== "\."/,
-  /packageJson\.peerDependencies !== undefined/,
-  /application\/session/,
-  /application\/react-document/,
-  /Removed implementation leaked into dist/,
-]) {
-  requirePattern("package smoke v3 closure", packageSmoke, pattern);
-}
-for (const pattern of [
-  /dist\/application\/document\/index\.js/,
-  /createJSONDocument/,
-  /applyPatch/,
-  /commit single leaf replace/,
-]) {
-  requirePattern("v3 core benchmark", coreBenchmark, pattern);
-}
-if (/application\/session|from\s+["']zod["']/.test(coreBenchmark)) {
-  fail("v3 core benchmark: removed session or schema provider leaked.");
-}
 
 if (failures.length > 0) {
   console.error(

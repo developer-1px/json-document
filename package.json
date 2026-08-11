@@ -22,7 +22,6 @@
     "verify:companions": "npm run verify -w @interactive-os/json-document-collaboration && npm run verify -w @interactive-os/json-document-contenteditable-collaboration",
     "pack:library": "npm pack -w @interactive-os/json-document --dry-run --cache ./.npm-cache",
     "pack:companions": "npm pack -w @interactive-os/json-document-collaboration --dry-run --cache ./.npm-cache && npm pack -w @interactive-os/json-document-contenteditable-collaboration --dry-run --cache ./.npm-cache",
-    "publish": "npm publish -w @interactive-os/json-document --tag next",
     "browser:test": "playwright test",
     "browser:test:headed": "playwright test --headed",
     "browser:install": "playwright install chromium",
