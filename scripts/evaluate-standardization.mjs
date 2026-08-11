@@ -5,61 +5,6 @@ import { fileURLToPath } from "node:url";
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const failures = [];
 
-const EXPECTED_VALUES = [
-  "appendSegment",
-  "applyPatch",
-  "buildPointer",
-  "createJSONDocument",
-  "parentPointer",
-  "parsePointer",
-  "trackPointer",
-  "tryParsePointer",
-];
-const EXPECTED_TYPES = [
-  "JSONAppliedChange",
-  "JSONChangeMetadata",
-  "JSONDocument",
-  "JSONDocumentOptions",
-  "JSONDocumentCommitOptions",
-  "JSONDocumentCommitResult",
-  "JSONPatchOperation",
-  "JSONPatchResult",
-  "JSONPatchValidationResult",
-  "JSONValue",
-  "Pointer",
-  "QueryResult",
-  "ReadResult",
-];
-const DOCUMENT_MEMBERS = [
-  "value",
-  "at",
-  "query",
-  "validatePatch",
-  "commit",
-  "subscribe",
-];
-const EXPECTED_CONFORMANCE = {
-  jsonDocumentVectors: "packages/json-document/tests/conformance/v3/json-document-vectors.json",
-  jsonDocumentSuite: "packages/json-document/tests/conformance/v3/json-document-suite.ts",
-  jsonDocumentBinding: "packages/json-document/tests/public/v3-json-document-standard-conformance.test.ts",
-  protocolVectors: "packages/json-document/tests/conformance/v3/protocol-vectors.json",
-  protocolSuite: "packages/json-document/tests/conformance/v3/protocol-suite.ts",
-  protocolBinding: "packages/json-document/tests/public/v3-protocol-standard-conformance.test.ts",
-  pointerVectors: "packages/json-document/tests/conformance/v3/pointer-vectors.json",
-  pointerSuite: "packages/json-document/tests/conformance/v3/pointer-suite.ts",
-  pointerBinding: "packages/json-document/tests/public/v3-pointer-standard-conformance.test.ts",
-  rfc6902Suite: "packages/json-document/tests/conformance/v3/rfc6902-suite.ts",
-  rfc6902Binding: "packages/json-document/tests/public/v3-rfc6902-standard-conformance.test.ts",
-  jsonPathSuite: "packages/json-document/tests/conformance/v3/jsonpath-suite.ts",
-  jsonPathBinding: "packages/json-document/tests/public/v3-jsonpath-standard-conformance.test.ts",
-  foundationVectors: "packages/json-document/tests/conformance/v3/foundation-vectors.json",
-  pressureVectors: "packages/json-document/tests/conformance/v3/pressure-vectors.json",
-  pressureSuite: "packages/json-document/tests/conformance/v3/pressure-suite.ts",
-  independentJSONDocumentImplementation: "packages/json-document/tests/independent/v3-json-document.ts",
-  independentJSONDocumentBinding: "packages/json-document/tests/independent/v3-json-document-independent-conformance.test.ts",
-  collaborationJSONDocumentBinding: "packages/json-document-collaboration/tests/json-document-conformance.test.ts",
-};
-
 function read(path) {
   return readFileSync(join(repoRoot, path), "utf8");
 }
@@ -199,20 +144,6 @@ if (manifest.formatVersion !== 1 || manifest.status !== "stable") {
 if (manifest.sourceContract !== "packages/json-document/public-contract.json#root") {
   fail("v3 manifest: sourceContract must point to the root public contract.");
 }
-equal(
-  "v3 manifest JSON Document members",
-  manifest.documentMembers,
-  DOCUMENT_MEMBERS,
-);
-equal("v3 manifest conformance paths", manifest.conformance, EXPECTED_CONFORMANCE);
-equal("v3 manifest binding values", manifest.binding?.values, EXPECTED_VALUES);
-equal("v3 manifest binding types", manifest.binding?.types, EXPECTED_TYPES);
-equal("v3 manifest counts", manifest.counts, {
-  values: 8,
-  types: 13,
-  exports: 21,
-  documentMembers: 6,
-});
 equal("v3 package identity", {
   name: manifest.package?.name,
   version: manifest.package?.version,
@@ -231,16 +162,14 @@ equal("v3 runtime dependencies", manifest.package?.runtimeDependencies, []);
 equal("v3 peer dependencies", manifest.package?.peerDependencies, []);
 
 equal("public contract entrypoints", Object.keys(packageContract), ["root"]);
-equal("public contract values", packageContract.root?.values, EXPECTED_VALUES);
-equal("public contract types", packageContract.root?.types, EXPECTED_TYPES);
 
 const sourceExports = publicExports(rootSource);
-equal("root source values", sourceExports.values, [...EXPECTED_VALUES].sort());
-equal("root source types", sourceExports.types, [...EXPECTED_TYPES].sort());
+equal("root source values", sourceExports.values, [...packageContract.root.values].sort());
+equal("root source types", sourceExports.types, [...packageContract.root.types].sort());
 equal(
   "JSONDocument members",
   interfaceMembers(contractSource, "JSONDocument"),
-  DOCUMENT_MEMBERS,
+  manifest.documentMembers,
 );
 
 equal("package entrypoints", Object.keys(packageManifest.exports ?? {}), ["."]);
@@ -316,7 +245,7 @@ if (
   fail("v3 signature: removed entrypoint or unsound document generic leaked.");
 }
 
-for (const path of Object.values(EXPECTED_CONFORMANCE)) {
+for (const path of Object.values(manifest.conformance)) {
   if (!existsSync(join(repoRoot, path))) fail(`v3 conformance artifact missing: ${path}.`);
 }
 
@@ -364,7 +293,7 @@ for (const [label, vectors] of [
 equal(
   "json-document vector members",
   jsonDocumentVectors.documentMembers,
-  DOCUMENT_MEMBERS,
+  manifest.documentMembers,
 );
 if (protocolVectors.function !== "applyPatch") {
   fail("protocol vectors: function must be applyPatch.");

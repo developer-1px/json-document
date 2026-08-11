@@ -205,8 +205,7 @@ array-property 분류만 공통 leaf에 두고, parity test가 untrusted boundar
 ## Package binding
 
 `@interactive-os/json-document`는 root entrypoint 하나와 21개 symbol을
-공개한다. `JSONDocument`의 canonical member는 일곱 개이며, 기존 v3 portable
-consumer가 의존하는 여섯 member는 그대로 유지된다.
+공개한다. `JSONDocument`의 canonical member는 여섯 개다.
 
 ```txt
 values  8
