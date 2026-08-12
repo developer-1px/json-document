@@ -79,6 +79,40 @@ test("TanStack Table Connector fills disjoint ranges in visible order", async ({
   expect(JSON.parse(await page.getByTestId("tanstack-selection-json").innerText()).ranges).toHaveLength(2);
 });
 
+test("TanStack Table and Web Platform Connectors compose for native structured clipboard events", async ({ page }) => {
+  await page.goto("/connectors/tanstack-table");
+  const nameR1 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "name r1" }) });
+  const statusR2 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "status r2" }) });
+  await nameR1.click();
+  await statusR2.click({ modifiers: ["Shift"] });
+
+  const copied = await page.evaluate(() => {
+    const surface = document.querySelector<HTMLElement>('[aria-label="TanStack Table editing"]')!;
+    const data = new DataTransfer();
+    const defaultAllowed = surface.dispatchEvent(new ClipboardEvent("copy", { clipboardData: data, bubbles: true, cancelable: true }));
+    return {
+      defaultAllowed,
+      structured: data.getData("application/vnd.interactive-os.sheet+json"),
+      text: data.getData("text/plain"),
+    };
+  });
+  expect(copied.defaultAllowed).toBe(false);
+  expect(copied.text).toBe("Alpha\tDraft\nBeta\tReady");
+
+  await page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "status r3" }) }).click();
+  const pasted = await page.evaluate((structured) => {
+    const surface = document.querySelector<HTMLElement>('[aria-label="TanStack Table editing"]')!;
+    const data = new DataTransfer();
+    data.setData("application/vnd.interactive-os.sheet+json", structured);
+    return surface.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+  }, copied.structured);
+  expect(pasted).toBe(false);
+
+  const value = JSON.parse(await page.getByTestId("tanstack-document-json").innerText()) as SheetValue;
+  expect(rowCells(value, "r3")).toEqual({ name: "Gamma", status: "Alpha", score: "Draft" });
+  expect(rowCells(value, "r4")).toEqual({ name: "Delta", status: "Beta", score: "Ready" });
+});
+
 type SheetValue = { rows: Array<{ id: string; cells: Record<string, unknown> }> };
 
 async function editCell(page: import("@playwright/test").Page, name: string, value: string) {

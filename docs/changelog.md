@@ -20,6 +20,11 @@ source and release history remains available from Git commits and version tags.
   hierarchy: Start, Core, Editing, and Connectors.
 - Added the official TanStack Table v8 Connector with visible-order Sheet
   selection, clipboard, history, editable cells, and a complete Live Demo.
+- Added `@interactive-os/json-document-web` to translate structured browser
+  clipboard copy/cut/paste events, text-control input, and modifier state into
+  public editing and selection contracts, with a complete Live Demo.
+- Applied the Web Platform Connector to the Document, Sheet, and TanStack Table
+  Live Demos so native event translation composes with their existing editors.
 
 ## 3.0.0
 

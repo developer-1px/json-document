@@ -38,12 +38,13 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 @interactive-os/json-document-react
 @interactive-os/json-document-zod
 @interactive-os/json-document-tanstack-table
+@interactive-os/json-document-web
 ```
 
 외부 runtime은 `peerDependency`입니다. 각 Connector는 Kernel 및 companion과
 lockstep이 아닌 독립 version을 가지며 README에 지원하는 양쪽 version 범위를
 기록합니다. Root subpath에 Connector를 넣지 않으므로 Core-only consumer는
-React, Zod 또는 TanStack Table을 설치하지 않습니다.
+React, Zod, TanStack Table 또는 Web Connector를 설치하지 않습니다.
 
 공식 Connector로 승격하려면 public contract만 사용하고, 대상 생태계의 native
 API를 유지하며, contract test, connector-specific Live Demo와 browser acceptance를
@@ -136,3 +137,40 @@ React에서 사용할 때 TanStack의 React adapter와 json-document React Conne
 조합합니다. 따라서 Table Connector 자체는 계속 headless입니다. 공식 site의
 `/connectors/tanstack-table`에서 정렬·필터·column ordering 이후의 visible-order
 selection, multi-range fill, copy/paste, undo/redo와 canonical JSON 반영을 확인할 수 있습니다.
+
+## Web Platform Connector
+
+`@interactive-os/json-document-web`은 browser-native clipboard와 input shape를
+Editing companion과 Selection companion의 public contract로 번역합니다.
+
+```ts
+const clipboard = createWebClipboardBinding({
+  codec: documentClipboardCodec,
+  read: () => editor.copy(),
+  cut: () => editor.cut()?.result ?? { ok: false },
+  paste: (payload) => editor.dispatch({
+    type: "clipboard.paste",
+    clipboard: payload,
+  }),
+});
+
+surface.addEventListener("copy", (event) => clipboard.copy(event));
+surface.addEventListener("cut", (event) => clipboard.cut(event));
+surface.addEventListener("paste", (event) => clipboard.paste(event));
+```
+
+Document와 Sheet codec은 structured MIME과 `text/plain` projection을 함께
+기록하고, paste에서는 유효한 structured payload만 소비합니다. cut은 clipboard
+기록이 가능할 때만 Editing 제거를 실행합니다. 임의의 외부 plain text를 block이나
+cell로 해석하는 정책은 Host가 소유합니다. 실패하거나 Editing이 거절한 cut/paste는
+`preventDefault()`를 호출하지 않아 native fallback을 보존합니다.
+
+`selectionOperationFromModifiers`는 Web modifier를 `replace`, `extend`, `toggle`로
+번역하고, `textInputFromControl`은 native text control의 value와 caret을 관찰합니다.
+Connector는 event target, shortcut, focus, geometry, accessibility wiring, native text
+selection 또는 IME lifecycle을 소유하지 않습니다. 공식 site의 `/connectors/web`에서
+실제 ClipboardEvent, modifier selection과 text-control editing을 확인할 수 있습니다.
+
+공식 Document와 Sheet Live Demo는 이 native event 경계를 직접 사용합니다. TanStack
+Table Live Demo에서는 visible topology를 소유하는 Table Connector와 native clipboard를
+소유하는 Web Connector가 동일한 Sheet editing contract 위에서 독립적으로 조합됩니다.
