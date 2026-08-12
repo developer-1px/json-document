@@ -53,6 +53,25 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
 });
 
+test("docs and demos share the page frame while preserving their content modes", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+
+  await page.goto("/docs");
+  const docsFrame = await pageFrameSnapshot(page);
+  await expect(page.locator("[data-page-header]")).toHaveCount(1);
+  await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
+
+  await page.goto("/docs/api");
+  await expect(page.locator("[data-petite-cat]")).toHaveCount(0);
+
+  await page.goto("/demo");
+  const demoFrame = await pageFrameSnapshot(page);
+  await expect(page.locator("[data-page-header]")).toHaveCount(1);
+
+  expect(docsFrame).toEqual(demoFrame);
+  expect(demoFrame.width).toBeGreaterThan(1000);
+});
+
 test("ordinary pages reuse one petite decorative cat without covering intro copy", async ({ page }) => {
   const illustrations = new Set<string>();
   const routes = [
@@ -158,7 +177,7 @@ async function scrollSnapshot(page: Page) {
     const main = document.querySelector("#main-content");
     const siteNav = document.querySelector('nav[aria-label="Site navigation"]');
     const pageOutline = document.querySelector('nav[aria-label="On this page"]');
-    const documentContent = document.querySelector("main > div > div");
+    const documentContent = document.querySelector("[data-doc-content]");
     const outlineRect = pageOutline?.getBoundingClientRect();
     const contentRect = documentContent?.getBoundingClientRect();
 
@@ -169,6 +188,13 @@ async function scrollSnapshot(page: Page) {
       pageOutlineTop: pageOutline ? Math.round(pageOutline.getBoundingClientRect().top) : null,
       pageOutlineSide: outlineRect && contentRect && outlineRect.left >= contentRect.right ? "right" : "overlap",
     };
+  });
+}
+
+async function pageFrameSnapshot(page: Page) {
+  return page.locator("[data-page-frame]").evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { left: Math.round(rect.left), top: Math.round(rect.top), width: Math.round(rect.width) };
   });
 }
 

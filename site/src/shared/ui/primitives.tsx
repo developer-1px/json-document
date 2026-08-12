@@ -3,27 +3,41 @@ import { classes, ui } from "./styles";
 
 export type PetiteCatIllustration = "sleep" | "peek" | "braces" | "cursor";
 
-export function PageIntro(props: {
+export function PageFrame(props: { readonly children: ReactNode }) {
+  return (
+    <main className={ui.frame.page}>
+      <div className={ui.frame.content} data-page-frame>{props.children}</div>
+    </main>
+  );
+}
+
+export function PageHeader(props: {
   readonly label?: ReactNode;
   readonly title: ReactNode;
-  readonly children: ReactNode;
-  readonly illustration: PetiteCatIllustration;
+  readonly children?: ReactNode;
+  readonly illustration?: PetiteCatIllustration;
+  readonly aside?: ReactNode;
 }) {
   return (
-    <div className={ui.pageIntro.root}>
-      <div>
-        {props.label ? <p className={classes("mb-2 mt-0", ui.text.label)}>{props.label}</p> : null}
-        <h1 className={classes("mb-2 mt-0", ui.text.title)}>{props.title}</h1>
-        <p className={`m-0 max-w-2xl ${ui.text.body}`}>{props.children}</p>
+    <header className={ui.pageHeader.root} data-page-header>
+      <div className={classes(ui.pageHeader.layout, props.aside != null && ui.pageHeader.layoutWithAside)}>
+        <div className={classes(ui.pageHeader.copy, props.illustration && ui.pageHeader.copyWithArtwork)}>
+          {props.label ? <p className={classes("mb-2 mt-0", ui.text.label)}>{props.label}</p> : null}
+          <h1 className={classes(props.children ? "mb-2" : "mb-0", "mt-0", ui.text.title)}>{props.title}</h1>
+          {props.children ? <p className={`m-0 max-w-2xl ${ui.text.body}`}>{props.children}</p> : null}
+          {props.illustration ? (
+            <figure className={ui.pageHeader.artwork} aria-hidden="true" data-petite-cat={props.illustration}>
+              <img
+                alt=""
+                className={ui.pageHeader.image}
+                src={sitePath(`/illustrations/petite-cats/${props.illustration}.png`)}
+              />
+            </figure>
+          ) : null}
+        </div>
+        {props.aside ? <div className={ui.pageHeader.aside}>{props.aside}</div> : null}
       </div>
-      <figure className={ui.pageIntro.artwork} aria-hidden="true" data-petite-cat={props.illustration}>
-        <img
-          alt=""
-          className={ui.pageIntro.image}
-          src={sitePath(`/illustrations/petite-cats/${props.illustration}.png`)}
-        />
-      </figure>
-    </div>
+    </header>
   );
 }
 

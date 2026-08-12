@@ -1,8 +1,7 @@
 export const ui = {
   frame: {
     app: "bg-white font-sans text-stone-900 antialiased",
-    page: "min-h-full bg-white",
-    plainPage: "min-h-full bg-white",
+    page: "min-h-full bg-white px-4 py-8 lg:px-8",
     content: "mx-auto max-w-6xl",
     header: "border-b border-black/[0.06]",
     hero: "border-b border-black/[0.06] bg-transparent",
@@ -22,10 +21,15 @@ export const ui = {
     body: "text-sm leading-6 text-stone-600",
     meta: "text-xs leading-5 text-stone-500",
   },
-  pageIntro: {
-    root: "relative min-w-0 pr-32 sm:pr-52",
+  pageHeader: {
+    root: "mb-7 border-b border-black/[0.06] pb-5",
+    layout: "grid min-w-0 gap-4",
+    layoutWithAside: "lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-end",
+    copy: "relative min-w-0",
+    copyWithArtwork: "pr-32 sm:pr-52",
     artwork: "pointer-events-none absolute right-0 top-0 m-0 flex h-20 w-28 items-start justify-end overflow-hidden sm:h-24 sm:w-48",
     image: "block max-h-full max-w-full object-contain object-right-bottom",
+    aside: "min-w-0",
   },
   surface: {
     flat: "shadow-none",
