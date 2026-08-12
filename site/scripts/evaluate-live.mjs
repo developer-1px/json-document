@@ -6,6 +6,7 @@ const attempts = Number(process.env.SITE_LIVE_ATTEMPTS ?? "18");
 const delayMs = Number(process.env.SITE_LIVE_DELAY_MS ?? "10000");
 const routes = JSON.parse(readFileSync(new URL("../site-routes.json", import.meta.url), "utf8"));
 const activeCompanionPackages = new Set([
+  "@interactive-os/json-document-selection",
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
