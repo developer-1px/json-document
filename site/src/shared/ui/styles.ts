@@ -81,6 +81,17 @@ export const ui = {
     canvasObject: "rounded-[6px] border-2 border-white text-xs font-medium text-white shadow-[0_1px_2px_rgba(24,24,27,0.12)] outline-none aria-pressed:ring-2 aria-pressed:ring-stone-700 aria-pressed:ring-offset-2",
     marquee: "border border-[#de6d55] bg-[#de6d55]/10",
   },
+  database: {
+    toolbar: "rounded-[10px] border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(24,24,27,0.04)]",
+    table: "border-collapse bg-white text-left text-sm",
+    head: "border border-black/[0.07] bg-[#f7f7f5] text-xs font-medium text-stone-500",
+    cell: "border border-black/[0.07] bg-white text-sm text-stone-800",
+    rowAction: "border border-black/[0.07] bg-[#f7f7f5] text-stone-400",
+    type: "rounded-full bg-[#ecece8] px-2 py-0.5 text-[10px] font-medium text-stone-500",
+    select: "rounded-[6px] border border-black/[0.08] bg-[#f1f1ee] px-2 py-1 text-xs text-stone-700 outline-none focus:border-black/30",
+    checkbox: "h-4 w-4 accent-stone-800",
+    lease: "rounded-[6px] border border-[#de6d55]/30 bg-[#de6d55]/10 px-2 py-1 text-xs text-[#a94b38]",
+  },
   home: {
     page: "min-h-full overflow-hidden bg-white",
     hero: "relative isolate mx-auto min-h-[52rem] max-w-[92rem] overflow-hidden bg-white lg:min-h-screen",
