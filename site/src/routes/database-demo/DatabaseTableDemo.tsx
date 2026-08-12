@@ -13,6 +13,7 @@ import {
   type DatabaseRecord,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { CodeBlock } from "../../shared/ui/code-block";
 import { classes, ui } from "../../shared/ui/styles";
 import { initialDatabase } from "./initial-database";
 
@@ -233,15 +234,15 @@ export function DatabaseTableDemo() {
         <aside aria-label="Database contract inspector" className="grid content-start gap-3 lg:grid-cols-3">
           <section className={classes("p-3", ui.surface.inset)}>
             <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Persistent Table view</h2>
-            <pre data-testid="database-view-json" className={classes("m-0 max-h-56 overflow-auto whitespace-pre-wrap", ui.code.json)}><code>{JSON.stringify(view, null, 2)}</code></pre>
+            <CodeBlock language="json" size="standard" source={JSON.stringify(view, null, 2)} testId="database-view-json" />
           </section>
           <section className={classes("p-3", ui.surface.inset)}>
             <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Structural selection</h2>
-            <pre data-testid="database-selection-json" className={classes("m-0 max-h-40 overflow-auto whitespace-pre-wrap", ui.code.json)}><code>{JSON.stringify(snapshot.selection, null, 2)}</code></pre>
+            <CodeBlock language="json" size="compact" source={JSON.stringify(snapshot.selection, null, 2)} testId="database-selection-json" />
           </section>
           <section className={classes("p-3", ui.surface.inset)}>
             <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Canonical database · revision {snapshot.revision}</h2>
-            <pre data-testid="database-document-json" className={classes("m-0 max-h-80 overflow-auto whitespace-pre-wrap", ui.code.json)}><code>{JSON.stringify(document, null, 2)}</code></pre>
+            <CodeBlock language="json" size="standard" source={JSON.stringify(document, null, 2)} testId="database-document-json" />
           </section>
         </aside>
       </div>
