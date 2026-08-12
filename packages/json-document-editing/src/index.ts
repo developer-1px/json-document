@@ -1,5 +1,6 @@
 export { createDocumentEditor } from "./document.js";
 export { createEditingSession } from "./session.js";
+export { createSheetEditor } from "./sheet.js";
 export type {
   BlockDocument,
   DocumentBlock,
@@ -16,3 +17,14 @@ export type {
   EditingSession,
   EditingSnapshot,
 } from "./session.js";
+export type {
+  SheetCell,
+  SheetClipboard,
+  SheetColumn,
+  SheetDocument,
+  SheetEditor,
+  SheetIntent,
+  SheetPoint,
+  SheetRow,
+  SheetSelection,
+} from "./sheet.js";

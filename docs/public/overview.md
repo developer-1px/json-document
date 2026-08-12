@@ -121,7 +121,7 @@ if (result.ok) {
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
 | `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
-| `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 최초 Document slice |
+| `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 Document·Sheet slice |
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
 | `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
@@ -177,5 +177,6 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 
 제품별 selection 의미는 editing companion의 공통 lifecycle 위에서 조합합니다.
 Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다. 공식 site의
-`/demo`는 public package만 사용해 Document selection, clipboard, history와
-canonical JSON projection을 함께 실행합니다.
+`/demo`와 `/demo/sheet`는 public package만 사용해 Document range와 Sheet
+rectangular selection, clipboard, history와 canonical JSON projection을 함께
+실행합니다.

@@ -13,6 +13,9 @@ source and release history remains available from Git commits and version tags.
 - Added `@interactive-os/json-document-zod` to translate Zod validation issues
   into JSON Document failures and JSON Pointer diagnostics without adopting
   parsed transforms, with a connector-specific Live Demo.
+- Added a browser-independent Sheet editing slice with stable row and column
+  identity, rectangular selection, JSON/TSV clipboard, atomic paste, cell
+  history, and the complete minimal `/demo/sheet` application.
 
 ## 3.0.0
 
