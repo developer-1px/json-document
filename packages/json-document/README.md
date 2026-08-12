@@ -134,9 +134,9 @@ types
 ```
 
 `JSONDocument`는 application-owned structural contract입니다. Selection,
-history, clipboard, DOM lifecycle과 framework binding은 별도 host 또는 adapter가
-이 여섯 member를 조합합니다. 패키지는 `/session`이나 `/react` subpath를
-공개하지 않습니다.
+history와 clipboard는 optional editing companion이 조합하고, framework binding은
+독립 Connector가 이 여섯 member를 사용합니다. Root package는 `/session`이나
+`/react` subpath를 공개하지 않습니다.
 
 ## 순수 core
 
@@ -187,12 +187,15 @@ const body = JSON.stringify(operations);
 body satisfies string;
 ```
 
-## Extension과 host 경계
+## Connector와 host 경계
 
 Form, data-grid, outliner, rich text, persistence/collaboration extension은 여섯
 member `JSONDocument`를 포트로 받는 것이 권장됩니다. DOM focus, geometry,
 keyboard, system clipboard, filesystem, network, formula, CRDT와 OT는 host가
 소유합니다.
+
+React, Zod와 TanStack Table 같은 외부 생태계의 반복되는 integration은 Root가
+아니라 `@interactive-os/json-document-<target>` 공식 Connector가 제공합니다.
 
 - GitHub Wiki: https://github.com/developer-1px/json-document/wiki
 - Extension guide: https://github.com/developer-1px/json-document/wiki/Labs-and-Extensions

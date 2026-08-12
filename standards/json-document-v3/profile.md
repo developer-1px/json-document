@@ -21,8 +21,9 @@ reference implementation의 현재 동작은 상위 계약을 덮어쓸 수 없�
 
 stateless JSON Patch은 JSON value, JSON Pointer, JSONPath, JSON Patch와 result의
 의미만 정의한다. JSON Document은 그 protocol을 현재 문서에 연결하는 stateful
-port다. Selection, history, clipboard, DOM과 framework lifecycle은 Host
-adapter가 JSON Document과 조합한다.
+port다. Selection, history와 clipboard는 optional companion이 조합하고, DOM과
+framework lifecycle은 Host adapter 또는 independently versioned Connector가
+JSON Document과 조합한다.
 
 ```txt
 stateless JSON Patch -> JSON Document -> host adapter
@@ -81,11 +82,11 @@ JSON이 아니거나 validation에 거부되면 TypeScript reference binding은
 | JD3-RESULT-002 | consumer는 모르는 result field와 error code를 일반적으로 처리할 수 있어야 한다. minor release는 기존 required field나 code의 의미를 바꾸면 안 되지만 optional field와 새 code는 MAY 추가할 수 있으므로 exact `Object.keys` 집합은 계약이 아니다. |
 | JD3-SCHEMA-001 | JSON Document이 validation rule을 구성하면 initial state와 commit candidate를 notification 전에 검사해야 한다. 이 boundary는 provider-neutral이어야 하며 `_zod`, provider issue, private schema object를 JSON Document 적합성에 요구하면 안 된다. 제약 없는 validation는 MAY 허용한다. Validation callback은 같은 JSON Document의 `validatePatch`나 `commit`을 재진입해서는 안 되며, binding은 그런 호출을 failure로 차단해 state와 change notification을 보존해야 한다. |
 | JD3-SCHEMA-002 | import나 initial parse는 commit 전에 명시적으로 값을 변환할 수 있다. commit-time validation는 candidate를 몰래 변환하면 안 되며 normalization이 필요하면 최종 value를 만드는 operation이 applied change에 명시되어야 한다. |
-| JD3-SESSION-001 | insert, replace, delete, move, duplicate, selection, clipboard, history, schema introspection과 그 patch validation는 host 또는 별도 adapter 책임이다. Kernel package의 export나 JSON Document 적합성에 요구하면 안 된다. |
+| JD3-SESSION-001 | insert, replace, delete, move, duplicate, selection, clipboard, history, schema introspection과 그 patch validation는 host, optional companion 또는 별도 Connector/adapter 책임이다. Kernel package의 export나 JSON Document 적합성에 요구하면 안 된다. |
 | JD3-HOST-001 | rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem, network, formula engine, CRDT와 OT는 host 또는 extension이 소유해야 하며 Core JSON Document의 필수 data나 member가 되어서는 안 된다. |
 | JD3-CONFORMANCE-001 | conformance는 public factory 또는 injected harness만 사용하는 machine-readable black-box vector로 성공, 실패, atomicity, immutability, probe/commit parity, change notification을 검증해야 한다. private source path, provider object, 특정 dist layout을 요구하면 안 된다. |
 | JD3-CONFORMANCE-002 | 이 profile을 stable이라고 선언하려면 같은 suite가 reference implementation과 최소 한 개의 독립 구현을 통과하고 form, table/data-grid, outliner/tree, rich text, storage/collaboration의 다섯 pressure vertical에서 같은 제약이 확인되어야 한다. |
-| JD3-BINDING-001 | package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 package는 root entrypoint와 21개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. |
+| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 21개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
 
 ## Result 초안
 

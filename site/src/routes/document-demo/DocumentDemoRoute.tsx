@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import {
-  createDocumentEditor,
   type BlockDocument,
   type DocumentClipboard,
 } from "@interactive-os/json-document-editing";
+import {
+  useDocumentEditor,
+  useEditingSnapshot,
+} from "@interactive-os/json-document-react";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -14,14 +17,12 @@ const initialDocument: BlockDocument = {
   ],
 };
 
-export function DocumentDemo() {
-  const editor = useMemo(() => createDocumentEditor(initialDocument), []);
-  const [snapshot, setSnapshot] = useState(editor.snapshot);
+export function DocumentDemoRoute() {
+  const editor = useDocumentEditor(initialDocument);
+  const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const surfaceRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => editor.subscribe(setSnapshot), [editor]);
 
   const document = snapshot.value as BlockDocument;
   const selected = new Set(editor.selectedBlockIds);

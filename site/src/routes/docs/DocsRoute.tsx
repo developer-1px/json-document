@@ -1,51 +1,27 @@
 import { useMemo } from "react";
-import { MarkdownViewer, markdownHeadings } from "../components/MarkdownViewer";
-import apiReferenceMarkdown from "../../../docs/public/api.md?raw";
-import overviewMarkdown from "../../../docs/public/overview.md?raw";
-import quickstartMarkdown from "../../../docs/public/quickstart.md?raw";
+import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
+import { docPageOrder, docPages, type DocPageId } from "./doc-pages";
 
-const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-const docPages = [
-  {
-    path: "/docs",
-    label: "Concepts",
-    title: "json-document Docs",
-    source: overviewMarkdown,
-  },
-  {
-    path: "/docs/tutorial",
-    label: "Quickstart",
-    title: "작은 카드 편집기 만들기",
-    source: quickstartMarkdown,
-  },
-  {
-    path: "/docs/api",
-    label: "API reference",
-    title: "json-document API",
-    source: apiReferenceMarkdown,
-  },
-] as const;
-
-type DocPage = (typeof docPages)[number];
-
-function sitePath(path: string): string {
-  return `${BASE_PATH}${path}` || "/";
+export function DocsOverviewRoute() {
+  return <DocsRoute pageId="overview" />;
 }
 
-export function Docs() {
-  return <DocsPage page={docPages[0]} />;
+export function QuickstartRoute() {
+  return <DocsRoute pageId="quickstart" />;
 }
 
-export function DocsTutorial() {
-  return <DocsPage page={docPages[1]} />;
+export function ConnectorDocsRoute() {
+  return <DocsRoute pageId="connectors" />;
 }
 
-export function DocsApiReference() {
-  return <DocsPage page={docPages[2]} />;
+export function ApiReferenceRoute() {
+  return <DocsRoute pageId="api" />;
 }
 
-function DocsPage({ page }: { page: DocPage }) {
+function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
+  const page = docPages[pageId];
   const headings = useMemo(
     () => markdownHeadings(page.source).filter((heading) => heading.level === 2),
     [page.source],
@@ -59,16 +35,19 @@ function DocsPage({ page }: { page: DocPage }) {
             <nav aria-label="Documentation pages">
               <div className="mb-2 font-medium text-stone-950">Docs</div>
               <div className="grid">
-                {docPages.map((item) => (
-                  <a
-                    key={item.path}
-                    href={sitePath(item.path)}
-                    aria-current={item.path === page.path ? "page" : undefined}
-                    className="border-l border-transparent px-3 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:border-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950"
-                  >
-                    {item.label}
-                  </a>
-                ))}
+                {docPageOrder.map((id) => {
+                  const item = docPages[id];
+                  return (
+                    <a
+                      key={item.path}
+                      href={sitePath(item.path)}
+                      aria-current={item.path === page.path ? "page" : undefined}
+                      className="border-l border-transparent px-3 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:border-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950"
+                    >
+                      {item.label}
+                    </a>
+                  );
+                })}
               </div>
             </nav>
 
@@ -92,16 +71,19 @@ function DocsPage({ page }: { page: DocPage }) {
         <div className="min-w-0">
           <nav aria-label="Documentation pages" className="mb-3 overflow-x-auto border-b border-stone-200 pb-2 text-xs lg:hidden">
             <div className="flex gap-1 whitespace-nowrap">
-              {docPages.map((item) => (
-                <a
-                  key={item.path}
-                  href={sitePath(item.path)}
-                  aria-current={item.path === page.path ? "page" : undefined}
-                  className="px-2 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950"
-                >
-                  {item.label}
-                </a>
-              ))}
+              {docPageOrder.map((id) => {
+                const item = docPages[id];
+                return (
+                  <a
+                    key={item.path}
+                    href={sitePath(item.path)}
+                    aria-current={item.path === page.path ? "page" : undefined}
+                    className="px-2 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950"
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
             </div>
           </nav>
 
@@ -129,4 +111,8 @@ function DocsPage({ page }: { page: DocPage }) {
       </div>
     </main>
   );
+}
+
+function sitePath(path: string): string {
+  return `${basePath}${path}` || "/";
 }

@@ -3,6 +3,15 @@
 All notable changes to the active v3 packages are documented here. Earlier
 source and release history remains available from Git commits and version tags.
 
+## Next
+
+- Added the official Connector package category for independently versioned
+  external ecosystem integrations, with planned Zod and TanStack Table
+  contracts.
+- Added `@interactive-os/json-document-react` for React external-store
+  subscriptions and Document editor component lifecycle, and migrated the
+  official Document demo to that Connector.
+
 ## 3.0.0
 
 - **Breaking:** Removed every deprecated public naming alias and option fallback.

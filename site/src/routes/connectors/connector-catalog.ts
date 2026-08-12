@@ -1,0 +1,43 @@
+export type ConnectorCatalogEntry = {
+  readonly id: "react" | "zod" | "tanstack-table" | "web";
+  readonly name: string;
+  readonly packageName: string;
+  readonly description: string;
+  readonly status: "available" | "planned";
+  readonly demoPath: string | null;
+};
+
+export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
+  {
+    id: "react",
+    name: "React",
+    packageName: "@interactive-os/json-document-react",
+    description: "External-store subscription and component-owned editor lifecycle.",
+    status: "available",
+    demoPath: "/connectors/react",
+  },
+  {
+    id: "zod",
+    name: "Zod",
+    packageName: "@interactive-os/json-document-zod",
+    description: "Zod validation results translated into JSON Document diagnostics.",
+    status: "planned",
+    demoPath: null,
+  },
+  {
+    id: "tanstack-table",
+    name: "TanStack Table",
+    packageName: "@interactive-os/json-document-tanstack-table",
+    description: "Headless table rows and cell commits connected to JSON Patch.",
+    status: "planned",
+    demoPath: null,
+  },
+  {
+    id: "web",
+    name: "Web Platform",
+    packageName: "@interactive-os/json-document-web",
+    description: "Browser clipboard and input surfaces connected to editing contracts.",
+    status: "planned",
+    demoPath: null,
+  },
+];

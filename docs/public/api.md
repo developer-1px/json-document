@@ -33,8 +33,9 @@
 | Pointer 조합 | `buildPointer`, `appendSegment`, `parentPointer` | `Pointer` |
 | 변경 뒤 Pointer 추적 | `trackPointer` | `Pointer | null` |
 
-Selection, clipboard, history와 high-level edit verb는 host 또는 adapter가
-`JSONDocument` 위에서 소유합니다.
+Selection, clipboard, history와 high-level edit verb는 editing companion 또는
+제품 domain이 `JSONDocument` 위에서 소유합니다. 외부 생태계 연결은 공식
+Connector가 제공할 수 있습니다.
 
 ## 시작
 
@@ -312,8 +313,13 @@ types
   ReadResult, QueryResult, JSONDocument
 ```
 
-## Host와 adapter
+## Connector와 host
 
-패키지는 `/session`이나 `/react` subpath를 공개하지 않습니다. Selection,
-clipboard, history, schema introspection, DOM lifecycle과 framework binding은
-host 또는 별도 adapter가 여섯-member `JSONDocument`를 조합해 구현합니다.
+Root package는 `/session`이나 `/react` subpath를 공개하지 않습니다. Selection,
+clipboard와 history는 optional editing companion이 조합합니다. React subscription
+같은 반복되는 외부 integration은 `@interactive-os/json-document-react` 같은 독립
+Connector package가 제공합니다. Schema introspection, DOM lifecycle과 제품별 UI
+의미는 해당 Connector 또는 host의 명시적인 책임으로 남습니다.
+
+Connector 개념, 패키지 정책과 planned Zod·TanStack Table API는
+[Connectors](connectors.md)를 참고합니다.

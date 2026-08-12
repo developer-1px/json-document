@@ -169,5 +169,6 @@ const acceptedDocument = createJSONDocument(initialBoard, {
 Acceptance는 candidate를 허용하거나 거부할 뿐 commit-time transform을 몰래
 state에 적용하지 않습니다.
 
-Selection, clipboard, history, DOM lifecycle과 React binding은 이 패키지의
-subpath가 아닙니다. 별도 host 또는 adapter가 위 `document`를 조합합니다.
+Selection, clipboard와 history는 optional editing companion이 조합합니다. React
+binding은 Root subpath가 아니라 공식 `@interactive-os/json-document-react`
+Connector로 제공합니다. DOM lifecycle과 제품별 의미는 host가 소유합니다.

@@ -33,7 +33,7 @@ export function validateSiteRoutes(routes, fail) {
     if (typeof route.description !== "string" || route.description.trim() === "") {
       fail(`site route ${route.path} is missing a description.`);
     }
-    if (route.group !== "Start") {
+    if (route.group !== "Start" && route.group !== "Connectors") {
       fail(`site route ${route.path} has an invalid group.`);
     }
 
