@@ -30,6 +30,7 @@ stateless JSON Patch
 | 프로젝트 이해 | [docs/public/overview.md](docs/public/overview.md) |
 | 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
+| Connector Live Demo | [공식 Connector catalog](https://developer-1px.github.io/json-document/connectors) |
 | 공개 API | [docs/public/api.md](docs/public/api.md) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |

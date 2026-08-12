@@ -17,7 +17,7 @@ const initialDocument: BlockDocument = {
   ],
 };
 
-export function DocumentDemo() {
+export function DocumentDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
   const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);

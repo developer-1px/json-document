@@ -12,7 +12,7 @@ function sitePath(path: string): string {
   return `${BASE_PATH}${path}` || "/";
 }
 
-export function Home() {
+export function HomeRoute() {
   return (
     <main className="min-h-full bg-stone-50">
       <section className="border-b border-stone-200 bg-white">
@@ -34,6 +34,9 @@ export function Home() {
               </a>
               <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/demo")}>
                 Try the demo
+              </a>
+              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/connectors")}>
+                Connector demos
               </a>
               <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs/api")}>
                 API reference

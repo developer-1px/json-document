@@ -168,7 +168,7 @@ synchronization은 `Binding`이라고 부를 수 있다.
 3. 외부 runtime은 Connector package의 peer dependency로 격리된다.
 4. 제거하거나 교체해도 canonical JSON과 editing semantics가 바뀌지 않는다.
 5. 대상 생태계의 native API 모양을 보존하고 contract test를 제공한다.
-6. 지원 version 범위와 최소 하나의 실제 product 또는 demo consumer가 있다.
+6. 지원 version 범위, connector-specific Live Demo와 browser acceptance가 있다.
 
 공식 package는 `@interactive-os/json-document-<target>` 문법을 사용한다.
 Connector들은 대상 peer와 독립적인 release lifecycle을 가지며 Kernel version을

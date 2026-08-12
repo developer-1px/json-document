@@ -46,7 +46,9 @@ lockstep이 아닌 독립 version을 가지며 README에 지원하는 양쪽 ver
 React, Zod 또는 TanStack Table을 설치하지 않습니다.
 
 공식 Connector로 승격하려면 public contract만 사용하고, 대상 생태계의 native
-API를 유지하며, contract test와 실제 product 또는 demo consumer를 가져야 합니다.
+API를 유지하며, contract test, connector-specific Live Demo와 browser acceptance를
+가져야 합니다. 구현되지 않은 Connector는 catalog에 planned 상태로만 표시하며
+가짜 Live Demo를 제공하지 않습니다.
 
 ## React Connector
 
@@ -76,6 +78,8 @@ function DocumentView() {
 | `useDocumentEditor(initial, options?)` | 한 mounted component가 소유하는 DocumentEditor 생성 |
 
 Connector는 UI component를 제공하거나 selection을 해석하지 않습니다.
+공식 site의 `/connectors/react`에서 세 hook의 실제 subscription, 편집과 canonical
+JSON 반영을 확인할 수 있습니다.
 
 ## Zod Connector 설계
 

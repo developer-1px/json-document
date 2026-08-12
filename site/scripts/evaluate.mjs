@@ -1,13 +1,14 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
 import { routeFile, validateSiteRoutes } from "./route-checks.mjs";
 
 const siteRoot = new URL("..", import.meta.url).pathname;
 const dist = join(siteRoot, "dist");
 const expectedBase = normalizeBase(process.env.SITE_BASE ?? "/");
 const expectedSiteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
-const siteRoutes = JSON.parse(readFileSync(join(siteRoot, "src/site-routes.json"), "utf8"));
+const siteRoutes = JSON.parse(readFileSync(join(siteRoot, "site-routes.json"), "utf8"));
 validateSiteRoutes(siteRoutes, fail);
+validateSourceBoundaries();
 const routes = siteRoutes.map((route) => ({ ...route, file: routeFile(route.path) }));
 
 function read(path) {
@@ -22,6 +23,57 @@ function fail(message) {
 function normalizeBase(value) {
   if (value === "" || value === "/") return "/";
   return `/${value.replace(/^\/+|\/+$/g, "")}/`;
+}
+
+function validateSourceBoundaries() {
+  const src = join(siteRoot, "src");
+  const routesRoot = join(src, "routes");
+  const rootEntries = readdirSync(src, { withFileTypes: true })
+    .map((entry) => entry.name)
+    .sort();
+
+  if (JSON.stringify(rootEntries) !== JSON.stringify(["app", "main.tsx", "routes"])) {
+    fail(`site src root must contain only app, main.tsx, and route owners: ${rootEntries.join(", ")}.`);
+  }
+
+  const flatRouteFiles = readdirSync(routesRoot, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name);
+  if (flatRouteFiles.length > 0) {
+    fail(`site routes must be owner directories, not flat files: ${flatRouteFiles.join(", ")}.`);
+  }
+
+  for (const file of sourceFiles(routesRoot)) {
+    const owner = relative(routesRoot, file).split("/")[0];
+    const source = readFileSync(file, "utf8");
+    for (const match of source.matchAll(/(?:from\s+|import\s*\()["']([^"']+)["']/g)) {
+      const specifier = match[1];
+      if (!specifier?.startsWith(".")) continue;
+      const target = resolve(dirname(file), specifier);
+      const targetRelative = relative(routesRoot, target);
+      if (targetRelative.startsWith("..")) continue;
+      const targetOwner = targetRelative.split("/")[0];
+      if (targetOwner !== owner) {
+        fail(`site route owner ${owner} must not import sibling route owner ${targetOwner}: ${relative(siteRoot, file)}.`);
+      }
+    }
+  }
+
+  const packagesRoot = join(siteRoot, "..", "packages");
+  for (const file of sourceFiles(packagesRoot)) {
+    if (/\bsite\/src\b/.test(readFileSync(file, "utf8"))) {
+      fail(`reusable package must not import site/src: ${relative(join(siteRoot, ".."), file)}.`);
+    }
+  }
+}
+
+function sourceFiles(root) {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    if (["dist", "node_modules", "coverage"].includes(entry.name)) return [];
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.(?:ts|tsx)$/.test(entry.name) ? [path] : [];
+  });
 }
 
 function routeUrl(path) {

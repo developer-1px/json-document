@@ -22,8 +22,8 @@
   },
   {
     "path": "/docs/connectors",
-    "label": "Connectors",
-    "title": "Connectors - json-document",
+    "label": "Connector docs",
+    "title": "Connector Docs - json-document",
     "description": "Official React connector and planned Zod and TanStack Table integration contracts for json-document.",
     "group": "Start"
   },
@@ -40,5 +40,19 @@
     "title": "Document Demo - json-document",
     "description": "A minimal, complete document editor powered by the public headless editing API.",
     "group": "Start"
+  },
+  {
+    "path": "/connectors",
+    "label": "Connectors",
+    "title": "Connectors - json-document",
+    "description": "Official json-document Connector catalog with live integration demos.",
+    "group": "Start"
+  },
+  {
+    "path": "/connectors/react",
+    "label": "React",
+    "title": "React Connector Live Demo - json-document",
+    "description": "Live React integration for JSON Document subscriptions and component-owned editing lifecycle.",
+    "group": "Connectors"
   }
 ]

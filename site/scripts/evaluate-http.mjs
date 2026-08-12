@@ -8,7 +8,7 @@ const siteRoot = new URL("..", import.meta.url).pathname;
 const dist = join(siteRoot, "dist");
 const expectedBase = normalizeBase(process.env.SITE_BASE ?? "/json-document/");
 const expectedSiteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
-const routes = JSON.parse(readFileSync(join(siteRoot, "src/site-routes.json"), "utf8"));
+const routes = JSON.parse(readFileSync(join(siteRoot, "site-routes.json"), "utf8"));
 validateSiteRoutes(routes, fail);
 const seenAssets = new Set();
 

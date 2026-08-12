@@ -4,7 +4,7 @@ import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { jsonDocumentSourceAliases } from "./config/json-document-source-aliases.ts";
-import siteRoutes from "./src/site-routes.json";
+import siteRoutes from "./site-routes.json";
 
 function rootLlmsTxt(): Plugin {
   const path = fileURLToPath(new URL("../docs/public/llms.txt", import.meta.url));

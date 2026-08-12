@@ -4,9 +4,10 @@ import { validateSiteRoutes } from "./route-checks.mjs";
 const siteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
 const attempts = Number(process.env.SITE_LIVE_ATTEMPTS ?? "18");
 const delayMs = Number(process.env.SITE_LIVE_DELAY_MS ?? "10000");
-const routes = JSON.parse(readFileSync(new URL("../src/site-routes.json", import.meta.url), "utf8"));
+const routes = JSON.parse(readFileSync(new URL("../site-routes.json", import.meta.url), "utf8"));
 const activeCompanionPackages = new Set([
   "@interactive-os/json-document-editing",
+  "@interactive-os/json-document-react",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);
@@ -74,7 +75,7 @@ async function checkOnce() {
     !/^# json-document v3$/m.test(llms)
     || !/공개 Root는 정확히 다음 21개 symbol/.test(llms)
     || !/`JSONDocument`의 필수 member는 정확히 여섯 개다/.test(llms)
-    || !/## Host adapter와 companion/.test(llms)
+    || !/## Connector, host adapter와 companion/.test(llms)
     || !/@interactive-os\/editable/.test(llms)
   ) {
     fail("live llms.txt is missing the v3 Core contract.");
