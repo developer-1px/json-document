@@ -23,6 +23,7 @@ const editor = createDocumentEditor({
 const clipboard = createWebClipboardBinding({
   codec: documentClipboardCodec,
   read: () => editor.copy(),
+  cut: () => editor.cut()?.result ?? { ok: false },
   paste: (payload) => editor.dispatch({
     type: "clipboard.paste",
     clipboard: payload,
@@ -30,6 +31,7 @@ const clipboard = createWebClipboardBinding({
 });
 
 surface.addEventListener("copy", (event) => clipboard.copy(event));
+surface.addEventListener("cut", (event) => clipboard.cut(event));
 surface.addEventListener("paste", (event) => clipboard.paste(event));
 
 surface.addEventListener("click", (event) => {
@@ -48,9 +50,10 @@ json-document MIME payload and its `text/plain` projection. Paste consumes only
 a valid structured payload. Parsing arbitrary external plain text into domain
 records or cells remains a host policy.
 
-The binding calls `preventDefault()` only after a successful copy or canonical
-paste. Missing clipboard data, malformed payloads, and rejected editing results
-fail without changing the document through the Connector.
+The binding calls `preventDefault()` only after a successful copy, canonical
+cut, or canonical paste. Cut writes the selected payload before asking the
+Editing companion to remove it. Missing clipboard data, malformed payloads,
+unsupported cut, and rejected editing results leave native handling available.
 
 ## Boundary
 
@@ -58,7 +61,7 @@ The Connector owns:
 
 - structured MIME serialization and validation for public Document and Sheet
   clipboard values;
-- `ClipboardEvent` copy/paste translation;
+- `ClipboardEvent` copy/cut/paste translation;
 - conventional Web modifier translation to `replace`, `extend`, or `toggle`.
 - native text control value and caret observation without owning text selection.
 

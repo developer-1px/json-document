@@ -71,6 +71,42 @@ describe("Web clipboard Connector", () => {
     expect((editor.snapshot.value as SheetDocument).rows[1]?.cells.name).toBe("Alpha");
   });
 
+  test("cuts a structured Document payload only after native clipboard data is available", () => {
+    const editor = createDocumentEditor({
+      blocks: [
+        { id: "a", text: "Alpha" },
+        { id: "b", text: "Beta" },
+      ],
+    });
+    let cutAttempts = 0;
+    const binding = createWebClipboardBinding({
+      codec: documentClipboardCodec,
+      read: () => editor.copy(),
+      cut: () => {
+        cutAttempts += 1;
+        return editor.cut()?.result ?? { ok: false, code: "selection.empty" };
+      },
+      paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard }),
+    });
+
+    const unavailable = event(null);
+    expect(binding.cut(unavailable)).toMatchObject({ ok: false, code: "clipboard.unavailable" });
+    expect(unavailable.defaultPrevented).toBe(false);
+    expect(cutAttempts).toBe(0);
+    expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["a", "b"]);
+
+    const data = new MemoryClipboardData();
+    const cut = event(data);
+
+    expect(binding.cut(cut)).toMatchObject({ ok: true, operation: "cut" });
+    expect(cutAttempts).toBe(1);
+    expect(cut.defaultPrevented).toBe(true);
+    expect(data.getData("text/plain")).toBe("Alpha");
+    expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["b"]);
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["a", "b"]);
+  });
+
   test("malformed and rejected pastes preserve canonical state and native handling", () => {
     const editor = createDocumentEditor({ blocks: [{ id: "a", text: "Alpha" }] });
     const binding = createWebClipboardBinding({
@@ -108,6 +144,9 @@ describe("Web clipboard Connector", () => {
 
     expect(binding.paste(event(plain))).toMatchObject({ ok: false, code: "clipboard.empty" });
     expect(binding.copy(event(null))).toMatchObject({ ok: false, code: "clipboard.unavailable" });
+    const unsupportedCut = event(new MemoryClipboardData());
+    expect(binding.cut(unsupportedCut)).toMatchObject({ ok: false, code: "clipboard.unsupported" });
+    expect(unsupportedCut.defaultPrevented).toBe(false);
   });
 });
 

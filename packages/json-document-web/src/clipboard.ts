@@ -26,14 +26,15 @@ export interface WebClipboardCodec<Payload extends WebClipboardPayload> {
   decode(serialized: string): Payload | null;
 }
 
-export type WebClipboardResult<Payload extends WebClipboardPayload, PasteResult> =
+export type WebClipboardResult<Payload extends WebClipboardPayload, EditingResult> =
   | { readonly ok: true; readonly operation: "copy"; readonly payload: Payload }
-  | { readonly ok: true; readonly operation: "paste"; readonly payload: Payload; readonly result: PasteResult }
-  | { readonly ok: false; readonly code: "clipboard.unavailable" | "clipboard.empty" | "clipboard.invalid" | "editing.rejected"; readonly reason?: string };
+  | { readonly ok: true; readonly operation: "cut" | "paste"; readonly payload: Payload; readonly result: EditingResult }
+  | { readonly ok: false; readonly code: "clipboard.unavailable" | "clipboard.empty" | "clipboard.invalid" | "clipboard.unsupported" | "editing.rejected"; readonly reason?: string };
 
-export interface WebClipboardBinding<Payload extends WebClipboardPayload, PasteResult> {
-  copy(event: WebClipboardEvent): WebClipboardResult<Payload, PasteResult>;
-  paste(event: WebClipboardEvent): WebClipboardResult<Payload, PasteResult>;
+export interface WebClipboardBinding<Payload extends WebClipboardPayload, EditingResult> {
+  copy(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
+  cut(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
+  paste(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
 }
 
 export const documentClipboardCodec: WebClipboardCodec<DocumentClipboard> = jsonCodec(
@@ -48,26 +49,44 @@ export const sheetClipboardCodec: WebClipboardCodec<SheetClipboard> = jsonCodec(
 
 export function createWebClipboardBinding<
   Payload extends WebClipboardPayload,
-  PasteResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
+  EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
 >(options: {
   readonly codec: WebClipboardCodec<Payload>;
   readonly read: () => Payload | null;
-  readonly paste: (payload: Payload) => PasteResult;
-}): WebClipboardBinding<Payload, PasteResult> {
+  readonly cut?: (payload: Payload) => EditingResult;
+  readonly paste: (payload: Payload) => EditingResult;
+}): WebClipboardBinding<Payload, EditingResult> {
+  function write(event: WebClipboardEvent):
+    | { readonly ok: true; readonly payload: Payload }
+    | Extract<WebClipboardResult<never, never>, { readonly ok: false }> {
+    const data = event.clipboardData;
+    if (data === null) return failure("clipboard.unavailable");
+    const payload = options.read();
+    if (payload === null) return failure("clipboard.empty");
+    try {
+      data.setData(options.codec.mimeType, options.codec.encode(payload));
+      data.setData("text/plain", payload.text);
+    } catch (error) {
+      return failure("clipboard.unavailable", errorMessage(error));
+    }
+    return { ok: true, payload };
+  }
+
   return {
     copy(event) {
-      const data = event.clipboardData;
-      if (data === null) return failure("clipboard.unavailable");
-      const payload = options.read();
-      if (payload === null) return failure("clipboard.empty");
-      try {
-        data.setData(options.codec.mimeType, options.codec.encode(payload));
-        data.setData("text/plain", payload.text);
-      } catch (error) {
-        return failure("clipboard.unavailable", errorMessage(error));
-      }
+      const written = write(event);
+      if (!written.ok) return written;
       event.preventDefault();
-      return { ok: true, operation: "copy", payload };
+      return { ok: true, operation: "copy", payload: written.payload };
+    },
+    cut(event) {
+      if (options.cut === undefined) return failure("clipboard.unsupported");
+      const written = write(event);
+      if (!written.ok) return written;
+      const result = options.cut(written.payload);
+      if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);
+      event.preventDefault();
+      return { ok: true, operation: "cut", payload: written.payload, result };
     },
     paste(event) {
       const data = event.clipboardData;

@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
 import {
   createSheetEditor,
   type SheetClipboard,
@@ -6,6 +6,11 @@ import {
   type SheetEditor,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import {
+  createWebClipboardBinding,
+  selectionOperationFromModifiers,
+  sheetClipboardCodec,
+} from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button, PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -28,6 +33,11 @@ export function SheetDemo() {
   const [editor] = useState<SheetEditor>(() => createSheetEditor(initialSheet));
   const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<SheetClipboard | null>(null);
+  const [webClipboard] = useState(() => createWebClipboardBinding({
+    codec: sheetClipboardCodec,
+    read: () => editor.copy(),
+    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+  }));
   const [announcement, setAnnouncement] = useState("Ready");
   const sheet = snapshot.value as SheetDocument;
   const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
@@ -38,11 +48,7 @@ export function SheetDemo() {
   }
 
   function selectCell(event: MouseEvent, rowId: string, columnId: string) {
-    const mode = event.shiftKey
-      ? "extend"
-      : event.metaKey || event.ctrlKey
-        ? "toggle"
-        : "replace";
+    const mode = selectionOperationFromModifiers(event);
     run(
       () => editor.dispatch({
         type: "selection.set",
@@ -70,16 +76,24 @@ export function SheetDemo() {
     );
   }
 
+  function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
+    const result = webClipboard.copy(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
+  }
+
+  function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
+    const result = webClipboard.paste(event);
+    setAnnouncement(result.ok
+      ? `Pasted ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`
+      : result.code);
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     const modifier = event.metaKey || event.ctrlKey;
     if (!modifier) return;
-    if (event.key.toLowerCase() === "c") {
-      event.preventDefault();
-      copySelection();
-    } else if (event.key.toLowerCase() === "v" && clipboard !== null) {
-      event.preventDefault();
-      pasteSelection();
-    } else if (event.key.toLowerCase() === "z") {
+    if (event.key.toLowerCase() === "z") {
       event.preventDefault();
       run(() => event.shiftKey ? editor.redo() : editor.undo(), event.shiftKey ? "Redone" : "Undone");
     }
@@ -110,7 +124,13 @@ export function SheetDemo() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
-          <section aria-label="Editable sheet" onKeyDown={handleKeyDown} className={classes("min-w-0 overflow-auto p-3", ui.surface.raised)}>
+          <section
+            aria-label="Editable sheet"
+            onCopy={handleNativeCopy}
+            onPaste={handleNativePaste}
+            onKeyDown={handleKeyDown}
+            className={classes("min-w-0 overflow-auto p-3", ui.surface.raised)}
+          >
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
               <thead>
                 <tr>

@@ -27,6 +27,7 @@ export function WebConnectorLab() {
   const [clipboard] = useState(() => createWebClipboardBinding({
     codec: documentClipboardCodec,
     read: () => editor.copy(),
+    cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const snapshot = useEditingSnapshot(editor);
@@ -44,6 +45,11 @@ export function WebConnectorLab() {
     setAnnouncement(result.ok ? `Pasted ${result.payload.blocks.length} structured block` : result.code);
   }
 
+  function handleCut(event: ClipboardEvent<HTMLElement>) {
+    const result = clipboard.cut(event);
+    setAnnouncement(result.ok ? `Cut ${result.payload.blocks.length} structured block` : result.code);
+  }
+
   function select(event: MouseEvent, blockId: string) {
     const mode = selectionOperationFromModifiers(event);
     const result = editor.dispatch({ type: "selection.set", blockId, mode });
@@ -55,6 +61,7 @@ export function WebConnectorLab() {
       aria-label="Web Platform editing surface"
       tabIndex={0}
       onCopy={handleCopy}
+      onCut={handleCut}
       onPaste={handlePaste}
       className={classes("p-4", ui.surface.raised, ui.state.focus)}
     >

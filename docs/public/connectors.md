@@ -147,6 +147,7 @@ Editing companion과 Selection companion의 public contract로 번역합니다.
 const clipboard = createWebClipboardBinding({
   codec: documentClipboardCodec,
   read: () => editor.copy(),
+  cut: () => editor.cut()?.result ?? { ok: false },
   paste: (payload) => editor.dispatch({
     type: "clipboard.paste",
     clipboard: payload,
@@ -154,17 +155,22 @@ const clipboard = createWebClipboardBinding({
 });
 
 surface.addEventListener("copy", (event) => clipboard.copy(event));
+surface.addEventListener("cut", (event) => clipboard.cut(event));
 surface.addEventListener("paste", (event) => clipboard.paste(event));
 ```
 
 Document와 Sheet codec은 structured MIME과 `text/plain` projection을 함께
-기록하고, paste에서는 유효한 structured payload만 소비합니다. 임의의 외부 plain
-text를 block이나 cell로 해석하는 정책은 Host가 소유합니다. 실패하거나 Editing이
-거절한 paste는 `preventDefault()`를 호출하지 않아 native fallback과 canonical JSON을
-보존합니다.
+기록하고, paste에서는 유효한 structured payload만 소비합니다. cut은 clipboard
+기록이 가능할 때만 Editing 제거를 실행합니다. 임의의 외부 plain text를 block이나
+cell로 해석하는 정책은 Host가 소유합니다. 실패하거나 Editing이 거절한 cut/paste는
+`preventDefault()`를 호출하지 않아 native fallback을 보존합니다.
 
 `selectionOperationFromModifiers`는 Web modifier를 `replace`, `extend`, `toggle`로
 번역하고, `textInputFromControl`은 native text control의 value와 caret을 관찰합니다.
 Connector는 event target, shortcut, focus, geometry, accessibility wiring, native text
 selection 또는 IME lifecycle을 소유하지 않습니다. 공식 site의 `/connectors/web`에서
 실제 ClipboardEvent, modifier selection과 text-control editing을 확인할 수 있습니다.
+
+공식 Document와 Sheet Live Demo는 이 native event 경계를 직접 사용합니다. TanStack
+Table Live Demo에서는 visible topology를 소유하는 Table Connector와 native clipboard를
+소유하는 Web Connector가 동일한 Sheet editing contract 위에서 독립적으로 조합됩니다.
