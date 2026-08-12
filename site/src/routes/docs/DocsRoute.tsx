@@ -1,7 +1,15 @@
 import { useMemo } from "react";
+import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 import { docPages, type DocPageId } from "./doc-pages";
+
+const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
+  overview: "sleep",
+  quickstart: "cursor",
+  connectors: "peek",
+  api: "braces",
+};
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
@@ -27,27 +35,24 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   );
 
   return (
-    <main className={classes(ui.frame.plainPage, ui.surface.flat)}>
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_11rem] lg:px-6">
-        <div className="min-w-0">
-          <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
-            <div className="flex gap-1 whitespace-nowrap">
-              {headings.map((heading) => (
-                <a
-                  key={`${heading.id}-${heading.text}`}
-                  href={`#${heading.id}`}
-                  className={classes("px-2 py-1 no-underline", ui.text.meta)}
-                >
-                  {heading.text}
-                </a>
-              ))}
-            </div>
-          </nav>
-
+    <PageFrame>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_11rem]">
+        <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
-            <header className={classes("mb-7 pb-4", ui.frame.header)}>
-              <h1 className={classes("m-0", ui.text.title)}>{page.title}</h1>
-            </header>
+            <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
+            <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
+              <div className="flex gap-1 whitespace-nowrap">
+                {headings.map((heading) => (
+                  <a
+                    key={`${heading.id}-${heading.text}`}
+                    href={`#${heading.id}`}
+                    className={classes("px-2 py-1 no-underline", ui.text.meta)}
+                  >
+                    {heading.text}
+                  </a>
+                ))}
+              </div>
+            </nav>
             <MarkdownViewer source={page.source} hideTitle />
           </div>
         </div>
@@ -69,6 +74,6 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
           </nav>
         </aside>
       </div>
-    </main>
+    </PageFrame>
   );
 }
