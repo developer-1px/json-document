@@ -9,13 +9,12 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import {
-  createSheetEditor,
   type SheetClipboard,
   type SheetDocument,
-  type SheetEditor,
 } from "@interactive-os/json-document-editing";
+import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { createTableDocumentBinding } from "@interactive-os/json-document-tanstack-table";
+import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
 import {
   createWebClipboardBinding,
   selectionOperationFromModifiers,
@@ -41,8 +40,8 @@ const initialSheet: SheetDocument = {
 };
 
 export function TanStackTableConnectorLab() {
-  const [editor] = useState<SheetEditor>(() => createSheetEditor(initialSheet));
-  const [binding] = useState(() => createTableDocumentBinding({ editor }));
+  const [document] = useState(() => createJSONDocument(initialSheet));
+  const [binding] = useState(() => createTanStackTableConnector(document));
   const snapshot = useEditingSnapshot(binding);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

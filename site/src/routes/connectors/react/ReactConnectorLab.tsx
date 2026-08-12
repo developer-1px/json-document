@@ -4,7 +4,7 @@ import { type BlockDocument } from "@interactive-os/json-document-editing";
 import {
   useDocumentEditor,
   useEditingSnapshot,
-  useJSONDocumentValue,
+  useReactConnector,
 } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
 import { Button } from "../../../shared/ui/primitives";
@@ -28,7 +28,7 @@ export function ReactConnectorLab() {
 
 function JSONDocumentSubscriptionLab() {
   const [document] = useState(() => createJSONDocument({ title: "Connector draft", count: 0 }));
-  const value = useJSONDocumentValue(document) as { readonly title: string; readonly count: number };
+  const value = useReactConnector(document) as { readonly title: string; readonly count: number };
 
   function replace(path: "/title" | "/count", next: JSONValue) {
     document.commit([{ op: "replace", path, value: next }], {
@@ -39,7 +39,7 @@ function JSONDocumentSubscriptionLab() {
   return (
     <section aria-label="JSON Document subscription" className={classes("p-4", ui.surface.raised)}>
       <div className="mb-4">
-        <p className={ui.text.label}>useJSONDocumentValue</p>
+        <p className={ui.text.label}>useReactConnector</p>
         <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Document subscription</h2>
         <p className={classes("m-0", ui.text.meta)}>A React view follows the six-member JSON Document through its public subscription.</p>
       </div>

@@ -21,6 +21,11 @@ export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
+/** Official React Connector entry point for a JSONDocument subscription. */
+export function useReactConnector(document: JSONDocument): JSONValue {
+  return useJSONDocumentValue(document);
+}
+
 export function useEditingSnapshot<Selection extends JSONValue>(
   source: EditingSnapshotSource<Selection>,
 ): EditingSnapshot<Selection> {

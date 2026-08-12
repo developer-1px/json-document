@@ -6,11 +6,27 @@ import {
   useDocumentEditor,
   useEditingSnapshot,
   useJSONDocumentValue,
+  useReactConnector,
 } from "../src/index.js";
 
 afterEach(cleanup);
 
 describe("React connector", () => {
+  test("exposes the shared document through the official Connector entry point", () => {
+    const document = createJSONDocument({ title: "Draft" });
+    function View() {
+      const value = useReactConnector(document) as { readonly title: string };
+      return <output>{value.title}</output>;
+    }
+    render(<View />);
+
+    act(() => {
+      document.commit([{ op: "replace", path: "/title", value: "Shared" }]);
+    });
+
+    expect(screen.getByText("Shared")).toBeTruthy();
+  });
+
   test("subscribes to a JSON Document with the React external-store contract", () => {
     const document = createJSONDocument({ title: "Draft" });
 

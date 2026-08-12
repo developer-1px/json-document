@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { createEditingSession } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { useJSONDocumentForm } from "@interactive-os/json-document-react-hook-form";
+import { useReactConnector } from "@interactive-os/json-document-react";
+import { useReactHookFormConnector } from "@interactive-os/json-document-react-hook-form";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
@@ -17,8 +16,6 @@ type ProfileForm = {
   };
 };
 
-type FormSelection = { readonly kind: "record-detail" };
-
 const profileSchema = z.object({
   profile: z.object({
     name: z.string().trim().min(3, "Name must contain at least 3 characters."),
@@ -27,23 +24,21 @@ const profileSchema = z.object({
   }),
 });
 
-function createProfileSession() {
-  return createEditingSession<FormSelection>({
-    document: createJSONDocument({
-      profile: { name: "Ada Lovelace", role: "Admin", active: true },
-    }, { validate: createZodValidator(profileSchema) }),
-    selection: { kind: "record-detail" },
-  });
+function createProfileDocument() {
+  return createJSONDocument({
+    profile: { name: "Ada Lovelace", role: "Admin", active: true },
+  }, { validate: createZodValidator(profileSchema) });
 }
 
 export function ReactHookFormConnectorLab() {
-  const [session] = useState(createProfileSession);
-  const snapshot = useEditingSnapshot(session);
-  const binding = useJSONDocumentForm<ProfileForm, FormSelection>(session, {
+  const [document] = useState(createProfileDocument);
+  const binding = useReactHookFormConnector<ProfileForm>(document, {
     errorName: (failure) => failure.pointer === "/profile/name"
       ? "profile.name"
       : "root.canonical",
   });
+  const snapshot = binding.snapshot;
+  const canonical = useReactConnector(document);
   const { register, formState } = binding.form;
 
   return (
@@ -77,8 +72,8 @@ export function ReactHookFormConnectorLab() {
 
           <div className="flex flex-wrap gap-2">
             <Button kind="primary" type="submit">Save record</Button>
-            <Button type="button" disabled={!snapshot.canUndo} onClick={() => session.undo()}>Undo</Button>
-            <Button type="button" disabled={!snapshot.canRedo} onClick={() => session.redo()}>Redo</Button>
+            <Button type="button" disabled={!snapshot.canUndo} onClick={binding.undo}>Undo</Button>
+            <Button type="button" disabled={!snapshot.canRedo} onClick={binding.redo}>Redo</Button>
           </div>
 
           <dl className={classes("grid grid-cols-2 gap-2 p-3", ui.surface.inset)}>
@@ -90,7 +85,7 @@ export function ReactHookFormConnectorLab() {
         </form>
 
         <div className="grid content-start gap-4">
-          <JsonInspector label="Canonical JSON" testId="rhf-canonical-json" value={snapshot.value} />
+          <JsonInspector label="Canonical JSON" testId="rhf-canonical-json" value={canonical} />
           <JsonInspector label="Last submit result" testId="rhf-submit-result" value={binding.result ?? { status: "not submitted" }} />
         </div>
       </div>

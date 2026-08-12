@@ -4,23 +4,24 @@ React Connector for `@interactive-os/json-document` and
 `@interactive-os/json-document-editing`.
 
 ```tsx
+import { createJSONDocument } from "@interactive-os/json-document";
 import {
-  useDocumentEditor,
-  useEditingSnapshot,
+  useReactConnector,
 } from "@interactive-os/json-document-react";
 
-function DocumentView() {
-  const editor = useDocumentEditor({
-    blocks: [{ id: "welcome", text: "Hello" }],
-  });
-  const snapshot = useEditingSnapshot(editor);
+const document = createJSONDocument({ title: "Hello" });
 
-  return <pre>{JSON.stringify(snapshot.value, null, 2)}</pre>;
+function DocumentView() {
+  const value = useReactConnector(document);
+
+  return <pre>{JSON.stringify(value, null, 2)}</pre>;
 }
 ```
 
-`useJSONDocumentValue` connects the six-member `JSONDocument` directly to
-React. `useEditingSnapshot` accepts the structural snapshot/subscription surface
+`useReactConnector(document)` is the official stateful Connector entry point
+and connects the six-member `JSONDocument` directly to React.
+`useJSONDocumentValue` remains the lower-level document-value hook.
+`useEditingSnapshot` accepts the structural snapshot/subscription surface
 shared by `EditingSession` and `DocumentEditor`.
 
 The Connector owns React subscription and component lifecycle only. It does not

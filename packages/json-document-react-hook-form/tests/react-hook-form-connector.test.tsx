@@ -1,11 +1,11 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
-import { createJSONDocument } from "@interactive-os/json-document";
-import { createEditingSession } from "@interactive-os/json-document-editing";
+import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
+import { useReactConnector } from "@interactive-os/json-document-react";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 
-import { useJSONDocumentForm } from "../src/index.js";
+import { useReactHookFormConnector } from "../src/index.js";
 
 interface ProfileForm {
   profile: {
@@ -14,39 +14,37 @@ interface ProfileForm {
   };
 }
 
-type FormSelection = { readonly kind: "form" };
-
 afterEach(cleanup);
 
 describe("React Hook Form connector", () => {
   test("keeps drafts local, then commits all submitted fields as one history entry", async () => {
-    const session = createProfileSession();
-    render(<ProfileEditor session={session} />);
+    const document = createProfileDocument();
+    render(<ProfileEditor document={document} />);
 
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Published" } });
     fireEvent.change(screen.getByLabelText("Role"), { target: { value: "admin" } });
 
-    expect(session.snapshot.value).toEqual(initialProfile);
+    expect(document.value).toEqual(initialProfile);
     expect(screen.getByTestId("dirty").textContent).toBe("dirty");
 
     fireEvent.submit(screen.getByRole("form", { name: "Profile" }));
 
     await waitFor(() => {
-      expect(session.snapshot.value).toEqual({
+      expect(document.value).toEqual({
         profile: { title: "Published", role: "admin" },
       });
     });
-    expect(session.snapshot.revision).toBe(1);
-    expect(session.snapshot.canUndo).toBe(true);
+    expect(screen.getByTestId("revision").textContent).toBe("1");
+    expect(screen.getByTestId("canonical").textContent).toContain("Published");
 
-    act(() => { session.undo(); });
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
     await waitFor(() => {
       expect(screen.getByLabelText("Title")).toHaveProperty("value", "Draft");
       expect(screen.getByLabelText("Role")).toHaveProperty("value", "viewer");
     });
     expect(screen.getByTestId("dirty").textContent).toBe("pristine");
 
-    act(() => { session.redo(); });
+    fireEvent.click(screen.getByRole("button", { name: "Redo" }));
     await waitFor(() => {
       expect(screen.getByLabelText("Title")).toHaveProperty("value", "Published");
       expect(screen.getByLabelText("Role")).toHaveProperty("value", "admin");
@@ -55,21 +53,20 @@ describe("React Hook Form connector", () => {
   });
 
   test("maps rejected canonical validation to a host-selected field without recording history", async () => {
-    const session = createProfileSession();
-    render(<ProfileEditor session={session} />);
+    const document = createProfileDocument();
+    render(<ProfileEditor document={document} />);
 
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "x" } });
     fireEvent.submit(screen.getByRole("form", { name: "Profile" }));
 
     expect(await screen.findByText("Title must contain at least 3 characters.")).toBeTruthy();
-    expect(session.snapshot.value).toEqual(initialProfile);
-    expect(session.snapshot.revision).toBe(0);
-    expect(session.snapshot.canUndo).toBe(false);
+    expect(document.value).toEqual(initialProfile);
+    expect(screen.getByTestId("revision").textContent).toBe("0");
   });
 
   test("resets dirty, touched, and errors after an external canonical commit", async () => {
-    const session = createProfileSession();
-    render(<ProfileEditor session={session} />);
+    const document = createProfileDocument();
+    render(<ProfileEditor document={document} />);
 
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "x" } });
     fireEvent.blur(screen.getByLabelText("Title"));
@@ -77,12 +74,7 @@ describe("React Hook Form connector", () => {
     expect(await screen.findByText("Title must contain at least 3 characters.")).toBeTruthy();
 
     act(() => {
-      session.apply({
-        operations: [{ op: "replace", path: "/profile/title", value: "External" }],
-        selectionAfter: { kind: "form" },
-        origin: "external.sync",
-        history: "ignore",
-      });
+      document.commit([{ op: "replace", path: "/profile/title", value: "External" }]);
     });
 
     await waitFor(() => {
@@ -98,8 +90,8 @@ const initialProfile = {
   profile: { title: "Draft", role: "viewer" },
 } as const;
 
-function createProfileSession() {
-  const document = createJSONDocument(initialProfile, {
+function createProfileDocument() {
+  return createJSONDocument(initialProfile, {
     validate: createZodValidator(z.object({
       profile: z.object({
         title: z.string().min(3, "Title must contain at least 3 characters."),
@@ -107,15 +99,15 @@ function createProfileSession() {
       }),
     })),
   });
-  return createEditingSession<FormSelection>({ document, selection: { kind: "form" } });
 }
 
-function ProfileEditor({ session }: { readonly session: ReturnType<typeof createProfileSession> }) {
-  const binding = useJSONDocumentForm<ProfileForm, FormSelection>(session, {
+function ProfileEditor({ document }: { readonly document: JSONDocument }) {
+  const binding = useReactHookFormConnector<ProfileForm>(document, {
     errorName: (failure) => failure.pointer === "/profile/title"
       ? "profile.title"
       : "root.canonical",
   });
+  const canonical = useReactConnector(document);
   const { register, formState } = binding.form;
 
   return (
@@ -125,7 +117,11 @@ function ProfileEditor({ session }: { readonly session: ReturnType<typeof create
       <label>Role<input {...register("profile.role")} /></label>
       <output data-testid="dirty">{formState.isDirty ? "dirty" : "pristine"}</output>
       <output data-testid="touched">{formState.touchedFields.profile?.title ? "touched" : "untouched"}</output>
+      <output data-testid="revision">{binding.snapshot.revision}</output>
+      <output data-testid="canonical">{JSON.stringify(canonical)}</output>
       <button type="submit">Save</button>
+      <button type="button" onClick={binding.undo}>Undo</button>
+      <button type="button" onClick={binding.redo}>Redo</button>
     </form>
   );
 }

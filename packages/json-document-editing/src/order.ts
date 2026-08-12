@@ -1,8 +1,8 @@
 import {
   buildPointer,
-  createJSONDocument,
   type JSONValue,
 } from "@interactive-os/json-document";
+import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
@@ -57,11 +57,13 @@ export interface OrderEditor {
   subscribe(listener: (snapshot: EditingSnapshot<OrderSelection>) => void): () => void;
 }
 
-export function createOrderEditor(initial: OrderDocument): OrderEditor {
+export function createOrderEditor(source: EditingDocumentSource<OrderDocument>): OrderEditor {
+  const document = resolveDocumentSource(source);
+  const initial = document.value as OrderDocument;
   assertOrderDocument(initial);
   const first = initial.items[0];
   const session = createEditingSession({
-    document: createJSONDocument(initial),
+    document,
     selection: first ? collapsed(first.id) : emptySelection(),
   });
 

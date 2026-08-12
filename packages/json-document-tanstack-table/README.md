@@ -5,11 +5,11 @@ Official TanStack Table v8 Connector for the headless Sheet editor from
 
 ```ts
 import { createTable, getCoreRowModel } from "@tanstack/table-core";
-import { createSheetEditor } from "@interactive-os/json-document-editing";
-import { createTableDocumentBinding } from "@interactive-os/json-document-tanstack-table";
+import { createJSONDocument } from "@interactive-os/json-document";
+import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
 
-const editor = createSheetEditor(initialSheet);
-const binding = createTableDocumentBinding({ editor });
+const document = createJSONDocument(initialSheet);
+const binding = createTanStackTableConnector(document);
 const table = createTable({
   ...binding.tableOptions,
   getCoreRowModel: getCoreRowModel(),
@@ -33,9 +33,13 @@ pagination, column visibility/order, rendering, and DOM focus.
 one value to every cell in all selected ranges using the table's current
 visible topology, while copy and paste use the primary rectangular range.
 
+`createTableDocumentBinding({ editor })` remains available as the lower-level
+binding for hosts that already own a `SheetEditor`.
+
 Supported peers:
 
 - `@interactive-os/json-document-editing >=0.1.0-rc.0 <1`
+- `@interactive-os/json-document ^3.0.0`
 - `@tanstack/table-core ^8.21.3`
 
 TanStack Table v9 beta, formulas, merged cells, and virtualization are outside

@@ -3,6 +3,33 @@ import { describe, expect, test } from "vitest";
 import { createEditingSession } from "../src/session.js";
 
 describe("selection-aware editing history", () => {
+  test("publishes external document changes and invalidates local history", () => {
+    const document = createJSONDocument({ title: "Draft" });
+    const session = createEditingSession<{ readonly current: string | null }>({
+      document,
+      selection: { current: null },
+    });
+    const revisions: number[] = [];
+    session.subscribe((snapshot) => revisions.push(snapshot.revision));
+
+    session.apply({
+      operations: [{ op: "replace", path: "/title", value: "Local" }],
+      selectionAfter: { current: null },
+      origin: "local",
+    });
+    expect(session.snapshot.canUndo).toBe(true);
+
+    document.commit([{ op: "replace", path: "/title", value: "External" }]);
+
+    expect(session.snapshot).toMatchObject({
+      value: { title: "External" },
+      revision: 2,
+      canUndo: false,
+      canRedo: false,
+    });
+    expect(revisions).toEqual([1, 2]);
+  });
+
   test("stores document mutation with before/after selection and replays forward patches", () => {
     const session = createEditingSession<{ readonly current: string | null }>({
       document: createJSONDocument({ items: ["a", "b"] }),
