@@ -1,4 +1,5 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
+const navigationGroups = new Set(["Start", "Core", "Editing", "Connectors"]);
 
 export function validateSiteRoutes(routes, fail) {
   if (!Array.isArray(routes) || routes.length === 0) {
@@ -33,8 +34,8 @@ export function validateSiteRoutes(routes, fail) {
     if (typeof route.description !== "string" || route.description.trim() === "") {
       fail(`site route ${route.path} is missing a description.`);
     }
-    if (route.group !== "Start" && route.group !== "Connectors") {
-      fail(`site route ${route.path} has an invalid group.`);
+    if (route.navigationGroup !== undefined && !navigationGroups.has(route.navigationGroup)) {
+      fail(`site route ${route.path} has an invalid navigation group.`);
     }
 
     if (typeof route.path === "string") {
@@ -46,8 +47,9 @@ export function validateSiteRoutes(routes, fail) {
       files.add(file);
     }
 
-    if (labels.has(route.label)) fail(`site routes contain duplicate label ${route.label}.`);
-    labels.add(route.label);
+    const navigationLabel = `${route.navigationGroup ?? "hidden"}:${route.label}`;
+    if (labels.has(navigationLabel)) fail(`site navigation group contains duplicate label ${route.label}.`);
+    labels.add(navigationLabel);
 
     if (titles.has(route.title)) fail(`site routes contain duplicate title ${route.title}.`);
     titles.add(route.title);

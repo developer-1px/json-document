@@ -6,6 +6,7 @@ import {
   useRouteMetadata,
   usePathname,
   type SiteRoute,
+  type SiteNavigationGroup,
 } from "./router";
 
 type Route = SiteRoute & { readonly Component: ComponentType };
@@ -48,7 +49,7 @@ export function App() {
   const pathname = usePathname();
   const route = routes.find((candidate) => candidate.path === pathname) ?? routes[0]!;
   const Page = route.Component;
-  const routeGroups = ["Start", "Connectors"] as const;
+  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["Start", "Core", "Editing", "Connectors"];
 
   useRouteMetadata(route);
 
@@ -69,11 +70,12 @@ export function App() {
         </NavLink>
         <div className="flex gap-4 overflow-x-auto px-3 pb-3 md:grid md:gap-4 md:px-2">
           {routeGroups.map((group) => {
-            const groupRoutes = routes.filter((item) => item.group === group);
+            const groupRoutes = routes.filter((item) => item.navigationGroup === group);
             if (groupRoutes.length === 0) return null;
+            const groupLabelId = `site-navigation-${group.toLowerCase()}`;
             return (
-              <div key={group} className="flex shrink-0 gap-1 md:grid">
-                <div className="hidden border-0 bg-transparent px-2 py-1 text-[10px] font-medium text-stone-400 md:flex">
+              <div key={group} role="group" aria-labelledby={groupLabelId} className="grid shrink-0 content-start gap-1">
+                <div id={groupLabelId} className="flex border-0 bg-transparent px-2 py-1 text-[10px] font-medium text-stone-400">
                   {group}
                 </div>
                 {groupRoutes.map((item) => (

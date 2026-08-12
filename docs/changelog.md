@@ -16,6 +16,8 @@ source and release history remains available from Git commits and version tags.
 - Added a browser-independent Sheet editing slice with stable row and column
   identity, rectangular selection, JSON/TSV clipboard, atomic paste, cell
   history, and the complete minimal `/demo/sheet` application.
+- Reorganized official site and documentation navigation around the product
+  hierarchy: Start, Core, Editing, and Connectors.
 
 ## 3.0.0
 

@@ -25,22 +25,28 @@ describe("documentation routes", () => {
     const user = userEvent.setup();
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
-    await user.click(nav.getByRole("link", { name: "Docs" }));
+    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Concepts" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Docs" }, { timeout: 10000 })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "배경" })).toBeTruthy();
 
-    await user.click(nav.getByRole("link", { name: "Quickstart" }));
+    await user.click(within(nav.getByRole("group", { name: "Start" })).getByRole("link", { name: "Quickstart" }));
     await waitFor(() => expect(document.title).toBe("Tutorial - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "작은 카드 편집기 만들기" })).toBeTruthy();
 
-    await user.click(nav.getByRole("link", { name: "Connector docs" }));
+    const docsNavigation = within(screen.getAllByRole("navigation", { name: "Documentation pages" })[0]!);
+    expect(within(docsNavigation.getByRole("group", { name: "Start" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Quickstart"]);
+    expect(within(docsNavigation.getByRole("group", { name: "Core" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Concepts", "API Reference"]);
+    expect(within(docsNavigation.getByRole("group", { name: "Connectors" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Connector guide"]);
+
+    window.history.pushState(null, "", "/docs/connectors");
+    window.dispatchEvent(new Event("popstate"));
     await waitFor(() => expect(document.title).toBe("Connector Docs - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "React Connector" })).toBeTruthy();
 
-    await user.click(nav.getByRole("link", { name: "API reference" }));
+    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
@@ -55,12 +61,12 @@ describe("documentation routes", () => {
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Docs" }, { timeout: 10000 })).toBeTruthy();
-    expect(nav.getByRole("link", { name: "Docs" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Concepts" }).getAttribute("aria-current")).toBe("page");
     await waitFor(() => expect(document.getElementById("배경")).toBeTruthy());
 
     window.history.pushState(null, "", "/docs/api/");
     window.dispatchEvent(new Event("popstate"));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
-    expect(nav.getByRole("link", { name: "API reference" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
   });
 });

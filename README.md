@@ -27,11 +27,11 @@ stateless JSON Patch
 
 | 목적 | 위치 |
 | --- | --- |
-| 프로젝트 이해 | [docs/public/overview.md](docs/public/overview.md) |
 | 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
+| Core 개념 이해 | [docs/public/overview.md](docs/public/overview.md) |
+| Core 공개 API | [docs/public/api.md](docs/public/api.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
 | Connector Live Demo | [공식 Connector catalog](https://developer-1px.github.io/json-document/connectors) |
-| 공개 API | [docs/public/api.md](docs/public/api.md) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
 | 개념·이름 정본 | [standards/repository-naming.md](standards/repository-naming.md) |
