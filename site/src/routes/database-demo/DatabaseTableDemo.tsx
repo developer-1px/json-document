@@ -13,6 +13,7 @@ import {
   type DatabaseRecord,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { JsonInspector } from "../../shared/ui/json-inspector";
 import { classes, ui } from "../../shared/ui/styles";
 import { initialDatabase } from "./initial-database";
 
@@ -231,18 +232,19 @@ export function DatabaseTableDemo() {
         </div>
 
         <aside aria-label="Database contract inspector" className="grid content-start gap-3 lg:grid-cols-3">
-          <section className={classes("p-3", ui.surface.inset)}>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Persistent Table view</h2>
-            <pre data-testid="database-view-json" className={classes("m-0 max-h-56 overflow-auto whitespace-pre-wrap", ui.code.json)}><code>{JSON.stringify(view, null, 2)}</code></pre>
-          </section>
-          <section className={classes("p-3", ui.surface.inset)}>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Structural selection</h2>
-            <pre data-testid="database-selection-json" className={classes("m-0 max-h-40 overflow-auto whitespace-pre-wrap", ui.code.json)}><code>{JSON.stringify(snapshot.selection, null, 2)}</code></pre>
-          </section>
-          <section className={classes("p-3", ui.surface.inset)}>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Canonical database · revision {snapshot.revision}</h2>
-            <pre data-testid="database-document-json" className={classes("m-0 max-h-80 overflow-auto whitespace-pre-wrap", ui.code.json)}><code>{JSON.stringify(document, null, 2)}</code></pre>
-          </section>
+          <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
+          <JsonInspector
+            label="Structural selection"
+            value={snapshot.selection}
+            testId="database-selection-json"
+            size="compact"
+          />
+          <JsonInspector
+            label="Canonical database"
+            signal={`revision ${snapshot.revision}`}
+            value={document}
+            testId="database-document-json"
+          />
         </aside>
       </div>
     </section>
