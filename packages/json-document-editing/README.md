@@ -22,3 +22,9 @@ inverse patches with `selectionBefore` and `selectionAfter`; selection-only,
 no-op, canceled, preview, and remote-presence changes do not create local document
 history. Native text selection remains input/editor-owned and connects through
 an explicit edit lease rather than becoming a structural selection variant.
+
+`Database` keeps typed property schema and records in canonical JSON while its
+saved Table views own property order and visibility, sort, and filter. The
+editor projects each saved view into a visible record/property topology for
+range selection, keeps native title/text caret state in the host, and restores
+structural selection with record and view mutations through history.

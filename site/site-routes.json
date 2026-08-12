@@ -49,6 +49,13 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/demo/database",
+    "label": "Database",
+    "title": "Database Table Demo - json-document",
+    "description": "A Notion-style Database Table v1 with typed properties, persistent view configuration, selection, native text editing, and history.",
+    "navigationGroup": "Editing"
+  },
+  {
     "path": "/connectors",
     "label": "Overview",
     "title": "Connectors - json-document",
