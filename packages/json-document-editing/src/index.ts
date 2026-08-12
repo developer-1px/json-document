@@ -1,0 +1,18 @@
+export { createDocumentEditor } from "./document.js";
+export { createEditingSession } from "./session.js";
+export type {
+  BlockDocument,
+  DocumentBlock,
+  DocumentClipboard,
+  DocumentEditor,
+  DocumentIntent,
+  DocumentPoint,
+  DocumentRange,
+  DocumentSelection,
+} from "./document.js";
+export type {
+  EditingPlan,
+  EditingResult,
+  EditingSession,
+  EditingSnapshot,
+} from "./session.js";

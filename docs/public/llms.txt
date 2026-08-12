@@ -47,7 +47,8 @@ React hook, host service를 추가하지 않는다.
 stateless JSON Patch
   |-> local implementation -----\
   |                               > same six-member JSON Document
-  `-> collaboration engine -----/    |-> optional history/text authoring
+  `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
 
@@ -195,20 +196,23 @@ Minor release에서 optional diagnostic field와 새 code가 추가될 수 있�
 
 ## Host adapter와 companion
 
-패키지는 root entrypoint만 공개한다. Selection, clipboard, history, schema
-introspection, DOM과 framework lifecycle은 host 또는 별도 adapter가
-여섯-member `JSONDocument`를 조합해 소유한다.
+Core package는 root entrypoint만 공개한다. Selection, clipboard, history는
+optional editing companion이 여섯-member `JSONDocument` 위에서 조합한다.
+Schema introspection, DOM과 framework lifecycle은 host 또는 별도 adapter가
+소유한다.
 
 v3 Kernel release는 dependency-free Core package 하나다. Local-only consumer는
-Core만 설치한다. 이 저장소의
+Core만 설치한다. 이 저장소의 `@interactive-os/json-document-editing`은 atomic
+editing transaction, selection publication, clipboard, history와 최초 Document
+domain slice를 제공하는 browser-independent companion이다.
 `@interactive-os/json-document-collaboration`은 같은 canonical JSON Document을
 제공하는 independently versioned, transport-free provider이고,
 `@interactive-os/json-document-contenteditable-collaboration`은 collaborative
 string을 위한 optional native-input DOM lease다. 두 companion을 사용해도
 Core Root API와 editor가 받는 `JSONDocument` port는 바뀌지 않는다.
 
-Host adapter는 공개 JSON Document만 입력으로 받고 제품 의도를 Pointer와
-JSON Patch로 번역한다. Collaboration companion은 transport, authentication,
+Editing companion과 Host adapter는 공개 JSON Document만 입력으로 받고 제품
+의도를 Pointer와 JSON Patch로 번역한다. Collaboration companion은 transport, authentication,
 presence, persistence를 소유하지 않는다. 별도 package로 배포하는 adapter와
 companion은 Core와 독립적으로 version과 compatibility를 검증한다.
 
@@ -221,7 +225,9 @@ catalog의 일부가 아니다.
 ## Host 책임
 
 Rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem,
-network, formula engine, CRDT와 OT는 host 또는 adapter가 소유한다. Tree
+network, formula engine, CRDT와 OT는 host 또는 adapter가 소유한다. Selection의
+공통 lifecycle은 editing companion에 있지만 grid range나 spatial object 같은
+구체적인 topology는 제품이 소유한다. Tree
 indent/outdent, visible-row focus, slide selection box, grid coordinate와 같은 제품
 의도는 host가 Pointer와 Patch operation으로 번역한다.
 

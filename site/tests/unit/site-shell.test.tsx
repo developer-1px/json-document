@@ -33,6 +33,7 @@ describe("official site shell", () => {
     expect(screen.getByRole("link", { name: "npm" }).getAttribute("href")).toBe("https://www.npmjs.com/package/@interactive-os/json-document");
     expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/developer-1px/json-document");
     expect(screen.queryByRole("link", { name: "Workbench" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Try the demo" }).getAttribute("href")).toBe("/demo");
   });
 
   test("navigates across the core documentation routes", async () => {
@@ -43,6 +44,7 @@ describe("official site shell", () => {
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Recipes" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
+    expect(nav.getByRole("link", { name: "Demo" })).toBeTruthy();
 
     await user.click(nav.getByRole("link", { name: "Docs" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));

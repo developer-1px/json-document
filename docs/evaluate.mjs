@@ -48,6 +48,7 @@ const surfaces = {
   rootReadme: read("README.md"),
   docsReadme: read("docs/README.md"),
   packageReadme: read("packages/json-document/README.md"),
+  editingReadme: read("packages/json-document-editing/README.md"),
   collaborationReadme: read("packages/json-document-collaboration/README.md"),
   contenteditableCollaborationReadme: read(
     "packages/contenteditable-collaboration/README.md",
@@ -58,6 +59,7 @@ const surfaces = {
 const publicSurface = readJson("standards/json-document-v3/public-surface.json");
 const publicContract = readJson("packages/json-document/public-contract.json");
 const activeCompanionPackages = new Set([
+  "@interactive-os/json-document-editing",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test("official overview exposes only the v3 core documentation", async ({ page }) => {
+test("official overview exposes the v3 documentation and editing demo", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
 
@@ -10,10 +10,54 @@ test("official overview exposes only the v3 core documentation", async ({ page }
   await expect(navigation.getByRole("link", { name: "Docs" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Quickstart" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "API reference" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Demo" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Recipes" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
+});
+
+test("minimal document demo completes selection, clipboard, edit, move, undo, and redo", async ({ page }) => {
+  await page.goto("/demo");
+  await expect(page.getByRole("heading", { level: 1, name: "Document demo" })).toBeVisible();
+
+  const surface = page.getByRole("region", { name: "Editable document" }).locator('[tabindex="0"]');
+  await surface.focus();
+  await surface.press("ArrowDown");
+  await expect(page.locator('article[data-block-id="select"]')).toHaveAttribute("data-selected", "true");
+
+  await page.getByRole("button", { name: "Select block 1" }).click();
+  await page.getByRole("button", { name: "Select block 2" }).click({ modifiers: ["Meta"] });
+  await expect(page.getByText("2 selected", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "Copy", exact: true }).click();
+
+  await page.getByRole("button", { name: "Select block 4" }).click();
+  await page.getByRole("button", { name: "Paste", exact: true }).click();
+  await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
+  await expect(page.getByRole("textbox", { name: "Block 6 text" })).toHaveValue(/Shift-click/);
+
+  await page.getByRole("textbox", { name: "Block 5 text" }).fill("한글 편집도 같은 transaction을 사용합니다.");
+  await page.getByRole("button", { name: "Select block 5" }).click();
+  await page.getByRole("button", { name: "Select block 6" }).click({ modifiers: ["Meta"] });
+  await page.getByRole("button", { name: "Move up" }).click();
+
+  const moved = await canonicalDocument(page);
+  expect(moved.blocks.map((block) => block.id)).toEqual(["welcome", "select", "clipboard", "block-1", "block-2", "json"]);
+
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(page.locator("article[data-selected=true]")).toHaveCount(1);
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(page.locator("article")).toHaveCount(4);
+
+  await page.getByRole("button", { name: "Redo", exact: true }).click();
+  await page.getByRole("button", { name: "Redo", exact: true }).click();
+  await page.getByRole("button", { name: "Redo", exact: true }).click();
+  const redone = await canonicalDocument(page);
+  expect(redone.blocks).toHaveLength(6);
+  expect(redone.blocks.find((block) => block.id === "block-1")?.text).toBe("한글 편집도 같은 transaction을 사용합니다.");
+  await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -73,4 +117,8 @@ async function scrollSnapshot(page: Page) {
       docsNavTop: docsNav ? Math.round(docsNav.getBoundingClientRect().top) : null,
     };
   });
+}
+
+async function canonicalDocument(page: Page): Promise<{ blocks: Array<{ id: string; text: string }> }> {
+  return JSON.parse(await page.getByTestId("canonical-json").innerText()) as { blocks: Array<{ id: string; text: string }> };
 }
