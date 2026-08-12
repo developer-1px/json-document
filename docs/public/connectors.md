@@ -15,6 +15,19 @@ JSON Document / Editing companion public contract
 Connector는 공통 TypeScript interface가 아닙니다. React hook, Zod validator와
 TanStack Table options는 서로 다른 native API 모양을 유지합니다.
 
+실제로 canonical state를 읽거나 구독하거나 변경하는 stateful Connector의 공식
+진입점은 다음 문법을 공유합니다.
+
+```ts
+createXxxConnector(document, options)
+useXxxConnector(document, options) // React Hook일 때
+```
+
+첫 번째 인자는 공유할 `JSONDocument`, 두 번째 인자는 대상 생태계의 options이며,
+반환값은 대상 생태계의 native binding입니다. Validator, codec, modifier translator처럼
+document에 직접 연결되지 않는 순수 함수는 이 문법을 흉내 내지 않고 책임에 맞는
+이름을 유지합니다.
+
 ## 경계
 
 | 계층 | 책임 |
@@ -58,23 +71,18 @@ API를 유지하며, contract test, connector-specific Live Demo와 browser acce
 lifecycle을 연결합니다.
 
 ```tsx
-import {
-  useDocumentEditor,
-  useEditingSnapshot,
-} from "@interactive-os/json-document-react";
+import { useReactConnector } from "@interactive-os/json-document-react";
 
-function DocumentView() {
-  const editor = useDocumentEditor({
-    blocks: [{ id: "welcome", text: "Hello" }],
-  });
-  const snapshot = useEditingSnapshot(editor);
+function DocumentView({ document }) {
+  const value = useReactConnector(document);
 
-  return <pre>{JSON.stringify(snapshot.value, null, 2)}</pre>;
+  return <pre>{JSON.stringify(value, null, 2)}</pre>;
 }
 ```
 
 | API | 책임 |
 | --- | --- |
+| `useReactConnector(document)` | React Connector의 공식 document 진입점 |
 | `useJSONDocumentValue(document)` | 여섯-member JSON Document value를 React에 구독 |
 | `useEditingSnapshot(source)` | EditingSession 또는 DocumentEditor snapshot을 React에 구독 |
 | `useDocumentEditor(initial, options?)` | 한 mounted component가 소유하는 DocumentEditor 생성 |
@@ -86,10 +94,10 @@ JSON 반영을 확인할 수 있습니다.
 ## React Hook Form Connector
 
 `@interactive-os/json-document-react-hook-form`은 React Hook Form의 form lifecycle과
-`EditingSession`의 canonical transaction/history를 연결합니다.
+공유 `JSONDocument`의 canonical transaction과 내부 form history를 연결합니다.
 
 ```tsx
-const binding = useJSONDocumentForm<ProfileForm, FormSelection>(session, {
+const binding = useReactHookFormConnector<ProfileForm>(document, {
   errorName: ({ pointer }) => pointer === "/profile/name"
     ? "profile.name"
     : "root.canonical",
@@ -140,9 +148,7 @@ UI는 범용 schema-description contract가 생기기 전까지 이 Connector �
 renderer가 아니라 `@tanstack/table-core`를 대상으로 합니다.
 
 ```ts
-const binding = createTableDocumentBinding({
-  editor,
-});
+const binding = createTanStackTableConnector(document);
 
 const table = createTable({
   ...binding.tableOptions,
@@ -153,7 +159,7 @@ binding.commitCell({ rowId: row.id, columnId: column.id, value });
 binding.fillSelected(table, "Ready");
 ```
 
-`TableDocumentBinding`은 stable row identity와 controlled row data를 TanStack
+`TanStackTableConnector`는 stable row identity와 controlled row data를 TanStack
 options로 제공하고 cell commit을 Sheet intent와 JSON Patch로 연결합니다. 최종
 visible row model과 visible leaf column order는 `SheetTopology`로 번역되므로 정렬,
 필터링과 column ordering 뒤에도 rectangular multi-range selection, selection fill과

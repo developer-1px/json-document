@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState, type BaseSyntheticEvent } from "react";
-import type { JSONValue } from "@interactive-os/json-document";
+import { useCallback, useEffect, useMemo, useRef, useState, type BaseSyntheticEvent } from "react";
+import type { JSONDocument, JSONValue } from "@interactive-os/json-document";
 import type {
   EditingResult,
   EditingSession,
+  EditingSnapshot,
 } from "@interactive-os/json-document-editing";
+import { createEditingSession } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import {
   useForm,
@@ -32,8 +34,28 @@ export interface JSONDocumentFormBinding<
   Selection extends JSONValue,
 > {
   readonly form: UseFormReturn<Values>;
+  readonly snapshot: EditingSnapshot<Selection>;
   readonly result: EditingResult<Selection> | null;
   readonly submit: (event?: BaseSyntheticEvent) => Promise<void>;
+  readonly undo: () => EditingResult<Selection>;
+  readonly redo: () => EditingResult<Selection>;
+}
+
+export type ReactHookFormConnector<Values extends FieldValues> =
+  JSONDocumentFormBinding<Values, null>;
+export type ReactHookFormConnectorOptions<Values extends FieldValues> =
+  UseJSONDocumentFormOptions<Values>;
+
+/** Official React Hook Form Connector entry point. */
+export function useReactHookFormConnector<Values extends FieldValues>(
+  document: JSONDocument,
+  options: ReactHookFormConnectorOptions<Values> = {},
+): ReactHookFormConnector<Values> {
+  const session = useMemo(() => createEditingSession({
+    document,
+    selection: null,
+  }), [document]);
+  return useJSONDocumentForm<Values, null>(session, options);
 }
 
 export function useJSONDocumentForm<
@@ -84,8 +106,11 @@ export function useJSONDocumentForm<
 
   return {
     form,
+    snapshot,
     result,
     submit: form.handleSubmit(commit),
+    undo: () => session.undo(),
+    redo: () => session.redo(),
   };
 }
 

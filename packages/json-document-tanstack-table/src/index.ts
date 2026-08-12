@@ -5,6 +5,7 @@ import type {
   TableMeta,
   TableOptions,
 } from "@tanstack/table-core";
+import type { JSONDocument } from "@interactive-os/json-document";
 import type {
   EditingResult,
   EditingSnapshot,
@@ -16,6 +17,7 @@ import type {
   SheetSelection,
   SheetTopology,
 } from "@interactive-os/json-document-editing";
+import { createSheetEditor } from "@interactive-os/json-document-editing";
 
 declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
@@ -46,6 +48,15 @@ export interface TableDocumentBinding {
   undo(): EditingResult<SheetSelection>;
   redo(): EditingResult<SheetSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
+}
+
+export type TanStackTableConnector = TableDocumentBinding;
+
+/** Official TanStack Table Connector entry point. */
+export function createTanStackTableConnector(
+  document: JSONDocument,
+): TanStackTableConnector {
+  return createTableDocumentBinding({ editor: createSheetEditor(document) });
 }
 
 export function createTableDocumentBinding(options: {

@@ -3,7 +3,7 @@ import { PageIntro } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 import { ReactHookFormConnectorLab } from "./ReactHookFormConnectorLab";
 
-const connectorCode = `const binding = useJSONDocumentForm<ProfileForm, FormSelection>(session, {
+const connectorCode = `const binding = useReactHookFormConnector<ProfileForm>(document, {
   errorName: ({ pointer }) => pointer === "/profile/name"
     ? "profile.name"
     : "root.canonical",

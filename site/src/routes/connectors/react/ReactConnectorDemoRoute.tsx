@@ -5,7 +5,7 @@ import { classes, ui } from "../../../shared/ui/styles";
 
 const connectorCode = `const editor = useDocumentEditor(initial);
 const snapshot = useEditingSnapshot(editor);
-const value = useJSONDocumentValue(document);`;
+const value = useReactConnector(document);`;
 
 export function ReactConnectorDemoRoute() {
   return (

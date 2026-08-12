@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createJSONDocument, type JSONPatchValidationResult } from "@interactive-os/json-document";
-import { useJSONDocumentValue } from "@interactive-os/json-document-react";
+import { useReactConnector } from "@interactive-os/json-document-react";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
@@ -26,7 +26,7 @@ export function ZodConnectorLab() {
     { profile: { title: "Draft" } },
     { validate: createZodValidator(profileSchema) },
   ));
-  const value = useJSONDocumentValue(document) as ProfileDocument;
+  const value = useReactConnector(document) as ProfileDocument;
   const [draft, setDraft] = useState(value.profile.title);
   const [result, setResult] = useState<JSONPatchValidationResult>(accepted);
 
