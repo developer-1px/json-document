@@ -6,8 +6,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
 
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "json-document" })).toBeVisible();
-  await expect(page.getByText("One document model.")).toBeVisible();
-  await expect(page.getByText("Any editor.")).toBeVisible();
+  await expect(page.getByText("One JSON document. Any editor.")).toBeVisible();
   await expect(page.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
