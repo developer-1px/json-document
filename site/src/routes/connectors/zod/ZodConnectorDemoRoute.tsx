@@ -11,7 +11,7 @@ export function ZodConnectorDemoRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className={classes("mb-6 grid gap-4 pb-5 lg:grid-cols-[minmax(0,1fr)_24rem]", ui.frame.header)}>
-          <PageIntro title="Zod Connector">
+          <PageIntro illustration="sleep" title="Zod Connector">
               Zod safeParse issues translated into JSON Document validation results and JSON Pointer diagnostics.
           </PageIntro>
           <div className={ui.code.install}>

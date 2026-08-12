@@ -97,7 +97,7 @@ export function DocumentDemoRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro title="Document demo">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageIntro>
+          <PageIntro illustration="sleep" title="Document demo">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageIntro>
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>

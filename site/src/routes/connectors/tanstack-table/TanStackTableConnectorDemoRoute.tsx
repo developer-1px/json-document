@@ -17,7 +17,7 @@ export function TanStackTableConnectorDemoRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className={classes("mb-6 grid gap-4 pb-5 lg:grid-cols-[minmax(0,1fr)_28rem]", ui.frame.header)}>
-          <PageIntro title="TanStack Table Connector">
+          <PageIntro illustration="cursor" title="TanStack Table Connector">
               TanStack Table v8 projects the visible grid while the Sheet editor keeps canonical JSON, rectangular selection, clipboard, and history.
           </PageIntro>
           <div className={ui.code.install}>

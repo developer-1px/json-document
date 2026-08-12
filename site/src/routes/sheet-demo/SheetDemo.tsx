@@ -89,7 +89,7 @@ export function SheetDemo() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro title="Sheet demo">A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageIntro>
+          <PageIntro illustration="braces" title="Sheet demo">A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageIntro>
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>

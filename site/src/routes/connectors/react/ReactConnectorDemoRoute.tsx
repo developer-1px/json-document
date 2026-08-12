@@ -12,7 +12,7 @@ export function ReactConnectorDemoRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className={classes("mb-6 grid gap-4 pb-5 lg:grid-cols-[minmax(0,1fr)_24rem]", ui.frame.header)}>
-          <PageIntro title="React Connector">
+          <PageIntro illustration="braces" title="React Connector">
               React subscription and component lifecycle connected to public JSON Document and editing contracts.
           </PageIntro>
           <div className={ui.code.install}>

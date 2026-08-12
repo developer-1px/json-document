@@ -85,7 +85,7 @@ export function SelectionLabRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro label="One canonical document · family-owned selection" title="Selection Workbench">
+          <PageIntro illustration="cursor" label="One canonical document · family-owned selection" title="Selection Workbench">
             Every family projects the same records through a different topology. Document mutations and history are shared; selection and editing state remain family-specific.
           </PageIntro>
           <span className={classes("px-3 py-1.5", ui.surface.workspace, ui.text.meta)}>

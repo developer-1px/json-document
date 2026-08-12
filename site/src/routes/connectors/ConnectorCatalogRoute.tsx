@@ -10,7 +10,7 @@ export function ConnectorCatalogRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className="mx-auto max-w-5xl">
         <header className={classes("mb-7 pb-5", ui.frame.header)}>
-          <PageIntro title="Connectors">
+          <PageIntro illustration="peek" title="Connectors">
             Optional packages that translate ecosystem-native contracts without changing the JSON Document Kernel.
           </PageIntro>
         </header>

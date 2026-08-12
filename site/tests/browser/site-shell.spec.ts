@@ -53,6 +53,45 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
 });
 
+test("ordinary pages reuse one petite decorative cat without covering intro copy", async ({ page }) => {
+  const illustrations = new Set<string>();
+  const routes = [
+    "/demo",
+    "/demo/sheet",
+    "/demo/selection",
+    "/demo/database",
+    "/connectors",
+    "/connectors/react",
+    "/connectors/zod",
+    "/connectors/tanstack-table",
+  ];
+
+  for (const route of routes) {
+    await page.goto(route);
+    const artwork = page.locator("[data-petite-cat]");
+    await expect(artwork).toHaveCount(1);
+    illustrations.add(await artwork.getAttribute("data-petite-cat") ?? "");
+    await expect(artwork.locator("img")).toHaveAttribute("alt", "");
+    expect(await petiteCatLayout(page)).toMatchObject({
+      artworkLongEdge: 72,
+      imageLoaded: true,
+      overlapsCopy: false,
+      pageOverflow: false,
+    });
+  }
+  expect([...illustrations].sort()).toEqual(["braces", "cursor", "peek", "sleep"]);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/demo");
+  await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
+  expect(await petiteCatLayout(page)).toMatchObject({
+    artworkLongEdge: 72,
+    imageLoaded: true,
+    overlapsCopy: false,
+    pageOverflow: false,
+  });
+});
+
 test("official site uses window scroll with sticky desktop navigation", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/docs/api");
@@ -101,6 +140,28 @@ async function scrollSnapshot(page: Page) {
       siteNavTop: siteNav ? Math.round(siteNav.getBoundingClientRect().top) : null,
       pageOutlineTop: pageOutline ? Math.round(pageOutline.getBoundingClientRect().top) : null,
       pageOutlineSide: outlineRect && contentRect && outlineRect.left >= contentRect.right ? "right" : "overlap",
+    };
+  });
+}
+
+async function petiteCatLayout(page: Page) {
+  return page.evaluate(() => {
+    const artwork = document.querySelector<HTMLElement>("[data-petite-cat]");
+    const image = artwork?.querySelector<HTMLImageElement>("img");
+    const intro = artwork?.parentElement;
+    const copy = intro?.firstElementChild;
+    const artRect = artwork?.getBoundingClientRect();
+    const copyRect = copy?.getBoundingClientRect();
+
+    return {
+      artworkLongEdge: artRect ? Math.round(Math.max(artRect.width, artRect.height)) : 0,
+      imageLoaded: Boolean(image?.complete && image.naturalWidth > 0),
+      overlapsCopy: Boolean(artRect && copyRect
+        && artRect.left < copyRect.right
+        && artRect.right > copyRect.left
+        && artRect.top < copyRect.bottom
+        && artRect.bottom > copyRect.top),
+      pageOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     };
   });
 }
