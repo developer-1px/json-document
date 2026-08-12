@@ -8,7 +8,8 @@
     "paths": {
       "@interactive-os/json-document": ["../packages/json-document/src/application/document/index.ts"],
       "@interactive-os/json-document-editing": ["../packages/json-document-editing/src/index.ts"],
-      "@interactive-os/json-document-react": ["../packages/json-document-react/src/index.ts"]
+      "@interactive-os/json-document-react": ["../packages/json-document-react/src/index.ts"],
+      "@interactive-os/json-document-zod": ["../packages/json-document-zod/src/index.ts"]
     },
     "jsx": "react-jsx",
     "strict": true,
