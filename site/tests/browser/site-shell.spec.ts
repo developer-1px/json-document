@@ -74,7 +74,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     illustrations.add(await artwork.getAttribute("data-petite-cat") ?? "");
     await expect(artwork.locator("img")).toHaveAttribute("alt", "");
     expect(await petiteCatLayout(page)).toMatchObject({
-      artworkLongEdge: 72,
+      artworkLongEdge: 192,
       imageLoaded: true,
       overlapsCopy: false,
       pageOverflow: false,
@@ -86,7 +86,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   await page.goto("/demo");
   await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
   expect(await petiteCatLayout(page)).toMatchObject({
-    artworkLongEdge: 72,
+    artworkLongEdge: 112,
     imageLoaded: true,
     overlapsCopy: false,
     pageOverflow: false,
