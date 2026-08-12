@@ -1,4 +1,5 @@
 import { ReactConnectorLab } from "./ReactConnectorLab";
+import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageIntro } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -14,9 +15,9 @@ export function ReactConnectorDemoRoute() {
           <PageIntro title="React Connector">
               React subscription and component lifecycle connected to public JSON Document and editing contracts.
           </PageIntro>
-          <div className={classes("p-3", ui.surface.inset)}>
+          <div className={ui.code.install}>
             <div className={ui.text.label}>Install</div>
-            <code className={classes("mt-2 block overflow-x-auto", ui.code.inline)}>npm i @interactive-os/json-document-react</code>
+            <InlineCode className="mt-2 block overflow-x-auto whitespace-nowrap" prompt>npm i @interactive-os/json-document-react</InlineCode>
           </div>
         </header>
 
@@ -24,7 +25,7 @@ export function ReactConnectorDemoRoute() {
 
         <section aria-label="Minimal React connector code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
           <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
-          <pre className={classes("m-0 overflow-x-auto", ui.code.block)}><code>{connectorCode}</code></pre>
+          <CodeBlock language="typescript" size="content" source={connectorCode} />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             The Connector owns React subscription and lifecycle only. Rendering and document meaning remain in the host and editing domain.
           </p>

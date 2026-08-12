@@ -1,4 +1,5 @@
 import { connectorCatalog } from "./connector-catalog";
+import { InlineCode } from "../../shared/ui/code-block";
 import { PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -23,7 +24,7 @@ export function ConnectorCatalogRoute() {
                   {connector.status}
                 </span>
               </div>
-              <code className={classes("mt-2 block", ui.code.inline)}>{connector.packageName}</code>
+              <InlineCode className="mt-2 block">{connector.packageName}</InlineCode>
               <p className={classes("mb-4 mt-3", ui.text.body)}>{connector.description}</p>
               {connector.demoPath === null ? (
                 <span className={classes("mt-auto", ui.text.meta)}>Live Demo ships with the implementation.</span>

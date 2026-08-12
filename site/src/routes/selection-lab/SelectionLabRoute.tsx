@@ -36,6 +36,7 @@ import {
   type WorkspaceSession,
   type WorkspaceState,
 } from "./selection-workbench-state";
+import { CodeBlock } from "../../shared/ui/code-block";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button, PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -276,9 +277,7 @@ function ContractInspector({ trace, testId }: { readonly trace: ContractTrace | 
       ) : cells.map(([label, value]) => (
         <div key={label} className={classes("min-w-0 p-3", ui.workbench.inspectorCell)}>
           <div className={classes("mb-2", ui.workbench.inspectorLabel)}>{label}</div>
-          <pre className={classes("m-0 max-h-48 overflow-auto whitespace-pre-wrap", ui.code.block)}>
-            <code>{JSON.stringify(value, null, 2)}</code>
-          </pre>
+          <CodeBlock language="json" size="compact" source={JSON.stringify(value, null, 2)} />
         </div>
       ))}
     </div>

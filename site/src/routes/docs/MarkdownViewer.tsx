@@ -1,6 +1,8 @@
 import ReactMarkdown from "react-markdown";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+import { CodeBlock, InlineCode } from "../../shared/ui/code-block";
+import { codeLanguage } from "../../shared/ui/code-tokens";
 import { classes, ui } from "../../shared/ui/styles";
 
 type MarkdownHeading = { id: string; level: number; text: string };
@@ -43,18 +45,12 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
             <td className={classes("py-1.5 pr-3 align-top", ui.surface.tableCell, ui.text.body)}>{children}</td>
           ),
           code: ({ children, className }) => {
-            if (className) return <code>{children}</code>;
-            return (
-              <code className={ui.code.inline}>
-                {children}
-              </code>
-            );
+            if (!className) return <InlineCode>{children}</InlineCode>;
+
+            const language = codeLanguage(/^language-(.+)$/.exec(className)?.[1]);
+            return <CodeBlock language={language} size="content" source={String(children)} />;
           },
-          pre: ({ children }) => (
-            <pre className={classes("m-0 overflow-x-auto", ui.code.block)}>
-              {children}
-            </pre>
-          ),
+          pre: ({ children }) => <>{children}</>,
         }}
       >
         {source}

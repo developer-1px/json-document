@@ -52,9 +52,10 @@ export const ui = {
     seamless: "border-0 bg-transparent px-3 py-2 text-sm leading-6 text-stone-800 outline-none",
   },
   code: {
-    inline: "rounded-[6px] bg-[#ecece8] px-1 py-0.5 font-mono text-[0.85em] text-stone-800",
-    block: "rounded-[6px] border border-black/[0.06] bg-[#f1f1ee] p-3 font-mono text-xs leading-5 text-stone-800",
-    inspector: {
+    inline: "rounded-[2px] border border-black/[0.08] bg-white px-1 py-0.5 font-mono text-[0.85em] text-stone-800",
+    install: "min-w-0 self-start rounded-[3px] border border-black/[0.09] bg-white p-3 shadow-none",
+    prompt: "text-[#de6d55]",
+    block: {
       frame: "min-w-0 overflow-hidden rounded-[3px] border border-black/[0.09] bg-white shadow-none",
       header: "flex min-h-9 items-center border-b border-black/[0.07] px-3 py-2 font-mono",
       label: "text-[11px] font-medium text-stone-700",
@@ -62,6 +63,7 @@ export const ui = {
       signal: "text-[10px] font-medium text-[#de6d55]",
       viewport: {
         compact: "max-h-32",
+        content: "max-h-none",
         standard: "min-h-24 max-h-64",
         tall: "max-h-[34rem]",
       },
@@ -71,7 +73,9 @@ export const ui = {
       lineNumber: "select-none border-r border-black/[0.06] pr-3 text-right text-[10px] text-stone-300 before:content-[attr(data-line-number)]",
       lineContent: "whitespace-pre pl-3 pr-3",
       token: {
+        comment: "text-[#a8a29e]",
         key: "text-[#292524]",
+        keyword: "text-[#8a5a44]",
         string: "text-[#4f6b62]",
         literal: "text-[#8a5a44]",
         punctuation: "text-[#a8a29e]",

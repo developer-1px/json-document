@@ -1,4 +1,5 @@
 import { TanStackTableConnectorLab } from "./TanStackTableConnectorLab";
+import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageIntro } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -19,9 +20,9 @@ export function TanStackTableConnectorDemoRoute() {
           <PageIntro title="TanStack Table Connector">
               TanStack Table v8 projects the visible grid while the Sheet editor keeps canonical JSON, rectangular selection, clipboard, and history.
           </PageIntro>
-          <div className={classes("p-3", ui.surface.inset)}>
+          <div className={ui.code.install}>
             <div className={ui.text.label}>Install</div>
-            <code className={classes("mt-2 block overflow-x-auto", ui.code.inline)}>npm i @interactive-os/json-document-tanstack-table @tanstack/table-core</code>
+            <InlineCode className="mt-2 block overflow-x-auto whitespace-nowrap" prompt>npm i @interactive-os/json-document-tanstack-table @tanstack/table-core</InlineCode>
           </div>
         </header>
 
@@ -29,7 +30,7 @@ export function TanStackTableConnectorDemoRoute() {
 
         <section aria-label="Minimal TanStack Table connector code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
           <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
-          <pre className={classes("m-0 overflow-x-auto", ui.code.block)}><code>{connectorCode}</code></pre>
+          <CodeBlock language="typescript" size="content" source={connectorCode} />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             TanStack owns view state and row models. The Connector translates visible stable identities into Sheet topology and editing intents.
           </p>
