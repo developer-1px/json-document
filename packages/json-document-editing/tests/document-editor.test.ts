@@ -76,4 +76,28 @@ describe("document editing vertical slice", () => {
     expect(editor.dispatch({ type: "clipboard.paste", clipboard: clipboard! }).ok).toBe(true);
     expect((editor.snapshot.value as { blocks: Array<{ id: string }> }).blocks.map((block) => block.id)).toEqual(["a", "b", "copy", "copy-2"]);
   });
+
+  test("supports range selection, insert, duplicate, cut, delete, and selection-restoring undo", () => {
+    let id = 0;
+    const editor = createDocumentEditor({
+      blocks: [{ id: "a", text: "A" }, { id: "b", text: "B" }, { id: "c", text: "C" }],
+    }, { createId: () => `new-${++id}` });
+
+    editor.dispatch({ type: "selection.set", blockId: "a" });
+    editor.dispatch({ type: "selection.set", blockId: "c", mode: "extend" });
+    expect(editor.selectedBlockIds).toEqual(["a", "b", "c"]);
+
+    editor.dispatch({ type: "selection.duplicate" });
+    expect(editor.selectedBlockIds).toEqual(["new-1", "new-2", "new-3"]);
+    const cut = editor.cut();
+    expect(cut?.clipboard.text).toBe("A\nB\nC");
+    expect((editor.snapshot.value as { blocks: unknown[] }).blocks).toHaveLength(3);
+    editor.undo();
+    expect(editor.selectedBlockIds).toEqual(["new-1", "new-2", "new-3"]);
+
+    editor.dispatch({ type: "block.insert", afterId: "new-3", text: "Inserted" });
+    expect(editor.selectedBlockIds).toEqual(["new-4"]);
+    editor.dispatch({ type: "selection.remove" });
+    expect((editor.snapshot.value as { blocks: Array<{ text: string }> }).blocks.some((block) => block.text === "Inserted")).toBe(false);
+  });
 });
