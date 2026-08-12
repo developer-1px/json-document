@@ -5,6 +5,7 @@ on:
     tags:
       - "json-document-v*"
       - "json-document-zod-v*"
+      - "json-document-react-hook-form-v*"
       - "json-document-tanstack-table-v*"
       - "json-document-web-v*"
       - "json-document-collaboration-v*"
@@ -44,6 +45,11 @@ jobs:
             import { appendFileSync, readFileSync } from "node:fs";
 
             const releases = [
+              {
+                prefix: "json-document-react-hook-form-v",
+                packageFile: "packages/json-document-react-hook-form/package.json",
+                workspace: "@interactive-os/json-document-react-hook-form",
+              },
               {
                 prefix: "json-document-web-v",
                 packageFile: "packages/json-document-web/package.json",

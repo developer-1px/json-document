@@ -12,7 +12,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
   await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Concepts", "API Reference"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Document", "Sheet", "Selection Lab", "Database"]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Overview", "Connector guide", "React", "Zod", "TanStack Table", "Web Platform"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Overview", "Connector guide", "React", "React Hook Form", "Zod", "TanStack Table", "Web Platform"]);
   await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -159,7 +159,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   await page.keyboard.press("Tab");
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
-  const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "React" });
+  const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "React", exact: true });
   expect(await currentLink.evaluate((element) => getComputedStyle(element).borderLeftColor)).toBe("rgb(222, 109, 85)");
 
   const code = page.getByRole("figure", { name: "TypeScript" }).first();

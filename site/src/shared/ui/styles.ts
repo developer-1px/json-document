@@ -97,6 +97,7 @@ export const ui = {
     focus: "outline-none focus-visible:ring-2 focus-visible:ring-impact/35",
     skipLink: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-xs font-medium text-ink-strong shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)] focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:ring-2 focus-visible:ring-impact/35",
     disabled: "disabled:cursor-not-allowed disabled:text-pencil",
+    error: "text-impact-ink",
   },
   workbench: {
     darkStrip: "rounded-[10px] border border-ink bg-ink-strong text-paper",
