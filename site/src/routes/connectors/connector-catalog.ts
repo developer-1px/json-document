@@ -29,8 +29,8 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     name: "TanStack Table",
     packageName: "@interactive-os/json-document-tanstack-table",
     description: "Headless table rows and cell commits connected to JSON Patch.",
-    status: "planned",
-    demoPath: null,
+    status: "available",
+    demoPath: "/connectors/tanstack-table",
   },
   {
     id: "web",

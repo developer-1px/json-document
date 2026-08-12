@@ -18,6 +18,8 @@ source and release history remains available from Git commits and version tags.
   history, and the complete minimal `/demo/sheet` application.
 - Reorganized official site and documentation navigation around the product
   hierarchy: Start, Core, Editing, and Connectors.
+- Added the official TanStack Table v8 Connector with visible-order Sheet
+  selection, clipboard, history, editable cells, and a complete Live Demo.
 
 ## 3.0.0
 

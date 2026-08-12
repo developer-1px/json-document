@@ -23,6 +23,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       find: "@interactive-os/json-document-zod",
       replacement: sourceFile("packages/json-document-zod/src/index.ts"),
     },
+    {
+      find: "@interactive-os/json-document-tanstack-table",
+      replacement: sourceFile("packages/json-document-tanstack-table/src/index.ts"),
+    },
   ];
 }
 

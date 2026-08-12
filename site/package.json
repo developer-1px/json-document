@@ -12,7 +12,9 @@
   "dependencies": {
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-react": "*",
+    "@interactive-os/json-document-tanstack-table": "*",
     "@interactive-os/json-document-zod": "*",
+    "@tanstack/react-table": "^8.21.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-markdown": "^10.1.0",

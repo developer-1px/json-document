@@ -52,6 +52,7 @@ const surfaces = {
   editingReadme: read("packages/json-document-editing/README.md"),
   reactReadme: read("packages/json-document-react/README.md"),
   zodReadme: read("packages/json-document-zod/README.md"),
+  tanstackTableReadme: read("packages/json-document-tanstack-table/README.md"),
   collaborationReadme: read("packages/json-document-collaboration/README.md"),
   contenteditableCollaborationReadme: read(
     "packages/contenteditable-collaboration/README.md",
@@ -65,11 +66,9 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
+  "@interactive-os/json-document-tanstack-table",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
-]);
-const plannedConnectorPackages = new Set([
-  "@interactive-os/json-document-tanstack-table",
 ]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
@@ -118,7 +117,6 @@ for (const [name, source] of Object.entries(surfaces)) {
   ) {
     if (
       !activeCompanionPackages.has(match[0])
-      && !(name === "connectors" && plannedConnectorPackages.has(match[0]))
     ) {
       fail(
         `${name}: removed json-document extension is still documented as current: ${match[0]}.`,

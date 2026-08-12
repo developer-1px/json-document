@@ -37,7 +37,7 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 ```txt
 @interactive-os/json-document-react
 @interactive-os/json-document-zod
-@interactive-os/json-document-tanstack-table  # planned
+@interactive-os/json-document-tanstack-table
 ```
 
 외부 runtime은 `peerDependency`입니다. 각 Connector는 Kernel 및 companion과
@@ -104,28 +104,33 @@ UI는 범용 schema-description contract가 생기기 전까지 이 Connector �
 `/connectors/zod`에서 invalid commit 보존, valid commit과 Zod trim 결과 비채택을
 확인할 수 있습니다.
 
-## TanStack Table Connector 설계
+## TanStack Table Connector
 
-Planned `@interactive-os/json-document-tanstack-table`은 framework-specific
+`@interactive-os/json-document-tanstack-table`은 framework-specific
 renderer가 아니라 `@tanstack/table-core`를 대상으로 합니다.
 
 ```ts
 const binding = createTableDocumentBinding({
-  document,
-  rowsPointer: "/rows",
-  getRowId: (row) => row.id,
+  editor,
 });
 
-binding.rows;
-binding.subscribe(listener);
-binding.commitCell({ rowId, columnId, value });
+const table = createTable({
+  ...binding.tableOptions,
+  getCoreRowModel: getCoreRowModel(),
+});
+
+binding.commitCell({ rowId: row.id, columnId: column.id, value });
 ```
 
-`TableDocumentBinding`은 stable row identity, controlled row data와 cell commit을
-JSON Pointer 및 JSON Patch로 연결합니다. Sorting, filtering, pagination 같은
-TanStack state는 host가 필요한 slice만 controlled state로 소유합니다. Rectangular
-cell multiselection, formula와 clipboard 의미는 Sheet editing domain의 책임이며
-Table Connector가 소유하지 않습니다.
+`TableDocumentBinding`은 stable row identity와 controlled row data를 TanStack
+options로 제공하고 cell commit을 Sheet intent와 JSON Patch로 연결합니다. 최종
+visible row model과 visible leaf column order는 `SheetTopology`로 번역되므로 정렬,
+필터링과 column ordering 뒤에도 rectangular selection과 clipboard가 화면 순서를
+따릅니다. Canonical JSON, selection, clipboard와 history는 Sheet editor가 계속
+소유합니다. Sorting, filtering, pagination과 column state는 TanStack과 host가
+소유하며 formula, merged cell과 virtualization은 Connector 범위가 아닙니다.
 
 React에서 사용할 때 TanStack의 React adapter와 json-document React Connector를
-조합합니다. 따라서 Table Connector 자체는 계속 headless입니다.
+조합합니다. 따라서 Table Connector 자체는 계속 headless입니다. 공식 site의
+`/connectors/tanstack-table`에서 정렬·필터·column ordering 이후의 visible-order
+selection, copy/paste, undo/redo와 canonical JSON 반영을 확인할 수 있습니다.
