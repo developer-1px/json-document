@@ -52,6 +52,8 @@ type SheetValue = { rows: Array<{ id: string; cells: Record<string, unknown> }> 
 
 async function editCell(page: import("@playwright/test").Page, name: string, value: string) {
   const input = page.getByRole("textbox", { name });
+  await input.click();
+  expect(await input.evaluate((element) => document.activeElement === element)).toBe(true);
   await input.fill(value);
   await input.press("Tab");
 }

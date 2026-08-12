@@ -68,6 +68,7 @@ export function TanStackTableConnectorLab() {
 
   function commitCell(event: FocusEvent<HTMLInputElement>, rowId: string, columnId: string, current: unknown) {
     const value = typeof current === "number" ? Number(event.currentTarget.value) : event.currentTarget.value;
+    if (Object.is(value, current)) return;
     run(() => binding.commitCell({ rowId, columnId, value }), `${columnId} committed`);
   }
 
@@ -136,7 +137,7 @@ export function TanStackTableConnectorLab() {
                         <input
                           aria-label={`${cell.column.id} ${row.id}`}
                           defaultValue={displayValue(value)}
-                          key={`${snapshot.revision}:${displayValue(value)}`}
+                          key={displayValue(value)}
                           onBlur={(event) => commitCell(event, row.id, cell.column.id, value)}
                           className="w-full min-w-0 border-0 bg-transparent px-3 py-2 text-sm text-stone-800 outline-none"
                         />
