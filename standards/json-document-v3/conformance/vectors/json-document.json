@@ -1,0 +1,1221 @@
+{
+  "formatVersion": 1,
+  "status": "stable",
+  "profile": "standards/json-document-v3/profile.md",
+  "documentMembers": [
+    "value",
+    "at",
+    "query",
+    "validatePatch",
+    "commit",
+    "subscribe"
+  ],
+  "coverage": {
+    "runtime": 15,
+    "static": 6,
+    "deferred": 0
+  },
+  "initial": {
+    "title": "Draft",
+    "items": [
+      {
+        "id": "a",
+        "done": false
+      },
+      {
+        "id": "b",
+        "done": false
+      }
+    ],
+    "meta": {
+      "owner": "core"
+    }
+  },
+  "vectors": [
+    {
+      "id": "document-members",
+      "kind": "surface",
+      "requirements": [
+        "JD3-DOCUMENT-001"
+      ],
+      "members": [
+        "value",
+        "at",
+        "query",
+        "validatePatch",
+        "commit",
+        "subscribe"
+      ]
+    },
+    {
+      "id": "pointer-read-and-jsonpath-query",
+      "kind": "read",
+      "requirements": [
+        "JD3-ADDRESS-001",
+        "JD3-QUERY-001",
+        "JD3-RESULT-001"
+      ],
+      "at": [
+        {
+          "pointer": "/items/0/id",
+          "expect": {
+            "ok": true,
+            "path": "/items/0/id",
+            "value": "a"
+          }
+        },
+        {
+          "pointer": "items/0",
+          "expect": {
+            "ok": false,
+            "code": "invalid_pointer",
+            "pointer": "items/0"
+          }
+        },
+        {
+          "pointer": "/items/9",
+          "expect": {
+            "ok": false,
+            "code": "path_not_found",
+            "pointer": "/items/9"
+          }
+        }
+      ],
+      "query": [
+        {
+          "jsonPath": "$.items[*].id",
+          "expect": {
+            "ok": true,
+            "query": "$.items[*].id",
+            "pointers": [
+              "/items/0/id",
+              "/items/1/id"
+            ]
+          }
+        },
+        {
+          "jsonPath": "$.items[",
+          "expect": {
+            "ok": false,
+            "code": "invalid_query"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ordered-commit-and-notification",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
+      ],
+      "validation": "task-list",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Ready"
+        },
+        {
+          "op": "add",
+          "path": "/items/-",
+          "value": {
+            "id": "c",
+            "done": false
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/items/2/done",
+          "value": true
+        }
+      ],
+      "metadata": {
+        "origin": "conformance",
+        "label": "ordered batch"
+      },
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              },
+              {
+                "op": "add",
+                "path": "/items/2",
+                "value": {
+                  "id": "c",
+                  "done": false
+                }
+              },
+              {
+                "op": "replace",
+                "path": "/items/2/done",
+                "value": true
+              }
+            ],
+            "metadata": {
+              "origin": "conformance",
+              "label": "ordered batch"
+            }
+          }
+        },
+        "value": {
+          "title": "Ready",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            },
+            {
+              "id": "c",
+              "done": true
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              },
+              {
+                "op": "add",
+                "path": "/items/2",
+                "value": {
+                  "id": "c",
+                  "done": false
+                }
+              },
+              {
+                "op": "replace",
+                "path": "/items/2/done",
+                "value": true
+              }
+            ],
+            "metadata": {
+              "origin": "conformance",
+              "label": "ordered batch"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "failed-batch-is-atomic",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001",
+        "JD3-RESULT-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Temporary"
+        },
+        {
+          "op": "test",
+          "path": "/meta/owner",
+          "value": "external"
+        },
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Never"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": false,
+          "code": "test_failed"
+        },
+        "commit": {
+          "ok": false,
+          "code": "test_failed"
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "jsonpath-is-not-a-mutation-target",
+      "kind": "commit",
+      "requirements": [
+        "JD3-ADDRESS-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-RESULT-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "$.title",
+          "value": "Invalid"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": false,
+          "code": "invalid_pointer"
+        },
+        "commit": {
+          "ok": false,
+          "code": "invalid_pointer"
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "validation-rejection-has-probe-commit-parity",
+      "kind": "commit",
+      "requirements": [
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-RESULT-001",
+        "JD3-SCHEMA-001"
+      ],
+      "validation": "task-list",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/items/0/done",
+          "value": "yes"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": false,
+          "code": "schema_violation"
+        },
+        "commit": {
+          "ok": false,
+          "code": "schema_violation"
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "state-equivalent-commit-does-not-notify",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "test",
+          "path": "/meta/owner",
+          "value": "core"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": []
+          }
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "validation-cannot-transform-the-candidate",
+      "kind": "commit",
+      "requirements": [
+        "JD3-SCHEMA-002"
+      ],
+      "validation": "attempt-transform",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Explicit"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Explicit"
+              }
+            ]
+          }
+        },
+        "value": {
+          "title": "Explicit",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Explicit"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-scalar-replace-does-not-notify",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Draft"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": []
+          }
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "same-object-replace-does-not-notify",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/meta",
+          "value": {
+            "owner": "core"
+          }
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": []
+          }
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "canceling-batch-does-not-notify",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Ready"
+        },
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Draft"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": []
+          }
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "same-path-move-does-not-notify",
+      "kind": "commit",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "move",
+          "from": "/items/0",
+          "path": "/items/0"
+        }
+      ],
+      "expect": {
+        "probe": {
+          "ok": true
+        },
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": []
+          }
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "unsubscribe-stops-future-notification",
+      "kind": "unsubscribe",
+      "requirements": [
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
+      ],
+      "commits": [
+        {
+          "operations": [
+            {
+              "op": "replace",
+              "path": "/title",
+              "value": "Ready"
+            }
+          ],
+          "metadata": {
+            "origin": "first"
+          },
+          "expect": {
+            "ok": true,
+            "change": {
+              "applied": [
+                {
+                  "op": "replace",
+                  "path": "/title",
+                  "value": "Ready"
+                }
+              ],
+              "metadata": {
+                "origin": "first"
+              }
+            }
+          }
+        },
+        {
+          "operations": [
+            {
+              "op": "replace",
+              "path": "/title",
+              "value": "Published"
+            }
+          ],
+          "metadata": {
+            "origin": "second"
+          },
+          "expect": {
+            "ok": true,
+            "change": {
+              "applied": [
+                {
+                  "op": "replace",
+                  "path": "/title",
+                  "value": "Published"
+                }
+              ],
+              "metadata": {
+                "origin": "second"
+              }
+            }
+          }
+        }
+      ],
+      "unsubscribeAfter": 0,
+      "expect": {
+        "value": {
+          "title": "Published",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              }
+            ],
+            "metadata": {
+              "origin": "first"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "unsubscribe-during-notification-stops-current-delivery",
+      "kind": "unsubscribe-during-notification",
+      "requirements": [
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Ready"
+        }
+      ],
+      "metadata": {
+        "origin": "intra-notification-unsubscribe"
+      },
+      "expect": {
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              }
+            ],
+            "metadata": {
+              "origin": "intra-notification-unsubscribe"
+            }
+          }
+        },
+        "firstSubscriber": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Ready"
+              }
+            ],
+            "metadata": {
+              "origin": "intra-notification-unsubscribe"
+            }
+          }
+        ],
+        "secondSubscriber": [],
+        "value": {
+          "title": "Ready",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        }
+      }
+    },
+    {
+      "id": "references-are-isolated",
+      "kind": "isolation",
+      "requirements": [
+        "JD3-DATA-002",
+        "JD3-COMMIT-001",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "add",
+          "path": "/items/-",
+          "value": {
+            "id": "c",
+            "done": false
+          }
+        }
+      ],
+      "metadata": {
+        "origin": "isolation",
+        "nested": {
+          "owner": "suite"
+        }
+      },
+      "nextOperations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Published"
+        }
+      ],
+      "mutations": {
+        "initial": {
+          "pointer": "/meta/owner",
+          "value": "outside"
+        },
+        "operations": {
+          "pointer": "/0/value/id",
+          "value": "outside"
+        },
+        "metadata": {
+          "pointer": "/nested/owner",
+          "value": "outside"
+        },
+        "snapshot": {
+          "pointer": "/title",
+          "value": "outside"
+        },
+        "read": {
+          "pointer": "/id",
+          "value": "outside"
+        },
+        "change": {
+          "pointer": "/applied/0/value/id",
+          "value": "outside"
+        }
+      },
+      "readPointer": "/items/2",
+      "expect": {
+        "previousSnapshot": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "afterFirst": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            },
+            {
+              "id": "c",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "afterSecond": {
+          "title": "Published",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            },
+            {
+              "id": "c",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "firstChange": {
+          "applied": [
+            {
+              "op": "add",
+              "path": "/items/2",
+              "value": {
+                "id": "c",
+                "done": false
+              }
+            }
+          ],
+          "metadata": {
+            "origin": "isolation",
+            "nested": {
+              "owner": "suite"
+            }
+          }
+        },
+        "notificationCount": 2
+      }
+    },
+    {
+      "id": "non-json-payload-is-rejected",
+      "kind": "non-json",
+      "requirements": [
+        "JD3-DATA-001",
+        "JD3-VALIDATION-001",
+        "JD3-COMMIT-001",
+        "JD3-RESULT-001"
+      ],
+      "path": "/meta/callback",
+      "hostValue": "callable",
+      "expect": {
+        "probe": {
+          "ok": false,
+          "code": "not_serializable"
+        },
+        "commit": {
+          "ok": false,
+          "code": "not_serializable"
+        },
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "notifications": []
+      }
+    },
+    {
+      "id": "reentrant-notification-preserves-causal-order",
+      "kind": "reentrant-notification",
+      "requirements": [
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
+      ],
+      "outer": {
+        "operations": [
+          {
+            "op": "replace",
+            "path": "/title",
+            "value": "Outer"
+          }
+        ],
+        "metadata": {
+          "origin": "outer"
+        }
+      },
+      "nested": {
+        "operations": [
+          {
+            "op": "replace",
+            "path": "/title",
+            "value": "Nested"
+          }
+        ],
+        "metadata": {
+          "origin": "nested"
+        }
+      },
+      "expect": {
+        "outer": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Outer"
+              }
+            ],
+            "metadata": {
+              "origin": "outer"
+            }
+          }
+        },
+        "nested": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Nested"
+              }
+            ],
+            "metadata": {
+              "origin": "nested"
+            }
+          }
+        },
+        "firstSubscriber": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Outer"
+              }
+            ],
+            "metadata": {
+              "origin": "outer"
+            }
+          },
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Nested"
+              }
+            ],
+            "metadata": {
+              "origin": "nested"
+            }
+          }
+        ],
+        "secondSubscriber": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Outer"
+              }
+            ],
+            "metadata": {
+              "origin": "outer"
+            }
+          },
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Nested"
+              }
+            ],
+            "metadata": {
+              "origin": "nested"
+            }
+          }
+        ],
+        "value": {
+          "title": "Nested",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        }
+      }
+    },
+    {
+      "id": "subscriber-errors-do-not-escape-commit",
+      "kind": "subscriber-error",
+      "requirements": [
+        "JD3-COMMIT-001",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Delivered"
+        }
+      ],
+      "metadata": {
+        "origin": "subscriber-error"
+      },
+      "expect": {
+        "commit": {
+          "ok": true,
+          "change": {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Delivered"
+              }
+            ],
+            "metadata": {
+              "origin": "subscriber-error"
+            }
+          }
+        },
+        "delivered": [
+          {
+            "applied": [
+              {
+                "op": "replace",
+                "path": "/title",
+                "value": "Delivered"
+              }
+            ],
+            "metadata": {
+              "origin": "subscriber-error"
+            }
+          }
+        ],
+        "value": {
+          "title": "Delivered",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        }
+      }
+    }
+  ],
+  "nonRuntimeRequirements": [
+    {
+      "id": "JD3-GOV-001",
+      "mode": "static",
+      "reason": "The standard evaluator locks the profile, manifest, vectors, and reference test together."
+    },
+    {
+      "id": "JD3-RESULT-002",
+      "mode": "static",
+      "reason": "The generic runner matches required fields only and never exact result keys."
+    },
+    {
+      "id": "JD3-SESSION-001",
+      "mode": "static",
+      "reason": "The generic runner depends on only the six JSON Document members."
+    },
+    {
+      "id": "JD3-HOST-001",
+      "mode": "static",
+      "reason": "The generic runner has no DOM, geometry, clipboard, storage, network, formula, CRDT, or OT dependency."
+    },
+    {
+      "id": "JD3-CONFORMANCE-001",
+      "mode": "static",
+      "reason": "The vectors run through an injected structural harness without private implementation imports."
+    },
+    {
+      "id": "JD3-BINDING-001",
+      "mode": "static",
+      "reason": "Both reference bindings import only the public package root."
+    }
+  ]
+}

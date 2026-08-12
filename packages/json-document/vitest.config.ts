@@ -7,6 +7,9 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["tests/**/*.test.ts"],
+    include: [
+      "tests/**/*.test.ts",
+      "../../standards/json-document-v3/implementations/independent/**/*.test.ts",
+    ],
   },
 });

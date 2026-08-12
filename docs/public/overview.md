@@ -45,7 +45,7 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 | Host adapter | selection, clipboard, history, DOM과 고수준 편집 동사를 소유하는 별도 계층 |
 
 전체 canonical concept, 접두어·접미어·동사·boolean 규칙은
-[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)가
+[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/standards/repository-naming.md)가
 정의합니다. Public API는 canonical identifier만 제공합니다.
 
 가장 중요한 경계는 query와 mutation을 섞지 않는 것입니다.

@@ -14,15 +14,15 @@
       "node"
     ],
     "noEmit": true,
-    "rootDir": "..",
+    "rootDir": "../..",
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
-    "../json-document/tests/conformance/v3/json-document-suite.ts",
-    "../json-document/tests/conformance/v3/pressure-suite.ts",
+    "../../standards/json-document-v3/conformance/suites/json-document.ts",
+    "../../standards/json-document-v3/conformance/suites/pressure.ts",
     "vitest.config.ts"
   ]
 }

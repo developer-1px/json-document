@@ -275,7 +275,7 @@ parse한 변환값은 Core state로 채택되지 않으며, normalization이 필
 
 Canonical concept와 result는 validation과 `JSONPatchValidationResult`입니다.
 Naming 기준은
-[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/docs/standard/concept-and-naming-standard.md)를
+[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/standards/repository-naming.md)를
 따릅니다.
 
 ## Result
