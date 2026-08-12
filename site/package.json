@@ -15,6 +15,7 @@
     "@interactive-os/json-document-selection": "*",
     "@interactive-os/json-document-react": "*",
     "@interactive-os/json-document-tanstack-table": "*",
+    "@interactive-os/json-document-web": "*",
     "@interactive-os/json-document-zod": "*",
     "@tanstack/react-table": "^8.21.3",
     "react": "^19.2.5",

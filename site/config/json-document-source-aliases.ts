@@ -31,6 +31,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       find: "@interactive-os/json-document-tanstack-table",
       replacement: sourceFile("packages/json-document-tanstack-table/src/index.ts"),
     },
+    {
+      find: "@interactive-os/json-document-web",
+      replacement: sourceFile("packages/json-document-web/src/index.ts"),
+    },
   ];
 }
 

@@ -37,7 +37,7 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     name: "Web Platform",
     packageName: "@interactive-os/json-document-web",
     description: "Browser clipboard and input surfaces connected to editing contracts.",
-    status: "planned",
-    demoPath: null,
+    status: "available",
+    demoPath: "/connectors/web",
   },
 ];

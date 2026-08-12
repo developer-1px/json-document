@@ -524,6 +524,14 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `createTableDocumentBinding`, `TableDocumentBinding`, `TableDocumentOptions` | TanStack Table public model과 Sheet editor 사이의 지속적인 synchronization 책임이 일치 |
 
+### Web Platform Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `createWebClipboardBinding`, `WebClipboardBinding`, `WebClipboardCodec`, `WebClipboardData`, `WebClipboardEvent`, `WebClipboardPayload`, `WebClipboardResult`, `documentClipboardCodec`, `sheetClipboardCodec` | Web clipboard native contract와 public Document·Sheet clipboard 번역 책임이 일치 |
+| keep | `selectionOperationFromModifiers`, `WebModifierState` | Web modifier state를 semantic selection operation으로 번역하는 책임이 일치 |
+| keep | `textInputFromControl`, `WebTextControl`, `WebTextControlEvent`, `WebTextInput` | Native text control을 관찰하되 selection ownership을 취하지 않는 책임이 일치 |
+
 ## Target vocabulary
 
 이 목록은 현재 canonical public vocabulary다.
@@ -597,9 +605,21 @@ Connector packages
 │  ├─ useJSONDocumentValue
 │  ├─ useEditingSnapshot
 │  └─ useDocumentEditor
-└─ Zod
-   ├─ ZodValidatorOptions
-   └─ createZodValidator
+├─ Zod
+│  ├─ ZodValidatorOptions
+│  └─ createZodValidator
+├─ TanStack Table
+│  ├─ TableDocumentBinding
+│  ├─ TableDocumentOptions
+│  └─ createTableDocumentBinding
+└─ Web Platform
+   ├─ WebClipboardBinding
+   ├─ WebClipboardCodec
+   ├─ createWebClipboardBinding
+   ├─ documentClipboardCodec
+   ├─ sheetClipboardCodec
+   ├─ selectionOperationFromModifiers
+   └─ textInputFromControl
 ```
 
 ## 새 concept admission

@@ -40,6 +40,41 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
   await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
 });
 
+test("Document demo composes native clipboard events with Web Platform Connector cut history", async ({ page }) => {
+  await page.goto("/demo");
+  await page.getByRole("button", { name: "Select block 1" }).click();
+
+  const clipboard = await page.evaluate(() => {
+    const surface = document.querySelector<HTMLElement>('[aria-label="Editable document"] [tabindex="0"]')!;
+    const data = new DataTransfer();
+    const copied = surface.dispatchEvent(new ClipboardEvent("copy", { clipboardData: data, bubbles: true, cancelable: true }));
+    const cut = surface.dispatchEvent(new ClipboardEvent("cut", { clipboardData: data, bubbles: true, cancelable: true }));
+    const pasted = surface.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+    return {
+      copiedDefaultAllowed: copied,
+      cutDefaultAllowed: cut,
+      pastedDefaultAllowed: pasted,
+      types: [...data.types],
+      text: data.getData("text/plain"),
+    };
+  });
+
+  expect(clipboard).toMatchObject({
+    copiedDefaultAllowed: false,
+    cutDefaultAllowed: false,
+    pastedDefaultAllowed: false,
+    text: "A minimal document that still behaves like an editor.",
+  });
+  expect(clipboard.types).toContain("application/vnd.interactive-os.blocks+json");
+  expect((await canonicalDocument(page)).blocks.map((block) => block.text)).toEqual([
+    "Shift-click for a range. Mod-click for multiple blocks.",
+    "A minimal document that still behaves like an editor.",
+    "Copy, cut, paste, move, duplicate, undo, and redo all preserve selection.",
+    "Every interaction commits to the canonical JSON shown beside the document.",
+  ]);
+  await expect(page.getByText("Pasted 1 structured block", { exact: true })).toBeVisible();
+});
+
 async function canonicalDocument(page: Page): Promise<{ blocks: Array<{ id: string; text: string }> }> {
   return JSON.parse(await page.getByTestId("canonical-json").innerText()) as { blocks: Array<{ id: string; text: string }> };
 }
