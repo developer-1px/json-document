@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { codeLanguageLabel, tokenizeCodeLine, type CodeLanguage } from "./code-tokens";
 import { classes, ui } from "./styles";
 
@@ -17,6 +17,19 @@ export function CodeBlock(props: {
   const source = withoutTerminalLineBreak(props.source.replace(/\r\n/g, "\n"));
   const label = props.label ?? codeLanguageLabel(props.language);
   const lines = source.split("\n");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => setCopied(false), [source]);
+
+  async function copySource() {
+    if (!navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(source);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
     <figure className={classes("m-0", ui.code.block.frame, props.className)} aria-label={label}>
@@ -25,6 +38,14 @@ export function CodeBlock(props: {
         <span className="ml-auto flex items-center gap-3">
           {props.meta ? <span className={ui.code.block.meta}>{props.meta}</span> : null}
           {props.signal ? <span className={ui.code.block.signal}>{props.signal}</span> : null}
+          <button
+            className={ui.code.block.copy}
+            data-copied={copied}
+            onClick={() => void copySource()}
+            type="button"
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
         </span>
       </figcaption>
       <pre

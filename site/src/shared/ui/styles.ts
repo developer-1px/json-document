@@ -70,6 +70,7 @@ export const ui = {
       label: "text-[11px] font-medium text-ink",
       meta: "text-[10px] text-pencil",
       signal: "text-[10px] font-medium text-impact-ink",
+      copy: "rounded-[3px] px-1.5 py-0.5 text-[10px] font-medium text-pencil hover:bg-paper-warm hover:text-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 data-[copied=true]:text-sage",
       viewport: {
         compact: "max-h-32",
         content: "max-h-none",
@@ -90,19 +91,6 @@ export const ui = {
         punctuation: "text-pencil",
       },
     },
-  },
-  changeFlow: {
-    root: "rounded-[6px] border border-pencil-light bg-paper-warm px-3 py-3",
-    caption: "mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1",
-    title: "text-xs font-semibold text-ink-strong",
-    description: "text-xs leading-5 text-pencil",
-    list: "m-0 grid list-none gap-0 p-0 sm:grid-flow-col sm:auto-cols-fr",
-    step: "relative grid min-w-0 grid-cols-[1rem_minmax(0,1fr)] gap-2 pb-3 last:pb-0 sm:block sm:pb-0 sm:pr-3 sm:last:pr-0",
-    connector: "absolute bottom-0 left-[0.4375rem] top-3 w-px bg-pencil-light sm:bottom-auto sm:left-2 sm:right-0 sm:top-[0.4375rem] sm:h-px sm:w-auto",
-    marker: "relative z-10 mt-0.5 block h-3 w-3 rounded-full border-2 border-pencil bg-paper group-data-[status=complete]:border-ink group-data-[status=complete]:bg-ink group-data-[status=current]:border-impact group-data-[status=current]:bg-impact group-data-[status=current]:ring-4 group-data-[status=current]:ring-impact/15 sm:mt-0",
-    copy: "grid min-w-0 gap-0.5 sm:mt-2.5",
-    label: "text-[11px] font-semibold leading-4 text-ink-strong group-data-[status=pending]:text-pencil",
-    detail: "min-w-0 break-words font-mono text-[10px] leading-4 text-pencil group-data-[status=current]:text-impact-ink",
   },
   state: {
     current: "border-b border-transparent text-pencil no-underline hover:text-ink-strong aria-[current=page]:border-impact aria-[current=page]:font-medium aria-[current=page]:text-ink-strong md:border-b-0 md:border-l",

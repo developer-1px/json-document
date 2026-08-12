@@ -24,7 +24,7 @@ test("TanStack Table Connector edits the visible sorted and filtered Sheet topol
   await start.click();
   await end.click({ modifiers: ["Shift"] });
   await expect(page.getByRole("gridcell", { selected: true })).toHaveCount(4);
-  await page.getByRole("button", { name: "Copy" }).click();
+  await page.getByLabel("TanStack view and editing").getByRole("button", { name: "Copy" }).click();
   await expect(page.getByTestId("tanstack-clipboard")).toHaveText("3\tGamma\n2\tBeta");
 
   await editCell(page, "score r3", "30");

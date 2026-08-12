@@ -12,7 +12,7 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
   await page.getByRole("button", { name: "Select block 1" }).click();
   await page.getByRole("button", { name: "Select block 2" }).click({ modifiers: ["Meta"] });
   await expect(page.getByText("2 selected", { exact: false })).toBeVisible();
-  await page.getByRole("button", { name: "Copy", exact: true }).click();
+  await page.getByLabel("Document actions").getByRole("button", { name: "Copy", exact: true }).click();
 
   await page.getByRole("button", { name: "Select block 4" }).click();
   await page.getByRole("button", { name: "Paste", exact: true }).click();

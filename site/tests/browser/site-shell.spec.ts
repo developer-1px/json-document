@@ -40,9 +40,6 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page).toHaveTitle("json-document Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Docs" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "배경" })).toBeVisible();
-  const changeFlow = page.getByRole("figure", { name: "One canonical change" });
-  await expect(changeFlow.locator("[data-change-flow-step]")).toHaveCount(5);
-  await expect(changeFlow.locator('[data-change-flow-step="complete"]')).toHaveCount(5);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
 
@@ -121,6 +118,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
 
 test("code blocks preserve source whitespace with a compact visual rhythm", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/docs/tutorial");
 
   const block = page.getByRole("figure", { name: "TypeScript" }).first();
@@ -144,6 +142,10 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
   expect(snapshot.lineGaps.every((gap) => gap >= 22 && gap <= 24)).toBe(true);
   expect(snapshot.source).toContain('";\n\nconst initialBoard');
   expect(snapshot.pageOverflow).toBe(false);
+
+  await block.getByRole("button", { name: "Copy" }).click();
+  await expect(block.getByRole("button", { name: "Copied" })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const initialBoard");
 });
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {

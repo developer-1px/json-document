@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { ChangeFlow, type ChangeFlowStep } from "../../shared/ui/change-flow";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
@@ -11,14 +10,6 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   connectors: "peek",
   api: "braces",
 };
-
-const coreChangeFlow: ReadonlyArray<ChangeFlowStep> = [
-  { label: "Host intent", detail: "edit title" },
-  { label: "Address", detail: "Pointer /title" },
-  { label: "Mutation", detail: "JSON Patch replace" },
-  { label: "Commit", detail: "validate → apply" },
-  { label: "Publish", detail: "canonical JSON" },
-];
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
@@ -49,14 +40,6 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
         <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
             <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
-            {pageId === "overview" ? (
-              <ChangeFlow
-                className="mb-6"
-                description="One edit crosses the public contract without giving Core any UI meaning."
-                label="One canonical change"
-                steps={coreChangeFlow}
-              />
-            ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
               <div className="flex gap-1 whitespace-nowrap">
                 {headings.map((heading) => (
