@@ -100,6 +100,10 @@ export const ui = {
     error: "text-impact-ink",
   },
   workbench: {
+    exampleShell: "overflow-hidden rounded-[10px] border border-pencil-light bg-paper shadow-[0_1px_2px_rgba(69,67,62,0.04),0_12px_32px_rgba(69,67,62,0.06)]",
+    exampleScenario: "flex items-center gap-3 border-b border-pencil-light bg-paper px-4 py-3",
+    exampleMarker: "h-8 w-1 rounded-full bg-impact",
+    exampleInspectors: "grid gap-3 border-t border-pencil-light bg-paper-warm p-3 lg:grid-cols-3",
     darkStrip: "rounded-[10px] border border-ink bg-ink-strong text-paper",
     darkLabel: "text-xs font-medium uppercase tracking-wide text-impact",
     darkMeta: "text-[10px] text-pencil-light",

@@ -16,6 +16,7 @@ const DocsOverviewRoute = lazy(() => import("../routes/docs/DocsRoute").then((mo
 const QuickstartRoute = lazy(() => import("../routes/docs/DocsRoute").then((module) => ({ default: module.QuickstartRoute })));
 const ConnectorDocsRoute = lazy(() => import("../routes/docs/DocsRoute").then((module) => ({ default: module.ConnectorDocsRoute })));
 const ApiReferenceRoute = lazy(() => import("../routes/docs/DocsRoute").then((module) => ({ default: module.ApiReferenceRoute })));
+const ExampleWorkbenchRoute = lazy(() => import("../routes/example-workbench/ExampleWorkbenchRoute").then((module) => ({ default: module.ExampleWorkbenchRoute })));
 const DocumentDemoRoute = lazy(() => import("../routes/document-demo/DocumentDemoRoute").then((module) => ({ default: module.DocumentDemoRoute })));
 const SheetDemoRoute = lazy(() => import("../routes/sheet-demo/SheetDemoRoute").then((module) => ({ default: module.SheetDemoRoute })));
 const SelectionLabRoute = lazy(() => import("../routes/selection-lab/SelectionLabRoute").then((module) => ({ default: module.SelectionLabRoute })));
@@ -33,6 +34,7 @@ const routeComponents: Record<string, ComponentType> = {
   "/docs/tutorial": QuickstartRoute,
   "/docs/connectors": ConnectorDocsRoute,
   "/docs/api": ApiReferenceRoute,
+  "/examples/document": ExampleWorkbenchRoute,
   "/demo": DocumentDemoRoute,
   "/demo/sheet": SheetDemoRoute,
   "/demo/selection": SelectionLabRoute,

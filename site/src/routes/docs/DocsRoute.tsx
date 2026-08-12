@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { NavLink } from "../../app/router";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
@@ -40,6 +41,11 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
         <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
             <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
+            {pageId === "quickstart" ? (
+              <div className="mb-5">
+                <NavLink to="/examples/document" className={ui.action.primary}>Open in Example Workbench</NavLink>
+              </div>
+            ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
               <div className="flex gap-1 whitespace-nowrap">
                 {headings.map((heading) => (
