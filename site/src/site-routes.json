@@ -26,5 +26,12 @@
     "title": "json-document API - json-document",
     "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
     "group": "Start"
+  },
+  {
+    "path": "/demo",
+    "label": "Demo",
+    "title": "Document Demo - json-document",
+    "description": "A minimal, complete document editor powered by the public headless editing API.",
+    "group": "Start"
   }
 ]

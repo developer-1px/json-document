@@ -10,7 +10,8 @@ selection, clipboard, history를 필수 계약에 넣지 않습니다.
 stateless JSON Patch
   |-> local implementation -----\
   |                               > same six-member JSON Document
-  `-> collaboration engine -----/    |-> optional history/text authoring
+  `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
 
@@ -38,14 +39,16 @@ stateless JSON Patch
 | 위치 | 역할 |
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
+| [packages/json-document-editing](packages/json-document-editing) | headless transaction, selection, clipboard, history와 Document slice |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
-| [site](site) | v3 Core 공개 문서 사이트 |
+| [site](site) | 공개 문서와 기능 완결형 최소 Document demo |
 
-v3 Kernel release는 `@interactive-os/json-document` 하나이며 dependency-free
-Core로 남습니다. 두 collaboration package는 독립 version과 release lifecycle을
-가진 optional companion입니다. Selection, clipboard, persistence와 제품별 DOM
-lifecycle은 host adapter가 여섯-member `JSONDocument` 위에서 조합합니다.
+v3 Kernel인 `@interactive-os/json-document`는 dependency-free Core로 남습니다.
+Editing과 collaboration package는 독립 version과 release lifecycle을 가진 optional
+companion입니다. Selection, clipboard, history는 editing companion이 제공하는
+headless lifecycle 위에서 도메인별 모델을 조합하고, persistence와 제품별 DOM
+lifecycle은 host가 소유합니다.
 일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
 `@interactive-os/editable`도 검토할 수 있습니다.
 
@@ -59,11 +62,17 @@ v3 Kernel이 제공하는 최소 계약:
 - ordered atomic JSON Patch commit
 - canonical applied change notification
 
-편집 툴이 계속 소유하는 것:
+optional editing companion이 제공하는 것:
+
+- atomic editing transaction과 selection publication
+- clipboard와 undo/redo coordination
+- 제품이 교체할 수 있는 selection과 domain intent 모델
+
+편집 제품이 계속 소유하는 것:
 
 - rendering, DOM focus, keyboard, drag/drop UI
-- selection, clipboard, history, framework lifecycle
-- grid selection, TSV clipboard, formula engine
+- DOM/system clipboard 연결과 framework lifecycle
+- grid selection, TSV 의미, formula engine
 - product command 이름, layout, route, remote protocol
 
 ## 개발

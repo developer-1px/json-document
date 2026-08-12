@@ -9,7 +9,8 @@ React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
 stateless JSON Patch
   |-> local implementation -----\
   |                               > same six-member JSON Document
-  `-> collaboration engine -----/    |-> optional history/text authoring
+  `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
 
@@ -42,7 +43,8 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 | Stateless JSON Patch | 현재 document instance 없이 JSON Patch를 적용하는 함수 |
 | JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 여섯-member port |
 | validation | Candidate document를 commit 전에 검사하는 implementation-neutral callback |
-| Host adapter | selection, clipboard, history, DOM과 고수준 편집 동사를 소유하는 별도 계층 |
+| Editing companion | transaction, selection publication, clipboard, history를 조합하는 browser-independent 계층 |
+| Host adapter | DOM, system clipboard, focus와 framework lifecycle을 소유하는 별도 계층 |
 
 전체 canonical concept, 접두어·접미어·동사·boolean 규칙은
 [Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/standards/repository-naming.md)가
@@ -116,6 +118,7 @@ if (result.ok) {
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
 | `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
+| `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 최초 Document slice |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
 | `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
 
@@ -127,9 +130,10 @@ collaboration engine으로 바꿔도 editor가 사용하는 `JSONDocument` API�
 
 ## Host adapter와 companion
 
-Host adapter는 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
-JSON Patch로 번역합니다. Selection, history, clipboard, persistence, focus와
-remote protocol은 Core member를 늘리지 않고 adapter 쪽에 둡니다.
+Editing companion은 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
+JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 늘리지
+않는 별도 headless lifecycle이며 구체적인 selection topology와 paste 의미는 제품이
+정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
 Collaboration companion도 transport, authentication, presence, persistence를
 소유하지 않습니다. Adapter와 companion은 Core와 독립적으로 version과
 compatibility를 검증합니다.
@@ -150,7 +154,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | 변경 구독 | `document.subscribe(listener)` |
 | instance 없는 patch 적용 | `applyPatch(value, operations)` |
 | Pointer 조합과 추적 | `buildPointer`, `appendSegment`, `parentPointer`, `trackPointer` |
-| selection, clipboard, undo/redo | host 또는 별도 adapter |
+| headless selection, clipboard, undo/redo | `@interactive-os/json-document-editing` |
 
 성공한 mutation의 `change.applied`는 실제 적용된 canonical operation입니다.
 실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 표현됩니다.
@@ -163,5 +167,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 - Slide와 whiteboard: object property와 layer state를 headless JSON으로 관리
 - 저장과 협업 adapter: subscribed canonical change를 외부 log로 전달
 
-제품별 selection, clipboard, history는 host 또는 별도 adapter에서
-조합합니다. Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다.
+제품별 selection 의미는 editing companion의 공통 lifecycle 위에서 조합합니다.
+Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다. 공식 site의
+`/demo`는 public package만 사용해 Document selection, clipboard, history와
+canonical JSON projection을 함께 실행합니다.

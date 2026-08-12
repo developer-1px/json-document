@@ -16,11 +16,13 @@ const SITE_URL = (import.meta.env.VITE_SITE_URL ?? "https://developer-1px.github
 const Docs = lazy(() => import("./routes/Docs").then((module) => ({ default: module.Docs })));
 const DocsTutorial = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsTutorial })));
 const DocsApiReference = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsApiReference })));
+const DocumentDemo = lazy(() => import("./routes/DocumentDemo").then((module) => ({ default: module.DocumentDemo })));
 const routeComponents: Record<string, ComponentType> = {
   "/": Home,
   "/docs": Docs,
   "/docs/tutorial": DocsTutorial,
   "/docs/api": DocsApiReference,
+  "/demo": DocumentDemo,
 };
 const ROUTES: Route[] = (siteRoutes as SiteRoute[]).map((route) => ({
   ...route,

@@ -5,7 +5,8 @@ const siteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-d
 const attempts = Number(process.env.SITE_LIVE_ATTEMPTS ?? "18");
 const delayMs = Number(process.env.SITE_LIVE_DELAY_MS ?? "10000");
 const routes = JSON.parse(readFileSync(new URL("../src/site-routes.json", import.meta.url), "utf8"));
-const v2CompanionPackages = new Set([
+const activeCompanionPackages = new Set([
+  "@interactive-os/json-document-editing",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);
@@ -80,7 +81,7 @@ async function checkOnce() {
   }
   const packageReferences = llms.match(/@interactive-os\/json-document-[a-z0-9-]+/g) ?? [];
   if (
-    packageReferences.some((packageName) => !v2CompanionPackages.has(packageName))
+    packageReferences.some((packageName) => !activeCompanionPackages.has(packageName))
     || /@interactive-os\/json-document\/(?:session|react)\b/.test(llms)
     || /\blabs\/extensions\b/.test(llms)
   ) {

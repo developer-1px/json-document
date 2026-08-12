@@ -2,7 +2,8 @@ const modelRows = [
   ["patch", "stateless JSON Patch application"],
   ["document", "value, at, query, validatePatch, commit, subscribe"],
   ["validation", "optional implementation-neutral candidate validation"],
-  ["host", "selection, history, rendering, focus, persistence, collaboration"],
+  ["editing", "optional headless selection, clipboard, history, transactions"],
+  ["host", "rendering, focus, persistence, and platform bridges"],
 ] as const;
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -30,6 +31,9 @@ export function Home() {
             <div className="mt-6 flex flex-wrap gap-2">
               <a className="rounded bg-stone-950 px-3 py-2 text-sm font-medium text-white no-underline hover:bg-stone-800" href={sitePath("/docs")}>
                 Docs
+              </a>
+              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/demo")}>
+                Try the demo
               </a>
               <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs/api")}>
                 API reference
@@ -79,7 +83,7 @@ export function Home() {
           <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
           <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
             <li>Root Kernel is React- and Zod-free.</li>
-            <li>Rich editing belongs to host adapters composed over the six-member document.</li>
+            <li>Headless editing is an optional companion composed over the six-member document.</li>
             <li>Mutation inputs are JSON Patch with JSON Pointer paths.</li>
             <li>JSONPath is search-only and returns pointers.</li>
           </ul>
