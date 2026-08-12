@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
 import {
   type BlockDocument,
   type DocumentClipboard,
@@ -7,6 +7,12 @@ import {
   useDocumentEditor,
   useEditingSnapshot,
 } from "@interactive-os/json-document-react";
+import {
+  createWebClipboardBinding,
+  documentClipboardCodec,
+  selectionOperationFromModifiers,
+  textInputFromControl,
+} from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button, PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -24,6 +30,12 @@ export function DocumentDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
   const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
+  const [webClipboard] = useState(() => createWebClipboardBinding({
+    codec: documentClipboardCodec,
+    read: () => editor.copy(),
+    cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
+    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+  }));
   const [announcement, setAnnouncement] = useState("Ready");
   const surfaceRef = useRef<HTMLDivElement>(null);
 
@@ -58,24 +70,33 @@ export function DocumentDemoRoute() {
 
   function handleBlockClick(event: MouseEvent, blockId: string) {
     if ((event.target as HTMLElement).closest("textarea")) return;
-    const mode = event.shiftKey ? "extend" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
+    const mode = selectionOperationFromModifiers(event);
     run(() => editor.dispatch({ type: "selection.set", blockId, mode }), "Selection changed");
+  }
+
+  function handleNativeCopy(event: ClipboardEvent<HTMLDivElement>) {
+    const result = webClipboard.copy(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Copied ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
+  }
+
+  function handleNativeCut(event: ClipboardEvent<HTMLDivElement>) {
+    const result = webClipboard.cut(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Cut ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
+  }
+
+  function handleNativePaste(event: ClipboardEvent<HTMLDivElement>) {
+    const result = webClipboard.paste(event);
+    setAnnouncement(result.ok
+      ? `Pasted ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`
+      : result.code);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const modifier = event.metaKey || event.ctrlKey;
-    if (modifier && event.key.toLowerCase() === "c") {
-      event.preventDefault();
-      return copySelection();
-    }
-    if (modifier && event.key.toLowerCase() === "x") {
-      event.preventDefault();
-      return cutSelection();
-    }
-    if (modifier && event.key.toLowerCase() === "v" && clipboard) {
-      event.preventDefault();
-      return pasteSelection();
-    }
     if (modifier && event.key.toLowerCase() === "z") {
       event.preventDefault();
       return run(() => event.shiftKey ? editor.redo() : editor.undo(), event.shiftKey ? "Redone" : "Undone");
@@ -121,7 +142,15 @@ export function DocumentDemoRoute() {
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
           <section aria-label="Editable document" className={classes("p-3", ui.surface.raised)}>
-            <div ref={surfaceRef} tabIndex={0} onKeyDown={handleKeyDown} className={ui.state.focus}>
+            <div
+              ref={surfaceRef}
+              tabIndex={0}
+              onCopy={handleNativeCopy}
+              onCut={handleNativeCut}
+              onPaste={handleNativePaste}
+              onKeyDown={handleKeyDown}
+              className={ui.state.focus}
+            >
               {document.blocks.length === 0 ? (
                 <button className={classes("p-8", ui.surface.empty, ui.text.body)} onClick={() => run(() => editor.dispatch({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</button>
               ) : document.blocks.map((block, index) => (
@@ -140,9 +169,9 @@ export function DocumentDemoRoute() {
                     aria-label={`Block ${index + 1} text`}
                     value={block.text}
                     rows={Math.max(1, Math.ceil(block.text.length / 64))}
-                    onFocus={(event) => editor.dispatch({ type: "selection.set", blockId: block.id, offset: event.currentTarget.selectionStart })}
-                    onClick={(event) => editor.dispatch({ type: "selection.set", blockId: block.id, offset: event.currentTarget.selectionStart })}
-                    onChange={(event) => editor.dispatch({ type: "text.replace", blockId: block.id, text: event.currentTarget.value, offset: event.currentTarget.selectionStart })}
+                    onFocus={(event) => editor.dispatch({ type: "selection.set", blockId: block.id, offset: textInputFromControl(event).offset })}
+                    onClick={(event) => editor.dispatch({ type: "selection.set", blockId: block.id, offset: textInputFromControl(event).offset })}
+                    onChange={(event) => editor.dispatch({ type: "text.replace", blockId: block.id, ...textInputFromControl(event) })}
                     className={classes("min-h-11 resize-none", ui.field.seamless)}
                   />
                 </article>
