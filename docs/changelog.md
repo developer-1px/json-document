@@ -6,11 +6,13 @@ source and release history remains available from Git commits and version tags.
 ## Next
 
 - Added the official Connector package category for independently versioned
-  external ecosystem integrations, with planned Zod and TanStack Table
-  contracts.
+  external ecosystem integrations, with Zod and TanStack Table contracts.
 - Added `@interactive-os/json-document-react` for React external-store
   subscriptions and Document editor component lifecycle, and migrated the
   official Document demo to that Connector.
+- Added `@interactive-os/json-document-zod` to translate Zod validation issues
+  into JSON Document failures and JSON Pointer diagnostics without adopting
+  parsed transforms, with a connector-specific Live Demo.
 
 ## 3.0.0
 

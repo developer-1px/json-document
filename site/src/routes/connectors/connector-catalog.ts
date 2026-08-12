@@ -21,8 +21,8 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     name: "Zod",
     packageName: "@interactive-os/json-document-zod",
     description: "Zod validation results translated into JSON Document diagnostics.",
-    status: "planned",
-    demoPath: null,
+    status: "available",
+    demoPath: "/connectors/zod",
   },
   {
     id: "tanstack-table",

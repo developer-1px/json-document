@@ -36,7 +36,7 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 
 ```txt
 @interactive-os/json-document-react
-@interactive-os/json-document-zod             # planned
+@interactive-os/json-document-zod
 @interactive-os/json-document-tanstack-table  # planned
 ```
 
@@ -81,9 +81,9 @@ Connector는 UI component를 제공하거나 selection을 해석하지 않습니
 공식 site의 `/connectors/react`에서 세 hook의 실제 subscription, 편집과 canonical
 JSON 반영을 확인할 수 있습니다.
 
-## Zod Connector 설계
+## Zod Connector
 
-Planned `@interactive-os/json-document-zod`의 첫 public surface는 다음 하나입니다.
+`@interactive-os/json-document-zod`의 public surface는 다음 하나입니다.
 
 ```ts
 const validate = createZodValidator(schema, {
@@ -98,6 +98,11 @@ const document = createJSONDocument(initial, { validate });
 변환값을 document state로 채택하지 않습니다. Metadata, form field와 schema-driven
 UI는 범용 schema-description contract가 생기기 전까지 이 Connector 범위가
 아닙니다.
+
+첫 Zod issue의 path는 JSON Pointer escaping을 거쳐 validation failure의
+`pointer`가 됩니다. Root issue는 빈 JSON Pointer `""`로 표현합니다. 공식 site의
+`/connectors/zod`에서 invalid commit 보존, valid commit과 Zod trim 결과 비채택을
+확인할 수 있습니다.
 
 ## TanStack Table Connector 설계
 
