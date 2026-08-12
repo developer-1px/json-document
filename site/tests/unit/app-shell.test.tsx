@@ -20,23 +20,29 @@ describe("official site shell", () => {
     expect(screen.getByText('import { createJSONDocument } from "@interactive-os/json-document";')).toBeTruthy();
     expect(screen.getByRole("link", { name: "npm" }).getAttribute("href")).toBe("https://www.npmjs.com/package/@interactive-os/json-document");
     expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/developer-1px/json-document");
-    expect(screen.getByRole("link", { name: "Try the demo" }).getAttribute("href")).toBe("/demo");
-    expect(screen.getByRole("link", { name: "Connector demos" }).getAttribute("href")).toBe("/connectors");
+    const home = within(screen.getByRole("main"));
+    expect(home.getByRole("link", { name: "Quickstart" }).getAttribute("href")).toBe("/docs/tutorial");
+    expect(home.getByRole("link", { name: "Concepts" }).getAttribute("href")).toBe("/docs");
+    expect(home.getByRole("link", { name: "API Reference" }).getAttribute("href")).toBe("/docs/api");
+    expect(home.getByRole("link", { name: "Document" }).getAttribute("href")).toBe("/demo");
+    expect(home.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
   });
 
-  test("navigates from the app shell to the Connector catalog", async () => {
+  test("projects the product hierarchy into the site navigation", async () => {
     render(<App />);
     const user = userEvent.setup();
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
-    expect(nav.getByRole("link", { name: "Connectors", exact: true })).toBeTruthy();
-    expect(nav.getByRole("link", { name: "React", exact: true })).toBeTruthy();
-    expect(nav.getByRole("link", { name: "Zod", exact: true })).toBeTruthy();
-    expect(nav.getByRole("link", { name: "Sheet", exact: true })).toBeTruthy();
+    expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
+    expect(groupLinks(nav, "Core")).toEqual(["Concepts", "API Reference"]);
+    expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "React", "Zod"]);
+    expect(nav.queryByRole("link", { name: "Connector guide" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
-    await user.click(nav.getByRole("link", { name: "Connectors", exact: true }));
+    const connectors = within(nav.getByRole("group", { name: "Connectors" }));
+    await user.click(connectors.getByRole("link", { name: "Overview", exact: true }));
     await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Connectors" })).toBeTruthy();
     const demos = screen.getAllByRole("link", { name: "Open Live Demo" });
@@ -46,6 +52,10 @@ describe("official site shell", () => {
     ]);
   });
 });
+
+function groupLinks(nav: ReturnType<typeof within>, name: string): string[] {
+  return within(nav.getByRole("group", { name })).getAllByRole("link").map((link) => link.textContent ?? "");
+}
 
 function resetDocument(path: string) {
   document.head.innerHTML = [

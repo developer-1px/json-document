@@ -9,11 +9,25 @@ docs
 |-- changelog.md              # 사용자 영향 중심 변경 기록
 |-- evaluate.mjs              # 공개 문서 구조·내용 검증
 `-- public
-|   |-- overview.md            # 프로젝트 이해
-|   |-- quickstart.md          # 사용 시작
-|   |-- connectors.md          # 공식 외부 생태계 Connector
-|   |-- api.md                 # 공개 API
+|   |-- quickstart.md          # Start: 사용 시작
+|   |-- overview.md            # Core: 개념 이해
+|   |-- api.md                 # Core: 공개 API
+|   |-- connectors.md          # Connectors: 공식 외부 생태계 연결
 |   `-- llms.txt               # machine-readable 공개 문서
+```
+
+사이트의 문서 탐색은 다음 읽기 위계를 사용한다. 파일은 `public/`의 평평한 책임
+폴더에 유지하고, 별도 중첩 폴더를 개념으로 추가하지 않는다.
+
+```txt
+Documentation
+|-- Start
+|   `-- Quickstart
+|-- Core
+|   |-- Concepts
+|   `-- API Reference
+`-- Connectors
+    `-- Connector guide
 ```
 
 ## 규범 우선순위

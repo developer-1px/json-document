@@ -18,13 +18,13 @@ export const docPages = {
   },
   connectors: {
     path: "/docs/connectors",
-    label: "Connectors",
+    label: "Connector guide",
     title: "json-document Connectors",
     source: connectorsMarkdown,
   },
   api: {
     path: "/docs/api",
-    label: "API reference",
+    label: "API Reference",
     title: "json-document API",
     source: apiReferenceMarkdown,
   },
@@ -32,9 +32,11 @@ export const docPages = {
 
 export type DocPageId = keyof typeof docPages;
 
-export const docPageOrder: ReadonlyArray<DocPageId> = [
-  "overview",
-  "quickstart",
-  "connectors",
-  "api",
+export const docNavigation: ReadonlyArray<{
+  readonly label: "Start" | "Core" | "Connectors";
+  readonly pageIds: ReadonlyArray<DocPageId>;
+}> = [
+  { label: "Start", pageIds: ["quickstart"] },
+  { label: "Core", pageIds: ["overview", "api"] },
+  { label: "Connectors", pageIds: ["connectors"] },
 ];

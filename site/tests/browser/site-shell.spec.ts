@@ -1,21 +1,38 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test("official overview exposes docs, editing, and Connector demos", async ({ page }) => {
+test("official overview exposes the product hierarchy", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
 
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "json-document" })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("link", { name: "Docs", exact: true })).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "Connector docs" })).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "Connectors", exact: true })).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "React", exact: true })).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "Demo" })).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "Sheet", exact: true })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
+  await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Concepts", "API Reference"]);
+  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Document", "Sheet"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Overview", "React", "Zod"]);
+  await expect(navigation.getByRole("link", { name: "Connector guide" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
+});
+
+test("mobile navigation preserves product and documentation groups", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(siteNavigation.getByRole("group", { name: "Start" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Core" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
+
+  await page.goto("/docs/tutorial");
+  const docsNavigation = page.getByRole("navigation", { name: "Documentation pages" });
+  await expect(docsNavigation.getByRole("group", { name: "Start" })).toBeVisible();
+  await expect(docsNavigation.getByRole("group", { name: "Core" })).toBeVisible();
+  await expect(docsNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
+  await expect(docsNavigation.getByRole("link", { name: "Quickstart" })).toHaveAttribute("aria-current", "page");
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -27,11 +44,16 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
 
-  await page.getByRole("navigation", { name: "Documentation pages" }).first().getByRole("link", { name: "Connectors", exact: true }).click();
+  const docsNavigation = page.getByRole("navigation", { name: "Documentation pages" }).first();
+  await expect(docsNavigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Quickstart"]);
+  await expect(docsNavigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Concepts", "API Reference"]);
+  await expect(docsNavigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connector guide"]);
+
+  await docsNavigation.getByRole("link", { name: "Connector guide" }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
 
-  await page.getByRole("link", { name: "API reference" }).first().click();
+  await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
 });
@@ -50,7 +72,10 @@ test("official site uses window scroll with sticky desktop navigation", async ({
     docsNavTop: 16,
   });
 
-  await page.getByRole("link", { name: "Overview" }).click();
+  await page.getByRole("navigation", { name: "Site navigation" })
+    .getByRole("group", { name: "Start" })
+    .getByRole("link", { name: "Overview" })
+    .click();
   await expect(page).toHaveTitle("json-document - Headless JSON editing");
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });

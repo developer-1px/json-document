@@ -4,69 +4,68 @@
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
     "description": "Implementation-neutral JSON editing and a six-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
-    "group": "Start"
+    "navigationGroup": "Start"
   },
   {
     "path": "/docs",
-    "label": "Docs",
+    "label": "Concepts",
     "title": "json-document Docs - json-document",
     "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
-    "group": "Start"
+    "navigationGroup": "Core"
   },
   {
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
     "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
-    "group": "Start"
+    "navigationGroup": "Start"
   },
   {
     "path": "/docs/connectors",
-    "label": "Connector docs",
+    "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "Official React and Zod connectors plus the planned TanStack Table integration contract for json-document.",
-    "group": "Start"
+    "description": "Official React and Zod connectors plus the planned TanStack Table integration contract for json-document."
   },
   {
     "path": "/docs/api",
-    "label": "API reference",
+    "label": "API Reference",
     "title": "json-document API - json-document",
     "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
-    "group": "Start"
+    "navigationGroup": "Core"
   },
   {
     "path": "/demo",
-    "label": "Demo",
+    "label": "Document",
     "title": "Document Demo - json-document",
     "description": "A minimal, complete document editor powered by the public headless editing API.",
-    "group": "Start"
+    "navigationGroup": "Editing"
   },
   {
     "path": "/demo/sheet",
     "label": "Sheet",
     "title": "Sheet Demo - json-document",
     "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
-    "group": "Start"
+    "navigationGroup": "Editing"
   },
   {
     "path": "/connectors",
-    "label": "Connectors",
+    "label": "Overview",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
-    "group": "Start"
+    "navigationGroup": "Connectors"
   },
   {
     "path": "/connectors/react",
     "label": "React",
     "title": "React Connector Live Demo - json-document",
     "description": "Live React integration for JSON Document subscriptions and component-owned editing lifecycle.",
-    "group": "Connectors"
+    "navigationGroup": "Connectors"
   },
   {
     "path": "/connectors/zod",
     "label": "Zod",
     "title": "Zod Connector Live Demo - json-document",
     "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
-    "group": "Connectors"
+    "navigationGroup": "Connectors"
   }
 ]

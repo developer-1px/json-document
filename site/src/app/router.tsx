@@ -1,11 +1,13 @@
 import { useEffect, useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 
+export type SiteNavigationGroup = "Start" | "Core" | "Editing" | "Connectors";
+
 export type SiteRoute = {
   readonly path: string;
   readonly label: string;
   readonly title: string;
   readonly description: string;
-  readonly group: "Start" | "Connectors";
+  readonly navigationGroup?: SiteNavigationGroup;
 };
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
