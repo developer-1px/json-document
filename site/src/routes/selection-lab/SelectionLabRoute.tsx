@@ -36,6 +36,8 @@ import {
   type WorkspaceSession,
   type WorkspaceState,
 } from "./selection-workbench-state";
+import { Button, PageIntro } from "../../shared/ui/primitives";
+import { classes, ui } from "../../shared/ui/styles";
 
 type FamilyId = "order" | "grid" | "objects" | "tree" | "protocols";
 type HistoryClass = "selection-only" | "document-mutation" | "undo" | "redo" | "reconcile" | "cancel";
@@ -78,19 +80,13 @@ export function SelectionLabRoute() {
   const session = useWorkspaceSession();
 
   return (
-    <main className="min-h-full bg-stone-100 px-4 py-8 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
+      <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-              One canonical document · family-owned selection
-            </p>
-            <h1 className="mb-2 mt-1 text-3xl font-semibold text-stone-950">Selection Workbench</h1>
-            <p className="m-0 max-w-3xl text-sm leading-6 text-stone-600">
-              Every family projects the same records through a different topology. Document mutations and history are shared; selection and editing state remain family-specific.
-            </p>
-          </div>
-          <span className="rounded-full border border-stone-300 bg-white px-3 py-1.5 text-xs text-stone-500">
+          <PageIntro label="One canonical document · family-owned selection" title="Selection Workbench">
+            Every family projects the same records through a different topology. Document mutations and history are shared; selection and editing state remain family-specific.
+          </PageIntro>
+          <span className={classes("px-3 py-1.5", ui.surface.workspace, ui.text.meta)}>
             Same document → different projection
           </span>
         </header>
@@ -99,7 +95,7 @@ export function SelectionLabRoute() {
 
         <nav
           aria-label="Selection family"
-          className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-stone-200 bg-white p-1 md:grid-cols-5"
+          className={classes("mb-4 grid grid-cols-2 gap-1 p-1 md:grid-cols-5", ui.surface.workspace)}
         >
           {families.map((item) => (
             <button
@@ -107,10 +103,10 @@ export function SelectionLabRoute() {
               type="button"
               aria-pressed={family === item.id}
               onClick={() => setFamily(item.id)}
-              className="rounded-lg px-3 py-2 text-left text-sm aria-pressed:bg-stone-950 aria-pressed:text-white"
+              className={classes("px-3 py-2 text-left", ui.workbench.tab)}
             >
-              <span className="block font-medium">{item.label}</span>
-              <span className="block text-[10px] opacity-60">{item.detail}</span>
+              <span className={classes("block", ui.text.label)}>{item.label}</span>
+              <span className={classes("block opacity-60", ui.workbench.darkMeta)}>{item.detail}</span>
             </button>
           ))}
         </nav>
@@ -127,15 +123,15 @@ export function SelectionLabRoute() {
 
 function SharedDocumentStrip({ session }: { readonly session: WorkspaceSession }) {
   return (
-    <section aria-label="Shared canonical document" className="mb-4 rounded-xl border border-stone-200 bg-stone-950 px-4 py-3 text-white">
+    <section aria-label="Shared canonical document" className={classes("mb-4 px-4 py-3", ui.workbench.darkStrip)}>
       <div className="flex flex-wrap items-center gap-2">
-        <strong className="mr-2 text-xs uppercase tracking-wide text-amber-400">Canonical records</strong>
+        <strong className={classes("mr-2", ui.workbench.darkLabel)}>Canonical records</strong>
         {session.state.document.records.map((record) => (
-          <span key={record.id} data-testid={`shared-record-${record.id}`} className="rounded-full border border-stone-700 px-2 py-1 text-xs">
+          <span key={record.id} data-testid={`shared-record-${record.id}`} className={classes("px-2 py-1", ui.workbench.darkChip)}>
             {record.label} · {record.status}
           </span>
         ))}
-        <span className="ml-auto text-[10px] text-stone-400">
+        <span className={classes("ml-auto", ui.workbench.darkMeta)}>
           {session.state.document.records.length} records · {session.canUndo ? "history available" : "clean history"}
         </span>
       </div>
@@ -181,27 +177,27 @@ function Workbench(props: {
   return (
     <section
       aria-label={`${props.title} selection workbench`}
-      className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm"
+      className={classes("overflow-hidden", ui.surface.raised)}
     >
-      <div className="grid gap-4 border-b border-stone-200 p-4 lg:grid-cols-[1fr_auto]">
+      <div className={classes("grid gap-4 p-4 lg:grid-cols-[1fr_auto]", ui.frame.header)}>
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="m-0 text-xl font-semibold">{props.title}</h2>
+            <h2 className={classes("m-0", ui.text.heading)}>{props.title}</h2>
             <Badge>{props.family}</Badge>
           </div>
-          <p className="mb-0 mt-1 text-xs text-stone-500">
+          <p className={classes("mb-0 mt-1", ui.text.meta)}>
             This projection owns its selection; the canonical records and document history live above every family.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Affordance">
-          <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-stone-400">Affordance</span>
+          <span className={classes("mr-1 uppercase", ui.text.label)}>Affordance</span>
           {props.affordances.map((item) => (
             <button
               key={item}
               type="button"
               aria-pressed={props.affordance === item}
               onClick={() => props.onAffordance(item)}
-              className="rounded border border-stone-200 px-2 py-1 text-xs aria-pressed:border-stone-950 aria-pressed:bg-stone-950 aria-pressed:text-white"
+              className={classes("px-2 py-1", ui.action.toggle)}
             >
               {item}
             </button>
@@ -211,20 +207,20 @@ function Workbench(props: {
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_250px]">
         <div className="min-w-0 p-4">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-stone-50 px-3 py-2">
-            <span className="text-xs text-stone-500">
-              Active view: <strong className="text-stone-900">{props.affordance}</strong>
+          <div className={classes("mb-3 flex flex-wrap items-center justify-between gap-2 px-3 py-2", ui.surface.inset)}>
+            <span className={ui.text.meta}>
+              Active view: <strong className={ui.text.heading}>{props.affordance}</strong>
             </span>
             <div className="flex flex-wrap items-center gap-1">
-              <span className="mr-1 text-[9px] font-semibold uppercase tracking-wide text-stone-400">Scenarios</span>
+              <span className={classes("mr-1 uppercase", ui.text.label)}>Scenarios</span>
               {props.scenarios}
             </div>
           </div>
           {props.children}
         </div>
 
-        <aside className="border-t border-stone-200 bg-stone-50 p-3 lg:border-l lg:border-t-0">
-          <h3 className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-500">Family selection</h3>
+        <aside className={classes("p-3", ui.workbench.sidebar)}>
+          <h3 className={classes("m-0 uppercase", ui.text.label)}>Family selection</h3>
           <JsonOutput label="Selection" testId={`${props.testId}-selection-json`} value={props.selection} compact />
           <JsonOutput
             label="Canonical document"
@@ -232,26 +228,26 @@ function Workbench(props: {
             value={props.session.document}
             compact
           />
-          <h3 className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-stone-500">History timeline</h3>
+          <h3 className={classes("mb-2 mt-4 uppercase", ui.text.label)}>History timeline</h3>
           <ol data-testid={`${props.testId}-timeline`} className="m-0 grid list-none gap-1 p-0">
-            {props.timeline.length === 0 && <li className="text-xs text-stone-400">No interaction in this family yet</li>}
+            {props.timeline.length === 0 && <li className={ui.text.meta}>No interaction in this family yet</li>}
             {props.timeline.map((entry) => (
-              <li key={entry.id} className="flex items-center gap-2 text-[11px]">
-                <span className="rounded bg-white px-1.5 py-0.5 text-stone-400">{entry.id}</span>
+              <li key={entry.id} className={classes("flex items-center gap-2", ui.text.meta)}>
+                <span className={classes("px-1.5 py-0.5", ui.surface.workspace)}>{entry.id}</span>
                 <span className="min-w-0 flex-1 truncate">{entry.label}</span>
-                <span className="text-[9px] text-stone-400">{entry.classification}</span>
+                <span className={ui.workbench.darkMeta}>{entry.classification}</span>
               </li>
             ))}
           </ol>
         </aside>
       </div>
 
-      <div className="border-t border-stone-200">
+      <div className={ui.surface.divider}>
         <button
           type="button"
           aria-expanded={inspectorOpen}
           onClick={() => setInspectorOpen((open) => !open)}
-          className="flex w-full items-center justify-between bg-stone-950 px-4 py-3 text-left text-xs font-semibold text-white"
+          className={classes("flex w-full items-center justify-between px-4 py-3 text-left", ui.workbench.inspectorToggle)}
         >
           Contract inspector <span>{inspectorOpen ? "Hide ↑" : "Open ↓"}</span>
         </button>
@@ -271,15 +267,15 @@ function ContractInspector({ trace, testId }: { readonly trace: ContractTrace | 
   ] as const;
 
   return (
-    <div data-testid={`${testId}-contract-inspector`} className="grid gap-px bg-stone-800 md:grid-cols-5">
+    <div data-testid={`${testId}-contract-inspector`} className={classes("grid gap-px md:grid-cols-5", ui.workbench.inspectorGrid)}>
       {trace === null ? (
-        <p className="col-span-full m-0 bg-stone-900 p-4 text-xs text-stone-400">
+        <p className={classes("col-span-full m-0 p-4", ui.workbench.inspectorCell, ui.text.meta)}>
           Interact with the active view to trace the complete host → core → shared document path.
         </p>
       ) : cells.map(([label, value]) => (
-        <div key={label} className="min-w-0 bg-stone-900 p-3 text-stone-100">
-          <div className="mb-2 text-[9px] font-semibold uppercase tracking-wider text-amber-400">{label}</div>
-          <pre className="m-0 max-h-48 overflow-auto whitespace-pre-wrap text-[10px] leading-4">
+        <div key={label} className={classes("min-w-0 p-3", ui.workbench.inspectorCell)}>
+          <div className={classes("mb-2", ui.workbench.inspectorLabel)}>{label}</div>
+          <pre className={classes("m-0 max-h-48 overflow-auto whitespace-pre-wrap", ui.code.block)}>
             <code>{JSON.stringify(value, null, 2)}</code>
           </pre>
         </div>
@@ -335,7 +331,7 @@ function OrderWorkbench({ session }: { readonly session: WorkspaceSession }) {
       timeline={log.timeline}
       testId="order"
     >
-      <div className={affordance === "Timeline" ? "flex gap-2 overflow-auto py-5" : affordance === "Compact" ? "divide-y divide-stone-100 rounded border border-stone-200" : "grid gap-2"}>
+      <div className={affordance === "Timeline" ? "flex gap-2 overflow-auto py-5" : affordance === "Compact" ? ui.workbench.compactList : "grid gap-2"}>
         {document.records.map((record, index) => (
           <button
             key={record.id}
@@ -343,11 +339,11 @@ function OrderWorkbench({ session }: { readonly session: WorkspaceSession }) {
             aria-label={`Order ${record.label}`}
             aria-pressed={selected.has(record.id)}
             onClick={(event) => select(event, record.id)}
-            className={`${affordance === "Timeline" ? "min-w-28 rounded-full" : "w-full rounded-lg"} flex items-center gap-3 border border-stone-200 bg-white px-3 py-2 text-left text-sm aria-pressed:border-stone-950 aria-pressed:bg-amber-50`}
+            className={classes(affordance === "Timeline" ? "min-w-28" : "w-full", "flex items-center gap-3 px-3 py-2 text-left", ui.workbench.item)}
           >
-            <span className="text-xs text-stone-400">{index + 1}</span>
+            <span className={ui.text.meta}>{index + 1}</span>
             <span className="flex-1">{record.label}</span>
-            <span className="text-[10px] text-stone-400">{record.status}</span>
+            <span className={ui.workbench.darkMeta}>{record.status}</span>
           </button>
         ))}
       </div>
@@ -423,7 +419,7 @@ function GridWorkbench({ session }: { readonly session: WorkspaceSession }) {
       timeline={log.timeline}
       testId="grid"
     >
-      <div data-testid="grid-editing-state" className="mb-2 text-xs text-stone-500">
+      <div data-testid="grid-editing-state" className={classes("mb-2", ui.text.meta)}>
         current: {state.gridCurrent === null ? "none" : `${state.gridCurrent.recordId}:${state.gridCurrent.field}`} · editing: {state.editing.kind}
       </div>
       <div className={affordance === "Records" ? "grid gap-2" : "grid grid-cols-3 gap-1"}>
@@ -462,10 +458,10 @@ function CellButton(props: {
       aria-pressed={props.selected}
       onClick={(event) => props.onSelect(event, props.point)}
       onDoubleClick={props.onEdit}
-      className={`${props.heatmap ? "rounded-full" : props.records ? "rounded-lg" : "rounded"} border border-stone-200 bg-white px-2 py-3 text-sm aria-pressed:border-stone-950 aria-pressed:bg-amber-400 aria-pressed:ring-1 aria-pressed:ring-stone-950`}
+      className={classes("px-2 py-3", ui.workbench.itemStrong)}
     >
-      <span className="block text-[9px] uppercase text-stone-400">{props.point.recordId} · {props.point.field}</span>
-      {props.point.field === "color" ? <span className="mx-auto mt-1 block h-4 w-10 rounded" style={{ background: props.value }} /> : props.value}
+      <span className={classes("block uppercase", ui.workbench.darkMeta)}>{props.point.recordId} · {props.point.field}</span>
+      {props.point.field === "color" ? <span className={classes("mx-auto mt-1 block h-4 w-10", ui.surface.inset)} style={{ background: props.value }} /> : props.value}
     </button>
   );
 }
@@ -576,7 +572,7 @@ function ObjectWorkbench({ session }: { readonly session: WorkspaceSession }) {
       affordances={["Canvas", "Layer list", "Cards"]}
       affordance={affordance}
       onAffordance={setAffordance}
-      scenarios={<><select aria-label="Region hit mode" value={regionMode} onChange={(event) => setRegionMode(event.target.value as typeof regionMode)} className="rounded border border-stone-300 bg-white px-2 py-1 text-xs"><option value="intersects">intersects</option><option value="contains">contains</option></select><select aria-label="Point hit mode" value={pointMode} onChange={(event) => setPointMode(event.target.value as typeof pointMode)} className="rounded border border-stone-300 bg-white px-2 py-1 text-xs"><option value="topmost">topmost</option><option value="deepest">deepest</option></select><Action label="Hit overlap" onClick={hitOverlap} /><Action label="Rename" onClick={renameSelection} /><Action label="Color" onClick={colorSelection} /><Action label="Delete" onClick={removeSelection} /><HistoryActions session={session} actions={history} /></>}
+      scenarios={<><select aria-label="Region hit mode" value={regionMode} onChange={(event) => setRegionMode(event.target.value as typeof regionMode)} className={classes("px-2 py-1", ui.field.control)}><option value="intersects">intersects</option><option value="contains">contains</option></select><select aria-label="Point hit mode" value={pointMode} onChange={(event) => setPointMode(event.target.value as typeof pointMode)} className={classes("px-2 py-1", ui.field.control)}><option value="topmost">topmost</option><option value="deepest">deepest</option></select><Action label="Hit overlap" onClick={hitOverlap} /><Action label="Rename" onClick={renameSelection} /><Action label="Color" onClick={colorSelection} /><Action label="Delete" onClick={removeSelection} /><HistoryActions session={session} actions={history} /></>}
       selection={selection}
       session={state}
       trace={log.trace}
@@ -590,7 +586,7 @@ function ObjectWorkbench({ session }: { readonly session: WorkspaceSession }) {
           onPointerMove={(event) => dragRef.current.kind !== "idle" && marquee(event, "move")}
           onPointerUp={(event) => marquee(event, "end")}
           onPointerCancel={(event) => marquee(event, "cancel")}
-          className="relative h-64 touch-none select-none overflow-hidden rounded-xl border border-stone-300 bg-[linear-gradient(#f5f5f4_1px,transparent_1px),linear-gradient(90deg,#f5f5f4_1px,transparent_1px)] bg-[size:16px_16px]"
+          className={classes("relative h-64 touch-none select-none overflow-hidden", ui.workbench.canvas)}
         >
           {document.records.map((record) => (
             <button
@@ -600,13 +596,13 @@ function ObjectWorkbench({ session }: { readonly session: WorkspaceSession }) {
               aria-pressed={selected.has(record.id)}
               onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => selectObject(event, record.id)}
-              className="absolute rounded border-2 border-white text-xs font-semibold text-white shadow-sm outline-none aria-pressed:ring-2 aria-pressed:ring-stone-950 aria-pressed:ring-offset-2"
+              className={classes("absolute", ui.workbench.canvasObject)}
               style={objectStyle(record)}
             >
               {record.label}
             </button>
           ))}
-          {drag && <div className="pointer-events-none absolute border border-blue-600 bg-blue-400/15" style={{ left: drag.x, top: drag.y, width: drag.width, height: drag.height }} />}
+          {drag && <div className={classes("pointer-events-none absolute", ui.workbench.marquee)} style={{ left: drag.x, top: drag.y, width: drag.width, height: drag.height }} />}
         </div>
       ) : (
         <div className={affordance === "Cards" ? "grid grid-cols-2 gap-2" : "grid gap-1"}>
@@ -617,11 +613,11 @@ function ObjectWorkbench({ session }: { readonly session: WorkspaceSession }) {
               aria-label={`Object ${record.label}`}
               aria-pressed={selected.has(record.id)}
               onClick={(event) => selectObject(event, record.id)}
-              className={`${affordance === "Cards" ? "h-24 rounded-xl" : "rounded"} flex items-center gap-3 border border-stone-200 bg-white p-3 text-left text-sm aria-pressed:border-stone-950 aria-pressed:bg-amber-50`}
+              className={classes(affordance === "Cards" && "h-24", "flex items-center gap-3 p-3 text-left", ui.workbench.item)}
             >
-              <span className="h-4 w-4 rounded" style={{ background: record.color }} />
+              <span className={classes("h-4 w-4", ui.surface.inset)} style={{ background: record.color }} />
               <span className="flex-1">{record.label}</span>
-              <span className="text-xs text-stone-400">{index + 1}</span>
+              <span className={ui.text.meta}>{index + 1}</span>
             </button>
           ))}
         </div>
@@ -696,7 +692,7 @@ function TreeWorkbench({ session }: { readonly session: WorkspaceSession }) {
       timeline={log.timeline}
       testId="tree"
     >
-      <output data-testid="tree-visible-order" className="mb-3 block rounded bg-stone-50 px-2 py-1 text-xs text-stone-500">
+      <output data-testid="tree-visible-order" className={classes("mb-3 block px-2 py-1", ui.surface.inset, ui.text.meta)}>
         visible: {visibleIds.join(" → ")}
       </output>
       <div className={affordance === "Visible order" ? "flex gap-2 overflow-auto py-3" : affordance === "Cards" ? "grid grid-cols-2 gap-2" : "grid gap-1"}>
@@ -706,11 +702,11 @@ function TreeWorkbench({ session }: { readonly session: WorkspaceSession }) {
           return (
             <div key={record.id} className={affordance === "Visible order" ? "min-w-32" : "flex"} style={affordance === "Outline" ? { paddingLeft: depth * 18 } : undefined}>
               {affordance === "Outline" && hasChildren ? (
-                <button type="button" aria-label={`${state.expanded.includes(record.id) ? "Collapse" : "Expand"} ${record.label}`} onClick={() => toggle(record.id)} className="w-8 shrink-0 rounded text-xs text-stone-500 hover:bg-stone-100">
+                <button type="button" aria-label={`${state.expanded.includes(record.id) ? "Collapse" : "Expand"} ${record.label}`} onClick={() => toggle(record.id)} className={classes("w-8 shrink-0", ui.action.secondary)}>
                   {state.expanded.includes(record.id) ? "−" : "+"}
                 </button>
               ) : affordance === "Outline" ? <span className="w-8" /> : null}
-              <button type="button" aria-label={`Tree ${record.label}`} aria-pressed={selected.has(record.id)} onClick={(event) => select(event, record.id)} className={`${affordance === "Cards" ? "h-20" : ""} min-w-0 flex-1 rounded border border-stone-200 px-2 py-2 text-left text-sm aria-pressed:border-stone-950 aria-pressed:bg-amber-50`}>
+              <button type="button" aria-label={`Tree ${record.label}`} aria-pressed={selected.has(record.id)} onClick={(event) => select(event, record.id)} className={classes(affordance === "Cards" && "h-20", "min-w-0 flex-1 px-2 py-2 text-left", ui.workbench.item)}>
                 {record.label}
               </button>
             </div>
@@ -794,7 +790,7 @@ function ProtocolWorkbench({ session }: { readonly session: WorkspaceSession }) 
     >
       {affordance === "Raster strip" ? (
         <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${Math.max(state.mask.length, 1)}, minmax(0, 1fr))` }}>
-          {state.mask.map((weight, index) => <div key={document.records[index]?.id ?? index} className="grid h-28 place-items-center rounded border border-stone-200 text-xs" style={{ background: `rgba(245, 158, 11, ${weight})` }}>{weight.toFixed(2)}</div>)}
+          {state.mask.map((weight, index) => <div key={document.records[index]?.id ?? index} className={classes("grid h-28 place-items-center", ui.workbench.item)} style={{ background: `rgba(222, 109, 85, ${weight})` }}>{weight.toFixed(2)}</div>)}
         </div>
       ) : affordance === "Compact panel" ? (
         <div className="flex flex-wrap gap-2">
@@ -879,9 +875,9 @@ function JsonOutput(props: {
   readonly compact?: boolean;
 }) {
   return (
-    <div className={`${props.compact ? "mt-2" : ""} min-w-0 rounded bg-stone-950 p-2 text-stone-100`}>
-      <div className="mb-1 text-[9px] uppercase tracking-wide text-stone-500">{props.label}</div>
-      <pre data-testid={props.testId} className={`${props.compact ? "max-h-32" : "max-h-44"} m-0 overflow-auto whitespace-pre-wrap text-[10px] leading-4`}>
+    <div className={classes(props.compact && "mt-2", "min-w-0 p-2", ui.code.json)}>
+      <div className={classes("mb-1 uppercase", ui.text.meta)}>{props.label}</div>
+      <pre data-testid={props.testId} className={classes(props.compact ? "max-h-32" : "max-h-44", "m-0 overflow-auto whitespace-pre-wrap")}>
         <code>{JSON.stringify(props.value, null, 2)}</code>
       </pre>
     </div>
@@ -889,14 +885,12 @@ function JsonOutput(props: {
 }
 
 function Badge({ children }: { readonly children: ReactNode }) {
-  return <span className="rounded-full bg-stone-100 px-2 py-1 text-[10px] text-stone-500">{children}</span>;
+  return <span className={classes("px-2 py-1", ui.surface.inset, ui.text.meta)}>{children}</span>;
 }
 
 function Action(props: { readonly label: string; readonly onClick: () => unknown; readonly disabled?: boolean }) {
   return (
-    <button type="button" disabled={props.disabled} onClick={props.onClick} className="rounded border border-stone-300 bg-white px-2 py-1 text-xs text-stone-700 hover:bg-stone-100 disabled:opacity-35">
-      {props.label}
-    </button>
+    <Button disabled={props.disabled} onClick={props.onClick} className="px-2 py-1">{props.label}</Button>
   );
 }
 

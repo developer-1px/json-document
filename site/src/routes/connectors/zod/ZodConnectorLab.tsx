@@ -3,6 +3,8 @@ import { createJSONDocument, type JSONPatchValidationResult } from "@interactive
 import { useJSONDocumentValue } from "@interactive-os/json-document-react";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
+import { Button } from "../../../shared/ui/primitives";
+import { classes, ui } from "../../../shared/ui/styles";
 
 const profileSchema = z.object({
   profile: z.object({
@@ -34,30 +36,30 @@ export function ZodConnectorLab() {
   }
 
   return (
-    <section aria-label="Zod validation" className="rounded border border-stone-200 bg-white p-4">
+    <section aria-label="Zod validation" className={classes("p-4", ui.surface.raised)}>
       <div className="mb-4">
-        <p className="m-0 text-[10px] font-semibold uppercase tracking-wide text-stone-400">createZodValidator</p>
-        <h2 className="mb-1 mt-1 text-base font-semibold text-stone-950">Validation boundary</h2>
-        <p className="m-0 text-xs leading-5 text-stone-500">
+        <p className={ui.text.label}>createZodValidator</p>
+        <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Validation boundary</h2>
+        <p className={classes("m-0", ui.text.meta)}>
           Try fewer than 3 characters, then a padded valid title. Invalid commits preserve the last canonical JSON; Zod trim output is never adopted.
         </p>
       </div>
 
-      <label className="grid gap-1 text-xs font-medium text-stone-600">
+      <label className={classes("grid gap-1", ui.text.meta)}>
         Profile title draft
         <input
           value={draft}
           onChange={(event) => setDraft(event.currentTarget.value)}
-          className="rounded border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none focus:border-stone-900"
+          className={ui.field.control}
         />
       </label>
-      <button
-        type="button"
+      <Button
+        kind="primary"
         onClick={commitDraft}
-        className="mt-3 rounded bg-stone-950 px-3 py-2 text-xs font-medium text-white hover:bg-stone-800"
+        className="mt-3"
       >
         Commit draft
-      </button>
+      </Button>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <JSONPanel label="Commit result" testId="zod-validation-result" value={result} />
@@ -73,9 +75,9 @@ function JSONPanel(props: {
   readonly value: unknown;
 }) {
   return (
-    <div className="rounded border border-stone-800 bg-stone-950 p-3 text-stone-100">
-      <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-stone-500">{props.label}</div>
-      <pre data-testid={props.testId} className="m-0 min-h-24 overflow-auto whitespace-pre-wrap text-xs leading-5">
+    <div className={ui.code.json}>
+      <div className={classes("mb-2", ui.text.meta)}>{props.label}</div>
+      <pre data-testid={props.testId} className="m-0 min-h-24 overflow-auto whitespace-pre-wrap">
         <code>{JSON.stringify(props.value, null, 2)}</code>
       </pre>
     </div>

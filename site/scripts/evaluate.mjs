@@ -32,8 +32,8 @@ function validateSourceBoundaries() {
     .map((entry) => entry.name)
     .sort();
 
-  if (JSON.stringify(rootEntries) !== JSON.stringify(["app", "main.tsx", "routes"])) {
-    fail(`site src root must contain only app, main.tsx, and route owners: ${rootEntries.join(", ")}.`);
+  if (JSON.stringify(rootEntries) !== JSON.stringify(["app", "main.tsx", "routes", "shared"])) {
+    fail(`site src root must contain only app, main.tsx, route owners, and shared UI: ${rootEntries.join(", ")}.`);
   }
 
   const flatRouteFiles = readdirSync(routesRoot, { withFileTypes: true })
@@ -55,6 +55,19 @@ function validateSourceBoundaries() {
       const targetOwner = targetRelative.split("/")[0];
       if (targetOwner !== owner) {
         fail(`site route owner ${owner} must not import sibling route owner ${targetOwner}: ${relative(siteRoot, file)}.`);
+      }
+    }
+  }
+
+  const sharedRoot = join(src, "shared");
+  for (const file of sourceFiles(sharedRoot)) {
+    const source = readFileSync(file, "utf8");
+    for (const match of source.matchAll(/(?:from\s+|import\s*\()["']([^"']+)["']/g)) {
+      const specifier = match[1];
+      if (!specifier?.startsWith(".")) continue;
+      const target = resolve(dirname(file), specifier);
+      if (relative(routesRoot, target).startsWith("..") === false || relative(join(src, "app"), target).startsWith("..") === false) {
+        fail(`site shared UI must not import app or route owners: ${relative(siteRoot, file)}.`);
       }
     }
   }

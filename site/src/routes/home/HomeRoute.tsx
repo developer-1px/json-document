@@ -1,10 +1,4 @@
-const modelRows = [
-  ["patch", "stateless JSON Patch application"],
-  ["document", "value, at, query, validatePatch, commit, subscribe"],
-  ["validation", "optional implementation-neutral candidate validation"],
-  ["editing", "optional headless selection, clipboard, history, transactions"],
-  ["host", "rendering, focus, persistence, and platform bridges"],
-] as const;
+import { ui } from "../../shared/ui/styles";
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -14,88 +8,74 @@ function sitePath(path: string): string {
 
 export function HomeRoute() {
   return (
-    <main className="min-h-full bg-stone-50">
-      <section className="border-b border-stone-200 bg-white">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
-          <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">
-              Implementation-neutral JSON editing
-            </p>
-            <h1 className="mb-4 mt-2 text-4xl font-semibold tracking-normal text-stone-950">
-              json-document
-            </h1>
-            <p className="m-0 max-w-2xl text-base leading-7 text-stone-600">
-              A headless JSON API and six-member JSON Document for
-              documents, tables, slides, canvases, and notes.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              <a className="rounded bg-stone-950 px-3 py-2 text-sm font-medium text-white no-underline hover:bg-stone-800" href={sitePath("/docs/tutorial")}>
-                Quickstart
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs")}>
-                Concepts
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs/api")}>
-                API Reference
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/demo")}>
-                Document
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/connectors")}>
-                Connectors
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href="https://www.npmjs.com/package/@interactive-os/json-document">
-                npm
-              </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href="https://github.com/developer-1px/json-document">
-                GitHub
-              </a>
-            </div>
-          </div>
+    <main className={ui.home.page}>
+      <section className={ui.home.hero} aria-labelledby="home-title">
+        <div className={ui.home.copy}>
+          <h1 id="home-title" className={ui.home.logoHeading}>
+            <span className="sr-only">json-document</span>
+            <HomeWordmark />
+          </h1>
+          <p className={ui.home.statement}>
+            One JSON document. Any editor.
+          </p>
+          <p className={ui.home.description}>
+            A tiny headless API to read, query, patch, and subscribe.
+          </p>
 
-          <div className="rounded border border-stone-200 bg-stone-950 p-3 text-stone-100">
-            <div className="mb-2 text-xs font-medium text-stone-400">Release</div>
-            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>3.0.0</code></pre>
-            <div className="mt-4 border-t border-stone-800 pt-3 text-xs font-medium text-stone-400">Start</div>
-            <pre className="m-0 mt-2 overflow-x-auto text-sm leading-6"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div>
-          <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Public model</h2>
-          <div className="overflow-x-auto rounded border border-stone-200 bg-white">
-            <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
-              <thead>
-                <tr>
-                  <th className="border-b border-stone-200 px-3 py-2 font-semibold text-stone-700">Surface</th>
-                  <th className="border-b border-stone-200 px-3 py-2 font-semibold text-stone-700">Responsibility</th>
-                </tr>
-              </thead>
-              <tbody>
-                {modelRows.map(([surface, responsibility]) => (
-                  <tr key={surface}>
-                    <td className="border-b border-stone-100 px-3 py-2 font-mono text-xs text-stone-900">{surface}</td>
-                    <td className="border-b border-stone-100 px-3 py-2 text-stone-600">{responsibility}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className={ui.home.entry}>
+            <code className={ui.home.install}>
+              <span aria-hidden="true" className={ui.accent.impact.text}>$ </span>
+              npm i @interactive-os/json-document
+            </code>
+            <a className={ui.home.startLink} href={sitePath("/docs/tutorial")}>
+              Get started <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
 
-        <aside className="rounded border border-stone-200 bg-white p-4">
-          <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
-          <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
-            <li>Root Kernel is React- and Zod-free.</li>
-            <li>Official Connectors add ecosystem-native integration without changing the Kernel.</li>
-            <li>Headless editing is an optional companion composed over the six-member document.</li>
-            <li>Mutation inputs are JSON Patch with JSON Pointer paths.</li>
-            <li>JSONPath is search-only and returns pointers.</li>
-          </ul>
-        </aside>
+        <figure className={ui.home.artwork}>
+          <img
+            className={ui.home.artworkImage}
+            src={sitePath("/cat-enter.png")}
+            alt="A small cat struggling to press an oversized Enter key."
+            width="1200"
+            height="800"
+          />
+        </figure>
       </section>
     </main>
+  );
+}
+
+function HomeWordmark() {
+  return (
+    <svg
+      aria-hidden="true"
+      className={ui.home.logo}
+      viewBox="0 0 435 66"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3">
+        <path d="M15 20v25c0 10-7 12-13 7" />
+        <path d="M45 23c-4-6-16-5-17 3-1 5 5 6 10 7 6 1 10 4 8 9-3 7-16 7-20 1" />
+        <path d="M61 30c0-9 5-14 13-14 10 0 15 6 15 15 0 11-6 17-15 17-9 0-13-7-13-18Z" />
+        <path d="m64 20 2-8 7 6m7-1 7-6v11" />
+        <path d="M101 47V21m0 9c4-8 10-11 16-8 5 2 6 6 6 13v12" />
+        <path d="M192 8v39m-1-18c-3-8-11-10-16-5-6 6-5 18 2 22 7 4 14-2 14-11" />
+        <path d="M206 34c0-9 4-14 12-14 9 0 13 6 13 14 0 9-5 14-13 14s-12-6-12-14Z" />
+        <path d="M260 24c-9-7-18-1-18 10s9 17 19 10" />
+        <path d="M272 21v17c0 8 4 11 10 10 6-1 10-8 10-15V21m0 0v26" />
+        <path d="M305 47V21m0 9c4-8 10-11 15-7 3 2 4 6 4 12v12m0-16c4-9 10-11 15-7 3 3 3 7 3 13v10" />
+        <path d="M369 42c-6 8-18 7-20-5-2-10 5-18 13-17 8 1 10 11 6 15l-18 1" />
+        <path d="M380 47V21m0 9c4-8 10-11 16-8 5 2 6 6 6 13v12" />
+        <path d="M417 10v28c0 8 4 11 10 8m-17-23h18" />
+      </g>
+      <g fill="currentColor">
+        <circle cx="15" cy="9" r="2.5" />
+        <circle cx="70" cy="31" r="1.7" />
+        <circle cx="80" cy="30" r="1.7" />
+      </g>
+      <path className={ui.accent.impact.stroke} d="M137 34c7-1 14 0 21-1" fill="none" strokeLinecap="round" strokeWidth="4" />
+    </svg>
   );
 }

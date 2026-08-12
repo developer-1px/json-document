@@ -7,6 +7,8 @@ import {
   useDocumentEditor,
   useEditingSnapshot,
 } from "@interactive-os/json-document-react";
+import { Button, PageIntro } from "../../shared/ui/primitives";
+import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -91,51 +93,47 @@ export function DocumentDemoRoute() {
   const lastSelectedId = editor.selectedBlockIds.at(-1);
 
   return (
-    <main className="min-h-full bg-stone-50 px-4 py-8 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
+      <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">Headless editing vertical slice</p>
-            <h1 className="mb-2 mt-1 text-3xl font-semibold text-stone-950">Document demo</h1>
-            <p className="m-0 max-w-2xl text-sm leading-6 text-stone-600">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</p>
-          </div>
-          <div className="text-right text-xs text-stone-500">
+          <PageIntro title="Document demo">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageIntro>
+          <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
         </header>
 
-        <div className="mb-3 flex flex-wrap gap-1 rounded border border-stone-200 bg-white p-2" role="toolbar" aria-label="Document actions">
+        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Document actions">
           <Action label="Add" onClick={() => run(() => editor.dispatch({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
           <Action label="Duplicate" onClick={() => run(() => editor.dispatch({ type: "selection.duplicate" }), "Selection duplicated")} />
           <Action label="Move up" onClick={() => run(() => editor.dispatch({ type: "selection.move", direction: -1 }), "Selection moved up")} />
           <Action label="Move down" onClick={() => run(() => editor.dispatch({ type: "selection.move", direction: 1 }), "Selection moved down")} />
-          <span className="mx-1 w-px bg-stone-200" aria-hidden="true" />
+          <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
           <Action label="Copy" onClick={copySelection} />
           <Action label="Cut" onClick={cutSelection} />
           <Action label="Paste" onClick={pasteSelection} disabled={!clipboard} />
           <Action label="Delete" onClick={() => run(() => editor.dispatch({ type: "selection.remove" }), "Selection deleted")} />
-          <span className="mx-1 w-px bg-stone-200" aria-hidden="true" />
+          <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
           <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
           <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
-          <section aria-label="Editable document" className="rounded border border-stone-200 bg-white p-3">
-            <div ref={surfaceRef} tabIndex={0} onKeyDown={handleKeyDown} className="grid gap-2 outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
+          <section aria-label="Editable document" className={classes("p-3", ui.surface.raised)}>
+            <div ref={surfaceRef} tabIndex={0} onKeyDown={handleKeyDown} className={ui.state.focus}>
               {document.blocks.length === 0 ? (
-                <button className="rounded border border-dashed border-stone-300 p-8 text-sm text-stone-500" onClick={() => run(() => editor.dispatch({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</button>
+                <button className={classes("p-8", ui.surface.empty, ui.text.body)} onClick={() => run(() => editor.dispatch({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</button>
               ) : document.blocks.map((block, index) => (
                 <article
                   key={block.id}
                   data-block-id={block.id}
                   data-selected={selected.has(block.id) ? "true" : "false"}
                   onClick={(event) => handleBlockClick(event, block.id)}
-                  className="group grid grid-cols-[2rem_minmax(0,1fr)] rounded border border-stone-200 bg-white data-[selected=true]:border-stone-900 data-[selected=true]:ring-1 data-[selected=true]:ring-stone-900"
+                  className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock, ui.state.selected)}
                 >
                   <button
                     aria-label={`Select block ${index + 1}`}
-                    className="cursor-default border-0 border-r border-stone-100 bg-stone-50 text-xs text-stone-400"
+                    className={classes("cursor-default", ui.surface.documentIndex, ui.text.meta)}
                   >{index + 1}</button>
                   <textarea
                     aria-label={`Block ${index + 1} text`}
@@ -144,17 +142,17 @@ export function DocumentDemoRoute() {
                     onFocus={(event) => editor.dispatch({ type: "selection.set", blockId: block.id, offset: event.currentTarget.selectionStart })}
                     onClick={(event) => editor.dispatch({ type: "selection.set", blockId: block.id, offset: event.currentTarget.selectionStart })}
                     onChange={(event) => editor.dispatch({ type: "text.replace", blockId: block.id, text: event.currentTarget.value, offset: event.currentTarget.selectionStart })}
-                    className="min-h-11 resize-none border-0 bg-transparent px-3 py-2 text-sm leading-6 text-stone-800 outline-none"
+                    className={classes("min-h-11 resize-none", ui.field.seamless)}
                   />
                 </article>
               ))}
             </div>
-            <p className="mb-0 mt-3 text-xs text-stone-400">Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
+            <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
 
-          <aside className="min-w-0 rounded border border-stone-800 bg-stone-950 p-3 text-stone-100" aria-label="Canonical JSON">
-            <div className="mb-2 flex items-center justify-between text-xs text-stone-400"><span>Canonical JSON</span><span>JSON Patch document</span></div>
-            <pre data-testid="canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap text-xs leading-5"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
+          <aside className={classes("min-w-0", ui.code.json)} aria-label="Canonical JSON">
+            <div className={classes("mb-2 flex items-center justify-between", ui.text.meta)}><span>Canonical JSON</span><span>JSON Patch document</span></div>
+            <pre data-testid="canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
           </aside>
         </div>
       </div>
@@ -163,5 +161,5 @@ export function DocumentDemoRoute() {
 }
 
 function Action(props: { readonly label: string; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <button type="button" disabled={props.disabled} onClick={props.onClick} className="rounded border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-35">{props.label}</button>;
+  return <Button disabled={props.disabled} onClick={props.onClick}>{props.label}</Button>;
 }

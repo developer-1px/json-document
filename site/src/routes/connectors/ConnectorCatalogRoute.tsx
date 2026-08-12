@@ -1,35 +1,35 @@
 import { connectorCatalog } from "./connector-catalog";
+import { PageIntro } from "../../shared/ui/primitives";
+import { classes, ui } from "../../shared/ui/styles";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function ConnectorCatalogRoute() {
   return (
-    <main className="min-h-full bg-stone-50 px-4 py-8 lg:px-8">
+    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className="mx-auto max-w-5xl">
-        <header className="mb-7 border-b border-stone-200 pb-5">
-          <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">Official integrations</p>
-          <h1 className="mb-2 mt-1 text-3xl font-semibold text-stone-950">Connectors</h1>
-          <p className="m-0 max-w-2xl text-sm leading-6 text-stone-600">
+        <header className={classes("mb-7 pb-5", ui.frame.header)}>
+          <PageIntro title="Connectors">
             Optional packages that translate ecosystem-native contracts without changing the JSON Document Kernel.
-          </p>
+          </PageIntro>
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
           {connectorCatalog.map((connector) => (
-            <article key={connector.id} className="flex min-h-44 flex-col rounded border border-stone-200 bg-white p-4">
+            <article key={connector.id} className={classes("flex min-h-44 flex-col py-4", ui.surface.sectionDivider)}>
               <div className="flex items-start justify-between gap-3">
-                <h2 className="m-0 text-base font-semibold text-stone-950">{connector.name}</h2>
-                <span className="rounded-full bg-stone-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-stone-500">
+                <h2 className={classes("m-0", ui.text.heading)}>{connector.name}</h2>
+                <span className={classes("px-2 py-1", ui.surface.inset, ui.text.label)}>
                   {connector.status}
                 </span>
               </div>
-              <code className="mt-2 block text-xs text-stone-500">{connector.packageName}</code>
-              <p className="mb-4 mt-3 text-sm leading-6 text-stone-600">{connector.description}</p>
+              <code className={classes("mt-2 block", ui.code.inline)}>{connector.packageName}</code>
+              <p className={classes("mb-4 mt-3", ui.text.body)}>{connector.description}</p>
               {connector.demoPath === null ? (
-                <span className="mt-auto text-xs text-stone-400">Live Demo ships with the implementation.</span>
+                <span className={classes("mt-auto", ui.text.meta)}>Live Demo ships with the implementation.</span>
               ) : (
                 <a
-                  className="mt-auto self-start rounded bg-stone-950 px-3 py-2 text-xs font-medium text-white no-underline hover:bg-stone-800"
+                  className={classes("mt-auto self-start", ui.action.primary)}
                   href={sitePath(connector.demoPath)}
                 >
                   Open Live Demo

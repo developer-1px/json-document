@@ -1,4 +1,6 @@
 import { TanStackTableConnectorLab } from "./TanStackTableConnectorLab";
+import { PageIntro } from "../../../shared/ui/primitives";
+import { classes, ui } from "../../../shared/ui/styles";
 
 const connectorCode = `const binding = createTableDocumentBinding({ editor });
 const table = useReactTable({
@@ -11,28 +13,24 @@ const table = useReactTable({
 
 export function TanStackTableConnectorDemoRoute() {
   return (
-    <main className="min-h-full bg-stone-50 px-4 py-8 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-6 grid gap-4 border-b border-stone-200 pb-5 lg:grid-cols-[minmax(0,1fr)_28rem]">
-          <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">Connector Live Demo</p>
-            <h1 className="mb-2 mt-1 text-3xl font-semibold text-stone-950">TanStack Table Connector</h1>
-            <p className="m-0 max-w-2xl text-sm leading-6 text-stone-600">
+    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
+      <div className={ui.frame.content}>
+        <header className={classes("mb-6 grid gap-4 pb-5 lg:grid-cols-[minmax(0,1fr)_28rem]", ui.frame.header)}>
+          <PageIntro title="TanStack Table Connector">
               TanStack Table v8 projects the visible grid while the Sheet editor keeps canonical JSON, rectangular selection, clipboard, and history.
-            </p>
-          </div>
-          <div className="rounded border border-stone-200 bg-white p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-stone-400">Install</div>
-            <code className="mt-2 block overflow-x-auto text-xs text-stone-700">npm i @interactive-os/json-document-tanstack-table @tanstack/table-core</code>
+          </PageIntro>
+          <div className={classes("p-3", ui.surface.inset)}>
+            <div className={ui.text.label}>Install</div>
+            <code className={classes("mt-2 block overflow-x-auto", ui.code.inline)}>npm i @interactive-os/json-document-tanstack-table @tanstack/table-core</code>
           </div>
         </header>
 
         <TanStackTableConnectorLab />
 
-        <section aria-label="Minimal TanStack Table connector code" className="mt-4 rounded border border-stone-200 bg-white p-4">
-          <h2 className="mb-2 mt-0 text-sm font-semibold text-stone-950">The connection</h2>
-          <pre className="m-0 overflow-x-auto rounded bg-stone-950 p-3 text-xs leading-5 text-stone-100"><code>{connectorCode}</code></pre>
-          <p className="mb-0 mt-3 text-xs leading-5 text-stone-500">
+        <section aria-label="Minimal TanStack Table connector code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
+          <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
+          <pre className={classes("m-0 overflow-x-auto", ui.code.block)}><code>{connectorCode}</code></pre>
+          <p className={classes("mb-0 mt-3", ui.text.meta)}>
             TanStack owns view state and row models. The Connector translates visible stable identities into Sheet topology and editing intents.
           </p>
         </section>

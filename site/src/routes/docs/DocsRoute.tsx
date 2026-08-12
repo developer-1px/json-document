@@ -1,8 +1,7 @@
 import { useMemo } from "react";
+import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
-import { docNavigation, docPages, type DocPageId } from "./doc-pages";
-
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { docPages, type DocPageId } from "./doc-pages";
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
@@ -28,86 +27,16 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   );
 
   return (
-    <main className="min-h-full bg-white">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 lg:grid-cols-[11rem_minmax(0,1fr)] lg:px-6">
-        <aside className="hidden self-start text-xs leading-5 lg:sticky lg:top-4 lg:flex">
-          <div>
-            <nav aria-label="Documentation pages">
-              <div className="mb-3 font-medium text-stone-950">Documentation</div>
-              <div className="grid gap-3">
-                {docNavigation.map((group) => (
-                  <div key={group.label} role="group" aria-label={group.label}>
-                    <div className="px-3 pb-1 text-[10px] font-medium uppercase tracking-wide text-stone-400">{group.label}</div>
-                    <div className="grid">
-                      {group.pageIds.map((id) => {
-                        const item = docPages[id];
-                        return (
-                          <a
-                            key={item.path}
-                            href={sitePath(item.path)}
-                            aria-current={item.path === page.path ? "page" : undefined}
-                            className="border-l border-transparent px-3 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:border-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950"
-                          >
-                            {item.label}
-                          </a>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </nav>
-
-            <nav aria-label="On this page" className="mt-6">
-              <div className="mb-2 font-medium text-stone-950">On this page</div>
-              <div className="grid">
-                {headings.map((heading) => (
-                  <a
-                    key={`${heading.id}-${heading.text}`}
-                    href={`#${heading.id}`}
-                    className="border-l border-transparent px-3 py-1 text-stone-500 no-underline hover:text-stone-950"
-                  >
-                    {heading.text}
-                  </a>
-                ))}
-              </div>
-            </nav>
-          </div>
-        </aside>
-
+    <main className={classes(ui.frame.plainPage, ui.surface.flat)}>
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_11rem] lg:px-6">
         <div className="min-w-0">
-          <nav aria-label="Documentation pages" className="mb-3 overflow-x-auto border-b border-stone-200 pb-2 text-xs lg:hidden">
-            <div className="flex gap-4 whitespace-nowrap">
-              {docNavigation.map((group) => (
-                <div key={group.label} role="group" aria-label={group.label} className="grid shrink-0 gap-1">
-                  <div className="px-2 text-[10px] font-medium uppercase tracking-wide text-stone-400">{group.label}</div>
-                  <div className="flex gap-1">
-                    {group.pageIds.map((id) => {
-                      const item = docPages[id];
-                      return (
-                        <a
-                          key={item.path}
-                          href={sitePath(item.path)}
-                          aria-current={item.path === page.path ? "page" : undefined}
-                          className="px-2 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950"
-                        >
-                          {item.label}
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          <nav aria-label="Documentation sections" className="mb-5 overflow-x-auto text-xs lg:hidden">
+          <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
             <div className="flex gap-1 whitespace-nowrap">
               {headings.map((heading) => (
                 <a
                   key={`${heading.id}-${heading.text}`}
                   href={`#${heading.id}`}
-                  className="px-2 py-1 text-stone-500 no-underline hover:text-stone-950"
+                  className={classes("px-2 py-1 no-underline", ui.text.meta)}
                 >
                   {heading.text}
                 </a>
@@ -116,17 +45,30 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
           </nav>
 
           <div className="mx-auto max-w-3xl">
-            <header className="mb-7 border-b border-stone-200 pb-4">
-              <h1 className="m-0 text-2xl font-semibold text-stone-950">{page.title}</h1>
+            <header className={classes("mb-7 pb-4", ui.frame.header)}>
+              <h1 className={classes("m-0", ui.text.title)}>{page.title}</h1>
             </header>
             <MarkdownViewer source={page.source} hideTitle />
           </div>
         </div>
+
+        <aside className={classes("hidden self-start lg:sticky lg:top-4 lg:block", ui.text.meta)}>
+          <nav aria-label="On this page">
+            <div className={classes("mb-2", ui.text.heading)}>On this page</div>
+            <div className="grid">
+              {headings.map((heading) => (
+                <a
+                  key={`${heading.id}-${heading.text}`}
+                  href={`#${heading.id}`}
+                  className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
+                >
+                  {heading.text}
+                </a>
+              ))}
+            </div>
+          </nav>
+        </aside>
       </div>
     </main>
   );
-}
-
-function sitePath(path: string): string {
-  return `${basePath}${path}` || "/";
 }
