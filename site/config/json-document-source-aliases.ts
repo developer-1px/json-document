@@ -1,0 +1,19 @@
+import { fileURLToPath } from "node:url";
+
+export interface SourceAlias {
+  find: string;
+  replacement: string;
+}
+
+export function jsonDocumentSourceAliases(): SourceAlias[] {
+  return [
+    {
+      find: "@interactive-os/json-document",
+      replacement: sourceFile("packages/json-document/src/application/document/index.ts"),
+    },
+  ];
+}
+
+function sourceFile(path: string): string {
+  return fileURLToPath(new URL(`../../${path}`, import.meta.url));
+}

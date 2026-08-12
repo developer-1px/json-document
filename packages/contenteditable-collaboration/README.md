@@ -9,7 +9,7 @@ immediately. While the browser owns native input or IME composition, only
 rendering back into that root is delayed.
 
 Canonical DOM adapter와 lease vocabulary는
-[Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
+[Concept and Naming Standard](../../standards/repository-naming.md)가
 정의합니다. Public API는 `TextDOMAdapter`와 `DOMObservation`을 사용합니다.
 
 ```ts

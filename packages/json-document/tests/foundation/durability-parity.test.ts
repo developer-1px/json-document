@@ -5,7 +5,7 @@ import { jsonEqual } from "../../src/foundation/json/equal.js";
 import { jsonSerializableError } from "../../src/foundation/json/serializable.js";
 import { cloneTrustedPlainJson } from "../../src/foundation/json/trusted-clone.js";
 import { parseArrayIndex } from "../../src/foundation/pointer/array-index.js";
-import rawVectors from "../conformance/v3/foundation-vectors.json" with { type: "json" };
+import rawVectors from "../../../../standards/json-document-v3/conformance/vectors/foundation.json" with { type: "json" };
 
 interface FoundationVectors {
   readonly arrayIndexes: ReadonlyArray<{

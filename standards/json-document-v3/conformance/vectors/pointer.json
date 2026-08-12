@@ -1,0 +1,130 @@
+{
+  "formatVersion": 1,
+  "status": "stable",
+  "profile": "standards/json-document-v3/profile.md",
+  "requirements": ["JD3-ADDRESS-001", "JD3-PATCH-001"],
+  "parse": [
+    { "id": "pointer-root", "pointer": "", "segments": [] },
+    { "id": "pointer-empty-member", "pointer": "/", "segments": [""] },
+    { "id": "pointer-escaped-slash", "pointer": "/a~1b", "segments": ["a/b"] },
+    { "id": "pointer-escaped-tilde", "pointer": "/m~0n", "segments": ["m~n"] },
+    { "id": "pointer-uri-fragment", "pointer": "#/%ED%95%9C%EA%B8%80/%F0%9F%98%80", "segments": ["한글", "😀"] }
+  ],
+  "invalid": [
+    { "id": "pointer-missing-root-marker", "pointer": "items/0" },
+    { "id": "pointer-invalid-escape", "pointer": "/a~2b" },
+    { "id": "pointer-invalid-fragment", "pointer": "#items/0" },
+    { "id": "pointer-invalid-percent-encoding", "pointer": "#/%E0%A4%A" }
+  ],
+  "build": [
+    { "id": "build-root", "segments": [], "pointer": "", "fragment": "#" },
+    { "id": "build-escaped", "segments": ["a/b", "m~n"], "pointer": "/a~1b/m~0n", "fragment": "#/a~1b/m~0n" },
+    { "id": "build-unicode", "segments": ["한글", "😀"], "pointer": "/한글/😀", "fragment": "#/%ED%95%9C%EA%B8%80/%F0%9F%98%80" },
+    { "id": "build-number-segment", "segments": ["items", 0], "pointer": "/items/0", "fragment": "#/items/0" }
+  ],
+  "append": [
+    { "id": "append-root", "pointer": "", "segment": "items", "expect": "/items" },
+    { "id": "append-index", "pointer": "/items", "segment": 0, "expect": "/items/0" },
+    { "id": "append-escaped", "pointer": "/items/0", "segment": "a/b~c", "expect": "/items/0/a~1b~0c" }
+  ],
+  "parent": [
+    { "id": "parent-root", "pointer": "", "expect": null },
+    { "id": "parent-top-level", "pointer": "/items", "expect": "" },
+    { "id": "parent-nested", "pointer": "/items/0/title", "expect": "/items/0" }
+  ],
+  "track": [
+    {
+      "id": "track-array-add",
+      "pointer": "/items/2/title",
+      "applied": [{ "op": "add", "path": "/items/0", "value": null }],
+      "expect": "/items/3/title"
+    },
+    {
+      "id": "track-array-remove",
+      "pointer": "/items/3",
+      "applied": [{ "op": "remove", "path": "/items/1" }],
+      "expect": "/items/2"
+    },
+    {
+      "id": "track-removed-descendant",
+      "pointer": "/items/1/title",
+      "applied": [{ "op": "remove", "path": "/items/1" }],
+      "expect": null
+    },
+    {
+      "id": "track-replaced-target",
+      "pointer": "/title",
+      "applied": [{ "op": "replace", "path": "/title", "value": "Ready" }],
+      "expect": "/title"
+    },
+    {
+      "id": "track-replaced-descendant",
+      "pointer": "/meta/owner",
+      "applied": [{ "op": "replace", "path": "/meta", "value": {} }],
+      "expect": null
+    },
+    {
+      "id": "track-moved-descendant",
+      "pointer": "/items/0/title",
+      "applied": [{ "op": "move", "from": "/items/0", "path": "/archive/0" }],
+      "expect": "/archive/0/title"
+    },
+    {
+      "id": "track-same-array-forward-moved-node",
+      "pointer": "/items/0/title",
+      "applied": [{ "op": "move", "from": "/items/0", "path": "/items/2" }],
+      "expect": "/items/2/title"
+    },
+    {
+      "id": "track-same-array-forward-sibling",
+      "pointer": "/items/1/title",
+      "applied": [{ "op": "move", "from": "/items/0", "path": "/items/2" }],
+      "expect": "/items/0/title"
+    },
+    {
+      "id": "track-same-array-backward-moved-node",
+      "pointer": "/items/2/title",
+      "applied": [{ "op": "move", "from": "/items/2", "path": "/items/0" }],
+      "expect": "/items/0/title"
+    },
+    {
+      "id": "track-same-array-backward-sibling",
+      "pointer": "/items/0/title",
+      "applied": [{ "op": "move", "from": "/items/2", "path": "/items/0" }],
+      "expect": "/items/1/title"
+    },
+    {
+      "id": "track-copy-shifts-array",
+      "pointer": "/items/2",
+      "applied": [{ "op": "copy", "from": "/template", "path": "/items/0" }],
+      "expect": "/items/3"
+    },
+    {
+      "id": "track-ordered-batch",
+      "pointer": "/items/2",
+      "applied": [
+        { "op": "add", "path": "/items/0", "value": null },
+        { "op": "remove", "path": "/items/2" }
+      ],
+      "expect": "/items/2"
+    },
+    {
+      "id": "track-root-replace",
+      "pointer": "/items/0",
+      "applied": [{ "op": "replace", "path": "", "value": null }],
+      "expect": null
+    },
+    {
+      "id": "track-invalid-input",
+      "pointer": "items/0",
+      "applied": [{ "op": "test", "path": "", "value": null }],
+      "expect": null
+    },
+    {
+      "id": "track-rejects-unresolved-append",
+      "pointer": "/items/0",
+      "applied": [{ "op": "move", "from": "/items/0", "path": "/items/-" }],
+      "expect": null
+    }
+  ]
+}

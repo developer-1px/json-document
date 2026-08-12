@@ -17,12 +17,14 @@
       "node"
     ],
     "noEmit": true,
-    "rootDir": ".",
+    "rootDir": "../..",
     "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
+    "../../standards/json-document-v3/conformance/suites/**/*.ts",
+    "../../standards/json-document-v3/implementations/independent/**/*.ts",
     "vitest.config.ts"
   ]
 }

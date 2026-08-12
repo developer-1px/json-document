@@ -7,7 +7,7 @@ Local and collaborative implementations expose the same six-member
 `JSONDocument` API.
 
 Canonical concept와 stable compatibility identifier의 관계는
-[Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
+[Concept and Naming Standard](../../standards/repository-naming.md)가
 정의합니다. `runtime.replica`, `CollaborationReplica`과
 `ReplicaStatus`은 현재 API 이름이며 canonical prose에서는 각각 replica
 surface와 replica status로 설명합니다.

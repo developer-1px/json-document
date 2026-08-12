@@ -1,0 +1,417 @@
+{
+  "formatVersion": 1,
+  "status": "stable",
+  "profile": "standards/json-document-v3/profile.md",
+  "function": "applyPatch",
+  "initial": {
+    "title": "Draft",
+    "items": [
+      {
+        "id": "a",
+        "done": false
+      },
+      {
+        "id": "b",
+        "done": false
+      }
+    ],
+    "meta": {
+      "owner": "core"
+    }
+  },
+  "vectors": [
+    {
+      "id": "ordered-patch-canonicalizes-append",
+      "kind": "patch",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Ready"
+        },
+        {
+          "op": "add",
+          "path": "/items/-",
+          "value": {
+            "id": "c",
+            "done": false
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/items/2/done",
+          "value": true
+        }
+      ],
+      "expect": {
+        "ok": true,
+        "value": {
+          "title": "Ready",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            },
+            {
+              "id": "c",
+              "done": true
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "change": {
+          "applied": [
+            {
+              "op": "replace",
+              "path": "/title",
+              "value": "Ready"
+            },
+            {
+              "op": "add",
+              "path": "/items/2",
+              "value": {
+                "id": "c",
+                "done": false
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/items/2/done",
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mid-batch-failure-is-atomic",
+      "kind": "patch",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-RESULT-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Temporary"
+        },
+        {
+          "op": "test",
+          "path": "/meta/owner",
+          "value": "external"
+        },
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Never"
+        }
+      ],
+      "expect": {
+        "ok": false,
+        "code": "test_failed",
+        "pointer": "/meta/owner"
+      }
+    },
+    {
+      "id": "jsonpath-is-not-a-patch-target",
+      "kind": "patch",
+      "requirements": [
+        "JD3-ADDRESS-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "$.title",
+          "value": "Invalid"
+        }
+      ],
+      "expect": {
+        "ok": false,
+        "code": "invalid_pointer",
+        "pointer": "$.title"
+      }
+    },
+    {
+      "id": "successful-test-is-preserved",
+      "kind": "patch",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-PATCH-002"
+      ],
+      "operations": [
+        {
+          "op": "test",
+          "path": "/meta/owner",
+          "value": "core"
+        }
+      ],
+      "expect": {
+        "ok": true,
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "change": {
+          "applied": [
+            {
+              "op": "test",
+              "path": "/meta/owner",
+              "value": "core"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "same-value-pure-operation-is-preserved",
+      "kind": "patch",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-PATCH-002"
+      ],
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/title",
+          "value": "Draft"
+        }
+      ],
+      "expect": {
+        "ok": true,
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "change": {
+          "applied": [
+            {
+              "op": "replace",
+              "path": "/title",
+              "value": "Draft"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "canonical-operation-drops-extra-fields",
+      "kind": "extra-fields",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-DATA-001"
+      ],
+      "operations": [
+        {
+          "op": "add",
+          "path": "/meta/status",
+          "value": "draft",
+          "extension": {
+            "source": "suite"
+          },
+          "debug": true
+        }
+      ],
+      "absentFields": [
+        "extension",
+        "debug"
+      ],
+      "expect": {
+        "ok": true,
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core",
+            "status": "draft"
+          }
+        },
+        "change": {
+          "applied": [
+            {
+              "op": "add",
+              "path": "/meta/status",
+              "value": "draft"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "non-json-state-is-rejected",
+      "kind": "non-json-state",
+      "requirements": [
+        "JD3-DATA-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
+      ],
+      "property": "callback",
+      "hostValue": "callable",
+      "expect": {
+        "ok": false,
+        "code": "not_serializable"
+      }
+    },
+    {
+      "id": "non-json-payload-is-rejected",
+      "kind": "non-json-payload",
+      "requirements": [
+        "JD3-DATA-001",
+        "JD3-PATCH-002",
+        "JD3-RESULT-001"
+      ],
+      "operation": {
+        "op": "add",
+        "path": "/meta/callback"
+      },
+      "hostValue": "callable",
+      "expect": {
+        "ok": false,
+        "code": "not_serializable"
+      }
+    },
+    {
+      "id": "earlier-runtime-failure-wins-over-later-callable",
+      "kind": "precedence",
+      "requirements": [
+        "JD3-DATA-001",
+        "JD3-PATCH-001",
+        "JD3-RESULT-001"
+      ],
+      "operations": [
+        {
+          "op": "test",
+          "path": "/title",
+          "value": "Not Draft"
+        }
+      ],
+      "laterOperation": {
+        "op": "add",
+        "path": "/meta/callback"
+      },
+      "hostValue": "callable",
+      "expect": {
+        "ok": false,
+        "code": "test_failed",
+        "pointer": "/title"
+      }
+    },
+    {
+      "id": "input-operation-and-result-are-isolated",
+      "kind": "isolation",
+      "requirements": [
+        "JD3-DATA-002",
+        "JD3-PATCH-002"
+      ],
+      "operations": [
+        {
+          "op": "add",
+          "path": "/items/-",
+          "value": {
+            "id": "c",
+            "done": false
+          }
+        }
+      ],
+      "mutations": {
+        "input": {
+          "pointer": "/meta/owner",
+          "value": "outside"
+        },
+        "operations": {
+          "pointer": "/0/value/id",
+          "value": "outside"
+        },
+        "resultValue": {
+          "pointer": "/items/2/id",
+          "value": "outside"
+        },
+        "resultChange": {
+          "pointer": "/applied/0/value/id",
+          "value": "outside"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "value": {
+          "title": "Draft",
+          "items": [
+            {
+              "id": "a",
+              "done": false
+            },
+            {
+              "id": "b",
+              "done": false
+            },
+            {
+              "id": "c",
+              "done": false
+            }
+          ],
+          "meta": {
+            "owner": "core"
+          }
+        },
+        "change": {
+          "applied": [
+            {
+              "op": "add",
+              "path": "/items/2",
+              "value": {
+                "id": "c",
+                "done": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

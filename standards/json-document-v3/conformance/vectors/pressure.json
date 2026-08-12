@@ -1,0 +1,387 @@
+{
+  "formatVersion": 1,
+  "status": "stable",
+  "profile": "standards/json-document-v3/profile.md",
+  "verticals": [
+    {
+      "id": "form",
+      "requirements": [
+        "JD3-SCHEMA-001",
+        "JD3-CONFORMANCE-002"
+      ],
+      "validation": "task-list",
+      "initial": {
+        "title": "Draft",
+        "items": [
+          { "id": "a", "done": false }
+        ],
+        "meta": { "owner": "form" }
+      },
+      "steps": [
+        {
+          "operations": [
+            { "op": "replace", "path": "/title", "value": "Ready" }
+          ],
+          "expect": {
+            "probe": { "ok": true },
+            "commit": {
+              "ok": true,
+              "change": {
+                "applied": [
+                  { "op": "replace", "path": "/title", "value": "Ready" }
+                ]
+              }
+            },
+            "value": {
+              "title": "Ready",
+              "items": [
+                { "id": "a", "done": false }
+              ],
+              "meta": { "owner": "form" }
+            },
+            "notificationCount": 1
+          }
+        },
+        {
+          "operations": [
+            { "op": "replace", "path": "/items/0/done", "value": "yes" }
+          ],
+          "expect": {
+            "probe": { "ok": false, "code": "schema_violation" },
+            "commit": { "ok": false, "code": "schema_violation" },
+            "value": {
+              "title": "Ready",
+              "items": [
+                { "id": "a", "done": false }
+              ],
+              "meta": { "owner": "form" }
+            },
+            "notificationCount": 1
+          }
+        }
+      ],
+      "reads": [
+        {
+          "pointer": "/title",
+          "expect": { "ok": true, "path": "/title", "value": "Ready" }
+        }
+      ]
+    },
+    {
+      "id": "table-data-grid",
+      "requirements": [
+        "JD3-PATCH-001",
+        "JD3-CONFORMANCE-002"
+      ],
+      "validation": "json",
+      "initial": {
+        "rows": [
+          { "id": "a", "cells": { "score": 1 } },
+          { "id": "b", "cells": { "score": 2 } }
+        ]
+      },
+      "steps": [
+        {
+          "operations": [
+            {
+              "op": "add",
+              "path": "/rows/-",
+              "value": { "id": "c", "cells": { "score": 0 } }
+            },
+            {
+              "op": "replace",
+              "path": "/rows/2/cells/score",
+              "value": 3
+            },
+            {
+              "op": "move",
+              "from": "/rows/0",
+              "path": "/rows/2"
+            }
+          ],
+          "metadata": {
+            "origin": "grid",
+            "transaction": "paste-sort"
+          },
+          "expect": {
+            "probe": { "ok": true },
+            "commit": {
+              "ok": true,
+              "change": {
+                "applied": [
+                  {
+                    "op": "add",
+                    "path": "/rows/2",
+                    "value": { "id": "c", "cells": { "score": 0 } }
+                  },
+                  {
+                    "op": "replace",
+                    "path": "/rows/2/cells/score",
+                    "value": 3
+                  },
+                  {
+                    "op": "move",
+                    "from": "/rows/0",
+                    "path": "/rows/2"
+                  }
+                ],
+                "metadata": {
+                  "origin": "grid",
+                  "transaction": "paste-sort"
+                }
+              }
+            },
+            "value": {
+              "rows": [
+                { "id": "b", "cells": { "score": 2 } },
+                { "id": "c", "cells": { "score": 3 } },
+                { "id": "a", "cells": { "score": 1 } }
+              ]
+            },
+            "notificationCount": 1
+          }
+        }
+      ],
+      "queries": [
+        {
+          "jsonPath": "$.rows[*].id",
+          "expect": {
+            "ok": true,
+            "query": "$.rows[*].id",
+            "pointers": ["/rows/0/id", "/rows/1/id", "/rows/2/id"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "outliner-tree",
+      "requirements": [
+        "JD3-ADDRESS-001",
+        "JD3-PATCH-001",
+        "JD3-CONFORMANCE-002"
+      ],
+      "validation": "json",
+      "initial": {
+        "nodes": [
+          {
+            "id": "a",
+            "title": "A",
+            "children": [
+              { "id": "a1", "title": "A.1", "children": [] }
+            ]
+          },
+          {
+            "id": "b",
+            "title": "B",
+            "children": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "operations": [
+            {
+              "op": "move",
+              "from": "/nodes/0/children/0",
+              "path": "/nodes/1/children/-"
+            }
+          ],
+          "expect": {
+            "probe": { "ok": true },
+            "commit": {
+              "ok": true,
+              "change": {
+                "applied": [
+                  {
+                    "op": "move",
+                    "from": "/nodes/0/children/0",
+                    "path": "/nodes/1/children/0"
+                  }
+                ]
+              }
+            },
+            "value": {
+              "nodes": [
+                {
+                  "id": "a",
+                  "title": "A",
+                  "children": []
+                },
+                {
+                  "id": "b",
+                  "title": "B",
+                  "children": [
+                    { "id": "a1", "title": "A.1", "children": [] }
+                  ]
+                }
+              ]
+            },
+            "notificationCount": 1
+          }
+        }
+      ],
+      "reads": [
+        {
+          "pointer": "/nodes/1/children/0/id",
+          "expect": {
+            "ok": true,
+            "path": "/nodes/1/children/0/id",
+            "value": "a1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "rich-text",
+      "requirements": [
+        "JD3-COMMIT-002",
+        "JD3-CONFORMANCE-002"
+      ],
+      "validation": "json",
+      "initial": {
+        "doc": {
+          "blocks": [
+            { "type": "paragraph", "text": "가🙂" }
+          ]
+        }
+      },
+      "steps": [
+        {
+          "operations": [
+            {
+              "op": "replace",
+              "path": "/doc/blocks/0/text",
+              "value": "가나다🙂"
+            }
+          ],
+          "metadata": {
+            "origin": "input",
+            "selection": { "anchor": 3, "focus": 3 }
+          },
+          "expect": {
+            "probe": { "ok": true },
+            "commit": {
+              "ok": true,
+              "change": {
+                "applied": [
+                  {
+                    "op": "replace",
+                    "path": "/doc/blocks/0/text",
+                    "value": "가나다🙂"
+                  }
+                ],
+                "metadata": {
+                  "origin": "input",
+                  "selection": { "anchor": 3, "focus": 3 }
+                }
+              }
+            },
+            "value": {
+              "doc": {
+                "blocks": [
+                  { "type": "paragraph", "text": "가나다🙂" }
+                ]
+              }
+            },
+            "notificationCount": 1
+          }
+        }
+      ],
+      "queries": [
+        {
+          "jsonPath": "$.doc.blocks[*].text",
+          "expect": {
+            "ok": true,
+            "query": "$.doc.blocks[*].text",
+            "pointers": ["/doc/blocks/0/text"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "storage-collaboration",
+      "requirements": [
+        "JD3-DATA-002",
+        "JD3-COMMIT-002",
+        "JD3-NOTIFICATION-001",
+        "JD3-CONFORMANCE-002"
+      ],
+      "validation": "json",
+      "initial": {
+        "counter": 0,
+        "notes": []
+      },
+      "steps": [
+        {
+          "operations": [
+            { "op": "replace", "path": "/counter", "value": 1 }
+          ],
+          "metadata": {
+            "actor": "a",
+            "sequence": 1
+          },
+          "expect": {
+            "probe": { "ok": true },
+            "commit": {
+              "ok": true,
+              "change": {
+                "applied": [
+                  { "op": "replace", "path": "/counter", "value": 1 }
+                ],
+                "metadata": {
+                  "actor": "a",
+                  "sequence": 1
+                }
+              }
+            },
+            "value": {
+              "counter": 1,
+              "notes": []
+            },
+            "notificationCount": 1
+          }
+        },
+        {
+          "operations": [
+            { "op": "add", "path": "/notes/-", "value": "synced" }
+          ],
+          "metadata": {
+            "actor": "b",
+            "sequence": 1
+          },
+          "expect": {
+            "probe": { "ok": true },
+            "commit": {
+              "ok": true,
+              "change": {
+                "applied": [
+                  { "op": "add", "path": "/notes/0", "value": "synced" }
+                ],
+                "metadata": {
+                  "actor": "b",
+                  "sequence": 1
+                }
+              }
+            },
+            "value": {
+              "counter": 1,
+              "notes": ["synced"]
+            },
+            "notificationCount": 2
+          }
+        }
+      ],
+      "replay": true,
+      "reads": [
+        {
+          "pointer": "/notes/0",
+          "expect": {
+            "ok": true,
+            "path": "/notes/0",
+            "value": "synced"
+          }
+        }
+      ]
+    }
+  ]
+}

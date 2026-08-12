@@ -12,7 +12,7 @@ stateless JSON Patch -> JSON Document -> host adapter
 ```
 
 Canonical concept와 stable v3 identifier의 관계는
-[Concept and Naming Standard](../../docs/standard/concept-and-naming-standard.md)가
+[Concept and Naming Standard](../../standards/repository-naming.md)가
 정의합니다.
 
 v3 표준 상태는 Stable입니다. 현재 source release version은 `3.0.0`이며 npm에는
@@ -21,7 +21,7 @@ v3 표준 상태는 Stable입니다. 현재 source release version은 `3.0.0`이
 pressure gate까지 검증했습니다.
 
 - 공식 사이트: https://developer-1px.github.io/json-document/
-- 표준 profile: `docs/standard/v3-json-document-profile.md`
+- 표준 profile: `standards/json-document-v3/profile.md`
 
 ## 설치
 

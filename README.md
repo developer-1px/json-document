@@ -29,9 +29,9 @@ stateless JSON Patch
 | 공개 API | [docs/public/api.md](docs/public/api.md) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
-| 개념·이름 정본 | [docs/standard/concept-and-naming-standard.md](docs/standard/concept-and-naming-standard.md) |
-| v3 JSON Document profile | [docs/standard/v3-json-document-profile.md](docs/standard/v3-json-document-profile.md) |
-| v3 공개 표면 manifest | [docs/standard/v3-public-surface.json](docs/standard/v3-public-surface.json) |
+| 개념·이름 정본 | [standards/repository-naming.md](standards/repository-naming.md) |
+| v3 JSON Document profile | [standards/json-document-v3/profile.md](standards/json-document-v3/profile.md) |
+| v3 공개 표면 manifest | [standards/json-document-v3/public-surface.json](standards/json-document-v3/public-surface.json) |
 
 ## 코드 지도
 
@@ -40,7 +40,7 @@ stateless JSON Patch
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
-| [apps/site](apps/site) | v3 Core 공개 문서 사이트 |
+| [site](site) | v3 Core 공개 문서 사이트 |
 
 v3 Kernel release는 `@interactive-os/json-document` 하나이며 dependency-free
 Core로 남습니다. 두 collaboration package는 독립 version과 release lifecycle을
