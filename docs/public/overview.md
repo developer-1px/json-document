@@ -122,6 +122,7 @@ if (result.ok) {
 | --- | --- | --- |
 | `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
 | `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 Document·Order·Sheet·Object·Tree slice |
+| `@interactive-os/json-document-selection` | optional companion | DOM-free key·range·mask family, semantic interaction과 topology/geometry port |
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
 | `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-tanstack-table` | official Connector | TanStack visible row/column model과 Sheet 편집 topology 번역 |
@@ -162,7 +163,8 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | 변경 구독 | `document.subscribe(listener)` |
 | instance 없는 patch 적용 | `applyPatch(value, operations)` |
 | Pointer 조합과 추적 | `buildPointer`, `appendSegment`, `parentPointer`, `trackPointer` |
-| headless selection, clipboard, undo/redo | `@interactive-os/json-document-editing` |
+| DOM-free selection state와 interaction | `@interactive-os/json-document-selection` |
+| selection 기반 clipboard, JSON 수정, undo/redo | `@interactive-os/json-document-editing` |
 | React에서 document/editor 구독 | `@interactive-os/json-document-react` |
 | Zod schema로 document validation | `@interactive-os/json-document-zod`의 `createZodValidator` |
 
@@ -177,8 +179,8 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 - Slide와 whiteboard: object property와 layer state를 headless JSON으로 관리
 - 저장과 협업 adapter: subscribed canonical change를 외부 log로 전달
 
-제품별 structural selection 의미는 editing companion의 공통 lifecycle 위에서
-range-set 또는 set-selection family로 조합합니다. Native text selection은 별도
+제품별 structural selection 의미는 selection companion의 공통 lifecycle 위에서
+range 또는 key family로 조합합니다. Native text selection은 별도
 authoring lifecycle입니다.
 Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다. 공식 site의
 `/demo`, `/demo/sheet`, `/demo/selection`과 TanStack Table Connector demo는 public

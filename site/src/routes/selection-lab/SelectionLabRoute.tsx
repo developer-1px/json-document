@@ -25,6 +25,17 @@ import {
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import {
+  createKeySelectionFamily,
+  idlePointerInteraction,
+  reduceMarqueeInteraction,
+  type EditingMode,
+  type KeySelection,
+  type MaskSelection,
+  type PointerInteractionState,
+  type ScopedSelection,
+  type SelectionOperation,
+} from "@interactive-os/json-document-selection";
 
 const initialOrder: OrderDocument = {
   items: [
@@ -84,6 +95,7 @@ export function SelectionLabRoute() {
           <GridVariant />
           <ObjectVariant />
           <TreeVariant />
+          <ProtocolVariant />
         </div>
       </div>
     </main>
@@ -133,8 +145,11 @@ function GridVariant() {
   const snapshot = useEditingSnapshot(editor);
   const document = snapshot.value as SheetDocument;
   const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}:${cell.columnId}`));
+  const [current, setCurrent] = useState<{ readonly rowId: string; readonly columnId: string } | null>(null);
+  const [editing, setEditing] = useState<EditingMode>({ kind: "navigate" });
 
   function select(event: MouseEvent, rowId: string, columnId: string) {
+    setCurrent({ rowId, columnId });
     editor.dispatch({
       type: "selection.set",
       rowId,
@@ -155,6 +170,10 @@ function GridVariant() {
               aria-label={`Grid ${String(row.cells[column.id])}`}
               aria-pressed={selected.has(key)}
               onClick={(event) => select(event, row.id, column.id)}
+              onDoubleClick={() => {
+                setCurrent({ rowId: row.id, columnId: column.id });
+                setEditing({ kind: "edit", lease: `cell:${row.id}:${column.id}` });
+              }}
               className="rounded border border-stone-200 bg-white px-2 py-3 text-sm aria-pressed:border-stone-950 aria-pressed:bg-amber-50 aria-pressed:ring-1 aria-pressed:ring-stone-950"
             >
               {String(row.cells[column.id])}
@@ -164,27 +183,27 @@ function GridVariant() {
       </div>
       <Toolbar>
         <Action label="Fill grid selection" onClick={() => editor.dispatch({ type: "selection.fill", value: "Selected" })} />
+        <Action label="Edit current cell" disabled={current === null} onClick={() => {
+          if (current !== null) setEditing({ kind: "edit", lease: `cell:${current.rowId}:${current.columnId}` });
+        }} />
+        <Action label="Exit cell edit" disabled={editing.kind === "navigate"} onClick={() => setEditing({ kind: "navigate" })} />
         <History editor={editor} canUndo={snapshot.canUndo} canRedo={snapshot.canRedo} />
       </Toolbar>
+      <JsonOutput label="Navigation + edit lease" testId="grid-session-json" value={{ current, editing }} />
     </Variant>
   );
 }
 
-type DragBox = {
-  readonly startX: number;
-  readonly startY: number;
-  readonly currentX: number;
-  readonly currentY: number;
-  readonly additive: boolean;
-};
+type CanvasPoint = { readonly x: number; readonly y: number };
+type DragBox = { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
 
 function ObjectVariant() {
   const [editor] = useState<ObjectEditor>(() => createObjectEditor(initialObjects));
   const snapshot = useEditingSnapshot(editor);
   const document = snapshot.value as ObjectDocument;
-  const selected = new Set(snapshot.selection.selectedIds);
+  const selected = new Set(snapshot.selection.keys);
   const stageRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<DragBox | null>(null);
+  const dragRef = useRef<PointerInteractionState<CanvasPoint>>(idlePointerInteraction());
   const [drag, setDrag] = useState<DragBox | null>(null);
 
   function localPoint(event: PointerEvent<HTMLDivElement>) {
@@ -196,40 +215,48 @@ function ObjectVariant() {
     if (event.target !== event.currentTarget) return;
     const point = localPoint(event);
     event.currentTarget.setPointerCapture(event.pointerId);
-    const next = {
-      startX: point.x,
-      startY: point.y,
-      currentX: point.x,
-      currentY: point.y,
-      additive: event.shiftKey,
-    };
-    dragRef.current = next;
-    setDrag(next);
+    const result = reduceMarqueeInteraction(dragRef.current, {
+      phase: "start",
+      pointerId: String(event.pointerId),
+      point,
+      operation: pointerOperation(event, "add"),
+    }, marqueeContext(document.objects));
+    dragRef.current = result.state;
+    setDrag(result.preview?.region ?? null);
   }
 
   function moveMarquee(event: PointerEvent<HTMLDivElement>) {
-    const active = dragRef.current;
-    if (active === null) return;
+    if (dragRef.current.kind === "idle") return;
     const point = localPoint(event);
-    const next = { ...active, currentX: point.x, currentY: point.y };
-    dragRef.current = next;
-    setDrag(next);
+    const result = reduceMarqueeInteraction(dragRef.current, {
+      phase: "move", pointerId: String(event.pointerId), point,
+    }, marqueeContext(document.objects));
+    dragRef.current = result.state;
+    setDrag(result.preview?.region ?? null);
   }
 
   function finishMarquee(event: PointerEvent<HTMLDivElement>) {
-    const active = dragRef.current;
-    if (active === null) return;
+    if (dragRef.current.kind === "idle") return;
     const point = localPoint(event);
-    const rectangle = normalizedBox({ ...active, currentX: point.x, currentY: point.y });
-    const objectIds = hitTest(document.objects, rectangle);
-    editor.dispatch({
+    const result = reduceMarqueeInteraction(dragRef.current, {
+      phase: "end", pointerId: String(event.pointerId), point,
+    }, marqueeContext(document.objects));
+    if (result.commit !== null) editor.dispatch({
       type: "selection.set",
-      objectIds,
-      mode: active.additive ? "add" : "replace",
+      objectIds: result.commit.keys,
+      mode: result.commit.operation === "extend" ? "add" : result.commit.operation,
     });
-    dragRef.current = null;
+    dragRef.current = result.state;
     setDrag(null);
     event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+
+  function cancelMarquee(event: PointerEvent<HTMLDivElement>) {
+    const result = reduceMarqueeInteraction(dragRef.current, {
+      phase: "cancel", pointerId: String(event.pointerId),
+    }, marqueeContext(document.objects));
+    dragRef.current = result.state;
+    setDrag(null);
   }
 
   function selectObject(event: MouseEvent, objectId: string) {
@@ -240,16 +267,17 @@ function ObjectVariant() {
     });
   }
 
-  const marquee = drag === null ? null : normalizedBox(drag);
+  const marquee = drag;
 
   return (
-    <Variant title="Objects" family="Set · host geometry query" selection={snapshot.selection} value={snapshot.value} testId="object">
+    <Variant title="Objects" family="Key · host geometry query" selection={snapshot.selection} value={snapshot.value} testId="object">
       <div
         ref={stageRef}
         data-testid="object-stage"
         onPointerDown={startMarquee}
         onPointerMove={moveMarquee}
         onPointerUp={finishMarquee}
+        onPointerCancel={cancelMarquee}
         className="relative h-60 touch-none select-none overflow-hidden rounded border border-stone-300 bg-[linear-gradient(#f5f5f4_1px,transparent_1px),linear-gradient(90deg,#f5f5f4_1px,transparent_1px)] bg-[size:16px_16px]"
       >
         {document.objects.map((object) => (
@@ -354,6 +382,75 @@ function TreeVariant() {
   );
 }
 
+type ProtocolScope = "canvas" | "vector" | "text";
+
+function ProtocolVariant() {
+  const family = useMemo(() => createKeySelectionFamily<string>(), []);
+  const context = {
+    keys: ["alpha", "beta", "gamma"],
+    universe: "filtered:demo:v1",
+    universeMismatch: "clear" as const,
+  };
+  const [selection, setSelection] = useState<KeySelection<string>>({
+    kind: "explicit",
+    keys: ["alpha"],
+    primaryKey: "alpha",
+  });
+  const [scoped, setScoped] = useState<ScopedSelection<ProtocolScope, KeySelection<string>>>({
+    scope: "canvas",
+    selection: { kind: "explicit", keys: ["alpha"], primaryKey: "alpha" },
+  });
+  const [editing, setEditing] = useState<EditingMode>({ kind: "navigate" });
+  const [mask, setMask] = useState<MaskSelection<readonly number[]>>({
+    kind: "mask",
+    representation: [0, 0, 0],
+  });
+
+  function transition(command: Parameters<typeof family.transition>[1]) {
+    setSelection((current) => family.transition(current, command, context).state);
+  }
+
+  return (
+    <Variant
+      title="Protocols"
+      family="Key all · nested scope · mask extension"
+      selection={selection}
+      value={{ targets: family.targets(selection, context), scoped, editing, mask }}
+      testId="protocol"
+    >
+      <p className="m-0 text-xs leading-5 text-stone-500">
+        Symbolic all stays compact; nested editing changes tagged ownership; weighted mask data remains host-owned.
+      </p>
+      <Toolbar>
+        <Action label="Select all" onClick={() => transition({ type: "select-all", universe: context.universe })} />
+        <Action label="Exclude Beta" onClick={() => transition({ type: "subtract", keys: ["beta"] })} />
+        <Action label="Enter vector scope" onClick={() => setScoped({
+          scope: "vector",
+          selection: { kind: "explicit", keys: ["point-1", "point-2"], primaryKey: "point-2" },
+        })} />
+        <Action label="Enter text edit" onClick={() => {
+          setScoped({
+            scope: "text",
+            selection: { kind: "explicit", keys: ["label"], primaryKey: "label" },
+          });
+          setEditing({ kind: "edit", lease: "native-text:label" });
+        }} />
+        <Action label="Exit nested edit" onClick={() => {
+          setScoped({
+            scope: "canvas",
+            selection: { kind: "explicit", keys: ["alpha"], primaryKey: "alpha" },
+          });
+          setEditing({ kind: "navigate" });
+        }} />
+        <Action label="Apply soft mask" onClick={() => setMask({
+          kind: "mask",
+          representation: [0, 0.5, 1],
+        })} />
+      </Toolbar>
+    </Variant>
+  );
+}
+
 function Variant(props: {
   readonly title: string;
   readonly family: string;
@@ -421,14 +518,51 @@ function objectStyle(object: DocumentObject): CSSProperties {
   };
 }
 
-function normalizedBox(box: DragBox) {
-  const x = Math.min(box.startX, box.currentX);
-  const y = Math.min(box.startY, box.currentY);
+function normalizedBox(start: CanvasPoint, current: CanvasPoint): DragBox {
+  const x = Math.min(start.x, current.x);
+  const y = Math.min(start.y, current.y);
   return {
     x,
     y,
-    width: Math.abs(box.startX - box.currentX),
-    height: Math.abs(box.startY - box.currentY),
+    width: Math.abs(start.x - current.x),
+    height: Math.abs(start.y - current.y),
+  };
+}
+
+function pointerOperation(
+  event: Pick<PointerEvent, "shiftKey" | "metaKey" | "ctrlKey" | "altKey">,
+  shiftOperation: SelectionOperation,
+): SelectionOperation {
+  if (event.altKey) return "subtract";
+  if (event.shiftKey) return shiftOperation;
+  if (event.metaKey || event.ctrlKey) return "toggle";
+  return "replace";
+}
+
+function marqueeContext(objects: ReadonlyArray<DocumentObject>) {
+  return {
+    regions: { fromPoints: normalizedBox },
+    spatialIndex: {
+      hitPoint(point: CanvasPoint, mode: "topmost" | "deepest") {
+        const hits = objects.filter((object) => (
+          point.x >= object.x && point.x <= object.x + object.width
+          && point.y >= object.y && point.y <= object.y + object.height
+        ));
+        const candidate = mode === "topmost" ? hits.at(-1) : hits[0];
+        return candidate?.id ?? null;
+      },
+      hitRegion: (rectangle: DragBox, mode: "intersects" | "contains") => (
+        mode === "intersects"
+          ? hitTest(objects, rectangle)
+          : objects.filter((object) => (
+              object.x >= rectangle.x
+              && object.y >= rectangle.y
+              && object.x + object.width <= rectangle.x + rectangle.width
+              && object.y + object.height <= rectangle.y + rectangle.height
+            )).map((object) => object.id)
+      ),
+    },
+    hitMode: "intersects" as const,
   };
 }
 

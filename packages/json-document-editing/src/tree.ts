@@ -3,6 +3,10 @@ import {
   createJSONDocument,
   type JSONValue,
 } from "@interactive-os/json-document";
+import {
+  createRangeSelectionFamily,
+  type OrderedTopology,
+} from "@interactive-os/json-document-selection";
 import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
@@ -36,8 +40,9 @@ export interface TreeRange extends Record<string, JSONValue> {
 }
 
 export interface TreeSelection extends Record<string, JSONValue> {
+  readonly kind: "range";
   readonly ranges: ReadonlyArray<TreeRange>;
-  readonly primaryIndex: number;
+  readonly primaryIndex: number | null;
 }
 
 export interface TreeTopology {
@@ -65,6 +70,7 @@ export interface TreeEditor {
 
 export function createTreeEditor(initial: TreeDocument): TreeEditor {
   assertTreeDocument(initial);
+  const selectionFamily = createRangeSelectionFamily<TreePoint, string>();
   const first = initial.nodes[0];
   const session = createEditingSession({
     document: createJSONDocument(initial),
@@ -88,43 +94,32 @@ export function createTreeEditor(initial: TreeDocument): TreeEditor {
 
   function selectedNodeIdsIn(topology: TreeTopology): string[] {
     const resolved = resolveTopology(topology);
-    const axis = createOrderedAxis(resolved.visibleIds);
-    const selected = new Set<string>();
-    for (const range of session.snapshot.selection.ranges) {
-      for (const id of axis.interval(range.anchor.nodeId, range.focus.nodeId)) selected.add(id);
-    }
+    const selected = new Set(selectionFamily.targets(
+      session.snapshot.selection,
+      { topology: rangeTopology(resolved) },
+    ));
     return resolved.visibleIds.filter((id) => selected.has(id));
   }
 
   function reconcile(topology: TreeTopology): EditingSnapshot<TreeSelection> {
     const resolved = resolveTopology(topology);
-    const visible = new Set(resolved.visibleIds);
-    const nodes = value().nodes;
-    const byId = new Map(nodes.map((node) => [node.id, node]));
-    const normalized: TreeRange[] = [];
-    let primaryIndex = 0;
-    for (let index = 0; index < session.snapshot.selection.ranges.length; index += 1) {
-      const range = session.snapshot.selection.ranges[index]!;
-      const anchor = nearestVisible(range.anchor.nodeId, visible, byId);
-      const focus = nearestVisible(range.focus.nodeId, visible, byId);
-      if (anchor === null || focus === null) continue;
-      const next: TreeRange = {
-        anchor: { nodeId: anchor },
-        focus: { nodeId: focus },
-      };
-      const duplicate = normalized.some((candidate) => (
-        candidate.anchor.nodeId === next.anchor.nodeId
-        && candidate.focus.nodeId === next.focus.nodeId
-      ));
-      if (!duplicate) {
-        if (index === session.snapshot.selection.primaryIndex) primaryIndex = normalized.length;
-        normalized.push(next);
-      }
-    }
-    const selection: TreeSelection = normalized.length === 0
-      ? emptySelection()
-      : { ranges: normalized, primaryIndex: Math.min(primaryIndex, normalized.length - 1) };
-    return session.select(selection);
+    return session.reconcile((selection) => asTreeSelection(
+      selectionFamily.reconcile(selection, { topology: rangeTopology(resolved) }).state,
+    ));
+  }
+
+  function rangeTopology(topology: TreeTopology): OrderedTopology<TreePoint, string> {
+    const axis = createOrderedAxis(topology.visibleIds);
+    const visible = new Set(topology.visibleIds);
+    const byId = new Map(value().nodes.map((node) => [node.id, node]));
+    return {
+      equals: (left, right) => left.nodeId === right.nodeId,
+      interval: (anchor, focus) => axis.interval(anchor.nodeId, focus.nodeId),
+      reconcilePoint(point) {
+        const nodeId = nearestVisible(point.nodeId, visible, byId);
+        return nodeId === null ? null : { nodeId };
+      },
+    };
   }
 
   function dispatch(intent: TreeIntent): EditingResult<TreeSelection> {
@@ -211,6 +206,7 @@ function emptySelection(): TreeSelection {
 
 function asTreeSelection(selection: RangeSelectionState<TreePoint>): TreeSelection {
   return {
+    kind: "range",
     ranges: selection.ranges.map((range) => ({
       anchor: { ...range.anchor },
       focus: { ...range.focus },

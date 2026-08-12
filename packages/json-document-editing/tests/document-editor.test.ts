@@ -117,6 +117,7 @@ describe("document editing vertical slice", () => {
 
     expect(editor.selectedBlockIds).toEqual(["a", "c", "d"]);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       ranges: [
         {
           anchor: { blockId: "a", offset: 0 },

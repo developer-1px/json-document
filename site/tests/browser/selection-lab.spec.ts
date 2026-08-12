@@ -32,7 +32,7 @@ test("Selection Lab compares Order and Grid range families", async ({ page }) =>
   await expect(grid.getByRole("button", { pressed: true })).toHaveCount(5);
 });
 
-test("Selection Lab keeps geometry in the Object host and selection in the set engine", async ({ page }) => {
+test("Selection Lab keeps geometry in the Object host and selection in the key family", async ({ page }) => {
   await page.goto("/demo/selection");
   const objects = page.getByRole("region", { name: "Objects selection variant" });
   const stage = page.getByTestId("object-stage");
@@ -40,15 +40,16 @@ test("Selection Lab keeps geometry in the Object host and selection in the set e
   await drag(page, stage, { x: 8, y: 8 }, { x: 275, y: 125 });
   await expect(objects.getByRole("button", { pressed: true })).toHaveCount(2);
   expect(await json(page, "object-selection-json")).toEqual({
-    selectedIds: ["object-a", "object-b"],
-    primaryId: "object-b",
+    kind: "explicit",
+    keys: ["object-a", "object-b"],
+    primaryKey: "object-b",
   });
 
   await page.keyboard.down("Shift");
   await drag(page, stage, { x: 230, y: 130 }, { x: 350, y: 225 });
   await page.keyboard.up("Shift");
   await expect(objects.getByRole("button", { pressed: true })).toHaveCount(3);
-  expect((await json(page, "object-selection-json")).selectedIds).toEqual([
+  expect((await json(page, "object-selection-json")).keys).toEqual([
     "object-a",
     "object-b",
     "object-d",
@@ -64,6 +65,37 @@ test("Selection Lab keeps geometry in the Object host and selection in the set e
     "#f43f5e",
   ]);
   await expect(objects.getByRole("button", { pressed: true })).toHaveCount(3);
+});
+
+test("Selection Lab separates navigation, edit lease, symbolic all, nested scope, and mask", async ({ page }) => {
+  await page.goto("/demo/selection");
+
+  const grid = page.getByRole("region", { name: "Grid selection variant" });
+  await grid.getByRole("button", { name: "Grid B2" }).click();
+  await grid.getByRole("button", { name: "Edit current cell" }).click();
+  expect(await json(page, "grid-session-json")).toEqual({
+    current: { rowId: "r2", columnId: "b" },
+    editing: { kind: "edit", lease: "cell:r2:b" },
+  });
+  await grid.getByRole("button", { name: "Exit cell edit" }).click();
+  expect((await json(page, "grid-session-json")).editing).toEqual({ kind: "navigate" });
+
+  const protocols = page.getByRole("region", { name: "Protocols selection variant" });
+  await protocols.getByRole("button", { name: "Select all" }).click();
+  await protocols.getByRole("button", { name: "Exclude Beta" }).click();
+  expect(await json(page, "protocol-selection-json")).toEqual({
+    kind: "all",
+    universe: "filtered:demo:v1",
+    excludedKeys: ["beta"],
+    primaryKey: "alpha",
+  });
+  await protocols.getByRole("button", { name: "Enter text edit" }).click();
+  await protocols.getByRole("button", { name: "Apply soft mask" }).click();
+  const protocol = await json(page, "protocol-document-json");
+  expect(protocol.targets).toEqual(["alpha", "gamma"]);
+  expect(protocol.scoped.scope).toBe("text");
+  expect(protocol.editing).toEqual({ kind: "edit", lease: "native-text:label" });
+  expect(protocol.mask).toEqual({ kind: "mask", representation: [0, 0.5, 1] });
 });
 
 test("Selection Lab normalizes Tree ranges after host visibility changes", async ({ page }) => {

@@ -5,11 +5,15 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import {
+  createKeySelectionFamily,
+  type KeySelectionCommand,
+  type KeySelectionContext,
+} from "@interactive-os/json-document-selection";
+import {
   createEditingSession,
   type EditingResult,
   type EditingSnapshot,
 } from "./session.js";
-import { selectSetItems, type SetSelectionMode } from "./set-selection.js";
 
 export interface DocumentObject extends Record<string, JSONValue> {
   readonly id: string;
@@ -26,15 +30,18 @@ export interface ObjectDocument extends Record<string, JSONValue> {
 }
 
 export interface ObjectSelection extends Record<string, JSONValue> {
-  readonly selectedIds: ReadonlyArray<string>;
-  readonly primaryId: string | null;
+  readonly kind: "explicit";
+  readonly keys: ReadonlyArray<string>;
+  readonly primaryKey: string | null;
 }
+
+export type ObjectSelectionMode = "replace" | "add" | "subtract" | "toggle";
 
 export type ObjectIntent =
   | {
       readonly type: "selection.set";
       readonly objectIds: ReadonlyArray<string>;
-      readonly mode?: SetSelectionMode;
+      readonly mode?: ObjectSelectionMode;
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string };
@@ -50,6 +57,7 @@ export interface ObjectEditor {
 
 export function createObjectEditor(initial: ObjectDocument): ObjectEditor {
   assertObjectDocument(initial);
+  const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.objects[0];
   const session = createEditingSession({
     document: createJSONDocument(initial),
@@ -61,8 +69,16 @@ export function createObjectEditor(initial: ObjectDocument): ObjectEditor {
   }
 
   function selectedObjects(): DocumentObject[] {
-    const ids = new Set(session.snapshot.selection.selectedIds);
+    const ids = new Set(selectionFamily.targets(session.snapshot.selection, selectionContext()));
     return value().objects.filter((object) => ids.has(object.id));
+  }
+
+  function selectionContext(): KeySelectionContext<string> {
+    return {
+      keys: value().objects.map((object) => object.id),
+      universe: "objects",
+      universeMismatch: "clear",
+    };
   }
 
   function dispatch(intent: ObjectIntent): EditingResult<ObjectSelection> {
@@ -71,12 +87,19 @@ export function createObjectEditor(initial: ObjectDocument): ObjectEditor {
       if (intent.objectIds.some((id) => !available.has(id))) {
         return failure("selection.object-not-found");
       }
-      const selection = selectSetItems(
+      const command: KeySelectionCommand<string> = {
+        type: intent.mode ?? "replace",
+        keys: intent.objectIds,
+      };
+      const selection = selectionFamily.transition(
         session.snapshot.selection,
-        intent.objectIds,
-        intent.mode ?? "replace",
-      );
-      return success(session.select(selectionFor(selection.selectedIds, selection.primaryId)));
+        command,
+        selectionContext(),
+      ).state;
+      return success(session.select(selectionFor(
+        selectionFamily.targets(selection, selectionContext()),
+        selection.primaryKey,
+      )));
     }
 
     const selected = selectedObjects();
@@ -122,10 +145,10 @@ export function createObjectEditor(initial: ObjectDocument): ObjectEditor {
 }
 
 function selectionFor(
-  selectedIds: ReadonlyArray<string>,
-  primaryId: string | null = selectedIds.at(-1) ?? null,
+  keys: ReadonlyArray<string>,
+  primaryKey: string | null = keys.at(-1) ?? null,
 ): ObjectSelection {
-  return { selectedIds: [...selectedIds], primaryId };
+  return { kind: "explicit", keys: [...keys], primaryKey };
 }
 
 function assertObjectDocument(document: ObjectDocument): void {

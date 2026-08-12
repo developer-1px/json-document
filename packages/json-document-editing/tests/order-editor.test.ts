@@ -19,6 +19,7 @@ describe("ordered structural selection", () => {
 
     expect(editor.selectedItemIds).toEqual(["b", "c", "d"]);
     expect(selectionBefore).toEqual({
+      kind: "range",
       ranges: [{ anchor: { itemId: "b" }, focus: { itemId: "d" } }],
       primaryIndex: 0,
     });

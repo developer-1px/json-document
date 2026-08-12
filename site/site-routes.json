@@ -51,7 +51,7 @@
     "path": "/demo/selection",
     "label": "Selection Lab",
     "title": "Selection Lab - json-document",
-    "description": "Compare structural Order, Grid, Object, and Tree selection families over one headless editing lifecycle.",
+    "description": "Compare DOM-free key, range, mask, nested scope, interaction, and history contracts across structural editors.",
     "navigationGroup": "Editing"
   },
   {

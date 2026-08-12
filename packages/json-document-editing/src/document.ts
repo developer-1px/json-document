@@ -27,8 +27,9 @@ export interface DocumentRange extends Record<string, JSONValue> {
 }
 
 export interface DocumentSelection extends Record<string, JSONValue> {
+  readonly kind: "range";
   readonly ranges: ReadonlyArray<DocumentRange>;
-  readonly primaryIndex: number;
+  readonly primaryIndex: number | null;
 }
 
 export interface DocumentClipboard extends Record<string, JSONValue> {
@@ -206,10 +207,12 @@ function emptySelection(): DocumentSelection {
 function asDocumentSelection(
   selection: {
     readonly ranges: ReadonlyArray<{ readonly anchor: DocumentPoint; readonly focus: DocumentPoint }>;
-    readonly primaryIndex: number;
+    readonly kind: "range";
+    readonly primaryIndex: number | null;
   },
 ): DocumentSelection {
   return {
+    kind: "range",
     ranges: selection.ranges.map((range) => ({
       anchor: { ...range.anchor },
       focus: { ...range.focus },
@@ -219,7 +222,7 @@ function asDocumentSelection(
 }
 
 function rangesFor(blocks: ReadonlyArray<DocumentBlock>): DocumentSelection {
-  return { ranges: blocks.map((block) => ({ anchor: pointAt(block), focus: pointAt(block) })), primaryIndex: 0 };
+  return { kind: "range", ranges: blocks.map((block) => ({ anchor: pointAt(block), focus: pointAt(block) })), primaryIndex: blocks.length === 0 ? null : 0 };
 }
 
 function createUniqueId(blocks: ReadonlyArray<DocumentBlock>, createId: () => string): string {

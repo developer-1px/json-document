@@ -91,6 +91,7 @@ describe("TanStack Table document binding", () => {
       { name: "G", status: "Ready", score: 30 },
     ]);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r3", columnId: "score" },
       focus: { rowId: "r2", columnId: "name" },
       ranges: [{
@@ -103,6 +104,7 @@ describe("TanStack Table document binding", () => {
     expect(binding.undo().ok).toBe(true);
     expect(editor.snapshot.value).toEqual(initial);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r3", columnId: "score" },
       focus: { rowId: "r3", columnId: "score" },
       ranges: [{
