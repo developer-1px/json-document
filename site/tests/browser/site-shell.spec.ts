@@ -40,6 +40,9 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page).toHaveTitle("json-document Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Docs" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "배경" })).toBeVisible();
+  const changeFlow = page.getByRole("figure", { name: "One canonical change" });
+  await expect(changeFlow.locator("[data-change-flow-step]")).toHaveCount(5);
+  await expect(changeFlow.locator('[data-change-flow-step="complete"]')).toHaveCount(5);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
 

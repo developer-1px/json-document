@@ -21,8 +21,13 @@ test("React Connector Live Demo publishes document and editing snapshots", async
 
   await page.goto("/connectors/react");
 
+  const changeFlow = page.getByRole("figure", { name: "Document change flow" });
+  await expect(changeFlow.locator('[data-change-flow-step="current"]')).toContainText("Intent");
+
   await page.getByRole("textbox", { name: "Document title" }).fill("Live React document");
   await page.getByRole("button", { name: "Count 0" }).click();
+  await expect(changeFlow.locator('[data-change-flow-step="current"]')).toContainText("Publish");
+  await expect(changeFlow.getByText("replace /count", { exact: true })).toBeVisible();
   const documentValue = JSON.parse(await page.getByTestId("react-document-json").innerText()) as { title: string; count: number };
   expect(documentValue).toEqual({ title: "Live React document", count: 1 });
 

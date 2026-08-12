@@ -6,6 +6,7 @@ import {
   useEditingSnapshot,
   useJSONDocumentValue,
 } from "@interactive-os/json-document-react";
+import { ChangeFlow, type ChangeFlowStep } from "../../../shared/ui/change-flow";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
 import { Button } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
@@ -29,12 +30,22 @@ export function ReactConnectorLab() {
 function JSONDocumentSubscriptionLab() {
   const [document] = useState(() => createJSONDocument({ title: "Connector draft", count: 0 }));
   const value = useJSONDocumentValue(document) as { readonly title: string; readonly count: number };
+  const [change, setChange] = useState({ intent: "waiting for input", path: "—", revision: 0 });
 
   function replace(path: "/title" | "/count", next: JSONValue) {
-    document.commit([{ op: "replace", path, value: next }], {
+    const result = document.commit([{ op: "replace", path, value: next }], {
       metadata: { origin: "react-connector-demo" },
     });
+    if (result.ok) {
+      setChange((current) => ({
+        intent: path === "/title" ? "text input" : "count button",
+        path,
+        revision: current.revision + 1,
+      }));
+    }
   }
+
+  const flow = documentChangeFlow(change);
 
   return (
     <section aria-label="JSON Document subscription" className={classes("p-4", ui.surface.raised)}>
@@ -59,9 +70,26 @@ function JSONDocumentSubscriptionLab() {
         Count {value.count}
       </Button>
 
+      <ChangeFlow
+        className="mt-4"
+        description="The current marker follows the latest accepted edit."
+        label="Document change flow"
+        steps={flow}
+      />
+
       <JSONPanel testId="react-document-json" value={value} />
     </section>
   );
+}
+
+function documentChangeFlow(change: { readonly intent: string; readonly path: string; readonly revision: number }): ReadonlyArray<ChangeFlowStep> {
+  const waiting = change.revision === 0;
+  return [
+    { label: "Intent", detail: change.intent, status: waiting ? "current" : "complete" },
+    { label: "Patch", detail: `replace ${change.path}`, status: waiting ? "pending" : "complete" },
+    { label: "Commit", detail: waiting ? "waiting" : "accepted", status: waiting ? "pending" : "complete" },
+    { label: "Publish", detail: `render ${change.revision}`, status: waiting ? "pending" : "current" },
+  ];
 }
 
 function EditingSnapshotLab() {
