@@ -62,7 +62,7 @@ test("docs and demos share the page frame while preserving their content modes",
   await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
 
   await page.goto("/docs/api");
-  await expect(page.locator("[data-petite-cat]")).toHaveCount(0);
+  await expect(page.locator('[data-petite-cat="braces"]')).toHaveCount(1);
 
   await page.goto("/demo");
   const demoFrame = await pageFrameSnapshot(page);
@@ -75,6 +75,10 @@ test("docs and demos share the page frame while preserving their content modes",
 test("ordinary pages reuse one petite decorative cat without covering intro copy", async ({ page }) => {
   const illustrations = new Set<string>();
   const routes = [
+    "/docs",
+    "/docs/tutorial",
+    "/docs/connectors",
+    "/docs/api",
     "/demo",
     "/demo/sheet",
     "/demo/selection",
