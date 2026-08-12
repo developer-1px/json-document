@@ -1,0 +1,21 @@
+export {
+  createWebClipboardBinding,
+  documentClipboardCodec,
+  sheetClipboardCodec,
+} from "./clipboard.js";
+export { selectionOperationFromModifiers } from "./modifiers.js";
+export { textInputFromControl } from "./input.js";
+export type {
+  WebClipboardBinding,
+  WebClipboardCodec,
+  WebClipboardData,
+  WebClipboardEvent,
+  WebClipboardPayload,
+  WebClipboardResult,
+} from "./clipboard.js";
+export type { WebModifierState } from "./modifiers.js";
+export type {
+  WebTextControl,
+  WebTextControlEvent,
+  WebTextInput,
+} from "./input.js";

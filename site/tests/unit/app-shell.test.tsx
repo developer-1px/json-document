@@ -33,7 +33,7 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
     expect(groupLinks(nav, "Core")).toEqual(["Concepts", "API Reference"]);
     expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet", "Selection Lab", "Database"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "Connector guide", "React", "Zod", "TanStack Table"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "Connector guide", "React", "Zod", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -46,6 +46,7 @@ describe("official site shell", () => {
       "/connectors/react",
       "/connectors/zod",
       "/connectors/tanstack-table",
+      "/connectors/web",
     ]);
   });
 });

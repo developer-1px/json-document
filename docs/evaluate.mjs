@@ -54,6 +54,7 @@ const surfaces = {
   reactReadme: read("packages/json-document-react/README.md"),
   zodReadme: read("packages/json-document-zod/README.md"),
   tanstackTableReadme: read("packages/json-document-tanstack-table/README.md"),
+  webReadme: read("packages/json-document-web/README.md"),
   collaborationReadme: read("packages/json-document-collaboration/README.md"),
   contenteditableCollaborationReadme: read(
     "packages/contenteditable-collaboration/README.md",
@@ -69,6 +70,7 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-tanstack-table",
+  "@interactive-os/json-document-web",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);
