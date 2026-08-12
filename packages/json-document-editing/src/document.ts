@@ -1,5 +1,11 @@
 import { createJSONDocument, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { createEditingSession, type EditingResult, type EditingSession, type EditingSnapshot } from "./session.js";
+import { createOrderedAxis } from "./ordered-axis.js";
+import {
+  collapsedRangeSelection,
+  emptyRangeSelection,
+  selectRangePoint,
+} from "./range-selection.js";
 
 export interface DocumentBlock extends Record<string, JSONValue> {
   readonly id: string;
@@ -64,14 +70,10 @@ export function createDocumentEditor(initial: BlockDocument, options: { readonly
 
   function selectedIds(): string[] {
     const blocks = value().blocks;
+    const axis = createOrderedAxis(blocks.map((block) => block.id));
     const ids = new Set<string>();
     for (const range of session.snapshot.selection.ranges) {
-      const anchor = blocks.findIndex((block) => block.id === range.anchor.blockId);
-      const focus = blocks.findIndex((block) => block.id === range.focus.blockId);
-      if (anchor < 0 || focus < 0) continue;
-      const start = Math.min(anchor, focus);
-      const end = Math.max(anchor, focus);
-      for (let index = start; index <= end; index += 1) ids.add(blocks[index]!.id);
+      for (const id of axis.interval(range.anchor.blockId, range.focus.blockId)) ids.add(id);
     }
     return blocks.filter((block) => ids.has(block.id)).map((block) => block.id);
   }
@@ -82,19 +84,13 @@ export function createDocumentEditor(initial: BlockDocument, options: { readonly
       const index = blocks.findIndex((block) => block.id === intent.blockId);
       if (index < 0) return failure("selection.block-not-found");
       const point = pointAt(blocks[index]!, intent.offset);
-      const current = session.snapshot.selection;
-      if (intent.mode === "extend" && current.ranges.length > 0) {
-        const primary = current.ranges[current.primaryIndex] ?? current.ranges[0]!;
-        return success(session.select({ ranges: [{ anchor: { ...primary.anchor }, focus: { ...point } }], primaryIndex: 0 }));
-      }
-      if (intent.mode === "toggle") {
-        const existing = current.ranges.findIndex((range) => range.anchor.blockId === intent.blockId && range.focus.blockId === intent.blockId);
-        const ranges = existing >= 0
-          ? current.ranges.filter((_, rangeIndex) => rangeIndex !== existing)
-          : [...current.ranges, { anchor: { ...point }, focus: { ...point } }];
-        return success(session.select(ranges.length > 0 ? { ranges, primaryIndex: Math.min(ranges.length - 1, current.primaryIndex) } : emptySelection()));
-      }
-      return success(session.select({ ranges: [{ anchor: { ...point }, focus: { ...point } }], primaryIndex: 0 }));
+      const selection = selectRangePoint(
+        session.snapshot.selection,
+        point,
+        intent.mode ?? "replace",
+        (left, right) => left.blockId === right.blockId,
+      );
+      return success(session.select(asDocumentSelection(selection)));
     }
 
     if (intent.type === "text.replace") {
@@ -200,11 +196,26 @@ function pointAt(block: DocumentBlock, offset = 0): DocumentPoint {
 
 function collapsed(blockId: string, offset: number): DocumentSelection {
   const point: DocumentPoint = { blockId, offset };
-  return { ranges: [{ anchor: { ...point }, focus: { ...point } }], primaryIndex: 0 };
+  return asDocumentSelection(collapsedRangeSelection(point));
 }
 
 function emptySelection(): DocumentSelection {
-  return { ranges: [], primaryIndex: 0 };
+  return asDocumentSelection(emptyRangeSelection());
+}
+
+function asDocumentSelection(
+  selection: {
+    readonly ranges: ReadonlyArray<{ readonly anchor: DocumentPoint; readonly focus: DocumentPoint }>;
+    readonly primaryIndex: number;
+  },
+): DocumentSelection {
+  return {
+    ranges: selection.ranges.map((range) => ({
+      anchor: { ...range.anchor },
+      focus: { ...range.focus },
+    })),
+    primaryIndex: selection.primaryIndex,
+  };
 }
 
 function rangesFor(blocks: ReadonlyArray<DocumentBlock>): DocumentSelection {

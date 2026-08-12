@@ -120,17 +120,19 @@ const table = createTable({
 });
 
 binding.commitCell({ rowId: row.id, columnId: column.id, value });
+binding.fillSelected(table, "Ready");
 ```
 
 `TableDocumentBinding`은 stable row identity와 controlled row data를 TanStack
 options로 제공하고 cell commit을 Sheet intent와 JSON Patch로 연결합니다. 최종
 visible row model과 visible leaf column order는 `SheetTopology`로 번역되므로 정렬,
-필터링과 column ordering 뒤에도 rectangular selection과 clipboard가 화면 순서를
-따릅니다. Canonical JSON, selection, clipboard와 history는 Sheet editor가 계속
+필터링과 column ordering 뒤에도 rectangular multi-range selection, selection fill과
+primary-range clipboard가 화면 순서를 따릅니다. Canonical JSON, selection,
+clipboard와 history는 Sheet editor가 계속
 소유합니다. Sorting, filtering, pagination과 column state는 TanStack과 host가
 소유하며 formula, merged cell과 virtualization은 Connector 범위가 아닙니다.
 
 React에서 사용할 때 TanStack의 React adapter와 json-document React Connector를
 조합합니다. 따라서 Table Connector 자체는 계속 headless입니다. 공식 site의
 `/connectors/tanstack-table`에서 정렬·필터·column ordering 이후의 visible-order
-selection, copy/paste, undo/redo와 canonical JSON 반영을 확인할 수 있습니다.
+selection, multi-range fill, copy/paste, undo/redo와 canonical JSON 반영을 확인할 수 있습니다.

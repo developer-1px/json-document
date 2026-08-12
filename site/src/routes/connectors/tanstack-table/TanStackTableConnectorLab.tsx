@@ -60,9 +60,14 @@ export function TanStackTableConnectorLab() {
   }
 
   function selectCell(event: MouseEvent, rowId: string, columnId: string) {
+    const mode = event.shiftKey
+      ? "extend"
+      : event.metaKey || event.ctrlKey
+        ? "toggle"
+        : "replace";
     run(
-      () => binding.selectCell(table, { rowId, columnId, mode: event.shiftKey ? "extend" : "replace" }),
-      event.shiftKey ? "Visible range extended" : "Cell selected",
+      () => binding.selectCell(table, { rowId, columnId, mode }),
+      mode === "extend" ? "Visible range extended" : mode === "toggle" ? "Visible range toggled" : "Cell selected",
     );
   }
 
@@ -94,6 +99,10 @@ export function TanStackTableConnectorLab() {
         <span className="mx-1 w-px bg-stone-200" aria-hidden="true" />
         <Control label="Copy" onClick={copySelection} />
         <Control label="Paste" disabled={clipboard === null} onClick={pasteSelection} />
+        <Control label="Fill selected" onClick={() => run(
+          () => binding.fillSelected(table, "Selected"),
+          "Visible selected cells filled",
+        )} />
         <Control label="Undo" disabled={!snapshot.canUndo} onClick={() => run(binding.undo, "Undone")} />
         <Control label="Redo" disabled={!snapshot.canRedo} onClick={() => run(binding.redo, "Redone")} />
       </div>
@@ -154,6 +163,8 @@ export function TanStackTableConnectorLab() {
         <aside className="rounded border border-stone-800 bg-stone-950 p-3 text-stone-100" aria-label="Canonical JSON">
           <div className="mb-2 text-xs text-stone-400">Canonical JSON · revision {snapshot.revision}</div>
           <pre data-testid="tanstack-document-json" className="m-0 max-h-[30rem] overflow-auto whitespace-pre-wrap text-xs leading-5"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
+          <div className="mb-2 mt-4 text-xs text-stone-400">Selection · {snapshot.selection.ranges.length} ranges</div>
+          <pre data-testid="tanstack-selection-json" className="m-0 max-h-48 overflow-auto whitespace-pre-wrap text-xs leading-5"><code>{JSON.stringify(snapshot.selection, null, 2)}</code></pre>
         </aside>
       </div>
     </section>

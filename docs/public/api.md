@@ -330,10 +330,17 @@ editor.dispatch({
   columnId: "status",
   value: "Ready",
 });
+
+editor.dispatch({
+  type: "selection.fill",
+  value: "Ready",
+});
 ```
 
-`SheetEditor`는 stable row·column identity, anchor/focus rectangular selection,
-cell commit, rectangular JSON/TSV clipboard와 selection-restoring undo/redo를
-제공합니다. Cell commit과 paste는 canonical JSON Pointer와 ordered JSON Patch로
-환원됩니다. Sorting, filtering, pagination, formula, DOM focus와 renderer는
-SheetEditor의 책임이 아닙니다.
+`SheetEditor`는 stable row·column identity, primary range를 포함한 복수의
+anchor/focus rectangular range, primary-range JSON/TSV clipboard, selection fill,
+cell commit과 selection-restoring undo/redo를 제공합니다. Document와 Sheet는
+같은 range-set 상태 전이를 사용하지만 선택 대상을 열거하는 topology와 JSON Patch
+계획은 각각 소유합니다. Cell commit, fill과 paste는 canonical JSON Pointer와
+ordered JSON Patch로 환원됩니다. Sorting, filtering, pagination, formula, DOM
+focus와 renderer는 SheetEditor의 책임이 아닙니다.

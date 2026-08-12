@@ -37,8 +37,9 @@ export interface TableDocumentBinding {
   selectedCells(table: Table<SheetRow>): ReadonlyArray<SheetCell>;
   selectCell(
     table: Table<SheetRow>,
-    input: { readonly rowId: string; readonly columnId: string; readonly mode?: "replace" | "extend" },
+    input: { readonly rowId: string; readonly columnId: string; readonly mode?: "replace" | "extend" | "toggle" },
   ): EditingResult<SheetSelection>;
+  fillSelected(table: Table<SheetRow>, value: SheetCell["value"]): EditingResult<SheetSelection>;
   commitCell(input: { readonly rowId: string; readonly columnId: string; readonly value: SheetCell["value"] }): EditingResult<SheetSelection>;
   copy(table: Table<SheetRow>): SheetClipboard | null;
   paste(table: Table<SheetRow>, clipboard: SheetClipboard): EditingResult<SheetSelection>;
@@ -108,6 +109,13 @@ export function createTableDocumentBinding(options: {
     selectedCells: (table) => editor.selectedCellsIn(topology(table)),
     selectCell(table, input) {
       return editor.dispatch({ type: "selection.set", ...input });
+    },
+    fillSelected(table, value) {
+      return editor.dispatch({
+        type: "selection.fill",
+        value,
+        topology: topology(table),
+      });
     },
     commitCell(input) {
       return editor.dispatch({

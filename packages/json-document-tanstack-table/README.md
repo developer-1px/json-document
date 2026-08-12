@@ -19,6 +19,7 @@ const table = createTable({
 });
 
 binding.commitCell({ rowId: "row-1", columnId: "status", value: "Done" });
+binding.fillSelected(table, "Done");
 ```
 
 The Connector projects canonical Sheet rows and columns into TanStack's native
@@ -27,6 +28,10 @@ row and column order into `SheetTopology` for range selection and clipboard
 operations. The Sheet editor continues to own canonical JSON, selection,
 clipboard, and history. TanStack Table or the host owns sorting, filtering,
 pagination, column visibility/order, rendering, and DOM focus.
+
+`selectCell` accepts `replace`, `extend`, and `toggle`. `fillSelected` applies
+one value to every cell in all selected ranges using the table's current
+visible topology, while copy and paste use the primary rectangular range.
 
 Supported peers:
 
