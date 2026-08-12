@@ -88,6 +88,7 @@ export const ui = {
     focus: "outline-none focus-visible:ring-2 focus-visible:ring-stone-400/70",
     skipLink: "rounded-[6px] border border-black/[0.10] bg-white px-3 py-2 text-xs font-medium text-stone-950 shadow-[0_2px_4px_rgba(24,24,27,0.06),0_20px_48px_rgba(24,24,27,0.10)] focus:not-sr-only focus:fixed focus:left-3 focus:top-3",
     disabled: "disabled:cursor-not-allowed disabled:opacity-35",
+    error: "text-red-700",
   },
   workbench: {
     darkStrip: "rounded-[10px] border border-black/[0.08] bg-stone-950 text-white",

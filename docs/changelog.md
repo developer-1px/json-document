@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Added `@interactive-os/json-document-react-hook-form` to keep form drafts and
+  field lifecycle in React Hook Form while valid submits become one canonical
+  editing transaction and undo/redo reset the form, with a Record Detail Live Demo.
 - Added the official Connector package category for independently versioned
   external ecosystem integrations, with Zod and TanStack Table contracts.
 - Added `@interactive-os/json-document-react` for React external-store

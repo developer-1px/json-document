@@ -66,7 +66,7 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "Official React, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
+    "description": "Official React, React Hook Form, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
     "navigationGroup": "Connectors"
   },
   {
@@ -74,6 +74,13 @@
     "label": "React",
     "title": "React Connector Live Demo - json-document",
     "description": "Live React integration for JSON Document subscriptions and component-owned editing lifecycle.",
+    "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/react-hook-form",
+    "label": "React Hook Form",
+    "title": "React Hook Form Connector Live Demo - json-document",
+    "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
     "navigationGroup": "Connectors"
   },
   {

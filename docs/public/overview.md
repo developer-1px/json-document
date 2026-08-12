@@ -124,6 +124,7 @@ if (result.ok) {
 | `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 Document·Order·Sheet·Object·Tree slice |
 | `@interactive-os/json-document-selection` | optional companion | DOM-free key·range·mask family, semantic interaction과 topology/geometry port |
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
+| `@interactive-os/json-document-react-hook-form` | official Connector | React Hook Form draft lifecycle, canonical submit과 history reset 번역 |
 | `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-tanstack-table` | official Connector | TanStack visible row/column model과 Sheet 편집 topology 번역 |
 | `@interactive-os/json-document-web` | official Connector | Web clipboard, text-control input과 modifier state 번역 |
@@ -145,7 +146,7 @@ JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 �
 slice 또는 host가 정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
 Collaboration companion도 transport, authentication, presence, persistence를
 소유하지 않습니다. Connector, adapter와 companion은 Core와 독립적으로 version과
-compatibility를 검증합니다. Connector의 승격 조건과 React·Zod·TanStack Table·Web Platform
+compatibility를 검증합니다. Connector의 승격 조건과 React·React Hook Form·Zod·TanStack Table·Web Platform
 구현은 [Connectors](connectors.md)에 정리되어 있습니다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion

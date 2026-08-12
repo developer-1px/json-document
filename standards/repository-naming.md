@@ -512,6 +512,12 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `useJSONDocumentValue`, `useEditingSnapshot`, `useDocumentEditor`, `EditingSnapshotSource` | React hook convention과 연결하는 대상 snapshot 책임이 일치 |
 
+### React Hook Form Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `useJSONDocumentForm`, `UseJSONDocumentFormOptions`, `JSONDocumentFormBinding`, `CanonicalFormFailure` | React Hook Form의 native form lifecycle을 canonical editing transaction과 동기화하는 책임이 일치 |
+
 ### Zod Connector package
 
 | Decision | Current public exports | Canonical rule |
@@ -605,6 +611,11 @@ Connector packages
 │  ├─ useJSONDocumentValue
 │  ├─ useEditingSnapshot
 │  └─ useDocumentEditor
+├─ React Hook Form
+│  ├─ CanonicalFormFailure
+│  ├─ UseJSONDocumentFormOptions
+│  ├─ JSONDocumentFormBinding
+│  └─ useJSONDocumentForm
 ├─ Zod
 │  ├─ ZodValidatorOptions
 │  └─ createZodValidator

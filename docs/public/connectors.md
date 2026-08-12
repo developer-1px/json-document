@@ -36,6 +36,7 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 
 ```txt
 @interactive-os/json-document-react
+@interactive-os/json-document-react-hook-form
 @interactive-os/json-document-zod
 @interactive-os/json-document-tanstack-table
 @interactive-os/json-document-web
@@ -44,7 +45,7 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 외부 runtime은 `peerDependency`입니다. 각 Connector는 Kernel 및 companion과
 lockstep이 아닌 독립 version을 가지며 README에 지원하는 양쪽 version 범위를
 기록합니다. Root subpath에 Connector를 넣지 않으므로 Core-only consumer는
-React, Zod, TanStack Table 또는 Web Connector를 설치하지 않습니다.
+React, React Hook Form, Zod, TanStack Table 또는 Web Connector를 설치하지 않습니다.
 
 공식 Connector로 승격하려면 public contract만 사용하고, 대상 생태계의 native
 API를 유지하며, contract test, connector-specific Live Demo와 browser acceptance를
@@ -81,6 +82,34 @@ function DocumentView() {
 Connector는 UI component를 제공하거나 selection을 해석하지 않습니다.
 공식 site의 `/connectors/react`에서 세 hook의 실제 subscription, 편집과 canonical
 JSON 반영을 확인할 수 있습니다.
+
+## React Hook Form Connector
+
+`@interactive-os/json-document-react-hook-form`은 React Hook Form의 form lifecycle과
+`EditingSession`의 canonical transaction/history를 연결합니다.
+
+```tsx
+const binding = useJSONDocumentForm<ProfileForm, FormSelection>(session, {
+  errorName: ({ pointer }) => pointer === "/profile/name"
+    ? "profile.name"
+    : "root.canonical",
+});
+
+return <form onSubmit={binding.submit}>...</form>;
+```
+
+RHF가 draft, dirty, touched, field registration과 field error를 소유합니다. 유효한
+submit은 전체 form value를 하나의 root replace transaction으로 적용하므로 여러
+field 변경도 undo 한 번으로 복구됩니다. Canonical validation이 거절하면 document와
+history는 바뀌지 않으며 Host가 JSON Pointer를 field name으로 번역할 수 있습니다.
+매 canonical value 변경은 `reset`으로 RHF에 동기화되므로 undo, redo와 외부 commit
+뒤에는 dirty, touched와 error도 canonical 기준으로 초기화됩니다. Selection-only
+publication은 form을 reset하지 않습니다.
+
+Connector는 object-shaped canonical JSON만 받으며 field UI, product schema,
+draft validation, live typing commit 또는 persistence를 소유하지 않습니다. 공식
+site의 `/connectors/react-hook-form` Record Detail Demo는 React와 Zod Connector를
+함께 조합해 이 경계를 보여줍니다.
 
 ## Zod Connector
 
