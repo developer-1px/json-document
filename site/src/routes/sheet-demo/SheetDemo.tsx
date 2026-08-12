@@ -6,6 +6,7 @@ import {
   type SheetEditor,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button, PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -155,11 +156,9 @@ export function SheetDemo() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click adds or removes a single-cell range. Fill selected changes every selected cell in one transaction.</p>
           </section>
 
-          <aside className={classes("min-w-0", ui.code.json)} aria-label="Canonical JSON">
-            <div className={classes("mb-2 flex items-center justify-between", ui.text.meta)}><span>Canonical JSON</span><span>stable row + column ids</span></div>
-            <pre data-testid="sheet-canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
-            <div className={classes("mb-2 mt-4", ui.text.meta)}>Selection</div>
-            <pre data-testid="sheet-selection-json" className="m-0 max-h-48 overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.selection, null, 2)}</code></pre>
+          <aside className="grid min-w-0 gap-3" aria-label="Canonical JSON">
+            <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
+            <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
           </aside>
         </div>
       </div>

@@ -6,6 +6,7 @@ import {
   useEditingSnapshot,
   useJSONDocumentValue,
 } from "@interactive-os/json-document-react";
+import { JsonInspector } from "../../../shared/ui/json-inspector";
 import { Button } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -118,12 +119,5 @@ function EditingSnapshotLab() {
 }
 
 function JSONPanel({ testId, value }: { readonly testId: string; readonly value: JSONValue }) {
-  return (
-    <div className={classes("mt-4", ui.code.json)}>
-      <div className={classes("mb-2", ui.text.meta)}>Canonical JSON</div>
-      <pre data-testid={testId} className="m-0 max-h-64 overflow-auto whitespace-pre-wrap">
-        <code>{JSON.stringify(value, null, 2)}</code>
-      </pre>
-    </div>
-  );
+  return <JsonInspector className="mt-4" label="Canonical JSON" testId={testId} value={value} />;
 }

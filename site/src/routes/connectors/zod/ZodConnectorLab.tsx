@@ -3,6 +3,7 @@ import { createJSONDocument, type JSONPatchValidationResult } from "@interactive
 import { useJSONDocumentValue } from "@interactive-os/json-document-react";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
+import { JsonInspector } from "../../../shared/ui/json-inspector";
 import { Button } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -74,12 +75,5 @@ function JSONPanel(props: {
   readonly testId: string;
   readonly value: unknown;
 }) {
-  return (
-    <div className={ui.code.json}>
-      <div className={classes("mb-2", ui.text.meta)}>{props.label}</div>
-      <pre data-testid={props.testId} className="m-0 min-h-24 overflow-auto whitespace-pre-wrap">
-        <code>{JSON.stringify(props.value, null, 2)}</code>
-      </pre>
-    </div>
-  );
+  return <JsonInspector label={props.label} testId={props.testId} value={props.value} />;
 }
