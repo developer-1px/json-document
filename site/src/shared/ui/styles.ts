@@ -54,7 +54,29 @@ export const ui = {
   code: {
     inline: "rounded-[6px] bg-[#ecece8] px-1 py-0.5 font-mono text-[0.85em] text-stone-800",
     block: "rounded-[6px] border border-black/[0.06] bg-[#f1f1ee] p-3 font-mono text-xs leading-5 text-stone-800",
-    json: "rounded-[6px] border border-black/[0.06] bg-[#f1f1ee] p-3 font-mono text-xs leading-5 text-stone-800",
+    inspector: {
+      frame: "min-w-0 overflow-hidden rounded-[3px] border border-black/[0.09] bg-white shadow-none",
+      header: "flex min-h-9 items-center border-b border-black/[0.07] px-3 py-2 font-mono",
+      label: "text-[11px] font-medium text-stone-700",
+      meta: "text-[10px] text-stone-400",
+      signal: "text-[10px] font-medium text-[#de6d55]",
+      viewport: {
+        compact: "max-h-32",
+        standard: "min-h-24 max-h-64",
+        tall: "max-h-[34rem]",
+      },
+      pre: "m-0 overflow-auto bg-white",
+      code: "block min-w-max py-3 font-mono text-[12px] leading-[1.65] text-stone-700",
+      line: "grid grid-cols-[2.75rem_minmax(max-content,1fr)] px-3",
+      lineNumber: "select-none border-r border-black/[0.06] pr-3 text-right text-[10px] text-stone-300 before:content-[attr(data-line-number)]",
+      lineContent: "whitespace-pre pl-3 pr-3",
+      token: {
+        key: "text-[#292524]",
+        string: "text-[#4f6b62]",
+        literal: "text-[#8a5a44]",
+        punctuation: "text-[#a8a29e]",
+      },
+    },
   },
   state: {
     current: "border-b border-transparent text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:border-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950 md:border-b-0 md:border-l",

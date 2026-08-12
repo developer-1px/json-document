@@ -36,6 +36,7 @@ import {
   type WorkspaceSession,
   type WorkspaceState,
 } from "./selection-workbench-state";
+import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button, PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -874,14 +875,7 @@ function JsonOutput(props: {
   readonly value: unknown;
   readonly compact?: boolean;
 }) {
-  return (
-    <div className={classes(props.compact && "mt-2", "min-w-0 p-2", ui.code.json)}>
-      <div className={classes("mb-1 uppercase", ui.text.meta)}>{props.label}</div>
-      <pre data-testid={props.testId} className={classes(props.compact ? "max-h-32" : "max-h-44", "m-0 overflow-auto whitespace-pre-wrap")}>
-        <code>{JSON.stringify(props.value, null, 2)}</code>
-      </pre>
-    </div>
-  );
+  return <JsonInspector className={props.compact ? "mt-2" : undefined} label={props.label} testId={props.testId} value={props.value} size={props.compact ? "compact" : "standard"} />;
 }
 
 function Badge({ children }: { readonly children: ReactNode }) {

@@ -16,6 +16,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { createTableDocumentBinding } from "@interactive-os/json-document-tanstack-table";
+import { JsonInspector } from "../../../shared/ui/json-inspector";
 import { Button } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -162,11 +163,9 @@ export function TanStackTableConnectorLab() {
           <pre data-testid="tanstack-clipboard" className={classes("mt-3 min-h-8 whitespace-pre-wrap p-2", ui.surface.inset, ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</pre>
         </div>
 
-        <aside className={ui.code.json} aria-label="Canonical JSON">
-          <div className={classes("mb-2", ui.text.meta)}>Canonical JSON · revision {snapshot.revision}</div>
-          <pre data-testid="tanstack-document-json" className="m-0 max-h-[30rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
-          <div className={classes("mb-2 mt-4", ui.text.meta)}>Selection · {snapshot.selection.ranges.length} ranges</div>
-          <pre data-testid="tanstack-selection-json" className="m-0 max-h-48 overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.selection, null, 2)}</code></pre>
+        <aside className="grid min-w-0 gap-3" aria-label="Canonical JSON">
+          <JsonInspector label="Canonical JSON" signal={`revision ${snapshot.revision}`} value={snapshot.value} testId="tanstack-document-json" size="tall" />
+          <JsonInspector label="Selection" meta={`${snapshot.selection.ranges.length} ranges`} value={snapshot.selection} testId="tanstack-selection-json" size="compact" />
         </aside>
       </div>
     </section>

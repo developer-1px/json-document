@@ -7,6 +7,7 @@ import {
   useDocumentEditor,
   useEditingSnapshot,
 } from "@interactive-os/json-document-react";
+import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button, PageIntro } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -150,10 +151,13 @@ export function DocumentDemoRoute() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
 
-          <aside className={classes("min-w-0", ui.code.json)} aria-label="Canonical JSON">
-            <div className={classes("mb-2 flex items-center justify-between", ui.text.meta)}><span>Canonical JSON</span><span>JSON Patch document</span></div>
-            <pre data-testid="canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
-          </aside>
+          <JsonInspector
+            label="Canonical JSON"
+            meta="JSON Patch document"
+            value={snapshot.value}
+            testId="canonical-json"
+            size="tall"
+          />
         </div>
       </div>
     </main>
