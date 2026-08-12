@@ -57,6 +57,17 @@ export const ui = {
     skipLink: "rounded-[6px] border border-black/[0.10] bg-white px-3 py-2 text-xs font-medium text-stone-950 shadow-[0_2px_4px_rgba(24,24,27,0.06),0_20px_48px_rgba(24,24,27,0.10)] focus:not-sr-only focus:fixed focus:left-3 focus:top-3",
     disabled: "disabled:cursor-not-allowed disabled:opacity-35",
   },
+  home: {
+    page: "min-h-full overflow-hidden bg-white",
+    hero: "relative isolate mx-auto min-h-[52rem] max-w-[92rem] overflow-hidden bg-white lg:min-h-screen",
+    copy: "relative z-10 flex min-h-[52rem] max-w-2xl flex-col justify-start px-6 pb-[22rem] pt-20 sm:justify-center sm:px-12 sm:pb-[20rem] sm:pt-16 lg:min-h-screen lg:max-w-[42rem] lg:px-16 lg:pb-20 xl:px-24",
+    title: "m-0 font-mono text-4xl font-medium tracking-[-0.045em] text-stone-950 sm:text-5xl lg:text-6xl",
+    statement: "mb-0 mt-7 text-3xl font-semibold leading-[1.08] tracking-[-0.045em] text-stone-950 sm:text-4xl lg:text-5xl",
+    description: "mb-0 mt-5 max-w-lg text-base leading-7 text-stone-600 sm:text-lg",
+    install: "rounded-[6px] border border-black/[0.06] bg-[#f1f1ee] px-3 py-2 font-mono text-xs leading-5 text-stone-800",
+    artwork: "pointer-events-none absolute inset-0 z-0 m-0 overflow-hidden",
+    artworkImage: "absolute bottom-0 right-0 h-auto w-[140vw] max-w-none translate-x-[18%] sm:w-[112vw] sm:translate-x-[14%] lg:w-[78vw] lg:translate-x-[8%]",
+  },
 } as const;
 
 export function classes(...values: ReadonlyArray<string | false | null | undefined>): string {

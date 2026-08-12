@@ -15,17 +15,14 @@ describe("official site shell", () => {
 
     expect(screen.getByRole("link", { name: "Skip to content" }).getAttribute("href")).toBe("#main-content");
     expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
-    expect(screen.getByText(/Implementation-neutral JSON editing/)).toBeTruthy();
-    expect(screen.getByText("3.0.0")).toBeTruthy();
-    expect(screen.getByText('import { createJSONDocument } from "@interactive-os/json-document";')).toBeTruthy();
-    expect(screen.getByRole("link", { name: "npm" }).getAttribute("href")).toBe("https://www.npmjs.com/package/@interactive-os/json-document");
-    expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe("https://github.com/developer-1px/json-document");
+    expect(screen.getByText(/One document model/)).toBeTruthy();
+    expect(screen.getByText(/Any editor/)).toBeTruthy();
+    expect(screen.getByText("npm i @interactive-os/json-document")).toBeTruthy();
+    expect(screen.getByText("v3.0.0")).toBeTruthy();
+    expect(screen.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeTruthy();
     const home = within(screen.getByRole("main"));
-    expect(home.getByRole("link", { name: "Quickstart" }).getAttribute("href")).toBe("/docs/tutorial");
-    expect(home.getByRole("link", { name: "Concepts" }).getAttribute("href")).toBe("/docs");
-    expect(home.getByRole("link", { name: "API Reference" }).getAttribute("href")).toBe("/docs/api");
-    expect(home.getByRole("link", { name: "Document" }).getAttribute("href")).toBe("/demo");
-    expect(home.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
+    expect(home.getByRole("link", { name: "Get started" }).getAttribute("href")).toBe("/docs/tutorial");
+    expect(home.getByRole("link", { name: "Read the API" }).getAttribute("href")).toBe("/docs/api");
   });
 
   test("projects the product hierarchy into the site navigation", async () => {
