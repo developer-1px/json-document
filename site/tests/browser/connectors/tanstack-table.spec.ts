@@ -48,6 +48,37 @@ test("TanStack Table Connector edits the visible sorted and filtered Sheet topol
   expect(errors).toEqual([]);
 });
 
+test("TanStack Table Connector fills disjoint ranges in visible order", async ({ page }) => {
+  await page.goto("/connectors/tanstack-table");
+  await page.getByRole("button", { name: "Score descending" }).click();
+  await page.getByRole("button", { name: "Score first" }).click();
+  await page.getByRole("button", { name: "Hide status" }).click();
+
+  const scoreR3 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "score r3" }) });
+  const nameR2 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "name r2" }) });
+  const scoreR1 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "score r1" }) });
+  await scoreR3.click();
+  await nameR2.click({ modifiers: ["Shift"] });
+  await scoreR1.click({ modifiers: ["Meta"] });
+
+  await expect(page.getByRole("gridcell", { selected: true })).toHaveCount(5);
+  expect(JSON.parse(await page.getByTestId("tanstack-selection-json").innerText()).ranges).toHaveLength(2);
+
+  await page.getByRole("button", { name: "Fill selected" }).click();
+  let value = JSON.parse(await page.getByTestId("tanstack-document-json").innerText()) as SheetValue;
+  expect(rowCells(value, "r3")).toEqual({ name: "Selected", status: "Ready", score: "Selected" });
+  expect(rowCells(value, "r2")).toEqual({ name: "Selected", status: "Ready", score: "Selected" });
+  expect(rowCells(value, "r1")).toEqual({ name: "Alpha", status: "Draft", score: "Selected" });
+
+  const nameR4 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "name r4" }) });
+  await nameR4.click();
+  await page.getByRole("button", { name: "Undo" }).click();
+  value = JSON.parse(await page.getByTestId("tanstack-document-json").innerText()) as SheetValue;
+  expect(rowCells(value, "r3")).toEqual({ name: "Gamma", status: "Ready", score: 3 });
+  await expect(page.getByRole("gridcell", { selected: true })).toHaveCount(5);
+  expect(JSON.parse(await page.getByTestId("tanstack-selection-json").innerText()).ranges).toHaveLength(2);
+});
+
 type SheetValue = { rows: Array<{ id: string; cells: Record<string, unknown> }> };
 
 async function editCell(page: import("@playwright/test").Page, name: string, value: string) {

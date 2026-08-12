@@ -206,16 +206,19 @@ Connector package의 peer dependency다. Schema introspection, DOM과 제품별 
 v3 Kernel release는 dependency-free Core package 하나다. Local-only consumer는
 Core만 설치한다. 이 저장소의 `@interactive-os/json-document-editing`은 atomic
 editing transaction, selection publication, clipboard, history와 Document 및
-Sheet domain slice를 제공하는 browser-independent companion이다. Sheet slice는
-stable row·column identity, anchor/focus rectangular selection, JSON/TSV
-clipboard, cell commit과 selection-restoring undo/redo를 제공한다.
+Sheet domain slice를 제공하는 browser-independent companion이다. Document와
+Sheet는 같은 range-set 상태 전이를 공유하되 topology와 JSON Patch 계획은 분리한다.
+Sheet slice는 stable row·column identity, 복수의 anchor/focus rectangular range,
+primary-range JSON/TSV clipboard, selection fill, cell commit과
+selection-restoring undo/redo를 제공한다.
 `@interactive-os/json-document-react`는 React external-store subscription과
 Document editor component lifecycle을 제공하는 공식 Connector다.
 `@interactive-os/json-document-zod`는 Zod issue path를 JSON Pointer validation
 diagnostic으로 번역하고 parse 변환값을 canonical JSON에 채택하지 않는 공식 Connector다.
 `@interactive-os/json-document-tanstack-table`은 TanStack Table v8의 visible
 row/column model을 Sheet topology로 번역해 정렬·필터·column ordering 뒤에도
-cell edit, rectangular selection과 clipboard가 화면 순서를 따르게 하는 공식 Connector다.
+cell edit, rectangular multi-range selection, selection fill과 clipboard가 화면
+순서를 따르게 하는 공식 Connector다.
 `@interactive-os/json-document-collaboration`은 같은 canonical JSON Document을
 제공하는 independently versioned, transport-free provider이고,
 `@interactive-os/json-document-contenteditable-collaboration`은 collaborative

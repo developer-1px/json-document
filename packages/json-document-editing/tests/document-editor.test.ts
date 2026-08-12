@@ -100,4 +100,35 @@ describe("document editing vertical slice", () => {
     editor.dispatch({ type: "selection.remove" });
     expect((editor.snapshot.value as { blocks: Array<{ text: string }> }).blocks.some((block) => block.text === "Inserted")).toBe(false);
   });
+
+  test("extends the primary range created by toggle selection", () => {
+    const editor = createDocumentEditor({
+      blocks: [
+        { id: "a", text: "A" },
+        { id: "b", text: "B" },
+        { id: "c", text: "C" },
+        { id: "d", text: "D" },
+      ],
+    });
+
+    editor.dispatch({ type: "selection.set", blockId: "a" });
+    editor.dispatch({ type: "selection.set", blockId: "c", mode: "toggle" });
+    editor.dispatch({ type: "selection.set", blockId: "d", mode: "extend" });
+
+    expect(editor.selectedBlockIds).toEqual(["a", "c", "d"]);
+    expect(editor.snapshot.selection).toEqual({
+      ranges: [
+        {
+          anchor: { blockId: "a", offset: 0 },
+          focus: { blockId: "a", offset: 0 },
+        },
+        {
+          anchor: { blockId: "c", offset: 0 },
+          focus: { blockId: "d", offset: 0 },
+        },
+      ],
+      primaryIndex: 1,
+    });
+    expect(editor.snapshot.canUndo).toBe(false);
+  });
 });

@@ -178,6 +178,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 
 제품별 selection 의미는 editing companion의 공통 lifecycle 위에서 조합합니다.
 Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다. 공식 site의
-`/demo`와 `/demo/sheet`는 public package만 사용해 Document range와 Sheet
-rectangular selection, clipboard, history와 canonical JSON projection을 함께
-실행합니다.
+`/demo`, `/demo/sheet`와 TanStack Table Connector demo는 public package만 사용해
+같은 range-set lifecycle 위의 ordered Document range, Sheet rectangle과
+visible-topology multi-range, selection 기반 JSON 변경, clipboard, history와
+canonical JSON projection을 함께 실행합니다.

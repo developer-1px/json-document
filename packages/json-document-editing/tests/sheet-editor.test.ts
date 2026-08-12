@@ -50,6 +50,11 @@ describe("sheet editing vertical slice", () => {
     expect(editor.snapshot.selection).toEqual({
       anchor: { rowId: "r2", columnId: "status" },
       focus: { rowId: "r3", columnId: "score" },
+      ranges: [{
+        anchor: { rowId: "r2", columnId: "status" },
+        focus: { rowId: "r3", columnId: "score" },
+      }],
+      primaryIndex: 0,
     });
 
     expect(editor.undo().ok).toBe(true);
@@ -61,6 +66,11 @@ describe("sheet editing vertical slice", () => {
     expect(editor.snapshot.selection).toEqual({
       anchor: { rowId: "r2", columnId: "status" },
       focus: { rowId: "r2", columnId: "status" },
+      ranges: [{
+        anchor: { rowId: "r2", columnId: "status" },
+        focus: { rowId: "r2", columnId: "status" },
+      }],
+      primaryIndex: 0,
     });
 
     expect(editor.redo().ok).toBe(true);
@@ -101,6 +111,11 @@ describe("sheet editing vertical slice", () => {
     expect(editor.snapshot.selection).toEqual({
       anchor: { rowId: "r2", columnId: "name" },
       focus: { rowId: "r2", columnId: "name" },
+      ranges: [{
+        anchor: { rowId: "r2", columnId: "name" },
+        focus: { rowId: "r2", columnId: "name" },
+      }],
+      primaryIndex: 0,
     });
   });
 
@@ -161,7 +176,48 @@ describe("sheet editing vertical slice", () => {
     expect(editor.snapshot.selection).toEqual({
       anchor: { rowId: "r3", columnId: "score" },
       focus: { rowId: "r3", columnId: "score" },
+      ranges: [{
+        anchor: { rowId: "r3", columnId: "score" },
+        focus: { rowId: "r3", columnId: "score" },
+      }],
+      primaryIndex: 0,
     });
+  });
+
+  test("fills disjoint ranges and restores JSON with the causal selection", () => {
+    const editor = createSheetEditor(initial);
+    editor.dispatch({ type: "selection.set", rowId: "r1", columnId: "name" });
+    editor.dispatch({ type: "selection.set", rowId: "r1", columnId: "status", mode: "toggle" });
+    editor.dispatch({ type: "selection.set", rowId: "r2", columnId: "score", mode: "extend" });
+
+    expect(editor.snapshot.canUndo).toBe(false);
+    expect(editor.selectedCells.map(({ rowId, columnId }) => `${rowId}:${columnId}`)).toEqual([
+      "r1:name",
+      "r1:status",
+      "r1:score",
+      "r2:status",
+      "r2:score",
+    ]);
+    const selectionBefore = editor.snapshot.selection;
+
+    expect(editor.dispatch({ type: "selection.fill", value: "Selected" }).ok).toBe(true);
+    expect(cells(editor.snapshot.value as SheetDocument)).toEqual([
+      ["Selected", "Selected", "Selected"],
+      ["Beta", "Selected", "Selected"],
+      ["Gamma", "Done", 3],
+    ]);
+
+    editor.dispatch({ type: "selection.set", rowId: "r3", columnId: "name" });
+    expect(editor.undo().ok).toBe(true);
+    expect(cells(editor.snapshot.value as SheetDocument)).toEqual([
+      ["Alpha", "Draft", 1],
+      ["Beta", "Ready", 2],
+      ["Gamma", "Done", 3],
+    ]);
+    expect(editor.snapshot.selection).toEqual(selectionBefore);
+
+    expect(editor.redo().ok).toBe(true);
+    expect(editor.snapshot.selection).toEqual(selectionBefore);
   });
 });
 

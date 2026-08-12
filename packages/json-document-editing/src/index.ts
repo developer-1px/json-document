@@ -25,6 +25,7 @@ export type {
   SheetEditor,
   SheetIntent,
   SheetPoint,
+  SheetRange,
   SheetRow,
   SheetSelection,
   SheetTopology,
