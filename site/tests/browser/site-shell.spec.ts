@@ -93,6 +93,33 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   });
 });
 
+test("code blocks preserve source whitespace with a compact visual rhythm", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/docs/tutorial");
+
+  const block = page.getByRole("figure", { name: "TypeScript" }).first();
+  await expect(block).toBeVisible();
+
+  const snapshot = await block.evaluate((element) => {
+    const code = element.querySelector("code");
+    const pre = element.querySelector("pre");
+    const lines = [...element.querySelectorAll("[data-code-line]")].slice(0, 4);
+    const tops = lines.map((line) => line.getBoundingClientRect().top);
+
+    return {
+      fontSize: code ? getComputedStyle(code).fontSize : null,
+      lineGaps: tops.slice(1).map((top, index) => Math.round((top - (tops[index] ?? top)) * 10) / 10),
+      source: pre?.textContent,
+      pageOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+
+  expect(snapshot.fontSize).toBe("13px");
+  expect(snapshot.lineGaps.every((gap) => gap >= 19 && gap <= 22)).toBe(true);
+  expect(snapshot.source).toContain('";\n\nconst initialBoard');
+  expect(snapshot.pageOverflow).toBe(false);
+});
+
 test("official site uses window scroll with sticky desktop navigation", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/docs/api");

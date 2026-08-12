@@ -13,7 +13,7 @@ import {
   type DatabaseRecord,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { CodeBlock } from "../../shared/ui/code-block";
+import { JsonInspector } from "../../shared/ui/json-inspector";
 import { classes, ui } from "../../shared/ui/styles";
 import { initialDatabase } from "./initial-database";
 
@@ -232,18 +232,19 @@ export function DatabaseTableDemo() {
         </div>
 
         <aside aria-label="Database contract inspector" className="grid content-start gap-3 lg:grid-cols-3">
-          <section className={classes("p-3", ui.surface.inset)}>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Persistent Table view</h2>
-            <CodeBlock language="json" size="standard" source={JSON.stringify(view, null, 2)} testId="database-view-json" />
-          </section>
-          <section className={classes("p-3", ui.surface.inset)}>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Structural selection</h2>
-            <CodeBlock language="json" size="compact" source={JSON.stringify(snapshot.selection, null, 2)} testId="database-selection-json" />
-          </section>
-          <section className={classes("p-3", ui.surface.inset)}>
-            <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Canonical database · revision {snapshot.revision}</h2>
-            <CodeBlock language="json" size="standard" source={JSON.stringify(document, null, 2)} testId="database-document-json" />
-          </section>
+          <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
+          <JsonInspector
+            label="Structural selection"
+            value={snapshot.selection}
+            testId="database-selection-json"
+            size="compact"
+          />
+          <JsonInspector
+            label="Canonical database"
+            signal={`revision ${snapshot.revision}`}
+            value={document}
+            testId="database-document-json"
+          />
         </aside>
       </div>
     </section>
