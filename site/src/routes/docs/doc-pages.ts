@@ -31,12 +31,3 @@ export const docPages = {
 } as const;
 
 export type DocPageId = keyof typeof docPages;
-
-export const docNavigation: ReadonlyArray<{
-  readonly label: "Start" | "Core" | "Connectors";
-  readonly pageIds: ReadonlyArray<DocPageId>;
-}> = [
-  { label: "Start", pageIds: ["quickstart"] },
-  { label: "Core", pageIds: ["overview", "api"] },
-  { label: "Connectors", pageIds: ["connectors"] },
-];

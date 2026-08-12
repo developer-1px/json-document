@@ -21,12 +21,6 @@
     "navigationGroup": "Start"
   },
   {
-    "path": "/docs/connectors",
-    "label": "Connector guide",
-    "title": "Connector Docs - json-document",
-    "description": "Official React, Zod, and TanStack Table integration contracts for json-document."
-  },
-  {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",
@@ -52,6 +46,13 @@
     "label": "Overview",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
+    "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/docs/connectors",
+    "label": "Connector guide",
+    "title": "Connector Docs - json-document",
+    "description": "Official React, Zod, and TanStack Table integration contracts for json-document.",
     "navigationGroup": "Connectors"
   },
   {
