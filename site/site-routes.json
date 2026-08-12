@@ -42,6 +42,13 @@
     "group": "Start"
   },
   {
+    "path": "/demo/sheet",
+    "label": "Sheet",
+    "title": "Sheet Demo - json-document",
+    "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
+    "group": "Start"
+  },
+  {
     "path": "/connectors",
     "label": "Connectors",
     "title": "Connectors - json-document",

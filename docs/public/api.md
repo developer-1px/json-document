@@ -309,3 +309,31 @@ Connector package가 제공합니다. Schema introspection, DOM lifecycle과 제
 
 Connector 개념, 패키지 정책, 제공되는 Zod API와 planned TanStack Table API는
 [Connectors](connectors.md)를 참고합니다.
+
+## Editing companion
+
+`@interactive-os/json-document-editing`은 renderer나 DOM을 소유하지 않는 별도
+package입니다. 공통 `EditingSession` lifecycle 위에 Document와 Sheet domain
+slice를 제공합니다.
+
+```ts
+import { createSheetEditor } from "@interactive-os/json-document-editing";
+
+const editor = createSheetEditor({
+  columns: [{ id: "status", label: "Status" }],
+  rows: [{ id: "task-1", cells: { status: "Draft" } }],
+});
+
+editor.dispatch({
+  type: "cell.commit",
+  rowId: "task-1",
+  columnId: "status",
+  value: "Ready",
+});
+```
+
+`SheetEditor`는 stable row·column identity, anchor/focus rectangular selection,
+cell commit, rectangular JSON/TSV clipboard와 selection-restoring undo/redo를
+제공합니다. Cell commit과 paste는 canonical JSON Pointer와 ordered JSON Patch로
+환원됩니다. Sorting, filtering, pagination, formula, DOM focus와 renderer는
+SheetEditor의 책임이 아닙니다.

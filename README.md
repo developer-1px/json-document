@@ -43,12 +43,12 @@ stateless JSON Patch
 | 위치 | 역할 |
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
-| [packages/json-document-editing](packages/json-document-editing) | headless transaction, selection, clipboard, history와 Document slice |
+| [packages/json-document-editing](packages/json-document-editing) | headless transaction, selection, clipboard, history와 Document·Sheet slice |
 | [packages/json-document-react](packages/json-document-react) | React subscription과 Document editor lifecycle Connector |
 | [packages/json-document-zod](packages/json-document-zod) | Zod validation issue를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
-| [site](site) | 공개 문서와 기능 완결형 최소 Document demo |
+| [site](site) | 공개 문서와 기능 완결형 최소 Document·Sheet demo |
 
 v3 Kernel인 `@interactive-os/json-document`는 dependency-free Core로 남습니다.
 Editing, collaboration과 Connector package는 독립 version과 release lifecycle을
@@ -73,12 +73,13 @@ optional editing companion이 제공하는 것:
 - atomic editing transaction과 selection publication
 - clipboard와 undo/redo coordination
 - 제품이 교체할 수 있는 selection과 domain intent 모델
+- Document range와 Sheet rectangular multiselection domain slice
 
 편집 제품이 계속 소유하는 것:
 
 - rendering, DOM focus, keyboard, drag/drop UI
 - DOM focus, system clipboard와 제품별 interaction policy
-- grid selection, TSV 의미, formula engine
+- formula engine과 제품별 grid projection 정책
 - product command 이름, layout, route, remote protocol
 
 공식 Connector가 제공하는 것:

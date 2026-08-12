@@ -32,6 +32,7 @@ describe("official site shell", () => {
     expect(nav.getByRole("link", { name: "Connectors", exact: true })).toBeTruthy();
     expect(nav.getByRole("link", { name: "React", exact: true })).toBeTruthy();
     expect(nav.getByRole("link", { name: "Zod", exact: true })).toBeTruthy();
+    expect(nav.getByRole("link", { name: "Sheet", exact: true })).toBeTruthy();
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 

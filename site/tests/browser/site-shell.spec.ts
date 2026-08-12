@@ -12,6 +12,7 @@ test("official overview exposes docs, editing, and Connector demos", async ({ pa
   await expect(navigation.getByRole("link", { name: "Connectors", exact: true })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "React", exact: true })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Demo" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Sheet", exact: true })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
