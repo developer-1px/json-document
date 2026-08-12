@@ -144,6 +144,37 @@ reconciliation을 소유하므로 일반 patch validation과 합치지 않는다
 
 Native-input DOM lease는 collaboration ingestion을 멈추지 않는다.
 
+### Connector
+
+| Canonical term | 정의 | 포함하지 않는 것 |
+| --- | --- | --- |
+| Connector | 이름 붙은 외부 생태계의 public contract와 json-document의 public contract를 번역하는 optional package category | 공통 runtime interface, document semantics, product UI |
+| Connector package | 외부 peer dependency를 격리하고 독립 version으로 배포하는 공식 integration artifact | Kernel subpath, app-local glue folder |
+
+Connector는 TypeScript base interface가 아니라 package와 지원 정책의 분류다.
+React hook, Zod validator와 TanStack Table options는 서로 다른 native contract를
+유지하며 공통 `Connector` interface에 맞추지 않는다. Connector 안의 구체적인
+model 또는 platform 변환 경계는 `Adapter`, 두 public model 사이의 지속적인
+synchronization은 `Binding`이라고 부를 수 있다.
+
+`Provider`는 network, storage, schema 또는 host port의 실제 구현을 가리킨다.
+예를 들어 Zod schema는 validation provider이고 Zod Connector는 그 provider를
+`JSONDocumentOptions.validate` contract로 번역한다. 둘은 같은 책임이 아니다.
+
+공식 Connector는 다음 조건을 모두 만족해야 한다.
+
+1. 대상 외부 생태계와 stable public contract가 명시되어 있다.
+2. json-document의 public package surface만 import한다.
+3. 외부 runtime은 Connector package의 peer dependency로 격리된다.
+4. 제거하거나 교체해도 canonical JSON과 editing semantics가 바뀌지 않는다.
+5. 대상 생태계의 native API 모양을 보존하고 contract test를 제공한다.
+6. 지원 version 범위와 최소 하나의 실제 product 또는 demo consumer가 있다.
+
+공식 package는 `@interactive-os/json-document-<target>` 문법을 사용한다.
+Connector들은 대상 peer와 독립적인 release lifecycle을 가지며 Kernel version을
+따라 lockstep release하지 않는다. 각 package README는 지원하는 Kernel,
+companion과 외부 peer version 범위를 기록한다.
+
 ## 이름 문법
 
 Public TypeScript 이름은 다음 순서로 만든다.
@@ -258,6 +289,7 @@ ActorId, ChangeId, actorId, epochId
 | `Report` | 완료 작업의 통계와 진단 | Success/failure union |
 | `Adapter` | 외부 platform/model 변환 경계 | Domain state |
 | `Binding` | 두 public model 사이의 지속적 synchronization | 일반 wrapper |
+| `Connector` | 외부 생태계 integration package의 분류 | 공통 runtime interface 또는 product semantics |
 
 ### 제한 suffix
 
@@ -411,6 +443,8 @@ Identifier의 `Id`는 앞선 TypeScript casing 규칙을 따른다.
 | `didChangeDocument` | Visible document change outcome | Exact predicate | 없음 | keep | `didChangeDocument` |
 | `TextDOMAdapter` | DOM observe/render/selection boundary | Exact responsibility | 없음 | keep | `TextDOMAdapter` |
 | publication lease | Native input 중 DOM rendering 유예 | Local | Sync lock으로 오해 | rename prose | native-input DOM lease |
+| framework binding | 외부 framework와의 package integration | Near | Host glue와 공식 지원을 구분하지 못함 | classify | Connector package |
+| `Connector` | 외부 생태계와 public contract를 번역하는 공식 package category | Exact local | 외부 표준명은 아니지만 Adapter 의미 중복을 피함 | admit | Connector |
 
 ## Protocol vocabulary boundary
 
@@ -462,6 +496,12 @@ identifier에는 canonical vocabulary만 사용한다.
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
 | keep | `ContentEditableAdapter`, `ContentEditableOptions`, `ContentEditableResult`, `createContentEditableAdapter`, `TextDOMAdapter`, `DOMObservation`, `plainTextDOMAdapter` | Package namespace와 DOM Adapter 책임이 일치 |
+
+### React Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `useJSONDocumentValue`, `useEditingSnapshot`, `useDocumentEditor`, `EditingSnapshotSource` | React hook convention과 연결하는 대상 snapshot 책임이 일치 |
 
 ## Target vocabulary
 
@@ -517,6 +557,13 @@ Contenteditable package
 ├─ ContentEditableOptions
 ├─ ContentEditableResult
 └─ ContentEditableAdapter
+
+Connector packages
+└─ React
+   ├─ EditingSnapshotSource
+   ├─ useJSONDocumentValue
+   ├─ useEditingSnapshot
+   └─ useDocumentEditor
 ```
 
 ## 새 concept admission
@@ -557,7 +604,7 @@ Contenteditable package
 8. Options는 caller input, Status는 현재 진단, Snapshot은 완전한 시점
    state, Checkpoint는 restoreable artifact다.
 9. Runtime은 stateful capability 조합, Replica는 causal participant,
-   Adapter는 외부 platform boundary다.
+   Adapter는 외부 platform/model boundary다.
 10. `Control`, `Manager`, `Helper`, `Util`, `Common`, `Misc`, vague `Data`,
     vague `Info`를 새 public 이름에 쓰지 않는다.
 11. Public boolean은 `is`, `has`, `can`, `should`, `did`로 읽히게 한다.
@@ -567,3 +614,5 @@ Contenteditable package
     internal identifier로 사용하지 않는다.
 15. 이름 변경은 runtime logic, protocol semantics 또는 wire behavior 변경을
     승인하지 않는다.
+16. Connector는 외부 생태계 integration package의 분류이며 공통 runtime
+    interface가 아니다.

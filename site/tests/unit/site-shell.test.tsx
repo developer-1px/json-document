@@ -45,6 +45,7 @@ describe("official site shell", () => {
     expect(nav.queryByRole("link", { name: "Recipes" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.getByRole("link", { name: "Demo" })).toBeTruthy();
+    expect(nav.getByRole("link", { name: "Connectors" })).toBeTruthy();
 
     await user.click(nav.getByRole("link", { name: "Docs" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
@@ -57,6 +58,11 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("link", { name: "Quickstart" }));
     await waitFor(() => expect(document.title).toBe("Tutorial - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "작은 카드 편집기 만들기" })).toBeTruthy();
+
+    await user.click(nav.getByRole("link", { name: "Connectors" }));
+    await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "React Connector" })).toBeTruthy();
 
     await user.click(nav.getByRole("link", { name: "API reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));

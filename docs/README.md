@@ -11,6 +11,7 @@ docs
 `-- public
 |   |-- overview.md            # 프로젝트 이해
 |   |-- quickstart.md          # 사용 시작
+|   |-- connectors.md          # 공식 외부 생태계 Connector
 |   |-- api.md                 # 공개 API
 |   `-- llms.txt               # machine-readable 공개 문서
 ```

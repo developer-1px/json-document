@@ -83,6 +83,7 @@ export function Home() {
           <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
           <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
             <li>Root Kernel is React- and Zod-free.</li>
+            <li>Official Connectors add ecosystem-native integration without changing the Kernel.</li>
             <li>Headless editing is an optional companion composed over the six-member document.</li>
             <li>Mutation inputs are JSON Patch with JSON Pointer paths.</li>
             <li>JSONPath is search-only and returns pointers.</li>

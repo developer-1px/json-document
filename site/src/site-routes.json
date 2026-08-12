@@ -21,6 +21,13 @@
     "group": "Start"
   },
   {
+    "path": "/docs/connectors",
+    "label": "Connectors",
+    "title": "Connectors - json-document",
+    "description": "Official React connector and planned Zod and TanStack Table integration contracts for json-document.",
+    "group": "Start"
+  },
+  {
     "path": "/docs/api",
     "label": "API reference",
     "title": "json-document API - json-document",

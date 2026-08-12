@@ -15,12 +15,14 @@ const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 const SITE_URL = (import.meta.env.VITE_SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
 const Docs = lazy(() => import("./routes/Docs").then((module) => ({ default: module.Docs })));
 const DocsTutorial = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsTutorial })));
+const DocsConnectors = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsConnectors })));
 const DocsApiReference = lazy(() => import("./routes/Docs").then((module) => ({ default: module.DocsApiReference })));
 const DocumentDemo = lazy(() => import("./routes/DocumentDemo").then((module) => ({ default: module.DocumentDemo })));
 const routeComponents: Record<string, ComponentType> = {
   "/": Home,
   "/docs": Docs,
   "/docs/tutorial": DocsTutorial,
+  "/docs/connectors": DocsConnectors,
   "/docs/api": DocsApiReference,
   "/demo": DocumentDemo,
 };

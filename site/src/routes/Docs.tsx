@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { MarkdownViewer, markdownHeadings } from "../components/MarkdownViewer";
 import apiReferenceMarkdown from "../../../docs/public/api.md?raw";
+import connectorsMarkdown from "../../../docs/public/connectors.md?raw";
 import overviewMarkdown from "../../../docs/public/overview.md?raw";
 import quickstartMarkdown from "../../../docs/public/quickstart.md?raw";
 
@@ -18,6 +19,12 @@ const docPages = [
     label: "Quickstart",
     title: "작은 카드 편집기 만들기",
     source: quickstartMarkdown,
+  },
+  {
+    path: "/docs/connectors",
+    label: "Connectors",
+    title: "json-document Connectors",
+    source: connectorsMarkdown,
   },
   {
     path: "/docs/api",
@@ -42,6 +49,10 @@ export function DocsTutorial() {
 }
 
 export function DocsApiReference() {
+  return <DocsPage page={docPages[3]} />;
+}
+
+export function DocsConnectors() {
   return <DocsPage page={docPages[2]} />;
 }
 

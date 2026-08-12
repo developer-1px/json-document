@@ -1,0 +1,54 @@
+{
+  "name": "@interactive-os/json-document-react",
+  "version": "0.1.0-rc.0",
+  "description": "Official React connector for json-document and its headless editing companion.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-react"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "prebuild": "npm run build -w @interactive-os/json-document && npm run build -w @interactive-os/json-document-editing",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "pretypecheck": "npm run build -w @interactive-os/json-document && npm run build -w @interactive-os/json-document-editing",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@interactive-os/json-document": "^3.0.0",
+    "@interactive-os/json-document-editing": ">=0.1.0-rc.0 <1",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-editing": "*",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.9.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.1.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7"
+  }
+}

@@ -10,6 +10,7 @@ test("official overview exposes the v3 documentation and editing demo", async ({
   await expect(navigation.getByRole("link", { name: "Docs" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Quickstart" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "API reference" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Connectors" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Demo" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
@@ -68,6 +69,11 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { name: "배경" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Connectors" }).first().click();
+  await expect(page).toHaveTitle("Connectors - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "React Connector" })).toBeVisible();
 
   await page.getByRole("link", { name: "API reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");

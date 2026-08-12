@@ -3,14 +3,16 @@
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
-v3 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 하며 Zod, React,
-selection, clipboard, history를 필수 계약에 넣지 않습니다.
+v3 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 합니다. React와
+Zod 같은 외부 생태계는 Root에 넣지 않고 independently versioned 공식
+Connector로 제공합니다.
 
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
   |                               > same six-member JSON Document
   `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional official Connectors
                                      |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
@@ -27,6 +29,7 @@ stateless JSON Patch
 | --- | --- |
 | 프로젝트 이해 | [docs/public/overview.md](docs/public/overview.md) |
 | 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
+| Connector | [docs/public/connectors.md](docs/public/connectors.md) |
 | 공개 API | [docs/public/api.md](docs/public/api.md) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
@@ -40,15 +43,16 @@ stateless JSON Patch
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
 | [packages/json-document-editing](packages/json-document-editing) | headless transaction, selection, clipboard, history와 Document slice |
+| [packages/json-document-react](packages/json-document-react) | React subscription과 Document editor lifecycle Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [site](site) | 공개 문서와 기능 완결형 최소 Document demo |
 
 v3 Kernel인 `@interactive-os/json-document`는 dependency-free Core로 남습니다.
-Editing과 collaboration package는 독립 version과 release lifecycle을 가진 optional
-companion입니다. Selection, clipboard, history는 editing companion이 제공하는
-headless lifecycle 위에서 도메인별 모델을 조합하고, persistence와 제품별 DOM
-lifecycle은 host가 소유합니다.
+Editing, collaboration과 Connector package는 독립 version과 release lifecycle을
+가집니다. Selection, clipboard, history는 editing companion이 제공하는 headless
+lifecycle 위에서 도메인별 모델을 조합합니다. External framework와 schema의 반복
+glue는 공식 Connector가 맡고, persistence와 제품별 UI 의미는 host가 소유합니다.
 일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
 `@interactive-os/editable`도 검토할 수 있습니다.
 
@@ -71,9 +75,15 @@ optional editing companion이 제공하는 것:
 편집 제품이 계속 소유하는 것:
 
 - rendering, DOM focus, keyboard, drag/drop UI
-- DOM/system clipboard 연결과 framework lifecycle
+- DOM focus, system clipboard와 제품별 interaction policy
 - grid selection, TSV 의미, formula engine
 - product command 이름, layout, route, remote protocol
+
+공식 Connector가 제공하는 것:
+
+- React external-store subscription과 component lifecycle
+- 외부 schema/table/platform contract와 public json-document contract의 번역
+- 대상 peer dependency 격리와 compatibility 범위
 
 ## 개발
 

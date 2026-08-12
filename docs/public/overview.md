@@ -2,14 +2,16 @@
 
 json-document v3는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수
 있는 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
-루트 package는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 하며 Zod,
-React, selection, clipboard, history를 필수 계약에 넣지 않습니다.
+루트 package는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 합니다. Zod,
+React 같은 외부 생태계는 필수 계약이 아니라 independently versioned 공식
+Connector로 제공합니다.
 
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
   |                               > same six-member JSON Document
   `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional official Connectors
                                      |-> optional history/text authoring
                                      `-> optional native-input DOM lease
 ```
@@ -44,7 +46,8 @@ CRDT와 OT는 host 또는 adapter 책임입니다.
 | JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 여섯-member port |
 | validation | Candidate document를 commit 전에 검사하는 implementation-neutral callback |
 | Editing companion | transaction, selection publication, clipboard, history를 조합하는 browser-independent 계층 |
-| Host adapter | DOM, system clipboard, focus와 framework lifecycle을 소유하는 별도 계층 |
+| Connector | 외부 생태계의 native contract와 public json-document contract를 번역하는 공식 optional package |
+| Host adapter | DOM, system clipboard, focus와 제품별 interaction policy를 소유하는 별도 계층 |
 
 전체 canonical concept, 접두어·접미어·동사·boolean 규칙은
 [Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/standards/repository-naming.md)가
@@ -119,24 +122,26 @@ if (result.ok) {
 | --- | --- | --- |
 | `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
 | `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 최초 Document slice |
+| `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
 | `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
 
-패키지는 `/session`과 `/react`를 공개하지 않습니다. 구현 간 교환 가능한 코드는
-루트 `JSONDocument` 여섯 member에만 의존하고, 편집 UX와 framework lifecycle은
-host 또는 별도 adapter가 소유합니다. Local-only consumer는 Core만 설치하며,
+패키지는 `/session`과 `/react` subpath를 공개하지 않습니다. 구현 간 교환 가능한
+코드는 루트 `JSONDocument` 여섯 member에만 의존하고, 반복되는 외부 생태계 glue는
+독립 Connector가 소유합니다. Local-only consumer는 Core만 설치하며,
 collaboration engine으로 바꿔도 editor가 사용하는 `JSONDocument` API는
 변하지 않습니다.
 
-## Host adapter와 companion
+## Connector, host adapter와 companion
 
 Editing companion은 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
 JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 늘리지
 않는 별도 headless lifecycle이며 구체적인 selection topology와 paste 의미는 제품이
 정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
 Collaboration companion도 transport, authentication, presence, persistence를
-소유하지 않습니다. Adapter와 companion은 Core와 독립적으로 version과
-compatibility를 검증합니다.
+소유하지 않습니다. Connector, adapter와 companion은 Core와 독립적으로 version과
+compatibility를 검증합니다. Connector의 승격 조건과 React·Zod·TanStack Table
+계획은 [Connectors](connectors.md)에 정리되어 있습니다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
 예시입니다. `JSONDocument`는 canonical headless JSON state로 남고, editable은
@@ -155,6 +160,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | instance 없는 patch 적용 | `applyPatch(value, operations)` |
 | Pointer 조합과 추적 | `buildPointer`, `appendSegment`, `parentPointer`, `trackPointer` |
 | headless selection, clipboard, undo/redo | `@interactive-os/json-document-editing` |
+| React에서 document/editor 구독 | `@interactive-os/json-document-react` |
 
 성공한 mutation의 `change.applied`는 실제 적용된 canonical operation입니다.
 실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 표현됩니다.
