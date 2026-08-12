@@ -243,30 +243,16 @@ implementation-neutral validation boundary입니다.
 
 ```ts
 import * as z from "zod";
-import {
-  createJSONDocument,
-  type JSONPatchValidationResult,
-  type JSONValue,
-} from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document";
+import { createZodValidator } from "@interactive-os/json-document-zod";
 
 const Schema = z.object({
   title: z.string().min(1),
 });
 
-function validate(candidate: JSONValue): JSONPatchValidationResult {
-  const parsed = Schema.safeParse(candidate);
-  return parsed.success
-    ? { ok: true }
-    : {
-        ok: false,
-        code: "schema_violation",
-        reason: JSON.stringify(parsed.error.issues),
-      };
-}
-
 const acceptedDocument = createJSONDocument(
   { title: "Draft" },
-  { validate },
+  { validate: createZodValidator(Schema) },
 );
 ```
 
@@ -321,5 +307,5 @@ clipboard와 history는 optional editing companion이 조합합니다. React sub
 Connector package가 제공합니다. Schema introspection, DOM lifecycle과 제품별 UI
 의미는 해당 Connector 또는 host의 명시적인 책임으로 남습니다.
 
-Connector 개념, 패키지 정책과 planned Zod·TanStack Table API는
+Connector 개념, 패키지 정책, 제공되는 Zod API와 planned TanStack Table API는
 [Connectors](connectors.md)를 참고합니다.

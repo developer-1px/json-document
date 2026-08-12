@@ -503,6 +503,12 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `useJSONDocumentValue`, `useEditingSnapshot`, `useDocumentEditor`, `EditingSnapshotSource` | React hook convention과 연결하는 대상 snapshot 책임이 일치 |
 
+### Zod Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `createZodValidator`, `ZodValidatorOptions` | Zod native schema를 JSON Document validation callback으로 연결하는 책임이 일치 |
+
 ## Target vocabulary
 
 이 목록은 현재 canonical public vocabulary다.
@@ -559,11 +565,14 @@ Contenteditable package
 └─ ContentEditableAdapter
 
 Connector packages
-└─ React
-   ├─ EditingSnapshotSource
-   ├─ useJSONDocumentValue
-   ├─ useEditingSnapshot
-   └─ useDocumentEditor
+├─ React
+│  ├─ EditingSnapshotSource
+│  ├─ useJSONDocumentValue
+│  ├─ useEditingSnapshot
+│  └─ useDocumentEditor
+└─ Zod
+   ├─ ZodValidatorOptions
+   └─ createZodValidator
 ```
 
 ## 새 concept admission

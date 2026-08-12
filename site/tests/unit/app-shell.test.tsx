@@ -31,13 +31,18 @@ describe("official site shell", () => {
 
     expect(nav.getByRole("link", { name: "Connectors", exact: true })).toBeTruthy();
     expect(nav.getByRole("link", { name: "React", exact: true })).toBeTruthy();
+    expect(nav.getByRole("link", { name: "Zod", exact: true })).toBeTruthy();
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     await user.click(nav.getByRole("link", { name: "Connectors", exact: true }));
     await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Connectors" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Open Live Demo" }).getAttribute("href")).toBe("/connectors/react");
+    const demos = screen.getAllByRole("link", { name: "Open Live Demo" });
+    expect(demos.map((link) => link.getAttribute("href"))).toEqual([
+      "/connectors/react",
+      "/connectors/zod",
+    ]);
   });
 });
 

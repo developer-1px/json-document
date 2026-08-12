@@ -17,6 +17,7 @@ const ApiReferenceRoute = lazy(() => import("../routes/docs/DocsRoute").then((mo
 const DocumentDemoRoute = lazy(() => import("../routes/document-demo/DocumentDemoRoute").then((module) => ({ default: module.DocumentDemoRoute })));
 const ConnectorCatalogRoute = lazy(() => import("../routes/connectors/ConnectorCatalogRoute").then((module) => ({ default: module.ConnectorCatalogRoute })));
 const ReactConnectorDemoRoute = lazy(() => import("../routes/connectors/react/ReactConnectorDemoRoute").then((module) => ({ default: module.ReactConnectorDemoRoute })));
+const ZodConnectorDemoRoute = lazy(() => import("../routes/connectors/zod/ZodConnectorDemoRoute").then((module) => ({ default: module.ZodConnectorDemoRoute })));
 
 const routeComponents: Record<string, ComponentType> = {
   "/": HomeRoute,
@@ -27,6 +28,7 @@ const routeComponents: Record<string, ComponentType> = {
   "/demo": DocumentDemoRoute,
   "/connectors": ConnectorCatalogRoute,
   "/connectors/react": ReactConnectorDemoRoute,
+  "/connectors/zod": ZodConnectorDemoRoute,
 };
 
 const routes: Route[] = (siteRoutes as SiteRoute[]).map((route) => ({

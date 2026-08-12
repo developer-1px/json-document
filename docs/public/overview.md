@@ -123,6 +123,7 @@ if (result.ok) {
 | `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
 | `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 최초 Document slice |
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
+| `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
 | `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
 
@@ -140,7 +141,7 @@ JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 �
 정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
 Collaboration companion도 transport, authentication, presence, persistence를
 소유하지 않습니다. Connector, adapter와 companion은 Core와 독립적으로 version과
-compatibility를 검증합니다. Connector의 승격 조건과 React·Zod·TanStack Table
+compatibility를 검증합니다. Connector의 승격 조건, React·Zod 구현과 TanStack Table
 계획은 [Connectors](connectors.md)에 정리되어 있습니다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
@@ -161,6 +162,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | Pointer 조합과 추적 | `buildPointer`, `appendSegment`, `parentPointer`, `trackPointer` |
 | headless selection, clipboard, undo/redo | `@interactive-os/json-document-editing` |
 | React에서 document/editor 구독 | `@interactive-os/json-document-react` |
+| Zod schema로 document validation | `@interactive-os/json-document-zod`의 `createZodValidator` |
 
 성공한 mutation의 `change.applied`는 실제 적용된 canonical operation입니다.
 실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 표현됩니다.

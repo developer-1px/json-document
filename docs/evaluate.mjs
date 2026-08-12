@@ -51,6 +51,7 @@ const surfaces = {
   packageReadme: read("packages/json-document/README.md"),
   editingReadme: read("packages/json-document-editing/README.md"),
   reactReadme: read("packages/json-document-react/README.md"),
+  zodReadme: read("packages/json-document-zod/README.md"),
   collaborationReadme: read("packages/json-document-collaboration/README.md"),
   contenteditableCollaborationReadme: read(
     "packages/contenteditable-collaboration/README.md",
@@ -63,11 +64,11 @@ const publicContract = readJson("packages/json-document/public-contract.json");
 const activeCompanionPackages = new Set([
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-react",
+  "@interactive-os/json-document-zod",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);
 const plannedConnectorPackages = new Set([
-  "@interactive-os/json-document-zod",
   "@interactive-os/json-document-tanstack-table",
 ]);
 

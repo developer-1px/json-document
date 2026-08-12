@@ -45,6 +45,7 @@ stateless JSON Patch
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
 | [packages/json-document-editing](packages/json-document-editing) | headless transaction, selection, clipboard, history와 Document slice |
 | [packages/json-document-react](packages/json-document-react) | React subscription과 Document editor lifecycle Connector |
+| [packages/json-document-zod](packages/json-document-zod) | Zod validation issue를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [site](site) | 공개 문서와 기능 완결형 최소 Document demo |

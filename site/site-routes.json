@@ -24,7 +24,7 @@
     "path": "/docs/connectors",
     "label": "Connector docs",
     "title": "Connector Docs - json-document",
-    "description": "Official React connector and planned Zod and TanStack Table integration contracts for json-document.",
+    "description": "Official React and Zod connectors plus the planned TanStack Table integration contract for json-document.",
     "group": "Start"
   },
   {
@@ -53,6 +53,13 @@
     "label": "React",
     "title": "React Connector Live Demo - json-document",
     "description": "Live React integration for JSON Document subscriptions and component-owned editing lifecycle.",
+    "group": "Connectors"
+  },
+  {
+    "path": "/connectors/zod",
+    "label": "Zod",
+    "title": "Zod Connector Live Demo - json-document",
+    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
     "group": "Connectors"
   }
 ]

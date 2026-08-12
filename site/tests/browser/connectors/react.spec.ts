@@ -1,14 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-test("React Connector catalog exposes only implemented Live Demos", async ({ page }) => {
+test("Connector catalog exposes only implemented Live Demos", async ({ page }) => {
   await page.goto("/connectors");
 
   await expect(page.getByRole("heading", { level: 1, name: "Connectors" })).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(4);
-  await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(1);
-  await expect(page.getByText("planned", { exact: true })).toHaveCount(3);
+  await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(2);
+  await expect(page.getByText("planned", { exact: true })).toHaveCount(2);
 
-  await page.getByRole("link", { name: "Open Live Demo" }).click();
+  await page.getByRole("article").filter({ hasText: "React" }).getByRole("link", { name: "Open Live Demo" }).click();
   await expect(page).toHaveURL(/\/connectors\/react$/);
   await expect(page.getByRole("heading", { level: 1, name: "React Connector" })).toBeVisible();
 });
