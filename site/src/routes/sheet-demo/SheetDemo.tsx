@@ -37,14 +37,19 @@ export function SheetDemo() {
   }
 
   function selectCell(event: MouseEvent, rowId: string, columnId: string) {
+    const mode = event.shiftKey
+      ? "extend"
+      : event.metaKey || event.ctrlKey
+        ? "toggle"
+        : "replace";
     run(
       () => editor.dispatch({
         type: "selection.set",
         rowId,
         columnId,
-        mode: event.shiftKey ? "extend" : "replace",
+        mode,
       }),
-      event.shiftKey ? "Range extended" : "Cell selected",
+      mode === "extend" ? "Range extended" : mode === "toggle" ? "Range toggled" : "Cell selected",
     );
   }
 
@@ -85,7 +90,7 @@ export function SheetDemo() {
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <PageIntro title="Sheet demo">A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageIntro>
           <div className={classes("text-right", ui.text.meta)}>
-            <div>{editor.selectedCells.length} selected · revision {snapshot.revision}</div>
+            <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
         </header>
@@ -93,6 +98,10 @@ export function SheetDemo() {
         <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Sheet actions">
           <Action label="Copy" onClick={copySelection} />
           <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
+          <Action label="Fill selected" onClick={() => run(
+            () => editor.dispatch({ type: "selection.fill", value: "Selected" }),
+            "Selected cells filled",
+          )} />
           <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
           <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
           <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
@@ -143,12 +152,14 @@ export function SheetDemo() {
                 ))}
               </tbody>
             </table>
-            <p className={classes("mb-0 mt-3", ui.text.meta)}>Click selects one cell. Shift-click extends a rectangle. Copy publishes rectangular JSON and TSV; paste starts at the focused cell.</p>
+            <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click adds or removes a single-cell range. Fill selected changes every selected cell in one transaction.</p>
           </section>
 
           <aside className={classes("min-w-0", ui.code.json)} aria-label="Canonical JSON">
             <div className={classes("mb-2 flex items-center justify-between", ui.text.meta)}><span>Canonical JSON</span><span>stable row + column ids</span></div>
             <pre data-testid="sheet-canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
+            <div className={classes("mb-2 mt-4", ui.text.meta)}>Selection</div>
+            <pre data-testid="sheet-selection-json" className="m-0 max-h-48 overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.selection, null, 2)}</code></pre>
           </aside>
         </div>
       </div>

@@ -313,8 +313,8 @@ Connector 개념, 패키지 정책, 제공되는 Zod와 TanStack Table API는
 ## Editing companion
 
 `@interactive-os/json-document-editing`은 renderer나 DOM을 소유하지 않는 별도
-package입니다. 공통 `EditingSession` lifecycle 위에 Document와 Sheet domain
-slice를 제공합니다.
+package입니다. 공통 `EditingSession` lifecycle 위에 Document, Order, Sheet,
+Object와 Tree domain slice를 제공합니다.
 
 ```ts
 import { createSheetEditor } from "@interactive-os/json-document-editing";
@@ -330,10 +330,37 @@ editor.dispatch({
   columnId: "status",
   value: "Ready",
 });
+
+editor.dispatch({
+  type: "selection.fill",
+  value: "Ready",
+});
 ```
 
-`SheetEditor`는 stable row·column identity, anchor/focus rectangular selection,
-cell commit, rectangular JSON/TSV clipboard와 selection-restoring undo/redo를
-제공합니다. Cell commit과 paste는 canonical JSON Pointer와 ordered JSON Patch로
-환원됩니다. Sorting, filtering, pagination, formula, DOM focus와 renderer는
-SheetEditor의 책임이 아닙니다.
+`SheetEditor`는 stable row·column identity, primary range를 포함한 복수의
+anchor/focus rectangular range, primary-range JSON/TSV clipboard, selection fill,
+cell commit과 selection-restoring undo/redo를 제공합니다. Document와 Sheet는
+같은 range-set 상태 전이를 사용하지만 선택 대상을 열거하는 topology와 JSON Patch
+계획은 각각 소유합니다. Cell commit, fill과 paste는 canonical JSON Pointer와
+ordered JSON Patch로 환원됩니다. Sorting, filtering, pagination, formula, DOM
+focus와 renderer는 SheetEditor의 책임이 아닙니다.
+
+Structural selection은 하나의 보편 엔진으로 합치지 않고 두 family로 나뉩니다.
+
+```txt
+range-set transition
+  |-- Document ordered points
+  |-- Order stable item IDs
+  |-- Sheet row axis × column axis
+  `-- Tree host-projected visible order
+
+set-selection transition
+  `-- Object stable IDs
+```
+
+Tree의 expand/collapse 상태와 visible order projection은 host가 소유하고,
+`TreeEditor`는 전달받은 topology에 맞춰 range를 정규화하고 hierarchy mutation을
+JSON Patch로 계획합니다. Object marquee의 pointer geometry와 hit-test도 host가
+소유하며 `ObjectEditor`에는 hit된 stable ID만 전달합니다. 값 변경 history는
+selection을 함께 복구합니다. Native text caret/range는 structural selection
+family에 포함되지 않습니다.

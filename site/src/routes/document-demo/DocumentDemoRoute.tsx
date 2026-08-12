@@ -82,7 +82,9 @@ export function DocumentDemoRoute() {
     if ((event.target as HTMLElement).closest("textarea")) return;
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     event.preventDefault();
-    const primary = snapshot.selection.ranges[snapshot.selection.primaryIndex]?.focus.blockId;
+    const primary = snapshot.selection.primaryIndex === null
+      ? undefined
+      : snapshot.selection.ranges[snapshot.selection.primaryIndex]?.focus.blockId;
     const index = document.blocks.findIndex((block) => block.id === primary);
     const next = document.blocks[index + (event.key === "ArrowUp" ? -1 : 1)];
     if (next) run(() => editor.dispatch({ type: "selection.set", blockId: next.id, mode: event.shiftKey ? "extend" : "replace" }), "Selection changed");

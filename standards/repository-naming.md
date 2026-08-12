@@ -471,7 +471,7 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `EditingPlan`, `EditingResult`, `EditingSession`, `EditingSnapshot`, `createEditingSession` | 공통 editing lifecycle과 Plan/Result/Session/Snapshot suffix가 일치 |
 | keep | `BlockDocument`, `DocumentBlock`, `DocumentClipboard`, `DocumentEditor`, `DocumentIntent`, `DocumentPoint`, `DocumentRange`, `DocumentSelection`, `createDocumentEditor` | Document domain과 selection topology 책임이 일치 |
-| keep | `SheetCell`, `SheetClipboard`, `SheetColumn`, `SheetDocument`, `SheetEditor`, `SheetIntent`, `SheetPoint`, `SheetRow`, `SheetSelection`, `createSheetEditor` | Sheet domain, stable identity와 rectangular selection 책임이 일치 |
+| keep | `SheetCell`, `SheetClipboard`, `SheetColumn`, `SheetDocument`, `SheetEditor`, `SheetIntent`, `SheetPoint`, `SheetRange`, `SheetRow`, `SheetSelection`, `createSheetEditor` | Sheet domain, stable identity와 rectangular range-set selection 책임이 일치 |
 | keep | `SheetTopology` | Host가 제공한 visible row/column order를 Sheet 편집 의미로 해석하는 책임이 일치 |
 
 ### Collaboration root
