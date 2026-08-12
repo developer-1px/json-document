@@ -1,9 +1,27 @@
 export { createDocumentEditor } from "./document.js";
+export { createDatabaseEditor } from "./database.js";
 export { createObjectEditor } from "./object.js";
 export { createOrderEditor } from "./order.js";
 export { createEditingSession } from "./session.js";
 export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
+export type {
+  DatabaseCell,
+  DatabaseDocument,
+  DatabaseEditor,
+  DatabaseFilter,
+  DatabaseIntent,
+  DatabasePoint,
+  DatabaseProperty,
+  DatabasePropertyType,
+  DatabaseRange,
+  DatabaseRecord,
+  DatabaseSelection,
+  DatabaseSelectOption,
+  DatabaseSort,
+  DatabaseTableView,
+  DatabaseTopology,
+} from "./database.js";
 export type {
   OrderDocument,
   OrderEditor,
