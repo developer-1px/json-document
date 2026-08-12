@@ -14,7 +14,7 @@ import {
   textInputFromControl,
 } from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageIntro } from "../../shared/ui/primitives";
+import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -115,15 +115,17 @@ export function DocumentDemoRoute() {
   const lastSelectedId = editor.selectedBlockIds.at(-1);
 
   return (
-    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
-      <div className={ui.frame.content}>
-        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro illustration="sleep" title="Document demo">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageIntro>
+    <PageFrame>
+        <PageHeader
+          illustration="sleep"
+          title="Document demo"
+          aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
-        </header>
+          )}
+        >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
 
         <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Document actions">
           <Action label="Add" onClick={() => run(() => editor.dispatch({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
@@ -188,8 +190,7 @@ export function DocumentDemoRoute() {
             size="tall"
           />
         </div>
-      </div>
-    </main>
+    </PageFrame>
   );
 }
 

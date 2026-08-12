@@ -1,19 +1,16 @@
 import { connectorCatalog } from "./connector-catalog";
 import { InlineCode } from "../../shared/ui/code-block";
-import { PageIntro } from "../../shared/ui/primitives";
+import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function ConnectorCatalogRoute() {
   return (
-    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
-      <div className="mx-auto max-w-5xl">
-        <header className={classes("mb-7 pb-5", ui.frame.header)}>
-          <PageIntro illustration="peek" title="Connectors">
+    <PageFrame>
+        <PageHeader illustration="peek" title="Connectors">
             Optional packages that translate ecosystem-native contracts without changing the JSON Document Kernel.
-          </PageIntro>
-        </header>
+        </PageHeader>
 
         <div className="grid gap-3 sm:grid-cols-2">
           {connectorCatalog.map((connector) => (
@@ -39,8 +36,7 @@ export function ConnectorCatalogRoute() {
             </article>
           ))}
         </div>
-      </div>
-    </main>
+    </PageFrame>
   );
 }
 
