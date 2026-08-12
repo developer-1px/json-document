@@ -36,6 +36,11 @@ export interface SheetSelection extends Record<string, JSONValue> {
   readonly focus: SheetPoint | null;
 }
 
+export interface SheetTopology {
+  readonly rowIds: ReadonlyArray<string>;
+  readonly columnIds: ReadonlyArray<string>;
+}
+
 export interface SheetCell extends SheetPoint {
   readonly value: JSONValue;
 }
@@ -62,13 +67,15 @@ export type SheetIntent =
   | {
       readonly type: "clipboard.paste";
       readonly clipboard: SheetClipboard;
+      readonly topology?: SheetTopology;
     };
 
 export interface SheetEditor {
   readonly snapshot: EditingSnapshot<SheetSelection>;
   readonly selectedCells: ReadonlyArray<SheetCell>;
+  selectedCellsIn(topology: SheetTopology): ReadonlyArray<SheetCell>;
   dispatch(intent: SheetIntent): EditingResult<SheetSelection>;
-  copy(): SheetClipboard | null;
+  copy(topology?: SheetTopology): SheetClipboard | null;
   undo(): EditingResult<SheetSelection>;
   redo(): EditingResult<SheetSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
@@ -90,19 +97,20 @@ export function createSheetEditor(initial: SheetDocument): SheetEditor {
     return session.snapshot.value as SheetDocument;
   }
 
-  function selectedCells(): SheetCell[] {
-    const bounds = selectionBounds(value(), session.snapshot.selection);
-    if (bounds === null) return [];
+  function selectedCells(topology?: SheetTopology): SheetCell[] {
     const document = value();
+    const axes = resolveTopology(document, topology);
+    const bounds = selectionBounds(axes, session.snapshot.selection);
+    if (bounds === null) return [];
     const selected: SheetCell[] = [];
     for (let rowIndex = bounds.rowStart; rowIndex <= bounds.rowEnd; rowIndex += 1) {
-      const row = document.rows[rowIndex]!;
+      const row = resolveRow(document, axes.rowIds[rowIndex]!);
       for (let columnIndex = bounds.columnStart; columnIndex <= bounds.columnEnd; columnIndex += 1) {
-        const column = document.columns[columnIndex]!;
+        const columnId = axes.columnIds[columnIndex]!;
         selected.push({
           rowId: row.id,
-          columnId: column.id,
-          value: row.cells[column.id]!,
+          columnId,
+          value: row.cells[columnId]!,
         });
       }
     }
@@ -135,18 +143,19 @@ export function createSheetEditor(initial: SheetDocument): SheetEditor {
       });
     }
 
-    return paste(session, value(), intent.clipboard);
+    return paste(session, value(), intent.clipboard, intent.topology);
   }
 
-  function copy(): SheetClipboard | null {
+  function copy(topology?: SheetTopology): SheetClipboard | null {
     const document = value();
-    const bounds = selectionBounds(document, session.snapshot.selection);
+    const axes = resolveTopology(document, topology);
+    const bounds = selectionBounds(axes, session.snapshot.selection);
     if (bounds === null) return null;
-    const cells = document.rows
+    const cells = axes.rowIds
       .slice(bounds.rowStart, bounds.rowEnd + 1)
-      .map((row) => document.columns
+      .map((rowId) => axes.columnIds
         .slice(bounds.columnStart, bounds.columnEnd + 1)
-        .map((column) => clone(row.cells[column.id]!)));
+        .map((columnId) => clone(resolveRow(document, rowId).cells[columnId]!)));
     return {
       type: "application/vnd.interactive-os.sheet+json",
       cells,
@@ -157,6 +166,7 @@ export function createSheetEditor(initial: SheetDocument): SheetEditor {
   return {
     get snapshot() { return session.snapshot; },
     get selectedCells() { return selectedCells(); },
+    selectedCellsIn: (topology) => selectedCells(topology),
     dispatch,
     copy,
     undo: () => session.undo(),
@@ -169,6 +179,7 @@ function paste(
   session: EditingSession<SheetSelection>,
   document: SheetDocument,
   clipboard: SheetClipboard,
+  topology?: SheetTopology,
 ): EditingResult<SheetSelection> {
   const focus = session.snapshot.selection.focus;
   if (focus === null) return failure("selection.empty");
@@ -179,41 +190,41 @@ function paste(
   if (clipboard.cells.some((row) => row.length !== width)) {
     return failure("clipboard.not-rectangular");
   }
-  const start = resolvePointWithIndices(document, focus.rowId, focus.columnId);
+  const axes = resolveTopology(document, topology);
+  const start = resolvePointInTopology(axes, focus.rowId, focus.columnId);
   if (start === null) return failure("selection.cell-not-found");
-  if (
-    start.rowIndex + clipboard.cells.length > document.rows.length
-    || start.columnIndex + width > document.columns.length
-  ) {
+  if (start.rowIndex + clipboard.cells.length > axes.rowIds.length || start.columnIndex + width > axes.columnIds.length) {
     return failure("paste.out-of-bounds");
   }
 
   const operations: JSONPatchOperation[] = [];
   for (let rowOffset = 0; rowOffset < clipboard.cells.length; rowOffset += 1) {
     for (let columnOffset = 0; columnOffset < width; columnOffset += 1) {
-      const column = document.columns[start.columnIndex + columnOffset]!;
+      const rowId = axes.rowIds[start.rowIndex + rowOffset]!;
+      const columnId = axes.columnIds[start.columnIndex + columnOffset]!;
+      const row = resolvePointWithIndices(document, rowId, columnId)!;
       operations.push({
         op: "replace",
-        path: buildPointer(["rows", start.rowIndex + rowOffset, "cells", column.id]),
+        path: buildPointer(["rows", row.rowIndex, "cells", columnId]),
         value: clipboard.cells[rowOffset]![columnOffset]!,
       });
     }
   }
 
-  const endRow = document.rows[start.rowIndex + clipboard.cells.length - 1]!;
-  const endColumn = document.columns[start.columnIndex + width - 1]!;
+  const endRowId = axes.rowIds[start.rowIndex + clipboard.cells.length - 1]!;
+  const endColumnId = axes.columnIds[start.columnIndex + width - 1]!;
   return session.apply({
     operations,
     selectionAfter: {
       anchor: { rowId: focus.rowId, columnId: focus.columnId },
-      focus: { rowId: endRow.id, columnId: endColumn.id },
+      focus: { rowId: endRowId, columnId: endColumnId },
     },
     origin: "clipboard.paste",
   });
 }
 
 function selectionBounds(
-  document: SheetDocument,
+  topology: SheetTopology,
   selection: SheetSelection,
 ): {
   readonly rowStart: number;
@@ -222,8 +233,8 @@ function selectionBounds(
   readonly columnEnd: number;
 } | null {
   if (selection.anchor === null || selection.focus === null) return null;
-  const anchor = resolvePointWithIndices(document, selection.anchor.rowId, selection.anchor.columnId);
-  const focus = resolvePointWithIndices(document, selection.focus.rowId, selection.focus.columnId);
+  const anchor = resolvePointInTopology(topology, selection.anchor.rowId, selection.anchor.columnId);
+  const focus = resolvePointInTopology(topology, selection.focus.rowId, selection.focus.columnId);
   if (anchor === null || focus === null) return null;
   return {
     rowStart: Math.min(anchor.rowIndex, focus.rowIndex),
@@ -231,6 +242,37 @@ function selectionBounds(
     columnStart: Math.min(anchor.columnIndex, focus.columnIndex),
     columnEnd: Math.max(anchor.columnIndex, focus.columnIndex),
   };
+}
+
+function resolveTopology(document: SheetDocument, topology?: SheetTopology): SheetTopology {
+  const resolved = topology ?? {
+    rowIds: document.rows.map((row) => row.id),
+    columnIds: document.columns.map((column) => column.id),
+  };
+  assertTopologyAxis(resolved.rowIds, new Set(document.rows.map((row) => row.id)), "row");
+  assertTopologyAxis(resolved.columnIds, new Set(document.columns.map((column) => column.id)), "column");
+  return resolved;
+}
+
+function assertTopologyAxis(ids: ReadonlyArray<string>, available: ReadonlySet<string>, label: "row" | "column"): void {
+  assertUniqueIds(ids, label);
+  for (const id of ids) {
+    if (!available.has(id)) throw new Error(`Sheet topology ${label} was not found: ${JSON.stringify(id)}.`);
+  }
+}
+
+function resolvePointInTopology(
+  topology: SheetTopology,
+  rowId: string,
+  columnId: string,
+): { readonly rowIndex: number; readonly columnIndex: number } | null {
+  const rowIndex = topology.rowIds.indexOf(rowId);
+  const columnIndex = topology.columnIds.indexOf(columnId);
+  return rowIndex < 0 || columnIndex < 0 ? null : { rowIndex, columnIndex };
+}
+
+function resolveRow(document: SheetDocument, rowId: string): SheetRow {
+  return document.rows.find((row) => row.id === rowId)!;
 }
 
 function resolvePoint(

@@ -307,7 +307,7 @@ clipboard와 history는 optional editing companion이 조합합니다. React sub
 Connector package가 제공합니다. Schema introspection, DOM lifecycle과 제품별 UI
 의미는 해당 Connector 또는 host의 명시적인 책임으로 남습니다.
 
-Connector 개념, 패키지 정책, 제공되는 Zod API와 planned TanStack Table API는
+Connector 개념, 패키지 정책, 제공되는 Zod와 TanStack Table API는
 [Connectors](connectors.md)를 참고합니다.
 
 ## Editing companion

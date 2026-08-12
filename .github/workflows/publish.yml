@@ -5,6 +5,7 @@ on:
     tags:
       - "json-document-v*"
       - "json-document-zod-v*"
+      - "json-document-tanstack-table-v*"
       - "json-document-collaboration-v*"
       - "json-document-contenteditable-collaboration-v*"
 
@@ -42,6 +43,11 @@ jobs:
             import { appendFileSync, readFileSync } from "node:fs";
 
             const releases = [
+              {
+                prefix: "json-document-tanstack-table-v",
+                packageFile: "packages/json-document-tanstack-table/package.json",
+                workspace: "@interactive-os/json-document-tanstack-table",
+              },
               {
                 prefix: "json-document-zod-v",
                 packageFile: "packages/json-document-zod/package.json",

@@ -121,6 +121,48 @@ describe("sheet editing vertical slice", () => {
       ["Gamma", "Done", 3],
     ]);
   });
+
+  test("selects, copies, and pastes in a host-provided visible topology", () => {
+    const editor = createSheetEditor(initial);
+    const topology = {
+      rowIds: ["r3", "r1"],
+      columnIds: ["score", "name"],
+    } as const;
+
+    editor.dispatch({ type: "selection.set", rowId: "r3", columnId: "score" });
+    editor.dispatch({ type: "selection.set", rowId: "r1", columnId: "name", mode: "extend" });
+
+    expect(editor.selectedCellsIn(topology)).toEqual([
+      { rowId: "r3", columnId: "score", value: 3 },
+      { rowId: "r3", columnId: "name", value: "Gamma" },
+      { rowId: "r1", columnId: "score", value: 1 },
+      { rowId: "r1", columnId: "name", value: "Alpha" },
+    ]);
+    const clipboard = editor.copy(topology)!;
+    expect(clipboard.text).toBe("3\tGamma\n1\tAlpha");
+
+    editor.dispatch({ type: "selection.set", rowId: "r3", columnId: "score" });
+    expect(editor.dispatch({
+      type: "clipboard.paste",
+      clipboard: { ...clipboard, cells: [[30, "G"], [10, "A"]], text: "30\tG\n10\tA" },
+      topology,
+    }).ok).toBe(true);
+    expect(cells(editor.snapshot.value as SheetDocument)).toEqual([
+      ["A", "Draft", 10],
+      ["Beta", "Ready", 2],
+      ["G", "Done", 30],
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect(cells(editor.snapshot.value as SheetDocument)).toEqual([
+      ["Alpha", "Draft", 1],
+      ["Beta", "Ready", 2],
+      ["Gamma", "Done", 3],
+    ]);
+    expect(editor.snapshot.selection).toEqual({
+      anchor: { rowId: "r3", columnId: "score" },
+      focus: { rowId: "r3", columnId: "score" },
+    });
+  });
 });
 
 function cells(document: SheetDocument): unknown[][] {

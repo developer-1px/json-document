@@ -24,7 +24,7 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "Official React and Zod connectors plus the planned TanStack Table integration contract for json-document."
+    "description": "Official React, Zod, and TanStack Table integration contracts for json-document."
   },
   {
     "path": "/docs/api",
@@ -66,6 +66,13 @@
     "label": "Zod",
     "title": "Zod Connector Live Demo - json-document",
     "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/tanstack-table",
+    "label": "TanStack Table",
+    "title": "TanStack Table Connector Live Demo - json-document",
+    "description": "Live TanStack Table v8 integration for visible-order Sheet selection, clipboard, history, and canonical JSON editing.",
     "navigationGroup": "Connectors"
   }
 ]

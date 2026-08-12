@@ -20,6 +20,7 @@ const SheetDemoRoute = lazy(() => import("../routes/sheet-demo/SheetDemoRoute").
 const ConnectorCatalogRoute = lazy(() => import("../routes/connectors/ConnectorCatalogRoute").then((module) => ({ default: module.ConnectorCatalogRoute })));
 const ReactConnectorDemoRoute = lazy(() => import("../routes/connectors/react/ReactConnectorDemoRoute").then((module) => ({ default: module.ReactConnectorDemoRoute })));
 const ZodConnectorDemoRoute = lazy(() => import("../routes/connectors/zod/ZodConnectorDemoRoute").then((module) => ({ default: module.ZodConnectorDemoRoute })));
+const TanStackTableConnectorDemoRoute = lazy(() => import("../routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute").then((module) => ({ default: module.TanStackTableConnectorDemoRoute })));
 
 const routeComponents: Record<string, ComponentType> = {
   "/": HomeRoute,
@@ -32,6 +33,7 @@ const routeComponents: Record<string, ComponentType> = {
   "/connectors": ConnectorCatalogRoute,
   "/connectors/react": ReactConnectorDemoRoute,
   "/connectors/zod": ZodConnectorDemoRoute,
+  "/connectors/tanstack-table": TanStackTableConnectorDemoRoute,
 };
 
 const routes: Route[] = (siteRoutes as SiteRoute[]).map((route) => ({

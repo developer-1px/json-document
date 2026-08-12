@@ -27,4 +27,5 @@ export type {
   SheetPoint,
   SheetRow,
   SheetSelection,
+  SheetTopology,
 } from "./sheet.js";

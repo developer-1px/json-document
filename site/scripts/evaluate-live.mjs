@@ -9,6 +9,7 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
+  "@interactive-os/json-document-tanstack-table",
   "@interactive-os/json-document-collaboration",
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);
