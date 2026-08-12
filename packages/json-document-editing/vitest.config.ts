@@ -4,6 +4,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@interactive-os/json-document": new URL("../json-document/src/application/document/index.ts", import.meta.url).pathname,
+      "@interactive-os/json-document-selection": new URL("../json-document-selection/src/index.ts", import.meta.url).pathname,
     },
   },
   test: { include: ["tests/**/*.test.ts"] },

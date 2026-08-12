@@ -91,16 +91,55 @@ describe("TanStack Table document binding", () => {
       { name: "G", status: "Ready", score: 30 },
     ]);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r3", columnId: "score" },
       focus: { rowId: "r2", columnId: "name" },
+      ranges: [{
+        anchor: { rowId: "r3", columnId: "score" },
+        focus: { rowId: "r2", columnId: "name" },
+      }],
+      primaryIndex: 0,
     });
 
     expect(binding.undo().ok).toBe(true);
     expect(editor.snapshot.value).toEqual(initial);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r3", columnId: "score" },
       focus: { rowId: "r3", columnId: "score" },
+      ranges: [{
+        anchor: { rowId: "r3", columnId: "score" },
+        focus: { rowId: "r3", columnId: "score" },
+      }],
+      primaryIndex: 0,
     });
+  });
+
+  test("fills disjoint ranges in the current visible topology", () => {
+    const editor = createSheetEditor(initial);
+    const binding = createTableDocumentBinding({ editor });
+    const table = createSheetTable(binding, {
+      sorting: [{ id: "score", desc: true }],
+      columnOrder: ["score", "name", "status"],
+      columnVisibility: { status: false },
+    });
+
+    binding.selectCell(table, { rowId: "r3", columnId: "score" });
+    binding.selectCell(table, { rowId: "r2", columnId: "name", mode: "extend" });
+    binding.selectCell(table, { rowId: "r1", columnId: "score", mode: "toggle" });
+
+    expect(binding.fillSelected(table, "Selected").ok).toBe(true);
+    expect((editor.snapshot.value as SheetDocument).rows.map((row) => row.cells)).toEqual([
+      { name: "Alpha", status: "Draft", score: "Selected" },
+      { name: "Selected", status: "Ready", score: "Selected" },
+      { name: "Selected", status: "Ready", score: "Selected" },
+    ]);
+    expect(editor.snapshot.selection.ranges).toHaveLength(2);
+
+    binding.selectCell(table, { rowId: "r1", columnId: "name" });
+    expect(binding.undo().ok).toBe(true);
+    expect(editor.snapshot.value).toEqual(initial);
+    expect(editor.snapshot.selection.ranges).toHaveLength(2);
   });
 });
 

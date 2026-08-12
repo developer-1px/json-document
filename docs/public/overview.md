@@ -121,7 +121,8 @@ if (result.ok) {
 | 표면 | 상태 | 책임 |
 | --- | --- | --- |
 | `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
-| `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 Document·Sheet slice |
+| `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 Document·Order·Sheet·Object·Tree slice |
+| `@interactive-os/json-document-selection` | optional companion | DOM-free key·range·mask family, semantic interaction과 topology/geometry port |
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
 | `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-tanstack-table` | official Connector | TanStack visible row/column model과 Sheet 편집 topology 번역 |
@@ -138,8 +139,9 @@ collaboration engine으로 바꿔도 editor가 사용하는 `JSONDocument` API�
 
 Editing companion은 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
 JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 늘리지
-않는 별도 headless lifecycle이며 구체적인 selection topology와 paste 의미는 제품이
-정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
+않는 별도 headless lifecycle입니다. Ordered range와 ID set은 공통 transition을
+공유하지만, grid axis, tree visible order, object geometry와 mutation 계획은 제품
+slice 또는 host가 정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
 Collaboration companion도 transport, authentication, presence, persistence를
 소유하지 않습니다. Connector, adapter와 companion은 Core와 독립적으로 version과
 compatibility를 검증합니다. Connector의 승격 조건과 React·Zod·TanStack Table
@@ -161,7 +163,8 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | 변경 구독 | `document.subscribe(listener)` |
 | instance 없는 patch 적용 | `applyPatch(value, operations)` |
 | Pointer 조합과 추적 | `buildPointer`, `appendSegment`, `parentPointer`, `trackPointer` |
-| headless selection, clipboard, undo/redo | `@interactive-os/json-document-editing` |
+| DOM-free selection state와 interaction | `@interactive-os/json-document-selection` |
+| selection 기반 clipboard, JSON 수정, undo/redo | `@interactive-os/json-document-editing` |
 | React에서 document/editor 구독 | `@interactive-os/json-document-react` |
 | Zod schema로 document validation | `@interactive-os/json-document-zod`의 `createZodValidator` |
 
@@ -176,8 +179,10 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 - Slide와 whiteboard: object property와 layer state를 headless JSON으로 관리
 - 저장과 협업 adapter: subscribed canonical change를 외부 log로 전달
 
-제품별 selection 의미는 editing companion의 공통 lifecycle 위에서 조합합니다.
+제품별 structural selection 의미는 selection companion의 공통 lifecycle 위에서
+range 또는 key family로 조합합니다. Native text selection은 별도
+authoring lifecycle입니다.
 Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다. 공식 site의
-`/demo`와 `/demo/sheet`는 public package만 사용해 Document range와 Sheet
-rectangular selection, clipboard, history와 canonical JSON projection을 함께
-실행합니다.
+`/demo`, `/demo/sheet`, `/demo/selection`과 TanStack Table Connector demo는 public
+package만 사용해 ordered ranges, grid rectangles, object sets, tree visible ranges,
+selection 기반 JSON 변경, clipboard, history와 canonical JSON projection을 실행합니다.

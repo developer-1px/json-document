@@ -17,6 +17,7 @@ const ConnectorDocsRoute = lazy(() => import("../routes/docs/DocsRoute").then((m
 const ApiReferenceRoute = lazy(() => import("../routes/docs/DocsRoute").then((module) => ({ default: module.ApiReferenceRoute })));
 const DocumentDemoRoute = lazy(() => import("../routes/document-demo/DocumentDemoRoute").then((module) => ({ default: module.DocumentDemoRoute })));
 const SheetDemoRoute = lazy(() => import("../routes/sheet-demo/SheetDemoRoute").then((module) => ({ default: module.SheetDemoRoute })));
+const SelectionLabRoute = lazy(() => import("../routes/selection-lab/SelectionLabRoute").then((module) => ({ default: module.SelectionLabRoute })));
 const ConnectorCatalogRoute = lazy(() => import("../routes/connectors/ConnectorCatalogRoute").then((module) => ({ default: module.ConnectorCatalogRoute })));
 const ReactConnectorDemoRoute = lazy(() => import("../routes/connectors/react/ReactConnectorDemoRoute").then((module) => ({ default: module.ReactConnectorDemoRoute })));
 const ZodConnectorDemoRoute = lazy(() => import("../routes/connectors/zod/ZodConnectorDemoRoute").then((module) => ({ default: module.ZodConnectorDemoRoute })));
@@ -30,6 +31,7 @@ const routeComponents: Record<string, ComponentType> = {
   "/docs/api": ApiReferenceRoute,
   "/demo": DocumentDemoRoute,
   "/demo/sheet": SheetDemoRoute,
+  "/demo/selection": SelectionLabRoute,
   "/connectors": ConnectorCatalogRoute,
   "/connectors/react": ReactConnectorDemoRoute,
   "/connectors/zod": ZodConnectorDemoRoute,
