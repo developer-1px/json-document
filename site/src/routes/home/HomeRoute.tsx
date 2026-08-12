@@ -1,3 +1,4 @@
+import { InlineCode } from "../../shared/ui/code-block";
 import { ui } from "../../shared/ui/styles";
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -23,10 +24,7 @@ export function HomeRoute() {
           </p>
 
           <div className={ui.home.entry}>
-            <code className={ui.home.install}>
-              <span aria-hidden="true" className={ui.accent.impact.text}>$ </span>
-              npm i @interactive-os/json-document
-            </code>
+            <InlineCode className={ui.home.install} prompt>npm i @interactive-os/json-document</InlineCode>
             <a className={ui.home.startLink} href={sitePath("/docs/tutorial")}>
               Get started <span aria-hidden="true">→</span>
             </a>

@@ -16,6 +16,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { createTableDocumentBinding } from "@interactive-os/json-document-tanstack-table";
+import { CodeBlock } from "../../../shared/ui/code-block";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
 import { Button } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
@@ -160,7 +161,7 @@ export function TanStackTableConnectorLab() {
               ))}
             </tbody>
           </table>
-          <pre data-testid="tanstack-clipboard" className={classes("mt-3 min-h-8 whitespace-pre-wrap p-2", ui.surface.inset, ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</pre>
+          <CodeBlock className="mt-3" language="text" size="compact" source={clipboard?.text ?? "Clipboard is empty"} testId="tanstack-clipboard" />
         </div>
 
         <aside className="grid min-w-0 gap-3" aria-label="Canonical JSON">
