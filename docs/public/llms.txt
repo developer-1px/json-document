@@ -205,12 +205,17 @@ Connector package의 peer dependency다. Schema introspection, DOM과 제품별 
 
 v3 Kernel release는 dependency-free Core package 하나다. Local-only consumer는
 Core만 설치한다. 이 저장소의 `@interactive-os/json-document-editing`은 atomic
-editing transaction, selection publication, clipboard, history와 Document 및
-Sheet domain slice를 제공하는 browser-independent companion이다. Document와
-Sheet는 같은 range-set 상태 전이를 공유하되 topology와 JSON Patch 계획은 분리한다.
+editing transaction, selection publication, clipboard, history와 Document,
+Order, Sheet, Object 및 Tree domain slice를 제공하는 browser-independent
+companion이다. Document, Order, Sheet와 Tree는 range-set 상태 전이를 공유하고
+Object는 set-selection 상태 전이를 사용하되 topology와 JSON Patch 계획은 각
+slice 또는 host에 둔다.
 Sheet slice는 stable row·column identity, 복수의 anchor/focus rectangular range,
 primary-range JSON/TSV clipboard, selection fill, cell commit과
 selection-restoring undo/redo를 제공한다.
+Tree expand/collapse와 visible order, Object pointer geometry와 hit-test는 host
+책임이다. 값 변경 history는 selection을 함께 복구한다. Native text selection은
+이 structural selection family에 포함하지 않는다.
 `@interactive-os/json-document-react`는 React external-store subscription과
 Document editor component lifecycle을 제공하는 공식 Connector다.
 `@interactive-os/json-document-zod`는 Zod issue path를 JSON Pointer validation

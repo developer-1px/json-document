@@ -35,7 +35,7 @@ describe("official site shell", () => {
 
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
     expect(groupLinks(nav, "Core")).toEqual(["Concepts", "API Reference"]);
-    expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet"]);
+    expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet", "Selection Lab"]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "React", "Zod", "TanStack Table"]);
     expect(nav.queryByRole("link", { name: "Connector guide" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
