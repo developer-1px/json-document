@@ -1,6 +1,5 @@
 import {
   buildPointer,
-  createJSONDocument,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
@@ -14,6 +13,7 @@ import {
   type EditingResult,
   type EditingSnapshot,
 } from "./session.js";
+import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 
 export interface DocumentObject extends Record<string, JSONValue> {
   readonly id: string;
@@ -55,12 +55,14 @@ export interface ObjectEditor {
   subscribe(listener: (snapshot: EditingSnapshot<ObjectSelection>) => void): () => void;
 }
 
-export function createObjectEditor(initial: ObjectDocument): ObjectEditor {
+export function createObjectEditor(source: EditingDocumentSource<ObjectDocument>): ObjectEditor {
+  const document = resolveDocumentSource(source);
+  const initial = document.value as ObjectDocument;
   assertObjectDocument(initial);
   const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.objects[0];
   const session = createEditingSession({
-    document: createJSONDocument(initial),
+    document,
     selection: first ? selectionFor([first.id]) : selectionFor([]),
   });
 

@@ -1,6 +1,5 @@
 import {
   buildPointer,
-  createJSONDocument,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
@@ -10,6 +9,7 @@ import {
   type EditingSession,
   type EditingSnapshot,
 } from "./session.js";
+import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
@@ -135,12 +135,14 @@ export interface DatabaseEditor {
   subscribe(listener: (snapshot: EditingSnapshot<DatabaseSelection>) => void): () => void;
 }
 
-export function createDatabaseEditor(initial: DatabaseDocument): DatabaseEditor {
+export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>): DatabaseEditor {
+  const document = resolveDocumentSource(source);
+  const initial = document.value as DatabaseDocument;
   assertDatabaseDocument(initial);
   const firstRecord = initial.records[0];
   const firstProperty = initial.schema.properties[0];
   const session = createEditingSession({
-    document: createJSONDocument(initial),
+    document,
     selection: firstRecord && firstProperty
       ? collapsed(firstRecord.id, firstProperty.id)
       : emptySelection(),
