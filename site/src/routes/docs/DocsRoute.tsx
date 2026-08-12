@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 import { docPages, type DocPageId } from "./doc-pages";
 
@@ -26,16 +27,16 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   );
 
   return (
-    <main className="min-h-full bg-white">
+    <main className={ui.frame.plainPage}>
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_11rem] lg:px-6">
         <div className="min-w-0">
-          <nav aria-label="Documentation sections" className="mb-5 overflow-x-auto text-xs lg:hidden">
+          <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
             <div className="flex gap-1 whitespace-nowrap">
               {headings.map((heading) => (
                 <a
                   key={`${heading.id}-${heading.text}`}
                   href={`#${heading.id}`}
-                  className="px-2 py-1 text-stone-500 no-underline hover:text-stone-950"
+                  className={classes("px-2 py-1 no-underline", ui.text.meta)}
                 >
                   {heading.text}
                 </a>
@@ -44,22 +45,22 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
           </nav>
 
           <div className="mx-auto max-w-3xl">
-            <header className="mb-7 border-b border-stone-200 pb-4">
-              <h1 className="m-0 text-2xl font-semibold text-stone-950">{page.title}</h1>
+            <header className={classes("mb-7 pb-4", ui.frame.header)}>
+              <h1 className={classes("m-0", ui.text.title)}>{page.title}</h1>
             </header>
             <MarkdownViewer source={page.source} hideTitle />
           </div>
         </div>
 
-        <aside className="hidden self-start text-xs leading-5 lg:sticky lg:top-4 lg:block">
+        <aside className={classes("hidden self-start lg:sticky lg:top-4 lg:block", ui.text.meta)}>
           <nav aria-label="On this page">
-            <div className="mb-2 font-medium text-stone-950">On this page</div>
+            <div className={classes("mb-2", ui.text.heading)}>On this page</div>
             <div className="grid">
               {headings.map((heading) => (
                 <a
                   key={`${heading.id}-${heading.text}`}
                   href={`#${heading.id}`}
-                  className="border-l border-transparent px-3 py-1 text-stone-500 no-underline hover:text-stone-950"
+                  className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
                 >
                   {heading.text}
                 </a>

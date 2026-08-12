@@ -1,3 +1,6 @@
+import { PageIntro } from "../../shared/ui/primitives";
+import { classes, ui } from "../../shared/ui/styles";
+
 const modelRows = [
   ["patch", "stateless JSON Patch application"],
   ["document", "value, at, query, validatePatch, commit, subscribe"],
@@ -14,70 +17,66 @@ function sitePath(path: string): string {
 
 export function HomeRoute() {
   return (
-    <main className="min-h-full bg-stone-50">
-      <section className="border-b border-stone-200 bg-white">
+    <main className={ui.frame.page}>
+      <section className={ui.frame.hero}>
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
           <div>
-            <p className="m-0 text-xs font-semibold uppercase tracking-wide text-stone-400">
-              Implementation-neutral JSON editing
-            </p>
-            <h1 className="mb-4 mt-2 text-4xl font-semibold tracking-normal text-stone-950">
-              json-document
-            </h1>
-            <p className="m-0 max-w-2xl text-base leading-7 text-stone-600">
+            <PageIntro eyebrow="Implementation-neutral JSON editing" title="json-document">
               A headless JSON API and six-member JSON Document for
               documents, tables, slides, canvases, and notes.
-            </p>
+            </PageIntro>
             <div className="mt-6 flex flex-wrap gap-2">
-              <a className="rounded bg-stone-950 px-3 py-2 text-sm font-medium text-white no-underline hover:bg-stone-800" href={sitePath("/docs/tutorial")}>
+              <a className={ui.action.primary} href={sitePath("/docs/tutorial")}>
                 Quickstart
               </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs")}>
+              <a className={ui.action.secondary} href={sitePath("/docs")}>
                 Concepts
               </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/docs/api")}>
+              <a className={ui.action.secondary} href={sitePath("/docs/api")}>
                 API Reference
               </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/demo")}>
+              <a className={ui.action.secondary} href={sitePath("/demo")}>
                 Document
               </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href={sitePath("/connectors")}>
+              <a className={ui.action.secondary} href={sitePath("/connectors")}>
                 Connectors
               </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href="https://www.npmjs.com/package/@interactive-os/json-document">
+              <a className={ui.action.secondary} href="https://www.npmjs.com/package/@interactive-os/json-document">
                 npm
               </a>
-              <a className="rounded border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 no-underline hover:bg-stone-100" href="https://github.com/developer-1px/json-document">
+              <a className={ui.action.secondary} href="https://github.com/developer-1px/json-document">
                 GitHub
               </a>
             </div>
           </div>
 
-          <div className="rounded border border-stone-200 bg-stone-950 p-3 text-stone-100">
-            <div className="mb-2 text-xs font-medium text-stone-400">Release</div>
-            <pre className="m-0 overflow-x-auto text-sm leading-6"><code>3.0.0</code></pre>
-            <div className="mt-4 border-t border-stone-800 pt-3 text-xs font-medium text-stone-400">Start</div>
-            <pre className="m-0 mt-2 overflow-x-auto text-sm leading-6"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
+          <div className={classes("p-3", ui.surface.inverse)}>
+            <div className={classes("mb-2", ui.text.inverseMeta)}>Release</div>
+            <pre className="m-0 overflow-x-auto"><code>3.0.0</code></pre>
+            <div className={classes("mt-4 pt-3", ui.surface.divider, ui.text.inverseMeta)}>Start</div>
+            <pre className="m-0 mt-2 overflow-x-auto"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
           </div>
         </div>
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div>
-          <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Public model</h2>
-          <div className="overflow-x-auto rounded border border-stone-200 bg-white">
-            <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
+          <h2 className={classes("mb-3 mt-0", ui.text.heading)}>Public model</h2>
+          <div className={classes("overflow-x-auto", ui.surface.default)}>
+            <table className={classes("w-full min-w-[34rem]", ui.surface.table)}>
               <thead>
                 <tr>
-                  <th className="border-b border-stone-200 px-3 py-2 font-semibold text-stone-700">Surface</th>
-                  <th className="border-b border-stone-200 px-3 py-2 font-semibold text-stone-700">Responsibility</th>
+                  <th className={classes("px-3 py-2", ui.surface.tableHead, ui.text.heading)}>Surface</th>
+                  <th className={classes("px-3 py-2", ui.surface.tableHead, ui.text.heading)}>Responsibility</th>
                 </tr>
               </thead>
               <tbody>
                 {modelRows.map(([surface, responsibility]) => (
                   <tr key={surface}>
-                    <td className="border-b border-stone-100 px-3 py-2 font-mono text-xs text-stone-900">{surface}</td>
-                    <td className="border-b border-stone-100 px-3 py-2 text-stone-600">{responsibility}</td>
+                    <td className={classes("px-3 py-2", ui.surface.tableCell)}>
+                      <code className={ui.code.inline}>{surface}</code>
+                    </td>
+                    <td className={classes("px-3 py-2", ui.surface.tableCell, ui.text.body)}>{responsibility}</td>
                   </tr>
                 ))}
               </tbody>
@@ -85,9 +84,9 @@ export function HomeRoute() {
           </div>
         </div>
 
-        <aside className="rounded border border-stone-200 bg-white p-4">
-          <h2 className="mb-3 mt-0 text-base font-semibold text-stone-950">Boundary</h2>
-          <ul className="m-0 grid gap-2 p-0 text-sm text-stone-600 [list-style:none]">
+        <aside className={classes("p-4", ui.surface.default)}>
+          <h2 className={classes("mb-3 mt-0", ui.text.heading)}>Boundary</h2>
+          <ul className={classes("m-0 grid gap-2 p-0 [list-style:none]", ui.text.body)}>
             <li>Root Kernel is React- and Zod-free.</li>
             <li>Official Connectors add ecosystem-native integration without changing the Kernel.</li>
             <li>Headless editing is an optional companion composed over the six-member document.</li>

@@ -6,6 +6,8 @@ import {
   useEditingSnapshot,
   useJSONDocumentValue,
 } from "@interactive-os/json-document-react";
+import { Button } from "../../../shared/ui/primitives";
+import { classes, ui } from "../../../shared/ui/styles";
 
 const initialEditorDocument: BlockDocument = {
   blocks: [
@@ -34,28 +36,27 @@ function JSONDocumentSubscriptionLab() {
   }
 
   return (
-    <section aria-label="JSON Document subscription" className="rounded border border-stone-200 bg-white p-4">
+    <section aria-label="JSON Document subscription" className={classes("p-4", ui.surface.default)}>
       <div className="mb-4">
-        <p className="m-0 text-[10px] font-semibold uppercase tracking-wide text-stone-400">useJSONDocumentValue</p>
-        <h2 className="mb-1 mt-1 text-base font-semibold text-stone-950">Document subscription</h2>
-        <p className="m-0 text-xs leading-5 text-stone-500">A React view follows the six-member JSON Document through its public subscription.</p>
+        <p className={ui.text.eyebrow}>useJSONDocumentValue</p>
+        <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Document subscription</h2>
+        <p className={classes("m-0", ui.text.meta)}>A React view follows the six-member JSON Document through its public subscription.</p>
       </div>
 
-      <label className="grid gap-1 text-xs font-medium text-stone-600">
+      <label className={classes("grid gap-1", ui.text.meta)}>
         Document title
         <input
           value={value.title}
           onChange={(event) => replace("/title", event.currentTarget.value)}
-          className="rounded border border-stone-300 px-3 py-2 text-sm text-stone-900 outline-none focus:border-stone-900"
+          className={ui.field.control}
         />
       </label>
-      <button
-        type="button"
+      <Button
         onClick={() => replace("/count", value.count + 1)}
-        className="mt-3 rounded border border-stone-300 bg-white px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100"
+        className="mt-3"
       >
         Count {value.count}
-      </button>
+      </Button>
 
       <JSONPanel testId="react-document-json" value={value} />
     </section>
@@ -68,14 +69,14 @@ function EditingSnapshotLab() {
   const value = snapshot.value as BlockDocument;
 
   return (
-    <section aria-label="Editing snapshot subscription" className="rounded border border-stone-200 bg-white p-4">
+    <section aria-label="Editing snapshot subscription" className={classes("p-4", ui.surface.default)}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="m-0 text-[10px] font-semibold uppercase tracking-wide text-stone-400">useDocumentEditor + useEditingSnapshot</p>
-          <h2 className="mb-1 mt-1 text-base font-semibold text-stone-950">Editing snapshot</h2>
-          <p className="m-0 text-xs leading-5 text-stone-500">The component owns one editor and rerenders from published editing snapshots.</p>
+          <p className={ui.text.eyebrow}>useDocumentEditor + useEditingSnapshot</p>
+          <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Editing snapshot</h2>
+          <p className={classes("m-0", ui.text.meta)}>The component owns one editor and rerenders from published editing snapshots.</p>
         </div>
-        <span className="shrink-0 text-xs text-stone-400">revision {snapshot.revision}</span>
+        <span className={classes("shrink-0", ui.text.meta)}>revision {snapshot.revision}</span>
       </div>
 
       <div className="grid gap-2">
@@ -92,27 +93,23 @@ function EditingSnapshotLab() {
               text: event.currentTarget.value,
               offset: event.currentTarget.selectionStart,
             })}
-            className="resize-none rounded border border-stone-300 px-3 py-2 text-sm leading-6 text-stone-800 outline-none focus:border-stone-900"
+            className={classes("resize-none", ui.field.control)}
           />
         ))}
       </div>
       <div className="mt-3 flex gap-2">
-        <button
-          type="button"
+        <Button
           disabled={!snapshot.canUndo}
           onClick={() => editor.undo()}
-          className="rounded border border-stone-300 bg-white px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 disabled:opacity-35"
         >
           Undo
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           disabled={!snapshot.canRedo}
           onClick={() => editor.redo()}
-          className="rounded border border-stone-300 bg-white px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 disabled:opacity-35"
         >
           Redo
-        </button>
+        </Button>
       </div>
 
       <JSONPanel testId="react-editor-json" value={snapshot.value} />
@@ -122,9 +119,9 @@ function EditingSnapshotLab() {
 
 function JSONPanel({ testId, value }: { readonly testId: string; readonly value: JSONValue }) {
   return (
-    <div className="mt-4 rounded border border-stone-800 bg-stone-950 p-3 text-stone-100">
-      <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-stone-500">Canonical JSON</div>
-      <pre data-testid={testId} className="m-0 max-h-64 overflow-auto whitespace-pre-wrap text-xs leading-5">
+    <div className={classes("mt-4", ui.code.json)}>
+      <div className={classes("mb-2", ui.text.inverseMeta)}>Canonical JSON</div>
+      <pre data-testid={testId} className="m-0 max-h-64 overflow-auto whitespace-pre-wrap">
         <code>{JSON.stringify(value, null, 2)}</code>
       </pre>
     </div>

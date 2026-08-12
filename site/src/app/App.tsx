@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ComponentType } from "react";
 import siteRoutes from "../../site-routes.json";
+import { classes, ui } from "../shared/ui/styles";
 import { HomeRoute } from "../routes/home/HomeRoute";
 import {
   NavLink,
@@ -56,18 +57,18 @@ export function App() {
   useRouteMetadata(route);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-stone-900 md:flex-row">
+    <div className={classes("flex min-h-screen flex-col md:flex-row", ui.frame.app)}>
       <a
         href="#main-content"
-        className="sr-only z-50 rounded bg-stone-950 px-3 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+        className={classes("sr-only z-50", ui.state.skipLink)}
       >
         Skip to content
       </a>
       <nav
         aria-label="Site navigation"
-        className="shrink-0 border-b border-stone-200 bg-white text-sm md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto md:border-b-0 md:border-r"
+        className={classes("shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", ui.frame.navigation)}
       >
-        <NavLink to="/" className="flex px-4 py-3 font-mono text-stone-950 no-underline hover:text-stone-600 md:border-b md:border-stone-200">
+        <NavLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
           json-document
         </NavLink>
         <div className="flex gap-4 overflow-x-auto px-3 pb-3 md:grid md:gap-4 md:px-2">
@@ -77,7 +78,7 @@ export function App() {
             const groupLabelId = `site-navigation-${group.toLowerCase()}`;
             return (
               <div key={group} role="group" aria-labelledby={groupLabelId} className="grid shrink-0 content-start gap-1">
-                <div id={groupLabelId} className="flex border-0 bg-transparent px-2 py-1 text-[10px] font-medium text-stone-400">
+                <div id={groupLabelId} className={classes("flex px-2 py-1", ui.text.meta)}>
                   {group}
                 </div>
                 {groupRoutes.map((item) => (
@@ -85,7 +86,7 @@ export function App() {
                     key={item.path}
                     to={item.path}
                     activePath={route.path}
-                    className="flex border-b border-transparent px-2 py-1 text-stone-500 no-underline hover:text-stone-950 aria-[current=page]:border-stone-950 aria-[current=page]:font-medium aria-[current=page]:text-stone-950 md:border-b-0 md:border-l md:px-3"
+                    className={classes("flex px-2 py-1 md:px-3", ui.text.meta, ui.state.current)}
                   >
                     {item.label}
                   </NavLink>

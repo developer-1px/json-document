@@ -16,6 +16,8 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { createTableDocumentBinding } from "@interactive-os/json-document-tanstack-table";
+import { Button } from "../../../shared/ui/primitives";
+import { classes, ui } from "../../../shared/ui/styles";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -85,32 +87,32 @@ export function TanStackTableConnectorLab() {
   }
 
   return (
-    <section aria-label="TanStack Table editing" className="rounded border border-stone-200 bg-white p-4">
+    <section aria-label="TanStack Table editing" className={classes("p-4", ui.surface.default)}>
       <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">
         <Control label="Ready rows" active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
         <Control label="Score descending" active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
         <Control label="Score first" active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
         <Control label="Hide status" active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
-        <span className="mx-1 w-px bg-stone-200" aria-hidden="true" />
+        <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
         <Control label="Copy" onClick={copySelection} />
         <Control label="Paste" disabled={clipboard === null} onClick={pasteSelection} />
         <Control label="Undo" disabled={!snapshot.canUndo} onClick={() => run(binding.undo, "Undone")} />
         <Control label="Redo" disabled={!snapshot.canRedo} onClick={() => run(binding.redo, "Redone")} />
       </div>
 
-      <div className="mb-3 flex flex-wrap justify-between gap-2 text-xs text-stone-500">
+      <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
         <output aria-live="polite">{announcement}</output>
         <output data-testid="tanstack-topology">{JSON.stringify(binding.topology(table))}</output>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
         <div className="overflow-auto">
-          <table role="grid" aria-label="TanStack project sheet" aria-multiselectable="true" className="w-full min-w-[30rem] border-collapse text-sm">
+          <table role="grid" aria-label="TanStack project sheet" aria-multiselectable="true" className={classes("w-full min-w-[30rem]", ui.surface.table, ui.text.body)}>
             <thead>
               {table.getHeaderGroups().map((group) => (
                 <tr key={group.id}>
                   {group.headers.map((header) => (
-                    <th key={header.id} scope="col" className="border border-stone-200 bg-stone-100 px-3 py-2 text-left text-xs font-semibold text-stone-600">
+                    <th key={header.id} scope="col" className={classes("px-3 py-2 text-left", ui.surface.gridHead, ui.text.heading)}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
@@ -132,14 +134,14 @@ export function TanStackTableConnectorLab() {
                         data-column-id={cell.column.id}
                         data-selected={isSelected ? "true" : "false"}
                         onClick={(event) => selectCell(event, row.id, cell.column.id)}
-                        className="border border-stone-200 p-0 data-[selected=true]:relative data-[selected=true]:bg-amber-50 data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-stone-900"
+                        className={classes("p-0", ui.surface.gridCell, ui.state.selected)}
                       >
                         <input
                           aria-label={`${cell.column.id} ${row.id}`}
                           defaultValue={displayValue(value)}
                           key={displayValue(value)}
                           onBlur={(event) => commitCell(event, row.id, cell.column.id, value)}
-                          className="w-full min-w-0 border-0 bg-transparent px-3 py-2 text-sm text-stone-800 outline-none"
+                          className={classes("w-full min-w-0", ui.field.seamless)}
                         />
                       </td>
                     );
@@ -148,12 +150,12 @@ export function TanStackTableConnectorLab() {
               ))}
             </tbody>
           </table>
-          <pre data-testid="tanstack-clipboard" className="mt-3 min-h-8 whitespace-pre-wrap rounded bg-stone-100 p-2 text-xs text-stone-500">{clipboard?.text ?? "Clipboard is empty"}</pre>
+          <pre data-testid="tanstack-clipboard" className={classes("mt-3 min-h-8 whitespace-pre-wrap p-2", ui.surface.subtle, ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</pre>
         </div>
 
-        <aside className="rounded border border-stone-800 bg-stone-950 p-3 text-stone-100" aria-label="Canonical JSON">
-          <div className="mb-2 text-xs text-stone-400">Canonical JSON · revision {snapshot.revision}</div>
-          <pre data-testid="tanstack-document-json" className="m-0 max-h-[30rem] overflow-auto whitespace-pre-wrap text-xs leading-5"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
+        <aside className={ui.code.json} aria-label="Canonical JSON">
+          <div className={classes("mb-2", ui.text.inverseMeta)}>Canonical JSON · revision {snapshot.revision}</div>
+          <pre data-testid="tanstack-document-json" className="m-0 max-h-[30rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
         </aside>
       </div>
     </section>
@@ -161,7 +163,7 @@ export function TanStackTableConnectorLab() {
 }
 
 function Control(props: { readonly label: string; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
-  return <button type="button" aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick} className="rounded border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 aria-pressed:bg-stone-950 aria-pressed:text-white disabled:opacity-35">{props.label}</button>;
+  return <Button kind="toggle" aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</Button>;
 }
 
 function displayValue(value: unknown): string {
