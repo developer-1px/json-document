@@ -46,11 +46,12 @@ export interface SheetRange extends Record<string, JSONValue> {
 }
 
 export interface SheetSelection extends Record<string, JSONValue> {
+  readonly kind: "range";
   /** Primary range aliases retained for single-range consumers. */
   readonly anchor: SheetPoint | null;
   readonly focus: SheetPoint | null;
   readonly ranges: ReadonlyArray<SheetRange>;
-  readonly primaryIndex: number;
+  readonly primaryIndex: number | null;
 }
 
 export interface SheetTopology {
@@ -271,6 +272,7 @@ function paste(
   return session.apply({
     operations,
     selectionAfter: withPrimaryAliases({
+      kind: "range",
       ranges: [{
         anchor: { rowId: focus.rowId, columnId: focus.columnId },
         focus: { rowId: endRowId, columnId: endColumnId },
@@ -398,6 +400,7 @@ function withPrimaryAliases(
 ): SheetSelection {
   const primary = primaryRange(selection);
   return {
+    kind: "range",
     anchor: primary?.anchor ?? null,
     focus: primary?.focus ?? null,
     ranges: selection.ranges.map((range) => ({

@@ -27,6 +27,7 @@ describe("tree editing selection family", () => {
 
     editor.reconcile(collapsedA);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       ranges: [{
         anchor: { nodeId: "a" },
         focus: { nodeId: "b-1" },

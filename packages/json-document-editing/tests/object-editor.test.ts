@@ -19,8 +19,9 @@ describe("object editing selection family", () => {
     editor.dispatch({ type: "selection.set", objectIds: ["b", "c"], mode: "add" });
 
     expect(editor.snapshot.selection).toEqual({
-      selectedIds: ["a", "b", "c"],
-      primaryId: "c",
+      kind: "explicit",
+      keys: ["a", "b", "c"],
+      primaryKey: "c",
     });
     expect(editor.snapshot.canUndo).toBe(false);
   });

@@ -11,12 +11,14 @@ describe("shared range selection state transitions", () => {
 
     selection = selectRangePoint(selection, "c", "extend", same);
     expect(selection).toEqual({
+      kind: "range",
       ranges: [{ anchor: "a", focus: "c" }],
       primaryIndex: 0,
     });
 
     selection = selectRangePoint(selection, "e", "toggle", same);
     expect(selection).toEqual({
+      kind: "range",
       ranges: [
         { anchor: "a", focus: "c" },
         { anchor: "e", focus: "e" },
@@ -29,6 +31,7 @@ describe("shared range selection state transitions", () => {
 
     selection = selectRangePoint(selection, "b", "replace", same);
     expect(selection).toEqual({
+      kind: "range",
       ranges: [{ anchor: "b", focus: "b" }],
       primaryIndex: 0,
     });
@@ -41,6 +44,7 @@ describe("shared range selection state transitions", () => {
     selection = selectRangePoint(selection, "c", "toggle", same);
 
     expect(selection).toEqual({
+      kind: "range",
       ranges: [{ anchor: "a", focus: "a" }],
       primaryIndex: 0,
     });

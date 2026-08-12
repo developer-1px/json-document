@@ -4,6 +4,7 @@ import type {
   JSONPatchOperation,
   JSONValue,
 } from "@interactive-os/json-document";
+import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
 
 export interface EditingPlan<Selection extends JSONValue> {
   readonly operations: ReadonlyArray<JSONPatchOperation>;
@@ -29,16 +30,14 @@ export interface EditingSession<Selection extends JSONValue> {
   readonly snapshot: EditingSnapshot<Selection>;
   apply(plan: EditingPlan<Selection>): EditingResult<Selection>;
   select(selection: Selection): EditingSnapshot<Selection>;
+  reconcile(reconciler: (selection: Selection, value: JSONValue) => Selection): EditingSnapshot<Selection>;
   undo(): EditingResult<Selection>;
   redo(): EditingResult<Selection>;
   subscribe(listener: (snapshot: EditingSnapshot<Selection>) => void): () => void;
 }
 
-interface HistoryEntry<Selection extends JSONValue> {
-  readonly beforeValue: JSONValue;
-  readonly beforeSelection: Selection;
-  readonly afterValue: JSONValue;
-  readonly afterSelection: Selection;
+interface HistoryEntry<Selection extends JSONValue>
+  extends SelectionHistoryEntry<Selection, JSONPatchOperation> {
   readonly group?: string;
 }
 
@@ -71,7 +70,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   }
 
   function apply(plan: EditingPlan<Selection>): EditingResult<Selection> {
-    const beforeValue = document.value;
+    const beforeValue = clone(document.value);
     const beforeSelection = selection;
     if (plan.operations.length === 0) {
       selection = clone(plan.selectionAfter);
@@ -92,17 +91,22 @@ export function createEditingSession<Selection extends JSONValue>(options: {
 
     selection = clone(plan.selectionAfter);
     revision += 1;
-    if (plan.history !== "ignore") {
+    if (plan.history !== "ignore" && !jsonEqual(beforeValue, document.value)) {
       const entry: HistoryEntry<Selection> = {
-        beforeValue,
-        beforeSelection,
-        afterValue: document.value,
-        afterSelection: selection,
+        forward: clonePatchOperations(plan.operations),
+        inverse: [{ op: "replace", path: "", value: beforeValue }],
+        selectionBefore: beforeSelection,
+        selectionAfter: selection,
         ...(plan.historyGroup === undefined ? {} : { group: plan.historyGroup }),
       };
       const previous = undoStack.at(-1);
       if (previous && plan.historyGroup !== undefined && activeHistoryGroup === plan.historyGroup && previous.group === plan.historyGroup) {
-        undoStack = [...undoStack.slice(0, -1), { ...entry, beforeValue: previous.beforeValue, beforeSelection: previous.beforeSelection }];
+        undoStack = [...undoStack.slice(0, -1), {
+          ...entry,
+          forward: [...previous.forward, ...entry.forward],
+          inverse: previous.inverse,
+          selectionBefore: previous.selectionBefore,
+        }];
       } else {
         undoStack = [...undoStack, entry];
       }
@@ -113,9 +117,9 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   }
 
   function restore(entry: HistoryEntry<Selection>, direction: "undo" | "redo"): EditingResult<Selection> {
-    const value = direction === "undo" ? entry.beforeValue : entry.afterValue;
-    const nextSelection = direction === "undo" ? entry.beforeSelection : entry.afterSelection;
-    const result = document.commit([{ op: "replace", path: "", value }], {
+    const operations = direction === "undo" ? entry.inverse : entry.forward;
+    const nextSelection = direction === "undo" ? entry.selectionBefore : entry.selectionAfter;
+    const result = document.commit(operations, {
       metadata: { editing: { origin: direction, selectionAfter: clone(nextSelection) } },
     });
     if (!result.ok) return result;
@@ -130,6 +134,14 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     apply,
     select(nextSelection) {
       selection = clone(nextSelection);
+      revision += 1;
+      activeHistoryGroup = undefined;
+      return publish();
+    },
+    reconcile(reconciler) {
+      const nextSelection = clone(reconciler(clone(selection), document.value));
+      if (jsonEqual(selection, nextSelection)) return snapshot();
+      selection = nextSelection;
       revision += 1;
       activeHistoryGroup = undefined;
       return publish();
@@ -161,6 +173,16 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return () => listeners.delete(listener);
     },
   };
+}
+
+function jsonEqual(left: JSONValue, right: JSONValue): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function clonePatchOperations(
+  operations: ReadonlyArray<JSONPatchOperation>,
+): ReadonlyArray<JSONPatchOperation> {
+  return JSON.parse(JSON.stringify(operations)) as ReadonlyArray<JSONPatchOperation>;
 }
 
 function clone<Value extends JSONValue>(value: Value): Value {

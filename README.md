@@ -44,6 +44,7 @@ stateless JSON Patch
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
 | [packages/json-document-editing](packages/json-document-editing) | headless transaction, structural selection, clipboard, history와 Document·Order·Sheet·Object·Tree slice |
+| [packages/json-document-selection](packages/json-document-selection) | DOM-free key·range·mask family, topology/geometry port와 semantic interaction controller |
 | [packages/json-document-react](packages/json-document-react) | React subscription과 Document editor lifecycle Connector |
 | [packages/json-document-zod](packages/json-document-zod) | Zod validation issue를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-tanstack-table](packages/json-document-tanstack-table) | TanStack Table visible model을 Sheet 편집 topology로 번역하는 Connector |

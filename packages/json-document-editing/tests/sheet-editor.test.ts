@@ -48,6 +48,7 @@ describe("sheet editing vertical slice", () => {
       ["Gamma", "Beta", "Ready"],
     ]);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r2", columnId: "status" },
       focus: { rowId: "r3", columnId: "score" },
       ranges: [{
@@ -64,6 +65,7 @@ describe("sheet editing vertical slice", () => {
       ["Gamma", "Done", 3],
     ]);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r2", columnId: "status" },
       focus: { rowId: "r2", columnId: "status" },
       ranges: [{
@@ -109,6 +111,7 @@ describe("sheet editing vertical slice", () => {
     expect((editor.snapshot.value as SheetDocument).rows[1]?.cells.name).toBe("Beta");
     expect(editor.snapshot.canUndo).toBe(false);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r2", columnId: "name" },
       focus: { rowId: "r2", columnId: "name" },
       ranges: [{
@@ -174,6 +177,7 @@ describe("sheet editing vertical slice", () => {
       ["Gamma", "Done", 3],
     ]);
     expect(editor.snapshot.selection).toEqual({
+      kind: "range",
       anchor: { rowId: "r3", columnId: "score" },
       focus: { rowId: "r3", columnId: "score" },
       ranges: [{

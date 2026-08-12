@@ -35,8 +35,9 @@ export interface OrderRange extends Record<string, JSONValue> {
 }
 
 export interface OrderSelection extends Record<string, JSONValue> {
+  readonly kind: "range";
   readonly ranges: ReadonlyArray<OrderRange>;
-  readonly primaryIndex: number;
+  readonly primaryIndex: number | null;
 }
 
 export type OrderIntent =
@@ -128,6 +129,7 @@ function emptySelection(): OrderSelection {
 
 function asOrderSelection(selection: RangeSelectionState<OrderPoint>): OrderSelection {
   return {
+    kind: "range",
     ranges: selection.ranges.map((range) => ({
       anchor: { ...range.anchor },
       focus: { ...range.focus },

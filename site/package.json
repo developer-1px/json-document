@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@interactive-os/json-document-editing": "*",
+    "@interactive-os/json-document-selection": "*",
     "@interactive-os/json-document-react": "*",
     "@interactive-os/json-document-tanstack-table": "*",
     "@interactive-os/json-document-zod": "*",

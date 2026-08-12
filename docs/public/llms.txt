@@ -198,6 +198,9 @@ Minor release에서 optional diagnostic field와 새 code가 추가될 수 있�
 
 Core package는 root entrypoint만 공개한다. Selection, clipboard, history는
 optional editing companion이 여섯-member `JSONDocument` 위에서 조합한다.
+DOM-free selection state와 semantic interaction은
+`@interactive-os/json-document-selection` companion이 key, range, mask family로
+제공하며 topology, geometry와 physical input 해석은 host port 밖에 둔다.
 반복되는 외부 생태계 integration은 independently versioned Connector가 제공한다.
 Connector는 공통 runtime interface가 아니라 package category이며 외부 peer는
 Connector package의 peer dependency다. Schema introspection, DOM과 제품별 UI
@@ -207,8 +210,8 @@ v3 Kernel release는 dependency-free Core package 하나다. Local-only consumer
 Core만 설치한다. 이 저장소의 `@interactive-os/json-document-editing`은 atomic
 editing transaction, selection publication, clipboard, history와 Document,
 Order, Sheet, Object 및 Tree domain slice를 제공하는 browser-independent
-companion이다. Document, Order, Sheet와 Tree는 range-set 상태 전이를 공유하고
-Object는 set-selection 상태 전이를 사용하되 topology와 JSON Patch 계획은 각
+companion이다. Document, Order, Sheet와 Tree는 range 상태 전이를 공유하고
+Object는 key 상태 전이를 사용하되 topology와 JSON Patch 계획은 각
 slice 또는 host에 둔다.
 Sheet slice는 stable row·column identity, 복수의 anchor/focus rectangular range,
 primary-range JSON/TSV clipboard, selection fill, cell commit과
