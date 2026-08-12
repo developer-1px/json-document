@@ -1,8 +1,15 @@
 import { useMemo } from "react";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 import { docPages, type DocPageId } from "./doc-pages";
+
+const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
+  overview: "sleep",
+  quickstart: "cursor",
+  connectors: "peek",
+  api: "braces",
+};
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
@@ -32,7 +39,7 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_11rem]">
         <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
-            <PageHeader title={page.title} illustration={pageId === "overview" ? "sleep" : undefined} />
+            <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
               <div className="flex gap-1 whitespace-nowrap">
                 {headings.map((heading) => (

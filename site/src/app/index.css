@@ -11,6 +11,7 @@
 
   body {
     margin: 0;
-    background: theme("colors.white");
+    background: theme("colors.paper.DEFAULT");
+    color: theme("colors.ink.DEFAULT");
   }
 }
