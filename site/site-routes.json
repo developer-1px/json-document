@@ -48,6 +48,13 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/demo/selection",
+    "label": "Selection Lab",
+    "title": "Selection Lab - json-document",
+    "description": "Compare structural Order, Grid, Object, and Tree selection families over one headless editing lifecycle.",
+    "navigationGroup": "Editing"
+  },
+  {
     "path": "/connectors",
     "label": "Overview",
     "title": "Connectors - json-document",
