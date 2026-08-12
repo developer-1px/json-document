@@ -38,7 +38,7 @@ import {
 } from "./selection-workbench-state";
 import { CodeBlock } from "../../shared/ui/code-block";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageIntro } from "../../shared/ui/primitives";
+import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 type FamilyId = "order" | "grid" | "objects" | "tree" | "protocols";
@@ -82,16 +82,19 @@ export function SelectionLabRoute() {
   const session = useWorkspaceSession();
 
   return (
-    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
-      <div className={ui.frame.content}>
-        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro label="One canonical document · family-owned selection" title="Selection Workbench">
+    <PageFrame>
+        <PageHeader
+          illustration="cursor"
+          label="One canonical document · family-owned selection"
+          title="Selection Workbench"
+          aside={(
+            <span className={classes("inline-block px-3 py-1.5", ui.surface.workspace, ui.text.meta)}>
+              Same document → different projection
+            </span>
+          )}
+        >
             Every family projects the same records through a different topology. Document mutations and history are shared; selection and editing state remain family-specific.
-          </PageIntro>
-          <span className={classes("px-3 py-1.5", ui.surface.workspace, ui.text.meta)}>
-            Same document → different projection
-          </span>
-        </header>
+        </PageHeader>
 
         <SharedDocumentStrip session={session} />
 
@@ -118,8 +121,7 @@ export function SelectionLabRoute() {
         {family === "objects" && <ObjectWorkbench session={session} />}
         {family === "tree" && <TreeWorkbench session={session} />}
         {family === "protocols" && <ProtocolWorkbench session={session} />}
-      </div>
-    </main>
+    </PageFrame>
   );
 }
 

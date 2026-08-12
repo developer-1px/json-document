@@ -12,7 +12,7 @@ import {
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageIntro } from "../../shared/ui/primitives";
+import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialSheet: SheetDocument = {
@@ -100,15 +100,17 @@ export function SheetDemo() {
   }
 
   return (
-    <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
-      <div className={ui.frame.content}>
-        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro title="Sheet demo">A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageIntro>
+    <PageFrame>
+        <PageHeader
+          illustration="braces"
+          title="Sheet demo"
+          aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
-        </header>
+          )}
+        >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
 
         <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Sheet actions">
           <Action label="Copy" onClick={copySelection} />
@@ -181,8 +183,7 @@ export function SheetDemo() {
             <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
           </aside>
         </div>
-      </div>
-    </main>
+    </PageFrame>
   );
 }
 
