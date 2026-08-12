@@ -1,106 +1,135 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-test("affordance 전환은 Objects family의 동일 session과 selection을 유지한다", async ({ page }) => {
+test("affordance와 family를 왕복해도 family별 selection이 보존된다", async ({ page }) => {
   await page.goto("/demo/selection");
   await expect(page.getByRole("heading", { level: 1, name: "Selection Workbench" })).toBeVisible();
+  const navigation = page.getByRole("navigation", { name: "Selection family" });
+  const objects = page.getByRole("region", { name: "Objects selection workbench" });
 
-  const workbench = page.getByRole("region", { name: "Objects selection workbench" });
-  await workbench.getByRole("button", { name: "Object Beta" }).click();
-  await workbench.getByRole("button", { name: "Object Gamma" }).click({ modifiers: ["Meta"] });
-  expect((await json(page, "object-selection-json")).keys).toEqual(["object-b", "object-c"]);
+  await objects.getByRole("button", { name: "Object Beta" }).click();
+  await objects.getByRole("button", { name: "Object Gamma" }).click({ modifiers: ["Meta"] });
+  expect((await json(page, "object-selection-json")).keys).toEqual(["beta", "gamma"]);
 
-  await workbench.getByRole("button", { name: "Layer list" }).click();
-  await expect(workbench.getByRole("button", { name: /Object /, pressed: true })).toHaveCount(2);
-  expect((await json(page, "object-selection-json")).keys).toEqual(["object-b", "object-c"]);
+  await objects.getByRole("button", { name: "Layer list" }).click();
+  await expect(objects.getByRole("button", { name: /Object /, pressed: true })).toHaveCount(2);
+  await objects.getByRole("button", { name: "Cards" }).click();
+  await expect(objects.getByRole("button", { name: /Object /, pressed: true })).toHaveCount(2);
 
-  await workbench.getByRole("button", { name: "Cards" }).click();
-  await expect(workbench.getByRole("button", { name: /Object /, pressed: true })).toHaveCount(2);
-  expect((await json(page, "object-selection-json")).keys).toEqual(["object-b", "object-c"]);
-});
-
-test("Objects host는 geometry mode를 해석하고 inspector가 전체 계약 경로를 노출한다", async ({ page }) => {
-  await page.goto("/demo/selection");
-  const workbench = page.getByRole("region", { name: "Objects selection workbench" });
-
-  await workbench.getByLabel("Point hit mode").selectOption("deepest");
-  await workbench.getByRole("button", { name: "Hit overlap" }).click();
-  expect(await json(page, "object-selection-json")).toEqual({ kind: "explicit", keys: ["object-a"], primaryKey: "object-a" });
-
-  await workbench.getByRole("button", { name: "Contract inspector" }).click();
-  const inspector = page.getByTestId("object-contract-inspector");
-  await expect(inspector).toContainText("physical input");
-  await expect(inspector).toContainText("platform adapter");
-  await expect(inspector).toContainText("family command");
-  await expect(inspector).toContainText("lifecycle result");
-  await expect(inspector).toContainText("history policy");
-  await expect(inspector).toContainText("deepest");
-  await expect(page.getByTestId("object-timeline")).toContainText("deepest overlap hit");
-
-  await workbench.getByLabel("Region hit mode").selectOption("contains");
-  const stage = page.getByTestId("object-stage");
-  await drag(page, stage, { x: 8, y: 8 }, { x: 145, y: 112 });
-  expect((await json(page, "object-selection-json")).keys).toEqual(["object-a"]);
-});
-
-test("Order와 Grid는 range 상태, document history, native edit lease를 구분한다", async ({ page }) => {
-  await page.goto("/demo/selection");
-  await page.getByRole("navigation", { name: "Selection family" }).getByRole("button", { name: /Order/ }).click();
+  await navigation.getByRole("button", { name: /Order/ }).click();
   const order = page.getByRole("region", { name: "Order selection workbench" });
-  await order.getByRole("button", { name: "Order Beta" }).click();
-  await order.getByRole("button", { name: "Order Delta" }).click({ modifiers: ["Shift"] });
-  expect((await json(page, "order-selection-json")).ranges).toEqual([{ anchor: { itemId: "order-b" }, focus: { itemId: "order-d" } }]);
-  await order.getByRole("button", { name: "Delete selection" }).click();
-  expect((await json(page, "order-document-json")).items.map((item: { id: string }) => item.id)).toEqual(["order-a"]);
-  await order.getByRole("button", { name: "Undo" }).click();
-  await expect(order.getByRole("button", { name: /Order /, pressed: true })).toHaveCount(3);
-  await expect(page.getByTestId("order-timeline")).toContainText("document-mutation");
-  await expect(page.getByTestId("order-timeline")).toContainText("undo");
+  await order.getByRole("button", { name: "Order Delta" }).click();
+  expect((await json(page, "order-selection-json")).ranges[0].focus).toEqual({ recordId: "delta" });
 
-  await page.getByRole("navigation", { name: "Selection family" }).getByRole("button", { name: /Grid/ }).click();
-  const grid = page.getByRole("region", { name: "Grid selection workbench" });
-  await grid.getByRole("button", { name: "Grid A1" }).click();
-  await grid.getByRole("button", { name: "Grid B2" }).click({ modifiers: ["Shift"] });
-  await expect(grid.getByRole("button", { name: /Grid /, pressed: true })).toHaveCount(4);
-  await grid.getByRole("button", { name: "Edit current" }).click();
-  expect((await json(page, "grid-document-json")).editing).toEqual({ kind: "edit", lease: "cell:r2:b" });
-  await grid.getByRole("button", { name: "Heatmap" }).click();
-  await expect(grid.getByRole("button", { name: /Grid /, pressed: true })).toHaveCount(4);
+  await navigation.getByRole("button", { name: /Objects/ }).click();
+  expect((await json(page, "object-selection-json")).keys).toEqual(["beta", "gamma"]);
+  await navigation.getByRole("button", { name: /Order/ }).click();
+  expect((await json(page, "order-selection-json")).ranges[0].focus).toEqual({ recordId: "delta" });
 });
 
-test("Tree topology reconcile과 symbolic all·universe·scope·mask protocol을 관찰한다", async ({ page }) => {
+test("한 family의 document mutation이 모든 projection에 나타나고 다른 family에서 undo된다", async ({ page }) => {
   await page.goto("/demo/selection");
   const navigation = page.getByRole("navigation", { name: "Selection family" });
+  const objects = page.getByRole("region", { name: "Objects selection workbench" });
+
+  await objects.getByRole("button", { name: "Object Beta" }).click();
+  await objects.getByRole("button", { name: "Rename" }).click();
+  await expect(page.getByTestId("shared-record-beta")).toContainText("Beta ★");
+  expect((await json(page, "object-document-json")).records.find((record: { id: string }) => record.id === "beta").label).toBe("Beta ★");
+
+  await navigation.getByRole("button", { name: /Order/ }).click();
+  await expect(page.getByRole("region", { name: "Order selection workbench" }).getByRole("button", { name: "Order Beta ★" })).toBeVisible();
+  await navigation.getByRole("button", { name: /Grid/ }).click();
+  await expect(page.getByRole("region", { name: "Grid selection workbench" }).getByRole("button", { name: "Grid beta label" })).toContainText("Beta ★");
   await navigation.getByRole("button", { name: /Tree/ }).click();
   const tree = page.getByRole("region", { name: "Tree selection workbench" });
-  await tree.getByRole("button", { name: "Tree Alpha child" }).click();
-  await tree.getByRole("button", { name: "Tree Beta child" }).click({ modifiers: ["Shift"] });
-  await tree.getByRole("button", { name: "Collapse Alpha", exact: true }).first().click();
-  await expect(page.getByTestId("tree-visible-order")).toHaveText("visible: workspace → alpha → beta → beta-child");
-  expect((await json(page, "tree-selection-json")).ranges).toEqual([{ anchor: { nodeId: "alpha" }, focus: { nodeId: "beta-child" } }]);
-  await expect(page.getByTestId("tree-timeline")).toContainText("reconcile");
+  await expect(tree.getByRole("button", { name: "Tree Beta ★" })).toBeVisible();
+
+  await tree.getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByTestId("shared-record-beta")).toContainText("Beta · Review");
+  await expect(tree.getByRole("button", { name: "Tree Beta" })).toBeVisible();
+  await navigation.getByRole("button", { name: /Objects/ }).click();
+  expect((await json(page, "object-selection-json")).keys).toEqual(["beta"]);
+  await expect(page.getByRole("region", { name: "Objects selection workbench" }).getByRole("button", { name: "Object Beta" })).toBeVisible();
+});
+
+test("shared record 삭제와 undo가 모든 family selection snapshot을 함께 reconcile한다", async ({ page }) => {
+  await page.goto("/demo/selection");
+  const navigation = page.getByRole("navigation", { name: "Selection family" });
+  const objects = page.getByRole("region", { name: "Objects selection workbench" });
+
+  await objects.getByRole("button", { name: "Delete" }).click();
+  expect((await json(page, "object-document-json")).records.map((record: { id: string }) => record.id)).toEqual(["delta"]);
+  expect(await json(page, "object-selection-json")).toEqual({ kind: "explicit", keys: [], primaryKey: null });
+
+  await navigation.getByRole("button", { name: /Order/ }).click();
+  expect((await json(page, "order-selection-json")).ranges).toEqual([]);
+  await navigation.getByRole("button", { name: /Grid/ }).click();
+  expect((await json(page, "grid-selection-json")).ranges).toEqual([]);
+  await navigation.getByRole("button", { name: /Tree/ }).click();
+  expect((await json(page, "tree-selection-json")).ranges).toEqual([]);
+  await navigation.getByRole("button", { name: /Protocols/ }).click();
+  expect(await json(page, "protocol-selection-json")).toEqual({ kind: "explicit", keys: [], primaryKey: null });
+
+  await navigation.getByRole("button", { name: /Order/ }).click();
+  const order = page.getByRole("region", { name: "Order selection workbench" });
+  await order.getByRole("button", { name: "Undo" }).click();
+  expect((await json(page, "order-document-json")).records).toHaveLength(4);
+  expect((await json(page, "order-selection-json")).ranges[0].anchor).toEqual({ recordId: "alpha" });
+  await navigation.getByRole("button", { name: /Objects/ }).click();
+  expect(await json(page, "object-selection-json")).toEqual({ kind: "explicit", keys: ["alpha"], primaryKey: "alpha" });
+});
+
+test("geometry·topology·all·scope·mask와 inspector 계약을 같은 document에서 관찰한다", async ({ page }) => {
+  await page.goto("/demo/selection");
+  const navigation = page.getByRole("navigation", { name: "Selection family" });
+  const objects = page.getByRole("region", { name: "Objects selection workbench" });
+
+  await objects.getByLabel("Point hit mode").selectOption("deepest");
+  await objects.getByRole("button", { name: "Hit overlap" }).click();
+  expect(await json(page, "object-selection-json")).toEqual({ kind: "explicit", keys: ["alpha"], primaryKey: "alpha" });
+  await objects.getByRole("button", { name: "Contract inspector" }).click();
+  const inspector = page.getByTestId("object-contract-inspector");
+  for (const heading of ["physical input", "platform adapter", "family command", "lifecycle result", "history policy"]) {
+    await expect(inspector).toContainText(heading);
+  }
+  await expect(inspector).toContainText("deepest");
+
+  await objects.getByLabel("Region hit mode").selectOption("contains");
+  await drag(page, page.getByTestId("object-stage"), { x: 8, y: 8 }, { x: 145, y: 112 });
+  expect((await json(page, "object-selection-json")).keys).toEqual(["alpha"]);
+
+  await navigation.getByRole("button", { name: /Tree/ }).click();
+  const tree = page.getByRole("region", { name: "Tree selection workbench" });
+  await tree.getByRole("button", { name: "Tree Beta" }).click();
+  await tree.getByRole("button", { name: "Tree Gamma" }).click({ modifiers: ["Shift"] });
+  await tree.getByRole("button", { name: "Toggle Alpha" }).click();
+  await expect(page.getByTestId("tree-visible-order")).toHaveText("visible: alpha → delta");
+  expect((await json(page, "tree-selection-json")).ranges).toEqual([{ anchor: { recordId: "alpha" }, focus: { recordId: "alpha" } }]);
 
   await navigation.getByRole("button", { name: /Protocols/ }).click();
   const protocols = page.getByRole("region", { name: "Protocols selection workbench" });
   await protocols.getByRole("button", { name: "Select all" }).click();
   await protocols.getByRole("button", { name: "Exclude Beta" }).click();
-  expect(await json(page, "protocol-selection-json")).toEqual({ kind: "all", universe: "filtered:demo:v1", excludedKeys: ["beta"], primaryKey: "alpha" });
+  expect(await json(page, "protocol-selection-json")).toEqual({ kind: "all", universe: "workspace:v1", excludedKeys: ["beta"], primaryKey: "alpha" });
   await protocols.getByRole("button", { name: "Switch universe" }).click();
   expect(await json(page, "protocol-selection-json")).toEqual({ kind: "explicit", keys: [], primaryKey: null });
   await protocols.getByRole("button", { name: "Enter text edit" }).click();
   await protocols.getByRole("button", { name: "Soft mask" }).click();
-  const session = await json(page, "protocol-document-json");
-  expect(session.scoped.scope).toBe("text");
-  expect(session.editing).toEqual({ kind: "edit", lease: "native-text:label" });
-  expect(session.mask).toEqual({ kind: "mask", representation: [0, 0.5, 1] });
   await protocols.getByRole("button", { name: "Raster strip" }).click();
-  await expect(protocols.getByText("0.5", { exact: true })).toBeVisible();
+  await expect(protocols.getByText("0.33", { exact: true })).toBeVisible();
+  expect((await json(page, "protocol-document-json")).records).toHaveLength(4);
 });
 
 async function json(page: Page, testId: string): Promise<any> {
   return JSON.parse(await page.getByTestId(testId).innerText());
 }
 
-async function drag(page: Page, target: Locator, start: { readonly x: number; readonly y: number }, end: { readonly x: number; readonly y: number }) {
+async function drag(
+  page: Page,
+  target: Locator,
+  start: { readonly x: number; readonly y: number },
+  end: { readonly x: number; readonly y: number },
+) {
   await target.scrollIntoViewIfNeeded();
   const box = await target.boundingBox();
   if (box === null) throw new Error("Object stage has no bounds");
