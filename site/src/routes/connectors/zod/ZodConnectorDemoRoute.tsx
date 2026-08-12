@@ -10,20 +10,20 @@ export function ZodConnectorDemoRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className={classes("mb-6 grid gap-4 pb-5 lg:grid-cols-[minmax(0,1fr)_24rem]", ui.frame.header)}>
-          <PageIntro eyebrow="Connector Live Demo" title="Zod Connector">
+          <PageIntro title="Zod Connector">
               Zod safeParse issues translated into JSON Document validation results and JSON Pointer diagnostics.
           </PageIntro>
-          <div className={classes("p-3", ui.surface.default)}>
-            <div className={ui.text.eyebrow}>Install</div>
+          <div className={classes("p-3", ui.surface.inset)}>
+            <div className={ui.text.label}>Install</div>
             <code className={classes("mt-2 block overflow-x-auto", ui.code.inline)}>npm i @interactive-os/json-document-zod zod</code>
           </div>
         </header>
 
         <ZodConnectorLab />
 
-        <section aria-label="Minimal Zod connector code" className={classes("mt-4 p-4", ui.surface.default)}>
+        <section aria-label="Minimal Zod connector code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
           <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
-          <pre className={classes("m-0 overflow-x-auto", ui.code.inverse)}><code>{connectorCode}</code></pre>
+          <pre className={classes("m-0 overflow-x-auto", ui.code.block)}><code>{connectorCode}</code></pre>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             The Connector owns validation result translation only. Forms, schema-driven UI, and canonical normalization remain explicit host concerns.
           </p>

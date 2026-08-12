@@ -9,17 +9,17 @@ export function ConnectorCatalogRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className="mx-auto max-w-5xl">
         <header className={classes("mb-7 pb-5", ui.frame.header)}>
-          <PageIntro eyebrow="Official integrations" title="Connectors">
+          <PageIntro title="Connectors">
             Optional packages that translate ecosystem-native contracts without changing the JSON Document Kernel.
           </PageIntro>
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
           {connectorCatalog.map((connector) => (
-            <article key={connector.id} className={classes("flex min-h-44 flex-col p-4", ui.surface.default)}>
+            <article key={connector.id} className={classes("flex min-h-44 flex-col py-4", ui.surface.sectionDivider)}>
               <div className="flex items-start justify-between gap-3">
                 <h2 className={classes("m-0", ui.text.heading)}>{connector.name}</h2>
-                <span className={classes("px-2 py-1", ui.surface.subtle, ui.text.eyebrow)}>
+                <span className={classes("px-2 py-1", ui.surface.inset, ui.text.label)}>
                   {connector.status}
                 </span>
               </div>

@@ -94,14 +94,14 @@ export function DocumentDemoRoute() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro eyebrow="Headless editing vertical slice" title="Document demo">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageIntro>
+          <PageIntro title="Document demo">A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageIntro>
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
         </header>
 
-        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.toolbar)} role="toolbar" aria-label="Document actions">
+        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Document actions">
           <Action label="Add" onClick={() => run(() => editor.dispatch({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
           <Action label="Duplicate" onClick={() => run(() => editor.dispatch({ type: "selection.duplicate" }), "Selection duplicated")} />
           <Action label="Move up" onClick={() => run(() => editor.dispatch({ type: "selection.move", direction: -1 }), "Selection moved up")} />
@@ -117,8 +117,8 @@ export function DocumentDemoRoute() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
-          <section aria-label="Editable document" className={classes("p-3", ui.surface.default)}>
-            <div ref={surfaceRef} tabIndex={0} onKeyDown={handleKeyDown} className={classes("grid gap-2", ui.state.focus)}>
+          <section aria-label="Editable document" className={classes("p-3", ui.surface.raised)}>
+            <div ref={surfaceRef} tabIndex={0} onKeyDown={handleKeyDown} className={ui.state.focus}>
               {document.blocks.length === 0 ? (
                 <button className={classes("p-8", ui.surface.empty, ui.text.body)} onClick={() => run(() => editor.dispatch({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</button>
               ) : document.blocks.map((block, index) => (
@@ -149,7 +149,7 @@ export function DocumentDemoRoute() {
           </section>
 
           <aside className={classes("min-w-0", ui.code.json)} aria-label="Canonical JSON">
-            <div className={classes("mb-2 flex items-center justify-between", ui.text.inverseMeta)}><span>Canonical JSON</span><span>JSON Patch document</span></div>
+            <div className={classes("mb-2 flex items-center justify-between", ui.text.meta)}><span>Canonical JSON</span><span>JSON Patch document</span></div>
             <pre data-testid="canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
           </aside>
         </div>

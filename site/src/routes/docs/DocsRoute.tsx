@@ -27,7 +27,7 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   );
 
   return (
-    <main className={ui.frame.plainPage}>
+    <main className={classes(ui.frame.plainPage, ui.surface.flat)}>
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_11rem] lg:px-6">
         <div className="min-w-0">
           <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>

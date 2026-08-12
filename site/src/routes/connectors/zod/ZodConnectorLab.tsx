@@ -36,9 +36,9 @@ export function ZodConnectorLab() {
   }
 
   return (
-    <section aria-label="Zod validation" className={classes("p-4", ui.surface.default)}>
+    <section aria-label="Zod validation" className={classes("p-4", ui.surface.raised)}>
       <div className="mb-4">
-        <p className={ui.text.eyebrow}>createZodValidator</p>
+        <p className={ui.text.label}>createZodValidator</p>
         <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Validation boundary</h2>
         <p className={classes("m-0", ui.text.meta)}>
           Try fewer than 3 characters, then a padded valid title. Invalid commits preserve the last canonical JSON; Zod trim output is never adopted.
@@ -76,7 +76,7 @@ function JSONPanel(props: {
 }) {
   return (
     <div className={ui.code.json}>
-      <div className={classes("mb-2", ui.text.inverseMeta)}>{props.label}</div>
+      <div className={classes("mb-2", ui.text.meta)}>{props.label}</div>
       <pre data-testid={props.testId} className="m-0 min-h-24 overflow-auto whitespace-pre-wrap">
         <code>{JSON.stringify(props.value, null, 2)}</code>
       </pre>

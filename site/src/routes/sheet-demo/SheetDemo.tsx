@@ -83,14 +83,14 @@ export function SheetDemo() {
     <main className={classes("px-4 py-8 lg:px-8", ui.frame.page)}>
       <div className={ui.frame.content}>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <PageIntro eyebrow="Headless Sheet editing vertical slice" title="Sheet demo">A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageIntro>
+          <PageIntro title="Sheet demo">A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageIntro>
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedCells.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
         </header>
 
-        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.toolbar)} role="toolbar" aria-label="Sheet actions">
+        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Sheet actions">
           <Action label="Copy" onClick={copySelection} />
           <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
           <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
@@ -100,7 +100,7 @@ export function SheetDemo() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
-          <section aria-label="Editable sheet" onKeyDown={handleKeyDown} className={classes("min-w-0 overflow-auto p-3", ui.surface.default)}>
+          <section aria-label="Editable sheet" onKeyDown={handleKeyDown} className={classes("min-w-0 overflow-auto p-3", ui.surface.raised)}>
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
               <thead>
                 <tr>
@@ -147,7 +147,7 @@ export function SheetDemo() {
           </section>
 
           <aside className={classes("min-w-0", ui.code.json)} aria-label="Canonical JSON">
-            <div className={classes("mb-2 flex items-center justify-between", ui.text.inverseMeta)}><span>Canonical JSON</span><span>stable row + column ids</span></div>
+            <div className={classes("mb-2 flex items-center justify-between", ui.text.meta)}><span>Canonical JSON</span><span>stable row + column ids</span></div>
             <pre data-testid="sheet-canonical-json" className="m-0 max-h-[34rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
           </aside>
         </div>

@@ -36,9 +36,9 @@ function JSONDocumentSubscriptionLab() {
   }
 
   return (
-    <section aria-label="JSON Document subscription" className={classes("p-4", ui.surface.default)}>
+    <section aria-label="JSON Document subscription" className={classes("p-4", ui.surface.raised)}>
       <div className="mb-4">
-        <p className={ui.text.eyebrow}>useJSONDocumentValue</p>
+        <p className={ui.text.label}>useJSONDocumentValue</p>
         <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Document subscription</h2>
         <p className={classes("m-0", ui.text.meta)}>A React view follows the six-member JSON Document through its public subscription.</p>
       </div>
@@ -69,10 +69,10 @@ function EditingSnapshotLab() {
   const value = snapshot.value as BlockDocument;
 
   return (
-    <section aria-label="Editing snapshot subscription" className={classes("p-4", ui.surface.default)}>
+    <section aria-label="Editing snapshot subscription" className={classes("p-4", ui.surface.raised)}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className={ui.text.eyebrow}>useDocumentEditor + useEditingSnapshot</p>
+          <p className={ui.text.label}>useDocumentEditor + useEditingSnapshot</p>
           <h2 className={classes("mb-1 mt-1", ui.text.heading)}>Editing snapshot</h2>
           <p className={classes("m-0", ui.text.meta)}>The component owns one editor and rerenders from published editing snapshots.</p>
         </div>
@@ -120,7 +120,7 @@ function EditingSnapshotLab() {
 function JSONPanel({ testId, value }: { readonly testId: string; readonly value: JSONValue }) {
   return (
     <div className={classes("mt-4", ui.code.json)}>
-      <div className={classes("mb-2", ui.text.inverseMeta)}>Canonical JSON</div>
+      <div className={classes("mb-2", ui.text.meta)}>Canonical JSON</div>
       <pre data-testid={testId} className="m-0 max-h-64 overflow-auto whitespace-pre-wrap">
         <code>{JSON.stringify(value, null, 2)}</code>
       </pre>

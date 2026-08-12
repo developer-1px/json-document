@@ -87,7 +87,7 @@ export function TanStackTableConnectorLab() {
   }
 
   return (
-    <section aria-label="TanStack Table editing" className={classes("p-4", ui.surface.default)}>
+    <section aria-label="TanStack Table editing" className={classes("p-4", ui.surface.raised)}>
       <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">
         <Control label="Ready rows" active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
         <Control label="Score descending" active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
@@ -150,11 +150,11 @@ export function TanStackTableConnectorLab() {
               ))}
             </tbody>
           </table>
-          <pre data-testid="tanstack-clipboard" className={classes("mt-3 min-h-8 whitespace-pre-wrap p-2", ui.surface.subtle, ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</pre>
+          <pre data-testid="tanstack-clipboard" className={classes("mt-3 min-h-8 whitespace-pre-wrap p-2", ui.surface.inset, ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</pre>
         </div>
 
         <aside className={ui.code.json} aria-label="Canonical JSON">
-          <div className={classes("mb-2", ui.text.inverseMeta)}>Canonical JSON · revision {snapshot.revision}</div>
+          <div className={classes("mb-2", ui.text.meta)}>Canonical JSON · revision {snapshot.revision}</div>
           <pre data-testid="tanstack-document-json" className="m-0 max-h-[30rem] overflow-auto whitespace-pre-wrap"><code>{JSON.stringify(snapshot.value, null, 2)}</code></pre>
         </aside>
       </div>

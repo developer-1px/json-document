@@ -21,7 +21,7 @@ export function HomeRoute() {
       <section className={ui.frame.hero}>
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:py-14">
           <div>
-            <PageIntro eyebrow="Implementation-neutral JSON editing" title="json-document">
+            <PageIntro label="Implementation-neutral JSON editing" title="json-document">
               A headless JSON API and six-member JSON Document for
               documents, tables, slides, canvases, and notes.
             </PageIntro>
@@ -50,11 +50,11 @@ export function HomeRoute() {
             </div>
           </div>
 
-          <div className={classes("p-3", ui.surface.inverse)}>
-            <div className={classes("mb-2", ui.text.inverseMeta)}>Release</div>
-            <pre className="m-0 overflow-x-auto"><code>3.0.0</code></pre>
-            <div className={classes("mt-4 pt-3", ui.surface.divider, ui.text.inverseMeta)}>Start</div>
-            <pre className="m-0 mt-2 overflow-x-auto"><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
+          <div className={classes("p-4", ui.surface.raised)}>
+            <div className={classes("mb-2", ui.text.label)}>Release</div>
+            <pre className={classes("m-0 overflow-x-auto", ui.code.block)}><code>3.0.0</code></pre>
+            <div className={classes("mt-4 pt-3", ui.surface.divider, ui.text.label)}>Start</div>
+            <pre className={classes("m-0 mt-2 overflow-x-auto", ui.code.block)}><code>{`import { createJSONDocument } from "@interactive-os/json-document";`}</code></pre>
           </div>
         </div>
       </section>
@@ -62,7 +62,7 @@ export function HomeRoute() {
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div>
           <h2 className={classes("mb-3 mt-0", ui.text.heading)}>Public model</h2>
-          <div className={classes("overflow-x-auto", ui.surface.default)}>
+          <div className={classes("overflow-x-auto", ui.surface.raised)}>
             <table className={classes("w-full min-w-[34rem]", ui.surface.table)}>
               <thead>
                 <tr>
@@ -84,7 +84,7 @@ export function HomeRoute() {
           </div>
         </div>
 
-        <aside className={classes("p-4", ui.surface.default)}>
+        <aside className={classes("pt-4", ui.surface.sectionDivider)}>
           <h2 className={classes("mb-3 mt-0", ui.text.heading)}>Boundary</h2>
           <ul className={classes("m-0 grid gap-2 p-0 [list-style:none]", ui.text.body)}>
             <li>Root Kernel is React- and Zod-free.</li>
