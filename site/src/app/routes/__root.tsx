@@ -20,7 +20,7 @@ export const Route = createRootRoute({
 function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
-  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["JSON Document", "Editing", "Connectors"];
+  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["JSON Document", "Editing", "Connectors", "Reference"];
 
   useRouteMetadata(route);
   const activeGroup = routeGroup(route, siteRoutes);

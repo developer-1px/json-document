@@ -1,8 +1,9 @@
-# 튜토리얼: 작은 카드 편집기 만들기
+# 작은 카드 문서 만들기
 
-Inbox에 카드 하나를 두고, 제목을 읽고, 상태를 바꾸고, 그 변경을 구독합니다.
+Inbox에 카드 하나가 있는 문서를 만들고 제목을 읽어 보겠습니다. 이어서 카드
+상태를 바꾸고, 적용된 변경을 구독합니다.
 
-## 1. JSON document 만들기
+## 1. 문서 만들기
 
 ```ts
 import { createJSONDocument } from "@interactive-os/json-document";
@@ -22,32 +23,41 @@ const initialBoard = {
 const document = createJSONDocument(initialBoard);
 ```
 
-입력 JSON은 document가 복사해서 가집니다. 이후에는 `commit`으로만 바꿉니다.
+`document.value`에는 생성할 때 넘긴 JSON이 들어 있습니다. document는 이 값을
+복사해 보관하므로 이후에 `initialBoard`를 수정해도 현재 값은 달라지지
+않습니다.
 
-## 2. Pointer로 읽고 JSONPath로 찾기
+## 2. 필요한 값 찾기
 
-한 곳은 JSON Pointer로 읽습니다.
+카드 제목의 위치를 알고 있다면 JSON Pointer로 읽습니다.
 
 ```ts
 const title = document.at("/lists/0/cards/0/title");
 
 if (title.ok) {
-  title.value;
+  console.log(title.value); // "Write docs"
 }
 ```
 
-여러 곳은 JSONPath로 찾습니다.
+위치를 모르고 조건만 알고 있다면 JSONPath로 찾습니다. 다음 쿼리는 상태가
+`todo`인 카드를 모두 찾습니다.
 
 ```ts
 const todos = document.query(
   "$..cards[?(@.status=='todo')]",
 );
+
+if (todos.ok) {
+  console.log(todos.pointers); // ["/lists/0/cards/0"]
+}
 ```
 
-JSONPath는 찾기만 합니다. 바꿀 때는 결과로 받은 Pointer를 JSON Patch의
-`path`에 넣습니다.
+쿼리 결과는 JSON Pointer 목록입니다. 찾은 카드의 상태를 바꿀 때 이 주소를
+JSON Patch의 `path`로 사용합니다.
 
-## 3. 확인하고 적용하기
+## 3. 변경 검사하고 적용하기
+
+카드를 시작한 상태로 바꿀 operation을 만듭니다.
 
 ```ts
 const operations = [{
@@ -67,16 +77,18 @@ if (validation.ok) {
   });
 
   if (result.ok) {
-    result.change.applied;
-    document.value;
+    console.log(document.at("/lists/0/cards/0/status"));
+    console.log(result.change.applied);
   }
 }
 ```
 
-`validatePatch`는 미리 검사만 합니다. `commit`은 목록 전체를 적용하거나
-아무것도 적용하지 않습니다.
+`validatePatch`는 operation을 적용할 수 있는지만 확인합니다. `commit`이
+성공한 뒤에 `document.value`를 읽으면 바뀐 상태를 확인할 수 있습니다.
 
-## 4. 변경 구독하기
+## 4. 적용된 변경 구독하기
+
+화면이나 저장소가 변경을 받아야 한다면 listener를 등록합니다.
 
 ```ts
 const unsubscribe = document.subscribe((change) => {
@@ -95,11 +107,13 @@ document.commit([
 unsubscribe();
 ```
 
-실패한 commit이나 값이 그대로인 commit은 listener를 부르지 않습니다.
+listener는 성공해서 값이 달라진 `commit`만 받습니다. 더 이상 변경을 받을
+필요가 없으면 반환된 함수를 호출해 구독을 끊습니다.
 
-## 5. document 없이 preview하기
+## 5. 문서를 만들지 않고 변경 결과 보기
 
-저장 전 미리보기처럼 document가 필요 없으면 `applyPatch`를 씁니다.
+저장 전 미리보기처럼 현재 상태를 보관할 필요가 없다면 `applyPatch`로 JSON과
+operation만 계산할 수 있습니다.
 
 ```ts
 import { applyPatch } from "@interactive-os/json-document";
@@ -115,16 +129,17 @@ const preview = applyPatch(initialBoard, [{
 }]);
 
 if (preview.ok) {
-  preview.value;
-  preview.change.applied;
+  console.log(preview.value);
 }
 ```
 
-입력 값과 operation은 그대로 남고, 성공 결과는 새 값입니다.
+`initialBoard`는 그대로 남고, 계산된 JSON은 성공 결과의 `value`에 들어
+있습니다.
 
-## 6. 스키마 붙이기
+## 6. 문서 규칙 추가하기
 
-잘못된 보드가 들어가지 않게 `validate`를 넘길 수 있습니다.
+현재 예제에서는 `status`에 어떤 문자열도 넣을 수 있습니다. 세 가지 상태만
+허용하려면 문서를 만들 때 validator를 연결합니다.
 
 ```ts
 import * as z from "zod";
@@ -162,9 +177,9 @@ const acceptedDocument = createJSONDocument(initialBoard, {
 });
 ```
 
-`validate`는 허용하거나 거절합니다. Zod가 만든 변환 값을 몰래 넣지 않습니다.
-같은 일을 패키지로 쓰려면 `@interactive-os/json-document-zod`의
-`createZodValidator`를 보면 됩니다.
+이제 규칙에 맞지 않는 변경은 실패 결과를 돌려주고 문서 값은 유지됩니다.
+Zod를 직접 연결하는 대신 `@interactive-os/json-document-zod`의
+`createZodValidator`를 사용할 수도 있습니다.
 
-다음으로 React에 붙이려면 [Connectors](connectors.md), 함수 목록은
-[API](api.md)입니다.
+지금까지 만든 JSON Document에 선택과 실행 취소 같은 편집 기능을 더하는
+순서는 [Concepts](concepts.md)에서 이어집니다.

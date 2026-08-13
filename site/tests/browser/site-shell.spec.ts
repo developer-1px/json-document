@@ -11,21 +11,22 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Concepts", "API Reference", "Quickstart"]);
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Quickstart", "Concepts"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Selection",
     "Selection Lab",
     "Topology",
     "Clipboard",
     "History",
-    "Intent",
     "Intent guide",
+    "Intent",
     "Document",
     "Workbench",
     "Sheet",
     "Database",
   ]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+  await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });
@@ -138,29 +139,52 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
 
   const block = page.getByRole("figure", { name: "TypeScript" }).first();
   await expect(block).toBeVisible();
+  await expect(block.getByRole("button", { name: "Copy" }).locator("svg")).toBeVisible();
 
   const snapshot = await block.evaluate((element) => {
     const code = element.querySelector("code");
     const pre = element.querySelector("pre");
+    const figureRect = element.getBoundingClientRect();
+    const preRect = pre?.getBoundingClientRect();
     const lines = [...element.querySelectorAll("[data-code-line]")].slice(0, 4);
     const tops = lines.map((line) => line.getBoundingClientRect().top);
 
     return {
       fontSize: code ? getComputedStyle(code).fontSize : null,
+      topInset: preRect ? Math.round((preRect.top - figureRect.top) * 10) / 10 : null,
       lineGaps: tops.slice(1).map((top, index) => Math.round((top - (tops[index] ?? top)) * 10) / 10),
       source: pre?.textContent,
       pageOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     };
   });
 
-  expect(snapshot.fontSize).toBe("14px");
-  expect(snapshot.lineGaps.every((gap) => gap >= 22 && gap <= 24)).toBe(true);
+  expect(snapshot.fontSize).toBe("13px");
+  expect(snapshot.topInset).toBeLessThanOrEqual(1);
+  expect(snapshot.lineGaps.every((gap) => gap >= 20 && gap <= 21)).toBe(true);
   expect(snapshot.source).toContain('";\n\nconst initialBoard');
   expect(snapshot.pageOverflow).toBe(false);
 
   await block.getByRole("button", { name: "Copy" }).click();
   await expect(block.getByRole("button", { name: "Copied" })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const initialBoard");
+});
+
+test("inline code stays distinct without drawing a border", async ({ page }) => {
+  await page.goto("/docs/tutorial");
+
+  const inlineCode = page.locator("code").filter({ hasText: /^document\.value$/ }).first();
+  await expect(inlineCode).toBeVisible();
+  expect(await inlineCode.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      borderWidth: style.borderWidth,
+      backgroundColor: style.backgroundColor,
+      fontFamily: style.fontFamily,
+    };
+  })).toMatchObject({
+    borderWidth: "0px",
+    backgroundColor: "rgb(251, 248, 242)",
+  });
 });
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
@@ -192,7 +216,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   }));
   expect(codePalette).toEqual({
     backgroundColor: "rgb(251, 248, 242)",
-    fontSize: "14px",
+    fontSize: "13px",
     keyword: "rgb(41, 40, 36)",
     usesImpactSyntax: false,
   });

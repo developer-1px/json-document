@@ -29,23 +29,25 @@ docs
 ```txt
 JSON Document
 |-- Why
-|-- Concepts
-|-- API Reference
-`-- Quickstart
+|-- Quickstart
+`-- Concepts
 
 Editing
 |-- Selection
 |-- Topology
 |-- Clipboard
 |-- History
+|-- Intent guide
 |-- Intent
-|   `-- Intent guide
 |-- Document
 |-- Sheet
 `-- Database
 
 Connectors
 `-- Connector guide
+
+Reference
+`-- API Reference
 ```
 
 ## 규범 우선순위
@@ -78,6 +80,9 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
+- 새 개념은 독자가 그 개념을 필요로 하는 상황을 본 뒤에 이름 붙인다.
+- 초안을 쓴 뒤 선언 전 사용, 선제 부정, 메타 안내와 중복을 제거하고
+  앞뒤 페이지를 이어 읽는다.
 - 무엇을 하는지로 정의한다. 소유하지 않는 것의 목록으로 시작하지 않는다.
 - 같은 아키텍처 다이어그램과 패키지 카탈로그를 페이지마다 복제하지 않는다.
 - 이름 정본과 profile은 `standards/`에 두고 public 가이드에서 인용하지 않는다.

@@ -34,6 +34,10 @@ describe("shared code language", () => {
     expect(screen.getByText("document.value").tagName).toBe("CODE");
     const typescript = screen.getByRole("figure", { name: "TypeScript" });
     const text = screen.getByRole("figure", { name: "Text" });
+    expect(within(typescript).getByText("TypeScript").className).toBe("sr-only");
+    expect(within(text).getByText("Text").className).toBe("sr-only");
+    expect(within(typescript).getByRole("button", { name: "Copy" }).textContent).toBe("");
+    expect(within(typescript).getByRole("button", { name: "Copy" }).querySelector("svg")).toBeTruthy();
     expect(within(typescript).getByText("const").getAttribute("data-code-token")).toBe("keyword");
     expect(text.querySelectorAll("[data-line-number]")).toHaveLength(2);
     expect(text.querySelector("pre > code")).toBeTruthy();

@@ -1,21 +1,9 @@
-# json-document API
+# API Reference
 
-`@interactive-os/json-document`의 공개 시그니처입니다.
-왜 이 계약이 있는지는 [왜 json-document인가](overview.md)를 보면 됩니다.
+앞 문서에서 사용한 `@interactive-os/json-document`의 공개 API를 작업별로
+정리합니다.
 
-```txt
-@interactive-os/json-document
-|-- createJSONDocument
-|-- applyPatch
-|-- Pointer helpers
-`-- JSONDocument
-```
-
-주소는 JSON Pointer입니다. 여러 곳을 찾을 때만 JSONPath를 쓰고, 결과는
-Pointer 배열입니다. `validatePatch`는 검사만 하고, `commit`만 상태를
-바꿉니다. 실패는 `{ ok: false, code }`입니다.
-
-## 시작
+## 문서 만들기
 
 ```ts
 import { createJSONDocument } from "@interactive-os/json-document";
@@ -24,32 +12,11 @@ const document = createJSONDocument({
   id: "c1",
   title: "Draft",
 });
-
-const result = document.commit([
-  { op: "replace", path: "/title", value: "Ready" },
-]);
-
-if (result.ok) {
-  result.change.applied;
-  document.value;
-}
 ```
 
-## 작업별 진입점
-
-| 작업 | API | 결과 |
-| --- | --- | --- |
-| 현재 값 | `document.value` | `JSONValue` |
-| 한 위치 | `document.at(pointer)` | `ReadResult` |
-| 여러 위치 | `document.query(jsonPath)` | `QueryResult` |
-| patch 검사 | `document.validatePatch(operations)` | `JSONPatchValidationResult` |
-| 상태 변경 | `document.commit(operations, options?)` | `JSONDocumentCommitResult` |
-| 변경 구독 | `document.subscribe(listener)` | unsubscribe function |
-| document 없이 patch | `applyPatch(value, operations)` | `JSONPatchResult` |
-| Pointer 조립 | `buildPointer`, `appendSegment`, `parentPointer` | `Pointer` |
-| 변경 뒤 추적 | `trackPointer` | `Pointer \| null` |
-
-## JSONDocument
+`createJSONDocument(initial, options?)`는 입력 JSON을 복사해 새
+`JSONDocument`를 만듭니다. `options.validate`를 넘기면 처음 값과 이후
+`commit`으로 적용할 값을 같은 함수로 검사합니다.
 
 ```ts
 interface JSONDocument {
@@ -69,62 +36,60 @@ interface JSONDocument {
 }
 ```
 
-`createJSONDocument(initial, options?)`로 만듭니다.
-`JSONDocumentOptions.validate`가 있으면 처음 값과 이후 candidate를
-`commit` 전에 검사합니다.
+## 현재 값 읽기
 
-## value
-
-`value`는 지금 document의 JSON입니다. 처음 넘긴 객체, patch, metadata를
-밖에서 바꿔도 document는 바뀌지 않습니다.
+`document.value`는 현재 JSON 값입니다. document를 만들 때 넘긴 객체와
+`commit`에 사용한 operation이나 metadata를 나중에 수정해도 현재 값은
+달라지지 않습니다.
 
 ```ts
 const initial = { nested: { count: 1 } };
 const document = createJSONDocument(initial);
 
 initial.nested.count = 99;
-document.value; // { nested: { count: 1 } }
+console.log(document.value); // { nested: { count: 1 } }
 ```
 
-같은 버전에서 객체 identity를 재사용할 수는 있지만, 그 identity에
-의존하지 마세요.
+다음 변경이 적용되기 전까지 객체 identity가 재사용될 수 있습니다. 값의 변경
+여부는 identity 대신 `commit` result와 subscription으로 확인합니다.
 
-## at
+## 한 위치 읽기
 
-JSON Pointer 한 곳을 읽습니다.
+`at(pointer)`는 JSON Pointer가 가리키는 값을 읽습니다.
 
 ```ts
 const result = document.at("/cards/0/title");
 
 if (result.ok) {
-  result.path;
-  result.value;
+  console.log(result.path);
+  console.log(result.value);
 } else {
-  result.code;
-  result.pointer;
+  console.log(result.code);
+  console.log(result.pointer);
 }
 ```
 
-없는 위치와 잘못된 Pointer는 throw 대신 failure입니다.
+주소가 없거나 Pointer 문법이 잘못되면 failure result가 돌아옵니다.
 
-## query
+## 여러 위치 찾기
 
-JSONPath를 받아 Pointer 배열을 돌려줍니다.
+`query(jsonPath)`는 JSONPath와 일치하는 위치를 Pointer 배열로 돌려줍니다.
 
 ```ts
 const result = document.query("$..cards[?(@.status=='todo')]");
 
 if (result.ok) {
-  result.pointers;
+  console.log(result.pointers);
 }
 ```
 
-JSONPath 문자열을 patch의 `path`나 `from`에 넣지 않습니다.
+찾은 값을 바꿀 때는 result의 Pointer를 JSON Patch `path`나 `from`에
+사용합니다.
 
-## Pointer
+## Pointer 만들고 추적하기
 
-루트 Pointer는 빈 문자열 `""`입니다. 문서 전체를 바꾸려면 `path: ""`를
-씁니다.
+Root Pointer는 빈 문자열 `""`입니다. `path: ""`인 replace operation은 문서
+전체를 바꿉니다.
 
 ```ts
 document.commit([
@@ -132,7 +97,8 @@ document.commit([
 ]);
 ```
 
-문자열을 Pointer로 바꿀 때는 parse와 build를 같이 씁니다.
+문자열을 Pointer로 검사하고 다시 만들 때는 `tryParsePointer`와
+`buildPointer`를 함께 사용할 수 있습니다.
 
 ```ts
 import {
@@ -147,13 +113,18 @@ function asPointer(path: string): Pointer | null {
 }
 ```
 
-`parsePointer`는 잘못된 문법에서 throw하고, `tryParsePointer`는 `null`을
-돌려줍니다. `appendSegment`는 Pointer 뒤에 칸을 하나 붙이고,
-`parentPointer`는 한 단계 위를 돌려줍니다.
+`parsePointer`는 잘못된 문법에서 throw합니다. `tryParsePointer`는 같은 경우
+`null`을 돌려줍니다. `appendSegment`는 Pointer에 segment를 하나 추가하고,
+`parentPointer`는 부모 위치를 돌려줍니다.
 
-## applyPatch
+`trackPointer(pointer, operations)`는 patch가 적용된 뒤 같은 값이 이동한
+위치를 계산합니다. 값이 제거됐거나 더 이상 한 위치로 추적되지 않으면
+`null`입니다.
 
-document 없이 RFC 6902 batch를 적용합니다.
+## 문서 없이 patch 적용하기
+
+`applyPatch(value, operations)`는 document 상태를 만들지 않고 RFC 6902
+operation을 적용합니다.
 
 ```ts
 import { applyPatch } from "@interactive-os/json-document";
@@ -167,18 +138,19 @@ const result = applyPatch(
 );
 
 if (result.ok) {
-  result.value;
-  result.change.applied;
+  console.log(result.value);
+  console.log(result.change.applied);
 }
 ```
 
-JSON이 아니면 `not_serializable`입니다. 입력은 바뀌지 않습니다. 성공한
-`change.applied`는 `/-`를 실제 index로 바꾼 `JSONPatchOperation`
-목록입니다.
+입력 값과 operation은 유지됩니다. 입력이 JSON으로 직렬화될 수 없으면
+`not_serializable` failure가 돌아옵니다. 성공한 `change.applied`에서는 array
+append 경로 `/-`가 실제 index로 바뀝니다.
 
-## validatePatch와 commit
+## Patch 검사하고 commit하기
 
-두 메서드는 같은 규칙으로 patch를 읽습니다.
+`validatePatch(operations)`는 현재 document에 operation을 적용할 수 있는지
+검사합니다. 성공해도 현재 값과 구독자는 바뀌지 않습니다.
 
 ```ts
 const operations = [
@@ -196,41 +168,41 @@ if (validation.ok) {
   });
 
   if (committed.ok) {
-    committed.change;
-    document.value;
+    console.log(committed.change);
+    console.log(document.value);
   }
 }
 ```
 
-`JSONDocumentCommitOptions.metadata`는 `JSONChangeMetadata`입니다.
-성공한 `commit`은 `JSONAppliedChange`를 돌려주고, 새 값은
-`document.value`에서 읽습니다. 목록은 전부 적용되거나 아무것도
-적용되지 않습니다. 실패와 값이 그대로인 commit은 `subscribe`
-listener를 부르지 않습니다.
+`commit(operations, options?)`은 모든 operation을 순서대로 적용합니다. 중간
+operation이나 validator가 실패하면 document는 요청 전 값을 유지합니다.
+성공하면 `JSONAppliedChange`가 result에 들어가고 새 값은 `document.value`에서
+읽을 수 있습니다.
 
-한 listener의 예외는 다른 listener 전달을 막거나, `commit` 밖으로
-나가거나, 성공 result를 바꾸지 않습니다.
+`JSONDocumentCommitOptions.metadata`에는 `JSONChangeMetadata`를 넘길 수
+있습니다. document는 metadata를 적용된 change와 함께 구독자에게 전달합니다.
 
-`trackPointer`는 이 변경을 지나며 Pointer가 어디로 옮겼는지 따라갑니다.
+## 변경 구독하기
 
-## subscribe
+`subscribe(listener)`는 성공해서 값이 달라진 commit을 전달합니다.
 
 ```ts
 const unsubscribe = document.subscribe((change) => {
-  change.applied;
-  change.metadata;
+  console.log(change.applied);
+  console.log(change.metadata);
 });
 
 unsubscribe();
 ```
 
-listener는 이미 적용된 `JSONAppliedChange`를 받습니다. 구독을 끊은 뒤에는
-더 이상 호출되지 않습니다.
+구독을 끊은 뒤에는 listener가 호출되지 않습니다. 한 listener에서 발생한
+예외는 다른 listener의 호출과 commit result에 영향을 주지 않습니다.
 
-## Validation
+## Validator 연결하기
 
-`validate`는 특정 schema 객체를 요구하지 않습니다. 결과는
-`JSONPatchValidationResult`입니다.
+`JSONDocumentOptions.validate`는 적용할 JSON을 받아
+`JSONPatchValidationResult`를 돌려주는 동기 함수입니다. 특정 schema library의
+타입을 요구하지 않습니다.
 
 ```ts
 import * as z from "zod";
@@ -241,19 +213,19 @@ const Schema = z.object({
   title: z.string().min(1),
 });
 
-const acceptedDocument = createJSONDocument(
+const document = createJSONDocument(
   { title: "Draft" },
   { validate: createZodValidator(Schema) },
 );
 ```
 
-처음 값과 commit candidate를 notification 전에 검사합니다. callback이
-파싱해서 만든 값은 state에 들어가지 않습니다. 값을 정규화하려면 그 내용을
-JSON Patch에 적습니다.
+validator가 허용한 JSON이 document state에 들어갑니다. schema library가
+검사 중에 별도의 변환 값을 만들더라도 그 값으로 입력 JSON을 교체하지
+않습니다. 정규화가 필요하면 변경 내용을 JSON Patch operation에 포함합니다.
 
-## Result
+## Result 읽기
 
-공개 Result는 `ok`로 나눕니다.
+공개 Result는 `ok`로 성공과 실패를 구분합니다.
 
 ```ts
 type Failure = {
@@ -264,12 +236,28 @@ type Failure = {
 };
 ```
 
-새 `code`와 선택 diagnostic field가 생길 수 있습니다. 키 집합을 고정하지
-마세요.
+`code`로 실패 종류를 처리하고, 제공된 경우 `reason`과 `pointer`를 진단에
+사용합니다. minor version에서 새 `code`나 선택 diagnostic field가 추가될 수
+있으므로 failure 객체의 키 집합을 고정하지 않습니다.
 
-## 공개 root
+## 작업별 진입점
 
-Root가 공개하는 symbol은 21개입니다.
+| 작업 | API | 결과 |
+| --- | --- | --- |
+| 현재 값 | `document.value` | `JSONValue` |
+| 한 위치 읽기 | `document.at(pointer)` | `ReadResult` |
+| 여러 위치 찾기 | `document.query(jsonPath)` | `QueryResult` |
+| patch 검사 | `document.validatePatch(operations)` | `JSONPatchValidationResult` |
+| 상태 변경 | `document.commit(operations, options?)` | `JSONDocumentCommitResult` |
+| 변경 구독 | `document.subscribe(listener)` | unsubscribe function |
+| document 없이 patch 적용 | `applyPatch(value, operations)` | `JSONPatchResult` |
+| Pointer 만들기 | `buildPointer`, `appendSegment`, `parentPointer` | `Pointer` |
+| Pointer parse | `parsePointer`, `tryParsePointer` | segments 또는 `null` |
+| patch 뒤 위치 추적 | `trackPointer` | `Pointer | null` |
+
+## 공개 export
+
+Package root는 다음 21개 symbol을 공개합니다.
 
 ```txt
 values
@@ -285,25 +273,6 @@ types
   ReadResult, QueryResult, JSONDocument
 ```
 
-선택, 클립보드, 실행 취소는 `@interactive-os/json-document-editing`이
-이 API 위에서 조합합니다. 편집기가 받는 말의 타입과 동사는
-[Intent 레퍼런스](intent.md)에 있습니다. React나 Zod는
-[Connectors](connectors.md)입니다.
-
-```ts
-import { createJSONDocument } from "@interactive-os/json-document";
-import { createSheetEditor } from "@interactive-os/json-document-editing";
-
-const document = createJSONDocument({
-  columns: [{ id: "status", label: "Status" }],
-  rows: [{ id: "task-1", cells: { status: "Draft" } }],
-});
-const editor = createSheetEditor(document);
-
-editor.dispatch({
-  type: "cell.commit",
-  rowId: "task-1",
-  columnId: "status",
-  value: "Ready",
-});
-```
+Selection, Clipboard, History와 Intent는
+`@interactive-os/json-document-editing`에서 이 API 위에 조합합니다. 외부 도구와
+연결하는 패키지는 [Connectors](connectors.md)에서 찾을 수 있습니다.

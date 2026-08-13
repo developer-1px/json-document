@@ -1,14 +1,13 @@
 # Intent 가이드
 
-처음 쓰는 사람용 따라 하기입니다. 블록을 고르고, 넣고, 복사하고,
-붙여 넣는 일을 코드와 화면에서 같이 봅니다.
+Document editor에 블록 두 개를 만들고, 사용자의 클릭을 편집 요청으로 바꿔
+보겠습니다. 같은 방식으로 블록을 추가하고 붙여넣을 수 있습니다.
 
-타입과 동사 목록은 [Intent 레퍼런스](intent.md)에, 눌러 보는 화면은
-[코어 컨셉](concepts.md)에 있습니다.
-
-## 1. 하려는 일을 한 줄로 적는다
+## 1. Editor 만들기
 
 ```ts
+import { createDocumentEditor } from "@interactive-os/json-document-editing";
+
 const editor = createDocumentEditor({
   blocks: [
     { id: "welcome", text: "Hello" },
@@ -17,34 +16,34 @@ const editor = createDocumentEditor({
 });
 ```
 
-사용자가 `welcome`을 클릭했습니다. JSON 주소를 계산하지 않습니다.
+화면에서 `welcome` 블록을 클릭하면 editor에는 클릭 event 자체보다 사용자가
+하려는 일이 중요합니다. 이 요청을 `type`과 대상 ID가 있는 객체로 나타냅니다.
 
 ```ts
-{
-  type: "selection.set",
+const intent = {
+  type: "selection.set" as const,
   blockId: "welcome",
-}
+};
 ```
 
-이게 Intent입니다. `type`은 동사, `blockId`는 대상입니다.
+이 객체가 Intent입니다. `type`은 수행할 동작이고 나머지 필드는 그 동작에
+필요한 값입니다.
 
-## 2. dispatch로 보낸다
+## 2. 요청 보내기
+
+`dispatch`에 Intent를 넘기면 editor가 현재 문서와 Selection을 기준으로
+처리합니다.
 
 ```ts
-const result = editor.dispatch({
-  type: "selection.set",
-  blockId: "welcome",
-});
+const result = editor.dispatch(intent);
 
 if (result.ok) {
-  editor.selectedBlockIds;
-  // ["welcome"]
+  console.log(editor.selectedBlockIds); // ["welcome"]
 }
 ```
 
-고르기만 했으므로 블록 `text`는 그대로이고 실행 취소는 꺼져 있습니다.
-
-없는 블록이면 거절됩니다. 문서와 선택은 그대로입니다.
+`selection.set`은 Selection만 바꾸므로 블록의 text와 History는 유지됩니다.
+없는 블록처럼 처리할 수 없는 대상을 보내면 failure result가 돌아옵니다.
 
 ```ts
 const missed = editor.dispatch({
@@ -52,34 +51,48 @@ const missed = editor.dispatch({
   blockId: "missing",
 });
 
-missed.ok;
-// false
-missed.code;
-// "selection.block-not-found"
+if (!missed.ok) {
+  console.log(missed.code); // "selection.block-not-found"
+}
 ```
 
-## 3. 값을 바꿀 때도 같은 방식이다
+## 3. 문서 값 바꾸기
+
+블록을 추가할 때도 같은 진입점을 사용합니다.
 
 ```ts
-editor.dispatch({
+const inserted = editor.dispatch({
   type: "block.insert",
   afterId: "welcome",
   text: "Inserted",
 });
+
+if (inserted.ok) {
+  console.log(inserted.change?.applied);
+}
 ```
 
-이제 JSON에 블록이 늘고 실행 취소를 누를 수 있습니다.
+이 요청은 JSON에 블록을 추가합니다. 값이 바뀌었으므로 History 항목이 생기고
+`undo()`로 되돌릴 수 있습니다.
 
-## 4. 오른쪽 패널에서 눌러 본다
+## 4. Clipboard 붙여넣기
 
-[컨셉 페이지](concepts.md) 오른쪽이 같은 순서입니다.
+복사는 현재 Selection을 읽어 Clipboard payload를 만듭니다. 만들어진
+payload를 문서에 적용할 때는 `clipboard.paste` Intent를 보냅니다.
 
-1. 블록을 누른다. Intent 칸에 `selection.set`이 보인다. JSON은
-   그대로다.
-2. 복사를 누른다. Clipboard만 생긴다. Intent 칸은 그대로다.
-3. 붙여넣기를 누른다. Intent 칸이 `clipboard.paste`가 되고 JSON에
-   블록이 늘며 실행 취소가 켜진다.
+```ts
+const clipboard = editor.copy();
 
-복사와 실행 취소는 새 Intent가 아닙니다. 붙여넣기만 문서를 바꾸는
-말입니다. 표 칸의 `cell.commit` 같은 나머지 동사는
-[레퍼런스](intent.md)에 있습니다.
+if (clipboard) {
+  editor.dispatch({
+    type: "clipboard.paste",
+    clipboard,
+    afterId: "next",
+  });
+}
+```
+
+복사 자체는 값을 바꾸지 않고, 붙여넣기는 새 블록과 History 항목을 만듭니다.
+
+Document 외의 editor가 받는 `type`과 각 필드는
+[Intent 레퍼런스](intent.md)에 정리되어 있습니다.

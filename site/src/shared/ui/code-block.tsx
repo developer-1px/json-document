@@ -33,21 +33,21 @@ export function CodeBlock(props: {
 
   return (
     <figure className={classes("m-0", ui.code.block.frame, props.className)} aria-label={label}>
-      <figcaption className={ui.code.block.header}>
-        <span className={ui.code.block.label}>{label}</span>
-        <span className="ml-auto flex items-center gap-3">
-          {props.meta ? <span className={ui.code.block.meta}>{props.meta}</span> : null}
-          {props.signal ? <span className={ui.code.block.signal}>{props.signal}</span> : null}
-          <button
-            className={ui.code.block.copy}
-            data-copied={copied}
-            onClick={() => void copySource()}
-            type="button"
-          >
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </span>
+      <figcaption className="sr-only">
+        {label}
+        {props.meta ? <> · {props.meta}</> : null}
+        {props.signal ? <> · {props.signal}</> : null}
       </figcaption>
+      <button
+        aria-label={copied ? "Copied" : "Copy"}
+        className={ui.code.block.copy}
+        data-copied={copied}
+        onClick={() => void copySource()}
+        title={copied ? "Copied" : "Copy"}
+        type="button"
+      >
+        <CopyIcon copied={copied} />
+      </button>
       <pre
         data-testid={props.testId}
         className={classes(ui.code.block.viewport[props.size ?? "standard"], ui.code.block.pre)}
@@ -80,6 +80,21 @@ export function CodeBlock(props: {
         </code>
       </pre>
     </figure>
+  );
+}
+
+function CopyIcon(props: { readonly copied: boolean }) {
+  return (
+    <svg aria-hidden="true" fill="none" height="14" viewBox="0 0 24 24" width="14">
+      {props.copied ? (
+        <path d="m5 12 4 4L19 6" />
+      ) : (
+        <>
+          <rect height="13" rx="2" width="13" x="9" y="9" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </>
+      )}
+    </svg>
   );
 }
 
