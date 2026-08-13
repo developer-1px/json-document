@@ -34,7 +34,7 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
     expect(groupLinks(nav, "Core")).toEqual(["Why", "API Reference"]);
     expect(groupLinks(nav, "Editing")).toEqual(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     const connectors = within(nav.getByRole("group", { name: "Connectors" }));
@@ -45,6 +45,7 @@ describe("official site shell", () => {
     expect(demos.map((link) => link.getAttribute("href"))).toEqual([
       "/connectors/react",
       "/connectors/react-hook-form",
+      "/connectors/ajv",
       "/connectors/zod",
       "/connectors/tanstack-table",
       "/connectors/web",

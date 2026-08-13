@@ -50,6 +50,7 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 ```txt
 @interactive-os/json-document-react
 @interactive-os/json-document-react-hook-form
+@interactive-os/json-document-ajv
 @interactive-os/json-document-zod
 @interactive-os/json-document-tanstack-table
 @interactive-os/json-document-web
@@ -58,7 +59,7 @@ Connector는 document나 editing semantics를 새로 만들지 않습니다. Con
 외부 runtime은 `peerDependency`입니다. 각 Connector는 Kernel 및 companion과
 lockstep이 아닌 독립 version을 가지며 README에 지원하는 양쪽 version 범위를
 기록합니다. Root subpath에 Connector를 넣지 않으므로 Core-only consumer는
-React, React Hook Form, Zod, TanStack Table 또는 Web Connector를 설치하지 않습니다.
+React, React Hook Form, Ajv, Zod, TanStack Table 또는 Web Connector를 설치하지 않습니다.
 
 공식 Connector로 승격하려면 public contract만 사용하고, 대상 생태계의 native
 API를 유지하며, contract test, connector-specific Live Demo와 browser acceptance를
@@ -118,6 +119,31 @@ Connector는 object-shaped canonical JSON만 받으며 field UI, product schema,
 draft validation, live typing commit 또는 persistence를 소유하지 않습니다. 공식
 site의 `/connectors/react-hook-form` Record Detail Demo는 React와 Zod Connector를
 함께 조합해 이 경계를 보여줍니다.
+
+## Ajv Connector
+
+`@interactive-os/json-document-ajv`는 호출자가 구성하고 컴파일한 Ajv validator를
+동기 JSON Document validation provider로 번역합니다.
+
+```ts
+const validateSchema = ajv.compile(schema);
+const validate = createAjvValidator(validateSchema, {
+  code: "schema_violation",
+});
+
+const document = createJSONDocument(initial, { validate });
+```
+
+첫 Ajv error의 message와 `instancePath`를 `JSONPatchValidationResult`와 JSON
+Pointer로 옮깁니다. Validator는 항상 candidate의 mutable clone을 검사하므로
+`removeAdditional`, `useDefaults`, `coerceTypes`가 만든 결과는 canonical JSON이나
+applied JSON Patch operations에 들어가지 않습니다.
+
+Connector는 Ajv instance, JSON Schema draft, format, custom keyword와 option을
+구성하지 않습니다. Core validation contract가 동기이므로 async validator는
+연결 시 거절합니다. JSON Schema에서 Database document나 UI를 만드는 일도 범위가
+아닙니다. 공식 site의 `/connectors/ajv`에서 invalid commit 보존과 Ajv 변형 결과
+비채택을 확인할 수 있습니다.
 
 ## Zod Connector
 

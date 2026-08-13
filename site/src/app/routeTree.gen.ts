@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as PageRouteImport } from "./routes/_page";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
+import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsReactRouteImport } from "./routes/_page/connectors/react";
 import { Route as PageConnectorsReactHookFormRouteImport } from "./routes/_page/connectors/react-hook-form";
 import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/connectors/tanstack-table";
@@ -40,6 +41,11 @@ const PageRoute = PageRouteImport.update({
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
   id: "/connectors/",
   path: "/connectors/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageConnectorsAjvRoute = PageConnectorsAjvRouteImport.update({
+  id: "/connectors/ajv",
+  path: "/connectors/ajv",
   getParentRoute: () => PageRoute,
 } as any);
 const PageConnectorsReactRoute = PageConnectorsReactRouteImport.update({
@@ -123,6 +129,7 @@ const PageConnectorsZodValidateRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_page": typeof PageRouteWithChildren;
+  "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
   "/_page/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/connectors/ajv"
     | "/connectors/react"
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/connectors/ajv"
     | "/connectors/react"
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_page"
+    | "/_page/connectors/ajv"
     | "/_page/connectors/react"
     | "/_page/connectors/react-hook-form"
     | "/_page/connectors/tanstack-table"
@@ -267,6 +279,13 @@ declare module "@tanstack/react-router" {
       path: "/connectors";
       fullPath: "/connectors/";
       preLoaderRoute: typeof PageConnectorsIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/connectors/ajv": {
+      id: "/_page/connectors/ajv";
+      path: "/connectors/ajv";
+      fullPath: "/connectors/ajv";
+      preLoaderRoute: typeof PageConnectorsAjvRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/react": {
@@ -378,6 +397,7 @@ declare module "@tanstack/react-router" {
 }
 
 interface PageRouteChildren {
+  PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
   PageConnectorsReactHookFormRoute: typeof PageConnectorsReactHookFormRoute;
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
@@ -397,6 +417,7 @@ interface PageRouteChildren {
 }
 
 const PageRouteChildren: PageRouteChildren = {
+  PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
   PageConnectorsReactHookFormRoute: PageConnectorsReactHookFormRoute,
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,

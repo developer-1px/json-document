@@ -12,7 +12,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
   await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Why", "API Reference"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });
@@ -85,6 +85,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/connectors",
     "/connectors/react",
     "/connectors/web",
+    "/connectors/ajv",
     "/connectors/zod",
     "/connectors/zod/validate",
     "/connectors/tanstack-table",

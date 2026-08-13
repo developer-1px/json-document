@@ -11,6 +11,9 @@ source and release history remains available from Git commits and version tags.
   edit form.
 - Split the Zod Live Demo so `/connectors/zod` is the admin table and
   `/connectors/zod/validate` is commit validation.
+- Added `@interactive-os/json-document-ajv` to translate compiled synchronous
+  Ajv validators into JSON Document failures and JSON Pointer diagnostics while
+  validating a clone so Ajv mutations are never adopted, with a Connector Live Demo.
 - Added `@interactive-os/json-document-react-hook-form` to keep form drafts and
   field lifecycle in React Hook Form while valid submits become one canonical
   editing transaction and undo/redo reset the form, with a Record Detail Live Demo.

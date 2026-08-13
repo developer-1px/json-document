@@ -73,7 +73,7 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "Official React, React Hook Form, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
+    "description": "Official React, React Hook Form, Ajv, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
     "navigationGroup": "Connectors"
   },
   {
@@ -88,6 +88,13 @@
     "label": "React Hook Form",
     "title": "React Hook Form Connector Live Demo - json-document",
     "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
+    "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/ajv",
+    "label": "Ajv",
+    "title": "Ajv Connector Live Demo - json-document",
+    "description": "Live Ajv validation with JSON Pointer diagnostics and non-adoption of validator mutations.",
     "navigationGroup": "Connectors"
   },
   {
