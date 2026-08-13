@@ -1,7 +1,8 @@
-# Intent 가이드
+# Editor와 Intent 만들기
 
-Document editor에 블록 두 개를 만들고, 사용자의 클릭을 편집 요청으로 바꿔
-보겠습니다. 같은 방식으로 블록을 추가하고 붙여넣을 수 있습니다.
+먼저 블록 두 개를 가진 Document editor를 만듭니다. 그런 다음 사용자의
+클릭을 편집 요청으로 바꿔 `dispatch`에 넘기겠습니다. 여기서 만든 editor는
+이후 문서에서도 계속 사용합니다.
 
 ## 1. Editor 만들기
 
@@ -16,7 +17,7 @@ const editor = createDocumentEditor({
 });
 ```
 
-화면에서 `welcome` 블록을 클릭하면 editor에는 클릭 event 자체보다 사용자가
+화면에서 `welcome` 블록을 클릭하면 editor에는 클릭 이벤트 자체보다 사용자가
 하려는 일이 중요합니다. 이 요청을 `type`과 대상 ID가 있는 객체로 나타냅니다.
 
 ```ts
@@ -26,13 +27,13 @@ const intent = {
 };
 ```
 
-이 객체가 Intent입니다. `type`은 수행할 동작이고 나머지 필드는 그 동작에
-필요한 값입니다.
+이런 요청의 공통 모양을 `EditingIntent`라고 하며, 줄여서 Intent라고
+부릅니다. `type`은 수행할 동작이고 나머지 필드는 그 동작에 필요한 값입니다.
 
 ## 2. 요청 보내기
 
-`dispatch`에 Intent를 넘기면 editor가 현재 문서와 Selection을 기준으로
-처리합니다.
+`dispatch`에 Intent를 넘기면 editor가 현재 문서와 편집 상태를 기준으로
+처리합니다. 반환되는 `EditingResult`에서 성공 여부를 확인할 수 있습니다.
 
 ```ts
 const result = editor.dispatch(intent);
@@ -42,8 +43,9 @@ if (result.ok) {
 }
 ```
 
-`selection.set`은 Selection만 바꾸므로 블록의 text와 History는 유지됩니다.
-없는 블록처럼 처리할 수 없는 대상을 보내면 failure result가 돌아옵니다.
+성공한 `selection.set`은 Selection만 바꾸므로 블록의 text와 History는
+유지됩니다. 없는 블록처럼 처리할 수 없는 대상을 보내면 실패 결과가
+돌아옵니다.
 
 ```ts
 const missed = editor.dispatch({
@@ -56,43 +58,7 @@ if (!missed.ok) {
 }
 ```
 
-## 3. 문서 값 바꾸기
-
-블록을 추가할 때도 같은 진입점을 사용합니다.
-
-```ts
-const inserted = editor.dispatch({
-  type: "block.insert",
-  afterId: "welcome",
-  text: "Inserted",
-});
-
-if (inserted.ok) {
-  console.log(inserted.change?.applied);
-}
-```
-
-이 요청은 JSON에 블록을 추가합니다. 값이 바뀌었으므로 History 항목이 생기고
-`undo()`로 되돌릴 수 있습니다.
-
-## 4. Clipboard 붙여넣기
-
-복사는 현재 Selection을 읽어 Clipboard payload를 만듭니다. 만들어진
-payload를 문서에 적용할 때는 `clipboard.paste` Intent를 보냅니다.
-
-```ts
-const clipboard = editor.copy();
-
-if (clipboard) {
-  editor.dispatch({
-    type: "clipboard.paste",
-    clipboard,
-    afterId: "next",
-  });
-}
-```
-
-복사 자체는 값을 바꾸지 않고, 붙여넣기는 새 블록과 History 항목을 만듭니다.
-
-Document 외의 editor가 받는 `type`과 각 필드는
-[Intent 레퍼런스](intent.md)에 정리되어 있습니다.
+같은 `editor`에 Intent를 계속 보내며 편집 상태를 바꿀 수 있습니다. 방금
+바뀐 [Selection](selection.md)이 무엇을 저장하는지부터 확인합니다. editor가
+받을 수 있는 전체 `type`과 각 필드는 [Intent 레퍼런스](intent.md)에 정리되어
+있습니다.

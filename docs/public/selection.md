@@ -9,7 +9,7 @@
 
 ## 대상을 하나 고르기
 
-Document editor는 블록 ID를 받아 Selection을 갱신합니다.
+앞 문서에서 만든 `editor`는 블록 ID를 받아 Selection을 갱신합니다.
 
 ```ts
 const result = editor.dispatch({
@@ -46,7 +46,5 @@ if (result.ok) {
 JSON 값이 바뀌면 editor는 변경 전후의 Selection을 patch와 함께 기록합니다.
 실행 취소는 값과 사용자가 작업하던 위치를 함께 복원합니다.
 
-글자 사이의 caret과 IME 조합 상태는 텍스트 입력기가 관리합니다. 구조
-Selection은 블록, 셀, 노드처럼 편집 명령이 대상으로 삼는 단위에 사용합니다.
-범위 Selection이 화면 순서를 읽는 방법은 다음
-[Topology](topology.md) 문서에서 이어집니다.
+다음 [Topology](topology.md) 문서에서는 범위 Selection에 화면 순서를
+더합니다.

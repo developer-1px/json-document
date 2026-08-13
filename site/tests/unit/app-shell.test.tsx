@@ -35,12 +35,12 @@ describe("official site shell", () => {
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
     expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "Quickstart", "Concepts"]);
     expect(groupLinks(nav, "Editing")).toEqual([
+      "Intent guide",
       "Selection",
       "Selection Lab",
       "Topology",
       "Clipboard",
       "History",
-      "Intent guide",
       "Intent",
       "Document",
       "Workbench",

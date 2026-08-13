@@ -51,7 +51,7 @@ console.log(document.value); // { nested: { count: 1 } }
 ```
 
 다음 변경이 적용되기 전까지 객체 identity가 재사용될 수 있습니다. 값의 변경
-여부는 identity 대신 `commit` result와 subscription으로 확인합니다.
+여부는 identity 대신 `commit` 결과와 구독 알림으로 확인합니다.
 
 ## 한 위치 읽기
 
@@ -69,7 +69,7 @@ if (result.ok) {
 }
 ```
 
-주소가 없거나 Pointer 문법이 잘못되면 failure result가 돌아옵니다.
+주소가 없거나 Pointer 문법이 잘못되면 실패 결과가 돌아옵니다.
 
 ## 여러 위치 찾기
 
@@ -83,7 +83,7 @@ if (result.ok) {
 }
 ```
 
-찾은 값을 바꿀 때는 result의 Pointer를 JSON Patch `path`나 `from`에
+찾은 값을 바꿀 때는 결과의 Pointer를 JSON Patch `path`나 `from`에
 사용합니다.
 
 ## Pointer 만들고 추적하기
@@ -176,7 +176,7 @@ if (validation.ok) {
 
 `commit(operations, options?)`은 모든 operation을 순서대로 적용합니다. 중간
 operation이나 validator가 실패하면 document는 요청 전 값을 유지합니다.
-성공하면 `JSONAppliedChange`가 result에 들어가고 새 값은 `document.value`에서
+성공하면 결과에 `JSONAppliedChange`가 들어가고 새 값은 `document.value`에서
 읽을 수 있습니다.
 
 `JSONDocumentCommitOptions.metadata`에는 `JSONChangeMetadata`를 넘길 수
@@ -192,11 +192,15 @@ const unsubscribe = document.subscribe((change) => {
   console.log(change.metadata);
 });
 
+document.commit([
+  { op: "replace", path: "/title", value: "Published" },
+]);
+
 unsubscribe();
 ```
 
 구독을 끊은 뒤에는 listener가 호출되지 않습니다. 한 listener에서 발생한
-예외는 다른 listener의 호출과 commit result에 영향을 주지 않습니다.
+예외는 다른 listener의 호출과 `commit` 결과에 영향을 주지 않습니다.
 
 ## Validator 연결하기
 
