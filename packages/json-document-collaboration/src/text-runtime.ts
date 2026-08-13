@@ -27,7 +27,7 @@ import {
   textFailure,
   textSelectionGap,
 } from "./text-selection.js";
-import type { RuntimeState } from "./runtime-state.js";
+import { assignCausalState, type RuntimeState } from "./runtime-state.js";
 import type {
   Text,
   TextCapture,
@@ -313,11 +313,12 @@ export function createText(state: RuntimeState): Text {
         state.documentStore.value,
         nextMaterialized.value,
       );
-      state.known = nextKnown;
-      state.graph = nextGraph;
-      state.materialized = nextMaterialized;
-      state.localCounter = changeId.counter;
-      state.graphRevision += 1;
+      assignCausalState(state, {
+        known: nextKnown,
+        graph: nextGraph,
+        materialized: nextMaterialized,
+        localCounter: changeId.counter,
+      });
 
       let documentChange = undefined;
       if (didChangeDocument) {
