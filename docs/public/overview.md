@@ -9,9 +9,9 @@ json-document는 그 반복되는 일을 제품 컨트롤러에서 떼어 낸 AP
 UI를 그리지 않습니다. 대신 폼과 표와 협업 엔진이 같은 문서 계약을
 쓰게 합니다.
 
-이 글은 왜 이 계약을 만들었는지 설명합니다. 문이 어떻게 커지는지는
-[코어 컨셉](concepts.md)에, 호출 형식은 [API](api.md)에, 따라 하는
-예제는 [튜토리얼](quickstart.md)에 있습니다.
+이 글은 왜 이 계약을 만들었는지 설명합니다. 호출 형식은
+[API](api.md)에, 따라 하는 예제는 [튜토리얼](quickstart.md)에
+있습니다. 편집 층은 [Selection](selection.md)에서 시작합니다.
 
 ## 왜
 
@@ -74,5 +74,7 @@ commit은 알리지 않습니다.
 | 상태 바꾸기 | `document.commit(operations, options?)` |
 | 변경 듣기 | `document.subscribe(listener)` |
 
-그 다음 커짐은 [코어 컨셉](concepts.md)이 그립니다. 읽기 위에 편집이
-붙고, 바깥에 Connector가 붙습니다.
+그 다음 커짐은 편집 층입니다. [Selection](selection.md),
+[History](history.md), [Clipboard](clipboard.md),
+[Topology](topology.md)가 붙고, 바깥에 [Connector](connectors.md)가
+붙습니다.

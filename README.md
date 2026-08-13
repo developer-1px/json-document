@@ -28,8 +28,9 @@ stateless JSON Patch
 | 목적 | 위치 |
 | --- | --- |
 | 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
-| Core 개념 이해 | [docs/public/overview.md](docs/public/overview.md) |
-| Core 공개 API | [docs/public/api.md](docs/public/api.md) |
+| JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
+| JSON Document API | [docs/public/api.md](docs/public/api.md) |
+| 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
 | Connector Live Demo | [공식 Connector catalog](https://developer-1px.github.io/json-document/connectors) |
 | 문서 구조 | [docs/README.md](docs/README.md) |

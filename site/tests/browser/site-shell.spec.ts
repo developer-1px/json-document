@@ -9,9 +9,20 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(page.getByText("One JSON document. Any editor.")).toBeVisible();
   await expect(page.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
-  await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Why", "Concepts", "Topology", "API Reference"]);
-  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
+  await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "API Reference", "Quickstart"]);
+  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
+    "Selection",
+    "Selection Lab",
+    "History",
+    "Clipboard",
+    "Topology",
+    "Document",
+    "Workbench",
+    "Sheet",
+    "Database",
+  ]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -22,8 +33,8 @@ test("mobile navigation preserves the product groups without duplicating documen
   await page.goto("/");
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(siteNavigation.getByRole("group", { name: "Start" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Core" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
 
@@ -41,7 +52,7 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Core" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("group", { name: "Connectors" }).getByRole("link", { name: "Connector guide" }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
@@ -217,8 +228,7 @@ test("official site uses window scroll with sticky desktop navigation", async ({
   });
 
   await page.getByRole("navigation", { name: "Site navigation" })
-    .getByRole("group", { name: "Start" })
-    .getByRole("link", { name: "Overview" })
+    .getByRole("link", { name: "json-document" })
     .click();
   await expect(page).toHaveTitle("json-document - Headless JSON editing");
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);

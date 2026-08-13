@@ -9,29 +9,38 @@ docs
 |-- changelog.md              # 사용자 영향 중심 변경 기록
 |-- evaluate.mjs              # 공개 문서 구조·내용 검증
 `-- public
-|   |-- quickstart.md          # Start: 사용 시작
-|   |-- overview.md            # Core: Why / How / What
-|   |-- concepts.md            # Core: 읽기 → 편집 → 외부 확장
-|   |-- topology.md            # Core: 화면 줄과 선택
-|   |-- api.md                 # Core: 레퍼런스
+|   |-- overview.md            # JSON Document: Why / How / What
+|   |-- api.md                 # JSON Document: 레퍼런스
+|   |-- quickstart.md          # JSON Document: 사용 시작
+|   |-- concepts.md            # 성장 소개. 네비 잎이 아님
+|   |-- selection.md           # Editing: 구조 선택
+|   |-- history.md             # Editing: 로컬 undo/redo
+|   |-- clipboard.md           # Editing: 구조화된 payload
+|   |-- topology.md            # Editing: 화면 줄과 선택
 |   |-- connectors.md          # Connectors: 공식 외부 생태계 연결
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
 
-사이트의 문서 탐색은 다음 읽기 위계를 사용한다. 파일은 `public/`의 평평한 책임
+사이트의 문서 탐색은 공개 컨셉 트리를 사용한다. 파일은 `public/`의 평평한 책임
 폴더에 유지하고, 별도 중첩 폴더를 개념으로 추가하지 않는다.
 
 ```txt
-Documentation
-|-- Start
-|   `-- Quickstart
-|-- Core
-|   |-- Why
-|   |-- Concepts
-|   |-- Topology
-|   `-- API Reference
-`-- Connectors
-    `-- Connector guide
+JSON Document
+|-- Why
+|-- API Reference
+`-- Quickstart
+
+Editing
+|-- Selection
+|-- History
+|-- Clipboard
+|-- Topology
+|-- Document
+|-- Sheet
+`-- Database
+
+Connectors
+`-- Connector guide
 ```
 
 ## 규범 우선순위
@@ -57,9 +66,10 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
 - 코드 식별자, 명령어, 파일 경로, 표준명은 원문을 유지한다.
 - public 문서는 usage와 프로젝트 이해만 다룬다.
 - 페이지마다 할 일 하나만 쓴다. overview는 Why/How/What 배경,
-  concepts는 살아남은 코어 아이디어, topology는 화면 줄과 선택,
-  api는 시그니처 레퍼런스, quickstart는 실습, connectors는 연결
-  방법이다.
+  api는 시그니처 레퍼런스, quickstart는 실습, selection은 구조
+  선택, history는 로컬 undo/redo, clipboard는 구조화된 payload,
+  topology는 화면 줄과 선택, connectors는 연결 방법이다.
+  concepts는 성장 소개이며 네비 잎이 아니다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
 - 무엇을 하는지로 정의한다. 소유하지 않는 것의 목록으로 시작하지 않는다.

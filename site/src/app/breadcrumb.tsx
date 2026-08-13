@@ -9,7 +9,7 @@ export type BreadcrumbCrumb = {
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
-  Core: { path: "/docs", label: "Why" },
+  "JSON Document": { path: "/docs", label: "Why" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 

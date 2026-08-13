@@ -25,13 +25,13 @@ describe("documentation routes", () => {
     const user = userEvent.setup();
     const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
 
-    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs");
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
-    await user.click(within(nav.getByRole("group", { name: "Start" })).getByRole("link", { name: "Quickstart" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Quickstart" }));
     await waitFor(() => expect(document.title).toBe("Tutorial - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "작은 카드 편집기 만들기" })).toBeTruthy();
 
@@ -42,16 +42,16 @@ describe("documentation routes", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "React Connector" })).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Topology" }));
+    await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Topology" }));
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Topology" })).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
-    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
     const mobileSections = within(screen.getByRole("navigation", { name: "Documentation sections" }));
     expect(mobileSections.getByRole("link", { name: "작업별 진입점" }).getAttribute("href")).toBe("#작업별-진입점");
   });
@@ -63,18 +63,18 @@ describe("documentation routes", () => {
 
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
     window.history.pushState(null, "", "/docs/topology/");
     window.dispatchEvent(new Event("popstate"));
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Topology" })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Topology" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Topology" }).getAttribute("aria-current")).toBe("page");
 
     window.history.pushState(null, "", "/docs/api/");
     window.dispatchEvent(new Event("popstate"));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
   });
 });

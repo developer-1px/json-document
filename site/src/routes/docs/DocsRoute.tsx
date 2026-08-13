@@ -11,6 +11,9 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   connectors: "peek",
   api: "braces",
   topology: "cursor",
+  selection: "cursor",
+  history: "cursor",
+  clipboard: "cursor",
 };
 
 export function DocsOverviewRoute() {
