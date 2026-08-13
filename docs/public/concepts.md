@@ -10,8 +10,7 @@
 ```txt
 읽기            JSON Document
   ↓
-편집            Selection · History · Clipboard · Topology
-                Intent                     (TBD)
+편집            Selection · History · Clipboard · Topology · Intent
   ↓
 외부 확장       Connector
 ```
@@ -116,13 +115,36 @@ Sheet의 `SheetTopology`는 Grid입니다. Database의 보이는 레코드×속�
 
 Intent 없이도 이 개념은 움직입니다. `copy(topology)`,
 `selectedCellsIn(topology)`처럼 선택과 Clipboard가 Topology를 직접
-받습니다. 명령의 공통 껍질은 아직 TBD입니다.
+받습니다. 명령의 공통 껍질은 Intent입니다.
 
-### Intent (TBD)
+### Intent
 
-읽기 층의 문은 `commit`입니다. 편집 층의 문은 아직 하나로 모이지
-않았습니다. 지금은 편집기마다 Intent가 있습니다. 구현은 다른 이슈에서
-다룹니다.
+읽기 층의 문은 `commit`입니다. 편집 층의 문은 `dispatch`입니다. UI가
+JSON Patch를 직접 짜지 않고 “이 칸을 채워라”, “이 블록을 붙여라”고
+말합니다. 그 문장이 Intent입니다.
+
+문장은 제품마다 다릅니다. Document는 `selection.set`과 `block.insert`를
+받고, Sheet는 `cell.commit`과 `selection.fill`을 받습니다. 공통인 것은
+껍질입니다. 모든 Intent는 `type`이 동사인 JSON이고, 모든 editor는
+`dispatch(intent)`로 받아 `EditingResult`를 돌려줍니다. 그 껍질이
+`EditingIntent`이고, 그 문이 `EditingDispatch`입니다.
+
+Intent는 Pointer와 Patch로 번역되기 전의 제품 문장입니다. editor가
+그걸 `EditingPlan`으로 바꾸고, `EditingSession`이 `commit`합니다.
+적용된 변경의 `origin`은 `intent.type`입니다.
+
+붙여넣기는 Intent입니다. 클립보드 payload를 다시 문서로 돌려보내는
+문장이기 때문입니다. 복사는 읽기만 하므로 Intent가 아닙니다. 실행
+취소는 이미 기록된 patch를 되감는 History의 문입니다. 새 문장이
+아닙니다.
+
+실패한 Intent는 읽기 층과 같습니다. `{ ok: false, code }`이고, 문서는
+그대로이며 History 항목도 생기지 않습니다. 선택만 옮긴 Intent도
+History에 남지 않습니다. 되돌릴 값의 변화가 없었기 때문입니다.
+
+오른쪽에서 블록을 고르면 Intent 칸에 `selection.set`이 보입니다.
+복사해도 그 칸은 바뀌지 않습니다. 붙여넣으면 `clipboard.paste`가
+보이고, 아래 문서와 History가 같이 움직입니다.
 
 ## 외부 확장
 
