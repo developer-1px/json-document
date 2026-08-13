@@ -1,4 +1,13 @@
 export { createDocumentEditor } from "./document.js";
+export {
+  gridCellsInRange,
+  gridPointIndex,
+  gridRangeBounds,
+  gridTopology,
+  lineInterval,
+  lineTopology,
+} from "./topology.js";
+export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./topology.js";
 export { createDatabaseEditor } from "./database.js";
 export { createObjectEditor } from "./object.js";
 export { createOrderEditor } from "./order.js";

@@ -10,8 +10,8 @@
 ```txt
 읽기            JSON Document
   ↓
-편집            Selection · History · Clipboard
-                Intent · Topology          (TBD)
+편집            Selection · History · Clipboard · Topology
+                Intent                     (TBD)
   ↓
 외부 확장       Connector
 ```
@@ -102,47 +102,27 @@ Selection만 움직입니다. 복사하면 Clipboard가 생깁니다. 잘라내�
 돌아옵니다. 아래 JSON이 읽기 층이고, 그 위의 선택과 버튼이 편집
 층입니다.
 
-### Intent (TBD)
-
-읽기 층의 문은 `commit`입니다. 편집 층의 문은 아직 하나로 모이지
-않았습니다. 지금은 편집기마다 Intent가 있습니다. Document는
-`selection.set`과 `block.insert`를 받고, Sheet는 `cell.commit`과
-`selection.fill`을 받습니다. UI가 JSON Patch를 직접 짜지 않고 “이
-칸을 채워라”, “이 블록을 붙여라”고 말하는 자리입니다.
-
-다음 이슈에서 만들려는 것은 그 명령이 **편집 층의 공통 개념**이 되는
-일입니다. 제품 문장이 Pointer와 Patch로 번역되기 전에, 모든
-editor가 같은 종류의 문을 받게 하는 것. 지금 코드의
-`DocumentIntent`와 `SheetIntent`는 그 초안이지 정본이 아닙니다.
-이름과 모양은 바뀔 수 있습니다.
-
-열려 있는 질문:
-
-- Intent는 editor마다 다른가, 공통 껍질 안에 제품 문장만 다른가
-- Clipboard paste와 History undo는 Intent인가, 별도 문인가
-- 실패한 Intent는 읽기 층의 `{ ok: false }`와 같은 이야기인가
-
-### Topology (TBD)
+### Topology
 
 선택은 “어디를 골랐는가”입니다. Topology는 “지금 무엇이 줄로 서
 있는가”입니다. 표를 정렬하거나 필터하면 JSON 행 순서와 화면 행 순서가
-갈라집니다. 그때 선택과 fill과 복사는 화면 줄을 따라야 합니다. 지금
-Sheet는 `SheetTopology`로 그 줄을 받고, Tree는 펼쳐진 순서, Database는
-저장된 뷰의 보이는 칸을 비슷하게 받습니다.
+갈라집니다. 그때 선택과 fill과 복사는 화면 줄을 따라야 합니다.
 
-다음 이슈에서 만들려는 것은 그 화면 순서가 **Selection이 기대는 공통
-개념**이 되는 일입니다. Host가 줄을 주고, 선택이 그 줄 위에서
-움직이게 하는 것. 지금 타입은 편집기마다 있고, 공통 Topology 계약은
-없습니다. 이름과 범위는 바뀔 수 있습니다.
+줄은 한 축일 수도 있고 두 축일 수도 있습니다. `LineTopology`는
+트리의 펼쳐진 행처럼 한 줄입니다. `GridTopology`는 표의 행×열입니다.
+Sheet의 `SheetTopology`는 Grid입니다. Database의 보이는 레코드×속성은
+같은 격자입니다. 누가 줄을 만드는지는 host나 Connector입니다. editor는
+그 줄을 받아 선택 범위를 읽습니다.
 
-열려 있는 질문:
+Intent 없이도 이 개념은 움직입니다. `copy(topology)`,
+`selectedCellsIn(topology)`처럼 선택과 Clipboard가 Topology를 직접
+받습니다. 명령의 공통 껍질은 아직 TBD입니다.
 
-- Topology는 표·트리만의 일인가, 블록 문서에도 있는가
-- 누가 Topology를 만드나. editor인가, Connector인가, host인가
-- 화면 줄이 바뀌면 선택은 따라가나, 다시 고르나
+### Intent (TBD)
 
-Intent와 Topology는 이 글에서 자리를 표시한 것뿐입니다. 구현과 정본
-API는 다음 이슈에서 다룹니다.
+읽기 층의 문은 `commit`입니다. 편집 층의 문은 아직 하나로 모이지
+않았습니다. 지금은 편집기마다 Intent가 있습니다. 구현은 다른 이슈에서
+다룹니다.
 
 ## 외부 확장
 
