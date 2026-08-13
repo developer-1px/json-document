@@ -20,16 +20,15 @@ Connector는 이런 번역을 패키지로 제공합니다. 대상 도구의 API
 | TanStack Table | `@interactive-os/json-document-tanstack-table` | visible table과 Sheet editing |
 | Web Platform | `@interactive-os/json-document-web` | clipboard event와 text input |
 
-각 패키지는 대상 runtime을 `peerDependency`로 받습니다. Kernel과 Connector는
-필요한 것만 따로 설치하고 각 패키지 README의 지원 version 범위를 확인합니다.
-실제 동작은 사이트의 [Connector catalog](/connectors)에서 바로 실행해 볼 수
-있습니다.
+필요한 Connector만 연결 대상 라이브러리와 함께 설치하면 됩니다. 지원하는
+버전은 각 패키지 README에서 확인할 수 있고, 실제 동작은 사이트의
+[Connector catalog](/connectors)에서 실행할 수 있습니다.
 
 ## React에서 변경 구독하기
 
-React component가 `document.value`를 렌더링한다면 document의 변경 알림을
-React 구독으로 바꿔야 합니다. `useReactConnector`가 현재 값을 돌려주고
-component lifecycle에 맞춰 구독을 관리합니다.
+React 컴포넌트에서 `document.value`를 그리려면 document의 변경 알림을 React
+구독으로 바꿔야 합니다. `useReactConnector`는 현재 값을 돌려주고 컴포넌트가
+화면에 있는 동안 구독을 유지합니다.
 
 ```tsx
 import { useReactConnector } from "@interactive-os/json-document-react";
@@ -48,15 +47,15 @@ function DocumentView({ document }) {
 | `useEditingSnapshot(source)` | EditingSession이나 DocumentEditor 상태를 렌더링할 때 |
 | `useDocumentEditor(initial, options?)` | mounted component가 editor lifecycle을 가질 때 |
 
-selection을 어떤 모양으로 표시할지와 어떤 component를 그릴지는 제품 화면이
+Selection을 어떤 모양으로 표시할지와 어떤 컴포넌트를 그릴지는 제품 화면이
 정합니다. [/connectors/react](/connectors/react) 데모는 구독 뒤 document
 value를 다시 렌더링합니다.
 
 ## React Hook Form의 draft 제출하기
 
-사용자가 입력 중인 form 값은 document에 적용하기 전의 draft입니다. React Hook
-Form은 draft, dirty, touched와 field error를 관리하고, Connector는 유효한
-submit을 하나의 document 변경으로 적용합니다.
+사용자가 폼에 입력 중인 값은 document에 아직 적용되지 않은 초안입니다.
+React Hook Form이 초안과 입력 상태, 필드 오류를 관리하고, Connector는 검사를
+통과한 submit을 하나의 document 변경으로 적용합니다.
 
 ```tsx
 const binding = useReactHookFormConnector<ProfileForm>(document, {
@@ -68,13 +67,12 @@ const binding = useReactHookFormConnector<ProfileForm>(document, {
 return <form onSubmit={binding.submit}>...</form>;
 ```
 
-한 번의 submit은 전체 form value를 root replace로 적용합니다. 여러 field가
-바뀌어도 History에는 항목 하나가 생깁니다. document validation이 실패하면
-document와 History는 유지되고, `errorName`이 JSON Pointer를 form field 이름으로
-바꿉니다.
+한 번의 submit은 폼 전체 값을 root replace로 적용합니다. 여러 필드가
+바뀌어도 History에는 항목 하나가 생깁니다. document 검사가 실패하면 값과
+History는 유지되고, `errorName`이 JSON Pointer를 폼 필드 이름으로 바꿉니다.
 
-undo, redo 또는 외부 commit으로 document value가 바뀌면 Connector가 `reset`을
-호출해 form을 새 값에 맞춥니다. Selection만 달라진 경우에는 form draft를
+undo, redo 또는 외부 commit으로 document 값이 바뀌면 Connector가 `reset`을
+호출해 폼을 새 값에 맞춥니다. Selection만 달라진 경우에는 입력 중인 초안을
 유지합니다. [/connectors/react-hook-form](/connectors/react-hook-form) 데모에서
 submit과 reset을 차례로 실행해 볼 수 있습니다.
 
@@ -92,15 +90,14 @@ const validate = createAjvValidator(validateSchema, {
 const document = createJSONDocument(initial, { validate });
 ```
 
-검사가 실패하면 첫 Ajv error의 `instancePath`와 message가 JSON Pointer가 있는
-failure result로 바뀝니다. Ajv는 검사 중에 defaults를 넣거나 type을 바꾸도록
-설정할 수 있으므로 Connector는 candidate의 clone을 검사합니다. 검사 과정에서
-생긴 변형은 document value와 applied operation에 들어가지 않습니다.
+검사가 실패하면 첫 Ajv error의 `instancePath`와 message가 JSON Pointer를 가진
+실패 결과로 바뀝니다. 성공하면 검사한 JSON을 그대로 document에 적용합니다.
+Ajv가 검사 중에 기본값을 넣거나 타입을 바꾸도록 설정돼 있어도 그 변형은
+document에 들어가지 않습니다.
 
-Ajv instance와 JSON Schema draft, format, custom keyword는 애플리케이션에서
-구성합니다. Core validation이 동기식이므로 연결할 validator도 동기식이어야
-합니다. [/connectors/ajv](/connectors/ajv)에서 거절된 commit과 validator 변형의
-처리를 비교할 수 있습니다.
+JSON Schema draft, format, custom keyword는 Ajv를 만들 때 구성합니다. document
+검사가 동기식이므로 여기 연결하는 validator도 동기식이어야 합니다.
+[/connectors/ajv](/connectors/ajv)에서 성공과 실패 결과를 확인할 수 있습니다.
 
 ## Zod schema 사용하기
 
@@ -128,8 +125,8 @@ if (translated.ok) {
 
 `databaseDocumentFromZod`는 object schema의 string, number, boolean, enum
 field를 Database property로 만들고 record 배열을 옮깁니다. `id` string field는
-record ID로 사용합니다. 지원하지 않는 nested object, array, date를 만나면
-failure result를 돌려줍니다.
+record ID로 사용합니다. 변환할 수 없는 nested object, array, date가 있으면
+어느 타입에서 멈췄는지 실패 결과로 알려 줍니다.
 
 [/connectors/zod](/connectors/zod)에서는 schema에서 만든 Database를,
 [/connectors/zod/validate](/connectors/zod/validate)에서는 commit validation을
@@ -163,9 +160,9 @@ TanStack의 React adapter와 json-document React Connector를 함께 조합합�
 [/connectors/tanstack-table](/connectors/tanstack-table) 데모는 화면 순서가
 편집 결과에 반영되는 모습을 보여줍니다.
 
-## Browser clipboard와 input 연결하기
+## 브라우저 clipboard와 input 연결하기
 
-Web Connector는 browser의 clipboard event를 editor의 copy, cut, paste와
+Web Connector는 브라우저의 clipboard event를 editor의 copy, cut, paste와
 연결합니다.
 
 ```ts
@@ -184,16 +181,16 @@ surface.addEventListener("cut", (event) => clipboard.cut(event));
 surface.addEventListener("paste", (event) => clipboard.paste(event));
 ```
 
-Document, Sheet, Order, Object, Tree, Database codec은 structured MIME과
-`text/plain`을 함께 기록합니다. paste할 때는 유효한 structured payload를
-editor에 전달합니다. cut은 clipboard 기록에 성공한 뒤 선택한 내용을
-제거합니다. 처리하지 못한 event는 `preventDefault()`를 호출하지 않아
-browser 기본 동작으로 이어집니다.
+Document, Sheet, Order, Object, Tree, Database codec은 구조화된 MIME과
+`text/plain`을 함께 기록합니다. paste할 때는 유효한 payload를 editor에
+전달하고, cut은 clipboard 기록에 성공한 뒤 선택한 내용을
+제거합니다. Connector가 처리하지 않은 event는 브라우저의 기본 동작으로
+이어집니다.
 
-`selectionOperationFromModifiers`는 modifier 입력을 `replace`, `extend`,
-`toggle`로 바꿉니다. `textInputFromControl`은 native text control의 value와
-caret을 관찰합니다. event target, shortcut, focus, 접근성 연결과 IME
-lifecycle은 제품 화면에서 구성합니다.
+`selectionOperationFromModifiers`는 보조 키 입력을 `replace`, `extend`,
+`toggle`로 바꿉니다. `textInputFromControl`은 브라우저 입력 요소의 값과
+caret을 관찰합니다. 이벤트 대상과 단축키, focus, 접근성, IME 처리는 제품
+화면에서 구성합니다.
 
 [/connectors/web](/connectors/web) 데모는 실제 ClipboardEvent와 modifier
 selection, text input을 연결합니다.

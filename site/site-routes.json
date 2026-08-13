@@ -9,7 +9,7 @@
     "path": "/docs",
     "label": "Why",
     "title": "json-document Docs - json-document",
-    "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
+    "description": "Why JSON documents share one contract for reading, validating, committing, and subscribing to changes.",
     "navigationGroup": "JSON Document"
   },
   {
@@ -170,7 +170,7 @@
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",
-    "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
+    "description": "Public v3 API reference for the six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
     "navigationGroup": "Reference"
   }
 ]

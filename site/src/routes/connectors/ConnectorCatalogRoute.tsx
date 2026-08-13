@@ -8,7 +8,7 @@ export function ConnectorCatalogRoute() {
   return (
     <PageFrame>
         <PageHeader illustration="peek" title="Connectors">
-            Optional packages that translate ecosystem-native contracts without changing the JSON Document Kernel.
+            Optional packages that connect external tools without changing the JSON Document and Editing contracts.
         </PageHeader>
 
         <div className="grid gap-3 sm:grid-cols-2">

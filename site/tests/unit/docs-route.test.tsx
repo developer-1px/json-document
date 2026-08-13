@@ -48,7 +48,7 @@ describe("documentation routes", () => {
 
     await user.click(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v3 API reference for the six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
     expect(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
