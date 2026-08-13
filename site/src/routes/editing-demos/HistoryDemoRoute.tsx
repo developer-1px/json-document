@@ -16,7 +16,7 @@ const initialDocument: BlockDocument = {
 export function HistoryDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
   const snapshot = useEditingSnapshot(editor);
-  const [lastCall, setLastCall] = useState("No edit yet");
+  const [lastCall, setLastCall] = useState("아직 편집하지 않았습니다");
 
   function edit() {
     editor.dispatch({ type: "text.replace", blockId: "bravo", text: "Edited text", offset: 6 });
@@ -36,17 +36,17 @@ export function HistoryDemoRoute() {
   return (
     <PageFrame>
       <PageHeader title="History Demo" illustration="cursor">
-        Commit one edit, then use the resulting History item to restore document value and Selection together.
+        편집을 한 번 commit하고, 만들어진 History 항목으로 document.value와 Selection을 함께 복원합니다.
       </PageHeader>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-input">
-          <p className={ui.text.label}>1 · Edit</p>
-          <h2 id="history-input" className={classes("mb-2 mt-1", ui.text.heading)}>Create one History item</h2>
+          <p className={ui.text.label}>1 · 편집</p>
+          <h2 id="history-input" className={classes("mb-2 mt-1", ui.text.heading)}>History 항목 하나 만들기</h2>
           <p className={classes("mt-0", ui.text.meta)}>
-            The edit starts from block bravo at offset 0 and moves Selection to offset 6.
+            편집은 bravo 블록의 offset 0에서 시작해 Selection을 offset 6으로 옮깁니다.
           </p>
-          <ActionButton kind="primary" onClick={edit}>Apply edit</ActionButton>
+          <ActionButton kind="primary" onClick={edit}>편집 적용</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-call">
@@ -65,8 +65,8 @@ export function HistoryDemoRoute() {
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-result">
-          <p className={ui.text.label}>3 · Restored state</p>
-          <h2 id="history-result" className={classes("mb-2 mt-1", ui.text.heading)}>Value and Selection move together</h2>
+          <p className={ui.text.label}>3 · 복원된 상태</p>
+          <h2 id="history-result" className={classes("mb-2 mt-1", ui.text.heading)}>document.value와 Selection이 함께 이동합니다</h2>
           <JsonInspector label="document.value" value={snapshot.value} testId="history-demo-document" size="compact" />
           <JsonInspector label="selection" value={snapshot.selection} testId="history-demo-selection" size="compact" />
         </section>

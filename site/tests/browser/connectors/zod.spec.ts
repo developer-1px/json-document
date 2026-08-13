@@ -11,7 +11,7 @@ test("Zod Connector Live Demo opens a Database admin from a Zod schema without a
   await expect(breadcrumb.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/");
   await expect(breadcrumb.getByRole("link", { name: "Connectors" })).toHaveAttribute("href", "/connectors");
   await expect(breadcrumb.getByText("Zod", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 1, name: "Zod Admin" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Zod Connector" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "The table is the admin" })).toBeVisible();
   await expect(page.getByRole("form")).toHaveCount(0);
   await expect(page.getByRole("textbox", { name: "Profile title draft" })).toHaveCount(0);

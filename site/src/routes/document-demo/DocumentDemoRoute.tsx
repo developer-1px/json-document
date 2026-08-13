@@ -140,7 +140,7 @@ export function DocumentDemoRoute() {
     <PageFrame>
         <PageHeader
           illustration="clipboard"
-          title="Document demo"
+          title="Document Demo"
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>

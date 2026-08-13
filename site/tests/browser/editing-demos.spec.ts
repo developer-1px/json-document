@@ -27,10 +27,10 @@ test("Topology Demo recomputes the interval from visible order", async ({ page }
 test("Clipboard Demo carries Selection through payload and paste", async ({ page }) => {
   await page.goto("/demo/clipboard");
   await page.getByRole("button", { name: "Copy this block" }).click();
-  await page.getByRole("region", { name: "Choose source blocks" }).getByRole("button", { name: "Copy", exact: true }).click();
+  await page.getByRole("region", { name: "복사할 블록 선택하기" }).getByRole("button", { name: "Copy", exact: true }).click();
   expect((await json(page, "clipboard-demo-payload")).blocks).toHaveLength(1);
 
-  await page.getByRole("button", { name: "Paste payload" }).click();
+  await page.getByRole("button", { name: "payload 붙여넣기" }).click();
   expect((await json(page, "clipboard-demo-document")).blocks).toHaveLength(4);
 });
 
@@ -39,7 +39,7 @@ test("History Demo restores document value and Selection together", async ({ pag
   const initialValue = await json(page, "history-demo-document");
   const initialSelection = await json(page, "history-demo-selection");
 
-  await page.getByRole("button", { name: "Apply edit" }).click();
+  await page.getByRole("button", { name: "편집 적용" }).click();
   const editedValue = await json(page, "history-demo-document");
   const editedSelection = await json(page, "history-demo-selection");
   expect(editedValue).not.toEqual(initialValue);

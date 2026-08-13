@@ -9,91 +9,104 @@
     "path": "/docs",
     "label": "Why",
     "title": "json-document Docs - json-document",
-    "description": "Why JSON documents share one contract for reading, validating, committing, and subscribing to changes.",
+    "description": "JSON 문서가 읽기, 검사, commit, 구독에 하나의 계약을 사용하는 이유를 설명합니다.",
+    "language": "ko",
     "navigationGroup": "JSON Document"
   },
   {
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
-    "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
+    "description": "JSON 문서를 만들고 읽고 검사해 commit한 뒤 변경을 구독하는 과정을 따라갑니다.",
+    "language": "ko",
     "navigationGroup": "JSON Document"
   },
   {
     "path": "/docs/concepts",
     "label": "Concepts",
     "title": "Core Concepts - json-document",
-    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
+    "description": "JSON Document에서 Editing과 외부 Connector로 이어지는 개념 지도를 설명합니다.",
+    "language": "ko",
     "navigationGroup": "JSON Document"
   },
   {
     "path": "/docs/intent-guide",
     "label": "Intent guide",
     "title": "Intent guide - json-document",
-    "description": "Create a document editor, express a request as an EditingIntent, and handle its EditingResult.",
+    "description": "Document editor를 만들고 요청을 EditingIntent로 표현해 EditingResult를 처리합니다.",
+    "language": "ko",
     "navigationGroup": "Editing"
   },
   {
     "path": "/docs/selection",
     "label": "Selection",
     "title": "Selection - json-document",
-    "description": "Structural selection beside a JSON document: range and key families that do not change document value.",
+    "description": "문서 값을 바꾸지 않고 편집 대상을 기억하는 구조적 Selection을 설명합니다.",
+    "language": "ko",
     "navigationGroup": "Editing"
   },
   {
     "path": "/demo/selection",
     "label": "Selection Demo",
     "title": "Selection Demo - json-document",
-    "description": "Change structural selection while the document value and editing history stay unchanged.",
+    "description": "document value와 History를 유지한 채 구조적 Selection만 바꿔 봅니다.",
+    "language": "ko",
     "parentPath": "/docs/selection"
   },
   {
     "path": "/docs/topology",
     "label": "Topology",
     "title": "Topology - json-document",
-    "description": "Visible order for selection and clipboard: LineTopology, GridTopology, and who supplies the line.",
+    "description": "Selection과 Clipboard가 공유하는 화면 순서인 LineTopology와 GridTopology를 설명합니다.",
+    "language": "ko",
     "navigationGroup": "Editing"
   },
   {
     "path": "/demo/topology",
     "label": "Topology Demo",
     "title": "Topology Demo - json-document",
-    "description": "Change visible order and compare the range computed from the same anchor and focus.",
+    "description": "같은 anchor와 focus에서 화면 순서에 따라 계산되는 범위를 비교합니다.",
+    "language": "ko",
     "parentPath": "/docs/topology"
   },
   {
     "path": "/docs/clipboard",
     "label": "Clipboard",
     "title": "Clipboard - json-document",
-    "description": "Structured copy, cut, and paste payloads created from the current structural selection.",
+    "description": "현재 구조적 Selection에서 copy, cut, paste에 사용할 Clipboard payload를 만듭니다.",
+    "language": "ko",
     "navigationGroup": "Editing"
   },
   {
     "path": "/demo/clipboard",
     "label": "Clipboard Demo",
     "title": "Clipboard Demo - json-document",
-    "description": "Follow a structural selection through copy or cut, its clipboard payload, and paste.",
+    "description": "구조적 Selection이 copy 또는 cut을 거쳐 payload와 paste로 이어지는 과정을 확인합니다.",
+    "language": "ko",
     "parentPath": "/docs/clipboard"
   },
   {
     "path": "/docs/history",
     "label": "History",
     "title": "History - json-document",
-    "description": "Local undo and redo that restore document value together with structural selection.",
+    "description": "document value와 구조적 Selection을 함께 복원하는 로컬 undo와 redo를 설명합니다.",
+    "language": "ko",
     "navigationGroup": "Editing"
   },
   {
     "path": "/demo/history",
     "label": "History Demo",
     "title": "History Demo - json-document",
-    "description": "Edit a document, then restore its value and selection together with undo and redo.",
+    "description": "문서를 편집한 뒤 undo와 redo로 value와 Selection을 함께 복원합니다.",
+    "language": "ko",
     "parentPath": "/docs/history"
   },
   {
     "path": "/docs/intent",
     "label": "Intent",
     "title": "Intent reference - json-document",
-    "description": "Signatures for EditingIntent, dispatch, EditingResult, and each editor's intent verbs.",
+    "description": "EditingIntent, dispatch, EditingResult와 editor별 Intent의 공개 시그니처를 정리합니다.",
+    "language": "ko",
     "navigationGroup": "Editing"
   },
   {
@@ -120,8 +133,8 @@
   {
     "path": "/demo/database",
     "label": "Database",
-    "title": "Database Table Demo - json-document",
-    "description": "A Notion-style Database Table v1 with typed properties, persistent view configuration, selection, native text editing, and history.",
+    "title": "Database Demo - json-document",
+    "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
     "parentPath": "/demos"
   },
   {
@@ -135,7 +148,8 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "Official React, React Hook Form, Ajv, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
+    "description": "React, React Hook Form, Ajv, Zod, TanStack Table, Web Platform, Contenteditable 연결 계약을 설명합니다.",
+    "language": "ko",
     "navigationGroup": "Connectors"
   },
   {
@@ -162,7 +176,7 @@
   {
     "path": "/connectors/zod",
     "label": "Zod",
-    "title": "Zod Admin Live Demo - json-document",
+    "title": "Zod Connector Live Demo - json-document",
     "description": "A Zod object schema and record array become a Database admin table.",
     "navigationGroup": "Connectors"
   },
@@ -191,14 +205,15 @@
     "path": "/connectors/contenteditable",
     "label": "Contenteditable",
     "title": "Contenteditable Connector Live Demo - json-document",
-    "description": "Live React contenteditable root that leases native input and commits a local JSON Document string.",
+    "description": "Live React contenteditable root that leases native input and commits its bound string through the public JSON Document API.",
     "navigationGroup": "Connectors"
   },
   {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",
-    "description": "Public v3 API reference for the six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
+    "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
+    "language": "ko",
     "navigationGroup": "Reference"
   }
 ]

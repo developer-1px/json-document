@@ -96,6 +96,7 @@ describe("official site shell", () => {
     const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
 
     await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }));
+    await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
     const frame = await waitFor(() => {
       const node = document.querySelector("[data-page-frame]");
       expect(node).toBeTruthy();
@@ -111,6 +112,9 @@ describe("official site shell", () => {
     const header = document.querySelector("[data-page-header]");
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
+
+    await user.click(within(nav.getByRole("group", { name: "Demos" })).getByRole("link", { name: "Showcase" }));
+    await waitFor(() => expect(document.documentElement.lang).toBe("en"));
   });
 });
 
@@ -119,6 +123,7 @@ function groupLinks(nav: ReturnType<typeof within>, name: string): string[] {
 }
 
 function resetDocument(path: string) {
+  document.documentElement.lang = "en";
   document.head.innerHTML = [
     '<meta name="description" content="" />',
     '<meta property="og:title" content="" />',

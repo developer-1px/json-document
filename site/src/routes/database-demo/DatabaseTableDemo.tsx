@@ -120,7 +120,7 @@ export function DatabaseTableDemo() {
   }
 
   return (
-    <section aria-label="Database Table v1" className="grid gap-4">
+    <section aria-label="Database editor" className="grid gap-4">
       <div className={classes("flex flex-wrap items-center gap-2 p-3", ui.database.toolbar)} role="toolbar" aria-label="Database and view actions">
         <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
         <ActionButton kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>

@@ -58,7 +58,10 @@ test("official docs routes render with route metadata in a real browser", async 
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(page).toHaveTitle("json-document Docs - json-document");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "하나의 변경 형식" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "하나의 변경 형식" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
@@ -69,6 +72,44 @@ test("official docs routes render with route metadata in a real browser", async 
   await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
+});
+
+test("Editing docs and API demos keep one Korean reading flow", async ({ page }) => {
+  await page.goto("/docs/selection");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
+  await page.getByRole("link", { name: "Selection Demo 열기" }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
+  await expect(page.getByText("Selection 입력을 dispatch한 뒤 바뀐 Selection을 그대로인 document.value와 History 옆에서 비교합니다.")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "모드와 블록 선택하기" })).toBeVisible();
+
+  await page.goto("/demos");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+});
+
+test("Connector pages declare the connection before the live demo", async ({ page }) => {
+  const routes = [
+    "/connectors/react",
+    "/connectors/react-hook-form",
+    "/connectors/ajv",
+    "/connectors/zod",
+    "/connectors/zod/validate",
+    "/connectors/tanstack-table",
+    "/connectors/web",
+    "/connectors/contenteditable",
+  ];
+
+  for (const route of routes) {
+    await page.goto(route);
+    await expect(page.getByRole("heading", { level: 2, name: "The connection" })).toBeVisible();
+    await expect(page.locator("[data-connector-connection] figure").first()).toBeVisible();
+    await expect(page.getByText("Install", { exact: true })).toBeVisible();
+    await expect(page.getByText("Live demo", { exact: true })).toBeVisible();
+    expect(await page.locator("[data-connector-connection]").evaluate((connection) => {
+      const demo = document.querySelector("[data-connector-live-demo]");
+      return demo !== null
+        && Boolean(connection.compareDocumentPosition(demo) & Node.DOCUMENT_POSITION_FOLLOWING);
+    })).toBe(true);
+  }
 });
 
 test("docs and demos share the page frame while preserving their content modes", async ({ page }) => {

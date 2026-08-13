@@ -32,13 +32,13 @@ export function SelectionDemoRoute() {
   return (
     <PageFrame>
       <PageHeader title="Selection Demo" illustration="cursor">
-        Choose a selection input, dispatch it, then compare Selection with the unchanged document and History.
+        Selection 입력을 dispatch한 뒤 바뀐 Selection을 그대로인 document.value와 History 옆에서 비교합니다.
       </PageHeader>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-input">
-          <p className={ui.text.label}>1 · Input</p>
-          <h2 id="selection-input" className={classes("mb-2 mt-1", ui.text.heading)}>Choose a mode and block</h2>
+          <p className={ui.text.label}>1 · 입력</p>
+          <h2 id="selection-input" className={classes("mb-2 mt-1", ui.text.heading)}>모드와 블록 선택하기</h2>
           <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Selection mode">
             {(["replace", "extend", "toggle"] as const).map((item) => (
               <ToggleButton
@@ -67,15 +67,15 @@ export function SelectionDemoRoute() {
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-call">
-          <p className={ui.text.label}>2 · API call</p>
+          <p className={ui.text.label}>2 · API 호출</p>
           <h2 id="selection-call" className={classes("mb-2 mt-1", ui.text.heading)}>dispatch(intent)</h2>
           <JsonInspector label="intent" value={lastIntent} testId="selection-demo-intent" size="compact" />
           <JsonInspector label="result" value={lastResult} testId="selection-demo-result" size="compact" />
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-result">
-          <p className={ui.text.label}>3 · Result</p>
-          <h2 id="selection-result" className={classes("mb-2 mt-1", ui.text.heading)}>Only Selection changes</h2>
+          <p className={ui.text.label}>3 · 결과</p>
+          <h2 id="selection-result" className={classes("mb-2 mt-1", ui.text.heading)}>Selection만 바뀝니다</h2>
           <JsonInspector label="selection" value={snapshot.selection} testId="selection-demo-selection" size="compact" />
           <JsonInspector label="document.value" value={snapshot.value} testId="selection-demo-document" size="compact" />
           <JsonInspector
