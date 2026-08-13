@@ -1,15 +1,16 @@
 import { NavLink, type SiteNavigationGroup, type SiteRoute } from "./router";
-import { classes, ui } from "../shared/ui/styles";
-
-const groupLandings: Partial<Record<SiteNavigationGroup, { readonly path: string; readonly label: string }>> = {
-  Start: { path: "/", label: "Overview" },
-  Core: { path: "/docs", label: "Why" },
-  Connectors: { path: "/connectors", label: "Connectors" },
-};
+import { ui } from "../shared/ui/styles";
 
 export type BreadcrumbCrumb = {
   readonly path: string;
   readonly label: string;
+};
+
+const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
+
+const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
+  Core: { path: "/docs", label: "Why" },
+  Connectors: { path: "/connectors", label: "Connectors" },
 };
 
 export function breadcrumbTrail(
@@ -22,23 +23,25 @@ export function breadcrumbTrail(
 
   while (current && !seen.has(current.path)) {
     seen.add(current.path);
-    stack.unshift({ path: current.path, label: current.label });
+    stack.unshift({ path: current.path, label: crumbLabel(current) });
     current = current.parentPath
       ? routes.find((candidate) => candidate.path === current?.parentPath)
       : undefined;
   }
 
-  const root = stack[0];
-  const grouped = routes.find((candidate) => candidate.path === root?.path);
-  const group = grouped?.navigationGroup ?? ancestorGroup(route, routes);
-  if (group) {
-    const landing = groupLandings[group];
-    if (landing && landing.path !== root?.path) {
-      stack.unshift(landing);
-    }
+  const group = ancestorGroup(route, routes);
+  const landing = group ? groupLandings[group] : undefined;
+  if (landing && !stack.some((crumb) => crumb.path === landing.path)) {
+    stack.unshift(landing);
   }
+  if (stack[0]?.path !== overview.path) stack.unshift(overview);
 
   return stack;
+}
+
+function crumbLabel(route: SiteRoute): string {
+  if (route.path === "/connectors") return "Connectors";
+  return route.label;
 }
 
 export function SiteBreadcrumb(props: {

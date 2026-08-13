@@ -32,7 +32,7 @@ describe("official site shell", () => {
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
-    expect(groupLinks(nav, "Core")).toEqual(["Why", "API Reference"]);
+    expect(groupLinks(nav, "Core")).toEqual(["Why", "Concepts", "API Reference"]);
     expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet", "Selection Lab", "Database"]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "Connector guide", "React", "React Hook Form", "Zod", "Validate", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
@@ -52,13 +52,20 @@ describe("official site shell", () => {
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
 
+    await user.click(nav.getByRole("link", { name: "Database", exact: true }));
+    const databaseCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
+    expect(databaseCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
+    expect(databaseCrumb.getByText("Database")).toBeTruthy();
+
     await user.click(connectors.getByRole("link", { name: "Zod", exact: true }));
     const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
+    expect(adminCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(adminCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
     expect(adminCrumb.getByText("Zod")).toBeTruthy();
 
     await user.click(nav.getByRole("link", { name: "Validate", exact: true }));
     const validateCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
+    expect(validateCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(validateCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
     expect(validateCrumb.getByRole("link", { name: "Zod" }).getAttribute("href")).toBe("/connectors/zod");
     expect(validateCrumb.getByText("Validate")).toBeTruthy();
