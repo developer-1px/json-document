@@ -5,9 +5,13 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Reorganized official site and documentation navigation to match the public
+  concept tree. Concepts is the overall map above the layers. JSON Document,
+  Editing, and Connectors are the three branches. Selection sits with
+  Topology, Clipboard with History; demos hang under their concept.
 - Extracted visible-order `LineTopology` and `GridTopology` in the editing
   companion so Sheet and Database range selection share the same grid math,
-  and opened a Topology guide under Core docs.
+  and opened a Topology guide under Editing.
 - Applied that shared line math to Tree, Document, and Order selection
   intervals, and listed selected Sheet/Database cells with `gridCellsInRange`.
 - Extended `@interactive-os/json-document-zod` with `databaseDocumentFromZod`, so

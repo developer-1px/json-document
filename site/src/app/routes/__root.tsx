@@ -9,7 +9,7 @@ import {
   useRouteMetadata,
   type SiteNavigationGroup,
 } from "../router";
-import { childRoutes, isNavBranch, routeGroup } from "../breadcrumb";
+import { childRoutes, isNavBranch, rootNavRoutes, routeGroup } from "../breadcrumb";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
 export const Route = createRootRoute({
@@ -20,7 +20,7 @@ export const Route = createRootRoute({
 function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
-  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["Start", "Core", "Editing", "Connectors"];
+  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["JSON Document", "Editing", "Connectors"];
 
   useRouteMetadata(route);
   const activeGroup = routeGroup(route, siteRoutes);
@@ -49,10 +49,20 @@ function AppShell() {
           json-document
         </NavLink>
         <div className={ui.nav.menu}>
+          {rootNavRoutes(siteRoutes).map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              activePath={route.path}
+              className={classes(ui.nav.item, ui.nav.current)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
           {routeGroups.map((group) => {
             const groupRoutes = siteRoutes.filter((item) => item.navigationGroup === group);
             if (groupRoutes.length === 0) return null;
-            const groupLabelId = `site-navigation-${group.toLowerCase()}`;
+            const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
             const open = openGroups.has(group);
             return (
               <div key={group} role="group" aria-labelledby={groupLabelId} className="grid content-start">

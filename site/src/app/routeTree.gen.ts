@@ -23,8 +23,11 @@ import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selec
 import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
+import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
+import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
+import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageExamplesDocumentRouteImport } from "./routes/_page/examples/document";
@@ -102,6 +105,11 @@ const PageDocsApiRoute = PageDocsApiRouteImport.update({
   path: "/docs/api",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsClipboardRoute = PageDocsClipboardRouteImport.update({
+  id: "/docs/clipboard",
+  path: "/docs/clipboard",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
   id: "/docs/concepts",
   path: "/docs/concepts",
@@ -110,6 +118,16 @@ const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
 const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
   id: "/docs/connectors",
   path: "/docs/connectors",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
+  id: "/docs/history",
+  path: "/docs/history",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsSelectionRoute = PageDocsSelectionRouteImport.update({
+  id: "/docs/selection",
+  path: "/docs/selection",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsTopologyRoute = PageDocsTopologyRouteImport.update({
@@ -150,8 +168,11 @@ export interface FileRoutesByFullPath {
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/docs/api": typeof PageDocsApiRoute;
+  "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/examples/document": typeof PageExamplesDocumentRoute;
@@ -172,8 +193,11 @@ export interface FileRoutesByTo {
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/docs/api": typeof PageDocsApiRoute;
+  "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/examples/document": typeof PageExamplesDocumentRoute;
@@ -196,8 +220,11 @@ export interface FileRoutesById {
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
+  "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/_page/docs/history": typeof PageDocsHistoryRoute;
+  "/_page/docs/selection": typeof PageDocsSelectionRoute;
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
   "/_page/examples/document": typeof PageExamplesDocumentRoute;
@@ -220,8 +247,11 @@ export interface FileRouteTypes {
     | "/demo/selection"
     | "/demo/sheet"
     | "/docs/api"
+    | "/docs/clipboard"
     | "/docs/concepts"
     | "/docs/connectors"
+    | "/docs/history"
+    | "/docs/selection"
     | "/docs/topology"
     | "/docs/tutorial"
     | "/examples/document"
@@ -242,8 +272,11 @@ export interface FileRouteTypes {
     | "/demo/selection"
     | "/demo/sheet"
     | "/docs/api"
+    | "/docs/clipboard"
     | "/docs/concepts"
     | "/docs/connectors"
+    | "/docs/history"
+    | "/docs/selection"
     | "/docs/topology"
     | "/docs/tutorial"
     | "/examples/document"
@@ -265,8 +298,11 @@ export interface FileRouteTypes {
     | "/_page/demo/selection"
     | "/_page/demo/sheet"
     | "/_page/docs/api"
+    | "/_page/docs/clipboard"
     | "/_page/docs/concepts"
     | "/_page/docs/connectors"
+    | "/_page/docs/history"
+    | "/_page/docs/selection"
     | "/_page/docs/topology"
     | "/_page/docs/tutorial"
     | "/_page/examples/document"
@@ -382,6 +418,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/clipboard": {
+      id: "/_page/docs/clipboard";
+      path: "/docs/clipboard";
+      fullPath: "/docs/clipboard";
+      preLoaderRoute: typeof PageDocsClipboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/concepts": {
       id: "/_page/docs/concepts";
       path: "/docs/concepts";
@@ -394,6 +437,20 @@ declare module "@tanstack/react-router" {
       path: "/docs/connectors";
       fullPath: "/docs/connectors";
       preLoaderRoute: typeof PageDocsConnectorsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/history": {
+      id: "/_page/docs/history";
+      path: "/docs/history";
+      fullPath: "/docs/history";
+      preLoaderRoute: typeof PageDocsHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/selection": {
+      id: "/_page/docs/selection";
+      path: "/docs/selection";
+      fullPath: "/docs/selection";
+      preLoaderRoute: typeof PageDocsSelectionRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/topology": {
@@ -444,8 +501,11 @@ interface PageRouteChildren {
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
+  PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
+  PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
+  PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
   PageExamplesDocumentRoute: typeof PageExamplesDocumentRoute;
@@ -466,8 +526,11 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoSelectionRoute: PageDemoSelectionRoute,
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDocsApiRoute: PageDocsApiRoute,
+  PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
+  PageDocsHistoryRoute: PageDocsHistoryRoute,
+  PageDocsSelectionRoute: PageDocsSelectionRoute,
   PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
   PageExamplesDocumentRoute: PageExamplesDocumentRoute,

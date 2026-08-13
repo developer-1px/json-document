@@ -9,7 +9,7 @@ export type BreadcrumbCrumb = {
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
-  Core: { path: "/docs", label: "Why" },
+  "JSON Document": { path: "/docs", label: "Why" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 
@@ -85,6 +85,14 @@ export function routeGroup(
       : undefined;
   }
   return undefined;
+}
+
+export function rootNavRoutes(routes: ReadonlyArray<SiteRoute>): ReadonlyArray<SiteRoute> {
+  return routes.filter((route) =>
+    route.path !== "/"
+    && route.navigationGroup === undefined
+    && route.parentPath === undefined
+  );
 }
 
 export function childRoutes(

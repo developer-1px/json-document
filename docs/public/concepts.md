@@ -10,7 +10,7 @@
 ```txt
 읽기            JSON Document
   ↓
-편집            Selection · History · Clipboard · Topology
+편집            Selection · Topology · Clipboard · History
                 Intent                     (TBD)
   ↓
 외부 확장       Connector
@@ -18,7 +18,9 @@
 
 왜 이런 문을 만들었는지는 [Why](overview.md)에 있습니다. 이 글은 그
 문이 실제로 어떻게 커지는지 이야기합니다. 오른쪽 패널은 같은 이야기를
-한 문서 위에서 보여 줍니다.
+한 문서 위에서 보여 줍니다. 편집 층의 잎은
+[Selection](selection.md), [Topology](topology.md),
+[Clipboard](clipboard.md), [History](history.md)에 있습니다.
 
 ## 읽기
 
@@ -52,10 +54,13 @@ Pointer 목록입니다. 그중 하나의 제목을 바꾸는 것은 그 Pointer
 JSON Patch입니다. 검색 문자열을 바로 고치려 하면, 여러 곳이 맞았을 때
 어디를 고쳐야 하는지 사라집니다.
 
+호출 형식은 [API](api.md)에, 따라 하는 예제는
+[Quickstart](quickstart.md)에 있습니다.
+
 ## 편집
 
-문서를 읽을 수 있다고 편집기는 아닙니다. 사용자는 어디를 고르고, 방금
-한 일을 되돌리고, 고른 것을 복사해 붙입니다. 그 세 가지가 붙을 때
+문서를 읽을 수 있다고 편집기는 아닙니다. 사용자는 어디를 고르고, 그
+줄 위에서 복사하고, 방금 한 일을 되돌립니다. 그 일들이 붙을 때
 비로소 편집기가 됩니다. 문서가 커진 것이 아니라, 문서 옆에 편집 층이
 붙은 것입니다.
 
@@ -67,7 +72,35 @@ JSON Patch입니다. 검색 문자열을 바로 고치려 하면, 여러 곳이 
 선택은 제품마다 모양이 다릅니다. 문서와 표와 트리는 순서 위의
 범위이고, 캔버스 객체는 안정적인 ID 집합입니다. 글자 사이의 caret은
 또 다른 이야기입니다. 그건 입력기가 잠깐 가져가는 상태이지, 구조
-선택이 아닙니다.
+선택이 아닙니다. 가족과 경계는 [Selection](selection.md)에 있습니다.
+
+**Topology**는 지금 무엇이 줄로 서 있는가입니다. 선택은 어디를
+골랐는지이고, Topology는 그 고르기가 읽는 화면 줄입니다. 표를
+정렬하거나 필터하면 JSON 행 순서와 화면 행 순서가 갈라집니다. 그때
+선택과 fill과 복사는 화면 줄을 따라야 합니다.
+
+줄은 한 축일 수도 있고 두 축일 수도 있습니다. `LineTopology`는
+트리의 펼쳐진 행처럼 한 줄입니다. `GridTopology`는 표의 행×열입니다.
+Sheet의 `SheetTopology`는 Grid입니다. Database의 보이는 레코드×속성은
+같은 격자입니다. 누가 줄을 만드는지는 host나 Connector입니다. editor는
+그 줄을 받아 선택 범위를 읽습니다.
+
+Intent 없이도 이 개념은 움직입니다. `copy(topology)`,
+`selectedCellsIn(topology)`처럼 선택과 Clipboard가 Topology를 직접
+받습니다. 줄의 모양과 쓰는 법은 [Topology](topology.md)에 있습니다.
+
+**Clipboard**는 고른 것을 복사하고, 잘라내고, 붙입니다. 여기 있는
+Clipboard는 운영체제의 클립보드가 아닙니다. 선택이 만든 구조화된
+payload입니다. 문서 블록이면 블록 JSON과 그냥 읽을 수 있는 텍스트를
+같이 들고, 표면 칸의 JSON과 TSV를 같이 듭니다.
+
+복사는 읽기만 합니다. 아래 문서는 그대로이고, Clipboard 칸에 payload가
+생깁니다. 잘라내기는 그 payload를 만든 뒤에야 문서에서 지웁니다.
+붙여넣기는 그 payload를 다시 문서로 돌려보냅니다. 바깥에서 온 아무
+텍스트를 블록으로 해석할지는 제품을 만드는 쪽이 정합니다. 브라우저의
+`Ctrl+C`로 옮기는 일은 아직 편집 층이 아닙니다. 그건 다음 고리의 Web
+Connector입니다. payload의 오가는 법은 [Clipboard](clipboard.md)에
+있습니다.
 
 **History**는 undo와 redo입니다. 기본 기능입니다. 다만
 `JSONDocument`가 하지 않고 `EditingSession`이 합니다. 값을 바꾼 뒤에
@@ -82,42 +115,14 @@ JSON Patch입니다. 검색 문자열을 바로 고치려 하면, 여러 곳이 
 
 협업에도 History라는 말이 있습니다. 그건 이 편집기의 실행 취소가
 아닙니다. 내 작업을 끄고 켜는 일입니다. 단어는 같고, 층이 다릅니다.
-로컬 편집 층이 붙은 뒤에야 이야기할 수 있는 다음 고리입니다.
-
-**Clipboard**도 기본 기능입니다. 고른 것을 복사하고, 잘라내고,
-붙입니다. 여기 있는 Clipboard는 운영체제의 클립보드가 아닙니다.
-선택이 만든 구조화된 payload입니다. 문서 블록이면 블록 JSON과 그냥
-읽을 수 있는 텍스트를 같이 들고, 표면 칸의 JSON과 TSV를 같이 듭니다.
-
-복사는 읽기만 합니다. 아래 문서는 그대로이고, Clipboard 칸에 payload가
-생깁니다. 잘라내기는 그 payload를 만든 뒤에야 문서에서 지웁니다.
-붙여넣기는 그 payload를 다시 문서로 돌려보냅니다. 바깥에서 온 아무
-텍스트를 블록으로 해석할지는 제품을 만드는 쪽이 정합니다. 브라우저의
-`Ctrl+C`로 옮기는 일은 아직 편집 층이 아닙니다. 그건 다음 고리의 Web
-Connector입니다.
+로컬 편집 층이 붙은 뒤에야 이야기할 수 있는 다음 고리입니다. 항목이
+되는 조건은 [History](history.md)에 있습니다.
 
 오른쪽 패널에서 그 순서를 그대로 밟을 수 있습니다. 블록을 고르면
 Selection만 움직입니다. 복사하면 Clipboard가 생깁니다. 잘라내면
 문서와 History가 같이 움직입니다. 실행 취소하면 값과 선택이 같이
 돌아옵니다. 아래 JSON이 읽기 층이고, 그 위의 선택과 버튼이 편집
 층입니다.
-
-### Topology
-
-선택은 “어디를 골랐는가”입니다. Topology는 “지금 무엇이 줄로 서
-있는가”입니다. 표를 정렬하거나 필터하면 JSON 행 순서와 화면 행 순서가
-갈라집니다. 그때 선택과 fill과 복사는 화면 줄을 따라야 합니다.
-
-줄은 한 축일 수도 있고 두 축일 수도 있습니다. `LineTopology`는
-트리의 펼쳐진 행처럼 한 줄입니다. `GridTopology`는 표의 행×열입니다.
-Sheet의 `SheetTopology`는 Grid입니다. Database의 보이는 레코드×속성은
-같은 격자입니다. 누가 줄을 만드는지는 host나 Connector입니다. editor는
-그 줄을 받아 선택 범위를 읽습니다.
-
-Intent 없이도 이 개념은 움직입니다. `copy(topology)`,
-`selectedCellsIn(topology)`처럼 선택과 Clipboard가 Topology를 직접
-받습니다. 줄의 모양과 쓰는 법은 [Topology](topology.md)에 있습니다.
-명령의 공통 껍질은 아직 TBD입니다.
 
 ### Intent (TBD)
 
@@ -146,6 +151,7 @@ Web Connector는 브라우저 클립보드 이벤트를 copy/cut/paste로 바꿉
 바깥을 붙인다고 안쪽이 바뀌면 안 됩니다. Connector를 빼도
 JSON Document는 그대로 읽히고, Selection과 History와 Clipboard는
 그대로 동작해야 합니다. 번역이 되풀이될 때만 공식 패키지가 됩니다.
+연결 방법은 [Connector](connectors.md)에 있습니다.
 
 더 커지면 협업이 같은 문서 문 위에 붙을 수 있습니다. 그때도 편집기가
 받는 읽기 문은 같습니다. 그 고리는 필요할 때 붙이면 됩니다.

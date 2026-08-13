@@ -31,9 +31,21 @@ describe("official site shell", () => {
     const user = userEvent.setup();
     const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
 
-    expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
-    expect(groupLinks(nav, "Core")).toEqual(["Why", "Concepts", "Topology", "API Reference"]);
-    expect(groupLinks(nav, "Editing")).toEqual(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
+    expect(nav.queryByRole("group", { name: "Start" })).toBeNull();
+    expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
+    expect(nav.getByRole("link", { name: "Concepts" }).getAttribute("href")).toBe("/docs/concepts");
+    expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "API Reference", "Quickstart"]);
+    expect(groupLinks(nav, "Editing")).toEqual([
+      "Selection",
+      "Selection Lab",
+      "Topology",
+      "Clipboard",
+      "History",
+      "Document",
+      "Workbench",
+      "Sheet",
+      "Database",
+    ]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -80,14 +92,14 @@ describe("official site shell", () => {
     const brand = screen.getByRole("link", { name: "json-document" });
     const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
 
-    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }));
     const frame = await waitFor(() => {
       const node = document.querySelector("[data-page-frame]");
       expect(node).toBeTruthy();
       return node;
     });
 
-    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }));
     const crumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     await waitFor(() => expect(crumb.getByText("API Reference")).toBeTruthy());
     expect(screen.getByRole("link", { name: "json-document" })).toBe(brand);

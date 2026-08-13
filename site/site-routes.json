@@ -3,49 +3,68 @@
     "path": "/",
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
-    "description": "A tiny API to read, query, patch, and subscribe to JSON.",
-    "navigationGroup": "Start"
+    "description": "A tiny API to read, query, patch, and subscribe to JSON."
   },
   {
     "path": "/docs",
     "label": "Why",
     "title": "json-document Docs - json-document",
     "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
-    "navigationGroup": "Core"
+    "navigationGroup": "JSON Document"
   },
   {
     "path": "/docs/concepts",
     "label": "Concepts",
     "title": "Core Concepts - json-document",
-    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
-    "navigationGroup": "Core"
-  },
-  {
-    "path": "/docs/topology",
-    "label": "Topology",
-    "title": "Topology - json-document",
-    "description": "Visible order for selection and clipboard: LineTopology, GridTopology, and who supplies the line.",
-    "navigationGroup": "Core"
-  },
-  {
-    "path": "/docs/tutorial",
-    "label": "Quickstart",
-    "title": "Tutorial - json-document",
-    "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
-    "navigationGroup": "Start"
+    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors."
   },
   {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",
     "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
-    "navigationGroup": "Core"
+    "navigationGroup": "JSON Document"
   },
   {
-    "path": "/examples/document",
-    "label": "Workbench",
-    "title": "Document Example Workbench - json-document",
-    "description": "Run a document editing scenario and inspect canonical JSON, selection, revision, and applied operations.",
+    "path": "/docs/tutorial",
+    "label": "Quickstart",
+    "title": "Tutorial - json-document",
+    "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
+    "navigationGroup": "JSON Document"
+  },
+  {
+    "path": "/docs/selection",
+    "label": "Selection",
+    "title": "Selection - json-document",
+    "description": "Structural selection beside a JSON document: range and key families that do not change document value.",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/demo/selection",
+    "label": "Selection Lab",
+    "title": "Selection Lab - json-document",
+    "description": "Compare DOM-free key, range, mask, nested scope, interaction, and history contracts across structural editors.",
+    "parentPath": "/docs/selection"
+  },
+  {
+    "path": "/docs/topology",
+    "label": "Topology",
+    "title": "Topology - json-document",
+    "description": "Visible order for selection and clipboard: LineTopology, GridTopology, and who supplies the line.",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/docs/clipboard",
+    "label": "Clipboard",
+    "title": "Clipboard - json-document",
+    "description": "Structured copy, cut, and paste payloads created from the current structural selection.",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/docs/history",
+    "label": "History",
+    "title": "History - json-document",
+    "description": "Local undo and redo that restore document value together with structural selection.",
     "navigationGroup": "Editing"
   },
   {
@@ -56,17 +75,17 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/examples/document",
+    "label": "Workbench",
+    "title": "Document Example Workbench - json-document",
+    "description": "Run a document editing scenario and inspect canonical JSON, selection, revision, and applied operations.",
+    "parentPath": "/demo"
+  },
+  {
     "path": "/demo/sheet",
     "label": "Sheet",
     "title": "Sheet Demo - json-document",
     "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
-    "navigationGroup": "Editing"
-  },
-  {
-    "path": "/demo/selection",
-    "label": "Selection Lab",
-    "title": "Selection Lab - json-document",
-    "description": "Compare DOM-free key, range, mask, nested scope, interaction, and history contracts across structural editors.",
     "navigationGroup": "Editing"
   },
   {
