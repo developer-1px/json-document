@@ -37,9 +37,9 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Editing")).toEqual([
       "Selection",
       "Selection Lab",
-      "History",
-      "Clipboard",
       "Topology",
+      "Clipboard",
+      "History",
       "Document",
       "Workbench",
       "Sheet",

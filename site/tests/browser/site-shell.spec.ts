@@ -15,9 +15,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Selection",
     "Selection Lab",
-    "History",
-    "Clipboard",
     "Topology",
+    "Clipboard",
+    "History",
     "Document",
     "Workbench",
     "Sheet",

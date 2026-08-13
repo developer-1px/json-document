@@ -33,9 +33,9 @@ JSON Document
 
 Editing
 |-- Selection
-|-- History
-|-- Clipboard
 |-- Topology
+|-- Clipboard
+|-- History
 |-- Document
 |-- Sheet
 `-- Database

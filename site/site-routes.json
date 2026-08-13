@@ -48,10 +48,10 @@
     "parentPath": "/docs/selection"
   },
   {
-    "path": "/docs/history",
-    "label": "History",
-    "title": "History - json-document",
-    "description": "Local undo and redo that restore document value together with structural selection.",
+    "path": "/docs/topology",
+    "label": "Topology",
+    "title": "Topology - json-document",
+    "description": "Visible order for selection and clipboard: LineTopology, GridTopology, and who supplies the line.",
     "navigationGroup": "Editing"
   },
   {
@@ -62,10 +62,10 @@
     "navigationGroup": "Editing"
   },
   {
-    "path": "/docs/topology",
-    "label": "Topology",
-    "title": "Topology - json-document",
-    "description": "Visible order for selection and clipboard: LineTopology, GridTopology, and who supplies the line.",
+    "path": "/docs/history",
+    "label": "History",
+    "title": "History - json-document",
+    "description": "Local undo and redo that restore document value together with structural selection.",
     "navigationGroup": "Editing"
   },
   {
