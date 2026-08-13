@@ -17,6 +17,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
+import { ActionButton, DisclosureButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import { initialDatabase } from "./initial-database";
 
@@ -35,6 +36,7 @@ export function DatabaseTableDemo() {
   const [announcement, setAnnouncement] = useState("Database ready");
   const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const nextRecord = useRef(5);
   const document = snapshot.value as DatabaseDocument;
   const view = document.views[0]!;
@@ -120,13 +122,11 @@ export function DatabaseTableDemo() {
   return (
     <section aria-label="Database Table v1" className="grid gap-4">
       <div className={classes("flex flex-wrap items-center gap-2 p-3", ui.database.toolbar)} role="toolbar" aria-label="Database and view actions">
-        <button type="button" className={ui.action.primary} onClick={addRecord}>New record</button>
-        <button type="button" className={ui.action.secondary} onClick={deleteSelectedRecord}>Delete selected</button>
+        <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
+        <ActionButton kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>
         <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
-        <button
-          type="button"
-          className={ui.action.toggle}
-          aria-pressed={view.filter !== null}
+        <ToggleButton
+          pressed={view.filter !== null}
           onClick={() => configure({
             type: "view.configure",
             viewId: view.id,
@@ -134,31 +134,25 @@ export function DatabaseTableDemo() {
               ? { propertyId: "status", operator: "equals", value: "backlog" }
               : null,
           })}
-        >Backlog only</button>
-        <button
-          type="button"
-          className={ui.action.toggle}
-          aria-pressed={view.sort !== null}
+        >Backlog only</ToggleButton>
+        <ToggleButton
+          pressed={view.sort !== null}
           onClick={() => configure({
             type: "view.configure",
             viewId: view.id,
             sort: view.sort === null ? { propertyId: "score", direction: "descending" } : null,
           })}
-        >Score descending</button>
-        <button
-          type="button"
-          className={ui.action.toggle}
-          aria-pressed={view.propertyVisibility.note === false}
+        >Score descending</ToggleButton>
+        <ToggleButton
+          pressed={view.propertyVisibility.note === false}
           onClick={() => configure({
             type: "view.configure",
             viewId: view.id,
             propertyVisibility: { ...view.propertyVisibility, note: view.propertyVisibility.note !== false ? false : true },
           })}
-        >Hide notes</button>
-        <button
-          type="button"
-          className={ui.action.toggle}
-          aria-pressed={view.propertyOrder[0] === "score"}
+        >Hide notes</ToggleButton>
+        <ToggleButton
+          pressed={view.propertyOrder[0] === "score"}
           onClick={() => configure({
             type: "view.configure",
             viewId: view.id,
@@ -166,10 +160,10 @@ export function DatabaseTableDemo() {
               ? ["name", "note", "score", "status", "complete"]
               : ["score", "name", "note", "status", "complete"],
           })}
-        >Score first</button>
+        >Score first</ToggleButton>
         <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
-        <button type="button" className={ui.action.secondary} disabled={!snapshot.canUndo} onClick={() => run(editor.undo, "Undone")}>Undo</button>
-        <button type="button" className={ui.action.secondary} disabled={!snapshot.canRedo} onClick={() => run(editor.redo, "Redone")}>Redo</button>
+        <ActionButton disabled={!snapshot.canUndo} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
+        <ActionButton disabled={!snapshot.canRedo} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -217,15 +211,16 @@ export function DatabaseTableDemo() {
                   {properties.map((property) => {
                     const isSelected = selected.has(cellKey(record.id, property.id));
                     return (
-                      <td
+                      <SelectableItem
+                        as="td"
                         key={property.id}
+                        selected={isSelected}
                         role="gridcell"
                         aria-selected={isSelected}
-                        data-selected={isSelected ? "true" : "false"}
                         data-record-id={record.id}
                         data-property-id={property.id}
                         onClick={(event) => selectCell(event, record.id, property.id)}
-                        className={classes("min-w-32 p-0", ui.database.cell, ui.state.selected)}
+                        className={classes("min-w-32 p-0", ui.database.cell)}
                       >
                         <PropertyEditor
                           property={property}
@@ -233,7 +228,7 @@ export function DatabaseTableDemo() {
                           onCommit={(value) => commit(record.id, property.id, value)}
                           onLease={(next) => setLease(next ? { recordId: record.id, propertyId: property.id, composing: next.composing } : null)}
                         />
-                      </td>
+                      </SelectableItem>
                     );
                   })}
                   <td className={classes("px-2 py-2", ui.database.rowAction)}>{record.id}</td>
@@ -244,9 +239,15 @@ export function DatabaseTableDemo() {
           {records.length === 0 ? <div className={classes("m-3 p-6", ui.surface.empty)}>No records in this view.</div> : null}
         </div>
 
-        <details className={classes("p-3", ui.surface.raised)}>
-          <summary className={classes("cursor-pointer", ui.text.heading)}>Inspect editing state</summary>
-          <aside aria-label="Database contract inspector" className="mt-3 grid content-start gap-3 lg:grid-cols-3">
+        <section className={classes("p-3", ui.surface.raised)}>
+          <DisclosureButton
+            expanded={inspectorOpen}
+            controls="database-editing-state"
+            onClick={() => setInspectorOpen((open) => !open)}
+          >
+            Inspect editing state
+          </DisclosureButton>
+          <aside id="database-editing-state" hidden={!inspectorOpen} aria-label="Database contract inspector" className="mt-3 grid content-start gap-3 lg:grid-cols-3">
             <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="database-intent-json" />
             <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="database-result-json" />
             <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
@@ -263,7 +264,7 @@ export function DatabaseTableDemo() {
               testId="database-document-json"
             />
           </aside>
-        </details>
+        </section>
       </div>
     </section>
   );

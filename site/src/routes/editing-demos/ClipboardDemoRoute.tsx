@@ -2,7 +2,8 @@ import { useState } from "react";
 import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -57,20 +58,20 @@ export function ClipboardDemoRoute() {
           <h2 id="clipboard-input" className={classes("mb-2 mt-1", ui.text.heading)}>Choose source blocks</h2>
           <div className="grid gap-1">
             {(snapshot.value as BlockDocument).blocks.map((block) => (
-              <button
+              <SelectableItem
                 key={block.id}
                 type="button"
-                aria-pressed={selected.has(block.id)}
-                className={classes("px-3 py-2 text-left", ui.action.toggle)}
+                selected={selected.has(block.id)}
+                className={classes("px-3 py-2", ui.surface.selectableBlock)}
                 onClick={() => select(block.id)}
               >
                 {block.text}
-              </button>
+              </SelectableItem>
             ))}
           </div>
           <div className="mt-3 flex gap-2">
-            <Button onClick={copy}>Copy</Button>
-            <Button onClick={cut}>Cut</Button>
+            <ActionButton onClick={copy}>Copy</ActionButton>
+            <ActionButton onClick={cut}>Cut</ActionButton>
           </div>
         </section>
 
@@ -78,7 +79,7 @@ export function ClipboardDemoRoute() {
           <p className={ui.text.label}>2 · API and payload</p>
           <h2 id="clipboard-payload" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
           <JsonInspector label="clipboard" value={clipboard} testId="clipboard-demo-payload" size="compact" />
-          <Button className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>Paste payload</Button>
+          <ActionButton className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>Paste payload</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-result">

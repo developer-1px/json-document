@@ -1,4 +1,5 @@
 import conceptsMarkdown from "../../../../docs/public/concepts.md?raw";
+import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { docPages, type DocPageId } from "./doc-pages";
@@ -52,9 +53,9 @@ function EditingConceptRoute(props: {
           <nav aria-label="On this page" className={classes("mb-6 lg:hidden", ui.text.meta)}>
             <div className="flex flex-wrap gap-1">
               {headings.map((heading) => (
-                <a key={heading.id} href={`#${heading.id}`} className={classes("px-2 py-1 no-underline", ui.text.meta)}>
+                <ActionLink key={heading.id} href={`#${heading.id}`} className={classes("px-2 py-1 no-underline", ui.text.meta)}>
                   {heading.text}
-                </a>
+                </ActionLink>
               ))}
             </div>
           </nav>
@@ -69,13 +70,13 @@ function EditingConceptRoute(props: {
             <div className={classes("mb-2", ui.text.heading)}>On this page</div>
             <div className="grid">
               {headings.map((heading) => (
-                <a
+                <ActionLink
                   key={heading.id}
                   href={`#${heading.id}`}
                   className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
                 >
                   {heading.text}
-                </a>
+                </ActionLink>
               ))}
             </div>
           </nav>

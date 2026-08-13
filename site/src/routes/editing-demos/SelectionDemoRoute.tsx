@@ -2,6 +2,7 @@ import { useState } from "react";
 import { type BlockDocument, type DocumentIntent } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
+import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -40,28 +41,27 @@ export function SelectionDemoRoute() {
           <h2 id="selection-input" className={classes("mb-2 mt-1", ui.text.heading)}>Choose a mode and block</h2>
           <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Selection mode">
             {(["replace", "extend", "toggle"] as const).map((item) => (
-              <button
+              <ToggleButton
                 key={item}
-                type="button"
-                aria-pressed={mode === item}
-                className={classes("px-3 py-1.5", ui.action.toggle)}
+                pressed={mode === item}
+                className="px-3 py-1.5"
                 onClick={() => setMode(item)}
               >
                 {item}
-              </button>
+              </ToggleButton>
             ))}
           </div>
           <div className="grid gap-1">
             {initialDocument.blocks.map((block) => (
-              <button
+              <SelectableItem
                 key={block.id}
                 type="button"
-                aria-pressed={selected.has(block.id)}
-                className={classes("px-3 py-2 text-left", ui.action.toggle)}
+                selected={selected.has(block.id)}
+                className={classes("px-3 py-2", ui.surface.selectableBlock)}
                 onClick={() => select(block.id)}
               >
                 {block.id} · {block.text}
-              </button>
+              </SelectableItem>
             ))}
           </div>
         </section>

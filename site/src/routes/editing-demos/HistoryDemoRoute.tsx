@@ -2,7 +2,8 @@ import { useState } from "react";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { ActionButton } from "../../shared/ui/interactive";
+import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -45,15 +46,15 @@ export function HistoryDemoRoute() {
           <p className={classes("mt-0", ui.text.meta)}>
             The edit starts from block bravo at offset 0 and moves Selection to offset 6.
           </p>
-          <Button kind="primary" onClick={edit}>Apply edit</Button>
+          <ActionButton kind="primary" onClick={edit}>Apply edit</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-call">
           <p className={ui.text.label}>2 · History API</p>
           <h2 id="history-call" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
           <div className="mb-3 flex gap-2">
-            <Button onClick={undo} disabled={!snapshot.canUndo}>Undo</Button>
-            <Button onClick={redo} disabled={!snapshot.canRedo}>Redo</Button>
+            <ActionButton onClick={undo} disabled={!snapshot.canUndo}>Undo</ActionButton>
+            <ActionButton onClick={redo} disabled={!snapshot.canRedo}>Redo</ActionButton>
           </div>
           <JsonInspector
             label="history"

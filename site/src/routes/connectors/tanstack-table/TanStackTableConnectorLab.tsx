@@ -22,7 +22,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
-import { Button } from "../../../shared/ui/primitives";
+import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const initialSheet: SheetDocument = {
@@ -178,24 +178,25 @@ export function TanStackTableConnectorLab() {
                     const isSelected = selected.has(`${row.id}\u0000${cell.column.id}`);
                     const value = row.original.cells[cell.column.id];
                     return (
-                      <td
+                      <SelectableItem
+                        as="td"
                         key={cell.id}
+                        selected={isSelected}
                         role="gridcell"
                         aria-selected={isSelected}
                         data-row-id={row.id}
                         data-column-id={cell.column.id}
-                        data-selected={isSelected ? "true" : "false"}
                         onClick={(event) => selectCell(event, row.id, cell.column.id)}
-                        className={classes("p-0", ui.surface.gridCell, ui.state.selected)}
+                        className={classes("p-0", ui.surface.gridCell)}
                       >
-                        <input
-                          aria-label={`${cell.column.id} ${row.id}`}
-                          defaultValue={displayValue(value)}
-                          key={displayValue(value)}
-                          onBlur={(event) => commitCell(event, row.id, cell.column.id, value)}
-                          className={classes("w-full min-w-0", ui.field.seamless)}
-                        />
-                      </td>
+                          <input
+                            aria-label={`${cell.column.id} ${row.id}`}
+                            defaultValue={displayValue(value)}
+                            key={displayValue(value)}
+                            onBlur={(event) => commitCell(event, row.id, cell.column.id, value)}
+                            className={classes("w-full min-w-0", ui.field.seamless)}
+                          />
+                      </SelectableItem>
                     );
                   })}
                 </tr>
@@ -215,7 +216,10 @@ export function TanStackTableConnectorLab() {
 }
 
 function Control(props: { readonly label: string; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
-  return <Button kind="toggle" aria-pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</Button>;
+  if (props.active !== undefined) {
+    return <ToggleButton pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</ToggleButton>;
+  }
+  return <ActionButton disabled={props.disabled} onClick={props.onClick}>{props.label}</ActionButton>;
 }
 
 function displayValue(value: unknown): string {

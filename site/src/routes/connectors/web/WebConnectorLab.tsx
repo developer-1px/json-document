@@ -12,6 +12,7 @@ import {
   textInputFromControl,
 } from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -73,29 +74,30 @@ export function WebConnectorLab() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
         <div className="grid gap-2">
           {document.blocks.map((block) => (
-            <article
+            <SelectableItem
+              as="article"
               key={block.id}
+              selected={selected.has(block.id)}
               data-block-id={block.id}
-              data-selected={selected.has(block.id) ? "true" : "false"}
               onClick={(event) => select(event, block.id)}
-              className={classes("p-3", ui.surface.workspace, ui.state.selected)}
+              className={classes("p-3", ui.surface.workspace)}
             >
-              <label className={classes("grid gap-2", ui.text.label)}>
-                {block.id}
-                <textarea
-                  aria-label={`${block.id} text`}
-                  key={block.text}
-                  defaultValue={block.text}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={(event) => {
-                    const input = textInputFromControl(event);
-                    const result = editor.dispatch({ type: "text.replace", blockId: block.id, ...input });
-                    setAnnouncement(result.ok ? "Native text input committed" : result.code);
-                  }}
-                  className={classes("min-h-20 w-full", ui.field.control)}
-                />
-              </label>
-            </article>
+                <label className={classes("grid gap-2", ui.text.label)}>
+                  {block.id}
+                  <textarea
+                    aria-label={`${block.id} text`}
+                    key={block.text}
+                    defaultValue={block.text}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(event) => {
+                      const input = textInputFromControl(event);
+                      const result = editor.dispatch({ type: "text.replace", blockId: block.id, ...input });
+                      setAnnouncement(result.ok ? "Native text input committed" : result.code);
+                    }}
+                    className={classes("min-h-20 w-full", ui.field.control)}
+                  />
+                </label>
+            </SelectableItem>
           ))}
         </div>
 

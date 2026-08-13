@@ -3,6 +3,7 @@ import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { CodeBlock, InlineCode } from "../../shared/ui/code-block";
 import { codeLanguage } from "../../shared/ui/code-tokens";
+import { ActionLink } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 
 type MarkdownHeading = { id: string; level: number; text: string };
@@ -51,9 +52,10 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
             return <CodeBlock language={language} size="content" source={String(children)} />;
           },
           pre: ({ children }) => <>{children}</>,
-          a: ({ href, children }) => (
-            <a href={rewriteMarkdownHref(href)}>{children}</a>
-          ),
+          a: ({ href, children }) => {
+            const target = rewriteMarkdownHref(href);
+            return target ? <ActionLink href={target}>{children}</ActionLink> : <span>{children}</span>;
+          },
         }}
       >
         {source}

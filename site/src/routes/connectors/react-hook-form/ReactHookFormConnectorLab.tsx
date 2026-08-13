@@ -5,7 +5,7 @@ import { useReactHookFormConnector } from "@interactive-os/json-document-react-h
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
-import { Button } from "../../../shared/ui/primitives";
+import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 type ProfileForm = {
@@ -71,9 +71,9 @@ export function ReactHookFormConnectorLab() {
           </label>
 
           <div className="flex flex-wrap gap-2">
-            <Button kind="primary" type="submit">Save record</Button>
-            <Button type="button" disabled={!snapshot.canUndo} onClick={binding.undo}>Undo</Button>
-            <Button type="button" disabled={!snapshot.canRedo} onClick={binding.redo}>Redo</Button>
+            <ActionButton kind="primary" type="submit">Save record</ActionButton>
+            <ActionButton type="button" disabled={!snapshot.canUndo} onClick={binding.undo}>Undo</ActionButton>
+            <ActionButton type="button" disabled={!snapshot.canRedo} onClick={binding.redo}>Redo</ActionButton>
           </div>
 
           <dl className={classes("grid grid-cols-2 gap-2 p-3", ui.surface.inset)}>

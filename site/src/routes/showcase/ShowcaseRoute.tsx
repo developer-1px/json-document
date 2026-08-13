@@ -1,4 +1,4 @@
-import { NavLink } from "../../app/router";
+import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -55,7 +55,7 @@ export function ShowcaseRoute() {
 
             <div className="p-5">
               <p className={classes("mt-0", ui.text.body)}>{demo.detail}</p>
-              <NavLink to={demo.path} className={ui.action.primary}>Open {demo.label} Demo</NavLink>
+              <ActionLink to={demo.path} kind="prominent">Open {demo.label} Demo</ActionLink>
             </div>
           </article>
         ))}
@@ -74,7 +74,7 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
             className={classes(
               "grid grid-cols-[2rem_1fr] items-center",
               ui.surface.documentBlock,
-              index === 1 && ui.state.selected,
+              index === 1 && ui.surface.previewSelected,
             )}
             data-selected={index === 1 ? "true" : "false"}
           >
@@ -103,7 +103,7 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
                 {row.map((cell, columnIndex) => (
                   <td
                     key={cell}
-                    className={classes("px-2 py-3", ui.surface.gridCell, ui.text.meta, rowIndex < 2 && columnIndex < 2 && ui.state.selected)}
+                    className={classes("px-2 py-3", ui.surface.gridCell, ui.text.meta, rowIndex < 2 && columnIndex < 2 && ui.surface.previewSelected)}
                     data-selected={rowIndex < 2 && columnIndex < 2 ? "true" : "false"}
                   >
                     {cell}

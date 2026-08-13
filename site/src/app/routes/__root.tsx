@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { ActionLink, DisclosureButton } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
-  NavLink,
   findSiteRoute,
   siteRoutes,
   usePathname,
@@ -45,19 +45,19 @@ function AppShell() {
         aria-label="Site navigation"
         className={classes("shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", ui.frame.navigation)}
       >
-        <NavLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
+        <ActionLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
           json-document
-        </NavLink>
+        </ActionLink>
         <div className={ui.nav.menu}>
           {rootNavRoutes(siteRoutes).map((item) => (
-            <NavLink
+            <ActionLink
               key={item.path}
               to={item.path}
               activePath={route.path}
               className={classes(ui.nav.item, ui.nav.current)}
             >
               {item.label}
-            </NavLink>
+            </ActionLink>
           ))}
           {routeGroups.map((group) => {
             const groupRoutes = siteRoutes.filter((item) => item.navigationGroup === group);
@@ -65,13 +65,13 @@ function AppShell() {
             const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
             const open = openGroups.has(group);
             return (
-              <div key={group} role="group" aria-labelledby={groupLabelId} className="grid content-start">
-                <button
-                  type="button"
-                  id={groupLabelId}
-                  className={ui.nav.group}
-                  aria-expanded={open}
-                  aria-controls={`${groupLabelId}-list`}
+              <div key={group} role="group" aria-label={group} className="grid content-start">
+                <span className={ui.nav.groupLabel}>{group}</span>
+                <DisclosureButton
+                  className={ui.nav.groupToggle}
+                  expanded={open}
+                  controls={`${groupLabelId}-list`}
+                  chevronClassName={ui.nav.chevron}
                   onClick={() => {
                     setOpenGroups((current) => {
                       const next = new Set(current);
@@ -82,32 +82,31 @@ function AppShell() {
                   }}
                 >
                   {group}
-                  <span className={ui.nav.chevron} aria-hidden="true">{open ? "−" : "+"}</span>
-                </button>
+                </DisclosureButton>
                 <ul id={`${groupLabelId}-list`} className={ui.nav.panel} data-open={open ? "true" : undefined}>
                   {groupRoutes.map((item) => {
                     const children = childRoutes(item.path, siteRoutes);
                     return (
                       <li key={item.path} className="grid content-start">
-                        <NavLink
+                        <ActionLink
                           to={item.path}
                           activePath={route.path}
                           branch={isNavBranch(route.path, item.path, siteRoutes)}
                           className={classes(ui.nav.item, ui.nav.current)}
                         >
                           {item.label}
-                        </NavLink>
+                        </ActionLink>
                         {children.length > 0 ? (
                           <ul className={ui.nav.list}>
                             {children.map((child) => (
                               <li key={child.path}>
-                                <NavLink
+                                <ActionLink
                                   to={child.path}
                                   activePath={route.path}
                                   className={classes(ui.nav.child, ui.nav.current)}
                                 >
                                   {child.label}
-                                </NavLink>
+                                </ActionLink>
                               </li>
                             ))}
                           </ul>

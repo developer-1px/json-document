@@ -10,7 +10,8 @@ export const ui = {
   },
   nav: {
     menu: "grid gap-3 px-3 pb-3 md:px-2",
-    group: "flex w-full items-center justify-between px-2 pb-1 pt-3 text-left text-[10px] font-medium uppercase tracking-[0.16em] text-ink md:pointer-events-none",
+    groupLabel: "hidden px-2 pb-1 pt-3 text-[10px] font-medium uppercase tracking-[0.16em] text-ink md:flex",
+    groupToggle: "px-2 pb-1 pt-3 text-[10px] uppercase tracking-[0.16em] md:hidden",
     chevron: "text-pencil md:hidden",
     list: "grid content-start",
     panel: "grid content-start max-md:hidden max-md:data-[open=true]:grid",
@@ -65,14 +66,28 @@ export const ui = {
     gridHead: "border border-pencil-light bg-paper-warm text-ink",
     gridIndex: "border border-pencil-light bg-paper-warm text-pencil",
     gridCell: "border border-pencil-light bg-paper",
+    selectableBlock: "border border-pencil-light bg-paper text-left text-xs font-medium",
+    previewSelected: "relative border-impact bg-paper-warm outline outline-2 -outline-offset-2 outline-impact",
     documentBlock: "border-b border-pencil-light/70 bg-transparent last:border-b-0",
-    documentIndex: "border-0 border-r border-pencil-light bg-paper-warm text-pencil",
+    documentIndex: "rounded-none border-0 border-r border-pencil-light bg-paper-warm text-pencil shadow-none",
     empty: "rounded-[6px] border border-dashed border-pencil-light bg-paper-warm text-pencil",
   },
-  action: {
-    primary: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-xs font-medium text-ink-strong no-underline shadow-[0_1px_2px_rgba(69,67,62,0.05),0_5px_14px_rgba(69,67,62,0.05)] hover:border-pencil hover:bg-paper-warm focus-visible:border-impact focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:border-pencil-light/60 disabled:text-pencil",
-    secondary: "rounded-[6px] border border-transparent bg-transparent px-3 py-2 text-xs font-medium text-ink no-underline hover:border-pencil-light hover:bg-paper-warm focus-visible:border-impact focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:text-pencil",
-    toggle: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-xs font-medium text-ink no-underline hover:border-pencil focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 aria-pressed:border-impact aria-pressed:bg-paper-warm aria-pressed:text-ink-strong aria-pressed:ring-1 aria-pressed:ring-impact disabled:cursor-not-allowed disabled:border-pencil-light/60 disabled:text-pencil",
+  interactive: {
+    control: "cursor-pointer rounded-[6px] border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:translate-y-px focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-pencil-light/60 disabled:bg-transparent disabled:text-pencil disabled:shadow-none",
+    action: {
+      primary: "border-pencil bg-ink-strong text-paper shadow-[0_1px_2px_rgba(69,67,62,0.10),0_5px_14px_rgba(69,67,62,0.10)] hover:border-ink-strong hover:bg-ink",
+      secondary: "border-pencil-light bg-paper text-ink shadow-[0_1px_2px_rgba(69,67,62,0.05)] hover:border-pencil hover:bg-paper-warm",
+      danger: "border-impact/60 bg-paper text-impact-ink hover:border-impact hover:bg-impact-soft",
+    },
+    link: {
+      prominent: "inline-flex cursor-pointer items-center gap-2 rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-xs font-medium text-ink-strong no-underline shadow-[0_1px_2px_rgba(69,67,62,0.05),0_5px_14px_rgba(69,67,62,0.05)] transition-[background-color,border-color,box-shadow,transform] duration-150 hover:border-pencil hover:bg-paper-warm active:translate-y-px focus-visible:border-impact focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25",
+      quiet: "inline-flex cursor-pointer items-center text-ink-strong underline decoration-pencil-light underline-offset-4 transition-colors hover:decoration-impact focus-visible:rounded-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25",
+    },
+    toggle: "border-pencil-light bg-paper text-ink hover:border-pencil hover:bg-paper-warm aria-pressed:border-impact aria-pressed:bg-paper-warm aria-pressed:text-impact-ink aria-pressed:ring-1 aria-pressed:ring-impact disabled:aria-pressed:border-pencil-light/60 disabled:aria-pressed:bg-transparent disabled:aria-pressed:text-pencil disabled:aria-pressed:ring-0",
+    disclosure: "group flex w-full cursor-pointer items-center justify-between gap-3 rounded-[6px] border border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-ink-strong outline-none transition-colors hover:border-pencil-light hover:bg-paper-warm focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:text-pencil",
+    chevron: "text-pencil transition-transform group-aria-expanded:rotate-180",
+    selectable: "cursor-pointer outline-none transition-[background-color,border-color,box-shadow] duration-150 hover:bg-paper-warm focus-visible:ring-2 focus-visible:ring-impact/25 focus-within:ring-2 focus-within:ring-impact/25 data-[selected=true]:relative data-[selected=true]:border-impact data-[selected=true]:bg-paper-warm data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-impact",
+    icon: "flex h-7 w-7 cursor-pointer items-center justify-center rounded-[4px] border border-transparent bg-transparent text-pencil outline-none transition-colors hover:border-pencil-light hover:bg-paper hover:text-ink-strong active:bg-paper-warm focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-pencil-light",
   },
   field: {
     control: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-sm leading-6 text-ink-strong outline-none hover:border-pencil focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:bg-paper-warm disabled:text-pencil",
@@ -84,7 +99,7 @@ export const ui = {
     prompt: "text-impact-ink",
     block: {
       frame: "relative min-w-0 overflow-hidden rounded-[3px] border border-pencil-light bg-paper-warm shadow-none",
-      copy: "absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-[3px] bg-paper-warm/90 text-pencil hover:bg-paper hover:text-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 data-[copied=true]:text-sage [&_path]:stroke-current [&_path]:stroke-2 [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round] [&_rect]:stroke-current [&_rect]:stroke-2",
+      copy: "absolute right-1.5 top-1.5 z-10 h-6 w-6 bg-paper-warm/90 data-[copied=true]:text-sage [&_path]:stroke-current [&_path]:stroke-2 [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round] [&_rect]:stroke-current [&_rect]:stroke-2",
       viewport: {
         compact: "max-h-32",
         content: "max-h-none",
@@ -108,7 +123,6 @@ export const ui = {
   },
   state: {
     current: "border-b border-transparent text-pencil no-underline hover:text-ink-strong aria-[current=page]:border-impact aria-[current=page]:font-medium aria-[current=page]:text-ink-strong md:border-b-0 md:border-l",
-    selected: "data-[selected=true]:relative data-[selected=true]:border-impact data-[selected=true]:bg-paper-warm data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-impact",
     focus: "outline-none focus-visible:ring-2 focus-visible:ring-impact/35",
     skipLink: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-xs font-medium text-ink-strong shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)] focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:ring-2 focus-visible:ring-impact/35",
     disabled: "disabled:cursor-not-allowed disabled:text-pencil",
@@ -157,7 +171,6 @@ export const ui = {
     description: "mb-0 mt-4 max-w-md text-base leading-7 text-ink",
     entry: "mt-8 flex flex-wrap items-center gap-x-5 gap-y-3",
     install: "font-mono text-xs leading-5 text-pencil",
-    startLink: "text-sm font-medium text-ink-strong underline decoration-impact/50 underline-offset-4 hover:decoration-impact",
     artwork: "pointer-events-none absolute inset-0 z-0 m-0 overflow-hidden",
     artworkImage: "absolute bottom-0 right-0 h-auto w-[140vw] max-w-none translate-x-[18%] sm:w-[112vw] sm:translate-x-[14%] lg:w-[78vw] lg:translate-x-[8%]",
   },
