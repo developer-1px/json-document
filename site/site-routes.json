@@ -16,7 +16,8 @@
     "path": "/docs/concepts",
     "label": "Concepts",
     "title": "Core Concepts - json-document",
-    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors."
+    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
+    "navigationGroup": "JSON Document"
   },
   {
     "path": "/docs/api",

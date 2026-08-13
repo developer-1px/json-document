@@ -15,7 +15,7 @@ describe("breadcrumbTrail", () => {
   test("uses the same Overview root on every interior page", () => {
     expect(trail("/docs/tutorial")).toEqual(["Overview:/", "Why:/docs", "Quickstart:/docs/tutorial"]);
     expect(trail("/docs")).toEqual(["Overview:/", "Why:/docs"]);
-    expect(trail("/docs/concepts")).toEqual(["Overview:/", "Concepts:/docs/concepts"]);
+    expect(trail("/docs/concepts")).toEqual(["Overview:/", "Why:/docs", "Concepts:/docs/concepts"]);
     expect(trail("/docs/selection")).toEqual(["Overview:/", "Selection:/docs/selection"]);
     expect(trail("/docs/history")).toEqual(["Overview:/", "History:/docs/history"]);
     expect(trail("/docs/clipboard")).toEqual(["Overview:/", "Clipboard:/docs/clipboard"]);
@@ -35,7 +35,7 @@ describe("breadcrumbTrail", () => {
     ]);
   });
 
-  test("keeps the concept map outside layer groups", () => {
-    expect(rootNavRoutes(routes).map((route) => route.path)).toEqual(["/docs/concepts"]);
+  test("does not lift the concept map above layer groups", () => {
+    expect(rootNavRoutes(routes)).toEqual([]);
   });
 });
