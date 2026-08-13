@@ -8,7 +8,7 @@
   },
   {
     "path": "/docs",
-    "label": "Concepts",
+    "label": "Why",
     "title": "json-document Docs - json-document",
     "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
     "navigationGroup": "Core"
@@ -64,7 +64,7 @@
   },
   {
     "path": "/connectors",
-    "label": "Overview",
+    "label": "Connectors",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
     "navigationGroup": "Connectors"
@@ -100,9 +100,16 @@
   {
     "path": "/connectors/zod",
     "label": "Zod",
-    "title": "Zod Connector Live Demo - json-document",
-    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "title": "Zod Admin Live Demo - json-document",
+    "description": "A Zod object schema and record array become a Database admin table.",
     "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/zod/validate",
+    "label": "Validate",
+    "title": "Zod Validate Live Demo - json-document",
+    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "parentPath": "/connectors/zod"
   },
   {
     "path": "/connectors/tanstack-table",

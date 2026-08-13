@@ -228,8 +228,10 @@ transaction으로 적용한다. Undo, redo와 외부 canonical 변경은 `reset`
 `@interactive-os/json-document-ajv`는 호출자가 컴파일한 동기 Ajv validator의
 첫 error message와 `instancePath`를 validation diagnostic으로 번역한다. Mutable
 clone을 검사하므로 Ajv option이 만든 변형 결과는 canonical JSON에 채택하지 않는다.
-`@interactive-os/json-document-zod`는 Zod issue path를 JSON Pointer validation
-diagnostic으로 번역하고 parse 변환값을 canonical JSON에 채택하지 않는 공식 Connector다.
+`@interactive-os/json-document-zod`는 Zod object schema와 레코드 배열을
+Database document로 번역하고, Zod issue path를 JSON Pointer validation
+diagnostic으로 옮기며 parse 변환값을 canonical JSON에 채택하지 않는 공식
+Connector다.
 `@interactive-os/json-document-tanstack-table`은 TanStack Table v8의 visible
 row/column model을 Sheet topology로 번역해 정렬·필터·column ordering 뒤에도
 cell edit, rectangular multi-range selection, selection fill과 clipboard가 화면

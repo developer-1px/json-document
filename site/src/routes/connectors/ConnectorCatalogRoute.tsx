@@ -1,9 +1,8 @@
 import { connectorCatalog } from "./connector-catalog";
 import { InlineCode } from "../../shared/ui/code-block";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { NavLink } from "../../app/router";
 import { classes, ui } from "../../shared/ui/styles";
-
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function ConnectorCatalogRoute() {
   return (
@@ -26,20 +25,20 @@ export function ConnectorCatalogRoute() {
               {connector.demoPath === null ? (
                 <span className={classes("mt-auto", ui.text.meta)}>Live Demo ships with the implementation.</span>
               ) : (
-                <a
-                  className={classes("mt-auto self-start", ui.action.primary)}
-                  href={sitePath(connector.demoPath)}
-                >
-                  Open Live Demo
-                </a>
+                <div className="mt-auto flex flex-wrap items-center gap-3">
+                  <NavLink to={connector.demoPath} className={classes("self-start", ui.action.primary)}>
+                    Open Live Demo
+                  </NavLink>
+                  {connector.moreDemos?.map((demo) => (
+                    <NavLink key={demo.path} to={demo.path} className={ui.action.secondary}>
+                      {demo.label}
+                    </NavLink>
+                  ))}
+                </div>
               )}
             </article>
           ))}
         </div>
     </PageFrame>
   );
-}
-
-function sitePath(path: string): string {
-  return `${basePath}${path}` || "/";
 }

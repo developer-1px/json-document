@@ -1,17 +1,17 @@
-import { ZodConnectorLab } from "./ZodConnectorLab";
+import { ZodAdminLab } from "./ZodAdminLab";
 import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageFrame, PageHeader } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
-const connectorCode = `const validate = createZodValidator(schema);
-const document = createJSONDocument(initial, { validate });`;
+const adminCode = `const result = databaseDocumentFromZod(schema, records);
+const editor = createDatabaseEditor(result.value);`;
 
 export function ZodConnectorDemoRoute() {
   return (
     <PageFrame>
         <PageHeader
           illustration="sleep"
-          title="Zod Connector"
+          title="Zod Admin"
           aside={(
             <div className={ui.code.install}>
               <div className={ui.text.label}>Install</div>
@@ -19,16 +19,16 @@ export function ZodConnectorDemoRoute() {
             </div>
           )}
         >
-              Zod safeParse issues translated into JSON Document validation results and JSON Pointer diagnostics.
+              A Zod object schema and record array become a Database table. That table is the admin.
         </PageHeader>
 
-        <ZodConnectorLab />
+        <ZodAdminLab />
 
-        <section aria-label="Minimal Zod connector code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
-          <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
-          <CodeBlock language="typescript" size="content" source={connectorCode} />
+        <section aria-label="Minimal Zod admin code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
+          <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Attach records</h2>
+          <CodeBlock language="typescript" size="content" source={adminCode} />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
-            The Connector owns validation result translation only. Forms, schema-driven UI, and canonical normalization remain explicit host concerns.
+            The table is the admin. <InlineCode>databaseDocumentFromZod</InlineCode> translates a Zod object and records into a Database document. It does not describe form fields or render UI.
           </p>
         </section>
     </PageFrame>

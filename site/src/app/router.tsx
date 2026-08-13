@@ -1,4 +1,6 @@
-import { useEffect, useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import siteRoutesJson from "../../site-routes.json";
 
 export type SiteNavigationGroup = "Start" | "Core" | "Editing" | "Connectors";
 
@@ -8,13 +10,24 @@ export type SiteRoute = {
   readonly title: string;
   readonly description: string;
   readonly navigationGroup?: SiteNavigationGroup;
+  readonly parentPath?: string;
 };
 
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+export const siteRoutes = siteRoutesJson as SiteRoute[];
+
 const siteUrl = (import.meta.env.VITE_SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
 
+export const routerBasepath = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+
+export function findSiteRoute(pathname: string): SiteRoute {
+  const path = normalizePath(pathname);
+  return siteRoutes.find((route) => route.path === path) ?? siteRoutes[0]!;
+}
+
 export function usePathname(): string {
-  return useSyncExternalStore(subscribePathname, readPathname, () => "/");
+  return useRouterState({
+    select: (state) => normalizePath(state.location.pathname),
+  });
 }
 
 export function useRouteMetadata(route: SiteRoute): void {
@@ -43,59 +56,26 @@ export function NavLink(props: {
   readonly children: ReactNode;
   readonly className: string;
   readonly activePath?: string;
+  readonly branch?: boolean;
 }) {
-  const active = props.activePath === props.to;
-
-  function handleClick(event: MouseEvent<HTMLAnchorElement>) {
-    if (
-      event.defaultPrevented
-      || event.button !== 0
-      || event.metaKey
-      || event.altKey
-      || event.ctrlKey
-      || event.shiftKey
-    ) return;
-
-    event.preventDefault();
-    if (!active) navigate(props.to);
-  }
+  const pathname = usePathname();
+  const active = (props.activePath ?? pathname) === props.to;
 
   return (
-    <a
-      href={pathWithBase(props.to)}
+    <Link
+      to={props.to as never}
       className={props.className}
       aria-current={active ? "page" : undefined}
-      onClick={handleClick}
+      data-branch={props.branch && !active ? "true" : undefined}
+      preload="intent"
+      activeOptions={{ exact: true }}
     >
       {props.children}
-    </a>
+    </Link>
   );
 }
 
-function pathWithBase(path: string): string {
-  return `${basePath}${path}` || "/";
-}
-
-function readPathname(): string {
-  const pathname = window.location.pathname;
-  const withoutBase = basePath !== "" && pathname.startsWith(`${basePath}/`)
-    ? pathname.slice(basePath.length)
-    : pathname === basePath ? "/" : pathname;
-  return normalizePath(withoutBase || "/");
-}
-
-function subscribePathname(listener: () => void): () => void {
-  window.addEventListener("popstate", listener);
-  return () => window.removeEventListener("popstate", listener);
-}
-
-function navigate(path: string): void {
-  window.history.pushState(null, "", pathWithBase(path));
-  window.scrollTo({ left: 0, top: 0 });
-  window.dispatchEvent(new Event("popstate"));
-}
-
-function normalizePath(path: string): string {
+export function normalizePath(path: string): string {
   if (path === "/") return path;
   return path.replace(/\/+$/g, "") || "/";
 }

@@ -126,7 +126,7 @@ if (result.ok) {
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
 | `@interactive-os/json-document-react-hook-form` | official Connector | React Hook Form draft lifecycle, canonical submit과 history reset 번역 |
 | `@interactive-os/json-document-ajv` | official Connector | compiled Ajv validator와 JSON Pointer 진단 번역 |
-| `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
+| `@interactive-os/json-document-zod` | official Connector | Zod object를 Database document로, Zod issue를 JSON Pointer 진단으로 번역 |
 | `@interactive-os/json-document-tanstack-table` | official Connector | TanStack visible row/column model과 Sheet 편집 topology 번역 |
 | `@interactive-os/json-document-web` | official Connector | Web clipboard, text-control input과 modifier state 번역 |
 | `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
@@ -171,6 +171,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | React에서 document/editor 구독 | `@interactive-os/json-document-react` |
 | Ajv로 document validation | `@interactive-os/json-document-ajv`의 `createAjvValidator` |
 | Zod schema로 document validation | `@interactive-os/json-document-zod`의 `createZodValidator` |
+| Zod schema로 Database admin 열기 | `@interactive-os/json-document-zod`의 `databaseDocumentFromZod` |
 
 성공한 mutation의 `change.applied`는 실제 적용된 canonical operation입니다.
 실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 표현됩니다.

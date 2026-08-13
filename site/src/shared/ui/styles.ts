@@ -1,12 +1,30 @@
 export const ui = {
   frame: {
     app: "bg-paper font-sans text-ink antialiased",
-    page: "min-h-full bg-paper px-4 py-8 lg:px-8",
+    page: "min-h-full bg-paper px-4 pb-8 pt-4 lg:px-8",
     content: "mx-auto max-w-6xl",
     header: "border-b border-pencil-light/60",
     hero: "border-b border-pencil-light/60 bg-transparent",
     navigation: "border-b border-pencil-light/60 bg-paper text-sm md:border-b-0 md:border-r",
     brand: "font-mono text-ink-strong no-underline hover:text-ink md:border-b md:border-pencil-light/60",
+  },
+  nav: {
+    menu: "grid gap-3 px-3 pb-3 md:px-2",
+    group: "flex w-full items-center justify-between px-2 pb-1 pt-3 text-left text-[10px] font-medium uppercase tracking-[0.16em] text-ink md:pointer-events-none",
+    chevron: "text-pencil md:hidden",
+    list: "grid content-start",
+    panel: "grid content-start max-md:hidden max-md:data-[open=true]:grid",
+    item: "flex border-l-2 border-transparent px-2 py-1 text-sm text-ink no-underline hover:text-ink-strong md:px-3",
+    child: "flex border-l-2 border-transparent py-1 pl-5 text-sm text-ink no-underline hover:text-ink-strong md:pl-6",
+    current: "aria-[current=page]:border-impact aria-[current=page]:font-medium aria-[current=page]:text-ink-strong data-[branch=true]:text-ink-strong",
+  },
+  breadcrumb: {
+    nav: "mb-3",
+    list: "m-0 flex list-none flex-wrap items-center p-0 text-xs leading-5 text-pencil",
+    item: "flex items-center",
+    link: "text-pencil no-underline hover:text-ink-strong",
+    current: "font-medium text-ink-strong",
+    sep: "mx-1.5 text-pencil-light",
   },
   accent: {
     impact: {

@@ -5,6 +5,10 @@ export type ConnectorCatalogEntry = {
   readonly description: string;
   readonly status: "available" | "planned";
   readonly demoPath: string | null;
+  readonly moreDemos?: ReadonlyArray<{
+    readonly path: string;
+    readonly label: string;
+  }>;
 };
 
 export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
@@ -36,9 +40,10 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     id: "zod",
     name: "Zod",
     packageName: "@interactive-os/json-document-zod",
-    description: "Zod validation results translated into JSON Document diagnostics.",
+    description: "Zod object schemas translated into Database admin documents.",
     status: "available",
     demoPath: "/connectors/zod",
+    moreDemos: [{ path: "/connectors/zod/validate", label: "Validate commits" }],
   },
   {
     id: "tanstack-table",
