@@ -27,6 +27,8 @@ import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipb
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
+import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
+import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
@@ -125,6 +127,16 @@ const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
   path: "/docs/history",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsIntentRoute = PageDocsIntentRouteImport.update({
+  id: "/docs/intent",
+  path: "/docs/intent",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsIntentGuideRoute = PageDocsIntentGuideRouteImport.update({
+  id: "/docs/intent-guide",
+  path: "/docs/intent-guide",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsSelectionRoute = PageDocsSelectionRouteImport.update({
   id: "/docs/selection",
   path: "/docs/selection",
@@ -172,6 +184,8 @@ export interface FileRoutesByFullPath {
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/intent": typeof PageDocsIntentRoute;
+  "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
@@ -197,6 +211,8 @@ export interface FileRoutesByTo {
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/intent": typeof PageDocsIntentRoute;
+  "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
@@ -224,6 +240,8 @@ export interface FileRoutesById {
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
+  "/_page/docs/intent": typeof PageDocsIntentRoute;
+  "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
@@ -251,6 +269,8 @@ export interface FileRouteTypes {
     | "/docs/concepts"
     | "/docs/connectors"
     | "/docs/history"
+    | "/docs/intent"
+    | "/docs/intent-guide"
     | "/docs/selection"
     | "/docs/topology"
     | "/docs/tutorial"
@@ -276,6 +296,8 @@ export interface FileRouteTypes {
     | "/docs/concepts"
     | "/docs/connectors"
     | "/docs/history"
+    | "/docs/intent"
+    | "/docs/intent-guide"
     | "/docs/selection"
     | "/docs/topology"
     | "/docs/tutorial"
@@ -302,6 +324,8 @@ export interface FileRouteTypes {
     | "/_page/docs/concepts"
     | "/_page/docs/connectors"
     | "/_page/docs/history"
+    | "/_page/docs/intent"
+    | "/_page/docs/intent-guide"
     | "/_page/docs/selection"
     | "/_page/docs/topology"
     | "/_page/docs/tutorial"
@@ -446,6 +470,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsHistoryRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/intent": {
+      id: "/_page/docs/intent";
+      path: "/docs/intent";
+      fullPath: "/docs/intent";
+      preLoaderRoute: typeof PageDocsIntentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/intent-guide": {
+      id: "/_page/docs/intent-guide";
+      path: "/docs/intent-guide";
+      fullPath: "/docs/intent-guide";
+      preLoaderRoute: typeof PageDocsIntentGuideRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/selection": {
       id: "/_page/docs/selection";
       path: "/docs/selection";
@@ -505,6 +543,8 @@ interface PageRouteChildren {
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
+  PageDocsIntentRoute: typeof PageDocsIntentRoute;
+  PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
@@ -530,6 +570,8 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConceptsRoute: PageDocsConceptsRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
+  PageDocsIntentRoute: PageDocsIntentRoute,
+  PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsSelectionRoute: PageDocsSelectionRoute,
   PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,

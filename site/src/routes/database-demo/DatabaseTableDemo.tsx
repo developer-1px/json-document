@@ -9,8 +9,11 @@ import {
   createDatabaseEditor,
   type DatabaseDocument,
   type DatabaseEditor,
+  type DatabaseIntent,
   type DatabaseProperty,
   type DatabaseRecord,
+  type DatabaseSelection,
+  type EditingResult,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
@@ -30,6 +33,8 @@ export function DatabaseTableDemo() {
   const [dragPreview, setDragPreview] = useState<ReadonlyArray<string> | null>(null);
   const draggedProperty = useRef<string | null>(null);
   const [announcement, setAnnouncement] = useState("Database ready");
+  const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
+  const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
   const nextRecord = useRef(5);
   const document = snapshot.value as DatabaseDocument;
   const view = document.views[0]!;
@@ -40,9 +45,17 @@ export function DatabaseTableDemo() {
   const records = topology.recordIds.map((id) => document.records.find((record) => record.id === id)!);
   const selected = new Set(editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)));
 
+  function dispatchIntent(intent: DatabaseIntent) {
+    const result: EditingResult<DatabaseSelection> = editor.dispatch(intent);
+    setLastIntent(intent);
+    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
+    return result;
+  }
+
   function run(action: () => { readonly ok: boolean }, message: string) {
     const result = action();
     setAnnouncement(result.ok ? message : "That action is not available");
+    return result;
   }
 
   function selectCell(event: MouseEvent, recordId: string, propertyId: string) {
@@ -51,27 +64,27 @@ export function DatabaseTableDemo() {
       : event.metaKey || event.ctrlKey
         ? "toggle"
         : "replace";
-    run(() => editor.dispatch({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
+    run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
   }
 
   function commit(recordId: string, propertyId: string, value: string | number | boolean) {
-    run(() => editor.dispatch({ type: "cell.commit", recordId, propertyId, value }), `${propertyId} committed`);
+    run(() => dispatchIntent({ type: "cell.commit", recordId, propertyId, value }), `${propertyId} committed`);
   }
 
   function configure(patch: Parameters<DatabaseEditor["dispatch"]>[0] & { readonly type: "view.configure" }) {
-    run(() => editor.dispatch(patch), "Table view saved in canonical JSON");
+    run(() => dispatchIntent(patch), "Table view saved in canonical JSON");
   }
 
   function addRecord() {
     const recordId = `page-${nextRecord.current}`;
     nextRecord.current += 1;
-    run(() => editor.dispatch({ type: "record.add", recordId }), "Record added");
+    run(() => dispatchIntent({ type: "record.add", recordId }), "Record added");
   }
 
   function deleteSelectedRecord() {
     const recordId = snapshot.selection.focus?.recordId;
     if (!recordId) return;
-    run(() => editor.dispatch({ type: "record.delete", recordId }), "Record deleted");
+    run(() => dispatchIntent({ type: "record.delete", recordId }), "Record deleted");
   }
 
   function startPropertyDrag(event: DragEvent, propertyId: string) {
@@ -232,6 +245,8 @@ export function DatabaseTableDemo() {
         </div>
 
         <aside aria-label="Database contract inspector" className="grid content-start gap-3 lg:grid-cols-3">
+          <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="database-intent-json" />
+          <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="database-result-json" />
           <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
           <JsonInspector
             label="Structural selection"
