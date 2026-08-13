@@ -162,7 +162,7 @@ export function DocumentDemoRoute() {
           <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+        <div className="grid gap-4">
           <section aria-label="Editable document" className={classes("p-3", ui.surface.raised)}>
             <div
               ref={surfaceRef}
@@ -202,29 +202,32 @@ export function DocumentDemoRoute() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
 
-          <div className="grid min-w-0 gap-3">
-            <JsonInspector
-              label="Canonical JSON"
-              meta="JSON Patch document"
-              value={snapshot.value}
-              testId="canonical-json"
-              size="tall"
-            />
-            <JsonInspector
-              label="intent"
-              meta={lastIntent ? lastIntent.type : "dispatch only"}
-              value={lastIntent}
-              testId="document-intent-json"
-              size="compact"
-            />
-            <JsonInspector
-              label="result"
-              meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"}
-              value={lastResult}
-              testId="document-result-json"
-              size="compact"
-            />
-          </div>
+          <details className={classes("p-3", ui.surface.raised)}>
+            <summary className={classes("cursor-pointer", ui.text.heading)}>Inspect editing state</summary>
+            <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
+              <JsonInspector
+                label="Canonical JSON"
+                meta="JSON Patch document"
+                value={snapshot.value}
+                testId="canonical-json"
+                size="tall"
+              />
+              <JsonInspector
+                label="intent"
+                meta={lastIntent ? lastIntent.type : "dispatch only"}
+                value={lastIntent}
+                testId="document-intent-json"
+                size="compact"
+              />
+              <JsonInspector
+                label="result"
+                meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"}
+                value={lastResult}
+                testId="document-result-json"
+                size="compact"
+              />
+            </div>
+          </details>
         </div>
     </PageFrame>
   );

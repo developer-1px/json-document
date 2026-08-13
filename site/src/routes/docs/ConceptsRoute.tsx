@@ -1,8 +1,8 @@
 import conceptsMarkdown from "../../../../docs/public/concepts.md?raw";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { ConceptsLab } from "./ConceptsLab";
 import { docPages, type DocPageId } from "./doc-pages";
+import { DocsRoute } from "./DocsRoute";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 
 export function ConceptsRoute() {
@@ -17,15 +17,15 @@ export function ConceptsRoute() {
 }
 
 export function SelectionDocsRoute() {
-  return <EditingConceptRoute pageId="selection" />;
+  return <DocsRoute pageId="selection" />;
 }
 
 export function HistoryDocsRoute() {
-  return <EditingConceptRoute pageId="history" />;
+  return <DocsRoute pageId="history" />;
 }
 
 export function ClipboardDocsRoute() {
-  return <EditingConceptRoute pageId="clipboard" />;
+  return <DocsRoute pageId="clipboard" />;
 }
 
 function EditingConceptRoute(props: {
@@ -43,7 +43,7 @@ function EditingConceptRoute(props: {
 
   return (
     <PageFrame>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_11rem]">
         <div className="min-w-0">
           <PageHeader title={title} illustration={illustration}>
             {props.summary}
@@ -64,7 +64,7 @@ function EditingConceptRoute(props: {
           </div>
         </div>
 
-        <aside className="min-w-0 lg:sticky lg:top-4">
+        <aside className="hidden min-w-0 self-start lg:sticky lg:top-4 lg:block">
           <nav aria-label="On this page" className={classes("mb-4 hidden lg:block", ui.text.meta)}>
             <div className={classes("mb-2", ui.text.heading)}>On this page</div>
             <div className="grid">
@@ -79,7 +79,6 @@ function EditingConceptRoute(props: {
               ))}
             </div>
           </nav>
-          <ConceptsLab />
         </aside>
       </div>
     </PageFrame>

@@ -161,7 +161,7 @@ export function SheetDemo() {
           <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+        <div className="grid gap-4">
           <section
             aria-label="Editable sheet"
             onCopy={handleNativeCopy}
@@ -215,12 +215,15 @@ export function SheetDemo() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click adds or removes a single-cell range. Fill selected changes every selected cell in one transaction.</p>
           </section>
 
-          <aside className="grid min-w-0 gap-3" aria-label="Canonical JSON">
-            <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
-            <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="sheet-intent-json" size="compact" />
-            <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="sheet-result-json" size="compact" />
-            <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
-          </aside>
+          <details className={classes("p-3", ui.surface.raised)}>
+            <summary className={classes("cursor-pointer", ui.text.heading)}>Inspect editing state</summary>
+            <aside className="mt-3 grid min-w-0 gap-3 lg:grid-cols-2" aria-label="Canonical JSON">
+              <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
+              <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="sheet-intent-json" size="compact" />
+              <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="sheet-result-json" size="compact" />
+              <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
+            </aside>
+          </details>
         </div>
     </PageFrame>
   );

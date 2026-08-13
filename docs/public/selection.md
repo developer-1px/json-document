@@ -35,10 +35,9 @@ if (result.ok) {
 두 점 사이에 어떤 항목이 포함되는지는 화면의 순서에 따라 달라집니다. 이
 순서를 Selection과 함께 사용하기 위해 [Topology](topology.md)를 넘깁니다.
 
-캔버스처럼 순서보다 개별 객체의 ID가 중요한 화면에서는 키 집합을
-사용합니다. 클릭으로 집합을 바꾸고, modifier 입력으로 ID를 더하거나 뺄 수
-있습니다. [Selection Lab](/demo/selection)에서 범위 선택과 키 선택의 상태
-변화를 나란히 확인할 수 있습니다.
+[Selection Demo](/demo/selection)에서는 같은 블록 목록에 `replace`, `extend`,
+`toggle` 입력을 차례로 보내며 Selection만 어떻게 달라지는지 확인할 수
+있습니다. 문서 값과 History가 그대로인 것도 결과 옆에서 함께 보입니다.
 
 ## 값을 바꿀 때 선택도 함께 넘기기
 

@@ -23,10 +23,13 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/intent")).toEqual(["Overview:/", "Intent:/docs/intent"]);
     expect(trail("/docs/intent-guide")).toEqual(["Overview:/", "Intent guide:/docs/intent-guide"]);
     expect(trail("/docs/api")).toEqual(["Overview:/", "API Reference:/docs/api"]);
-    expect(trail("/examples/document")).toEqual(["Overview:/", "Document:/demo", "Workbench:/examples/document"]);
-    expect(trail("/demo")).toEqual(["Overview:/", "Document:/demo"]);
-    expect(trail("/demo/selection")).toEqual(["Overview:/", "Selection:/docs/selection", "Selection Lab:/demo/selection"]);
-    expect(trail("/demo/database")).toEqual(["Overview:/", "Database:/demo/database"]);
+    expect(trail("/demos")).toEqual(["Overview:/", "Showcase:/demos"]);
+    expect(trail("/demo")).toEqual(["Overview:/", "Showcase:/demos", "Document:/demo"]);
+    expect(trail("/demo/selection")).toEqual(["Overview:/", "Selection:/docs/selection", "Selection Demo:/demo/selection"]);
+    expect(trail("/demo/topology")).toEqual(["Overview:/", "Topology:/docs/topology", "Topology Demo:/demo/topology"]);
+    expect(trail("/demo/clipboard")).toEqual(["Overview:/", "Clipboard:/docs/clipboard", "Clipboard Demo:/demo/clipboard"]);
+    expect(trail("/demo/history")).toEqual(["Overview:/", "History:/docs/history", "History Demo:/demo/history"]);
+    expect(trail("/demo/database")).toEqual(["Overview:/", "Showcase:/demos", "Database:/demo/database"]);
     expect(trail("/connectors")).toEqual(["Overview:/", "Connectors:/connectors"]);
     expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connectors:/connectors", "Zod:/connectors/zod"]);
     expect(trail("/connectors/zod/validate")).toEqual([

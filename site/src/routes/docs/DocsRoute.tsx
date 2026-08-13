@@ -46,8 +46,16 @@ export function IntentGuideRoute() {
   return <DocsRoute pageId="intentGuide" />;
 }
 
-function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
+const demoLinks: Partial<Record<DocPageId, { readonly to: string; readonly label: string }>> = {
+  selection: { to: "/demo/selection", label: "Open Selection Demo" },
+  topology: { to: "/demo/topology", label: "Open Topology Demo" },
+  clipboard: { to: "/demo/clipboard", label: "Open Clipboard Demo" },
+  history: { to: "/demo/history", label: "Open History Demo" },
+};
+
+export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   const page = docPages[pageId];
+  const demo = demoLinks[pageId];
   const headings = useMemo(
     () => markdownHeadings(page.source).filter((heading) => heading.level === 2),
     [page.source],
@@ -59,9 +67,9 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
         <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
             <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
-            {pageId === "quickstart" ? (
+            {demo ? (
               <div className="mb-5">
-                <NavLink to="/examples/document" className={ui.action.primary}>Open in Example Workbench</NavLink>
+                <NavLink to={demo.to} className={ui.action.primary}>{demo.label}</NavLink>
               </div>
             ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>

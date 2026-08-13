@@ -10,6 +10,7 @@ const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
   "JSON Document": { path: "/docs", label: "Why" },
+  Demos: { path: "/demos", label: "Showcase" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 

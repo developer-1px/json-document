@@ -42,9 +42,9 @@
   },
   {
     "path": "/demo/selection",
-    "label": "Selection Lab",
-    "title": "Selection Lab - json-document",
-    "description": "Compare DOM-free key, range, mask, nested scope, interaction, and history contracts across structural editors.",
+    "label": "Selection Demo",
+    "title": "Selection Demo - json-document",
+    "description": "Change structural selection while the document value and editing history stay unchanged.",
     "parentPath": "/docs/selection"
   },
   {
@@ -55,11 +55,25 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/demo/topology",
+    "label": "Topology Demo",
+    "title": "Topology Demo - json-document",
+    "description": "Change visible order and compare the range computed from the same anchor and focus.",
+    "parentPath": "/docs/topology"
+  },
+  {
     "path": "/docs/clipboard",
     "label": "Clipboard",
     "title": "Clipboard - json-document",
     "description": "Structured copy, cut, and paste payloads created from the current structural selection.",
     "navigationGroup": "Editing"
+  },
+  {
+    "path": "/demo/clipboard",
+    "label": "Clipboard Demo",
+    "title": "Clipboard Demo - json-document",
+    "description": "Follow a structural selection through copy or cut, its clipboard payload, and paste.",
+    "parentPath": "/docs/clipboard"
   },
   {
     "path": "/docs/history",
@@ -69,6 +83,13 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/demo/history",
+    "label": "History Demo",
+    "title": "History Demo - json-document",
+    "description": "Edit a document, then restore its value and selection together with undo and redo.",
+    "parentPath": "/docs/history"
+  },
+  {
     "path": "/docs/intent",
     "label": "Intent",
     "title": "Intent reference - json-document",
@@ -76,32 +97,32 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/demos",
+    "label": "Showcase",
+    "title": "Demo Showcase - json-document",
+    "description": "Explore complete Document, Sheet, and Database editing experiences built on json-document.",
+    "navigationGroup": "Demos"
+  },
+  {
     "path": "/demo",
     "label": "Document",
     "title": "Document Demo - json-document",
     "description": "A minimal, complete document editor powered by the public headless editing API.",
-    "navigationGroup": "Editing"
-  },
-  {
-    "path": "/examples/document",
-    "label": "Workbench",
-    "title": "Document Example Workbench - json-document",
-    "description": "Run a document editing scenario and inspect canonical JSON, selection, revision, and applied operations.",
-    "parentPath": "/demo"
+    "parentPath": "/demos"
   },
   {
     "path": "/demo/sheet",
     "label": "Sheet",
     "title": "Sheet Demo - json-document",
     "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
-    "navigationGroup": "Editing"
+    "parentPath": "/demos"
   },
   {
     "path": "/demo/database",
     "label": "Database",
     "title": "Database Table Demo - json-document",
     "description": "A Notion-style Database Table v1 with typed properties, persistent view configuration, selection, native text editing, and history.",
-    "navigationGroup": "Editing"
+    "parentPath": "/demos"
   },
   {
     "path": "/connectors",

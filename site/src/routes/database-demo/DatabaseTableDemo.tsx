@@ -244,23 +244,26 @@ export function DatabaseTableDemo() {
           {records.length === 0 ? <div className={classes("m-3 p-6", ui.surface.empty)}>No records in this view.</div> : null}
         </div>
 
-        <aside aria-label="Database contract inspector" className="grid content-start gap-3 lg:grid-cols-3">
-          <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="database-intent-json" />
-          <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="database-result-json" />
-          <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
-          <JsonInspector
-            label="Structural selection"
-            value={snapshot.selection}
-            testId="database-selection-json"
-            size="compact"
-          />
-          <JsonInspector
-            label="Canonical database"
-            signal={`revision ${snapshot.revision}`}
-            value={document}
-            testId="database-document-json"
-          />
-        </aside>
+        <details className={classes("p-3", ui.surface.raised)}>
+          <summary className={classes("cursor-pointer", ui.text.heading)}>Inspect editing state</summary>
+          <aside aria-label="Database contract inspector" className="mt-3 grid content-start gap-3 lg:grid-cols-3">
+            <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="database-intent-json" />
+            <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="database-result-json" />
+            <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
+            <JsonInspector
+              label="Structural selection"
+              value={snapshot.selection}
+              testId="database-selection-json"
+              size="compact"
+            />
+            <JsonInspector
+              label="Canonical database"
+              signal={`revision ${snapshot.revision}`}
+              value={document}
+              testId="database-document-json"
+            />
+          </aside>
+        </details>
       </div>
     </section>
   );
