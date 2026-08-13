@@ -1,9 +1,12 @@
 import { useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
 import {
   createSheetEditor,
+  type EditingResult,
   type SheetClipboard,
   type SheetDocument,
   type SheetEditor,
+  type SheetIntent,
+  type SheetSelection,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import {
@@ -39,18 +42,28 @@ export function SheetDemo() {
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const [announcement, setAnnouncement] = useState("Ready");
+  const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
+  const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
   const sheet = snapshot.value as SheetDocument;
   const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
+
+  function dispatchIntent(intent: SheetIntent) {
+    const result: EditingResult<SheetSelection> = editor.dispatch(intent);
+    setLastIntent(intent);
+    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
+    return result;
+  }
 
   function run(action: () => { readonly ok: boolean }, successMessage: string) {
     const result = action();
     setAnnouncement(result.ok ? successMessage : "That action is not available here");
+    return result;
   }
 
   function selectCell(event: MouseEvent, rowId: string, columnId: string) {
     const mode = selectionOperationFromModifiers(event);
     run(
-      () => editor.dispatch({
+      () => dispatchIntent({
         type: "selection.set",
         rowId,
         columnId,
@@ -71,7 +84,7 @@ export function SheetDemo() {
   function pasteSelection() {
     if (clipboard === null) return setAnnouncement("Copy cells first");
     run(
-      () => editor.dispatch({ type: "clipboard.paste", clipboard }),
+      () => dispatchIntent({ type: "clipboard.paste", clipboard }),
       `Pasted ${clipboard.cells.length} × ${clipboard.cells[0]?.length ?? 0} cells`,
     );
   }
@@ -116,7 +129,7 @@ export function SheetDemo() {
           <Action label="Copy" onClick={copySelection} />
           <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
           <Action label="Fill selected" onClick={() => run(
-            () => editor.dispatch({ type: "selection.fill", value: "Selected" }),
+            () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
             "Selected cells filled",
           )} />
           <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
@@ -163,7 +176,7 @@ export function SheetDemo() {
                             aria-label={`${column.label} row ${rowIndex + 1}`}
                             value={displayValue(row.cells[column.id])}
                             onChange={(event) => run(
-                              () => editor.dispatch({ type: "cell.commit", rowId: row.id, columnId: column.id, value: event.currentTarget.value }),
+                              () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value: event.currentTarget.value }),
                               `${column.label} committed`,
                             )}
                             className={classes("w-full min-w-0", ui.field.seamless)}
@@ -180,6 +193,8 @@ export function SheetDemo() {
 
           <aside className="grid min-w-0 gap-3" aria-label="Canonical JSON">
             <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
+            <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="sheet-intent-json" size="compact" />
+            <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="sheet-result-json" size="compact" />
             <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
           </aside>
         </div>
