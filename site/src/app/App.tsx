@@ -24,6 +24,7 @@ const DatabaseDemoRoute = lazy(() => import("../routes/database-demo/DatabaseDem
 const ConnectorCatalogRoute = lazy(() => import("../routes/connectors/ConnectorCatalogRoute").then((module) => ({ default: module.ConnectorCatalogRoute })));
 const ReactConnectorDemoRoute = lazy(() => import("../routes/connectors/react/ReactConnectorDemoRoute").then((module) => ({ default: module.ReactConnectorDemoRoute })));
 const ReactHookFormConnectorDemoRoute = lazy(() => import("../routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute").then((module) => ({ default: module.ReactHookFormConnectorDemoRoute })));
+const AjvConnectorDemoRoute = lazy(() => import("../routes/connectors/ajv/AjvConnectorDemoRoute").then((module) => ({ default: module.AjvConnectorDemoRoute })));
 const ZodConnectorDemoRoute = lazy(() => import("../routes/connectors/zod/ZodConnectorDemoRoute").then((module) => ({ default: module.ZodConnectorDemoRoute })));
 const TanStackTableConnectorDemoRoute = lazy(() => import("../routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute").then((module) => ({ default: module.TanStackTableConnectorDemoRoute })));
 const WebConnectorDemoRoute = lazy(() => import("../routes/connectors/web/WebConnectorDemoRoute").then((module) => ({ default: module.WebConnectorDemoRoute })));
@@ -42,6 +43,7 @@ const routeComponents: Record<string, ComponentType> = {
   "/connectors": ConnectorCatalogRoute,
   "/connectors/react": ReactConnectorDemoRoute,
   "/connectors/react-hook-form": ReactHookFormConnectorDemoRoute,
+  "/connectors/ajv": AjvConnectorDemoRoute,
   "/connectors/zod": ZodConnectorDemoRoute,
   "/connectors/tanstack-table": TanStackTableConnectorDemoRoute,
   "/connectors/web": WebConnectorDemoRoute,

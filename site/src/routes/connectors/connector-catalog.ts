@@ -1,5 +1,5 @@
 export type ConnectorCatalogEntry = {
-  readonly id: "react" | "react-hook-form" | "zod" | "tanstack-table" | "web";
+  readonly id: "react" | "react-hook-form" | "ajv" | "zod" | "tanstack-table" | "web";
   readonly name: string;
   readonly packageName: string;
   readonly description: string;
@@ -23,6 +23,14 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     description: "Form drafts and field lifecycle connected to canonical commits and history.",
     status: "available",
     demoPath: "/connectors/react-hook-form",
+  },
+  {
+    id: "ajv",
+    name: "Ajv",
+    packageName: "@interactive-os/json-document-ajv",
+    description: "Compiled Ajv validators translated into synchronous JSON Document diagnostics.",
+    status: "available",
+    demoPath: "/connectors/ajv",
   },
   {
     id: "zod",

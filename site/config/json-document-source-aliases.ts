@@ -28,6 +28,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-react-hook-form/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-ajv",
+      replacement: sourceFile("packages/json-document-ajv/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-zod",
       replacement: sourceFile("packages/json-document-zod/src/index.ts"),
     },

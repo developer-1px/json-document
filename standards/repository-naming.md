@@ -524,6 +524,12 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `createZodValidator`, `ZodValidatorOptions` | Zod native schema를 JSON Document validation callback으로 연결하는 책임이 일치 |
 
+### Ajv Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `createAjvValidator`, `AjvValidatorOptions` | Ajv native compiled validator를 JSON Document validation callback으로 연결하는 책임이 일치 |
+
 ### TanStack Table Connector package
 
 | Decision | Current public exports | Canonical rule |
@@ -619,6 +625,9 @@ Connector packages
 ├─ Zod
 │  ├─ ZodValidatorOptions
 │  └─ createZodValidator
+├─ Ajv
+│  ├─ AjvValidatorOptions
+│  └─ createAjvValidator
 ├─ TanStack Table
 │  ├─ TableDocumentBinding
 │  ├─ TableDocumentOptions

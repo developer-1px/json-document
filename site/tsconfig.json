@@ -11,6 +11,7 @@
       "@interactive-os/json-document-selection": ["../packages/json-document-selection/src/index.ts"],
       "@interactive-os/json-document-react": ["../packages/json-document-react/src/index.ts"],
       "@interactive-os/json-document-react-hook-form": ["../packages/json-document-react-hook-form/src/index.ts"],
+      "@interactive-os/json-document-ajv": ["../packages/json-document-ajv/src/index.ts"],
       "@interactive-os/json-document-tanstack-table": ["../packages/json-document-tanstack-table/src/index.ts"],
       "@interactive-os/json-document-web": ["../packages/json-document-web/src/index.ts"],
       "@interactive-os/json-document-zod": ["../packages/json-document-zod/src/index.ts"]
