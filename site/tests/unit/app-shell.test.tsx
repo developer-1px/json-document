@@ -49,6 +49,7 @@ describe("official site shell", () => {
       "/connectors/tanstack-table",
       "/connectors/web",
     ]);
+    expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
   });
 });
 

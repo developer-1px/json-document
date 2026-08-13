@@ -7,8 +7,10 @@ test("Zod Connector Live Demo opens a Database admin from a Zod schema without a
   });
 
   await page.goto("/connectors/zod");
+  await expect(page.getByRole("heading", { level: 1, name: "Zod Admin" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "The table is the admin" })).toBeVisible();
   await expect(page.getByRole("form")).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "Profile title draft" })).toHaveCount(0);
   await expect(page.getByRole("grid", { name: "Admin records" })).toBeVisible();
 
   const title = page.getByRole("textbox", { name: "Title t1" });
@@ -36,8 +38,9 @@ test("Zod Connector Live Demo rejects invalid changes and preserves canonical JS
     if (message.type() === "error" || message.type() === "warning") errors.push(message.text());
   });
 
-  await page.goto("/connectors/zod");
-  await expect(page.getByRole("heading", { level: 1, name: "Zod Connector" })).toBeVisible();
+  await page.goto("/connectors/zod/validate");
+  await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
+  await expect(page.getByRole("grid", { name: "Admin records" })).toHaveCount(0);
 
   const title = page.getByRole("textbox", { name: "Profile title draft" });
   await title.fill("x");

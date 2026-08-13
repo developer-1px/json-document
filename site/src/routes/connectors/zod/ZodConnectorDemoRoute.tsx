@@ -1,21 +1,19 @@
 import { ZodAdminLab } from "./ZodAdminLab";
-import { ZodConnectorLab } from "./ZodConnectorLab";
 import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageFrame, PageHeader } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 const adminCode = `const result = databaseDocumentFromZod(schema, records);
 const editor = createDatabaseEditor(result.value);`;
-
-const connectorCode = `const validate = createZodValidator(schema);
-const document = createJSONDocument(initial, { validate });`;
 
 export function ZodConnectorDemoRoute() {
   return (
     <PageFrame>
         <PageHeader
           illustration="sleep"
-          title="Zod Connector"
+          title="Zod Admin"
           aside={(
             <div className={ui.code.install}>
               <div className={ui.text.label}>Install</div>
@@ -23,7 +21,7 @@ export function ZodConnectorDemoRoute() {
             </div>
           )}
         >
-              Zod object schemas become a Database admin table. The same package still translates safeParse issues into JSON Pointer diagnostics.
+              A Zod object schema and record array become a Database table. That table is the admin.
         </PageHeader>
 
         <ZodAdminLab />
@@ -34,15 +32,9 @@ export function ZodConnectorDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             The table is the admin. <InlineCode>databaseDocumentFromZod</InlineCode> translates a Zod object and records into a Database document. It does not describe form fields or render UI.
           </p>
-        </section>
-
-        <div className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
-          <ZodConnectorLab />
-        </div>
-
-        <section aria-label="Minimal Zod validator code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
-          <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Validate commits</h2>
-          <CodeBlock language="typescript" size="content" source={connectorCode} />
+          <p className={classes("mb-0 mt-3", ui.text.meta)}>
+            <a href={`${basePath}/connectors/zod/validate`} className={ui.action.secondary}>Validate commits</a>
+          </p>
         </section>
     </PageFrame>
   );

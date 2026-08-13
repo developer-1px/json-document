@@ -86,9 +86,15 @@
   {
     "path": "/connectors/zod",
     "label": "Zod",
-    "title": "Zod Connector Live Demo - json-document",
-    "description": "Live Zod object-to-Database admin table plus validation diagnostics that preserve canonical JSON.",
+    "title": "Zod Admin Live Demo - json-document",
+    "description": "A Zod object schema and record array become a Database admin table.",
     "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/zod/validate",
+    "label": "Validate",
+    "title": "Zod Validate Live Demo - json-document",
+    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation."
   },
   {
     "path": "/connectors/tanstack-table",

@@ -26,12 +26,19 @@ export function ConnectorCatalogRoute() {
               {connector.demoPath === null ? (
                 <span className={classes("mt-auto", ui.text.meta)}>Live Demo ships with the implementation.</span>
               ) : (
-                <a
-                  className={classes("mt-auto self-start", ui.action.primary)}
-                  href={sitePath(connector.demoPath)}
-                >
-                  Open Live Demo
-                </a>
+                <div className="mt-auto flex flex-wrap items-center gap-3">
+                  <a
+                    className={classes("self-start", ui.action.primary)}
+                    href={sitePath(connector.demoPath)}
+                  >
+                    Open Live Demo
+                  </a>
+                  {connector.moreDemos?.map((demo) => (
+                    <a key={demo.path} className={ui.action.secondary} href={sitePath(demo.path)}>
+                      {demo.label}
+                    </a>
+                  ))}
+                </div>
               )}
             </article>
           ))}

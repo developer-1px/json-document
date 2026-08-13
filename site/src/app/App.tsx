@@ -24,6 +24,7 @@ const ConnectorCatalogRoute = lazy(() => import("../routes/connectors/ConnectorC
 const ReactConnectorDemoRoute = lazy(() => import("../routes/connectors/react/ReactConnectorDemoRoute").then((module) => ({ default: module.ReactConnectorDemoRoute })));
 const ReactHookFormConnectorDemoRoute = lazy(() => import("../routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute").then((module) => ({ default: module.ReactHookFormConnectorDemoRoute })));
 const ZodConnectorDemoRoute = lazy(() => import("../routes/connectors/zod/ZodConnectorDemoRoute").then((module) => ({ default: module.ZodConnectorDemoRoute })));
+const ZodValidateDemoRoute = lazy(() => import("../routes/connectors/zod/ZodValidateDemoRoute").then((module) => ({ default: module.ZodValidateDemoRoute })));
 const TanStackTableConnectorDemoRoute = lazy(() => import("../routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute").then((module) => ({ default: module.TanStackTableConnectorDemoRoute })));
 const WebConnectorDemoRoute = lazy(() => import("../routes/connectors/web/WebConnectorDemoRoute").then((module) => ({ default: module.WebConnectorDemoRoute })));
 
@@ -41,6 +42,7 @@ const routeComponents: Record<string, ComponentType> = {
   "/connectors/react": ReactConnectorDemoRoute,
   "/connectors/react-hook-form": ReactHookFormConnectorDemoRoute,
   "/connectors/zod": ZodConnectorDemoRoute,
+  "/connectors/zod/validate": ZodValidateDemoRoute,
   "/connectors/tanstack-table": TanStackTableConnectorDemoRoute,
   "/connectors/web": WebConnectorDemoRoute,
 };

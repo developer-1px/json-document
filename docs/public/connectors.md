@@ -151,8 +151,8 @@ UI는 범용 schema-description contract가 생기기 전까지 이 Connector �
 
 첫 Zod issue의 path는 JSON Pointer escaping을 거쳐 validation failure의
 `pointer`가 됩니다. Root issue는 빈 JSON Pointer `""`로 표현합니다. 공식 site의
-`/connectors/zod`에서 Zod 스키마로 연 admin 표와 invalid commit 보존, valid
-commit과 Zod trim 결과 비채택을 확인할 수 있습니다.
+`/connectors/zod`에서 스키마로 연 admin 표를, `/connectors/zod/validate`에서
+거절된 commit과 trim 결과가 채택되지 않는 경우를 볼 수 있습니다.
 
 ## TanStack Table Connector
 

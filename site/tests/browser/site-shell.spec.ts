@@ -87,6 +87,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/connectors/react",
     "/connectors/web",
     "/connectors/zod",
+    "/connectors/zod/validate",
     "/connectors/tanstack-table",
   ];
 
