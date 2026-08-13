@@ -12,7 +12,7 @@ docs
 |   |-- overview.md            # JSON Document: Why / How / What
 |   |-- api.md                 # JSON Document: 레퍼런스
 |   |-- quickstart.md          # JSON Document: 사용 시작
-|   |-- concepts.md            # 세 층 전체 지도. 한 층의 잎이 아님
+|   |-- concepts.md            # JSON Document: 읽기 → 편집 → 확장 지도
 |   |-- selection.md           # Editing: 구조 선택
 |   |-- history.md             # Editing: 로컬 undo/redo
 |   |-- clipboard.md           # Editing: 구조화된 payload
@@ -27,10 +27,9 @@ docs
 폴더에 유지하고, 별도 중첩 폴더를 개념으로 추가하지 않는다.
 
 ```txt
-Concepts
-
 JSON Document
 |-- Why
+|-- Concepts
 |-- API Reference
 `-- Quickstart
 
@@ -76,7 +75,7 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   선택, history는 로컬 undo/redo, clipboard는 구조화된 payload,
   topology는 화면 줄과 선택, intent는 편집 Intent 시그니처,
   intent-guide는 Intent 따라 하기, connectors는 연결 방법이다.
-  concepts는 읽기 → 편집 → 확장 전체 지도이며 한 층의 잎이 아니다.
+  concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
 - 무엇을 하는지로 정의한다. 소유하지 않는 것의 목록으로 시작하지 않는다.
