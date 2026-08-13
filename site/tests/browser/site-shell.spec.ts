@@ -25,7 +25,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Sheet",
     "Database",
   ]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
   await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);

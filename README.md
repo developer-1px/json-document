@@ -52,6 +52,7 @@ stateless JSON Patch
 | [packages/json-document-zod](packages/json-document-zod) | Zod object를 Database document로, Zod issue를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-tanstack-table](packages/json-document-tanstack-table) | TanStack Table visible model을 Sheet 편집 topology로 번역하는 Connector |
 | [packages/json-document-web](packages/json-document-web) | Web ClipboardEvent, text-control input과 modifier state를 editing contract로 번역하는 Connector |
+| [packages/json-document-contenteditable](packages/json-document-contenteditable) | local JSONDocument 문자열을 leased contenteditable React root에 붙이는 Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [site](site) | 공개 문서와 Document·Sheet·Database demo, structural Selection Lab |

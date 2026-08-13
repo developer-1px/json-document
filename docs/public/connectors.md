@@ -19,6 +19,7 @@ Connector는 이런 번역을 패키지로 제공합니다. 대상 도구의 API
 | Zod | `@interactive-os/json-document-zod` | Zod validation과 Database 변환 |
 | TanStack Table | `@interactive-os/json-document-tanstack-table` | visible table과 Sheet editing |
 | Web Platform | `@interactive-os/json-document-web` | clipboard event와 text input |
+| Contenteditable | `@interactive-os/json-document-contenteditable` | React contenteditable root와 local string commit |
 
 필요한 Connector만 연결 대상 라이브러리와 함께 설치하면 됩니다. 지원하는
 버전은 각 패키지 README에서 확인할 수 있고, 실제 동작은 사이트의
@@ -194,6 +195,26 @@ caret을 관찰합니다. 이벤트 대상과 단축키, focus, 접근성, IME �
 
 [/connectors/web](/connectors/web) 데모는 실제 ClipboardEvent와 modifier
 selection, text input을 연결합니다.
+
+## Contenteditable root 붙이기
+
+Contenteditable Connector는 local `JSONDocument`의 문자열 포인터를 React
+contenteditable root에 붙입니다. IME와 native input 동안 그 root의
+model→DOM render만 유예하고, 커밋은 여섯 member `document`로 들어갑니다.
+
+```tsx
+import { createJSONDocument } from "@interactive-os/json-document";
+import { ContentEditable } from "@interactive-os/json-document-contenteditable";
+
+const document = createJSONDocument({ title: "Shared title" });
+
+<ContentEditable document={document} pointer="/title" />;
+```
+
+툴바, 슬래시 팔레트, 전송 버튼과 atom·marks 의미는 이 패키지에 없습니다.
+[/connectors/contenteditable](/connectors/contenteditable)에서 두 필드를
+동시에 붙여 다른 경로 변경이 leased root를 덮어쓰지 않는 모습을 볼 수
+있습니다.
 
 ## 각 구성 요소가 맡는 값
 

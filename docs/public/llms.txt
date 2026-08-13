@@ -242,6 +242,9 @@ cell edit, rectangular multi-range selection, selection fill과 clipboard가 화
 text-control value/caret과 Web modifier state를 public editing·selection contract로
 번역하는 공식 Connector다. Event target, shortcut, focus, geometry와 native text
 selection은 Host가 계속 소유한다.
+`@interactive-os/json-document-contenteditable`은 local JSONDocument 문자열
+포인터를 leased contenteditable React root에 붙이는 공식 Connector다.
+툴바, atom, marks와 product chrome은 Host가 소유한다.
 `@interactive-os/json-document-collaboration`은 같은 canonical JSON Document을
 제공하는 independently versioned, transport-free provider이고,
 `@interactive-os/json-document-contenteditable-collaboration`은 collaborative
@@ -254,7 +257,7 @@ persistence를 소유하지 않는다. 별도 package로 배포하는 Connector,
 companion은 Core와 독립적으로 version과 compatibility를 검증한다.
 
 공식 Connector package 문법은 `@interactive-os/json-document-<target>`이다.
-React, React Hook Form, Ajv, Zod, TanStack Table과 Web Platform Connector를 현재 제공한다. Connector는 canonical JSON, selection
+React, React Hook Form, Ajv, Zod, TanStack Table, Web Platform과 Contenteditable Connector를 현재 제공한다. Connector는 canonical JSON, selection
 topology나 제품 command 의미를 새로 만들지 않는다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 맡는 별도 companion
