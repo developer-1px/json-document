@@ -1,7 +1,14 @@
 import type {
+  DatabaseClipboard,
   DocumentBlock,
   DocumentClipboard,
+  DocumentObject,
+  OrderClipboard,
+  OrderItem,
+  ObjectClipboard,
   SheetClipboard,
+  TreeClipboard,
+  TreeNode,
 } from "@interactive-os/json-document-editing";
 
 export interface WebClipboardPayload {
@@ -45,6 +52,26 @@ export const documentClipboardCodec: WebClipboardCodec<DocumentClipboard> = json
 export const sheetClipboardCodec: WebClipboardCodec<SheetClipboard> = jsonCodec(
   "application/vnd.interactive-os.sheet+json",
   isSheetClipboard,
+);
+
+export const orderClipboardCodec: WebClipboardCodec<OrderClipboard> = jsonCodec(
+  "application/vnd.interactive-os.order+json",
+  isOrderClipboard,
+);
+
+export const objectClipboardCodec: WebClipboardCodec<ObjectClipboard> = jsonCodec(
+  "application/vnd.interactive-os.objects+json",
+  isObjectClipboard,
+);
+
+export const treeClipboardCodec: WebClipboardCodec<TreeClipboard> = jsonCodec(
+  "application/vnd.interactive-os.tree+json",
+  isTreeClipboard,
+);
+
+export const databaseClipboardCodec: WebClipboardCodec<DatabaseClipboard> = jsonCodec(
+  "application/vnd.interactive-os.database+json",
+  isDatabaseClipboard,
 );
 
 export function createWebClipboardBinding<
@@ -133,8 +160,53 @@ function isDocumentBlock(value: unknown): value is DocumentBlock {
   return isRecord(value) && typeof value.id === "string" && typeof value.text === "string";
 }
 
+function isOrderClipboard(value: unknown): value is OrderClipboard {
+  if (!isRecord(value) || value.type !== orderClipboardCodec.mimeType || typeof value.text !== "string") return false;
+  return Array.isArray(value.items) && value.items.every(isOrderItem);
+}
+
+function isOrderItem(value: unknown): value is OrderItem {
+  return isRecord(value) && typeof value.id === "string" && typeof value.label === "string";
+}
+
+function isObjectClipboard(value: unknown): value is ObjectClipboard {
+  if (!isRecord(value) || value.type !== objectClipboardCodec.mimeType || typeof value.text !== "string") return false;
+  return Array.isArray(value.objects) && value.objects.every(isDocumentObject);
+}
+
+function isDocumentObject(value: unknown): value is DocumentObject {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.label === "string"
+    && typeof value.x === "number"
+    && typeof value.y === "number"
+    && typeof value.width === "number"
+    && typeof value.height === "number"
+    && typeof value.color === "string";
+}
+
+function isTreeClipboard(value: unknown): value is TreeClipboard {
+  if (!isRecord(value) || value.type !== treeClipboardCodec.mimeType || typeof value.text !== "string") return false;
+  return Array.isArray(value.nodes) && value.nodes.every(isTreeNode);
+}
+
+function isTreeNode(value: unknown): value is TreeNode {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.label === "string"
+    && (value.parentId === null || typeof value.parentId === "string");
+}
+
+function isDatabaseClipboard(value: unknown): value is DatabaseClipboard {
+  return isRectangularClipboard(value, databaseClipboardCodec.mimeType);
+}
+
 function isSheetClipboard(value: unknown): value is SheetClipboard {
-  if (!isRecord(value) || value.type !== sheetClipboardCodec.mimeType || typeof value.text !== "string") return false;
+  return isRectangularClipboard(value, sheetClipboardCodec.mimeType);
+}
+
+function isRectangularClipboard(value: unknown, mimeType: string): value is SheetClipboard {
+  if (!isRecord(value) || value.type !== mimeType || typeof value.text !== "string") return false;
   if (!Array.isArray(value.cells) || value.cells.length === 0) return false;
   const width = Array.isArray(value.cells[0]) ? value.cells[0].length : 0;
   return width > 0 && value.cells.every((row) => (

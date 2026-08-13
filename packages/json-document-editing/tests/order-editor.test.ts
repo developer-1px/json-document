@@ -29,4 +29,27 @@ describe("ordered structural selection", () => {
     expect(editor.undo().ok).toBe(true);
     expect(editor.snapshot.selection).toEqual(selectionBefore);
   });
+
+  test("copies, pastes, and cuts selected items with selection-restoring undo", () => {
+    let sequence = 0;
+    const editor = createOrderEditor(initial, { createId: () => `n${++sequence}` });
+    editor.dispatch({ type: "selection.set", itemId: "b" });
+    editor.dispatch({ type: "selection.set", itemId: "c", mode: "extend" });
+    const clipboard = editor.copy();
+    expect(clipboard?.text).toBe("Beta\nGamma");
+
+    expect(editor.dispatch({ type: "clipboard.paste", clipboard: clipboard!, afterId: "d" }).ok).toBe(true);
+    expect(editor.selectedItemIds).toEqual(["n1", "n2"]);
+    expect((editor.snapshot.value as OrderDocument).items.map((item) => item.id)).toEqual([
+      "a", "b", "c", "d", "n1", "n2",
+    ]);
+
+    const cut = editor.cut();
+    expect(cut?.clipboard.text).toBe("Beta\nGamma");
+    expect((editor.snapshot.value as OrderDocument).items.map((item) => item.id)).toEqual([
+      "a", "b", "c", "d",
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.selectedItemIds).toEqual(["n1", "n2"]);
+  });
 });

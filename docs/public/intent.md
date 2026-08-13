@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | 편집 요청 보내기 | `editor.dispatch(intent)` | `EditingResult` |
 | 선택한 내용 읽기 | `editor.copy()` | Clipboard 또는 `null` |
-| Document의 선택한 블록 잘라내기 | `editor.cut()` | cut result |
+| 선택한 내용 잘라내기 | `editor.cut()` | cut result 또는 `null` |
 | 실행 취소 | `editor.undo()` | `EditingResult` |
 | 다시 실행 | `editor.redo()` | `EditingResult` |
 
@@ -58,8 +58,8 @@ JSON 값까지 바뀌었다면 적용된 `change`도 들어 있습니다. failur
 | `clipboard.paste` | `clipboard`, `afterId?` | Clipboard 블록 붙여넣기 |
 
 `selection.set`의 `mode`는 `"replace" | "extend" | "toggle"`입니다.
-`createDocumentEditor`는 선택한 블록을 읽고 제거하는 `copy()`와 `cut()`도
-제공합니다.
+`copy()`와 `cut()`도 줍니다. `cut`은 복사 다음 지우기이며 `dispatch`가
+아닙니다.
 
 ## SheetIntent
 
@@ -70,12 +70,18 @@ JSON 값까지 바뀌었다면 적용된 `change`도 들어 있습니다. failur
 | `cell.commit` | `rowId`, `columnId`, `value` | 한 셀의 값 확정 |
 | `clipboard.paste` | `clipboard`, `topology?` | Clipboard 셀 붙여넣기 |
 
+`copy(topology?)`와 `cut(topology?)`도 줍니다. `cut`은 고른 칸을 비웁니다.
+
 ## TreeIntent
 
 | `type` | 필드 | 결과 |
 | --- | --- | --- |
 | `selection.set` | `nodeId`, `topology`, `mode?` | 보이는 노드 선택 변경 |
 | `selection.remove` | `topology` | 선택한 노드 제거 |
+| `clipboard.paste` | `clipboard`, `topology`, `afterId?` | 붙여넣기 |
+
+`copy(topology)`와 `cut(topology)`도 줍니다. 복사는 remove와 같은 후손
+닫힘을 가져갑니다.
 
 ## ObjectIntent
 
@@ -84,8 +90,10 @@ JSON 값까지 바뀌었다면 적용된 `change`도 들어 있습니다. failur
 | `selection.set` | `objectIds`, `mode?` | 객체 선택 변경 |
 | `selection.remove` | | 선택한 객체 제거 |
 | `selection.fill` | `color` | 선택한 객체 색 변경 |
+| `clipboard.paste` | `clipboard` | 붙여넣기 |
 
 `selection.set`의 `mode`는 `"replace" | "add" | "subtract" | "toggle"`입니다.
+`copy()`와 `cut()`도 줍니다.
 
 ## OrderIntent
 
@@ -93,6 +101,9 @@ JSON 값까지 바뀌었다면 적용된 `change`도 들어 있습니다. failur
 | --- | --- | --- |
 | `selection.set` | `itemId`, `mode?` | 항목 선택 변경 |
 | `selection.remove` | | 선택한 항목 제거 |
+| `clipboard.paste` | `clipboard`, `afterId?` | 붙여넣기 |
+
+`copy()`와 `cut()`도 줍니다.
 
 ## DatabaseIntent
 
@@ -103,13 +114,17 @@ JSON 값까지 바뀌었다면 적용된 `change`도 들어 있습니다. failur
 | `record.add` | `recordId` | 레코드 추가 |
 | `record.delete` | `recordId` | 레코드 삭제 |
 | `view.configure` | `viewId`, 보기 필드 | 저장된 view 변경 |
+| `clipboard.paste` | `clipboard`, `topology?` | 붙여넣기 |
+
+`copy(topology?)`도 줍니다. 화면 줄이 있으면 그 직사각형을 읽습니다.
 
 ## 별도 메서드로 제공하는 작업
 
 `copy()`는 현재 Selection을 읽어 Clipboard payload를 돌려줍니다. `cut()`은
-payload를 만든 다음 Document에서 선택한 블록을 제거합니다. `undo()`와
-`redo()`는 History에 이미 기록된 변경을 이동합니다. 이 작업들은 새 편집
-요청을 만들지 않으므로 `dispatch` 대신 각각의 메서드로 호출합니다.
+payload를 만든 다음 선택한 내용을 제거하거나, Sheet에서는 고른 칸을
+비웁니다. Database에는 `cut()`이 없습니다. `undo()`와 `redo()`는 History에
+이미 기록된 변경을 이동합니다. 이 작업들은 새 편집 요청을 만들지 않으므로
+`dispatch` 대신 각각의 메서드로 호출합니다.
 
 붙여넣기는 Clipboard payload를 문서에 적용하는 새 요청입니다. 각 editor의
 `clipboard.paste` Intent를 `dispatch`에 넘깁니다.

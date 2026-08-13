@@ -8,9 +8,10 @@ Selection과 Topology를 함께 읽으면 사용자가 고른 블록이나 셀�
 ## 선택한 내용 복사하기
 
 Document editor에서 `copy()`를 호출하면 선택한 블록의 JSON과 일반 텍스트가
-payload에 들어갑니다. Sheet는 선택한 셀의 JSON과 TSV를 만듭니다. 구조를
-이해하는 편집기는 JSON을 사용하고, 일반 텍스트만 받는 앱은 text 또는 TSV를
-사용할 수 있습니다.
+payload에 들어갑니다. Sheet와 Database는 선택한 셀의 JSON과 TSV를 만듭니다.
+Order 항목, Object, Tree 노드도 같은 방식으로 구조 JSON과 텍스트를 같이
+듭니다. 구조를 이해하는 편집기는 JSON을 사용하고, 일반 텍스트만 받는 앱은
+text 또는 TSV를 사용할 수 있습니다.
 
 ```ts
 const clipboard = editor.copy();
@@ -26,8 +27,9 @@ if (clipboard) {
 ## 잘라내고 붙여넣기
 
 잘라내기는 먼저 같은 payload를 만든 뒤 선택한 내용을 문서에서 제거합니다.
-제거가 성공하면 History에 변경이 기록됩니다. 붙여넣기는 payload의 구조화된
-데이터를 새 위치에 적용합니다.
+제거가 성공하면 History에 변경이 기록됩니다. Sheet `cut()`은 고른 칸을
+비웁니다. Database는 칸을 지우지 않고 복사와 붙여넣기만 합니다. 붙여넣기는
+payload의 구조화된 데이터를 새 위치에 적용합니다.
 
 ```ts
 const clipboard = editor.copy();

@@ -96,6 +96,7 @@ export interface SheetEditor {
   selectedCellsIn(topology: SheetTopology): ReadonlyArray<SheetCell>;
   dispatch(intent: SheetIntent): EditingResult<SheetSelection>;
   copy(topology?: SheetTopology): SheetClipboard | null;
+  cut(topology?: SheetTopology): { readonly clipboard: SheetClipboard; readonly result: EditingResult<SheetSelection> } | null;
   undo(): EditingResult<SheetSelection>;
   redo(): EditingResult<SheetSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
@@ -214,12 +215,42 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     };
   }
 
+  function cut(topology?: SheetTopology): { readonly clipboard: SheetClipboard; readonly result: EditingResult<SheetSelection> } | null {
+    const clipboard = copy(topology);
+    if (!clipboard) return null;
+    const document = value();
+    const axes = resolveTopology(document, topology);
+    const range = primaryRange(session.snapshot.selection);
+    const bounds = range === null ? null : rangeBounds(axes, range);
+    if (bounds === null) return null;
+    const operations: JSONPatchOperation[] = [];
+    for (const rowId of axes.rowIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
+      for (const columnId of axes.columnIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
+        const row = resolvePointWithIndices(document, rowId, columnId)!;
+        operations.push({
+          op: "replace",
+          path: buildPointer(["rows", row.rowIndex, "cells", columnId]),
+          value: null,
+        });
+      }
+    }
+    return {
+      clipboard,
+      result: session.apply({
+        operations,
+        selectionAfter: session.snapshot.selection,
+        origin: "clipboard.cut",
+      }),
+    };
+  }
+
   return {
     get snapshot() { return session.snapshot; },
     get selectedCells() { return selectedCells(); },
     selectedCellsIn: (topology) => selectedCells(topology),
     dispatch,
     copy,
+    cut,
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

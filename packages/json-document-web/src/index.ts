@@ -1,7 +1,11 @@
 export {
   createWebClipboardBinding,
+  databaseClipboardCodec,
   documentClipboardCodec,
+  objectClipboardCodec,
+  orderClipboardCodec,
   sheetClipboardCodec,
+  treeClipboardCodec,
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";

@@ -45,10 +45,10 @@ input.addEventListener("input", (event) => {
 });
 ```
 
-`documentClipboardCodec` and `sheetClipboardCodec` write both the structured
-json-document MIME payload and its `text/plain` projection. Paste consumes only
-a valid structured payload. Parsing arbitrary external plain text into domain
-records or cells remains a host policy.
+Document, Sheet, Order, Object, Tree, and Database codecs write both the
+structured json-document MIME payload and its `text/plain` projection. Paste
+consumes only a valid structured payload. Parsing arbitrary external plain text
+into domain records or cells remains a host policy.
 
 The binding calls `preventDefault()` only after a successful copy, canonical
 cut, or canonical paste. Cut writes the selected payload before asking the
@@ -59,8 +59,8 @@ unsupported cut, and rejected editing results leave native handling available.
 
 The Connector owns:
 
-- structured MIME serialization and validation for public Document and Sheet
-  clipboard values;
+- structured MIME serialization and validation for public domain clipboard
+  values;
 - `ClipboardEvent` copy/cut/paste translation;
 - conventional Web modifier translation to `replace`, `extend`, or `toggle`.
 - native text control value and caret observation without owning text selection.
