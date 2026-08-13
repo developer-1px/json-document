@@ -3,7 +3,7 @@ import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageFrame, PageHeader } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
-const connectorCode = `const binding = createTableDocumentBinding({ editor });
+const connectorCode = `const binding = createTanStackTableConnector(document);
 const table = useReactTable({
   ...binding.tableOptions,
   state: { sorting, columnFilters, columnOrder, columnVisibility },

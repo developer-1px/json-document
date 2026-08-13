@@ -4,6 +4,12 @@ import type {
 } from "@interactive-os/json-document";
 import type { ZodType } from "zod/v4";
 
+export { databaseDocumentFromZod } from "./database-document.js";
+export type {
+  DatabaseDocumentFromZod,
+  DatabaseDocumentFromZodResult,
+} from "./database-document.js";
+
 export interface ZodValidatorOptions {
   readonly code?: string;
 }

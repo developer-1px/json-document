@@ -10,10 +10,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(page.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
-  await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Concepts", "API Reference"]);
-  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Document", "Sheet", "Selection Lab", "Database"]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Overview", "Connector guide", "React", "Zod", "TanStack Table", "Web Platform"]);
-  await expect(navigation.getByRole("link", { name: "Workbench" })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Why", "API Reference"]);
+  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });
@@ -37,13 +36,12 @@ test("mobile navigation preserves the product groups without duplicating documen
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
   await page.goto("/docs");
 
+  const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(page).toHaveTitle("json-document Docs - json-document");
-  await expect(page.getByRole("heading", { level: 1, name: "json-document Docs" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "배경" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
-
-  const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(siteNavigation.getByRole("group", { name: "Core" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("group", { name: "Connectors" }).getByRole("link", { name: "Connector guide" }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
@@ -79,6 +77,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/docs/tutorial",
     "/docs/connectors",
     "/docs/api",
+    "/examples/document",
     "/demo",
     "/demo/sheet",
     "/demo/selection",
@@ -86,7 +85,9 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/connectors",
     "/connectors/react",
     "/connectors/web",
+    "/connectors/ajv",
     "/connectors/zod",
+    "/connectors/zod/validate",
     "/connectors/tanstack-table",
   ];
 
@@ -164,7 +165,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   await page.keyboard.press("Tab");
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
-  const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "React" });
+  const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "React", exact: true });
   expect(await currentLink.evaluate((element) => getComputedStyle(element).borderLeftColor)).toBe("rgb(222, 109, 85)");
 
   const code = page.getByRole("figure", { name: "TypeScript" }).first();

@@ -1,4 +1,5 @@
-import { createJSONDocument, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
+import { type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
+import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createEditingSession, type EditingResult, type EditingSession, type EditingSnapshot } from "./session.js";
 import { createOrderedAxis } from "./ordered-axis.js";
 import {
@@ -58,12 +59,14 @@ export interface DocumentEditor {
   subscribe(listener: (snapshot: EditingSnapshot<DocumentSelection>) => void): () => void;
 }
 
-export function createDocumentEditor(initial: BlockDocument, options: { readonly createId?: () => string } = {}): DocumentEditor {
+export function createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options: { readonly createId?: () => string } = {}): DocumentEditor {
+  const document = resolveDocumentSource(source);
+  const initial = document.value as BlockDocument;
   let sequence = 0;
   const createId = options.createId ?? (() => `block-${++sequence}`);
   const first = initial.blocks[0];
   const initialSelection = first ? collapsed(first.id, 0) : emptySelection();
-  const session = createEditingSession({ document: createJSONDocument(initial), selection: initialSelection });
+  const session = createEditingSession({ document, selection: initialSelection });
 
   function value(): BlockDocument {
     return session.snapshot.value as BlockDocument;

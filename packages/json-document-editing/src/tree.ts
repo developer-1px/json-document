@@ -1,8 +1,8 @@
 import {
   buildPointer,
-  createJSONDocument,
   type JSONValue,
 } from "@interactive-os/json-document";
+import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import {
   createRangeSelectionFamily,
   type OrderedTopology,
@@ -68,12 +68,14 @@ export interface TreeEditor {
   subscribe(listener: (snapshot: EditingSnapshot<TreeSelection>) => void): () => void;
 }
 
-export function createTreeEditor(initial: TreeDocument): TreeEditor {
+export function createTreeEditor(source: EditingDocumentSource<TreeDocument>): TreeEditor {
+  const document = resolveDocumentSource(source);
+  const initial = document.value as TreeDocument;
   assertTreeDocument(initial);
   const selectionFamily = createRangeSelectionFamily<TreePoint, string>();
   const first = initial.nodes[0];
   const session = createEditingSession({
-    document: createJSONDocument(initial),
+    document,
     selection: first ? collapsed(first.id) : emptySelection(),
   });
 

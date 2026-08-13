@@ -11,18 +11,13 @@ const allowedLayerSeams = new Map([
     "application->domain",
     new Set([
       "domain/json-document/index.ts",
-      "domain/document/index.ts",
     ]),
   ],
   [
     "domain->foundation",
     new Set([
-      "foundation/error/index.ts",
-      "foundation/history/index.ts",
       "foundation/json/index.ts",
       "foundation/jsonpath/index.ts",
-      "foundation/patch/index.ts",
-      "foundation/pointer/index.ts",
       "foundation/protocol/index.ts",
     ]),
   ],

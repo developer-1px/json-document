@@ -8,7 +8,7 @@
   },
   {
     "path": "/docs",
-    "label": "Concepts",
+    "label": "Why",
     "title": "json-document Docs - json-document",
     "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
     "navigationGroup": "Core"
@@ -26,6 +26,13 @@
     "title": "json-document API - json-document",
     "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
     "navigationGroup": "Core"
+  },
+  {
+    "path": "/examples/document",
+    "label": "Workbench",
+    "title": "Document Example Workbench - json-document",
+    "description": "Run a document editing scenario and inspect canonical JSON, selection, revision, and applied operations.",
+    "navigationGroup": "Editing"
   },
   {
     "path": "/demo",
@@ -57,7 +64,7 @@
   },
   {
     "path": "/connectors",
-    "label": "Overview",
+    "label": "Connectors",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
     "navigationGroup": "Connectors"
@@ -66,7 +73,7 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "Official React, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
+    "description": "Official React, React Hook Form, Ajv, Zod, TanStack Table, and Web Platform integration contracts for json-document.",
     "navigationGroup": "Connectors"
   },
   {
@@ -77,11 +84,32 @@
     "navigationGroup": "Connectors"
   },
   {
+    "path": "/connectors/react-hook-form",
+    "label": "React Hook Form",
+    "title": "React Hook Form Connector Live Demo - json-document",
+    "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
+    "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/ajv",
+    "label": "Ajv",
+    "title": "Ajv Connector Live Demo - json-document",
+    "description": "Live Ajv validation with JSON Pointer diagnostics and non-adoption of validator mutations.",
+    "navigationGroup": "Connectors"
+  },
+  {
     "path": "/connectors/zod",
     "label": "Zod",
-    "title": "Zod Connector Live Demo - json-document",
-    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "title": "Zod Admin Live Demo - json-document",
+    "description": "A Zod object schema and record array become a Database admin table.",
     "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/connectors/zod/validate",
+    "label": "Validate",
+    "title": "Zod Validate Live Demo - json-document",
+    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "parentPath": "/connectors/zod"
   },
   {
     "path": "/connectors/tanstack-table",

@@ -7,6 +7,16 @@ semantic interaction contracts come from `@interactive-os/json-document-selectio
 The package keeps browser rendering and input outside the core. Its first
 domain slice is a small block document used by the official site demo.
 
+Every domain editor accepts either an initial JSON value or an existing
+`JSONDocument`. Passing an existing instance lets multiple Connectors observe
+and commit the same canonical state while each editor keeps its own structural
+selection and local history.
+
+```ts
+const document = createJSONDocument(initialSheet);
+const sheet = createSheetEditor(document);
+```
+
 Its structural selection slices split into two reusable families without
 pretending that every topology is the same:
 

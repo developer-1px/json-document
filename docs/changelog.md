@@ -5,6 +5,18 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Extended `@interactive-os/json-document-zod` with `databaseDocumentFromZod`, so
+  a Zod object schema and record array become a Database document and the
+  official Zod Live Demo can use that table as the admin — without a create or
+  edit form.
+- Split the Zod Live Demo so `/connectors/zod` is the admin table and
+  `/connectors/zod/validate` is commit validation.
+- Added `@interactive-os/json-document-ajv` to translate compiled synchronous
+  Ajv validators into JSON Document failures and JSON Pointer diagnostics while
+  validating a clone so Ajv mutations are never adopted, with a Connector Live Demo.
+- Added `@interactive-os/json-document-react-hook-form` to keep form drafts and
+  field lifecycle in React Hook Form while valid submits become one canonical
+  editing transaction and undo/redo reset the form, with a Record Detail Live Demo.
 - Added the official Connector package category for independently versioned
   external ecosystem integrations, with Zod and TanStack Table contracts.
 - Added `@interactive-os/json-document-react` for React external-store

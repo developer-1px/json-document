@@ -512,11 +512,24 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `useJSONDocumentValue`, `useEditingSnapshot`, `useDocumentEditor`, `EditingSnapshotSource` | React hook convention과 연결하는 대상 snapshot 책임이 일치 |
 
+### React Hook Form Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `useJSONDocumentForm`, `UseJSONDocumentFormOptions`, `JSONDocumentFormBinding`, `CanonicalFormFailure` | React Hook Form의 native form lifecycle을 canonical editing transaction과 동기화하는 책임이 일치 |
+
 ### Zod Connector package
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
 | keep | `createZodValidator`, `ZodValidatorOptions` | Zod native schema를 JSON Document validation callback으로 연결하는 책임이 일치 |
+| keep | `databaseDocumentFromZod`, `DatabaseDocumentFromZod`, `DatabaseDocumentFromZodResult` | Zod object schema와 레코드 배열을 public Database document로 번역하는 책임이 일치. `createXxxConnector`가 아니다 |
+
+### Ajv Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `createAjvValidator`, `AjvValidatorOptions` | Ajv native compiled validator를 JSON Document validation callback으로 연결하는 책임이 일치 |
 
 ### TanStack Table Connector package
 
@@ -605,9 +618,20 @@ Connector packages
 │  ├─ useJSONDocumentValue
 │  ├─ useEditingSnapshot
 │  └─ useDocumentEditor
+├─ React Hook Form
+│  ├─ CanonicalFormFailure
+│  ├─ UseJSONDocumentFormOptions
+│  ├─ JSONDocumentFormBinding
+│  └─ useJSONDocumentForm
 ├─ Zod
 │  ├─ ZodValidatorOptions
-│  └─ createZodValidator
+│  ├─ createZodValidator
+│  ├─ DatabaseDocumentFromZod
+│  ├─ DatabaseDocumentFromZodResult
+│  └─ databaseDocumentFromZod
+├─ Ajv
+│  ├─ AjvValidatorOptions
+│  └─ createAjvValidator
 ├─ TanStack Table
 │  ├─ TableDocumentBinding
 │  ├─ TableDocumentOptions

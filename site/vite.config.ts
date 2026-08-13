@@ -1,4 +1,5 @@
 import react from "@vitejs/plugin-react";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig, type Plugin } from "vite";
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -103,7 +104,19 @@ function productionSiteAssets(): Plugin {
 
 export default defineConfig({
   base: process.env.SITE_BASE ?? "/",
-  plugins: [react(), rootLlmsTxt(), productionSiteAssets()],
+  plugins: [
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+      routesDirectory: "./src/app/routes",
+      generatedRouteTree: "./src/app/routeTree.gen.ts",
+      quoteStyle: "double",
+      semicolons: true,
+    }),
+    react(),
+    rootLlmsTxt(),
+    productionSiteAssets(),
+  ],
   resolve: {
     alias: jsonDocumentSourceAliases(),
     dedupe: ["react", "react-dom"],

@@ -317,12 +317,14 @@ package입니다. 공통 `EditingSession` lifecycle 위에 Document, Order, Shee
 Object와 Tree domain slice를 제공합니다.
 
 ```ts
+import { createJSONDocument } from "@interactive-os/json-document";
 import { createSheetEditor } from "@interactive-os/json-document-editing";
 
-const editor = createSheetEditor({
+const document = createJSONDocument({
   columns: [{ id: "status", label: "Status" }],
   rows: [{ id: "task-1", cells: { status: "Draft" } }],
 });
+const editor = createSheetEditor(document);
 
 editor.dispatch({
   type: "cell.commit",

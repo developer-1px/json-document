@@ -1,6 +1,5 @@
 import {
   buildPointer,
-  createJSONDocument,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
@@ -10,6 +9,7 @@ import {
   type EditingSession,
   type EditingSnapshot,
 } from "./session.js";
+import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
@@ -104,7 +104,9 @@ export interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 
-export function createSheetEditor(initial: SheetDocument): SheetEditor {
+export function createSheetEditor(source: EditingDocumentSource<SheetDocument>): SheetEditor {
+  const document = resolveDocumentSource(source);
+  const initial = document.value as SheetDocument;
   assertSheetDocument(initial);
   const firstRow = initial.rows[0];
   const firstColumn = initial.columns[0];
@@ -112,7 +114,7 @@ export function createSheetEditor(initial: SheetDocument): SheetEditor {
     ? collapsed(firstRow.id, firstColumn.id)
     : emptySelection();
   const session = createEditingSession({
-    document: createJSONDocument(initial),
+    document,
     selection: initialSelection,
   });
 

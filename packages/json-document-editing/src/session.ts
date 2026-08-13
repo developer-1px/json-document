@@ -51,9 +51,12 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   let undoStack: HistoryEntry<Selection>[] = [];
   let redoStack: HistoryEntry<Selection>[] = [];
   let activeHistoryGroup: string | undefined;
+  let isCommitting = false;
+  let observedValue = document.value;
+  let unsubscribeDocument: (() => void) | null = null;
   const listeners = new Set<(snapshot: EditingSnapshot<Selection>) => void>();
 
-  function snapshot(): EditingSnapshot<Selection> {
+  function currentSnapshot(): EditingSnapshot<Selection> {
     return {
       value: document.value,
       selection,
@@ -64,12 +67,41 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   }
 
   function publish(): EditingSnapshot<Selection> {
-    const current = snapshot();
+    const current = currentSnapshot();
     for (const listener of listeners) listener(current);
     return current;
   }
 
+  function synchronizeExternalChange(): boolean {
+    if (observedValue === document.value) return false;
+    observedValue = document.value;
+    undoStack = [];
+    redoStack = [];
+    activeHistoryGroup = undefined;
+    revision += 1;
+    return true;
+  }
+
+  function commit(
+    operations: ReadonlyArray<JSONPatchOperation>,
+    metadata: Readonly<Record<string, JSONValue>>,
+  ) {
+    isCommitting = true;
+    try {
+      return document.commit(operations, { metadata });
+    } finally {
+      isCommitting = false;
+      observedValue = document.value;
+    }
+  }
+
+  function observeDocument(): void {
+    if (isCommitting) return;
+    if (synchronizeExternalChange()) publish();
+  }
+
   function apply(plan: EditingPlan<Selection>): EditingResult<Selection> {
+    synchronizeExternalChange();
     const beforeValue = clone(document.value);
     const beforeSelection = selection;
     if (plan.operations.length === 0) {
@@ -78,13 +110,11 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return { ok: true, snapshot: publish() };
     }
 
-    const result = document.commit(plan.operations, {
-      metadata: {
-        editing: {
-          origin: plan.origin,
-          selectionBefore: clone(beforeSelection),
-          selectionAfter: clone(plan.selectionAfter),
-        },
+    const result = commit(plan.operations, {
+      editing: {
+        origin: plan.origin,
+        selectionBefore: clone(beforeSelection),
+        selectionAfter: clone(plan.selectionAfter),
       },
     });
     if (!result.ok) return result;
@@ -119,34 +149,40 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   function restore(entry: HistoryEntry<Selection>, direction: "undo" | "redo"): EditingResult<Selection> {
     const operations = direction === "undo" ? entry.inverse : entry.forward;
     const nextSelection = direction === "undo" ? entry.selectionBefore : entry.selectionAfter;
-    const result = document.commit(operations, {
-      metadata: { editing: { origin: direction, selectionAfter: clone(nextSelection) } },
+    const result = commit(operations, {
+      editing: { origin: direction, selectionAfter: clone(nextSelection) },
     });
     if (!result.ok) return result;
     selection = clone(nextSelection);
     revision += 1;
     activeHistoryGroup = undefined;
-    return { ok: true, snapshot: snapshot(), change: result.change };
+    return { ok: true, snapshot: currentSnapshot(), change: result.change };
   }
 
   return {
-    get snapshot() { return snapshot(); },
+    get snapshot() {
+      synchronizeExternalChange();
+      return currentSnapshot();
+    },
     apply,
     select(nextSelection) {
+      synchronizeExternalChange();
       selection = clone(nextSelection);
       revision += 1;
       activeHistoryGroup = undefined;
       return publish();
     },
     reconcile(reconciler) {
+      synchronizeExternalChange();
       const nextSelection = clone(reconciler(clone(selection), document.value));
-      if (jsonEqual(selection, nextSelection)) return snapshot();
+      if (jsonEqual(selection, nextSelection)) return currentSnapshot();
       selection = nextSelection;
       revision += 1;
       activeHistoryGroup = undefined;
       return publish();
     },
     undo() {
+      synchronizeExternalChange();
       const entry = undoStack.at(-1);
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "undo");
@@ -158,6 +194,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return result;
     },
     redo() {
+      synchronizeExternalChange();
       const entry = redoStack.at(-1);
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "redo");
@@ -169,8 +206,15 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return result;
     },
     subscribe(listener) {
+      synchronizeExternalChange();
       listeners.add(listener);
-      return () => listeners.delete(listener);
+      unsubscribeDocument ??= document.subscribe(observeDocument);
+      return () => {
+        listeners.delete(listener);
+        if (listeners.size > 0) return;
+        unsubscribeDocument?.();
+        unsubscribeDocument = null;
+      };
     },
   };
 }

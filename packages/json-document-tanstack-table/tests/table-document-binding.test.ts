@@ -11,8 +11,12 @@ import {
   type SheetDocument,
   type SheetRow,
 } from "@interactive-os/json-document-editing";
+import { createJSONDocument } from "@interactive-os/json-document";
 import { describe, expect, test } from "vitest";
-import { createTableDocumentBinding } from "../src/index.js";
+import {
+  createTableDocumentBinding,
+  createTanStackTableConnector,
+} from "../src/index.js";
 
 const initial: SheetDocument = {
   columns: [
@@ -28,6 +32,33 @@ const initial: SheetDocument = {
 };
 
 describe("TanStack Table document binding", () => {
+  test("connects the official entry point to the provided JSONDocument", () => {
+    const document = createJSONDocument(initial);
+    const binding = createTanStackTableConnector(document);
+
+    expect(binding.commitCell({ rowId: "r1", columnId: "status", value: "Ready" }).ok).toBe(true);
+    expect(document.at("/rows/0/cells/status")).toEqual({
+      ok: true,
+      path: "/rows/0/cells/status",
+      value: "Ready",
+    });
+
+    document.commit([{ op: "replace", path: "/rows/1/cells/status", value: "Done" }]);
+    expect(binding.snapshot.value).toBe(document.value);
+  });
+
+  test("isolates official Connectors backed by different document identities", () => {
+    const first = createJSONDocument(initial);
+    const second = createJSONDocument(initial);
+    const firstConnector = createTanStackTableConnector(first);
+    const secondConnector = createTanStackTableConnector(second);
+
+    firstConnector.commitCell({ rowId: "r1", columnId: "status", value: "Done" });
+
+    expect(first.value).not.toEqual(second.value);
+    expect(secondConnector.snapshot.revision).toBe(0);
+  });
+
   test("projects stable rows and commits editable cells through the Sheet editor", () => {
     const editor = createSheetEditor(initial);
     const binding = createTableDocumentBinding({ editor });
@@ -144,7 +175,7 @@ describe("TanStack Table document binding", () => {
 });
 
 function createSheetTable(
-  binding: ReturnType<typeof createTableDocumentBinding>,
+  binding: ReturnType<typeof createTableDocumentBinding> | ReturnType<typeof createTanStackTableConnector>,
   state: {
     readonly sorting?: SortingState;
     readonly columnFilters?: ColumnFiltersState;

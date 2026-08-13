@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document-zod",
   "version": "0.1.0-rc.0",
-  "description": "Official Zod connector for json-document validation.",
+  "description": "Official Zod connector for json-document validation and Database document translation.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
