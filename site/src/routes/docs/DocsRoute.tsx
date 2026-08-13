@@ -47,10 +47,10 @@ export function IntentGuideRoute() {
 }
 
 const demoLinks: Partial<Record<DocPageId, { readonly to: string; readonly label: string }>> = {
-  selection: { to: "/demo/selection", label: "Open Selection Demo" },
-  topology: { to: "/demo/topology", label: "Open Topology Demo" },
-  clipboard: { to: "/demo/clipboard", label: "Open Clipboard Demo" },
-  history: { to: "/demo/history", label: "Open History Demo" },
+  selection: { to: "/demo/selection", label: "Selection Demo 열기" },
+  topology: { to: "/demo/topology", label: "Topology Demo 열기" },
+  clipboard: { to: "/demo/clipboard", label: "Clipboard Demo 열기" },
+  history: { to: "/demo/history", label: "History Demo 열기" },
 };
 
 export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {

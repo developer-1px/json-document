@@ -9,6 +9,7 @@ export type SiteRoute = {
   readonly label: string;
   readonly title: string;
   readonly description: string;
+  readonly language?: "en" | "ko";
   readonly navigationGroup?: SiteNavigationGroup;
   readonly parentPath?: string;
 };
@@ -33,6 +34,7 @@ export function usePathname(): string {
 export function useRouteMetadata(route: SiteRoute): void {
   useEffect(() => {
     const url = route.path === "/" ? `${siteUrl}/` : `${siteUrl}${route.path}`;
+    document.documentElement.lang = route.language ?? "en";
     document.title = route.title;
     setMetaContent('meta[name="description"]', "name", "description", route.description);
     setMetaContent('meta[property="og:title"]', "property", "og:title", route.title);

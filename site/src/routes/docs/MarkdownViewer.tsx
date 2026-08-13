@@ -17,16 +17,16 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
         components={{
           h1: ({ children, id }) => hideTitle
             ? null
-            : <h2 id={id} className={classes("mb-0 mt-0", ui.text.heading)}>{children}</h2>,
+            : <h1 id={id} className={classes("mb-0 mt-0", ui.text.heading)}>{children}</h1>,
           h2: ({ children, id }) => (
-            <h3 id={id} className={classes("mb-0 mt-6 pt-5 first:mt-0", ui.surface.sectionDivider, ui.text.heading)}>
+            <h2 id={id} className={classes("mb-0 mt-6 pt-5 first:mt-0", ui.surface.sectionDivider, ui.text.heading)}>
               {children}
-            </h3>
+            </h2>
           ),
           h3: ({ children, id }) => (
-            <h4 id={id} className={classes("mb-0 mt-2", ui.text.heading)}>
+            <h3 id={id} className={classes("mb-0 mt-2", ui.text.heading)}>
               {children}
-            </h4>
+            </h3>
           ),
           p: ({ children }) => (
             <p className={classes("m-0", ui.text.body)}>{children}</p>

@@ -18,7 +18,7 @@ export function ClipboardDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
   const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
-  const [lastCall, setLastCall] = useState("Select a block, then copy or cut it.");
+  const [lastCall, setLastCall] = useState("블록을 선택한 뒤 copy 또는 cut을 실행합니다.");
   const selected = new Set(editor.selectedBlockIds);
 
   function select(blockId: string) {
@@ -49,13 +49,13 @@ export function ClipboardDemoRoute() {
   return (
     <PageFrame>
       <PageHeader title="Clipboard Demo" illustration="braces">
-        Start with Selection, create a structured payload with copy or cut, then pass that payload to paste.
+        Selection에서 시작해 copy 또는 cut으로 구조화된 payload를 만들고 paste에 넘깁니다.
       </PageHeader>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-input">
           <p className={ui.text.label}>1 · Selection</p>
-          <h2 id="clipboard-input" className={classes("mb-2 mt-1", ui.text.heading)}>Choose source blocks</h2>
+          <h2 id="clipboard-input" className={classes("mb-2 mt-1", ui.text.heading)}>복사할 블록 선택하기</h2>
           <div className="grid gap-1">
             {(snapshot.value as BlockDocument).blocks.map((block) => (
               <SelectableItem
@@ -76,15 +76,15 @@ export function ClipboardDemoRoute() {
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-payload">
-          <p className={ui.text.label}>2 · API and payload</p>
+          <p className={ui.text.label}>2 · API와 payload</p>
           <h2 id="clipboard-payload" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
           <JsonInspector label="clipboard" value={clipboard} testId="clipboard-demo-payload" size="compact" />
-          <ActionButton className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>Paste payload</ActionButton>
+          <ActionButton className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>payload 붙여넣기</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-result">
-          <p className={ui.text.label}>3 · Result</p>
-          <h2 id="clipboard-result" className={classes("mb-2 mt-1", ui.text.heading)}>Paste commits cloned blocks</h2>
+          <p className={ui.text.label}>3 · 결과</p>
+          <h2 id="clipboard-result" className={classes("mb-2 mt-1", ui.text.heading)}>paste하면 복제한 블록을 commit합니다</h2>
           <JsonInspector label="document.value" value={snapshot.value} testId="clipboard-demo-document" size="tall" />
           <JsonInspector label="selection" value={snapshot.selection} testId="clipboard-demo-selection" size="compact" />
         </section>

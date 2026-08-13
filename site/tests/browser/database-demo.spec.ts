@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("Database Table edits five property types while native text lease stays outside structural selection", async ({ page }) => {
   await page.goto("/demo/database");
-  await expect(page.getByRole("heading", { level: 1, name: "Database Table v1" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Database Demo" })).toBeVisible();
   const grid = page.getByRole("grid", { name: "Notion-style database" });
   await expect(grid.getByRole("columnheader")).toContainText(["Name", "Note", "Score", "Status", "Complete", "Row"]);
 
@@ -13,14 +13,14 @@ test("Database Table edits five property types while native text lease stays out
   await expect(page.getByTestId("native-text-lease")).toContainText("composing");
   await title.dispatchEvent("compositionend");
   await title.fill("Selection engine");
-  await page.getByRole("heading", { level: 1, name: "Database Table v1" }).click();
+  await page.getByRole("heading", { level: 1, name: "Database Demo" }).click();
   await expect(page.getByTestId("native-text-lease")).toHaveText("Structural navigation");
 
   await page.getByRole("textbox", { name: "Note page-1" }).fill("Native text is leased");
   await page.getByRole("spinbutton", { name: "Score page-1" }).fill("8");
   await page.getByRole("combobox", { name: "Status page-1" }).selectOption("progress");
   await page.getByRole("checkbox", { name: "Complete page-1" }).uncheck();
-  await page.getByRole("heading", { level: 1, name: "Database Table v1" }).click();
+  await page.getByRole("heading", { level: 1, name: "Database Demo" }).click();
 
   const json = page.getByTestId("database-document-json");
   await expect(json).toContainText("Selection engine");

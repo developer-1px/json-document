@@ -1,7 +1,5 @@
 import { TanStackTableConnectorLab } from "./TanStackTableConnectorLab";
-import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
-import { PageFrame, PageHeader } from "../../../shared/ui/primitives";
-import { classes, ui } from "../../../shared/ui/styles";
+import { ConnectorDemoPage } from "../ConnectorDemoPage";
 
 const connectorCode = `const binding = createTanStackTableConnector(document);
 const table = useReactTable({
@@ -23,30 +21,18 @@ surface.addEventListener("paste", (event) => clipboard.paste(event));`;
 
 export function TanStackTableConnectorDemoRoute() {
   return (
-    <PageFrame>
-        <PageHeader
-          illustration="cursor"
-          title="TanStack Table Connector"
-          aside={(
-            <div className={ui.code.install}>
-              <div className={ui.text.label}>Install</div>
-              <InlineCode className="mt-2 block overflow-x-auto whitespace-nowrap" prompt>npm i @interactive-os/json-document-tanstack-table @interactive-os/json-document-web @tanstack/table-core</InlineCode>
-            </div>
-          )}
-        >
-              TanStack Table v8 projects the visible grid, the Web Platform Connector translates native clipboard events, and the Sheet editor keeps canonical JSON, selection, and history.
-        </PageHeader>
-
-        <TanStackTableConnectorLab />
-
-        <section aria-label="Minimal TanStack Table connector code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
-          <h2 className={classes("mb-2 mt-0", ui.text.heading)}>The connection</h2>
-          <CodeBlock language="typescript" size="content" source={connectorCode} />
-          <CodeBlock className="mt-3" language="typescript" size="content" source={webCompositionCode} />
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>
-            TanStack owns view state and row models. Its Connector translates visible stable identities into Sheet topology; the Web Connector independently translates native clipboard events into the same Sheet editing contract.
-          </p>
-        </section>
-    </PageFrame>
+    <ConnectorDemoPage
+      connectionCode={[
+        { language: "typescript", source: connectorCode },
+        { language: "typescript", source: webCompositionCode },
+      ]}
+      connectionDescription="TanStack owns view state and row models. Its Connector translates visible stable identities into Sheet topology; the Web Connector independently translates native clipboard events into the same Sheet editing contract."
+      description="TanStack Table v8 projects the visible grid, the Web Platform Connector translates native clipboard events, and the Sheet editor keeps canonical JSON, selection, and history."
+      illustration="cursor"
+      install="npm i @interactive-os/json-document-tanstack-table @interactive-os/json-document-web @tanstack/table-core"
+      title="TanStack Table Connector"
+    >
+      <TanStackTableConnectorLab />
+    </ConnectorDemoPage>
   );
 }
