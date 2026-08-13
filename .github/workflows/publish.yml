@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "json-document-v*"
+      - "json-document-ajv-v*"
       - "json-document-zod-v*"
       - "json-document-react-hook-form-v*"
       - "json-document-tanstack-table-v*"
@@ -45,6 +46,11 @@ jobs:
             import { appendFileSync, readFileSync } from "node:fs";
 
             const releases = [
+              {
+                prefix: "json-document-ajv-v",
+                packageFile: "packages/json-document-ajv/package.json",
+                workspace: "@interactive-os/json-document-ajv",
+              },
               {
                 prefix: "json-document-react-hook-form-v",
                 packageFile: "packages/json-document-react-hook-form/package.json",

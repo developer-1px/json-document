@@ -225,6 +225,9 @@ Document editor component lifecycle을 제공하는 공식 Connector다.
 touched와 field error를 소유하게 두고 유효한 submit만 하나의 canonical editing
 transaction으로 적용한다. Undo, redo와 외부 canonical 변경은 `reset`으로 form에
 동기화하며 field UI와 product schema는 Host가 소유한다.
+`@interactive-os/json-document-ajv`는 호출자가 컴파일한 동기 Ajv validator의
+첫 error message와 `instancePath`를 validation diagnostic으로 번역한다. Mutable
+clone을 검사하므로 Ajv option이 만든 변형 결과는 canonical JSON에 채택하지 않는다.
 `@interactive-os/json-document-zod`는 Zod issue path를 JSON Pointer validation
 diagnostic으로 번역하고 parse 변환값을 canonical JSON에 채택하지 않는 공식 Connector다.
 `@interactive-os/json-document-tanstack-table`은 TanStack Table v8의 visible
@@ -247,7 +250,7 @@ persistence를 소유하지 않는다. 별도 package로 배포하는 Connector,
 companion은 Core와 독립적으로 version과 compatibility를 검증한다.
 
 공식 Connector package 문법은 `@interactive-os/json-document-<target>`이다.
-React, React Hook Form, Zod, TanStack Table과 Web Platform Connector를 현재 제공한다. Connector는 canonical JSON, selection
+React, React Hook Form, Ajv, Zod, TanStack Table과 Web Platform Connector를 현재 제공한다. Connector는 canonical JSON, selection
 topology나 제품 command 의미를 새로 만들지 않는다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 맡는 별도 companion

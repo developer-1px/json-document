@@ -125,6 +125,7 @@ if (result.ok) {
 | `@interactive-os/json-document-selection` | optional companion | DOM-free key·range·mask family, semantic interaction과 topology/geometry port |
 | `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
 | `@interactive-os/json-document-react-hook-form` | official Connector | React Hook Form draft lifecycle, canonical submit과 history reset 번역 |
+| `@interactive-os/json-document-ajv` | official Connector | compiled Ajv validator와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-zod` | official Connector | Zod validation issue와 JSON Pointer 진단 번역 |
 | `@interactive-os/json-document-tanstack-table` | official Connector | TanStack visible row/column model과 Sheet 편집 topology 번역 |
 | `@interactive-os/json-document-web` | official Connector | Web clipboard, text-control input과 modifier state 번역 |
@@ -146,7 +147,7 @@ JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 �
 slice 또는 host가 정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
 Collaboration companion도 transport, authentication, presence, persistence를
 소유하지 않습니다. Connector, adapter와 companion은 Core와 독립적으로 version과
-compatibility를 검증합니다. Connector의 승격 조건과 React·React Hook Form·Zod·TanStack Table·Web Platform
+compatibility를 검증합니다. Connector의 승격 조건과 React·React Hook Form·Ajv·Zod·TanStack Table·Web Platform
 구현은 [Connectors](connectors.md)에 정리되어 있습니다.
 
 `@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
@@ -168,6 +169,7 @@ contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결
 | DOM-free selection state와 interaction | `@interactive-os/json-document-selection` |
 | selection 기반 clipboard, JSON 수정, undo/redo | `@interactive-os/json-document-editing` |
 | React에서 document/editor 구독 | `@interactive-os/json-document-react` |
+| Ajv로 document validation | `@interactive-os/json-document-ajv`의 `createAjvValidator` |
 | Zod schema로 document validation | `@interactive-os/json-document-zod`의 `createZodValidator` |
 
 성공한 mutation의 `change.applied`는 실제 적용된 canonical operation입니다.
