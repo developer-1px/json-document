@@ -83,12 +83,8 @@ export const ui = {
     install: "min-w-0 self-start rounded-[3px] border border-pencil-light bg-paper p-3 shadow-none",
     prompt: "text-impact-ink",
     block: {
-      frame: "min-w-0 overflow-hidden rounded-[3px] border border-pencil-light bg-paper-warm shadow-none",
-      header: "flex h-7 items-center border-b border-pencil-light bg-paper px-2 font-mono",
-      label: "text-[10px] font-medium text-ink",
-      meta: "text-[10px] text-pencil",
-      signal: "text-[10px] font-medium text-impact-ink",
-      copy: "rounded-[3px] px-1.5 py-0 text-[10px] font-medium text-pencil hover:bg-paper-warm hover:text-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 data-[copied=true]:text-sage",
+      frame: "relative min-w-0 overflow-hidden rounded-[3px] border border-pencil-light bg-paper-warm shadow-none",
+      copy: "absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-[3px] bg-paper-warm/90 text-pencil hover:bg-paper hover:text-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 data-[copied=true]:text-sage [&_path]:stroke-current [&_path]:stroke-2 [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round] [&_rect]:stroke-current [&_rect]:stroke-2",
       viewport: {
         compact: "max-h-32",
         content: "max-h-none",
@@ -99,7 +95,7 @@ export const ui = {
       code: "block min-w-max whitespace-normal py-2 font-mono text-[13px] leading-[1.55] text-ink",
       line: "grid min-h-[1.55em] grid-cols-[2.25rem_minmax(max-content,1fr)] px-2",
       lineNumber: "select-none border-r border-pencil-light pr-2 text-right text-[9px] text-pencil before:content-[attr(data-line-number)]",
-      lineContent: "whitespace-pre pl-2 pr-2.5",
+      lineContent: "whitespace-pre pl-2 pr-10",
       token: {
         comment: "text-pencil",
         key: "font-medium text-ink-strong",
