@@ -8,7 +8,7 @@
   },
   {
     "path": "/docs",
-    "label": "Concepts",
+    "label": "Why",
     "title": "json-document Docs - json-document",
     "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
     "navigationGroup": "Core"

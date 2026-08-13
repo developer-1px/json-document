@@ -10,10 +10,10 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("official site shell", () => {
-  test("serves the official overview at the root route", () => {
+  test("serves the official overview at the root route", async () => {
     render(<App />);
 
-    expect(screen.getByRole("link", { name: "Skip to content" }).getAttribute("href")).toBe("#main-content");
+    expect((await screen.findByRole("link", { name: "Skip to content" })).getAttribute("href")).toBe("#main-content");
     expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
     expect(screen.getByText("One JSON document. Any editor.")).toBeTruthy();
     expect(screen.getByText("A tiny headless API to read, query, patch, and subscribe.")).toBeTruthy();
@@ -29,7 +29,7 @@ describe("official site shell", () => {
   test("projects the product hierarchy into the site navigation", async () => {
     render(<App />);
     const user = userEvent.setup();
-    const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
+    const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
 
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
     expect(groupLinks(nav, "Core")).toEqual(["Why", "API Reference"]);
