@@ -211,8 +211,10 @@ Core만 설치한다. 이 저장소의 `@interactive-os/json-document-editing`�
 editing transaction, selection publication, clipboard, history와 Document,
 Order, Sheet, Object 및 Tree domain slice를 제공하는 browser-independent
 companion이다. Document, Order, Sheet와 Tree는 range 상태 전이를 공유하고
-Object는 key 상태 전이를 사용하되 topology와 JSON Patch 계획은 각
-slice 또는 host에 둔다.
+Object는 key 상태 전이를 사용한다. 화면 줄은 `LineTopology`와
+`GridTopology`로 넘긴다. Sheet는 `SheetTopology`, Database는 저장된
+뷰의 `recordIds`×`propertyIds`, Tree는 host `visibleIds`다. JSON Patch
+계획은 각 slice 또는 host에 둔다.
 Sheet slice는 stable row·column identity, 복수의 anchor/focus rectangular range,
 primary-range JSON/TSV clipboard, selection fill, cell commit과
 selection-restoring undo/redo를 제공한다.

@@ -2,6 +2,7 @@ import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import connectorsMarkdown from "../../../../docs/public/connectors.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
 import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
+import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 
 export const docPages = {
   overview: {
@@ -27,6 +28,12 @@ export const docPages = {
     label: "API Reference",
     title: "json-document API",
     source: apiReferenceMarkdown,
+  },
+  topology: {
+    path: "/docs/topology",
+    label: "Topology",
+    title: "Topology",
+    source: topologyMarkdown,
   },
 } as const;
 

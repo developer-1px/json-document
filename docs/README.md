@@ -12,6 +12,7 @@ docs
 |   |-- quickstart.md          # Start: 사용 시작
 |   |-- overview.md            # Core: Why / How / What
 |   |-- concepts.md            # Core: 읽기 → 편집 → 외부 확장
+|   |-- topology.md            # Core: 화면 줄과 선택
 |   |-- api.md                 # Core: 레퍼런스
 |   |-- connectors.md          # Connectors: 공식 외부 생태계 연결
 |   `-- llms.txt               # machine-readable 공개 문서
@@ -27,6 +28,7 @@ Documentation
 |-- Core
 |   |-- Why
 |   |-- Concepts
+|   |-- Topology
 |   `-- API Reference
 `-- Connectors
     `-- Connector guide
@@ -55,8 +57,9 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
 - 코드 식별자, 명령어, 파일 경로, 표준명은 원문을 유지한다.
 - public 문서는 usage와 프로젝트 이해만 다룬다.
 - 페이지마다 할 일 하나만 쓴다. overview는 Why/How/What 배경,
-  concepts는 살아남은 코어 아이디어, api는 시그니처 레퍼런스,
-  quickstart는 실습, connectors는 연결 방법이다.
+  concepts는 살아남은 코어 아이디어, topology는 화면 줄과 선택,
+  api는 시그니처 레퍼런스, quickstart는 실습, connectors는 연결
+  방법이다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
 - 무엇을 하는지로 정의한다. 소유하지 않는 것의 목록으로 시작하지 않는다.

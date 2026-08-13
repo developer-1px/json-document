@@ -10,7 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createOrderedAxis } from "./ordered-axis.js";
+import { gridRangeBounds } from "./topology.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -290,11 +290,9 @@ function selectedCells(
   selection: DatabaseSelection,
   topology: DatabaseTopology,
 ): DatabaseCell[] {
-  const recordAxis = createOrderedAxis(topology.recordIds);
-  const propertyAxis = createOrderedAxis(topology.propertyIds);
   const selectedKeys = new Set<string>();
   for (const range of selection.ranges) {
-    const bounds = rangeBounds(recordAxis, propertyAxis, range);
+    const bounds = rangeBounds(topology, range);
     if (!bounds) continue;
     for (let recordIndex = bounds.recordStart; recordIndex <= bounds.recordEnd; recordIndex += 1) {
       for (let propertyIndex = bounds.propertyStart; propertyIndex <= bounds.propertyEnd; propertyIndex += 1) {
@@ -310,21 +308,20 @@ function selectedCells(
   });
 }
 
-function rangeBounds(
-  recordAxis: ReturnType<typeof createOrderedAxis>,
-  propertyAxis: ReturnType<typeof createOrderedAxis>,
-  range: SelectionRange<DatabasePoint>,
-) {
-  const anchorRecord = recordAxis.indexOf(range.anchor.recordId);
-  const focusRecord = recordAxis.indexOf(range.focus.recordId);
-  const anchorProperty = propertyAxis.indexOf(range.anchor.propertyId);
-  const focusProperty = propertyAxis.indexOf(range.focus.propertyId);
-  if (anchorRecord === null || focusRecord === null || anchorProperty === null || focusProperty === null) return null;
+function rangeBounds(topology: DatabaseTopology, range: SelectionRange<DatabasePoint>) {
+  const bounds = gridRangeBounds(
+    { rowIds: topology.recordIds, columnIds: topology.propertyIds },
+    {
+      anchor: { rowId: range.anchor.recordId, columnId: range.anchor.propertyId },
+      focus: { rowId: range.focus.recordId, columnId: range.focus.propertyId },
+    },
+  );
+  if (bounds === null) return null;
   return {
-    recordStart: Math.min(anchorRecord, focusRecord),
-    recordEnd: Math.max(anchorRecord, focusRecord),
-    propertyStart: Math.min(anchorProperty, focusProperty),
-    propertyEnd: Math.max(anchorProperty, focusProperty),
+    recordStart: bounds.rowStart,
+    recordEnd: bounds.rowEnd,
+    propertyStart: bounds.columnStart,
+    propertyEnd: bounds.columnEnd,
   };
 }
 

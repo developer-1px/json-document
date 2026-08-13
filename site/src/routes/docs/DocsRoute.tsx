@@ -10,6 +10,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   quickstart: "cursor",
   connectors: "peek",
   api: "braces",
+  topology: "cursor",
 };
 
 export function DocsOverviewRoute() {
@@ -26,6 +27,10 @@ export function ConnectorDocsRoute() {
 
 export function ApiReferenceRoute() {
   return <DocsRoute pageId="api" />;
+}
+
+export function TopologyDocsRoute() {
+  return <DocsRoute pageId="topology" />;
 }
 
 function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {

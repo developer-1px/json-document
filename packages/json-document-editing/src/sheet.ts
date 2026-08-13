@@ -10,7 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createOrderedAxis } from "./ordered-axis.js";
+import { gridPointIndex, gridRangeBounds, type GridTopology } from "./topology.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -54,10 +54,7 @@ export interface SheetSelection extends Record<string, JSONValue> {
   readonly primaryIndex: number | null;
 }
 
-export interface SheetTopology {
-  readonly rowIds: ReadonlyArray<string>;
-  readonly columnIds: ReadonlyArray<string>;
-}
+export type SheetTopology = GridTopology;
 
 export interface SheetCell extends SheetPoint {
   readonly value: JSONValue;
@@ -288,25 +285,8 @@ function paste(
 function rangeBounds(
   topology: SheetTopology,
   range: SelectionRange<SheetPoint>,
-): {
-  readonly rowStart: number;
-  readonly rowEnd: number;
-  readonly columnStart: number;
-  readonly columnEnd: number;
-} | null {
-  const rowAxis = createOrderedAxis(topology.rowIds);
-  const columnAxis = createOrderedAxis(topology.columnIds);
-  const anchorRow = rowAxis.indexOf(range.anchor.rowId);
-  const anchorColumn = columnAxis.indexOf(range.anchor.columnId);
-  const focusRow = rowAxis.indexOf(range.focus.rowId);
-  const focusColumn = columnAxis.indexOf(range.focus.columnId);
-  if (anchorRow === null || anchorColumn === null || focusRow === null || focusColumn === null) return null;
-  return {
-    rowStart: Math.min(anchorRow, focusRow),
-    rowEnd: Math.max(anchorRow, focusRow),
-    columnStart: Math.min(anchorColumn, focusColumn),
-    columnEnd: Math.max(anchorColumn, focusColumn),
-  };
+) {
+  return gridRangeBounds(topology, range);
 }
 
 function resolveTopology(document: SheetDocument, topology?: SheetTopology): SheetTopology {
@@ -331,9 +311,7 @@ function resolvePointInTopology(
   rowId: string,
   columnId: string,
 ): { readonly rowIndex: number; readonly columnIndex: number } | null {
-  const rowIndex = topology.rowIds.indexOf(rowId);
-  const columnIndex = topology.columnIds.indexOf(columnId);
-  return rowIndex < 0 || columnIndex < 0 ? null : { rowIndex, columnIndex };
+  return gridPointIndex(topology, { rowId, columnId });
 }
 
 function resolveRow(document: SheetDocument, rowId: string): SheetRow {

@@ -42,6 +42,7 @@ function fail(message) {
 const publicDocs = {
   overview: read("docs/public/overview.md"),
   concepts: read("docs/public/concepts.md"),
+  topology: read("docs/public/topology.md"),
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
   connectors: read("docs/public/connectors.md"),
@@ -87,6 +88,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "llms.txt",
   "overview.md",
   "quickstart.md",
+  "topology.md",
 ])) {
   fail("docs/public: only the active v3 guides and llms.txt may remain.");
 }
