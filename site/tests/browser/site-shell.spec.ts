@@ -154,8 +154,8 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
     };
   });
 
-  expect(snapshot.fontSize).toBe("14px");
-  expect(snapshot.lineGaps.every((gap) => gap >= 22 && gap <= 24)).toBe(true);
+  expect(snapshot.fontSize).toBe("13px");
+  expect(snapshot.lineGaps.every((gap) => gap >= 20 && gap <= 21)).toBe(true);
   expect(snapshot.source).toContain('";\n\nconst initialBoard');
   expect(snapshot.pageOverflow).toBe(false);
 
@@ -193,7 +193,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   }));
   expect(codePalette).toEqual({
     backgroundColor: "rgb(251, 248, 242)",
-    fontSize: "14px",
+    fontSize: "13px",
     keyword: "rgb(41, 40, 36)",
     usesImpactSyntax: false,
   });

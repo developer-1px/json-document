@@ -34,8 +34,8 @@ export function CodeBlock(props: {
   return (
     <figure className={classes("m-0", ui.code.block.frame, props.className)} aria-label={label}>
       <figcaption className={ui.code.block.header}>
-        <span className={ui.code.block.label}>{label}</span>
-        <span className="ml-auto flex items-center gap-3">
+        {props.label ? <span className={ui.code.block.label}>{props.label}</span> : null}
+        <span className="ml-auto flex items-center gap-2">
           {props.meta ? <span className={ui.code.block.meta}>{props.meta}</span> : null}
           {props.signal ? <span className={ui.code.block.signal}>{props.signal}</span> : null}
           <button
