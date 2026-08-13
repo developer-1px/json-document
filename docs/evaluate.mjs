@@ -24,7 +24,7 @@ function filesUnder(path) {
     .flatMap((entry) => {
       if (
         entry.isDirectory()
-        && [".git", ".npm-cache", "node_modules", "dist", "build", "coverage"].includes(entry.name)
+        && [".git", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
       ) {
         return [];
       }
@@ -41,6 +41,7 @@ function fail(message) {
 
 const publicDocs = {
   overview: read("docs/public/overview.md"),
+  concepts: read("docs/public/concepts.md"),
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
   connectors: read("docs/public/connectors.md"),
@@ -81,12 +82,13 @@ const activeCompanionPackages = new Set([
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "api.md",
+  "concepts.md",
   "connectors.md",
   "llms.txt",
   "overview.md",
   "quickstart.md",
 ])) {
-  fail("docs/public: only the four active v3 guides and llms.txt may remain.");
+  fail("docs/public: only the active v3 guides and llms.txt may remain.");
 }
 
 if (JSON.stringify(fileNames("standards")) !== JSON.stringify([

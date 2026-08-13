@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document",
   "short_name": "@interactive-os/json-document",
-  "description": "Implementation-neutral JSON editing and a headless JSON Document.",
+  "description": "A tiny API to read, query, patch, and subscribe to JSON.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fafaf9",

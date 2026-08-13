@@ -1,7 +1,6 @@
 # 튜토리얼: 작은 카드 편집기 만들기
 
-작은 board state를 여섯-member Core로 읽고, 검증하고, 변경하고, 구독합니다.
-루트 package에는 schema provider나 UI framework가 필요하지 않습니다.
+Inbox에 카드 하나를 두고, 제목을 읽고, 상태를 바꾸고, 그 변경을 구독합니다.
 
 ## 1. JSON document 만들기
 
@@ -23,12 +22,11 @@ const initialBoard = {
 const document = createJSONDocument(initialBoard);
 ```
 
-입력은 caller와 격리된 immutable JSON snapshot으로 소유됩니다. 이후 변경은
-직접 대입하지 않고 `commit`으로만 수행합니다.
+입력 JSON은 document가 복사해서 가집니다. 이후에는 `commit`으로만 바꿉니다.
 
 ## 2. Pointer로 읽고 JSONPath로 찾기
 
-정확한 한 위치는 JSON Pointer로 읽습니다.
+한 곳은 JSON Pointer로 읽습니다.
 
 ```ts
 const title = document.at("/lists/0/cards/0/title");
@@ -38,7 +36,7 @@ if (title.ok) {
 }
 ```
 
-여러 위치는 JSONPath로 찾습니다.
+여러 곳은 JSONPath로 찾습니다.
 
 ```ts
 const todos = document.query(
@@ -46,10 +44,10 @@ const todos = document.query(
 );
 ```
 
-JSONPath는 변경 언어가 아닙니다. Query 결과의 Pointer를 JSON Patch path로
-사용합니다.
+JSONPath는 찾기만 합니다. 바꿀 때는 결과로 받은 Pointer를 JSON Patch의
+`path`에 넣습니다.
 
-## 3. 변경 전에 확인하고 commit하기
+## 3. 확인하고 적용하기
 
 ```ts
 const operations = [{
@@ -75,8 +73,8 @@ if (validation.ok) {
 }
 ```
 
-`validatePatch`는 state와 subscriber를 바꾸지 않습니다. `commit`은 ordered batch
-전체를 적용하거나 아무것도 적용하지 않습니다.
+`validatePatch`는 미리 검사만 합니다. `commit`은 목록 전체를 적용하거나
+아무것도 적용하지 않습니다.
 
 ## 4. 변경 구독하기
 
@@ -97,12 +95,11 @@ document.commit([
 unsubscribe();
 ```
 
-실패하거나 최종 state가 같은 no-op commit은 notification을 만들지 않습니다.
+실패한 commit이나 값이 그대로인 commit은 listener를 부르지 않습니다.
 
-## 5. 순수 patch 적용하기
+## 5. document 없이 preview하기
 
-저장 전 preview나 import 검토처럼 document instance가 필요 없는 경우에는
-`applyPatch`를 씁니다.
+저장 전 미리보기처럼 document가 필요 없으면 `applyPatch`를 씁니다.
 
 ```ts
 import { applyPatch } from "@interactive-os/json-document";
@@ -123,12 +120,11 @@ if (preview.ok) {
 }
 ```
 
-입력 state와 operation은 변경되지 않으며, 성공 result는 caller input과 격리됩니다.
+입력 값과 operation은 그대로 남고, 성공 결과는 새 값입니다.
 
-## 6. 선택한 validator 연결하기
+## 6. 스키마 붙이기
 
-Core는 Zod를 요구하지 않습니다. 어떤 validator든 canonical `validate`
-callback으로 연결할 수 있습니다.
+잘못된 보드가 들어가지 않게 `validate`를 넘길 수 있습니다.
 
 ```ts
 import * as z from "zod";
@@ -166,9 +162,9 @@ const acceptedDocument = createJSONDocument(initialBoard, {
 });
 ```
 
-Acceptance는 candidate를 허용하거나 거부할 뿐 commit-time transform을 몰래
-state에 적용하지 않습니다.
+`validate`는 허용하거나 거절합니다. Zod가 만든 변환 값을 몰래 넣지 않습니다.
+같은 일을 패키지로 쓰려면 `@interactive-os/json-document-zod`의
+`createZodValidator`를 보면 됩니다.
 
-Selection, clipboard와 history는 optional editing companion이 조합합니다. React
-binding은 Root subpath가 아니라 공식 `@interactive-os/json-document-react`
-Connector로 제공합니다. DOM lifecycle과 제품별 의미는 host가 소유합니다.
+다음으로 React에 붙이려면 [Connectors](connectors.md), 함수 목록은
+[API](api.md)입니다.

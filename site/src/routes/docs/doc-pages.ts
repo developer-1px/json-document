@@ -6,8 +6,8 @@ import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
 export const docPages = {
   overview: {
     path: "/docs",
-    label: "Concepts",
-    title: "json-document Docs",
+    label: "Why",
+    title: "왜 json-document인가",
     source: overviewMarkdown,
   },
   quickstart: {

@@ -23,6 +23,7 @@ import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selec
 import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
+import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageExamplesDocumentRouteImport } from "./routes/_page/examples/document";
@@ -100,6 +101,11 @@ const PageDocsApiRoute = PageDocsApiRouteImport.update({
   path: "/docs/api",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
+  id: "/docs/concepts",
+  path: "/docs/concepts",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
   id: "/docs/connectors",
   path: "/docs/connectors",
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/docs/api": typeof PageDocsApiRoute;
+  "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/examples/document": typeof PageExamplesDocumentRoute;
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/docs/api": typeof PageDocsApiRoute;
+  "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/examples/document": typeof PageExamplesDocumentRoute;
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
+  "/_page/docs/concepts": typeof PageDocsConceptsRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
   "/_page/examples/document": typeof PageExamplesDocumentRoute;
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | "/demo/selection"
     | "/demo/sheet"
     | "/docs/api"
+    | "/docs/concepts"
     | "/docs/connectors"
     | "/docs/tutorial"
     | "/examples/document"
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | "/demo/selection"
     | "/demo/sheet"
     | "/docs/api"
+    | "/docs/concepts"
     | "/docs/connectors"
     | "/docs/tutorial"
     | "/examples/document"
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | "/_page/demo/selection"
     | "/_page/demo/sheet"
     | "/_page/docs/api"
+    | "/_page/docs/concepts"
     | "/_page/docs/connectors"
     | "/_page/docs/tutorial"
     | "/_page/examples/document"
@@ -358,6 +370,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/concepts": {
+      id: "/_page/docs/concepts";
+      path: "/docs/concepts";
+      fullPath: "/docs/concepts";
+      preLoaderRoute: typeof PageDocsConceptsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/connectors": {
       id: "/_page/docs/connectors";
       path: "/docs/connectors";
@@ -406,6 +425,7 @@ interface PageRouteChildren {
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
+  PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
   PageExamplesDocumentRoute: typeof PageExamplesDocumentRoute;
@@ -426,6 +446,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoSelectionRoute: PageDemoSelectionRoute,
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDocsApiRoute: PageDocsApiRoute,
+  PageDocsConceptsRoute: PageDocsConceptsRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
   PageExamplesDocumentRoute: PageExamplesDocumentRoute,

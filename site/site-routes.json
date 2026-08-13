@@ -14,6 +14,13 @@
     "navigationGroup": "Core"
   },
   {
+    "path": "/docs/concepts",
+    "label": "Concepts",
+    "title": "Core Concepts - json-document",
+    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
+    "navigationGroup": "Core"
+  },
+  {
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
