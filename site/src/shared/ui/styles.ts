@@ -88,6 +88,7 @@ export const ui = {
       label: "text-[11px] font-medium text-ink",
       meta: "text-[10px] text-pencil",
       signal: "text-[10px] font-medium text-impact-ink",
+      copy: "rounded-[3px] px-1.5 py-0.5 text-[10px] font-medium text-pencil hover:bg-paper-warm hover:text-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-impact/25 data-[copied=true]:text-sage",
       viewport: {
         compact: "max-h-32",
         content: "max-h-none",

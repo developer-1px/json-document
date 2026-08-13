@@ -119,6 +119,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
 
 test("code blocks preserve source whitespace with a compact visual rhythm", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/docs/tutorial");
 
   const block = page.getByRole("figure", { name: "TypeScript" }).first();
@@ -142,6 +143,10 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
   expect(snapshot.lineGaps.every((gap) => gap >= 22 && gap <= 24)).toBe(true);
   expect(snapshot.source).toContain('";\n\nconst initialBoard');
   expect(snapshot.pageOverflow).toBe(false);
+
+  await block.getByRole("button", { name: "Copy" }).click();
+  await expect(block.getByRole("button", { name: "Copied" })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const initialBoard");
 });
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {

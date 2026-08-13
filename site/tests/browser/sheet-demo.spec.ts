@@ -13,7 +13,7 @@ test("Sheet demo completes rectangular selection, clipboard, edit, undo, and red
   await page.getByRole("textbox", { name: "Status row 2" }).click({ modifiers: ["Shift"] });
   await expect(page.locator('td[data-selected="true"]')).toHaveCount(4);
 
-  await page.getByRole("button", { name: "Copy", exact: true }).click();
+  await page.getByLabel("Sheet actions").getByRole("button", { name: "Copy", exact: true }).click();
   await expect(page.getByTestId("sheet-clipboard-tsv")).toHaveText("Alpha\tDraft\nBeta\tReady");
 
   await page.getByRole("textbox", { name: "Status row 3" }).click();
