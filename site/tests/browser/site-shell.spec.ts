@@ -19,6 +19,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Topology",
     "Clipboard",
     "History",
+    "Intent",
+    "Intent guide",
     "Document",
     "Workbench",
     "Sheet",
