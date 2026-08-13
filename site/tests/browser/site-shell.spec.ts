@@ -74,7 +74,7 @@ test("docs and demos share the page frame while preserving their content modes",
   await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
 
   await page.goto("/docs/api");
-  await expect(page.locator('[data-petite-cat="braces"]')).toHaveCount(1);
+  await expect(page.locator('[data-petite-cat="patch"]')).toHaveCount(1);
 
   await page.goto("/demo");
   const demoFrame = await pageFrameSnapshot(page);
