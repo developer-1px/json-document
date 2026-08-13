@@ -72,6 +72,28 @@ describe("official site shell", () => {
     expect(validateCrumb.getByRole("link", { name: "Zod" }).getAttribute("href")).toBe("/connectors/zod");
     expect(validateCrumb.getByText("Validate")).toBeTruthy();
   });
+
+  test("keeps the site chrome mounted across interior routes", async () => {
+    render(<App />);
+    const user = userEvent.setup();
+    const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
+    const brand = screen.getByRole("link", { name: "json-document" });
+    const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
+
+    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }));
+    const frame = await waitFor(() => {
+      const node = document.querySelector("[data-page-frame]");
+      expect(node).toBeTruthy();
+      return node;
+    });
+
+    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }));
+    await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
+    expect(screen.getByRole("link", { name: "json-document" })).toBe(brand);
+    expect(screen.getByRole("navigation", { name: "Site navigation" })).toBe(siteNav);
+    expect(document.querySelector("[data-page-frame]")).toBe(frame);
+    expect(frame?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
+  });
 });
 
 function groupLinks(nav: ReturnType<typeof within>, name: string): string[] {

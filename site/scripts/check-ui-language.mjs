@@ -42,6 +42,7 @@ function collect(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const entryPath = path.join(directory, entry.name);
     if (entry.isDirectory()) return collect(entryPath);
+    if (entry.name.endsWith(".gen.ts") || entry.name.endsWith(".gen.tsx")) return [];
     return /\.tsx?$/.test(entry.name) ? [entryPath] : [];
   });
 }

@@ -2,6 +2,7 @@ import { createContext, useContext, type ButtonHTMLAttributes, type ReactNode } 
 import { classes, ui } from "./styles";
 
 const PageLeadContext = createContext<ReactNode>(null);
+const PageFrameContext = createContext(false);
 
 export function PageLeadProvider(props: {
   readonly lead: ReactNode;
@@ -14,13 +15,16 @@ export type PetiteCatIllustration = "sleep" | "peek" | "braces" | "cursor";
 
 export function PageFrame(props: { readonly children: ReactNode }) {
   const lead = useContext(PageLeadContext);
+  if (useContext(PageFrameContext)) return props.children;
   return (
-    <main className={ui.frame.page}>
-      <div className={ui.frame.content} data-page-frame>
-        {lead}
-        {props.children}
-      </div>
-    </main>
+    <PageFrameContext.Provider value={true}>
+      <main className={ui.frame.page}>
+        <div className={ui.frame.content} data-page-frame>
+          {lead}
+          {props.children}
+        </div>
+      </main>
+    </PageFrameContext.Provider>
   );
 }
 

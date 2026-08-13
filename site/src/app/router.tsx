@@ -63,7 +63,7 @@ export function NavLink(props: {
 
   return (
     <Link
-      to={props.to}
+      to={props.to as never}
       className={props.className}
       aria-current={active ? "page" : undefined}
       data-branch={props.branch && !active ? "true" : undefined}
