@@ -11,7 +11,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "API Reference", "Quickstart"]);
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Concepts", "API Reference", "Quickstart"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Selection",
     "Selection Lab",

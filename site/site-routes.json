@@ -13,6 +13,13 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/concepts",
+    "label": "Concepts",
+    "title": "Core Concepts - json-document",
+    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
+    "navigationGroup": "JSON Document"
+  },
+  {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",
@@ -25,12 +32,6 @@
     "title": "Tutorial - json-document",
     "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
     "navigationGroup": "JSON Document"
-  },
-  {
-    "path": "/docs/concepts",
-    "label": "Concepts",
-    "title": "Core Concepts - json-document",
-    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors."
   },
   {
     "path": "/docs/selection",
