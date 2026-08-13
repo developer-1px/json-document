@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Applied Sheet `cut()` to the TanStack Table Connector and official Sheet
+  live paths, and named all six Web clipboard codecs plus the Database slice
+  in the public catalogs.
 - Applied the editing-layer Clipboard door to Order, Object, Tree, and
   Database, added Sheet `cut()` as a primary-range cell clear, and exported
   matching Web codecs.

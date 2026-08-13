@@ -44,7 +44,7 @@ stateless JSON Patch
 | 위치 | 역할 |
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
-| [packages/json-document-editing](packages/json-document-editing) | headless transaction, structural selection, clipboard, history와 Document·Order·Sheet·Object·Tree slice |
+| [packages/json-document-editing](packages/json-document-editing) | headless transaction, structural selection, clipboard, history와 Document·Order·Sheet·Object·Tree·Database slice |
 | [packages/json-document-selection](packages/json-document-selection) | DOM-free key·range·mask family, topology/geometry port와 semantic interaction controller |
 | [packages/json-document-react](packages/json-document-react) | React subscription과 Document editor lifecycle Connector |
 | [packages/json-document-react-hook-form](packages/json-document-react-hook-form) | React Hook Form draft lifecycle을 canonical submit과 history에 연결하는 Connector |
@@ -54,7 +54,7 @@ stateless JSON Patch
 | [packages/json-document-web](packages/json-document-web) | Web ClipboardEvent, text-control input과 modifier state를 editing contract로 번역하는 Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
-| [site](site) | 공개 문서와 Document·Sheet demo, structural Selection Lab |
+| [site](site) | 공개 문서와 Document·Sheet·Database demo, structural Selection Lab |
 
 v3 Kernel인 `@interactive-os/json-document`는 dependency-free Core로 남습니다.
 Editing, collaboration과 Connector package는 독립 version과 release lifecycle을

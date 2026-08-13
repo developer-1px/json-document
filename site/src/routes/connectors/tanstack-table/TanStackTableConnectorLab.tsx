@@ -63,6 +63,7 @@ export function TanStackTableConnectorLab() {
   const webClipboard = createWebClipboardBinding({
     codec: sheetClipboardCodec,
     read: () => binding.copy(table),
+    cut: () => binding.cut(table)?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => binding.paste(table, payload),
   });
   const selected = new Set(binding.selectedCells(table).map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
@@ -93,6 +94,15 @@ export function TanStackTableConnectorLab() {
     setAnnouncement(`Copied ${next.cells.length} × ${next.cells[0]?.length ?? 0} visible cells`);
   }
 
+  function cutSelection() {
+    const next = binding.cut(table);
+    if (next === null) return setAnnouncement("Select a visible cell first");
+    setClipboard(next.clipboard);
+    setAnnouncement(next.result.ok
+      ? `Cut ${next.clipboard.cells.length} × ${next.clipboard.cells[0]?.length ?? 0} visible cells`
+      : next.result.code);
+  }
+
   function pasteSelection() {
     if (clipboard === null) return;
     run(() => binding.paste(table, clipboard), "Pasted visible rectangle");
@@ -105,6 +115,13 @@ export function TanStackTableConnectorLab() {
     setAnnouncement(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
   }
 
+  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
+    const result = webClipboard.cut(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
+  }
+
   function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.paste(event);
     setAnnouncement(result.ok ? "Pasted structured visible rectangle" : result.code);
@@ -114,6 +131,7 @@ export function TanStackTableConnectorLab() {
     <section
       aria-label="TanStack Table editing"
       onCopy={handleNativeCopy}
+      onCut={handleNativeCut}
       onPaste={handleNativePaste}
       className={classes("p-4", ui.surface.raised)}
     >
@@ -124,6 +142,7 @@ export function TanStackTableConnectorLab() {
         <Control label="Hide status" active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
         <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
         <Control label="Copy" onClick={copySelection} />
+        <Control label="Cut" onClick={cutSelection} />
         <Control label="Paste" disabled={clipboard === null} onClick={pasteSelection} />
         <Control label="Fill selected" onClick={() => run(
           () => binding.fillSelected(table, "Selected"),

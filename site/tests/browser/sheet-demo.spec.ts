@@ -65,6 +65,24 @@ test("Sheet demo fills disjoint ranges and restores their selection with undo", 
   expect(JSON.parse(await page.getByTestId("sheet-selection-json").innerText()).ranges).toHaveLength(2);
 });
 
+test("Sheet demo cuts the primary rectangle and restores cells with undo", async ({ page }) => {
+  await page.goto("/demo/sheet");
+  await page.getByRole("textbox", { name: "Name row 1" }).click();
+  await page.getByRole("textbox", { name: "Status row 2" }).click({ modifiers: ["Shift"] });
+
+  await page.getByLabel("Sheet actions").getByRole("button", { name: "Cut", exact: true }).click();
+  await expect(page.getByTestId("sheet-clipboard-tsv")).toHaveText("Alpha\tDraft\nBeta\tReady");
+  let document = await canonicalSheet(page);
+  expect(document.rows[0]?.cells).toEqual({ name: null, status: null, owner: "Mina" });
+  expect(document.rows[1]?.cells).toEqual({ name: null, status: null, owner: "Theo" });
+  await expect(page.locator('td[data-selected="true"]')).toHaveCount(4);
+
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  document = await canonicalSheet(page);
+  expect(document.rows[0]?.cells).toEqual({ name: "Alpha", status: "Draft", owner: "Mina" });
+  expect(document.rows[1]?.cells).toEqual({ name: "Beta", status: "Ready", owner: "Theo" });
+});
+
 test("Sheet demo composes native structured clipboard events with its Sheet editor", async ({ page }) => {
   await page.goto("/demo/sheet");
   await page.getByRole("textbox", { name: "Name row 1" }).click();

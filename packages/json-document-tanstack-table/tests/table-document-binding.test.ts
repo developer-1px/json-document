@@ -99,6 +99,16 @@ describe("TanStack Table document binding", () => {
       { rowId: "r2", columnId: "name", value: "Beta" },
     ]);
     expect(binding.copy(table)?.text).toBe("3\tGamma\n2\tBeta");
+
+    const cut = binding.cut(table);
+    expect(cut?.clipboard.text).toBe("3\tGamma\n2\tBeta");
+    expect((editor.snapshot.value as SheetDocument).rows.map((row) => row.cells)).toEqual([
+      { name: "Alpha", status: "Draft", score: 1 },
+      { name: null, status: "Ready", score: null },
+      { name: null, status: "Ready", score: null },
+    ]);
+    expect(binding.undo().ok).toBe(true);
+    expect(editor.snapshot.value).toEqual(initial);
   });
 
   test("pastes one visible rectangle and restores JSON with selection", () => {

@@ -48,6 +48,29 @@ test("TanStack Table Connector edits the visible sorted and filtered Sheet topol
   expect(errors).toEqual([]);
 });
 
+test("TanStack Table Connector cuts the visible rectangle and restores it with undo", async ({ page }) => {
+  await page.goto("/connectors/tanstack-table");
+  await page.getByRole("button", { name: "Score descending" }).click();
+  await page.getByRole("button", { name: "Score first" }).click();
+  await page.getByRole("button", { name: "Hide status" }).click();
+
+  const start = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "score r3" }) });
+  const end = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "name r2" }) });
+  await start.click();
+  await end.click({ modifiers: ["Shift"] });
+  await page.getByLabel("TanStack view and editing").getByRole("button", { name: "Cut" }).click();
+  await expect(page.getByTestId("tanstack-clipboard")).toHaveText("3\tGamma\n2\tBeta");
+
+  let value = JSON.parse(await page.getByTestId("tanstack-document-json").innerText()) as SheetValue;
+  expect(rowCells(value, "r3")).toEqual({ name: null, status: "Ready", score: null });
+  expect(rowCells(value, "r2")).toEqual({ name: null, status: "Ready", score: null });
+
+  await page.getByRole("button", { name: "Undo" }).click();
+  value = JSON.parse(await page.getByTestId("tanstack-document-json").innerText()) as SheetValue;
+  expect(rowCells(value, "r3")).toEqual({ name: "Gamma", status: "Ready", score: 3 });
+  expect(rowCells(value, "r2")).toEqual({ name: "Beta", status: "Ready", score: 2 });
+});
+
 test("TanStack Table Connector fills disjoint ranges in visible order", async ({ page }) => {
   await page.goto("/connectors/tanstack-table");
   await page.getByRole("button", { name: "Score descending" }).click();

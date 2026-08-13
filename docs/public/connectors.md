@@ -184,10 +184,11 @@ surface.addEventListener("cut", (event) => clipboard.cut(event));
 surface.addEventListener("paste", (event) => clipboard.paste(event));
 ```
 
-Document와 Sheet codec은 structured MIME과 `text/plain`을 함께 기록합니다.
-paste할 때는 유효한 structured payload를 editor에 전달합니다. cut은 clipboard
-기록에 성공한 뒤 선택한 내용을 제거합니다. 처리하지 못한 event는
-`preventDefault()`를 호출하지 않아 browser 기본 동작으로 이어집니다.
+Document, Sheet, Order, Object, Tree, Database codec은 structured MIME과
+`text/plain`을 함께 기록합니다. paste할 때는 유효한 structured payload를
+editor에 전달합니다. cut은 clipboard 기록에 성공한 뒤 선택한 내용을
+제거합니다. 처리하지 못한 event는 `preventDefault()`를 호출하지 않아
+browser 기본 동작으로 이어집니다.
 
 `selectionOperationFromModifiers`는 modifier 입력을 `replace`, `extend`,
 `toggle`로 바꿉니다. `textInputFromControl`은 native text control의 value와
