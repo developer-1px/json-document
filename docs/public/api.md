@@ -286,7 +286,9 @@ types
 ```
 
 선택, 클립보드, 실행 취소는 `@interactive-os/json-document-editing`이
-이 API 위에서 조합합니다. React나 Zod는 [Connectors](connectors.md)입니다.
+이 API 위에서 조합합니다. 편집기가 받는 말의 타입과 동사는
+[Intent 레퍼런스](intent.md)에 있습니다. React나 Zod는
+[Connectors](connectors.md)입니다.
 
 ```ts
 import { createJSONDocument } from "@interactive-os/json-document";
