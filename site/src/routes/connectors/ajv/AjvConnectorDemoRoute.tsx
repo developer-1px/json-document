@@ -11,7 +11,7 @@ export function AjvConnectorDemoRoute() {
   return (
     <PageFrame>
       <PageHeader
-        illustration="braces"
+        illustration="debug"
         title="Ajv Connector"
         aside={(
           <div className={ui.code.install}>
