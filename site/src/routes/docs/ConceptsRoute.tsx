@@ -29,7 +29,7 @@ export function ClipboardDocsRoute() {
 }
 
 function EditingConceptRoute(props: {
-  readonly pageId?: Exclude<DocPageId, "overview" | "quickstart" | "connectors" | "api" | "topology">;
+  readonly pageId?: Exclude<DocPageId, "overview" | "quickstart" | "connectors" | "api" | "topology" | "intent" | "intentGuide">;
   readonly title?: string;
   readonly source?: string;
   readonly illustration?: PetiteCatIllustration;

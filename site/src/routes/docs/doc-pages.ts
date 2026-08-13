@@ -2,6 +2,8 @@ import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
 import connectorsMarkdown from "../../../../docs/public/connectors.md?raw";
 import historyMarkdown from "../../../../docs/public/history.md?raw";
+import intentGuideMarkdown from "../../../../docs/public/intent-guide.md?raw";
+import intentMarkdown from "../../../../docs/public/intent.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
 import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
@@ -25,6 +27,18 @@ export const docPages = {
     label: "Connector guide",
     title: "json-document Connectors",
     source: connectorsMarkdown,
+  },
+  intent: {
+    path: "/docs/intent",
+    label: "Intent",
+    title: "Intent 레퍼런스",
+    source: intentMarkdown,
+  },
+  intentGuide: {
+    path: "/docs/intent-guide",
+    label: "Intent guide",
+    title: "Intent 가이드",
+    source: intentGuideMarkdown,
   },
   api: {
     path: "/docs/api",

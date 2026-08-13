@@ -139,6 +139,9 @@ JSON 주소를 짜지 않고, 그 객체를 `dispatch`로 보냅니다.
 따라 하기는 [Intent 가이드](intent-guide.md)에, 타입과 동사는
 [Intent 레퍼런스](intent.md)에 있습니다.
 
+계약만 보려면 [Intent](intent.md)를, 문장이 적용되는 순서는
+[Intent guide](intent-guide.md)를 보면 됩니다.
+
 ## 외부 확장
 
 편집기까지 있으면 이미 문서를 고칠 수 있습니다. 그런데 실제 제품은

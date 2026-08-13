@@ -5,6 +5,8 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Named the editing-layer Intent door as `EditingIntent` / `EditingDispatch`,
+  and added the Intent reference and walkthrough under Editing.
 - Reorganized official site and documentation navigation to match the public
   concept tree. Concepts is the overall map above the layers. JSON Document,
   Editing, and Connectors are the three branches. Selection sits with
