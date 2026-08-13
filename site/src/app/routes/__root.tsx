@@ -9,7 +9,7 @@ import {
   useRouteMetadata,
   type SiteNavigationGroup,
 } from "../router";
-import { childRoutes, isNavBranch, routeGroup } from "../breadcrumb";
+import { childRoutes, isNavBranch, rootNavRoutes, routeGroup } from "../breadcrumb";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
 export const Route = createRootRoute({
@@ -49,6 +49,16 @@ function AppShell() {
           json-document
         </NavLink>
         <div className={ui.nav.menu}>
+          {rootNavRoutes(siteRoutes).map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              activePath={route.path}
+              className={classes(ui.nav.item, ui.nav.current)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
           {routeGroups.map((group) => {
             const groupRoutes = siteRoutes.filter((item) => item.navigationGroup === group);
             if (groupRoutes.length === 0) return null;

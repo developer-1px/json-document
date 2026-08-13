@@ -87,6 +87,14 @@ export function routeGroup(
   return undefined;
 }
 
+export function rootNavRoutes(routes: ReadonlyArray<SiteRoute>): ReadonlyArray<SiteRoute> {
+  return routes.filter((route) =>
+    route.path !== "/"
+    && route.navigationGroup === undefined
+    && route.parentPath === undefined
+  );
+}
+
 export function childRoutes(
   parentPath: string,
   routes: ReadonlyArray<SiteRoute>,

@@ -33,7 +33,8 @@ describe("official site shell", () => {
 
     expect(nav.queryByRole("group", { name: "Start" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
-    expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "Concepts", "API Reference", "Quickstart"]);
+    expect(nav.getByRole("link", { name: "Concepts" }).getAttribute("href")).toBe("/docs/concepts");
+    expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "API Reference", "Quickstart"]);
     expect(groupLinks(nav, "Editing")).toEqual([
       "Selection",
       "Selection Lab",
