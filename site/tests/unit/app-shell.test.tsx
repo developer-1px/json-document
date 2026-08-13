@@ -23,6 +23,7 @@ describe("official site shell", () => {
     expect(home.getByRole("link", { name: "Get started" }).getAttribute("href")).toBe("/docs/tutorial");
     expect(home.queryByText("v3.0.0")).toBeNull();
     expect(home.queryByRole("link", { name: "Read the API" })).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "Breadcrumb" })).toBeNull();
   });
 
   test("projects the product hierarchy into the site navigation", async () => {
@@ -31,9 +32,9 @@ describe("official site shell", () => {
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
-    expect(groupLinks(nav, "Core")).toEqual(["Concepts", "API Reference"]);
+    expect(groupLinks(nav, "Core")).toEqual(["Why", "API Reference"]);
     expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet", "Selection Lab", "Database"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "Connector guide", "React", "React Hook Form", "Zod", "TanStack Table", "Web Platform"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "Connector guide", "React", "React Hook Form", "Zod", "Validate", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -50,6 +51,17 @@ describe("official site shell", () => {
       "/connectors/web",
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
+
+    await user.click(connectors.getByRole("link", { name: "Zod", exact: true }));
+    const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
+    expect(adminCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
+    expect(adminCrumb.getByText("Zod")).toBeTruthy();
+
+    await user.click(nav.getByRole("link", { name: "Validate", exact: true }));
+    const validateCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
+    expect(validateCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
+    expect(validateCrumb.getByRole("link", { name: "Zod" }).getAttribute("href")).toBe("/connectors/zod");
+    expect(validateCrumb.getByText("Validate")).toBeTruthy();
   });
 });
 

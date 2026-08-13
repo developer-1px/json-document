@@ -94,7 +94,8 @@
     "path": "/connectors/zod/validate",
     "label": "Validate",
     "title": "Zod Validate Live Demo - json-document",
-    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation."
+    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "parentPath": "/connectors/zod"
   },
   {
     "path": "/connectors/tanstack-table",

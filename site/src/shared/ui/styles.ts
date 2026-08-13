@@ -1,12 +1,28 @@
 export const ui = {
   frame: {
     app: "bg-paper font-sans text-ink antialiased",
-    page: "min-h-full bg-paper px-4 py-8 lg:px-8",
+    page: "min-h-full bg-paper px-4 pb-8 pt-4 lg:px-8",
     content: "mx-auto max-w-6xl",
     header: "border-b border-pencil-light/60",
     hero: "border-b border-pencil-light/60 bg-transparent",
     navigation: "border-b border-pencil-light/60 bg-paper text-sm md:border-b-0 md:border-r",
     brand: "font-mono text-ink-strong no-underline hover:text-ink md:border-b md:border-pencil-light/60",
+    crumbRail: "px-4 pt-6 lg:px-8",
+  },
+  nav: {
+    group: "px-2 pb-1 pt-3 text-[10px] font-medium uppercase tracking-[0.16em] text-ink",
+    list: "grid content-start",
+    item: "flex border-l-2 border-transparent px-2 py-1 text-sm text-ink no-underline hover:text-ink-strong md:px-3",
+    child: "flex border-l-2 border-transparent py-1 pl-5 text-sm text-ink no-underline hover:text-ink-strong md:pl-6",
+    current: "aria-[current=page]:border-impact aria-[current=page]:font-medium aria-[current=page]:text-ink-strong data-[branch=true]:text-ink-strong",
+  },
+  breadcrumb: {
+    nav: "mb-3",
+    list: "m-0 flex list-none flex-wrap items-center p-0 text-xs text-pencil",
+    item: "flex items-center",
+    link: "text-pencil no-underline hover:text-ink-strong",
+    current: "font-medium text-ink-strong",
+    sep: "mx-1.5 text-pencil-light",
   },
   accent: {
     impact: {

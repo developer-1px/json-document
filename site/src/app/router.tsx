@@ -8,6 +8,7 @@ export type SiteRoute = {
   readonly title: string;
   readonly description: string;
   readonly navigationGroup?: SiteNavigationGroup;
+  readonly parentPath?: string;
 };
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -43,6 +44,7 @@ export function NavLink(props: {
   readonly children: ReactNode;
   readonly className: string;
   readonly activePath?: string;
+  readonly branch?: boolean;
 }) {
   const active = props.activePath === props.to;
 
@@ -65,6 +67,7 @@ export function NavLink(props: {
       href={pathWithBase(props.to)}
       className={props.className}
       aria-current={active ? "page" : undefined}
+      data-branch={props.branch && !active ? "true" : undefined}
       onClick={handleClick}
     >
       {props.children}

@@ -9,6 +9,7 @@ import {
   type SiteRoute,
   type SiteNavigationGroup,
 } from "./router";
+import { SiteBreadcrumb, childRoutes, isNavBranch } from "./breadcrumb";
 
 type Route = SiteRoute & { readonly Component: ComponentType };
 
@@ -81,32 +82,59 @@ export function App() {
         <NavLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
           json-document
         </NavLink>
-        <div className="flex gap-4 overflow-x-auto px-3 pb-3 md:grid md:gap-4 md:px-2">
+        <div className="flex gap-4 overflow-x-auto px-3 pb-3 md:grid md:gap-3 md:px-2">
           {routeGroups.map((group) => {
             const groupRoutes = routes.filter((item) => item.navigationGroup === group);
             if (groupRoutes.length === 0) return null;
             const groupLabelId = `site-navigation-${group.toLowerCase()}`;
             return (
-              <div key={group} role="group" aria-labelledby={groupLabelId} className="grid shrink-0 content-start gap-1">
-                <div id={groupLabelId} className={classes("flex px-2 py-1", ui.text.meta)}>
+              <div key={group} role="group" aria-labelledby={groupLabelId} className="grid shrink-0 content-start">
+                <div id={groupLabelId} className={ui.nav.group}>
                   {group}
                 </div>
-                {groupRoutes.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    activePath={route.path}
-                    className={classes("flex px-2 py-1 md:px-3", ui.text.meta, ui.state.current)}
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
+                <ul className={ui.nav.list}>
+                  {groupRoutes.map((item) => {
+                    const children = childRoutes(item.path, routes);
+                    return (
+                      <li key={item.path} className="grid content-start">
+                        <NavLink
+                          to={item.path}
+                          activePath={route.path}
+                          branch={isNavBranch(route.path, item.path, routes)}
+                          className={classes(ui.nav.item, ui.nav.current)}
+                        >
+                          {item.label}
+                        </NavLink>
+                        {children.length > 0 ? (
+                          <ul className={ui.nav.list}>
+                            {children.map((child) => (
+                              <li key={child.path}>
+                                <NavLink
+                                  to={child.path}
+                                  activePath={route.path}
+                                  className={classes(ui.nav.child, ui.nav.current)}
+                                >
+                                  {child.label}
+                                </NavLink>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             );
           })}
         </div>
       </nav>
       <div id="main-content" className="min-w-0 flex-1">
+        <div className={ui.frame.crumbRail}>
+          <div className={ui.frame.content}>
+            <SiteBreadcrumb route={route} routes={routes} />
+          </div>
+        </div>
         <Suspense fallback={<div aria-hidden="true" />}>
           <Page />
         </Suspense>
