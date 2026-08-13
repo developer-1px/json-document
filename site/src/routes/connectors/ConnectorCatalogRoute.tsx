@@ -1,7 +1,7 @@
 import { connectorCatalog } from "./connector-catalog";
 import { InlineCode } from "../../shared/ui/code-block";
+import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
-import { NavLink } from "../../app/router";
 import { classes, ui } from "../../shared/ui/styles";
 
 export function ConnectorCatalogRoute() {
@@ -26,13 +26,13 @@ export function ConnectorCatalogRoute() {
                 <span className={classes("mt-auto", ui.text.meta)}>Live Demo ships with the implementation.</span>
               ) : (
                 <div className="mt-auto flex flex-wrap items-center gap-3">
-                  <NavLink to={connector.demoPath} className={classes("self-start", ui.action.primary)}>
+                  <ActionLink to={connector.demoPath} kind="prominent" className="self-start">
                     Open Live Demo
-                  </NavLink>
+                  </ActionLink>
                   {connector.moreDemos?.map((demo) => (
-                    <NavLink key={demo.path} to={demo.path} className={ui.action.secondary}>
+                    <ActionLink key={demo.path} to={demo.path}>
                       {demo.label}
-                    </NavLink>
+                    </ActionLink>
                   ))}
                 </div>
               )}

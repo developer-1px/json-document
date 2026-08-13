@@ -1,8 +1,9 @@
 import conceptsMarkdown from "../../../../docs/public/concepts.md?raw";
+import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { ConceptsLab } from "./ConceptsLab";
 import { docPages, type DocPageId } from "./doc-pages";
+import { DocsRoute } from "./DocsRoute";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 
 const editingConceptIllustrations: Record<
@@ -26,15 +27,15 @@ export function ConceptsRoute() {
 }
 
 export function SelectionDocsRoute() {
-  return <EditingConceptRoute pageId="selection" />;
+  return <DocsRoute pageId="selection" />;
 }
 
 export function HistoryDocsRoute() {
-  return <EditingConceptRoute pageId="history" />;
+  return <DocsRoute pageId="history" />;
 }
 
 export function ClipboardDocsRoute() {
-  return <EditingConceptRoute pageId="clipboard" />;
+  return <DocsRoute pageId="clipboard" />;
 }
 
 function EditingConceptRoute(props: {
@@ -53,7 +54,7 @@ function EditingConceptRoute(props: {
 
   return (
     <PageFrame>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_11rem]">
         <div className="min-w-0">
           <PageHeader title={title} illustration={illustration}>
             {props.summary}
@@ -62,9 +63,9 @@ function EditingConceptRoute(props: {
           <nav aria-label="On this page" className={classes("mb-6 lg:hidden", ui.text.meta)}>
             <div className="flex flex-wrap gap-1">
               {headings.map((heading) => (
-                <a key={heading.id} href={`#${heading.id}`} className={classes("px-2 py-1 no-underline", ui.text.meta)}>
+                <ActionLink key={heading.id} href={`#${heading.id}`} className={classes("px-2 py-1 no-underline", ui.text.meta)}>
                   {heading.text}
-                </a>
+                </ActionLink>
               ))}
             </div>
           </nav>
@@ -74,22 +75,21 @@ function EditingConceptRoute(props: {
           </div>
         </div>
 
-        <aside className="min-w-0 lg:sticky lg:top-4">
+        <aside className="hidden min-w-0 self-start lg:sticky lg:top-4 lg:block">
           <nav aria-label="On this page" className={classes("mb-4 hidden lg:block", ui.text.meta)}>
             <div className={classes("mb-2", ui.text.heading)}>On this page</div>
             <div className="grid">
               {headings.map((heading) => (
-                <a
+                <ActionLink
                   key={heading.id}
                   href={`#${heading.id}`}
                   className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
                 >
                   {heading.text}
-                </a>
+                </ActionLink>
               ))}
             </div>
           </nav>
-          <ConceptsLab />
         </aside>
       </div>
     </PageFrame>

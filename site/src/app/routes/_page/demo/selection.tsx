@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SelectionLabRoute } from "../../../../routes/selection-lab/SelectionLabRoute";
+import { SelectionDemoRoute } from "../../../../routes/editing-demos/SelectionDemoRoute";
 
 export const Route = createFileRoute("/_page/demo/selection")({
-  component: SelectionLabRoute,
+  component: SelectionDemoRoute,
 });

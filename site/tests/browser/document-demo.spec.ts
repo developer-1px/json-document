@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 test("minimal document demo completes selection, clipboard, edit, move, undo, and redo", async ({ page }) => {
   await page.goto("/demo");
+  await page.getByText("Inspect editing state", { exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Document demo" })).toBeVisible();
 
   const surface = page.getByRole("region", { name: "Editable document" }).locator('[tabindex="0"]');
@@ -42,6 +43,7 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
 
 test("Document demo composes native clipboard events with Web Platform Connector cut history", async ({ page }) => {
   await page.goto("/demo");
+  await page.getByText("Inspect editing state", { exact: true }).click();
   await page.getByRole("button", { name: "Select block 1" }).click();
 
   const clipboard = await page.evaluate(() => {

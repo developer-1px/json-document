@@ -1,4 +1,5 @@
-import { NavLink, type SiteNavigationGroup, type SiteRoute } from "./router";
+import { type SiteNavigationGroup, type SiteRoute } from "./router";
+import { ActionLink } from "../shared/ui/interactive";
 import { ui } from "../shared/ui/styles";
 
 export type BreadcrumbCrumb = {
@@ -10,6 +11,7 @@ const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
   "JSON Document": { path: "/docs", label: "Why" },
+  Demos: { path: "/demos", label: "Showcase" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 
@@ -63,7 +65,7 @@ export function SiteBreadcrumb(props: {
               {current ? (
                 <span className={ui.breadcrumb.current} aria-current="page">{crumb.label}</span>
               ) : (
-                <NavLink to={crumb.path} className={ui.breadcrumb.link}>{crumb.label}</NavLink>
+                <ActionLink to={crumb.path} className={ui.breadcrumb.link}>{crumb.label}</ActionLink>
               )}
             </li>
           );

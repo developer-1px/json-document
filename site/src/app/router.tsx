@@ -1,8 +1,8 @@
-import { useEffect, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import siteRoutesJson from "../../site-routes.json";
 
-export type SiteNavigationGroup = "JSON Document" | "Editing" | "Connectors" | "Reference";
+export type SiteNavigationGroup = "JSON Document" | "Editing" | "Demos" | "Connectors" | "Reference";
 
 export type SiteRoute = {
   readonly path: string;
@@ -49,30 +49,6 @@ export function useRouteMetadata(route: SiteRoute): void {
     }
     canonical.setAttribute("href", url);
   }, [route]);
-}
-
-export function NavLink(props: {
-  readonly to: string;
-  readonly children: ReactNode;
-  readonly className: string;
-  readonly activePath?: string;
-  readonly branch?: boolean;
-}) {
-  const pathname = usePathname();
-  const active = (props.activePath ?? pathname) === props.to;
-
-  return (
-    <Link
-      to={props.to as never}
-      className={props.className}
-      aria-current={active ? "page" : undefined}
-      data-branch={props.branch && !active ? "true" : undefined}
-      preload="intent"
-      activeOptions={{ exact: true }}
-    >
-      {props.children}
-    </Link>
-  );
 }
 
 export function normalizePath(path: string): string {

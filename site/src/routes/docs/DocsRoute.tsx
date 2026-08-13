@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { NavLink } from "../../app/router";
+import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
@@ -46,8 +46,16 @@ export function IntentGuideRoute() {
   return <DocsRoute pageId="intentGuide" />;
 }
 
-function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
+const demoLinks: Partial<Record<DocPageId, { readonly to: string; readonly label: string }>> = {
+  selection: { to: "/demo/selection", label: "Open Selection Demo" },
+  topology: { to: "/demo/topology", label: "Open Topology Demo" },
+  clipboard: { to: "/demo/clipboard", label: "Open Clipboard Demo" },
+  history: { to: "/demo/history", label: "Open History Demo" },
+};
+
+export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   const page = docPages[pageId];
+  const demo = demoLinks[pageId];
   const headings = useMemo(
     () => markdownHeadings(page.source).filter((heading) => heading.level === 2),
     [page.source],
@@ -59,21 +67,21 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
         <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
             <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
-            {pageId === "quickstart" ? (
+            {demo ? (
               <div className="mb-5">
-                <NavLink to="/examples/document" className={ui.action.primary}>Open in Example Workbench</NavLink>
+                <ActionLink to={demo.to} kind="prominent">{demo.label}</ActionLink>
               </div>
             ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
               <div className="flex gap-1 whitespace-nowrap">
                 {headings.map((heading) => (
-                  <a
+                  <ActionLink
                     key={`${heading.id}-${heading.text}`}
                     href={`#${heading.id}`}
                     className={classes("px-2 py-1 no-underline", ui.text.meta)}
                   >
                     {heading.text}
-                  </a>
+                  </ActionLink>
                 ))}
               </div>
             </nav>
@@ -86,13 +94,13 @@ function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
             <div className={classes("mb-2", ui.text.heading)}>On this page</div>
             <div className="grid">
               {headings.map((heading) => (
-                <a
+                <ActionLink
                   key={`${heading.id}-${heading.text}`}
                   href={`#${heading.id}`}
                   className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
                 >
                   {heading.text}
-                </a>
+                </ActionLink>
               ))}
             </div>
           </nav>

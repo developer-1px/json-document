@@ -15,13 +15,18 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Intent guide",
     "Selection",
-    "Selection Lab",
+    "Selection Demo",
     "Topology",
+    "Topology Demo",
     "Clipboard",
+    "Clipboard Demo",
     "History",
+    "History Demo",
     "Intent",
+  ]);
+  await expect(navigation.getByRole("group", { name: "Demos" }).getByRole("link")).toHaveText([
+    "Showcase",
     "Document",
-    "Workbench",
     "Sheet",
     "Database",
   ]);
@@ -39,6 +44,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Demos" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
@@ -94,10 +100,13 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/docs/topology",
     "/docs/clipboard",
     "/docs/history",
-    "/examples/document",
+    "/demos",
     "/demo",
     "/demo/sheet",
     "/demo/selection",
+    "/demo/topology",
+    "/demo/clipboard",
+    "/demo/history",
     "/demo/database",
     "/connectors",
     "/connectors/react",
@@ -106,6 +115,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/connectors/zod",
     "/connectors/zod/validate",
     "/connectors/tanstack-table",
+    "/connectors/contenteditable",
   ];
 
   for (const route of routes) {

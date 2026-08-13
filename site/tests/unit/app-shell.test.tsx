@@ -37,16 +37,16 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Editing")).toEqual([
       "Intent guide",
       "Selection",
-      "Selection Lab",
+      "Selection Demo",
       "Topology",
+      "Topology Demo",
       "Clipboard",
+      "Clipboard Demo",
       "History",
+      "History Demo",
       "Intent",
-      "Document",
-      "Workbench",
-      "Sheet",
-      "Database",
     ]);
+    expect(groupLinks(nav, "Demos")).toEqual(["Showcase", "Document", "Sheet", "Database"]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
     expect(groupLinks(nav, "Reference")).toEqual(["API Reference"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
@@ -67,7 +67,7 @@ describe("official site shell", () => {
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
 
-    await user.click(nav.getByRole("link", { name: "Database", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Demos" })).getByRole("link", { name: "Database", exact: true }));
     const databaseCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(databaseCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();

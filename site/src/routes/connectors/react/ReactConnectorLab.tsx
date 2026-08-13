@@ -7,7 +7,7 @@ import {
   useReactConnector,
 } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
-import { Button } from "../../../shared/ui/primitives";
+import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const initialEditorDocument: BlockDocument = {
@@ -52,12 +52,12 @@ function JSONDocumentSubscriptionLab() {
           className={ui.field.control}
         />
       </label>
-      <Button
+      <ActionButton
         onClick={() => replace("/count", value.count + 1)}
         className="mt-3"
       >
         Count {value.count}
-      </Button>
+      </ActionButton>
 
       <JSONPanel testId="react-document-json" value={value} />
     </section>
@@ -99,18 +99,18 @@ function EditingSnapshotLab() {
         ))}
       </div>
       <div className="mt-3 flex gap-2">
-        <Button
+        <ActionButton
           disabled={!snapshot.canUndo}
           onClick={() => editor.undo()}
         >
           Undo
-        </Button>
-        <Button
+        </ActionButton>
+        <ActionButton
           disabled={!snapshot.canRedo}
           onClick={() => editor.redo()}
         >
           Redo
-        </Button>
+        </ActionButton>
       </div>
 
       <JSONPanel testId="react-editor-json" value={snapshot.value} />

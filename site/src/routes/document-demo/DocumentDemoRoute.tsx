@@ -17,7 +17,8 @@ import {
   textInputFromControl,
 } from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -42,6 +43,7 @@ export function DocumentDemoRoute() {
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
   const document = snapshot.value as BlockDocument;
@@ -162,7 +164,7 @@ export function DocumentDemoRoute() {
           <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+        <div className="grid gap-4">
           <section aria-label="Editable document" className={classes("p-3", ui.surface.raised)}>
             <div
               ref={surfaceRef}
@@ -174,19 +176,20 @@ export function DocumentDemoRoute() {
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (
-                <button className={classes("p-8", ui.surface.empty, ui.text.body)} onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</button>
+                <ActionButton kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
               ) : document.blocks.map((block, index) => (
-                <article
+                <SelectableItem
+                  as="article"
                   key={block.id}
+                  selected={selected.has(block.id)}
                   data-block-id={block.id}
-                  data-selected={selected.has(block.id) ? "true" : "false"}
                   onClick={(event) => handleBlockClick(event, block.id)}
-                  className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock, ui.state.selected)}
+                  className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                 >
-                  <button
+                  <ActionButton
                     aria-label={`Select block ${index + 1}`}
-                    className={classes("cursor-default", ui.surface.documentIndex, ui.text.meta)}
-                  >{index + 1}</button>
+                    className={classes(ui.surface.documentIndex, ui.text.meta)}
+                  >{index + 1}</ActionButton>
                   <textarea
                     aria-label={`Block ${index + 1} text`}
                     value={block.text}
@@ -196,40 +199,49 @@ export function DocumentDemoRoute() {
                     onChange={(event) => dispatchIntent({ type: "text.replace", blockId: block.id, ...textInputFromControl(event) })}
                     className={classes("min-h-11 resize-none", ui.field.seamless)}
                   />
-                </article>
+                </SelectableItem>
               ))}
             </div>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
 
-          <div className="grid min-w-0 gap-3">
-            <JsonInspector
-              label="Canonical JSON"
-              meta="JSON Patch document"
-              value={snapshot.value}
-              testId="canonical-json"
-              size="tall"
-            />
-            <JsonInspector
-              label="intent"
-              meta={lastIntent ? lastIntent.type : "dispatch only"}
-              value={lastIntent}
-              testId="document-intent-json"
-              size="compact"
-            />
-            <JsonInspector
-              label="result"
-              meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"}
-              value={lastResult}
-              testId="document-result-json"
-              size="compact"
-            />
-          </div>
+          <section className={classes("p-3", ui.surface.raised)}>
+            <DisclosureButton
+              expanded={inspectorOpen}
+              controls="document-editing-state"
+              onClick={() => setInspectorOpen((open) => !open)}
+            >
+              Inspect editing state
+            </DisclosureButton>
+            <div id="document-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
+              <JsonInspector
+                label="Canonical JSON"
+                meta="JSON Patch document"
+                value={snapshot.value}
+                testId="canonical-json"
+                size="tall"
+              />
+              <JsonInspector
+                label="intent"
+                meta={lastIntent ? lastIntent.type : "dispatch only"}
+                value={lastIntent}
+                testId="document-intent-json"
+                size="compact"
+              />
+              <JsonInspector
+                label="result"
+                meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"}
+                value={lastResult}
+                testId="document-result-json"
+                size="compact"
+              />
+            </div>
+          </section>
         </div>
     </PageFrame>
   );
 }
 
 function Action(props: { readonly label: string; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <Button disabled={props.disabled} onClick={props.onClick}>{props.label}</Button>;
+  return <ActionButton disabled={props.disabled} onClick={props.onClick}>{props.label}</ActionButton>;
 }
