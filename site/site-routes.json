@@ -3,7 +3,7 @@
     "path": "/",
     "label": "Overview",
     "title": "json-document - Headless JSON editing",
-    "description": "Implementation-neutral JSON editing and a six-member headless JSON Document for JSON Patch, JSON Pointer, and JSONPath.",
+    "description": "A tiny API to read, query, patch, and subscribe to JSON.",
     "navigationGroup": "Start"
   },
   {
@@ -11,6 +11,13 @@
     "label": "Why",
     "title": "json-document Docs - json-document",
     "description": "User guide to stateless JSON Patch, the v3 JSON Document, validation, and host adapter boundaries.",
+    "navigationGroup": "Core"
+  },
+  {
+    "path": "/docs/concepts",
+    "label": "Concepts",
+    "title": "Core Concepts - json-document",
+    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
     "navigationGroup": "Core"
   },
   {

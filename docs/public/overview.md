@@ -1,193 +1,78 @@
-# json-document Docs
+# 왜 json-document인가
 
-json-document v3는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수
-있는 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
-루트 package는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 합니다. Zod,
-React 같은 외부 생태계는 필수 계약이 아니라 independently versioned 공식
-Connector로 제공합니다.
+문서 앱, 표, 슬라이드, 화이트보드, 노트는 서로 다르게 생겼습니다.
+그런데 상태를 다루는 일은 거의 같습니다. JSON을 읽고, 이 변경이 가능한지
+확인하고, 순서가 있는 patch를 한 번에 적용하고, 그 결과를 다른 화면에
+알립니다.
 
-```txt
-stateless JSON Patch
-  |-> local implementation -----\
-  |                               > same six-member JSON Document
-  `-> collaboration engine -----/    |-> optional headless editing
-                                     |-> optional official Connectors
-                                     |-> optional history/text authoring
-                                     `-> optional native-input DOM lease
-```
+json-document는 그 반복되는 일을 제품 컨트롤러에서 떼어 낸 API입니다.
+UI를 그리지 않습니다. 대신 폼과 표와 협업 엔진이 같은 문서 계약을
+쓰게 합니다.
 
-## 배경
+이 글은 왜 이 계약을 만들었는지 설명합니다. 문이 어떻게 커지는지는
+[코어 컨셉](concepts.md)에, 호출 형식은 [API](api.md)에, 따라 하는
+예제는 [튜토리얼](quickstart.md)에 있습니다.
 
-편집 제품의 UI는 서로 달라도 JSON 상태를 읽고, 변경 가능성을 확인하고,
-ordered patch를 원자적으로 적용하고, 변경을 구독하는 흐름은 반복됩니다.
-이 최소 의미를 제품별 controller와 분리하면 저장, 협업, 렌더링 adapter가 같은
-계약을 공유할 수 있습니다.
+## 왜
 
-Core는 다음만 소유합니다.
+편집기를 두 개만 만들어 봐도 같은 코드가 생깁니다. 칸을 읽고, 값이
+맞는지 보고, 여러 칸을 한 묶음으로 바꾸고, 사이드바나 원격 화면에
+그 묶음을 알립니다. 제품마다 이 코드를 다시 짜면 저장, 실행 취소,
+협업이 제품 수만큼 갈라집니다.
 
-- RFC 8259 JSON data
-- RFC 6901 JSON Pointer
-- RFC 9535 JSONPath query
-- RFC 6902 JSON Patch
-- immutable document value, patch validation, atomic commit, change notification
+더 아픈 지점은 그다음입니다. 표 셀을 고치는 일과 문서 블록을 옮기는
+일은 화면에선 전혀 다른데, 아래를 보면 둘 다 “이 JSON 주소의 값을
+이렇게 바꿔라”입니다. 그 주소를 제품마다 다른 객체 경로, 다른
+이벤트, 다른 store action으로 부르면 협업 로그도, 실행 취소도,
+다른 화면의 구독도 제품에 묶입니다.
 
-DOM, focus, keyboard, geometry, system clipboard, filesystem, network, formula,
-CRDT와 OT는 host 또는 adapter 책임입니다.
+그래서 하고 싶었던 일은 단순합니다. 편집 제품이 달라도 **같은 방식으로
+JSON 상태를 다루게** 하는 것. 화면은 각자 그리고, 문서의 읽기·검사·적용·
+알림만 공유합니다.
 
-## 핵심 개념
+이 선택이 맞으려면 계약이 작아야 합니다. React를 알아야 하거나 선택
+모델을 포함하면, 표 호스트와 협업 replica가 같은 문을 쓸 수 없습니다.
+안쪽은 JSON, JSON Pointer, JSONPath, JSON Patch만 전제합니다.
 
-| 개념 | 뜻 |
+로컬에서만 쓸 때도 이 문은 필요합니다. 오늘 혼자 고치는 칸이 내일
+다른 탭으로 나갈 때, 편집기가 받는 API가 바뀌면 안 됩니다. 로컬
+구현과 협업 엔진이 같은 `JSONDocument`를 내미는 것은 처음부터 그
+전환을 전제한 설계입니다.
+
+## 어떻게
+
+구조를 나눈 기준은 “무엇이 같은 일인가”입니다. 화면 위젯이 아니라
+문서에 일어나는 일입니다.
+
+**찾기와 바꾸기는 다른 언어입니다.** 찾기는 JSONPath이고 결과는
+Pointer 목록입니다. 바꾸기는 그 Pointer를 담은 JSON Patch입니다.
+
+**검사와 적용은 같은 규칙, 다른 효과입니다.** `validatePatch`는
+상태와 구독자를 건드리지 않습니다. `commit`만 상태를 바꿉니다.
+
+**예상된 실패는 예외가 아닙니다.** 없는 칸을 읽거나 스키마에 걸리는
+patch는 `{ ok: false, code }`입니다. `commit`은 목록 전체를 적용하거나
+아무것도 적용하지 않습니다.
+
+**알림은 이미 일어난 일만 전합니다.** 실패한 commit과 값이 그대로인
+commit은 알리지 않습니다.
+
+**작게 두고 붙입니다.** 선택, History, Clipboard는 읽기 층이 아니라
+편집 층입니다. React와 Zod와 브라우저는 Connector입니다. 렌더링과
+포커스와 단축키는 제품을 만드는 쪽이 가집니다.
+
+## 무엇을
+
+남는 제품은 작은 문서 포트입니다. `JSONDocument`의 여섯 가지 일:
+
+| 하고 싶은 일 | 호출 |
 | --- | --- |
-| JSON value | 편집 대상이 되는 직렬화 가능한 상태 |
-| JSON Pointer | 한 위치를 정확히 가리키는 주소. 예: `/lists/0/cards/0/title` |
-| JSONPath | 여러 위치를 찾는 query. 결과는 Pointer 목록 |
-| JSON Patch | ordered atomic mutation 형식 |
-| Stateless JSON Patch | 현재 document instance 없이 JSON Patch를 적용하는 함수 |
-| JSON Document | 현재 document value에 read, validation, commit, notification을 연결한 여섯-member port |
-| validation | Candidate document를 commit 전에 검사하는 implementation-neutral callback |
-| Editing companion | transaction, selection publication, clipboard, history를 조합하는 browser-independent 계층 |
-| Connector | 외부 생태계의 native contract와 public json-document contract를 번역하는 공식 optional package |
-| Host adapter | DOM, system clipboard, focus와 제품별 interaction policy를 소유하는 별도 계층 |
+| 지금 값 | `document.value` |
+| 한 곳 읽기 | `document.at(pointer)` |
+| 여러 곳 찾기 | `document.query(jsonPath)` |
+| 적용 전에 검사 | `document.validatePatch(operations)` |
+| 상태 바꾸기 | `document.commit(operations, options?)` |
+| 변경 듣기 | `document.subscribe(listener)` |
 
-전체 canonical concept, 접두어·접미어·동사·boolean 규칙은
-[Concept and Naming Standard](https://github.com/developer-1px/json-document/blob/main/standards/repository-naming.md)가
-정의합니다. Public API는 canonical identifier만 제공합니다.
-
-가장 중요한 경계는 query와 mutation을 섞지 않는 것입니다.
-
-```txt
-검색: JSONPath -> Pointer[]
-변경: Pointer -> JSON Patch
-검증: JSON candidate -> validation result
-상태: immutable document value
-```
-
-## 기본 사용 흐름
-
-```ts
-import { createJSONDocument } from "@interactive-os/json-document";
-
-const document = createJSONDocument({
-  id: "c1",
-  title: "Write docs",
-  status: "todo",
-});
-
-const patch = [
-  { op: "replace", path: "/status", value: "doing" },
-] as const;
-
-if (document.validatePatch(patch).ok) {
-  const result = document.commit(patch, {
-    metadata: { origin: "status-control" },
-  });
-
-  if (result.ok) {
-    result.change.applied;
-    document.value;
-  }
-}
-```
-
-`JSONDocument`의 필수 member는 여섯 개입니다.
-
-```txt
-value
-at
-query
-validatePatch
-commit
-subscribe
-```
-
-순수 변환만 필요하면 document를 만들지 않습니다.
-
-```ts
-import { applyPatch } from "@interactive-os/json-document";
-
-const result = applyPatch(
-  { title: "Draft" },
-  [{ op: "replace", path: "/title", value: "Ready" }],
-);
-
-if (result.ok) {
-  result.value;
-  result.change.applied;
-}
-```
-
-## Core와 host
-
-| 표면 | 상태 | 책임 |
-| --- | --- | --- |
-| `@interactive-os/json-document` | v3 Kernel | Stateless JSON Patch와 여섯-member JSON Document |
-| `@interactive-os/json-document-editing` | optional companion | Headless editing transaction, selection, clipboard, history와 Document·Order·Sheet·Object·Tree slice |
-| `@interactive-os/json-document-selection` | optional companion | DOM-free key·range·mask family, semantic interaction과 topology/geometry port |
-| `@interactive-os/json-document-react` | official Connector | React subscription과 Document editor lifecycle |
-| `@interactive-os/json-document-react-hook-form` | official Connector | React Hook Form draft lifecycle, canonical submit과 history reset 번역 |
-| `@interactive-os/json-document-ajv` | official Connector | compiled Ajv validator와 JSON Pointer 진단 번역 |
-| `@interactive-os/json-document-zod` | official Connector | Zod object를 Database document로, Zod issue를 JSON Pointer 진단으로 번역 |
-| `@interactive-os/json-document-tanstack-table` | official Connector | TanStack visible row/column model과 Sheet 편집 topology 번역 |
-| `@interactive-os/json-document-web` | official Connector | Web clipboard, text-control input과 modifier state 번역 |
-| `@interactive-os/json-document-collaboration` | optional companion | 같은 JSON Document 뒤의 transport-free causal engine |
-| `@interactive-os/json-document-contenteditable-collaboration` | optional companion | collaborative string의 native-input DOM lease |
-
-패키지는 `/session`과 `/react` subpath를 공개하지 않습니다. 구현 간 교환 가능한
-코드는 루트 `JSONDocument` 여섯 member에만 의존하고, 반복되는 외부 생태계 glue는
-독립 Connector가 소유합니다. Local-only consumer는 Core만 설치하며,
-collaboration engine으로 바꿔도 editor가 사용하는 `JSONDocument` API는
-변하지 않습니다.
-
-## Connector, host adapter와 companion
-
-Editing companion은 공개 `JSONDocument`만 입력으로 받고 제품 의도를 Pointer와
-JSON Patch로 번역합니다. Selection, history, clipboard는 Core member를 늘리지
-않는 별도 headless lifecycle입니다. Ordered range와 ID set은 공통 transition을
-공유하지만, grid axis, tree visible order, object geometry와 mutation 계획은 제품
-slice 또는 host가 정의합니다. Persistence, focus와 remote protocol은 host 쪽에 둡니다.
-Collaboration companion도 transport, authentication, presence, persistence를
-소유하지 않습니다. Connector, adapter와 companion은 Core와 독립적으로 version과
-compatibility를 검증합니다. Connector의 승격 조건과 React·React Hook Form·Ajv·Zod·TanStack Table·Web Platform
-구현은 [Connectors](connectors.md)에 정리되어 있습니다.
-
-`@interactive-os/editable`은 DOM과 Input Events 정규화를 담당하는 별도 companion
-예시입니다. `JSONDocument`는 canonical headless JSON state로 남고, editable은
-contenteditable lifecycle을 소유하며, 문서별 의미는 adapter가 연결합니다.
-이 companion은 json-document v3 release catalog에 포함되지 않습니다.
-
-## 자주 쓰는 작업
-
-| 하고 싶은 일 | 먼저 보는 API |
-| --- | --- |
-| 현재 값 읽기 | `document.value`, `document.at(pointer)` |
-| 여러 위치 찾기 | `document.query(jsonPath)` |
-| 변경 가능성 확인 | `document.validatePatch(operations)` |
-| 상태 변경 | `document.commit(operations, options?)` |
-| 변경 구독 | `document.subscribe(listener)` |
-| instance 없는 patch 적용 | `applyPatch(value, operations)` |
-| Pointer 조합과 추적 | `buildPointer`, `appendSegment`, `parentPointer`, `trackPointer` |
-| DOM-free selection state와 interaction | `@interactive-os/json-document-selection` |
-| selection 기반 clipboard, JSON 수정, undo/redo | `@interactive-os/json-document-editing` |
-| React에서 document/editor 구독 | `@interactive-os/json-document-react` |
-| Ajv로 document validation | `@interactive-os/json-document-ajv`의 `createAjvValidator` |
-| Zod schema로 document validation | `@interactive-os/json-document-zod`의 `createZodValidator` |
-| Zod schema로 Database admin 열기 | `@interactive-os/json-document-zod`의 `databaseDocumentFromZod` |
-
-성공한 mutation의 `change.applied`는 실제 적용된 canonical operation입니다.
-실패는 throw 대신 `{ ok: false, code, reason?, pointer? }` result로 표현됩니다.
-
-## 이걸로 할 수 있는 것들
-
-- Form과 settings editor: validation으로 commit 가능한 JSON 구조 제한
-- Data grid: cell과 row 변경을 ordered JSON Patch로 표현
-- Outliner와 block docs: tree command를 Pointer와 Patch로 환원
-- Slide와 whiteboard: object property와 layer state를 headless JSON으로 관리
-- 저장과 협업 adapter: subscribed canonical change를 외부 log로 전달
-
-제품별 structural selection 의미는 selection companion의 공통 lifecycle 위에서
-range 또는 key family로 조합합니다. Native text selection은 별도
-authoring lifecycle입니다.
-Core JSON Document는 그 기능을 필수 member로 요구하지 않습니다. 공식 site의
-`/demo`, `/demo/sheet`, `/demo/selection`과 TanStack Table Connector demo는 public
-package만 사용해 ordered ranges, grid rectangles, object sets, tree visible ranges,
-selection 기반 JSON 변경, clipboard, history와 canonical JSON projection을 실행합니다.
+그 다음 커짐은 [코어 컨셉](concepts.md)이 그립니다. 읽기 위에 편집이
+붙고, 바깥에 Connector가 붙습니다.

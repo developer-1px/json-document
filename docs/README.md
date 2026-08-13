@@ -10,8 +10,9 @@ docs
 |-- evaluate.mjs              # 공개 문서 구조·내용 검증
 `-- public
 |   |-- quickstart.md          # Start: 사용 시작
-|   |-- overview.md            # Core: 개념 이해
-|   |-- api.md                 # Core: 공개 API
+|   |-- overview.md            # Core: Why / How / What
+|   |-- concepts.md            # Core: 읽기 → 편집 → 외부 확장
+|   |-- api.md                 # Core: 레퍼런스
 |   |-- connectors.md          # Connectors: 공식 외부 생태계 연결
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
@@ -24,6 +25,7 @@ Documentation
 |-- Start
 |   `-- Quickstart
 |-- Core
+|   |-- Why
 |   |-- Concepts
 |   `-- API Reference
 `-- Connectors
@@ -52,6 +54,14 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
 - 본문은 한글로 쓴다.
 - 코드 식별자, 명령어, 파일 경로, 표준명은 원문을 유지한다.
 - public 문서는 usage와 프로젝트 이해만 다룬다.
+- 페이지마다 할 일 하나만 쓴다. overview는 Why/How/What 배경,
+  concepts는 살아남은 코어 아이디어, api는 시그니처 레퍼런스,
+  quickstart는 실습, connectors는 연결 방법이다.
+- 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
+  한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
+- 무엇을 하는지로 정의한다. 소유하지 않는 것의 목록으로 시작하지 않는다.
+- 같은 아키텍처 다이어그램과 패키지 카탈로그를 페이지마다 복제하지 않는다.
+- 이름 정본과 profile은 `standards/`에 두고 public 가이드에서 인용하지 않는다.
 - 릴리스 history, 검토 loop, maintainer-only gate는 public 문서에 쓰지 않는다.
 - 내부 구현 경로는 public 문서에 쓰지 않는다.
 - 새 문서는 기존 책임 폴더 중 하나에 들어가야 한다.

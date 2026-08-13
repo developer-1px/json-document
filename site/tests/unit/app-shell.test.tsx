@@ -32,7 +32,7 @@ describe("official site shell", () => {
     const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
 
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
-    expect(groupLinks(nav, "Core")).toEqual(["Why", "API Reference"]);
+    expect(groupLinks(nav, "Core")).toEqual(["Why", "Concepts", "API Reference"]);
     expect(groupLinks(nav, "Editing")).toEqual(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();

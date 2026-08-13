@@ -10,7 +10,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(page.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" }).getByRole("link")).toHaveText(["Overview", "Quickstart"]);
-  await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Why", "API Reference"]);
+  await expect(navigation.getByRole("group", { name: "Core" }).getByRole("link")).toHaveText(["Why", "Concepts", "API Reference"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText(["Workbench", "Document", "Sheet", "Selection Lab", "Database"]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);

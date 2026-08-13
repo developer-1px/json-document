@@ -1,19 +1,8 @@
 # json-document
 
-문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
-implementation-neutral JSON 편집 API와 headless JSON Document입니다.
+JSON을 읽고, 찾고, 고치고, 구독하는 작은 API입니다.
 
-v3 root는 JSON, RFC 6901 JSON Pointer, RFC 9535 JSONPath, RFC 6902 JSON
-Patch만 전제로 합니다. UI framework, schema provider, history, selection,
-clipboard는 core 계약이 아닙니다.
-
-```txt
-stateless JSON Patch -> JSON Document -> host adapter
-```
-
-Canonical concept와 stable v3 identifier의 관계는
-[Concept and Naming Standard](../../standards/repository-naming.md)가
-정의합니다.
+주소는 JSON Pointer, 검색은 JSONPath, 변경은 JSON Patch입니다.
 
 v3 표준 상태는 Stable입니다. 현재 source release version은 `3.0.0`이며 npm에는
 아직 배포되지 않았습니다. reference와 독립 구현이 같은 conformance suite를
