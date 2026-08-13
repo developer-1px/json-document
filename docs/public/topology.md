@@ -58,46 +58,32 @@ const cells = gridCellsInRange(visibleGrid, {
 // r3/score, r3/name, r1/score, r1/name
 ```
 
-Sheet에서는 이 모양을 `SheetTopology`라고 부릅니다. Database는 같은 격자를
-`recordIds`와 `propertyIds`로 나타냅니다. 이름은 편집 대상에 맞지만 두 경우
-모두 화면의 행과 열을 전달합니다.
+격자형 editor는 다루는 데이터에 맞춰 같은 모양에 이름을 붙입니다. Sheet는
+이를 `SheetTopology`라고 부르고, Database는 행과 열을 `recordIds`와
+`propertyIds`로 나타냅니다.
 
 ## Editor에 전달하기
 
-Sheet editor는 선택을 읽거나 복사할 때 화면 순서를 받을 수 있습니다.
+Sheet editor는 선택을 읽거나 복사할 때 화면 순서를 받을 수 있습니다. 다음
+함수는 `editor`를 매개변수로 받아 정렬된 행 순서를 전달합니다.
 
 ```ts
-const visible = {
-  rowIds: ["r3", "r1", "r2"],
-  columnIds: ["status", "name"],
-};
+import type { SheetEditor } from "@interactive-os/json-document-editing";
 
-editor.selectedCellsIn(visible);
-editor.copy(visible);
+function copyVisibleSelection(editor: SheetEditor) {
+  const visible = {
+    rowIds: ["r3", "r1", "r2"],
+    columnIds: ["status", "name"],
+  };
+
+  editor.selectedCellsIn(visible);
+  return editor.copy(visible);
+}
 ```
 
 화면 순서와 JSON 저장 순서가 같으면 Topology를 생략할 수 있습니다. 이때
 Sheet는 문서의 `rows`와 `columns` 순서를 사용합니다.
 
-Database의 저장된 view에는 정렬과 필터 조건이 들어 있습니다. editor는 그
-view를 현재 보이는 격자로 펼쳐 줍니다.
-
-```ts
-const visible = database.tableTopology(view.id);
-database.selectedCellsIn(visible);
-```
-
-Tree에서는 host가 펼침 상태를 알고 있으므로 선택 명령에 `visibleIds`를 함께
-보냅니다.
-
-```ts
-tree.dispatch({
-  type: "selection.set",
-  nodeId: "a-1",
-  topology: { visibleIds: ["a", "a-1", "b"] },
-});
-```
-
-Topology가 정한 범위는 선택 표시뿐 아니라 구조화된 복사 결과에도 이어집니다.
-다음 [Clipboard](clipboard.md) 문서에서는 그 범위를 어떤 payload로 옮기는지
-살펴봅니다.
+Topology가 정한 범위는 선택 표시뿐 아니라 구조화된 복사 결과에도
+쓰입니다. 이 범위를 옮길 값으로 만드는 과정은
+[Clipboard](clipboard.md)에서 이어집니다.

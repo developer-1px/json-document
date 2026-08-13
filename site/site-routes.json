@@ -27,6 +27,13 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/intent-guide",
+    "label": "Intent guide",
+    "title": "Intent guide - json-document",
+    "description": "Create a document editor, express a request as an EditingIntent, and handle its EditingResult.",
+    "navigationGroup": "Editing"
+  },
+  {
     "path": "/docs/selection",
     "label": "Selection",
     "title": "Selection - json-document",
@@ -59,13 +66,6 @@
     "label": "History",
     "title": "History - json-document",
     "description": "Local undo and redo that restore document value together with structural selection.",
-    "navigationGroup": "Editing"
-  },
-  {
-    "path": "/docs/intent-guide",
-    "label": "Intent guide",
-    "title": "Intent guide - json-document",
-    "description": "A first walkthrough that selects, inserts, copies, and pastes a document block.",
     "navigationGroup": "Editing"
   },
   {

@@ -37,7 +37,7 @@ export const docPages = {
   intentGuide: {
     path: "/docs/intent-guide",
     label: "Intent guide",
-    title: "Intent 가이드",
+    title: "Editor와 Intent 만들기",
     source: intentGuideMarkdown,
   },
   api: {

@@ -57,7 +57,7 @@ JSON Patch의 `path`로 사용합니다.
 
 ## 3. 변경 검사하고 적용하기
 
-카드를 시작한 상태로 바꿀 operation을 만듭니다.
+카드 상태를 `doing`으로 바꿀 operation을 만듭니다.
 
 ```ts
 const operations = [{
@@ -110,76 +110,5 @@ unsubscribe();
 listener는 성공해서 값이 달라진 `commit`만 받습니다. 더 이상 변경을 받을
 필요가 없으면 반환된 함수를 호출해 구독을 끊습니다.
 
-## 5. 문서를 만들지 않고 변경 결과 보기
-
-저장 전 미리보기처럼 현재 상태를 보관할 필요가 없다면 `applyPatch`로 JSON과
-operation만 계산할 수 있습니다.
-
-```ts
-import { applyPatch } from "@interactive-os/json-document";
-
-const preview = applyPatch(initialBoard, [{
-  op: "add",
-  path: "/lists/0/cards/-",
-  value: {
-    id: "c2",
-    title: "Review API",
-    status: "todo",
-  },
-}]);
-
-if (preview.ok) {
-  console.log(preview.value);
-}
-```
-
-`initialBoard`는 그대로 남고, 계산된 JSON은 성공 결과의 `value`에 들어
-있습니다.
-
-## 6. 문서 규칙 추가하기
-
-현재 예제에서는 `status`에 어떤 문자열도 넣을 수 있습니다. 세 가지 상태만
-허용하려면 문서를 만들 때 validator를 연결합니다.
-
-```ts
-import * as z from "zod";
-import {
-  createJSONDocument,
-  type JSONPatchValidationResult,
-  type JSONValue,
-} from "@interactive-os/json-document";
-
-const Board = z.object({
-  lists: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    cards: z.array(z.object({
-      id: z.string(),
-      title: z.string(),
-      status: z.enum(["todo", "doing", "done"]),
-    })),
-  })),
-});
-
-function validateBoard(candidate: JSONValue): JSONPatchValidationResult {
-  const result = Board.safeParse(candidate);
-  return result.success
-    ? { ok: true }
-    : {
-        ok: false,
-        code: "schema_violation",
-        reason: JSON.stringify(result.error.issues),
-      };
-}
-
-const acceptedDocument = createJSONDocument(initialBoard, {
-  validate: validateBoard,
-});
-```
-
-이제 규칙에 맞지 않는 변경은 실패 결과를 돌려주고 문서 값은 유지됩니다.
-Zod를 직접 연결하는 대신 `@interactive-os/json-document-zod`의
-`createZodValidator`를 사용할 수도 있습니다.
-
-지금까지 만든 JSON Document에 선택과 실행 취소 같은 편집 기능을 더하는
-순서는 [Concepts](concepts.md)에서 이어집니다.
+이 JSON Document에 선택과 실행 취소를 더하려면
+[Concepts](concepts.md)의 Editing 단계로 넘어갑니다.

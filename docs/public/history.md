@@ -27,16 +27,8 @@ if (cut?.result.ok) {
 
 History 항목은 JSON 값이 실제로 바뀐 편집에서 생깁니다. Selection 이동은
 현재 편집 대상만 바꾸므로 기록을 추가하지 않습니다. 검사를 통과하지 못한
-요청과 결과가 같은 요청도 되돌릴 값이 없어 기록되지 않습니다.
+요청과 문서 값이 그대로인 요청도 되돌릴 값이 없어 기록되지 않습니다.
 
-다른 구독자가 document에 직접 변경을 적용하면 editor의 로컬 History는
-비워집니다. 이후의 undo가 외부에서 들어온 새 값을 이전 로컬 상태로 덮는
-상황을 막기 위해서입니다.
-
-이 History는 한 editor에서 수행한 작업을 되돌리는 기록입니다. 여러 사용자의
-변경을 합치고 각 참여자의 작업을 추적하는 협업 기록은 별도의 협업 계층에서
-다룹니다.
-
-Selection, Topology, Clipboard, History가 준비되면 사용자의 편집 요청을
-editor에 보낼 수 있습니다. 다음 [Intent guide](intent-guide.md)에서는 블록을
-고르고 추가하는 요청을 코드로 만들어 봅니다.
+여기까지 `editor.dispatch`로 시작한 요청이 Selection과 Topology를 읽고,
+Clipboard를 거쳐 문서와 History를 바꾸는 흐름을 살펴봤습니다. editor가
+받는 전체 요청은 [Intent 레퍼런스](intent.md)에서 확인할 수 있습니다.

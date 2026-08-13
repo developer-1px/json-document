@@ -13,12 +13,12 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Quickstart", "Concepts"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
+    "Intent guide",
     "Selection",
     "Selection Lab",
     "Topology",
     "Clipboard",
     "History",
-    "Intent guide",
     "Intent",
     "Document",
     "Workbench",
