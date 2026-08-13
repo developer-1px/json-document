@@ -45,10 +45,21 @@ describe("official site shell", () => {
       "History",
       "History Demo",
       "Intent",
+      "Examples",
+      "Document",
+      "Sheet",
+      "Database",
     ]);
-    expect(groupLinks(nav, "Demos")).toEqual(["Showcase", "Document", "Sheet", "Database"]);
+    expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
+    expect(groupLinks(nav, "Collaboration")).toEqual([
+      "Overview",
+      "Replica & Sync",
+      "Collaborative History",
+      "Collaborative Text",
+      "Checkpoints & Epochs",
+    ]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
-    expect(groupLinks(nav, "Reference")).toEqual(["API Reference"]);
+    expect(groupLinks(nav, "Reference")).toEqual(["API Reference", "Collaboration API"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     const connectors = within(nav.getByRole("group", { name: "Connectors" }));
@@ -67,7 +78,7 @@ describe("official site shell", () => {
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
 
-    await user.click(within(nav.getByRole("group", { name: "Demos" })).getByRole("link", { name: "Database", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Database", exact: true }));
     const databaseCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(databaseCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
@@ -113,7 +124,7 @@ describe("official site shell", () => {
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Demos" })).getByRole("link", { name: "Showcase" }));
+    await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Examples" }));
     await waitFor(() => expect(document.documentElement.lang).toBe("en"));
   });
 });

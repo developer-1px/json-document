@@ -33,6 +33,42 @@ position, text splice, adapter와 transport-agnostic engine이다.
 
 ## 개념 경계
 
+Repository와 공개 site는 다음 개념 위계를 공유한다. Package directory와 site
+menu는 이 위계의 서로 다른 투영이며, package 하나가 곧 menu 하나를 뜻하지
+않는다.
+
+```text
+JSON Standards
+└── JSON Document Contract
+    ├── Runtime implementations
+    │   ├── Local JSON Document
+    │   └── Collaboration Engine
+    │       ├── Replica & synchronization
+    │       ├── Collaborative History
+    │       ├── Collaborative Text
+    │       └── Lifecycle
+    │           └── checkpoint · restore · epoch · compaction
+    ├── Editing
+    │   ├── Intent & Session
+    │   ├── Selection & Topology
+    │   ├── Clipboard
+    │   ├── Editing History
+    │   └── Domain Editors
+    │       └── Document · Sheet · Database · Tree · Object · Order
+    └── Integration boundaries
+        ├── Connectors
+        └── Adapters
+            └── Collaborative Contenteditable Adapter
+
+Product Host composes these surfaces.
+```
+
+Collaboration Engine은 `JSONDocument` 계약의 runtime implementation이고
+Connector가 아니다. Editing은 Local 또는 Collaboration implementation이
+제공하는 같은 `JSONDocument` port를 소비한다. Editing History와 Collaborative
+History는 각각 selection-restoring local authoring history와 actor-local
+selective history이므로 하나의 개념으로 합치지 않는다.
+
 ### 표준 JSON
 
 | Canonical term | 정의 | 포함하지 않는 것 |

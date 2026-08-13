@@ -111,10 +111,10 @@
   },
   {
     "path": "/demos",
-    "label": "Showcase",
+    "label": "Examples",
     "title": "Demo Showcase - json-document",
     "description": "Explore complete Document, Sheet, and Database editing experiences built on json-document.",
-    "navigationGroup": "Demos"
+    "navigationGroup": "Editing"
   },
   {
     "path": "/demo",
@@ -136,6 +136,46 @@
     "title": "Database Demo - json-document",
     "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
     "parentPath": "/demos"
+  },
+  {
+    "path": "/docs/collaboration",
+    "label": "Overview",
+    "title": "Collaboration - json-document",
+    "description": "Editor의 JSON Document 계약을 유지하면서 transport-agnostic Collaboration Engine을 사용하는 방법을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Collaboration"
+  },
+  {
+    "path": "/docs/collaboration/replica",
+    "label": "Replica & Sync",
+    "title": "Replica and Synchronization - json-document",
+    "description": "Causal Change, dependency, bundle 교환, materialization과 replica status를 설명합니다.",
+    "language": "ko",
+    "parentPath": "/docs/collaboration"
+  },
+  {
+    "path": "/docs/collaboration/history",
+    "label": "Collaborative History",
+    "title": "Collaborative History - json-document",
+    "description": "동시 작업을 덮어쓰지 않고 한 actor의 causal contribution을 undo하고 redo합니다.",
+    "language": "ko",
+    "parentPath": "/docs/collaboration"
+  },
+  {
+    "path": "/docs/collaboration/text",
+    "label": "Collaborative Text",
+    "title": "Collaborative Text - json-document",
+    "description": "Text capture, plan, commit과 stable atom으로 문자열 변경과 native-input reconciliation을 설명합니다.",
+    "language": "ko",
+    "parentPath": "/docs/collaboration"
+  },
+  {
+    "path": "/docs/collaboration/lifecycle",
+    "label": "Checkpoints & Epochs",
+    "title": "Checkpoints and Epochs - json-document",
+    "description": "Checkpoint, membership, epoch와 compaction으로 causal state를 복원하고 recovery boundary를 전환합니다.",
+    "language": "ko",
+    "parentPath": "/docs/collaboration"
   },
   {
     "path": "/connectors",
@@ -213,6 +253,14 @@
     "label": "API Reference",
     "title": "json-document API - json-document",
     "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Reference"
+  },
+  {
+    "path": "/docs/collaboration/api",
+    "label": "Collaboration API",
+    "title": "Collaboration API - json-document",
+    "description": "Collaboration runtime, replica, selective history, text와 contenteditable adapter 공개 진입점을 정리합니다.",
     "language": "ko",
     "navigationGroup": "Reference"
   }

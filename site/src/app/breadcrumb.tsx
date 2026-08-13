@@ -11,7 +11,6 @@ const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
   "JSON Document": { path: "/docs", label: "Why" },
-  Demos: { path: "/demos", label: "Showcase" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 
@@ -43,6 +42,7 @@ export function breadcrumbTrail(
 
 function crumbLabel(route: SiteRoute): string {
   if (route.path === "/connectors") return "Connectors";
+  if (route.path === "/docs/collaboration") return "Collaboration";
   return route.label;
 }
 

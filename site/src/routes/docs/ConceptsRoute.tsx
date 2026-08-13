@@ -6,10 +6,9 @@ import { docPages, type DocPageId } from "./doc-pages";
 import { DocsRoute } from "./DocsRoute";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 
-const editingConceptIllustrations: Record<
-  Exclude<DocPageId, "overview" | "quickstart" | "connectors" | "api" | "topology" | "intent" | "intentGuide">,
-  PetiteCatIllustration
-> = {
+type EditingConceptPageId = "selection" | "history" | "clipboard";
+
+const editingConceptIllustrations: Record<EditingConceptPageId, PetiteCatIllustration> = {
   selection: "cursor",
   history: "branch",
   clipboard: "clipboard",
@@ -21,7 +20,7 @@ export function ConceptsRoute() {
       title="코어 컨셉"
       source={conceptsMarkdown}
       illustration="sleep"
-      summary="JSON Document에 Editing과 Connector가 차례로 이어집니다."
+      summary="JSON Document 계약을 중심으로 runtime, Editing과 integration 경계를 함께 봅니다."
     />
   );
 }
@@ -39,7 +38,7 @@ export function ClipboardDocsRoute() {
 }
 
 function EditingConceptRoute(props: {
-  readonly pageId?: Exclude<DocPageId, "overview" | "quickstart" | "connectors" | "api" | "topology" | "intent" | "intentGuide">;
+  readonly pageId?: EditingConceptPageId;
   readonly title?: string;
   readonly source?: string;
   readonly illustration?: PetiteCatIllustration;

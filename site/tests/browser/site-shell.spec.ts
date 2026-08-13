@@ -23,15 +23,21 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "History",
     "History Demo",
     "Intent",
-  ]);
-  await expect(navigation.getByRole("group", { name: "Demos" }).getByRole("link")).toHaveText([
-    "Showcase",
+    "Examples",
     "Document",
     "Sheet",
     "Database",
   ]);
+  await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "Collaboration" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Replica & Sync",
+    "Collaborative History",
+    "Collaborative Text",
+    "Checkpoints & Epochs",
+  ]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
-  await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference"]);
+  await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference", "Collaboration API"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });
@@ -44,7 +50,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Demos" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
@@ -68,6 +74,12 @@ test("official docs routes render with route metadata in a real browser", async 
   await siteNavigation.getByRole("group", { name: "Connectors" }).getByRole("link", { name: "Connector guide" }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
+
+  await siteNavigation.getByRole("group", { name: "Collaboration" }).getByRole("link", { name: "Overview" }).click();
+  await expect(page).toHaveTitle("Collaboration - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Collaboration" })).toBeVisible();
+  await expect(siteNavigation.getByRole("link", { name: "Replica & Sync" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: "Collaboration API" })).toHaveAttribute("href", "/docs/collaboration/api");
 
   await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");
@@ -141,6 +153,12 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/docs/topology",
     "/docs/clipboard",
     "/docs/history",
+    "/docs/collaboration",
+    "/docs/collaboration/replica",
+    "/docs/collaboration/history",
+    "/docs/collaboration/text",
+    "/docs/collaboration/lifecycle",
+    "/docs/collaboration/api",
     "/demos",
     "/demo",
     "/demo/sheet",
@@ -164,7 +182,11 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     const artwork = page.locator("[data-petite-cat]");
     await expect(artwork).toHaveCount(1);
     illustrations.add(await artwork.getAttribute("data-petite-cat") ?? "");
-    await expect(artwork.locator("img")).toHaveAttribute("alt", "");
+    const image = artwork.locator("img");
+    await expect(image).toHaveAttribute("alt", "");
+    await expect.poll(() => image.evaluate((element) => (
+      element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0
+    ))).toBe(true);
     expect(await petiteCatLayout(page)).toMatchObject({
       artworkLongEdge: 192,
       imageLoaded: true,

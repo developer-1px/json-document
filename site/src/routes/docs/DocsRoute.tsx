@@ -16,6 +16,12 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   selection: "cursor",
   history: "branch",
   clipboard: "clipboard",
+  collaboration: "connector",
+  collaborationReplica: "branch",
+  collaborationHistory: "branch",
+  collaborationText: "cursor",
+  collaborationLifecycle: "package",
+  collaborationApi: "braces",
 };
 
 export function DocsOverviewRoute() {
@@ -32,6 +38,30 @@ export function ConnectorDocsRoute() {
 
 export function ApiReferenceRoute() {
   return <DocsRoute pageId="api" />;
+}
+
+export function CollaborationOverviewRoute() {
+  return <DocsRoute pageId="collaboration" />;
+}
+
+export function CollaborationReplicaRoute() {
+  return <DocsRoute pageId="collaborationReplica" />;
+}
+
+export function CollaborationHistoryRoute() {
+  return <DocsRoute pageId="collaborationHistory" />;
+}
+
+export function CollaborationTextRoute() {
+  return <DocsRoute pageId="collaborationText" />;
+}
+
+export function CollaborationLifecycleRoute() {
+  return <DocsRoute pageId="collaborationLifecycle" />;
+}
+
+export function CollaborationApiRoute() {
+  return <DocsRoute pageId="collaborationApi" />;
 }
 
 export function TopologyDocsRoute() {

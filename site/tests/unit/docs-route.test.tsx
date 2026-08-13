@@ -54,6 +54,27 @@ describe("documentation routes", () => {
     expect(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
     const mobileSections = within(screen.getByRole("navigation", { name: "Documentation sections" }));
     expect(mobileSections.getByRole("link", { name: "작업별 진입점" }).getAttribute("href")).toBe("#작업별-진입점");
+
+  });
+
+  test("navigates the Collaboration concept branch and reference", async () => {
+    window.history.pushState(null, "", "/docs/collaboration");
+    render(<App />);
+    const user = userEvent.setup();
+    const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
+
+    await waitFor(() => expect(document.title).toBe("Collaboration - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Collaboration" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Runtime 만들기" })).toBeTruthy();
+    expect(screen.getByRole("main").querySelector('a[href="/docs/collaboration/replica"]')).toBeTruthy();
+
+    await user.click(within(nav.getByRole("group", { name: "Collaboration" })).getByRole("link", { name: "Collaborative History" }));
+    await waitFor(() => expect(document.title).toBe("Collaborative History - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Collaborative History" })).toBeTruthy();
+
+    await user.click(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "Collaboration API" }));
+    await waitFor(() => expect(document.title).toBe("Collaboration API - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Collaboration API" })).toBeTruthy();
   });
 
   test("supports direct route entry for static-hosting fallbacks", async () => {
@@ -76,5 +97,11 @@ describe("documentation routes", () => {
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
+
+    window.history.pushState(null, "", "/docs/collaboration/text/");
+    window.dispatchEvent(new Event("popstate"));
+    await waitFor(() => expect(document.title).toBe("Collaborative Text - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Collaborative Text" })).toBeTruthy();
+    expect(within(nav.getByRole("group", { name: "Collaboration" })).getByRole("link", { name: "Collaborative Text" }).getAttribute("aria-current")).toBe("page");
   });
 });
