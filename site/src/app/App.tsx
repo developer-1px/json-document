@@ -1,6 +1,7 @@
-import { lazy, Suspense, type ComponentType } from "react";
+import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 import siteRoutes from "../../site-routes.json";
 import { classes, ui } from "../shared/ui/styles";
+import { PageLeadProvider } from "../shared/ui/primitives";
 import { HomeRoute } from "../routes/home/HomeRoute";
 import {
   NavLink,
@@ -9,7 +10,7 @@ import {
   type SiteRoute,
   type SiteNavigationGroup,
 } from "./router";
-import { SiteBreadcrumb, childRoutes, isNavBranch } from "./breadcrumb";
+import { SiteBreadcrumb, childRoutes, isNavBranch, routeGroup } from "./breadcrumb";
 
 type Route = SiteRoute & { readonly Component: ComponentType };
 
@@ -66,8 +67,18 @@ export function App() {
   const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["Start", "Core", "Editing", "Connectors"];
 
   useRouteMetadata(route);
+  const activeGroup = routeGroup(route, routes);
+  const [openGroups, setOpenGroups] = useState<ReadonlySet<SiteNavigationGroup>>(
+    () => new Set(activeGroup ? [activeGroup] : []),
+  );
+
+  useEffect(() => {
+    if (!activeGroup) return;
+    setOpenGroups((current) => current.has(activeGroup) ? current : new Set([...current, activeGroup]));
+  }, [activeGroup]);
 
   return (
+    <PageLeadProvider lead={<SiteBreadcrumb route={route} routes={routes} />}>
     <div className={classes("flex min-h-screen flex-col md:flex-row", ui.frame.app)}>
       <a
         href="#main-content"
@@ -82,17 +93,33 @@ export function App() {
         <NavLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
           json-document
         </NavLink>
-        <div className="flex gap-4 overflow-x-auto px-3 pb-3 md:grid md:gap-3 md:px-2">
+        <div className={ui.nav.menu}>
           {routeGroups.map((group) => {
             const groupRoutes = routes.filter((item) => item.navigationGroup === group);
             if (groupRoutes.length === 0) return null;
             const groupLabelId = `site-navigation-${group.toLowerCase()}`;
+            const open = openGroups.has(group);
             return (
-              <div key={group} role="group" aria-labelledby={groupLabelId} className="grid shrink-0 content-start">
-                <div id={groupLabelId} className={ui.nav.group}>
+              <div key={group} role="group" aria-labelledby={groupLabelId} className="grid content-start">
+                <button
+                  type="button"
+                  id={groupLabelId}
+                  className={ui.nav.group}
+                  aria-expanded={open}
+                  aria-controls={`${groupLabelId}-list`}
+                  onClick={() => {
+                    setOpenGroups((current) => {
+                      const next = new Set(current);
+                      if (next.has(group)) next.delete(group);
+                      else next.add(group);
+                      return next;
+                    });
+                  }}
+                >
                   {group}
-                </div>
-                <ul className={ui.nav.list}>
+                  <span className={ui.nav.chevron} aria-hidden="true">{open ? "−" : "+"}</span>
+                </button>
+                <ul id={`${groupLabelId}-list`} className={ui.nav.panel} data-open={open ? "true" : undefined}>
                   {groupRoutes.map((item) => {
                     const children = childRoutes(item.path, routes);
                     return (
@@ -130,15 +157,11 @@ export function App() {
         </div>
       </nav>
       <div id="main-content" className="min-w-0 flex-1">
-        <div className={ui.frame.crumbRail}>
-          <div className={ui.frame.content}>
-            <SiteBreadcrumb route={route} routes={routes} />
-          </div>
-        </div>
         <Suspense fallback={<div aria-hidden="true" />}>
           <Page />
         </Suspense>
       </div>
     </div>
+    </PageLeadProvider>
   );
 }

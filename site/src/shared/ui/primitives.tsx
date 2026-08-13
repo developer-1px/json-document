@@ -1,12 +1,25 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { createContext, useContext, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { classes, ui } from "./styles";
+
+const PageLeadContext = createContext<ReactNode>(null);
+
+export function PageLeadProvider(props: {
+  readonly lead: ReactNode;
+  readonly children: ReactNode;
+}) {
+  return <PageLeadContext.Provider value={props.lead}>{props.children}</PageLeadContext.Provider>;
+}
 
 export type PetiteCatIllustration = "sleep" | "peek" | "braces" | "cursor";
 
 export function PageFrame(props: { readonly children: ReactNode }) {
+  const lead = useContext(PageLeadContext);
   return (
     <main className={ui.frame.page}>
-      <div className={ui.frame.content} data-page-frame>{props.children}</div>
+      <div className={ui.frame.content} data-page-frame>
+        {lead}
+        {props.children}
+      </div>
     </main>
   );
 }

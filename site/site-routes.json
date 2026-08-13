@@ -57,7 +57,7 @@
   },
   {
     "path": "/connectors",
-    "label": "Overview",
+    "label": "Connectors",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
     "navigationGroup": "Connectors"

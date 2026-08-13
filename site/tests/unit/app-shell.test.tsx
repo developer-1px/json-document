@@ -32,14 +32,14 @@ describe("official site shell", () => {
     const nav = within(screen.getByRole("navigation", { name: "Site navigation" }));
 
     expect(groupLinks(nav, "Start")).toEqual(["Overview", "Quickstart"]);
-    expect(groupLinks(nav, "Core")).toEqual(["Why", "Concepts", "API Reference"]);
+    expect(groupLinks(nav, "Core")).toEqual(["Why", "API Reference"]);
     expect(groupLinks(nav, "Editing")).toEqual(["Document", "Sheet", "Selection Lab", "Database"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Overview", "Connector guide", "React", "React Hook Form", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Zod", "Validate", "TanStack Table", "Web Platform"]);
     expect(nav.queryByRole("link", { name: "Workbench" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     const connectors = within(nav.getByRole("group", { name: "Connectors" }));
-    await user.click(connectors.getByRole("link", { name: "Overview", exact: true }));
+    await user.click(connectors.getByRole("link", { name: "Connectors", exact: true }));
     await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Connectors" })).toBeTruthy();
     const demos = screen.getAllByRole("link", { name: "Open Live Demo" });
@@ -58,6 +58,8 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
     await user.click(connectors.getByRole("link", { name: "Zod", exact: true }));
+    const adminFrame = document.querySelector("[data-page-frame]");
+    expect(adminFrame?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
     const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(adminCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(adminCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");

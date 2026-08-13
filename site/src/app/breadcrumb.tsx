@@ -29,7 +29,7 @@ export function breadcrumbTrail(
       : undefined;
   }
 
-  const group = ancestorGroup(route, routes);
+  const group = routeGroup(route, routes);
   const landing = group ? groupLandings[group] : undefined;
   if (landing && !stack.some((crumb) => crumb.path === landing.path)) {
     stack.unshift(landing);
@@ -73,7 +73,7 @@ export function SiteBreadcrumb(props: {
   );
 }
 
-function ancestorGroup(
+export function routeGroup(
   route: SiteRoute,
   routes: ReadonlyArray<SiteRoute>,
 ): SiteNavigationGroup | undefined {

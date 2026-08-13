@@ -3,8 +3,6 @@ import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageFrame, PageHeader } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-
 const connectorCode = `const validate = createZodValidator(schema);
 const document = createJSONDocument(initial, { validate });`;
 
@@ -29,9 +27,6 @@ export function ZodValidateDemoRoute() {
         <section aria-label="Minimal Zod validator code" className={classes("mt-4 pt-4", ui.surface.sectionDivider)}>
           <h2 className={classes("mb-2 mt-0", ui.text.heading)}>Validate commits</h2>
           <CodeBlock language="typescript" size="content" source={connectorCode} />
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>
-            <a href={`${basePath}/connectors/zod`} className={ui.action.secondary}>Zod admin table</a>
-          </p>
         </section>
     </PageFrame>
   );

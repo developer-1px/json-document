@@ -3,8 +3,6 @@ import { CodeBlock, InlineCode } from "../../../shared/ui/code-block";
 import { PageFrame, PageHeader } from "../../../shared/ui/primitives";
 import { classes, ui } from "../../../shared/ui/styles";
 
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-
 const adminCode = `const result = databaseDocumentFromZod(schema, records);
 const editor = createDatabaseEditor(result.value);`;
 
@@ -31,9 +29,6 @@ export function ZodConnectorDemoRoute() {
           <CodeBlock language="typescript" size="content" source={adminCode} />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             The table is the admin. <InlineCode>databaseDocumentFromZod</InlineCode> translates a Zod object and records into a Database document. It does not describe form fields or render UI.
-          </p>
-          <p className={classes("mb-0 mt-3", ui.text.meta)}>
-            <a href={`${basePath}/connectors/zod/validate`} className={ui.action.secondary}>Validate commits</a>
           </p>
         </section>
     </PageFrame>
