@@ -15,7 +15,7 @@ import {
 } from "./change.js";
 import { jsonEqual } from "./json-equal.js";
 import { materializeChanges } from "./materialize.js";
-import type { RuntimeState } from "./runtime-state.js";
+import { assignCausalState, type RuntimeState } from "./runtime-state.js";
 import type {
   ChangeId,
   CollaborationBundle,
@@ -143,10 +143,11 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
       );
       const changed = !jsonEqual(state.documentStore.value, nextMaterialized.value);
 
-      state.known = nextKnown;
-      state.graph = nextGraph;
-      state.materialized = nextMaterialized;
-      state.graphRevision += 1;
+      assignCausalState(state, {
+        known: nextKnown,
+        graph: nextGraph,
+        materialized: nextMaterialized,
+      });
       for (const change of prepared.bundle.changes) {
         if (
           change.changeId.actorId === state.actorId

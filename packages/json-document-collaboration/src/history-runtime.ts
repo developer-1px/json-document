@@ -16,6 +16,7 @@ import {
   type MaterializedDocument,
 } from "./materialize.js";
 import {
+  assignCausalState,
   failure,
   OK,
   type RuntimeState,
@@ -210,11 +211,12 @@ export function createHistory(state: RuntimeState): History {
     const prepared = prepareHistoryChange(direction);
     if (!prepared.ok) return prepared;
 
-    state.known = new Map(prepared.value.known);
-    state.graph = prepared.value.graph;
-    state.materialized = prepared.value.materialized;
-    state.localCounter = prepared.value.change.changeId.counter;
-    state.graphRevision += 1;
+    assignCausalState(state, {
+      known: prepared.value.known,
+      graph: prepared.value.graph,
+      materialized: prepared.value.materialized,
+      localCounter: prepared.value.change.changeId.counter,
+    });
 
     let documentChange = undefined;
     if (prepared.value.didChangeDocument) {

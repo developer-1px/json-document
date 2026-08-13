@@ -90,6 +90,24 @@ export interface RuntimeState {
   subscribeReplica(listener: (status: ReplicaStatus) => void): () => void;
 }
 
+export function assignCausalState(
+  state: RuntimeState,
+  next: {
+    readonly known: ReadonlyMap<string, CollaborationChange>;
+    readonly graph: PreparedGraph;
+    readonly materialized: MaterializedDocument;
+    readonly localCounter?: number;
+  },
+): void {
+  state.known = new Map(next.known);
+  state.graph = next.graph;
+  state.materialized = next.materialized;
+  state.graphRevision += 1;
+  if (next.localCounter !== undefined) {
+    state.localCounter = next.localCounter;
+  }
+}
+
 export function createRuntimeState(
   initial: unknown,
   options: CollaborationRuntimeOptions,

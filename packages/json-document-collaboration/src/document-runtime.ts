@@ -19,6 +19,7 @@ import { jsonEqual } from "./json-equal.js";
 import { materializeChanges, type MaterializedDocument } from "./materialize.js";
 import {
   ACCEPTANCE_REENTRANCY_FAILURE,
+  assignCausalState,
   failure,
   OK,
   type RuntimeState,
@@ -152,11 +153,12 @@ export function createDocumentRuntime(state: RuntimeState): JSONDocument {
       if (!committed.ok) return committed;
 
       if (prepared.value.change !== null) {
-        state.known = new Map(prepared.value.known);
-        state.graph = prepared.value.graph;
-        state.materialized = prepared.value.materialized;
-        state.localCounter = prepared.value.change.changeId.counter;
-        state.graphRevision += 1;
+        assignCausalState(state, {
+          known: prepared.value.known,
+          graph: prepared.value.graph,
+          materialized: prepared.value.materialized,
+          localCounter: prepared.value.change.changeId.counter,
+        });
       }
 
       if (committed.change.applied.length > 0) {
