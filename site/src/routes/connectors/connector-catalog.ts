@@ -28,7 +28,7 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     id: "zod",
     name: "Zod",
     packageName: "@interactive-os/json-document-zod",
-    description: "Zod validation results translated into JSON Document diagnostics.",
+    description: "Zod object schemas translated into Database admin documents, plus validation diagnostics.",
     status: "available",
     demoPath: "/connectors/zod",
   },

@@ -225,8 +225,10 @@ Document editor component lifecycle을 제공하는 공식 Connector다.
 touched와 field error를 소유하게 두고 유효한 submit만 하나의 canonical editing
 transaction으로 적용한다. Undo, redo와 외부 canonical 변경은 `reset`으로 form에
 동기화하며 field UI와 product schema는 Host가 소유한다.
-`@interactive-os/json-document-zod`는 Zod issue path를 JSON Pointer validation
-diagnostic으로 번역하고 parse 변환값을 canonical JSON에 채택하지 않는 공식 Connector다.
+`@interactive-os/json-document-zod`는 Zod object schema와 레코드 배열을
+Database document로 번역하고, Zod issue path를 JSON Pointer validation
+diagnostic으로 옮기며 parse 변환값을 canonical JSON에 채택하지 않는 공식
+Connector다.
 `@interactive-os/json-document-tanstack-table`은 TanStack Table v8의 visible
 row/column model을 Sheet topology로 번역해 정렬·필터·column ordering 뒤에도
 cell edit, rectangular multi-range selection, selection fill과 clipboard가 화면

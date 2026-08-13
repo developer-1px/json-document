@@ -121,15 +121,27 @@ site의 `/connectors/react-hook-form` Record Detail Demo는 React와 Zod Connect
 
 ## Zod Connector
 
-`@interactive-os/json-document-zod`의 public surface는 다음 하나입니다.
+`@interactive-os/json-document-zod`는 Zod native schema를 public contract로
+번역합니다. document에 직접 연결되지 않는 순수 함수이므로
+`createXxxConnector` 문법을 쓰지 않습니다.
 
 ```ts
+const translated = databaseDocumentFromZod(rowSchema, records);
+if (translated.ok) {
+  createDatabaseEditor(translated.value);
+}
+
 const validate = createZodValidator(schema, {
   code: "schema_violation",
 });
-
 const document = createJSONDocument(initial, { validate });
 ```
+
+`databaseDocumentFromZod`는 Zod object의 string·number·boolean·enum 필드를
+Database property로 옮기고 레코드 배열을 `DatabaseDocument`로 만듭니다. `id`
+string 필드는 record identity이고 컬럼이 아닙니다. 중첩 object, array, date는
+지원하지 않으며 `{ ok: false, code }`로 거절합니다. 이 함수는 표를 그리거나
+form field 디스크립터를 만들지 않습니다.
 
 `createZodValidator`는 Zod `safeParse` 결과와 issue path를
 `JSONPatchValidationResult`와 JSON Pointer로 번역합니다. Zod가 parse하며 만든
@@ -139,8 +151,8 @@ UI는 범용 schema-description contract가 생기기 전까지 이 Connector �
 
 첫 Zod issue의 path는 JSON Pointer escaping을 거쳐 validation failure의
 `pointer`가 됩니다. Root issue는 빈 JSON Pointer `""`로 표현합니다. 공식 site의
-`/connectors/zod`에서 invalid commit 보존, valid commit과 Zod trim 결과 비채택을
-확인할 수 있습니다.
+`/connectors/zod`에서 Zod 스키마로 연 admin 표와 invalid commit 보존, valid
+commit과 Zod trim 결과 비채택을 확인할 수 있습니다.
 
 ## TanStack Table Connector
 

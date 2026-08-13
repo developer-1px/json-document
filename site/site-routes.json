@@ -87,7 +87,7 @@
     "path": "/connectors/zod",
     "label": "Zod",
     "title": "Zod Connector Live Demo - json-document",
-    "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
+    "description": "Live Zod object-to-Database admin table plus validation diagnostics that preserve canonical JSON.",
     "navigationGroup": "Connectors"
   },
   {
