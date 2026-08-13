@@ -24,6 +24,7 @@ import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
+import { Route as PageExamplesDocumentRouteImport } from "./routes/_page/examples/document";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
 
@@ -103,6 +104,11 @@ const PageDocsTutorialRoute = PageDocsTutorialRouteImport.update({
   path: "/docs/tutorial",
   getParentRoute: () => PageRoute,
 } as any);
+const PageExamplesDocumentRoute = PageExamplesDocumentRouteImport.update({
+  id: "/examples/document",
+  path: "/examples/document",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsZodIndexRoute = PageConnectorsZodIndexRouteImport.update({
   id: "/connectors/zod/",
   path: "/connectors/zod/",
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/examples/document": typeof PageExamplesDocumentRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/examples/document": typeof PageExamplesDocumentRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   "/_page/docs/api": typeof PageDocsApiRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/_page/examples/document": typeof PageExamplesDocumentRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | "/docs/api"
     | "/docs/connectors"
     | "/docs/tutorial"
+    | "/examples/document"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | "/docs/api"
     | "/docs/connectors"
     | "/docs/tutorial"
+    | "/examples/document"
     | "/connectors"
     | "/demo"
     | "/docs"
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api"
     | "/_page/docs/connectors"
     | "/_page/docs/tutorial"
+    | "/_page/examples/document"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
@@ -341,6 +353,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsTutorialRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/examples/document": {
+      id: "/_page/examples/document";
+      path: "/examples/document";
+      fullPath: "/examples/document";
+      preLoaderRoute: typeof PageExamplesDocumentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/connectors/zod/": {
       id: "/_page/connectors/zod/";
       path: "/connectors/zod";
@@ -369,6 +388,7 @@ interface PageRouteChildren {
   PageDocsApiRoute: typeof PageDocsApiRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
+  PageExamplesDocumentRoute: typeof PageExamplesDocumentRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
@@ -387,6 +407,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiRoute: PageDocsApiRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
+  PageExamplesDocumentRoute: PageExamplesDocumentRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,

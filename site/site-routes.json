@@ -28,6 +28,13 @@
     "navigationGroup": "Core"
   },
   {
+    "path": "/examples/document",
+    "label": "Workbench",
+    "title": "Document Example Workbench - json-document",
+    "description": "Run a document editing scenario and inspect canonical JSON, selection, revision, and applied operations.",
+    "navigationGroup": "Editing"
+  },
+  {
     "path": "/demo",
     "label": "Document",
     "title": "Document Demo - json-document",
