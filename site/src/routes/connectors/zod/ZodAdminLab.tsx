@@ -10,6 +10,7 @@ import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 export const adminTaskSchema = z.object({
@@ -76,12 +77,10 @@ export function ZodAdminLab() {
       </div>
 
       <div className={classes("flex flex-wrap items-center gap-2 p-3", ui.database.toolbar)} role="toolbar" aria-label="Admin table actions">
-        <button type="button" className={ui.action.primary} onClick={addRecord}>New record</button>
-        <button type="button" className={ui.action.secondary} onClick={deleteSelected}>Delete selected</button>
-        <button
-          type="button"
-          className={ui.action.toggle}
-          aria-pressed={view.filter !== null}
+        <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
+        <ActionButton kind="danger" onClick={deleteSelected}>Delete selected</ActionButton>
+        <ToggleButton
+          pressed={view.filter !== null}
           onClick={() => configure({
             type: "view.configure",
             viewId: view.id,
@@ -91,11 +90,9 @@ export function ZodAdminLab() {
           })}
         >
           Backlog only
-        </button>
-        <button
-          type="button"
-          className={ui.action.toggle}
-          aria-pressed={view.sort !== null}
+        </ToggleButton>
+        <ToggleButton
+          pressed={view.sort !== null}
           onClick={() => configure({
             type: "view.configure",
             viewId: view.id,
@@ -103,9 +100,9 @@ export function ZodAdminLab() {
           })}
         >
           Points descending
-        </button>
-        <button type="button" className={ui.action.secondary} disabled={!snapshot.canUndo} onClick={() => run(editor.undo)}>Undo</button>
-        <button type="button" className={ui.action.secondary} disabled={!snapshot.canRedo} onClick={() => run(editor.redo)}>Redo</button>
+        </ToggleButton>
+        <ActionButton disabled={!snapshot.canUndo} onClick={() => run(editor.undo)}>Undo</ActionButton>
+        <ActionButton disabled={!snapshot.canRedo} onClick={() => run(editor.redo)}>Redo</ActionButton>
       </div>
 
       <div className={classes("overflow-auto", ui.surface.raised)}>
@@ -128,25 +125,26 @@ export function ZodAdminLab() {
                 {properties.map((property) => {
                   const isSelected = selected.has(`${record.id}\u0000${property.id}`);
                   return (
-                    <td
+                    <SelectableItem
+                      as="td"
                       key={property.id}
+                      selected={isSelected}
                       role="gridcell"
                       aria-selected={isSelected}
-                      data-selected={isSelected ? "true" : "false"}
                       onClick={(event) => selectCell(event, record.id, property.id)}
-                      className={classes("min-w-32 p-0", ui.database.cell, ui.state.selected)}
+                      className={classes("min-w-32 p-0", ui.database.cell)}
                     >
-                      <AdminPropertyEditor
-                        property={property}
-                        record={record}
-                        onCommit={(value) => run(() => editor.dispatch({
-                          type: "cell.commit",
-                          recordId: record.id,
-                          propertyId: property.id,
-                          value,
-                        }))}
-                      />
-                    </td>
+                        <AdminPropertyEditor
+                          property={property}
+                          record={record}
+                          onCommit={(value) => run(() => editor.dispatch({
+                            type: "cell.commit",
+                            recordId: record.id,
+                            propertyId: property.id,
+                            value,
+                          }))}
+                        />
+                    </SelectableItem>
                   );
                 })}
               </tr>

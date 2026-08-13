@@ -15,7 +15,8 @@ import {
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { Button, PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialSheet: SheetDocument = {
@@ -45,6 +46,7 @@ export function SheetDemo() {
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const sheet = snapshot.value as SheetDocument;
   const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
 
@@ -186,26 +188,27 @@ export function SheetDemo() {
                     {sheet.columns.map((column) => {
                       const isSelected = selected.has(`${row.id}\u0000${column.id}`);
                       return (
-                        <td
+                        <SelectableItem
+                          as="td"
                           key={column.id}
+                          selected={isSelected}
                           role="gridcell"
                           aria-selected={isSelected}
                           data-row-id={row.id}
                           data-column-id={column.id}
-                          data-selected={isSelected ? "true" : "false"}
                           onClick={(event) => selectCell(event, row.id, column.id)}
-                          className={classes("p-0", ui.surface.gridCell, ui.state.selected)}
+                          className={classes("p-0", ui.surface.gridCell)}
                         >
-                          <input
-                            aria-label={`${column.label} row ${rowIndex + 1}`}
-                            value={displayValue(row.cells[column.id])}
-                            onChange={(event) => run(
-                              () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value: event.currentTarget.value }),
-                              `${column.label} committed`,
-                            )}
-                            className={classes("w-full min-w-0", ui.field.seamless)}
-                          />
-                        </td>
+                            <input
+                              aria-label={`${column.label} row ${rowIndex + 1}`}
+                              value={displayValue(row.cells[column.id])}
+                              onChange={(event) => run(
+                                () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value: event.currentTarget.value }),
+                                `${column.label} committed`,
+                              )}
+                              className={classes("w-full min-w-0", ui.field.seamless)}
+                            />
+                        </SelectableItem>
                       );
                     })}
                   </tr>
@@ -215,15 +218,21 @@ export function SheetDemo() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click adds or removes a single-cell range. Fill selected changes every selected cell in one transaction.</p>
           </section>
 
-          <details className={classes("p-3", ui.surface.raised)}>
-            <summary className={classes("cursor-pointer", ui.text.heading)}>Inspect editing state</summary>
-            <aside className="mt-3 grid min-w-0 gap-3 lg:grid-cols-2" aria-label="Canonical JSON">
+          <section className={classes("p-3", ui.surface.raised)}>
+            <DisclosureButton
+              expanded={inspectorOpen}
+              controls="sheet-editing-state"
+              onClick={() => setInspectorOpen((open) => !open)}
+            >
+              Inspect editing state
+            </DisclosureButton>
+            <aside id="sheet-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-2" aria-label="Canonical JSON">
               <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
               <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="sheet-intent-json" size="compact" />
               <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="sheet-result-json" size="compact" />
               <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
             </aside>
-          </details>
+          </section>
         </div>
     </PageFrame>
   );
@@ -235,5 +244,5 @@ function displayValue(value: unknown): string {
 }
 
 function Action(props: { readonly label: string; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <Button disabled={props.disabled} onClick={props.onClick}>{props.label}</Button>;
+  return <ActionButton disabled={props.disabled} onClick={props.onClick}>{props.label}</ActionButton>;
 }

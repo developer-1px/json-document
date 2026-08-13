@@ -4,7 +4,7 @@ import { createAjvValidator } from "@interactive-os/json-document-ajv";
 import { useReactConnector } from "@interactive-os/json-document-react";
 import { Ajv } from "ajv";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
-import { Button } from "../../../shared/ui/primitives";
+import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const ajv = new Ajv({ useDefaults: true });
@@ -67,9 +67,9 @@ export function AjvConnectorLab() {
           className={ui.field.control}
         />
       </label>
-      <Button kind="primary" onClick={commitDraft} className="mt-3">
+      <ActionButton kind="primary" onClick={commitDraft} className="mt-3">
         Commit draft
-      </Button>
+      </ActionButton>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <JsonInspector label="Commit result" testId="ajv-validation-result" value={result} />

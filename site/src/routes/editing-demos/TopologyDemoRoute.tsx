@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { lineInterval, lineTopology } from "@interactive-os/json-document-editing";
 import { JsonInspector } from "../../shared/ui/json-inspector";
+import { ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -34,15 +35,14 @@ export function TopologyDemoRoute() {
           <h2 id="topology-input" className={classes("mb-2 mt-1", ui.text.heading)}>Choose visible order</h2>
           <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Visible order">
             {(Object.keys(orders) as ReadonlyArray<keyof typeof orders>).map((item) => (
-              <button
+              <ToggleButton
                 key={item}
-                type="button"
-                aria-pressed={order === item}
-                className={classes("px-3 py-1.5", ui.action.toggle)}
+                pressed={order === item}
+                className="px-3 py-1.5"
                 onClick={() => setOrder(item)}
               >
                 {item}
-              </button>
+              </ToggleButton>
             ))}
           </div>
           <ol className="m-0 grid list-none gap-1 p-0">

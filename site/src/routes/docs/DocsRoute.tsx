@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { NavLink } from "../../app/router";
+import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
@@ -69,19 +69,19 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
             <PageHeader title={page.title} illustration={docIllustrations[pageId]} />
             {demo ? (
               <div className="mb-5">
-                <NavLink to={demo.to} className={ui.action.primary}>{demo.label}</NavLink>
+                <ActionLink to={demo.to} kind="prominent">{demo.label}</ActionLink>
               </div>
             ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
               <div className="flex gap-1 whitespace-nowrap">
                 {headings.map((heading) => (
-                  <a
+                  <ActionLink
                     key={`${heading.id}-${heading.text}`}
                     href={`#${heading.id}`}
                     className={classes("px-2 py-1 no-underline", ui.text.meta)}
                   >
                     {heading.text}
-                  </a>
+                  </ActionLink>
                 ))}
               </div>
             </nav>
@@ -94,13 +94,13 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
             <div className={classes("mb-2", ui.text.heading)}>On this page</div>
             <div className="grid">
               {headings.map((heading) => (
-                <a
+                <ActionLink
                   key={`${heading.id}-${heading.text}`}
                   href={`#${heading.id}`}
                   className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
                 >
                   {heading.text}
-                </a>
+                </ActionLink>
               ))}
             </div>
           </nav>

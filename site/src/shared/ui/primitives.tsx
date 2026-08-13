@@ -1,4 +1,4 @@
-import { createContext, useContext, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { classes, ui } from "./styles";
 
 const PageLeadContext = createContext<ReactNode>(null);
@@ -61,11 +61,4 @@ export function PageHeader(props: {
 function sitePath(path: string): string {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
   return `${basePath}${path}` || "/";
-}
-
-export function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {
-  readonly kind?: "primary" | "secondary" | "toggle";
-}) {
-  const { className, kind = "secondary", type = "button", ...buttonProps } = props;
-  return <button {...buttonProps} type={type} className={classes(className, ui.action[kind])} />;
 }

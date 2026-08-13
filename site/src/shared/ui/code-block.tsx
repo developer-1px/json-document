@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { codeLanguageLabel, tokenizeCodeLine, type CodeLanguage } from "./code-tokens";
+import { IconButton } from "./interactive";
 import { classes, ui } from "./styles";
 
 type CodeBlockSize = "compact" | "content" | "standard" | "tall";
@@ -38,16 +39,14 @@ export function CodeBlock(props: {
         {props.meta ? <> · {props.meta}</> : null}
         {props.signal ? <> · {props.signal}</> : null}
       </figcaption>
-      <button
-        aria-label={copied ? "Copied" : "Copy"}
+      <IconButton
+        label={copied ? "Copied" : "Copy"}
         className={ui.code.block.copy}
         data-copied={copied}
         onClick={() => void copySource()}
-        title={copied ? "Copied" : "Copy"}
-        type="button"
       >
         <CopyIcon copied={copied} />
-      </button>
+      </IconButton>
       <pre
         data-testid={props.testId}
         className={classes(ui.code.block.viewport[props.size ?? "standard"], ui.code.block.pre)}

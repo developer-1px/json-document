@@ -1,5 +1,5 @@
 import { InlineCode } from "../../shared/ui/code-block";
-import { NavLink } from "../../app/router";
+import { ActionLink } from "../../shared/ui/interactive";
 import { ui } from "../../shared/ui/styles";
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -26,9 +26,7 @@ export function HomeRoute() {
 
           <div className={ui.home.entry}>
             <InlineCode className={ui.home.install} prompt>npm i @interactive-os/json-document</InlineCode>
-            <NavLink to="/docs/tutorial" className={ui.home.startLink}>
-              Get started <span aria-hidden="true">→</span>
-            </NavLink>
+            <ActionLink to="/docs/tutorial" kind="prominent">Get started</ActionLink>
           </div>
         </div>
 
