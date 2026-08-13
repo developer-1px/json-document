@@ -32,23 +32,19 @@ if (clipboard) {
 payload의 구조화된 데이터를 새 위치에 적용합니다.
 
 ```ts
-const clipboard = editor.copy();
+const cut = editor.cut();
 
-if (clipboard) {
+if (cut?.result.ok) {
   editor.dispatch({
     type: "clipboard.paste",
-    clipboard,
+    clipboard: cut.clipboard,
   });
 }
 ```
 
+`cut()`이 돌려준 payload를 붙여넣기 Intent에 넘깁니다. 잘라내기와
+붙여넣기는 각각 문서 값을 바꾸므로 History에도 두 작업이 차례로 기록됩니다.
+
 표에서 복사할 때는 [Topology](topology.md)를 함께 넘겨 현재 보이는 직사각형의
-행과 열 순서를 유지합니다.
-
-browser의 `copy`, `cut`, `paste` event에는 이 payload를 읽고 쓰는 과정이
-추가됩니다. Web Connector가 event와 editor 메서드를 연결하고, 제품은 외부
-plain text를 블록이나 셀로 해석할 규칙을 정합니다.
-
-잘라내기와 붙여넣기로 생긴 문서 변경은 다른 편집과 같은 방식으로
-기록됩니다. [History](history.md)에서는 이 기록이 값과 Selection을 어떻게
-복원하는지 이어서 살펴봅니다.
+행과 열 순서를 유지합니다. [History](history.md)는 이렇게 기록된 문서 값과
+Selection을 함께 복원합니다.
