@@ -79,7 +79,7 @@ export const ui = {
     seamless: "border-0 bg-transparent px-3 py-2 text-sm leading-6 text-ink-strong outline-none focus-visible:bg-paper focus-visible:ring-2 focus-visible:ring-impact/25",
   },
   code: {
-    inline: "rounded-[2px] border border-pencil-light bg-paper-warm px-1 py-0.5 font-mono text-[0.85em] text-ink-strong",
+    inline: "rounded-[2px] bg-paper-warm px-1 py-0.5 font-mono text-[0.85em] text-ink-strong",
     install: "min-w-0 self-start rounded-[3px] border border-pencil-light bg-paper p-3 shadow-none",
     prompt: "text-impact-ink",
     block: {

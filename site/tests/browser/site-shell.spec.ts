@@ -169,6 +169,24 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const initialBoard");
 });
 
+test("inline code stays distinct without drawing a border", async ({ page }) => {
+  await page.goto("/docs/tutorial");
+
+  const inlineCode = page.locator("code").filter({ hasText: /^document\.value$/ }).first();
+  await expect(inlineCode).toBeVisible();
+  expect(await inlineCode.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      borderWidth: style.borderWidth,
+      backgroundColor: style.backgroundColor,
+      fontFamily: style.fontFamily,
+    };
+  })).toMatchObject({
+    borderWidth: "0px",
+    backgroundColor: "rgb(251, 248, 242)",
+  });
+});
+
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/connectors/react");
