@@ -10,7 +10,7 @@ export function ZodValidateDemoRoute() {
   return (
     <PageFrame>
         <PageHeader
-          illustration="braces"
+          illustration="debug"
           title="Zod Validate"
           aside={(
             <div className={ui.code.install}>

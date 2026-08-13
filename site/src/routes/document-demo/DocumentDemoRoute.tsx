@@ -137,7 +137,7 @@ export function DocumentDemoRoute() {
   return (
     <PageFrame>
         <PageHeader
-          illustration="sleep"
+          illustration="clipboard"
           title="Document demo"
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
