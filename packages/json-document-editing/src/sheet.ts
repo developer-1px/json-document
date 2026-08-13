@@ -10,7 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { gridPointIndex, gridRangeBounds, type GridTopology } from "./topology.js";
+import { gridCellsInRange, gridPointIndex, gridRangeBounds, type GridTopology } from "./topology.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -124,12 +124,8 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     const axes = resolveTopology(document, topology);
     const selectedKeys = new Set<string>();
     for (const range of session.snapshot.selection.ranges) {
-      const bounds = rangeBounds(axes, range);
-      if (bounds === null) continue;
-      for (let rowIndex = bounds.rowStart; rowIndex <= bounds.rowEnd; rowIndex += 1) {
-        for (let columnIndex = bounds.columnStart; columnIndex <= bounds.columnEnd; columnIndex += 1) {
-          selectedKeys.add(cellKey(axes.rowIds[rowIndex]!, axes.columnIds[columnIndex]!));
-        }
+      for (const cell of gridCellsInRange(axes, range)) {
+        selectedKeys.add(cellKey(cell.rowId, cell.columnId));
       }
     }
     const selected: SheetCell[] = [];

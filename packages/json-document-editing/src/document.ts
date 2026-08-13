@@ -1,12 +1,12 @@
 import { type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createEditingSession, type EditingResult, type EditingSession, type EditingSnapshot } from "./session.js";
-import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
   selectRangePoint,
 } from "./range-selection.js";
+import { lineInterval, lineTopology } from "./topology.js";
 
 export interface DocumentBlock extends Record<string, JSONValue> {
   readonly id: string;
@@ -74,10 +74,10 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
 
   function selectedIds(): string[] {
     const blocks = value().blocks;
-    const axis = createOrderedAxis(blocks.map((block) => block.id));
+    const visible = lineTopology(blocks.map((block) => block.id));
     const ids = new Set<string>();
     for (const range of session.snapshot.selection.ranges) {
-      for (const id of axis.interval(range.anchor.blockId, range.focus.blockId)) ids.add(id);
+      for (const id of lineInterval(visible, range.anchor.blockId, range.focus.blockId)) ids.add(id);
     }
     return blocks.filter((block) => ids.has(block.id)).map((block) => block.id);
   }

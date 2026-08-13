@@ -5,7 +5,8 @@
 복사하게 하려면 이 줄이 필요합니다.
 
 이 글은 그 줄이 어떻게 생겼는지, 누가 만드는지, 선택이 어떻게 읽는지
-설명합니다. 큰 그림은 [코어 컨셉](concepts.md)에 있습니다.
+설명합니다. 고르기는 [Selection](selection.md)이, 복사는
+[Clipboard](clipboard.md)가 맡습니다.
 
 ## 왜 저장 순서만으로는 부족한가
 
@@ -115,6 +116,11 @@ tree.dispatch({
 | Sheet | `SheetTopology` | `rowIds` × `columnIds` |
 | Database | `DatabaseTopology` | `recordIds` × `propertyIds` |
 | Tree | `TreeTopology` | `visibleIds` |
+| Document | 저장 순서 | `blocks` |
+| Order | 저장 순서 | `items` |
+
+Document와 Order는 화면 줄을 따로 받지 않습니다. 고른 구간은 저장 순서를
+`lineInterval`로 읽습니다.
 
 공통으로 줄을 계산할 때는 `lineTopology`, `gridTopology`,
 `lineInterval`, `gridCellsInRange`를 쓰면 됩니다. 선택과 Clipboard가

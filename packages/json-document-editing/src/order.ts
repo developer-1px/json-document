@@ -3,13 +3,13 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
   selectRangePoint,
   type RangeSelectionState,
 } from "./range-selection.js";
+import { lineInterval, lineTopology } from "./topology.js";
 import {
   createEditingSession,
   type EditingResult,
@@ -73,10 +73,10 @@ export function createOrderEditor(source: EditingDocumentSource<OrderDocument>):
 
   function selectedItemIds(): string[] {
     const items = value().items;
-    const axis = createOrderedAxis(items.map((item) => item.id));
+    const visible = lineTopology(items.map((item) => item.id));
     const selected = new Set<string>();
     for (const range of session.snapshot.selection.ranges) {
-      for (const id of axis.interval(range.anchor.itemId, range.focus.itemId)) selected.add(id);
+      for (const id of lineInterval(visible, range.anchor.itemId, range.focus.itemId)) selected.add(id);
     }
     return items.map((item) => item.id).filter((id) => selected.has(id));
   }

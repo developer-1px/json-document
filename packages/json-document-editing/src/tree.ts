@@ -7,13 +7,13 @@ import {
   createRangeSelectionFamily,
   type OrderedTopology,
 } from "@interactive-os/json-document-selection";
-import { createOrderedAxis } from "./ordered-axis.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
   selectRangePoint,
   type RangeSelectionState,
 } from "./range-selection.js";
+import { lineInterval, lineTopology } from "./topology.js";
 import {
   createEditingSession,
   type EditingResult,
@@ -111,14 +111,14 @@ export function createTreeEditor(source: EditingDocumentSource<TreeDocument>): T
   }
 
   function rangeTopology(topology: TreeTopology): OrderedTopology<TreePoint, string> {
-    const axis = createOrderedAxis(topology.visibleIds);
-    const visible = new Set(topology.visibleIds);
+    const visible = lineTopology(topology.visibleIds);
+    const visibleSet = new Set(topology.visibleIds);
     const byId = new Map(value().nodes.map((node) => [node.id, node]));
     return {
       equals: (left, right) => left.nodeId === right.nodeId,
-      interval: (anchor, focus) => axis.interval(anchor.nodeId, focus.nodeId),
+      interval: (anchor, focus) => lineInterval(visible, anchor.nodeId, focus.nodeId),
       reconcilePoint(point) {
-        const nodeId = nearestVisible(point.nodeId, visible, byId);
+        const nodeId = nearestVisible(point.nodeId, visibleSet, byId);
         return nodeId === null ? null : { nodeId };
       },
     };

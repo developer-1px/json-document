@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
 import {
+  createDocumentEditor,
+  createOrderEditor,
+  createTreeEditor,
   gridCellsInRange,
   gridPointIndex,
   gridRangeBounds,
@@ -39,5 +42,35 @@ describe("topology", () => {
       { rowId: "r1", columnId: "score" },
       { rowId: "r1", columnId: "name" },
     ]);
+  });
+
+  test("Tree, Document, and Order read the same line interval", () => {
+    const ids = ["c", "a", "b"] as const;
+    expect(lineInterval(lineTopology(ids), "c", "a")).toEqual(["c", "a"]);
+
+    const tree = createTreeEditor({
+      nodes: [
+        { id: "c", parentId: null, label: "C" },
+        { id: "a", parentId: null, label: "A" },
+        { id: "b", parentId: null, label: "B" },
+      ],
+    });
+    tree.dispatch({ type: "selection.set", nodeId: "c", topology: { visibleIds: ids } });
+    tree.dispatch({ type: "selection.set", nodeId: "a", topology: { visibleIds: ids }, mode: "extend" });
+    expect(tree.selectedNodeIdsIn({ visibleIds: ids })).toEqual(["c", "a"]);
+
+    const document = createDocumentEditor({
+      blocks: ids.map((id) => ({ id, text: id })),
+    });
+    document.dispatch({ type: "selection.set", blockId: "c" });
+    document.dispatch({ type: "selection.set", blockId: "a", mode: "extend" });
+    expect(document.selectedBlockIds).toEqual(["c", "a"]);
+
+    const order = createOrderEditor({
+      items: ids.map((id) => ({ id, label: id })),
+    });
+    order.dispatch({ type: "selection.set", itemId: "c" });
+    order.dispatch({ type: "selection.set", itemId: "a", mode: "extend" });
+    expect(order.selectedItemIds).toEqual(["c", "a"]);
   });
 });
