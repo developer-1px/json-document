@@ -38,3 +38,8 @@ saved Table views own property order and visibility, sort, and filter. The
 editor projects each saved view into a visible record/property topology for
 range selection, keeps native title/text caret state in the host, and restores
 structural selection with record and view mutations through history.
+
+Visible order is a value, not a command. `LineTopology` and `GridTopology` are
+the shared shapes. Sheet aliases Grid as `SheetTopology`. Database projects a
+saved view into `{ recordIds, propertyIds }`. Tree takes host `visibleIds`.
+Selection and clipboard read that line.

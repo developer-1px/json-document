@@ -201,7 +201,8 @@ binding.fillSelected(table, "Ready");
 options로 제공하고 cell commit을 Sheet intent와 JSON Patch로 연결합니다. 최종
 visible row model과 visible leaf column order는 `SheetTopology`로 번역되므로 정렬,
 필터링과 column ordering 뒤에도 rectangular multi-range selection, selection fill과
-primary-range clipboard가 화면 순서를 따릅니다. Canonical JSON, selection,
+primary-range clipboard가 화면 순서를 따릅니다. 줄의 모양과 쓰는 법은
+[Topology](topology.md)에 있습니다. Canonical JSON, selection,
 clipboard와 history는 Sheet editor가 계속
 소유합니다. Sorting, filtering, pagination과 column state는 TanStack과 host가
 소유하며 formula, merged cell과 virtualization은 Connector 범위가 아닙니다.

@@ -25,6 +25,7 @@ import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
+import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageExamplesDocumentRouteImport } from "./routes/_page/examples/document";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
@@ -111,6 +112,11 @@ const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
   path: "/docs/connectors",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsTopologyRoute = PageDocsTopologyRouteImport.update({
+  id: "/docs/topology",
+  path: "/docs/topology",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsTutorialRoute = PageDocsTutorialRouteImport.update({
   id: "/docs/tutorial",
   path: "/docs/tutorial",
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/examples/document": typeof PageExamplesDocumentRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/examples/document": typeof PageExamplesDocumentRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   "/_page/docs/api": typeof PageDocsApiRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
   "/_page/examples/document": typeof PageExamplesDocumentRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | "/docs/api"
     | "/docs/concepts"
     | "/docs/connectors"
+    | "/docs/topology"
     | "/docs/tutorial"
     | "/examples/document"
     | "/connectors/"
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | "/docs/api"
     | "/docs/concepts"
     | "/docs/connectors"
+    | "/docs/topology"
     | "/docs/tutorial"
     | "/examples/document"
     | "/connectors"
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api"
     | "/_page/docs/concepts"
     | "/_page/docs/connectors"
+    | "/_page/docs/topology"
     | "/_page/docs/tutorial"
     | "/_page/examples/document"
     | "/_page/connectors/"
@@ -384,6 +396,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsConnectorsRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/topology": {
+      id: "/_page/docs/topology";
+      path: "/docs/topology";
+      fullPath: "/docs/topology";
+      preLoaderRoute: typeof PageDocsTopologyRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/tutorial": {
       id: "/_page/docs/tutorial";
       path: "/docs/tutorial";
@@ -427,6 +446,7 @@ interface PageRouteChildren {
   PageDocsApiRoute: typeof PageDocsApiRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
+  PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
   PageExamplesDocumentRoute: typeof PageExamplesDocumentRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
@@ -448,6 +468,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsApiRoute: PageDocsApiRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
+  PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
   PageExamplesDocumentRoute: PageExamplesDocumentRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,

@@ -116,7 +116,8 @@ Sheet의 `SheetTopology`는 Grid입니다. Database의 보이는 레코드×속�
 
 Intent 없이도 이 개념은 움직입니다. `copy(topology)`,
 `selectedCellsIn(topology)`처럼 선택과 Clipboard가 Topology를 직접
-받습니다. 명령의 공통 껍질은 아직 TBD입니다.
+받습니다. 줄의 모양과 쓰는 법은 [Topology](topology.md)에 있습니다.
+명령의 공통 껍질은 아직 TBD입니다.
 
 ### Intent (TBD)
 

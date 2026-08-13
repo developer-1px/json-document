@@ -42,6 +42,10 @@ describe("documentation routes", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "React Connector" })).toBeTruthy();
 
+    await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Topology" }));
+    await waitFor(() => expect(document.title).toBe("Topology - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Topology" })).toBeTruthy();
+
     await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.");
@@ -60,6 +64,12 @@ describe("documentation routes", () => {
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
+
+    window.history.pushState(null, "", "/docs/topology/");
+    window.dispatchEvent(new Event("popstate"));
+    await waitFor(() => expect(document.title).toBe("Topology - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Topology" })).toBeTruthy();
+    expect(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "Topology" }).getAttribute("aria-current")).toBe("page");
 
     window.history.pushState(null, "", "/docs/api/");
     window.dispatchEvent(new Event("popstate"));

@@ -16,6 +16,7 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/tutorial")).toEqual(["Overview:/", "Quickstart:/docs/tutorial"]);
     expect(trail("/docs")).toEqual(["Overview:/", "Why:/docs"]);
     expect(trail("/docs/concepts")).toEqual(["Overview:/", "Why:/docs", "Concepts:/docs/concepts"]);
+    expect(trail("/docs/topology")).toEqual(["Overview:/", "Why:/docs", "Topology:/docs/topology"]);
     expect(trail("/docs/api")).toEqual(["Overview:/", "Why:/docs", "API Reference:/docs/api"]);
     expect(trail("/examples/document")).toEqual(["Overview:/", "Workbench:/examples/document"]);
     expect(trail("/demo")).toEqual(["Overview:/", "Document:/demo"]);

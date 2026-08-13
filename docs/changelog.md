@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Extracted visible-order `LineTopology` and `GridTopology` in the editing
+  companion so Sheet and Database range selection share the same grid math,
+  and opened a Topology guide under Core docs.
 - Extended `@interactive-os/json-document-zod` with `databaseDocumentFromZod`, so
   a Zod object schema and record array become a Database document and the
   official Zod Live Demo can use that table as the admin — without a create or
