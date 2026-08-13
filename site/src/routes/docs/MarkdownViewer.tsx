@@ -51,6 +51,9 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
             return <CodeBlock language={language} size="content" source={String(children)} />;
           },
           pre: ({ children }) => <>{children}</>,
+          a: ({ href, children }) => (
+            <a href={rewriteMarkdownHref(href)}>{children}</a>
+          ),
         }}
       >
         {source}
@@ -74,6 +77,24 @@ export function markdownHeadings(source: string): MarkdownHeading[] {
 
 function stripInlineMarkdown(text: string): string {
   return text.replace(/`([^`]+)`/g, "$1").trim();
+}
+
+const markdownHrefs: Readonly<Record<string, string>> = {
+  "overview.md": "/docs",
+  "api.md": "/docs/api",
+  "quickstart.md": "/docs/tutorial",
+  "concepts.md": "/docs/concepts",
+  "selection.md": "/docs/selection",
+  "history.md": "/docs/history",
+  "clipboard.md": "/docs/clipboard",
+  "topology.md": "/docs/topology",
+  "connectors.md": "/docs/connectors",
+};
+
+function rewriteMarkdownHref(href: string | undefined): string | undefined {
+  if (!href) return href;
+  const file = href.replace(/^\.\//, "");
+  return markdownHrefs[file] ?? href;
 }
 
 function headingId(text: string): string {
