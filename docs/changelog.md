@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Applied the editing-layer Clipboard door to Order, Object, Tree, and
+  Database, added Sheet `cut()` as a primary-range cell clear, and exported
+  matching Web codecs.
 - Named the editing-layer Intent door as `EditingIntent` / `EditingDispatch`,
   and added the Intent reference and walkthrough under Editing.
 - Reorganized official site and documentation navigation to match the public

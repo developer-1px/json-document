@@ -53,4 +53,26 @@ describe("object editing selection family", () => {
     expect(editor.undo().ok).toBe(true);
     expect(editor.selectedObjects.map((object) => object.id)).toEqual(["a", "c"]);
   });
+
+  test("copies, pastes, and cuts selected objects with new ids", () => {
+    let sequence = 0;
+    const editor = createObjectEditor(initial, { createId: () => `n${++sequence}` });
+    editor.dispatch({ type: "selection.set", objectIds: ["a", "c"] });
+    const clipboard = editor.copy();
+    expect(clipboard?.text).toBe("Alpha\nGamma");
+
+    expect(editor.dispatch({ type: "clipboard.paste", clipboard: clipboard! }).ok).toBe(true);
+    expect(editor.selectedObjects.map((object) => object.id)).toEqual(["n1", "n2"]);
+    expect((editor.snapshot.value as ObjectDocument).objects.map((object) => object.id)).toEqual([
+      "a", "b", "c", "n1", "n2",
+    ]);
+
+    const cut = editor.cut();
+    expect(cut?.clipboard.text).toBe("Alpha\nGamma");
+    expect((editor.snapshot.value as ObjectDocument).objects.map((object) => object.id)).toEqual([
+      "a", "b", "c",
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.selectedObjects.map((object) => object.id)).toEqual(["n1", "n2"]);
+  });
 });

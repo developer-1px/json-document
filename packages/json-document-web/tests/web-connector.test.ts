@@ -1,13 +1,19 @@
 import { describe, expect, test } from "vitest";
 import {
+  createDatabaseEditor,
   createDocumentEditor,
+  createOrderEditor,
   createSheetEditor,
   type BlockDocument,
+  type DatabaseDocument,
+  type OrderDocument,
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import {
   createWebClipboardBinding,
+  databaseClipboardCodec,
   documentClipboardCodec,
+  orderClipboardCodec,
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
@@ -69,6 +75,52 @@ describe("Web clipboard Connector", () => {
     expect(editor.dispatch({ type: "selection.set", rowId: "r2", columnId: "name" }).ok).toBe(true);
     expect(binding.paste(event(data)).ok).toBe(true);
     expect((editor.snapshot.value as SheetDocument).rows[1]?.cells.name).toBe("Alpha");
+  });
+
+  test("round-trips Order and Database payloads through their codecs", () => {
+    const order = createOrderEditor({
+      items: [{ id: "a", label: "Alpha" }, { id: "b", label: "Beta" }],
+    });
+    const orderBinding = createWebClipboardBinding({
+      codec: orderClipboardCodec,
+      read: () => order.copy(),
+      cut: (payload) => order.cut()?.result ?? { ok: false, code: "selection.empty", reason: payload.type },
+      paste: (clipboard) => order.dispatch({ type: "clipboard.paste", clipboard }),
+    });
+    const orderData = new MemoryClipboardData();
+    expect(orderBinding.copy(event(orderData)).ok).toBe(true);
+    expect(orderData.getData("text/plain")).toBe("Alpha");
+    expect(order.dispatch({ type: "selection.set", itemId: "b" }).ok).toBe(true);
+    expect(orderBinding.paste(event(orderData)).ok).toBe(true);
+    expect((order.snapshot.value as OrderDocument).items.map((item) => item.label)).toEqual([
+      "Alpha",
+      "Beta",
+      "Alpha",
+    ]);
+
+    const database = createDatabaseEditor({
+      schema: { properties: [{ id: "title", name: "Title", type: "title", options: [] }] },
+      records: [{ id: "r1", values: { title: "Alpha" } }, { id: "r2", values: { title: "Beta" } }],
+      views: [{
+        id: "all",
+        name: "All",
+        type: "table",
+        propertyOrder: ["title"],
+        propertyVisibility: { title: true },
+        sort: null,
+        filter: null,
+      }],
+    });
+    const databaseBinding = createWebClipboardBinding({
+      codec: databaseClipboardCodec,
+      read: () => database.copy(),
+      paste: (clipboard) => database.dispatch({ type: "clipboard.paste", clipboard }),
+    });
+    const databaseData = new MemoryClipboardData();
+    expect(databaseBinding.copy(event(databaseData)).ok).toBe(true);
+    expect(database.dispatch({ type: "selection.set", recordId: "r2", propertyId: "title" }).ok).toBe(true);
+    expect(databaseBinding.paste(event(databaseData)).ok).toBe(true);
+    expect((database.snapshot.value as DatabaseDocument).records[1]?.values.title).toBe("Alpha");
   });
 
   test("cuts a structured Document payload only after native clipboard data is available", () => {

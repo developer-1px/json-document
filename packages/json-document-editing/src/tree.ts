@@ -49,6 +49,12 @@ export interface TreeTopology {
   readonly visibleIds: ReadonlyArray<string>;
 }
 
+export interface TreeClipboard extends Record<string, JSONValue> {
+  readonly type: "application/vnd.interactive-os.tree+json";
+  readonly nodes: ReadonlyArray<TreeNode>;
+  readonly text: string;
+}
+
 export type TreeIntent =
   | {
       readonly type: "selection.set";
@@ -56,22 +62,35 @@ export type TreeIntent =
       readonly topology: TreeTopology;
       readonly mode?: "replace" | "extend" | "toggle";
     }
-  | { readonly type: "selection.remove"; readonly topology: TreeTopology };
+  | { readonly type: "selection.remove"; readonly topology: TreeTopology }
+  | {
+      readonly type: "clipboard.paste";
+      readonly clipboard: TreeClipboard;
+      readonly topology: TreeTopology;
+      readonly afterId?: string;
+    };
 
 export interface TreeEditor {
   readonly snapshot: EditingSnapshot<TreeSelection>;
   selectedNodeIdsIn(topology: TreeTopology): ReadonlyArray<string>;
   dispatch(intent: TreeIntent): EditingResult<TreeSelection>;
+  copy(topology: TreeTopology): TreeClipboard | null;
+  cut(topology: TreeTopology): { readonly clipboard: TreeClipboard; readonly result: EditingResult<TreeSelection> } | null;
   reconcile(topology: TreeTopology): EditingSnapshot<TreeSelection>;
   undo(): EditingResult<TreeSelection>;
   redo(): EditingResult<TreeSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<TreeSelection>) => void): () => void;
 }
 
-export function createTreeEditor(source: EditingDocumentSource<TreeDocument>): TreeEditor {
+export function createTreeEditor(
+  source: EditingDocumentSource<TreeDocument>,
+  options: { readonly createId?: () => string } = {},
+): TreeEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as TreeDocument;
   assertTreeDocument(initial);
+  let sequence = 0;
+  const createId = options.createId ?? (() => `node-${++sequence}`);
   const selectionFamily = createRangeSelectionFamily<TreePoint, string>();
   const first = initial.nodes[0];
   const session = createEditingSession({
@@ -138,7 +157,53 @@ export function createTreeEditor(source: EditingDocumentSource<TreeDocument>): T
       return success(session.select(asTreeSelection(selection)));
     }
 
+    if (intent.type === "clipboard.paste") {
+      return paste(intent.clipboard, topology, intent.afterId);
+    }
+
+    return removeSelected(topology, selectedNodeIdsIn(topology));
+  }
+
+  function copy(topology: TreeTopology): TreeClipboard | null {
     const selectedIds = selectedNodeIdsIn(topology);
+    if (selectedIds.length === 0) return null;
+    const nodes = value().nodes;
+    const copiedIds = descendantClosure(nodes, new Set(selectedIds));
+    const copied = nodes.filter((node) => copiedIds.has(node.id));
+    return {
+      type: "application/vnd.interactive-os.tree+json",
+      nodes: copied,
+      text: copied.map((node) => node.label).join("\n"),
+    };
+  }
+
+  function paste(
+    clipboard: TreeClipboard,
+    topology: TreeTopology,
+    afterId?: string,
+  ): EditingResult<TreeSelection> {
+    const nodes = value().nodes;
+    const available = new Set(nodes.map((node) => node.id));
+    const target = afterId ?? selectedNodeIdsIn(topology).at(-1);
+    if (target !== undefined && !available.has(target)) return failure("paste.target-not-found");
+    const parentId = target === undefined ? null : nodes.find((node) => node.id === target)?.parentId ?? null;
+    const pasted = cloneNodesWithUniqueIds(clipboard.nodes, nodes, createId, parentId);
+    if (pasted.length === 0) return failure("clipboard.empty");
+    return session.apply({
+      operations: pasted.map((node, offset) => ({
+        op: "add",
+        path: `/nodes/${nodes.length + offset}`,
+        value: node,
+      })),
+      selectionAfter: rangesFor(pasted.filter((node) => node.parentId === parentId)),
+      origin: "clipboard.paste",
+    });
+  }
+
+  function removeSelected(
+    topology: TreeTopology,
+    selectedIds: ReadonlyArray<string>,
+  ): EditingResult<TreeSelection> {
     if (selectedIds.length === 0) return failure("selection.empty");
     const document = value();
     const removed = descendantClosure(document.nodes, new Set(selectedIds));
@@ -152,7 +217,7 @@ export function createTreeEditor(source: EditingDocumentSource<TreeDocument>): T
     return session.apply({
       operations: indices.map((index) => ({ op: "remove", path: buildPointer(["nodes", index]) })),
       selectionAfter: next ? collapsed(next) : emptySelection(),
-      origin: intent.type,
+      origin: "selection.remove",
     });
   }
 
@@ -160,6 +225,12 @@ export function createTreeEditor(source: EditingDocumentSource<TreeDocument>): T
     get snapshot() { return session.snapshot; },
     selectedNodeIdsIn,
     dispatch,
+    copy,
+    cut(topology) {
+      const clipboard = copy(topology);
+      if (!clipboard) return null;
+      return { clipboard, result: removeSelected(resolveTopology(topology), selectedNodeIdsIn(topology)) };
+    },
     reconcile,
     undo: () => session.undo(),
     redo: () => session.redo(),
@@ -196,6 +267,48 @@ function descendantClosure(
     }
   }
   return removed;
+}
+
+function rangesFor(nodes: ReadonlyArray<TreeNode>): TreeSelection {
+  return {
+    kind: "range",
+    ranges: nodes.map((node) => ({ anchor: { nodeId: node.id }, focus: { nodeId: node.id } })),
+    primaryIndex: nodes.length === 0 ? null : 0,
+  };
+}
+
+function createUniqueId(nodes: ReadonlyArray<TreeNode>, createId: () => string): string {
+  const existing = new Set(nodes.map((node) => node.id));
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const id = createId();
+    if (!existing.has(id)) return id;
+  }
+  throw new Error("createId did not produce a unique tree node id");
+}
+
+function cloneNodesWithUniqueIds(
+  source: ReadonlyArray<TreeNode>,
+  existing: ReadonlyArray<TreeNode>,
+  createId: () => string,
+  rootParentId: string | null,
+): TreeNode[] {
+  const occupied = [...existing];
+  const idMap = new Map<string, string>();
+  const copied = source.map((node) => {
+    const id = createUniqueId(occupied, createId);
+    idMap.set(node.id, id);
+    const copy = { ...node, id };
+    occupied.push(copy);
+    return copy;
+  });
+  const sourceIds = new Set(source.map((node) => node.id));
+  return copied.map((node, index) => {
+    const original = source[index]!;
+    const parentId = original.parentId !== null && sourceIds.has(original.parentId)
+      ? idMap.get(original.parentId) ?? rootParentId
+      : rootParentId;
+    return { ...node, parentId };
+  });
 }
 
 function collapsed(nodeId: string): TreeSelection {

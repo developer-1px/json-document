@@ -16,6 +16,7 @@ export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
 export type {
   DatabaseCell,
+  DatabaseClipboard,
   DatabaseDocument,
   DatabaseEditor,
   DatabaseFilter,
@@ -32,6 +33,7 @@ export type {
   DatabaseTopology,
 } from "./database.js";
 export type {
+  OrderClipboard,
   OrderDocument,
   OrderEditor,
   OrderIntent,
@@ -42,6 +44,7 @@ export type {
 } from "./order.js";
 export type {
   DocumentObject,
+  ObjectClipboard,
   ObjectDocument,
   ObjectEditor,
   ObjectIntent,
@@ -78,6 +81,7 @@ export type {
   SheetTopology,
 } from "./sheet.js";
 export type {
+  TreeClipboard,
   TreeDocument,
   TreeEditor,
   TreeIntent,

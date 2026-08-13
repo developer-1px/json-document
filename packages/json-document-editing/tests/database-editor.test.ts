@@ -90,4 +90,42 @@ describe("Database editor", () => {
       "r1:name", "r1:note", "r1:score", "r2:name", "r2:note", "r2:score",
     ]);
   });
+
+  test("copies and pastes a visible-topology rectangle as JSON and TSV", () => {
+    const editor = createDatabaseEditor(initial);
+    editor.dispatch({
+      type: "view.configure",
+      viewId: "table",
+      sort: { propertyId: "score", direction: "descending" },
+      filter: { propertyId: "status", operator: "equals", value: "todo" },
+      propertyOrder: ["score", "name", "note", "status", "done"],
+      propertyVisibility: { note: false, status: false, done: false },
+    });
+    const topology = editor.tableTopology("table");
+    expect(topology).toEqual({ recordIds: ["r3", "r1"], propertyIds: ["score", "name"] });
+
+    editor.dispatch({ type: "selection.set", recordId: "r3", propertyId: "score" });
+    editor.dispatch({ type: "selection.set", recordId: "r1", propertyId: "name", mode: "extend" });
+    const clipboard = editor.copy(topology);
+    expect(clipboard).toEqual({
+      type: "application/vnd.interactive-os.database+json",
+      cells: [[2, "Gamma"], [1, "Alpha"]],
+      text: "2\tGamma\n1\tAlpha",
+    });
+
+    editor.dispatch({ type: "selection.set", recordId: "r3", propertyId: "score" });
+    expect(editor.dispatch({
+      type: "clipboard.paste",
+      clipboard: { ...clipboard!, cells: [[9, "G"], [8, "A"]], text: "9\tG\n8\tA" },
+      topology,
+    }).ok).toBe(true);
+    const records = editor.snapshot.value as DatabaseDocument;
+    expect(records.records.find((record) => record.id === "r3")?.values).toMatchObject({ score: 9, name: "G" });
+    expect(records.records.find((record) => record.id === "r1")?.values).toMatchObject({ score: 8, name: "A" });
+    expect(editor.snapshot.selection.focus).toEqual({ recordId: "r1", propertyId: "name" });
+
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as DatabaseDocument).records.find((record) => record.id === "r3")?.values.name).toBe("Gamma");
+    expect(editor.snapshot.selection.focus).toEqual({ recordId: "r3", propertyId: "score" });
+  });
 });

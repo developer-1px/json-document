@@ -10,7 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { gridCellsInRange } from "./topology.js";
+import { gridCellsInRange, gridPointIndex, gridRangeBounds } from "./topology.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -94,6 +94,12 @@ export interface DatabaseCell extends DatabasePoint {
   readonly value: JSONValue;
 }
 
+export interface DatabaseClipboard extends Record<string, JSONValue> {
+  readonly type: "application/vnd.interactive-os.database+json";
+  readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>>;
+  readonly text: string;
+}
+
 export type DatabaseIntent =
   | {
       readonly type: "selection.set";
@@ -122,6 +128,11 @@ export type DatabaseIntent =
       readonly propertyVisibility?: Readonly<Record<string, boolean>>;
       readonly sort?: DatabaseSort | null;
       readonly filter?: DatabaseFilter | null;
+    }
+  | {
+      readonly type: "clipboard.paste";
+      readonly clipboard: DatabaseClipboard;
+      readonly topology?: DatabaseTopology;
     };
 
 export interface DatabaseEditor {
@@ -129,6 +140,7 @@ export interface DatabaseEditor {
   dispatch(intent: DatabaseIntent): EditingResult<DatabaseSelection>;
   tableTopology(viewId: string): DatabaseTopology;
   selectedCellsIn(topology: DatabaseTopology): ReadonlyArray<DatabaseCell>;
+  copy(topology?: DatabaseTopology): DatabaseClipboard | null;
   undo(): EditingResult<DatabaseSelection>;
   redo(): EditingResult<DatabaseSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<DatabaseSelection>) => void): () => void;
@@ -223,7 +235,36 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       });
     }
 
-    return configureView(session, value(), intent);
+    if (intent.type === "view.configure") {
+      return configureView(session, value(), intent);
+    }
+
+    return paste(session, value(), intent.clipboard, intent.topology);
+  }
+
+  function copy(topology?: DatabaseTopology): DatabaseClipboard | null {
+    const document = value();
+    const axes = resolveTopology(document, topology);
+    const range = primaryRange(session.snapshot.selection);
+    if (range === null) return null;
+    const bounds = gridRangeBounds(databaseGrid(axes), {
+      anchor: { rowId: range.anchor.recordId, columnId: range.anchor.propertyId },
+      focus: { rowId: range.focus.recordId, columnId: range.focus.propertyId },
+    });
+    if (bounds === null) return null;
+    const cells = axes.recordIds
+      .slice(bounds.rowStart, bounds.rowEnd + 1)
+      .map((recordId) => {
+        const record = document.records.find((candidate) => candidate.id === recordId)!;
+        return axes.propertyIds
+          .slice(bounds.columnStart, bounds.columnEnd + 1)
+          .map((propertyId) => clone(record.values[propertyId]!));
+      });
+    return {
+      type: "application/vnd.interactive-os.database+json",
+      cells,
+      text: cells.map((row) => row.map(cellText).join("\t")).join("\n"),
+    };
   }
 
   return {
@@ -235,10 +276,96 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
     selectedCellsIn(topology) {
       return selectedCells(value(), session.snapshot.selection, topology);
     },
+    copy,
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),
   };
+}
+
+function paste(
+  session: EditingSession<DatabaseSelection>,
+  document: DatabaseDocument,
+  clipboard: DatabaseClipboard,
+  topology?: DatabaseTopology,
+): EditingResult<DatabaseSelection> {
+  const focus = session.snapshot.selection.focus;
+  if (focus === null) return failure("selection.empty");
+  if (clipboard.cells.length === 0 || clipboard.cells.some((row) => row.length === 0)) {
+    return failure("clipboard.empty");
+  }
+  const width = clipboard.cells[0]!.length;
+  if (clipboard.cells.some((row) => row.length !== width)) {
+    return failure("clipboard.not-rectangular");
+  }
+  const axes = resolveTopology(document, topology);
+  const start = gridPointIndex(databaseGrid(axes), {
+    rowId: focus.recordId,
+    columnId: focus.propertyId,
+  });
+  if (start === null) return failure("selection.cell-not-found");
+  if (start.rowIndex + clipboard.cells.length > axes.recordIds.length || start.columnIndex + width > axes.propertyIds.length) {
+    return failure("paste.out-of-bounds");
+  }
+
+  const operations: JSONPatchOperation[] = [];
+  for (let rowOffset = 0; rowOffset < clipboard.cells.length; rowOffset += 1) {
+    for (let columnOffset = 0; columnOffset < width; columnOffset += 1) {
+      const recordId = axes.recordIds[start.rowIndex + rowOffset]!;
+      const propertyId = axes.propertyIds[start.columnIndex + columnOffset]!;
+      const resolved = resolveCell(document, recordId, propertyId);
+      if (resolved === null) return failure("cell.not-found");
+      const nextValue = clipboard.cells[rowOffset]![columnOffset]!;
+      if (!acceptsValue(resolved.property, nextValue)) return failure("cell.invalid-value");
+      operations.push({
+        op: "replace",
+        path: buildPointer(["records", resolved.recordIndex, "values", propertyId]),
+        value: nextValue,
+      });
+    }
+  }
+
+  const endRecordId = axes.recordIds[start.rowIndex + clipboard.cells.length - 1]!;
+  const endPropertyId = axes.propertyIds[start.columnIndex + width - 1]!;
+  return session.apply({
+    operations,
+    selectionAfter: withPrimaryAliases({
+      kind: "range",
+      ranges: [{
+        anchor: { recordId: focus.recordId, propertyId: focus.propertyId },
+        focus: { recordId: endRecordId, propertyId: endPropertyId },
+      }],
+      primaryIndex: 0,
+    }),
+    origin: "clipboard.paste",
+  });
+}
+
+function resolveTopology(document: DatabaseDocument, topology?: DatabaseTopology): DatabaseTopology {
+  const resolved = topology ?? {
+    recordIds: document.records.map((record) => record.id),
+    propertyIds: document.schema.properties.map((property) => property.id),
+  };
+  const records = new Set(document.records.map((record) => record.id));
+  const properties = new Set(document.schema.properties.map((property) => property.id));
+  for (const id of resolved.recordIds) {
+    if (!records.has(id)) throw new Error(`Database topology record was not found: ${JSON.stringify(id)}.`);
+  }
+  for (const id of resolved.propertyIds) {
+    if (!properties.has(id)) throw new Error(`Database topology property was not found: ${JSON.stringify(id)}.`);
+  }
+  return resolved;
+}
+
+function cellText(value: JSONValue): string {
+  if (value === null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return JSON.stringify(value);
+}
+
+function clone<Value extends JSONValue>(value: Value): Value {
+  return JSON.parse(JSON.stringify(value)) as Value;
 }
 
 function configureView(

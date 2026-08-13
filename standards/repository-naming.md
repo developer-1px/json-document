@@ -475,6 +475,10 @@ identifier에는 canonical vocabulary만 사용한다.
 | keep | `SheetCell`, `SheetClipboard`, `SheetColumn`, `SheetDocument`, `SheetEditor`, `SheetIntent`, `SheetPoint`, `SheetRange`, `SheetRow`, `SheetSelection`, `createSheetEditor` | Sheet domain, stable identity와 rectangular range-set selection 책임이 일치 |
 | keep | `SheetTopology` | Host가 제공한 visible row/column order를 Sheet 편집 의미로 해석하는 책임이 일치 |
 | keep | `LineTopology`, `GridTopology` | Selection이 기대는 화면 순서. 한 축과 두 축 |
+| keep | `OrderClipboard`, `OrderEditor`, `OrderIntent`, `OrderSelection`, `createOrderEditor` | Order domain과 line-range clipboard 책임이 일치 |
+| keep | `ObjectClipboard`, `ObjectEditor`, `ObjectIntent`, `ObjectSelection`, `createObjectEditor` | Object domain과 key-set clipboard 책임이 일치 |
+| keep | `TreeClipboard`, `TreeEditor`, `TreeIntent`, `TreeSelection`, `TreeTopology`, `createTreeEditor` | Tree domain, visible-line selection과 subtree clipboard 책임이 일치 |
+| keep | `DatabaseClipboard`, `DatabaseEditor`, `DatabaseIntent`, `DatabaseSelection`, `DatabaseTopology`, `createDatabaseEditor` | Database domain, saved-view grid와 rectangular clipboard 책임이 일치 |
 
 ### Collaboration root
 
@@ -512,13 +516,13 @@ identifier에는 canonical vocabulary만 사용한다.
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
-| keep | `useJSONDocumentValue`, `useEditingSnapshot`, `useDocumentEditor`, `EditingSnapshotSource` | React hook convention과 연결하는 대상 snapshot 책임이 일치 |
+| keep | `useReactConnector`, `useJSONDocumentValue`, `useEditingSnapshot`, `useDocumentEditor`, `EditingSnapshotSource` | 공식 React Connector 진입점과 document/editor snapshot 구독 |
 
 ### React Hook Form Connector package
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
-| keep | `useJSONDocumentForm`, `UseJSONDocumentFormOptions`, `JSONDocumentFormBinding`, `CanonicalFormFailure` | React Hook Form의 native form lifecycle을 canonical editing transaction과 동기화하는 책임이 일치 |
+| keep | `useReactHookFormConnector`, `useJSONDocumentForm`, `UseJSONDocumentFormOptions`, `JSONDocumentFormBinding`, `CanonicalFormFailure` | 공식 React Hook Form Connector 진입점과 하위 session binding |
 
 ### Zod Connector package
 
@@ -537,13 +541,13 @@ identifier에는 canonical vocabulary만 사용한다.
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
-| keep | `createTableDocumentBinding`, `TableDocumentBinding`, `TableDocumentOptions` | TanStack Table public model과 Sheet editor 사이의 지속적인 synchronization 책임이 일치 |
+| keep | `createTanStackTableConnector`, `createTableDocumentBinding`, `TableDocumentBinding`, `TableDocumentOptions` | 공식 TanStack Table Connector 진입점과 하위 Sheet binding |
 
 ### Web Platform Connector package
 
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
-| keep | `createWebClipboardBinding`, `WebClipboardBinding`, `WebClipboardCodec`, `WebClipboardData`, `WebClipboardEvent`, `WebClipboardPayload`, `WebClipboardResult`, `documentClipboardCodec`, `sheetClipboardCodec` | Web clipboard native contract와 public Document·Sheet clipboard 번역 책임이 일치 |
+| keep | `createWebClipboardBinding`, `WebClipboardBinding`, `WebClipboardCodec`, `WebClipboardData`, `WebClipboardEvent`, `WebClipboardPayload`, `WebClipboardResult`, `documentClipboardCodec`, `sheetClipboardCodec`, `orderClipboardCodec`, `objectClipboardCodec`, `treeClipboardCodec`, `databaseClipboardCodec` | Web clipboard native contract와 public domain clipboard 번역 책임이 일치 |
 | keep | `selectionOperationFromModifiers`, `WebModifierState` | Web modifier state를 semantic selection operation으로 번역하는 책임이 일치 |
 | keep | `textInputFromControl`, `WebTextControl`, `WebTextControlEvent`, `WebTextInput` | Native text control을 관찰하되 selection ownership을 취하지 않는 책임이 일치 |
 
@@ -569,12 +573,29 @@ Editing package
 ├─ EditingResult
 ├─ EditingSession
 ├─ EditingSnapshot
+├─ EditingIntent
+├─ EditingDispatch
 ├─ DocumentEditor
 ├─ DocumentSelection
+├─ DocumentClipboard
+├─ OrderEditor
+├─ OrderSelection
+├─ OrderClipboard
 ├─ SheetEditor
 ├─ SheetSelection
 ├─ SheetTopology
 ├─ SheetClipboard
+├─ ObjectEditor
+├─ ObjectSelection
+├─ ObjectClipboard
+├─ TreeEditor
+├─ TreeSelection
+├─ TreeTopology
+├─ TreeClipboard
+├─ DatabaseEditor
+├─ DatabaseSelection
+├─ DatabaseTopology
+├─ DatabaseClipboard
 ├─ LineTopology
 └─ GridTopology
 
@@ -619,6 +640,7 @@ Contenteditable package
 Connector packages
 ├─ React
 │  ├─ EditingSnapshotSource
+│  ├─ useReactConnector
 │  ├─ useJSONDocumentValue
 │  ├─ useEditingSnapshot
 │  └─ useDocumentEditor
@@ -626,7 +648,8 @@ Connector packages
 │  ├─ CanonicalFormFailure
 │  ├─ UseJSONDocumentFormOptions
 │  ├─ JSONDocumentFormBinding
-│  └─ useJSONDocumentForm
+│  ├─ useJSONDocumentForm
+│  └─ useReactHookFormConnector
 ├─ Zod
 │  ├─ ZodValidatorOptions
 │  ├─ createZodValidator
@@ -639,13 +662,18 @@ Connector packages
 ├─ TanStack Table
 │  ├─ TableDocumentBinding
 │  ├─ TableDocumentOptions
-│  └─ createTableDocumentBinding
+│  ├─ createTableDocumentBinding
+│  └─ createTanStackTableConnector
 └─ Web Platform
    ├─ WebClipboardBinding
    ├─ WebClipboardCodec
    ├─ createWebClipboardBinding
    ├─ documentClipboardCodec
    ├─ sheetClipboardCodec
+   ├─ orderClipboardCodec
+   ├─ objectClipboardCodec
+   ├─ treeClipboardCodec
+   ├─ databaseClipboardCodec
    ├─ selectionOperationFromModifiers
    └─ textInputFromControl
 ```

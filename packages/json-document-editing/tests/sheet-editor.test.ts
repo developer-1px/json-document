@@ -223,6 +223,26 @@ describe("sheet editing vertical slice", () => {
     expect(editor.redo().ok).toBe(true);
     expect(editor.snapshot.selection).toEqual(selectionBefore);
   });
+
+  test("cuts the primary rectangle by clearing cells and restores them on undo", () => {
+    const editor = createSheetEditor(initial);
+    editor.dispatch({ type: "selection.set", rowId: "r1", columnId: "name" });
+    editor.dispatch({ type: "selection.set", rowId: "r2", columnId: "status", mode: "extend" });
+    const cut = editor.cut();
+    expect(cut?.clipboard.text).toBe("Alpha\tDraft\nBeta\tReady");
+    expect(cells(editor.snapshot.value as SheetDocument)).toEqual([
+      [null, null, 1],
+      [null, null, 2],
+      ["Gamma", "Done", 3],
+    ]);
+    expect(editor.snapshot.selection.anchor).toEqual({ rowId: "r1", columnId: "name" });
+    expect(editor.undo().ok).toBe(true);
+    expect(cells(editor.snapshot.value as SheetDocument)).toEqual([
+      ["Alpha", "Draft", 1],
+      ["Beta", "Ready", 2],
+      ["Gamma", "Done", 3],
+    ]);
+  });
 });
 
 function cells(document: SheetDocument): unknown[][] {
