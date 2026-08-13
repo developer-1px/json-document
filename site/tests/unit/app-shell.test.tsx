@@ -47,7 +47,7 @@ describe("official site shell", () => {
       "Sheet",
       "Database",
     ]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
     expect(groupLinks(nav, "Reference")).toEqual(["API Reference"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -63,6 +63,7 @@ describe("official site shell", () => {
       "/connectors/zod",
       "/connectors/tanstack-table",
       "/connectors/web",
+      "/connectors/contenteditable",
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
 

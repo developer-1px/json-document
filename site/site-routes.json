@@ -167,6 +167,13 @@
     "navigationGroup": "Connectors"
   },
   {
+    "path": "/connectors/contenteditable",
+    "label": "Contenteditable",
+    "title": "Contenteditable Connector Live Demo - json-document",
+    "description": "Live React contenteditable root that leases native input and commits a local JSON Document string.",
+    "navigationGroup": "Connectors"
+  },
+  {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",

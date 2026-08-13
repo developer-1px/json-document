@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as PageRouteImport } from "./routes/_page";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
+import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
 import { Route as PageConnectorsReactRouteImport } from "./routes/_page/connectors/react";
 import { Route as PageConnectorsReactHookFormRouteImport } from "./routes/_page/connectors/react-hook-form";
 import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/connectors/tanstack-table";
@@ -55,6 +56,12 @@ const PageConnectorsAjvRoute = PageConnectorsAjvRouteImport.update({
   path: "/connectors/ajv",
   getParentRoute: () => PageRoute,
 } as any);
+const PageConnectorsContenteditableRoute =
+  PageConnectorsContenteditableRouteImport.update({
+    id: "/connectors/contenteditable",
+    path: "/connectors/contenteditable",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageConnectorsReactRoute = PageConnectorsReactRouteImport.update({
   id: "/connectors/react",
   path: "/connectors/react",
@@ -172,6 +179,7 @@ const PageConnectorsZodValidateRoute =
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
+  "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
@@ -199,6 +207,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
+  "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
@@ -228,6 +237,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_page": typeof PageRouteWithChildren;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
+  "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
   "/_page/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/connectors/ajv"
+    | "/connectors/contenteditable"
     | "/connectors/react"
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/connectors/ajv"
+    | "/connectors/contenteditable"
     | "/connectors/react"
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
@@ -312,6 +324,7 @@ export interface FileRouteTypes {
     | "/"
     | "/_page"
     | "/_page/connectors/ajv"
+    | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
     | "/_page/connectors/react-hook-form"
     | "/_page/connectors/tanstack-table"
@@ -370,6 +383,13 @@ declare module "@tanstack/react-router" {
       path: "/connectors/ajv";
       fullPath: "/connectors/ajv";
       preLoaderRoute: typeof PageConnectorsAjvRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/connectors/contenteditable": {
+      id: "/_page/connectors/contenteditable";
+      path: "/connectors/contenteditable";
+      fullPath: "/connectors/contenteditable";
+      preLoaderRoute: typeof PageConnectorsContenteditableRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/react": {
@@ -531,6 +551,7 @@ declare module "@tanstack/react-router" {
 
 interface PageRouteChildren {
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
+  PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
   PageConnectorsReactHookFormRoute: typeof PageConnectorsReactHookFormRoute;
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
@@ -558,6 +579,7 @@ interface PageRouteChildren {
 
 const PageRouteChildren: PageRouteChildren = {
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
+  PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
   PageConnectorsReactHookFormRoute: PageConnectorsReactHookFormRoute,
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,

@@ -43,6 +43,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       find: "@interactive-os/json-document-web",
       replacement: sourceFile("packages/json-document-web/src/index.ts"),
     },
+    {
+      find: "@interactive-os/json-document-contenteditable",
+      replacement: sourceFile("packages/json-document-contenteditable/src/index.ts"),
+    },
   ];
 }
 

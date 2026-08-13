@@ -551,6 +551,14 @@ identifier에는 canonical vocabulary만 사용한다.
 | keep | `selectionOperationFromModifiers`, `WebModifierState` | Web modifier state를 semantic selection operation으로 번역하는 책임이 일치 |
 | keep | `textInputFromControl`, `WebTextControl`, `WebTextControlEvent`, `WebTextInput` | Native text control을 관찰하되 selection ownership을 취하지 않는 책임이 일치 |
 
+### Contenteditable Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `ContentEditable`, `ContentEditableProps` | local JSONDocument 문자열 포인터를 leased contenteditable React root에 붙이는 공식 진입점 |
+| keep | `createContentEditableBinding`, `ContentEditableBinding`, `ContentEditableBindingOptions`, `ContentEditableBindingResult` | React 없이 같은 lease bind를 소유하는 하위 진입점 |
+| keep | `plainTextDOMAdapter`, `TextDOMAdapter`, `DOMObservation`, `TextSelection` | 평문 observe/render/restore 경계 |
+
 ## Target vocabulary
 
 이 목록은 현재 canonical public vocabulary다.
@@ -676,6 +684,11 @@ Connector packages
    ├─ databaseClipboardCodec
    ├─ selectionOperationFromModifiers
    └─ textInputFromControl
+└─ Contenteditable
+   ├─ ContentEditable
+   ├─ ContentEditableProps
+   ├─ createContentEditableBinding
+   └─ plainTextDOMAdapter
 ```
 
 ## 새 concept admission

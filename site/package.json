@@ -18,6 +18,7 @@
     "@interactive-os/json-document-ajv": "*",
     "@interactive-os/json-document-tanstack-table": "*",
     "@interactive-os/json-document-web": "*",
+    "@interactive-os/json-document-contenteditable": "*",
     "@interactive-os/json-document-zod": "*",
     "@tanstack/react-router": "^1.170.27",
     "@tanstack/react-table": "^8.21.3",
