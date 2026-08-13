@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Added `@interactive-os/json-document-contenteditable`, a React
+  contenteditable root that leases native input for one local JSON Document
+  string pointer, with a Connector catalog Live Demo.
 - Applied Sheet `cut()` to the TanStack Table Connector and official Sheet
   live paths, and named all six Web clipboard codecs plus the Database slice
   in the public catalogs.

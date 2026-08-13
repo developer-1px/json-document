@@ -6,16 +6,16 @@ import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 import { docPages, type DocPageId } from "./doc-pages";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
-  overview: "sleep",
-  quickstart: "cursor",
-  connectors: "peek",
+  overview: "package",
+  quickstart: "terminal",
+  connectors: "connector",
   intent: "braces",
-  intentGuide: "cursor",
-  api: "braces",
-  topology: "cursor",
+  intentGuide: "terminal",
+  api: "patch",
+  topology: "branch",
   selection: "cursor",
-  history: "cursor",
-  clipboard: "cursor",
+  history: "branch",
+  clipboard: "clipboard",
 };
 
 export function DocsOverviewRoute() {

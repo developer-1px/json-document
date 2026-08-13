@@ -30,7 +30,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Sheet",
     "Database",
   ]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
   await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -80,7 +80,7 @@ test("docs and demos share the page frame while preserving their content modes",
   await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
 
   await page.goto("/docs/api");
-  await expect(page.locator('[data-petite-cat="braces"]')).toHaveCount(1);
+  await expect(page.locator('[data-petite-cat="patch"]')).toHaveCount(1);
 
   await page.goto("/demo");
   const demoFrame = await pageFrameSnapshot(page);
@@ -98,6 +98,8 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/docs/connectors",
     "/docs/api",
     "/docs/topology",
+    "/docs/clipboard",
+    "/docs/history",
     "/demos",
     "/demo",
     "/demo/sheet",
@@ -113,6 +115,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/connectors/zod",
     "/connectors/zod/validate",
     "/connectors/tanstack-table",
+    "/connectors/contenteditable",
   ];
 
   for (const route of routes) {
@@ -128,7 +131,20 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
       pageOverflow: false,
     });
   }
-  expect([...illustrations].sort()).toEqual(["braces", "cursor", "peek", "sleep"]);
+  expect([...illustrations].sort()).toEqual([
+    "braces",
+    "branch",
+    "clipboard",
+    "connector",
+    "cursor",
+    "database",
+    "debug",
+    "package",
+    "patch",
+    "peek",
+    "sleep",
+    "terminal",
+  ]);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/demo");

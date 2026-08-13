@@ -9,6 +9,7 @@ on:
       - "json-document-react-hook-form-v*"
       - "json-document-tanstack-table-v*"
       - "json-document-web-v*"
+      - "json-document-contenteditable-v*"
       - "json-document-collaboration-v*"
       - "json-document-contenteditable-collaboration-v*"
 
@@ -60,6 +61,11 @@ jobs:
                 prefix: "json-document-web-v",
                 packageFile: "packages/json-document-web/package.json",
                 workspace: "@interactive-os/json-document-web",
+              },
+              {
+                prefix: "json-document-contenteditable-v",
+                packageFile: "packages/json-document-contenteditable/package.json",
+                workspace: "@interactive-os/json-document-contenteditable",
               },
               {
                 prefix: "json-document-tanstack-table-v",

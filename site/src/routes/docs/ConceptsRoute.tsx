@@ -6,6 +6,15 @@ import { docPages, type DocPageId } from "./doc-pages";
 import { DocsRoute } from "./DocsRoute";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 
+const editingConceptIllustrations: Record<
+  Exclude<DocPageId, "overview" | "quickstart" | "connectors" | "api" | "topology" | "intent" | "intentGuide">,
+  PetiteCatIllustration
+> = {
+  selection: "cursor",
+  history: "branch",
+  clipboard: "clipboard",
+};
+
 export function ConceptsRoute() {
   return (
     <EditingConceptRoute
@@ -39,7 +48,8 @@ function EditingConceptRoute(props: {
   const page = props.pageId ? docPages[props.pageId] : undefined;
   const title = props.title ?? page?.title ?? "";
   const source = props.source ?? page?.source ?? "";
-  const illustration = props.illustration ?? "cursor";
+  const illustration = props.illustration
+    ?? (props.pageId ? editingConceptIllustrations[props.pageId] : "cursor");
   const headings = markdownHeadings(source).filter((heading) => heading.level === 2);
 
   return (

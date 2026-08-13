@@ -11,7 +11,19 @@ export function PageLeadProvider(props: {
   return <PageLeadContext.Provider value={props.lead}>{props.children}</PageLeadContext.Provider>;
 }
 
-export type PetiteCatIllustration = "sleep" | "peek" | "braces" | "cursor";
+export type PetiteCatIllustration =
+  | "sleep"
+  | "peek"
+  | "braces"
+  | "cursor"
+  | "terminal"
+  | "branch"
+  | "clipboard"
+  | "connector"
+  | "debug"
+  | "package"
+  | "database"
+  | "patch";
 
 export function PageFrame(props: { readonly children: ReactNode }) {
   if (useContext(PageFrameContext)) return props.children;
