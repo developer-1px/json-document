@@ -14,13 +14,11 @@ export function PageLeadProvider(props: {
 export type PetiteCatIllustration = "sleep" | "peek" | "braces" | "cursor";
 
 export function PageFrame(props: { readonly children: ReactNode }) {
-  const lead = useContext(PageLeadContext);
   if (useContext(PageFrameContext)) return props.children;
   return (
     <PageFrameContext.Provider value={true}>
       <main className={ui.frame.page}>
         <div className={ui.frame.content} data-page-frame>
-          {lead}
           {props.children}
         </div>
       </main>
@@ -35,8 +33,10 @@ export function PageHeader(props: {
   readonly illustration?: PetiteCatIllustration;
   readonly aside?: ReactNode;
 }) {
+  const lead = useContext(PageLeadContext);
   return (
     <header className={ui.pageHeader.root} data-page-header>
+      {lead}
       <div className={classes(ui.pageHeader.layout, props.aside != null && ui.pageHeader.layoutWithAside)}>
         <div className={classes(ui.pageHeader.copy, props.illustration && ui.pageHeader.copyWithArtwork)}>
           {props.label ? <p className={classes("mb-2 mt-0", ui.text.label)}>{props.label}</p> : null}

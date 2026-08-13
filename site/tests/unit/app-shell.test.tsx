@@ -58,8 +58,8 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
     await user.click(connectors.getByRole("link", { name: "Zod", exact: true }));
-    const adminFrame = document.querySelector("[data-page-frame]");
-    expect(adminFrame?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
+    const adminHeader = document.querySelector("[data-page-header]");
+    expect(adminHeader?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
     const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(adminCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(adminCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
@@ -88,11 +88,14 @@ describe("official site shell", () => {
     });
 
     await user.click(within(nav.getByRole("group", { name: "Core" })).getByRole("link", { name: "API Reference" }));
-    await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
+    const crumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
+    await waitFor(() => expect(crumb.getByText("API Reference")).toBeTruthy());
     expect(screen.getByRole("link", { name: "json-document" })).toBe(brand);
     expect(screen.getByRole("navigation", { name: "Site navigation" })).toBe(siteNav);
     expect(document.querySelector("[data-page-frame]")).toBe(frame);
-    expect(frame?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
+    const header = document.querySelector("[data-page-header]");
+    expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
+    expect(header?.querySelector("h1")).toBeTruthy();
   });
 });
 

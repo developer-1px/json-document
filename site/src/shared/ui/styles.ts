@@ -20,7 +20,7 @@ export const ui = {
   },
   breadcrumb: {
     nav: "mb-3",
-    list: "m-0 flex list-none flex-wrap items-center p-0 text-xs text-pencil",
+    list: "m-0 flex list-none flex-wrap items-center p-0 text-xs leading-5 text-pencil",
     item: "flex items-center",
     link: "text-pencil no-underline hover:text-ink-strong",
     current: "font-medium text-ink-strong",
