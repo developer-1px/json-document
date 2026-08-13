@@ -57,6 +57,7 @@ export type {
   DocumentRange,
   DocumentSelection,
 } from "./document.js";
+export type { EditingDispatch, EditingIntent } from "./intent.js";
 export type {
   EditingPlan,
   EditingResult,

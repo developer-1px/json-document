@@ -69,6 +69,20 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/docs/intent",
+    "label": "Intent",
+    "title": "Intent reference - json-document",
+    "description": "Signatures for EditingIntent, dispatch, EditingResult, and each editor's intent verbs.",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/docs/intent-guide",
+    "label": "Intent guide",
+    "title": "Intent guide - json-document",
+    "description": "A first walkthrough that selects, inserts, copies, and pastes a document block.",
+    "parentPath": "/docs/intent"
+  },
+  {
     "path": "/demo",
     "label": "Document",
     "title": "Document Demo - json-document",

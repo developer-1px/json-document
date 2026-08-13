@@ -88,6 +88,8 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "history.md": "/docs/history",
   "clipboard.md": "/docs/clipboard",
   "topology.md": "/docs/topology",
+  "intent.md": "/docs/intent",
+  "intent-guide.md": "/docs/intent-guide",
   "connectors.md": "/docs/connectors",
 };
 

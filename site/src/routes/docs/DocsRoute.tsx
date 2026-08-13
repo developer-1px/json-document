@@ -9,6 +9,8 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "sleep",
   quickstart: "cursor",
   connectors: "peek",
+  intent: "braces",
+  intentGuide: "cursor",
   api: "braces",
   topology: "cursor",
   selection: "cursor",
@@ -34,6 +36,14 @@ export function ApiReferenceRoute() {
 
 export function TopologyDocsRoute() {
   return <DocsRoute pageId="topology" />;
+}
+
+export function IntentRoute() {
+  return <DocsRoute pageId="intent" />;
+}
+
+export function IntentGuideRoute() {
+  return <DocsRoute pageId="intentGuide" />;
 }
 
 function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {

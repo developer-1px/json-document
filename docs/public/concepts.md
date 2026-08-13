@@ -10,8 +10,7 @@
 ```txt
 읽기            JSON Document
   ↓
-편집            Selection · Topology · Clipboard · History
-                Intent                     (TBD)
+편집            Selection · Topology · Clipboard · History · Intent
   ↓
 외부 확장       Connector
 ```
@@ -20,7 +19,8 @@
 문이 실제로 어떻게 커지는지 이야기합니다. 오른쪽 패널은 같은 이야기를
 한 문서 위에서 보여 줍니다. 편집 층의 잎은
 [Selection](selection.md), [Topology](topology.md),
-[Clipboard](clipboard.md), [History](history.md)에 있습니다.
+[Clipboard](clipboard.md), [History](history.md),
+[Intent](intent.md)에 있습니다.
 
 ## 읽기
 
@@ -88,6 +88,7 @@ Sheet의 `SheetTopology`는 Grid입니다. Database의 보이는 레코드×속�
 Intent 없이도 이 개념은 움직입니다. `copy(topology)`,
 `selectedCellsIn(topology)`처럼 선택과 Clipboard가 Topology를 직접
 받습니다. 줄의 모양과 쓰는 법은 [Topology](topology.md)에 있습니다.
+명령의 공통 껍질은 [Intent](intent.md)입니다.
 
 **Clipboard**는 고른 것을 복사하고, 잘라내고, 붙입니다. 여기 있는
 Clipboard는 운영체제의 클립보드가 아닙니다. 선택이 만든 구조화된
@@ -124,11 +125,19 @@ Selection만 움직입니다. 복사하면 Clipboard가 생깁니다. 잘라내�
 돌아옵니다. 아래 JSON이 읽기 층이고, 그 위의 선택과 버튼이 편집
 층입니다.
 
-### Intent (TBD)
+### Intent
 
-읽기 층의 문은 `commit`입니다. 편집 층의 문은 아직 하나로 모이지
-않았습니다. 지금은 편집기마다 Intent가 있습니다. 구현은 다른 이슈에서
-다룹니다.
+버튼을 눌렀을 때 편집기가 받는 말입니다. “이 블록을 고른다”, “이
+칸을 채워라”처럼 하려는 일을 적은 객체를 Intent라고 부릅니다. 화면은
+JSON 주소를 짜지 않고, 그 객체를 `dispatch`로 보냅니다.
+
+오른쪽에서 블록을 누르면 Intent 칸에 `selection.set`이 보입니다.
+아래 JSON은 그대로입니다. 고르기만 해서입니다. 복사해도 Intent 칸은
+안 바뀝니다. 읽기이기 때문입니다. 붙여넣으면 `clipboard.paste`가
+보이고 문서와 실행 취소가 같이 움직입니다.
+
+따라 하기는 [Intent 가이드](intent-guide.md)에, 타입과 동사는
+[Intent 레퍼런스](intent.md)에 있습니다.
 
 ## 외부 확장
 

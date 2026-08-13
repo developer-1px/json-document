@@ -40,6 +40,8 @@ describe("official site shell", () => {
       "Topology",
       "Clipboard",
       "History",
+      "Intent",
+      "Intent guide",
       "Document",
       "Workbench",
       "Sheet",

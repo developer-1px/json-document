@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
+import {
+  type BlockDocument,
+  type DocumentClipboard,
+  type DocumentIntent,
+  type DocumentSelection,
+  type EditingResult,
+} from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { Button } from "../../shared/ui/primitives";
@@ -20,9 +26,18 @@ export function ConceptsLab() {
   const selected = new Set(editor.selectedBlockIds);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
   const [notice, setNotice] = useState("블록을 고르고 복사, 잘라내기, 실행 취소를 눌러 보세요.");
+  const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
+  const [lastResult, setLastResult] = useState<Pick<EditingResult<DocumentSelection>, "ok"> & { readonly code?: string } | null>(null);
+
+  function rememberDispatch(intent: DocumentIntent, result: EditingResult<DocumentSelection>) {
+    setLastIntent(intent);
+    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
+  }
 
   function select(blockId: string) {
-    const result = editor.dispatch({ type: "selection.set", blockId });
+    const intent = { type: "selection.set" as const, blockId };
+    const result = editor.dispatch(intent);
+    rememberDispatch(intent, result);
     setNotice(result.ok ? `Selection: ${blockId}. history 항목은 늘지 않았습니다.` : result.code);
   }
 
@@ -53,7 +68,9 @@ export function ConceptsLab() {
       setNotice("먼저 복사하거나 잘라내세요.");
       return;
     }
-    const result = editor.dispatch({ type: "clipboard.paste", clipboard });
+    const intent = { type: "clipboard.paste" as const, clipboard };
+    const result = editor.dispatch(intent);
+    rememberDispatch(intent, result);
     setNotice(result.ok ? "Clipboard를 문서에 붙여 넣었습니다." : result.code);
   }
 
@@ -111,6 +128,20 @@ export function ConceptsLab() {
         value={document}
         size="compact"
         meta={`undo ${snapshot.canUndo ? "on" : "off"} · redo ${snapshot.canRedo ? "on" : "off"}`}
+      />
+      <JsonInspector
+        label="intent"
+        testId="concepts-intent-json"
+        value={lastIntent}
+        size="compact"
+        meta={lastIntent ? lastIntent.type : "dispatch만 여기를 바꿉니다"}
+      />
+      <JsonInspector
+        label="result"
+        testId="concepts-result-json"
+        value={lastResult}
+        size="compact"
+        meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "아직 없음"}
       />
       <JsonInspector
         label="clipboard"
