@@ -13,24 +13,17 @@
     "navigationGroup": "JSON Document"
   },
   {
-    "path": "/docs/concepts",
-    "label": "Concepts",
-    "title": "Core Concepts - json-document",
-    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
-    "navigationGroup": "JSON Document"
-  },
-  {
-    "path": "/docs/api",
-    "label": "API Reference",
-    "title": "json-document API - json-document",
-    "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
-    "navigationGroup": "JSON Document"
-  },
-  {
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
     "description": "Step-by-step guide to reading, validating, committing, and subscribing to implementation-neutral JSON document changes.",
+    "navigationGroup": "JSON Document"
+  },
+  {
+    "path": "/docs/concepts",
+    "label": "Concepts",
+    "title": "Core Concepts - json-document",
+    "description": "A concept map that grows from reading a JSON document, to editing, to external connectors.",
     "navigationGroup": "JSON Document"
   },
   {
@@ -69,18 +62,18 @@
     "navigationGroup": "Editing"
   },
   {
+    "path": "/docs/intent-guide",
+    "label": "Intent guide",
+    "title": "Intent guide - json-document",
+    "description": "A first walkthrough that selects, inserts, copies, and pastes a document block.",
+    "navigationGroup": "Editing"
+  },
+  {
     "path": "/docs/intent",
     "label": "Intent",
     "title": "Intent reference - json-document",
     "description": "Signatures for EditingIntent, dispatch, EditingResult, and each editor's intent verbs.",
     "navigationGroup": "Editing"
-  },
-  {
-    "path": "/docs/intent-guide",
-    "label": "Intent guide",
-    "title": "Intent guide - json-document",
-    "description": "A first walkthrough that selects, inserts, copies, and pastes a document block.",
-    "parentPath": "/docs/intent"
   },
   {
     "path": "/demo",
@@ -172,5 +165,12 @@
     "title": "Web Platform Connector Live Demo - json-document",
     "description": "Live browser clipboard, text-control input, and modifier translation into public json-document editing contracts.",
     "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/docs/api",
+    "label": "API Reference",
+    "title": "json-document API - json-document",
+    "description": "Public v3 Kernel API reference for the exact six-member JSON Document surface, JSON Patch, Pointer, and JSONPath.",
+    "navigationGroup": "Reference"
   }
 ]

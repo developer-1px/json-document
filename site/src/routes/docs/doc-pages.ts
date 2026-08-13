@@ -19,7 +19,7 @@ export const docPages = {
   quickstart: {
     path: "/docs/tutorial",
     label: "Quickstart",
-    title: "작은 카드 편집기 만들기",
+    title: "작은 카드 문서 만들기",
     source: quickstartMarkdown,
   },
   connectors: {

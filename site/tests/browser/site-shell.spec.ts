@@ -11,21 +11,22 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Concepts", "API Reference", "Quickstart"]);
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Quickstart", "Concepts"]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Selection",
     "Selection Lab",
     "Topology",
     "Clipboard",
     "History",
-    "Intent",
     "Intent guide",
+    "Intent",
     "Document",
     "Workbench",
     "Sheet",
     "Database",
   ]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+  await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });

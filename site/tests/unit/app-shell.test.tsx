@@ -33,21 +33,22 @@ describe("official site shell", () => {
 
     expect(nav.queryByRole("group", { name: "Start" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
-    expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "Concepts", "API Reference", "Quickstart"]);
+    expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "Quickstart", "Concepts"]);
     expect(groupLinks(nav, "Editing")).toEqual([
       "Selection",
       "Selection Lab",
       "Topology",
       "Clipboard",
       "History",
-      "Intent",
       "Intent guide",
+      "Intent",
       "Document",
       "Workbench",
       "Sheet",
       "Database",
     ]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform"]);
+    expect(groupLinks(nav, "Reference")).toEqual(["API Reference"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     const connectors = within(nav.getByRole("group", { name: "Connectors" }));
@@ -100,7 +101,7 @@ describe("official site shell", () => {
       return node;
     });
 
-    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }));
+    await user.click(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }));
     const crumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     await waitFor(() => expect(crumb.getByText("API Reference")).toBeTruthy());
     expect(screen.getByRole("link", { name: "json-document" })).toBe(brand);

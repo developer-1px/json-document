@@ -1,28 +1,18 @@
 # Intent 레퍼런스
 
-`@interactive-os/json-document-editing`의 Intent 시그니처입니다.
-처음 따라 하기는 [Intent 가이드](intent-guide.md)에, 편집 층 지도는
-[코어 컨셉](concepts.md)에 있습니다. JSON Document 자체는
-[API](api.md)입니다.
-
-```txt
-@interactive-os/json-document-editing
-|-- EditingIntent
-|-- EditingDispatch
-|-- EditingResult
-`-- DocumentIntent · SheetIntent · TreeIntent
-    ObjectIntent · OrderIntent · DatabaseIntent
-```
-
-하려는 일은 `{ type, ... }` 객체입니다. 편집기는 `dispatch`로만
-받습니다. `copy`와 `undo`/`redo`는 Intent가 아닙니다.
+[Intent 가이드](intent-guide.md)에서 사용한 `EditingIntent`, `dispatch`,
+`EditingResult`의 공개 시그니처입니다.
 
 ## 진입점
 
+값이나 Selection을 바꾸는 요청은 `dispatch`로 보냅니다. 성공과 실패는
+`EditingResult`로 돌아옵니다.
+
 | 작업 | API | 결과 |
 | --- | --- | --- |
-| 하려는 일 보내기 | `editor.dispatch(intent)` | `EditingResult` |
-| 고른 것 읽기 | `editor.copy()` | Clipboard 또는 `null` |
+| 편집 요청 보내기 | `editor.dispatch(intent)` | `EditingResult` |
+| 선택한 내용 읽기 | `editor.copy()` | Clipboard 또는 `null` |
+| Document의 선택한 블록 잘라내기 | `editor.cut()` | cut result |
 | 실행 취소 | `editor.undo()` | `EditingResult` |
 | 다시 실행 | `editor.redo()` | `EditingResult` |
 
@@ -46,83 +36,83 @@ type EditingResult<Selection> =
   | { readonly ok: false; readonly code: string; readonly reason?: string };
 ```
 
-`type`은 동사입니다. 나머지 필드는 편집기마다 다릅니다. 성공하면
-`ok: true`입니다. 거절되면 `ok: false`이고 문서 값은 그대로입니다.
-값이 바뀐 성공만 실행 취소 항목이 됩니다. 선택만 옮긴 성공과 실패한
-요청은 항목이 되지 않습니다.
+`type`은 editor가 수행할 동작을 나타냅니다. 각 동작에 필요한 필드는 editor별
+Intent union에서 정합니다. 성공 result에는 처리 뒤 snapshot이 들어 있고,
+JSON 값까지 바뀌었다면 적용된 `change`도 들어 있습니다. failure result를
+받으면 문서와 Selection은 요청 전 상태를 유지합니다.
 
-값이 바뀐 뒤 `change.metadata.editing.origin`은 `intent.type`입니다.
+값이 바뀐 요청은 History 항목을 만들고
+`change.metadata.editing.origin`에 `intent.type`을 남깁니다. Selection만 바뀐
+요청은 성공 snapshot을 돌려주지만 History 항목은 만들지 않습니다.
 
-## 편집기별 Intent
+## DocumentIntent
 
-각 편집기는 자기 유니온만 받습니다. 한 유니온으로 합치지 않습니다.
-
-### DocumentIntent
-
-| `type` | 필드 | 하는 일 |
+| `type` | 필드 | 결과 |
 | --- | --- | --- |
-| `selection.set` | `blockId`, `mode?`, `offset?` | 블록 고르기 |
-| `text.replace` | `blockId`, `text`, `offset?` | 블록 글자 바꾸기 |
-| `block.insert` | `afterId?`, `text?` | 블록 넣기 |
-| `selection.remove` | | 고른 블록 지우기 |
-| `selection.move` | `direction` | 고른 블록 옮기기 |
-| `selection.duplicate` | | 고른 블록 복제 |
-| `clipboard.paste` | `clipboard`, `afterId?` | 붙여넣기 |
+| `selection.set` | `blockId`, `mode?`, `offset?` | 블록 선택 변경 |
+| `text.replace` | `blockId`, `text`, `offset?` | 블록 text 변경 |
+| `block.insert` | `afterId?`, `text?` | 블록 추가 |
+| `selection.remove` | | 선택한 블록 제거 |
+| `selection.move` | `direction` | 선택한 블록 이동 |
+| `selection.duplicate` | | 선택한 블록 복제 |
+| `clipboard.paste` | `clipboard`, `afterId?` | Clipboard 블록 붙여넣기 |
 
-`mode`는 `"replace" \| "extend" \| "toggle"`입니다.
-`createDocumentEditor`는 `copy()`, `cut()`도 줍니다. `cut`은 복사 다음
-지우기이며 `dispatch`가 아닙니다.
+`selection.set`의 `mode`는 `"replace" | "extend" | "toggle"`입니다.
+`createDocumentEditor`는 선택한 블록을 읽고 제거하는 `copy()`와 `cut()`도
+제공합니다.
 
-### SheetIntent
+## SheetIntent
 
-| `type` | 필드 | 하는 일 |
+| `type` | 필드 | 결과 |
 | --- | --- | --- |
-| `selection.set` | `rowId`, `columnId`, `mode?` | 칸 고르기 |
-| `selection.fill` | `value`, `topology?` | 고른 칸 채우기 |
-| `cell.commit` | `rowId`, `columnId`, `value` | 한 칸 확정 |
-| `clipboard.paste` | `clipboard`, `topology?` | 붙여넣기 |
+| `selection.set` | `rowId`, `columnId`, `mode?` | 셀 선택 변경 |
+| `selection.fill` | `value`, `topology?` | 선택한 셀 채우기 |
+| `cell.commit` | `rowId`, `columnId`, `value` | 한 셀의 값 확정 |
+| `clipboard.paste` | `clipboard`, `topology?` | Clipboard 셀 붙여넣기 |
 
-### TreeIntent
+## TreeIntent
 
-| `type` | 필드 | 하는 일 |
+| `type` | 필드 | 결과 |
 | --- | --- | --- |
-| `selection.set` | `nodeId`, `topology`, `mode?` | 보이는 줄에서 고르기 |
-| `selection.remove` | `topology` | 고른 노드 지우기 |
+| `selection.set` | `nodeId`, `topology`, `mode?` | 보이는 노드 선택 변경 |
+| `selection.remove` | `topology` | 선택한 노드 제거 |
 
-### ObjectIntent
+## ObjectIntent
 
-| `type` | 필드 | 하는 일 |
+| `type` | 필드 | 결과 |
 | --- | --- | --- |
-| `selection.set` | `objectIds`, `mode?` | 객체 고르기 |
-| `selection.remove` | | 고른 객체 지우기 |
-| `selection.fill` | `color` | 고른 객체 색 채우기 |
+| `selection.set` | `objectIds`, `mode?` | 객체 선택 변경 |
+| `selection.remove` | | 선택한 객체 제거 |
+| `selection.fill` | `color` | 선택한 객체 색 변경 |
 
-`mode`는 `"replace" \| "add" \| "subtract" \| "toggle"`입니다.
+`selection.set`의 `mode`는 `"replace" | "add" | "subtract" | "toggle"`입니다.
 
-### OrderIntent
+## OrderIntent
 
-| `type` | 필드 | 하는 일 |
+| `type` | 필드 | 결과 |
 | --- | --- | --- |
-| `selection.set` | `itemId`, `mode?` | 항목 고르기 |
-| `selection.remove` | | 고른 항목 지우기 |
+| `selection.set` | `itemId`, `mode?` | 항목 선택 변경 |
+| `selection.remove` | | 선택한 항목 제거 |
 
-### DatabaseIntent
+## DatabaseIntent
 
-| `type` | 필드 | 하는 일 |
+| `type` | 필드 | 결과 |
 | --- | --- | --- |
-| `selection.set` | `recordId`, `propertyId`, `mode?` | 칸 고르기 |
-| `cell.commit` | `recordId`, `propertyId`, `value` | 한 칸 확정 |
+| `selection.set` | `recordId`, `propertyId`, `mode?` | 셀 선택 변경 |
+| `cell.commit` | `recordId`, `propertyId`, `value` | 한 셀의 값 확정 |
 | `record.add` | `recordId` | 레코드 추가 |
 | `record.delete` | `recordId` | 레코드 삭제 |
-| `view.configure` | `viewId`, 보기 필드 | 저장된 보기 바꾸기 |
+| `view.configure` | `viewId`, 보기 필드 | 저장된 view 변경 |
 
-## Intent가 아닌 메서드
+## 별도 메서드로 제공하는 작업
 
-| 메서드 | 이유 |
-| --- | --- |
-| `copy()` | 읽기만 한다. 문서를 바꾸지 않는다. |
-| `cut()` | 복사 다음 삭제. Document만 있다. |
-| `undo()` / `redo()` | 이미 기록된 변경을 되돌리거나 다시 적용한다. |
+`copy()`는 현재 Selection을 읽어 Clipboard payload를 돌려줍니다. `cut()`은
+payload를 만든 다음 Document에서 선택한 블록을 제거합니다. `undo()`와
+`redo()`는 History에 이미 기록된 변경을 이동합니다. 이 작업들은 새 편집
+요청을 만들지 않으므로 `dispatch` 대신 각각의 메서드로 호출합니다.
 
-붙여넣기만 Intent입니다. `{ type: "clipboard.paste", clipboard }`를
-`dispatch`합니다.
+붙여넣기는 Clipboard payload를 문서에 적용하는 새 요청입니다. 각 editor의
+`clipboard.paste` Intent를 `dispatch`에 넘깁니다.
+
+editor를 React, schema library, table과 browser API에 연결하는 방법은 다음
+[Connectors](connectors.md) 문서에서 이어집니다.
