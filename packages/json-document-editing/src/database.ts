@@ -10,14 +10,13 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { gridRangeBounds } from "./topology.js";
+import { gridCellsInRange } from "./topology.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
   primaryRange,
   selectRangePoint,
   type RangeSelectionState,
-  type SelectionRange,
 } from "./range-selection.js";
 
 export type DatabasePropertyType = "title" | "text" | "number" | "select" | "checkbox";
@@ -291,13 +290,13 @@ function selectedCells(
   topology: DatabaseTopology,
 ): DatabaseCell[] {
   const selectedKeys = new Set<string>();
+  const grid = databaseGrid(topology);
   for (const range of selection.ranges) {
-    const bounds = rangeBounds(topology, range);
-    if (!bounds) continue;
-    for (let recordIndex = bounds.recordStart; recordIndex <= bounds.recordEnd; recordIndex += 1) {
-      for (let propertyIndex = bounds.propertyStart; propertyIndex <= bounds.propertyEnd; propertyIndex += 1) {
-        selectedKeys.add(cellKey(topology.recordIds[recordIndex]!, topology.propertyIds[propertyIndex]!));
-      }
+    for (const cell of gridCellsInRange(grid, {
+      anchor: { rowId: range.anchor.recordId, columnId: range.anchor.propertyId },
+      focus: { rowId: range.focus.recordId, columnId: range.focus.propertyId },
+    })) {
+      selectedKeys.add(cellKey(cell.rowId, cell.columnId));
     }
   }
   return topology.recordIds.flatMap((recordId) => {
@@ -308,21 +307,8 @@ function selectedCells(
   });
 }
 
-function rangeBounds(topology: DatabaseTopology, range: SelectionRange<DatabasePoint>) {
-  const bounds = gridRangeBounds(
-    { rowIds: topology.recordIds, columnIds: topology.propertyIds },
-    {
-      anchor: { rowId: range.anchor.recordId, columnId: range.anchor.propertyId },
-      focus: { rowId: range.focus.recordId, columnId: range.focus.propertyId },
-    },
-  );
-  if (bounds === null) return null;
-  return {
-    recordStart: bounds.rowStart,
-    recordEnd: bounds.rowEnd,
-    propertyStart: bounds.columnStart,
-    propertyEnd: bounds.columnEnd,
-  };
+function databaseGrid(topology: DatabaseTopology) {
+  return { rowIds: topology.recordIds, columnIds: topology.propertyIds };
 }
 
 function resolveCell(document: DatabaseDocument, recordId: string, propertyId: string) {
