@@ -39,6 +39,7 @@ export function SheetDemo() {
   const [webClipboard] = useState(() => createWebClipboardBinding({
     codec: sheetClipboardCodec,
     read: () => editor.copy(),
+    cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const [announcement, setAnnouncement] = useState("Ready");
@@ -81,6 +82,17 @@ export function SheetDemo() {
     setAnnouncement(`Copied ${next.cells.length} × ${next.cells[0]?.length ?? 0} cells`);
   }
 
+  function cutSelection() {
+    const next = editor.cut();
+    if (next === null) return setAnnouncement("Select a cell first");
+    setClipboard(next.clipboard);
+    setLastResult(next.result.ok ? { ok: true } : { ok: false, code: next.result.code });
+    void navigator.clipboard?.writeText(next.clipboard.text).catch(() => undefined);
+    setAnnouncement(next.result.ok
+      ? `Cut ${next.clipboard.cells.length} × ${next.clipboard.cells[0]?.length ?? 0} cells`
+      : next.result.code);
+  }
+
   function pasteSelection() {
     if (clipboard === null) return setAnnouncement("Copy cells first");
     run(
@@ -94,6 +106,16 @@ export function SheetDemo() {
     if (!result.ok) return setAnnouncement(result.code);
     setClipboard(result.payload);
     setAnnouncement(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
+  }
+
+  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
+    const result = webClipboard.cut(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    if (result.operation === "cut") {
+      setLastResult(result.result.ok ? { ok: true } : { ok: false, code: result.result.code ?? "editing.rejected" });
+    }
+    setAnnouncement(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
   }
 
   function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
@@ -127,6 +149,7 @@ export function SheetDemo() {
 
         <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Sheet actions">
           <Action label="Copy" onClick={copySelection} />
+          <Action label="Cut" onClick={cutSelection} />
           <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
           <Action label="Fill selected" onClick={() => run(
             () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
@@ -142,6 +165,7 @@ export function SheetDemo() {
           <section
             aria-label="Editable sheet"
             onCopy={handleNativeCopy}
+            onCut={handleNativeCut}
             onPaste={handleNativePaste}
             onKeyDown={handleKeyDown}
             className={classes("min-w-0 overflow-auto p-3", ui.surface.raised)}

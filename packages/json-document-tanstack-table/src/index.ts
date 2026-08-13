@@ -44,6 +44,10 @@ export interface TableDocumentBinding {
   fillSelected(table: Table<SheetRow>, value: SheetCell["value"]): EditingResult<SheetSelection>;
   commitCell(input: { readonly rowId: string; readonly columnId: string; readonly value: SheetCell["value"] }): EditingResult<SheetSelection>;
   copy(table: Table<SheetRow>): SheetClipboard | null;
+  cut(table: Table<SheetRow>): {
+    readonly clipboard: SheetClipboard;
+    readonly result: EditingResult<SheetSelection>;
+  } | null;
   paste(table: Table<SheetRow>, clipboard: SheetClipboard): EditingResult<SheetSelection>;
   undo(): EditingResult<SheetSelection>;
   redo(): EditingResult<SheetSelection>;
@@ -137,6 +141,7 @@ export function createTableDocumentBinding(options: {
       });
     },
     copy: (table) => editor.copy(topology(table)),
+    cut: (table) => editor.cut(topology(table)),
     paste: (table, clipboard) => editor.dispatch({
       type: "clipboard.paste",
       clipboard,

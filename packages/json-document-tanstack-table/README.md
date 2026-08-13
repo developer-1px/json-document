@@ -31,7 +31,8 @@ pagination, column visibility/order, rendering, and DOM focus.
 
 `selectCell` accepts `replace`, `extend`, and `toggle`. `fillSelected` applies
 one value to every cell in all selected ranges using the table's current
-visible topology, while copy and paste use the primary rectangular range.
+visible topology, while copy, cut, and paste use the primary rectangular range.
+Cut clears that rectangle after the payload is read.
 
 `createTableDocumentBinding({ editor })` remains available as the lower-level
 binding for hosts that already own a `SheetEditor`.
