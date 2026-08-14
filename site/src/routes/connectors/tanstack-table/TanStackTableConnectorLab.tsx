@@ -21,7 +21,7 @@ import {
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -157,7 +157,7 @@ export function TanStackTableConnectorLab() {
         <output data-testid="tanstack-topology">{JSON.stringify(binding.topology(table))}</output>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+      <div className="grid gap-4">
         <div className="overflow-auto">
           <table role="grid" aria-label="TanStack project sheet" aria-multiselectable="true" className={classes("w-full min-w-[30rem]", ui.surface.table, ui.text.body)}>
             <thead>
@@ -206,10 +206,10 @@ export function TanStackTableConnectorLab() {
           <CodeBlock className="mt-3" language="text" size="compact" source={clipboard?.text ?? "Clipboard is empty"} testId="tanstack-clipboard" />
         </div>
 
-        <aside className="grid min-w-0 gap-3" aria-label="Canonical JSON">
-          <JsonInspector label="Canonical JSON" signal={`revision ${snapshot.revision}`} value={snapshot.value} testId="tanstack-document-json" size="tall" />
-          <JsonInspector label="Selection" meta={`${snapshot.selection.ranges.length} ranges`} value={snapshot.selection} testId="tanstack-selection-json" size="compact" />
-        </aside>
+        <Inspector label="Inspect TanStack Table state" items={[
+          { label: "Canonical JSON", signal: `revision ${snapshot.revision}`, value: snapshot.value, testId: "tanstack-document-json", size: "tall" },
+          { label: "Selection", meta: `${snapshot.selection.ranges.length} ranges`, value: snapshot.selection, testId: "tanstack-selection-json", size: "compact" },
+        ]} />
       </div>
     </section>
   );

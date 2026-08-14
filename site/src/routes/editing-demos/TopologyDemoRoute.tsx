@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { lineInterval, lineTopology } from "@interactive-os/json-document-editing";
-import { JsonInspector } from "../../shared/ui/json-inspector";
+import { Inspector } from "../../shared/ui/inspector";
 import { ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -57,19 +57,23 @@ export function TopologyDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-call">
           <p className={ui.text.label}>2 · API 호출</p>
           <h2 id="topology-call" className={classes("mb-2 mt-1", ui.text.heading)}>lineInterval(topology, anchor, focus)</h2>
-          <JsonInspector label="topology" value={topology} testId="topology-demo-topology" size="compact" />
-          <JsonInspector
-            label="endpoints"
-            value={{ anchor: "alpha", focus: "charlie" }}
-            testId="topology-demo-endpoints"
-            size="compact"
-          />
+          <Inspector label="Inspect topology input" items={[
+            { label: "topology", value: topology, testId: "topology-demo-topology", size: "compact" },
+            {
+              label: "endpoints",
+              value: { anchor: "alpha", focus: "charlie" },
+              testId: "topology-demo-endpoints",
+              size: "compact",
+            },
+          ]} />
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-result">
           <p className={ui.text.label}>3 · 결과</p>
           <h2 id="topology-result" className={classes("mb-2 mt-1", ui.text.heading)}>범위는 화면 순서를 따릅니다</h2>
-          <JsonInspector label="interval" value={interval} testId="topology-demo-interval" size="compact" />
+          <Inspector label="Inspect interval" items={[
+            { label: "interval", value: interval, testId: "topology-demo-interval", size: "compact" },
+          ]} />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             양 끝점은 그대로입니다. 화면이 넘긴 Topology가 그 사이에 놓일 항목을 결정합니다.
           </p>

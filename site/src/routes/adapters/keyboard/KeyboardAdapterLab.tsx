@@ -15,7 +15,7 @@ import {
   selectionOperationFromModifiers,
   type WebKeyboardCommand,
 } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -138,7 +138,7 @@ export function KeyboardAdapterLab() {
         </span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+      <div className="grid gap-4">
         <div className="grid gap-2">
           {document.blocks.map((block) => (
             <SelectableItem
@@ -154,12 +154,12 @@ export function KeyboardAdapterLab() {
           ))}
         </div>
 
-        <aside className="grid min-w-0 gap-3" aria-label="Canonical state">
-          <JsonInspector label="Canonical JSON" signal={`revision ${snapshot.revision}`} value={snapshot.value} testId="keyboard-document-json" size="tall" />
-          <JsonInspector label="Keyboard command" value={lastCommand} testId="keyboard-command-json" size="compact" />
-          <JsonInspector label="Intent" value={lastIntent} testId="keyboard-intent-json" size="compact" />
-          <JsonInspector label="Selection" value={snapshot.selection} testId="keyboard-selection-json" size="compact" />
-        </aside>
+        <Inspector label="Inspect keyboard adapter state" items={[
+          { label: "Canonical JSON", signal: `revision ${snapshot.revision}`, value: snapshot.value, testId: "keyboard-document-json", size: "tall" },
+          { label: "Keyboard command", value: lastCommand, testId: "keyboard-command-json", size: "compact" },
+          { label: "Intent", value: lastIntent, testId: "keyboard-intent-json", size: "compact" },
+          { label: "Selection", value: snapshot.selection, testId: "keyboard-selection-json", size: "compact" },
+        ]} />
       </div>
     </section>
   );

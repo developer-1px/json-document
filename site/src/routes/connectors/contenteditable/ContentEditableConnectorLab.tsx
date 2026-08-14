@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { useReactConnector } from "@interactive-os/json-document-react";
 import { ContentEditable } from "@interactive-os/json-document-contenteditable";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { classes, ui } from "../../../shared/ui/styles";
 
 export function ContentEditableConnectorLab() {
@@ -50,11 +50,9 @@ export function ContentEditableConnectorLab() {
             />
           </label>
         </div>
-        <JsonInspector
-          label="document.value"
-          testId="contenteditable-document-json"
-          value={value}
-        />
+        <Inspector label="Inspect contenteditable document" items={[
+          { label: "document.value", testId: "contenteditable-document-json", value },
+        ]} />
       </div>
     </section>
   );

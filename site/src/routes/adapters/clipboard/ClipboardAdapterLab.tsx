@@ -11,7 +11,7 @@ import {
   selectionOperationFromModifiers,
   textInputFromControl,
 } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -71,7 +71,7 @@ export function ClipboardAdapterLab() {
         <span>revision {snapshot.revision} · {editor.selectedBlockIds.length} selected</span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+      <div className="grid gap-4">
         <div className="grid gap-2">
           {document.blocks.map((block) => (
             <SelectableItem
@@ -101,10 +101,10 @@ export function ClipboardAdapterLab() {
           ))}
         </div>
 
-        <aside className="grid min-w-0 gap-3" aria-label="Canonical state">
-          <JsonInspector label="Canonical JSON" signal={`revision ${snapshot.revision}`} value={snapshot.value} testId="clipboard-document-json" size="tall" />
-          <JsonInspector label="Selection" value={snapshot.selection} testId="clipboard-selection-json" size="compact" />
-        </aside>
+        <Inspector label="Inspect clipboard adapter state" items={[
+          { label: "Canonical JSON", signal: `revision ${snapshot.revision}`, value: snapshot.value, testId: "clipboard-document-json", size: "tall" },
+          { label: "Selection", value: snapshot.selection, testId: "clipboard-selection-json", size: "compact" },
+        ]} />
       </div>
     </section>
   );

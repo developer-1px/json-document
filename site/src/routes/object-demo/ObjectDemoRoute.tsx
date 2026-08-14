@@ -7,8 +7,8 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { Inspector } from "../../shared/ui/inspector";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -28,7 +28,6 @@ export function ObjectDemoRoute() {
   const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<ObjectIntent | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const document = snapshot.value as ObjectDocument;
   const selected = new Set(editor.selectedObjects.map((object) => object.id));
 
@@ -135,14 +134,11 @@ export function ObjectDemoRoute() {
       </section>
 
       <section className={classes("mt-4 p-3", ui.surface.raised)}>
-        <DisclosureButton expanded={inspectorOpen} controls="object-editing-state" onClick={() => setInspectorOpen((open) => !open)}>
-          Inspect editing state
-        </DisclosureButton>
-        <div id="object-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
-          <JsonInspector label="Canonical JSON" value={snapshot.value} testId="object-demo-document" size="tall" />
-          <JsonInspector label="intent" value={lastIntent} testId="object-demo-intent" size="compact" />
-          <JsonInspector label="selection" value={snapshot.selection} testId="object-demo-selection" size="compact" />
-        </div>
+        <Inspector items={[
+          { label: "Canonical JSON", value: snapshot.value, testId: "object-demo-document", size: "tall" },
+          { label: "intent", value: lastIntent, testId: "object-demo-intent", size: "compact" },
+          { label: "selection", value: snapshot.selection, testId: "object-demo-selection", size: "compact" },
+        ]} />
       </section>
     </PageFrame>
   );
