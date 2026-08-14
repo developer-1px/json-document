@@ -6,7 +6,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
@@ -20,9 +19,12 @@ import {
   type RichTextNode,
   type RichTextPoint,
   type RichTextRenderAdapter,
-  type RichTextSelection,
   type RichTextText,
 } from "@interactive-os/json-document-rich-text";
+import {
+  createRichTextContentEditableBinding,
+  type RichTextContentEditableBinding,
+} from "@interactive-os/json-document-rich-text-web";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
@@ -72,6 +74,7 @@ export function RichTextDemoRoute() {
   const [lastPatch, setLastPatch] = useState<ReadonlyArray<JSONPatchOperation>>([]);
   const [lastAction, setLastAction] = useState("selection.ready");
   const surfaceRef = useRef<HTMLElement>(null);
+  const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
   const rendered = useMemo(
     () => renderRichText(snapshot.value as RichTextDocument, reactAdapter).output.node,
     [snapshot.value],
@@ -83,58 +86,32 @@ export function RichTextDemoRoute() {
 
   useLayoutEffect(() => {
     if (surfaceRef.current && surfaceRef.current.contains(document.activeElement)) {
-      restoreDOMSelection(surfaceRef.current, snapshot.selection);
+      bindingRef.current?.restoreSelection();
     }
   }, [snapshot.selection, snapshot.value]);
 
   useEffect(() => {
     const surface = surfaceRef.current;
     if (!surface) return;
-    const listener = (event: InputEvent) => handleBeforeInput(event);
-    surface.addEventListener("beforeinput", listener);
-    return () => surface.removeEventListener("beforeinput", listener);
+    const binding = createRichTextContentEditableBinding({
+      root: surface,
+      editor,
+      onAction(action, result) {
+        setLastAction(action);
+        if (result?.ok && result.change) setLastPatch(result.change.applied);
+      },
+    });
+    bindingRef.current = binding;
+    return () => {
+      binding.destroy();
+      bindingRef.current = null;
+    };
   }, [editor]);
 
   function remember(action: string, result: ReturnType<RichTextEditor["dispatch"]>) {
     setLastAction(result.ok ? action : result.code);
     if (result.ok && result.change) setLastPatch(result.change.applied);
     return result;
-  }
-
-  function syncSelection(): RichTextSelection | null {
-    const surface = surfaceRef.current;
-    if (!surface) return null;
-    const selection = readDOMSelection(surface);
-    if (!selection) return null;
-    if (JSON.stringify(selection) === JSON.stringify(editor.snapshot.selection)) return selection;
-    remember("selection.set", editor.dispatch({ type: "selection.set", selection }));
-    return selection;
-  }
-
-  function handleBeforeInput(input: InputEvent) {
-    syncSelection();
-    if (input.inputType === "insertText" && input.data !== null) {
-      input.preventDefault();
-      remember("text.insert", editor.dispatch({ type: "text.insert", text: input.data }));
-      return;
-    }
-    if (input.inputType === "deleteContentBackward" || input.inputType === "deleteContentForward") {
-      input.preventDefault();
-      remember("text.delete", editor.dispatch({
-        type: "text.delete",
-        direction: input.inputType === "deleteContentBackward" ? "backward" : "forward",
-        unit: "character",
-      }));
-      return;
-    }
-    input.preventDefault();
-    setLastAction(`unsupported:${input.inputType}`);
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "z") return;
-    event.preventDefault();
-    runHistory(event.shiftKey ? "redo" : "undo");
   }
 
   function runHistory(direction: "undo" | "redo") {
@@ -188,16 +165,12 @@ export function RichTextDemoRoute() {
             spellCheck={false}
             aria-label="Rich Text 편집기"
             data-testid="rich-text-editor"
-            onFocus={syncSelection}
-            onMouseUp={syncSelection}
-            onKeyUp={syncSelection}
-            onKeyDown={handleKeyDown}
             className={classes(ui.workbench.richTextEditor, ui.state.focus)}
           >
             {rendered}
           </article>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
-            현재 slice는 text insertion/deletion과 selection/history를 증명합니다. Enter, IME, Clipboard는 이 PR의 명시적 범위 밖입니다.
+            입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.
           </p>
         </section>
 
@@ -280,60 +253,6 @@ function markElement(mark: RichTextMark): { readonly type: string; readonly prop
   if (mark.type === "strikethrough") return { type: "s" };
   if (mark.type === "code") return { type: "code" };
   return { type: "a", props: { href: mark.attrs.href, ...(mark.attrs.title ? { title: mark.attrs.title } : {}) } };
-}
-
-function readDOMSelection(surface: HTMLElement): RichTextSelection | null {
-  const native = window.getSelection();
-  if (!native || native.rangeCount === 0 || !native.anchorNode || !native.focusNode) return null;
-  const anchor = domPoint(surface, native.anchorNode, native.anchorOffset);
-  const focus = domPoint(surface, native.focusNode, native.focusOffset);
-  if (!anchor || !focus) return null;
-  return { kind: "range", ranges: [{ anchor, focus }], primaryIndex: 0 };
-}
-
-function domPoint(surface: HTMLElement, node: Node, offset: number): RichTextPoint | null {
-  const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
-  const textRoot = element?.closest<HTMLElement>("[data-rich-text-node-id]");
-  if (!textRoot || !surface.contains(textRoot)) return null;
-  const range = document.createRange();
-  range.selectNodeContents(textRoot);
-  try {
-    range.setEnd(node, offset);
-  } catch {
-    return null;
-  }
-  return {
-    kind: "text",
-    nodeId: textRoot.dataset.richTextNodeId!,
-    offset: range.toString().length,
-    affinity: "forward",
-  };
-}
-
-function restoreDOMSelection(surface: HTMLElement, selection: RichTextSelection): void {
-  if (selection.primaryIndex === null) return;
-  const range = selection.ranges[selection.primaryIndex];
-  if (!range || range.anchor.kind !== "text" || range.focus.kind !== "text") return;
-  const anchor = findDOMPoint(surface, range.anchor);
-  const focus = findDOMPoint(surface, range.focus);
-  if (!anchor || !focus) return;
-  window.getSelection()?.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset);
-}
-
-function findDOMPoint(surface: HTMLElement, point: RichTextPoint): { readonly node: Node; readonly offset: number } | null {
-  if (point.kind !== "text") return null;
-  const element = surface.querySelector<HTMLElement>(`[data-rich-text-node-id="${CSS.escape(point.nodeId)}"]`);
-  if (!element) return null;
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-  let remaining = point.offset;
-  let node = walker.nextNode();
-  while (node) {
-    const length = node.textContent?.length ?? 0;
-    if (remaining <= length) return { node, offset: remaining };
-    remaining -= length;
-    node = walker.nextNode();
-  }
-  return { node: element, offset: element.childNodes.length };
 }
 
 function findTextNode(node: RichTextDocument | RichTextNode, id: string): RichTextText | null {
