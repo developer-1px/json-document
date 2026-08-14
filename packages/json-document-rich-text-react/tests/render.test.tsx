@@ -60,7 +60,10 @@ describe("RichTextRenderer", () => {
       profile: richTextSchemaV1.profile,
       id: "doc",
       type: "doc",
-      content: [{ id: "p", type: "paragraph", content: [{ id: "text", type: "text", text: "a  b", marks: [] }] }],
+      content: [
+        { id: "p", type: "paragraph", content: [{ id: "text", type: "text", text: "a  b", marks: [] }] },
+        { id: "empty", type: "paragraph", content: [] },
+      ],
     };
     const editor = {
       schema: richTextSchemaV1,
@@ -81,5 +84,7 @@ describe("RichTextRenderer", () => {
 
     expect(html).toContain('style="color:red;white-space:pre-wrap"');
     expect(html).toContain(">a  b</span>");
+    expect(html).toContain('<p data-rich-text-node-id="empty" data-rich-text-container-id="empty"><br data-rich-text-placeholder=""/></p>');
+    expect(renderToStaticMarkup(<RichTextRenderer document={document} />)).not.toContain("data-rich-text-placeholder");
   });
 });

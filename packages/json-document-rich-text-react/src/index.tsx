@@ -33,7 +33,19 @@ export interface RichTextRendererProps {
 }
 
 export function RichTextRenderer({ document, schema, renderExtension, renderExtensionMark, renderUnknown }: RichTextRendererProps): ReactNode {
+  return renderRichTextReact(document, schema, renderExtension, renderExtensionMark, renderUnknown, false);
+}
+
+function renderRichTextReact(
+  document: RichTextDocument,
+  schema: RichTextSchema | undefined,
+  renderExtension: RichTextRendererProps["renderExtension"],
+  renderExtensionMark: RichTextRendererProps["renderExtensionMark"],
+  renderUnknown: RichTextRendererProps["renderUnknown"],
+  editable: boolean,
+): ReactNode {
   const adapter = createReactAdapter({
+    editable,
     ...(renderExtension === undefined ? {} : { renderExtension }),
     ...(renderExtensionMark === undefined ? {} : { renderExtensionMark }),
     ...(renderUnknown === undefined ? {} : { renderUnknown }),
@@ -61,7 +73,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
   const frozenDocumentRef = useRef(snapshot.value);
   if (!isComposing) frozenDocumentRef.current = snapshot.value;
   const rendered = useMemo(
-    () => <RichTextRenderer document={(isComposing ? frozenDocumentRef.current : snapshot.value) as RichTextDocument} schema={editor.schema} {...(renderExtension === undefined ? {} : { renderExtension })} {...(renderExtensionMark === undefined ? {} : { renderExtensionMark })} {...(renderUnknown === undefined ? {} : { renderUnknown })} />,
+    () => renderRichTextReact((isComposing ? frozenDocumentRef.current : snapshot.value) as RichTextDocument, editor.schema, renderExtension, renderExtensionMark, renderUnknown, true),
     [editor.schema, isComposing, renderExtension, renderExtensionMark, renderUnknown, snapshot.value],
   );
 
@@ -99,7 +111,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
 
 interface RenderedNode { readonly key: string; readonly node: ReactNode }
 
-function createReactAdapter(options: Pick<RichTextRendererProps, "renderExtension" | "renderExtensionMark" | "renderUnknown">): RichTextRenderAdapter<RenderedNode> { return {
+function createReactAdapter(options: Pick<RichTextRendererProps, "renderExtension" | "renderExtensionMark" | "renderUnknown"> & { readonly editable: boolean }): RichTextRenderAdapter<RenderedNode> { return {
   document(document, children) {
     return { key: document.id, node: <>{children.map((child) => child.node)}</> };
   },
@@ -109,6 +121,9 @@ function createReactAdapter(options: Pick<RichTextRendererProps, "renderExtensio
   node(node, children) {
     const content = Children.toArray(children.map((child) => child.node));
     const hasContent = "content" in node && Array.isArray(node.content);
+    if (options.editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
+      content.push(<br key={`${node.id}:placeholder`} data-rich-text-placeholder="" />);
+    }
     const props = {
       "data-rich-text-node-id": node.id,
       ...(hasContent ? { "data-rich-text-container-id": node.id } : {}),

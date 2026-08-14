@@ -70,6 +70,29 @@ test("Rich Text Lab preserves consecutive spaces in the canonical document and r
   });
 });
 
+test("Rich Text Lab preserves consecutive Enter in empty canonical paragraphs", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+
+  const editor = page.getByTestId("rich-text-editor");
+  await setSelection(page, "text-editable", 20, 20);
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+
+  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(9);
+  const document = await json(page, "rich-text-document-json");
+  expect(document.content.slice(3, 5)).toMatchObject([
+    { type: "paragraph", content: [] },
+    { type: "paragraph", content: [] },
+  ]);
+  await expect.poll(() => domSelection(page)).toMatchObject({
+    nodeId: document.content[4].id,
+    anchorOffset: 0,
+    focusOffset: 0,
+  });
+  await expect(editor.locator("[data-rich-text-placeholder]")).toHaveCount(2);
+  await expect(page.getByText("last: block.split", { exact: true })).toBeVisible();
+});
+
 test("Rich Text Lab exposes a deterministic sample intent for inspection", async ({ page }) => {
   await page.goto("/editing/rich-text");
   await page.getByRole("button", { name: "Apply sample intent" }).click();
@@ -293,7 +316,9 @@ async function setSelection(page: Page, nodeId: string, anchorOffset: number, fo
 async function domSelection(page: Page): Promise<unknown> {
   return page.getByTestId("rich-text-editor").evaluate((root) => {
     const selection = window.getSelection();
-    const element = selection?.anchorNode?.parentElement?.closest<HTMLElement>("[data-rich-text-node-id]");
+    const anchor = selection?.anchorNode;
+    const element = (anchor instanceof HTMLElement ? anchor : anchor?.parentElement)
+      ?.closest<HTMLElement>("[data-rich-text-node-id]");
     return { nodeId: element?.dataset.richTextNodeId, anchorOffset: selection?.anchorOffset, focusOffset: selection?.focusOffset };
   });
 }

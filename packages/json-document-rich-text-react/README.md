@@ -27,3 +27,7 @@ jamo composition or duplicating the final `insertText` event.
 The official editable surface enforces `white-space: pre-wrap` so consecutive
 U+0020 spaces remain visible and caret geometry stays aligned with canonical
 UTF-16 offsets. Other host-provided inline styles are preserved.
+
+Canonical empty text blocks remain empty in JSON. On the editable surface only,
+they receive a non-canonical `<br data-rich-text-placeholder>` so browsers can
+retain the DOM caret across consecutive Enter operations.
