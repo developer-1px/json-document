@@ -101,6 +101,57 @@ describe("Rich Text vertical slice", () => {
       "<article><heading><strong>Rich</strong></heading><paragraph>Text</paragraph></article>",
     );
   });
+
+  it("splits a block at Enter and restores the caret with undo", () => {
+    const document = createJSONDocument(initial);
+    let id = 0;
+    const editor = createRichTextEditor({ document, selection: collapsed("text-2", 2), createId: () => `new-${++id}` });
+
+    expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content).toMatchObject([
+      { type: "heading" },
+      { id: "paragraph-1", type: "paragraph", content: [{ id: "text-2", text: "Te" }] },
+      { id: "new-2", type: "paragraph", content: [{ id: "new-1", text: "xt" }] },
+    ]);
+    expect(editor.snapshot.selection.ranges[0]?.focus).toMatchObject({ nodeId: "new-1", offset: 0 });
+    expect(editor.dispatch({ type: "text.delete", direction: "backward", unit: "character" }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content).toMatchObject([
+      { type: "heading" },
+      { id: "paragraph-1", type: "paragraph", content: [{ id: "text-2", text: "Text" }] },
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.snapshot.selection).toEqual(collapsed("text-2", 2));
+  });
+
+  it("groups one IME composition and preserves structured marks through clipboard paste", () => {
+    const document = createJSONDocument(initial);
+    let id = 0;
+    const editor = createRichTextEditor({ document, selection: collapsed("text-2", 4), createId: () => `new-${++id}` });
+    expect(editor.dispatch({ type: "text.insert", text: "한", historyGroup: "composition:1" }).ok).toBe(true);
+    expect(editor.dispatch({ type: "text.insert", text: "글", historyGroup: "composition:1" }).ok).toBe(true);
+    expect(editor.undo().ok).toBe(true);
+    expect((document.value as RichTextDocument).content[1]).toMatchObject({ content: [{ text: "Text" }] });
+
+    expect(editor.dispatch({ type: "selection.set", selection: {
+      kind: "range",
+      ranges: [{
+        anchor: { kind: "text", nodeId: "text-1", offset: 0, affinity: "forward" },
+        focus: { kind: "text", nodeId: "text-1", offset: 4, affinity: "forward" },
+      }],
+      primaryIndex: 0,
+    } }).ok).toBe(true);
+    const clipboard = editor.copy();
+    expect(clipboard).toMatchObject({ text: "Rich", slice: { openStart: 1, openEnd: 1 } });
+    expect(editor.dispatch({ type: "selection.set", selection: collapsed("text-2", 4) }).ok).toBe(true);
+    expect(editor.dispatch({ type: "clipboard.paste", clipboard: clipboard! }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content[1]).toMatchObject({
+      content: [
+        { id: "text-2", text: "Text", marks: [] },
+        { text: "Rich", marks: [{ type: "strong" }] },
+      ],
+    });
+  });
 });
 
 function collapsed(nodeId: string, offset: number): RichTextSelection {

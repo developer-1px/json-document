@@ -15,6 +15,7 @@ export type {
   WebClipboardData,
   WebClipboardEvent,
   WebClipboardPayload,
+  WebClipboardRepresentation,
   WebClipboardResult,
 } from "./clipboard.js";
 export type { WebModifierState } from "./modifiers.js";

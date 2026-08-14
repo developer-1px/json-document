@@ -73,6 +73,22 @@ export interface RichTextDocument extends RichTextNodeValue {
   readonly content: ReadonlyArray<RichTextNode>;
 }
 
+export const RICH_TEXT_CLIPBOARD_MIME = "application/vnd.interactive-os.rich-text+json" as const;
+
+export interface RichTextSlice extends Record<string, JSONValue> {
+  readonly profile: typeof RICH_TEXT_PROFILE_V1;
+  readonly content: ReadonlyArray<RichTextNode>;
+  readonly openStart: number;
+  readonly openEnd: number;
+}
+
+export interface RichTextClipboard {
+  readonly type: typeof RICH_TEXT_CLIPBOARD_MIME;
+  readonly slice: RichTextSlice;
+  readonly text: string;
+  readonly html: string;
+}
+
 export function isRichTextDocument(value: JSONValue): value is RichTextDocument {
   return isRecord(value)
     && value.profile === RICH_TEXT_PROFILE_V1

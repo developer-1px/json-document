@@ -33,6 +33,12 @@ export interface WebClipboardCodec<Payload extends WebClipboardPayload> {
   decode(serialized: string): Payload | null;
 }
 
+export interface WebClipboardRepresentation<Payload extends WebClipboardPayload> {
+  readonly mimeType: string;
+  encode(payload: Payload): string;
+  decode(serialized: string): Payload | null;
+}
+
 export type WebClipboardResult<Payload extends WebClipboardPayload, EditingResult> =
   | { readonly ok: true; readonly operation: "copy"; readonly payload: Payload }
   | { readonly ok: true; readonly operation: "cut" | "paste"; readonly payload: Payload; readonly result: EditingResult }
@@ -79,6 +85,7 @@ export function createWebClipboardBinding<
   EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
 >(options: {
   readonly codec: WebClipboardCodec<Payload>;
+  readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
   readonly read: () => Payload | null;
   readonly cut?: (payload: Payload) => EditingResult;
   readonly paste: (payload: Payload) => EditingResult;
@@ -91,8 +98,14 @@ export function createWebClipboardBinding<
     const payload = options.read();
     if (payload === null) return failure("clipboard.empty");
     try {
-      data.setData(options.codec.mimeType, options.codec.encode(payload));
-      data.setData("text/plain", payload.text);
+      if (options.representations === undefined) {
+        data.setData(options.codec.mimeType, options.codec.encode(payload));
+        data.setData("text/plain", payload.text);
+      } else {
+        for (const representation of options.representations) {
+          data.setData(representation.mimeType, representation.encode(payload));
+        }
+      }
     } catch (error) {
       return failure("clipboard.unavailable", errorMessage(error));
     }
@@ -118,16 +131,26 @@ export function createWebClipboardBinding<
     paste(event) {
       const data = event.clipboardData;
       if (data === null) return failure("clipboard.unavailable");
-      if (!Array.from(data.types).includes(options.codec.mimeType)) {
-        return failure("clipboard.empty");
+      const representations: ReadonlyArray<WebClipboardRepresentation<Payload>> = options.representations ?? [{
+        mimeType: options.codec.mimeType,
+        encode: options.codec.encode,
+        decode: options.codec.decode,
+      }];
+      let payload: Payload | null = null;
+      let matched = false;
+      let invalidReason: string | undefined;
+      for (const representation of representations) {
+        if (!Array.from(data.types).includes(representation.mimeType)) continue;
+        matched = true;
+        try {
+          payload = representation.decode(data.getData(representation.mimeType));
+        } catch (error) {
+          invalidReason = errorMessage(error);
+        }
+        if (payload !== null) break;
       }
-      let payload: Payload | null;
-      try {
-        payload = options.codec.decode(data.getData(options.codec.mimeType));
-      } catch (error) {
-        return failure("clipboard.invalid", errorMessage(error));
-      }
-      if (payload === null) return failure("clipboard.invalid");
+      if (!matched) return failure("clipboard.empty");
+      if (payload === null) return failure("clipboard.invalid", invalidReason);
       const result = options.paste(payload);
       if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);
       event.preventDefault();

@@ -200,6 +200,47 @@ describe("Web clipboard Connector", () => {
     expect(binding.cut(unsupportedCut)).toMatchObject({ ok: false, code: "clipboard.unsupported" });
     expect(unsupportedCut.defaultPrevented).toBe(false);
   });
+
+  test("writes all representations and parses the first valid representation by priority", () => {
+    type Payload = { readonly type: "application/x-example"; readonly text: string; readonly source: string };
+    const codec = {
+      mimeType: "application/x-example" as const,
+      encode: (payload: Payload) => JSON.stringify(payload),
+      decode: (serialized: string): Payload | null => JSON.parse(serialized) as Payload,
+    };
+    const binding = createWebClipboardBinding({
+      codec,
+      representations: [
+        codec,
+        {
+          mimeType: "text/html",
+          encode: (payload: Payload) => `<p>${payload.text}</p>`,
+          decode: (serialized: string): Payload | null => serialized === "<p>HTML</p>"
+            ? { type: codec.mimeType, text: "HTML", source: "html" }
+            : null,
+        },
+        {
+          mimeType: "text/plain",
+          encode: (payload: Payload) => payload.text,
+          decode: (text: string): Payload => ({ type: codec.mimeType, text, source: "plain" }),
+        },
+      ],
+      read: () => ({ type: codec.mimeType, text: "Alpha", source: "structured" }),
+      paste: () => ({ ok: true as const }),
+    });
+    const copied = new MemoryClipboardData();
+    expect(binding.copy(event(copied)).ok).toBe(true);
+    expect(copied.types).toEqual([codec.mimeType, "text/html", "text/plain"]);
+
+    const fallback = new MemoryClipboardData();
+    fallback.setData(codec.mimeType, "invalid json");
+    fallback.setData("text/html", "<p>HTML</p>");
+    fallback.setData("text/plain", "Plain");
+    expect(binding.paste(event(fallback))).toMatchObject({
+      ok: true,
+      payload: { text: "HTML", source: "html" },
+    });
+  });
 });
 
 describe("Web input modifiers", () => {
