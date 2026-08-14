@@ -84,18 +84,7 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
   await page.keyboard.press("Control+z");
   await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: "text-editable", anchorOffset: 3, focusOffset: 3 });
 
-  await setSelection(page, "text-editable", 3, 3);
-  await editor.evaluate((root) => {
-    root.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true, data: "" }));
-    root.dispatchEvent(new InputEvent("beforeinput", {
-      bubbles: true,
-      cancelable: true,
-      inputType: "insertCompositionText",
-      data: "한글",
-      isComposing: true,
-    }));
-    root.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "한글" }));
-  });
+  await composeWithDOMMutation(page, "text-editable", 3, ["ㅎ", "하", "한", "한ㄱ", "한그", "한글"]);
   await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable")?.text)
     .toBe("여기를한글 선택하고 직접 입력해 보세요.");
   await page.getByRole("button", { name: "Undo" }).click();
@@ -152,6 +141,37 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
     "text/plain",
   ]);
   await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), plainId)?.text).toBe("plain");
+});
+
+test("Rich Text Lab handles Chromium Korean IME composition without orphaned jamo", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium");
+  await page.goto("/editing/rich-text");
+  await setSelection(page, "text-editable", 3, 3);
+
+  const client = await page.context().newCDPSession(page);
+  for (const text of ["ㅎ", "하", "한", "한ㄱ", "한그", "한글"]) {
+    await client.send("Input.imeSetComposition", {
+      text,
+      selectionStart: text.length,
+      selectionEnd: text.length,
+    });
+  }
+  await client.send("Input.insertText", { text: "한글" });
+  await client.detach();
+
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable")?.text)
+    .toBe("여기를한글 선택하고 직접 입력해 보세요.");
+  await expect.poll(() => domSelection(page)).toMatchObject({
+    nodeId: "text-editable",
+    anchorOffset: 5,
+    focusOffset: 5,
+  });
+  await expect(page.getByText("last: composition.commit", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Undo" }).click();
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를 선택하고 직접 입력해 보세요.",
+  });
 });
 
 test("Rich Text Lab renders the complete v1 vocabulary and exposes schema-aware proof intents", async ({ page }) => {
@@ -252,6 +272,63 @@ async function domSelection(page: Page): Promise<unknown> {
     const element = selection?.anchorNode?.parentElement?.closest<HTMLElement>("[data-rich-text-node-id]");
     return { nodeId: element?.dataset.richTextNodeId, anchorOffset: selection?.anchorOffset, focusOffset: selection?.focusOffset };
   });
+}
+
+async function composeWithDOMMutation(
+  page: Page,
+  nodeId: string,
+  offset: number,
+  steps: readonly string[],
+): Promise<void> {
+  await page.getByTestId("rich-text-editor").evaluate((root, options) => {
+    const element = root.querySelector<HTMLElement>(`[data-rich-text-text-id="${CSS.escape(options.nodeId)}"]`)!;
+    const textNode = element.firstChild as Text;
+    const selection = window.getSelection()!;
+    selection.setBaseAndExtent(textNode, options.offset, textNode, options.offset);
+    (root as HTMLElement).focus();
+    root.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    root.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true, data: "" }));
+
+    let previousLength = 0;
+    for (const text of options.steps) {
+      root.dispatchEvent(new CompositionEvent("compositionupdate", { bubbles: true, data: text }));
+      const targetRange = new StaticRange({
+        startContainer: textNode,
+        startOffset: options.offset,
+        endContainer: textNode,
+        endOffset: options.offset + previousLength,
+      });
+      const beforeInput = new InputEvent("beforeinput", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertCompositionText",
+        data: text,
+      });
+      Object.defineProperty(beforeInput, "isComposing", { value: true });
+      Object.defineProperty(beforeInput, "getTargetRanges", { value: () => [targetRange] });
+      root.dispatchEvent(beforeInput);
+
+      const value = textNode.nodeValue ?? "";
+      textNode.nodeValue = value.slice(0, options.offset) + text + value.slice(options.offset + previousLength);
+      previousLength = text.length;
+      selection.setBaseAndExtent(textNode, options.offset + text.length, textNode, options.offset + text.length);
+      const input = new InputEvent("input", {
+        bubbles: true,
+        inputType: "insertCompositionText",
+        data: text,
+      });
+      Object.defineProperty(input, "isComposing", { value: true });
+      root.dispatchEvent(input);
+    }
+
+    const committed = options.steps.at(-1) ?? "";
+    root.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: committed }));
+    root.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      inputType: "insertFromComposition",
+      data: committed,
+    }));
+  }, { nodeId, offset, steps: [...steps] });
 }
 
 async function dispatchPaste(

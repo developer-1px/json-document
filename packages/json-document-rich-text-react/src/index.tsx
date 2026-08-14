@@ -5,6 +5,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
   type HTMLAttributes,
   type ReactNode,
 } from "react";
@@ -54,15 +55,18 @@ export interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElem
 
 export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, ...props }: RichTextEditorSurfaceProps) {
   const snapshot = useEditingSnapshot(editor);
+  const [isComposing, setIsComposing] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
   const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
+  const frozenDocumentRef = useRef(snapshot.value);
+  if (!isComposing) frozenDocumentRef.current = snapshot.value;
   const rendered = useMemo(
-    () => <RichTextRenderer document={snapshot.value as RichTextDocument} schema={editor.schema} {...(renderExtension === undefined ? {} : { renderExtension })} {...(renderExtensionMark === undefined ? {} : { renderExtensionMark })} {...(renderUnknown === undefined ? {} : { renderUnknown })} />,
-    [editor.schema, renderExtension, renderExtensionMark, renderUnknown, snapshot.value],
+    () => <RichTextRenderer document={(isComposing ? frozenDocumentRef.current : snapshot.value) as RichTextDocument} schema={editor.schema} {...(renderExtension === undefined ? {} : { renderExtension })} {...(renderExtensionMark === undefined ? {} : { renderExtensionMark })} {...(renderUnknown === undefined ? {} : { renderUnknown })} />,
+    [editor.schema, isComposing, renderExtension, renderExtensionMark, renderUnknown, snapshot.value],
   );
 
   useLayoutEffect(() => {
-    if (rootRef.current?.contains(rootRef.current.ownerDocument.activeElement)) bindingRef.current?.restoreSelection();
+    if (!bindingRef.current?.isComposing() && rootRef.current?.contains(rootRef.current.ownerDocument.activeElement)) bindingRef.current?.restoreSelection();
   }, [snapshot.selection, snapshot.value]);
 
   useEffect(() => {
@@ -73,6 +77,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
       editor,
       ...(createId === undefined ? {} : { createId }),
       ...(onAction === undefined ? {} : { onAction }),
+      onCompositionChange: setIsComposing,
     });
     bindingRef.current = binding;
     return () => {

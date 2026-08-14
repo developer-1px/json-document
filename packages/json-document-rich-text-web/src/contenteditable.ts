@@ -8,6 +8,7 @@ import { createWebClipboardBinding, type WebClipboardData, type WebClipboardEven
 import { createRichTextClipboardCodec, createRichTextClipboardRepresentations } from "./clipboard.js";
 
 export interface RichTextContentEditableBinding {
+  isComposing(): boolean;
   syncSelection(): RichTextSelection | null;
   restoreSelection(): void;
   destroy(): void;
@@ -18,11 +19,13 @@ export function createRichTextContentEditableBinding(options: {
   readonly editor: RichTextEditor;
   readonly createId?: () => string;
   readonly onAction?: (action: string, result?: ReturnType<RichTextEditor["dispatch"]>) => void;
+  readonly onCompositionChange?: (composing: boolean) => void;
 }): RichTextContentEditableBinding {
   const { root, editor } = options;
   const createId = options.createId ?? createRichTextNodeId;
   let compositionSequence = 0;
-  let compositionId: string | null = null;
+  let composition: CompositionLease | null = null;
+  let compositionEndTimer: ReturnType<typeof setTimeout> | null = null;
   let renderPending = false;
   const clipboard = createWebClipboardBinding({
     codec: createRichTextClipboardCodec(editor.schema),
@@ -35,14 +38,27 @@ export function createRichTextContentEditableBinding(options: {
   });
 
   const beforeInput = (event: InputEvent) => {
-    if (compositionId !== null && (event.inputType.includes("Composition") || event.isComposing)) return;
-    const usesPlatformTargetRange = ![
+    if (composition !== null && (
+      event.inputType.includes("Composition")
+      || event.isComposing
+      || (composition.phase === "ending" && event.inputType === "insertText")
+    )) return;
+    const platformSelection = readSelectionFromInput(event);
+    const normallyUsesPlatformRange = ![
       "insertText",
       "insertTranspose",
       "deleteContentBackward",
       "deleteContentForward",
     ].includes(event.inputType);
-    if (!usesPlatformTargetRange || syncSelectionFromInput(event) === null) syncSelection();
+    const usesIOSKoreanReplacementRange = event.inputType === "deleteContentBackward"
+      && platformSelection !== null
+      && selectionIsExpanded(platformSelection)
+      && isIOS(root.ownerDocument.defaultView?.navigator);
+    const targetSelection = platformSelection !== null
+      && (normallyUsesPlatformRange || usesIOSKoreanReplacementRange)
+      ? publishSelection(platformSelection)
+      : null;
+    if (targetSelection === null) syncSelection();
     if (["insertText", "insertReplacementText", "insertFromYank", "insertTranspose"].includes(event.inputType) && event.data !== null) {
       event.preventDefault();
       report("text.insert", editor.dispatch({ type: "text.insert", text: event.data }));
@@ -61,7 +77,9 @@ export function createRichTextContentEditableBinding(options: {
     } else if (["deleteContentBackward", "deleteContentForward", "deleteWordBackward", "deleteWordForward", "deleteSoftLineBackward", "deleteSoftLineForward", "deleteHardLineBackward", "deleteHardLineForward"].includes(event.inputType)) {
       event.preventDefault();
       const direction = event.inputType.endsWith("Backward") ? "backward" : "forward";
-      if (event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
+      if (targetSelection !== null && selectionIsExpanded(targetSelection)) {
+        report("selection.remove", editor.dispatch({ type: "selection.remove" }));
+      } else if (event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
         report("text.delete", editor.dispatch({ type: "text.delete", direction, unit: "character" }));
       } else {
         report("selection.remove", editor.dispatch({ type: "selection.remove" }));
@@ -82,15 +100,28 @@ export function createRichTextContentEditableBinding(options: {
     }
   };
   const compositionStart = () => {
-    syncSelection();
-    compositionId = `composition:${++compositionSequence}`;
+    if (composition !== null) finishComposition(true);
+    const selection = syncSelection() ?? editor.snapshot.selection;
+    composition = {
+      id: `composition:${++compositionSequence}`,
+      selection,
+      beforeText: root.textContent ?? "",
+      phase: "composing",
+      endData: null,
+    };
+    options.onCompositionChange?.(true);
     options.onAction?.("composition.start");
   };
   const compositionEnd = (event: CompositionEvent) => {
-    const historyGroup = compositionId;
-    compositionId = null;
-    if (historyGroup === null || event.data.length === 0) return;
-    report("composition.commit", editor.dispatch({ type: "text.insert", text: event.data, historyGroup }));
+    if (composition === null) return;
+    composition.phase = "ending";
+    composition.endData = event.data;
+    queueMicrotask(() => finishComposition(false));
+    if (compositionEndTimer !== null) clearTimeout(compositionEndTimer);
+    compositionEndTimer = setTimeout(() => finishComposition(true), 30);
+  };
+  const input = () => {
+    if (composition?.phase === "ending") queueMicrotask(() => finishComposition(false));
   };
   const copy = (event: ClipboardEvent) => {
     syncSelection();
@@ -112,6 +143,7 @@ export function createRichTextContentEditableBinding(options: {
   };
 
   root.addEventListener("beforeinput", beforeInput);
+  root.addEventListener("input", input);
   root.addEventListener("compositionstart", compositionStart);
   root.addEventListener("compositionend", compositionEnd);
   root.addEventListener("copy", copy);
@@ -123,13 +155,17 @@ export function createRichTextContentEditableBinding(options: {
   root.addEventListener("keydown", keyDown);
 
   return {
+    isComposing: () => composition !== null,
     syncSelection,
     restoreSelection: () => {
+      if (composition !== null) return;
       restoreRichTextDOMSelection(root, editor.snapshot.selection);
       renderPending = false;
     },
     destroy() {
+      if (compositionEndTimer !== null) clearTimeout(compositionEndTimer);
       root.removeEventListener("beforeinput", beforeInput);
+      root.removeEventListener("input", input);
       root.removeEventListener("compositionstart", compositionStart);
       root.removeEventListener("compositionend", compositionEnd);
       root.removeEventListener("copy", copy);
@@ -139,8 +175,34 @@ export function createRichTextContentEditableBinding(options: {
       root.removeEventListener("mouseup", selectionChanged);
       root.removeEventListener("keyup", selectionChanged);
       root.removeEventListener("keydown", keyDown);
+      composition = null;
+      options.onCompositionChange?.(false);
     },
   };
+
+  function finishComposition(force: boolean): void {
+    const lease = composition;
+    if (lease === null || lease.phase !== "ending") return;
+    const diff = singleTextDiff(lease.beforeText, root.textContent ?? "");
+    if (!force && !compositionDOMIsFinal(diff, lease.endData)) return;
+    if (compositionEndTimer !== null) clearTimeout(compositionEndTimer);
+    compositionEndTimer = null;
+    composition = null;
+
+    if (diff === null) {
+      options.onCompositionChange?.(false);
+      options.onAction?.("composition.cancel");
+      return;
+    }
+
+    report("selection.set", editor.dispatch({ type: "selection.set", selection: lease.selection }));
+    report("composition.commit", editor.dispatch({
+      type: "text.insert",
+      text: diff.inserted,
+      historyGroup: lease.id,
+    }));
+    options.onCompositionChange?.(false);
+  }
 
   function syncSelection(): RichTextSelection | null {
     if (renderPending) return editor.snapshot.selection;
@@ -152,7 +214,7 @@ export function createRichTextContentEditableBinding(options: {
     return selection;
   }
 
-  function syncSelectionFromInput(event: InputEvent): RichTextSelection | null {
+  function readSelectionFromInput(event: InputEvent): RichTextSelection | null {
     if (renderPending) return editor.snapshot.selection;
     const ranges = typeof event.getTargetRanges === "function" ? Array.from(event.getTargetRanges()) : [];
     if (ranges.length === 0) return null;
@@ -162,7 +224,10 @@ export function createRichTextContentEditableBinding(options: {
       return anchor && focus ? { anchor, focus } : null;
     }).filter((range): range is { anchor: RichTextPoint; focus: RichTextPoint } => range !== null);
     if (mapped.length === 0) return null;
-    const selection: RichTextSelection = { kind: "range", ranges: mapped, primaryIndex: 0 };
+    return { kind: "range", ranges: mapped, primaryIndex: 0 };
+  }
+
+  function publishSelection(selection: RichTextSelection): RichTextSelection {
     report("selection.set", editor.dispatch({ type: "selection.set", selection }));
     return selection;
   }
@@ -177,6 +242,48 @@ export function createRichTextContentEditableBinding(options: {
     else if (result.operation === "copy") options.onAction?.(action);
     else options.onAction?.(action, result.result);
   }
+}
+
+interface CompositionLease {
+  readonly id: string;
+  readonly selection: RichTextSelection;
+  readonly beforeText: string;
+  phase: "composing" | "ending";
+  endData: string | null;
+}
+
+interface TextDiff {
+  readonly removed: string;
+  readonly inserted: string;
+}
+
+function singleTextDiff(before: string, after: string): TextDiff | null {
+  if (before === after) return null;
+  let start = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) start++;
+  let beforeEnd = before.length;
+  let afterEnd = after.length;
+  while (beforeEnd > start && afterEnd > start && before[beforeEnd - 1] === after[afterEnd - 1]) {
+    beforeEnd--;
+    afterEnd--;
+  }
+  return { removed: before.slice(start, beforeEnd), inserted: after.slice(start, afterEnd) };
+}
+
+function compositionDOMIsFinal(diff: TextDiff | null, endData: string | null): boolean {
+  if (endData === null) return false;
+  if (endData.length === 0) return diff === null;
+  return diff?.inserted === endData;
+}
+
+function selectionIsExpanded(selection: RichTextSelection): boolean {
+  return selection.ranges.some((range) => JSON.stringify(range.anchor) !== JSON.stringify(range.focus));
+}
+
+function isIOS(navigator: Navigator | undefined): boolean {
+  if (navigator === undefined) return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
 export function readRichTextDOMSelection(root: HTMLElement): RichTextSelection | null {
