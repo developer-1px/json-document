@@ -24,9 +24,12 @@ import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
+import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
+import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
 import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDemoTopologyRouteImport } from "./routes/_page/demo/topology";
+import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
@@ -127,6 +130,16 @@ const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
   path: "/demo/history",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoObjectRoute = PageDemoObjectRouteImport.update({
+  id: "/demo/object",
+  path: "/demo/object",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoOrderRoute = PageDemoOrderRouteImport.update({
+  id: "/demo/order",
+  path: "/demo/order",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoSelectionRoute = PageDemoSelectionRouteImport.update({
   id: "/demo/selection",
   path: "/demo/selection",
@@ -140,6 +153,11 @@ const PageDemoSheetRoute = PageDemoSheetRouteImport.update({
 const PageDemoTopologyRoute = PageDemoTopologyRouteImport.update({
   id: "/demo/topology",
   path: "/demo/topology",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoTreeRoute = PageDemoTreeRouteImport.update({
+  id: "/demo/tree",
+  path: "/demo/tree",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsIndexRoute = PageDocsIndexRouteImport.update({
@@ -273,9 +291,12 @@ export interface FileRoutesByFullPath {
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
+  "/demo/object": typeof PageDemoObjectRoute;
+  "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
+  "/demo/tree": typeof PageDemoTreeRoute;
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -314,9 +335,12 @@ export interface FileRoutesByTo {
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
+  "/demo/object": typeof PageDemoObjectRoute;
+  "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
+  "/demo/tree": typeof PageDemoTreeRoute;
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -357,9 +381,12 @@ export interface FileRoutesById {
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
+  "/_page/demo/object": typeof PageDemoObjectRoute;
+  "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/demo/topology": typeof PageDemoTopologyRoute;
+  "/_page/demo/tree": typeof PageDemoTreeRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
@@ -400,9 +427,12 @@ export interface FileRouteTypes {
     | "/demo/clipboard"
     | "/demo/database"
     | "/demo/history"
+    | "/demo/object"
+    | "/demo/order"
     | "/demo/selection"
     | "/demo/sheet"
     | "/demo/topology"
+    | "/demo/tree"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/concepts"
@@ -441,9 +471,12 @@ export interface FileRouteTypes {
     | "/demo/clipboard"
     | "/demo/database"
     | "/demo/history"
+    | "/demo/object"
+    | "/demo/order"
     | "/demo/selection"
     | "/demo/sheet"
     | "/demo/topology"
+    | "/demo/tree"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/concepts"
@@ -483,9 +516,12 @@ export interface FileRouteTypes {
     | "/_page/demo/clipboard"
     | "/_page/demo/database"
     | "/_page/demo/history"
+    | "/_page/demo/object"
+    | "/_page/demo/order"
     | "/_page/demo/selection"
     | "/_page/demo/sheet"
     | "/_page/demo/topology"
+    | "/_page/demo/tree"
     | "/_page/docs/api"
     | "/_page/docs/clipboard"
     | "/_page/docs/concepts"
@@ -624,6 +660,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoHistoryRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/object": {
+      id: "/_page/demo/object";
+      path: "/demo/object";
+      fullPath: "/demo/object";
+      preLoaderRoute: typeof PageDemoObjectRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/order": {
+      id: "/_page/demo/order";
+      path: "/demo/order";
+      fullPath: "/demo/order";
+      preLoaderRoute: typeof PageDemoOrderRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/demo/selection": {
       id: "/_page/demo/selection";
       path: "/demo/selection";
@@ -643,6 +693,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/topology";
       fullPath: "/demo/topology";
       preLoaderRoute: typeof PageDemoTopologyRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/tree": {
+      id: "/_page/demo/tree";
+      path: "/demo/tree";
+      fullPath: "/demo/tree";
+      preLoaderRoute: typeof PageDemoTreeRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/": {
@@ -814,9 +871,12 @@ interface PageRouteChildren {
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
+  PageDemoObjectRoute: typeof PageDemoObjectRoute;
+  PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDemoTopologyRoute: typeof PageDemoTopologyRoute;
+  PageDemoTreeRoute: typeof PageDemoTreeRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
@@ -855,9 +915,12 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoClipboardRoute: PageDemoClipboardRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
+  PageDemoObjectRoute: PageDemoObjectRoute,
+  PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDemoTopologyRoute: PageDemoTopologyRoute,
+  PageDemoTreeRoute: PageDemoTreeRoute,
   PageDocsApiRoute: PageDocsApiRoute,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,

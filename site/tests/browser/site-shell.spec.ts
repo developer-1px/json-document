@@ -41,8 +41,11 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Sheet",
     "Database",
     "Order",
+    "Order Demo",
     "Object",
+    "Object Demo",
     "Tree",
+    "Tree Demo",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);

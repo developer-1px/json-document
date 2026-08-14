@@ -5,6 +5,8 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Added minimum Order, Object, and Tree editor demos under Editors, with the
+  existing guides as their entrance.
 - Reorganized official site navigation into JSON Document, Editing, Editors,
   and Connectors. Collaboration sits under JSON Document. Domain editors sit
   in Editors, including Order, Object, and Tree. Concept demos remain under
