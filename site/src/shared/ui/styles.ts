@@ -93,6 +93,9 @@ export const ui = {
     control: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-sm leading-6 text-ink-strong outline-none hover:border-pencil focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:bg-paper-warm disabled:text-pencil",
     seamless: "border-0 bg-transparent px-3 py-2 text-sm leading-6 text-ink-strong outline-none focus-visible:bg-paper focus-visible:ring-2 focus-visible:ring-impact/25",
   },
+  contenteditable: {
+    canvas: "min-h-28 whitespace-pre-wrap rounded-[6px] border border-pencil bg-paper-warm px-4 py-3 text-base leading-7 text-ink-strong shadow-[inset_0_1px_2px_rgba(69,67,62,0.04)] outline-none transition-[background-color,border-color,box-shadow] hover:border-ink focus-visible:border-impact focus-visible:bg-paper focus-visible:ring-2 focus-visible:ring-impact/25",
+  },
   code: {
     inline: "rounded-[2px] bg-paper-warm px-1 py-0.5 font-mono text-[0.85em] text-ink-strong",
     install: "min-w-0 self-start rounded-[3px] border border-pencil-light bg-paper p-3 shadow-none",

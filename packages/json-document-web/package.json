@@ -1,7 +1,7 @@
 {
   "name": "@interactive-os/json-document-web",
   "version": "0.1.0-rc.0",
-  "description": "Web Platform clipboard and input translation for json-document editing contracts.",
+  "description": "Official Web adapters for keyboard, clipboard, and input translation of json-document editing contracts.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,

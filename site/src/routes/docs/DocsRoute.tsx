@@ -8,6 +8,7 @@ import { docPages, type DocPageId } from "./doc-pages";
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
   quickstart: "terminal",
+  adapters: "peek",
   connectors: "connector",
   collaboration: "package",
   collaborationReplica: "debug",
@@ -34,6 +35,10 @@ export function DocsOverviewRoute() {
 
 export function QuickstartRoute() {
   return <DocsRoute pageId="quickstart" />;
+}
+
+export function AdapterDocsRoute() {
+  return <DocsRoute pageId="adapters" />;
 }
 
 export function ConnectorDocsRoute() {

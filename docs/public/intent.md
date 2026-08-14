@@ -159,4 +159,4 @@ payload를 만든 다음 선택한 내용을 제거하거나, Sheet에서는 고
 `clipboard.paste` Intent를 `dispatch`에 넘깁니다.
 
 editor를 React, schema library, table, 브라우저 API와 연결하는 방법은
-[Connectors](connectors.md)에 정리되어 있습니다.
+[Adapters](adapters.md)와 [Connectors](connectors.md)에 정리되어 있습니다.

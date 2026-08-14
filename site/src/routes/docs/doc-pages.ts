@@ -1,5 +1,6 @@
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
+import adaptersMarkdown from "../../../../docs/public/adapters.md?raw";
 import collaborationMarkdown from "../../../../docs/public/collaboration.md?raw";
 import collaborationHistoryMarkdown from "../../../../docs/public/collaboration-history.md?raw";
 import collaborationLeaseMarkdown from "../../../../docs/public/collaboration-lease.md?raw";
@@ -31,6 +32,12 @@ export const docPages = {
     label: "Quickstart",
     title: "작은 카드 문서 만들기",
     source: quickstartMarkdown,
+  },
+  adapters: {
+    path: "/docs/adapters",
+    label: "Adapter guide",
+    title: "json-document Adapters",
+    source: adaptersMarkdown,
   },
   connectors: {
     path: "/docs/connectors",

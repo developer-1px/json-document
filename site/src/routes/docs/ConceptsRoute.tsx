@@ -18,7 +18,7 @@ export function ConceptsRoute() {
       title="코어 컨셉"
       source={conceptsMarkdown}
       illustration="sleep"
-      summary="JSON Document에 Editing과 Connector가 차례로 이어집니다."
+      summary="JSON Document에 Editing, Adapter, Connector가 차례로 이어집니다."
     />
   );
 }

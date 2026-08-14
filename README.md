@@ -3,15 +3,16 @@
 json-document는 문서, 표, 슬라이드, 캔버스, 노트 편집기가 함께 쓸 수 있는
 implementation-neutral JSON 편집 API와 headless JSON Document입니다.
 
-v3 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 합니다. React와
-Zod 같은 외부 생태계는 Root에 넣지 않고 independently versioned 공식
-Connector로 제공합니다.
+v3 root는 JSON, JSON Pointer, JSONPath, JSON Patch만 전제로 합니다. 브라우저
+플랫폼 계약은 공식 Adapter로, React와 Zod 같은 외부 생태계는 independently
+versioned 공식 Connector로 제공합니다.
 
 ```txt
 stateless JSON Patch
   |-> local implementation -----\
   |                               > same six-member JSON Document
   `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional official Adapters
                                      |-> optional official Connectors
                                      |-> optional history/text authoring
                                      `-> optional native-input DOM lease
@@ -31,7 +32,9 @@ stateless JSON Patch
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
 | JSON Document API | [docs/public/api.md](docs/public/api.md) |
 | 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |
+| Adapter | [docs/public/adapters.md](docs/public/adapters.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
+| Adapter Live Demo | [공식 Adapter catalog](https://developer-1px.github.io/json-document/adapters) |
 | Connector Live Demo | [공식 Connector catalog](https://developer-1px.github.io/json-document/connectors) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
@@ -46,22 +49,23 @@ stateless JSON Patch
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
 | [packages/json-document-editing](packages/json-document-editing) | headless transaction, structural selection, clipboard, history와 Document·Order·Sheet·Object·Tree·Database slice |
 | [packages/json-document-selection](packages/json-document-selection) | DOM-free key·range·mask family, topology/geometry port와 semantic interaction controller |
+| [packages/json-document-web](packages/json-document-web) | official keyboard adapter, ClipboardEvent, text-control input과 modifier state를 editing contract로 번역하는 Adapter |
+| [packages/json-document-contenteditable](packages/json-document-contenteditable) | local JSONDocument 문자열을 leased contenteditable React root에 붙이는 Adapter |
 | [packages/json-document-react](packages/json-document-react) | React subscription과 Document editor lifecycle Connector |
 | [packages/json-document-react-hook-form](packages/json-document-react-hook-form) | React Hook Form draft lifecycle을 canonical submit과 history에 연결하는 Connector |
 | [packages/json-document-ajv](packages/json-document-ajv) | Ajv validator 결과를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-zod](packages/json-document-zod) | Zod object를 Database document로, Zod issue를 JSON Pointer 진단으로 번역하는 Connector |
 | [packages/json-document-tanstack-table](packages/json-document-tanstack-table) | TanStack Table visible model을 Sheet 편집 topology로 번역하는 Connector |
-| [packages/json-document-web](packages/json-document-web) | Web ClipboardEvent, text-control input과 modifier state를 editing contract로 번역하는 Connector |
-| [packages/json-document-contenteditable](packages/json-document-contenteditable) | local JSONDocument 문자열을 leased contenteditable React root에 붙이는 Connector |
 | [packages/json-document-collaboration](packages/json-document-collaboration) | transport-free causal collaboration engine |
 | [packages/contenteditable-collaboration](packages/contenteditable-collaboration) | collaborative string을 위한 optional native-input DOM lease |
 | [site](site) | 공개 문서와 Document·Sheet·Database demo, structural Selection Lab |
 
 v3 Kernel인 `@interactive-os/json-document`는 dependency-free Core로 남습니다.
-Editing, collaboration과 Connector package는 독립 version과 release lifecycle을
-가집니다. Selection, clipboard, history는 editing companion이 제공하는 headless
-lifecycle 위에서 도메인별 모델을 조합합니다. External framework와 schema의 반복
-glue는 공식 Connector가 맡고, persistence와 제품별 UI 의미는 host가 소유합니다.
+Editing, Adapter, Connector와 collaboration package는 독립 version과 release
+lifecycle을 가집니다. Selection, clipboard, history는 editing companion이
+제공하는 headless lifecycle 위에서 도메인별 모델을 조합합니다. 플랫폼 계약은
+공식 Adapter가 맡고, external framework와 schema의 반복 glue는 공식 Connector가
+맡으며, persistence와 제품별 UI 의미는 host가 소유합니다.
 일반 DOM과 Input Events 정규화가 필요한 제품은 별도 수명 주기의
 `@interactive-os/editable`도 검토할 수 있습니다.
 
@@ -89,11 +93,17 @@ optional editing companion이 제공하는 것:
 - formula engine과 제품별 grid projection 정책
 - product command 이름, layout, route, remote protocol
 
+공식 Adapter가 제공하는 것:
+
+- KeyboardEvent chord를 semantic command로 번역
+- ClipboardEvent를 copy, cut, paste에 연결
+- contenteditable root를 JSON Document string pointer에 연결
+
 공식 Connector가 제공하는 것:
 
 - React external-store subscription과 component lifecycle
 - React Hook Form draft/dirty/touched lifecycle과 atomic canonical submit의 번역
-- 외부 schema/table/platform contract와 public json-document contract의 번역
+- 외부 schema/table contract와 public json-document contract의 번역
 - 대상 peer dependency 격리와 compatibility 범위
 
 ## 개발

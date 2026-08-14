@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import siteRoutesJson from "../../site-routes.json";
 
-export type SiteNavigationGroup = "JSON Document" | "Editing" | "Editors" | "Connectors";
+export type SiteNavigationGroup = "JSON Document" | "Editing" | "Editors" | "Adapters" | "Connectors";
 
 export type SiteRoute = {
   readonly path: string;

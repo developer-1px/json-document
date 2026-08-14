@@ -13,6 +13,10 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as PageRouteImport } from "./routes/_page";
 import { Route as PageDemosRouteImport } from "./routes/_page/demos";
 import { Route as PageEditorsRouteImport } from "./routes/_page/editors";
+import { Route as PageAdaptersIndexRouteImport } from "./routes/_page/adapters/index";
+import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapters/clipboard";
+import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
+import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
@@ -33,6 +37,7 @@ import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDemoTopologyRouteImport } from "./routes/_page/demo/topology";
 import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
+import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
@@ -72,6 +77,27 @@ const PageDemosRoute = PageDemosRouteImport.update({
 const PageEditorsRoute = PageEditorsRouteImport.update({
   id: "/editors",
   path: "/editors",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageAdaptersIndexRoute = PageAdaptersIndexRouteImport.update({
+  id: "/adapters/",
+  path: "/adapters/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageAdaptersClipboardRoute = PageAdaptersClipboardRouteImport.update({
+  id: "/adapters/clipboard",
+  path: "/adapters/clipboard",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageAdaptersContenteditableRoute =
+  PageAdaptersContenteditableRouteImport.update({
+    id: "/adapters/contenteditable",
+    path: "/adapters/contenteditable",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageAdaptersKeyboardRoute = PageAdaptersKeyboardRouteImport.update({
+  id: "/adapters/keyboard",
+  path: "/adapters/keyboard",
   getParentRoute: () => PageRoute,
 } as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
@@ -175,6 +201,11 @@ const PageDemoTreeRoute = PageDemoTreeRouteImport.update({
 const PageDocsIndexRoute = PageDocsIndexRouteImport.update({
   id: "/docs/",
   path: "/docs/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAdaptersRoute = PageDocsAdaptersRouteImport.update({
+  id: "/docs/adapters",
+  path: "/docs/adapters",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsApiRoute = PageDocsApiRouteImport.update({
@@ -294,6 +325,9 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/demos": typeof PageDemosRoute;
   "/editors": typeof PageEditorsRoute;
+  "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
+  "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
+  "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -311,6 +345,7 @@ export interface FileRoutesByFullPath {
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -324,6 +359,7 @@ export interface FileRoutesByFullPath {
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/adapters/": typeof PageAdaptersIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
@@ -340,6 +376,9 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/demos": typeof PageDemosRoute;
   "/editors": typeof PageEditorsRoute;
+  "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
+  "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
+  "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -357,6 +396,7 @@ export interface FileRoutesByTo {
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -370,6 +410,7 @@ export interface FileRoutesByTo {
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/adapters": typeof PageAdaptersIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
@@ -388,6 +429,9 @@ export interface FileRoutesById {
   "/_page": typeof PageRouteWithChildren;
   "/_page/demos": typeof PageDemosRoute;
   "/_page/editors": typeof PageEditorsRoute;
+  "/_page/adapters/clipboard": typeof PageAdaptersClipboardRoute;
+  "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
+  "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
@@ -405,6 +449,7 @@ export interface FileRoutesById {
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/demo/topology": typeof PageDemoTopologyRoute;
   "/_page/demo/tree": typeof PageDemoTreeRoute;
+  "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
@@ -418,6 +463,7 @@ export interface FileRoutesById {
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tree": typeof PageDocsTreeRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/_page/adapters/": typeof PageAdaptersIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
@@ -436,6 +482,9 @@ export interface FileRouteTypes {
     | "/"
     | "/demos"
     | "/editors"
+    | "/adapters/clipboard"
+    | "/adapters/contenteditable"
+    | "/adapters/keyboard"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -453,6 +502,7 @@ export interface FileRouteTypes {
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/docs/adapters"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/concepts"
@@ -466,6 +516,7 @@ export interface FileRouteTypes {
     | "/docs/topology"
     | "/docs/tree"
     | "/docs/tutorial"
+    | "/adapters/"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
@@ -482,6 +533,9 @@ export interface FileRouteTypes {
     | "/"
     | "/demos"
     | "/editors"
+    | "/adapters/clipboard"
+    | "/adapters/contenteditable"
+    | "/adapters/keyboard"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -499,6 +553,7 @@ export interface FileRouteTypes {
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/docs/adapters"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/concepts"
@@ -512,6 +567,7 @@ export interface FileRouteTypes {
     | "/docs/topology"
     | "/docs/tree"
     | "/docs/tutorial"
+    | "/adapters"
     | "/connectors"
     | "/demo"
     | "/docs"
@@ -529,6 +585,9 @@ export interface FileRouteTypes {
     | "/_page"
     | "/_page/demos"
     | "/_page/editors"
+    | "/_page/adapters/clipboard"
+    | "/_page/adapters/contenteditable"
+    | "/_page/adapters/keyboard"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
@@ -546,6 +605,7 @@ export interface FileRouteTypes {
     | "/_page/demo/sheet"
     | "/_page/demo/topology"
     | "/_page/demo/tree"
+    | "/_page/docs/adapters"
     | "/_page/docs/api"
     | "/_page/docs/clipboard"
     | "/_page/docs/concepts"
@@ -559,6 +619,7 @@ export interface FileRouteTypes {
     | "/_page/docs/topology"
     | "/_page/docs/tree"
     | "/_page/docs/tutorial"
+    | "/_page/adapters/"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
@@ -605,6 +666,34 @@ declare module "@tanstack/react-router" {
       path: "/editors";
       fullPath: "/editors";
       preLoaderRoute: typeof PageEditorsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/adapters/": {
+      id: "/_page/adapters/";
+      path: "/adapters";
+      fullPath: "/adapters/";
+      preLoaderRoute: typeof PageAdaptersIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/adapters/clipboard": {
+      id: "/_page/adapters/clipboard";
+      path: "/adapters/clipboard";
+      fullPath: "/adapters/clipboard";
+      preLoaderRoute: typeof PageAdaptersClipboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/adapters/contenteditable": {
+      id: "/_page/adapters/contenteditable";
+      path: "/adapters/contenteditable";
+      fullPath: "/adapters/contenteditable";
+      preLoaderRoute: typeof PageAdaptersContenteditableRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/adapters/keyboard": {
+      id: "/_page/adapters/keyboard";
+      path: "/adapters/keyboard";
+      fullPath: "/adapters/keyboard";
+      preLoaderRoute: typeof PageAdaptersKeyboardRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/": {
@@ -745,6 +834,13 @@ declare module "@tanstack/react-router" {
       path: "/docs";
       fullPath: "/docs/";
       preLoaderRoute: typeof PageDocsIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/adapters": {
+      id: "/_page/docs/adapters";
+      path: "/docs/adapters";
+      fullPath: "/docs/adapters";
+      preLoaderRoute: typeof PageDocsAdaptersRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/api": {
@@ -900,6 +996,9 @@ declare module "@tanstack/react-router" {
 interface PageRouteChildren {
   PageDemosRoute: typeof PageDemosRoute;
   PageEditorsRoute: typeof PageEditorsRoute;
+  PageAdaptersClipboardRoute: typeof PageAdaptersClipboardRoute;
+  PageAdaptersContenteditableRoute: typeof PageAdaptersContenteditableRoute;
+  PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
@@ -917,6 +1016,7 @@ interface PageRouteChildren {
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDemoTopologyRoute: typeof PageDemoTopologyRoute;
   PageDemoTreeRoute: typeof PageDemoTreeRoute;
+  PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
@@ -930,6 +1030,7 @@ interface PageRouteChildren {
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTreeRoute: typeof PageDocsTreeRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
+  PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
@@ -946,6 +1047,9 @@ interface PageRouteChildren {
 const PageRouteChildren: PageRouteChildren = {
   PageDemosRoute: PageDemosRoute,
   PageEditorsRoute: PageEditorsRoute,
+  PageAdaptersClipboardRoute: PageAdaptersClipboardRoute,
+  PageAdaptersContenteditableRoute: PageAdaptersContenteditableRoute,
+  PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
@@ -963,6 +1067,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDemoTopologyRoute: PageDemoTopologyRoute,
   PageDemoTreeRoute: PageDemoTreeRoute,
+  PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsApiRoute: PageDocsApiRoute,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
@@ -976,6 +1081,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTreeRoute: PageDocsTreeRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
+  PageAdaptersIndexRoute: PageAdaptersIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,

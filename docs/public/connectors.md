@@ -18,8 +18,6 @@ Connector는 이런 번역을 패키지로 제공합니다. 대상 도구의 API
 | Ajv | `@interactive-os/json-document-ajv` | Ajv error와 document validation |
 | Zod | `@interactive-os/json-document-zod` | Zod validation과 Database 변환 |
 | TanStack Table | `@interactive-os/json-document-tanstack-table` | visible table과 Sheet editing |
-| Web Platform | `@interactive-os/json-document-web` | clipboard event와 text input |
-| Contenteditable | `@interactive-os/json-document-contenteditable` | React contenteditable root와 local string commit |
 
 필요한 Connector만 연결 대상 라이브러리와 함께 설치하면 됩니다. 지원하는
 버전은 각 패키지 README에서 확인할 수 있고, 실제 동작은 사이트의
@@ -161,60 +159,8 @@ TanStack의 React adapter와 json-document React Connector를 함께 조합합�
 [/connectors/tanstack-table](/connectors/tanstack-table) 데모는 화면 순서가
 편집 결과에 반영되는 모습을 보여줍니다.
 
-## 브라우저 clipboard와 input 연결하기
-
-Web Connector는 브라우저의 clipboard event를 editor의 copy, cut, paste와
-연결합니다.
-
-```ts
-const clipboard = createWebClipboardBinding({
-  codec: documentClipboardCodec,
-  read: () => editor.copy(),
-  cut: () => editor.cut()?.result ?? { ok: false },
-  paste: (payload) => editor.dispatch({
-    type: "clipboard.paste",
-    clipboard: payload,
-  }),
-});
-
-surface.addEventListener("copy", (event) => clipboard.copy(event));
-surface.addEventListener("cut", (event) => clipboard.cut(event));
-surface.addEventListener("paste", (event) => clipboard.paste(event));
-```
-
-Document, Sheet, Order, Object, Tree, Database codec은 구조화된 MIME과
-`text/plain`을 함께 기록합니다. paste할 때는 유효한 payload를 editor에
-전달하고, cut은 clipboard 기록에 성공한 뒤 선택한 내용을
-제거합니다. Connector가 처리하지 않은 event는 브라우저의 기본 동작으로
-이어집니다.
-
-`selectionOperationFromModifiers`는 보조 키 입력을 `replace`, `extend`,
-`toggle`로 바꿉니다. `textInputFromControl`은 브라우저 입력 요소의 값과
-caret을 관찰합니다. 이벤트 대상과 단축키, focus, 접근성, IME 처리는 제품
-화면에서 구성합니다.
-
-[/connectors/web](/connectors/web) 데모는 실제 ClipboardEvent와 modifier
-selection, text input을 연결합니다.
-
-## Contenteditable root 붙이기
-
-Contenteditable Connector는 local `JSONDocument`의 문자열 포인터를 React
-contenteditable root에 붙입니다. IME와 native input 동안 그 root의
-model→DOM render만 유예하고, 커밋은 여섯 member `document`로 들어갑니다.
-
-```tsx
-import { createJSONDocument } from "@interactive-os/json-document";
-import { ContentEditable } from "@interactive-os/json-document-contenteditable";
-
-const document = createJSONDocument({ title: "Shared title" });
-
-<ContentEditable document={document} pointer="/title" />;
-```
-
-툴바, 슬래시 팔레트, 전송 버튼과 atom·marks 의미는 이 패키지에 없습니다.
-[/connectors/contenteditable](/connectors/contenteditable)에서 두 필드를
-동시에 붙여 다른 경로 변경이 leased root를 덮어쓰지 않는 모습을 볼 수
-있습니다.
+키보드, clipboard, contenteditable 같은 플랫폼 계약은
+[Adapters](adapters.md)에서 연결합니다.
 
 ## 각 구성 요소가 맡는 값
 
@@ -222,7 +168,8 @@ const document = createJSONDocument({ title: "Shared title" });
 | --- | --- |
 | JSON Document | 현재 JSON 값, read, validation, commit, subscription |
 | Editing | transaction, Selection, Clipboard, History |
-| Connector | 외부 도구와 공개 API 사이의 번역 |
+| Adapter | 플랫폼 계약과 공개 API 사이의 변환 |
+| Connector | 이름 있는 라이브러리 생태계와 공개 API 사이의 번역 |
 | 제품 | UI, 제품별 의미, 입력과 외부 상태 조립 |
 
 Connector를 바꾸어도 JSON Document와 Editing은 같은 입력을 같은 의미로

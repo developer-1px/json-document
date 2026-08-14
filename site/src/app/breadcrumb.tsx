@@ -13,6 +13,7 @@ const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
   "JSON Document": { path: "/docs", label: "JSON Document" },
   Editing: { path: "/docs/intent-guide", label: "Editing" },
   Editors: { path: "/editors", label: "Editors" },
+  Adapters: { path: "/adapters", label: "Adapters" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 
@@ -42,6 +43,7 @@ export function breadcrumbTrail(
 }
 
 function crumbLabel(route: SiteRoute): string {
+  if (route.path === "/adapters") return "Adapters";
   if (route.path === "/connectors") return "Connectors";
   if (route.path === "/editors") return "Editors";
   return route.label;

@@ -279,4 +279,5 @@ types
 
 Selection, Clipboard, History와 Intent는
 `@interactive-os/json-document-editing`에서 이 API 위에 조합합니다. 외부 도구와
-연결하는 패키지는 [Connectors](connectors.md)에서 찾을 수 있습니다.
+연결하는 패키지는 [Adapters](adapters.md)와 [Connectors](connectors.md)에서
+찾을 수 있습니다.

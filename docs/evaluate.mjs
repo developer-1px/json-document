@@ -50,6 +50,7 @@ const publicDocs = {
   intentGuide: read("docs/public/intent-guide.md"),
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
+  adapters: read("docs/public/adapters.md"),
   connectors: read("docs/public/connectors.md"),
   collaboration: read("docs/public/collaboration.md"),
   collaborationReplica: read("docs/public/collaboration-replica.md"),
@@ -99,6 +100,7 @@ const activeCompanionPackages = new Set([
 ]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
+  "adapters.md",
   "api.md",
   "clipboard.md",
   "collaboration-history.md",
