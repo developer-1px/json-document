@@ -104,21 +104,20 @@ function createReactAdapter(options: Pick<RichTextRendererProps, "renderExtensio
     const content = Children.toArray(children.map((child) => child.node));
     const hasContent = "content" in node && Array.isArray(node.content);
     const props = {
-      key: node.id,
       "data-rich-text-node-id": node.id,
       ...(hasContent ? { "data-rich-text-container-id": node.id } : {}),
     };
-    if (node.type === "heading") return { key: node.id, node: createElement(`h${node.attrs.level}`, props, content) };
-    if (node.type === "hardBreak") return { key: node.id, node: <br {...props} /> };
-    if (node.type === "codeBlock") return { key: node.id, node: <pre {...props}><code {...(node.attrs.language === null ? {} : { className: `language-${node.attrs.language}` })}>{content}</code></pre> };
-    if (node.type === "orderedList") return { key: node.id, node: <ol {...props} start={node.attrs.start}>{content}</ol> };
+    if (node.type === "heading") return { key: node.id, node: createElement(`h${node.attrs.level}`, { key: node.id, ...props }, content) };
+    if (node.type === "hardBreak") return { key: node.id, node: <br key={node.id} {...props} /> };
+    if (node.type === "codeBlock") return { key: node.id, node: <pre key={node.id} {...props}><code {...(node.attrs.language === null ? {} : { className: `language-${node.attrs.language}` })}>{content}</code></pre> };
+    if (node.type === "orderedList") return { key: node.id, node: <ol key={node.id} {...props} start={node.attrs.start}>{content}</ol> };
     if (node.type.includes("/") && options.renderExtension) return { key: node.id, node: options.renderExtension(node, content) };
     const element = node.type === "paragraph" ? "p"
       : node.type === "blockquote" ? "blockquote"
       : node.type === "bulletList" ? "ul"
       : node.type === "listItem" ? "li"
       : "div";
-    return { key: node.id, node: createElement(element, props, content) };
+    return { key: node.id, node: createElement(element, { key: node.id, ...props }, content) };
   },
   mark(mark, children) {
     const child = children[0]!;
