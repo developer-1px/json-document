@@ -63,8 +63,11 @@ describe("official site shell", () => {
       "Sheet",
       "Database",
       "Order",
+      "Order Demo",
       "Object",
+      "Object Demo",
       "Tree",
+      "Tree Demo",
     ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();

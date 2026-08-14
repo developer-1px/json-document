@@ -203,6 +203,13 @@
     "navigationGroup": "Editors"
   },
   {
+    "path": "/demo/order",
+    "label": "Order Demo",
+    "title": "Order Demo - json-document",
+    "description": "A one-line Order editor with range selection, structured clipboard, delete, and local history.",
+    "parentPath": "/docs/order"
+  },
+  {
     "path": "/docs/object",
     "label": "Object",
     "title": "Object - json-document",
@@ -211,12 +218,26 @@
     "navigationGroup": "Editors"
   },
   {
+    "path": "/demo/object",
+    "label": "Object Demo",
+    "title": "Object Demo - json-document",
+    "description": "A key-family Object board with ID selection, color fill, structured clipboard, and local history.",
+    "parentPath": "/docs/object"
+  },
+  {
     "path": "/docs/tree",
     "label": "Tree",
     "title": "Tree - json-document",
     "description": "호스트가 만든 보이는 노드 줄에서 범위를 집는 Tree editor를 설명합니다.",
     "language": "ko",
     "navigationGroup": "Editors"
+  },
+  {
+    "path": "/demo/tree",
+    "label": "Tree Demo",
+    "title": "Tree Demo - json-document",
+    "description": "A folded Tree editor whose host sends visible node IDs for range selection, clipboard, and history.",
+    "parentPath": "/docs/tree"
   },
   {
     "path": "/demos",

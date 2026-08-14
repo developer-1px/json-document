@@ -40,6 +40,24 @@ describe("breadcrumbTrail", () => {
     expect(trail("/demo")).toEqual(["Overview:/", "Editors:/editors", "Document:/demo"]);
     expect(trail("/editors")).toEqual(["Overview:/", "Editors:/editors"]);
     expect(trail("/docs/tree")).toEqual(["Overview:/", "Editors:/editors", "Tree:/docs/tree"]);
+    expect(trail("/demo/order")).toEqual([
+      "Overview:/",
+      "Editors:/editors",
+      "Order:/docs/order",
+      "Order Demo:/demo/order",
+    ]);
+    expect(trail("/demo/object")).toEqual([
+      "Overview:/",
+      "Editors:/editors",
+      "Object:/docs/object",
+      "Object Demo:/demo/object",
+    ]);
+    expect(trail("/demo/tree")).toEqual([
+      "Overview:/",
+      "Editors:/editors",
+      "Tree:/docs/tree",
+      "Tree Demo:/demo/tree",
+    ]);
     expect(trail("/demo/selection")).toEqual([
       "Overview:/",
       "Editing:/docs/intent-guide",

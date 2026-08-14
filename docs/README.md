@@ -62,8 +62,11 @@ Editors
 |-- Sheet
 |-- Database
 |-- Order
+|   `-- Order Demo
 |-- Object
+|   `-- Object Demo
 `-- Tree
+    `-- Tree Demo
 
 Connectors
 `-- Connector guide
