@@ -179,6 +179,53 @@ describe("Official Rich Text editor", () => {
     expect((empty.value as RichTextDocument).content).toHaveLength(2);
   });
 
+  it("repeatedly joins empty child-point blocks in both deletion directions", () => {
+    const backwardDocument = createJSONDocument({
+      profile: "urn:interactive-os:json-document:rich-text:1",
+      id: "backward-doc",
+      type: "doc",
+      content: [
+        { id: "backward-text-block", type: "paragraph", content: [{ id: "backward-text", type: "text", text: "A", marks: [] }] },
+        { id: "backward-empty-a", type: "paragraph", content: [] },
+        { id: "backward-empty-b", type: "paragraph", content: [] },
+      ],
+    } satisfies RichTextDocument);
+    const backwardEditor = createRichTextEditor({
+      document: backwardDocument,
+      selection: childCollapsed("backward-empty-b", 0),
+    });
+
+    expect(backwardEditor.dispatch({ type: "text.delete", direction: "backward", unit: "character" }).ok).toBe(true);
+    expect((backwardDocument.value as RichTextDocument).content).toHaveLength(2);
+    expect(backwardEditor.snapshot.selection.ranges[0]?.focus).toMatchObject({ kind: "child", nodeId: "backward-empty-a", offset: 0 });
+    expect(backwardEditor.dispatch({ type: "text.delete", direction: "backward", unit: "character" }).ok).toBe(true);
+    expect((backwardDocument.value as RichTextDocument).content).toMatchObject([
+      { id: "backward-text-block", content: [{ id: "backward-text", text: "A" }] },
+    ]);
+
+    const forwardDocument = createJSONDocument({
+      profile: "urn:interactive-os:json-document:rich-text:1",
+      id: "forward-doc",
+      type: "doc",
+      content: [
+        { id: "forward-empty-a", type: "paragraph", content: [] },
+        { id: "forward-empty-b", type: "paragraph", content: [] },
+        { id: "forward-text-block", type: "paragraph", content: [{ id: "forward-text", type: "text", text: "B", marks: [] }] },
+      ],
+    } satisfies RichTextDocument);
+    const forwardEditor = createRichTextEditor({
+      document: forwardDocument,
+      selection: childCollapsed("forward-empty-a", 0),
+    });
+
+    expect(forwardEditor.dispatch({ type: "text.delete", direction: "forward", unit: "character" }).ok).toBe(true);
+    expect((forwardDocument.value as RichTextDocument).content).toHaveLength(2);
+    expect(forwardEditor.dispatch({ type: "text.delete", direction: "forward", unit: "character" }).ok).toBe(true);
+    expect((forwardDocument.value as RichTextDocument).content).toMatchObject([
+      { id: "forward-empty-a", content: [{ id: "forward-text", text: "B" }] },
+    ]);
+  });
+
   it("groups one IME composition and preserves structured marks through clipboard paste", () => {
     const document = createJSONDocument(initial);
     let id = 0;
@@ -309,6 +356,11 @@ function collapsed(nodeId: string, offset: number): RichTextSelection {
     }],
     primaryIndex: 0,
   };
+}
+
+function childCollapsed(nodeId: string, offset: number): RichTextSelection {
+  const point = { kind: "child" as const, nodeId, offset, affinity: "forward" as const };
+  return { kind: "range", ranges: [{ anchor: point, focus: point }], primaryIndex: 0 };
 }
 
 function point(nodeId: string, offset: number) {

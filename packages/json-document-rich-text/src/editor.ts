@@ -427,7 +427,15 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     if (!pointsEqual(range.anchor, range.focus)) return removeSelections();
     const resolved = resolveDeletionPoint(value(), range.anchor, direction);
     if (resolved?.kind === "node") return removeNode(resolved.nodeId);
-    if (!resolved) return success(session.snapshot);
+    if (!resolved) {
+      const block = findPointBlock(value(), range.anchor);
+      const atJoinBoundary = range.anchor.kind === "child"
+        && block?.node.id === range.anchor.nodeId
+        && (direction === "backward"
+          ? range.anchor.offset === 0
+          : range.anchor.offset === block.node.content.length);
+      return atJoinBoundary ? joinBlock(direction) : success(session.snapshot);
+    }
     const located = findText(value(), resolved.nodeId);
     if (!located) return failure("rich-text.point-not-found");
     const offset = resolved.offset;

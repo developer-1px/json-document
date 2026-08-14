@@ -82,7 +82,7 @@ export function createRichTextContentEditableBinding(options: {
       } else if (event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
         report("text.delete", editor.dispatch({ type: "text.delete", direction, unit: "character" }));
       } else {
-        report("selection.remove", editor.dispatch({ type: "selection.remove" }));
+        report("selection.remove", { ok: false, code: "rich-text.intent-unsupported" });
       }
     } else if (event.inputType === "deleteByDrag" || event.inputType === "deleteByCut") {
       event.preventDefault();

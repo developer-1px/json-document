@@ -64,6 +64,37 @@ describe("Official Rich Text contenteditable composition", () => {
     expect(editor.snapshot.canUndo).toBe(false);
     binding.destroy();
   });
+
+  it("does not report unsupported collapsed word and line deletion as a successful removal", () => {
+    const document = createJSONDocument(initialDocument());
+    const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });
+    const root = fixture();
+    const actions: string[] = [];
+    const binding = createRichTextContentEditableBinding({
+      root,
+      editor,
+      onAction: (action) => actions.push(action),
+    });
+    const text = root.querySelector("[data-rich-text-text-id='text']")!.firstChild as Text;
+    window.getSelection()!.setBaseAndExtent(text, 3, text, 3);
+
+    for (const inputType of [
+      "deleteWordBackward",
+      "deleteWordForward",
+      "deleteSoftLineBackward",
+      "deleteSoftLineForward",
+      "deleteHardLineBackward",
+      "deleteHardLineForward",
+    ]) {
+      const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType });
+      root.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+    }
+
+    expect(actions).toEqual(Array.from({ length: 6 }, () => "rich-text.intent-unsupported"));
+    expect(document.value).toEqual(initialDocument());
+    binding.destroy();
+  });
 });
 
 function initialDocument(): RichTextDocument {

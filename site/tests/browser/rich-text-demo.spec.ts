@@ -93,6 +93,50 @@ test("Rich Text Lab preserves consecutive Enter in empty canonical paragraphs", 
   await expect(page.getByText("last: block.split", { exact: true })).toBeVisible();
 });
 
+test("Rich Text Lab repeatedly joins empty canonical paragraphs with Backspace and Delete", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+
+  await setSelection(page, "text-editable", 20, 20);
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.press("Backspace");
+
+  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(7);
+  await expect(editor.locator("[data-rich-text-placeholder]")).toHaveCount(0);
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를 선택하고 직접 입력해 보세요.",
+  });
+
+  await page.reload();
+  await setSelection(page, "text-editable", 20, 20);
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  const splitDocument = await json(page, "rich-text-document-json");
+  const firstEmptyId = splitDocument.content[3].id;
+  await setChildSelection(page, firstEmptyId, 0);
+  await page.keyboard.press("Delete");
+  await page.keyboard.press("Delete");
+
+  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(8);
+  await expect(page.getByTestId("rich-text-editor").locator("[data-rich-text-placeholder]")).toHaveCount(1);
+  await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: firstEmptyId, anchorOffset: 0, focusOffset: 0 });
+});
+
+test("Rich Text Lab preserves repeated forward character deletion", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  await setSelection(page, "text-editable", 0, 0);
+  await page.keyboard.press("Delete");
+  await page.keyboard.press("Delete");
+
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "를 선택하고 직접 입력해 보세요.",
+  });
+  await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: "text-editable", anchorOffset: 0, focusOffset: 0 });
+});
+
 test("Rich Text Lab exposes a deterministic sample intent for inspection", async ({ page }) => {
   await page.goto("/editing/rich-text");
   await page.getByRole("button", { name: "Apply sample intent" }).click();
@@ -204,7 +248,6 @@ test("Rich Text Lab handles Chromium Korean IME composition without orphaned jam
     });
   }
   await client.send("Input.insertText", { text: "한글" });
-  await client.detach();
 
   await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable")?.text)
     .toBe("여기를한글 선택하고 직접 입력해 보세요.");
@@ -215,6 +258,28 @@ test("Rich Text Lab handles Chromium Korean IME composition without orphaned jam
   });
   await expect(page.getByText("last: composition.commit", { exact: true })).toBeVisible();
 
+  for (const text of ["ㅇ", "이", "입", "입ㄹ", "입려", "입력"]) {
+    await client.send("Input.imeSetComposition", {
+      text,
+      selectionStart: text.length,
+      selectionEnd: text.length,
+    });
+  }
+  await client.send("Input.insertText", { text: "입력" });
+  await client.detach();
+
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable")?.text)
+    .toBe("여기를한글입력 선택하고 직접 입력해 보세요.");
+  await expect.poll(() => domSelection(page)).toMatchObject({
+    nodeId: "text-editable",
+    anchorOffset: 7,
+    focusOffset: 7,
+  });
+
+  await page.getByRole("button", { name: "Undo" }).click();
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를한글 선택하고 직접 입력해 보세요.",
+  });
   await page.getByRole("button", { name: "Undo" }).click();
   expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
     text: "여기를 선택하고 직접 입력해 보세요.",
@@ -261,6 +326,10 @@ test("Rich Text Lab maps formatting, hard-break, and platform deletion target ra
     bubbles: true, cancelable: true, inputType: "insertLineBreak",
   })));
   await expect(editor.locator("br")).toHaveCount(2);
+  await editor.evaluate((root) => root.dispatchEvent(new InputEvent("beforeinput", {
+    bubbles: true, cancelable: true, inputType: "insertLineBreak",
+  })));
+  await expect(editor.locator("br")).toHaveCount(3);
 
   await page.reload();
   const prevented = await page.getByTestId("rich-text-editor").evaluate((root) => {
@@ -311,6 +380,15 @@ async function setSelection(page: Page, nodeId: string, anchorOffset: number, fo
     (root as HTMLElement).focus();
     root.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
   }, { nodeId, anchorOffset, focusOffset });
+}
+
+async function setChildSelection(page: Page, nodeId: string, offset: number): Promise<void> {
+  await page.getByTestId("rich-text-editor").evaluate((root, options) => {
+    const container = root.querySelector<HTMLElement>(`[data-rich-text-container-id="${CSS.escape(options.nodeId)}"]`)!;
+    window.getSelection()?.setBaseAndExtent(container, options.offset, container, options.offset);
+    (root as HTMLElement).focus();
+    root.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+  }, { nodeId, offset });
 }
 
 async function domSelection(page: Page): Promise<unknown> {
