@@ -1,30 +1,15 @@
-import {
-  Children,
-  createElement,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useState } from "react";
 import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import {
   createRichTextEditor,
-  renderRichText,
   type RichTextDocument,
   type RichTextEditor,
-  type RichTextMark,
   type RichTextNode,
   type RichTextPoint,
-  type RichTextRenderAdapter,
   type RichTextText,
 } from "@interactive-os/json-document-rich-text";
-import {
-  createRichTextContentEditableBinding,
-  type RichTextContentEditableBinding,
-} from "@interactive-os/json-document-rich-text-web";
+import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
@@ -65,6 +50,53 @@ const initialDocument: RichTextDocument = {
         marks: [],
       }],
     },
+    {
+      id: "blockquote-1",
+      type: "blockquote",
+      content: [{
+        id: "quote-paragraph",
+        type: "paragraph",
+        content: [
+          { id: "quote-text", type: "text", text: "Blockquote와 ", marks: [] },
+          { id: "quote-code", type: "text", text: "inline code", marks: [{ type: "code" }] },
+          { id: "quote-break", type: "hardBreak" },
+          { id: "quote-link", type: "text", text: "안전한 링크", marks: [{ type: "link", attrs: { href: "#canonical-json" } }] },
+        ],
+      }],
+    },
+    {
+      id: "code-block-1",
+      type: "codeBlock",
+      attrs: { language: "json" },
+      content: [{ id: "code-text", type: "text", text: '{ "canonical": true }', marks: [] }],
+    },
+    {
+      id: "ordered-list-1",
+      type: "orderedList",
+      attrs: { start: 2 },
+      content: [{
+        id: "list-item-1",
+        type: "listItem",
+        content: [{
+          id: "list-paragraph-1",
+          type: "paragraph",
+          content: [{ id: "list-text-1", type: "text", text: "stable node identity", marks: [{ type: "underline" }] }],
+        }],
+      }],
+    },
+    {
+      id: "bullet-list-1",
+      type: "bulletList",
+      content: [{
+        id: "bullet-item-1",
+        type: "listItem",
+        content: [{
+          id: "bullet-paragraph-1",
+          type: "paragraph",
+          content: [{ id: "bullet-text-1", type: "text", text: "schema-aware transforms", marks: [{ type: "strikethrough" }] }],
+        }],
+      }],
+    },
   ],
 };
 
@@ -73,40 +105,15 @@ export function RichTextDemoRoute() {
   const snapshot = useEditingSnapshot(editor);
   const [lastPatch, setLastPatch] = useState<ReadonlyArray<JSONPatchOperation>>([]);
   const [lastAction, setLastAction] = useState("selection.ready");
-  const surfaceRef = useRef<HTMLElement>(null);
-  const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
-  const rendered = useMemo(
-    () => renderRichText(snapshot.value as RichTextDocument, reactAdapter).output.node,
-    [snapshot.value],
-  );
   const primary = snapshot.selection.primaryIndex === null
     ? null
     : snapshot.selection.ranges[snapshot.selection.primaryIndex] ?? null;
   const interval = primary === null ? [] : editor.topology.interval(primary.anchor, primary.focus);
 
-  useLayoutEffect(() => {
-    if (surfaceRef.current && surfaceRef.current.contains(document.activeElement)) {
-      bindingRef.current?.restoreSelection();
-    }
-  }, [snapshot.selection, snapshot.value]);
-
-  useEffect(() => {
-    const surface = surfaceRef.current;
-    if (!surface) return;
-    const binding = createRichTextContentEditableBinding({
-      root: surface,
-      editor,
-      onAction(action, result) {
-        setLastAction(action);
-        if (result?.ok && result.change) setLastPatch(result.change.applied);
-      },
-    });
-    bindingRef.current = binding;
-    return () => {
-      binding.destroy();
-      bindingRef.current = null;
-    };
-  }, [editor]);
+  const onSurfaceAction = useCallback((action: string, result?: ReturnType<RichTextEditor["dispatch"]>) => {
+    setLastAction(action);
+    if (result?.ok && result.change) setLastPatch(result.change.applied);
+  }, []);
 
   function remember(action: string, result: ReturnType<RichTextEditor["dispatch"]>) {
     setLastAction(result.ok ? action : result.code);
@@ -136,6 +143,34 @@ export function RichTextDemoRoute() {
     remember("text.insert", editor.dispatch({ type: "text.insert", text: " ✓" }));
   }
 
+  function selectText(nodeId: string, from: number, to: number) {
+    const anchor: RichTextPoint = { kind: "text", nodeId, offset: from, affinity: "forward" };
+    const focus: RichTextPoint = { kind: "text", nodeId, offset: to, affinity: "forward" };
+    editor.dispatch({ type: "selection.set", selection: { kind: "range", ranges: [{ anchor, focus }], primaryIndex: 0 } });
+  }
+
+  function toggleStrong() {
+    selectText("text-editable", 0, 3);
+    remember("mark.toggle:strong", editor.dispatch({ type: "mark.toggle", mark: { type: "strong" } }));
+  }
+
+  function setHeading() {
+    selectText("text-editable", 0, 0);
+    remember("block.set-type:heading", editor.dispatch({ type: "block.set-type", nodeType: "heading", attrs: { level: 3 } }));
+  }
+
+  function insertHardBreak() {
+    remember("node.insert:hardBreak", editor.dispatch({
+      type: "node.insert",
+      point: { kind: "child", nodeId: "paragraph-2", offset: 1, affinity: "forward" },
+      node: { id: "demo-hard-break", type: "hardBreak" },
+    }));
+  }
+
+  function updateCodeAttrs() {
+    remember("node.set-attrs", editor.dispatch({ type: "node.set-attrs", nodeId: "code-block-1", attrs: { language: "typescript" } }));
+  }
+
   return (
     <PageFrame>
       <PageHeader
@@ -154,21 +189,26 @@ export function RichTextDemoRoute() {
         <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
       </div>
 
+      <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="group" aria-label="Official Rich Text intent proofs">
+        <span className={ui.text.meta}>Schema-aware intent proofs</span>
+        <ActionButton onClick={toggleStrong}>Toggle strong</ActionButton>
+        <ActionButton onClick={setHeading}>Set heading</ActionButton>
+        <ActionButton onClick={insertHardBreak}>Insert hard break</ActionButton>
+        <ActionButton onClick={updateCodeAttrs}>Set code attrs</ActionButton>
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="rich-text-surface-label">
           <p className={ui.text.label}>Official semantic rendering + editable DOM lease</p>
           <h2 id="rich-text-surface-label" className={classes("mb-3 mt-1", ui.text.heading)}>Canonical document</h2>
-          <article
-            ref={surfaceRef}
-            contentEditable
-            suppressContentEditableWarning
+          <RichTextEditorSurface
+            editor={editor}
+            onAction={onSurfaceAction}
             spellCheck={false}
             aria-label="Rich Text 편집기"
             data-testid="rich-text-editor"
             className={classes(ui.workbench.richTextEditor, ui.state.focus)}
-          >
-            {rendered}
-          </article>
+          />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.
           </p>
@@ -202,57 +242,6 @@ export function RichTextDemoRoute() {
       </div>
     </PageFrame>
   );
-}
-
-interface RenderedNode {
-  readonly key: string;
-  readonly node: ReactNode;
-}
-
-const reactAdapter: RichTextRenderAdapter<RenderedNode> = {
-  document(document, children) {
-    return { key: document.id, node: <>{children.map((child) => child.node)}</> };
-  },
-  text(node) {
-    return {
-      key: node.id,
-      node: <span key={node.id} data-rich-text-node-id={node.id}>{node.text}</span>,
-    };
-  },
-  node(node, children) {
-    const props = { key: node.id, "data-rich-text-block-id": node.id };
-    const content = Children.toArray(children.map((child) => child.node));
-    if (node.type === "heading") {
-      const level = Number((node as RichTextNode & { readonly attrs?: { readonly level?: number } }).attrs?.level ?? 2);
-      return { key: node.id, node: createElement(`h${Math.min(Math.max(level, 1), 6)}`, props, content) };
-    }
-    const element = node.type === "paragraph" ? "p"
-      : node.type === "blockquote" ? "blockquote"
-      : node.type === "bulletList" ? "ul"
-      : node.type === "orderedList" ? "ol"
-      : node.type === "listItem" ? "li"
-      : node.type === "codeBlock" ? "pre"
-      : node.type === "hardBreak" ? "br"
-      : "div";
-    return { key: node.id, node: createElement(element, props, content) };
-  },
-  mark(mark, children) {
-    const child = children[0]!;
-    const element = markElement(mark);
-    return { key: child.key, node: createElement(element.type, { ...element.props, key: child.key }, child.node) };
-  },
-  unknown(value) {
-    return { key: "unknown", node: <span data-rich-text-unknown>{JSON.stringify(value)}</span> };
-  },
-};
-
-function markElement(mark: RichTextMark): { readonly type: string; readonly props?: Readonly<Record<string, string>> } {
-  if (mark.type === "strong") return { type: "strong" };
-  if (mark.type === "emphasis") return { type: "em" };
-  if (mark.type === "underline") return { type: "u" };
-  if (mark.type === "strikethrough") return { type: "s" };
-  if (mark.type === "code") return { type: "code" };
-  return { type: "a", props: { href: mark.attrs.href, ...(mark.attrs.title ? { title: mark.attrs.title } : {}) } };
 }
 
 function findTextNode(node: RichTextDocument | RichTextNode, id: string): RichTextText | null {

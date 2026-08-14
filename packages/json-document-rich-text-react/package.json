@@ -1,14 +1,14 @@
 {
-  "name": "@interactive-os/json-document-rich-text-web",
+  "name": "@interactive-os/json-document-rich-text-react",
   "version": "0.1.0-rc.0",
-  "description": "Official DOM, contenteditable, HTML, and Clipboard integration for json-document Rich Text.",
+  "description": "Official React rendering and contenteditable integration for json-document Rich Text.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/developer-1px/json-document.git",
-    "directory": "packages/json-document-rich-text-web"
+    "directory": "packages/json-document-rich-text-react"
   },
   "publishConfig": {
     "access": "public",
@@ -21,7 +21,7 @@
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
   "scripts": {
     "clean": "rm -rf dist",
-    "prebuild": "npm run build -w @interactive-os/json-document-rich-text && npm run build -w @interactive-os/json-document-web",
+    "prebuild": "npm run build -w @interactive-os/json-document-rich-text && npm run build -w @interactive-os/json-document-rich-text-web && npm run build -w @interactive-os/json-document-react",
     "build": "npm run clean && tsc -p tsconfig.json",
     "pretypecheck": "npm run prebuild",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
@@ -29,14 +29,19 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
+    "@interactive-os/json-document-react": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text": "^0.1.0-rc.0",
-    "@interactive-os/json-document-web": "^0.1.0-rc.0"
+    "@interactive-os/json-document-rich-text-web": "^0.1.0-rc.0",
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@interactive-os/json-document-react": "*",
     "@interactive-os/json-document-rich-text": "*",
-    "@interactive-os/json-document-web": "*",
-    "@types/node": "^25.9.0",
-    "jsdom": "^29.1.1",
+    "@interactive-os/json-document-rich-text-web": "*",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "typescript": "^5.0.0",
     "vitest": "^4.1.7"
   }

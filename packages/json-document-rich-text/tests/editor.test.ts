@@ -4,8 +4,12 @@ import {
   createRichTextEditor,
   renderRichText,
   type RichTextDocument,
+  type RichTextMark,
+  type RichTextNode,
+  type RichTextParagraph,
   type RichTextRenderAdapter,
   type RichTextSelection,
+  type RichTextText,
 } from "../src/index.js";
 
 const initial: RichTextDocument = {
@@ -27,7 +31,33 @@ const initial: RichTextDocument = {
   ],
 };
 
-describe("Rich Text vertical slice", () => {
+describe("Official Rich Text editor", () => {
+  it("uses a child boundary for an empty first block and splits at both text boundaries canonically", () => {
+    const empty = createJSONDocument({
+      profile: "urn:interactive-os:json-document:rich-text:1",
+      id: "empty-doc",
+      type: "doc",
+      content: [{ id: "empty-p", type: "paragraph", content: [] }],
+    });
+    expect(createRichTextEditor({ document: empty }).snapshot.selection.ranges[0]?.anchor).toEqual({
+      kind: "child", nodeId: "empty-p", offset: 0, affinity: "forward",
+    });
+
+    const document = createJSONDocument(initial);
+    const editor = createRichTextEditor({ document, selection: collapsed("text-2", 0), createId: ids() });
+    expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content.slice(-2)).toMatchObject([
+      { id: "paragraph-1", content: [] },
+      { type: "paragraph", content: [{ text: "Text" }] },
+    ]);
+    const right = (document.value as RichTextDocument).content.at(-1)!;
+    const rightText = (right as RichTextParagraph).content[0];
+    expect(rightText).toBeDefined();
+    editor.dispatch({ type: "selection.set", selection: collapsed(rightText!.id, (rightText as RichTextText).text.length) });
+    expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content.at(-1)).toMatchObject({ type: "paragraph", content: [] });
+    expect(editor.snapshot.selection.ranges[0]?.anchor).toMatchObject({ kind: "child", offset: 0 });
+  });
   it("commits text through EditingSession and restores value with selection", () => {
     const document = createJSONDocument(initial);
     const selection = collapsed("text-2", 4);
@@ -124,6 +154,31 @@ describe("Rich Text vertical slice", () => {
     expect(editor.snapshot.selection).toEqual(collapsed("text-2", 2));
   });
 
+  it("splits empty blocks and joins schema-compatible heading/paragraph and code blocks", () => {
+    const document = createJSONDocument({
+      profile: "urn:interactive-os:json-document:rich-text:1",
+      id: "join-doc",
+      type: "doc",
+      content: [
+        { id: "h", type: "heading", attrs: { level: 2 }, content: [{ id: "ht", type: "text", text: "A", marks: [] }] },
+        { id: "p", type: "paragraph", content: [{ id: "pt", type: "text", text: "B", marks: [] }] },
+        { id: "code-a", type: "codeBlock", attrs: { language: "ts" }, content: [{ id: "ca", type: "text", text: "x", marks: [] }] },
+        { id: "code-b", type: "codeBlock", attrs: { language: "ts" }, content: [{ id: "cb", type: "text", text: "y", marks: [] }] },
+      ],
+    });
+    const editor = createRichTextEditor({ document, selection: collapsed("pt", 0), createId: ids() });
+    expect(editor.dispatch({ type: "block.join", direction: "backward" }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content[0]).toMatchObject({ type: "heading", content: [{ text: "AB" }] });
+    editor.dispatch({ type: "selection.set", selection: collapsed("cb", 0) });
+    expect(editor.dispatch({ type: "block.join", direction: "backward" }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content.at(-1)).toMatchObject({ type: "codeBlock", content: [{ text: "xy" }] });
+
+    const empty = createJSONDocument({ profile: "urn:interactive-os:json-document:rich-text:1", id: "d", type: "doc", content: [{ id: "p", type: "paragraph", content: [] }] });
+    const emptyEditor = createRichTextEditor({ document: empty, createId: ids() });
+    expect(emptyEditor.dispatch({ type: "block.split" }).ok).toBe(true);
+    expect((empty.value as RichTextDocument).content).toHaveLength(2);
+  });
+
   it("groups one IME composition and preserves structured marks through clipboard paste", () => {
     const document = createJSONDocument(initial);
     let id = 0;
@@ -152,6 +207,97 @@ describe("Rich Text vertical slice", () => {
       ],
     });
   });
+
+  it("supports multi-range insertion and cross-node selection removal", () => {
+    const document = createJSONDocument(initial);
+    const editor = createRichTextEditor({
+      document,
+      selection: {
+        kind: "range",
+        ranges: [
+          { anchor: point("text-1", 1), focus: point("text-1", 3) },
+          { anchor: point("text-2", 1), focus: point("text-2", 3) },
+        ],
+        primaryIndex: 1,
+      },
+      createId: ids(),
+    });
+    expect(editor.dispatch({ type: "text.insert", text: "X" }).ok).toBe(true);
+    expect(textById(document.value as RichTextDocument, "text-1")?.text).toBe("RXh");
+    expect(textById(document.value as RichTextDocument, "text-2")?.text).toBe("TXt");
+    expect(editor.snapshot.selection.ranges).toHaveLength(2);
+
+    expect(editor.dispatch({ type: "selection.set", selection: {
+      kind: "range",
+      ranges: [{ anchor: point("text-1", 1), focus: point("text-2", 2) }],
+      primaryIndex: 0,
+    } }).ok).toBe(true);
+    expect(editor.dispatch({ type: "selection.remove" }).ok).toBe(true);
+    expect(textById(document.value as RichTextDocument, "text-1")?.text).toBe("R");
+    expect(textById(document.value as RichTextDocument, "text-2")?.text).toBe("t");
+  });
+
+  it("toggles marks across text nodes and changes block type without losing identity", () => {
+    const document = createJSONDocument(initial);
+    const editor = createRichTextEditor({
+      document,
+      selection: {
+        kind: "range",
+        ranges: [{ anchor: point("text-1", 1), focus: point("text-2", 2) }],
+        primaryIndex: 0,
+      },
+      createId: ids(),
+    });
+    expect(editor.dispatch({ type: "mark.toggle", mark: { type: "underline" } }).ok).toBe(true);
+    const marked = allTexts(document.value as RichTextDocument).filter((node) => node.marks.some((mark: RichTextMark) => mark.type === "underline"));
+    expect(marked.map((node) => node.text).join("")).toBe("ichTe");
+
+    expect(editor.dispatch({ type: "block.set-type", nodeType: "heading", attrs: { level: 3 } }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content).toMatchObject([
+      { id: "heading-1", type: "heading", attrs: { level: 3 } },
+      { id: "paragraph-1", type: "heading", attrs: { level: 3 } },
+    ]);
+  });
+
+  it("inserts, moves, removes, and updates nodes through schema-aware intents", () => {
+    const document = createJSONDocument(initial);
+    const editor = createRichTextEditor({ document, selection: collapsed("text-2", 2), createId: ids() });
+    expect(editor.dispatch({
+      type: "node.insert",
+      point: { kind: "child", nodeId: "paragraph-1", offset: 1, affinity: "forward" },
+      node: { id: "break-1", type: "hardBreak" },
+    }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content[1]).toMatchObject({ content: [{ id: "text-2" }, { id: "break-1" }] });
+
+    expect(editor.dispatch({ type: "node.move", nodeId: "paragraph-1", point: { kind: "child", nodeId: "document-1", offset: 0, affinity: "forward" } }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content[0]).toMatchObject({ id: "paragraph-1" });
+    expect(editor.dispatch({ type: "node.remove", nodeId: "break-1" }).ok).toBe(true);
+    expect(textById(document.value as RichTextDocument, "text-2")).not.toBeNull();
+    expect(editor.dispatch({ type: "node.set-attrs", nodeId: "heading-1", attrs: { level: 4 } }).ok).toBe(true);
+    expect((document.value as RichTextDocument).content[1]).toMatchObject({ id: "heading-1", attrs: { level: 4 } });
+  });
+
+  it("copies a cross-node range and pastes every range with fresh IDs", () => {
+    const document = createJSONDocument(initial);
+    const editor = createRichTextEditor({
+      document,
+      selection: { kind: "range", ranges: [{ anchor: point("text-1", 1), focus: point("text-2", 2) }], primaryIndex: 0 },
+      createId: ids(),
+    });
+    const clipboard = editor.copy();
+    expect(clipboard).toMatchObject({ text: "ich\nTe", slice: { openStart: 0, openEnd: 0 } });
+    expect(editor.dispatch({ type: "selection.set", selection: {
+      kind: "range",
+      ranges: [
+        { anchor: point("text-1", 4), focus: point("text-1", 4) },
+        { anchor: point("text-2", 4), focus: point("text-2", 4) },
+      ],
+      primaryIndex: 0,
+    } }).ok).toBe(true);
+    expect(editor.dispatch({ type: "clipboard.paste", clipboard: clipboard! }).ok).toBe(true);
+    const idsAfter = allNodes(document.value as RichTextDocument).map((node) => node.id);
+    expect(new Set(idsAfter).size).toBe(idsAfter.length);
+  });
 });
 
 function collapsed(nodeId: string, offset: number): RichTextSelection {
@@ -163,4 +309,31 @@ function collapsed(nodeId: string, offset: number): RichTextSelection {
     }],
     primaryIndex: 0,
   };
+}
+
+function point(nodeId: string, offset: number) {
+  return { kind: "text" as const, nodeId, offset, affinity: "forward" as const };
+}
+
+function ids(): () => string {
+  let sequence = 0;
+  return () => `generated-${++sequence}`;
+}
+
+function allNodes(document: RichTextDocument): Array<RichTextDocument | RichTextNode> {
+  const output: Array<RichTextDocument | RichTextNode> = [];
+  const visit = (node: RichTextDocument | RichTextNode) => {
+    output.push(node);
+    if ("content" in node && Array.isArray(node.content)) node.content.forEach((child) => visit(child as RichTextNode));
+  };
+  visit(document);
+  return output;
+}
+
+function allTexts(document: RichTextDocument): RichTextText[] {
+  return allNodes(document).filter((node): node is RichTextText => node.type === "text");
+}
+
+function textById(document: RichTextDocument, id: string): RichTextText | null {
+  return allTexts(document).find((node) => node.id === id) ?? null;
 }

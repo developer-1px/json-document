@@ -313,6 +313,30 @@
       }
     },
     {
+      "id": "official-intent-family-is-complete",
+      "kind": "editing-intent-family",
+      "requirements": ["JDRT1-EDIT-003"],
+      "intents": [
+        "selection.set",
+        "selection.remove",
+        "text.insert",
+        "text.delete",
+        "mark.toggle",
+        "block.split",
+        "block.join",
+        "block.set-type",
+        "node.insert",
+        "node.remove",
+        "node.move",
+        "node.set-attrs",
+        "clipboard.paste"
+      ],
+      "expect": {
+        "validSchemaActionsReportedUnsupported": false,
+        "usesEditingSession": true
+      }
+    },
+    {
       "id": "clipboard-preserves-structure-and-representations",
       "kind": "clipboard",
       "requirements": [
@@ -452,12 +476,16 @@
       "requirements": ["JDRT1-CONFORMANCE-002"],
       "scenarios": [
         "beforeinput",
+        "paragraph-and-hard-break",
+        "platform-deletion-target-ranges",
+        "formatting-beforeinput",
         "composition",
         "selection-restore",
         "structured-clipboard",
         "html-clipboard",
         "plain-text-clipboard",
-        "undo-redo"
+        "undo-redo",
+        "complete-semantic-node-rendering"
       ],
       "requiresRealContentEditableRoot": true
     }

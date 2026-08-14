@@ -2,7 +2,7 @@ import {
   buildPointer,
   parsePointer,
   type JSONDocument,
-  type JSONPatchOperation,
+  type JSONValue,
   type Pointer,
 } from "@interactive-os/json-document";
 import {
@@ -13,10 +13,8 @@ import {
 import {
   collapsedRangeSelection,
   createRangeSelectionFamily,
-  emptyRangeSelection,
   primaryRange,
   type RangeSelection,
-  type RangeSelectionMapping,
   type SelectionRange,
 } from "@interactive-os/json-document-selection";
 import {
@@ -24,28 +22,41 @@ import {
   isRichTextDocument,
   isRichTextText,
   RICH_TEXT_CLIPBOARD_MIME,
-  RICH_TEXT_PROFILE_V1,
   type RichTextClipboard,
+  type RichTextContentNode,
   type RichTextDocument,
   type RichTextNode,
   type RichTextPoint,
   type RichTextSelection,
   type RichTextTarget,
+  type RichTextMark,
 } from "./model.js";
+import { createRichTextNodeId } from "./identity.js";
+import { normalizeRichText } from "./normalize.js";
+import { compareRichTextMarks, richTextSchemaV1, type RichTextSchema } from "./schema.js";
 import { createRichTextTopology, type RichTextTopology } from "./topology.js";
+import { validateRichText } from "./validation.js";
+import type { RichTextValidationFailure } from "./validation.js";
 
 export type RichTextIntent =
   | { readonly type: "selection.set"; readonly selection: RichTextSelection }
   | { readonly type: "selection.remove" }
   | { readonly type: "text.insert"; readonly text: string; readonly historyGroup?: string }
   | { readonly type: "text.delete"; readonly direction: "backward" | "forward"; readonly unit: "character" }
+  | { readonly type: "mark.toggle"; readonly mark: RichTextMark }
   | { readonly type: "block.split" }
   | { readonly type: "block.join"; readonly direction: "backward" | "forward" }
+  | { readonly type: "block.set-type"; readonly nodeType: "paragraph" | "heading"; readonly attrs?: Readonly<Record<string, import("@interactive-os/json-document").JSONValue>> }
+  | { readonly type: "node.insert"; readonly point: RichTextPoint; readonly node: RichTextContentNode }
+  | { readonly type: "node.remove"; readonly nodeId: string }
+  | { readonly type: "node.move"; readonly nodeId: string; readonly point: RichTextPoint }
+  | { readonly type: "node.set-attrs"; readonly nodeId: string; readonly attrs: Readonly<Record<string, import("@interactive-os/json-document").JSONValue>> }
   | { readonly type: "clipboard.paste"; readonly clipboard: RichTextClipboard };
 
 export interface RichTextEditor {
   readonly snapshot: EditingSnapshot<RichTextSelection>;
   readonly pointer: Pointer;
+  readonly schema: RichTextSchema;
   readonly topology: RichTextTopology;
   dispatch(intent: RichTextIntent): EditingResult<RichTextSelection>;
   copy(): RichTextClipboard | null;
@@ -55,14 +66,30 @@ export interface RichTextEditor {
   subscribe(listener: (snapshot: EditingSnapshot<RichTextSelection>) => void): () => void;
 }
 
-export function createRichTextEditor(options: {
+export interface RichTextEditorOptions {
   readonly document: JSONDocument;
   readonly pointer?: Pointer;
   readonly selection?: RichTextSelection;
   readonly createId?: () => string;
-}): RichTextEditor {
+  readonly schema?: RichTextSchema;
+}
+
+export type RichTextEditorCreationResult =
+  | { readonly ok: true; readonly editor: RichTextEditor }
+  | RichTextValidationFailure;
+
+export function tryCreateRichTextEditor(options: RichTextEditorOptions): RichTextEditorCreationResult {
   const pointer = options.pointer ?? "";
-  const initial = readDocument(options.document, pointer);
+  const located = options.document.at(pointer);
+  if (!located.ok) return { ok: false, code: "rich-text.invalid-document", reason: `Rich Text document was not found at ${JSON.stringify(pointer)}.`, pointer };
+  const validation = validateRichText(located.value, { schema: options.schema ?? richTextSchemaV1 });
+  return validation.ok ? { ok: true, editor: createRichTextEditor(options) } : validation;
+}
+
+export function createRichTextEditor(options: RichTextEditorOptions): RichTextEditor {
+  const pointer = options.pointer ?? "";
+  const schema = options.schema ?? richTextSchemaV1;
+  const initial = readDocument(options.document, pointer, schema);
   const initialTopology = createRichTextTopology(initial);
   const selectionFamily = createRangeSelectionFamily<RichTextPoint, RichTextTarget>();
   const session = createEditingSession<RichTextSelection>({
@@ -72,12 +99,12 @@ export function createRichTextEditor(options: {
       : asRichTextSelection(selectionFamily.reconcile(options.selection, { topology: initialTopology }).state),
   });
 
-  let nextId = 0;
-  const createId = options.createId ?? (() => `rich-text-${Date.now().toString(36)}-${++nextId}`);
+  const createId = options.createId ?? createRichTextNodeId;
 
   return {
     get snapshot() { return session.snapshot; },
     pointer,
+    schema,
     get topology() { return createRichTextTopology(value()); },
     dispatch(intent) {
       if (intent.type === "selection.set") {
@@ -86,18 +113,24 @@ export function createRichTextEditor(options: {
         );
         return { ok: true, snapshot: session.select(selection) };
       }
-      if (intent.type === "selection.remove") return replaceSelection("");
-      if (intent.type === "text.insert") return replaceSelection(intent.text, undefined, intent.historyGroup);
+      if (intent.type === "selection.remove") return removeSelections();
+      if (intent.type === "text.insert") return insertText(intent.text, intent.historyGroup);
       if (intent.type === "text.delete") return deleteCharacter(intent.direction);
+      if (intent.type === "mark.toggle") return toggleMark(intent.mark);
       if (intent.type === "block.split") return splitBlock();
       if (intent.type === "block.join") return joinBlock(intent.direction);
+      if (intent.type === "block.set-type") return setBlockType(intent.nodeType, intent.attrs);
+      if (intent.type === "node.insert") return insertNode(intent.point, intent.node);
+      if (intent.type === "node.remove") return removeNode(intent.nodeId);
+      if (intent.type === "node.move") return moveNode(intent.nodeId, intent.point);
+      if (intent.type === "node.set-attrs") return setNodeAttrs(intent.nodeId, intent.attrs);
       return pasteClipboard(intent.clipboard);
     },
     copy: copySelection,
     cut() {
       const clipboard = copySelection();
       if (clipboard === null) return null;
-      return { clipboard, result: replaceSelection("") };
+      return { clipboard, result: removeSelections() };
     },
     undo: () => session.undo(),
     redo: () => session.redo(),
@@ -105,67 +138,107 @@ export function createRichTextEditor(options: {
   };
 
   function value(): RichTextDocument {
-    return readDocument(options.document, pointer);
+    return readDocument(options.document, pointer, schema);
   }
 
-  function replaceSelection(
-    text: string,
-    targetRange?: SelectionRange<RichTextPoint>,
-    historyGroup = "rich-text.typing",
-  ): EditingResult<RichTextSelection> {
-    const range = targetRange ?? primaryRange(session.snapshot.selection);
-    if (!range) return failure("rich-text.selection-empty");
-    if (range.anchor.kind !== "text" || range.focus.kind !== "text" || range.anchor.nodeId !== range.focus.nodeId) {
-      return failure("rich-text.intent-unsupported");
+  function insertText(text: string, historyGroup = "rich-text.typing"): EditingResult<RichTextSelection> {
+    if (text.length === 0) return removeSelections();
+    const ranges = session.snapshot.selection.ranges;
+    if (ranges.length === 0) return failure("rich-text.selection-empty");
+    if (ranges.every((range) => range.anchor.kind === "text" && range.focus.kind === "text" && range.anchor.nodeId === range.focus.nodeId)) {
+      const before = value();
+      let next = before;
+      const nextRanges: SelectionRange<RichTextPoint>[] = [];
+      const grouped = new Map<string, Array<{ start: number; end: number; rangeIndex: number; affinity: RichTextPoint["affinity"] }>>();
+      ranges.forEach((range, rangeIndex) => {
+        const anchor = range.anchor as Extract<RichTextPoint, { readonly kind: "text" }>;
+        const focus = range.focus as Extract<RichTextPoint, { readonly kind: "text" }>;
+        grouped.set(anchor.nodeId, [...(grouped.get(anchor.nodeId) ?? []), {
+          start: Math.min(anchor.offset, focus.offset),
+          end: Math.max(anchor.offset, focus.offset),
+          rangeIndex,
+          affinity: focus.affinity,
+        }]);
+      });
+      for (const [nodeId, replacements] of grouped) {
+        const located = findText(next, nodeId);
+        if (!located) return failure("rich-text.point-not-found");
+        let nextText = located.node.text;
+        for (const replacement of [...replacements].sort((left, right) => right.start - left.start)) {
+          if (!validOffset(nextText, replacement.start) || !validOffset(nextText, replacement.end)) return failure("rich-text.invalid-offset");
+          nextText = nextText.slice(0, replacement.start) + text + nextText.slice(replacement.end);
+        }
+        next = replaceText(next, nodeId, nextText);
+        for (const replacement of replacements) {
+          const shift = replacements
+            .filter((candidate) => candidate.start < replacement.start)
+            .reduce((total, candidate) => total + text.length - (candidate.end - candidate.start), 0);
+          const point: RichTextPoint = {
+            kind: "text",
+            nodeId,
+            offset: replacement.start + shift + text.length,
+            affinity: replacement.affinity,
+          };
+          nextRanges[replacement.rangeIndex] = { anchor: point, focus: point };
+        }
+      }
+      const selectionAfter = asRichTextSelection({ ...session.snapshot.selection, ranges: nextRanges } as RangeSelection<RichTextPoint>);
+      if (ranges.length === 1) {
+        const range = ranges[0]!;
+        const nodeId = (range.anchor as Extract<RichTextPoint, { readonly kind: "text" }>).nodeId;
+        const beforeText = findText(before, nodeId);
+        const afterText = findText(next, nodeId);
+        if (!beforeText || !afterText) return failure("rich-text.point-not-found");
+        return session.apply({
+          operations: [{ op: "replace", path: absolutePath(pointer, [...beforeText.path, "text"]), value: afterText.node.text }],
+          selectionAfter,
+          origin: "rich-text.text.insert",
+          historyGroup,
+        });
+      }
+      return applyWhole(next, selectionAfter, "rich-text.text.insert", historyGroup);
     }
-    const current = value();
-    const located = findText(current, range.anchor.nodeId);
-    if (!located) return failure("rich-text.point-not-found");
-    const start = Math.min(range.anchor.offset, range.focus.offset);
-    const end = Math.max(range.anchor.offset, range.focus.offset);
-    if (!validOffset(located.node.text, start) || !validOffset(located.node.text, end)) {
-      return failure("rich-text.invalid-offset");
+    const removed = removeSelectedValue(value(), session.snapshot.selection, schema, createId);
+    if (!removed.ok) return failure(removed.code);
+    let next = removed.value;
+    const nextRanges: SelectionRange<RichTextPoint>[] = [];
+    const ordered = removed.selection.ranges.map((range, index) => ({ point: range.anchor, index })).reverse();
+    for (const item of ordered) {
+      const textNode: RichTextNode = { id: createId(), type: "text", text, marks: [] };
+      const inserted = insertNodeAtPoint(next, item.point, textNode, createId);
+      if (!inserted) return failure("rich-text.invalid-offset");
+      next = inserted.value;
+      const point: RichTextPoint = { kind: "text", nodeId: textNode.id, offset: text.length, affinity: item.point.affinity };
+      nextRanges[item.index] = { anchor: point, focus: point };
     }
-    if (start === end && text.length === 0) return success(session.snapshot);
-    const nextText = located.node.text.slice(0, start) + text + located.node.text.slice(end);
-    const operations: ReadonlyArray<JSONPatchOperation> = [{
-      op: "replace",
-      path: absolutePath(pointer, [...located.path, "text"]),
-      value: nextText,
-    }];
-    const nextDocument = replaceText(current, located.node.id, nextText);
-    const mapping = replaceMapping(located.node.id, start, end, text.length);
-    const selectionAfter = asRichTextSelection(selectionFamily.map(
-      session.snapshot.selection,
-      mapping,
-      { topology: createRichTextTopology(nextDocument) },
-    ).state);
-    return session.apply({
-      operations,
-      selectionAfter,
-      origin: text.length === 0 ? "rich-text.selection.remove" : "rich-text.text.insert",
-      historyGroup,
-    });
+    return applyWhole(next, asRichTextSelection({ ...removed.selection, ranges: nextRanges } as RangeSelection<RichTextPoint>), "rich-text.text.insert", historyGroup);
+  }
+
+  function removeSelections(): EditingResult<RichTextSelection> {
+    const removed = removeSelectedValue(value(), session.snapshot.selection, schema, createId);
+    if (!removed.ok) return failure(removed.code);
+    if (removed.value === value()) return success(session.snapshot);
+    return applyWhole(removed.value, removed.selection, "rich-text.selection.remove");
   }
 
   function copySelection(): RichTextClipboard | null {
-    const range = primaryRange(session.snapshot.selection);
-    if (!range || range.anchor.kind !== "text" || range.focus.kind !== "text" || range.anchor.nodeId !== range.focus.nodeId) {
-      return null;
-    }
-    const located = findText(value(), range.anchor.nodeId);
-    if (!located) return null;
-    const start = Math.min(range.anchor.offset, range.focus.offset);
-    const end = Math.max(range.anchor.offset, range.focus.offset);
-    if (start === end || !validOffset(located.node.text, start) || !validOffset(located.node.text, end)) return null;
-    const text = located.node.text.slice(start, end);
+    const current = value();
+    const slices = session.snapshot.selection.ranges
+      .map((range) => sliceRange(current, range, schema))
+      .filter((slice): slice is { readonly content: ReadonlyArray<RichTextNode>; readonly openStart: number; readonly openEnd: number } => slice !== null);
+    if (slices.length === 0) return null;
+    const allInline = slices.length === 1 && slices[0]!.openStart === 1;
+    const content = allInline
+      ? slices[0]!.content
+      : slices.flatMap((slice) => slice.openStart === 0 ? slice.content : [{ id: createId(), type: "paragraph", content: slice.content } as RichTextNode]);
+    const text = plainTextForNodes(content);
     return {
       type: RICH_TEXT_CLIPBOARD_MIME,
       slice: {
-        profile: RICH_TEXT_PROFILE_V1,
-        content: [{ ...located.node, text }],
-        openStart: 1,
-        openEnd: 1,
+        profile: current.profile,
+        content,
+        openStart: allInline ? 1 : 0,
+        openEnd: allInline ? 1 : 0,
       },
       text,
       html: "",
@@ -173,110 +246,191 @@ export function createRichTextEditor(options: {
   }
 
   function pasteClipboard(clipboard: RichTextClipboard): EditingResult<RichTextSelection> {
-    if (clipboard.type !== RICH_TEXT_CLIPBOARD_MIME || clipboard.slice.profile !== RICH_TEXT_PROFILE_V1) {
+    if (clipboard.type !== RICH_TEXT_CLIPBOARD_MIME || clipboard.slice.profile !== schema.profile) {
       return failure("rich-text.clipboard-invalid");
     }
-    const range = primaryRange(session.snapshot.selection);
-    if (!range || range.anchor.kind !== "text" || range.focus.kind !== "text" || range.anchor.nodeId !== range.focus.nodeId) {
-      return failure("rich-text.intent-unsupported");
+    const removed = removeSelectedValue(value(), session.snapshot.selection, schema, createId);
+    if (!removed.ok) return failure(removed.code);
+    let next = removed.value;
+    const nextRanges: SelectionRange<RichTextPoint>[] = [];
+    const order = logicalPointOrder(next);
+    const points = removed.selection.ranges.map((range, index) => ({ point: range.anchor, index }))
+      .sort((left, right) => order(right.point) - order(left.point));
+    for (const item of points) {
+      const pasted = pasteSliceAtPoint(next, item.point, clipboard.slice.content, clipboard.slice.openStart, clipboard.slice.openEnd, schema, createId);
+      if (!pasted.ok) return failure(pasted.code);
+      next = pasted.value;
+      nextRanges[item.index] = { anchor: pasted.point, focus: pasted.point };
     }
-    const current = value();
-    const located = findText(current, range.anchor.nodeId);
-    const block = located ? findTextBlock(current, located.node.id) : null;
-    if (!located || !block) return failure("rich-text.point-not-found");
-    const start = Math.min(range.anchor.offset, range.focus.offset);
-    const end = Math.max(range.anchor.offset, range.focus.offset);
-    const before = located.node.text.slice(0, start);
-    const after = located.node.text.slice(end);
-    if (clipboard.slice.openStart === 0 && clipboard.slice.openEnd === 0) {
-      const remappedBlocks = clipboard.slice.content.map((node) => remapNodeIds(node, createId));
-      const last = findLastText(remappedBlocks);
-      if (!last) return failure("rich-text.clipboard-invalid");
-      const textIndex = block.node.content.findIndex((node) => node.id === located.node.id);
-      const prefix = [
-        ...block.node.content.slice(0, textIndex),
-        ...(before.length > 0 ? [{ ...located.node, text: before }] : []),
-      ];
-      const suffix = [
-        ...(after.length > 0 ? [{ ...located.node, id: createId(), text: after }] : []),
-        ...block.node.content.slice(textIndex + 1),
-      ];
-      const replacement: RichTextNode[] = [
-        ...(prefix.length > 0 ? [{ ...block.node, content: prefix } as RichTextBlock] : []),
-        ...remappedBlocks,
-        ...(suffix.length > 0 ? [{ id: createId(), type: "paragraph", content: suffix } as RichTextBlock] : []),
-      ];
-      const next = replaceTopLevelBlock(current, block.node.id, replacement);
-      return session.apply({
-        operations: [{ op: "replace", path: absolutePath(pointer, []), value: detached(next) }],
-        selectionAfter: collapsedAt(last.id, last.text.length),
-        origin: "rich-text.clipboard.paste",
-        historyGroup: "rich-text.clipboard.paste",
-      });
-    }
-    const inserted = collectTexts(clipboard.slice.content);
-    if (inserted.length === 0) return replaceSelection(clipboard.text, undefined, "rich-text.clipboard.paste");
-    const remapped = inserted.map((node) => ({ ...node, id: createId() }));
-    const replacement = [
-      ...(before.length > 0 ? [{ ...located.node, text: before }] : []),
-      ...remapped,
-      ...(after.length > 0 ? [{ ...located.node, id: createId(), text: after }] : []),
-    ];
-    const next = replaceBlockContent(current, block.node.id, located.node.id, replacement);
-    const last = remapped.at(-1)!;
-    const selectionAfter = collapsedAt(last.id, last.text.length);
-    return session.apply({
-      operations: [{ op: "replace", path: absolutePath(pointer, []), value: detached(next) }],
-      selectionAfter,
-      origin: "rich-text.clipboard.paste",
-      historyGroup: "rich-text.clipboard.paste",
-    });
+    return applyWhole(next, asRichTextSelection({ ...removed.selection, ranges: nextRanges } as RangeSelection<RichTextPoint>), "rich-text.clipboard.paste", "rich-text.clipboard.paste");
   }
 
   function splitBlock(): EditingResult<RichTextSelection> {
-    const range = primaryRange(session.snapshot.selection);
-    if (!range || range.anchor.kind !== "text" || range.focus.kind !== "text" || range.anchor.nodeId !== range.focus.nodeId) {
-      return failure("rich-text.intent-unsupported");
+    const originalRange = primaryRange(session.snapshot.selection);
+    if (!originalRange) return failure("rich-text.selection-empty");
+    let current = value();
+    let selection = session.snapshot.selection;
+    if (!pointsEqual(originalRange.anchor, originalRange.focus)) {
+      const removed = removeSelectedValue(current, selection, schema, createId);
+      if (!removed.ok) return failure(removed.code);
+      current = removed.value;
+      selection = removed.selection;
     }
-    if (range.anchor.offset !== range.focus.offset) return failure("rich-text.intent-unsupported");
-    const current = value();
-    const block = findTextBlock(current, range.anchor.nodeId);
+    const range = primaryRange(selection);
+    if (!range) return failure("rich-text.invalid-offset");
+    const block = findPointBlock(current, range.anchor);
     if (!block) return failure("rich-text.point-not-found");
+    if (range.anchor.kind === "child") {
+      if (range.anchor.nodeId !== block.node.id || range.anchor.offset < 0 || range.anchor.offset > block.node.content.length) {
+        return failure("rich-text.invalid-offset");
+      }
+      const right = splitBlockShell(block.node, createId(), block.node.content.slice(range.anchor.offset));
+      const left = { ...block.node, content: block.node.content.slice(0, range.anchor.offset) } as RichTextBlock;
+      const next = replaceNodeWithMany(current, block.node.id, [left, right]);
+      return applyWhole(next, collapsedAtPoint({ kind: "child", nodeId: right.id, offset: 0, affinity: "forward" }), "rich-text.block.split");
+    }
     const textIndex = block.node.content.findIndex((node) => node.id === range.anchor.nodeId);
     const text = block.node.content[textIndex];
     if (!text || !isRichTextText(text) || !validOffset(text.text, range.anchor.offset)) return failure("rich-text.invalid-offset");
-    const leftText = { ...text, text: text.text.slice(0, range.anchor.offset) };
-    const rightText = { ...text, id: createId(), text: text.text.slice(range.anchor.offset) };
-    const left = { ...block.node, content: [...block.node.content.slice(0, textIndex), leftText] };
-    const right: RichTextBlock = block.node.type === "heading"
-      ? {
-          id: createId(),
-          type: "paragraph",
-          content: [rightText, ...block.node.content.slice(textIndex + 1)],
-        }
-      : {
-          ...block.node,
-          id: createId(),
-          content: [rightText, ...block.node.content.slice(textIndex + 1)],
-        };
-    const next = replaceTopLevelBlock(current, block.node.id, [left as RichTextNode, right]);
+    const leftValue = text.text.slice(0, range.anchor.offset);
+    const rightValue = text.text.slice(range.anchor.offset);
+    const rightText = rightValue.length === 0 ? null : { ...text, id: createId(), text: rightValue };
+    const leftContent = [
+      ...block.node.content.slice(0, textIndex),
+      ...(leftValue.length === 0 ? [] : [{ ...text, text: leftValue }]),
+    ];
+    const rightContent = [
+      ...(rightText === null ? [] : [rightText]),
+      ...block.node.content.slice(textIndex + 1),
+    ];
+    const left = { ...block.node, content: leftContent };
+    const right = splitBlockShell(block.node, createId(), rightContent);
+    const next = replaceNodeWithMany(current, block.node.id, [left as RichTextBlock, right]);
+    const point: RichTextPoint = rightText === null
+      ? { kind: "child", nodeId: right.id, offset: 0, affinity: "forward" }
+      : { kind: "text", nodeId: rightText.id, offset: 0, affinity: "forward" };
+    return applyWhole(next, collapsedAtPoint(point), "rich-text.block.split");
+  }
+
+  function toggleMark(mark: RichTextMark): EditingResult<RichTextSelection> {
+    if (schema.marks[mark.type] === undefined) return failure("rich-text.schema-violation");
+    const targets = selectedTextIntervals(value(), session.snapshot.selection);
+    if (targets.length === 0) return success(session.snapshot);
+    const remove = targets.every((target) => {
+      const located = findText(value(), target.nodeId);
+      return located?.node.marks.some((candidate) => candidate.type === mark.type) === true;
+    });
+    const before = value();
+    let next = before;
+    for (const group of groupIntervals(targets)) {
+      const located = findText(next, group.nodeId);
+      if (!located) return failure("rich-text.point-not-found");
+      const replacements = markedSegments(located.node, group.intervals, mark, remove, schema, createId);
+      next = replaceNodeWithMany(next, located.node.id, replacements);
+    }
+    const normalized = normalizeRichText(next, { schema, createId });
+    if (!normalized.ok) return failure(normalized.code);
+    const selectionAfter = mapSelectionByTextOrder(before, normalized.value, session.snapshot.selection);
+    return applyWhole(normalized.value, selectionAfter, "rich-text.mark.toggle");
+  }
+
+  function setBlockType(
+    nodeType: "paragraph" | "heading",
+    attrs?: Readonly<Record<string, import("@interactive-os/json-document").JSONValue>>,
+  ): EditingResult<RichTextSelection> {
+    if (nodeType === "heading" && (!attrs || !Number.isInteger(attrs.level) || Number(attrs.level) < 1 || Number(attrs.level) > 6)) {
+      return failure("rich-text.schema-violation");
+    }
+    const before = value();
+    const blockIds = selectedTextBlockIds(before, session.snapshot.selection);
+    if (blockIds.length === 0) return failure("rich-text.point-not-found");
+    let next = before;
+    for (const blockId of blockIds) {
+      next = replaceNode(next, blockId, (node) => {
+        if (node.type !== "paragraph" && node.type !== "heading") return node;
+        return (nodeType === "paragraph"
+          ? { id: node.id, type: "paragraph", content: node.content }
+          : { id: node.id, type: "heading", attrs: { level: Number(attrs!.level) as 1 | 2 | 3 | 4 | 5 | 6 }, content: node.content }) as RichTextContentNode;
+      });
+    }
+    return applyWhole(next, session.snapshot.selection, "rich-text.block.set-type");
+  }
+
+  function insertNode(point: RichTextPoint, node: RichTextContentNode): EditingResult<RichTextSelection> {
+    const current = value();
+    if (findNode(current, node.id)) return failure("rich-text.duplicate-id");
+    const inserted = insertNodeAtPoint(current, point, node, createId);
+    if (inserted === null) return failure("rich-text.invalid-offset");
+    const selectionAfter = pointAfterInsertedNode(inserted.value, node.id, point.affinity);
+    return applyWhole(inserted.value, selectionAfter, "rich-text.node.insert");
+  }
+
+  function removeNode(nodeId: string): EditingResult<RichTextSelection> {
+    const current = value();
+    const located = findNode(current, nodeId);
+    if (!located || located.parent === null) return failure("rich-text.point-not-found");
+    const next = removeNodeById(current, nodeId);
+    const normalized = normalizeRichText(next, { schema, createId });
+    if (!normalized.ok) return failure(normalized.code);
+    const point: RichTextPoint = {
+      kind: "child",
+      nodeId: located.parent.id,
+      offset: Math.min(located.index, located.parent.content.length - 1),
+      affinity: "forward",
+    };
+    return applyWhole(normalized.value, collapsedAtPoint(reconcileOrFirst(normalized.value, point)), "rich-text.node.remove");
+  }
+
+  function moveNode(nodeId: string, point: RichTextPoint): EditingResult<RichTextSelection> {
+    const current = value();
+    const located = findNode(current, nodeId);
+    if (!located || located.parent === null || point.kind !== "child" || isDescendant(current, nodeId, point.nodeId)) {
+      return failure("rich-text.invalid-offset");
+    }
+    let destinationOffset = point.offset;
+    if (located.parent.id === point.nodeId && located.index < destinationOffset) destinationOffset -= 1;
+    const without = removeNodeById(current, nodeId);
+    const inserted = insertNodeAtPoint(without, { ...point, offset: destinationOffset }, located.node, createId);
+    if (inserted === null) return failure("rich-text.invalid-offset");
+    const nextSelection = mapSelectionByExistingIds(session.snapshot.selection, inserted.value);
+    return applyWhole(inserted.value, nextSelection, "rich-text.node.move");
+  }
+
+  function setNodeAttrs(
+    nodeId: string,
+    attrs: Readonly<Record<string, import("@interactive-os/json-document").JSONValue>>,
+  ): EditingResult<RichTextSelection> {
+    if (!findNode(value(), nodeId)) return failure("rich-text.point-not-found");
+    const next = replaceNode(value(), nodeId, (node) => ({ ...node, attrs } as RichTextNode));
+    return applyWhole(next, session.snapshot.selection, "rich-text.node.set-attrs");
+  }
+
+  function applyWhole(
+    next: RichTextDocument,
+    selectionAfter: RichTextSelection,
+    origin: string,
+    historyGroup?: string,
+  ): EditingResult<RichTextSelection> {
+    const validation = validateRichText(next, { schema });
+    if (!validation.ok) return failure(validation.code);
     return session.apply({
       operations: [{ op: "replace", path: absolutePath(pointer, []), value: detached(next) }],
-      selectionAfter: collapsedAt(rightText.id, 0),
-      origin: "rich-text.block.split",
+      selectionAfter,
+      origin,
+      ...(historyGroup === undefined ? {} : { historyGroup }),
     });
   }
 
   function deleteCharacter(direction: "backward" | "forward"): EditingResult<RichTextSelection> {
     const range = primaryRange(session.snapshot.selection);
     if (!range) return failure("rich-text.selection-empty");
-    if (range.anchor.kind !== "text" || range.focus.kind !== "text" || range.anchor.nodeId !== range.focus.nodeId) {
-      return failure("rich-text.intent-unsupported");
-    }
-    if (range.anchor.offset !== range.focus.offset) return replaceSelection("");
-    const located = findText(value(), range.anchor.nodeId);
+    if (!pointsEqual(range.anchor, range.focus)) return removeSelections();
+    const resolved = resolveDeletionPoint(value(), range.anchor, direction);
+    if (resolved?.kind === "node") return removeNode(resolved.nodeId);
+    if (!resolved) return success(session.snapshot);
+    const located = findText(value(), resolved.nodeId);
     if (!located) return failure("rich-text.point-not-found");
-    const offset = range.anchor.offset;
+    const offset = resolved.offset;
     const boundary = direction === "backward"
       ? previousScalarOffset(located.node.text, offset)
       : nextScalarOffset(located.node.text, offset);
@@ -284,27 +438,30 @@ export function createRichTextEditor(options: {
     const selection = {
       kind: "range",
       ranges: [{
-        anchor: { ...range.anchor, offset: Math.min(offset, boundary), affinity: "forward" },
-        focus: { ...range.focus, offset: Math.max(offset, boundary), affinity: "forward" },
+        anchor: { ...resolved, offset: Math.min(offset, boundary), affinity: "forward" },
+        focus: { ...resolved, offset: Math.max(offset, boundary), affinity: "forward" },
       }],
       primaryIndex: 0,
     } satisfies RichTextSelection;
-    return replaceSelection("", selection.ranges[0]);
+    const removed = removeSelectedValue(value(), selection, schema, createId);
+    if (!removed.ok) return failure(removed.code);
+    return applyWhole(removed.value, removed.selection, "rich-text.text.delete", "rich-text.typing");
   }
 
   function joinBlock(direction: "backward" | "forward"): EditingResult<RichTextSelection> {
     const range = primaryRange(session.snapshot.selection);
-    if (!range || range.anchor.kind !== "text" || range.focus.kind !== "text" || range.anchor.nodeId !== range.focus.nodeId) {
-      return failure("rich-text.intent-unsupported");
-    }
+    if (!range) return failure("rich-text.invalid-offset");
     const current = value();
-    const block = findTextBlock(current, range.anchor.nodeId);
+    const block = findPointBlock(current, range.anchor);
     if (!block) return failure("rich-text.point-not-found");
-    const blockIndex = current.content.findIndex((node) => node.id === block.node.id);
+    const locatedBlock = findNode(current, block.node.id);
+    if (!locatedBlock?.parent) return failure("rich-text.point-not-found");
+    const blockIndex = locatedBlock.index;
     const adjacentIndex = direction === "backward" ? blockIndex - 1 : blockIndex + 1;
-    const adjacent = current.content[adjacentIndex];
-    if (!adjacent || (adjacent.type !== "paragraph" && adjacent.type !== "heading") || adjacent.type !== block.node.type) {
-      return success(session.snapshot);
+    const adjacent = locatedBlock.parent.content[adjacentIndex];
+    if (!adjacent) return success(session.snapshot);
+    if (!isJoinableBlock(adjacent) || !blocksCanJoin(block.node, adjacent)) {
+      return failure("rich-text.intent-unsupported");
     }
     const adjacentBlock = adjacent as RichTextBlock;
     const first = direction === "backward" ? adjacentBlock : block.node;
@@ -314,9 +471,11 @@ export function createRichTextEditor(options: {
     const canMergeText = lastInline !== undefined && firstInline !== undefined
       && isRichTextText(lastInline) && isRichTextText(firstInline)
       && JSON.stringify(lastInline.marks) === JSON.stringify(firstInline.marks);
-    const caretNodeId = canMergeText ? lastInline.id : firstInline?.id;
-    const caretOffset = canMergeText ? lastInline.text.length : 0;
-    if (caretNodeId === undefined) return failure("rich-text.intent-unsupported");
+    const joinOffset = first.content.length;
+    if (lastInline === undefined && firstInline === undefined) {
+      const next = replaceNodeWithMany(current, first.id, [joinedEmptyBlocks(first, second)]);
+      return applyWhole(removeNodeById(next, second.id), collapsedAtPoint({ kind: "child", nodeId: first.id, offset: 0, affinity: "forward" }), "rich-text.block.join");
+    }
     const content = canMergeText
       ? [
           ...first.content.slice(0, -1),
@@ -325,22 +484,17 @@ export function createRichTextEditor(options: {
         ]
       : [...first.content, ...second.content];
     const joined = { ...first, content } as RichTextBlock;
-    const start = Math.min(blockIndex, adjacentIndex);
-    const next: RichTextDocument = {
-      ...current,
-      content: [...current.content.slice(0, start), joined, ...current.content.slice(start + 2)],
-    };
-    return session.apply({
-      operations: [{ op: "replace", path: absolutePath(pointer, []), value: detached(next) }],
-      selectionAfter: collapsedAt(caretNodeId, caretOffset),
-      origin: "rich-text.block.join",
-    });
+    const next = replaceNodeWithMany(current, first.id, [joined]);
+    const caret = canMergeText
+      ? { kind: "text" as const, nodeId: lastInline.id, offset: lastInline.text.length, affinity: "forward" as const }
+      : { kind: "child" as const, nodeId: first.id, offset: joinOffset, affinity: "forward" as const };
+    return applyWhole(removeNodeById(next, second.id), collapsedAtPoint(caret), "rich-text.block.join");
   }
 }
 
-function readDocument(document: JSONDocument, pointer: Pointer): RichTextDocument {
+function readDocument(document: JSONDocument, pointer: Pointer, schema: RichTextSchema = richTextSchemaV1): RichTextDocument {
   const result = document.at(pointer);
-  if (!result.ok || !isRichTextDocument(result.value)) {
+  if (!result.ok || !isRichTextDocument(result.value) || !validateRichText(result.value, { schema }).ok) {
     throw new TypeError(`Rich Text document was not found at ${JSON.stringify(pointer)}.`);
   }
   createRichTextTopology(result.value);
@@ -351,7 +505,17 @@ function firstSelection(document: RichTextDocument): RichTextSelection {
   const text = findFirstText(document);
   return asRichTextSelection(text
     ? collapsedRangeSelection({ kind: "text", nodeId: text.id, offset: 0, affinity: "forward" })
-    : emptyRangeSelection());
+    : collapsedRangeSelection(firstChildPoint(document)));
+}
+
+function firstChildPoint(document: RichTextDocument): RichTextPoint {
+  let node: RichTextDocument | RichTextNode = document;
+  while (hasRichTextContent(node) && node.content.length > 0) {
+    const child: RichTextNode = node.content[0]!;
+    if (!hasRichTextContent(child) || child.content.length > 0) break;
+    node = child;
+  }
+  return { kind: "child", nodeId: node.id, offset: 0, affinity: "forward" };
 }
 
 function findFirstText(node: RichTextDocument | RichTextNode): ReturnType<typeof asText> {
@@ -392,51 +556,38 @@ function replaceText(document: RichTextDocument, id: string, text: string): Rich
   }
 }
 
-type RichTextBlock = Extract<RichTextNode, { readonly type: "paragraph" | "heading" }>;
+type RichTextBlock = Extract<RichTextNode, { readonly type: "paragraph" | "heading" | "codeBlock" }>;
 
 function findTextBlock(
   document: RichTextDocument,
   textId: string,
 ): { readonly node: RichTextBlock } | null {
-  for (const node of document.content) {
-    if ((node.type === "paragraph" || node.type === "heading") && node.content.some((child) => child.id === textId)) {
-      return { node: node as RichTextBlock };
-    }
-  }
-  return null;
+  const node = findAncestors(document, textId).reverse()
+    .find(isJoinableBlock);
+  return node ? { node: node as RichTextBlock } : null;
 }
 
-function replaceTopLevelBlock(
-  document: RichTextDocument,
-  blockId: string,
-  replacement: ReadonlyArray<RichTextNode>,
-): RichTextDocument {
-  const index = document.content.findIndex((node) => node.id === blockId);
-  if (index < 0) return document;
-  return {
-    ...document,
-    content: [...document.content.slice(0, index), ...replacement, ...document.content.slice(index + 1)],
-  };
+function findPointBlock(document: RichTextDocument, point: RichTextPoint): { readonly node: RichTextBlock } | null {
+  if (point.kind === "text") return findTextBlock(document, point.nodeId);
+  const direct = findNode(document, point.nodeId)?.node;
+  if (direct && isJoinableBlock(direct)) return { node: direct };
+  const ancestor = findAncestors(document, point.nodeId).reverse().find(isJoinableBlock);
+  return ancestor ? { node: ancestor } : null;
 }
 
-function replaceBlockContent(
-  document: RichTextDocument,
-  blockId: string,
-  textId: string,
-  replacement: ReadonlyArray<Extract<RichTextNode, { readonly type: "text" }>>,
-): RichTextDocument {
-  return {
-    ...document,
-    content: document.content.map((node) => {
-      if ((node.type !== "paragraph" && node.type !== "heading") || node.id !== blockId) return node;
-      const index = node.content.findIndex((child) => child.id === textId);
-      if (index < 0) return node;
-      return {
-        ...node,
-        content: [...node.content.slice(0, index), ...replacement, ...node.content.slice(index + 1)],
-      };
-    }),
-  };
+function isJoinableBlock(node: RichTextNode | RichTextDocument): node is RichTextBlock {
+  return node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock";
+}
+
+function blocksCanJoin(left: RichTextBlock, right: RichTextBlock): boolean {
+  const leftInline = left.type === "paragraph" || left.type === "heading";
+  const rightInline = right.type === "paragraph" || right.type === "heading";
+  return (leftInline && rightInline) || (left.type === "codeBlock" && right.type === "codeBlock");
+}
+
+function splitBlockShell(block: RichTextBlock, id: string, content: RichTextBlock["content"]): RichTextBlock {
+  if (block.type === "heading") return { id, type: "paragraph", content } as RichTextBlock;
+  return { ...block, id, content } as RichTextBlock;
 }
 
 function collectTexts(nodes: ReadonlyArray<RichTextNode>): ReadonlyArray<Extract<RichTextNode, { readonly type: "text" }>> {
@@ -448,25 +599,33 @@ function collectTexts(nodes: ReadonlyArray<RichTextNode>): ReadonlyArray<Extract
   return texts;
 }
 
-function remapNodeIds(node: RichTextNode, createId: () => string): RichTextNode {
-  if (!hasRichTextContent(node)) return { ...node, id: createId() };
-  return {
-    ...node,
-    id: createId(),
-    content: node.content.map((child) => remapNodeIds(child, createId)),
-  } as RichTextNode;
-}
+function remapSliceNodeIds(
+  nodes: ReadonlyArray<RichTextNode>,
+  schema: RichTextSchema,
+  createId: () => string,
+): RichTextNode[] {
+  const ids = new Map<string, string>();
+  const collect = (node: RichTextNode) => {
+    ids.set(node.id, createId());
+    if (hasRichTextContent(node)) node.content.forEach(collect);
+  };
+  nodes.forEach(collect);
+  return nodes.map(remap);
 
-function findLastText(nodes: ReadonlyArray<RichTextNode>): Extract<RichTextNode, { readonly type: "text" }> | null {
-  for (let index = nodes.length - 1; index >= 0; index -= 1) {
-    const node = nodes[index]!;
-    if (isRichTextText(node)) return node;
-    if (hasRichTextContent(node)) {
-      const found = findLastText(node.content);
-      if (found) return found;
-    }
+  function remap(node: RichTextNode): RichTextNode {
+    const spec = schema.nodes[node.type];
+    const record = node as RichTextNode & { readonly attrs?: Readonly<Record<string, JSONValue>> };
+    const attrs = record.attrs === undefined ? undefined : Object.fromEntries(Object.entries(record.attrs).map(([name, value]) => {
+      const mapped = spec?.attrs[name]?.nodeReference === true && typeof value === "string" ? ids.get(value) ?? value : value;
+      return [name, mapped];
+    }));
+    return {
+      ...node,
+      id: ids.get(node.id)!,
+      ...(attrs === undefined ? {} : { attrs }),
+      ...(hasRichTextContent(node) ? { content: node.content.map(remap) } : {}),
+    } as RichTextNode;
   }
-  return null;
 }
 
 function collapsedAt(nodeId: string, offset: number): RichTextSelection {
@@ -482,16 +641,581 @@ function detached(document: RichTextDocument): RichTextDocument {
   return JSON.parse(JSON.stringify(document)) as RichTextDocument;
 }
 
-function replaceMapping(nodeId: string, start: number, end: number, insertedLength: number): RangeSelectionMapping<RichTextPoint> {
+interface LocatedRichTextNode {
+  readonly node: RichTextNode;
+  readonly parent: (RichTextNode | RichTextDocument) & { readonly content: ReadonlyArray<RichTextNode> } | null;
+  readonly index: number;
+}
+
+interface TextInterval {
+  readonly nodeId: string;
+  readonly from: number;
+  readonly to: number;
+}
+
+function findNode(
+  document: RichTextDocument,
+  nodeId: string,
+): LocatedRichTextNode | null {
+  return visit(document, null, -1);
+
+  function visit(
+    node: RichTextNode | RichTextDocument,
+    parent: LocatedRichTextNode["parent"],
+    index: number,
+  ): LocatedRichTextNode | null {
+    if (node.id === nodeId && node.type !== "doc") return { node: node as RichTextNode, parent, index };
+    if (!hasRichTextContent(node)) return null;
+    for (let childIndex = 0; childIndex < node.content.length; childIndex += 1) {
+      const found = visit(node.content[childIndex]!, node, childIndex);
+      if (found) return found;
+    }
+    return null;
+  }
+}
+
+function replaceNode(
+  document: RichTextDocument,
+  nodeId: string,
+  replacement: (node: RichTextNode) => RichTextNode,
+): RichTextDocument {
+  return visit(document) as RichTextDocument;
+  function visit(node: RichTextNode | RichTextDocument): RichTextNode | RichTextDocument {
+    if (node.type !== "doc" && node.id === nodeId) return replacement(node);
+    if (!hasRichTextContent(node)) return node;
+    return { ...node, content: node.content.map(visit) } as RichTextNode | RichTextDocument;
+  }
+}
+
+function replaceNodeWithMany(
+  document: RichTextDocument,
+  nodeId: string,
+  replacement: ReadonlyArray<RichTextNode>,
+): RichTextDocument {
+  return visit(document) as RichTextDocument;
+  function visit(node: RichTextNode | RichTextDocument): RichTextNode | RichTextDocument {
+    if (!hasRichTextContent(node)) return node;
+    const children: RichTextNode[] = [];
+    for (const child of node.content) {
+      if (child.id === nodeId) children.push(...replacement);
+      else children.push(visit(child) as RichTextNode);
+    }
+    return { ...node, content: children } as RichTextNode | RichTextDocument;
+  }
+}
+
+function removeNodeById(document: RichTextDocument, nodeId: string): RichTextDocument {
+  return replaceNodeWithMany(document, nodeId, []);
+}
+
+function insertNodeAtPoint(
+  document: RichTextDocument,
+  point: RichTextPoint,
+  node: RichTextNode,
+  createId: () => string,
+): { readonly value: RichTextDocument } | null {
+  if (point.kind === "child") {
+    const container = point.nodeId === document.id ? document : findNode(document, point.nodeId)?.node;
+    if (!container || !hasRichTextContent(container) || point.offset < 0 || point.offset > container.content.length) return null;
+    const value = replaceContainerContent(document, container.id, [
+      ...container.content.slice(0, point.offset),
+      node,
+      ...container.content.slice(point.offset),
+    ]);
+    return { value };
+  }
+  const located = findNode(document, point.nodeId);
+  if (!located || !isRichTextText(located.node) || located.parent === null || !validOffset(located.node.text, point.offset)) return null;
+  if (point.offset === 0) return { value: replaceNodeWithMany(document, located.node.id, [node, located.node]) };
+  if (point.offset === located.node.text.length) return { value: replaceNodeWithMany(document, located.node.id, [located.node, node]) };
   return {
-    mapPoint(point) {
-      if (point.kind !== "text" || point.nodeId !== nodeId) return point;
-      if (point.offset < start) return point;
-      if (point.offset > end) return { ...point, offset: point.offset + insertedLength - (end - start) };
-      if (start === end && point.affinity === "backward") return point;
-      return { ...point, offset: start + insertedLength };
-    },
+    value: replaceNodeWithMany(document, located.node.id, [
+      { ...located.node, text: located.node.text.slice(0, point.offset) },
+      node,
+      { ...located.node, id: createId(), text: located.node.text.slice(point.offset) },
+    ]),
   };
+}
+
+function replaceContainerContent(
+  document: RichTextDocument,
+  containerId: string,
+  content: ReadonlyArray<RichTextNode>,
+): RichTextDocument {
+  if (document.id === containerId) return { ...document, content: content as RichTextDocument["content"] };
+  return replaceNode(document, containerId, (node) => ({ ...node, content } as RichTextNode));
+}
+
+function pointAfterInsertedNode(document: RichTextDocument, nodeId: string, affinity: RichTextPoint["affinity"]): RichTextSelection {
+  const located = findNode(document, nodeId);
+  if (!located) return firstSelection(document);
+  if (isRichTextText(located.node)) return collapsedAtPoint({ kind: "text", nodeId, offset: located.node.text.length, affinity });
+  if (located.parent === null) return firstSelection(document);
+  return collapsedAtPoint({ kind: "child", nodeId: located.parent.id, offset: located.index + 1, affinity });
+}
+
+function selectedTextIntervals(document: RichTextDocument, selection: RichTextSelection): TextInterval[] {
+  const topology = createRichTextTopology(document);
+  return selection.ranges.flatMap((range) => topology.interval(range.anchor, range.focus))
+    .filter((target): target is Extract<RichTextTarget, { readonly kind: "text" }> => target.kind === "text" && target.from < target.to)
+    .map((target) => ({ nodeId: target.nodeId, from: target.from, to: target.to }));
+}
+
+function groupIntervals(intervals: ReadonlyArray<TextInterval>): ReadonlyArray<{
+  readonly nodeId: string;
+  readonly intervals: ReadonlyArray<{ readonly from: number; readonly to: number }>;
+}> {
+  const grouped = new Map<string, Array<{ from: number; to: number }>>();
+  for (const interval of intervals) grouped.set(interval.nodeId, [...(grouped.get(interval.nodeId) ?? []), { from: interval.from, to: interval.to }]);
+  return [...grouped].map(([nodeId, values]) => {
+    const sorted = values.sort((left, right) => left.from - right.from || left.to - right.to);
+    const merged: Array<{ from: number; to: number }> = [];
+    for (const interval of sorted) {
+      const previous = merged.at(-1);
+      if (previous && interval.from <= previous.to) previous.to = Math.max(previous.to, interval.to);
+      else merged.push({ ...interval });
+    }
+    return { nodeId, intervals: merged };
+  });
+}
+
+function markedSegments(
+  node: Extract<RichTextNode, { readonly type: "text" }>,
+  intervals: ReadonlyArray<{ readonly from: number; readonly to: number }>,
+  mark: RichTextMark,
+  remove: boolean,
+  schema: RichTextSchema,
+  createId: () => string,
+): ReadonlyArray<RichTextNode> {
+  const boundaries = [...new Set([0, node.text.length, ...intervals.flatMap((interval) => [interval.from, interval.to])])].sort((a, b) => a - b);
+  const nodes: RichTextNode[] = [];
+  for (let index = 0; index < boundaries.length - 1; index += 1) {
+    const from = boundaries[index]!;
+    const to = boundaries[index + 1]!;
+    if (from === to) continue;
+    const selected = intervals.some((interval) => from >= interval.from && to <= interval.to);
+    let marks = [...node.marks];
+    if (selected) {
+      marks = marks.filter((candidate) => candidate.type !== mark.type);
+      if (!remove) {
+        if (mark.type === "code") marks = [];
+        else marks = marks.filter((candidate) => candidate.type !== "code");
+        marks.push(mark);
+      }
+      marks.sort((left, right) => compareRichTextMarks(schema, left.type, right.type));
+    }
+    nodes.push({ ...node, id: nodes.length === 0 ? node.id : createId(), text: node.text.slice(from, to), marks });
+  }
+  return nodes;
+}
+
+function selectedTextBlockIds(document: RichTextDocument, selection: RichTextSelection): ReadonlyArray<string> {
+  const ids = new Set<string>();
+  const points = selection.ranges.flatMap((range) => [range.anchor, range.focus]);
+  for (const point of points) {
+    const ancestors = findAncestors(document, point.nodeId);
+    const block = ancestors.reverse().find((node) => node.type === "paragraph" || node.type === "heading");
+    if (block) ids.add(block.id);
+  }
+  for (const target of selectedTextIntervals(document, selection)) {
+    const block = findAncestors(document, target.nodeId).reverse().find((node) => node.type === "paragraph" || node.type === "heading");
+    if (block) ids.add(block.id);
+  }
+  return [...ids];
+}
+
+function findAncestors(document: RichTextDocument, nodeId: string): Array<RichTextNode | RichTextDocument> {
+  const path: Array<RichTextNode | RichTextDocument> = [];
+  return visit(document) ? path : [];
+  function visit(node: RichTextNode | RichTextDocument): boolean {
+    path.push(node);
+    if (node.id === nodeId) return true;
+    if (hasRichTextContent(node)) for (const child of node.content) if (visit(child)) return true;
+    path.pop();
+    return false;
+  }
+}
+
+function mapSelectionByTextOrder(
+  before: RichTextDocument,
+  after: RichTextDocument,
+  selection: RichTextSelection,
+): RichTextSelection {
+  return {
+    ...selection,
+    ranges: selection.ranges.map((range) => ({
+      anchor: mapPoint(range.anchor),
+      focus: mapPoint(range.focus),
+    })),
+  } as RichTextSelection;
+
+  function mapPoint(point: RichTextPoint): RichTextPoint {
+    if (point.kind === "child") return createRichTextTopology(after).reconcilePoint(point) ?? firstSelection(after).ranges[0]!.anchor;
+    const offset = absoluteTextOffset(before, point);
+    return pointAtTextOffset(after, offset, point.affinity);
+  }
+}
+
+function absoluteTextOffset(document: RichTextDocument, point: Extract<RichTextPoint, { readonly kind: "text" }>): number {
+  let total = 0;
+  for (const text of allTextNodes(document)) {
+    if (text.id === point.nodeId) return total + Math.min(point.offset, text.text.length);
+    total += text.text.length;
+  }
+  return total;
+}
+
+function pointAtTextOffset(document: RichTextDocument, absolute: number, affinity: RichTextPoint["affinity"]): RichTextPoint {
+  let remaining = absolute;
+  const texts = allTextNodes(document);
+  for (const text of texts) {
+    if (remaining <= text.text.length) return { kind: "text", nodeId: text.id, offset: remaining, affinity };
+    remaining -= text.text.length;
+  }
+  const last = texts.at(-1);
+  return last ? { kind: "text", nodeId: last.id, offset: last.text.length, affinity } : firstSelection(document).ranges[0]!.anchor;
+}
+
+function allTextNodes(document: RichTextDocument): Array<Extract<RichTextNode, { readonly type: "text" }>> {
+  const output: Array<Extract<RichTextNode, { readonly type: "text" }>> = [];
+  visit(document);
+  return output;
+  function visit(node: RichTextNode | RichTextDocument): void {
+    if (isRichTextText(node)) output.push(node);
+    else if (hasRichTextContent(node)) node.content.forEach(visit);
+  }
+}
+
+function mapSelectionByExistingIds(selection: RichTextSelection, document: RichTextDocument): RichTextSelection {
+  const topology = createRichTextTopology(document);
+  return asRichTextSelection(createRangeSelectionFamily<RichTextPoint, RichTextTarget>().reconcile(selection, { topology }).state);
+}
+
+function reconcileOrFirst(document: RichTextDocument, point: RichTextPoint): RichTextPoint {
+  return createRichTextTopology(document).reconcilePoint(point) ?? firstSelection(document).ranges[0]!.anchor;
+}
+
+function collapsedAtPoint(point: RichTextPoint): RichTextSelection {
+  return asRichTextSelection(collapsedRangeSelection(point));
+}
+
+function isDescendant(document: RichTextDocument, nodeId: string, possibleDescendantId: string): boolean {
+  const located = findNode(document, nodeId);
+  if (!located || !hasRichTextContent(located.node)) return false;
+  return findNode({ profile: document.profile, id: "probe", type: "doc", content: located.node.content as RichTextDocument["content"] }, possibleDescendantId) !== null;
+}
+
+type RemoveSelectedResult =
+  | { readonly ok: true; readonly value: RichTextDocument; readonly selection: RichTextSelection }
+  | { readonly ok: false; readonly code: string };
+
+function removeSelectedValue(
+  document: RichTextDocument,
+  selection: RichTextSelection,
+  schema: RichTextSchema,
+  createId: () => string,
+): RemoveSelectedResult {
+  const topology = createRichTextTopology(document);
+  const targets = selection.ranges.flatMap((range) => topology.interval(range.anchor, range.focus));
+  const intervals = groupIntervals(targets
+    .filter((target): target is Extract<RichTextTarget, { readonly kind: "text" }> => target.kind === "text" && target.from < target.to)
+    .map((target) => ({ nodeId: target.nodeId, from: target.from, to: target.to })));
+  const atoms = [...new Set(targets.filter((target) => target.kind === "node").map((target) => target.nodeId))];
+  if (intervals.length === 0 && atoms.length === 0) return { ok: true, value: document, selection };
+  let next = document;
+  for (const group of intervals) {
+    const located = findText(next, group.nodeId);
+    if (!located) continue;
+    let text = located.node.text;
+    for (const interval of [...group.intervals].sort((left, right) => right.from - left.from)) {
+      text = text.slice(0, interval.from) + text.slice(interval.to);
+    }
+    next = replaceText(next, group.nodeId, text);
+  }
+  for (const nodeId of atoms) next = removeNodeById(next, nodeId);
+  const normalized = normalizeRichText(next, { schema, createId });
+  if (!normalized.ok) return { ok: false, code: normalized.code };
+  const ranges = selection.ranges.map((range) => {
+    const start = earlierPoint(document, range.anchor, range.focus);
+    const point = mapPointAfterRemoval(document, normalized.value, start, intervals);
+    return { anchor: point, focus: point };
+  });
+  return { ok: true, value: normalized.value, selection: { ...selection, ranges } as RichTextSelection };
+}
+
+function earlierPoint(document: RichTextDocument, left: RichTextPoint, right: RichTextPoint): RichTextPoint {
+  const order = logicalPointOrder(document);
+  return (order(left) <= order(right)) ? left : right;
+}
+
+function logicalPointOrder(document: RichTextDocument): (point: RichTextPoint) => number {
+  const positions = new Map<string, number>();
+  let sequence = 0;
+  visit(document);
+  return (point) => (positions.get(point.nodeId) ?? Number.MAX_SAFE_INTEGER) * 1_000_000 + point.offset;
+  function visit(node: RichTextNode | RichTextDocument): void {
+    positions.set(node.id, sequence++);
+    if (hasRichTextContent(node)) node.content.forEach(visit);
+  }
+}
+
+function mapPointAfterRemoval(
+  before: RichTextDocument,
+  after: RichTextDocument,
+  point: RichTextPoint,
+  groups: ReadonlyArray<{ readonly nodeId: string; readonly intervals: ReadonlyArray<{ readonly from: number; readonly to: number }> }>,
+): RichTextPoint {
+  if (point.kind === "child") return reconcileOrFirst(after, point);
+  const group = groups.find((candidate) => candidate.nodeId === point.nodeId);
+  let offset = point.offset;
+  if (group) {
+    for (const interval of group.intervals) {
+      if (offset > interval.to) offset -= interval.to - interval.from;
+      else if (offset >= interval.from) offset = interval.from;
+    }
+  }
+  const direct: RichTextPoint = { ...point, offset };
+  const reconciled = createRichTextTopology(after).reconcilePoint(direct);
+  if (reconciled) return reconciled;
+  const located = findNode(before, point.nodeId);
+  if (located?.parent) {
+    return reconcileOrFirst(after, {
+      kind: "child",
+      nodeId: located.parent.id,
+      offset: located.index,
+      affinity: point.affinity,
+    });
+  }
+  return firstSelection(after).ranges[0]!.anchor;
+}
+
+function pointsEqual(left: RichTextPoint, right: RichTextPoint): boolean {
+  return left.kind === right.kind && left.nodeId === right.nodeId && left.offset === right.offset;
+}
+
+function resolveDeletionPoint(
+  document: RichTextDocument,
+  point: RichTextPoint,
+  direction: "backward" | "forward",
+): Extract<RichTextPoint, { readonly kind: "text" }> | { readonly kind: "node"; readonly nodeId: string } | null {
+  if (point.kind === "text") return point;
+  const container = point.nodeId === document.id ? document : findNode(document, point.nodeId)?.node;
+  if (!container || !hasRichTextContent(container)) return null;
+  const index = direction === "backward" ? point.offset - 1 : point.offset;
+  const adjacent = container.content[index];
+  if (!adjacent) return null;
+  if (isRichTextText(adjacent)) {
+    return {
+      kind: "text",
+      nodeId: adjacent.id,
+      offset: direction === "backward" ? adjacent.text.length : 0,
+      affinity: point.affinity,
+    };
+  }
+  if (!hasRichTextContent(adjacent)) return { kind: "node", nodeId: adjacent.id };
+  const texts = allTextNodes({
+    profile: document.profile,
+    id: "deletion-probe",
+    type: "doc",
+    content: adjacent.content as RichTextDocument["content"],
+  });
+  const text = direction === "backward" ? texts.at(-1) : texts[0];
+  return text ? {
+    kind: "text",
+    nodeId: text.id,
+    offset: direction === "backward" ? text.text.length : 0,
+    affinity: point.affinity,
+  } : { kind: "node", nodeId: adjacent.id };
+}
+
+function joinedEmptyBlocks(first: RichTextBlock, second: RichTextBlock): RichTextBlock {
+  return { ...first, content: [...first.content, ...second.content] } as RichTextBlock;
+}
+
+function sliceRange(
+  document: RichTextDocument,
+  range: SelectionRange<RichTextPoint>,
+  schema: RichTextSchema,
+): { readonly content: ReadonlyArray<RichTextNode>; readonly openStart: number; readonly openEnd: number } | null {
+  if (pointsEqual(range.anchor, range.focus)) return null;
+  if (range.anchor.kind === "child" && range.focus.kind === "child" && range.anchor.nodeId === range.focus.nodeId) {
+    const container = range.anchor.nodeId === document.id ? document : findNode(document, range.anchor.nodeId)?.node;
+    if (!container || !hasRichTextContent(container)) return null;
+    const from = Math.min(range.anchor.offset, range.focus.offset);
+    const to = Math.max(range.anchor.offset, range.focus.offset);
+    const content = container.content.slice(from, to).map((node) => detachedNode(node));
+    const isBlock = content.every((node) => schema.nodes[node.type]?.group === "block");
+    return content.length === 0 ? null : { content, openStart: isBlock ? 0 : 1, openEnd: isBlock ? 0 : 1 };
+  }
+  const targets = createRichTextTopology(document).interval(range.anchor, range.focus);
+  const inlineByBlock = new Map<string, { block: RichTextNode; content: RichTextNode[] }>();
+  for (const target of targets) {
+    const located = findNode(document, target.nodeId);
+    if (!located) continue;
+    const block = findContainingTextBlock(document, target.nodeId, schema);
+    if (!block) continue;
+    const entry = inlineByBlock.get(block.id) ?? { block, content: [] };
+    if (target.kind === "text" && isRichTextText(located.node) && target.from < target.to) {
+      entry.content.push({ ...located.node, text: located.node.text.slice(target.from, target.to) });
+    } else if (target.kind === "node") {
+      entry.content.push(detachedNode(located.node));
+    }
+    inlineByBlock.set(block.id, entry);
+  }
+  const entries = [...inlineByBlock.values()].filter((entry) => entry.content.length > 0);
+  if (entries.length === 0) return null;
+  if (entries.length === 1) return { content: entries[0]!.content, openStart: 1, openEnd: 1 };
+  return {
+    content: entries.map(({ block, content }) => ({ ...block, content } as RichTextNode)),
+    openStart: 0,
+    openEnd: 0,
+  };
+}
+
+function findContainingTextBlock(document: RichTextDocument, nodeId: string, schema: RichTextSchema): RichTextNode | null {
+  return findAncestors(document, nodeId).reverse().find((node) => {
+    if (node.type === "doc") return false;
+    const spec = schema.nodes[node.type];
+    return spec?.group === "block" && hasRichTextContent(node)
+      && node.content.every((child) => schema.nodes[child.type]?.group === "inline");
+  }) as RichTextNode | undefined ?? null;
+}
+
+function plainTextForNodes(nodes: ReadonlyArray<RichTextNode>): string {
+  return nodes.map((node) => {
+    if (isRichTextText(node)) return node.text;
+    if (node.type === "hardBreak") return "\n";
+    return hasRichTextContent(node) ? plainTextForNodes(node.content) : "";
+  }).join(nodes.some((node) => node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock") ? "\n" : "");
+}
+
+function detachedNode(node: RichTextNode): RichTextNode {
+  return JSON.parse(JSON.stringify(node)) as RichTextNode;
+}
+
+type PasteAtPointResult =
+  | { readonly ok: true; readonly value: RichTextDocument; readonly point: RichTextPoint }
+  | { readonly ok: false; readonly code: string };
+
+function pasteSliceAtPoint(
+  document: RichTextDocument,
+  point: RichTextPoint,
+  content: ReadonlyArray<RichTextNode>,
+  openStart: number,
+  openEnd: number,
+  schema: RichTextSchema,
+  createId: () => string,
+): PasteAtPointResult {
+  if (!Number.isInteger(openStart) || !Number.isInteger(openEnd) || openStart < 0 || openEnd < 0 || openStart !== openEnd || openStart > 1) {
+    return { ok: false, code: "rich-text.clipboard-invalid" };
+  }
+  const remapped = remapSliceNodeIds(content, schema, createId);
+  if (remapped.length === 0) return { ok: false, code: "rich-text.clipboard-invalid" };
+  if (openStart === 1) {
+    const inserted = insertManyAtPoint(document, point, remapped, createId);
+    if (!inserted) return { ok: false, code: "rich-text.clipboard-invalid" };
+    const last = remapped.at(-1)!;
+    return { ok: true, value: inserted, point: pointAfterNode(inserted, last.id, point.affinity) };
+  }
+  const allBlocks = remapped.every((node) => schema.nodes[node.type]?.group === "block");
+  if (!allBlocks) return { ok: false, code: "rich-text.clipboard-invalid" };
+  if (point.kind === "child") {
+    const container = point.nodeId === document.id ? document : findNode(document, point.nodeId)?.node;
+    if (!container || !hasRichTextContent(container)) return { ok: false, code: "rich-text.invalid-offset" };
+    const spec = schema.nodes[container.type]!;
+    if (remapped.every((node) => spec.content?.allowedTypes.includes(node.type))) {
+      const next = replaceContainerContent(document, container.id, [
+        ...container.content.slice(0, point.offset),
+        ...remapped,
+        ...container.content.slice(point.offset),
+      ]);
+      return { ok: true, value: next, point: pointAfterNode(next, remapped.at(-1)!.id, point.affinity) };
+    }
+    const block = (container.type === "paragraph" || container.type === "heading") ? container as RichTextBlock : null;
+    if (!block) return { ok: false, code: "rich-text.clipboard-invalid" };
+    return pasteBlocksAroundInlineBlock(document, block, point.offset, remapped, createId, point.affinity);
+  }
+  const block = findTextBlock(document, point.nodeId);
+  const located = findText(document, point.nodeId);
+  if (!block || !located) return { ok: false, code: "rich-text.point-not-found" };
+  const textIndex = block.node.content.findIndex((node) => node.id === point.nodeId);
+  const prefix = [
+    ...block.node.content.slice(0, textIndex),
+    ...(point.offset > 0 ? [{ ...located.node, text: located.node.text.slice(0, point.offset) }] : []),
+  ];
+  const suffixText = located.node.text.slice(point.offset);
+  const suffix = [
+    ...(suffixText.length > 0 ? [{ ...located.node, id: createId(), text: suffixText }] : []),
+    ...block.node.content.slice(textIndex + 1),
+  ];
+  const replacement: RichTextNode[] = [
+    ...(prefix.length > 0 ? [{ ...block.node, content: prefix } as RichTextNode] : []),
+    ...remapped,
+    ...(suffix.length > 0 ? [{ id: createId(), type: "paragraph", content: suffix } as RichTextNode] : []),
+  ];
+  const next = replaceNodeWithMany(document, block.node.id, replacement);
+  return { ok: true, value: next, point: pointAfterNode(next, remapped.at(-1)!.id, point.affinity) };
+}
+
+function insertManyAtPoint(
+  document: RichTextDocument,
+  point: RichTextPoint,
+  nodes: ReadonlyArray<RichTextNode>,
+  createId: () => string,
+): RichTextDocument | null {
+  if (point.kind === "child") {
+    const container = point.nodeId === document.id ? document : findNode(document, point.nodeId)?.node;
+    if (!container || !hasRichTextContent(container) || point.offset < 0 || point.offset > container.content.length) return null;
+    return replaceContainerContent(document, container.id, [
+      ...container.content.slice(0, point.offset),
+      ...nodes,
+      ...container.content.slice(point.offset),
+    ]);
+  }
+  const located = findText(document, point.nodeId);
+  if (!located || !validOffset(located.node.text, point.offset)) return null;
+  const before = located.node.text.slice(0, point.offset);
+  const after = located.node.text.slice(point.offset);
+  return replaceNodeWithMany(document, located.node.id, [
+    ...(before.length > 0 ? [{ ...located.node, text: before }] : []),
+    ...nodes,
+    ...(after.length > 0 ? [{ ...located.node, id: createId(), text: after }] : []),
+  ]);
+}
+
+function pasteBlocksAroundInlineBlock(
+  document: RichTextDocument,
+  block: RichTextBlock,
+  offset: number,
+  blocks: ReadonlyArray<RichTextNode>,
+  createId: () => string,
+  affinity: RichTextPoint["affinity"],
+): PasteAtPointResult {
+  if (offset < 0 || offset > block.content.length) return { ok: false, code: "rich-text.invalid-offset" };
+  const prefix = block.content.slice(0, offset);
+  const suffix = block.content.slice(offset);
+  const replacement: RichTextNode[] = [
+    ...(prefix.length > 0 ? [{ ...block, content: prefix } as RichTextNode] : []),
+    ...blocks,
+    ...(suffix.length > 0 ? [{ id: createId(), type: "paragraph", content: suffix } as RichTextNode] : []),
+  ];
+  const next = replaceNodeWithMany(document, block.id, replacement);
+  return { ok: true, value: next, point: pointAfterNode(next, blocks.at(-1)!.id, affinity) };
+}
+
+function pointAfterNode(document: RichTextDocument, nodeId: string, affinity: RichTextPoint["affinity"]): RichTextPoint {
+  const located = findNode(document, nodeId);
+  if (!located) return firstSelection(document).ranges[0]!.anchor;
+  const lastText = isRichTextText(located.node) ? located.node : hasRichTextContent(located.node) ? allTextNodes({
+    profile: document.profile,
+    id: "point-probe",
+    type: "doc",
+    content: located.node.content as RichTextDocument["content"],
+  }).at(-1) : undefined;
+  if (lastText) return { kind: "text", nodeId: lastText.id, offset: lastText.text.length, affinity };
+  return located.parent
+    ? { kind: "child", nodeId: located.parent.id, offset: located.index + 1, affinity }
+    : firstSelection(document).ranges[0]!.anchor;
 }
 
 function absolutePath(pointer: Pointer, segments: ReadonlyArray<string | number>): Pointer {

@@ -1,5 +1,6 @@
 export {
   createRichTextClipboardRepresentations,
+  createRichTextClipboardCodec,
   parseRichTextHTML,
   richTextClipboardCodec,
   serializeRichTextSlice,

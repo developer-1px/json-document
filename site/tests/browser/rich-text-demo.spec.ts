@@ -67,7 +67,7 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
 
   await setSelection(page, "text-editable", 3, 3);
   await page.keyboard.press("Enter");
-  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(4);
+  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(8);
   const afterSplit = await json(page, "rich-text-document-json");
   expect(afterSplit.content[2]).toMatchObject({ type: "paragraph", content: [{ text: "여기를" }] });
   expect(afterSplit.content[3]).toMatchObject({ type: "paragraph", content: [{ text: " 선택하고 직접 입력해 보세요." }] });
@@ -75,7 +75,7 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
   const splitTextId = afterSplit.content[3].content[0].id;
   await setSelection(page, splitTextId, 0, 0);
   await page.keyboard.press("Backspace");
-  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(3);
+  await expect.poll(async () => (await json(page, "rich-text-document-json")).content.length).toBe(7);
   expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
     text: "여기를 선택하고 직접 입력해 보세요.",
   });
@@ -152,6 +152,64 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
     "text/plain",
   ]);
   await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), plainId)?.text).toBe("plain");
+});
+
+test("Rich Text Lab renders the complete v1 vocabulary and exposes schema-aware proof intents", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+  await expect(editor.locator("blockquote")).toContainText("Blockquote");
+  await expect(editor.locator("pre code")).toHaveText('{ "canonical": true }');
+  await expect(editor.locator("ol")).toHaveAttribute("start", "2");
+  await expect(editor.locator("ul")).toContainText("schema-aware transforms");
+  await expect(editor.locator("br")).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Toggle strong" }).click();
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를",
+    marks: [{ type: "strong" }],
+  });
+  await page.getByRole("button", { name: "Set code attrs" }).click();
+  expect(textNode(await json(page, "rich-text-document-json"), "code-block-1")).toMatchObject({
+    attrs: { language: "typescript" },
+  });
+  await page.getByRole("button", { name: "Insert hard break" }).click();
+  expect(textNode(await json(page, "rich-text-document-json"), "demo-hard-break")).toMatchObject({ type: "hardBreak" });
+});
+
+test("Rich Text Lab maps formatting, hard-break, and platform deletion target ranges", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+
+  await setSelection(page, "text-editable", 0, 3);
+  await editor.evaluate((root) => root.dispatchEvent(new InputEvent("beforeinput", {
+    bubbles: true, cancelable: true, inputType: "formatBold",
+  })));
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를", marks: [{ type: "strong" }],
+  });
+
+  const remaining = textNodeByText(await json(page, "rich-text-document-json"), " 선택하고 직접 입력해 보세요.");
+  await setSelection(page, remaining.id, 0, 0);
+  await editor.evaluate((root) => root.dispatchEvent(new InputEvent("beforeinput", {
+    bubbles: true, cancelable: true, inputType: "insertLineBreak",
+  })));
+  await expect(editor.locator("br")).toHaveCount(2);
+
+  await page.reload();
+  const prevented = await page.getByTestId("rich-text-editor").evaluate((root) => {
+    const text = root.querySelector<HTMLElement>('[data-rich-text-text-id="text-editable"]')!.firstChild!;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 3);
+    const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "deleteWordForward" });
+    Object.defineProperty(event, "getTargetRanges", { value: () => [range] });
+    root.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: " 선택하고 직접 입력해 보세요.",
+  });
 });
 
 async function json(page: Page, testId: string): Promise<any> {
