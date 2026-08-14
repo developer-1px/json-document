@@ -102,6 +102,14 @@
     "parentPath": "/docs/history"
   },
   {
+    "path": "/editing/rich-text",
+    "label": "Rich Text Lab",
+    "title": "Rich Text Lab - json-document",
+    "description": "Draft Official Rich Text Schema가 JSONDocument, Selection, Topology와 Editing History를 통과하는 최소 수직 슬라이스를 검증합니다.",
+    "language": "ko",
+    "navigationGroup": "Editing"
+  },
+  {
     "path": "/docs/intent",
     "label": "Intent",
     "title": "Intent reference - json-document",

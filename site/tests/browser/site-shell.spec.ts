@@ -22,6 +22,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Clipboard Demo",
     "History",
     "History Demo",
+    "Rich Text Lab",
     "Intent",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" }).getByRole("link")).toHaveText([
@@ -148,6 +149,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/demo/topology",
     "/demo/clipboard",
     "/demo/history",
+    "/editing/rich-text",
     "/demo/database",
     "/connectors",
     "/connectors/react",
@@ -165,6 +167,9 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     await expect(artwork).toHaveCount(1);
     illustrations.add(await artwork.getAttribute("data-petite-cat") ?? "");
     await expect(artwork.locator("img")).toHaveAttribute("alt", "");
+    await expect.poll(() => artwork.locator("img").evaluate((image) => (
+      (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0
+    ))).toBe(true);
     expect(await petiteCatLayout(page)).toMatchObject({
       artworkLongEdge: 192,
       imageLoaded: true,
@@ -190,6 +195,9 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/demo");
   await expect(page.locator("[data-petite-cat]")).toHaveCount(1);
+  await expect.poll(() => page.locator("[data-petite-cat] img").evaluate((image) => (
+    (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0
+  ))).toBe(true);
   expect(await petiteCatLayout(page)).toMatchObject({
     artworkLongEdge: 112,
     imageLoaded: true,

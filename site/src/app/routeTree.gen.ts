@@ -37,6 +37,7 @@ import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/int
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
+import { Route as PageEditingRichTextRouteImport } from "./routes/_page/editing/rich-text";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
 
@@ -182,6 +183,11 @@ const PageDocsTutorialRoute = PageDocsTutorialRouteImport.update({
   path: "/docs/tutorial",
   getParentRoute: () => PageRoute,
 } as any);
+const PageEditingRichTextRoute = PageEditingRichTextRouteImport.update({
+  id: "/editing/rich-text",
+  path: "/editing/rich-text",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsZodIndexRoute = PageConnectorsZodIndexRouteImport.update({
   id: "/connectors/zod/",
   path: "/connectors/zod/",
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/editing/rich-text": typeof PageEditingRichTextRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/editing/rich-text": typeof PageEditingRichTextRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
@@ -283,6 +291,7 @@ export interface FileRoutesById {
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/_page/editing/rich-text": typeof PageEditingRichTextRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | "/docs/selection"
     | "/docs/topology"
     | "/docs/tutorial"
+    | "/editing/rich-text"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | "/docs/selection"
     | "/docs/topology"
     | "/docs/tutorial"
+    | "/editing/rich-text"
     | "/connectors"
     | "/demo"
     | "/docs"
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | "/_page/docs/selection"
     | "/_page/docs/topology"
     | "/_page/docs/tutorial"
+    | "/_page/editing/rich-text"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
@@ -589,6 +601,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsTutorialRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/editing/rich-text": {
+      id: "/_page/editing/rich-text";
+      path: "/editing/rich-text";
+      fullPath: "/editing/rich-text";
+      preLoaderRoute: typeof PageEditingRichTextRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/connectors/zod/": {
       id: "/_page/connectors/zod/";
       path: "/connectors/zod";
@@ -630,6 +649,7 @@ interface PageRouteChildren {
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
+  PageEditingRichTextRoute: typeof PageEditingRichTextRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
@@ -661,6 +681,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsSelectionRoute: PageDocsSelectionRoute,
   PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
+  PageEditingRichTextRoute: PageEditingRichTextRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,

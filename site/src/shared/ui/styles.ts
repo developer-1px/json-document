@@ -149,6 +149,7 @@ export const ui = {
     canvas: "rounded-[10px] border border-pencil-light bg-paper-grid bg-[size:16px_16px]",
     canvasObject: "rounded-[6px] border-2 border-paper text-xs font-medium text-paper shadow-[0_1px_2px_rgba(69,67,62,0.12)] outline-none aria-pressed:ring-2 aria-pressed:ring-impact aria-pressed:ring-offset-2",
     marquee: "border border-impact bg-impact/10",
+    richTextEditor: "min-h-56 rounded-[6px] border border-pencil-light bg-paper p-5 text-base leading-7 text-ink-strong outline-none",
   },
   database: {
     toolbar: "rounded-[10px] border border-pencil-light bg-paper shadow-[0_1px_2px_rgba(69,67,62,0.04)]",

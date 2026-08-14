@@ -44,6 +44,7 @@ describe("official site shell", () => {
       "Clipboard Demo",
       "History",
       "History Demo",
+      "Rich Text Lab",
       "Intent",
     ]);
     expect(groupLinks(nav, "Demos")).toEqual(["Showcase", "Document", "Sheet", "Database"]);
