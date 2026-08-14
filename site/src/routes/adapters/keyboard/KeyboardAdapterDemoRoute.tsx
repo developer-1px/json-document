@@ -1,5 +1,5 @@
 import { KeyboardAdapterLab } from "./KeyboardAdapterLab";
-import { ConnectorDemoPage } from "../../connectors/ConnectorDemoPage";
+import { CatalogDemoPage } from "../../../shared/ui/catalog-demo-page";
 
 const connectionCode = `const keyboard = createWebKeyboardAdapter();
 
@@ -10,7 +10,7 @@ surface.addEventListener("keydown", (event) => {
 
 export function KeyboardAdapterDemoRoute() {
   return (
-    <ConnectorDemoPage
+    <CatalogDemoPage
       connectionCode={{ language: "typescript", source: connectionCode }}
       connectionDescription="The official keyboard adapter owns the keymap. The host maps the resolved command through Topology into the same public Intent, Clipboard, and History doors."
       description="Official keyboard adapter. Conventional KeyboardEvent chords become semantic commands, then existing editing doors."
@@ -19,6 +19,6 @@ export function KeyboardAdapterDemoRoute() {
       title="Keyboard Adapter"
     >
       <KeyboardAdapterLab />
-    </ConnectorDemoPage>
+    </CatalogDemoPage>
   );
 }
