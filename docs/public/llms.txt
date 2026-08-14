@@ -78,6 +78,11 @@ Local JSON Document와 Collaboration Engine은 같은 여섯-member
 Adapter는 외부 생태계와 platform 경계를 번역한다. Collaboration Engine은
 Connector가 아니다.
 
+Site navigation projects this graph as JSON Document (with Collaboration as
+an advanced runtime topic), Editing, Connectors, Adapters, Examples, and
+Reference. Examples are a separate exploration section, not an Editing
+concept. Connectors and Adapters remain separate integration boundaries.
+
 Canonical concept와 identifier 문법은
 `standards/repository-naming.md`가 정의한다.
 

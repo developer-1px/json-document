@@ -11,32 +11,37 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Quickstart", "Concepts"]);
-  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
-    "Intent guide",
-    "Selection",
-    "Selection Demo",
-    "Topology",
-    "Topology Demo",
-    "Clipboard",
-    "Clipboard Demo",
-    "History",
-    "History Demo",
-    "Intent",
-    "Examples",
-    "Document",
-    "Sheet",
-    "Database",
-  ]);
-  await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "Collaboration" }).getByRole("link")).toHaveText([
-    "Overview",
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
+    "Why",
+    "Quickstart",
+    "Concepts",
+    "Collaboration",
     "Replica & Sync",
     "Collaborative History",
     "Collaborative Text",
     "Checkpoints & Epochs",
   ]);
+  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
+    "Intent guide",
+    "Selection",
+    "Topology",
+    "Clipboard",
+    "History",
+    "Intent",
+  ]);
+  await expect(navigation.getByRole("group", { name: "Collaboration" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
+  await expect(navigation.getByRole("group", { name: "Adapters" }).getByRole("link")).toHaveText(["Collaborative Contenteditable"]);
+  await expect(navigation.getByRole("group", { name: "Examples" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Selection Demo",
+    "Topology Demo",
+    "Clipboard Demo",
+    "History Demo",
+    "Document",
+    "Sheet",
+    "Database",
+  ]);
   await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference", "Collaboration API"]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -50,8 +55,9 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Adapters" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Examples" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
@@ -75,11 +81,15 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
 
-  await siteNavigation.getByRole("group", { name: "Collaboration" }).getByRole("link", { name: "Overview" }).click();
+  await siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Collaboration" }).click();
   await expect(page).toHaveTitle("Collaboration - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "Collaboration" })).toBeVisible();
   await expect(siteNavigation.getByRole("link", { name: "Replica & Sync" })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: "Collaboration API" })).toHaveAttribute("href", "/docs/collaboration/api");
+
+  await siteNavigation.getByRole("group", { name: "Adapters" }).getByRole("link", { name: "Collaborative Contenteditable" }).click();
+  await expect(page).toHaveTitle("Collaborative Contenteditable Adapter - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Collaborative Contenteditable Adapter" })).toBeVisible();
 
   await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");

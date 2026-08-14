@@ -42,6 +42,7 @@ export function breadcrumbTrail(
 
 function crumbLabel(route: SiteRoute): string {
   if (route.path === "/connectors") return "Connectors";
+  if (route.path === "/demos") return "Examples";
   if (route.path === "/docs/collaboration") return "Collaboration";
   return route.label;
 }

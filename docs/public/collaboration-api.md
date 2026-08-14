@@ -10,12 +10,6 @@ npm install @interactive-os/json-document \
   @interactive-os/json-document-collaboration
 ```
 
-Collaborative contenteditable DOM Adapter가 필요할 때만 다음 package를 더합니다.
-
-```sh
-npm install @interactive-os/json-document-contenteditable-collaboration
-```
-
 ## Entrypoint 선택하기
 
 | Entrypoint | Runtime | 추가 authoring surface |
@@ -23,7 +17,6 @@ npm install @interactive-os/json-document-contenteditable-collaboration
 | `@interactive-os/json-document-collaboration` | `CollaborationRuntime` | document와 replica |
 | `@interactive-os/json-document-collaboration/history` | `HistoryRuntime` | selective `history` |
 | `@interactive-os/json-document-collaboration/text` | `TextRuntime` | `text`와 selective `history` |
-| `@interactive-os/json-document-contenteditable-collaboration` | DOM Adapter | contenteditable native-input lease |
 
 ## Base runtime
 
@@ -64,3 +57,5 @@ const captured = textRuntime.text.capture("/title");
 개념과 lifecycle은 [Collaboration](collaboration.md), [Collaborative
 History](collaboration-history.md), [Collaborative Text](collaboration-text.md),
 [Checkpoints & Epochs](collaboration-lifecycle.md)에서 설명합니다.
+DOM input 연결은 별도 [Collaborative Contenteditable
+Adapter](adapter-contenteditable.md) 문서에서 설명합니다.

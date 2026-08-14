@@ -63,6 +63,21 @@ JSON Standards
 Product Host composes these surfaces.
 ```
 
+공개 site는 이 의미 위계를 학습 순서로 투영한다. Collaboration은 독립
+최상위 메뉴가 아니라 JSON Document 아래의 심화 runtime 주제다. Connectors와
+Adapters는 서로 다른 integration boundary이므로 별도 최상위 섹션으로
+표현한다. Examples는 개념이 아니라 완성된 조합을 보는 별도 탐색 섹션이다.
+
+```text
+JSON Document
+└── Collaboration
+Editing
+Connectors
+Adapters
+Examples
+Reference
+```
+
 Collaboration Engine은 `JSONDocument` 계약의 runtime implementation이고
 Connector가 아니다. Editing은 Local 또는 Collaboration implementation이
 제공하는 같은 `JSONDocument` port를 소비한다. Editing History와 Collaborative

@@ -25,7 +25,7 @@
     "path": "/docs/concepts",
     "label": "Concepts",
     "title": "Core Concepts - json-document",
-    "description": "JSON Document에서 Editing과 외부 Connector로 이어지는 개념 지도를 설명합니다.",
+    "description": "JSON Document에서 Editing, Connector와 Adapter 경계로 이어지는 개념 지도를 설명합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
   },
@@ -51,7 +51,7 @@
     "title": "Selection Demo - json-document",
     "description": "document value와 History를 유지한 채 구조적 Selection만 바꿔 봅니다.",
     "language": "ko",
-    "parentPath": "/docs/selection"
+    "parentPath": "/demos"
   },
   {
     "path": "/docs/topology",
@@ -67,7 +67,7 @@
     "title": "Topology Demo - json-document",
     "description": "같은 anchor와 focus에서 화면 순서에 따라 계산되는 범위를 비교합니다.",
     "language": "ko",
-    "parentPath": "/docs/topology"
+    "parentPath": "/demos"
   },
   {
     "path": "/docs/clipboard",
@@ -83,7 +83,7 @@
     "title": "Clipboard Demo - json-document",
     "description": "구조적 Selection이 copy 또는 cut을 거쳐 payload와 paste로 이어지는 과정을 확인합니다.",
     "language": "ko",
-    "parentPath": "/docs/clipboard"
+    "parentPath": "/demos"
   },
   {
     "path": "/docs/history",
@@ -99,7 +99,7 @@
     "title": "History Demo - json-document",
     "description": "문서를 편집한 뒤 undo와 redo로 value와 Selection을 함께 복원합니다.",
     "language": "ko",
-    "parentPath": "/docs/history"
+    "parentPath": "/demos"
   },
   {
     "path": "/docs/intent",
@@ -111,10 +111,10 @@
   },
   {
     "path": "/demos",
-    "label": "Examples",
+    "label": "Overview",
     "title": "Demo Showcase - json-document",
     "description": "Explore complete Document, Sheet, and Database editing experiences built on json-document.",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Examples"
   },
   {
     "path": "/demo",
@@ -139,11 +139,11 @@
   },
   {
     "path": "/docs/collaboration",
-    "label": "Overview",
+    "label": "Collaboration",
     "title": "Collaboration - json-document",
     "description": "Editor의 JSON Document 계약을 유지하면서 transport-agnostic Collaboration Engine을 사용하는 방법을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Collaboration"
+    "navigationGroup": "JSON Document"
   },
   {
     "path": "/docs/collaboration/replica",
@@ -247,6 +247,14 @@
     "title": "Contenteditable Connector Live Demo - json-document",
     "description": "Live React contenteditable root that leases native input and commits its bound string through the public JSON Document API.",
     "navigationGroup": "Connectors"
+  },
+  {
+    "path": "/docs/adapters/contenteditable",
+    "label": "Collaborative Contenteditable",
+    "title": "Collaborative Contenteditable Adapter - json-document",
+    "description": "Collaborative Text와 contenteditable DOM root 사이의 native-input lifecycle 경계를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapters"
   },
   {
     "path": "/docs/api",

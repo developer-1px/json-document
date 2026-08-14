@@ -49,27 +49,5 @@ Capture 뒤 remote bundle이 도착해도 unseen input은 concurrent Change로 �
 stable atom을 기준으로 merge됩니다. Plan 뒤 graph가 바뀌면
 `stale_text_plan`으로 실패하고 최신 model을 다시 rendering해야 합니다.
 
-## Contenteditable Adapter 연결하기
-
-`@interactive-os/json-document-contenteditable-collaboration`은 Collaborative
-Text와 한 contenteditable root를 연결하는 DOM Adapter입니다. 이는 공식
-Connector catalog의 local React Contenteditable Connector와 다른 위치에
-있습니다.
-
-```ts
-import {
-  createContentEditableAdapter,
-} from "@interactive-os/json-document-contenteditable-collaboration";
-
-const adapter = createContentEditableAdapter({
-  runtime,
-  pointer: "/title",
-  root,
-});
-
-const unbind = adapter.bind();
-```
-
-Native-input DOM lease 동안 collaboration ingestion과 document model은 계속
-갱신되고, browser가 소유한 root로의 rendering만 잠시 유예됩니다. Transport,
-presence, rich-text schema와 React rendering은 Adapter가 소유하지 않습니다.
+DOM input과 연결할 때는 별도 integration boundary인 [Collaborative
+Contenteditable Adapter](adapter-contenteditable.md)를 조합합니다.

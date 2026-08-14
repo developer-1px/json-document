@@ -33,32 +33,37 @@ describe("official site shell", () => {
 
     expect(nav.queryByRole("group", { name: "Start" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
-    expect(groupLinks(nav, "JSON Document")).toEqual(["Why", "Quickstart", "Concepts"]);
-    expect(groupLinks(nav, "Editing")).toEqual([
-      "Intent guide",
-      "Selection",
-      "Selection Demo",
-      "Topology",
-      "Topology Demo",
-      "Clipboard",
-      "Clipboard Demo",
-      "History",
-      "History Demo",
-      "Intent",
-      "Examples",
-      "Document",
-      "Sheet",
-      "Database",
-    ]);
-    expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
-    expect(groupLinks(nav, "Collaboration")).toEqual([
-      "Overview",
+    expect(groupLinks(nav, "JSON Document")).toEqual([
+      "Why",
+      "Quickstart",
+      "Concepts",
+      "Collaboration",
       "Replica & Sync",
       "Collaborative History",
       "Collaborative Text",
       "Checkpoints & Epochs",
     ]);
+    expect(groupLinks(nav, "Editing")).toEqual([
+      "Intent guide",
+      "Selection",
+      "Topology",
+      "Clipboard",
+      "History",
+      "Intent",
+    ]);
+    expect(nav.queryByRole("group", { name: "Collaboration" })).toBeNull();
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
+    expect(groupLinks(nav, "Adapters")).toEqual(["Collaborative Contenteditable"]);
+    expect(groupLinks(nav, "Examples")).toEqual([
+      "Overview",
+      "Selection Demo",
+      "Topology Demo",
+      "Clipboard Demo",
+      "History Demo",
+      "Document",
+      "Sheet",
+      "Database",
+    ]);
     expect(groupLinks(nav, "Reference")).toEqual(["API Reference", "Collaboration API"]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -78,7 +83,7 @@ describe("official site shell", () => {
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
 
-    await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Database", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Examples" })).getByRole("link", { name: "Database", exact: true }));
     const databaseCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(databaseCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
@@ -124,7 +129,7 @@ describe("official site shell", () => {
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Examples" }));
+    await user.click(within(nav.getByRole("group", { name: "Examples" })).getByRole("link", { name: "Overview" }));
     await waitFor(() => expect(document.documentElement.lang).toBe("en"));
   });
 });

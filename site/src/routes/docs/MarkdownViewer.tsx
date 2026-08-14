@@ -93,6 +93,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "intent.md": "/docs/intent",
   "intent-guide.md": "/docs/intent-guide",
   "connectors.md": "/docs/connectors",
+  "adapter-contenteditable.md": "/docs/adapters/contenteditable",
   "collaboration.md": "/docs/collaboration",
   "collaboration-replica.md": "/docs/collaboration/replica",
   "collaboration-history.md": "/docs/collaboration/history",

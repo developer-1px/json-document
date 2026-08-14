@@ -68,7 +68,7 @@ describe("documentation routes", () => {
     expect(screen.getByRole("heading", { name: "Runtime 만들기" })).toBeTruthy();
     expect(screen.getByRole("main").querySelector('a[href="/docs/collaboration/replica"]')).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Collaboration" })).getByRole("link", { name: "Collaborative History" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Collaborative History" }));
     await waitFor(() => expect(document.title).toBe("Collaborative History - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Collaborative History" })).toBeTruthy();
 
@@ -102,6 +102,6 @@ describe("documentation routes", () => {
     window.dispatchEvent(new Event("popstate"));
     await waitFor(() => expect(document.title).toBe("Collaborative Text - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Collaborative Text" })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Collaboration" })).getByRole("link", { name: "Collaborative Text" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Collaborative Text" }).getAttribute("aria-current")).toBe("page");
   });
 });

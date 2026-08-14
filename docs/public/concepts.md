@@ -125,7 +125,8 @@ UI 도구나 실행 환경이 달라져도 유지됩니다. 제품은 필요한 
 Adapter는 특정 platform/model 경계를 번역합니다. 예를 들어 collaborative
 contenteditable adapter는 Collaborative Text와 한 DOM root를 연결하고 native
 input 동안 model-to-DOM rendering만 유예합니다. 외부 생태계의 공식 package
-분류인 Connector와 Collaboration 안의 DOM Adapter는 같은 위계가 아닙니다.
+분류인 Connector와 DOM Adapter는 같은 개념이 아니므로 공개 site에서도
+Connectors와 Adapters를 별도 섹션으로 탐색합니다.
 
 마지막으로 Product Host가 rendering, focus, keyboard, transport, persistence,
 presence와 제품별 의미를 선택해 이 표면들을 조립합니다.
@@ -139,3 +140,4 @@ presence와 제품별 의미를 선택해 이 표면들을 조립합니다.
 - [History](history.md): 값과 선택을 함께 되돌리는 기록
 - [Collaboration](collaboration.md): 같은 JSON Document 계약을 제공하는 causal runtime
 - [Connectors](connectors.md): 외부 생태계와 공개 계약의 연결
+- [Collaborative Contenteditable Adapter](adapter-contenteditable.md): Collaborative Text와 DOM input lifecycle의 연결

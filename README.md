@@ -45,6 +45,8 @@ Product Host composes these surfaces.
 | 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |
 | Collaboration | [overview](docs/public/collaboration.md), [replica](docs/public/collaboration-replica.md), [history](docs/public/collaboration-history.md), [text](docs/public/collaboration-text.md), [lifecycle](docs/public/collaboration-lifecycle.md), [API](docs/public/collaboration-api.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
+| Adapter | [Collaborative Contenteditable Adapter](docs/public/adapter-contenteditable.md) |
+| Examples | [Document·Sheet·Database Examples](https://developer-1px.github.io/json-document/demos) |
 | Connector Live Demo | [공식 Connector catalog](https://developer-1px.github.io/json-document/connectors) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |

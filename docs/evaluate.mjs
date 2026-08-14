@@ -51,6 +51,7 @@ const publicDocs = {
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
   connectors: read("docs/public/connectors.md"),
+  adapterContenteditable: read("docs/public/adapter-contenteditable.md"),
   collaboration: read("docs/public/collaboration.md"),
   collaborationReplica: read("docs/public/collaboration-replica.md"),
   collaborationHistory: read("docs/public/collaboration-history.md"),
@@ -96,6 +97,7 @@ const activeCompanionPackages = new Set([
 ]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
+  "adapter-contenteditable.md",
   "api.md",
   "clipboard.md",
   "collaboration-api.md",

@@ -39,6 +39,7 @@ import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topolo
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
+import { Route as PageDocsAdaptersContenteditableRouteImport } from "./routes/_page/docs/adapters/contenteditable";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
 import { Route as PageDocsCollaborationApiRouteImport } from "./routes/_page/docs/collaboration/api";
 import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
@@ -199,6 +200,12 @@ const PageConnectorsZodValidateRoute =
     path: "/connectors/zod/validate",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAdaptersContenteditableRoute =
+  PageDocsAdaptersContenteditableRouteImport.update({
+    id: "/docs/adapters/contenteditable",
+    path: "/docs/adapters/contenteditable",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsCollaborationIndexRoute =
   PageDocsCollaborationIndexRouteImport.update({
     id: "/docs/collaboration/",
@@ -265,6 +272,7 @@ export interface FileRoutesByFullPath {
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/adapters/contenteditable": typeof PageDocsAdaptersContenteditableRoute;
   "/docs/collaboration/api": typeof PageDocsCollaborationApiRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
@@ -302,6 +310,7 @@ export interface FileRoutesByTo {
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/adapters/contenteditable": typeof PageDocsAdaptersContenteditableRoute;
   "/docs/collaboration/api": typeof PageDocsCollaborationApiRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
@@ -341,6 +350,7 @@ export interface FileRoutesById {
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
   "/_page/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/_page/docs/adapters/contenteditable": typeof PageDocsAdaptersContenteditableRoute;
   "/_page/docs/collaboration/api": typeof PageDocsCollaborationApiRoute;
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | "/demo/"
     | "/docs/"
     | "/connectors/zod/validate"
+    | "/docs/adapters/contenteditable"
     | "/docs/collaboration/api"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | "/demo"
     | "/docs"
     | "/connectors/zod/validate"
+    | "/docs/adapters/contenteditable"
     | "/docs/collaboration/api"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
@@ -455,6 +467,7 @@ export interface FileRouteTypes {
     | "/_page/demo/"
     | "/_page/docs/"
     | "/_page/connectors/zod/validate"
+    | "/_page/docs/adapters/contenteditable"
     | "/_page/docs/collaboration/api"
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
@@ -681,6 +694,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageConnectorsZodValidateRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/adapters/contenteditable": {
+      id: "/_page/docs/adapters/contenteditable";
+      path: "/docs/adapters/contenteditable";
+      fullPath: "/docs/adapters/contenteditable";
+      preLoaderRoute: typeof PageDocsAdaptersContenteditableRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/collaboration/": {
       id: "/_page/docs/collaboration/";
       path: "/docs/collaboration";
@@ -754,6 +774,7 @@ interface PageRouteChildren {
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
   PageConnectorsZodValidateRoute: typeof PageConnectorsZodValidateRoute;
+  PageDocsAdaptersContenteditableRoute: typeof PageDocsAdaptersContenteditableRoute;
   PageDocsCollaborationApiRoute: typeof PageDocsCollaborationApiRoute;
   PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
   PageDocsCollaborationLifecycleRoute: typeof PageDocsCollaborationLifecycleRoute;
@@ -791,6 +812,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,
   PageConnectorsZodValidateRoute: PageConnectorsZodValidateRoute,
+  PageDocsAdaptersContenteditableRoute: PageDocsAdaptersContenteditableRoute,
   PageDocsCollaborationApiRoute: PageDocsCollaborationApiRoute,
   PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,
   PageDocsCollaborationLifecycleRoute: PageDocsCollaborationLifecycleRoute,

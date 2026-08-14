@@ -13,6 +13,7 @@ docs
 |   |-- api.md                 # JSON Document: 레퍼런스
 |   |-- quickstart.md          # JSON Document: 사용 시작
 |   |-- concepts.md            # JSON Document: 읽기 → 편집 → 확장 지도
+|   |-- adapter-contenteditable.md # Adapters: Collaborative Text와 DOM 경계
 |   |-- collaboration.md       # Collaboration: runtime과 replica 경계
 |   |-- collaboration-replica.md   # Collaboration: Change와 synchronization
 |   |-- collaboration-history.md   # Collaboration: selective undo/redo
@@ -36,7 +37,12 @@ docs
 JSON Document
 |-- Why
 |-- Quickstart
-`-- Concepts
+|-- Concepts
+`-- Collaboration
+    |-- Replica & Sync
+    |-- Collaborative History
+    |-- Collaborative Text
+    `-- Checkpoints & Epochs
 
 Editing
 |-- Selection
@@ -44,21 +50,23 @@ Editing
 |-- Clipboard
 |-- History
 |-- Intent guide
-|-- Intent
-`-- Examples
-    |-- Document
-    |-- Sheet
-    `-- Database
-
-Collaboration
-|-- Overview
-|-- Replica & Sync
-|-- Collaborative History
-|-- Collaborative Text
-`-- Checkpoints & Epochs
+`-- Intent
 
 Connectors
 `-- Connector guide
+
+Adapters
+`-- Collaborative Contenteditable
+
+Examples
+|-- Overview
+|-- Selection Demo
+|-- Topology Demo
+|-- Clipboard Demo
+|-- History Demo
+|-- Document
+|-- Sheet
+`-- Database
 
 Reference
 |-- API Reference
@@ -94,8 +102,9 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   intent-guide는 Intent 따라 하기, connectors는 연결 방법이다.
   concepts는 JSON Document 계약을 중심으로 runtime implementation, Editing,
   integration boundary와 Product Host의 전체 지도를 보여 준다. Collaboration
-  문서는 Overview → Replica → History/Text → Lifecycle 순서로 책임을 나누고,
-  collaboration-api는 호출과 공개 계약만 다룬다.
+  문서는 JSON Document 아래의 심화 주제로 Overview → Replica → History/Text →
+  Lifecycle 순서로 책임을 나눈다. adapters는 platform/model 경계를 별도
+  섹션으로 분리하고, collaboration-api는 collaboration 호출과 공개 계약만 다룬다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
 - 새 개념은 독자가 그 개념을 필요로 하는 상황을 본 뒤에 이름 붙인다.

@@ -1,4 +1,5 @@
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
+import adapterContenteditableMarkdown from "../../../../docs/public/adapter-contenteditable.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
 import collaborationApiMarkdown from "../../../../docs/public/collaboration-api.md?raw";
 import collaborationHistoryMarkdown from "../../../../docs/public/collaboration-history.md?raw";
@@ -111,6 +112,12 @@ export const docPages = {
     label: "Collaboration API",
     title: "Collaboration API",
     source: collaborationApiMarkdown,
+  },
+  adapterContenteditable: {
+    path: "/docs/adapters/contenteditable",
+    label: "Collaborative Contenteditable",
+    title: "Collaborative Contenteditable Adapter",
+    source: adapterContenteditableMarkdown,
   },
 } as const;
 

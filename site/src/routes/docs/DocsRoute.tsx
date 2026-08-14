@@ -22,6 +22,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   collaborationText: "cursor",
   collaborationLifecycle: "package",
   collaborationApi: "braces",
+  adapterContenteditable: "connector",
 };
 
 export function DocsOverviewRoute() {
@@ -62,6 +63,10 @@ export function CollaborationLifecycleRoute() {
 
 export function CollaborationApiRoute() {
   return <DocsRoute pageId="collaborationApi" />;
+}
+
+export function AdapterContenteditableRoute() {
+  return <DocsRoute pageId="adapterContenteditable" />;
 }
 
 export function TopologyDocsRoute() {
