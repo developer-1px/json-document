@@ -10,6 +10,16 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   quickstart: "terminal",
   adapters: "peek",
   connectors: "connector",
+  collaboration: "package",
+  collaborationReplica: "debug",
+  collaborationHistory: "branch",
+  collaborationText: "sleep",
+  collaborationLease: "connector",
+  collaborationLifecycle: "peek",
+  editors: "braces",
+  order: "cursor",
+  object: "peek",
+  tree: "branch",
   intent: "braces",
   intentGuide: "terminal",
   api: "patch",
@@ -56,6 +66,9 @@ const demoLinks: Partial<Record<DocPageId, { readonly to: string; readonly label
   topology: { to: "/demo/topology", label: "Topology Demo 열기" },
   clipboard: { to: "/demo/clipboard", label: "Clipboard Demo 열기" },
   history: { to: "/demo/history", label: "History Demo 열기" },
+  order: { to: "/demo/order", label: "Order Demo 열기" },
+  object: { to: "/demo/object", label: "Object Demo 열기" },
+  tree: { to: "/demo/tree", label: "Tree Demo 열기" },
 };
 
 export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {

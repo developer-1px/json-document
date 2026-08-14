@@ -20,7 +20,7 @@ export const Route = createRootRoute({
 function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
-  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["JSON Document", "Editing", "Demos", "Adapters", "Connectors", "Reference"];
+  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["JSON Document", "Editing", "Editors", "Adapters", "Connectors"];
 
   useRouteMetadata(route);
   const activeGroup = routeGroup(route, siteRoutes);
@@ -98,17 +98,36 @@ function AppShell() {
                         </ActionLink>
                         {children.length > 0 ? (
                           <ul className={ui.nav.list}>
-                            {children.map((child) => (
-                              <li key={child.path}>
-                                <ActionLink
-                                  to={child.path}
-                                  activePath={route.path}
-                                  className={classes(ui.nav.child, ui.nav.current)}
-                                >
-                                  {child.label}
-                                </ActionLink>
-                              </li>
-                            ))}
+                            {children.map((child) => {
+                              const grandchildren = childRoutes(child.path, siteRoutes);
+                              return (
+                                <li key={child.path} className="grid content-start">
+                                  <ActionLink
+                                    to={child.path}
+                                    activePath={route.path}
+                                    branch={isNavBranch(route.path, child.path, siteRoutes)}
+                                    className={classes(ui.nav.child, ui.nav.current)}
+                                  >
+                                    {child.label}
+                                  </ActionLink>
+                                  {grandchildren.length > 0 ? (
+                                    <ul className={ui.nav.list}>
+                                      {grandchildren.map((grandchild) => (
+                                        <li key={grandchild.path}>
+                                          <ActionLink
+                                            to={grandchild.path}
+                                            activePath={route.path}
+                                            className={classes(ui.nav.child, ui.nav.current)}
+                                          >
+                                            {grandchild.label}
+                                          </ActionLink>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : null}
+                                </li>
+                              );
+                            })}
                           </ul>
                         ) : null}
                       </li>

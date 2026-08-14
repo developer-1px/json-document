@@ -11,9 +11,21 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Quickstart", "Concepts"]);
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
+    "Why",
+    "Quickstart",
+    "Concepts",
+    "API Reference",
+    "Collaboration",
+    "Replica",
+    "Collaborative History",
+    "Text",
+    "Contenteditable lease",
+    "Lifecycle",
+  ]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Intent guide",
+    "Intent",
     "Selection",
     "Selection Demo",
     "Topology",
@@ -22,24 +34,29 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Clipboard Demo",
     "History",
     "History Demo",
-    "Intent",
   ]);
-  await expect(navigation.getByRole("group", { name: "Demos" }).getByRole("link")).toHaveText([
-    "Showcase",
+  await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
+    "Editors",
     "Document",
     "Sheet",
     "Database",
+    "Order",
+    "Order Demo",
+    "Object",
+    "Object Demo",
+    "Tree",
+    "Tree Demo",
   ]);
   await expect(navigation.getByRole("group", { name: "Adapters" }).getByRole("link")).toHaveText(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
-  await expect(navigation.getByRole("group", { name: "Reference" }).getByRole("link")).toHaveText(["API Reference"]);
+  await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
     "Editing",
-    "Demos",
+    "Editors",
     "Adapters",
     "Connectors",
-    "Reference",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -53,8 +70,9 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Demos" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Editors" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Adapters" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
