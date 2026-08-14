@@ -1,7 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { RichTextRenderer } from "../src/index.js";
-import { createRichTextSchema, type RichTextDocument } from "@interactive-os/json-document-rich-text";
+import { RichTextEditorSurface, RichTextRenderer } from "../src/index.js";
+import {
+  createRichTextSchema,
+  richTextSchemaV1,
+  type RichTextDocument,
+  type RichTextEditor,
+} from "@interactive-os/json-document-rich-text";
 
 describe("RichTextRenderer", () => {
   it("renders every official container with DOM mapping identifiers", () => {
@@ -48,5 +53,33 @@ describe("RichTextRenderer", () => {
     } as RichTextDocument;
     expect(renderToStaticMarkup(<RichTextRenderer document={document} schema={schema} renderExtensionMark={(_mark, children) => <mark>{children}</mark>} />))
       .toBe('<p data-rich-text-node-id="p" data-rich-text-container-id="p"><mark><span data-rich-text-node-id="t" data-rich-text-text-id="t">marked</span></mark></p>');
+  });
+
+  it("preserves whitespace on the official editable surface without discarding host styles", () => {
+    const document: RichTextDocument = {
+      profile: richTextSchemaV1.profile,
+      id: "doc",
+      type: "doc",
+      content: [{ id: "p", type: "paragraph", content: [{ id: "text", type: "text", text: "a  b", marks: [] }] }],
+    };
+    const editor = {
+      schema: richTextSchemaV1,
+      snapshot: {
+        value: document,
+        selection: { kind: "range", ranges: [], primaryIndex: null },
+        revision: 0,
+        canUndo: false,
+        canRedo: false,
+      },
+      subscribe: () => () => {},
+    } as unknown as RichTextEditor;
+
+    const html = renderToStaticMarkup(<RichTextEditorSurface
+      editor={editor}
+      style={{ color: "red", whiteSpace: "normal" }}
+    />);
+
+    expect(html).toContain('style="color:red;white-space:pre-wrap"');
+    expect(html).toContain(">a  b</span>");
   });
 });

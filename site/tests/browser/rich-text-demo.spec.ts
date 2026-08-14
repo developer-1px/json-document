@@ -46,6 +46,30 @@ test("Rich Text Lab commits contenteditable input through JSON Patch and restore
   });
 });
 
+test("Rich Text Lab preserves consecutive spaces in the canonical document and rendered surface", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+
+  const editor = page.getByTestId("rich-text-editor");
+  await setSelection(page, "text-editable", 3, 3);
+  await page.keyboard.press("Space");
+  await page.keyboard.press("Space");
+
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable")?.text)
+    .toBe("여기를   선택하고 직접 입력해 보세요.");
+  await expect(editor).toHaveCSS("white-space", "pre-wrap");
+  await expect(editor.locator('[data-rich-text-text-id="text-editable"]')).toHaveText("여기를   선택하고 직접 입력해 보세요.", { useInnerText: true });
+  await expect.poll(() => domSelection(page)).toMatchObject({
+    nodeId: "text-editable",
+    anchorOffset: 5,
+    focusOffset: 5,
+  });
+
+  await page.getByRole("button", { name: "Undo" }).click();
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를 선택하고 직접 입력해 보세요.",
+  });
+});
+
 test("Rich Text Lab exposes a deterministic sample intent for inspection", async ({ page }) => {
   await page.goto("/editing/rich-text");
   await page.getByRole("button", { name: "Apply sample intent" }).click();

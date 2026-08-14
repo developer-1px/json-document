@@ -88,6 +88,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
 
   return createElement(as, {
     ...props,
+    style: { ...props.style, whiteSpace: "pre-wrap" },
     ref: rootRef,
     contentEditable: true,
     suppressContentEditableWarning: true,
