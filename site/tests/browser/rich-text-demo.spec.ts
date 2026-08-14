@@ -46,6 +46,21 @@ test("Rich Text Lab commits contenteditable input through JSON Patch and restore
   });
 });
 
+test("Rich Text Lab exposes a deterministic sample intent for inspection", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  await page.getByRole("button", { name: "Apply sample intent" }).click();
+
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를 선택하고 직접 입력해 보세요. ✓",
+  });
+  expect(await json(page, "rich-text-patch-json")).toEqual([{
+    op: "replace",
+    path: "/content/2/content/0/text",
+    value: "여기를 선택하고 직접 입력해 보세요. ✓",
+  }]);
+  await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
+});
+
 async function json(page: Page, testId: string): Promise<any> {
   return JSON.parse(await page.getByTestId(testId).innerText());
 }

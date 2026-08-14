@@ -143,6 +143,22 @@ export function RichTextDemoRoute() {
     if (result.ok && result.change) setLastPatch(result.change.applied);
   }
 
+  function applySampleIntent() {
+    const text = findTextNode(snapshot.value as RichTextDocument, "text-editable");
+    if (!text) return setLastAction("rich-text.point-not-found");
+    const point: RichTextPoint = {
+      kind: "text",
+      nodeId: text.id,
+      offset: text.text.length,
+      affinity: "forward",
+    };
+    editor.dispatch({
+      type: "selection.set",
+      selection: { kind: "range", ranges: [{ anchor: point, focus: point }], primaryIndex: 0 },
+    });
+    remember("text.insert", editor.dispatch({ type: "text.insert", text: " ✓" }));
+  }
+
   return (
     <PageFrame>
       <PageHeader
@@ -155,6 +171,7 @@ export function RichTextDemoRoute() {
       </PageHeader>
 
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
+        <ActionButton kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
         <ActionButton onClick={() => runHistory("undo")} disabled={!snapshot.canUndo}>Undo</ActionButton>
         <ActionButton onClick={() => runHistory("redo")} disabled={!snapshot.canRedo}>Redo</ActionButton>
         <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
@@ -317,4 +334,14 @@ function findDOMPoint(surface: HTMLElement, point: RichTextPoint): { readonly no
     node = walker.nextNode();
   }
   return { node: element, offset: element.childNodes.length };
+}
+
+function findTextNode(node: RichTextDocument | RichTextNode, id: string): RichTextText | null {
+  if (node.type === "text") return node.id === id ? node as RichTextText : null;
+  if (!("content" in node) || !Array.isArray(node.content)) return null;
+  for (const child of node.content) {
+    const found = findTextNode(child as RichTextNode, id);
+    if (found) return found;
+  }
+  return null;
 }
