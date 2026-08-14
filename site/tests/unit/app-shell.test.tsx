@@ -59,15 +59,12 @@ describe("official site shell", () => {
     ]);
     expect(groupLinks(nav, "Editors")).toEqual([
       "Editors",
-      "Document",
-      "Sheet",
+      "Simple Document",
+      "Simple Canvas",
+      "Simple Sheet",
+      "Simple Tree",
+      "Simple Kanban",
       "Database",
-      "Order",
-      "Order Demo",
-      "Object",
-      "Object Demo",
-      "Tree",
-      "Tree Demo",
     ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
@@ -138,7 +135,7 @@ describe("official site shell", () => {
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Editors" })).getByRole("link", { name: "Document", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Editors" })).getByRole("link", { name: "Simple Document", exact: true }));
     await waitFor(() => expect(document.documentElement.lang).toBe("en"));
   });
 });

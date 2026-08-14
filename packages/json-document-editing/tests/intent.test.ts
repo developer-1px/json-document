@@ -7,6 +7,7 @@ import {
   createOrderEditor,
   createSheetEditor,
   createTreeEditor,
+  createKanbanEditor,
   type DatabaseIntent,
   type DatabaseSelection,
   type DocumentIntent,
@@ -21,6 +22,8 @@ import {
   type SheetSelection,
   type TreeIntent,
   type TreeSelection,
+  type KanbanIntent,
+  type KanbanSelection,
 } from "../src/index.js";
 
 function asDispatch<Intent extends EditingIntent, Selection extends JSONValue>(
@@ -47,6 +50,10 @@ describe("editing intent door", () => {
     asDispatch<OrderIntent, OrderSelection>(
       createOrderEditor({ items: [{ id: "a", label: "A" }] }),
     );
+    asDispatch<KanbanIntent, KanbanSelection>(createKanbanEditor({
+      columns: [{ id: "todo", title: "Todo", cardIds: ["a"] }],
+      cards: [{ id: "a", title: "A" }],
+    }));
     asDispatch<DatabaseIntent, DatabaseSelection>(createDatabaseEditor({
       schema: { properties: [{ id: "title", name: "Title", type: "title", options: [] }] },
       records: [{ id: "a", values: { title: "A" } }],

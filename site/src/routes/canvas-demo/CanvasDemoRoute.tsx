@@ -1,0 +1,113 @@
+import { useState, type PointerEvent } from "react";
+import {
+  createObjectEditor,
+  type ObjectDocument,
+} from "@interactive-os/json-document-editing";
+import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { classes, ui } from "../../shared/ui/styles";
+
+const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
+
+const initialObjects: ObjectDocument = {
+  objects: [
+    { id: "note", label: "Note", x: 24, y: 24, width: 120, height: 72, color: "#de6d55" },
+    { id: "card", label: "Card", x: 168, y: 40, width: 120, height: 72, color: "#60786f" },
+    { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
+  ],
+};
+
+type DragState = {
+  readonly ids: ReadonlyArray<string>;
+  readonly originX: number;
+  readonly originY: number;
+  readonly dx: number;
+  readonly dy: number;
+};
+
+export function CanvasDemoRoute() {
+  const [editor] = useState(() => createObjectEditor(initialObjects));
+  const snapshot = useEditingSnapshot(editor);
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const document = snapshot.value as ObjectDocument;
+  const selected = new Set(editor.selectedObjects.map((object) => object.id));
+
+  function handlePointerDown(event: PointerEvent<HTMLButtonElement>, objectId: string) {
+    const mode = selectionOperationFromModifiers(event);
+    editor.dispatch({
+      type: "selection.set",
+      objectIds: [objectId],
+      mode: mode === "extend" ? "add" : mode,
+    });
+    const ids = mode === "toggle" || mode === "extend"
+      ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
+      : [objectId];
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDrag({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLButtonElement>) {
+    if (!drag) return;
+    setDrag({
+      ...drag,
+      dx: event.clientX - drag.originX,
+      dy: event.clientY - drag.originY,
+    });
+  }
+
+  function handlePointerUp() {
+    if (!drag) return;
+    if (drag.dx !== 0 || drag.dy !== 0) {
+      editor.dispatch({ type: "object.translate", objectIds: drag.ids, dx: drag.dx, dy: drag.dy });
+    }
+    setDrag(null);
+  }
+
+  return (
+    <PageFrame>
+      <PageHeader illustration="peek" title="Simple Canvas">
+        Pick a box, drag it, then fill the selection. The board is the editor.
+      </PageHeader>
+
+      <section aria-label="Canvas" className={classes("relative min-h-[22rem] overflow-hidden", ui.surface.raised)}>
+        {document.objects.map((object) => {
+          const offset = drag?.ids.includes(object.id) ? drag : null;
+          return (
+            <SelectableItem
+              key={object.id}
+              selected={selected.has(object.id)}
+              data-object-id={object.id}
+              onPointerDown={(event) => handlePointerDown(event, object.id)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              className="absolute grid place-items-center"
+              style={{
+                left: object.x + (offset?.dx ?? 0),
+                top: object.y + (offset?.dy ?? 0),
+                width: object.width,
+                height: object.height,
+                backgroundColor: object.color,
+                color: "#fff8f2",
+              }}
+            >
+              {object.label}
+            </SelectableItem>
+          );
+        })}
+        <div className={classes("absolute bottom-3 left-3 flex flex-wrap gap-1", ui.surface.workspace)}>
+          {colors.map((color) => (
+            <ActionButton
+              key={color}
+              aria-label={`Fill ${color}`}
+              onClick={() => editor.dispatch({ type: "selection.fill", color })}
+            >
+              <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
+            </ActionButton>
+          ))}
+        </div>
+      </section>
+    </PageFrame>
+  );
+}

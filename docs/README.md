@@ -58,15 +58,12 @@ Editing
     `-- History Demo
 
 Editors
-|-- Document
-|-- Sheet
-|-- Database
-|-- Order
-|   `-- Order Demo
-|-- Object
-|   `-- Object Demo
-`-- Tree
-    `-- Tree Demo
+|-- Simple Document
+|-- Simple Canvas
+|-- Simple Sheet
+|-- Simple Tree
+|-- Simple Kanban
+`-- Database
 
 Connectors
 `-- Connector guide

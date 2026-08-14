@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 test("minimal document demo completes selection, clipboard, edit, move, undo, and redo", async ({ page }) => {
   await page.goto("/demo");
   await page.getByText("Inspect editing state", { exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Document Demo" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Simple Document" })).toBeVisible();
 
   const surface = page.getByRole("region", { name: "Editable document" }).locator('[tabindex="0"]');
   await surface.focus();
