@@ -55,6 +55,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       find: "@interactive-os/json-document-rich-text-web",
       replacement: sourceFile("packages/json-document-rich-text-web/src/index.ts"),
     },
+    {
+      find: "@interactive-os/json-document-rich-text-react",
+      replacement: sourceFile("packages/json-document-rich-text-react/src/index.tsx"),
+    },
   ];
 }
 
