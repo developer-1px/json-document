@@ -197,7 +197,7 @@
   {
     "path": "/demo/tree",
     "label": "Tree",
-    "title": "Tree - json-document",
+    "title": "Tree Demo - json-document",
     "description": "A simple minimal tree: fold branches and select on the visible line.",
     "navigationGroup": "Editors"
   },
