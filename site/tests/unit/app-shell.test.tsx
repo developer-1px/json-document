@@ -60,14 +60,11 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Editors")).toEqual([
       "Editors",
       "Document",
+      "Canvas",
       "Sheet",
-      "Database",
-      "Order",
-      "Order Demo",
-      "Object",
-      "Object Demo",
       "Tree",
-      "Tree Demo",
+      "Kanban",
+      "Database",
     ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();

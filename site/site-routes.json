@@ -169,22 +169,43 @@
     "path": "/editors",
     "label": "Editors",
     "title": "Editors - json-document",
-    "description": "Editing 모델로 만든 Document, Sheet, Database, Order, Object, Tree 편집기를 고릅니다.",
+    "description": "Document, Canvas, Sheet, Tree, Kanban 최소 완성본을 고릅니다.",
     "language": "ko",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo",
     "label": "Document",
-    "title": "Document Demo - json-document",
-    "description": "A minimal, complete document editor powered by the public headless editing API.",
+    "title": "Document - json-document",
+    "description": "A simple minimal document editor: type in the line, move blocks, copy, and undo.",
+    "navigationGroup": "Editors"
+  },
+  {
+    "path": "/demo/canvas",
+    "label": "Canvas",
+    "title": "Canvas - json-document",
+    "description": "A simple minimal canvas: pick, drag, and fill objects on a plane.",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo/sheet",
     "label": "Sheet",
-    "title": "Sheet Demo - json-document",
-    "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
+    "title": "Sheet - json-document",
+    "description": "A simple minimal sheet: select cells, type, and fill a rectangle.",
+    "navigationGroup": "Editors"
+  },
+  {
+    "path": "/demo/tree",
+    "label": "Tree",
+    "title": "Tree Demo - json-document",
+    "description": "A simple minimal tree: fold branches and select on the visible line.",
+    "navigationGroup": "Editors"
+  },
+  {
+    "path": "/demo/kanban",
+    "label": "Kanban",
+    "title": "Kanban - json-document",
+    "description": "A simple minimal kanban: move cards between columns in one JSON document.",
     "navigationGroup": "Editors"
   },
   {
@@ -200,14 +221,14 @@
     "title": "Order - json-document",
     "description": "한 줄 목록을 범위 선택으로 집고 옮기는 Order editor를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Editors"
+    "parentPath": "/"
   },
   {
     "path": "/demo/order",
     "label": "Order Demo",
     "title": "Order Demo - json-document",
     "description": "A one-line Order editor with range selection, structured clipboard, delete, and local history.",
-    "parentPath": "/docs/order"
+    "parentPath": "/"
   },
   {
     "path": "/docs/object",
@@ -215,14 +236,14 @@
     "title": "Object - json-document",
     "description": "안정된 객체 ID를 키 가족으로 집는 Object editor를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Editors"
+    "parentPath": "/"
   },
   {
     "path": "/demo/object",
     "label": "Object Demo",
     "title": "Object Demo - json-document",
     "description": "A key-family Object board with ID selection, color fill, structured clipboard, and local history.",
-    "parentPath": "/docs/object"
+    "parentPath": "/"
   },
   {
     "path": "/docs/tree",
@@ -230,14 +251,7 @@
     "title": "Tree - json-document",
     "description": "호스트가 만든 보이는 노드 줄에서 범위를 집는 Tree editor를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Editors"
-  },
-  {
-    "path": "/demo/tree",
-    "label": "Tree Demo",
-    "title": "Tree Demo - json-document",
-    "description": "A folded Tree editor whose host sends visible node IDs for range selection, clipboard, and history.",
-    "parentPath": "/docs/tree"
+    "parentPath": "/"
   },
   {
     "path": "/demos",

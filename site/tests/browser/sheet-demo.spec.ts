@@ -8,7 +8,7 @@ test("Sheet demo completes rectangular selection, clipboard, edit, undo, and red
 
   await page.goto("/demo/sheet");
   await page.getByText("Inspect editing state", { exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Sheet Demo" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sheet", exact: true })).toBeVisible();
 
   await page.getByRole("textbox", { name: "Name row 1" }).click();
   await page.getByRole("textbox", { name: "Status row 2" }).click({ modifiers: ["Shift"] });
