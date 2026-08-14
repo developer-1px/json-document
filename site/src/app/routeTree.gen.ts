@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as PageRouteImport } from "./routes/_page";
 import { Route as PageDemosRouteImport } from "./routes/_page/demos";
+import { Route as PageEditorsRouteImport } from "./routes/_page/editors";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
@@ -34,11 +35,20 @@ import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/conn
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
+import { Route as PageDocsObjectRouteImport } from "./routes/_page/docs/object";
+import { Route as PageDocsOrderRouteImport } from "./routes/_page/docs/order";
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
+import { Route as PageDocsTreeRouteImport } from "./routes/_page/docs/tree";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
+import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
+import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
+import { Route as PageDocsCollaborationLifecycleRouteImport } from "./routes/_page/docs/collaboration/lifecycle";
+import { Route as PageDocsCollaborationReplicaRouteImport } from "./routes/_page/docs/collaboration/replica";
+import { Route as PageDocsCollaborationTextIndexRouteImport } from "./routes/_page/docs/collaboration/text/index";
+import { Route as PageDocsCollaborationTextLeaseRouteImport } from "./routes/_page/docs/collaboration/text/lease";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
@@ -52,6 +62,11 @@ const PageRoute = PageRouteImport.update({
 const PageDemosRoute = PageDemosRouteImport.update({
   id: "/demos",
   path: "/demos",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageEditorsRoute = PageEditorsRouteImport.update({
+  id: "/editors",
+  path: "/editors",
   getParentRoute: () => PageRoute,
 } as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
@@ -167,6 +182,16 @@ const PageDocsIntentGuideRoute = PageDocsIntentGuideRouteImport.update({
   path: "/docs/intent-guide",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsObjectRoute = PageDocsObjectRouteImport.update({
+  id: "/docs/object",
+  path: "/docs/object",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsOrderRoute = PageDocsOrderRouteImport.update({
+  id: "/docs/order",
+  path: "/docs/order",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsSelectionRoute = PageDocsSelectionRouteImport.update({
   id: "/docs/selection",
   path: "/docs/selection",
@@ -175,6 +200,11 @@ const PageDocsSelectionRoute = PageDocsSelectionRouteImport.update({
 const PageDocsTopologyRoute = PageDocsTopologyRouteImport.update({
   id: "/docs/topology",
   path: "/docs/topology",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsTreeRoute = PageDocsTreeRouteImport.update({
+  id: "/docs/tree",
+  path: "/docs/tree",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsTutorialRoute = PageDocsTutorialRouteImport.update({
@@ -193,10 +223,47 @@ const PageConnectorsZodValidateRoute =
     path: "/connectors/zod/validate",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsCollaborationIndexRoute =
+  PageDocsCollaborationIndexRouteImport.update({
+    id: "/docs/collaboration/",
+    path: "/docs/collaboration/",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsCollaborationHistoryRoute =
+  PageDocsCollaborationHistoryRouteImport.update({
+    id: "/docs/collaboration/history",
+    path: "/docs/collaboration/history",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsCollaborationLifecycleRoute =
+  PageDocsCollaborationLifecycleRouteImport.update({
+    id: "/docs/collaboration/lifecycle",
+    path: "/docs/collaboration/lifecycle",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsCollaborationReplicaRoute =
+  PageDocsCollaborationReplicaRouteImport.update({
+    id: "/docs/collaboration/replica",
+    path: "/docs/collaboration/replica",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsCollaborationTextIndexRoute =
+  PageDocsCollaborationTextIndexRouteImport.update({
+    id: "/docs/collaboration/text/",
+    path: "/docs/collaboration/text/",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsCollaborationTextLeaseRoute =
+  PageDocsCollaborationTextLeaseRouteImport.update({
+    id: "/docs/collaboration/text/lease",
+    path: "/docs/collaboration/text/lease",
+    getParentRoute: () => PageRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/demos": typeof PageDemosRoute;
+  "/editors": typeof PageEditorsRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -216,18 +283,28 @@ export interface FileRoutesByFullPath {
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
+  "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/order": typeof PageDocsOrderRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
+  "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
+  "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
+  "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/connectors/zod/": typeof PageConnectorsZodIndexRoute;
+  "/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
+  "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
+  "/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/demos": typeof PageDemosRoute;
+  "/editors": typeof PageEditorsRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -247,20 +324,30 @@ export interface FileRoutesByTo {
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
+  "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/order": typeof PageDocsOrderRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
   "/docs/topology": typeof PageDocsTopologyRoute;
+  "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
+  "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
+  "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/connectors/zod": typeof PageConnectorsZodIndexRoute;
+  "/docs/collaboration": typeof PageDocsCollaborationIndexRoute;
+  "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
+  "/docs/collaboration/text": typeof PageDocsCollaborationTextIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_page": typeof PageRouteWithChildren;
   "/_page/demos": typeof PageDemosRoute;
+  "/_page/editors": typeof PageEditorsRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
@@ -280,20 +367,30 @@ export interface FileRoutesById {
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
+  "/_page/docs/object": typeof PageDocsObjectRoute;
+  "/_page/docs/order": typeof PageDocsOrderRoute;
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
+  "/_page/docs/tree": typeof PageDocsTreeRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
   "/_page/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
+  "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
+  "/_page/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/_page/connectors/zod/": typeof PageConnectorsZodIndexRoute;
+  "/_page/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
+  "/_page/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
+  "/_page/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
     | "/demos"
+    | "/editors"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -313,18 +410,28 @@ export interface FileRouteTypes {
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
+    | "/docs/object"
+    | "/docs/order"
     | "/docs/selection"
     | "/docs/topology"
+    | "/docs/tree"
     | "/docs/tutorial"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
     | "/connectors/zod/validate"
-    | "/connectors/zod/";
+    | "/docs/collaboration/history"
+    | "/docs/collaboration/lifecycle"
+    | "/docs/collaboration/replica"
+    | "/connectors/zod/"
+    | "/docs/collaboration/"
+    | "/docs/collaboration/text/lease"
+    | "/docs/collaboration/text/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
     | "/demos"
+    | "/editors"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -344,19 +451,29 @@ export interface FileRouteTypes {
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
+    | "/docs/object"
+    | "/docs/order"
     | "/docs/selection"
     | "/docs/topology"
+    | "/docs/tree"
     | "/docs/tutorial"
     | "/connectors"
     | "/demo"
     | "/docs"
     | "/connectors/zod/validate"
-    | "/connectors/zod";
+    | "/docs/collaboration/history"
+    | "/docs/collaboration/lifecycle"
+    | "/docs/collaboration/replica"
+    | "/connectors/zod"
+    | "/docs/collaboration"
+    | "/docs/collaboration/text/lease"
+    | "/docs/collaboration/text";
   id:
     | "__root__"
     | "/"
     | "/_page"
     | "/_page/demos"
+    | "/_page/editors"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
@@ -376,14 +493,23 @@ export interface FileRouteTypes {
     | "/_page/docs/history"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
+    | "/_page/docs/object"
+    | "/_page/docs/order"
     | "/_page/docs/selection"
     | "/_page/docs/topology"
+    | "/_page/docs/tree"
     | "/_page/docs/tutorial"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
     | "/_page/connectors/zod/validate"
-    | "/_page/connectors/zod/";
+    | "/_page/docs/collaboration/history"
+    | "/_page/docs/collaboration/lifecycle"
+    | "/_page/docs/collaboration/replica"
+    | "/_page/connectors/zod/"
+    | "/_page/docs/collaboration/"
+    | "/_page/docs/collaboration/text/lease"
+    | "/_page/docs/collaboration/text/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -412,6 +538,13 @@ declare module "@tanstack/react-router" {
       path: "/demos";
       fullPath: "/demos";
       preLoaderRoute: typeof PageDemosRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/editors": {
+      id: "/_page/editors";
+      path: "/editors";
+      fullPath: "/editors";
+      preLoaderRoute: typeof PageEditorsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/": {
@@ -568,6 +701,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsIntentGuideRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/object": {
+      id: "/_page/docs/object";
+      path: "/docs/object";
+      fullPath: "/docs/object";
+      preLoaderRoute: typeof PageDocsObjectRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/order": {
+      id: "/_page/docs/order";
+      path: "/docs/order";
+      fullPath: "/docs/order";
+      preLoaderRoute: typeof PageDocsOrderRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/selection": {
       id: "/_page/docs/selection";
       path: "/docs/selection";
@@ -580,6 +727,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/topology";
       fullPath: "/docs/topology";
       preLoaderRoute: typeof PageDocsTopologyRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/tree": {
+      id: "/_page/docs/tree";
+      path: "/docs/tree";
+      fullPath: "/docs/tree";
+      preLoaderRoute: typeof PageDocsTreeRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/tutorial": {
@@ -603,11 +757,54 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageConnectorsZodValidateRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/collaboration/": {
+      id: "/_page/docs/collaboration/";
+      path: "/docs/collaboration";
+      fullPath: "/docs/collaboration/";
+      preLoaderRoute: typeof PageDocsCollaborationIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/collaboration/history": {
+      id: "/_page/docs/collaboration/history";
+      path: "/docs/collaboration/history";
+      fullPath: "/docs/collaboration/history";
+      preLoaderRoute: typeof PageDocsCollaborationHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/collaboration/lifecycle": {
+      id: "/_page/docs/collaboration/lifecycle";
+      path: "/docs/collaboration/lifecycle";
+      fullPath: "/docs/collaboration/lifecycle";
+      preLoaderRoute: typeof PageDocsCollaborationLifecycleRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/collaboration/replica": {
+      id: "/_page/docs/collaboration/replica";
+      path: "/docs/collaboration/replica";
+      fullPath: "/docs/collaboration/replica";
+      preLoaderRoute: typeof PageDocsCollaborationReplicaRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/collaboration/text/": {
+      id: "/_page/docs/collaboration/text/";
+      path: "/docs/collaboration/text";
+      fullPath: "/docs/collaboration/text/";
+      preLoaderRoute: typeof PageDocsCollaborationTextIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/collaboration/text/lease": {
+      id: "/_page/docs/collaboration/text/lease";
+      path: "/docs/collaboration/text/lease";
+      fullPath: "/docs/collaboration/text/lease";
+      preLoaderRoute: typeof PageDocsCollaborationTextLeaseRouteImport;
+      parentRoute: typeof PageRoute;
+    };
   }
 }
 
 interface PageRouteChildren {
   PageDemosRoute: typeof PageDemosRoute;
+  PageEditorsRoute: typeof PageEditorsRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
@@ -627,18 +824,28 @@ interface PageRouteChildren {
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
+  PageDocsObjectRoute: typeof PageDocsObjectRoute;
+  PageDocsOrderRoute: typeof PageDocsOrderRoute;
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
+  PageDocsTreeRoute: typeof PageDocsTreeRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
   PageConnectorsZodValidateRoute: typeof PageConnectorsZodValidateRoute;
+  PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
+  PageDocsCollaborationLifecycleRoute: typeof PageDocsCollaborationLifecycleRoute;
+  PageDocsCollaborationReplicaRoute: typeof PageDocsCollaborationReplicaRoute;
   PageConnectorsZodIndexRoute: typeof PageConnectorsZodIndexRoute;
+  PageDocsCollaborationIndexRoute: typeof PageDocsCollaborationIndexRoute;
+  PageDocsCollaborationTextLeaseRoute: typeof PageDocsCollaborationTextLeaseRoute;
+  PageDocsCollaborationTextIndexRoute: typeof PageDocsCollaborationTextIndexRoute;
 }
 
 const PageRouteChildren: PageRouteChildren = {
   PageDemosRoute: PageDemosRoute,
+  PageEditorsRoute: PageEditorsRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
@@ -658,14 +865,23 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
+  PageDocsObjectRoute: PageDocsObjectRoute,
+  PageDocsOrderRoute: PageDocsOrderRoute,
   PageDocsSelectionRoute: PageDocsSelectionRoute,
   PageDocsTopologyRoute: PageDocsTopologyRoute,
+  PageDocsTreeRoute: PageDocsTreeRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,
   PageConnectorsZodValidateRoute: PageConnectorsZodValidateRoute,
+  PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,
+  PageDocsCollaborationLifecycleRoute: PageDocsCollaborationLifecycleRoute,
+  PageDocsCollaborationReplicaRoute: PageDocsCollaborationReplicaRoute,
   PageConnectorsZodIndexRoute: PageConnectorsZodIndexRoute,
+  PageDocsCollaborationIndexRoute: PageDocsCollaborationIndexRoute,
+  PageDocsCollaborationTextLeaseRoute: PageDocsCollaborationTextLeaseRoute,
+  PageDocsCollaborationTextIndexRoute: PageDocsCollaborationTextIndexRoute,
 };
 
 const PageRouteWithChildren = PageRoute._addFileChildren(PageRouteChildren);

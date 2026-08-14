@@ -19,6 +19,11 @@ docs
 |   |-- topology.md            # Editing: 화면 줄과 선택
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
+|   |-- collaboration.md       # JSON Document: 같은 계약의 협업 구현
+|   |-- editors.md             # Editors: 숙제 종류
+|   |-- order.md               # Editors: 한 줄 목록
+|   |-- object.md              # Editors: 키 선택 객체
+|   |-- tree.md                # Editors: 보이는 나무
 |   |-- connectors.md          # Connectors: 공식 외부 생태계 연결
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
@@ -30,24 +35,38 @@ docs
 JSON Document
 |-- Why
 |-- Quickstart
-`-- Concepts
+|-- Concepts
+|-- API Reference
+`-- Collaboration
+    |-- Replica
+    |-- Collaborative History
+    |-- Text
+    |   `-- Contenteditable lease
+    `-- Lifecycle
 
 Editing
-|-- Selection
-|-- Topology
-|-- Clipboard
-|-- History
-|-- Intent guide
 |-- Intent
+|   |-- Intent guide
+|   `-- Intent
+|-- Selection
+|   `-- Selection Demo
+|-- Topology
+|   `-- Topology Demo
+|-- Clipboard
+|   `-- Clipboard Demo
+`-- History
+    `-- History Demo
+
+Editors
 |-- Document
 |-- Sheet
-`-- Database
+|-- Database
+|-- Order
+|-- Object
+`-- Tree
 
 Connectors
 `-- Connector guide
-
-Reference
-`-- API Reference
 ```
 
 ## 규범 우선순위
@@ -78,6 +97,9 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   topology는 화면 줄과 선택, intent는 편집 Intent 시그니처,
   intent-guide는 Intent 따라 하기, connectors는 연결 방법이다.
   concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
+  collaboration은 같은 JSON Document의 다른 구현이다. editors는
+  Editing 모델로 만든 숙제 종류다. order·object·tree는 그 숙제의
+  나머지 slice다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
 - 새 개념은 독자가 그 개념을 필요로 하는 상황을 본 뒤에 이름 붙인다.

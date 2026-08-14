@@ -46,12 +46,12 @@ describe("documentation routes", () => {
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Topology" })).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }));
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
-    expect(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
     const mobileSections = within(screen.getByRole("navigation", { name: "Documentation sections" }));
     expect(mobileSections.getByRole("link", { name: "작업별 진입점" }).getAttribute("href")).toBe("#작업별-진입점");
   });
@@ -75,6 +75,6 @@ describe("documentation routes", () => {
     window.dispatchEvent(new Event("popstate"));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Reference" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
   });
 });
