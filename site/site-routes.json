@@ -25,7 +25,15 @@
     "path": "/docs/concepts",
     "label": "Concepts",
     "title": "Core Concepts - json-document",
-    "description": "JSON Document에서 Editing, Connector와 Adapter 경계로 이어지는 개념 지도를 설명합니다.",
+    "description": "JSON Document에서 Editing과 외부 Connector로 이어지는 개념 지도를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "JSON Document"
+  },
+  {
+    "path": "/docs/api",
+    "label": "API Reference",
+    "title": "json-document API - json-document",
+    "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
   },
@@ -51,7 +59,7 @@
     "title": "Selection Demo - json-document",
     "description": "document value와 History를 유지한 채 구조적 Selection만 바꿔 봅니다.",
     "language": "ko",
-    "parentPath": "/demos"
+    "parentPath": "/docs/selection"
   },
   {
     "path": "/docs/topology",
@@ -67,7 +75,7 @@
     "title": "Topology Demo - json-document",
     "description": "같은 anchor와 focus에서 화면 순서에 따라 계산되는 범위를 비교합니다.",
     "language": "ko",
-    "parentPath": "/demos"
+    "parentPath": "/docs/topology"
   },
   {
     "path": "/docs/clipboard",
@@ -83,7 +91,7 @@
     "title": "Clipboard Demo - json-document",
     "description": "구조적 Selection이 copy 또는 cut을 거쳐 payload와 paste로 이어지는 과정을 확인합니다.",
     "language": "ko",
-    "parentPath": "/demos"
+    "parentPath": "/docs/clipboard"
   },
   {
     "path": "/docs/history",
@@ -99,7 +107,28 @@
     "title": "History Demo - json-document",
     "description": "문서를 편집한 뒤 undo와 redo로 value와 Selection을 함께 복원합니다.",
     "language": "ko",
-    "parentPath": "/demos"
+    "parentPath": "/docs/history"
+  },
+  {
+    "path": "/demo",
+    "label": "Document",
+    "title": "Document Demo - json-document",
+    "description": "A minimal, complete document editor powered by the public headless editing API.",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/demo/sheet",
+    "label": "Sheet",
+    "title": "Sheet Demo - json-document",
+    "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/demo/database",
+    "label": "Database",
+    "title": "Database Demo - json-document",
+    "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
+    "navigationGroup": "Editing"
   },
   {
     "path": "/docs/intent",
@@ -111,71 +140,10 @@
   },
   {
     "path": "/demos",
-    "label": "Overview",
+    "label": "Showcase",
     "title": "Demo Showcase - json-document",
     "description": "Explore complete Document, Sheet, and Database editing experiences built on json-document.",
-    "navigationGroup": "Examples"
-  },
-  {
-    "path": "/demo",
-    "label": "Document",
-    "title": "Document Demo - json-document",
-    "description": "A minimal, complete document editor powered by the public headless editing API.",
-    "parentPath": "/demos"
-  },
-  {
-    "path": "/demo/sheet",
-    "label": "Sheet",
-    "title": "Sheet Demo - json-document",
-    "description": "A minimal, complete Sheet editor with rectangular selection, TSV clipboard, history, and canonical JSON.",
-    "parentPath": "/demos"
-  },
-  {
-    "path": "/demo/database",
-    "label": "Database",
-    "title": "Database Demo - json-document",
-    "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
-    "parentPath": "/demos"
-  },
-  {
-    "path": "/docs/collaboration",
-    "label": "Collaboration",
-    "title": "Collaboration - json-document",
-    "description": "Editor의 JSON Document 계약을 유지하면서 transport-agnostic Collaboration Engine을 사용하는 방법을 설명합니다.",
-    "language": "ko",
-    "navigationGroup": "JSON Document"
-  },
-  {
-    "path": "/docs/collaboration/replica",
-    "label": "Replica & Sync",
-    "title": "Replica and Synchronization - json-document",
-    "description": "Causal Change, dependency, bundle 교환, materialization과 replica status를 설명합니다.",
-    "language": "ko",
-    "parentPath": "/docs/collaboration"
-  },
-  {
-    "path": "/docs/collaboration/history",
-    "label": "Collaborative History",
-    "title": "Collaborative History - json-document",
-    "description": "동시 작업을 덮어쓰지 않고 한 actor의 causal contribution을 undo하고 redo합니다.",
-    "language": "ko",
-    "parentPath": "/docs/collaboration"
-  },
-  {
-    "path": "/docs/collaboration/text",
-    "label": "Collaborative Text",
-    "title": "Collaborative Text - json-document",
-    "description": "Text capture, plan, commit과 stable atom으로 문자열 변경과 native-input reconciliation을 설명합니다.",
-    "language": "ko",
-    "parentPath": "/docs/collaboration"
-  },
-  {
-    "path": "/docs/collaboration/lifecycle",
-    "label": "Checkpoints & Epochs",
-    "title": "Checkpoints and Epochs - json-document",
-    "description": "Checkpoint, membership, epoch와 compaction으로 causal state를 복원하고 recovery boundary를 전환합니다.",
-    "language": "ko",
-    "parentPath": "/docs/collaboration"
+    "parentPath": "/"
   },
   {
     "path": "/connectors",
@@ -247,29 +215,5 @@
     "title": "Contenteditable Connector Live Demo - json-document",
     "description": "Live React contenteditable root that leases native input and commits its bound string through the public JSON Document API.",
     "navigationGroup": "Connectors"
-  },
-  {
-    "path": "/docs/adapters/contenteditable",
-    "label": "Collaborative Contenteditable",
-    "title": "Collaborative Contenteditable Adapter - json-document",
-    "description": "Collaborative Text와 contenteditable DOM root 사이의 native-input lifecycle 경계를 설명합니다.",
-    "language": "ko",
-    "navigationGroup": "Adapters"
-  },
-  {
-    "path": "/docs/api",
-    "label": "API Reference",
-    "title": "json-document API - json-document",
-    "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
-    "language": "ko",
-    "navigationGroup": "Reference"
-  },
-  {
-    "path": "/docs/collaboration/api",
-    "label": "Collaboration API",
-    "title": "Collaboration API - json-document",
-    "description": "Collaboration runtime, replica, selective history, text와 contenteditable adapter 공개 진입점을 정리합니다.",
-    "language": "ko",
-    "navigationGroup": "Reference"
   }
 ]

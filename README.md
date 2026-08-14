@@ -8,24 +8,13 @@ Zod 같은 외부 생태계는 Root에 넣지 않고 independently versioned 공
 Connector로 제공합니다.
 
 ```txt
-JSON Standards
-`-- JSON Document Contract
-    |-- Runtime implementations
-    |   |-- Local JSON Document
-    |   `-- Collaboration Engine
-    |       |-- Replica & synchronization
-    |       |-- Collaborative History
-    |       |-- Collaborative Text
-    |       `-- checkpoint / restore / epoch / compaction
-    |-- Editing
-    |   |-- Intent / Selection / Topology / Clipboard / Editing History
-    |   `-- Domain Editors
-    |       `-- Document · Sheet · Database · Tree · Object · Order
-    `-- Integration boundaries
-        |-- Connectors
-        `-- Adapters
-
-Product Host composes these surfaces.
+stateless JSON Patch
+  |-> local implementation -----\
+  |                               > same six-member JSON Document
+  `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional official Connectors
+                                     |-> optional history/text authoring
+                                     `-> optional native-input DOM lease
 ```
 
 로컬 전용 사용자는 Core만 설치합니다. 협업으로 전환해도 편집기가 받는
@@ -40,13 +29,9 @@ Product Host composes these surfaces.
 | --- | --- |
 | 빠른 사용 예제 | [docs/public/quickstart.md](docs/public/quickstart.md) |
 | JSON Document 개념 | [docs/public/overview.md](docs/public/overview.md) |
-| 전체 개념 위계 | [docs/public/concepts.md](docs/public/concepts.md) |
 | JSON Document API | [docs/public/api.md](docs/public/api.md) |
 | 편집 개념 | [docs/public/selection.md](docs/public/selection.md), [history](docs/public/history.md), [clipboard](docs/public/clipboard.md), [topology](docs/public/topology.md) |
-| Collaboration | [overview](docs/public/collaboration.md), [replica](docs/public/collaboration-replica.md), [history](docs/public/collaboration-history.md), [text](docs/public/collaboration-text.md), [lifecycle](docs/public/collaboration-lifecycle.md), [API](docs/public/collaboration-api.md) |
 | Connector | [docs/public/connectors.md](docs/public/connectors.md) |
-| Adapter | [Collaborative Contenteditable Adapter](docs/public/adapter-contenteditable.md) |
-| Examples | [Document·Sheet·Database Examples](https://developer-1px.github.io/json-document/demos) |
 | Connector Live Demo | [공식 Connector catalog](https://developer-1px.github.io/json-document/connectors) |
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |

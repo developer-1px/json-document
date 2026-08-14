@@ -41,47 +41,20 @@ types
 구현 내부 경로를 import하지 않는다. Root에 새 edit verb, schema provider object,
 React hook, host service를 추가하지 않는다.
 
-## 정본 개념 위계
+## Stateless JSON Patch와 JSON Document
 
 ```txt
-JSON Standards
-└── JSON Document Contract
-    ├── Runtime implementations
-    │   ├── Local JSON Document
-    │   └── Collaboration Engine
-    │       ├── Replica & synchronization
-    │       ├── Collaborative History
-    │       ├── Collaborative Text
-    │       └── Lifecycle
-    │           └── checkpoint · restore · epoch · compaction
-    ├── Editing
-    │   ├── Intent & Session
-    │   ├── Selection & Topology
-    │   ├── Clipboard
-    │   ├── Editing History
-    │   └── Domain Editors
-    │       └── Document · Sheet · Database · Tree · Object · Order
-    └── Integration boundaries
-        ├── Connectors
-        └── Adapters
-            └── Collaborative Contenteditable Adapter
-
-Product Host composes these surfaces.
+stateless JSON Patch
+  |-> local implementation -----\
+  |                               > same six-member JSON Document
+  `-> collaboration engine -----/    |-> optional headless editing
+                                     |-> optional history/text authoring
+                                     `-> optional native-input DOM lease
 ```
 
 Stateless JSON Patch는 JSON value, RFC 6901 JSON Pointer, RFC 9535 JSONPath,
 RFC 6902 JSON Patch, Result 의미를 소유한다. JSON Document는 현재 document
 value와 change notification을 연결한다.
-
-Local JSON Document와 Collaboration Engine은 같은 여섯-member
-`JSONDocument` port를 제공한다. Editing은 그 port를 소비하고, Connector와
-Adapter는 외부 생태계와 platform 경계를 번역한다. Collaboration Engine은
-Connector가 아니다.
-
-Site navigation projects this graph as JSON Document (with Collaboration as
-an advanced runtime topic), Editing, Connectors, Adapters, Examples, and
-Reference. Examples are a separate exploration section, not an Editing
-concept. Connectors and Adapters remain separate integration boundaries.
 
 Canonical concept와 identifier 문법은
 `standards/repository-naming.md`가 정의한다.

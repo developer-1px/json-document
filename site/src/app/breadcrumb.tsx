@@ -9,8 +9,9 @@ export type BreadcrumbCrumb = {
 
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
-const groupLandings: Partial<Record<SiteNavigationGroup, BreadcrumbCrumb>> = {
-  "JSON Document": { path: "/docs", label: "Why" },
+const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
+  "JSON Document": { path: "/docs", label: "JSON Document" },
+  Editing: { path: "/docs/intent-guide", label: "Editing" },
   Connectors: { path: "/connectors", label: "Connectors" },
 };
 
@@ -31,9 +32,8 @@ export function breadcrumbTrail(
   }
 
   const group = routeGroup(route, routes);
-  const landing = group ? groupLandings[group] : undefined;
-  if (landing && !stack.some((crumb) => crumb.path === landing.path)) {
-    stack.unshift(landing);
+  if (group && stack[0]?.label !== group) {
+    stack.unshift(groupLandings[group]);
   }
   if (stack[0]?.path !== overview.path) stack.unshift(overview);
 
@@ -42,8 +42,6 @@ export function breadcrumbTrail(
 
 function crumbLabel(route: SiteRoute): string {
   if (route.path === "/connectors") return "Connectors";
-  if (route.path === "/demos") return "Examples";
-  if (route.path === "/docs/collaboration") return "Collaboration";
   return route.label;
 }
 
@@ -61,7 +59,7 @@ export function SiteBreadcrumb(props: {
         {trail.map((crumb, index) => {
           const current = index === trail.length - 1;
           return (
-            <li key={crumb.path} className={ui.breadcrumb.item}>
+            <li key={`${crumb.path}:${crumb.label}`} className={ui.breadcrumb.item}>
               {index > 0 ? <span className={ui.breadcrumb.sep} aria-hidden="true">›</span> : null}
               {current ? (
                 <span className={ui.breadcrumb.current} aria-current="page">{crumb.label}</span>
