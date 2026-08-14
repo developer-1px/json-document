@@ -1,0 +1,465 @@
+{
+  "formatVersion": 1,
+  "status": "draft",
+  "profile": "standards/json-document-rich-text-v1/profile.md",
+  "schema": "standards/json-document-rich-text-v1/schema.json",
+  "cases": [
+    {
+      "id": "canonical-document",
+      "kind": "schema",
+      "requirements": [
+        "JDRT1-DATA-001",
+        "JDRT1-PROFILE-001",
+        "JDRT1-NODE-001",
+        "JDRT1-NODE-002",
+        "JDRT1-NODE-003",
+        "JDRT1-MARK-001",
+        "JDRT1-MARK-002",
+        "JDRT1-VALIDATION-001"
+      ],
+      "value": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "document-1",
+        "type": "doc",
+        "content": [
+          {
+            "id": "heading-1",
+            "type": "heading",
+            "attrs": { "level": 2 },
+            "content": [
+              {
+                "id": "text-1",
+                "type": "text",
+                "text": "Canonical",
+                "marks": [
+                  { "type": "link", "attrs": { "href": "/canonical" } },
+                  { "type": "strong" }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "paragraph-1",
+            "type": "paragraph",
+            "content": []
+          }
+        ]
+      },
+      "expect": { "schemaValid": true, "semanticValid": true }
+    },
+    {
+      "id": "empty-document-is-structurally-invalid",
+      "kind": "schema",
+      "requirements": ["JDRT1-PROFILE-001", "JDRT1-VALIDATION-001"],
+      "value": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "document-1",
+        "type": "doc",
+        "content": []
+      },
+      "expect": {
+        "schemaValid": false,
+        "code": "rich-text.schema-violation"
+      }
+    },
+    {
+      "id": "code-block-rejects-marks",
+      "kind": "schema",
+      "requirements": ["JDRT1-NODE-002", "JDRT1-MARK-001", "JDRT1-VALIDATION-001"],
+      "value": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "document-1",
+        "type": "doc",
+        "content": [
+          {
+            "id": "code-1",
+            "type": "codeBlock",
+            "attrs": { "language": "ts" },
+            "content": [
+              {
+                "id": "text-1",
+                "type": "text",
+                "text": "const value = 1;",
+                "marks": [{ "type": "strong" }]
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "schemaValid": false,
+        "code": "rich-text.schema-violation"
+      }
+    },
+    {
+      "id": "duplicate-id-is-semantically-invalid",
+      "kind": "semantic-validation",
+      "requirements": ["JDRT1-NODE-001", "JDRT1-VALIDATION-001"],
+      "value": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "same",
+        "type": "doc",
+        "content": [
+          { "id": "same", "type": "paragraph", "content": [] }
+        ]
+      },
+      "expect": {
+        "schemaValid": true,
+        "semanticValid": false,
+        "code": "rich-text.duplicate-id",
+        "nodeId": "same"
+      }
+    },
+    {
+      "id": "normalization-is-explicit-and-deterministic",
+      "kind": "normalization",
+      "requirements": [
+        "JDRT1-NORMALIZATION-001",
+        "JDRT1-NORMALIZATION-002",
+        "JDRT1-NODE-003",
+        "JDRT1-MARK-002"
+      ],
+      "value": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "document-1",
+        "type": "doc",
+        "content": [
+          {
+            "id": "paragraph-1",
+            "type": "paragraph",
+            "content": [
+              {
+                "id": "text-1",
+                "type": "text",
+                "text": "A",
+                "marks": [{ "type": "strong" }, { "type": "link", "attrs": { "href": "/a" } }]
+              },
+              {
+                "id": "text-2",
+                "type": "text",
+                "text": "B",
+                "marks": [{ "type": "link", "attrs": { "href": "/a" } }, { "type": "strong" }]
+              },
+              {
+                "id": "text-empty",
+                "type": "text",
+                "text": "",
+                "marks": []
+              }
+            ]
+          }
+        ]
+      },
+      "createIds": [],
+      "expect": {
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "document-1",
+          "type": "doc",
+          "content": [
+            {
+              "id": "paragraph-1",
+              "type": "paragraph",
+              "content": [
+                {
+                  "id": "text-1",
+                  "type": "text",
+                  "text": "AB",
+                  "marks": [{ "type": "link", "attrs": { "href": "/a" } }, { "type": "strong" }]
+                }
+              ]
+            }
+          ]
+        },
+        "operations": [
+          {
+            "op": "replace",
+            "path": "/content/0/content",
+            "value": [
+              {
+                "id": "text-1",
+                "type": "text",
+                "text": "AB",
+                "marks": [{ "type": "link", "attrs": { "href": "/a" } }, { "type": "strong" }]
+              }
+            ]
+          }
+        ],
+        "retiredIds": ["text-2", "text-empty"]
+      }
+    },
+    {
+      "id": "identity-and-position-mapping",
+      "kind": "mapping",
+      "requirements": [
+        "JDRT1-IDENTITY-001",
+        "JDRT1-POSITION-001",
+        "JDRT1-POSITION-002",
+        "JDRT1-MAPPING-001"
+      ],
+      "steps": [
+        {
+          "operation": { "type": "text.insert", "nodeId": "text-1", "offset": 1, "text": "🙂" },
+          "points": [
+            {
+              "before": { "kind": "text", "nodeId": "text-1", "offset": 1, "affinity": "backward" },
+              "after": { "kind": "text", "nodeId": "text-1", "offset": 1, "affinity": "backward" }
+            },
+            {
+              "before": { "kind": "text", "nodeId": "text-1", "offset": 1, "affinity": "forward" },
+              "after": { "kind": "text", "nodeId": "text-1", "offset": 3, "affinity": "forward" }
+            }
+          ]
+        },
+        {
+          "operation": { "type": "node.split", "nodeId": "text-1", "offset": 1, "rightId": "text-2" },
+          "points": [
+            {
+              "before": { "kind": "text", "nodeId": "text-1", "offset": 2, "affinity": "forward" },
+              "after": { "kind": "text", "nodeId": "text-2", "offset": 1, "affinity": "forward" }
+            }
+          ]
+        },
+        {
+          "operation": { "type": "node.join", "leftId": "text-1", "rightId": "text-2", "leftLength": 1 },
+          "points": [
+            {
+              "before": { "kind": "text", "nodeId": "text-2", "offset": 1, "affinity": "forward" },
+              "after": { "kind": "text", "nodeId": "text-1", "offset": 2, "affinity": "forward" }
+            }
+          ],
+          "retiredIds": ["text-2"]
+        }
+      ]
+    },
+    {
+      "id": "range-selection-uses-logical-topology",
+      "kind": "selection-topology",
+      "requirements": [
+        "JDRT1-SELECTION-001",
+        "JDRT1-TOPOLOGY-001",
+        "JDRT1-MAPPING-001"
+      ],
+      "selection": {
+        "kind": "range",
+        "ranges": [
+          {
+            "anchor": { "kind": "text", "nodeId": "text-1", "offset": 1, "affinity": "forward" },
+            "focus": { "kind": "text", "nodeId": "text-2", "offset": 1, "affinity": "backward" }
+          }
+        ],
+        "primaryIndex": 0
+      },
+      "logicalOrder": ["text-1", "break-1", "text-2"],
+      "expect": {
+        "targets": [
+          { "kind": "text", "nodeId": "text-1", "from": 1, "to": 2 },
+          { "kind": "node", "nodeId": "break-1" },
+          { "kind": "text", "nodeId": "text-2", "from": 0, "to": 1 }
+        ]
+      }
+    },
+    {
+      "id": "intent-plans-atomic-json-patch",
+      "kind": "editing",
+      "requirements": [
+        "JDRT1-EDIT-001",
+        "JDRT1-EDIT-002",
+        "JDRT1-EDIT-003",
+        "JDRT1-HISTORY-001"
+      ],
+      "intent": { "type": "text.insert", "text": "X" },
+      "selectionBefore": {
+        "kind": "range",
+        "ranges": [
+          {
+            "anchor": { "kind": "text", "nodeId": "text-1", "offset": 1, "affinity": "forward" },
+            "focus": { "kind": "text", "nodeId": "text-1", "offset": 1, "affinity": "forward" }
+          }
+        ],
+        "primaryIndex": 0
+      },
+      "expect": {
+        "plan": {
+          "operations": [
+            { "op": "replace", "path": "/content/0/content/0/text", "value": "aXb" }
+          ],
+          "selectionAfter": {
+            "kind": "range",
+            "ranges": [
+              {
+                "anchor": { "kind": "text", "nodeId": "text-1", "offset": 2, "affinity": "forward" },
+                "focus": { "kind": "text", "nodeId": "text-1", "offset": 2, "affinity": "forward" }
+              }
+            ],
+            "primaryIndex": 0
+          },
+          "origin": "text.insert"
+        }
+      }
+    },
+    {
+      "id": "composition-is-one-editing-history-group",
+      "kind": "history",
+      "requirements": ["JDRT1-HISTORY-001", "JDRT1-HISTORY-002"],
+      "composition": {
+        "id": "composition-1",
+        "origins": ["text.insert", "text.insert", "text.insert"]
+      },
+      "expect": {
+        "historyEntries": 1,
+        "historyGroup": "composition:composition-1",
+        "restoresSelectionBeforeAndAfter": true
+      }
+    },
+    {
+      "id": "clipboard-preserves-structure-and-representations",
+      "kind": "clipboard",
+      "requirements": [
+        "JDRT1-IDENTITY-002",
+        "JDRT1-CLIPBOARD-001",
+        "JDRT1-CLIPBOARD-002"
+      ],
+      "clipboard": {
+        "type": "application/vnd.interactive-os.rich-text+json",
+        "slice": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "content": [
+            {
+              "id": "paragraph-source",
+              "type": "paragraph",
+              "content": [
+                { "id": "text-source", "type": "text", "text": "Hello", "marks": [{ "type": "strong" }] }
+              ]
+            }
+          ],
+          "openStart": 0,
+          "openEnd": 0
+        },
+        "text": "Hello",
+        "html": "<p><strong>Hello</strong></p>"
+      },
+      "destinationIds": ["document-1", "paragraph-source"],
+      "createdIds": ["paragraph-paste", "text-paste"],
+      "expect": {
+        "pastePriority": [
+          "application/vnd.interactive-os.rich-text+json",
+          "text/html",
+          "text/plain"
+        ],
+        "idMapping": {
+          "paragraph-source": "paragraph-paste",
+          "text-source": "text-paste"
+        },
+        "copyChangesDocument": false,
+        "cutAndPasteUseEditingSession": true
+      }
+    },
+    {
+      "id": "extension-profile-is-explicit-and-lossless",
+      "kind": "extension",
+      "requirements": ["JDRT1-EXTENSION-001", "JDRT1-EXTENSION-002"],
+      "profile": "urn:example:rich-text:1",
+      "types": ["com.example/mention"],
+      "unknownValue": {
+        "id": "mention-1",
+        "type": "com.example/mention",
+        "attrs": { "userId": "user-1" }
+      },
+      "expect": {
+        "withoutProvider": {
+          "validationCode": "rich-text.profile-unavailable",
+          "editingCode": "rich-text.profile-unavailable",
+          "rawValuePreserved": true,
+          "rendererFallbackReceivesRawValue": true
+        },
+        "officialTypeOverrideAllowed": false
+      }
+    },
+    {
+      "id": "official-semantic-rendering",
+      "kind": "rendering",
+      "requirements": ["JDRT1-RENDER-001", "JDRT1-RENDER-002"],
+      "value": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "document-1",
+        "type": "doc",
+        "content": [
+          {
+            "id": "paragraph-1",
+            "type": "paragraph",
+            "content": [
+              {
+                "id": "text-1",
+                "type": "text",
+                "text": "Link",
+                "marks": [
+                  { "type": "link", "attrs": { "href": "/docs" } },
+                  { "type": "strong" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "html": "<p><a href=\"/docs\"><strong>Link</strong></a></p>",
+        "ownsProductUi": false,
+        "canonicalStorageIsDom": false
+      }
+    },
+    {
+      "id": "package-boundaries-reuse-existing-contracts",
+      "kind": "static-boundary",
+      "requirements": [
+        "JDRT1-GOV-001",
+        "JDRT1-PACKAGE-001",
+        "JDRT1-PACKAGE-002",
+        "JDRT1-CONFORMANCE-001"
+      ],
+      "packages": {
+        "@interactive-os/json-document-rich-text": {
+          "allowedPeers": [
+            "@interactive-os/json-document",
+            "@interactive-os/json-document-selection",
+            "@interactive-os/json-document-editing"
+          ],
+          "forbiddenDependencies": ["react", "react-dom"]
+        },
+        "@interactive-os/json-document-rich-text-web": {
+          "requiredPeers": [
+            "@interactive-os/json-document-rich-text",
+            "@interactive-os/json-document-web"
+          ]
+        },
+        "@interactive-os/json-document-rich-text-react": {
+          "requiredPeers": ["react", "@interactive-os/json-document-rich-text"]
+        }
+      },
+      "reuse": [
+        "RangeSelection",
+        "RangeSelectionMapping",
+        "OrderedTopology",
+        "EditingSession",
+        "WebClipboardPayload",
+        "JSONDocument.commit"
+      ],
+      "preserveExistingPackage": "@interactive-os/json-document-contenteditable"
+    },
+    {
+      "id": "browser-acceptance-contract",
+      "kind": "browser-acceptance",
+      "requirements": ["JDRT1-CONFORMANCE-002"],
+      "scenarios": [
+        "beforeinput",
+        "composition",
+        "selection-restore",
+        "structured-clipboard",
+        "html-clipboard",
+        "plain-text-clipboard",
+        "undo-redo"
+      ],
+      "requiresRealContentEditableRoot": true
+    }
+  ]
+}
