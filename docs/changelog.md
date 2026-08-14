@@ -5,6 +5,10 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Reorganized official site navigation into JSON Document, Editing, Editors,
+  and Connectors. Collaboration sits under JSON Document. Domain editors sit
+  in Editors, including Order, Object, and Tree. Concept demos remain under
+  their Editing guide.
 - Reorganized official site navigation to one public tree: JSON Document,
   Editing, and Connectors. API sits with JSON Document. Document, Sheet, and
   Database sit with Editing. Concept demos remain under their guide.

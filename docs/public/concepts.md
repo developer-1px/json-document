@@ -70,3 +70,6 @@ UI 도구나 실행 환경이 달라져도 유지됩니다. 제품은 필요한 
 - [Topology](topology.md): 화면에 보이는 순서와 범위
 - [Clipboard](clipboard.md): 선택한 데이터의 복사, 잘라내기와 붙여넣기
 - [History](history.md): 값과 선택을 함께 되돌리는 기록
+
+같은 공책을 여러 참여자가 쓰려면 [Collaboration](collaboration.md)으로
+갑니다. 모델을 모아 만든 숙제는 [Editors](editors.md)에서 고릅니다.

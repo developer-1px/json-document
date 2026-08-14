@@ -11,9 +11,21 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText(["Why", "Quickstart", "Concepts", "API Reference"]);
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
+    "Why",
+    "Quickstart",
+    "Concepts",
+    "API Reference",
+    "Collaboration",
+    "Replica",
+    "Collaborative History",
+    "Text",
+    "Contenteditable lease",
+    "Lifecycle",
+  ]);
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Intent guide",
+    "Intent",
     "Selection",
     "Selection Demo",
     "Topology",
@@ -22,10 +34,15 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Clipboard Demo",
     "History",
     "History Demo",
+  ]);
+  await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
+    "Editors",
     "Document",
     "Sheet",
     "Database",
-    "Intent",
+    "Order",
+    "Object",
+    "Tree",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
@@ -42,6 +59,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Editors" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
 
