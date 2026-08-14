@@ -6,8 +6,8 @@ test("Contenteditable Connector commits a local string through the mounted React
     if (message.type() === "error" || message.type() === "warning") errors.push(message.text());
   });
 
-  await page.goto("/connectors/contenteditable");
-  await expect(page.getByRole("heading", { level: 1, name: "Contenteditable Connector" })).toBeVisible();
+  await page.goto("/adapters/contenteditable");
+  await expect(page.getByRole("heading", { level: 1, name: "Contenteditable Adapter" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Native editing surface" })).toBeVisible();
   await expect(page.getByText('contenteditable="true"')).toBeVisible();
 

@@ -1,17 +1,20 @@
 # @interactive-os/json-document-web
 
-Web Platform Connector for the public clipboard and selection interaction
+Official keyboard and clipboard adapters for the public editing
 contracts from `@interactive-os/json-document-editing` and
 `@interactive-os/json-document-selection`.
 
-The package translates browser-native `ClipboardEvent`/`DataTransfer` shapes
-without rendering UI or deciding product keyboard policy.
+The package provides official Web adapters for clipboard, keyboard, and text
+input. It translates native `ClipboardEvent`/`DataTransfer` shapes and
+conventional keyboard chords without rendering UI or deciding product
+keyboard policy.
 
 ```ts
 import { createDocumentEditor } from "@interactive-os/json-document-editing";
 import {
   createWebClipboardBinding,
   documentClipboardCodec,
+  createWebKeyboardAdapter,
   selectionOperationFromModifiers,
   textInputFromControl,
 } from "@interactive-os/json-document-web";
@@ -34,9 +37,16 @@ surface.addEventListener("copy", (event) => clipboard.copy(event));
 surface.addEventListener("cut", (event) => clipboard.cut(event));
 surface.addEventListener("paste", (event) => clipboard.paste(event));
 
+const keyboard = createWebKeyboardAdapter();
+
 surface.addEventListener("click", (event) => {
   const operation = selectionOperationFromModifiers(event);
   // The host resolves geometry and dispatches its domain selection intent.
+});
+
+surface.addEventListener("keydown", (event) => {
+  const command = keyboard.resolve(event);
+  // Official adapter output. The host maps it through topology to a domain intent.
 });
 
 input.addEventListener("input", (event) => {
@@ -50,10 +60,16 @@ structured json-document MIME payload and its `text/plain` projection. Paste
 consumes only a valid structured payload. Parsing arbitrary external plain text
 into domain records or cells remains a host policy.
 
-The binding calls `preventDefault()` only after a successful copy, canonical
-cut, or canonical paste. Cut writes the selected payload before asking the
-Editing companion to remove it. Missing clipboard data, malformed payloads,
-unsupported cut, and rejected editing results leave native handling available.
+The official keyboard adapter owns `defaultWebKeymap`. `resolve` returns a
+semantic command or `null`; `moveLinePoint` and `moveGridPoint` locate the
+visible neighbor. The host still decides when a command applies and which
+domain Intent to dispatch.
+
+The clipboard binding calls `preventDefault()` only after a successful copy,
+canonical cut, or canonical paste. Cut writes the selected payload before
+asking the Editing companion to remove it. Missing clipboard data, malformed
+payloads, unsupported cut, and rejected editing results leave native handling
+available.
 
 ## Boundary
 
@@ -63,11 +79,13 @@ The Connector owns:
   values;
 - `ClipboardEvent` copy/cut/paste translation;
 - conventional Web modifier translation to `replace`, `extend`, or `toggle`.
+- the official keyboard adapter: conventional chords, a host-overridable keymap,
+  and visible-order neighbor helpers.
 - native text control value and caret observation without owning text selection.
 
 The host owns:
 
-- the event target, focus, keyboard shortcuts, and accessibility wiring;
+- the event target, focus, when a command applies, and accessibility wiring;
 - DOM/canvas geometry and hit testing;
 - external plain-text interpretation and product-specific paste policy;
 - native text selection, IME, drag/drop, persistence, and remote protocols.

@@ -19,7 +19,8 @@ docs
 |   |-- topology.md            # Editing: 화면 줄과 선택
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
-|   |-- connectors.md          # Connectors: 공식 외부 생태계 연결
+|   |-- adapters.md            # Adapters: 공식 플랫폼 변환
+|   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
 
@@ -42,6 +43,9 @@ Editing
 |-- Document
 |-- Sheet
 `-- Database
+
+Adapters
+`-- Adapter guide
 
 Connectors
 `-- Connector guide
@@ -76,7 +80,8 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   api는 시그니처 레퍼런스, quickstart는 실습, selection은 구조
   선택, history는 로컬 undo/redo, clipboard는 구조화된 payload,
   topology는 화면 줄과 선택, intent는 편집 Intent 시그니처,
-  intent-guide는 Intent 따라 하기, connectors는 연결 방법이다.
+  intent-guide는 Intent 따라 하기, adapters는 플랫폼 변환,
+  connectors는 연결 방법이다.
   concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.

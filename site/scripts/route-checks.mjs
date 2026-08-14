@@ -1,5 +1,5 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
-const navigationGroups = new Set(["JSON Document", "Editing", "Demos", "Connectors", "Reference"]);
+const navigationGroups = new Set(["JSON Document", "Editing", "Demos", "Adapters", "Connectors", "Reference"]);
 
 export function validateSiteRoutes(routes, fail) {
   if (!Array.isArray(routes) || routes.length === 0) {

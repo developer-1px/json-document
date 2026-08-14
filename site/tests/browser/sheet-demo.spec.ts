@@ -86,6 +86,33 @@ test("Sheet demo cuts the primary rectangle and restores cells with undo", async
   expect(document.rows[1]?.cells).toEqual({ name: "Beta", status: "Ready", owner: "Theo" });
 });
 
+test("Sheet demo moves and extends selection through the Web keyboard adapter", async ({ page }) => {
+  await page.goto("/demo/sheet");
+  await page.getByText("Inspect editing state", { exact: true }).click();
+  await page.getByRole("textbox", { name: "Name row 1" }).click();
+
+  await page.keyboard.press("ArrowDown");
+  expect(JSON.parse(await page.getByTestId("sheet-selection-json").innerText()).focus).toEqual({
+    rowId: "row-2",
+    columnId: "name",
+  });
+
+  await page.keyboard.press("Shift+ArrowRight");
+  expect(JSON.parse(await page.getByTestId("sheet-selection-json").innerText()).focus).toEqual({
+    rowId: "row-2",
+    columnId: "status",
+  });
+  await expect(page.locator('td[data-selected="true"]')).toHaveCount(2);
+
+  await page.keyboard.press("Delete");
+  let document = await canonicalSheet(page);
+  expect(document.rows[1]?.cells).toEqual({ name: null, status: null, owner: "Theo" });
+
+  await page.keyboard.press("ControlOrMeta+z");
+  document = await canonicalSheet(page);
+  expect(document.rows[1]?.cells).toEqual({ name: "Beta", status: "Ready", owner: "Theo" });
+});
+
 test("Sheet demo composes native structured clipboard events with its Sheet editor", async ({ page }) => {
   await page.goto("/demo/sheet");
   await page.getByText("Inspect editing state", { exact: true }).click();

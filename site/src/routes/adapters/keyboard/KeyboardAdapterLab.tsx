@@ -13,7 +13,6 @@ import {
   lineBoundary,
   moveLinePoint,
   selectionOperationFromModifiers,
-  textInputFromControl,
   type WebKeyboardCommand,
 } from "@interactive-os/json-document-web";
 import { JsonInspector } from "../../../shared/ui/json-inspector";
@@ -22,13 +21,13 @@ import { classes, ui } from "../../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
   blocks: [
-    { id: "alpha", text: "Select this block and use the native clipboard." },
+    { id: "alpha", text: "Select this block and use arrows, Delete, and undo." },
     { id: "beta", text: "Paste inserts a canonical block after the selection." },
-    { id: "gamma", text: "Text input commits through the same editing history." },
+    { id: "gamma", text: "Keyboard commands use the same Intent, Clipboard, and History doors." },
   ],
 };
 
-export function WebConnectorLab() {
+export function KeyboardAdapterLab() {
   const [editor] = useState<DocumentEditor>(() => createDocumentEditor(initialDocument));
   const [clipboard] = useState(() => createWebClipboardBinding({
     codec: documentClipboardCodec,
@@ -122,7 +121,7 @@ export function WebConnectorLab() {
 
   return (
     <section
-      aria-label="Web Platform editing surface"
+      aria-label="Keyboard adapter surface"
       tabIndex={0}
       onCopy={handleCopy}
       onCut={handleCut}
@@ -131,8 +130,8 @@ export function WebConnectorLab() {
       className={classes("p-4", ui.surface.raised, ui.state.focus)}
     >
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
-        <output aria-live="polite" data-testid="web-announcement">{announcement}</output>
-        <span data-testid="web-history-state">
+        <output aria-live="polite" data-testid="keyboard-announcement">{announcement}</output>
+        <span data-testid="keyboard-history-state">
           revision {snapshot.revision} · {editor.selectedBlockIds.length} selected
           {snapshot.canUndo ? " · undo" : ""}
           {snapshot.canRedo ? " · redo" : ""}
@@ -150,30 +149,16 @@ export function WebConnectorLab() {
               onClick={(event) => select(event, block.id)}
               className={classes("p-3", ui.surface.workspace)}
             >
-                <label className={classes("grid gap-2", ui.text.label)}>
-                  {block.id}
-                  <textarea
-                    aria-label={`${block.id} text`}
-                    key={block.text}
-                    defaultValue={block.text}
-                    onClick={(event) => event.stopPropagation()}
-                    onChange={(event) => {
-                      const input = textInputFromControl(event);
-                      const result = editor.dispatch({ type: "text.replace", blockId: block.id, ...input });
-                      setAnnouncement(result.ok ? "Native text input committed" : result.code);
-                    }}
-                    className={classes("min-h-20 w-full", ui.field.control)}
-                  />
-                </label>
+              <span className={ui.text.label}>{block.id}</span>
             </SelectableItem>
           ))}
         </div>
 
         <aside className="grid min-w-0 gap-3" aria-label="Canonical state">
-          <JsonInspector label="Canonical JSON" signal={`revision ${snapshot.revision}`} value={snapshot.value} testId="web-document-json" size="tall" />
-          <JsonInspector label="Keyboard command" value={lastCommand} testId="web-keyboard-command-json" size="compact" />
-          <JsonInspector label="Intent" value={lastIntent} testId="web-intent-json" size="compact" />
-          <JsonInspector label="Selection" value={snapshot.selection} testId="web-selection-json" size="compact" />
+          <JsonInspector label="Canonical JSON" signal={`revision ${snapshot.revision}`} value={snapshot.value} testId="keyboard-document-json" size="tall" />
+          <JsonInspector label="Keyboard command" value={lastCommand} testId="keyboard-command-json" size="compact" />
+          <JsonInspector label="Intent" value={lastIntent} testId="keyboard-intent-json" size="compact" />
+          <JsonInspector label="Selection" value={snapshot.selection} testId="keyboard-selection-json" size="compact" />
         </aside>
       </div>
     </section>

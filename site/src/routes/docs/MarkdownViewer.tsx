@@ -93,6 +93,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "intent.md": "/docs/intent",
   "intent-guide.md": "/docs/intent-guide",
   "connectors.md": "/docs/connectors",
+  "adapters.md": "/docs/adapters",
 };
 
 function rewriteMarkdownHref(href: string | undefined): string | undefined {

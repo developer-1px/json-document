@@ -25,7 +25,7 @@
     "path": "/docs/concepts",
     "label": "Concepts",
     "title": "Core Concepts - json-document",
-    "description": "JSON Document에서 Editing과 외부 Connector로 이어지는 개념 지도를 설명합니다.",
+    "description": "JSON Document에서 Editing, Adapter, Connector로 이어지는 개념 지도를 설명합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
   },
@@ -138,6 +138,42 @@
     "parentPath": "/demos"
   },
   {
+    "path": "/adapters",
+    "label": "Adapters",
+    "title": "Adapters - json-document",
+    "description": "Official json-document platform adapters with live keyboard, clipboard, and contenteditable demos.",
+    "navigationGroup": "Adapters"
+  },
+  {
+    "path": "/docs/adapters",
+    "label": "Adapter guide",
+    "title": "Adapter Docs - json-document",
+    "description": "Keyboard, Clipboard, Contenteditable 공식 adapter 계약을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapters"
+  },
+  {
+    "path": "/adapters/keyboard",
+    "label": "Keyboard",
+    "title": "Keyboard Adapter Live Demo - json-document",
+    "description": "Official keyboard adapter: conventional chords become commands, then existing Intent, Clipboard, and History doors.",
+    "navigationGroup": "Adapters"
+  },
+  {
+    "path": "/adapters/clipboard",
+    "label": "Clipboard",
+    "title": "Clipboard Adapter Live Demo - json-document",
+    "description": "Official clipboard adapter: native ClipboardEvent copy, cut, and paste bind to public editing contracts.",
+    "navigationGroup": "Adapters"
+  },
+  {
+    "path": "/adapters/contenteditable",
+    "label": "Contenteditable",
+    "title": "Contenteditable Adapter Live Demo - json-document",
+    "description": "Official DOM adapter: a React contenteditable root leases native input and commits one JSON Document string pointer.",
+    "navigationGroup": "Adapters"
+  },
+  {
     "path": "/connectors",
     "label": "Connectors",
     "title": "Connectors - json-document",
@@ -148,7 +184,7 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
-    "description": "React, React Hook Form, Ajv, Zod, TanStack Table, Web Platform, Contenteditable 연결 계약을 설명합니다.",
+    "description": "React, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
     "language": "ko",
     "navigationGroup": "Connectors"
   },
@@ -192,20 +228,6 @@
     "label": "TanStack Table",
     "title": "TanStack Table Connector Live Demo - json-document",
     "description": "Live TanStack Table v8 integration for visible-order Sheet selection, clipboard, history, and canonical JSON editing.",
-    "navigationGroup": "Connectors"
-  },
-  {
-    "path": "/connectors/web",
-    "label": "Web Platform",
-    "title": "Web Platform Connector Live Demo - json-document",
-    "description": "Live browser clipboard, text-control input, and modifier translation into public json-document editing contracts.",
-    "navigationGroup": "Connectors"
-  },
-  {
-    "path": "/connectors/contenteditable",
-    "label": "Contenteditable",
-    "title": "Contenteditable Connector Live Demo - json-document",
-    "description": "Live React contenteditable root that leases native input and commits its bound string through the public JSON Document API.",
     "navigationGroup": "Connectors"
   },
   {

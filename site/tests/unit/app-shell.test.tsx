@@ -47,8 +47,17 @@ describe("official site shell", () => {
       "Intent",
     ]);
     expect(groupLinks(nav, "Demos")).toEqual(["Showcase", "Document", "Sheet", "Database"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table", "Web Platform", "Contenteditable"]);
+    expect(groupLinks(nav, "Adapters")).toEqual(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
     expect(groupLinks(nav, "Reference")).toEqual(["API Reference"]);
+    expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
+      "JSON Document",
+      "Editing",
+      "Demos",
+      "Adapters",
+      "Connectors",
+      "Reference",
+    ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     const connectors = within(nav.getByRole("group", { name: "Connectors" }));
@@ -62,8 +71,6 @@ describe("official site shell", () => {
       "/connectors/ajv",
       "/connectors/zod",
       "/connectors/tanstack-table",
-      "/connectors/web",
-      "/connectors/contenteditable",
     ]);
     expect(screen.getByRole("link", { name: "Validate commits" }).getAttribute("href")).toBe("/connectors/zod/validate");
 

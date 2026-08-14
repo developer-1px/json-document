@@ -5,6 +5,10 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Split official Adapters from Connectors and put Adapters before Connectors
+  in the public concept tree. Keyboard and Clipboard are separate official
+  adapters in `@interactive-os/json-document-web`, Contenteditable is an
+  official adapter, and the Connector catalog keeps library integrations only.
 - Added `@interactive-os/json-document-contenteditable`, a React
   contenteditable root that leases native input for one local JSON Document
   string pointer, with a Connector catalog Live Demo.

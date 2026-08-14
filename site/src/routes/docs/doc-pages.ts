@@ -1,5 +1,6 @@
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
+import adaptersMarkdown from "../../../../docs/public/adapters.md?raw";
 import connectorsMarkdown from "../../../../docs/public/connectors.md?raw";
 import historyMarkdown from "../../../../docs/public/history.md?raw";
 import intentGuideMarkdown from "../../../../docs/public/intent-guide.md?raw";
@@ -21,6 +22,12 @@ export const docPages = {
     label: "Quickstart",
     title: "작은 카드 문서 만들기",
     source: quickstartMarkdown,
+  },
+  adapters: {
+    path: "/docs/adapters",
+    label: "Adapter guide",
+    title: "json-document Adapters",
+    source: adaptersMarkdown,
   },
   connectors: {
     path: "/docs/connectors",

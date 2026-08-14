@@ -2,15 +2,16 @@
 
 Quickstart에서는 JSON을 읽고, 변경을 적용하고, 결과를 구독했습니다. 실제
 편집기에서는 여기에 사용자가 고른 위치와 복사한 내용, 되돌릴 변경이
-필요합니다. 화면과 스키마 도구를 연결하는 일도 남아 있습니다.
+필요합니다. 브라우저 플랫폼과 스키마 도구를 붙이는 일도 남아 있습니다.
 
-json-document를 제품에 연결하는 흐름은 세 단계로 이어집니다. 먼저 JSON
-Document가 값을 다루고, Editing이 사용자의 편집 상태를 더합니다. Connector는
-그 결과를 React나 브라우저 같은 외부 도구에 연결합니다.
+json-document를 제품에 연결하는 흐름은 이렇게 이어집니다. 먼저 JSON
+Document가 값을 다루고, Editing이 사용자의 편집 상태를 더합니다.
+Adapter는 브라우저 플랫폼 계약을 붙이고, Connector는 라이브러리 생태계를
+연결합니다.
 
 ```txt
-JSON Document  →  Editing  →  Connector  →  제품 화면
-값과 변경         선택과 작업    외부 API 번역    렌더링과 입력
+JSON Document  →  Editing  →  Adapter  →  Connector  →  제품 화면
+값과 변경         선택과 작업    플랫폼 계약    라이브러리      렌더링과 입력
 ```
 
 ## JSON Document가 값을 다룬다
@@ -48,20 +49,29 @@ Topology입니다. Selection과 복사 기능은 같은 Topology를 읽어 같�
 문서 값이 바뀌면 Editing은 적용된 patch와 그때의 Selection을 기록합니다.
 History는 이 기록을 사용해 값과 선택을 함께 되돌리거나 다시 적용합니다.
 
+## Adapter가 플랫폼을 붙인다
+
+Editing까지 조합하면 화면과 독립된 편집 동작이 완성됩니다. 브라우저에서
+쓰려면 키보드, clipboard, contenteditable 같은 플랫폼 계약을 붙여야
+합니다.
+
+Adapter는 이런 플랫폼 계약을 json-document의 공개 API에 맞게 변환합니다.
+Keyboard adapter는 키 chord를 의미 command로 바꾸고, Clipboard adapter는
+복사와 붙여넣기를 Editing의 copy, cut, paste에 연결합니다.
+
+필요한 Adapter만 골라 기존 편집 동작과 조합할 수 있습니다.
+
 ## Connector가 외부 도구를 연결한다
 
-Editing까지 조합하면 화면과 독립된 편집 동작이 완성됩니다. 제품에서는 이
-동작을 React로 렌더링하거나 Zod와 Ajv로 값을 검사할 수 있습니다.
+제품에서는 같은 편집 동작을 React로 렌더링하거나 Zod와 Ajv로 값을 검사할
+수 있습니다.
 
-Connector는 외부 도구의 입력과 출력을 json-document의 공개 API에 맞게
-번역합니다. 예를 들어 React Connector는 document 변경을 React의 구독
-방식으로 전달합니다. TanStack Table Connector는 화면에 보이는 행과 열을
-Sheet의 Topology로 바꿉니다. Web Connector는 브라우저의 복사와 붙여넣기를
-Editing의 copy, cut, paste에 연결합니다.
+Connector는 이름 있는 라이브러리 생태계의 입력과 출력을 json-document의
+공개 API에 맞게 번역합니다. 예를 들어 React Connector는 document 변경을
+React의 구독 방식으로 전달합니다. TanStack Table Connector는 화면에
+보이는 행과 열을 Sheet의 Topology로 바꿉니다.
 
-Connector가 외부 의존성을 맡으면 JSON Document와 Editing의 API는 사용하는
-UI 도구나 실행 환경이 달라져도 유지됩니다. 제품은 필요한 Connector만
-골라 기존 도구와 조합할 수 있습니다.
+필요한 Connector만 골라 기존 도구와 조합할 수 있습니다.
 
 이제 Editing의 각 개념을 실제 입력과 결과로 연결합니다.
 
@@ -70,3 +80,5 @@ UI 도구나 실행 환경이 달라져도 유지됩니다. 제품은 필요한 
 - [Topology](topology.md): 화면에 보이는 순서와 범위
 - [Clipboard](clipboard.md): 선택한 데이터의 복사, 잘라내기와 붙여넣기
 - [History](history.md): 값과 선택을 함께 되돌리는 기록
+- [Adapters](adapters.md): 키보드, clipboard, contenteditable 플랫폼 변환
+- [Connectors](connectors.md): React, Zod, TanStack Table 같은 라이브러리 연결
