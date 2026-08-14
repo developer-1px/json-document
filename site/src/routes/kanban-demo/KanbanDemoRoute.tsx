@@ -37,7 +37,7 @@ export function KanbanDemoRoute() {
 
   return (
     <PageFrame>
-      <PageHeader illustration="braces" title="Simple Kanban">
+      <PageHeader illustration="braces" title="Kanban">
         Drag a card into another column. One JSON document keeps the board.
       </PageHeader>
 

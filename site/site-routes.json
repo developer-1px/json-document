@@ -169,42 +169,42 @@
     "path": "/editors",
     "label": "Editors",
     "title": "Editors - json-document",
-    "description": "Simple Document, Canvas, Sheet, Tree, Kanban 최소 완성본을 고릅니다.",
+    "description": "Document, Canvas, Sheet, Tree, Kanban 최소 완성본을 고릅니다.",
     "language": "ko",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo",
-    "label": "Simple Document",
-    "title": "Simple Document - json-document",
+    "label": "Document",
+    "title": "Document - json-document",
     "description": "A simple minimal document editor: type in the line, move blocks, copy, and undo.",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo/canvas",
-    "label": "Simple Canvas",
-    "title": "Simple Canvas - json-document",
+    "label": "Canvas",
+    "title": "Canvas - json-document",
     "description": "A simple minimal canvas: pick, drag, and fill objects on a plane.",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo/sheet",
-    "label": "Simple Sheet",
-    "title": "Simple Sheet - json-document",
+    "label": "Sheet",
+    "title": "Sheet - json-document",
     "description": "A simple minimal sheet: select cells, type, and fill a rectangle.",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo/tree",
-    "label": "Simple Tree",
-    "title": "Simple Tree - json-document",
+    "label": "Tree",
+    "title": "Tree - json-document",
     "description": "A simple minimal tree: fold branches and select on the visible line.",
     "navigationGroup": "Editors"
   },
   {
     "path": "/demo/kanban",
-    "label": "Simple Kanban",
-    "title": "Simple Kanban - json-document",
+    "label": "Kanban",
+    "title": "Kanban - json-document",
     "description": "A simple minimal kanban: move cards between columns in one JSON document.",
     "navigationGroup": "Editors"
   },

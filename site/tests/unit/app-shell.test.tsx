@@ -59,11 +59,11 @@ describe("official site shell", () => {
     ]);
     expect(groupLinks(nav, "Editors")).toEqual([
       "Editors",
-      "Simple Document",
-      "Simple Canvas",
-      "Simple Sheet",
-      "Simple Tree",
-      "Simple Kanban",
+      "Document",
+      "Canvas",
+      "Sheet",
+      "Tree",
+      "Kanban",
       "Database",
     ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
@@ -135,7 +135,7 @@ describe("official site shell", () => {
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Editors" })).getByRole("link", { name: "Simple Document", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Editors" })).getByRole("link", { name: "Document", exact: true }));
     await waitFor(() => expect(document.documentElement.lang).toBe("en"));
   });
 });

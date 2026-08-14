@@ -58,11 +58,11 @@ Editing
     `-- History Demo
 
 Editors
-|-- Simple Document
-|-- Simple Canvas
-|-- Simple Sheet
-|-- Simple Tree
-|-- Simple Kanban
+|-- Document
+|-- Canvas
+|-- Sheet
+|-- Tree
+|-- Kanban
 `-- Database
 
 Connectors

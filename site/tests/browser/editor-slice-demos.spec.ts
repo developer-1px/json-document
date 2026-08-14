@@ -1,17 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-test("Simple Canvas fills a selected object", async ({ page }) => {
+test("Canvas fills a selected object", async ({ page }) => {
   await page.goto("/demo/canvas");
-  await expect(page.getByRole("heading", { level: 1, name: "Simple Canvas" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Canvas", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Note" }).click();
   await page.getByRole("button", { name: "Fill #4d6a8a" }).click();
   await expect(page.getByRole("button", { name: "Note" })).toHaveCSS("background-color", "rgb(77, 106, 138)");
 });
 
-test("Simple Tree uses host visible order and restores a cut with undo", async ({ page }) => {
+test("Tree uses host visible order and restores a cut with undo", async ({ page }) => {
   await page.goto("/demo/tree");
   await page.getByText("Inspect editing state", { exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Simple Tree" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Tree", exact: true })).toBeVisible();
   expect(await json(page, "tree-demo-visible")).toEqual(["fruit", "apple", "pear", "veg", "kale", "pea"]);
 
   await page.getByRole("button", { name: "Collapse Fruit" }).click();
@@ -28,9 +28,9 @@ test("Simple Tree uses host visible order and restores a cut with undo", async (
     .toEqual(["fruit", "apple", "pear"]);
 });
 
-test("Simple Kanban moves a card to another column", async ({ page }) => {
+test("Kanban moves a card to another column", async ({ page }) => {
   await page.goto("/demo/kanban");
-  await expect(page.getByRole("heading", { level: 1, name: "Simple Kanban" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Kanban", exact: true })).toBeVisible();
   const card = page.getByRole("button", { name: "Write the brief" });
   const done = page.locator("[data-column-id=done]");
   await card.dragTo(done);

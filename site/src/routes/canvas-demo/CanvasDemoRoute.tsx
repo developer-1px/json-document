@@ -67,7 +67,7 @@ export function CanvasDemoRoute() {
 
   return (
     <PageFrame>
-      <PageHeader illustration="peek" title="Simple Canvas">
+      <PageHeader illustration="peek" title="Canvas">
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
 

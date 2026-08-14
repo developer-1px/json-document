@@ -5,8 +5,8 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
-- Opened Simple Document, Canvas, Sheet, Tree, and Kanban as the Editors
-  demos, and added `createKanbanEditor` plus object translate for those hands.
+- Opened Document, Canvas, Sheet, Tree, and Kanban as the Editors demos,
+  and added `createKanbanEditor` plus object translate for those hands.
 - Added minimum Order, Object, and Tree editor demos under Editors, with the
   existing guides as their entrance.
 - Reorganized official site navigation into JSON Document, Editing, Editors,

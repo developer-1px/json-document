@@ -37,11 +37,11 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
     "Editors",
-    "Simple Document",
-    "Simple Canvas",
-    "Simple Sheet",
-    "Simple Tree",
-    "Simple Kanban",
+    "Document",
+    "Canvas",
+    "Sheet",
+    "Tree",
+    "Kanban",
     "Database",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
