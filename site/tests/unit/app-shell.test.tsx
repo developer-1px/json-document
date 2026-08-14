@@ -60,14 +60,11 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Editors")).toEqual([
       "Editors",
       "Document",
+      "Canvas",
       "Sheet",
-      "Database",
-      "Order",
-      "Order Demo",
-      "Object",
-      "Object Demo",
       "Tree",
-      "Tree Demo",
+      "Kanban",
+      "Database",
     ]);
     expect(groupLinks(nav, "Adapters")).toEqual(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
     expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);

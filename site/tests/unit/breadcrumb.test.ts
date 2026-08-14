@@ -38,26 +38,11 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/intent-guide")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Intent guide:/docs/intent-guide"]);
     expect(trail("/demos")).toEqual(["Overview:/", "Showcase:/demos"]);
     expect(trail("/demo")).toEqual(["Overview:/", "Editors:/editors", "Document:/demo"]);
+    expect(trail("/demo/canvas")).toEqual(["Overview:/", "Editors:/editors", "Canvas:/demo/canvas"]);
+    expect(trail("/demo/kanban")).toEqual(["Overview:/", "Editors:/editors", "Kanban:/demo/kanban"]);
     expect(trail("/editors")).toEqual(["Overview:/", "Editors:/editors"]);
-    expect(trail("/docs/tree")).toEqual(["Overview:/", "Editors:/editors", "Tree:/docs/tree"]);
-    expect(trail("/demo/order")).toEqual([
-      "Overview:/",
-      "Editors:/editors",
-      "Order:/docs/order",
-      "Order Demo:/demo/order",
-    ]);
-    expect(trail("/demo/object")).toEqual([
-      "Overview:/",
-      "Editors:/editors",
-      "Object:/docs/object",
-      "Object Demo:/demo/object",
-    ]);
-    expect(trail("/demo/tree")).toEqual([
-      "Overview:/",
-      "Editors:/editors",
-      "Tree:/docs/tree",
-      "Tree Demo:/demo/tree",
-    ]);
+    expect(trail("/docs/tree")).toEqual(["Overview:/", "Tree:/docs/tree"]);
+    expect(trail("/demo/tree")).toEqual(["Overview:/", "Editors:/editors", "Tree:/demo/tree"]);
     expect(trail("/demo/selection")).toEqual([
       "Overview:/",
       "Editing:/docs/intent-guide",

@@ -51,6 +51,12 @@ export type ObjectIntent =
     }
   | { readonly type: "selection.remove" }
   | { readonly type: "selection.fill"; readonly color: string }
+  | {
+      readonly type: "object.translate";
+      readonly objectIds: ReadonlyArray<string>;
+      readonly dx: number;
+      readonly dy: number;
+    }
   | { readonly type: "clipboard.paste"; readonly clipboard: ObjectClipboard };
 
 export interface ObjectEditor {
@@ -116,6 +122,25 @@ export function createObjectEditor(
         selectionFamily.targets(selection, selectionContext()),
         selection.primaryKey,
       )));
+    }
+
+    if (intent.type === "object.translate") {
+      const objects = value().objects;
+      const moving = new Set(intent.objectIds);
+      if (intent.objectIds.some((id) => !objects.some((object) => object.id === id))) {
+        return failure("selection.object-not-found");
+      }
+      return session.apply({
+        operations: objects.flatMap((object, index) => {
+          if (!moving.has(object.id)) return [];
+          return [
+            { op: "replace", path: buildPointer(["objects", index, "x"]), value: object.x + intent.dx },
+            { op: "replace", path: buildPointer(["objects", index, "y"]), value: object.y + intent.dy },
+          ];
+        }),
+        selectionAfter: selectionFor(intent.objectIds),
+        origin: intent.type,
+      });
     }
 
     if (intent.type === "clipboard.paste") {

@@ -14,6 +14,7 @@ export { createOrderEditor } from "./order.js";
 export { createEditingSession } from "./session.js";
 export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
+export { createKanbanEditor } from "./kanban.js";
 export type {
   DatabaseCell,
   DatabaseClipboard,
@@ -91,3 +92,11 @@ export type {
   TreeSelection,
   TreeTopology,
 } from "./tree.js";
+export type {
+  KanbanCard,
+  KanbanColumn,
+  KanbanDocument,
+  KanbanEditor,
+  KanbanIntent,
+  KanbanSelection,
+} from "./kanban.js";

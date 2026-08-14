@@ -60,14 +60,11 @@ Editing
 
 Editors
 |-- Document
+|-- Canvas
 |-- Sheet
-|-- Database
-|-- Order
-|   `-- Order Demo
-|-- Object
-|   `-- Object Demo
-`-- Tree
-    `-- Tree Demo
+|-- Tree
+|-- Kanban
+`-- Database
 
 Adapters
 `-- Adapter guide

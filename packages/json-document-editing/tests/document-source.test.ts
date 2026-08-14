@@ -12,6 +12,7 @@ import {
   createOrderEditor,
   createSheetEditor,
   createTreeEditor,
+  createKanbanEditor,
   type EditingSnapshot,
 } from "../src/index.js";
 
@@ -63,6 +64,17 @@ describe("document-backed domain editors", () => {
         },
         createSheetEditor,
         { op: "replace", path: "/rows/0/cells/title", value: "Shared" },
+      ),
+    },
+    {
+      name: "kanban",
+      verify: () => expectSharedDocument(
+        {
+          columns: [{ id: "todo", title: "Todo", cardIds: ["a"] }],
+          cards: [{ id: "a", title: "Draft" }],
+        },
+        createKanbanEditor,
+        { op: "replace", path: "/cards/0/title", value: "Shared" },
       ),
     },
     {

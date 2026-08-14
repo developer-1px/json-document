@@ -80,7 +80,7 @@ export function TreeDemoRoute() {
     <PageFrame>
       <PageHeader
         illustration="branch"
-        title="Tree Demo"
+        title="Tree"
         aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{selected.size} selected · revision {snapshot.revision}</div>

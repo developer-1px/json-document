@@ -9,6 +9,8 @@ source and release history remains available from Git commits and version tags.
   in the public concept tree. Keyboard and Clipboard are separate official
   adapters in `@interactive-os/json-document-web`, Contenteditable is an
   official adapter, and the Connector catalog keeps library integrations only.
+- Opened Document, Canvas, Sheet, Tree, and Kanban as the Editors demos,
+  and added `createKanbanEditor` plus object translate for those hands.
 - Added minimum Order, Object, and Tree editor demos under Editors, with the
   existing guides as their entrance.
 - Reorganized official site navigation into JSON Document, Editing, Editors,

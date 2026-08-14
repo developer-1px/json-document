@@ -38,14 +38,11 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
     "Editors",
     "Document",
+    "Canvas",
     "Sheet",
-    "Database",
-    "Order",
-    "Order Demo",
-    "Object",
-    "Object Demo",
     "Tree",
-    "Tree Demo",
+    "Kanban",
+    "Database",
   ]);
   await expect(navigation.getByRole("group", { name: "Adapters" }).getByRole("link")).toHaveText(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
   await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);

@@ -199,7 +199,7 @@ export function SheetDemo() {
     <PageFrame>
         <PageHeader
           illustration="braces"
-          title="Sheet Demo"
+          title="Sheet"
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>

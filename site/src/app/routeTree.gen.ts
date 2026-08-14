@@ -25,9 +25,11 @@ import { Route as PageConnectorsReactHookFormRouteImport } from "./routes/_page/
 import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/connectors/tanstack-table";
 import { Route as PageConnectorsWebRouteImport } from "./routes/_page/connectors/web";
 import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
+import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
+import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
 import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
 import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
@@ -141,6 +143,11 @@ const PageDemoIndexRoute = PageDemoIndexRouteImport.update({
   path: "/demo/",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoCanvasRoute = PageDemoCanvasRouteImport.update({
+  id: "/demo/canvas",
+  path: "/demo/canvas",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoClipboardRoute = PageDemoClipboardRouteImport.update({
   id: "/demo/clipboard",
   path: "/demo/clipboard",
@@ -154,6 +161,11 @@ const PageDemoDatabaseRoute = PageDemoDatabaseRouteImport.update({
 const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
   id: "/demo/history",
   path: "/demo/history",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoKanbanRoute = PageDemoKanbanRouteImport.update({
+  id: "/demo/kanban",
+  path: "/demo/kanban",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoObjectRoute = PageDemoObjectRouteImport.update({
@@ -322,9 +334,11 @@ export interface FileRoutesByFullPath {
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
+  "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -371,9 +385,11 @@ export interface FileRoutesByTo {
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
+  "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -422,9 +438,11 @@ export interface FileRoutesById {
   "/_page/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/_page/connectors/web": typeof PageConnectorsWebRoute;
+  "/_page/demo/canvas": typeof PageDemoCanvasRoute;
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
+  "/_page/demo/kanban": typeof PageDemoKanbanRoute;
   "/_page/demo/object": typeof PageDemoObjectRoute;
   "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
@@ -473,9 +491,11 @@ export interface FileRouteTypes {
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/database"
     | "/demo/history"
+    | "/demo/kanban"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -522,9 +542,11 @@ export interface FileRouteTypes {
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/database"
     | "/demo/history"
+    | "/demo/kanban"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -572,9 +594,11 @@ export interface FileRouteTypes {
     | "/_page/connectors/react-hook-form"
     | "/_page/connectors/tanstack-table"
     | "/_page/connectors/web"
+    | "/_page/demo/canvas"
     | "/_page/demo/clipboard"
     | "/_page/demo/database"
     | "/_page/demo/history"
+    | "/_page/demo/kanban"
     | "/_page/demo/object"
     | "/_page/demo/order"
     | "/_page/demo/selection"
@@ -728,6 +752,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoIndexRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/canvas": {
+      id: "/_page/demo/canvas";
+      path: "/demo/canvas";
+      fullPath: "/demo/canvas";
+      preLoaderRoute: typeof PageDemoCanvasRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/demo/clipboard": {
       id: "/_page/demo/clipboard";
       path: "/demo/clipboard";
@@ -747,6 +778,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/history";
       fullPath: "/demo/history";
       preLoaderRoute: typeof PageDemoHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/kanban": {
+      id: "/_page/demo/kanban";
+      path: "/demo/kanban";
+      fullPath: "/demo/kanban";
+      preLoaderRoute: typeof PageDemoKanbanRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/object": {
@@ -967,9 +1005,11 @@ interface PageRouteChildren {
   PageConnectorsReactHookFormRoute: typeof PageConnectorsReactHookFormRoute;
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
   PageConnectorsWebRoute: typeof PageConnectorsWebRoute;
+  PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
+  PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
   PageDemoObjectRoute: typeof PageDemoObjectRoute;
   PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
@@ -1016,9 +1056,11 @@ const PageRouteChildren: PageRouteChildren = {
   PageConnectorsReactHookFormRoute: PageConnectorsReactHookFormRoute,
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,
   PageConnectorsWebRoute: PageConnectorsWebRoute,
+  PageDemoCanvasRoute: PageDemoCanvasRoute,
   PageDemoClipboardRoute: PageDemoClipboardRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
+  PageDemoKanbanRoute: PageDemoKanbanRoute,
   PageDemoObjectRoute: PageDemoObjectRoute,
   PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
