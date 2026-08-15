@@ -1,9 +1,14 @@
 import type { JSONValue, Pointer } from "@interactive-os/json-document";
+import { getActiveRichTextInstrument } from "./instrument.js";
 import {
+  hasRichTextContent,
+  isRichTextText,
   RICH_TEXT_PROFILE_V1,
   type RichTextDocument,
+  type RichTextNode,
   type RichTextNodeId,
 } from "./model.js";
+import { nodeAtPath } from "./path.js";
 import { compareRichTextMarks, richTextSchemaV1, type RichTextSchema } from "./schema.js";
 
 export type RichTextFailureCode =
@@ -32,6 +37,7 @@ export function validateRichText(
   value: unknown,
   options: { readonly schema?: RichTextSchema } = {},
 ): RichTextValidationResult {
+  getActiveRichTextInstrument()?.validate("full");
   const schema = options.schema ?? richTextSchemaV1;
   if (!isJSONObject(value)) return fail("rich-text.invalid-document", "Rich Text document must be a JSON object.", "");
   if (typeof value.profile !== "string" || value.profile !== schema.profile) {
@@ -112,8 +118,88 @@ export function validateRichText(
   }
 }
 
+export function validateRichTextPath(
+  document: RichTextDocument,
+  path: ReadonlyArray<number>,
+  options: { readonly schema?: RichTextSchema } = {},
+): RichTextValidationResult {
+  getActiveRichTextInstrument()?.validate("incremental");
+  const schema = options.schema ?? richTextSchemaV1;
+  const node = nodeAtPath(document, path);
+  if (node === null) return fail("rich-text.point-not-found", "Rich Text path does not address a node.");
+  const pointer = path.flatMap((index) => ["content", String(index)]).reduce((current, segment) => `${current}/${segment}`, "");
+  const parentType = parentTypeAtPath(document, path);
+  return validateStandaloneNode(node, pointer, parentType, schema);
+}
+
 export function isRichTextDocumentForSchema(value: unknown, schema: RichTextSchema = richTextSchemaV1): value is RichTextDocument {
   return validateRichText(value, { schema }).ok;
+}
+
+function parentTypeAtPath(document: RichTextDocument, path: ReadonlyArray<number>): string | null {
+  if (path.length === 0) return null;
+  const parent = nodeAtPath(document, path.slice(0, -1));
+  return parent === null ? null : parent.type;
+}
+
+function validateStandaloneNode(
+  node: RichTextDocument | RichTextNode,
+  pointer: Pointer,
+  parentType: string | null,
+  schema: RichTextSchema,
+): RichTextValidationResult {
+  if (typeof node.id !== "string" || node.id.length === 0) return fail("rich-text.schema-violation", "Node id must be non-empty.", `${pointer}/id`);
+  if (typeof node.type !== "string" || schema.nodes[node.type] === undefined) {
+    return fail("rich-text.schema-violation", `Unknown node type ${JSON.stringify(node.type)}.`, `${pointer}/type`);
+  }
+  const spec = schema.nodes[node.type]!;
+  if (parentType !== null) {
+    const parent = schema.nodes[parentType];
+    if (parent === undefined || !parent.content?.allowedTypes.includes(node.type)) {
+      return fail("rich-text.schema-violation", `${node.type} is not allowed in ${parentType}.`, pointer);
+    }
+  }
+  const record = node as unknown as Record<string, unknown>;
+  const attrsResult = validateAttrs(record, spec.attrs, pointer);
+  if (!attrsResult.ok) return attrsResult;
+  if (isRichTextText(node)) {
+    if (node.text.length === 0) return fail("rich-text.noncanonical", "Text nodes must be non-empty.", `${pointer}/text`);
+    if (!Array.isArray(node.marks)) return fail("rich-text.schema-violation", "Text marks must be an array.", `${pointer}/marks`);
+    const parentMarks = parentType === null ? "none" : schema.nodes[parentType]!.allowedMarks;
+    if (parentMarks === "none" && node.marks.length > 0) return fail("rich-text.schema-violation", `${parentType} does not allow marks.`, `${pointer}/marks`);
+    const seen = new Set<string>();
+    let previous: string | null = null;
+    for (let index = 0; index < node.marks.length; index += 1) {
+      const mark = node.marks[index];
+      if (!isJSONObject(mark) || typeof mark.type !== "string" || schema.marks[mark.type] === undefined) {
+        return fail("rich-text.schema-violation", "Unknown mark.", `${pointer}/marks/${index}`);
+      }
+      const markType = mark.type;
+      if (seen.has(markType)) return fail("rich-text.noncanonical", `Duplicate mark ${markType}.`, `${pointer}/marks/${index}`);
+      if (previous !== null && compareRichTextMarks(schema, previous, markType) >= 0) {
+        return fail("rich-text.noncanonical", "Marks are not in canonical order.", `${pointer}/marks`);
+      }
+      if (parentMarks !== "all" && parentMarks !== "none" && !parentMarks.includes(markType)) {
+        return fail("rich-text.schema-violation", `${markType} is not allowed in ${parentType}.`, `${pointer}/marks/${index}`);
+      }
+      const markSpec = schema.marks[markType]!;
+      if ([...seen].some((type) => markSpec.excludes.includes(type) || schema.marks[type]!.excludes.includes(markType))) {
+        return fail("rich-text.schema-violation", `Mark ${markType} conflicts with another mark.`, `${pointer}/marks/${index}`);
+      }
+      seen.add(markType);
+      previous = markType;
+    }
+    return exactKeys(record, ["id", "type", "text", "marks"], pointer);
+  }
+  if (spec.content === null) {
+    if ("content" in node || "text" in node || "marks" in node) return fail("rich-text.schema-violation", `${node.type} is an atom.`, pointer);
+    return exactKeys(record, ["id", "type", ...(Object.keys(spec.attrs).length > 0 ? ["attrs"] : [])], pointer);
+  }
+  if (!hasRichTextContent(node)) return fail("rich-text.schema-violation", `${node.type}.content must be an array.`, `${pointer}/content`);
+  if (node.content.length < spec.content.minimum || (spec.content.maximum !== null && node.content.length > spec.content.maximum)) {
+    return fail("rich-text.schema-violation", `${node.type}.content cardinality is invalid.`, `${pointer}/content`);
+  }
+  return { ok: true };
 }
 
 function validateAttrs(

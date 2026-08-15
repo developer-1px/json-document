@@ -102,10 +102,13 @@ export function createRichTextContentEditableBinding(options: {
   const compositionStart = () => {
     if (composition !== null) finishComposition(true);
     const selection = syncSelection() ?? editor.snapshot.selection;
+    const scope = compositionScope(root, selection);
     composition = {
       id: `composition:${++compositionSequence}`,
       selection,
-      beforeText: root.textContent ?? "",
+      element: scope.element,
+      beforeText: scope.beforeText,
+      scoped: scope.scoped,
       phase: "composing",
       endData: null,
     };
@@ -183,7 +186,10 @@ export function createRichTextContentEditableBinding(options: {
   function finishComposition(force: boolean): void {
     const lease = composition;
     if (lease === null || lease.phase !== "ending") return;
-    const diff = singleTextDiff(lease.beforeText, root.textContent ?? "");
+    const after = lease.element.textContent ?? "";
+    const diff = lease.scoped
+      ? singleTextDiff(lease.beforeText, after)
+      : lease.endData ? { removed: "", inserted: lease.endData } : null;
     if (!force && !compositionDOMIsFinal(diff, lease.endData)) return;
     if (compositionEndTimer !== null) clearTimeout(compositionEndTimer);
     compositionEndTimer = null;
@@ -247,9 +253,33 @@ export function createRichTextContentEditableBinding(options: {
 interface CompositionLease {
   readonly id: string;
   readonly selection: RichTextSelection;
+  readonly element: HTMLElement;
   readonly beforeText: string;
+  readonly scoped: boolean;
   phase: "composing" | "ending";
   endData: string | null;
+}
+
+function compositionScope(root: HTMLElement, selection: RichTextSelection): {
+  readonly element: HTMLElement;
+  readonly beforeText: string;
+  readonly scoped: boolean;
+} {
+  const range = selection.primaryIndex === null ? selection.ranges[0] : selection.ranges[selection.primaryIndex];
+  const escape = root.ownerDocument.defaultView?.CSS?.escape ?? ((value: string) => value.replaceAll('"', '\\"'));
+  if (range) {
+    const text = root.querySelector<HTMLElement>(`[data-rich-text-text-id="${escape(range.anchor.nodeId)}"]`);
+    if (text && root.contains(text)) return { element: text, beforeText: text.textContent ?? "", scoped: true };
+    const container = root.querySelector<HTMLElement>(`[data-rich-text-container-id="${escape(range.anchor.nodeId)}"]`);
+    if (container && container !== root && root.contains(container)) {
+      return { element: container, beforeText: container.textContent ?? "", scoped: true };
+    }
+  }
+  const focus = root.ownerDocument.getSelection()?.focusNode;
+  const host = (focus instanceof HTMLElement ? focus : focus?.parentElement)
+    ?.closest<HTMLElement>("[data-rich-text-text-id], [data-rich-text-container-id], [data-rich-text-node-id]");
+  if (host && host !== root && root.contains(host)) return { element: host, beforeText: host.textContent ?? "", scoped: true };
+  return { element: root, beforeText: "", scoped: false };
 }
 
 interface TextDiff {

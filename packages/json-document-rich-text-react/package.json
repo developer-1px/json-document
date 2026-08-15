@@ -40,6 +40,7 @@
     "@interactive-os/json-document-rich-text-web": "*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.1.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "typescript": "^5.0.0",

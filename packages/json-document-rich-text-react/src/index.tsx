@@ -1,9 +1,9 @@
 import {
   Children,
   createElement,
+  memo,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
   type HTMLAttributes,
@@ -11,12 +11,13 @@ import {
 } from "react";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import {
-  renderRichText,
+  hasRichTextContent,
+  isRichTextText,
+  richTextSchemaV1,
   type RichTextDocument,
   type RichTextEditor,
   type RichTextMark,
   type RichTextNode,
-  type RichTextRenderAdapter,
   type RichTextSchema,
 } from "@interactive-os/json-document-rich-text";
 import {
@@ -32,27 +33,24 @@ export interface RichTextRendererProps {
   readonly renderUnknown?: (value: unknown) => ReactNode;
 }
 
-export function RichTextRenderer({ document, schema, renderExtension, renderExtensionMark, renderUnknown }: RichTextRendererProps): ReactNode {
-  return renderRichTextReact(document, schema, renderExtension, renderExtensionMark, renderUnknown, false);
+let blockRenderListener: ((nodeId: string) => void) | null = null;
+
+export function observeRichTextBlockRenders(listener: ((nodeId: string) => void) | null): void {
+  blockRenderListener = listener;
 }
 
-function renderRichTextReact(
-  document: RichTextDocument,
-  schema: RichTextSchema | undefined,
-  renderExtension: RichTextRendererProps["renderExtension"],
-  renderExtensionMark: RichTextRendererProps["renderExtensionMark"],
-  renderUnknown: RichTextRendererProps["renderUnknown"],
-  editable: boolean,
-): ReactNode {
-  const adapter = createReactAdapter({
-    editable,
-    ...(renderExtension === undefined ? {} : { renderExtension }),
-    ...(renderExtensionMark === undefined ? {} : { renderExtensionMark }),
-    ...(renderUnknown === undefined ? {} : { renderUnknown }),
-  });
-  return (schema === undefined
-    ? renderRichText(document, adapter)
-    : renderRichText(document, schema, adapter)).output.node;
+export function RichTextRenderer({ document, schema, renderExtension, renderExtensionMark, renderUnknown }: RichTextRendererProps): ReactNode {
+  return document.content.map((node) => (
+    <RichTextMemoNode
+      key={node.id}
+      node={node}
+      schema={schema}
+      editable={false}
+      renderExtension={renderExtension}
+      renderExtensionMark={renderExtensionMark}
+      renderUnknown={renderUnknown}
+    />
+  ));
 }
 
 export interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "contentEditable" | "onInput"> {
@@ -72,10 +70,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
   const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
   const frozenDocumentRef = useRef(snapshot.value);
   if (!isComposing) frozenDocumentRef.current = snapshot.value;
-  const rendered = useMemo(
-    () => renderRichTextReact((isComposing ? frozenDocumentRef.current : snapshot.value) as RichTextDocument, editor.schema, renderExtension, renderExtensionMark, renderUnknown, true),
-    [editor.schema, isComposing, renderExtension, renderExtensionMark, renderUnknown, snapshot.value],
-  );
+  const document = (isComposing ? frozenDocumentRef.current : snapshot.value) as RichTextDocument;
 
   useLayoutEffect(() => {
     if (!bindingRef.current?.isComposing() && rootRef.current?.contains(rootRef.current.ownerDocument.activeElement)) bindingRef.current?.restoreSelection();
@@ -104,53 +99,100 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
     ref: rootRef,
     contentEditable: true,
     suppressContentEditableWarning: true,
-    "data-rich-text-node-id": (snapshot.value as RichTextDocument).id,
-    "data-rich-text-container-id": (snapshot.value as RichTextDocument).id,
-  }, rendered);
+    "data-rich-text-node-id": document.id,
+    "data-rich-text-container-id": document.id,
+  }, document.content.map((node) => (
+    <RichTextMemoNode
+      key={node.id}
+      node={node}
+      schema={editor.schema}
+      editable
+      renderExtension={renderExtension}
+      renderExtensionMark={renderExtensionMark}
+      renderUnknown={renderUnknown}
+    />
+  )));
 }
 
-interface RenderedNode { readonly key: string; readonly node: ReactNode }
+interface MemoNodeProps {
+  readonly node: RichTextNode;
+  readonly schema: RichTextSchema | undefined;
+  readonly editable: boolean;
+  readonly renderExtension: RichTextRendererProps["renderExtension"];
+  readonly renderExtensionMark: RichTextRendererProps["renderExtensionMark"];
+  readonly renderUnknown: RichTextRendererProps["renderUnknown"];
+}
 
-function createReactAdapter(options: Pick<RichTextRendererProps, "renderExtension" | "renderExtensionMark" | "renderUnknown"> & { readonly editable: boolean }): RichTextRenderAdapter<RenderedNode> { return {
-  document(document, children) {
-    return { key: document.id, node: <>{children.map((child) => child.node)}</> };
-  },
-  text(node) {
-    return { key: node.id, node: <span key={node.id} data-rich-text-node-id={node.id} data-rich-text-text-id={node.id}>{node.text}</span> };
-  },
-  node(node, children) {
-    const content = Children.toArray(children.map((child) => child.node));
-    const hasContent = "content" in node && Array.isArray(node.content);
-    if (options.editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
-      content.push(<br key={`${node.id}:placeholder`} data-rich-text-placeholder="" />);
-    }
-    const props = {
-      "data-rich-text-node-id": node.id,
-      ...(hasContent ? { "data-rich-text-container-id": node.id } : {}),
-    };
-    if (node.type === "heading") return { key: node.id, node: createElement(`h${node.attrs.level}`, { key: node.id, ...props }, content) };
-    if (node.type === "hardBreak") return { key: node.id, node: <br key={node.id} {...props} /> };
-    if (node.type === "codeBlock") return { key: node.id, node: <pre key={node.id} {...props}><code {...(node.attrs.language === null ? {} : { className: `language-${node.attrs.language}` })}>{content}</code></pre> };
-    if (node.type === "orderedList") return { key: node.id, node: <ol key={node.id} {...props} start={node.attrs.start}>{content}</ol> };
-    if (node.type.includes("/") && options.renderExtension) return { key: node.id, node: options.renderExtension(node, content) };
-    const element = node.type === "paragraph" ? "p"
-      : node.type === "blockquote" ? "blockquote"
-      : node.type === "bulletList" ? "ul"
-      : node.type === "listItem" ? "li"
-      : "div";
-    return { key: node.id, node: createElement(element, { key: node.id, ...props }, content) };
-  },
-  mark(mark, children) {
-    const child = children[0]!;
-    if (mark.type.includes("/") && options.renderExtensionMark) return { key: child.key, node: options.renderExtensionMark(mark, children.map((item) => item.node)) };
-    const element = markElement(mark);
-    return { key: child.key, node: createElement(element.type, { ...element.props, key: child.key }, child.node) };
-  },
-  unknown(value) {
-    const id = typeof value === "object" && value !== null && "id" in value ? String(value.id) : "unknown";
-    return { key: id, node: options.renderUnknown?.(value) ?? <span data-rich-text-unknown>{JSON.stringify(value)}</span> };
-  },
-}; }
+const RichTextMemoNode = memo(function RichTextMemoNode({
+  node,
+  schema,
+  editable,
+  renderExtension,
+  renderExtensionMark,
+  renderUnknown,
+}: MemoNodeProps) {
+  blockRenderListener?.(node.id);
+  const activeSchema = schema ?? richTextSchemaV1;
+  if (activeSchema.nodes[node.type] === undefined) {
+    return renderUnknown?.(node) ?? <span data-rich-text-unknown>{JSON.stringify(node)}</span>;
+  }
+  if (isRichTextText(node)) {
+    const text = <span key={node.id} data-rich-text-node-id={node.id} data-rich-text-text-id={node.id}>{node.text}</span>;
+    return node.marks.reduceRight<ReactNode>((children, mark) => wrapMark(mark, children, node.id, renderExtensionMark), text);
+  }
+  const children = hasRichTextContent(node)
+    ? node.content.map((child) => (
+      <RichTextMemoNode
+        key={child.id}
+        node={child}
+        schema={schema}
+        editable={editable}
+        renderExtension={renderExtension}
+        renderExtensionMark={renderExtensionMark}
+        renderUnknown={renderUnknown}
+      />
+    ))
+    : [];
+  const content = Children.toArray(children);
+  if (editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
+    content.push(<br key={`${node.id}:placeholder`} data-rich-text-placeholder="" />);
+  }
+  const props = {
+    "data-rich-text-node-id": node.id,
+    ...(hasRichTextContent(node) ? { "data-rich-text-container-id": node.id } : {}),
+  };
+  if (node.type === "heading") return createElement(`h${node.attrs.level}`, { key: node.id, ...props }, content);
+  if (node.type === "hardBreak") return <br key={node.id} {...props} />;
+  if (node.type === "codeBlock") {
+    return <pre key={node.id} {...props}><code {...(node.attrs.language === null ? {} : { className: `language-${node.attrs.language}` })}>{content}</code></pre>;
+  }
+  if (node.type === "orderedList") return <ol key={node.id} {...props} start={node.attrs.start}>{content}</ol>;
+  if (node.type.includes("/") && renderExtension) return renderExtension(node, content);
+  const element = node.type === "paragraph" ? "p"
+    : node.type === "blockquote" ? "blockquote"
+    : node.type === "bulletList" ? "ul"
+    : node.type === "listItem" ? "li"
+    : "div";
+  return createElement(element, { key: node.id, ...props }, content);
+}, (previous, next) => (
+  previous.node === next.node
+  && previous.schema === next.schema
+  && previous.editable === next.editable
+  && previous.renderExtension === next.renderExtension
+  && previous.renderExtensionMark === next.renderExtensionMark
+  && previous.renderUnknown === next.renderUnknown
+));
+
+function wrapMark(
+  mark: RichTextMark,
+  children: ReactNode,
+  key: string,
+  renderExtensionMark: RichTextRendererProps["renderExtensionMark"],
+): ReactNode {
+  if (mark.type.includes("/") && renderExtensionMark) return renderExtensionMark(mark, [children]);
+  const element = markElement(mark);
+  return createElement(element.type, { ...element.props, key }, children);
+}
 
 function markElement(mark: RichTextMark): { readonly type: string; readonly props?: Readonly<Record<string, string>> } {
   if (mark.type === "strong") return { type: "strong" };
