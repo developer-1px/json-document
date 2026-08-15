@@ -128,10 +128,12 @@ export function createJSONDocumentState(
       const metadata = ownMetadata(commitOptions?.metadata);
       if (!metadata.ok) return metadata;
 
+      const local = localCommitEffect(state, operations);
       const result = prepare(operations);
       if (!result.ok) return result;
 
-      if (jsonEqual(state, result.value)) {
+      const unchanged = local === "noop" || (local === "unknown" && jsonEqual(state, result.value));
+      if (unchanged) {
         return Object.freeze({
           ok: true,
           change: createChange([], metadata.value),
@@ -179,6 +181,29 @@ export function createJSONDocumentState(
       notifying = false;
     }
   }
+}
+
+function localCommitEffect(
+  state: JSONValue,
+  operations: ReadonlyArray<JSONPatchOperation>,
+): "noop" | "changed" | "unknown" {
+  if (operations.length !== 1) return "unknown";
+  const operation = operations[0];
+  if (operation === undefined || typeof operation !== "object" || operation === null) return "unknown";
+  if (operation.op === "replace") {
+    if (operation.path === "") return jsonEqual(state, operation.value) ? "noop" : "changed";
+    let segments: string[];
+    try {
+      segments = parsePointer(operation.path);
+    } catch {
+      return "unknown";
+    }
+    const current = readAt(state, segments);
+    if (!current.ok) return "unknown";
+    return jsonEqual(current.value, operation.value) ? "noop" : "changed";
+  }
+  if (operation.op === "add" || operation.op === "remove") return "changed";
+  return "unknown";
 }
 
 const OK: JSONPatchValidationResult = Object.freeze({ ok: true });

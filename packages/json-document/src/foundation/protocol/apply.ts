@@ -88,10 +88,14 @@ export function applyOwnedProtocolPatch(
   // operations prevents caller-owned values from entering JSON Document state.
   const applied = prepared.applied.map(ownAppliedOperation);
   Object.freeze(applied);
-  const validated = applyValidatedPatch(
-    value,
-    applied as ReadonlyArray<AppliedPatchOperation>,
-  );
+  const replayRequired = applied.some((operation) => (
+    (operation.op === "add" || operation.op === "replace")
+    && operation.value !== null
+    && typeof operation.value === "object"
+  ));
+  const validated = replayRequired
+    ? applyValidatedPatch(value, applied as ReadonlyArray<AppliedPatchOperation>)
+    : prepared;
   const ownedValue = validated.result.ok
     ? freezeOwnedState(validated.state as JSONValue, applied)
     // The validated replay should be equivalent by construction. Keep a safe
