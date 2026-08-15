@@ -66,13 +66,13 @@ function diffContent(
     if (afterSet.has(before[index]!.id)) continue;
     operations.push({ op: "remove", path: buildPointer([...segments, index]) });
   }
-  const remaining = before.filter((node) => afterSet.has(node.id));
+  const remaining = new Map(before.filter((node) => afterSet.has(node.id)).map((node) => [node.id, node]));
   after.forEach((node, index) => {
     if (!beforeSet.has(node.id)) {
       operations.push({ op: "add", path: buildPointer([...segments, index]), value: detachedValue(node) });
       return;
     }
-    const previous = remaining.find((candidate) => candidate.id === node.id);
+    const previous = remaining.get(node.id);
     if (previous) operations.push(...diffNode(previous, node, [...segments, index]));
   });
   return operations;

@@ -161,8 +161,11 @@ function bindTopology(state: TopologyInternals): RichTextTopology {
           const to = node.id === ordered[1].nodeId && ordered[1].kind === "text" ? ordered[1].offset : node.text.length;
           targets.push({ kind: "text", nodeId: node.id, from, to });
         } else if (!hasRichTextContent(node)) {
+          const startKey = pointKey(ordered[0]);
+          const endKey = pointKey(ordered[1]);
+          if (startKey === null || endKey === null) continue;
           const atomKey = [...indexed.path, 0];
-          if (compareKeys(atomKey, pointKey(ordered[0])) >= 0 && compareKeys(atomKey, pointKey(ordered[1])) <= 0) {
+          if (compareKeys(atomKey, startKey) >= 0 && compareKeys(atomKey, endKey) <= 0) {
             targets.push({ kind: "node", nodeId: node.id });
           }
         }
@@ -187,11 +190,15 @@ function bindTopology(state: TopologyInternals): RichTextTopology {
   }
 
   function compare(left: RichTextPoint, right: RichTextPoint): number {
-    return compareKeys(pointKey(left), pointKey(right));
+    const leftKey = pointKey(left);
+    const rightKey = pointKey(right);
+    if (leftKey === null || rightKey === null) return 0;
+    return compareKeys(leftKey, rightKey);
   }
 
-  function pointKey(point: RichTextPoint): ReadonlyArray<number> {
-    const indexed = lookupNode(state, point.nodeId)!;
+  function pointKey(point: RichTextPoint): ReadonlyArray<number> | null {
+    const indexed = lookupNode(state, point.nodeId);
+    if (indexed === null) return null;
     return point.kind === "text"
       ? [...indexed.path, point.offset]
       : [...indexed.path, point.offset, -1];

@@ -138,6 +138,50 @@ describe("Official Rich Text local edit costs", () => {
     expect(instrument.snapshot().topologyVisits).toBeLessThan(32);
   });
 
+  it.each([1_000, 10_000])("inserts, moves, and removes a sibling in a %s-block document without a content replace or full walk", (size) => {
+    const document = createJSONDocument(createRichTextBlockFixture(size));
+    const editor = createRichTextEditor({
+      document,
+      selection: collapsed(`block-text-${Math.floor(size / 2)}`, 1),
+    });
+    const instrument = createRichTextInstrument();
+    const inserted = runWithRichTextInstrument(instrument, () => editor.dispatch({
+      type: "node.insert",
+      point: { kind: "child", nodeId: "fixture-doc", offset: Math.floor(size / 2), affinity: "forward" },
+      node: { id: "extra-p", type: "paragraph", content: [{ id: "extra-t", type: "text", text: "z", marks: [] }] },
+    }));
+    expect(inserted.ok).toBe(true);
+    if (!inserted.ok) return;
+    expect(inserted.change?.applied.some((operation) => operation.path === "" || operation.path === "/content")).toBe(false);
+    expect(inserted.change?.applied).toEqual([
+      { op: "add", path: `/content/${Math.floor(size / 2)}`, value: expect.objectContaining({ id: "extra-p" }) },
+    ]);
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyAdopts).toBe(1);
+    expect(instrument.snapshot().fullValidations).toBe(0);
+
+    instrument.reset();
+    const moved = runWithRichTextInstrument(instrument, () => editor.dispatch({
+      type: "node.move",
+      nodeId: "extra-p",
+      point: { kind: "child", nodeId: "fixture-doc", offset: 0, affinity: "forward" },
+    }));
+    expect(moved.ok).toBe(true);
+    if (!moved.ok) return;
+    expect(moved.change?.applied.some((operation) => operation.path === "" || operation.path === "/content")).toBe(false);
+    expect(moved.change?.applied.map((operation) => operation.op)).toEqual(["remove", "add"]);
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyAdopts).toBe(1);
+
+    instrument.reset();
+    const removed = runWithRichTextInstrument(instrument, () => editor.dispatch({ type: "node.remove", nodeId: "extra-p" }));
+    expect(removed.ok).toBe(true);
+    if (!removed.ok) return;
+    expect(removed.change?.applied).toEqual([{ op: "remove", path: "/content/0" }]);
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().fullValidations).toBe(0);
+  });
+
   it.each([1_000, 10_000])("splits a block in a %s-block document with sibling add/remove, not a content replace", (size) => {
     const document = createJSONDocument(createRichTextBlockFixture(size));
     const editor = createRichTextEditor({
