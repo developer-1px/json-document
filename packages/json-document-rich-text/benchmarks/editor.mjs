@@ -144,7 +144,7 @@ for (const size of sizes) {
   for (const [name, stats] of Object.entries(row.workloads)) {
     console.log(`  ${name}: p50=${stats.p50.toFixed(3)}ms p95=${stats.p95.toFixed(3)}ms`);
   }
-  console.log(`  visitedNodes=${row.instrumentation.visitedNodes} fullValidations=${row.instrumentation.fullValidations}`);
+  console.log(`  visitedNodes=${row.instrumentation.visitedNodes} topologyCreates=${row.instrumentation.topologyCreates} topologyAdopts=${row.instrumentation.topologyAdopts} topologyVisits=${row.instrumentation.topologyVisits} fullValidations=${row.instrumentation.fullValidations}`);
   if (size === 10_000) {
     assertBudget("text-insert-middle", row.workloads["text-insert-middle"].p95, budgetMs);
   }

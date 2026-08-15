@@ -43,8 +43,9 @@ import {
   replaceNodeAtPath,
 } from "./path.js";
 import { compareRichTextMarks, richTextSchemaV1, type RichTextSchema } from "./schema.js";
-import { richTextTopology, type RichTextTopology } from "./topology.js";
-import { validateRichText, validateRichTextPath } from "./validation.js";
+import { rememberAppliedOperations } from "./applied-change.js";
+import { richTextTopology, seedRichTextTopology, type RichTextTopology } from "./topology.js";
+import { validateRichText, validateRichTextNodeAt, validateRichTextPath } from "./validation.js";
 import type { RichTextValidationFailure } from "./validation.js";
 
 export type RichTextIntent =
@@ -102,6 +103,13 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   const initialValidation = validateRichText(initial, { schema });
   if (!initialValidation.ok) throw new TypeError(initialValidation.reason);
   const initialTopology = richTextTopology(initial);
+  let previousDocument = initial;
+  options.document.subscribe((change) => {
+    const next = readDocument(options.document, pointer);
+    seedRichTextTopology(previousDocument, next, change.applied, pointer);
+    rememberAppliedOperations(next, change.applied);
+    previousDocument = next;
+  });
   const selectionFamily = createRangeSelectionFamily<RichTextPoint, RichTextTarget>();
   const session = createEditingSession<RichTextSelection>({
     document: options.document,
@@ -158,7 +166,6 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     if (ranges.length === 0) return failure("rich-text.selection-empty");
     if (ranges.every((range) => range.anchor.kind === "text" && range.focus.kind === "text" && range.anchor.nodeId === range.focus.nodeId)) {
       const before = value();
-      let next = before;
       const nextRanges: SelectionRange<RichTextPoint>[] = [];
       const grouped = new Map<string, Array<{ start: number; end: number; rangeIndex: number; affinity: RichTextPoint["affinity"] }>>();
       ranges.forEach((range, rangeIndex) => {
@@ -175,14 +182,16 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [];
       for (const [nodeId, replacements] of grouped) {
         const located = topology.locate(nodeId);
-        const currentNode = located === null ? null : nodeAtPath(next, located.path);
+        const currentNode = located === null ? null : nodeAtPath(before, located.path);
         if (located === null || currentNode === null || !isRichTextText(currentNode)) return failure("rich-text.point-not-found");
         let nextText = currentNode.text;
         for (const replacement of [...replacements].sort((left, right) => right.start - left.start)) {
           if (!validOffset(nextText, replacement.start) || !validOffset(nextText, replacement.end)) return failure("rich-text.invalid-offset");
           nextText = nextText.slice(0, replacement.start) + text + nextText.slice(replacement.end);
         }
-        next = replaceNodeAtPath(next, located.path, { ...currentNode, text: nextText });
+        const nextNode = { ...currentNode, text: nextText };
+        const validation = validateRichTextNodeAt(before, located.path, nextNode, { schema });
+        if (!validation.ok) return failure(validation.code);
         operations.push({ op: "replace", path: absolutePath(pointer, [...contentSegments(located.path), "text"]), value: nextText });
         for (const replacement of replacements) {
           const shift = replacements
@@ -198,8 +207,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
         }
       }
       const selectionAfter = asRichTextSelection({ ...session.snapshot.selection, ranges: nextRanges } as RangeSelection<RichTextPoint>);
-      const firstPath = topology.locate((ranges[0]!.anchor as Extract<RichTextPoint, { readonly kind: "text" }>).nodeId)?.path;
-      return applyChange(next, selectionAfter, "rich-text.text.insert", historyGroup, operations, firstPath === undefined ? undefined : { path: firstPath });
+      return commitOperations(selectionAfter, "rich-text.text.insert", historyGroup, operations);
     }
     const removed = removeSelectedValue(value(), session.snapshot.selection, schema, createId);
     if (!removed.ok) return failure(removed.code);
@@ -433,14 +441,14 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     const to = Math.max(offset, boundary);
     const nextText = located.node.text.slice(0, from) + located.node.text.slice(to);
     if (nextText.length > 0) {
-      const next = replaceNodeAtPath(current, located.path, { ...located.node, text: nextText });
-      return applyChange(
-        next,
+      const nextNode = { ...located.node, text: nextText };
+      const validation = validateRichTextNodeAt(current, located.path, nextNode, { schema });
+      if (!validation.ok) return failure(validation.code);
+      return commitOperations(
         collapsedAt(resolved.nodeId, from),
         "rich-text.text.delete",
         "rich-text.typing",
         [{ op: "replace", path: absolutePath(pointer, [...contentSegments(located.path), "text"]), value: nextText }],
-        { path: located.path },
       );
     }
     const parentPath = located.path.slice(0, -1);
@@ -556,6 +564,15 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       ? validateRichText(next, { schema })
       : validateLocalOrFallback(next, incremental.path, schema);
     if (!validation.ok) return failure(validation.code);
+    return commitOperations(selectionAfter, origin, historyGroup, operations);
+  }
+
+  function commitOperations(
+    selectionAfter: RichTextSelection,
+    origin: string,
+    historyGroup: string | undefined,
+    operations: ReadonlyArray<import("@interactive-os/json-document").JSONPatchOperation>,
+  ): EditingResult<RichTextSelection> {
     return session.apply({
       operations,
       selectionAfter,

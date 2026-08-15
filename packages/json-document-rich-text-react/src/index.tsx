@@ -25,6 +25,8 @@ import {
 } from "@interactive-os/json-document-rich-text-web";
 import { richTextRenderStore } from "./render-store.js";
 
+export { lastRenderStoreBlockScan } from "./render-store.js";
+
 export interface RichTextRendererProps {
   readonly document: RichTextDocument;
   readonly schema?: RichTextSchema;
