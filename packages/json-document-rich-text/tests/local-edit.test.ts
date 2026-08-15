@@ -57,6 +57,7 @@ describe("Official Rich Text local edit costs", () => {
     expect(instrument.snapshot().topologyCreates).toBe(0);
     expect(instrument.snapshot().topologyAdopts).toBe(1);
     expect(instrument.snapshot().topologyVisits).toBeLessThan(16);
+    expect(instrument.snapshot().contentCopies).toBe(0);
   });
 
   it("rebuilds topology after a structural content replace", () => {
@@ -90,6 +91,7 @@ describe("Official Rich Text local edit costs", () => {
     expect(instrument.snapshot().visitedNodes).toBeLessThan(32);
     expect(instrument.snapshot().fullValidations).toBe(0);
     expect(instrument.snapshot().incrementalValidations).toBeGreaterThan(0);
+    expect(instrument.snapshot().contentCopies).toBe(0);
     expect(textAt(document.value as RichTextDocument, Math.floor(size / 2))).toBe("xy");
 
     instrument.reset();
@@ -105,6 +107,7 @@ describe("Official Rich Text local edit costs", () => {
     ]);
     expect(instrument.snapshot().visitedNodes).toBeLessThan(32);
     expect(instrument.snapshot().fullValidations).toBe(0);
+    expect(instrument.snapshot().contentCopies).toBe(0);
   });
 
   it("undoes a local text insert with a leaf inverse, not a root replace", () => {

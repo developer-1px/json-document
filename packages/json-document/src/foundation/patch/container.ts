@@ -1,5 +1,6 @@
 // RFC 6902 patch 적용을 위한 내부 container helper.
 
+import { replaceArrayIndex } from "../json/shared-array.js";
 import { parsePointer, readAt, type Pointer, PointerSyntaxError } from "../pointer/core.js";
 import { parseArrayIndex } from "../pointer/array-index.js";
 import type { ErrorCode, JSONPatchOperation } from "./contract.js";
@@ -110,9 +111,9 @@ export function withMutated(
   for (let i = parents.length - 1; i >= 0; i--) {
     const { container, key } = parents[i]!;
     if (Array.isArray(container)) {
-      const arr = container.slice();
-      arr[Number(key)] = next;
-      next = arr;
+      const index = parseArrayIndex(key);
+      if (index === null) return { error: "path_not_found", reason: `array index: ${key}` };
+      next = replaceArrayIndex(container, index, next);
     } else next = { ...(container as Record<string, unknown>), [key]: next };
   }
   return { state: next };
@@ -138,9 +139,7 @@ export function mutateContainer(parent: unknown, key: string, verb: Verb, value?
     }
     if (idx >= parent.length) return { error: "path_not_found", reason: `array index: ${key}` };
     if (verb === "replace") {
-      const next = parent.slice();
-      next[idx] = value;
-      return { value: next };
+      return { value: replaceArrayIndex(parent, idx, value) };
     }
     if (idx === parent.length - 1) return { value: parent.slice(0, idx) };
     const next = parent.slice();

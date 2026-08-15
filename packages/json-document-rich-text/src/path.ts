@@ -43,6 +43,7 @@ export function replaceNodeAtPath(
     getActiveRichTextInstrument()?.visitNode();
     if (!hasRichTextContent(node)) throw new TypeError("Rich Text path does not address a container.");
     const index = path[depth]!;
+    if (node.content.length > 32) getActiveRichTextInstrument()?.contentCopy();
     const children = node.content.slice();
     children[index] = depth === path.length - 1
       ? replacement

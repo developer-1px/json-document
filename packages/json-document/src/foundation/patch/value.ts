@@ -1,3 +1,4 @@
+import { replaceArrayIndex } from "../json/shared-array.js";
 import type { Pointer } from "../pointer/core.js";
 import { parseArrayIndex } from "../pointer/array-index.js";
 import {
@@ -93,9 +94,7 @@ function applyObjectArrayElementTrustedValueMutation(
   }
 
   if (itemIndex >= array.length) return { error: "path_not_found", reason: `array index: ${itemIndex}`, pointer: path };
-  const nextArray = array.slice();
-  nextArray[itemIndex] = op.value;
-  return { state: { ...root, [arrayKey]: nextArray } };
+  return { state: { ...root, [arrayKey]: replaceArrayIndex(array, itemIndex, op.value) } };
 }
 
 function applyObjectArrayFieldTrustedValueMutation(
@@ -129,7 +128,5 @@ function applyObjectArrayFieldTrustedValueMutation(
   }
 
   const nextRow = { ...record, [field]: op.value };
-  const nextArray = array.slice();
-  nextArray[rowIndex] = nextRow;
-  return { state: { ...root, [arrayKey]: nextArray } };
+  return { state: { ...root, [arrayKey]: replaceArrayIndex(array, rowIndex, nextRow) } };
 }

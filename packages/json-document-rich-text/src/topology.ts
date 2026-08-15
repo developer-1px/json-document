@@ -29,6 +29,7 @@ interface IndexedNode {
 interface TopologyInternals {
   readonly nodes: Map<string, IndexedNode>;
   readonly linear: Array<RichTextNode | RichTextDocument>;
+  readonly overlay: Map<string, IndexedNode> | null;
 }
 
 interface TopologyPatch {
@@ -73,7 +74,7 @@ export function createRichTextTopology(document: RichTextDocument): RichTextTopo
   const nodes = new Map<string, IndexedNode>();
   const linear: Array<RichTextNode | RichTextDocument> = [];
   visit(document, []);
-  return bindTopology({ nodes, linear });
+  return bindTopology({ nodes, linear, overlay: null });
 
   function visit(node: RichTextNode | RichTextDocument, path: ReadonlyArray<number>): void {
     getActiveRichTextInstrument()?.topologyVisit();
@@ -85,10 +86,10 @@ export function createRichTextTopology(document: RichTextDocument): RichTextTopo
 }
 
 function bindTopology(state: TopologyInternals): RichTextTopology {
-  const { nodes, linear } = state;
+  const { linear } = state;
   const topology: RichTextTopology = {
     locate(nodeId) {
-      return nodes.get(nodeId) ?? null;
+      return lookupNode(state, nodeId);
     },
     equals(left, right) {
       return left.kind === right.kind
@@ -102,9 +103,11 @@ function bindTopology(state: TopologyInternals): RichTextTopology {
       if (start === null || end === null) return [];
       const ordered = compare(start, end) <= 0 ? [start, end] as const : [end, start] as const;
       const targets: RichTextTarget[] = [];
-      for (const node of linear) {
-        if (!node || node.type === "doc") continue;
-        const indexed = nodes.get(node.id)!;
+      for (const slot of linear) {
+        if (!slot || slot.type === "doc") continue;
+        const indexed = lookupNode(state, slot.id);
+        if (indexed === null) continue;
+        const node = indexed.node;
         if (isRichTextText(node)) {
           const nodeStart: RichTextPoint = { kind: "text", nodeId: node.id, offset: 0, affinity: "forward" };
           const nodeEnd: RichTextPoint = { kind: "text", nodeId: node.id, offset: node.text.length, affinity: "backward" };
@@ -127,7 +130,7 @@ function bindTopology(state: TopologyInternals): RichTextTopology {
   return topology;
 
   function reconcile(point: RichTextPoint): RichTextPoint | null {
-    const indexed = nodes.get(point.nodeId);
+    const indexed = lookupNode(state, point.nodeId);
     if (!indexed) return null;
     if (point.kind === "text") {
       if (!isRichTextText(indexed.node)) return null;
@@ -143,7 +146,7 @@ function bindTopology(state: TopologyInternals): RichTextTopology {
   }
 
   function pointKey(point: RichTextPoint): ReadonlyArray<number> {
-    const indexed = nodes.get(point.nodeId)!;
+    const indexed = lookupNode(state, point.nodeId)!;
     return point.kind === "text"
       ? [...indexed.path, point.offset]
       : [...indexed.path, point.offset, -1];
@@ -166,24 +169,27 @@ function adoptRichTextTopology(
   operations: ReadonlyArray<TopologyPatch>,
   rootPointer: string,
 ): RichTextTopology | null {
-  const nodes = new Map(previous.nodes);
-  const linear = previous.linear.slice();
+  const overlay = new Map(previous.overlay ?? undefined);
   getActiveRichTextInstrument()?.topologyAdopt();
   for (const operation of operations) {
     const path = relativePatchPath(operation.path, rootPointer);
-    if (path === null || !refreshTopologyPath(next, path, nodes, linear)) return null;
+    if (path === null || !refreshTopologyPath(next, path, previous.nodes, overlay)) return null;
   }
-  return bindTopology({ nodes, linear });
+  return bindTopology({ nodes: previous.nodes, linear: previous.linear, overlay });
+}
+
+function lookupNode(state: TopologyInternals, nodeId: string): IndexedNode | null {
+  return state.overlay?.get(nodeId) ?? state.nodes.get(nodeId) ?? null;
 }
 
 function refreshTopologyPath(
   document: RichTextDocument,
   path: string,
   nodes: Map<string, IndexedNode>,
-  linear: Array<RichTextNode | RichTextDocument>,
+  overlay: Map<string, IndexedNode>,
 ): boolean {
   let current: RichTextNode | RichTextDocument = document;
-  if (!replaceTopologyEntry(current, nodes, linear)) return false;
+  if (!replaceTopologyEntry(current, nodes, overlay)) return false;
   let segments: string[];
   try {
     segments = parsePointer(path);
@@ -197,7 +203,7 @@ function refreshTopologyPath(
     const child: RichTextNode | undefined = current.content[childIndex];
     if (child === undefined) return false;
     current = child;
-    if (!replaceTopologyEntry(current, nodes, linear)) return false;
+    if (!replaceTopologyEntry(current, nodes, overlay)) return false;
     index += 2;
   }
   return true;
@@ -206,13 +212,12 @@ function refreshTopologyPath(
 function replaceTopologyEntry(
   node: RichTextNode | RichTextDocument,
   nodes: Map<string, IndexedNode>,
-  linear: Array<RichTextNode | RichTextDocument>,
+  overlay: Map<string, IndexedNode>,
 ): boolean {
   getActiveRichTextInstrument()?.topologyVisit();
-  const previous = nodes.get(node.id);
+  const previous = overlay.get(node.id) ?? nodes.get(node.id);
   if (previous === undefined) return false;
-  nodes.set(node.id, { node, order: previous.order, path: previous.path });
-  linear[previous.order] = node;
+  overlay.set(node.id, { node, order: previous.order, path: previous.path });
   return true;
 }
 
