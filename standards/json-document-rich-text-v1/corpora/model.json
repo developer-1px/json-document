@@ -200,6 +200,7 @@
       "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t2", "offset": 2, "affinity": "forward" } }], "primaryIndex": 0 },
       "intents": [{ "type": "selection.remove" }],
       "expect": {
+        "forbidRootReplace": true,
         "value": {
           "profile": "urn:interactive-os:json-document:rich-text:1",
           "id": "doc",
@@ -226,6 +227,7 @@
         { "type": "block.set-type", "nodeType": "heading", "attrs": { "level": 2 } }
       ],
       "expect": {
+        "forbidRootReplace": true,
         "value": {
           "profile": "urn:interactive-os:json-document:rich-text:1",
           "id": "doc",
@@ -246,6 +248,7 @@
       "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" } }], "primaryIndex": 0 },
       "intents": [{ "type": "node.insert", "point": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "node": { "id": "br1", "type": "hardBreak" } }],
       "expect": {
+        "forbidRootReplace": true,
         "value": {
           "profile": "urn:interactive-os:json-document:rich-text:1",
           "id": "doc",
@@ -310,6 +313,7 @@
         }
       }],
       "expect": {
+        "forbidRootReplace": true,
         "valueText": "Hello!"
       }
     }

@@ -34,6 +34,7 @@ import {
 import { createRichTextNodeId } from "./identity.js";
 import { getActiveRichTextInstrument } from "./instrument.js";
 import { normalizeRichText } from "./normalize.js";
+import { diffRichText } from "./diff.js";
 import {
   containerContentSegments,
   contentSegments,
@@ -531,25 +532,39 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     removeId?: string,
   ): EditingResult<RichTextSelection> {
     const located = richTextTopology(current).locate(nodeId);
-    if (located === null) return failure("rich-text.point-not-found");
+    if (located === null || replacements.length === 0) return failure("rich-text.point-not-found");
     const parentPath = located.path.slice(0, -1);
     const parent = nodeAtPath(current, parentPath);
     if (parent === null || !hasRichTextContent(parent)) return failure("rich-text.point-not-found");
     const index = located.path[located.path.length - 1]!;
-    const content = parent.content.flatMap((child, childIndex) => {
-      if (child.id === removeId) return [];
-      if (childIndex === index) return replacements;
-      return [child];
-    });
-    const next = replaceContentAtPath(current, parentPath, content);
-    return applyChange(
-      next,
-      selectionAfter,
-      origin,
-      undefined,
-      [{ op: "replace", path: absolutePath(pointer, containerContentSegments(parentPath)), value: detachedValue(content) }],
-      { path: parentPath },
-    );
+    const removeIndex = removeId === undefined ? -1 : parent.content.findIndex((child) => child.id === removeId);
+    if (removeId !== undefined && removeIndex < 0) return failure("rich-text.point-not-found");
+    for (const node of replacements) {
+      const validation = validateRichTextNodeAt(current, located.path, node, { schema });
+      if (!validation.ok) return failure(validation.code);
+    }
+    const contentPath = absolutePath(pointer, containerContentSegments(parentPath));
+    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [];
+    const first = replacements[0];
+    if (first === undefined) return failure("rich-text.point-not-found");
+    if (removeIndex >= 0 && removeIndex < index) {
+      operations.push({ op: "remove", path: `${contentPath}/${removeIndex}` });
+      operations.push({ op: "replace", path: `${contentPath}/${index - 1}`, value: detachedValue(first) });
+      for (let offset = 1; offset < replacements.length; offset += 1) {
+        const added = replacements[offset];
+        if (added === undefined) continue;
+        operations.push({ op: "add", path: `${contentPath}/${index - 1 + offset}`, value: detachedValue(added) });
+      }
+    } else {
+      if (removeIndex > index) operations.push({ op: "remove", path: `${contentPath}/${removeIndex}` });
+      operations.push({ op: "replace", path: `${contentPath}/${index}`, value: detachedValue(first) });
+      for (let offset = 1; offset < replacements.length; offset += 1) {
+        const added = replacements[offset];
+        if (added === undefined) continue;
+        operations.push({ op: "add", path: `${contentPath}/${index + offset}`, value: detachedValue(added) });
+      }
+    }
+    return commitOperations(selectionAfter, origin, undefined, operations);
   }
 
   function applyChange(
@@ -587,13 +602,8 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     origin: string,
     historyGroup?: string,
   ): EditingResult<RichTextSelection> {
-    return applyChange(
-      next,
-      selectionAfter,
-      origin,
-      historyGroup,
-      [{ op: "replace", path: absolutePath(pointer, []), value: detached(next) }],
-    );
+    const operations = diffRichText(value(), next, pointer);
+    return applyChange(next, selectionAfter, origin, historyGroup, operations);
   }
 }
 

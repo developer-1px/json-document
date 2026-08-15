@@ -60,19 +60,46 @@ describe("Official Rich Text local edit costs", () => {
     expect(instrument.snapshot().contentCopies).toBe(0);
   });
 
-  it("rebuilds topology after a structural content replace", () => {
-    const document = createJSONDocument(createRichTextBlockFixture(32));
+  it("commits mark toggle and block split without a root replace", () => {
+    const document = createJSONDocument(createRichTextBlockFixture(8));
     const editor = createRichTextEditor({
       document,
-      selection: collapsed("block-text-4", 1),
+      selection: {
+        kind: "range",
+        ranges: [{
+          anchor: { kind: "text", nodeId: "block-text-2", offset: 0, affinity: "forward" },
+          focus: { kind: "text", nodeId: "block-text-2", offset: 1, affinity: "forward" },
+        }],
+        primaryIndex: 0,
+      },
     });
-    const instrument = createRichTextInstrument();
-    runWithRichTextInstrument(instrument, () => {
-      expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
-      expect(editor.topology.locate("block-text-4")).not.toBeNull();
+    const marked = editor.dispatch({ type: "mark.toggle", mark: { type: "strong" } });
+    expect(marked.ok).toBe(true);
+    if (marked.ok) expect(marked.change?.applied.some((operation) => operation.path === "")).toBe(false);
+    editor.dispatch({ type: "selection.set", selection: collapsed("block-text-2", 1) });
+    const split = editor.dispatch({ type: "block.split" });
+    expect(split.ok).toBe(true);
+    if (!split.ok) return;
+    expect(split.change?.applied.some((operation) => operation.path === "")).toBe(false);
+    expect(split.change?.applied.some((operation) => operation.path === "/content")).toBe(false);
+    expect(split.change?.applied.some((operation) => operation.op === "add")).toBe(true);
+  });
+
+  it.each([1_000, 10_000])("splits a block in a %s-block document with sibling add/remove, not a content replace", (size) => {
+    const document = createJSONDocument(createRichTextBlockFixture(size));
+    const editor = createRichTextEditor({
+      document,
+      selection: collapsed(`block-text-${Math.floor(size / 2)}`, 1),
     });
-    expect(instrument.snapshot().topologyAdopts).toBe(0);
-    expect(instrument.snapshot().topologyCreates).toBe(1);
+    const split = editor.dispatch({ type: "block.split" });
+    expect(split.ok).toBe(true);
+    if (!split.ok) return;
+    expect(split.change?.applied.some((operation) => operation.path === "" || operation.path === "/content")).toBe(false);
+    expect(split.change?.applied.some((operation) => operation.op === "add")).toBe(true);
+    const joined = editor.dispatch({ type: "block.join", direction: "backward" });
+    expect(joined.ok).toBe(true);
+    if (!joined.ok) return;
+    expect(joined.change?.applied.some((operation) => operation.path === "" || operation.path === "/content")).toBe(false);
   });
 
   it.each([1_000, 10_000])("inserts and deletes one text leaf in a %s-block document without a root replace or full walk", (size) => {
