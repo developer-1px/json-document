@@ -85,6 +85,40 @@ describe("Official Rich Text local edit costs", () => {
     expect(split.change?.applied.some((operation) => operation.op === "add")).toBe(true);
   });
 
+  it("adopts topology after split and join instead of walking every node", () => {
+    const document = createJSONDocument(createRichTextBlockFixture(10_000, { text: "xy" }));
+    const editor = createRichTextEditor({
+      document,
+      selection: collapsed("block-text-5000", 1),
+    });
+    const instrument = createRichTextInstrument();
+    const split = runWithRichTextInstrument(instrument, () => editor.dispatch({ type: "block.split" }));
+    expect(split.ok).toBe(true);
+    if (!split.ok) return;
+    const rightId = editor.snapshot.selection.ranges[0]?.focus.nodeId;
+    expect(rightId).toBeDefined();
+    expect(editor.topology.locate("block-text-5000")?.path).toEqual([5000, 0]);
+    expect(editor.topology.locate(rightId!)?.node).toMatchObject({ type: "text", text: "y" });
+    expect(editor.topology.locate("block-text-0")?.path).toEqual([0, 0]);
+    expect(editor.topology.locate("block-text-9999")?.path).toEqual([10_000, 0]);
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyAdopts).toBe(1);
+    expect(instrument.snapshot().topologyVisits).toBeLessThan(32);
+
+    instrument.reset();
+    const joined = runWithRichTextInstrument(instrument, () => editor.dispatch({
+      type: "block.join",
+      direction: "backward",
+    }));
+    expect(joined.ok).toBe(true);
+    expect(editor.topology.locate("block-text-5000")?.node).toMatchObject({ type: "text", text: "xy" });
+    expect(editor.topology.locate("block-text-9999")?.path).toEqual([9999, 0]);
+    expect(editor.topology.locate(rightId!)).toBeNull();
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyAdopts).toBe(1);
+    expect(instrument.snapshot().topologyVisits).toBeLessThan(32);
+  });
+
   it.each([1_000, 10_000])("splits a block in a %s-block document with sibling add/remove, not a content replace", (size) => {
     const document = createJSONDocument(createRichTextBlockFixture(size));
     const editor = createRichTextEditor({
