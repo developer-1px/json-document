@@ -131,11 +131,20 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
       const end = Math.max(...indices);
       if ((intent.direction < 0 && start === 0) || (intent.direction > 0 && end === blocks.length - 1)) return failure("move.boundary");
       const selected = blocks.filter((block) => ids.includes(block.id));
-      const remaining = blocks.filter((block) => !ids.includes(block.id));
       const insertAt = intent.direction < 0 ? start - 1 : start + 1;
-      const reordered = [...remaining.slice(0, insertAt), ...selected, ...remaining.slice(insertAt)];
+      const operations: JSONPatchOperation[] = [
+        ...indices.sort((left, right) => right - left).map((index) => ({
+          op: "remove" as const,
+          path: `/blocks/${index}`,
+        })),
+        ...selected.map((block, offset) => ({
+          op: "add" as const,
+          path: `/blocks/${insertAt + offset}`,
+          value: block,
+        })),
+      ];
       return session.apply({
-        operations: [{ op: "replace", path: "/blocks", value: reordered }],
+        operations,
         selectionAfter: session.snapshot.selection,
         origin: intent.type,
       });
