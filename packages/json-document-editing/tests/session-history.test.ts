@@ -61,6 +61,37 @@ describe("selection-aware editing history", () => {
     });
   });
 
+  test("inverts a leaf replace without cloning the whole document into history", () => {
+    const inner = createJSONDocument({
+      items: Array.from({ length: 32 }, (_, index) => ({ id: `item-${index}`, title: "Draft" })),
+    });
+    const committed: Array<ReadonlyArray<{ readonly op: string; readonly path: string }>> = [];
+    const document = {
+      get value() { return inner.value; },
+      at: inner.at.bind(inner),
+      query: inner.query.bind(inner),
+      validatePatch: inner.validatePatch.bind(inner),
+      subscribe: inner.subscribe.bind(inner),
+      commit(operations: Parameters<typeof inner.commit>[0], options?: Parameters<typeof inner.commit>[1]) {
+        committed.push(operations.map((operation) => ({ op: operation.op, path: operation.path })));
+        return inner.commit(operations, options);
+      },
+    };
+    const session = createEditingSession<{ readonly current: string | null }>({
+      document,
+      selection: { current: "item-16" },
+    });
+    session.apply({
+      operations: [{ op: "replace", path: "/items/16/title", value: "Ready" }],
+      selectionAfter: { current: "item-16" },
+      origin: "rename",
+    });
+    expect(session.undo().ok).toBe(true);
+    expect(document.value).toMatchObject({ items: expect.arrayContaining([{ id: "item-16", title: "Draft" }]) });
+    expect((document.value as { items: Array<{ title: string }> }).items[16]).toEqual({ id: "item-16", title: "Draft" });
+    expect(committed.at(-1)).toEqual([{ op: "replace", path: "/items/16/title" }]);
+  });
+
   test("does not record selection-only or semantic no-op changes", () => {
     const session = createEditingSession<{ readonly current: string | null }>({
       document: createJSONDocument({ name: "alpha" }),

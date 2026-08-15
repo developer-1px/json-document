@@ -5,11 +5,10 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
+  useSyncExternalStore,
   type HTMLAttributes,
   type ReactNode,
 } from "react";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import {
   hasRichTextContent,
   isRichTextText,
@@ -24,6 +23,7 @@ import {
   createRichTextContentEditableBinding,
   type RichTextContentEditableBinding,
 } from "@interactive-os/json-document-rich-text-web";
+import { richTextRenderStore } from "./render-store.js";
 
 export interface RichTextRendererProps {
   readonly document: RichTextDocument;
@@ -34,9 +34,14 @@ export interface RichTextRendererProps {
 }
 
 let blockRenderListener: ((nodeId: string) => void) | null = null;
+let surfaceRenderListener: (() => void) | null = null;
 
 export function observeRichTextBlockRenders(listener: ((nodeId: string) => void) | null): void {
   blockRenderListener = listener;
+}
+
+export function observeRichTextSurfaceRenders(listener: (() => void) | null): void {
+  surfaceRenderListener = listener;
 }
 
 export function RichTextRenderer({ document, schema, renderExtension, renderExtensionMark, renderUnknown }: RichTextRendererProps): ReactNode {
@@ -64,17 +69,16 @@ export interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElem
 }
 
 export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, ...props }: RichTextEditorSurfaceProps) {
-  const snapshot = useEditingSnapshot(editor);
-  const [isComposing, setIsComposing] = useState(false);
+  surfaceRenderListener?.();
+  const store = richTextRenderStore(editor);
+  const blockIds = useSyncExternalStore(store.subscribeStructure, store.getBlockIds, store.getBlockIds);
+  const documentId = useSyncExternalStore(
+    store.subscribeStructure,
+    store.getDocumentId,
+    store.getDocumentId,
+  );
   const rootRef = useRef<HTMLElement>(null);
   const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
-  const frozenDocumentRef = useRef(snapshot.value);
-  if (!isComposing) frozenDocumentRef.current = snapshot.value;
-  const document = (isComposing ? frozenDocumentRef.current : snapshot.value) as RichTextDocument;
-
-  useLayoutEffect(() => {
-    if (!bindingRef.current?.isComposing() && rootRef.current?.contains(rootRef.current.ownerDocument.activeElement)) bindingRef.current?.restoreSelection();
-  }, [snapshot.selection, snapshot.value]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -84,7 +88,6 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
       editor,
       ...(createId === undefined ? {} : { createId }),
       ...(onAction === undefined ? {} : { onAction }),
-      onCompositionChange: setIsComposing,
     });
     bindingRef.current = binding;
     return () => {
@@ -99,19 +102,82 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
     ref: rootRef,
     contentEditable: true,
     suppressContentEditableWarning: true,
-    "data-rich-text-node-id": document.id,
-    "data-rich-text-container-id": document.id,
-  }, document.content.map((node) => (
+    "data-rich-text-node-id": documentId,
+    "data-rich-text-container-id": documentId,
+  }, [
+    <SelectionRestorer key=":selection" editor={editor} rootRef={rootRef} bindingRef={bindingRef} />,
+    ...blockIds.map((nodeId) => (
+      <RichTextBlockSlot
+        key={nodeId}
+        editor={editor}
+        nodeId={nodeId}
+        schema={editor.schema}
+        editable
+        renderExtension={renderExtension}
+        renderExtensionMark={renderExtensionMark}
+        renderUnknown={renderUnknown}
+      />
+    )),
+  ]);
+}
+
+function SelectionRestorer({
+  editor,
+  rootRef,
+  bindingRef,
+}: {
+  readonly editor: RichTextEditor;
+  readonly rootRef: { current: HTMLElement | null };
+  readonly bindingRef: { current: RichTextContentEditableBinding | null };
+}) {
+  const selection = useSyncExternalStore(
+    (notify) => editor.subscribe(() => notify()),
+    () => editor.snapshot.selection,
+    () => editor.snapshot.selection,
+  );
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!bindingRef.current?.isComposing() && root?.contains(root.ownerDocument.activeElement)) {
+      bindingRef.current?.restoreSelection();
+    }
+  }, [bindingRef, editor, rootRef, selection]);
+  return null;
+}
+
+function RichTextBlockSlot({
+  editor,
+  nodeId,
+  schema,
+  editable,
+  renderExtension,
+  renderExtensionMark,
+  renderUnknown,
+}: {
+  readonly editor: RichTextEditor;
+  readonly nodeId: string;
+  readonly schema: RichTextSchema;
+  readonly editable: boolean;
+  readonly renderExtension: RichTextRendererProps["renderExtension"];
+  readonly renderExtensionMark: RichTextRendererProps["renderExtensionMark"];
+  readonly renderUnknown: RichTextRendererProps["renderUnknown"];
+}) {
+  const store = richTextRenderStore(editor);
+  const node = useSyncExternalStore(
+    (notify) => store.subscribeNode(nodeId, notify),
+    () => store.getNode(nodeId),
+    () => store.getNode(nodeId),
+  );
+  if (node === null) return null;
+  return (
     <RichTextMemoNode
-      key={node.id}
       node={node}
-      schema={editor.schema}
-      editable
+      schema={schema}
+      editable={editable}
       renderExtension={renderExtension}
       renderExtensionMark={renderExtensionMark}
       renderUnknown={renderUnknown}
     />
-  )));
+  );
 }
 
 interface MemoNodeProps {
