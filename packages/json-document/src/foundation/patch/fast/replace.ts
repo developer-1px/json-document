@@ -1,3 +1,4 @@
+import { replaceArrayIndex } from "../../json/shared-array.js";
 import { jsonSerializableError } from "../../json/serializable.js";
 import type { Pointer } from "../../pointer/core.js";
 import { getValueAt, parseSafe } from "../container.js";
@@ -93,24 +94,9 @@ export function applySameArrayFieldReplacePatch(
   }
 
   if (arraySegments === null || field === null || arrayValue === null) return { handled: false };
-  const next = arrayValue.slice();
-  if (hasRepeatedOrNonMonotonicIndex) {
-    const replacedRows = new Set<number>();
-    for (let index = ops.length - 1; index >= 0; index -= 1) {
-      const rowIndex = updateIndexes[index]!;
-      if (replacedRows.has(rowIndex)) continue;
-      replacedRows.add(rowIndex);
-      replaceRowField(next, arrayValue, rowIndex, field, updateValues[index]);
-    }
-    const stateWithArray = replaceValueAtSegments(state, arraySegments, 0, next);
-    return stateWithArray === null
-      ? { handled: false }
-      : { handled: true, state: stateWithArray, applied };
-  }
-  for (let index = 0; index < ops.length; index += 1) {
-    replaceRowField(next, arrayValue, updateIndexes[index]!, field, updateValues[index]);
-  }
-
+  const next = applyIndexedReplacements(arrayValue, updateIndexes, updateValues, (source, rowIndex, value) => (
+    replaceRowField(source, rowIndex, field, value)
+  ), hasRepeatedOrNonMonotonicIndex);
   const stateWithArray = replaceValueAtSegments(state, arraySegments, 0, next);
   return stateWithArray === null
     ? { handled: false }
@@ -118,12 +104,11 @@ export function applySameArrayFieldReplacePatch(
 }
 
 function replaceRowField(
-  next: unknown[],
   source: unknown[],
   rowIndex: number,
   field: string,
   value: unknown,
-): void {
+): unknown {
   const row = source[rowIndex] as Record<string, unknown>;
   const replaced = { ...row };
   if (field === "__proto__") {
@@ -136,7 +121,7 @@ function replaceRowField(
   } else {
     replaced[field] = value;
   }
-  next[rowIndex] = replaced;
+  return replaced;
 }
 
 export function applySameArrayNestedReplacePatch(
@@ -195,15 +180,13 @@ export function applySameArrayNestedReplacePatch(
   }
 
   if (arraySegments === null || suffixSegments === null || arrayValue === null) return { handled: false };
-  const next = arrayValue.slice();
+  const replacedRows: unknown[] = [];
   for (let index = 0; index < ops.length; index += 1) {
-    const rowIndex = updateIndexes[index]!;
-    const value = updateValues[index];
-    const replaced = replaceValueAtSegments(arrayValue[rowIndex], suffixSegments, 0, value);
+    const replaced = replaceValueAtSegments(arrayValue[updateIndexes[index]!], suffixSegments, 0, updateValues[index]);
     if (replaced === null) return { handled: false };
-    next[rowIndex] = replaced;
+    replacedRows[index] = replaced;
   }
-
+  const next = applyIndexedReplacements(arrayValue, updateIndexes, replacedRows, (source, rowIndex, value) => value);
   const stateWithArray = replaceValueAtSegments(state, arraySegments, 0, next);
   return stateWithArray === null
     ? { handled: false }
@@ -219,7 +202,9 @@ export function applySameArrayElementReplacePatch(
 
   let parent: Pointer | null = null;
   let parentSegments: string[] | null = null;
-  let next: unknown[] | null = null;
+  let currentArray: unknown[] | null = null;
+  const updateIndexes = new Array<number>(ops.length);
+  const updateValues = new Array<unknown>(ops.length);
   const applied = new Array<JSONPatchOperation>(ops.length);
 
   for (let index = 0; index < ops.length; index += 1) {
@@ -235,18 +220,20 @@ export function applySameArrayElementReplacePatch(
       parentSegments = parsedParent.segs;
       const current = getValueAt(state, parentSegments);
       if (!current.ok || !Array.isArray(current.value)) return { handled: false };
-      next = current.value.slice();
+      currentArray = current.value;
     } else if (parent !== location.parent) {
       return { handled: false };
     }
 
     if (!valuesTrusted && jsonSerializableError(op.value) !== null) return { handled: false };
-    if (next === null || location.index < 0 || location.index >= next.length) return { handled: false };
-    next[location.index] = op.value;
+    if (currentArray === null || location.index < 0 || location.index >= currentArray.length) return { handled: false };
+    updateIndexes[index] = location.index;
+    updateValues[index] = op.value;
     applied[index] = op;
   }
 
-  if (parentSegments === null || next === null) return { handled: false };
+  if (parentSegments === null || currentArray === null) return { handled: false };
+  const next = applyIndexedReplacements(currentArray, updateIndexes, updateValues, (_source, _rowIndex, value) => value);
   const stateWithArray = replaceValueAtSegments(state, parentSegments, 0, next);
   return stateWithArray === null
     ? { handled: false }
@@ -293,12 +280,36 @@ function buildReplaceTree(items: ReadonlyArray<{ segments: string[]; value: unkn
   return root;
 }
 
+function applyIndexedReplacements(
+  source: unknown[],
+  indexes: ReadonlyArray<number>,
+  values: ReadonlyArray<unknown>,
+  replace: (source: unknown[], rowIndex: number, value: unknown) => unknown,
+  lastWriteWins = false,
+): unknown[] {
+  let next: unknown[] = source;
+  const seen = new Set<number>();
+  const start = lastWriteWins ? indexes.length - 1 : 0;
+  const step = lastWriteWins ? -1 : 1;
+  for (let index = start; lastWriteWins ? index >= 0 : index < indexes.length; index += step) {
+    const rowIndex = indexes[index]!;
+    if (lastWriteWins && seen.has(rowIndex)) continue;
+    seen.add(rowIndex);
+    next = replaceArrayIndex(next, rowIndex, replace(source, rowIndex, values[index]));
+  }
+  return next;
+}
+
 function applyReplaceTree(value: unknown, tree: ReplaceTree): unknown {
   if (tree.children.size === 0) return tree.value;
   if (Array.isArray(value)) {
-    const next = value.slice();
+    let next: unknown[] = value;
     for (const [segment, child] of tree.children) {
-      next[Number(segment)] = applyReplaceTree(next[Number(segment)], child);
+      const index = Number(segment);
+      next = replaceArrayIndex(next, index, applyReplaceTree(
+        Array.isArray(next) ? next[index] : undefined,
+        child,
+      ));
     }
     return next;
   }
