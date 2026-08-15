@@ -1,3 +1,4 @@
+import { replaceArrayIndex } from "../json/shared-array.js";
 import { parseArrayIndex } from "../pointer/array-index.js";
 import { objectHasOwn } from "./object.js";
 
@@ -16,9 +17,7 @@ export function replaceValueAtSegments(
     if (childIndex === null || childIndex >= current.length) return null;
     const child = replaceValueAtSegments(current[childIndex], segments, index + 1, value);
     if (child === null) return null;
-    const next = current.slice();
-    next[childIndex] = child;
-    return next;
+    return replaceArrayIndex(current, childIndex, child);
   }
 
   if (!objectHasOwn.call(current, segment)) return null;

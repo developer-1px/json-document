@@ -123,10 +123,19 @@ export function validateRichTextPath(
   path: ReadonlyArray<number>,
   options: { readonly schema?: RichTextSchema } = {},
 ): RichTextValidationResult {
-  getActiveRichTextInstrument()?.validate("incremental");
-  const schema = options.schema ?? richTextSchemaV1;
   const node = nodeAtPath(document, path);
   if (node === null) return fail("rich-text.point-not-found", "Rich Text path does not address a node.");
+  return validateRichTextNodeAt(document, path, node, options);
+}
+
+export function validateRichTextNodeAt(
+  document: RichTextDocument,
+  path: ReadonlyArray<number>,
+  node: RichTextDocument | RichTextNode,
+  options: { readonly schema?: RichTextSchema } = {},
+): RichTextValidationResult {
+  getActiveRichTextInstrument()?.validate("incremental");
+  const schema = options.schema ?? richTextSchemaV1;
   const pointer = path.flatMap((index) => ["content", String(index)]).reduce((current, segment) => `${current}/${segment}`, "");
   const parentType = parentTypeAtPath(document, path);
   return validateStandaloneNode(node, pointer, parentType, schema);

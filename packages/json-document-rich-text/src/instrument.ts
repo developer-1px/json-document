@@ -3,6 +3,7 @@ export interface RichTextInstrumentSnapshot {
   readonly topologyAdopts: number;
   readonly topologyVisits: number;
   readonly visitedNodes: number;
+  readonly contentCopies: number;
   readonly fullValidations: number;
   readonly incrementalValidations: number;
   readonly fullValidationFallbacks: number;
@@ -13,6 +14,7 @@ export interface RichTextInstrument {
   topologyAdopt(): void;
   topologyVisit(): void;
   visitNode(): void;
+  contentCopy(): void;
   validate(mode: "full" | "incremental" | "full-fallback"): void;
   snapshot(): RichTextInstrumentSnapshot;
   reset(): void;
@@ -26,6 +28,7 @@ export function createRichTextInstrument(): RichTextInstrument {
     topologyAdopts: 0,
     topologyVisits: 0,
     visitedNodes: 0,
+    contentCopies: 0,
     fullValidations: 0,
     incrementalValidations: 0,
     fullValidationFallbacks: 0,
@@ -35,6 +38,7 @@ export function createRichTextInstrument(): RichTextInstrument {
     topologyAdopt() { state.topologyAdopts += 1; },
     topologyVisit() { state.topologyVisits += 1; },
     visitNode() { state.visitedNodes += 1; },
+    contentCopy() { state.contentCopies += 1; },
     validate(mode) {
       if (mode === "full") state.fullValidations += 1;
       else if (mode === "incremental") state.incrementalValidations += 1;
@@ -46,6 +50,7 @@ export function createRichTextInstrument(): RichTextInstrument {
       state.topologyAdopts = 0;
       state.topologyVisits = 0;
       state.visitedNodes = 0;
+      state.contentCopies = 0;
       state.fullValidations = 0;
       state.incrementalValidations = 0;
       state.fullValidationFallbacks = 0;
