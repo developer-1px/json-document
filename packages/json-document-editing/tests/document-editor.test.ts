@@ -22,7 +22,11 @@ describe("document editing vertical slice", () => {
     expect(editor.dispatch({ type: "text.replace", blockId: "n10", text: "Alpha edited" }).ok).toBe(true);
     expect(editor.dispatch({ type: "selection.set", blockId: "n10" }).ok).toBe(true);
     expect(editor.dispatch({ type: "selection.set", blockId: "n11", mode: "toggle" }).ok).toBe(true);
-    expect(editor.dispatch({ type: "selection.move", direction: -1 }).ok).toBe(true);
+    const moved = editor.dispatch({ type: "selection.move", direction: -1 });
+    expect(moved.ok).toBe(true);
+    if (moved.ok) {
+      expect(moved.change?.applied.some((operation) => operation.op === "replace" && operation.path === "/blocks")).toBe(false);
+    }
 
     expect((editor.snapshot.value as { blocks: Array<{ id: string }> }).blocks.map((block) => block.id)).toEqual(["a", "b", "n10", "n11", "c"]);
     expect(editor.undo().ok).toBe(true);
