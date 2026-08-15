@@ -148,6 +148,7 @@ describe("@interactive-os/json-document-collaboration/text", () => {
     expect(localChange?.deps).toEqual([]);
     expect(localChange?.ops).toMatchObject([{ kind: "text-splice" }]);
     expect(documentListener).toHaveBeenCalledTimes(1);
+    expect(documentListener.mock.calls[0]?.[0]?.applied.every((operation: { path: string }) => operation.path !== "")).toBe(true);
     expect(collaborationListener).toHaveBeenCalledTimes(1);
 
     expect(remote.replica.ingest(local.replica.exportBundle()))

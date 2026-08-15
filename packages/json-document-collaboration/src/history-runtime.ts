@@ -8,6 +8,7 @@ import {
   prepareGraph,
   type PreparedGraph,
 } from "./change.js";
+import { patchBetweenValues } from "./document-patch.js";
 import { jsonEqual } from "./json-equal.js";
 import {
   historyOperationFor,
@@ -220,11 +221,10 @@ export function createHistory(state: RuntimeState): History {
 
     let documentChange = undefined;
     if (prepared.value.didChangeDocument) {
-      const documentCommit = state.documentStore.commit([{
-        op: "replace",
-        path: "",
-        value: state.materialized.value,
-      }]);
+      const documentCommit = state.documentStore.commit(patchBetweenValues(
+        state.documentStore.value,
+        state.materialized.value,
+      ));
       if (!documentCommit.ok) {
         throw new Error(
           `history document commit failed: ${documentCommit.reason ?? documentCommit.code}`,
