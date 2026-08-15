@@ -10,7 +10,8 @@ import {
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
-import { observeRichTextBlockRenders, observeRichTextSurfaceRenders, RichTextEditorSurface } from "../src/index.js";
+import { lastRenderStoreBlockScan, observeRichTextBlockRenders, observeRichTextSurfaceRenders, RichTextEditorSurface } from "../src/index.js";
+import { richTextRenderStore } from "../src/render-store.js";
 
 describe("Rich Text React locality", () => {
   afterEach(() => {
@@ -77,6 +78,36 @@ describe("Rich Text React locality", () => {
       await act(async () => reactRoot.unmount());
       root.remove();
     }
+  });
+
+  it("does not scan every block after a local insert in a 10,000-block document", () => {
+    const jsonDocument = createJSONDocument(createRichTextBlockFixture(10_000, { idPrefix: "scan" }));
+    const editor = createRichTextEditor({
+      document: jsonDocument,
+      selection: collapsed("scan-text-5000", 1),
+    });
+    const store = richTextRenderStore(editor);
+    const notified: string[] = [];
+    store.subscribeNode("scan-5000", () => notified.push("scan-5000"));
+    store.subscribeNode("scan-0", () => notified.push("scan-0"));
+    expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
+    expect(lastRenderStoreBlockScan()).toBeLessThan(16);
+    expect(notified).toEqual(["scan-5000"]);
+  });
+
+  it("notifies structure subscribers after a block split", () => {
+    const jsonDocument = createJSONDocument(createRichTextBlockFixture(4, { idPrefix: "split" }));
+    const editor = createRichTextEditor({
+      document: jsonDocument,
+      selection: collapsed("split-text-1", 1),
+    });
+    const store = richTextRenderStore(editor);
+    let structureNotifies = 0;
+    store.subscribeStructure(() => { structureNotifies += 1; });
+    const beforeIds = store.getBlockIds();
+    expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+    expect(structureNotifies).toBe(1);
+    expect(store.getBlockIds().length).toBe(beforeIds.length + 1);
   });
 });
 

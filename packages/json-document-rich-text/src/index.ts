@@ -1,3 +1,4 @@
+export { appliedOperationsFor } from "./applied-change.js";
 export { createRichTextEditor, tryCreateRichTextEditor } from "./editor.js";
 export { createRichTextBlockFixture } from "./fixture.js";
 export { createRichTextNodeId } from "./identity.js";
