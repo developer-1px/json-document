@@ -66,8 +66,13 @@ describe("TanStack Table document binding", () => {
 
     expect(table.getRowModel().rows.map((row) => row.id)).toEqual(["r1", "r2", "r3"]);
     expect(table.options.meta?.jsonDocument).toBe(binding);
+    const untouched = binding.rows[0];
+    const sourceRows = (editor.snapshot.value as SheetDocument).rows;
     expect(binding.commitCell({ rowId: "r2", columnId: "score", value: 20 }).ok).toBe(true);
     expect((editor.snapshot.value as SheetDocument).rows[1]?.cells.score).toBe(20);
+    expect(binding.rows[0]).toBe(untouched);
+    expect(binding.rows).toBe((editor.snapshot.value as SheetDocument).rows);
+    expect(binding.rows).not.toBe(sourceRows);
 
     table.setOptions((previous) => ({ ...previous, ...binding.tableOptions }));
     expect(table.getRow("r2").getValue("score")).toBe(20);
