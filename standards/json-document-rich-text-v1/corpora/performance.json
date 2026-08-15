@@ -47,11 +47,6 @@
     "fixtureSize": 10000,
     "metric": "p95Ms",
     "stages": ["intent-transform", "validation-normalization", "topology-selection", "json-patch-commit"],
-    "p95Ms": 16,
-    "recordedMiss": {
-      "measuredAfterP95Ms": 24.703,
-      "cause": "Rich Text core no longer walks the document (visitedNodes=10, fullValidations=0, no root replace). Remaining p95 is JSONDocument.commit of a 10,000-block value.",
-      "nextBoundary": "JSONDocument incremental leaf commit, not a separate Rich Text document stack"
-    }
+    "p95Ms": 16
   }
 }

@@ -71,6 +71,31 @@ describe("Official Rich Text local edit costs", () => {
     expect(instrument.snapshot().fullValidations).toBe(0);
   });
 
+  it("undoes a local text insert with a leaf inverse, not a root replace", () => {
+    const inner = createJSONDocument(createRichTextBlockFixture(256));
+    const committed: string[][] = [];
+    const document = {
+      get value() { return inner.value; },
+      at: inner.at.bind(inner),
+      query: inner.query.bind(inner),
+      validatePatch: inner.validatePatch.bind(inner),
+      subscribe: inner.subscribe.bind(inner),
+      commit(operations: Parameters<typeof inner.commit>[0], options?: Parameters<typeof inner.commit>[1]) {
+        committed.push(operations.map((operation) => operation.path));
+        return inner.commit(operations, options);
+      },
+    };
+    const editor = createRichTextEditor({
+      document,
+      selection: collapsed("block-text-80", 1),
+    });
+    expect(editor.dispatch({ type: "text.insert", text: "Q" }).ok).toBe(true);
+    expect(committed.at(-1)).toEqual(["/content/80/content/0/text"]);
+    expect(editor.undo().ok).toBe(true);
+    expect(committed.at(-1)).toEqual(["/content/80/content/0/text"]);
+    expect(committed.every((paths) => paths.every((path) => path !== ""))).toBe(true);
+  });
+
   it("keeps selection mapping and history after a local text insert", () => {
     const initial = createRichTextBlockFixture(8);
     const document = createJSONDocument(initial);
