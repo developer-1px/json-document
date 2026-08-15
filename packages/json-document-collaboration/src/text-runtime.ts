@@ -10,6 +10,7 @@ import {
   freezeLocalChange,
   prepareGraph,
 } from "./change.js";
+import { patchBetweenValues } from "./document-patch.js";
 import { jsonEqual } from "./json-equal.js";
 import { materializeChanges } from "./materialize.js";
 import {
@@ -322,11 +323,10 @@ export function createText(state: RuntimeState): Text {
 
       let documentChange = undefined;
       if (didChangeDocument) {
-        const documentCommit = state.documentStore.commit([{
-          op: "replace",
-          path: "",
-          value: state.materialized.value,
-        }], {
+        const documentCommit = state.documentStore.commit(patchBetweenValues(
+          state.documentStore.value,
+          state.materialized.value,
+        ), {
           ...(metadataProbe.change.metadata === undefined
             ? {}
             : { metadata: metadataProbe.change.metadata }),

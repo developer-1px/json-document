@@ -13,6 +13,7 @@ import {
   prepareGraph,
   unauthorizedChange,
 } from "./change.js";
+import { patchBetweenValues } from "./document-patch.js";
 import { jsonEqual } from "./json-equal.js";
 import { materializeChanges } from "./materialize.js";
 import { assignCausalState, type RuntimeState } from "./runtime-state.js";
@@ -159,11 +160,10 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
 
       let documentChange = undefined;
       if (changed) {
-        const documentCommit = state.documentStore.commit([{
-          op: "replace",
-          path: "",
-          value: state.materialized.value,
-        }]);
+        const documentCommit = state.documentStore.commit(patchBetweenValues(
+          state.documentStore.value,
+          state.materialized.value,
+        ));
         if (!documentCommit.ok) {
           throw new Error(
             `collaboration document commit failed: ${documentCommit.reason ?? documentCommit.code}`,
