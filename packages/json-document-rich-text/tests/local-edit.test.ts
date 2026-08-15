@@ -9,7 +9,7 @@ import {
 } from "../src/index.js";
 
 describe("Official Rich Text local edit costs", () => {
-  it("reuses topology for the same snapshot and rebuilds after commit", () => {
+  it("reuses topology for the same snapshot and adopts after a leaf commit", () => {
     const document = createJSONDocument(createRichTextBlockFixture(32));
     const instrument = createRichTextInstrument();
     const editor = runWithRichTextInstrument(instrument, () => {
@@ -29,12 +29,48 @@ describe("Official Rich Text local edit costs", () => {
       return created;
     });
     expect(instrument.snapshot().topologyCreates).toBe(1);
+    expect(instrument.snapshot().topologyAdopts).toBe(0);
 
     instrument.reset();
     runWithRichTextInstrument(instrument, () => {
       editor.dispatch({ type: "text.insert", text: "y" });
-      editor.topology.locate("block-text-1");
+      expect(editor.topology.locate("block-text-1")?.node).toMatchObject({ type: "text", text: "xy" });
     });
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyAdopts).toBe(1);
+    expect(instrument.snapshot().topologyVisits).toBeLessThan(16);
+  });
+
+  it("adopts topology on a second 10,000-block insert instead of walking every node", () => {
+    const document = createJSONDocument(createRichTextBlockFixture(10_000));
+    const editor = createRichTextEditor({
+      document,
+      selection: collapsed("block-text-5000", 1),
+    });
+    expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
+
+    const instrument = createRichTextInstrument();
+    const second = runWithRichTextInstrument(instrument, () => editor.dispatch({ type: "text.insert", text: "z" }));
+    expect(second.ok).toBe(true);
+    expect(editor.topology.locate("block-text-5000")?.node).toMatchObject({ type: "text", text: "xyz" });
+    expect(editor.topology.locate("block-text-0")?.node).toMatchObject({ type: "text", text: "x" });
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyAdopts).toBe(1);
+    expect(instrument.snapshot().topologyVisits).toBeLessThan(16);
+  });
+
+  it("rebuilds topology after a structural content replace", () => {
+    const document = createJSONDocument(createRichTextBlockFixture(32));
+    const editor = createRichTextEditor({
+      document,
+      selection: collapsed("block-text-4", 1),
+    });
+    const instrument = createRichTextInstrument();
+    runWithRichTextInstrument(instrument, () => {
+      expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+      expect(editor.topology.locate("block-text-4")).not.toBeNull();
+    });
+    expect(instrument.snapshot().topologyAdopts).toBe(0);
     expect(instrument.snapshot().topologyCreates).toBe(1);
   });
 
