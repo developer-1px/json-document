@@ -1,0 +1,57 @@
+{
+  "formatVersion": 1,
+  "suite": "performance",
+  "profile": "standards/json-document-rich-text-v1/profile.md",
+  "sources": [
+    {
+      "url": "https://github.com/ianstormtaylor/slate/blob/main/docs/walkthroughs/09-performance.md",
+      "meaning": "typing INP, 수정 노드와 조상만 normalization, React rerender, large-document workload"
+    },
+    {
+      "url": "https://github.com/facebook/lexical/blob/main/packages/lexical-playground/src/plugins/TypingPerfPlugin/index.ts",
+      "meaning": "beforeinput/keydown부터 selection 안정화까지 typing latency 단계 분리"
+    },
+    {
+      "url": "https://github.com/ckeditor/ckeditor5/tree/master/packages/ckeditor5/manual/performance",
+      "meaning": "initialization, setData, large paste, large-document workload 참고. 코드는 복사하지 않는다."
+    }
+  ],
+  "fixtures": [100, 1000, 10000],
+  "stages": [
+    "intent-transform",
+    "validation-normalization",
+    "topology-selection",
+    "json-patch-commit",
+    "react-render",
+    "dom-selection-restore"
+  ],
+  "workloads": [
+    "initial-render",
+    "text-insert-start",
+    "text-insert-middle",
+    "text-insert-end",
+    "text-delete",
+    "block-split",
+    "block-join",
+    "selection-mapping",
+    "mark-toggle-short",
+    "mark-toggle-cross-block",
+    "ime-composition-commit",
+    "paste-1kb",
+    "paste-100kb",
+    "undo",
+    "redo"
+  ],
+  "interactionBudget": {
+    "workload": "text-insert-middle",
+    "fixtureSize": 10000,
+    "metric": "p95Ms",
+    "stages": ["intent-transform", "validation-normalization", "topology-selection", "json-patch-commit"],
+    "p95Ms": 16,
+    "recordedMiss": {
+      "measuredAfterP95Ms": 24.703,
+      "cause": "Rich Text core no longer walks the document (visitedNodes=10, fullValidations=0, no root replace). Remaining p95 is JSONDocument.commit of a 10,000-block value.",
+      "nextBoundary": "JSONDocument incremental leaf commit, not a separate Rich Text document stack"
+    }
+  }
+}

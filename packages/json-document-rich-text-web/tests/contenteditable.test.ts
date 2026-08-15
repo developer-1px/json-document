@@ -95,6 +95,38 @@ describe("Official Rich Text contenteditable composition", () => {
     expect(document.value).toEqual(initialDocument());
     binding.destroy();
   });
+
+  it("reconciles composition from the composing text node instead of the editable root", async () => {
+    const document = createJSONDocument({
+      ...initialDocument(),
+      content: [
+        initialDocument().content[0]!,
+        { id: "noise", type: "paragraph", content: [{ id: "noise-text", type: "text", text: "x".repeat(10_000), marks: [] }] },
+      ],
+    });
+    const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });
+    const root = fixture();
+    const noise = root.ownerDocument.createElement("p");
+    noise.dataset.richTextNodeId = "noise";
+    noise.innerHTML = `<span data-rich-text-node-id="noise-text" data-rich-text-text-id="noise-text">${"x".repeat(10_000)}</span>`;
+    root.append(noise);
+    const binding = createRichTextContentEditableBinding({ root, editor });
+    const text = root.querySelector("[data-rich-text-text-id='text']")!.firstChild as Text;
+    window.getSelection()!.setBaseAndExtent(text, 3, text, 3);
+    root.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    mutateComposition(text, 3, 0, "한");
+    root.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "한" }));
+    await Promise.resolve();
+    const value = document.value as RichTextDocument;
+    expect(value.content[0]).toMatchObject({
+      content: [{ id: "text", text: "abc한" }],
+    });
+    const noiseBlock = value.content[1];
+    expect(noiseBlock && "content" in noiseBlock && Array.isArray(noiseBlock.content) ? noiseBlock.content[0] : undefined).toMatchObject({
+      text: "x".repeat(10_000),
+    });
+    binding.destroy();
+  });
 });
 
 function initialDocument(): RichTextDocument {

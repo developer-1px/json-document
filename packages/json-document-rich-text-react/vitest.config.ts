@@ -1,2 +1,8 @@
 import { defineConfig } from "vitest/config";
-export default defineConfig({ test: { environment: "node" } });
+export default defineConfig({
+  test: {
+    environment: "node",
+    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
+    environmentMatchGlobs: [["tests/render-locality.test.tsx", "jsdom"]],
+  },
+});

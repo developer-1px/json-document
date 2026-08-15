@@ -1,4 +1,5 @@
 import type { OrderedTopology } from "@interactive-os/json-document-selection";
+import { getActiveRichTextInstrument } from "./instrument.js";
 import {
   hasRichTextContent,
   isRichTextText,
@@ -8,7 +9,15 @@ import {
   type RichTextTarget,
 } from "./model.js";
 
-export interface RichTextTopology extends OrderedTopology<RichTextPoint, RichTextTarget> {}
+export interface RichTextLocatedNode {
+  readonly node: RichTextNode | RichTextDocument;
+  readonly order: number;
+  readonly path: ReadonlyArray<number>;
+}
+
+export interface RichTextTopology extends OrderedTopology<RichTextPoint, RichTextTarget> {
+  locate(nodeId: string): RichTextLocatedNode | null;
+}
 
 interface IndexedNode {
   readonly node: RichTextNode | RichTextDocument;
@@ -16,12 +25,28 @@ interface IndexedNode {
   readonly path: ReadonlyArray<number>;
 }
 
+const topologies = new WeakMap<RichTextDocument, RichTextTopology>();
+
+// Owner: the current Rich Text document value. Invalidated when commit yields a
+// new document identity. Same snapshot/revision must reuse this index.
+export function richTextTopology(document: RichTextDocument): RichTextTopology {
+  const cached = topologies.get(document);
+  if (cached) return cached;
+  const created = createRichTextTopology(document);
+  topologies.set(document, created);
+  return created;
+}
+
 export function createRichTextTopology(document: RichTextDocument): RichTextTopology {
+  getActiveRichTextInstrument()?.topologyCreate();
   const nodes = new Map<string, IndexedNode>();
   const linear: Array<RichTextNode | RichTextDocument> = [];
   visit(document, []);
 
   return {
+    locate(nodeId) {
+      return nodes.get(nodeId) ?? null;
+    },
     equals(left, right) {
       return left.kind === right.kind
         && left.nodeId === right.nodeId

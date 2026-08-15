@@ -1,0 +1,60 @@
+{
+  "formatVersion": 1,
+  "suite": "browser",
+  "profile": "standards/json-document-rich-text-v1/profile.md",
+  "matrix": ["chromium", "firefox", "webkit"],
+  "cases": [
+    {
+      "id": "beforeinput-insert-text",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "insertText beforeinput는 Official Rich Text text.insert intent가 된다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "consecutive-space",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "연속 U+0020은 canonical text와 pre-wrap surface에 보존된다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "consecutive-enter",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "연속 Enter는 empty block split과 caret 복원을 유지한다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "repeated-backspace-delete",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/selection", "meaning": "반복 Backspace/Delete 뒤 selectionchange와 canonical JSON이 일치한다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "dom-selection-roundtrip",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/selection", "meaning": "DOM Selection과 RichTextSelection 왕복 및 rerender 뒤 복원" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "korean-ime-composition",
+      "source": { "url": "https://www.w3.org/TR/input-events-2/", "meaning": "실제 native composition mutation을 한 history group으로 commit한다" },
+      "requiresNativeInput": true,
+      "browsers": ["chromium"],
+      "skip": {
+        "firefox": "Firefox Playwright는 Chromium CDP Input.imeSetComposition을 제공하지 않는다.",
+        "webkit": "WebKit Playwright는 Chromium CDP Input.imeSetComposition을 제공하지 않는다."
+      }
+    },
+    {
+      "id": "clipboard-representations",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/clipboard-apis", "meaning": "structured/HTML/plain copy-cut-paste representation priority" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "undo-redo-document-and-selection",
+      "source": { "url": "https://github.com/ianstormtaylor/slate/tree/main/packages/slate-history/test", "meaning": "Undo/Redo는 document와 selection을 함께 복원한다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    }
+  ]
+}

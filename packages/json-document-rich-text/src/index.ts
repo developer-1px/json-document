@@ -1,12 +1,15 @@
 export { createRichTextEditor, tryCreateRichTextEditor } from "./editor.js";
+export { createRichTextBlockFixture } from "./fixture.js";
 export { createRichTextNodeId } from "./identity.js";
-export { RICH_TEXT_CLIPBOARD_MIME, RICH_TEXT_PROFILE_V1, isRichTextDocument } from "./model.js";
+export { createRichTextInstrument, runWithRichTextInstrument } from "./instrument.js";
+export { RICH_TEXT_CLIPBOARD_MIME, RICH_TEXT_PROFILE_V1, hasRichTextContent, isRichTextDocument, isRichTextText } from "./model.js";
 export { normalizeRichText } from "./normalize.js";
 export { renderRichText } from "./render.js";
 export { createRichTextSchema, richTextSchemaV1 } from "./schema.js";
-export { createRichTextTopology } from "./topology.js";
-export { validateRichText } from "./validation.js";
+export { createRichTextTopology, richTextTopology } from "./topology.js";
+export { validateRichText, validateRichTextPath } from "./validation.js";
 export type { RichTextEditor, RichTextEditorCreationResult, RichTextEditorOptions, RichTextIntent } from "./editor.js";
+export type { RichTextInstrument, RichTextInstrumentSnapshot } from "./instrument.js";
 export type {
   RichTextAffinity,
   RichTextClipboard,
@@ -50,7 +53,7 @@ export type {
   RichTextNodeSpec,
   RichTextSchema,
 } from "./schema.js";
-export type { RichTextTopology } from "./topology.js";
+export type { RichTextLocatedNode, RichTextTopology } from "./topology.js";
 export type {
   RichTextFailureCode,
   RichTextValidationFailure,
