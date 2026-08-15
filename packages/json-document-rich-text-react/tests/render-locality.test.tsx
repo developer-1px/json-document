@@ -94,6 +94,21 @@ describe("Rich Text React locality", () => {
     expect(lastRenderStoreBlockScan()).toBeLessThan(16);
     expect(notified).toEqual(["scan-5000"]);
   });
+
+  it("notifies structure subscribers after a block split", () => {
+    const jsonDocument = createJSONDocument(createRichTextBlockFixture(4, { idPrefix: "split" }));
+    const editor = createRichTextEditor({
+      document: jsonDocument,
+      selection: collapsed("split-text-1", 1),
+    });
+    const store = richTextRenderStore(editor);
+    let structureNotifies = 0;
+    store.subscribeStructure(() => { structureNotifies += 1; });
+    const beforeIds = store.getBlockIds();
+    expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+    expect(structureNotifies).toBe(1);
+    expect(store.getBlockIds().length).toBe(beforeIds.length + 1);
+  });
 });
 
 function collapsed(nodeId: string, offset: number) {
