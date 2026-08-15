@@ -43,7 +43,7 @@ import {
   replaceNodeAtPath,
 } from "./path.js";
 import { compareRichTextMarks, richTextSchemaV1, type RichTextSchema } from "./schema.js";
-import { richTextTopology, type RichTextTopology } from "./topology.js";
+import { richTextTopology, seedRichTextTopology, type RichTextTopology } from "./topology.js";
 import { validateRichText, validateRichTextPath } from "./validation.js";
 import type { RichTextValidationFailure } from "./validation.js";
 
@@ -102,6 +102,12 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   const initialValidation = validateRichText(initial, { schema });
   if (!initialValidation.ok) throw new TypeError(initialValidation.reason);
   const initialTopology = richTextTopology(initial);
+  let previousDocument = initial;
+  options.document.subscribe((change) => {
+    const next = readDocument(options.document, pointer);
+    seedRichTextTopology(previousDocument, next, change.applied, pointer);
+    previousDocument = next;
+  });
   const selectionFamily = createRangeSelectionFamily<RichTextPoint, RichTextTarget>();
   const session = createEditingSession<RichTextSelection>({
     document: options.document,
