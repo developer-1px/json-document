@@ -263,6 +263,16 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     if (clipboard.type !== RICH_TEXT_CLIPBOARD_MIME || clipboard.slice.profile !== schema.profile) {
       return failure("rich-text.clipboard-invalid");
     }
+    const ranges = session.snapshot.selection.ranges;
+    if (
+      clipboard.slice.openStart === 1 && clipboard.slice.openEnd === 1
+      && ranges.length === 1 && pointsEqual(ranges[0]!.anchor, ranges[0]!.focus)
+    ) {
+      const remapped = remapSliceNodeIds(clipboard.slice.content, schema, createId);
+      if (remapped.length === 1) {
+        return insertNode(ranges[0]!.anchor, remapped[0] as RichTextContentNode);
+      }
+    }
     const removed = removeSelectedValue(value(), session.snapshot.selection, schema, createId);
     if (!removed.ok) return failure(removed.code);
     let next = removed.value;
@@ -328,22 +338,31 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     if (schema.marks[mark.type] === undefined) return failure("rich-text.schema-violation");
     const targets = selectedTextIntervals(value(), session.snapshot.selection);
     if (targets.length === 0) return success(session.snapshot);
+    const currentMarks = value();
+    const markTopology = richTextTopology(currentMarks);
     const remove = targets.every((target) => {
-      const located = findText(value(), target.nodeId);
-      return located?.node.marks.some((candidate) => candidate.type === mark.type) === true;
+      const located = markTopology.locate(target.nodeId);
+      return located !== null && isRichTextText(located.node) && located.node.marks.some((candidate) => candidate.type === mark.type);
     });
     const before = value();
-    let next = before;
-    for (const group of groupIntervals(targets)) {
-      const located = findText(next, group.nodeId);
-      if (!located) return failure("rich-text.point-not-found");
+    const topology = richTextTopology(before);
+    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [];
+    const groups = [...groupIntervals(targets)].sort((left, right) => {
+      const leftPath = topology.locate(left.nodeId)?.path ?? [];
+      const rightPath = topology.locate(right.nodeId)?.path ?? [];
+      return compareKeys(rightPath, leftPath);
+    });
+    for (const group of groups) {
+      const located = topology.locate(group.nodeId);
+      if (located === null || !isRichTextText(located.node)) return failure("rich-text.point-not-found");
       const replacements = markedSegments(located.node, group.intervals, mark, remove, schema, createId);
-      next = replaceNodeWithMany(next, located.node.id, replacements);
+      if (replacements.length === 0) continue;
+      const sibling = siblingReplacementOps(before, located, replacements, pointer);
+      if (sibling === null) return failure("rich-text.point-not-found");
+      operations.push(...sibling);
     }
-    const normalized = normalizeRichText(next, { schema, createId });
-    if (!normalized.ok) return failure(normalized.code);
-    const selectionAfter = mapSelectionByTextOrder(before, normalized.value, session.snapshot.selection);
-    return applyWhole(normalized.value, selectionAfter, "rich-text.mark.toggle");
+    if (operations.length === 0) return success(session.snapshot);
+    return commitOperations(session.snapshot.selection, "rich-text.mark.toggle", undefined, operations);
   }
 
   function setBlockType(
@@ -353,68 +372,119 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     if (nodeType === "heading" && (!attrs || !Number.isInteger(attrs.level) || Number(attrs.level) < 1 || Number(attrs.level) > 6)) {
       return failure("rich-text.schema-violation");
     }
-    const before = value();
-    const blockIds = selectedTextBlockIds(before, session.snapshot.selection);
+    const current = value();
+    const topology = richTextTopology(current);
+    const blockIds = selectedTextBlockIds(current, session.snapshot.selection);
     if (blockIds.length === 0) return failure("rich-text.point-not-found");
-    let next = before;
+    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [];
     for (const blockId of blockIds) {
-      next = replaceNode(next, blockId, (node) => {
-        if (node.type !== "paragraph" && node.type !== "heading") return node;
-        return (nodeType === "paragraph"
-          ? { id: node.id, type: "paragraph", content: node.content }
-          : { id: node.id, type: "heading", attrs: { level: Number(attrs!.level) as 1 | 2 | 3 | 4 | 5 | 6 }, content: node.content }) as RichTextContentNode;
-      });
+      const located = topology.locate(blockId);
+      if (located === null) return failure("rich-text.point-not-found");
+      const node = located.node;
+      if (node.type !== "paragraph" && node.type !== "heading") continue;
+      const nextNode = (nodeType === "paragraph"
+        ? { id: node.id, type: "paragraph", content: node.content }
+        : { id: node.id, type: "heading", attrs: { level: Number(attrs!.level) as 1 | 2 | 3 | 4 | 5 | 6 }, content: node.content }) as RichTextNode;
+      const validation = validateRichTextNodeAt(current, located.path, nextNode, { schema });
+      if (!validation.ok) return failure(validation.code);
+      operations.push({ op: "replace", path: absolutePath(pointer, contentSegments(located.path)), value: detachedValue(nextNode) });
     }
-    return applyWhole(next, session.snapshot.selection, "rich-text.block.set-type");
+    if (operations.length === 0) return success(session.snapshot);
+    return commitOperations(session.snapshot.selection, "rich-text.block.set-type", undefined, operations);
   }
 
-  function insertNode(point: RichTextPoint, node: RichTextContentNode): EditingResult<RichTextSelection> {
+  function insertNode(point: RichTextPoint, node: RichTextNode): EditingResult<RichTextSelection> {
     const current = value();
-    if (findNode(current, node.id)) return failure("rich-text.duplicate-id");
-    const inserted = insertNodeAtPoint(current, point, node, createId);
-    if (inserted === null) return failure("rich-text.invalid-offset");
-    const selectionAfter = pointAfterInsertedNode(inserted.value, node.id, point.affinity);
-    return applyWhole(inserted.value, selectionAfter, "rich-text.node.insert");
+    const topology = richTextTopology(current);
+    if (locateContainer(current, topology, node.id) !== null) return failure("rich-text.duplicate-id");
+    const planned = planInsertNode(current, topology, point, node, pointer, createId);
+    if (planned === null) return failure("rich-text.invalid-offset");
+    for (const candidate of planned.nodes) {
+      const validation = validateRichTextNodeAt(current, planned.parentPath.concat(0), candidate, { schema });
+      if (!validation.ok) return failure(validation.code);
+    }
+    return commitOperations(planned.selection, "rich-text.node.insert", undefined, planned.operations);
   }
 
   function removeNode(nodeId: string): EditingResult<RichTextSelection> {
     const current = value();
-    const located = findNode(current, nodeId);
-    if (!located || located.parent === null) return failure("rich-text.point-not-found");
-    const next = removeNodeById(current, nodeId);
-    const normalized = normalizeRichText(next, { schema, createId });
-    if (!normalized.ok) return failure(normalized.code);
-    const point: RichTextPoint = {
-      kind: "child",
-      nodeId: located.parent.id,
-      offset: Math.min(located.index, located.parent.content.length - 1),
-      affinity: "forward",
-    };
-    return applyWhole(normalized.value, collapsedAtPoint(reconcileOrFirst(normalized.value, point)), "rich-text.node.remove");
+    const topology = richTextTopology(current);
+    const located = topology.locate(nodeId);
+    if (located === null || located.path.length === 0) return failure("rich-text.point-not-found");
+    const parentPath = located.path.slice(0, -1);
+    const index = located.path[located.path.length - 1]!;
+    const parent = nodeAtPath(current, parentPath);
+    if (parent === null || !hasRichTextContent(parent)) return failure("rich-text.point-not-found");
+    const contentPath = absolutePath(pointer, containerContentSegments(parentPath));
+    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [
+      { op: "remove", path: `${contentPath}/${index}` },
+    ];
+    const before = parent.content[index - 1];
+    const after = parent.content[index + 1];
+    if (
+      before !== undefined && after !== undefined
+      && isRichTextText(before) && isRichTextText(after)
+      && JSON.stringify(before.marks) === JSON.stringify(after.marks)
+    ) {
+      operations.push({
+        op: "replace",
+        path: `${contentPath}/${index - 1}/text`,
+        value: before.text + after.text,
+      });
+      operations.push({ op: "remove", path: `${contentPath}/${index}` });
+    }
+    const caret: RichTextPoint = before && isRichTextText(before)
+      ? { kind: "text", nodeId: before.id, offset: before.text.length, affinity: "forward" }
+      : after && isRichTextText(after)
+        ? { kind: "text", nodeId: after.id, offset: 0, affinity: "forward" }
+        : { kind: "child", nodeId: parent.id, offset: Math.min(index, parent.content.length - 1), affinity: "forward" };
+    return commitOperations(collapsedAtPoint(caret), "rich-text.node.remove", undefined, operations);
   }
 
   function moveNode(nodeId: string, point: RichTextPoint): EditingResult<RichTextSelection> {
     const current = value();
-    const located = findNode(current, nodeId);
-    if (!located || located.parent === null || point.kind !== "child" || isDescendant(current, nodeId, point.nodeId)) {
+    const topology = richTextTopology(current);
+    const located = topology.locate(nodeId);
+    const destination = point.kind === "child" ? locateContainer(current, topology, point.nodeId) : null;
+    if (
+      located === null || located.path.length === 0 || destination === null
+      || !hasRichTextContent(destination.node)
+      || pathStartsWith(destination.path, located.path)
+    ) {
       return failure("rich-text.invalid-offset");
     }
-    let destinationOffset = point.offset;
-    if (located.parent.id === point.nodeId && located.index < destinationOffset) destinationOffset -= 1;
-    const without = removeNodeById(current, nodeId);
-    const inserted = insertNodeAtPoint(without, { ...point, offset: destinationOffset }, located.node, createId);
-    if (inserted === null) return failure("rich-text.invalid-offset");
-    const nextSelection = mapSelectionByExistingIds(session.snapshot.selection, inserted.value);
-    return applyWhole(inserted.value, nextSelection, "rich-text.node.move");
+    if (point.offset < 0 || point.offset > destination.node.content.length) return failure("rich-text.invalid-offset");
+    const sourceParent = located.path.slice(0, -1);
+    const sourceIndex = located.path[located.path.length - 1]!;
+    let destParent = destination.path;
+    let destIndex = point.offset;
+    if (sameNumberPath(sourceParent, destParent) && sourceIndex < destIndex) destIndex -= 1;
+    destParent = shiftPathAfterRemove(destParent, sourceParent, sourceIndex);
+    const sourcePath = absolutePath(pointer, [...containerContentSegments(sourceParent), sourceIndex]);
+    const destPath = absolutePath(pointer, [...containerContentSegments(destParent), destIndex]);
+    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [
+      { op: "remove", path: sourcePath },
+      { op: "add", path: destPath, value: detachedValue(located.node) },
+    ];
+    return commitOperations(session.snapshot.selection, "rich-text.node.move", undefined, operations);
   }
 
   function setNodeAttrs(
     nodeId: string,
     attrs: Readonly<Record<string, import("@interactive-os/json-document").JSONValue>>,
   ): EditingResult<RichTextSelection> {
-    if (!findNode(value(), nodeId)) return failure("rich-text.point-not-found");
-    const next = replaceNode(value(), nodeId, (node) => ({ ...node, attrs } as RichTextNode));
-    return applyWhole(next, session.snapshot.selection, "rich-text.node.set-attrs");
+    const current = value();
+    const located = richTextTopology(current).locate(nodeId);
+    if (located === null) return failure("rich-text.point-not-found");
+    const nextNode = { ...located.node, attrs } as RichTextNode;
+    const validation = validateRichTextNodeAt(current, located.path, nextNode, { schema });
+    if (!validation.ok) return failure(validation.code);
+    return commitOperations(
+      session.snapshot.selection,
+      "rich-text.node.set-attrs",
+      undefined,
+      [{ op: "replace", path: absolutePath(pointer, [...contentSegments(located.path), "attrs"]), value: detachedValue(attrs) }],
+    );
   }
 
   function deleteCharacter(direction: "backward" | "forward"): EditingResult<RichTextSelection> {
@@ -605,7 +675,13 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     historyGroup?: string,
   ): EditingResult<RichTextSelection> {
     const operations = diffRichText(value(), next, pointer);
-    return applyChange(next, selectionAfter, origin, historyGroup, operations);
+    const whole = operations.some((operation) => {
+      const path = operation.path === pointer || operation.path === `${pointer}/content` || operation.path === "/content";
+      return path && operation.op === "replace";
+    });
+    return whole
+      ? applyChange(next, selectionAfter, origin, historyGroup, operations)
+      : commitOperations(selectionAfter, origin, historyGroup, operations);
   }
 }
 
@@ -896,9 +972,16 @@ function pointAfterInsertedNode(document: RichTextDocument, nodeId: string, affi
 
 function selectedTextIntervals(document: RichTextDocument, selection: RichTextSelection): TextInterval[] {
   const topology = richTextTopology(document);
-  return selection.ranges.flatMap((range) => topology.interval(range.anchor, range.focus))
-    .filter((target): target is Extract<RichTextTarget, { readonly kind: "text" }> => target.kind === "text" && target.from < target.to)
-    .map((target) => ({ nodeId: target.nodeId, from: target.from, to: target.to }));
+  return selection.ranges.flatMap((range) => {
+    if (range.anchor.kind === "text" && range.focus.kind === "text" && range.anchor.nodeId === range.focus.nodeId) {
+      const from = Math.min(range.anchor.offset, range.focus.offset);
+      const to = Math.max(range.anchor.offset, range.focus.offset);
+      return from < to ? [{ nodeId: range.anchor.nodeId, from, to }] : [];
+    }
+    return topology.interval(range.anchor, range.focus)
+      .filter((target): target is Extract<RichTextTarget, { readonly kind: "text" }> => target.kind === "text" && target.from < target.to)
+      .map((target) => ({ nodeId: target.nodeId, from: target.from, to: target.to }));
+  });
 }
 
 function groupIntervals(intervals: ReadonlyArray<TextInterval>): ReadonlyArray<{
@@ -951,17 +1034,26 @@ function markedSegments(
 
 function selectedTextBlockIds(document: RichTextDocument, selection: RichTextSelection): ReadonlyArray<string> {
   const ids = new Set<string>();
+  const topology = richTextTopology(document);
   const points = selection.ranges.flatMap((range) => [range.anchor, range.focus]);
-  for (const point of points) {
-    const ancestors = findAncestors(document, point.nodeId);
-    const block = ancestors.reverse().find((node) => node.type === "paragraph" || node.type === "heading");
-    if (block) ids.add(block.id);
-  }
-  for (const target of selectedTextIntervals(document, selection)) {
-    const block = findAncestors(document, target.nodeId).reverse().find((node) => node.type === "paragraph" || node.type === "heading");
-    if (block) ids.add(block.id);
-  }
+  for (const point of points) rememberBlock(point.nodeId);
+  for (const target of selectedTextIntervals(document, selection)) rememberBlock(target.nodeId);
   return [...ids];
+
+  function rememberBlock(nodeId: string): void {
+    const located = locateContainer(document, topology, nodeId);
+    if (located === null) return;
+    let path = located.path;
+    while (true) {
+      const node = nodeAtPath(document, path);
+      if (node && (node.type === "paragraph" || node.type === "heading")) {
+        ids.add(node.id);
+        return;
+      }
+      if (path.length === 0) return;
+      path = path.slice(0, -1);
+    }
+  }
 }
 
 function findAncestors(document: RichTextDocument, nodeId: string): Array<RichTextNode | RichTextDocument> {
@@ -1356,6 +1448,148 @@ function pointAfterNode(document: RichTextDocument, nodeId: string, affinity: Ri
   return located.parent
     ? { kind: "child", nodeId: located.parent.id, offset: located.index + 1, affinity }
     : firstSelection(document).ranges[0]!.anchor;
+}
+
+function siblingReplacementOps(
+  current: RichTextDocument,
+  located: { readonly node: RichTextDocument | RichTextNode; readonly path: ReadonlyArray<number> },
+  replacements: ReadonlyArray<RichTextNode>,
+  rootPointer: Pointer,
+): import("@interactive-os/json-document").JSONPatchOperation[] | null {
+  if (located.path.length === 0 || replacements.length === 0) return null;
+  const parentPath = located.path.slice(0, -1);
+  const index = located.path[located.path.length - 1]!;
+  const parent = nodeAtPath(current, parentPath);
+  if (parent === null || !hasRichTextContent(parent)) return null;
+  const contentPath = absolutePath(rootPointer, containerContentSegments(parentPath));
+  const first = replacements[0]!;
+  const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [
+    { op: "replace", path: `${contentPath}/${index}`, value: detachedValue(first) },
+  ];
+  for (let offset = 1; offset < replacements.length; offset += 1) {
+    operations.push({ op: "add", path: `${contentPath}/${index + offset}`, value: detachedValue(replacements[offset]!) });
+  }
+  return operations;
+}
+
+function compareKeys(left: ReadonlyArray<number>, right: ReadonlyArray<number>): number {
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    if (left[index] === right[index]) continue;
+    if (left[index] === undefined) return -1;
+    if (right[index] === undefined) return 1;
+    return left[index]! - right[index]!;
+  }
+  return 0;
+}
+
+function locateContainer(
+  document: RichTextDocument,
+  topology: RichTextTopology,
+  nodeId: string,
+): { readonly node: RichTextDocument | RichTextNode; readonly path: ReadonlyArray<number> } | null {
+  if (nodeId === document.id) return { node: document, path: [] };
+  return topology.locate(nodeId);
+}
+
+function planInsertNode(
+  document: RichTextDocument,
+  topology: RichTextTopology,
+  point: RichTextPoint,
+  node: RichTextNode,
+  rootPointer: Pointer,
+  createId: () => string,
+): {
+  readonly operations: import("@interactive-os/json-document").JSONPatchOperation[];
+  readonly nodes: ReadonlyArray<RichTextNode>;
+  readonly parentPath: ReadonlyArray<number>;
+  readonly selection: RichTextSelection;
+} | null {
+  if (point.kind === "child") {
+    const container = locateContainer(document, topology, point.nodeId);
+    if (container === null || !hasRichTextContent(container.node) || point.offset < 0 || point.offset > container.node.content.length) {
+      return null;
+    }
+    return {
+      operations: [{
+        op: "add",
+        path: absolutePath(rootPointer, [...containerContentSegments(container.path), point.offset]),
+        value: detachedValue(node),
+      }],
+      nodes: [node],
+      parentPath: container.path,
+      selection: pointAfterInsertedAt(container.node.id, point.offset, node, point.affinity),
+    };
+  }
+  const located = topology.locate(point.nodeId);
+  if (located === null || !isRichTextText(located.node) || !validOffset(located.node.text, point.offset)) return null;
+  const parentPath = located.path.slice(0, -1);
+  const index = located.path[located.path.length - 1]!;
+  const contentPath = absolutePath(rootPointer, containerContentSegments(parentPath));
+  if (point.offset === 0) {
+    return {
+      operations: [{ op: "add", path: `${contentPath}/${index}`, value: detachedValue(node) }],
+      nodes: [node],
+      parentPath,
+      selection: pointAfterInsertedAt(parentIdFromPath(document, parentPath), index, node, point.affinity),
+    };
+  }
+  if (point.offset === located.node.text.length) {
+    return {
+      operations: [{ op: "add", path: `${contentPath}/${index + 1}`, value: detachedValue(node) }],
+      nodes: [node],
+      parentPath,
+      selection: pointAfterInsertedAt(parentIdFromPath(document, parentPath), index + 1, node, point.affinity),
+    };
+  }
+  const left = { ...located.node, text: located.node.text.slice(0, point.offset) };
+  const right = { ...located.node, id: createId(), text: located.node.text.slice(point.offset) };
+  return {
+    operations: [
+      { op: "replace", path: `${contentPath}/${index}`, value: detachedValue(left) },
+      { op: "add", path: `${contentPath}/${index + 1}`, value: detachedValue(node) },
+      { op: "add", path: `${contentPath}/${index + 2}`, value: detachedValue(right) },
+    ],
+    nodes: [left, node, right],
+    parentPath,
+    selection: pointAfterInsertedAt(parentIdFromPath(document, parentPath), index + 1, node, point.affinity),
+  };
+}
+
+function pointAfterInsertedAt(
+  parentId: string,
+  index: number,
+  node: RichTextNode,
+  affinity: RichTextPoint["affinity"],
+): RichTextSelection {
+  if (isRichTextText(node)) return collapsedAtPoint({ kind: "text", nodeId: node.id, offset: node.text.length, affinity });
+  return collapsedAtPoint({ kind: "child", nodeId: parentId, offset: index + 1, affinity });
+}
+
+function parentIdFromPath(document: RichTextDocument, path: ReadonlyArray<number>): string {
+  const parent = nodeAtPath(document, path);
+  return parent?.id ?? document.id;
+}
+
+function pathStartsWith(path: ReadonlyArray<number>, prefix: ReadonlyArray<number>): boolean {
+  return prefix.length <= path.length && prefix.every((value, index) => value === path[index]);
+}
+
+function sameNumberPath(left: ReadonlyArray<number>, right: ReadonlyArray<number>): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function shiftPathAfterRemove(
+  path: ReadonlyArray<number>,
+  removeParent: ReadonlyArray<number>,
+  removeIndex: number,
+): number[] {
+  if (path.length <= removeParent.length || !pathStartsWith(path, removeParent)) return [...path];
+  const index = path[removeParent.length]!;
+  if (index <= removeIndex) return [...path];
+  const next = [...path];
+  next[removeParent.length] = index - 1;
+  return next;
 }
 
 function absolutePath(pointer: Pointer, segments: ReadonlyArray<string | number>): Pointer {
