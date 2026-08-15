@@ -41,6 +41,42 @@ test("a leaf replace does not dense-copy a large sibling array", () => {
   expect(denseArrayCopies()).toBe(0);
 });
 
+test("a batch of leaf replaces does not walk the whole value or dense-copy the array", () => {
+  const items = Array.from({ length: 10_000 }, (_, item) => ({ id: `item-${item}`, title: "Draft" }));
+  const document = createJSONDocument({ items });
+  const before = document.value as { items: Array<{ id: string; title: string }> };
+  resetDenseArrayCopies();
+  const result = document.commit([
+    { op: "replace", path: "/items/10/title", value: "A" },
+    { op: "replace", path: "/items/80/title", value: "B" },
+    { op: "replace", path: "/items/9999/title", value: "C" },
+  ]);
+  expect(result).toMatchObject({
+    ok: true,
+    change: {
+      applied: [
+        { op: "replace", path: "/items/10/title", value: "A" },
+        { op: "replace", path: "/items/80/title", value: "B" },
+        { op: "replace", path: "/items/9999/title", value: "C" },
+      ],
+    },
+  });
+  const after = document.value as { items: Array<{ id: string; title: string }> };
+  expect(after.items[10]).toEqual({ id: "item-10", title: "A" });
+  expect(after.items[80]).toEqual({ id: "item-80", title: "B" });
+  expect(after.items[9999]).toEqual({ id: "item-9999", title: "C" });
+  expect(after.items[11]).toBe(before.items[11]);
+  expect(denseArrayCopies()).toBe(0);
+  expect(document.commit([
+    { op: "replace", path: "/items/10/title", value: "A" },
+    { op: "replace", path: "/items/80/title", value: "B" },
+    { op: "replace", path: "/items/9999/title", value: "C" },
+  ])).toMatchObject({
+    ok: true,
+    change: { applied: [] },
+  });
+});
+
 test("a root replace still freezes the whole owned tree", () => {
   const items = Array.from({ length: 32 }, (_, index) => ({ id: `item-${index}`, title: "Draft" }));
   const result = applyOwnedProtocolPatch({ items: [] }, [

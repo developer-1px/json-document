@@ -187,23 +187,46 @@ function localCommitEffect(
   state: JSONValue,
   operations: ReadonlyArray<JSONPatchOperation>,
 ): "noop" | "changed" | "unknown" {
-  if (operations.length !== 1) return "unknown";
-  const operation = operations[0];
-  if (operation === undefined || typeof operation !== "object" || operation === null) return "unknown";
-  if (operation.op === "replace") {
-    if (operation.path === "") return jsonEqual(state, operation.value) ? "noop" : "changed";
-    let segments: string[];
-    try {
-      segments = parsePointer(operation.path);
-    } catch {
-      return "unknown";
+  if (operations.length === 0) return "noop";
+  const seen: string[] = [];
+  let changed = false;
+  for (const operation of operations) {
+    if (operation === undefined || typeof operation !== "object" || operation === null) return "unknown";
+    if (operation.op === "replace") {
+      if (typeof operation.path !== "string") return "unknown";
+      if (operation.path === "") {
+        if (operations.length !== 1) return "unknown";
+        return jsonEqual(state, operation.value) ? "noop" : "changed";
+      }
+      if (overlapsLocalPath(seen, operation.path)) return "unknown";
+      seen.push(operation.path);
+      let segments: string[];
+      try {
+        segments = parsePointer(operation.path);
+      } catch {
+        return "unknown";
+      }
+      const current = readAt(state, segments);
+      if (!current.ok) return "unknown";
+      if (!jsonEqual(current.value, operation.value)) changed = true;
+      continue;
     }
-    const current = readAt(state, segments);
-    if (!current.ok) return "unknown";
-    return jsonEqual(current.value, operation.value) ? "noop" : "changed";
+    if (operation.op === "add" || operation.op === "remove") {
+      if (typeof operation.path !== "string" || operation.path === "") return "unknown";
+      changed = true;
+      continue;
+    }
+    return "unknown";
   }
-  if (operation.op === "add" || operation.op === "remove") return "changed";
-  return "unknown";
+  return changed ? "changed" : "noop";
+}
+
+function overlapsLocalPath(seen: ReadonlyArray<string>, path: string): boolean {
+  return seen.some((existing) => (
+    existing === path
+    || existing.startsWith(`${path}/`)
+    || path.startsWith(`${existing}/`)
+  ));
 }
 
 const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
