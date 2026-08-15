@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type BlockDocument, type DocumentIntent } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
-import { JsonInspector } from "../../shared/ui/json-inspector";
+import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -69,21 +69,25 @@ export function SelectionDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-call">
           <p className={ui.text.label}>2 · API 호출</p>
           <h2 id="selection-call" className={classes("mb-2 mt-1", ui.text.heading)}>dispatch(intent)</h2>
-          <JsonInspector label="intent" value={lastIntent} testId="selection-demo-intent" size="compact" />
-          <JsonInspector label="result" value={lastResult} testId="selection-demo-result" size="compact" />
+          <Inspector label="Inspect API call" items={[
+            { label: "intent", value: lastIntent, testId: "selection-demo-intent", size: "compact" },
+            { label: "result", value: lastResult, testId: "selection-demo-result", size: "compact" },
+          ]} />
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-result">
           <p className={ui.text.label}>3 · 결과</p>
           <h2 id="selection-result" className={classes("mb-2 mt-1", ui.text.heading)}>Selection만 바뀝니다</h2>
-          <JsonInspector label="selection" value={snapshot.selection} testId="selection-demo-selection" size="compact" />
-          <JsonInspector label="document.value" value={snapshot.value} testId="selection-demo-document" size="compact" />
-          <JsonInspector
-            label="history"
-            value={{ canUndo: snapshot.canUndo, canRedo: snapshot.canRedo }}
-            testId="selection-demo-history"
-            size="compact"
-          />
+          <Inspector label="Inspect result state" items={[
+            { label: "selection", value: snapshot.selection, testId: "selection-demo-selection", size: "compact" },
+            { label: "document.value", value: snapshot.value, testId: "selection-demo-document", size: "compact" },
+            {
+              label: "history",
+              value: { canUndo: snapshot.canUndo, canRedo: snapshot.canRedo },
+              testId: "selection-demo-history",
+              size: "compact",
+            },
+          ]} />
         </section>
       </div>
     </PageFrame>

@@ -6,7 +6,7 @@ import {
   useEditingSnapshot,
   useReactConnector,
 } from "@interactive-os/json-document-react";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -119,5 +119,7 @@ function EditingSnapshotLab() {
 }
 
 function JSONPanel({ testId, value }: { readonly testId: string; readonly value: JSONValue }) {
-  return <JsonInspector className="mt-4" label="Canonical JSON" testId={testId} value={value} />;
+  return <Inspector className="mt-4" label="Inspect canonical JSON" items={[
+    { label: "Canonical JSON", testId, value },
+  ]} />;
 }

@@ -4,7 +4,7 @@ import { useReactConnector } from "@interactive-os/json-document-react";
 import { useReactHookFormConnector } from "@interactive-os/json-document-react-hook-form";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -84,10 +84,10 @@ export function ReactHookFormConnectorLab() {
           </dl>
         </form>
 
-        <div className="grid content-start gap-4">
-          <JsonInspector label="Canonical JSON" testId="rhf-canonical-json" value={canonical} />
-          <JsonInspector label="Last submit result" testId="rhf-submit-result" value={binding.result ?? { status: "not submitted" }} />
-        </div>
+        <Inspector label="Inspect form binding" items={[
+          { label: "Canonical JSON", testId: "rhf-canonical-json", value: canonical },
+          { label: "Last submit result", testId: "rhf-submit-result", value: binding.result ?? { status: "not submitted" } },
+        ]} />
       </div>
     </section>
   );

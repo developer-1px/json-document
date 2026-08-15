@@ -3,7 +3,7 @@ import { createJSONDocument, type JSONPatchValidationResult } from "@interactive
 import { createAjvValidator } from "@interactive-os/json-document-ajv";
 import { useReactConnector } from "@interactive-os/json-document-react";
 import { Ajv } from "ajv";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -71,10 +71,10 @@ export function AjvConnectorLab() {
         Commit draft
       </ActionButton>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <JsonInspector label="Commit result" testId="ajv-validation-result" value={result} />
-        <JsonInspector label="Canonical JSON" testId="ajv-document-json" value={value} />
-      </div>
+      <Inspector className="mt-4" label="Inspect validation state" items={[
+        { label: "Commit result", testId: "ajv-validation-result", value: result },
+        { label: "Canonical JSON", testId: "ajv-document-json", value },
+      ]} />
     </section>
   );
 }

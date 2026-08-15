@@ -17,8 +17,8 @@ import {
   selectionOperationFromModifiers,
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { Inspector } from "../../shared/ui/inspector";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -51,7 +51,6 @@ export function SheetDemo() {
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const sheet = snapshot.value as SheetDocument;
   const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
 
@@ -280,19 +279,12 @@ export function SheetDemo() {
           </section>
 
           <section className={classes("p-3", ui.surface.raised)}>
-            <DisclosureButton
-              expanded={inspectorOpen}
-              controls="sheet-editing-state"
-              onClick={() => setInspectorOpen((open) => !open)}
-            >
-              Inspect editing state
-            </DisclosureButton>
-            <aside id="sheet-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-2" aria-label="Canonical JSON">
-              <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
-              <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="sheet-intent-json" size="compact" />
-              <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="sheet-result-json" size="compact" />
-              <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
-            </aside>
+            <Inspector items={[
+              { label: "Canonical JSON", meta: "stable row + column ids", value: snapshot.value, testId: "sheet-canonical-json", size: "tall" },
+              { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "sheet-intent-json", size: "compact" },
+              { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "sheet-result-json", size: "compact" },
+              { label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact" },
+            ]} />
           </section>
         </div>
     </PageFrame>

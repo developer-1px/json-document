@@ -3,7 +3,7 @@ import { createJSONDocument, type JSONPatchValidationResult } from "@interactive
 import { useReactConnector } from "@interactive-os/json-document-react";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -75,5 +75,7 @@ function JSONPanel(props: {
   readonly testId: string;
   readonly value: unknown;
 }) {
-  return <JsonInspector label={props.label} testId={props.testId} value={props.value} />;
+  return <Inspector label={`Inspect ${props.label}`} items={[
+    { label: props.label, testId: props.testId, value: props.value },
+  ]} />;
 }

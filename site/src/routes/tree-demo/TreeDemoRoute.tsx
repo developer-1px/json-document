@@ -9,8 +9,8 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { Inspector } from "../../shared/ui/inspector";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -32,7 +32,6 @@ export function TreeDemoRoute() {
   const [clipboard, setClipboard] = useState<TreeClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<TreeIntent | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const document = snapshot.value as TreeDocument;
   const topology = useMemo(() => visibleTopology(document.nodes, expanded), [document.nodes, expanded]);
   const selected = new Set(editor.selectedNodeIdsIn(topology));
@@ -141,14 +140,11 @@ export function TreeDemoRoute() {
       </section>
 
       <section className={classes("mt-4 p-3", ui.surface.raised)}>
-        <DisclosureButton expanded={inspectorOpen} controls="tree-editing-state" onClick={() => setInspectorOpen((open) => !open)}>
-          Inspect editing state
-        </DisclosureButton>
-        <div id="tree-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
-          <JsonInspector label="Canonical JSON" value={snapshot.value} testId="tree-demo-document" size="tall" />
-          <JsonInspector label="visibleIds" value={topology.visibleIds} testId="tree-demo-visible" size="compact" />
-          <JsonInspector label="selection" value={snapshot.selection} testId="tree-demo-selection" size="compact" />
-        </div>
+        <Inspector items={[
+          { label: "Canonical JSON", value: snapshot.value, testId: "tree-demo-document", size: "tall" },
+          { label: "visibleIds", value: topology.visibleIds, testId: "tree-demo-visible", size: "compact" },
+          { label: "selection", value: snapshot.selection, testId: "tree-demo-selection", size: "compact" },
+        ]} />
       </section>
     </PageFrame>
   );

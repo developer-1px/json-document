@@ -28,6 +28,8 @@ test("React Connector Live Demo publishes document and editing snapshots", async
   await page.getByRole("button", { name: "Count 0" }).click();
   const documentValue = JSON.parse(await page.getByTestId("react-document-json").innerText()) as { title: string; count: number };
   expect(documentValue).toEqual({ title: "Live React document", count: 1 });
+  await page.getByRole("region", { name: "JSON Document subscription" })
+    .getByRole("button", { name: "Inspect canonical JSON" }).click();
   await expect(page.getByTestId("react-document-json").locator("xpath=ancestor::figure").getByRole("button", { name: "Copy" })).toBeVisible();
 
   await page.getByRole("textbox", { name: "Connector block 1" }).fill("React snapshot updated.");

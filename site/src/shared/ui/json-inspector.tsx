@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { CodeBlock } from "./code-block";
 
-type JsonInspectorSize = "compact" | "standard" | "tall";
+export type JsonInspectorSize = "compact" | "standard" | "tall";
 
-export function JsonInspector(props: {
+export interface JsonInspectorProps {
   readonly label: string;
   readonly value: unknown;
   readonly testId: string;
@@ -11,7 +11,9 @@ export function JsonInspector(props: {
   readonly signal?: ReactNode;
   readonly size?: JsonInspectorSize;
   readonly className?: string;
-}) {
+}
+
+export function JsonInspector(props: JsonInspectorProps) {
   const source = JSON.stringify(props.value, null, 2) ?? "null";
 
   return (
