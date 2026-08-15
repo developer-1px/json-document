@@ -9,6 +9,20 @@ import {
 } from "../src/index.js";
 
 describe("Official Rich Text local edit costs", () => {
+  it("indexes topology during editor create in the same walk as validation", () => {
+    const size = 256;
+    const instrument = createRichTextInstrument();
+    const editor = runWithRichTextInstrument(instrument, () => createRichTextEditor({
+      document: createJSONDocument(createRichTextBlockFixture(size)),
+    }));
+    expect(editor.topology.locate("block-text-0")?.node).toMatchObject({ type: "text", text: "x" });
+    expect(editor.topology.locate(`block-text-${size - 1}`)?.path).toEqual([size - 1, 0]);
+    expect(instrument.snapshot().fullValidations).toBe(1);
+    expect(instrument.snapshot().topologyCreates).toBe(1);
+    expect(instrument.snapshot().topologyVisits).toBe(size * 2 + 1);
+    expect(instrument.snapshot().topologyVisits).toBeLessThan(size * 3);
+  });
+
   it("reuses topology for the same snapshot and adopts after a leaf commit", () => {
     const document = createJSONDocument(createRichTextBlockFixture(32));
     const instrument = createRichTextInstrument();

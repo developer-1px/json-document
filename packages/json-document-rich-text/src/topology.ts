@@ -1,14 +1,17 @@
-import { parsePointer } from "@interactive-os/json-document";
+import { parsePointer, type JSONValue } from "@interactive-os/json-document";
 import type { OrderedTopology } from "@interactive-os/json-document-selection";
 import { getActiveRichTextInstrument } from "./instrument.js";
 import {
   hasRichTextContent,
+  isRichTextDocument,
   isRichTextText,
   type RichTextDocument,
   type RichTextNode,
   type RichTextPoint,
   type RichTextTarget,
 } from "./model.js";
+import { validateRichText, type RichTextValidationResult } from "./validation.js";
+import type { RichTextSchema } from "./schema.js";
 
 export interface RichTextLocatedNode {
   readonly node: RichTextNode | RichTextDocument;
@@ -83,6 +86,35 @@ export function seedRichTextTopology(
   const adopted = adoptRichTextTopology(previousInternals, next, operations, rootPointer);
   if (adopted === null) return;
   topologies.set(next, adopted);
+}
+
+export function indexValidatedRichText(
+  document: unknown,
+  schema: RichTextSchema,
+): RichTextValidationResult {
+  const value = asJSONValue(document);
+  if (value !== undefined && isRichTextDocument(value) && topologies.has(value)) return { ok: true };
+  getActiveRichTextInstrument()?.topologyCreate();
+  const nodes = new Map<string, IndexedNode>();
+  const linear: Array<RichTextNode | RichTextDocument> = [];
+  const validation = validateRichText(document, {
+    schema,
+    onNode(node, path) {
+      getActiveRichTextInstrument()?.topologyVisit();
+      nodes.set(node.id, { node, order: linear.length, path, shiftCount: 0 });
+      linear.push(node);
+    },
+  });
+  if (!validation.ok || value === undefined || !isRichTextDocument(value)) return validation;
+  topologies.set(value, bindTopology({
+    nodes,
+    linear,
+    overlay: null,
+    added: null,
+    removed: null,
+    shifts: null,
+  }));
+  return validation;
 }
 
 export function createRichTextTopology(document: RichTextDocument): RichTextTopology {
@@ -487,4 +519,11 @@ function scalarBoundary(text: string, offset: number, affinity: RichTextPoint["a
 function clamp(value: number, maximum: number): number {
   if (!Number.isInteger(value)) return 0;
   return Math.min(Math.max(value, 0), maximum);
+}
+
+function asJSONValue(value: unknown): JSONValue | undefined {
+  if (value === undefined || typeof value === "function" || typeof value === "symbol" || typeof value === "bigint") {
+    return undefined;
+  }
+  return value as JSONValue;
 }

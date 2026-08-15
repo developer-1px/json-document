@@ -49,7 +49,9 @@ export function applyProtocolPatch(
     });
   }
 
-  const ownedValue = ownJSON(result.state);
+  const ownedValue = operations.length === 0
+    ? freezeJSON(result.state as JSONValue)
+    : ownJSON(result.state);
   const applied = result.applied.map(ownAppliedOperation);
   Object.freeze(applied);
   const change: JSONAppliedChange = Object.freeze({ applied });
