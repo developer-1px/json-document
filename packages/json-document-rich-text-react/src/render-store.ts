@@ -1,4 +1,6 @@
 import {
+  appliedOperationsFor,
+  hasRichTextContent,
   richTextTopology,
   type RichTextDocument,
   type RichTextEditor,
@@ -14,6 +16,12 @@ export interface RichTextRenderStore {
 }
 
 const stores = new WeakMap<RichTextEditor, RichTextRenderStore>();
+
+let lastBlockScan = 0;
+
+export function lastRenderStoreBlockScan(): number {
+  return lastBlockScan;
+}
 
 export function richTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
   const cached = stores.get(editor);
@@ -34,7 +42,14 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
     if (next === document) return;
     const previous = document;
     document = next;
+    const applied = appliedOperationsFor(next);
+    if (applied !== null && !contentStructureChanged(applied)) {
+      lastBlockScan = applied.length;
+      for (const operation of applied) notifyAppliedPath(next, operation.path, nodeListeners);
+      return;
+    }
     const nextIds = next.content.map((node) => node.id);
+    lastBlockScan = next.content.length;
     const structureChanged = nextIds.length !== blockIds.length
       || nextIds.some((id, index) => id !== blockIds[index]);
     const previousBlocks = previous.content;
@@ -71,4 +86,34 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
       return () => { structureListeners.delete(notify); };
     },
   };
+}
+
+function contentStructureChanged(
+  applied: ReadonlyArray<{ readonly op: string; readonly path: string }>,
+): boolean {
+  return applied.some((operation) => {
+    if (operation.path === "" || operation.path === "/content") return true;
+    return (operation.op === "add" || operation.op === "remove") && /^\/content\/\d+$/.test(operation.path);
+  });
+}
+
+function notifyAppliedPath(
+  document: RichTextDocument,
+  path: string,
+  nodeListeners: Map<string, Set<() => void>>,
+): void {
+  const match = /^\/content\/(\d+)(?:\/content\/(\d+))?/.exec(path);
+  if (match === null) return;
+  const block = document.content[Number(match[1])];
+  if (block === undefined) return;
+  notifyNode(block.id, nodeListeners);
+  if (match[2] === undefined || !hasRichTextContent(block)) return;
+  const child = block.content[Number(match[2])];
+  if (child !== undefined) notifyNode(child.id, nodeListeners);
+}
+
+function notifyNode(nodeId: string, nodeListeners: Map<string, Set<() => void>>): void {
+  const listeners = nodeListeners.get(nodeId);
+  if (listeners === undefined) return;
+  for (const notify of listeners) notify();
 }
