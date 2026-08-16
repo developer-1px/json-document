@@ -29,4 +29,9 @@ editor.dispatch({ type: "text.insert", text: "hello" });
 Use `tryCreateRichTextEditor` when unavailable profiles must be reported as a
 stable failure result rather than thrown at an application boundary.
 
+`normalizeRichText` detaches external input by default. When the caller owns an
+immutable canonical value, `{ inputOwnership: "borrowed" }` skips that full
+clone and reuses unchanged subtree identity. Mutating borrowed input after the
+call is outside the contract; use the default for external payloads.
+
 The public surface is not frozen while RFC #363 remains Draft.

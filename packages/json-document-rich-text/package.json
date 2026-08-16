@@ -32,6 +32,7 @@
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "perf": "npm run build && node benchmarks/editor.mjs",
+    "perf:normalize": "npm run build && node benchmarks/normalization.mjs",
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
