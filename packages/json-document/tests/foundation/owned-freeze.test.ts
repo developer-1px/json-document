@@ -11,6 +11,18 @@ import {
   resetOwnedPatchFreezeInspections,
 } from "../../src/foundation/protocol/apply.js";
 
+test("createJSONDocument freezes a clone and leaves the caller tree mutable", () => {
+  const items = Array.from({ length: 128 }, (_, item) => ({ id: `item-${item}`, title: "Draft" }));
+  const initial = { items };
+  const document = createJSONDocument(initial);
+  expect(Object.isFrozen(initial)).toBe(false);
+  expect(Object.isFrozen(items)).toBe(false);
+  expect(Object.isFrozen(items[0])).toBe(false);
+  expect(Object.isFrozen(document.value)).toBe(true);
+  items[0]!.title = "Mutated";
+  expect((document.value as { items: Array<{ title: string }> }).items[0]?.title).toBe("Draft");
+});
+
 test("a leaf replace freeze inspects the changed path, not every sibling", () => {
   const small = applyOwnedAndCount(256, 80);
   const large = applyOwnedAndCount(10_000, 80);

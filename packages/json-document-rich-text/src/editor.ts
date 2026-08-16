@@ -45,7 +45,7 @@ import {
 } from "./path.js";
 import { compareRichTextMarks, richTextSchemaV1, type RichTextSchema } from "./schema.js";
 import { rememberAppliedOperations } from "./applied-change.js";
-import { richTextTopology, seedRichTextTopology, type RichTextTopology } from "./topology.js";
+import { indexValidatedRichText, richTextTopology, seedRichTextTopology, type RichTextTopology } from "./topology.js";
 import { validateRichText, validateRichTextNodeAt, validateRichTextPath } from "./validation.js";
 import type { RichTextValidationFailure } from "./validation.js";
 
@@ -93,15 +93,17 @@ export function tryCreateRichTextEditor(options: RichTextEditorOptions): RichTex
   const pointer = options.pointer ?? "";
   const located = options.document.at(pointer);
   if (!located.ok) return { ok: false, code: "rich-text.invalid-document", reason: `Rich Text document was not found at ${JSON.stringify(pointer)}.`, pointer };
-  const validation = validateRichText(located.value, { schema: options.schema ?? richTextSchemaV1 });
-  return validation.ok ? { ok: true, editor: createRichTextEditor(options) } : validation;
+  const schema = options.schema ?? richTextSchemaV1;
+  const indexed = indexValidatedRichText(located.value, schema);
+  if (!indexed.ok) return indexed;
+  return { ok: true, editor: createRichTextEditor(options) };
 }
 
 export function createRichTextEditor(options: RichTextEditorOptions): RichTextEditor {
   const pointer = options.pointer ?? "";
   const schema = options.schema ?? richTextSchemaV1;
   const initial = readDocument(options.document, pointer);
-  const initialValidation = validateRichText(initial, { schema });
+  const initialValidation = indexValidatedRichText(initial, schema);
   if (!initialValidation.ok) throw new TypeError(initialValidation.reason);
   const initialTopology = richTextTopology(initial);
   let previousDocument = initial;

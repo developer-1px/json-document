@@ -35,7 +35,10 @@ export type RichTextValidationResult = { readonly ok: true } | RichTextValidatio
 
 export function validateRichText(
   value: unknown,
-  options: { readonly schema?: RichTextSchema } = {},
+  options: {
+    readonly schema?: RichTextSchema;
+    readonly onNode?: (node: RichTextDocument | RichTextNode, path: ReadonlyArray<number>) => void;
+  } = {},
 ): RichTextValidationResult {
   getActiveRichTextInstrument()?.validate("full");
   const schema = options.schema ?? richTextSchemaV1;
@@ -45,9 +48,18 @@ export function validateRichText(
   }
   if (value.type !== "doc") return fail("rich-text.schema-violation", "Rich Text root type must be doc.", "/type");
   const ids = new Set<string>();
-  return validateNode(value, "", null);
+  return validateNode(value, "", null, []);
 
-  function validateNode(node: unknown, pointer: Pointer, parentType: string | null): RichTextValidationResult {
+  function remember(node: Record<string, unknown>, path: ReadonlyArray<number>): void {
+    options.onNode?.(node as unknown as RichTextDocument | RichTextNode, path);
+  }
+
+  function validateNode(
+    node: unknown,
+    pointer: Pointer,
+    parentType: string | null,
+    path: ReadonlyArray<number>,
+  ): RichTextValidationResult {
     if (!isJSONObject(node)) return fail("rich-text.schema-violation", "Rich Text node must be an object.", pointer);
     if (typeof node.id !== "string" || node.id.length === 0) return fail("rich-text.schema-violation", "Node id must be non-empty.", `${pointer}/id`);
     if (ids.has(node.id)) return { ...fail("rich-text.duplicate-id", `Duplicate node id ${JSON.stringify(node.id)}.`, pointer), nodeId: node.id };
@@ -64,10 +76,16 @@ export function validateRichText(
     }
     const attrsResult = validateAttrs(node, spec.attrs, pointer);
     if (!attrsResult.ok) return attrsResult;
-    if (node.type === "text") return validateText(node, pointer, parentType);
+    if (node.type === "text") {
+      const result = validateText(node, pointer, parentType);
+      if (result.ok) remember(node, path);
+      return result;
+    }
     if (spec.content === null) {
       if ("content" in node || "text" in node || "marks" in node) return fail("rich-text.schema-violation", `${node.type} is an atom.`, pointer);
-      return exactKeys(node, ["id", "type", ...(Object.keys(spec.attrs).length > 0 ? ["attrs"] : [])], pointer);
+      const atomResult = exactKeys(node, ["id", "type", ...(Object.keys(spec.attrs).length > 0 ? ["attrs"] : [])], pointer);
+      if (atomResult.ok) remember(node, path);
+      return atomResult;
     }
     if (!Array.isArray(node.content)) return fail("rich-text.schema-violation", `${node.type}.content must be an array.`, `${pointer}/content`);
     if (node.content.length < spec.content.minimum || (spec.content.maximum !== null && node.content.length > spec.content.maximum)) {
@@ -75,8 +93,9 @@ export function validateRichText(
     }
     const keyResult = exactKeys(node, ["id", "type", "content", ...(Object.keys(spec.attrs).length > 0 ? ["attrs"] : []), ...(node.type === "doc" ? ["profile"] : [])], pointer);
     if (!keyResult.ok) return keyResult;
+    remember(node, path);
     for (let index = 0; index < node.content.length; index += 1) {
-      const result = validateNode(node.content[index], `${pointer}/content/${index}`, node.type);
+      const result = validateNode(node.content[index], `${pointer}/content/${index}`, node.type, [...path, index]);
       if (!result.ok) return result;
     }
     return { ok: true };
