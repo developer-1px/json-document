@@ -1165,7 +1165,11 @@ function removeSelectedValue(
     next = replaceText(next, group.nodeId, text);
   }
   for (const nodeId of atoms) next = removeNodeById(next, nodeId);
-  const normalized = normalizeRichText(next, { schema, createId });
+  const normalized = normalizeRichText(next, {
+    schema,
+    createId,
+    inputOwnership: "borrowed",
+  });
   if (!normalized.ok) return { ok: false, code: normalized.code };
   const ranges = selection.ranges.map((range) => {
     const start = earlierPoint(document, range.anchor, range.focus);
