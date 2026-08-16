@@ -202,7 +202,24 @@ function localCommitEffect(
     if (!current.ok) return "unknown";
     return jsonEqual(current.value, operation.value) ? "noop" : "changed";
   }
-  if (operation.op === "add" || operation.op === "remove") return "changed";
+  if (operation.op === "add") {
+    let segments: string[];
+    try {
+      segments = parsePointer(operation.path);
+    } catch {
+      return "unknown";
+    }
+    if (segments.length === 0) {
+      return jsonEqual(state, operation.value) ? "noop" : "changed";
+    }
+    const parent = readAt(state, segments.slice(0, -1));
+    if (!parent.ok || Array.isArray(parent.value)) return "changed";
+    const current = readAt(state, segments);
+    return current.ok && jsonEqual(current.value, operation.value)
+      ? "noop"
+      : "changed";
+  }
+  if (operation.op === "remove") return "changed";
   return "unknown";
 }
 
