@@ -6,8 +6,12 @@ export function jsonEqual(left: unknown, right: unknown): boolean {
   if (left === null || right === null || typeof left !== "object" || typeof right !== "object") return false;
   if (Array.isArray(left) !== Array.isArray(right)) return false;
   if (Array.isArray(left)) {
-    if (left.length !== (right as ReadonlyArray<unknown>).length) return false;
-    return left.every((value, index) => jsonEqual(value, (right as ReadonlyArray<unknown>)[index]));
+    const rightArray = right as ReadonlyArray<unknown>;
+    if (left.length !== rightArray.length) return false;
+    for (let index = 0; index < left.length; index += 1) {
+      if (!jsonEqual(left[index], rightArray[index])) return false;
+    }
+    return true;
   }
   const leftObject = left as Record<string, unknown>;
   const rightObject = right as Record<string, unknown>;

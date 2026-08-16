@@ -408,7 +408,6 @@ test("a leaf replace keeps unrelated sibling identity and does not emit a root r
     change: { applied: [] },
   });
 });
-
 test("an equivalent object add stays a no-op while an array add remains a change", () => {
   const document = createJSONDocument({ item: { title: "Draft" }, values: ["same"] });
   const notifications: unknown[] = [];
