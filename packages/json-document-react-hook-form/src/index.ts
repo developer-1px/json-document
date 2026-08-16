@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type BaseSyntheticEvent } from "react";
-import type { JSONDocument, JSONValue } from "@interactive-os/json-document";
+import {
+  buildPointer,
+  parsePointer,
+  type JSONAppliedChange,
+  type JSONDocument,
+  type JSONPatchOperation,
+  type JSONValue,
+} from "@interactive-os/json-document";
 import type {
   EditingResult,
   EditingSession,
@@ -55,7 +62,7 @@ export function useReactHookFormConnector<Values extends FieldValues>(
     document,
     selection: null,
   }), [document]);
-  return useJSONDocumentForm<Values, null>(session, options);
+  return useJSONDocumentForm<Values, null>(session, options, document);
 }
 
 export function useJSONDocumentForm<
@@ -64,6 +71,7 @@ export function useJSONDocumentForm<
 >(
   session: EditingSession<Selection>,
   options: UseJSONDocumentFormOptions<Values> = {},
+  changeSource?: Pick<JSONDocument, "subscribe" | "at">,
 ): JSONDocumentFormBinding<Values, Selection> {
   const snapshot = useEditingSnapshot(session);
   const form = useForm<Values, unknown, Values>({
@@ -73,19 +81,32 @@ export function useJSONDocumentForm<
   const [result, setResult] = useState<EditingResult<Selection> | null>(null);
   const canonicalValue = useRef(snapshot.value);
   const canonicalError = useRef<FieldPath<Values> | `root.${string}` | null>(null);
+  const pendingChanges = useRef<JSONAppliedChange[]>([]);
+
+  useEffect(() => changeSource?.subscribe((change) => {
+    pendingChanges.current.push(change);
+  }), [changeSource]);
 
   useEffect(() => {
     if (canonicalValue.current === snapshot.value) return;
     canonicalValue.current = snapshot.value;
     canonicalError.current = null;
-    form.reset(cloneFormValues<Values>(snapshot.value));
-  }, [form, snapshot.value]);
+    const changes = pendingChanges.current;
+    pendingChanges.current = [];
+    const change = changes.length === 0 ? null : {
+      applied: changes.flatMap((candidate) => candidate.applied),
+    };
+    if (changeSource === undefined || change === null || !syncAppliedChange(form, changeSource, change)) {
+      form.reset(cloneFormValues<Values>(snapshot.value));
+    }
+  }, [changeSource, form, snapshot.value]);
 
   const commit = useCallback((values: Values) => {
     if (canonicalError.current !== null) form.clearErrors(canonicalError.current);
-    const next = cloneJSON(values);
+    const next = values as JSONValue;
+    const operations = diffJSON(canonicalValue.current, next);
     const committed = session.apply({
-      operations: [{ op: "replace", path: "", value: next }],
+      operations,
       selectionAfter: session.snapshot.selection,
       origin: options.origin ?? "form.submit",
     });
@@ -112,6 +133,85 @@ export function useJSONDocumentForm<
     undo: () => session.undo(),
     redo: () => session.redo(),
   };
+}
+
+function syncAppliedChange<Values extends FieldValues>(
+  form: UseFormReturn<Values>,
+  source: Pick<JSONDocument, "at">,
+  change: JSONAppliedChange,
+): boolean {
+  const pointers = syncPointers(change.applied);
+  if (pointers === null) return false;
+  for (const pointer of pointers) {
+    const result = source.at(pointer);
+    if (!result.ok) return false;
+    const name = fieldPath(pointer);
+    if (name === null) return false;
+    const value = cloneJSON(result.value) as never;
+    form.setValue(name as FieldPath<Values>, value, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: false,
+    });
+    form.resetField(name as FieldPath<Values>, { defaultValue: value });
+  }
+  return true;
+}
+
+function syncPointers(operations: ReadonlyArray<JSONPatchOperation>): string[] | null {
+  const pointers: string[] = [];
+  for (const operation of operations) {
+    if (operation.op === "test") continue;
+    if (operation.path === "") return null;
+    const segments = parsePointer(operation.path);
+    const structural = operation.op === "add" || operation.op === "remove"
+      || operation.op === "move" || operation.op === "copy";
+    if (structural) segments.pop();
+    const pointer = buildPointer(segments);
+    if (pointer === "") return null;
+    pointers.push(pointer);
+    if ((operation.op === "move" || operation.op === "copy") && operation.from !== "") {
+      const from = parsePointer(operation.from);
+      from.pop();
+      if (from.length === 0) return null;
+      pointers.push(buildPointer(from));
+    }
+  }
+  return pointers.filter((pointer, index) => (
+    pointers.indexOf(pointer) === index
+    && !pointers.some((other) => other !== pointer && pointer.startsWith(`${other}/`))
+  ));
+}
+
+function fieldPath(pointer: string): string | null {
+  const segments = parsePointer(pointer);
+  if (segments.length === 0 || segments.some((segment) => (
+    !/^[$A-Z_a-z][$\w]*$/.test(segment) && !/^\d+$/.test(segment)
+  ))) return null;
+  return segments.join(".");
+}
+
+function diffJSON(current: JSONValue, next: JSONValue, segments: ReadonlyArray<string> = []): JSONPatchOperation[] {
+  if (Object.is(current, next)) return [];
+  if (Array.isArray(current) && Array.isArray(next)) {
+    if (current.length !== next.length) {
+      return [{ op: "replace", path: buildPointer(segments), value: cloneJSON(next) }];
+    }
+    return current.flatMap((value, index) => diffJSON(value, next[index]!, [...segments, String(index)]));
+  }
+  if (isRecord(current) && isRecord(next)) {
+    const operations: JSONPatchOperation[] = [];
+    for (const key of Object.keys(current)) {
+      if (!(key in next)) operations.push({ op: "remove", path: buildPointer([...segments, key]) });
+    }
+    for (const [key, value] of Object.entries(next)) {
+      operations.push(...(key in current
+        ? diffJSON(current[key]!, value, [...segments, key])
+        : [{ op: "add" as const, path: buildPointer([...segments, key]), value: cloneJSON(value) }]));
+    }
+    return operations;
+  }
+  return [{ op: "replace", path: buildPointer(segments), value: cloneJSON(next) }];
 }
 
 function cloneFormValues<Values extends FieldValues>(value: JSONValue): Values {
