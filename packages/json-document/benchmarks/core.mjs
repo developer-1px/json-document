@@ -18,7 +18,7 @@ const {
   createJSONDocument,
 } = await import(publicEntry.href);
 
-const sizes = envList("PERF_ITEMS", [10_000, 50_000]);
+const sizes = envList("PERF_ITEMS", [1_000, 10_000, 50_000]);
 const rounds = envPositiveInteger("PERF_ROUNDS", 5);
 const warmups = envPositiveInteger("PERF_WARMUPS", 2);
 const commitBudgetPerTenThousandMs = envPositiveNumber(
@@ -28,6 +28,8 @@ const commitBudgetPerTenThousandMs = envPositiveNumber(
 
 console.log("json-document v3 public-root benchmark");
 console.log(`items=${sizes.join(",")} rounds=${rounds} warmups=${warmups}`);
+
+const leafCommits = [];
 
 for (const size of sizes) {
   const initial = {
@@ -66,6 +68,7 @@ for (const size of sizes) {
     nextDone = !nextDone;
     return result.ok;
   });
+  leafCommits.push({ size, ...commit });
   assertBudget(
     "commit single leaf replace",
     commit.p50,
@@ -77,6 +80,19 @@ for (const size of sizes) {
     const result = queryDocument.query(`$.items[${middle}].id`);
     return result.ok && result.pointers[0] === `/items/${middle}/id`;
   });
+}
+
+if (leafCommits.length > 1) {
+  console.log("\nleaf commit scaling");
+  for (let index = 1; index < leafCommits.length; index += 1) {
+    const previous = leafCommits[index - 1];
+    const current = leafCommits[index];
+    console.log(
+      `${previous.size}->${current.size}: size=${(current.size / previous.size).toFixed(1)}x `
+      + `p50=${(current.p50 / previous.p50).toFixed(2)}x `
+      + `p95=${(current.p95 / previous.p95).toFixed(2)}x`,
+    );
+  }
 }
 
 function measure(label, run) {
