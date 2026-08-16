@@ -12,6 +12,11 @@ type AjvValidateFunction = ValidateFunction | AsyncValidateFunction;
 
 export interface AjvValidatorOptions {
   readonly code?: string;
+  /**
+   * `clone` protects canonical candidates from mutating Ajv options and custom
+   * keywords. Use `none` only when the compiled validator is proven read-only.
+   */
+  readonly candidateIsolation?: "clone" | "none";
 }
 
 export function createAjvValidator(
@@ -23,9 +28,10 @@ export function createAjvValidator(
   }
 
   const code = options.code ?? "schema_violation";
+  const isolate = options.candidateIsolation !== "none";
 
   return (candidate) => {
-    const result = validate(cloneJSON(candidate));
+    const result = validate(isolate ? cloneJSON(candidate) : candidate);
     if (result === true) return { ok: true };
     if (result !== false) {
       return {

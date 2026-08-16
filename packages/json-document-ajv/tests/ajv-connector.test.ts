@@ -103,6 +103,18 @@ describe("Ajv connector", () => {
     expect(document.value).toEqual({ count: "2", clientNote: "keep" });
   });
 
+  test("allows an explicit clone-free path for a proven read-only validator", () => {
+    let received: unknown;
+    const validate = createAjvValidator(((candidate: unknown) => {
+      received = candidate;
+      return true;
+    }) as never, { candidateIsolation: "none" });
+    const candidate = { items: [{ id: "item-1" }] };
+
+    expect(validate(candidate)).toEqual({ ok: true });
+    expect(received).toBe(candidate);
+  });
+
   test("rejects compiled async validators at the Connector boundary", () => {
     const ajv = new Ajv();
     const asyncValidator = ajv.compile({ $async: true, type: "object" });
