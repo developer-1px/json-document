@@ -158,6 +158,16 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       ? collapsed(firstRecord.id, firstProperty.id)
       : emptySelection(),
   });
+  let indexedDocument: DatabaseDocument | undefined = initial;
+  let indexedDatabase: DatabaseIndex | undefined = createDatabaseIndex(initial);
+
+  function index(document = value()): DatabaseIndex {
+    if (document !== indexedDocument) {
+      indexedDocument = document;
+      indexedDatabase = createDatabaseIndex(document);
+    }
+    return indexedDatabase as DatabaseIndex;
+  }
 
   function value(): DatabaseDocument {
     return session.snapshot.value as DatabaseDocument;
@@ -165,7 +175,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
 
   function dispatch(intent: DatabaseIntent): EditingResult<DatabaseSelection> {
     if (intent.type === "selection.set") {
-      if (resolveCell(value(), intent.recordId, intent.propertyId) === null) {
+      if (resolveCell(value(), intent.recordId, intent.propertyId, index()) === null) {
         return failure("selection.cell-not-found");
       }
       const selection = selectRangePoint(
@@ -179,7 +189,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
 
     if (intent.type === "cell.commit") {
       const document = value();
-      const resolved = resolveCell(document, intent.recordId, intent.propertyId);
+      const resolved = resolveCell(document, intent.recordId, intent.propertyId, index(document));
       if (resolved === null) return failure("cell.not-found");
       if (!acceptsValue(resolved.property, intent.value)) return failure("cell.invalid-value");
       if (Object.is(resolved.record.values[intent.propertyId], intent.value)) {
@@ -199,7 +209,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
 
     if (intent.type === "record.add") {
       const document = value();
-      if (document.records.some((record) => record.id === intent.recordId)) {
+      if (index(document).recordById.has(intent.recordId)) {
         return failure("record.duplicate-id");
       }
       const record: DatabaseRecord = {
@@ -219,12 +229,12 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
 
     if (intent.type === "record.delete") {
       const document = value();
-      const recordIndex = document.records.findIndex((record) => record.id === intent.recordId);
-      if (recordIndex < 0) return failure("record.not-found");
+      const recordIndex = index(document).recordIndexById.get(intent.recordId);
+      if (recordIndex === undefined) return failure("record.not-found");
       const remaining = document.records.filter((record) => record.id !== intent.recordId);
       const nextRecord = remaining[Math.min(recordIndex, remaining.length - 1)];
       const currentPropertyId = session.snapshot.selection.focus?.propertyId;
-      const nextProperty = document.schema.properties.find((property) => property.id === currentPropertyId)
+      const nextProperty = (currentPropertyId === undefined ? undefined : index(document).propertyById.get(currentPropertyId))
         ?? document.schema.properties[0];
       return session.apply({
         operations: [{ op: "remove", path: buildPointer(["records", recordIndex]) }],
@@ -239,12 +249,13 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       return configureView(session, value(), intent);
     }
 
-    return paste(session, value(), intent.clipboard, intent.topology);
+    return paste(session, value(), intent.clipboard, intent.topology, index());
   }
 
   function copy(topology?: DatabaseTopology): DatabaseClipboard | null {
     const document = value();
-    const axes = resolveTopology(document, topology);
+    const databaseIndex = index(document);
+    const axes = resolveTopology(document, topology, databaseIndex);
     const range = primaryRange(session.snapshot.selection);
     if (range === null) return null;
     const bounds = gridRangeBounds(databaseGrid(axes), {
@@ -255,7 +266,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
     const cells = axes.recordIds
       .slice(bounds.rowStart, bounds.rowEnd + 1)
       .map((recordId) => {
-        const record = document.records.find((candidate) => candidate.id === recordId)!;
+        const record = databaseIndex.recordById.get(recordId) as DatabaseRecord;
         return axes.propertyIds
           .slice(bounds.columnStart, bounds.columnEnd + 1)
           .map((propertyId) => clone(record.values[propertyId]!));
@@ -271,10 +282,10 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
     get snapshot() { return session.snapshot; },
     dispatch,
     tableTopology(viewId) {
-      return projectTable(value(), viewId);
+      return tableTopology(index(), viewId);
     },
     selectedCellsIn(topology) {
-      return selectedCells(value(), session.snapshot.selection, topology);
+      return selectedCells(value(), session.snapshot.selection, topology, index());
     },
     copy,
     undo: () => session.undo(),
@@ -288,6 +299,7 @@ function paste(
   document: DatabaseDocument,
   clipboard: DatabaseClipboard,
   topology?: DatabaseTopology,
+  index?: DatabaseIndex,
 ): EditingResult<DatabaseSelection> {
   const focus = session.snapshot.selection.focus;
   if (focus === null) return failure("selection.empty");
@@ -298,7 +310,7 @@ function paste(
   if (clipboard.cells.some((row) => row.length !== width)) {
     return failure("clipboard.not-rectangular");
   }
-  const axes = resolveTopology(document, topology);
+  const axes = resolveTopology(document, topology, index);
   const start = gridPointIndex(databaseGrid(axes), {
     rowId: focus.recordId,
     columnId: focus.propertyId,
@@ -313,7 +325,7 @@ function paste(
     for (let columnOffset = 0; columnOffset < width; columnOffset += 1) {
       const recordId = axes.recordIds[start.rowIndex + rowOffset]!;
       const propertyId = axes.propertyIds[start.columnIndex + columnOffset]!;
-      const resolved = resolveCell(document, recordId, propertyId);
+      const resolved = resolveCell(document, recordId, propertyId, index);
       if (resolved === null) return failure("cell.not-found");
       const nextValue = clipboard.cells[rowOffset]![columnOffset]!;
       if (!acceptsValue(resolved.property, nextValue)) return failure("cell.invalid-value");
@@ -341,19 +353,39 @@ function paste(
   });
 }
 
-function resolveTopology(document: DatabaseDocument, topology?: DatabaseTopology): DatabaseTopology {
+interface DatabaseIndex {
+  readonly recordById: ReadonlyMap<string, DatabaseRecord>;
+  readonly recordIndexById: ReadonlyMap<string, number>;
+  readonly propertyById: ReadonlyMap<string, DatabaseProperty>;
+  readonly topologyByViewId: Map<string, DatabaseTopology>;
+  readonly validatedTopologies: WeakSet<DatabaseTopology>;
+  readonly document: DatabaseDocument;
+}
+
+function createDatabaseIndex(document: DatabaseDocument): DatabaseIndex {
+  return {
+    recordById: new Map(document.records.map((record) => [record.id, record])),
+    recordIndexById: new Map(document.records.map((record, position) => [record.id, position])),
+    propertyById: new Map(document.schema.properties.map((property) => [property.id, property])),
+    topologyByViewId: new Map(),
+    validatedTopologies: new WeakSet(),
+    document,
+  };
+}
+
+function resolveTopology(document: DatabaseDocument, topology?: DatabaseTopology, index = createDatabaseIndex(document)): DatabaseTopology {
   const resolved = topology ?? {
     recordIds: document.records.map((record) => record.id),
     propertyIds: document.schema.properties.map((property) => property.id),
   };
-  const records = new Set(document.records.map((record) => record.id));
-  const properties = new Set(document.schema.properties.map((property) => property.id));
+  if (index.validatedTopologies.has(resolved)) return resolved;
   for (const id of resolved.recordIds) {
-    if (!records.has(id)) throw new Error(`Database topology record was not found: ${JSON.stringify(id)}.`);
+    if (!index.recordById.has(id)) throw new Error(`Database topology record was not found: ${JSON.stringify(id)}.`);
   }
   for (const id of resolved.propertyIds) {
-    if (!properties.has(id)) throw new Error(`Database topology property was not found: ${JSON.stringify(id)}.`);
+    if (!index.propertyById.has(id)) throw new Error(`Database topology property was not found: ${JSON.stringify(id)}.`);
   }
+  index.validatedTopologies.add(resolved);
   return resolved;
 }
 
@@ -411,10 +443,20 @@ function projectTable(document: DatabaseDocument, viewId: string): DatabaseTopol
   };
 }
 
+function tableTopology(index: DatabaseIndex, viewId: string): DatabaseTopology {
+  const cached = index.topologyByViewId.get(viewId);
+  if (cached !== undefined) return cached;
+  const topology = projectTable(index.document, viewId);
+  index.validatedTopologies.add(topology);
+  index.topologyByViewId.set(viewId, topology);
+  return topology;
+}
+
 function selectedCells(
   document: DatabaseDocument,
   selection: DatabaseSelection,
   topology: DatabaseTopology,
+  index = createDatabaseIndex(document),
 ): DatabaseCell[] {
   const selectedKeys = new Set<string>();
   const grid = databaseGrid(topology);
@@ -427,7 +469,7 @@ function selectedCells(
     }
   }
   return topology.recordIds.flatMap((recordId) => {
-    const record = document.records.find((candidate) => candidate.id === recordId)!;
+    const record = index.recordById.get(recordId) as DatabaseRecord;
     return topology.propertyIds
       .filter((propertyId) => selectedKeys.has(cellKey(recordId, propertyId)))
       .map((propertyId) => ({ recordId, propertyId, value: record.values[propertyId]! }));
@@ -438,10 +480,10 @@ function databaseGrid(topology: DatabaseTopology) {
   return { rowIds: topology.recordIds, columnIds: topology.propertyIds };
 }
 
-function resolveCell(document: DatabaseDocument, recordId: string, propertyId: string) {
-  const recordIndex = document.records.findIndex((record) => record.id === recordId);
-  const property = document.schema.properties.find((candidate) => candidate.id === propertyId);
-  if (recordIndex < 0 || !property) return null;
+function resolveCell(document: DatabaseDocument, recordId: string, propertyId: string, index = createDatabaseIndex(document)) {
+  const recordIndex = index.recordIndexById.get(recordId);
+  const property = index.propertyById.get(propertyId);
+  if (recordIndex === undefined || property === undefined) return null;
   return { recordIndex, record: document.records[recordIndex]!, property };
 }
 

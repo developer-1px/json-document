@@ -19,6 +19,22 @@ const expanded: TreeTopology = { visibleIds: ["root", "a", "a-1", "b", "b-1"] };
 const collapsedA: TreeTopology = { visibleIds: ["root", "a", "b", "b-1"] };
 
 describe("tree editing selection family", () => {
+  test("handles a 10,000-node hierarchy without recursive or quadratic ancestry lookup", () => {
+    const document: TreeDocument = {
+      nodes: Array.from({ length: 10_000 }, (_, index) => ({
+        id: `node-${index}`,
+        parentId: index === 0 ? null : `node-${index - 1}`,
+        label: `Node ${index}`,
+      })),
+    };
+    const topology = { visibleIds: document.nodes.map((node) => node.id) };
+    const editor = createTreeEditor(document);
+
+    editor.dispatch({ type: "selection.set", nodeId: "node-0", topology });
+
+    expect(editor.copy(topology)?.nodes).toHaveLength(10_000);
+  });
+
   test("extends through host visible order and normalizes hidden endpoints to an ancestor", () => {
     const editor = createTreeEditor(initial);
     editor.dispatch({ type: "selection.set", nodeId: "a-1", topology: expanded });
