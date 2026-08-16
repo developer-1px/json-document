@@ -115,6 +115,16 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     document,
     selection: initialSelection,
   });
+  let indexedDocument: SheetDocument | undefined = initial;
+  let indexedSheet: SheetIndex | undefined = createSheetIndex(initial);
+
+  function index(document = value()): SheetIndex {
+    if (document !== indexedDocument) {
+      indexedDocument = document;
+      indexedSheet = createSheetIndex(document);
+    }
+    return indexedSheet as SheetIndex;
+  }
 
   function value(): SheetDocument {
     return session.snapshot.value as SheetDocument;
@@ -122,7 +132,8 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
 
   function selectedCells(topology?: SheetTopology): SheetCell[] {
     const document = value();
-    const axes = resolveTopology(document, topology);
+    const sheetIndex = index(document);
+    const axes = resolveTopology(document, topology, sheetIndex);
     const selectedKeys = new Set<string>();
     for (const range of session.snapshot.selection.ranges) {
       for (const cell of gridCellsInRange(axes, range)) {
@@ -131,7 +142,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     }
     const selected: SheetCell[] = [];
     for (const rowId of axes.rowIds) {
-      const row = resolveRow(document, rowId);
+      const row = sheetIndex.rowById.get(rowId) as SheetRow;
       for (const columnId of axes.columnIds) {
         if (!selectedKeys.has(cellKey(rowId, columnId))) continue;
         selected.push({ rowId, columnId, value: row.cells[columnId]! });
@@ -148,7 +159,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     const cells = selectedCells(topology);
     if (cells.length === 0) return failure("selection.empty");
     const operations: JSONPatchOperation[] = cells.map((cell) => {
-      const row = resolvePointWithIndices(document, cell.rowId, cell.columnId)!;
+      const row = resolvePointWithIndices(document, cell.rowId, cell.columnId, index(document))!;
       return {
         op: "replace",
         path: buildPointer(["rows", row.rowIndex, "cells", cell.columnId]),
@@ -164,7 +175,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
     if (intent.type === "selection.set") {
-      const point = resolvePoint(value(), intent.rowId, intent.columnId);
+      const point = resolvePoint(value(), intent.rowId, intent.columnId, index());
       if (point === null) return failure("selection.cell-not-found");
       const selection = selectRangePoint(
         session.snapshot.selection,
@@ -180,7 +191,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     }
 
     if (intent.type === "cell.commit") {
-      const resolved = resolvePointWithIndices(value(), intent.rowId, intent.columnId);
+      const resolved = resolvePointWithIndices(value(), intent.rowId, intent.columnId, index());
       if (resolved === null) return failure("cell.not-found");
       return session.apply({
         operations: [{
@@ -194,12 +205,13 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
       });
     }
 
-    return paste(session, value(), intent.clipboard, intent.topology);
+    return paste(session, value(), intent.clipboard, intent.topology, index());
   }
 
   function copy(topology?: SheetTopology): SheetClipboard | null {
     const document = value();
-    const axes = resolveTopology(document, topology);
+    const sheetIndex = index(document);
+    const axes = resolveTopology(document, topology, sheetIndex);
     const range = primaryRange(session.snapshot.selection);
     const bounds = range === null ? null : rangeBounds(axes, range);
     if (bounds === null) return null;
@@ -207,7 +219,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
       .slice(bounds.rowStart, bounds.rowEnd + 1)
       .map((rowId) => axes.columnIds
         .slice(bounds.columnStart, bounds.columnEnd + 1)
-        .map((columnId) => clone(resolveRow(document, rowId).cells[columnId]!)));
+        .map((columnId) => clone((sheetIndex.rowById.get(rowId) as SheetRow).cells[columnId]!)));
     return {
       type: "application/vnd.interactive-os.sheet+json",
       cells,
@@ -219,14 +231,14 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     const clipboard = copy(topology);
     if (!clipboard) return null;
     const document = value();
-    const axes = resolveTopology(document, topology);
+    const axes = resolveTopology(document, topology, index(document));
     const range = primaryRange(session.snapshot.selection);
     const bounds = range === null ? null : rangeBounds(axes, range);
     if (bounds === null) return null;
     const operations: JSONPatchOperation[] = [];
     for (const rowId of axes.rowIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
       for (const columnId of axes.columnIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
-        const row = resolvePointWithIndices(document, rowId, columnId)!;
+        const row = resolvePointWithIndices(document, rowId, columnId, index(document))!;
         operations.push({
           op: "replace",
           path: buildPointer(["rows", row.rowIndex, "cells", columnId]),
@@ -262,6 +274,7 @@ function paste(
   document: SheetDocument,
   clipboard: SheetClipboard,
   topology?: SheetTopology,
+  index?: SheetIndex,
 ): EditingResult<SheetSelection> {
   const focus = session.snapshot.selection.focus;
   if (focus === null) return failure("selection.empty");
@@ -272,7 +285,7 @@ function paste(
   if (clipboard.cells.some((row) => row.length !== width)) {
     return failure("clipboard.not-rectangular");
   }
-  const axes = resolveTopology(document, topology);
+  const axes = resolveTopology(document, topology, index);
   const start = resolvePointInTopology(axes, focus.rowId, focus.columnId);
   if (start === null) return failure("selection.cell-not-found");
   if (start.rowIndex + clipboard.cells.length > axes.rowIds.length || start.columnIndex + width > axes.columnIds.length) {
@@ -284,7 +297,7 @@ function paste(
     for (let columnOffset = 0; columnOffset < width; columnOffset += 1) {
       const rowId = axes.rowIds[start.rowIndex + rowOffset]!;
       const columnId = axes.columnIds[start.columnIndex + columnOffset]!;
-      const row = resolvePointWithIndices(document, rowId, columnId)!;
+      const row = resolvePointWithIndices(document, rowId, columnId, index)!;
       operations.push({
         op: "replace",
         path: buildPointer(["rows", row.rowIndex, "cells", columnId]),
@@ -316,17 +329,38 @@ function rangeBounds(
   return gridRangeBounds(topology, range);
 }
 
-function resolveTopology(document: SheetDocument, topology?: SheetTopology): SheetTopology {
-  const resolved = topology ?? {
+interface SheetIndex {
+  readonly rowById: ReadonlyMap<string, SheetRow>;
+  readonly rowIndexById: ReadonlyMap<string, number>;
+  readonly columnIndexById: ReadonlyMap<string, number>;
+  readonly defaultTopology: SheetTopology;
+  readonly validatedTopologies: WeakSet<SheetTopology>;
+}
+
+function createSheetIndex(document: SheetDocument): SheetIndex {
+  const defaultTopology = {
     rowIds: document.rows.map((row) => row.id),
     columnIds: document.columns.map((column) => column.id),
   };
-  assertTopologyAxis(resolved.rowIds, new Set(document.rows.map((row) => row.id)), "row");
-  assertTopologyAxis(resolved.columnIds, new Set(document.columns.map((column) => column.id)), "column");
+  return {
+    rowById: new Map(document.rows.map((row) => [row.id, row])),
+    rowIndexById: new Map(document.rows.map((row, position) => [row.id, position])),
+    columnIndexById: new Map(document.columns.map((column, position) => [column.id, position])),
+    defaultTopology,
+    validatedTopologies: new WeakSet([defaultTopology]),
+  };
+}
+
+function resolveTopology(document: SheetDocument, topology?: SheetTopology, index = createSheetIndex(document)): SheetTopology {
+  const resolved = topology ?? index.defaultTopology;
+  if (index.validatedTopologies.has(resolved)) return resolved;
+  assertTopologyAxis(resolved.rowIds, index.rowById, "row");
+  assertTopologyAxis(resolved.columnIds, index.columnIndexById, "column");
+  index.validatedTopologies.add(resolved);
   return resolved;
 }
 
-function assertTopologyAxis(ids: ReadonlyArray<string>, available: ReadonlySet<string>, label: "row" | "column"): void {
+function assertTopologyAxis(ids: ReadonlyArray<string>, available: { has(id: string): boolean }, label: "row" | "column"): void {
   assertUniqueIds(ids, label);
   for (const id of ids) {
     if (!available.has(id)) throw new Error(`Sheet topology ${label} was not found: ${JSON.stringify(id)}.`);
@@ -341,16 +375,13 @@ function resolvePointInTopology(
   return gridPointIndex(topology, { rowId, columnId });
 }
 
-function resolveRow(document: SheetDocument, rowId: string): SheetRow {
-  return document.rows.find((row) => row.id === rowId)!;
-}
-
 function resolvePoint(
   document: SheetDocument,
   rowId: string,
   columnId: string,
+  index?: SheetIndex,
 ): SheetPoint | null {
-  return resolvePointWithIndices(document, rowId, columnId) === null
+  return resolvePointWithIndices(document, rowId, columnId, index) === null
     ? null
     : { rowId, columnId };
 }
@@ -359,10 +390,11 @@ function resolvePointWithIndices(
   document: SheetDocument,
   rowId: string,
   columnId: string,
+  index = createSheetIndex(document),
 ): { readonly rowIndex: number; readonly columnIndex: number } | null {
-  const rowIndex = document.rows.findIndex((row) => row.id === rowId);
-  const columnIndex = document.columns.findIndex((column) => column.id === columnId);
-  return rowIndex < 0 || columnIndex < 0 ? null : { rowIndex, columnIndex };
+  const rowIndex = index.rowIndexById.get(rowId);
+  const columnIndex = index.columnIndexById.get(columnId);
+  return rowIndex === undefined || columnIndex === undefined ? null : { rowIndex, columnIndex };
 }
 
 function assertSheetDocument(document: SheetDocument): void {

@@ -19,6 +19,14 @@ for (const size of config.sizes) {
     editor.dispatch({ type: "selection.set", nodeId: `node-${size - 1}`, topology: treeTopology });
     return () => editor.selectedNodeIdsIn(treeTopology).at(-1) === `node-${size - 1}`;
   }));
+  const deepTreeDocument = { nodes: Array.from({ length: size }, (_, index) => ({
+    id: `deep-${index}`,
+    parentId: index === 0 ? null : `deep-${index - 1}`,
+    label: `Deep ${index}`,
+  })) };
+  record("tree deep snapshot setup", size, measure(config, "tree deep snapshot setup", () => (
+    () => createTreeEditor(deepTreeDocument).snapshot.value.nodes.length === size
+  )));
 
   const columns = ["name", "status", "score"].map((id) => ({ id, label: id }));
   const rows = Array.from({ length: size }, (_, index) => ({
@@ -34,6 +42,12 @@ for (const size of config.sizes) {
       value: "Ready",
     }).ok;
   }));
+  record("sheet full-column copy", size, measure(config, "sheet full-column copy", () => {
+    const editor = createSheetEditor({ columns, rows });
+    editor.dispatch({ type: "selection.set", rowId: `row-${size - 1}`, columnId: "name", mode: "extend" });
+    const topology = { rowIds: rows.map((row) => row.id), columnIds: columns.map((column) => column.id) };
+    return () => editor.copy(topology)?.cells.length === size;
+  }));
 
   const database = {
     schema: { properties: columns.map((column) => ({ id: column.id, name: column.label, type: column.id === "score" ? "number" : column.id === "name" ? "title" : "text", options: [] })) },
@@ -43,6 +57,17 @@ for (const size of config.sizes) {
   record("database sorted topology", size, measure(config, "database sorted topology", () => {
     const editor = createDatabaseEditor(database);
     return () => editor.tableTopology("table").recordIds.length === size;
+  }));
+  record("database cached topology", size, measure(config, "database cached topology", () => {
+    const editor = createDatabaseEditor(database);
+    editor.tableTopology("table");
+    return () => editor.tableTopology("table").recordIds.length === size;
+  }));
+  record("database full-column selection", size, measure(config, "database full-column selection", () => {
+    const editor = createDatabaseEditor(database);
+    const topology = editor.tableTopology("table");
+    editor.dispatch({ type: "selection.set", recordId: `row-${size - 1}`, propertyId: "name", mode: "extend" });
+    return () => editor.selectedCellsIn(topology).length === size;
   }));
 }
 

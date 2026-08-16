@@ -97,19 +97,33 @@ export function createTreeEditor(
     document,
     selection: first ? collapsed(first.id) : emptySelection(),
   });
+  let indexedDocument: TreeDocument | undefined = initial;
+  let indexedNodes: TreeNodeIndex | undefined = createTreeNodeIndex(initial.nodes);
+  let topologyCache = new WeakMap<TreeTopology, TreeTopologyIndex>();
+
+  function nodeIndex(document = value()): TreeNodeIndex {
+    if (document !== indexedDocument) {
+      indexedDocument = document;
+      indexedNodes = createTreeNodeIndex(document.nodes);
+      topologyCache = new WeakMap();
+    }
+    return indexedNodes as TreeNodeIndex;
+  }
 
   function value(): TreeDocument {
     return session.snapshot.value as TreeDocument;
   }
 
   function resolveTopology(topology: TreeTopology): TreeTopology {
-    const available = new Set(value().nodes.map((node) => node.id));
+    if (topologyCache.has(topology)) return topology;
+    const available = nodeIndex().byId;
     const unique = new Set<string>();
     for (const id of topology.visibleIds) {
       if (!available.has(id)) throw new Error(`Tree topology node was not found: ${JSON.stringify(id)}.`);
       if (unique.has(id)) throw new Error(`Tree topology node must be unique: ${JSON.stringify(id)}.`);
       unique.add(id);
     }
+    topologyCache.set(topology, createTreeTopologyIndex(topology, nodeIndex().byId));
     return topology;
   }
 
@@ -130,23 +144,16 @@ export function createTreeEditor(
   }
 
   function rangeTopology(topology: TreeTopology): OrderedTopology<TreePoint, string> {
-    const visible = lineTopology(topology.visibleIds);
-    const visibleSet = new Set(topology.visibleIds);
-    const byId = new Map(value().nodes.map((node) => [node.id, node]));
-    return {
-      equals: (left, right) => left.nodeId === right.nodeId,
-      interval: (anchor, focus) => lineInterval(visible, anchor.nodeId, focus.nodeId),
-      reconcilePoint(point) {
-        const nodeId = nearestVisible(point.nodeId, visibleSet, byId);
-        return nodeId === null ? null : { nodeId };
-      },
-    };
+    resolveTopology(topology);
+    return (topologyCache.get(topology) as TreeTopologyIndex).ordered;
   }
 
   function dispatch(intent: TreeIntent): EditingResult<TreeSelection> {
     const topology = resolveTopology(intent.topology);
     if (intent.type === "selection.set") {
-      if (!topology.visibleIds.includes(intent.nodeId)) return failure("selection.node-not-visible");
+      if (!(topologyCache.get(topology) as TreeTopologyIndex).visible.has(intent.nodeId)) {
+        return failure("selection.node-not-visible");
+      }
       const point: TreePoint = { nodeId: intent.nodeId };
       const selection = selectRangePoint(
         session.snapshot.selection,
@@ -168,7 +175,7 @@ export function createTreeEditor(
     const selectedIds = selectedNodeIdsIn(topology);
     if (selectedIds.length === 0) return null;
     const nodes = value().nodes;
-    const copiedIds = descendantClosure(nodes, new Set(selectedIds));
+    const copiedIds = descendantClosure(nodeIndex(), new Set(selectedIds));
     const copied = nodes.filter((node) => copiedIds.has(node.id));
     return {
       type: "application/vnd.interactive-os.tree+json",
@@ -183,10 +190,10 @@ export function createTreeEditor(
     afterId?: string,
   ): EditingResult<TreeSelection> {
     const nodes = value().nodes;
-    const available = new Set(nodes.map((node) => node.id));
+    const available = nodeIndex().byId;
     const target = afterId ?? selectedNodeIdsIn(topology).at(-1);
     if (target !== undefined && !available.has(target)) return failure("paste.target-not-found");
-    const parentId = target === undefined ? null : nodes.find((node) => node.id === target)?.parentId ?? null;
+    const parentId = target === undefined ? null : available.get(target)?.parentId ?? null;
     const pasted = cloneNodesWithUniqueIds(clipboard.nodes, nodes, createId, parentId);
     if (pasted.length === 0) return failure("clipboard.empty");
     return session.apply({
@@ -206,12 +213,13 @@ export function createTreeEditor(
   ): EditingResult<TreeSelection> {
     if (selectedIds.length === 0) return failure("selection.empty");
     const document = value();
-    const removed = descendantClosure(document.nodes, new Set(selectedIds));
+    const removed = descendantClosure(nodeIndex(document), new Set(selectedIds));
     const indices = document.nodes
       .map((node, index) => removed.has(node.id) ? index : -1)
       .filter((index) => index >= 0)
       .sort((left, right) => right - left);
-    const firstVisibleIndex = Math.min(...selectedIds.map((id) => topology.visibleIds.indexOf(id)));
+    const visibleIndex = new Map(topology.visibleIds.map((id, index) => [id, index]));
+    const firstVisibleIndex = Math.min(...selectedIds.map((id) => visibleIndex.get(id) as number));
     const remainingVisible = topology.visibleIds.filter((id) => !removed.has(id));
     const next = remainingVisible[Math.min(firstVisibleIndex, remainingVisible.length - 1)];
     return session.apply({
@@ -251,19 +259,60 @@ function nearestVisible(
   return null;
 }
 
+interface TreeNodeIndex {
+  readonly byId: ReadonlyMap<string, TreeNode>;
+  readonly childrenByParent: ReadonlyMap<string, ReadonlyArray<string>>;
+}
+
+interface TreeTopologyIndex {
+  readonly visible: ReadonlySet<string>;
+  readonly ordered: OrderedTopology<TreePoint, string>;
+}
+
+function createTreeTopologyIndex(
+  topology: TreeTopology,
+  byId: ReadonlyMap<string, TreeNode>,
+): TreeTopologyIndex {
+  const visible = new Set(topology.visibleIds);
+  const line = lineTopology(topology.visibleIds);
+  return {
+    visible,
+    ordered: {
+      equals: (left, right) => left.nodeId === right.nodeId,
+      interval: (anchor, focus) => lineInterval(line, anchor.nodeId, focus.nodeId),
+      reconcilePoint(point) {
+        const nodeId = nearestVisible(point.nodeId, visible, byId);
+        return nodeId === null ? null : { nodeId };
+      },
+    },
+  };
+}
+
+function createTreeNodeIndex(nodes: ReadonlyArray<TreeNode>): TreeNodeIndex {
+  const byId = new Map<string, TreeNode>();
+  const childrenByParent = new Map<string, string[]>();
+  for (const node of nodes) {
+    byId.set(node.id, node);
+    if (node.parentId === null) continue;
+    const children = childrenByParent.get(node.parentId);
+    if (children === undefined) childrenByParent.set(node.parentId, [node.id]);
+    else children.push(node.id);
+  }
+  return { byId, childrenByParent };
+}
+
 function descendantClosure(
-  nodes: ReadonlyArray<TreeNode>,
+  index: TreeNodeIndex,
   selected: Set<string>,
 ): Set<string> {
   const removed = new Set(selected);
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (const node of nodes) {
-      if (node.parentId !== null && removed.has(node.parentId) && !removed.has(node.id)) {
-        removed.add(node.id);
-        changed = true;
-      }
+  const pending = [...selected];
+  while (pending.length > 0) {
+    const parentId = pending.pop() as string;
+    for (const childId of index.childrenByParent.get(parentId) ?? []) {
+      if (removed.has(childId)) continue;
+      removed.add(childId);
+      pending.push(childId);
     }
   }
   return removed;
@@ -332,21 +381,30 @@ function asTreeSelection(selection: RangeSelectionState<TreePoint>): TreeSelecti
 
 function assertTreeDocument(document: TreeDocument): void {
   const ids = new Set<string>();
+  const byId = createTreeNodeIndex(document.nodes).byId;
   for (const node of document.nodes) {
     if (node.id.length === 0) throw new Error("Tree node ids must not be empty.");
     if (ids.has(node.id)) throw new Error(`Tree node id must be unique: ${JSON.stringify(node.id)}.`);
     ids.add(node.id);
   }
+  const ancestryState = new Map<string, 1 | 2>();
   for (const node of document.nodes) {
     if (node.parentId !== null && !ids.has(node.parentId)) {
       throw new Error(`Tree parent was not found: ${JSON.stringify(node.parentId)}.`);
     }
-    let parentId = node.parentId;
-    const ancestors = new Set([node.id]);
-    while (parentId !== null) {
-      if (ancestors.has(parentId)) throw new Error(`Tree hierarchy contains a cycle at ${JSON.stringify(node.id)}.`);
-      ancestors.add(parentId);
-      parentId = document.nodes.find((candidate) => candidate.id === parentId)?.parentId ?? null;
+    if (ancestryState.has(node.id)) continue;
+    const path: string[] = [];
+    let currentId: string | null = node.id;
+    while (currentId !== null && !ancestryState.has(currentId)) {
+      ancestryState.set(currentId, 1);
+      path.push(currentId);
+      currentId = byId.get(currentId)?.parentId ?? null;
+    }
+    if (currentId !== null && ancestryState.get(currentId) === 1) {
+      throw new Error(`Tree hierarchy contains a cycle at ${JSON.stringify(node.id)}.`);
+    }
+    for (const id of path) {
+      ancestryState.set(id, 2);
     }
   }
 }
