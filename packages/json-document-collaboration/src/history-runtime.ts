@@ -176,7 +176,7 @@ export function createHistory(state: RuntimeState): History {
     const nextMaterialized = materializeChanges(
       state.initialTree,
       nextGraph.ordered,
-      (candidate) => state.evaluateValidation(candidate),
+      state.materializeValidation,
     );
     const controlKey = changeIdKey(changeId);
     if (!nextMaterialized.history.appliedHistoryKeys.has(controlKey)) {

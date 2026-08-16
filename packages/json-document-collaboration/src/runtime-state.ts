@@ -84,6 +84,7 @@ export interface RuntimeState {
   readonly textCaptures: WeakMap<TextCapture, TextCaptureState>;
   readonly textPlans: WeakMap<TextPlan, TextPlanState>;
   evaluateValidation(candidate: JSONValue): JSONPatchValidationResult;
+  readonly materializeValidation?: (candidate: JSONValue) => JSONPatchValidationResult;
   replicaStatus(): ReplicaStatus;
   notify(event: NotificationEvent): void;
   subscribeDocument(listener: (change: JSONAppliedChange) => void): () => void;
@@ -190,6 +191,7 @@ export function createRuntimeState(
     textCaptures: new WeakMap<TextCapture, TextCaptureState>(),
     textPlans: new WeakMap<TextPlan, TextPlanState>(),
     evaluateValidation,
+    ...(validate === undefined ? {} : { materializeValidation: evaluateValidation }),
     replicaStatus() {
       return Object.freeze({
         epoch: state.epoch,

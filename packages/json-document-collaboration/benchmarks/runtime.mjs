@@ -36,3 +36,27 @@ for (const size of config.sizes) {
 
 console.log("\nremote leaf ingest");
 reportScaling(ingestRows);
+
+const ledgerSizes = (process.env.PERF_COLLABORATION_CHANGES ?? "100,1000,10000")
+  .split(",")
+  .map((value) => Number(value));
+const seed = createCollaborationRuntime({ value: 0 }, { ...runtimeOptions, actorId: "ledger-author" });
+seed.document.commit([{ op: "replace", path: "/value", value: 1 }]);
+const first = seed.replica.exportBundle().changes[0];
+if (first === undefined || first.ops[0]?.kind !== "set") throw new Error("ledger seed failed");
+const ledgerRows = [];
+console.log("\nledger replay");
+for (const size of ledgerSizes) {
+  const changes = Array.from({ length: size }, (_, index) => ({
+    changeId: { actorId: "ledger-author", counter: index + 1 },
+    deps: index === 0 ? [] : [{ actorId: "ledger-author", counter: index }],
+    ops: [{ kind: "set", target: first.ops[0].target, value: (index + 1) % 2 }],
+  }));
+  const bundle = { epoch: seed.replica.epoch, changes };
+  const result = measure(config, `${size} change ingest`, () => {
+    const receiver = createCollaborationRuntime({ value: 0 }, { ...runtimeOptions, actorId: "ledger-receiver" });
+    return () => receiver.replica.ingest(bundle).ok;
+  });
+  ledgerRows.push({ size, ...result });
+}
+reportScaling(ledgerRows);
