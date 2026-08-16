@@ -105,7 +105,7 @@ export function createDocumentRuntime(state: RuntimeState): JSONDocument {
     const nextMaterialized = materializeChanges(
       state.initialTree,
       nextGraph.ordered,
-      (candidate) => state.evaluateValidation(candidate),
+      state.materializeValidation,
     );
     if (!jsonEqual(nextMaterialized.value, patched.value)) {
       return failure(
