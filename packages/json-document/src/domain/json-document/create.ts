@@ -188,6 +188,9 @@ function localCommitEffect(
   operations: ReadonlyArray<JSONPatchOperation>,
 ): "noop" | "changed" | "unknown" {
   if (operations.length === 0) return "noop";
+  if (operations.length === 1 && operations[0]?.op === "add") {
+    return singleAddEffect(state, operations[0]);
+  }
   const seen: string[] = [];
   let changed = false;
   for (const operation of operations) {
@@ -227,6 +230,28 @@ function overlapsLocalPath(seen: ReadonlyArray<string>, path: string): boolean {
     || existing.startsWith(`${path}/`)
     || path.startsWith(`${existing}/`)
   ));
+}
+
+function singleAddEffect(
+  state: JSONValue,
+  operation: Extract<JSONPatchOperation, { readonly op: "add" }>,
+): "noop" | "changed" | "unknown" {
+  if (typeof operation.path !== "string") return "unknown";
+  let segments: string[];
+  try {
+    segments = parsePointer(operation.path);
+  } catch {
+    return "unknown";
+  }
+  if (segments.length === 0) {
+    return jsonEqual(state, operation.value) ? "noop" : "changed";
+  }
+  const parent = readAt(state, segments.slice(0, -1));
+  if (!parent.ok || Array.isArray(parent.value)) return "changed";
+  const current = readAt(state, segments);
+  return current.ok && jsonEqual(current.value, operation.value)
+    ? "noop"
+    : "changed";
 }
 
 const OK: JSONPatchValidationResult = Object.freeze({ ok: true });

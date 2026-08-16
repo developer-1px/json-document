@@ -408,3 +408,21 @@ test("a leaf replace keeps unrelated sibling identity and does not emit a root r
     change: { applied: [] },
   });
 });
+test("an equivalent object add stays a no-op while an array add remains a change", () => {
+  const document = createJSONDocument({ item: { title: "Draft" }, values: ["same"] });
+  const notifications: unknown[] = [];
+  document.subscribe((change) => notifications.push(change));
+
+  expect(document.commit([{ op: "add", path: "/item/title", value: "Draft" }])).toMatchObject({
+    ok: true,
+    change: { applied: [] },
+  });
+  expect(notifications).toEqual([]);
+
+  expect(document.commit([{ op: "add", path: "/values/0", value: "same" }])).toMatchObject({
+    ok: true,
+    change: { applied: [{ op: "add", path: "/values/0", value: "same" }] },
+  });
+  expect(document.value).toEqual({ item: { title: "Draft" }, values: ["same", "same"] });
+  expect(notifications).toHaveLength(1);
+});
