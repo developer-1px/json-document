@@ -301,6 +301,7 @@ function createAncestry(
     const leftKey = changeIdKey(left);
     const rightKey = changeIdKey(right);
     if (leftKey === rightKey) return false;
+    if (left.actorId === right.actorId) return left.counter < right.counter;
     const pair = `${leftKey.length}:${leftKey}${rightKey}`;
     const cached = cache.get(pair);
     if (cached !== undefined) return cached;
@@ -381,6 +382,8 @@ function replayDataChanges(
   isAncestor: (left: ChangeId, right: ChangeId) => boolean,
 ): DataReplay {
   let tree = cloneTree(initialTree);
+  let projected: Extract<ReturnType<typeof projectTree>, { readonly ok: true }> | null = null;
+  let firstDataChange = true;
   const suppressed: SuppressedChange[] = [];
   const appliedKeys = new Set<string>();
 
@@ -390,9 +393,11 @@ function replayDataChanges(
     const key = changeIdKey(change.changeId);
     if (disabledByTarget.has(key)) continue;
 
-    const candidate = cloneTree(tree);
+    const candidate = firstDataChange ? tree : cloneTree(tree);
+    firstDataChange = false;
     const applied = applySemanticChange(candidate, change, order);
     if (!applied.ok) {
+      if (candidate === tree) tree = cloneTree(initialTree);
       suppressed.push(freezeSuppressed(
         change.changeId,
         applied.code,
@@ -401,8 +406,16 @@ function replayDataChanges(
       continue;
     }
 
+    if (validate === undefined) {
+      tree = candidate;
+      projected = null;
+      appliedKeys.add(key);
+      continue;
+    }
+
     const materializedDocument = projectTree(candidate, isAncestor);
     if (!materializedDocument.ok) {
+      if (candidate === tree) tree = cloneTree(initialTree);
       suppressed.push(freezeSuppressed(
         change.changeId,
         materializedDocument.code,
@@ -413,6 +426,7 @@ function replayDataChanges(
 
     const validation = validateCandidate(validate, materializedDocument.value);
     if (!validation.ok) {
+      if (candidate === tree) tree = cloneTree(initialTree);
       suppressed.push(freezeSuppressed(
         change.changeId,
         validation.code,
@@ -422,10 +436,11 @@ function replayDataChanges(
       continue;
     }
     tree = candidate;
+    projected = materializedDocument;
     appliedKeys.add(key);
   }
 
-  const materializedDocument = projectTree(tree, isAncestor);
+  const materializedDocument = projected ?? projectTree(tree, isAncestor);
   if (!materializedDocument.ok) {
     throw new Error(`materialized tree is invalid: ${materializedDocument.reason}`);
   }

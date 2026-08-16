@@ -143,7 +143,9 @@ export function compactCollaborationCheckpoint(
     materialized = materializeChanges(
       initialTree,
       graph.ordered,
-      (candidate) => validateCandidate(validate, candidate),
+      validate === undefined
+        ? undefined
+        : (candidate) => validateCandidate(validate, candidate),
     );
   } catch (error) {
     return failure(

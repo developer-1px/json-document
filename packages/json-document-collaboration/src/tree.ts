@@ -1157,11 +1157,14 @@ function versionConflict<T>(
   const authored = versions.filter((version) => (
     stampOf(version).changeId !== undefined
   ));
-  const maximal = authored.filter((candidate) => {
+  const descending = [...authored].sort((left, right) => (
+    compareStamps(stampOf(right), stampOf(left))
+  ));
+  const maximal: T[] = [];
+  for (const candidate of descending) {
     const candidateStamp = stampOf(candidate);
     const candidateId = candidateStamp.changeId as ChangeId;
-    return !authored.some((other) => {
-      if (other === candidate) return false;
+    const superseded = maximal.some((other) => {
       const otherStamp = stampOf(other);
       const otherId = otherStamp.changeId as ChangeId;
       if (changeIdKey(candidateId) === changeIdKey(otherId)) {
@@ -1169,7 +1172,8 @@ function versionConflict<T>(
       }
       return isAncestor(candidateId, otherId);
     });
-  });
+    if (!superseded) maximal.push(candidate);
+  }
   if (maximal.length < 2) return null;
   const sorted = [...maximal].sort((left, right) => (
     compareStamps(stampOf(left), stampOf(right))
