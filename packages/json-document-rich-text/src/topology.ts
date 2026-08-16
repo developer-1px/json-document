@@ -205,7 +205,7 @@ function adoptRichTextTopology(
     if (operation.op === "remove") {
       const target = previousChild(previous, next.id, classified.parentPath, classified.index);
       if (target === null) return null;
-      tombstoneTree(target, removed);
+      tombstoneTree(target, removed, added);
       shifts.push({ parentPath: classified.parentPath, fromIndex: classified.index + 1, delta: -1 });
     } else if (operation.op === "add") {
       shifts.push({ parentPath: classified.parentPath, fromIndex: classified.index, delta: 1 });
@@ -223,7 +223,7 @@ function adoptRichTextTopology(
     if (operation.op === "replace") {
       const previousId = nodeIdOf(operation.value);
       const previousEntry = previousId === null ? null : previous.overlay?.get(previousId) ?? previous.nodes.get(previousId) ?? null;
-      if (previousEntry) tombstoneTree(previousEntry.node, removed);
+      if (previousEntry) tombstoneTree(previousEntry.node, removed, added);
     }
     const finalIndex = finalSiblingIndex(classifiedOps, opIndex, classified.parentPath, classified.index);
     const node = nodeAtIndices(next, [...classified.parentPath, finalIndex]);
@@ -250,6 +250,7 @@ function lookupNode(state: TopologyInternals, nodeId: string): IndexedNode | nul
 
 function iterateIndexed(state: TopologyInternals): IndexedNode[] {
   const extras = [...(state.added?.values() ?? [])]
+    .filter((entry) => state.removed?.has(entry.node.id) !== true)
     .map((entry) => applyShifts(entry, state.shifts ?? []))
     .sort((left, right) => compareKeys(left.path, right.path));
   const ordered: IndexedNode[] = [];
@@ -343,9 +344,14 @@ function indexSubtree(
   }
 }
 
-function tombstoneTree(node: RichTextNode | RichTextDocument, removed: Set<string>): void {
+function tombstoneTree(
+  node: RichTextNode | RichTextDocument,
+  removed: Set<string>,
+  added?: Map<string, IndexedNode>,
+): void {
   removed.add(node.id);
-  if (hasRichTextContent(node)) node.content.forEach((child) => tombstoneTree(child, removed));
+  added?.delete(node.id);
+  if (hasRichTextContent(node)) node.content.forEach((child) => tombstoneTree(child, removed, added));
 }
 
 function previousChild(

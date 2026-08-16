@@ -114,6 +114,11 @@ describe("Official Rich Text local edit costs", () => {
     expect(editor.topology.locate("block-text-5000")?.node).toMatchObject({ type: "text", text: "xy" });
     expect(editor.topology.locate("block-text-9999")?.path).toEqual([9999, 0]);
     expect(editor.topology.locate(rightId!)).toBeNull();
+    const joinedInterval = editor.topology.interval(
+      { kind: "text", nodeId: "block-text-0", offset: 0, affinity: "forward" },
+      { kind: "text", nodeId: "block-text-9999", offset: 1, affinity: "forward" },
+    );
+    expect(joinedInterval.some((target) => target.nodeId === rightId)).toBe(false);
     expect(instrument.snapshot().topologyCreates).toBe(0);
     expect(instrument.snapshot().topologyAdopts).toBe(1);
     expect(instrument.snapshot().topologyVisits).toBeLessThan(32);
