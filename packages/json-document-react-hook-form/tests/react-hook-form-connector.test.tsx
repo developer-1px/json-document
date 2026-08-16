@@ -64,12 +64,14 @@ describe("React Hook Form connector", () => {
     expect(screen.getByTestId("revision").textContent).toBe("0");
   });
 
-  test("resets dirty, touched, and errors after an external canonical commit", async () => {
+  test("resets only the externally changed field while preserving unrelated drafts", async () => {
     const document = createProfileDocument();
     render(<ProfileEditor document={document} />);
 
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "x" } });
     fireEvent.blur(screen.getByLabelText("Title"));
+    fireEvent.change(screen.getByLabelText("Role"), { target: { value: "local-role" } });
+    fireEvent.blur(screen.getByLabelText("Role"));
     fireEvent.submit(screen.getByRole("form", { name: "Profile" }));
     expect(await screen.findByText("Title must contain at least 3 characters.")).toBeTruthy();
 
@@ -79,10 +81,12 @@ describe("React Hook Form connector", () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText("Title")).toHaveProperty("value", "External");
+      expect(screen.getByLabelText("Role")).toHaveProperty("value", "local-role");
       expect(screen.queryByText("Title must contain at least 3 characters.")).toBeNull();
     });
-    expect(screen.getByTestId("dirty").textContent).toBe("pristine");
+    expect(screen.getByTestId("dirty").textContent).toBe("dirty");
     expect(screen.getByTestId("touched").textContent).toBe("untouched");
+    expect(screen.getByTestId("role-touched").textContent).toBe("touched");
   });
 });
 
@@ -117,6 +121,7 @@ function ProfileEditor({ document }: { readonly document: JSONDocument }) {
       <label>Role<input {...register("profile.role")} /></label>
       <output data-testid="dirty">{formState.isDirty ? "dirty" : "pristine"}</output>
       <output data-testid="touched">{formState.touchedFields.profile?.title ? "touched" : "untouched"}</output>
+      <output data-testid="role-touched">{formState.touchedFields.profile?.role ? "touched" : "untouched"}</output>
       <output data-testid="revision">{binding.snapshot.revision}</output>
       <output data-testid="canonical">{JSON.stringify(canonical)}</output>
       <button type="submit">Save</button>
