@@ -94,6 +94,15 @@ describe("Official Rich Text schema", () => {
       .toEqual({ kind: "text", nodeId: "next", offset: 0, affinity: "forward" });
   });
 
+  it("reuses canonical subtree identity only for explicitly borrowed immutable input", () => {
+    const detached = normalizeRichText(canonical);
+    const borrowed = normalizeRichText(canonical, { inputOwnership: "borrowed" });
+
+    expect(detached.ok && detached.value).not.toBe(canonical);
+    expect(borrowed.ok && borrowed.value).toBe(canonical);
+    expect(borrowed.ok && borrowed.operations).toEqual([]);
+  });
+
   it("orders child boundaries, atoms, and Unicode scalar points in logical topology", () => {
     const document: RichTextDocument = {
       profile: canonical.profile,
