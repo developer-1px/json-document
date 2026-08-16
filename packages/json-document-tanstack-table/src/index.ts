@@ -80,7 +80,7 @@ export function createTableDocumentBinding(options: {
     const next = sheet().rows;
     if (sourceRows !== next) {
       sourceRows = next;
-      rows = [...next];
+      rows = next as SheetRow[];
     }
     return rows;
   }

@@ -102,7 +102,6 @@ export function createEditingSession<Selection extends JSONValue>(options: {
 
   function apply(plan: EditingPlan<Selection>): EditingResult<Selection> {
     synchronizeExternalChange();
-    const beforeValue = clone(document.value);
     const beforeSelection = selection;
     if (plan.operations.length === 0) {
       selection = clone(plan.selectionAfter);
@@ -110,6 +109,8 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return { ok: true, snapshot: publish() };
     }
 
+    const inverse = invertOperations(document, plan.operations);
+    const beforeValue = inverse === null ? clone(document.value) : null;
     const result = commit(plan.operations, {
       editing: {
         origin: plan.origin,
@@ -121,10 +122,10 @@ export function createEditingSession<Selection extends JSONValue>(options: {
 
     selection = clone(plan.selectionAfter);
     revision += 1;
-    if (plan.history !== "ignore" && !jsonEqual(beforeValue, document.value)) {
+    if (plan.history !== "ignore" && result.change.applied.length > 0) {
       const entry: HistoryEntry<Selection> = {
         forward: clonePatchOperations(plan.operations),
-        inverse: [{ op: "replace", path: "", value: beforeValue }],
+        inverse: inverse ?? [{ op: "replace", path: "", value: beforeValue! }],
         selectionBefore: beforeSelection,
         selectionAfter: selection,
         ...(plan.historyGroup === undefined ? {} : { group: plan.historyGroup }),
@@ -217,6 +218,31 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       };
     },
   };
+}
+
+function invertOperations(
+  document: JSONDocument,
+  operations: ReadonlyArray<JSONPatchOperation>,
+): ReadonlyArray<JSONPatchOperation> | null {
+  const inverse: JSONPatchOperation[] = [];
+  for (let index = operations.length - 1; index >= 0; index -= 1) {
+    const operation = operations[index];
+    if (operation === undefined) return null;
+    if (operation.op === "replace") {
+      const located = document.at(operation.path);
+      if (!located.ok) return null;
+      inverse.push({ op: "replace", path: operation.path, value: clone(located.value) });
+    } else if (operation.op === "remove") {
+      const located = document.at(operation.path);
+      if (!located.ok) return null;
+      inverse.push({ op: "add", path: operation.path, value: clone(located.value) });
+    } else if (operation.op === "add") {
+      inverse.push({ op: "remove", path: operation.path });
+    } else {
+      return null;
+    }
+  }
+  return inverse;
 }
 
 function jsonEqual(left: JSONValue, right: JSONValue): boolean {

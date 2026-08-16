@@ -83,6 +83,14 @@ const rendering = vectors.cases.find((entry) => entry.id === "official-semantic-
 assert(rendering, "official rendering vector is required");
 assert.equal(validateSchema(rendering.value), true, ajv.errorsText(validateSchema.errors));
 
+const intentFamily = vectors.cases.find((entry) => entry.id === "official-intent-family-is-complete");
+assert(intentFamily, "official intent family vector is required");
+assert.deepEqual(intentFamily.intents, [
+  "selection.set", "selection.remove", "text.insert", "text.delete", "mark.toggle",
+  "block.split", "block.join", "block.set-type", "node.insert", "node.remove",
+  "node.move", "node.set-attrs", "clipboard.paste",
+]);
+
 console.log(`json-document rich-text v1 RFC: ${requirementIds.length} requirements, ${vectors.cases.length} vectors`);
 
 function semanticIssues(value) {

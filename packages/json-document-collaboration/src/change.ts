@@ -104,30 +104,28 @@ export function changesEqual(
 export function graphCycle(
   changes: ReadonlyMap<string, CollaborationChange>,
 ): ChangeId | null {
-  const visiting = new Set<string>();
-  const visited = new Set<string>();
-
-  const visit = (key: string): ChangeId | null => {
-    if (visiting.has(key)) return changes.get(key)?.changeId ?? null;
-    if (visited.has(key)) return null;
-    const change = changes.get(key);
-    if (change === undefined) return null;
-
-    visiting.add(key);
-    for (const dependency of change.deps) {
+  const state = new Map<string, 1 | 2>();
+  for (const key of [...changes.keys()].sort()) {
+    if (state.has(key)) continue;
+    const stack: Array<{ readonly key: string; next: number }> = [{ key, next: 0 }];
+    state.set(key, 1);
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1] as { key: string; next: number };
+      const change = changes.get(frame.key);
+      if (change === undefined || frame.next >= change.deps.length) {
+        state.set(frame.key, 2);
+        stack.pop();
+        continue;
+      }
+      const dependency = change.deps[frame.next++]!;
       const dependencyKey = changeIdKey(dependency);
       if (!changes.has(dependencyKey)) continue;
-      const found = visit(dependencyKey);
-      if (found !== null) return found;
+      const dependencyState = state.get(dependencyKey);
+      if (dependencyState === 1) return changes.get(dependencyKey)?.changeId ?? null;
+      if (dependencyState === 2) continue;
+      state.set(dependencyKey, 1);
+      stack.push({ key: dependencyKey, next: 0 });
     }
-    visiting.delete(key);
-    visited.add(key);
-    return null;
-  };
-
-  for (const key of [...changes.keys()].sort()) {
-    const found = visit(key);
-    if (found !== null) return found;
   }
   return null;
 }
@@ -135,25 +133,43 @@ export function graphCycle(
 export function prepareGraph(
   changes: ReadonlyMap<string, CollaborationChange>,
 ): PreparedGraph {
-  const remaining = new Map(changes);
+  const unresolved = new Map<string, number>();
+  const dependents = new Map<string, string[]>();
+  const available = new ChangeMinHeap();
   const readyKeys = new Set<string>();
   const ordered: CollaborationChange[] = [];
 
-  while (remaining.size > 0) {
-    const available = [...remaining.values()]
-      .filter((change) => change.deps.every((dependency) => (
-        readyKeys.has(changeIdKey(dependency))
-      )))
-      .sort(compareChanges);
-    const next = available[0];
-    if (next === undefined) break;
-    const key = changeIdKey(next.changeId);
-    remaining.delete(key);
-    readyKeys.add(key);
-    ordered.push(next);
+  for (const [key, change] of changes) {
+    unresolved.set(key, change.deps.length);
+    for (const dependency of change.deps) {
+      const dependencyKey = changeIdKey(dependency);
+      if (!changes.has(dependencyKey)) continue;
+      const rows = dependents.get(dependencyKey);
+      if (rows === undefined) dependents.set(dependencyKey, [key]);
+      else rows.push(key);
+    }
+  }
+  for (const [key, count] of unresolved) {
+    if (count === 0) available.push(changes.get(key) as CollaborationChange);
   }
 
-  const pending = [...remaining.values()]
+  while (available.size > 0) {
+    const next = available.pop() as CollaborationChange;
+    const key = changeIdKey(next.changeId);
+    readyKeys.add(key);
+    ordered.push(next);
+    for (const dependentKey of dependents.get(key) ?? []) {
+      const count = (unresolved.get(dependentKey) as number) - 1;
+      unresolved.set(dependentKey, count);
+      if (count === 0) {
+        available.push(changes.get(dependentKey) as CollaborationChange);
+      }
+    }
+  }
+
+  const pending = [...changes.entries()]
+    .filter(([key]) => !readyKeys.has(key))
+    .map(([, change]) => change)
     .sort(compareChanges)
     .map((change) => Object.freeze({
       changeId: freezeChangeId(change.changeId),
@@ -183,6 +199,48 @@ export function prepareGraph(
     pending: Object.freeze(pending),
     heads: Object.freeze(heads),
   };
+}
+
+class ChangeMinHeap {
+  readonly #items: CollaborationChange[] = [];
+
+  get size(): number {
+    return this.#items.length;
+  }
+
+  push(change: CollaborationChange): void {
+    let index = this.#items.push(change) - 1;
+    while (index > 0) {
+      const parent = Math.floor((index - 1) / 2);
+      if (compareChanges(this.#items[parent]!, change) <= 0) break;
+      this.#items[index] = this.#items[parent]!;
+      index = parent;
+    }
+    this.#items[index] = change;
+  }
+
+  pop(): CollaborationChange | undefined {
+    const first = this.#items[0];
+    const last = this.#items.pop();
+    if (first === undefined || last === undefined || this.#items.length === 0) {
+      return first;
+    }
+    let index = 0;
+    while (true) {
+      const left = index * 2 + 1;
+      if (left >= this.#items.length) break;
+      const right = left + 1;
+      const child = right < this.#items.length
+        && compareChanges(this.#items[right]!, this.#items[left]!) < 0
+        ? right
+        : left;
+      if (compareChanges(this.#items[child]!, last) >= 0) break;
+      this.#items[index] = this.#items[child]!;
+      index = child;
+    }
+    this.#items[index] = last;
+    return first;
+  }
 }
 
 export function authorDependencies(

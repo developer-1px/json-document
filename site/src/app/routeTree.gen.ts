@@ -51,6 +51,7 @@ import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selec
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
 import { Route as PageDocsTreeRouteImport } from "./routes/_page/docs/tree";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
+import { Route as PageEditingRichTextRouteImport } from "./routes/_page/editing/rich-text";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
@@ -273,6 +274,11 @@ const PageDocsTutorialRoute = PageDocsTutorialRouteImport.update({
   path: "/docs/tutorial",
   getParentRoute: () => PageRoute,
 } as any);
+const PageEditingRichTextRoute = PageEditingRichTextRouteImport.update({
+  id: "/editing/rich-text",
+  path: "/editing/rich-text",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsZodIndexRoute = PageConnectorsZodIndexRouteImport.update({
   id: "/connectors/zod/",
   path: "/connectors/zod/",
@@ -359,6 +365,7 @@ export interface FileRoutesByFullPath {
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/editing/rich-text": typeof PageEditingRichTextRoute;
   "/adapters/": typeof PageAdaptersIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
@@ -410,6 +417,7 @@ export interface FileRoutesByTo {
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/editing/rich-text": typeof PageEditingRichTextRoute;
   "/adapters": typeof PageAdaptersIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
@@ -463,6 +471,7 @@ export interface FileRoutesById {
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tree": typeof PageDocsTreeRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/_page/editing/rich-text": typeof PageEditingRichTextRoute;
   "/_page/adapters/": typeof PageAdaptersIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
@@ -516,6 +525,7 @@ export interface FileRouteTypes {
     | "/docs/topology"
     | "/docs/tree"
     | "/docs/tutorial"
+    | "/editing/rich-text"
     | "/adapters/"
     | "/connectors/"
     | "/demo/"
@@ -567,6 +577,7 @@ export interface FileRouteTypes {
     | "/docs/topology"
     | "/docs/tree"
     | "/docs/tutorial"
+    | "/editing/rich-text"
     | "/adapters"
     | "/connectors"
     | "/demo"
@@ -619,6 +630,7 @@ export interface FileRouteTypes {
     | "/_page/docs/topology"
     | "/_page/docs/tree"
     | "/_page/docs/tutorial"
+    | "/_page/editing/rich-text"
     | "/_page/adapters/"
     | "/_page/connectors/"
     | "/_page/demo/"
@@ -934,6 +946,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsTutorialRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/editing/rich-text": {
+      id: "/_page/editing/rich-text";
+      path: "/editing/rich-text";
+      fullPath: "/editing/rich-text";
+      preLoaderRoute: typeof PageEditingRichTextRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/connectors/zod/": {
       id: "/_page/connectors/zod/";
       path: "/connectors/zod";
@@ -1030,6 +1049,7 @@ interface PageRouteChildren {
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTreeRoute: typeof PageDocsTreeRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
+  PageEditingRichTextRoute: typeof PageEditingRichTextRoute;
   PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
@@ -1081,6 +1101,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTreeRoute: PageDocsTreeRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
+  PageEditingRichTextRoute: PageEditingRichTextRoute,
   PageAdaptersIndexRoute: PageAdaptersIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,

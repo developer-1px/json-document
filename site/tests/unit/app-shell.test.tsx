@@ -56,6 +56,7 @@ describe("official site shell", () => {
       "Clipboard Demo",
       "History",
       "History Demo",
+      "Rich Text Lab",
     ]);
     expect(groupLinks(nav, "Editors")).toEqual([
       "Editors",

@@ -1,0 +1,51 @@
+{
+  "name": "@interactive-os/json-document-rich-text",
+  "version": "0.1.0-rc.0",
+  "description": "Experimental Official Rich Text domain for @interactive-os/json-document.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-rich-text"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "prebuild": "npm run build -w @interactive-os/json-document && npm run build -w @interactive-os/json-document-selection && npm run build -w @interactive-os/json-document-editing",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "pretypecheck": "npm run build -w @interactive-os/json-document && npm run build -w @interactive-os/json-document-selection && npm run build -w @interactive-os/json-document-editing",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "perf": "npm run build && node benchmarks/editor.mjs",
+    "perf:normalize": "npm run build && node benchmarks/normalization.mjs",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@interactive-os/json-document": "^3.0.0",
+    "@interactive-os/json-document-editing": "^0.1.0-rc.0",
+    "@interactive-os/json-document-selection": "^0.1.0-rc.0"
+  },
+  "devDependencies": {
+    "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-editing": "*",
+    "@interactive-os/json-document-selection": "*",
+    "@types/node": "^25.9.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7"
+  }
+}

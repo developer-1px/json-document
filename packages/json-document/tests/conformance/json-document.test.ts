@@ -389,3 +389,40 @@ test("state-equivalent commits expose a frozen empty applied list", () => {
   expect(document.value).toEqual({ value: 1 });
   expect(notifications).toEqual([]);
 });
+
+test("a leaf replace keeps unrelated sibling identity and does not emit a root replace", () => {
+  const items = Array.from({ length: 256 }, (_, index) => ({ id: `item-${index}`, title: "Draft" }));
+  const document = createJSONDocument({ items });
+  const before = document.value as { items: Array<{ id: string; title: string }> };
+  const result = document.commit([{ op: "replace", path: "/items/80/title", value: "Ready" }]);
+  expect(result).toMatchObject({
+    ok: true,
+    change: { applied: [{ op: "replace", path: "/items/80/title", value: "Ready" }] },
+  });
+  const after = document.value as { items: Array<{ id: string; title: string }> };
+  expect(after.items[80]).toEqual({ id: "item-80", title: "Ready" });
+  expect(after.items[79]).toBe(before.items[79]);
+  expect(after.items[81]).toBe(before.items[81]);
+  expect(document.commit([{ op: "replace", path: "/items/80/title", value: "Ready" }])).toMatchObject({
+    ok: true,
+    change: { applied: [] },
+  });
+});
+test("an equivalent object add stays a no-op while an array add remains a change", () => {
+  const document = createJSONDocument({ item: { title: "Draft" }, values: ["same"] });
+  const notifications: unknown[] = [];
+  document.subscribe((change) => notifications.push(change));
+
+  expect(document.commit([{ op: "add", path: "/item/title", value: "Draft" }])).toMatchObject({
+    ok: true,
+    change: { applied: [] },
+  });
+  expect(notifications).toEqual([]);
+
+  expect(document.commit([{ op: "add", path: "/values/0", value: "same" }])).toMatchObject({
+    ok: true,
+    change: { applied: [{ op: "add", path: "/values/0", value: "same" }] },
+  });
+  expect(document.value).toEqual({ item: { title: "Draft" }, values: ["same", "same"] });
+  expect(notifications).toHaveLength(1);
+});

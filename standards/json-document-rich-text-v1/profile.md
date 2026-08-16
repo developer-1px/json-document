@@ -2,8 +2,9 @@
 
 표준 상태: Draft. 이 profile은 [#361](https://github.com/developer-1px/json-document/issues/361)의
 Official Rich Text Domain을 구현하기 전에 동결해야 하는 normative 계약이다.
-현재 reference implementation은 없으며 이 문서, `schema.json`, machine-readable
-conformance vector 순서가 향후 구현보다 우선한다.
+Draft reference implementation은 official Domain/Web/React packages와 Rich Text Lab에서
+검증한다. 구현이 존재하더라도 이 문서, `schema.json`, machine-readable conformance
+vector 순서가 구현의 우연한 동작보다 우선한다.
 
 `MUST`, `MUST NOT`, `SHOULD`, `MAY`는 RFC 2119의 의미로 사용한다.
 

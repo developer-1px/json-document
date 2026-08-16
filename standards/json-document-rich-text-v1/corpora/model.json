@@ -1,0 +1,321 @@
+{
+  "formatVersion": 1,
+  "suite": "model",
+  "profile": "standards/json-document-rich-text-v1/profile.md",
+  "cases": [
+    {
+      "id": "repeated-character-insert",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "반복 문자 삽입은 같은 text leaf에 누적되고 한 history group으로 undo된다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hi", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [
+        { "type": "text.insert", "text": "a", "historyGroup": "rich-text.typing" },
+        { "type": "text.insert", "text": "a", "historyGroup": "rich-text.typing" }
+      ],
+      "expect": {
+        "operations": [
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "Hia" }],
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "Hiaa" }]
+        ],
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hiaa", "marks": [] }] }]
+        },
+        "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 4, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 4, "affinity": "forward" } }], "primaryIndex": 0 },
+        "historyGroup": "rich-text.typing",
+        "undo": {
+          "value": {
+            "profile": "urn:interactive-os:json-document:rich-text:1",
+            "id": "doc",
+            "type": "doc",
+            "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hi", "marks": [] }] }]
+          }
+        }
+      }
+    },
+    {
+      "id": "repeated-space-insert",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "연속 U+0020은 한 text leaf에 보존된다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "A", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [
+        { "type": "text.insert", "text": " " },
+        { "type": "text.insert", "text": " " }
+      ],
+      "expect": {
+        "operations": [
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "A " }],
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "A  " }]
+        ],
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "A  ", "marks": [] }] }]
+        },
+        "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 3, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 3, "affinity": "forward" } }], "primaryIndex": 0 }
+      }
+    },
+    {
+      "id": "consecutive-enter-empty-split",
+      "source": { "url": "https://github.com/ProseMirror/prosemirror-view/tree/master/test", "meaning": "빈 block에서 연속 split은 sibling paragraph를 만든다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "child", "nodeId": "p1", "offset": 0, "affinity": "forward" }, "focus": { "kind": "child", "nodeId": "p1", "offset": 0, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [{ "type": "block.split" }, { "type": "block.split" }],
+      "expect": {
+        "forbidRootReplace": true,
+        "valueLength": 3
+      }
+    },
+    {
+      "id": "repeated-backspace",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "반복 Backspace는 같은 text leaf의 지역 replace다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "abc", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 3, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 3, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [
+        { "type": "text.delete", "direction": "backward", "unit": "character" },
+        { "type": "text.delete", "direction": "backward", "unit": "character" }
+      ],
+      "expect": {
+        "operations": [
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "ab" }],
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "a" }]
+        ],
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "a", "marks": [] }] }]
+        },
+        "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" } }], "primaryIndex": 0 }
+      }
+    },
+    {
+      "id": "repeated-forward-delete",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "반복 forward Delete는 같은 text leaf의 지역 replace다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "abc", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 0, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 0, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [
+        { "type": "text.delete", "direction": "forward", "unit": "character" },
+        { "type": "text.delete", "direction": "forward", "unit": "character" }
+      ],
+      "expect": {
+        "operations": [
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "bc" }],
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "c" }]
+        ],
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "c", "marks": [] }] }]
+        }
+      }
+    },
+    {
+      "id": "text-boundary-join",
+      "source": { "url": "https://github.com/ianstormtaylor/slate/tree/main/packages/slate-history/test", "meaning": "block 경계 Backspace는 두 paragraph를 join하고 지역 content patch를 낸다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [
+          { "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "AB", "marks": [] }] },
+          { "id": "p2", "type": "paragraph", "content": [{ "id": "t2", "type": "text", "text": "CD", "marks": [] }] }
+        ]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t2", "offset": 0, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t2", "offset": 0, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [{ "type": "block.join", "direction": "backward" }],
+      "expect": {
+        "forbidRootReplace": true,
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "ABCD", "marks": [] }] }]
+        },
+        "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" } }], "primaryIndex": 0 }
+      }
+    },
+    {
+      "id": "noncollapsed-same-node-replace",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "같은 text leaf의 non-collapsed 선택은 삽입으로 대체된다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hello", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 4, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [{ "type": "text.insert", "text": "i" }],
+      "expect": {
+        "operations": [[{ "op": "replace", "path": "/content/0/content/0/text", "value": "Hio" }]],
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hio", "marks": [] }] }]
+        }
+      }
+    },
+    {
+      "id": "cross-node-selection-remove",
+      "source": { "url": "https://github.com/ProseMirror/prosemirror-view/tree/master/test", "meaning": "cross-node 삭제는 영향받은 content만 남긴다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [
+          { "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hello", "marks": [] }] },
+          { "id": "p2", "type": "paragraph", "content": [{ "id": "t2", "type": "text", "text": "World", "marks": [] }] }
+        ]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t2", "offset": 2, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [{ "type": "selection.remove" }],
+      "expect": {
+        "forbidRootReplace": true,
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [
+            { "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "He", "marks": [] }] },
+            { "id": "p2", "type": "paragraph", "content": [{ "id": "t2", "type": "text", "text": "rld", "marks": [] }] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mark-toggle-and-block-type",
+      "source": { "url": "https://github.com/ianstormtaylor/slate/tree/main/packages/slate-history/test", "meaning": "mark toggle과 heading 전환은 canonical marks/type을 유지한다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hi", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 0, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 2, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [
+        { "type": "mark.toggle", "mark": { "type": "strong" } },
+        { "type": "block.set-type", "nodeType": "heading", "attrs": { "level": 2 } }
+      ],
+      "expect": {
+        "forbidRootReplace": true,
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "heading", "attrs": { "level": 2 }, "content": [{ "id": "t1", "type": "text", "text": "Hi", "marks": [{ "type": "strong" }] }] }]
+        }
+      }
+    },
+    {
+      "id": "hard-break-and-child-point",
+      "source": { "url": "https://github.com/ProseMirror/prosemirror-view/tree/master/test", "meaning": "hard break는 atom/child point에 삽입된다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "AB", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [{ "type": "node.insert", "point": { "kind": "text", "nodeId": "t1", "offset": 1, "affinity": "forward" }, "node": { "id": "br1", "type": "hardBreak" } }],
+      "expect": {
+        "forbidRootReplace": true,
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [
+            { "id": "t1", "type": "text", "text": "A", "marks": [] },
+            { "id": "br1", "type": "hardBreak" },
+            { "id": "generated-1", "type": "text", "text": "B", "marks": [] }
+          ] }]
+        }
+      }
+    },
+    {
+      "id": "unicode-scalar-and-korean-insert",
+      "source": { "url": "https://www.w3.org/TR/input-events-2/", "meaning": "UTF-16 scalar 삭제와 한국어 조합 결과는 canonical text에 그대로 남는다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "A😀", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 3, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 3, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [
+        { "type": "text.delete", "direction": "backward", "unit": "character" },
+        { "type": "text.insert", "text": "한글" }
+      ],
+      "expect": {
+        "operations": [
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "A" }],
+          [{ "op": "replace", "path": "/content/0/content/0/text", "value": "A한글" }]
+        ],
+        "value": {
+          "profile": "urn:interactive-os:json-document:rich-text:1",
+          "id": "doc",
+          "type": "doc",
+          "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "A한글", "marks": [] }] }]
+        }
+      }
+    },
+    {
+      "id": "plain-paste-and-cut",
+      "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/clipboard-apis", "meaning": "structured slice paste와 cut은 Official clipboard 계약을 따른다" },
+      "initial": {
+        "profile": "urn:interactive-os:json-document:rich-text:1",
+        "id": "doc",
+        "type": "doc",
+        "content": [{ "id": "p1", "type": "paragraph", "content": [{ "id": "t1", "type": "text", "text": "Hello", "marks": [] }] }]
+      },
+      "selection": { "kind": "range", "ranges": [{ "anchor": { "kind": "text", "nodeId": "t1", "offset": 5, "affinity": "forward" }, "focus": { "kind": "text", "nodeId": "t1", "offset": 5, "affinity": "forward" } }], "primaryIndex": 0 },
+      "intents": [{
+        "type": "clipboard.paste",
+        "clipboard": {
+          "type": "application/vnd.interactive-os.rich-text+json",
+          "slice": {
+            "profile": "urn:interactive-os:json-document:rich-text:1",
+            "content": [{ "id": "paste", "type": "text", "text": "!", "marks": [] }],
+            "openStart": 1,
+            "openEnd": 1
+          },
+          "text": "!",
+          "html": "!"
+        }
+      }],
+      "expect": {
+        "forbidRootReplace": true,
+        "valueText": "Hello!"
+      }
+    }
+  ]
+}
