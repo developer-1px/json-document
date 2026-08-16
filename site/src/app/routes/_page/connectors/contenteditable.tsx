@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ContentEditableConnectorDemoRoute } from "../../../../routes/connectors/contenteditable/ContentEditableConnectorDemoRoute";
+import { Navigate, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_page/connectors/contenteditable")({
-  component: ContentEditableConnectorDemoRoute,
+  component: () => <Navigate to="/adapters/contenteditable" />,
 });

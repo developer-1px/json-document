@@ -144,6 +144,16 @@ reconciliation을 소유하므로 일반 patch validation과 합치지 않는다
 
 Native-input DOM lease는 collaboration ingestion을 멈추지 않는다.
 
+### Adapter
+
+| Canonical term | 정의 | 포함하지 않는 것 |
+| --- | --- | --- |
+| Adapter | 외부 platform/model 계약을 json-document public contract로 변환하는 경계 | Domain state, product command 의미 |
+| Adapter package | 플랫폼 계약을 격리하고 독립 version으로 배포하는 공식 변환 artifact | Kernel subpath, Connector, product UI |
+
+공식 Adapter는 Keyboard, Clipboard, Contenteditable처럼 브라우저 플랫폼 계약을
+번역한다. 제거해도 canonical JSON과 editing semantics가 바뀌지 않는다.
+
 ### Connector
 
 | Canonical term | 정의 | 포함하지 않는 것 |
@@ -512,6 +522,23 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `ContentEditableAdapter`, `ContentEditableOptions`, `ContentEditableResult`, `createContentEditableAdapter`, `TextDOMAdapter`, `DOMObservation`, `plainTextDOMAdapter` | Package namespace와 DOM Adapter 책임이 일치 |
 
+### Web Platform adapter package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `createWebClipboardBinding`, `WebClipboardBinding`, `WebClipboardCodec`, `WebClipboardData`, `WebClipboardEvent`, `WebClipboardPayload`, `WebClipboardResult`, `documentClipboardCodec`, `sheetClipboardCodec`, `orderClipboardCodec`, `objectClipboardCodec`, `treeClipboardCodec`, `databaseClipboardCodec` | Web clipboard native contract와 public domain clipboard 번역 책임이 일치 |
+| keep | `selectionOperationFromModifiers`, `WebModifierState` | Web modifier state를 semantic selection operation으로 번역하는 책임이 일치 |
+| keep | `textInputFromControl`, `WebTextControl`, `WebTextControlEvent`, `WebTextInput` | Native text control을 관찰하되 selection ownership을 취하지 않는 책임이 일치 |
+| keep | `createWebKeyboardAdapter`, `defaultWebKeymap`, `chordFromStroke`, `moveGridPoint`, `moveLinePoint`, `gridBoundary`, `lineBoundary`, `WebKeyboardAdapter`, `WebKeyboardCommand`, `WebKeyboardStroke`, `WebKeymap` | 공식 Web keyboard adapter: chord를 semantic command로 번역하고 visible line/grid 이웃을 계산한다 |
+
+### Contenteditable adapter package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `ContentEditable`, `ContentEditableProps` | local JSONDocument 문자열 포인터를 leased contenteditable React root에 붙이는 공식 진입점 |
+| keep | `createContentEditableBinding`, `ContentEditableBinding`, `ContentEditableBindingOptions`, `ContentEditableBindingResult` | React 없이 같은 lease bind를 소유하는 하위 진입점 |
+| keep | `plainTextDOMAdapter`, `TextDOMAdapter`, `DOMObservation`, `TextSelection` | 평문 observe/render/restore 경계 |
+
 ### React Connector package
 
 | Decision | Current public exports | Canonical rule |
@@ -542,22 +569,6 @@ identifier에는 canonical vocabulary만 사용한다.
 | Decision | Current public exports | Canonical rule |
 | --- | --- | --- |
 | keep | `createTanStackTableConnector`, `createTableDocumentBinding`, `TableDocumentBinding`, `TableDocumentOptions` | 공식 TanStack Table Connector 진입점과 하위 Sheet binding |
-
-### Web Platform Connector package
-
-| Decision | Current public exports | Canonical rule |
-| --- | --- | --- |
-| keep | `createWebClipboardBinding`, `WebClipboardBinding`, `WebClipboardCodec`, `WebClipboardData`, `WebClipboardEvent`, `WebClipboardPayload`, `WebClipboardResult`, `documentClipboardCodec`, `sheetClipboardCodec`, `orderClipboardCodec`, `objectClipboardCodec`, `treeClipboardCodec`, `databaseClipboardCodec` | Web clipboard native contract와 public domain clipboard 번역 책임이 일치 |
-| keep | `selectionOperationFromModifiers`, `WebModifierState` | Web modifier state를 semantic selection operation으로 번역하는 책임이 일치 |
-| keep | `textInputFromControl`, `WebTextControl`, `WebTextControlEvent`, `WebTextInput` | Native text control을 관찰하되 selection ownership을 취하지 않는 책임이 일치 |
-
-### Contenteditable Connector package
-
-| Decision | Current public exports | Canonical rule |
-| --- | --- | --- |
-| keep | `ContentEditable`, `ContentEditableProps` | local JSONDocument 문자열 포인터를 leased contenteditable React root에 붙이는 공식 진입점 |
-| keep | `createContentEditableBinding`, `ContentEditableBinding`, `ContentEditableBindingOptions`, `ContentEditableBindingResult` | React 없이 같은 lease bind를 소유하는 하위 진입점 |
-| keep | `plainTextDOMAdapter`, `TextDOMAdapter`, `DOMObservation`, `TextSelection` | 평문 observe/render/restore 경계 |
 
 ## Target vocabulary
 
@@ -645,6 +656,29 @@ Contenteditable package
 ├─ ContentEditableResult
 └─ ContentEditableAdapter
 
+Adapter packages
+├─ Web Platform
+│  ├─ WebClipboardBinding
+│  ├─ WebClipboardCodec
+│  ├─ createWebClipboardBinding
+│  ├─ documentClipboardCodec
+│  ├─ sheetClipboardCodec
+│  ├─ orderClipboardCodec
+│  ├─ objectClipboardCodec
+│  ├─ treeClipboardCodec
+│  ├─ databaseClipboardCodec
+│  ├─ selectionOperationFromModifiers
+│  ├─ createWebKeyboardAdapter
+│  ├─ defaultWebKeymap
+│  ├─ moveGridPoint
+│  ├─ moveLinePoint
+│  └─ textInputFromControl
+└─ Contenteditable
+   ├─ ContentEditable
+   ├─ ContentEditableProps
+   ├─ createContentEditableBinding
+   └─ plainTextDOMAdapter
+
 Connector packages
 ├─ React
 │  ├─ EditingSnapshotSource
@@ -667,28 +701,11 @@ Connector packages
 ├─ Ajv
 │  ├─ AjvValidatorOptions
 │  └─ createAjvValidator
-├─ TanStack Table
-│  ├─ TableDocumentBinding
-│  ├─ TableDocumentOptions
-│  ├─ createTableDocumentBinding
-│  └─ createTanStackTableConnector
-└─ Web Platform
-   ├─ WebClipboardBinding
-   ├─ WebClipboardCodec
-   ├─ createWebClipboardBinding
-   ├─ documentClipboardCodec
-   ├─ sheetClipboardCodec
-   ├─ orderClipboardCodec
-   ├─ objectClipboardCodec
-   ├─ treeClipboardCodec
-   ├─ databaseClipboardCodec
-   ├─ selectionOperationFromModifiers
-   └─ textInputFromControl
-└─ Contenteditable
-   ├─ ContentEditable
-   ├─ ContentEditableProps
-   ├─ createContentEditableBinding
-   └─ plainTextDOMAdapter
+└─ TanStack Table
+   ├─ TableDocumentBinding
+   ├─ TableDocumentOptions
+   ├─ createTableDocumentBinding
+   └─ createTanStackTableConnector
 ```
 
 ## 새 concept admission

@@ -9,7 +9,7 @@ import {
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
-import { JsonInspector } from "../../../shared/ui/json-inspector";
+import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
@@ -154,15 +154,15 @@ export function ZodAdminLab() {
         {records.length === 0 ? <div className={classes("m-3 p-6", ui.surface.empty)}>No records in this view.</div> : null}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <JsonInspector label="Zod schema fields" testId="zod-admin-schema" value={document.schema} />
-        <JsonInspector
-          label="Canonical admin document"
-          testId="zod-admin-document"
-          signal={`revision ${snapshot.revision}`}
-          value={document}
-        />
-      </div>
+      <Inspector label="Inspect Zod admin state" items={[
+        { label: "Zod schema fields", testId: "zod-admin-schema", value: document.schema },
+        {
+          label: "Canonical admin document",
+          testId: "zod-admin-document",
+          signal: `revision ${snapshot.revision}`,
+          value: document,
+        },
+      ]} />
     </section>
   );
 }

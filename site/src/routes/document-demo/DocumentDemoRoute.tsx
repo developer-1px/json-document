@@ -12,12 +12,14 @@ import {
 } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
+  createWebKeyboardAdapter,
   documentClipboardCodec,
+  moveLinePoint,
   selectionOperationFromModifiers,
   textInputFromControl,
 } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { Inspector } from "../../shared/ui/inspector";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -40,10 +42,10 @@ export function DocumentDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
+  const [keyboard] = useState(() => createWebKeyboardAdapter());
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
   const document = snapshot.value as BlockDocument;
@@ -118,20 +120,32 @@ export function DocumentDemoRoute() {
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const modifier = event.metaKey || event.ctrlKey;
-    if (modifier && event.key.toLowerCase() === "z") {
-      event.preventDefault();
-      return run(() => event.shiftKey ? editor.redo() : editor.undo(), event.shiftKey ? "Redone" : "Undone");
-    }
-    if ((event.target as HTMLElement).closest("textarea")) return;
-    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
-    event.preventDefault();
-    const primary = snapshot.selection.primaryIndex === null
+    const command = keyboard.resolve(event);
+    if (command === null) return;
+    const inField = (event.target as HTMLElement).closest("textarea, input, [contenteditable]");
+    if (inField && command.type !== "undo" && command.type !== "redo") return;
+
+    const ids = document.blocks.map((block) => block.id);
+    const current = snapshot.selection.primaryIndex === null
       ? undefined
       : snapshot.selection.ranges[snapshot.selection.primaryIndex]?.focus.blockId;
-    const index = document.blocks.findIndex((block) => block.id === primary);
-    const next = document.blocks[index + (event.key === "ArrowUp" ? -1 : 1)];
-    if (next) run(() => dispatchIntent({ type: "selection.set", blockId: next.id, mode: event.shiftKey ? "extend" : "replace" }), "Selection changed");
+
+    if (command.type === "move") {
+      if (current === undefined) return;
+      const next = moveLinePoint(ids, current, command.direction);
+      if (next === null) return;
+      event.preventDefault();
+      run(() => dispatchIntent({ type: "selection.set", blockId: next, mode: command.operation }), "Selection changed");
+      return;
+    }
+    if (command.type === "delete") {
+      event.preventDefault();
+      run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted");
+      return;
+    }
+    if (command.type !== "undo" && command.type !== "redo") return;
+    event.preventDefault();
+    run(() => command.type === "redo" ? editor.redo() : editor.undo(), command.type === "redo" ? "Redone" : "Undone");
   }
 
   const lastSelectedId = editor.selectedBlockIds.at(-1);
@@ -140,7 +154,7 @@ export function DocumentDemoRoute() {
     <PageFrame>
         <PageHeader
           illustration="clipboard"
-          title="Document Demo"
+          title="Document"
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
@@ -206,36 +220,29 @@ export function DocumentDemoRoute() {
           </section>
 
           <section className={classes("p-3", ui.surface.raised)}>
-            <DisclosureButton
-              expanded={inspectorOpen}
-              controls="document-editing-state"
-              onClick={() => setInspectorOpen((open) => !open)}
-            >
-              Inspect editing state
-            </DisclosureButton>
-            <div id="document-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-3">
-              <JsonInspector
-                label="Canonical JSON"
-                meta="JSON Patch document"
-                value={snapshot.value}
-                testId="canonical-json"
-                size="tall"
-              />
-              <JsonInspector
-                label="intent"
-                meta={lastIntent ? lastIntent.type : "dispatch only"}
-                value={lastIntent}
-                testId="document-intent-json"
-                size="compact"
-              />
-              <JsonInspector
-                label="result"
-                meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"}
-                value={lastResult}
-                testId="document-result-json"
-                size="compact"
-              />
-            </div>
+            <Inspector items={[
+              {
+                label: "Canonical JSON",
+                meta: "JSON Patch document",
+                value: snapshot.value,
+                testId: "canonical-json",
+                size: "tall",
+              },
+              {
+                label: "intent",
+                meta: lastIntent ? lastIntent.type : "dispatch only",
+                value: lastIntent,
+                testId: "document-intent-json",
+                size: "compact",
+              },
+              {
+                label: "result",
+                meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet",
+                value: lastResult,
+                testId: "document-result-json",
+                size: "compact",
+              },
+            ]} />
           </section>
         </div>
     </PageFrame>

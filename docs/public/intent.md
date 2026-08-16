@@ -109,6 +109,7 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `selection.set` | `objectIds`, `mode?` | 객체 선택 변경 |
 | `selection.remove` | | 선택한 객체 제거 |
 | `selection.fill` | `color` | 선택한 객체 색 변경 |
+| `object.translate` | `objectIds`, `dx`, `dy` | 선택한 객체 위치 이동 |
 | `clipboard.paste` | `clipboard` | 붙여넣기 |
 
 `selection.set`의 `mode`는 `"replace" | "add" | "subtract" | "toggle"`입니다.
@@ -123,6 +124,14 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `clipboard.paste` | `clipboard`, `afterId?` | 붙여넣기 |
 
 `copy()`는 선택한 항목을 읽고, `cut()`은 같은 항목을 읽은 뒤 제거합니다.
+
+## KanbanIntent
+
+| `type` | 필드 | 결과 |
+| --- | --- | --- |
+| `selection.set` | `cardId`, `mode?` | 카드 선택 변경 |
+| `card.move` | `cardId`, `columnId`, `beforeCardId?` | 카드를 다른 칸으로 옮김 |
+| `selection.remove` | | 선택한 카드 제거 |
 
 ## DatabaseIntent
 
@@ -150,4 +159,4 @@ payload를 만든 다음 선택한 내용을 제거하거나, Sheet에서는 고
 `clipboard.paste` Intent를 `dispatch`에 넘깁니다.
 
 editor를 React, schema library, table, 브라우저 API와 연결하는 방법은
-[Connectors](connectors.md)에 정리되어 있습니다.
+[Adapters](adapters.md)와 [Connectors](connectors.md)에 정리되어 있습니다.

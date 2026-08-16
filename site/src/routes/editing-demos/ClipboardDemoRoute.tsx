@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
-import { JsonInspector } from "../../shared/ui/json-inspector";
+import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -78,15 +78,19 @@ export function ClipboardDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-payload">
           <p className={ui.text.label}>2 · API와 payload</p>
           <h2 id="clipboard-payload" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
-          <JsonInspector label="clipboard" value={clipboard} testId="clipboard-demo-payload" size="compact" />
+          <Inspector label="Inspect clipboard payload" items={[
+            { label: "clipboard", value: clipboard, testId: "clipboard-demo-payload", size: "compact" },
+          ]} />
           <ActionButton className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>payload 붙여넣기</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-result">
           <p className={ui.text.label}>3 · 결과</p>
           <h2 id="clipboard-result" className={classes("mb-2 mt-1", ui.text.heading)}>paste하면 복제한 블록을 commit합니다</h2>
-          <JsonInspector label="document.value" value={snapshot.value} testId="clipboard-demo-document" size="tall" />
-          <JsonInspector label="selection" value={snapshot.selection} testId="clipboard-demo-selection" size="compact" />
+          <Inspector label="Inspect paste result" items={[
+            { label: "document.value", value: snapshot.value, testId: "clipboard-demo-document", size: "tall" },
+            { label: "selection", value: snapshot.selection, testId: "clipboard-demo-selection", size: "compact" },
+          ]} />
         </section>
       </div>
     </PageFrame>

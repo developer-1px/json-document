@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-test("Web Platform Connector translates native modifiers, text input, and structured clipboard events", async ({ page }) => {
+test("Clipboard adapter translates native modifiers, text input, and structured clipboard events", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error" || message.type() === "warning") errors.push(message.text());
   });
 
-  await page.goto("/connectors/web");
-  await expect(page.getByRole("heading", { level: 1, name: "Web Platform Connector" })).toBeVisible();
+  await page.goto("/adapters/clipboard");
+  await expect(page.getByRole("heading", { level: 1, name: "Clipboard Adapter" })).toBeVisible();
 
   const alpha = page.locator('[data-block-id="alpha"]');
   const beta = page.locator('[data-block-id="beta"]');
@@ -21,7 +21,7 @@ test("Web Platform Connector translates native modifiers, text input, and struct
 
   await alpha.click({ position: { x: 8, y: 8 } });
   const clipboard = await page.evaluate(() => {
-    const surface = document.querySelector<HTMLElement>('[aria-label="Web Platform editing surface"]')!;
+    const surface = document.querySelector<HTMLElement>('[aria-label="Clipboard adapter surface"]')!;
     const data = new DataTransfer();
     const copied = surface.dispatchEvent(new ClipboardEvent("copy", { clipboardData: data, bubbles: true, cancelable: true }));
     const pasted = surface.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
@@ -44,12 +44,12 @@ test("Web Platform Connector translates native modifiers, text input, and struct
     "Paste inserts a canonical block after the selection.",
     "Text input commits through the same editing history.",
   ]);
-  await expect(page.getByTestId("web-announcement")).toContainText("Pasted 1 structured block");
+  await expect(page.getByTestId("clipboard-announcement")).toContainText("Pasted 1 structured block");
   expect(errors).toEqual([]);
 });
 
 type DocumentValue = { blocks: Array<{ id: string; text: string }> };
 
 async function documentValue(page: import("@playwright/test").Page): Promise<DocumentValue> {
-  return JSON.parse(await page.getByTestId("web-document-json").innerText()) as DocumentValue;
+  return JSON.parse(await page.getByTestId("clipboard-document-json").innerText()) as DocumentValue;
 }

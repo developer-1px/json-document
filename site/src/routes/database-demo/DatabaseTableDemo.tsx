@@ -16,8 +16,8 @@ import {
   type EditingResult,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, DisclosureButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
+import { Inspector } from "../../shared/ui/inspector";
+import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import { initialDatabase } from "./initial-database";
 
@@ -36,7 +36,6 @@ export function DatabaseTableDemo() {
   const [announcement, setAnnouncement] = useState("Database ready");
   const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const nextRecord = useRef(5);
   const document = snapshot.value as DatabaseDocument;
   const view = document.views[0]!;
@@ -240,30 +239,13 @@ export function DatabaseTableDemo() {
         </div>
 
         <section className={classes("p-3", ui.surface.raised)}>
-          <DisclosureButton
-            expanded={inspectorOpen}
-            controls="database-editing-state"
-            onClick={() => setInspectorOpen((open) => !open)}
-          >
-            Inspect editing state
-          </DisclosureButton>
-          <aside id="database-editing-state" hidden={!inspectorOpen} aria-label="Database contract inspector" className="mt-3 grid content-start gap-3 lg:grid-cols-3">
-            <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="database-intent-json" />
-            <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="database-result-json" />
-            <JsonInspector label="Persistent Table view" value={view} testId="database-view-json" />
-            <JsonInspector
-              label="Structural selection"
-              value={snapshot.selection}
-              testId="database-selection-json"
-              size="compact"
-            />
-            <JsonInspector
-              label="Canonical database"
-              signal={`revision ${snapshot.revision}`}
-              value={document}
-              testId="database-document-json"
-            />
-          </aside>
+          <Inspector label="Inspect database state" items={[
+            { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "database-intent-json" },
+            { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "database-result-json" },
+            { label: "Persistent Table view", value: view, testId: "database-view-json" },
+            { label: "Structural selection", value: snapshot.selection, testId: "database-selection-json", size: "compact" },
+            { label: "Canonical database", signal: `revision ${snapshot.revision}`, value: document, testId: "database-document-json" },
+          ]} />
         </section>
       </div>
     </section>

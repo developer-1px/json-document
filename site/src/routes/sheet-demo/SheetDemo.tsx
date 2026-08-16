@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
 import {
   createSheetEditor,
   type EditingResult,
@@ -11,11 +11,14 @@ import {
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
+  createWebKeyboardAdapter,
+  gridBoundary,
+  moveGridPoint,
   selectionOperationFromModifiers,
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
-import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, DisclosureButton, SelectableItem } from "../../shared/ui/interactive";
+import { Inspector } from "../../shared/ui/inspector";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -43,10 +46,11 @@ export function SheetDemo() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
+  const [keyboard] = useState(() => createWebKeyboardAdapter());
+  const surfaceRef = useRef<HTMLElement>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const sheet = snapshot.value as SheetDocument;
   const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
 
@@ -128,19 +132,73 @@ export function SheetDemo() {
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    const modifier = event.metaKey || event.ctrlKey;
-    if (!modifier) return;
-    if (event.key.toLowerCase() === "z") {
+    const command = keyboard.resolve(event);
+    if (command === null) return;
+    const inField = (event.target as HTMLElement).closest("input, textarea, [contenteditable]");
+    if (command.type === "toggle" && inField && event.key === " ") return;
+    if (command.type === "delete" && inField && event.key === "Backspace") return;
+
+    const topology = {
+      rowIds: sheet.rows.map((row) => row.id),
+      columnIds: sheet.columns.map((column) => column.id),
+    };
+    const focus = snapshot.selection.focus;
+    if (focus === null) return;
+
+    if (command.type === "move" || command.type === "boundary") {
+      const next = command.type === "move"
+        ? moveGridPoint(topology, focus, command.direction)
+        : gridBoundary(topology, focus, command.edge);
+      if (next === null) return;
       event.preventDefault();
-      run(() => event.shiftKey ? editor.redo() : editor.undo(), event.shiftKey ? "Redone" : "Undone");
+      run(
+        () => dispatchIntent({
+          type: "selection.set",
+          rowId: next.rowId,
+          columnId: next.columnId,
+          mode: command.operation,
+        }),
+        command.operation === "extend" ? "Range extended" : "Selection changed",
+      );
+      focusCell(surfaceRef.current, next.rowId, next.columnId);
+      return;
     }
+
+    if (command.type === "toggle") {
+      event.preventDefault();
+      run(
+        () => dispatchIntent({
+          type: "selection.set",
+          rowId: focus.rowId,
+          columnId: focus.columnId,
+          mode: "toggle",
+        }),
+        "Range toggled",
+      );
+      return;
+    }
+
+    if (command.type === "delete") {
+      event.preventDefault();
+      run(
+        () => dispatchIntent({ type: "selection.fill", value: null }),
+        "Selected cells cleared",
+      );
+      return;
+    }
+
+    event.preventDefault();
+    run(
+      () => command.type === "redo" ? editor.redo() : editor.undo(),
+      command.type === "redo" ? "Redone" : "Undone",
+    );
   }
 
   return (
     <PageFrame>
         <PageHeader
           illustration="braces"
-          title="Sheet Demo"
+          title="Sheet"
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>
@@ -165,12 +223,14 @@ export function SheetDemo() {
 
         <div className="grid gap-4">
           <section
+            ref={surfaceRef}
             aria-label="Editable sheet"
+            tabIndex={0}
             onCopy={handleNativeCopy}
             onCut={handleNativeCut}
             onPaste={handleNativePaste}
             onKeyDown={handleKeyDown}
-            className={classes("min-w-0 overflow-auto p-3", ui.surface.raised)}
+            className={classes("min-w-0 overflow-auto p-3", ui.surface.raised, ui.state.focus)}
           >
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
               <thead>
@@ -215,27 +275,27 @@ export function SheetDemo() {
                 ))}
               </tbody>
             </table>
-            <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click adds or removes a single-cell range. Fill selected changes every selected cell in one transaction.</p>
+            <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
           </section>
 
           <section className={classes("p-3", ui.surface.raised)}>
-            <DisclosureButton
-              expanded={inspectorOpen}
-              controls="sheet-editing-state"
-              onClick={() => setInspectorOpen((open) => !open)}
-            >
-              Inspect editing state
-            </DisclosureButton>
-            <aside id="sheet-editing-state" hidden={!inspectorOpen} className="mt-3 grid min-w-0 gap-3 lg:grid-cols-2" aria-label="Canonical JSON">
-              <JsonInspector label="Canonical JSON" meta="stable row + column ids" value={snapshot.value} testId="sheet-canonical-json" size="tall" />
-              <JsonInspector label="intent" meta={lastIntent ? lastIntent.type : "dispatch only"} value={lastIntent} testId="sheet-intent-json" size="compact" />
-              <JsonInspector label="result" meta={lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet"} value={lastResult} testId="sheet-result-json" size="compact" />
-              <JsonInspector label="Selection" value={snapshot.selection} testId="sheet-selection-json" size="compact" />
-            </aside>
+            <Inspector items={[
+              { label: "Canonical JSON", meta: "stable row + column ids", value: snapshot.value, testId: "sheet-canonical-json", size: "tall" },
+              { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "sheet-intent-json", size: "compact" },
+              { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "sheet-result-json", size: "compact" },
+              { label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact" },
+            ]} />
           </section>
         </div>
     </PageFrame>
   );
+}
+
+function focusCell(surface: HTMLElement | null, rowId: string, columnId: string) {
+  const cell = surface?.querySelector(
+    `[data-row-id="${CSS.escape(rowId)}"][data-column-id="${CSS.escape(columnId)}"] input`,
+  );
+  if (cell instanceof HTMLInputElement) cell.focus();
 }
 
 function displayValue(value: unknown): string {

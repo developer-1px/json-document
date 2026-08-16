@@ -9,6 +9,15 @@ export {
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";
+export {
+  chordFromStroke,
+  createWebKeyboardAdapter,
+  defaultWebKeymap,
+  gridBoundary,
+  lineBoundary,
+  moveGridPoint,
+  moveLinePoint,
+} from "./keyboard.js";
 export type {
   WebClipboardBinding,
   WebClipboardCodec,
@@ -24,3 +33,9 @@ export type {
   WebTextControlEvent,
   WebTextInput,
 } from "./input.js";
+export type {
+  WebKeyboardAdapter,
+  WebKeyboardCommand,
+  WebKeyboardStroke,
+  WebKeymap,
+} from "./keyboard.js";

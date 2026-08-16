@@ -8,7 +8,7 @@ test("Sheet demo completes rectangular selection, clipboard, edit, undo, and red
 
   await page.goto("/demo/sheet");
   await page.getByText("Inspect editing state", { exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Sheet Demo" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sheet", exact: true })).toBeVisible();
 
   await page.getByRole("textbox", { name: "Name row 1" }).click();
   await page.getByRole("textbox", { name: "Status row 2" }).click({ modifiers: ["Shift"] });
@@ -83,6 +83,33 @@ test("Sheet demo cuts the primary rectangle and restores cells with undo", async
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   document = await canonicalSheet(page);
   expect(document.rows[0]?.cells).toEqual({ name: "Alpha", status: "Draft", owner: "Mina" });
+  expect(document.rows[1]?.cells).toEqual({ name: "Beta", status: "Ready", owner: "Theo" });
+});
+
+test("Sheet demo moves and extends selection through the Web keyboard adapter", async ({ page }) => {
+  await page.goto("/demo/sheet");
+  await page.getByText("Inspect editing state", { exact: true }).click();
+  await page.getByRole("textbox", { name: "Name row 1" }).click();
+
+  await page.keyboard.press("ArrowDown");
+  expect(JSON.parse(await page.getByTestId("sheet-selection-json").innerText()).focus).toEqual({
+    rowId: "row-2",
+    columnId: "name",
+  });
+
+  await page.keyboard.press("Shift+ArrowRight");
+  expect(JSON.parse(await page.getByTestId("sheet-selection-json").innerText()).focus).toEqual({
+    rowId: "row-2",
+    columnId: "status",
+  });
+  await expect(page.locator('td[data-selected="true"]')).toHaveCount(2);
+
+  await page.keyboard.press("Delete");
+  let document = await canonicalSheet(page);
+  expect(document.rows[1]?.cells).toEqual({ name: null, status: null, owner: "Theo" });
+
+  await page.keyboard.press("ControlOrMeta+z");
+  document = await canonicalSheet(page);
   expect(document.rows[1]?.cells).toEqual({ name: "Beta", status: "Ready", owner: "Theo" });
 });
 

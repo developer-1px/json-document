@@ -50,7 +50,18 @@ const publicDocs = {
   intentGuide: read("docs/public/intent-guide.md"),
   quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
+  adapters: read("docs/public/adapters.md"),
   connectors: read("docs/public/connectors.md"),
+  collaboration: read("docs/public/collaboration.md"),
+  collaborationReplica: read("docs/public/collaboration-replica.md"),
+  collaborationHistory: read("docs/public/collaboration-history.md"),
+  collaborationText: read("docs/public/collaboration-text.md"),
+  collaborationLease: read("docs/public/collaboration-lease.md"),
+  collaborationLifecycle: read("docs/public/collaboration-lifecycle.md"),
+  editors: read("docs/public/editors.md"),
+  order: read("docs/public/order.md"),
+  object: read("docs/public/object.md"),
+  tree: read("docs/public/tree.md"),
 };
 const surfaces = {
   rootReadme: read("README.md"),
@@ -89,18 +100,29 @@ const activeCompanionPackages = new Set([
 ]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
+  "adapters.md",
   "api.md",
   "clipboard.md",
+  "collaboration-history.md",
+  "collaboration-lease.md",
+  "collaboration-lifecycle.md",
+  "collaboration-replica.md",
+  "collaboration-text.md",
+  "collaboration.md",
   "concepts.md",
   "connectors.md",
+  "editors.md",
   "history.md",
   "intent-guide.md",
   "intent.md",
   "llms.txt",
+  "object.md",
+  "order.md",
   "overview.md",
   "quickstart.md",
   "selection.md",
   "topology.md",
+  "tree.md",
 ])) {
   fail("docs/public: only the active v3 guides and llms.txt may remain.");
 }

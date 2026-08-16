@@ -14,6 +14,12 @@ import {
   databaseClipboardCodec,
   documentClipboardCodec,
   orderClipboardCodec,
+  createWebKeyboardAdapter,
+  defaultWebKeymap,
+  gridBoundary,
+  lineBoundary,
+  moveGridPoint,
+  moveLinePoint,
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
@@ -261,6 +267,54 @@ describe("Web input modifiers", () => {
       text: "Beta",
       offset: 4,
     });
+  });
+});
+
+describe("Web keyboard adapter", () => {
+  const adapter = createWebKeyboardAdapter();
+  const grid = {
+    rowIds: ["r1", "r2", "r3"],
+    columnIds: ["name", "status", "owner"],
+  };
+
+  test("resolves conventional structural chords through the default keymap", () => {
+    expect(adapter.resolve({ key: "ArrowDown", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "move", direction: "down", operation: "replace" });
+    expect(adapter.resolve({ key: "ArrowRight", shiftKey: true, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "move", direction: "right", operation: "extend" });
+    expect(adapter.resolve({ key: " ", shiftKey: false, metaKey: true, ctrlKey: false }))
+      .toEqual({ type: "toggle" });
+    expect(adapter.resolve({ key: "Delete", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "delete" });
+    expect(adapter.resolve({ key: "z", shiftKey: true, metaKey: false, ctrlKey: true }))
+      .toEqual({ type: "redo" });
+    expect(adapter.resolve({ key: "c", shiftKey: false, metaKey: true, ctrlKey: false })).toBeNull();
+  });
+
+  test("lets the host replace chords without inventing editing commands", () => {
+    const custom = createWebKeyboardAdapter({
+      keymap: { ...defaultWebKeymap, Enter: { type: "toggle" } },
+    });
+    expect(custom.resolve({ key: "Enter", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "toggle" });
+  });
+
+  test("moves and bounds a grid point in visible order", () => {
+    const start = { rowId: "r2", columnId: "status" };
+    expect(moveGridPoint(grid, start, "up")).toEqual({ rowId: "r1", columnId: "status" });
+    expect(moveGridPoint(grid, start, "left")).toEqual({ rowId: "r2", columnId: "name" });
+    expect(moveGridPoint(grid, { rowId: "r1", columnId: "name" }, "up")).toBeNull();
+    expect(gridBoundary(grid, start, "start")).toEqual({ rowId: "r2", columnId: "name" });
+    expect(gridBoundary(grid, start, "end")).toEqual({ rowId: "r2", columnId: "owner" });
+  });
+
+  test("moves and bounds a line point in visible order", () => {
+    const ids = ["alpha", "beta", "gamma"];
+    expect(moveLinePoint(ids, "beta", "up")).toBe("alpha");
+    expect(moveLinePoint(ids, "beta", "down")).toBe("gamma");
+    expect(moveLinePoint(ids, "alpha", "up")).toBeNull();
+    expect(lineBoundary(ids, "start")).toBe("alpha");
+    expect(lineBoundary(ids, "end")).toBe("gamma");
   });
 });
 

@@ -4,9 +4,9 @@ test("Connector catalog exposes only implemented Live Demos", async ({ page }) =
   await page.goto("/connectors");
 
   await expect(page.getByRole("heading", { level: 1, name: "Connectors" })).toBeVisible();
-  await expect(page.getByRole("article")).toHaveCount(7);
-  await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(7);
-  await expect(page.getByText("available", { exact: true })).toHaveCount(7);
+  await expect(page.getByRole("article")).toHaveCount(5);
+  await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(5);
+  await expect(page.getByText("available", { exact: true })).toHaveCount(5);
 
   const reactArticle = page.getByRole("article").filter({
     has: page.getByRole("heading", { level: 2, name: "React", exact: true }),
@@ -28,6 +28,8 @@ test("React Connector Live Demo publishes document and editing snapshots", async
   await page.getByRole("button", { name: "Count 0" }).click();
   const documentValue = JSON.parse(await page.getByTestId("react-document-json").innerText()) as { title: string; count: number };
   expect(documentValue).toEqual({ title: "Live React document", count: 1 });
+  await page.getByRole("region", { name: "JSON Document subscription" })
+    .getByRole("button", { name: "Inspect canonical JSON" }).click();
   await expect(page.getByTestId("react-document-json").locator("xpath=ancestor::figure").getByRole("button", { name: "Copy" })).toBeVisible();
 
   await page.getByRole("textbox", { name: "Connector block 1" }).fill("React snapshot updated.");

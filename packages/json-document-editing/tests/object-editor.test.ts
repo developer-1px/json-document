@@ -44,6 +44,14 @@ describe("object editing selection family", () => {
     expect(editor.snapshot.selection).toEqual(selectionBefore);
   });
 
+  test("translates selected objects and restores their positions", () => {
+    const editor = createObjectEditor(initial);
+    expect(editor.dispatch({ type: "object.translate", objectIds: ["a"], dx: 5, dy: -2 }).ok).toBe(true);
+    expect((editor.snapshot.value as ObjectDocument).objects[0]).toMatchObject({ x: 15, y: 8 });
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.snapshot.value).toEqual(initial);
+  });
+
   test("deletes selected objects and restores them selected", () => {
     const editor = createObjectEditor(initial);
     editor.dispatch({ type: "selection.set", objectIds: ["a", "c"] });

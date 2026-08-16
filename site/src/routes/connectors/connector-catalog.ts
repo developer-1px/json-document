@@ -1,5 +1,5 @@
 export type ConnectorCatalogEntry = {
-  readonly id: "react" | "react-hook-form" | "ajv" | "zod" | "tanstack-table" | "web" | "contenteditable";
+  readonly id: "react" | "react-hook-form" | "ajv" | "zod" | "tanstack-table";
   readonly name: string;
   readonly packageName: string;
   readonly description: string;
@@ -52,21 +52,5 @@ export const connectorCatalog: ReadonlyArray<ConnectorCatalogEntry> = [
     description: "Headless table rows and cell commits connected to JSON Patch.",
     status: "available",
     demoPath: "/connectors/tanstack-table",
-  },
-  {
-    id: "web",
-    name: "Web Platform",
-    packageName: "@interactive-os/json-document-web",
-    description: "Browser clipboard and input surfaces connected to editing contracts.",
-    status: "available",
-    demoPath: "/connectors/web",
-  },
-  {
-    id: "contenteditable",
-    name: "Contenteditable",
-    packageName: "@interactive-os/json-document-contenteditable",
-    description: "React contenteditable root leased to a local JSON Document string pointer.",
-    status: "available",
-    demoPath: "/connectors/contenteditable",
   },
 ];

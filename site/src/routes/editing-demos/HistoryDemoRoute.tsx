@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
-import { JsonInspector } from "../../shared/ui/json-inspector";
+import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -56,19 +56,23 @@ export function HistoryDemoRoute() {
             <ActionButton onClick={undo} disabled={!snapshot.canUndo}>Undo</ActionButton>
             <ActionButton onClick={redo} disabled={!snapshot.canRedo}>Redo</ActionButton>
           </div>
-          <JsonInspector
-            label="history"
-            value={{ canUndo: snapshot.canUndo, canRedo: snapshot.canRedo }}
-            testId="history-demo-status"
-            size="compact"
-          />
+          <Inspector label="Inspect history state" items={[
+            {
+              label: "history",
+              value: { canUndo: snapshot.canUndo, canRedo: snapshot.canRedo },
+              testId: "history-demo-status",
+              size: "compact",
+            },
+          ]} />
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-result">
           <p className={ui.text.label}>3 · 복원된 상태</p>
           <h2 id="history-result" className={classes("mb-2 mt-1", ui.text.heading)}>document.value와 Selection이 함께 이동합니다</h2>
-          <JsonInspector label="document.value" value={snapshot.value} testId="history-demo-document" size="compact" />
-          <JsonInspector label="selection" value={snapshot.selection} testId="history-demo-selection" size="compact" />
+          <Inspector label="Inspect restored state" items={[
+            { label: "document.value", value: snapshot.value, testId: "history-demo-document", size: "compact" },
+            { label: "selection", value: snapshot.selection, testId: "history-demo-selection", size: "compact" },
+          ]} />
         </section>
       </div>
     </PageFrame>
