@@ -28,15 +28,22 @@ type RetiredPoint =
 
 export function normalizeRichText(
   value: unknown,
-  options: { readonly schema?: RichTextSchema; readonly createId?: () => RichTextNodeId } = {},
+  options: {
+    readonly schema?: RichTextSchema;
+    readonly createId?: () => RichTextNodeId;
+    /** Skip input detachment only when the caller keeps the input immutable. */
+    readonly inputOwnership?: "detached" | "borrowed";
+  } = {},
 ): RichTextNormalizationResult {
   const schema = options.schema ?? richTextSchemaV1;
   if (!isObject(value) || value.type !== "doc") return failure("rich-text.invalid-document", "Rich Text document must be a doc object.");
   if (value.profile !== schema.profile) return failure("rich-text.profile-unavailable", "Rich Text profile provider is unavailable.");
-  const cloned = JSON.parse(JSON.stringify(value)) as RichTextDocument;
+  const input = options.inputOwnership === "borrowed"
+    ? value as RichTextDocument
+    : JSON.parse(JSON.stringify(value)) as RichTextDocument;
   const operations: JSONPatchOperation[] = [];
   const retired = new Map<string, RetiredPoint>();
-  const normalized = normalizeNode(cloned, "") as RichTextDocument | RichTextValidationFailure;
+  const normalized = normalizeNode(input, "") as RichTextDocument | RichTextValidationFailure;
   if (isFailure(normalized)) return normalized;
   let document = normalized as RichTextDocument;
   if (document.content.length === 0) {
