@@ -25,10 +25,21 @@ const document = createJSONDocument(
 ```
 
 The Connector reports the first Ajv error message and `instancePath` as a JSON
-Document validation failure. It always validates a mutable clone. Ajv options
+Document validation failure. By default it validates a mutable clone. Ajv options
 such as `removeAdditional`, `useDefaults`, and `coerceTypes` may affect whether
 that clone passes, but their transformed output is never adopted as canonical
 JSON or reported as applied JSON Patch operations.
+
+When the compiled validator and every custom keyword are proven read-only, the
+clone can be skipped explicitly:
+
+```ts
+createAjvValidator(validateSchema, { candidateIsolation: "none" });
+```
+
+This mode passes the live validation candidate to Ajv. Do not use it with
+mutating Ajv options or keywords; `candidateIsolation: "clone"` remains the
+default and safe fallback.
 
 Async validators are rejected because JSON Document patch validation and commit
 are synchronous. The Connector does not create or configure an Ajv instance,
