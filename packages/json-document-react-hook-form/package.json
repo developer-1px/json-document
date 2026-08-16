@@ -29,6 +29,7 @@
     "prebuild": "npm run build -w @interactive-os/json-document-selection && npm run build -w @interactive-os/json-document-editing && npm run build -w @interactive-os/json-document-react",
     "build": "npm run clean && tsc -p tsconfig.json",
     "test": "vitest run --config vitest.config.ts",
+    "perf": "npm run build && node benchmarks/form.mjs",
     "pretypecheck": "npm run build -w @interactive-os/json-document-selection && npm run build -w @interactive-os/json-document-editing && npm run build -w @interactive-os/json-document-react && npm run build -w @interactive-os/json-document-zod",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
