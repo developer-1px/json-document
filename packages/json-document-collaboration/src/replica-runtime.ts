@@ -139,7 +139,7 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
       const nextMaterialized = materializeChanges(
         state.initialTree,
         nextGraph.ordered,
-        (candidate) => state.evaluateValidation(candidate),
+        state.materializeValidation,
       );
       const changed = !jsonEqual(state.documentStore.value, nextMaterialized.value);
 

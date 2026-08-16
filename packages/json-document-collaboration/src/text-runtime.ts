@@ -295,7 +295,7 @@ export function createText(state: RuntimeState): Text {
       const nextMaterialized = materializeChanges(
         state.initialTree,
         nextGraph.ordered,
-        (candidate) => state.evaluateValidation(candidate),
+        state.materializeValidation,
       );
       const changeKey = changeIdKey(changeId);
       if (!nextMaterialized.history.appliedKeys.has(changeKey)) {
