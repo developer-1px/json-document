@@ -5,18 +5,15 @@ import {
   pageDescriptor,
   pageDescriptors,
 } from "../../src/app/page-descriptors";
-import { adapterCatalog } from "../../src/routes/adapters/adapter-catalog";
-import { connectorCatalog } from "../../src/routes/connectors/connector-catalog";
 
 describe("public page descriptors", () => {
-  test("derive adapter and connector catalogs from integration metadata", () => {
-    expect(adapterCatalog.map(({ demoPath }) => demoPath)).toEqual(
-      integrationPageDescriptors("adapter").map(({ path }) => path),
-    );
-    expect(connectorCatalog.map(({ demoPath }) => demoPath)).toEqual(
-      integrationPageDescriptors("connector").map(({ path }) => path),
-    );
-    expect(connectorCatalog.find(({ id }) => id === "zod")?.moreDemos).toEqual([
+  test("owns integration pages and related demos in canonical descriptors", () => {
+    expect(integrationPageDescriptors("adapter")).toHaveLength(3);
+    expect(integrationPageDescriptors("connector")).toHaveLength(5);
+    expect(pageDescriptors.filter(({ parentPath }) => parentPath === "/connectors/zod").map(({ path, label, relatedDemoLabel }) => ({
+      path,
+      label: relatedDemoLabel ?? label,
+    }))).toEqual([
       { path: "/connectors/zod/validate", label: "Validate commits" },
     ]);
   });

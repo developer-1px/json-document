@@ -18,7 +18,6 @@ export type SiteRoute = {
   readonly integration?: {
     readonly kind: IntegrationKind;
     readonly packageName: string;
-    readonly status: "available" | "planned";
   };
 };
 

@@ -1,4 +1,4 @@
-import { adapterCatalog } from "./adapter-catalog";
+import { integrationPageDescriptors } from "../../app/page-descriptors";
 import { InlineCode } from "../../shared/ui/code-block";
 import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
@@ -12,17 +12,12 @@ export function AdapterCatalogRoute() {
       </PageHeader>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {adapterCatalog.map((adapter) => (
-          <article key={adapter.id} className={classes("flex min-h-44 flex-col py-4", ui.surface.sectionDivider)}>
-            <div className="flex items-start justify-between gap-3">
-              <h2 className={classes("m-0", ui.text.heading)}>{adapter.name}</h2>
-              <span className={classes("px-2 py-1", ui.surface.inset, ui.text.label)}>
-                {adapter.status}
-              </span>
-            </div>
-            <InlineCode className="mt-2 block">{adapter.packageName}</InlineCode>
+        {integrationPageDescriptors("adapter").map((adapter) => (
+          <article key={adapter.path} className={classes("flex min-h-44 flex-col py-4", ui.surface.sectionDivider)}>
+            <h2 className={classes("m-0", ui.text.heading)}>{adapter.label}</h2>
+            <InlineCode className="mt-2 block">{adapter.integration!.packageName}</InlineCode>
             <p className={classes("mb-4 mt-3", ui.text.body)}>{adapter.description}</p>
-            <ActionLink to={adapter.demoPath} kind="prominent" className="mt-auto self-start">
+            <ActionLink to={adapter.path} kind="prominent" className="mt-auto self-start">
               Open Live Demo
             </ActionLink>
           </article>
