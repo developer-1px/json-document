@@ -13,7 +13,7 @@ export function ConnectorCatalogRoute() {
 
         <div className="grid gap-3 sm:grid-cols-2">
           {integrationPageDescriptors("connector").map((connector) => (
-            <article key={connector.path} className={classes("flex min-h-44 flex-col py-4", ui.surface.sectionDivider)}>
+            <article key={connector.path} className="flex min-h-44 flex-col py-4">
               <h2 className={classes("m-0", ui.text.heading)}>{connector.label}</h2>
               <InlineCode className="mt-2 block">{connector.integration!.packageName}</InlineCode>
               <p className={classes("mb-4 mt-3", ui.text.body)}>{connector.description}</p>

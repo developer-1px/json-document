@@ -19,7 +19,7 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
             ? null
             : <h1 id={id} className={classes("mb-0 mt-0", ui.text.heading)}>{children}</h1>,
           h2: ({ children, id }) => (
-            <h2 id={id} className={classes("mb-0 mt-6 pt-5 first:mt-0", ui.surface.sectionDivider, ui.text.heading)}>
+            <h2 id={id} className={classes("mb-0", ui.text.section)}>
               {children}
             </h2>
           ),

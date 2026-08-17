@@ -5,8 +5,8 @@ export const ui = {
     app: "bg-paper font-sans text-ink antialiased",
     page: "min-h-full bg-paper px-page pb-8 pt-4 lg:px-page-wide",
     content: "mx-auto max-w-6xl",
-    navigation: "border-b border-pencil-light/60 bg-paper text-sm md:border-b-0 md:border-r",
-    brand: "font-mono text-ink-strong no-underline hover:text-ink md:border-b md:border-pencil-light/60",
+    navigation: "bg-paper-warm text-sm",
+    brand: "font-mono text-ink-strong no-underline hover:text-ink",
   },
   nav: {
     menu: "grid gap-3 px-3 pb-3 md:px-2",
@@ -36,14 +36,15 @@ export const ui = {
     label: "text-xs font-medium text-ink",
     title: "text-page-title font-semibold tracking-[-0.025em] text-ink-strong",
     heading: "text-base font-semibold text-ink-strong",
+    section: "mt-6 text-lg font-semibold tracking-[-0.015em] text-ink-strong first:mt-0",
     body: "text-sm leading-6 text-ink",
     meta: "text-xs leading-5 text-pencil",
   },
   pageHeader: {
-    root: "mb-7 border-b border-pencil-light/60 pb-5",
+    root: "mb-8",
     layout: "grid min-w-0 gap-4",
     layoutWithAside: "lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-end",
-    copy: "relative min-w-0",
+    copy: "relative min-w-0 border-b border-pencil-light/40 pb-5",
     copyWithArtwork: "pr-32 sm:pr-52",
     artwork: "pointer-events-none absolute right-0 top-0 m-0 flex h-20 w-28 items-start justify-end overflow-hidden sm:h-24 sm:w-48",
     image: "block max-h-full max-w-full object-contain object-right-bottom",
@@ -57,7 +58,6 @@ export const ui = {
     tableHead: "border-b border-pencil-light text-ink",
     tableCell: "border-b border-pencil-light/70 text-ink",
     table: "border-collapse text-left",
-    sectionDivider: "border-t border-pencil-light/70",
     navigationRule: "border-l border-transparent",
     separator: "bg-pencil-light",
     gridHead: "border border-pencil-light bg-paper-warm text-ink",
@@ -95,10 +95,10 @@ export const ui = {
   },
   code: {
     inline: "rounded-[2px] bg-paper-warm px-1 py-0.5 font-mono text-[0.85em] text-ink-strong",
-    install: "min-w-0 self-start rounded-[3px] border border-pencil-light bg-paper p-3 shadow-none",
+    install: "min-w-0 self-start rounded-[3px] bg-paper-warm p-3 shadow-none",
     prompt: "text-impact-ink",
     block: {
-      frame: "relative min-w-0 overflow-hidden rounded-[3px] border border-pencil-light bg-paper-warm shadow-none",
+      frame: "relative min-w-0 overflow-hidden rounded-[3px] bg-paper-warm shadow-none",
       copy: "absolute right-1.5 top-1.5 z-10 h-6 w-6 bg-paper-warm/90 data-[copied=true]:text-sage [&_path]:stroke-current [&_path]:stroke-2 [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round] [&_rect]:stroke-current [&_rect]:stroke-2",
       viewport: {
         compact: "max-h-32",
@@ -109,7 +109,7 @@ export const ui = {
       pre: "m-0 overflow-auto bg-paper-warm",
       code: "block min-w-max whitespace-normal py-2 font-mono text-[13px] leading-[1.55] text-ink",
       line: "grid min-h-[1.55em] grid-cols-[2.25rem_minmax(max-content,1fr)] px-2",
-      lineNumber: "select-none border-r border-pencil-light pr-2 text-right text-[9px] text-pencil before:content-[attr(data-line-number)]",
+      lineNumber: "select-none pr-2 text-right text-[9px] text-pencil before:content-[attr(data-line-number)]",
       lineContent: "whitespace-pre pl-2 pr-10",
       token: {
         comment: "text-pencil",
