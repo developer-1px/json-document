@@ -26,10 +26,9 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "prebuild": "npm run build -w @interactive-os/json-document-editing",
-    "build": "npm run clean && tsc -p tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json",
     "test": "vitest run --config vitest.config.ts",
-    "pretypecheck": "npm run build -w @interactive-os/json-document-editing",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
