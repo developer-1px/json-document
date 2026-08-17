@@ -102,7 +102,7 @@ test("TanStack Table Connector fills disjoint ranges in visible order", async ({
   expect(JSON.parse(await page.getByTestId("tanstack-selection-json").innerText()).ranges).toHaveLength(2);
 });
 
-test("TanStack Table and Web Platform Connectors compose for native structured clipboard events", async ({ page }) => {
+test("TanStack Table Connector and Web Platform Adapter compose for native structured clipboard events", async ({ page }) => {
   await page.goto("/connectors/tanstack-table");
   const nameR1 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "name r1" }) });
   const statusR2 = page.getByRole("gridcell").filter({ has: page.getByRole("textbox", { name: "status r2" }) });

@@ -73,7 +73,7 @@ available.
 
 ## Boundary
 
-The Connector owns:
+The Adapter owns:
 
 - structured MIME serialization and validation for public domain clipboard
   values;
