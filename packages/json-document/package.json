@@ -33,6 +33,7 @@
   ],
   "files": [
     "dist",
+    "!dist/.tsbuildinfo",
     "README.md",
     "public-contract.json",
     "LICENSE"
