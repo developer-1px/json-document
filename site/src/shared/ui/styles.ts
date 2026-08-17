@@ -40,6 +40,12 @@ export const ui = {
     body: "text-sm leading-6 text-ink",
     meta: "text-xs leading-5 text-pencil",
   },
+  product: {
+    frame: "rounded-[10px] bg-paper shadow-[0_1px_2px_rgba(69,67,62,0.04),0_16px_40px_rgba(69,67,62,0.08)]",
+    toolbar: "flex flex-wrap items-center gap-1 border-b border-pencil-light/40 px-3 py-2",
+    canvas: "p-3",
+    panel: "border-t border-pencil-light/40 px-3 py-2",
+  },
   pageHeader: {
     root: "mb-8",
     layout: "grid min-w-0 gap-4",

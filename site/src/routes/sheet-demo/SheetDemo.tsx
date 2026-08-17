@@ -19,7 +19,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialSheet: SheetDocument = {
@@ -207,21 +207,32 @@ export function SheetDemo() {
           )}
         >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
 
-        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Sheet actions">
-          <Action label="Copy" onClick={copySelection} />
-          <Action label="Cut" onClick={cutSelection} />
-          <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
-          <Action label="Fill selected" onClick={() => run(
-            () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
-            "Selected cells filled",
-          )} />
-          <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-          <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
-          <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
-          <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
-        </div>
-
-        <div className="grid gap-4">
+        <ProductApp
+          toolbarLabel="Sheet actions"
+          toolbar={(
+            <>
+              <Action label="Copy" onClick={copySelection} />
+              <Action label="Cut" onClick={cutSelection} />
+              <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
+              <Action label="Fill selected" onClick={() => run(
+                () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
+                "Selected cells filled",
+              )} />
+              <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
+              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
+              <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
+            </>
+          )}
+          inspector={(
+            <Inspector placement="inline" items={[
+              { label: "Canonical JSON", meta: "stable row + column ids", value: snapshot.value, testId: "sheet-canonical-json", size: "tall" },
+              { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "sheet-intent-json", size: "compact" },
+              { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "sheet-result-json", size: "compact" },
+              { label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact" },
+            ]} />
+          )}
+        >
           <section
             ref={surfaceRef}
             aria-label="Editable sheet"
@@ -230,7 +241,7 @@ export function SheetDemo() {
             onCut={handleNativeCut}
             onPaste={handleNativePaste}
             onKeyDown={handleKeyDown}
-            className={classes("min-w-0 overflow-auto p-3", ui.surface.raised, ui.state.focus)}
+            className={classes("min-w-0 overflow-auto", ui.state.focus)}
           >
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
               <thead>
@@ -277,16 +288,7 @@ export function SheetDemo() {
             </table>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
           </section>
-
-          <section className={classes("p-3", ui.surface.raised)}>
-            <Inspector items={[
-              { label: "Canonical JSON", meta: "stable row + column ids", value: snapshot.value, testId: "sheet-canonical-json", size: "tall" },
-              { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "sheet-intent-json", size: "compact" },
-              { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "sheet-result-json", size: "compact" },
-              { label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact" },
-            ]} />
-          </section>
-        </div>
+        </ProductApp>
     </PageFrame>
   );
 }

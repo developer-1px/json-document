@@ -6,8 +6,7 @@ import {
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
+import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 
 const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
 
@@ -71,43 +70,46 @@ export function CanvasDemoRoute() {
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
 
-      <section aria-label="Canvas" className={classes("relative min-h-[22rem] overflow-hidden", ui.surface.raised)}>
-        {document.objects.map((object) => {
-          const offset = drag?.ids.includes(object.id) ? drag : null;
-          return (
-            <SelectableItem
-              key={object.id}
-              selected={selected.has(object.id)}
-              data-object-id={object.id}
-              onPointerDown={(event) => handlePointerDown(event, object.id)}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              className="absolute grid place-items-center"
-              style={{
-                left: object.x + (offset?.dx ?? 0),
-                top: object.y + (offset?.dy ?? 0),
-                width: object.width,
-                height: object.height,
-                backgroundColor: object.color,
-                color: "#fff8f2",
-              }}
-            >
-              {object.label}
-            </SelectableItem>
-          );
-        })}
-        <div className={classes("absolute bottom-3 left-3 flex flex-wrap gap-1", ui.surface.workspace)}>
-          {colors.map((color) => (
-            <ActionButton
-              key={color}
-              aria-label={`Fill ${color}`}
-              onClick={() => editor.dispatch({ type: "selection.fill", color })}
-            >
-              <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
-            </ActionButton>
-          ))}
-        </div>
-      </section>
+      <ProductApp
+        toolbarLabel="Canvas actions"
+        canvasClassName="relative min-h-[22rem] overflow-hidden"
+        toolbar={colors.map((color) => (
+          <ActionButton
+            key={color}
+            aria-label={`Fill ${color}`}
+            onClick={() => editor.dispatch({ type: "selection.fill", color })}
+          >
+            <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
+          </ActionButton>
+        ))}
+      >
+        <section aria-label="Canvas" className="contents">
+          {document.objects.map((object) => {
+            const offset = drag?.ids.includes(object.id) ? drag : null;
+            return (
+              <SelectableItem
+                key={object.id}
+                selected={selected.has(object.id)}
+                data-object-id={object.id}
+                onPointerDown={(event) => handlePointerDown(event, object.id)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                className="absolute grid place-items-center"
+                style={{
+                  left: object.x + (offset?.dx ?? 0),
+                  top: object.y + (offset?.dy ?? 0),
+                  width: object.width,
+                  height: object.height,
+                  backgroundColor: object.color,
+                  color: "#fff8f2",
+                }}
+              >
+                {object.label}
+              </SelectableItem>
+            );
+          })}
+        </section>
+      </ProductApp>
     </PageFrame>
   );
 }

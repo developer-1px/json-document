@@ -5,7 +5,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { ActionButton } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialBoard: KanbanDocument = {
@@ -41,11 +41,15 @@ export function KanbanDemoRoute() {
         Drag a card into another column. One JSON document keeps the board.
       </PageHeader>
 
-      <div className="mb-3 flex gap-1">
-        <ActionButton disabled={!snapshot.canUndo} onClick={() => editor.undo()}>Undo</ActionButton>
-        <ActionButton disabled={!snapshot.canRedo} onClick={() => editor.redo()}>Redo</ActionButton>
-      </div>
-
+      <ProductApp
+        toolbarLabel="Kanban actions"
+        toolbar={(
+          <>
+            <ActionButton disabled={!snapshot.canUndo} onClick={() => editor.undo()}>Undo</ActionButton>
+            <ActionButton disabled={!snapshot.canRedo} onClick={() => editor.redo()}>Redo</ActionButton>
+          </>
+        )}
+      >
       <section aria-label="Kanban board" className="grid gap-3 md:grid-cols-3">
         {board.columns.map((column) => (
           <div
@@ -56,7 +60,7 @@ export function KanbanDemoRoute() {
               event.preventDefault();
               moveTo(column.id);
             }}
-            className={classes("grid content-start gap-2 p-3", ui.surface.raised)}
+            className="grid content-start gap-2 p-3"
           >
             <h2 className={classes("mt-0", ui.text.title)}>{column.title}</h2>
             {column.cardIds.map((cardId) => {
@@ -84,6 +88,7 @@ export function KanbanDemoRoute() {
           </div>
         ))}
       </section>
+      </ProductApp>
     </PageFrame>
   );
 }

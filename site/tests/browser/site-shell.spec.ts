@@ -373,6 +373,24 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   ))).not.toBe("0px");
 });
 
+test("editor demos keep one product app under the page lobby", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/demo/tree");
+
+  await expect(page.locator("[data-page-header]")).toHaveCount(1);
+  await expect(page.locator("[data-product-app]")).toHaveCount(1);
+  const app = page.locator("[data-product-app]");
+  await expect(app.getByRole("toolbar", { name: "Tree actions" })).toBeVisible();
+  await expect(app.getByRole("treeitem").or(app.getByText("Fruit", { exact: true })).first()).toBeVisible();
+  await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
+  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => (
+    getComputedStyle(element).backgroundColor
+  ))).toBe("rgba(0, 0, 0, 0)");
+
+  await page.goto("/demo/selection");
+  await expect(page.locator("[data-product-app]")).toHaveCount(0);
+});
+
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/connectors/react");

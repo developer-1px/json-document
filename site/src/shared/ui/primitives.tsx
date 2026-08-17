@@ -38,6 +38,26 @@ export function PageFrame(props: { readonly children: ReactNode }) {
   );
 }
 
+export function ProductApp(props: {
+  readonly toolbar?: ReactNode;
+  readonly toolbarLabel?: string;
+  readonly inspector?: ReactNode;
+  readonly canvasClassName?: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <div className={ui.product.frame} data-product-app>
+      {props.toolbar != null ? (
+        <div className={ui.product.toolbar} role="toolbar" aria-label={props.toolbarLabel}>
+          {props.toolbar}
+        </div>
+      ) : null}
+      <div className={classes(ui.product.canvas, props.canvasClassName)}>{props.children}</div>
+      {props.inspector != null ? <div className={ui.product.panel}>{props.inspector}</div> : null}
+    </div>
+  );
+}
+
 export function PageHeader(props: {
   readonly label?: ReactNode;
   readonly title: ReactNode;
