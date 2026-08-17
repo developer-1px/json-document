@@ -41,7 +41,7 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
   await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
 });
 
-test("Document demo composes native clipboard events with Web Platform Connector cut history", async ({ page }) => {
+test("Document demo composes native clipboard events with Web Platform Adapter cut history", async ({ page }) => {
   await page.goto("/demo");
   await page.getByText("Inspect editing state", { exact: true }).click();
   await page.getByRole("button", { name: "Select block 1" }).click();

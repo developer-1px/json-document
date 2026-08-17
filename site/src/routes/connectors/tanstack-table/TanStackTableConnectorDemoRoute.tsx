@@ -26,8 +26,8 @@ export function TanStackTableConnectorDemoRoute() {
         { language: "typescript", source: connectorCode },
         { language: "typescript", source: webCompositionCode },
       ]}
-      connectionDescription="TanStack owns view state and row models. Its Connector translates visible stable identities into Sheet topology; the Web Connector independently translates native clipboard events into the same Sheet editing contract."
-      description="TanStack Table v8 projects the visible grid, the Web Platform Connector translates native clipboard events, and the Sheet editor keeps canonical JSON, selection, and history."
+      connectionDescription="TanStack owns view state and row models. Its Connector translates visible stable identities into Sheet topology; the Web Adapter independently translates native clipboard events into the same Sheet editing contract."
+      description="TanStack Table v8 projects the visible grid, the Web Platform Adapter translates native clipboard events, and the Sheet editor keeps canonical JSON, selection, and history."
       illustration="cursor"
       install="npm i @interactive-os/json-document-tanstack-table @interactive-os/json-document-web @tanstack/table-core"
       title="TanStack Table Connector"
