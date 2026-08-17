@@ -1,5 +1,3 @@
-import { defineConfig } from "vitest/config";
+import { defineNodeProject } from "../../test/vitest.shared.js";
 
-export default defineConfig({
-  test: { include: ["tests/**/*.test.ts"] },
-});
+export default defineNodeProject("json-document-rich-text");

@@ -11,7 +11,7 @@ import {
 
 afterEach(cleanup);
 
-describe("React connector", () => {
+describe("React Connector", () => {
   test("exposes the shared document through the official Connector entry point", () => {
     const document = createJSONDocument({ title: "Draft" });
     function View() {

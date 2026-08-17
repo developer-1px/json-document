@@ -4,7 +4,7 @@ import * as z from "zod/v4";
 
 import { createZodValidator } from "../src/index.js";
 
-describe("Zod connector", () => {
+describe("Zod Connector", () => {
   test("translates the first nested issue path into an escaped JSON Pointer", () => {
     const validate = createZodValidator(z.object({
       profile: z.object({

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("Contenteditable Connector commits a local string through the mounted React component", async ({ page }) => {
+test("Contenteditable Adapter commits a local string through the mounted React component", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error" || message.type() === "warning") errors.push(message.text());
