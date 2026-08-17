@@ -28,11 +28,12 @@
     "clean": "rm -rf dist",
     "prebuild": "npm run build -w @interactive-os/json-document && npm run build -w @interactive-os/json-document-selection",
     "build": "npm run clean && tsc -p tsconfig.json",
+    "check:structure": "node scripts/check-responsibility-layout.mjs",
     "pretypecheck": "npm run build -w @interactive-os/json-document",
     "test": "vitest run --config vitest.config.ts",
     "perf": "npm run build && node benchmarks/editors.mjs",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
-    "verify": "npm run typecheck && npm test && npm run build"
+    "verify": "npm run check:structure && npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
     "@interactive-os/json-document": "^3.0.0",

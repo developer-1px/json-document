@@ -11,6 +11,7 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { gridCellsInRange, gridPointIndex, gridRangeBounds, type GridTopology } from "./topology.js";
+import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -361,7 +362,7 @@ function resolveTopology(document: SheetDocument, topology?: SheetTopology, inde
 }
 
 function assertTopologyAxis(ids: ReadonlyArray<string>, available: { has(id: string): boolean }, label: "row" | "column"): void {
-  assertUniqueIds(ids, label);
+  assertUniqueSheetIds(ids, label);
   for (const id of ids) {
     if (!available.has(id)) throw new Error(`Sheet topology ${label} was not found: ${JSON.stringify(id)}.`);
   }
@@ -395,27 +396,6 @@ function resolvePointWithIndices(
   const rowIndex = index.rowIndexById.get(rowId);
   const columnIndex = index.columnIndexById.get(columnId);
   return rowIndex === undefined || columnIndex === undefined ? null : { rowIndex, columnIndex };
-}
-
-function assertSheetDocument(document: SheetDocument): void {
-  assertUniqueIds(document.columns.map((column) => column.id), "column");
-  assertUniqueIds(document.rows.map((row) => row.id), "row");
-  for (const row of document.rows) {
-    for (const column of document.columns) {
-      if (!Object.prototype.hasOwnProperty.call(row.cells, column.id)) {
-        throw new Error(`Sheet row ${JSON.stringify(row.id)} is missing column ${JSON.stringify(column.id)}.`);
-      }
-    }
-  }
-}
-
-function assertUniqueIds(ids: ReadonlyArray<string>, label: "row" | "column"): void {
-  const unique = new Set<string>();
-  for (const id of ids) {
-    if (id.length === 0) throw new Error(`Sheet ${label} ids must not be empty.`);
-    if (unique.has(id)) throw new Error(`Sheet ${label} id must be unique: ${JSON.stringify(id)}.`);
-    unique.add(id);
-  }
 }
 
 function cellText(value: JSONValue): string {
