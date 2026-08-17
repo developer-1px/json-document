@@ -1,7 +1,7 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
+import { defineDOMReactProject } from "../../test/vitest.shared.js";
 
-export default defineConfig({
+export default defineDOMReactProject("json-document-react-hook-form", {
   plugins: [react()],
   resolve: {
     alias: {
@@ -11,9 +11,5 @@ export default defineConfig({
       "@interactive-os/json-document-zod": new URL("../json-document-zod/src/index.ts", import.meta.url).pathname,
     },
     dedupe: ["react", "react-dom", "react-hook-form"],
-  },
-  test: {
-    environment: "jsdom",
-    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
   },
 });

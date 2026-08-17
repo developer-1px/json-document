@@ -30,7 +30,13 @@ export default defineConfig({
       },
   projects: [
     {
+      name: "setup",
+      testMatch: /.*\.setup\.ts/,
+    },
+    {
       name: "chrome",
+      dependencies: ["setup"],
+      testIgnore: /.*\.setup\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         ...(browserChannel ? { channel: browserChannel } : {}),

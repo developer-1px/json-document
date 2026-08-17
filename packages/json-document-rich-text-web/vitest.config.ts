@@ -1,2 +1,3 @@
-import { defineConfig } from "vitest/config";
-export default defineConfig({ test: { environment: "jsdom", include: ["tests/**/*.test.ts"] } });
+import { defineDOMProject } from "../../test/vitest.shared.js";
+
+export default defineDOMProject("json-document-rich-text-web");

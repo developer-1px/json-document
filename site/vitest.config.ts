@@ -1,9 +1,9 @@
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import { defineConfig } from "vitest/config";
+import { defineDOMReactProject } from "../test/vitest.shared.js";
 import { jsonDocumentSourceAliases } from "./config/json-document-source-aliases.ts";
 
-export default defineConfig({
+export default defineDOMReactProject("site", {
   plugins: [
     tanstackRouter({
       target: "react",
@@ -18,9 +18,5 @@ export default defineConfig({
   resolve: {
     alias: jsonDocumentSourceAliases(),
     dedupe: ["react", "react-dom"],
-  },
-  test: {
-    environment: "jsdom",
-    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
   },
 });

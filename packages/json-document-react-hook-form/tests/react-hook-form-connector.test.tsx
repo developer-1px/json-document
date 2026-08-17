@@ -16,7 +16,7 @@ interface ProfileForm {
 
 afterEach(cleanup);
 
-describe("React Hook Form connector", () => {
+describe("React Hook Form Connector", () => {
   test("keeps drafts local, then commits all submitted fields as one history entry", async () => {
     const document = createProfileDocument();
     render(<ProfileEditor document={document} />);

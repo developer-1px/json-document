@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 
 import { createAjvValidator } from "../src/index.js";
 
-describe("Ajv connector", () => {
+describe("Ajv Connector", () => {
   test("translates the first nested error instancePath into a JSON Pointer", () => {
     const ajv = new Ajv();
     const validate = createAjvValidator(ajv.compile({
