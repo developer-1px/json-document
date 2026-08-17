@@ -19,7 +19,6 @@ import {
 } from "@interactive-os/json-document-selection";
 import {
   hasRichTextContent,
-  isRichTextDocument,
   isRichTextText,
   RICH_TEXT_CLIPBOARD_MIME,
   type RichTextClipboard,
@@ -32,7 +31,6 @@ import {
   type RichTextMark,
 } from "./model.js";
 import { createRichTextNodeId } from "./identity.js";
-import { getActiveRichTextInstrument } from "./instrument.js";
 import { normalizeRichText } from "./normalize.js";
 import { diffRichText } from "./diff.js";
 import {
@@ -46,8 +44,11 @@ import {
 import { compareRichTextMarks, richTextSchemaV1, type RichTextSchema } from "./schema.js";
 import { rememberAppliedOperations } from "./applied-change.js";
 import { indexValidatedRichText, richTextTopology, seedRichTextTopology, type RichTextTopology } from "./topology.js";
-import { validateRichText, validateRichTextNodeAt, validateRichTextPath } from "./validation.js";
+import { validateRichText, validateRichTextNodeAt } from "./validation.js";
 import type { RichTextValidationFailure } from "./validation.js";
+import { readRichTextDocument, validateLocalOrFallback } from "./editor-validation.js";
+import { allTextNodes, collapsedAtPoint, firstSelection, mapSelectionByExistingIds, mapSelectionByTextOrder, reconcileOrFirst } from "./selection-mapping.js";
+import { nextScalarOffset, previousScalarOffset, validTextOffset } from "./text-offset.js";
 
 export type RichTextIntent =
   | { readonly type: "selection.set"; readonly selection: RichTextSelection }
@@ -102,13 +103,13 @@ export function tryCreateRichTextEditor(options: RichTextEditorOptions): RichTex
 export function createRichTextEditor(options: RichTextEditorOptions): RichTextEditor {
   const pointer = options.pointer ?? "";
   const schema = options.schema ?? richTextSchemaV1;
-  const initial = readDocument(options.document, pointer);
+  const initial = readRichTextDocument(options.document, pointer);
   const initialValidation = indexValidatedRichText(initial, schema);
   if (!initialValidation.ok) throw new TypeError(initialValidation.reason);
   const initialTopology = richTextTopology(initial);
   let previousDocument = initial;
   options.document.subscribe((change) => {
-    const next = readDocument(options.document, pointer);
+    const next = readRichTextDocument(options.document, pointer);
     seedRichTextTopology(previousDocument, next, change.applied, pointer);
     rememberAppliedOperations(next, change.applied);
     previousDocument = next;
@@ -160,7 +161,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   };
 
   function value(): RichTextDocument {
-    return readDocument(options.document, pointer);
+    return readRichTextDocument(options.document, pointer);
   }
 
   function insertText(text: string, historyGroup = "rich-text.typing"): EditingResult<RichTextSelection> {
@@ -189,7 +190,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
         if (located === null || currentNode === null || !isRichTextText(currentNode)) return failure("rich-text.point-not-found");
         let nextText = currentNode.text;
         for (const replacement of [...replacements].sort((left, right) => right.start - left.start)) {
-          if (!validOffset(nextText, replacement.start) || !validOffset(nextText, replacement.end)) return failure("rich-text.invalid-offset");
+          if (!validTextOffset(nextText, replacement.start) || !validTextOffset(nextText, replacement.end)) return failure("rich-text.invalid-offset");
           nextText = nextText.slice(0, replacement.start) + text + nextText.slice(replacement.end);
         }
         const nextNode = { ...currentNode, text: nextText };
@@ -314,7 +315,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     }
     const textIndex = block.node.content.findIndex((node) => node.id === range.anchor.nodeId);
     const text = block.node.content[textIndex];
-    if (!text || !isRichTextText(text) || !validOffset(text.text, range.anchor.offset)) return failure("rich-text.invalid-offset");
+    if (!text || !isRichTextText(text) || !validTextOffset(text.text, range.anchor.offset)) return failure("rich-text.invalid-offset");
     const leftValue = text.text.slice(0, range.anchor.offset);
     const rightValue = text.text.slice(range.anchor.offset);
     const rightText = rightValue.length === 0 ? null : { ...text, id: createId(), text: rightValue };
@@ -685,25 +686,6 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   }
 }
 
-function readDocument(document: JSONDocument, pointer: Pointer): RichTextDocument {
-  const result = document.at(pointer);
-  if (!result.ok || !isRichTextDocument(result.value)) {
-    throw new TypeError(`Rich Text document was not found at ${JSON.stringify(pointer)}.`);
-  }
-  return result.value;
-}
-
-function validateLocalOrFallback(
-  next: RichTextDocument,
-  path: ReadonlyArray<number>,
-  schema: RichTextSchema,
-): ReturnType<typeof validateRichText> {
-  const incremental = validateRichTextPath(next, path, { schema });
-  if (incremental.ok) return incremental;
-  getActiveRichTextInstrument()?.validate("full-fallback");
-  return validateRichText(next, { schema });
-}
-
 function mergeAdjacentEquivalentText(content: ReadonlyArray<RichTextNode>): RichTextNode[] {
   const merged: RichTextNode[] = [];
   for (const child of content) {
@@ -715,37 +697,6 @@ function mergeAdjacentEquivalentText(content: ReadonlyArray<RichTextNode>): Rich
     }
   }
   return merged;
-}
-
-function firstSelection(document: RichTextDocument): RichTextSelection {
-  const text = findFirstText(document);
-  return asRichTextSelection(text
-    ? collapsedRangeSelection({ kind: "text", nodeId: text.id, offset: 0, affinity: "forward" })
-    : collapsedRangeSelection(firstChildPoint(document)));
-}
-
-function firstChildPoint(document: RichTextDocument): RichTextPoint {
-  let node: RichTextDocument | RichTextNode = document;
-  while (hasRichTextContent(node) && node.content.length > 0) {
-    const child: RichTextNode = node.content[0]!;
-    if (!hasRichTextContent(child) || child.content.length > 0) break;
-    node = child;
-  }
-  return { kind: "child", nodeId: node.id, offset: 0, affinity: "forward" };
-}
-
-function findFirstText(node: RichTextDocument | RichTextNode): ReturnType<typeof asText> {
-  if (node.type === "text") return asText(node);
-  if (!hasRichTextContent(node)) return null;
-  for (const child of node.content) {
-    const text = findFirstText(child);
-    if (text) return text;
-  }
-  return null;
-}
-
-function asText(node: RichTextNode): Extract<RichTextNode, { readonly type: "text" }> | null {
-  return isRichTextText(node) ? node : null;
 }
 
 function findText(
@@ -941,7 +892,7 @@ function insertNodeAtPoint(
     return { value };
   }
   const located = findNode(document, point.nodeId);
-  if (!located || !isRichTextText(located.node) || located.parent === null || !validOffset(located.node.text, point.offset)) return null;
+  if (!located || !isRichTextText(located.node) || located.parent === null || !validTextOffset(located.node.text, point.offset)) return null;
   if (point.offset === 0) return { value: replaceNodeWithMany(document, located.node.id, [node, located.node]) };
   if (point.offset === located.node.text.length) return { value: replaceNodeWithMany(document, located.node.id, [located.node, node]) };
   return {
@@ -1066,69 +1017,6 @@ function findAncestors(document: RichTextDocument, nodeId: string): Array<RichTe
     path.pop();
     return false;
   }
-}
-
-function mapSelectionByTextOrder(
-  before: RichTextDocument,
-  after: RichTextDocument,
-  selection: RichTextSelection,
-): RichTextSelection {
-  return {
-    ...selection,
-    ranges: selection.ranges.map((range) => ({
-      anchor: mapPoint(range.anchor),
-      focus: mapPoint(range.focus),
-    })),
-  } as RichTextSelection;
-
-  function mapPoint(point: RichTextPoint): RichTextPoint {
-    if (point.kind === "child") return richTextTopology(after).reconcilePoint(point) ?? firstSelection(after).ranges[0]!.anchor;
-    const offset = absoluteTextOffset(before, point);
-    return pointAtTextOffset(after, offset, point.affinity);
-  }
-}
-
-function absoluteTextOffset(document: RichTextDocument, point: Extract<RichTextPoint, { readonly kind: "text" }>): number {
-  let total = 0;
-  for (const text of allTextNodes(document)) {
-    if (text.id === point.nodeId) return total + Math.min(point.offset, text.text.length);
-    total += text.text.length;
-  }
-  return total;
-}
-
-function pointAtTextOffset(document: RichTextDocument, absolute: number, affinity: RichTextPoint["affinity"]): RichTextPoint {
-  let remaining = absolute;
-  const texts = allTextNodes(document);
-  for (const text of texts) {
-    if (remaining <= text.text.length) return { kind: "text", nodeId: text.id, offset: remaining, affinity };
-    remaining -= text.text.length;
-  }
-  const last = texts.at(-1);
-  return last ? { kind: "text", nodeId: last.id, offset: last.text.length, affinity } : firstSelection(document).ranges[0]!.anchor;
-}
-
-function allTextNodes(document: RichTextDocument): Array<Extract<RichTextNode, { readonly type: "text" }>> {
-  const output: Array<Extract<RichTextNode, { readonly type: "text" }>> = [];
-  visit(document);
-  return output;
-  function visit(node: RichTextNode | RichTextDocument): void {
-    if (isRichTextText(node)) output.push(node);
-    else if (hasRichTextContent(node)) node.content.forEach(visit);
-  }
-}
-
-function mapSelectionByExistingIds(selection: RichTextSelection, document: RichTextDocument): RichTextSelection {
-  const topology = richTextTopology(document);
-  return asRichTextSelection(createRangeSelectionFamily<RichTextPoint, RichTextTarget>().reconcile(selection, { topology }).state);
-}
-
-function reconcileOrFirst(document: RichTextDocument, point: RichTextPoint): RichTextPoint {
-  return richTextTopology(document).reconcilePoint(point) ?? firstSelection(document).ranges[0]!.anchor;
-}
-
-function collapsedAtPoint(point: RichTextPoint): RichTextSelection {
-  return asRichTextSelection(collapsedRangeSelection(point));
 }
 
 function isDescendant(document: RichTextDocument, nodeId: string, possibleDescendantId: string): boolean {
@@ -1409,7 +1297,7 @@ function insertManyAtPoint(
     ]);
   }
   const located = findText(document, point.nodeId);
-  if (!located || !validOffset(located.node.text, point.offset)) return null;
+  if (!located || !validTextOffset(located.node.text, point.offset)) return null;
   const before = located.node.text.slice(0, point.offset);
   const after = located.node.text.slice(point.offset);
   return replaceNodeWithMany(document, located.node.id, [
@@ -1526,7 +1414,7 @@ function planInsertNode(
     };
   }
   const located = topology.locate(point.nodeId);
-  if (located === null || !isRichTextText(located.node) || !validOffset(located.node.text, point.offset)) return null;
+  if (located === null || !isRichTextText(located.node) || !validTextOffset(located.node.text, point.offset)) return null;
   const parentPath = located.path.slice(0, -1);
   const index = located.path[located.path.length - 1]!;
   const contentPath = absolutePath(rootPointer, containerContentSegments(parentPath));
@@ -1598,28 +1486,6 @@ function shiftPathAfterRemove(
 
 function absolutePath(pointer: Pointer, segments: ReadonlyArray<string | number>): Pointer {
   return buildPointer([...parsePointer(pointer), ...segments]);
-}
-
-function validOffset(text: string, offset: number): boolean {
-  if (!Number.isInteger(offset) || offset < 0 || offset > text.length) return false;
-  if (offset === 0 || offset === text.length) return true;
-  const previous = text.charCodeAt(offset - 1);
-  const next = text.charCodeAt(offset);
-  return !(previous >= 0xd800 && previous <= 0xdbff && next >= 0xdc00 && next <= 0xdfff);
-}
-
-function previousScalarOffset(text: string, offset: number): number {
-  if (offset <= 0) return 0;
-  const previous = text.charCodeAt(offset - 1);
-  if (previous >= 0xdc00 && previous <= 0xdfff && offset >= 2) return offset - 2;
-  return offset - 1;
-}
-
-function nextScalarOffset(text: string, offset: number): number {
-  if (offset >= text.length) return text.length;
-  const current = text.charCodeAt(offset);
-  if (current >= 0xd800 && current <= 0xdbff && offset + 1 < text.length) return offset + 2;
-  return offset + 1;
 }
 
 function success(snapshot: EditingSnapshot<RichTextSelection>): EditingResult<RichTextSelection> {
