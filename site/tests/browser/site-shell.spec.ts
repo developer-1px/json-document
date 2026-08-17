@@ -352,9 +352,25 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   ))).toBe("rgb(216, 209, 197)");
 
   await page.goto("/demo/selection");
-  expect(await page.getByRole("region", { name: "모드와 블록 선택하기" }).evaluate((element) => (
+  expect(await page.getByRole("region", { name: "모드와 블록 선택하기" }).evaluate((element) => ({
+    borderWidth: getComputedStyle(element).borderWidth,
+    backgroundColor: getComputedStyle(element).backgroundColor,
+  }))).toEqual({
+    borderWidth: "0px",
+    backgroundColor: "rgb(251, 248, 242)",
+  });
+  const unselected = page.getByRole("button", { name: "bravo · Middle" });
+  expect(await unselected.getAttribute("data-selected")).not.toBe("true");
+
+  await unselected.click();
+  await expect(unselected).toHaveAttribute("data-selected", "true");
+  await expect.poll(async () => unselected.evaluate((element) => getComputedStyle(element).outlineColor))
+    .toBe("rgb(222, 109, 85)");
+
+  await page.goto("/demo/sheet");
+  expect(await page.getByRole("columnheader", { name: "Name" }).evaluate((element) => (
     getComputedStyle(element).borderWidth
-  ))).toBe("1px");
+  ))).not.toBe("0px");
 });
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
