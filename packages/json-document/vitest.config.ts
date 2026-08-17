@@ -1,6 +1,6 @@
-import { defineConfig } from "vitest/config";
+import { defineNodeProject } from "../../test/vitest.shared.js";
 
-export default defineConfig({
+export default defineNodeProject("json-document", {
   resolve: {
     alias: {
       "@interactive-os/json-document": new URL("./src/application/document/index.ts", import.meta.url).pathname,

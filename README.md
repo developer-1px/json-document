@@ -39,6 +39,8 @@ stateless JSON Patch
 | 문서 구조 | [docs/README.md](docs/README.md) |
 | 변경 기록 | [docs/changelog.md](docs/changelog.md) |
 | 개념·이름 정본 | [standards/repository-naming.md](standards/repository-naming.md) |
+| 구현 모양 정본 | [standards/repository-implementation-shape.md](standards/repository-implementation-shape.md) |
+| DOM 편집 lifecycle 정본 | [standards/dom-editing-lifecycle.md](standards/dom-editing-lifecycle.md) |
 | v3 JSON Document profile | [standards/json-document-v3/profile.md](standards/json-document-v3/profile.md) |
 | v3 공개 표면 manifest | [standards/json-document-v3/public-surface.json](standards/json-document-v3/public-surface.json) |
 

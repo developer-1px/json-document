@@ -27,12 +27,13 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -b tsconfig.json",
+    "check:structure": "node scripts/check-editor-responsibilities.mjs",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "perf": "npm run build && node benchmarks/editor.mjs",
     "perf:normalize": "npm run build && node benchmarks/normalization.mjs",
-    "verify": "npm run typecheck && npm test && npm run build"
+    "verify": "npm run check:structure && npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
     "@interactive-os/json-document": "^3.0.0",

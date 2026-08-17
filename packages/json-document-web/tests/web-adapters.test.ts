@@ -27,7 +27,7 @@ import {
   type WebClipboardEvent,
 } from "../src/index.js";
 
-describe("Web clipboard Connector", () => {
+describe("Web clipboard Adapter", () => {
   test("copies and pastes a structured Document payload through ClipboardEvent contracts", () => {
     const editor = createDocumentEditor({
       blocks: [
@@ -270,7 +270,7 @@ describe("Web input modifiers", () => {
   });
 });
 
-describe("Web keyboard adapter", () => {
+describe("Web keyboard Adapter", () => {
   const adapter = createWebKeyboardAdapter();
   const grid = {
     rowIds: ["r1", "r2", "r3"],

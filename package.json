@@ -25,6 +25,7 @@
     "build": "tsc -b tsconfig.build.json",
     "build:clean": "tsc -b tsconfig.build.json --clean",
     "test": "npm test -w @interactive-os/json-document",
+    "test:projects": "vitest run --config vitest.config.ts",
     "test:collaboration:soak": "npm run test:soak -w @interactive-os/json-document-collaboration",
     "typecheck": "npm run typecheck -w @interactive-os/json-document",
     "smoke:package": "npm run smoke:package -w @interactive-os/json-document",

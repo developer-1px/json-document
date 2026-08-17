@@ -6,7 +6,7 @@
       "node"
     ],
     "noEmit": true,
-    "rootDir": ".",
+    "rootDir": "../..",
     "skipLibCheck": true
   },
   "include": [

@@ -1,8 +1,7 @@
-import { defineConfig } from "vitest/config";
-export default defineConfig({
+import { defineNodeReactProject } from "../../test/vitest.shared.js";
+
+export default defineNodeReactProject("json-document-rich-text-react", {
   test: {
-    environment: "node",
-    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     environmentMatchGlobs: [["tests/render-locality.test.tsx", "jsdom"]],
   },
 });

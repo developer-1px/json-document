@@ -1,6 +1,6 @@
-import { defineConfig } from "vitest/config";
+import { defineDOMProject } from "../../test/vitest.shared.js";
 
-export default defineConfig({
+export default defineDOMProject("contenteditable-collaboration", {
   resolve: {
     alias: [
       {
@@ -25,9 +25,5 @@ export default defineConfig({
         ).pathname,
       },
     ],
-  },
-  test: {
-    environment: "jsdom",
-    include: ["tests/**/*.test.ts"],
   },
 });

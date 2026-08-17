@@ -11,6 +11,7 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { gridCellsInRange, gridPointIndex, gridRangeBounds } from "./topology.js";
+import { acceptsDatabaseValue, assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -191,7 +192,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       const document = value();
       const resolved = resolveCell(document, intent.recordId, intent.propertyId, index(document));
       if (resolved === null) return failure("cell.not-found");
-      if (!acceptsValue(resolved.property, intent.value)) return failure("cell.invalid-value");
+      if (!acceptsDatabaseValue(resolved.property, intent.value)) return failure("cell.invalid-value");
       if (Object.is(resolved.record.values[intent.propertyId], intent.value)) {
         return success(session.snapshot);
       }
@@ -328,7 +329,7 @@ function paste(
       const resolved = resolveCell(document, recordId, propertyId, index);
       if (resolved === null) return failure("cell.not-found");
       const nextValue = clipboard.cells[rowOffset]![columnOffset]!;
-      if (!acceptsValue(resolved.property, nextValue)) return failure("cell.invalid-value");
+      if (!acceptsDatabaseValue(resolved.property, nextValue)) return failure("cell.invalid-value");
       operations.push({
         op: "replace",
         path: buildPointer(["records", resolved.recordIndex, "values", propertyId]),
@@ -415,7 +416,7 @@ function configureView(
     ...(intent.sort === undefined ? {} : { sort: intent.sort }),
     ...(intent.filter === undefined ? {} : { filter: intent.filter }),
   };
-  assertView(next, document.schema.properties);
+  assertDatabaseView(next, document.schema.properties);
   return session.apply({
     operations: [{ op: "replace", path: buildPointer(["views", viewIndex]), value: next }],
     selectionAfter: session.snapshot.selection,
@@ -487,46 +488,6 @@ function resolveCell(document: DatabaseDocument, recordId: string, propertyId: s
   return { recordIndex, record: document.records[recordIndex]!, property };
 }
 
-function assertDatabaseDocument(document: DatabaseDocument): void {
-  assertUnique(document.schema.properties.map((property) => property.id), "property");
-  assertUnique(document.records.map((record) => record.id), "record");
-  assertUnique(document.views.map((view) => view.id), "view");
-  for (const property of document.schema.properties) {
-    if (property.type === "select") assertUnique(property.options.map((option) => option.id), "select option");
-  }
-  for (const record of document.records) {
-    for (const property of document.schema.properties) {
-      if (!Object.prototype.hasOwnProperty.call(record.values, property.id)) {
-        throw new Error(`Database record ${JSON.stringify(record.id)} is missing property ${JSON.stringify(property.id)}.`);
-      }
-      if (!acceptsValue(property, record.values[property.id]!)) {
-        throw new Error(`Database record ${JSON.stringify(record.id)} has an invalid ${property.type} value.`);
-      }
-    }
-  }
-  for (const view of document.views) assertView(view, document.schema.properties);
-}
-
-function assertView(view: DatabaseTableView, properties: ReadonlyArray<DatabaseProperty>): void {
-  const available = new Set(properties.map((property) => property.id));
-  assertUnique(view.propertyOrder, "view property");
-  if (view.propertyOrder.length !== properties.length || view.propertyOrder.some((id) => !available.has(id))) {
-    throw new Error(`Database view ${JSON.stringify(view.id)} must order every property exactly once.`);
-  }
-  for (const propertyId of Object.keys(view.propertyVisibility)) {
-    if (!available.has(propertyId)) throw new Error(`Database view references unknown property ${JSON.stringify(propertyId)}.`);
-  }
-  if (view.sort && !available.has(view.sort.propertyId)) throw new Error("Database sort property was not found.");
-  if (view.filter && !available.has(view.filter.propertyId)) throw new Error("Database filter property was not found.");
-}
-
-function acceptsValue(property: DatabaseProperty, value: JSONValue): boolean {
-  if (property.type === "title" || property.type === "text") return typeof value === "string";
-  if (property.type === "number") return typeof value === "number";
-  if (property.type === "checkbox") return typeof value === "boolean";
-  return typeof value === "string" && property.options.some((option) => option.id === value);
-}
-
 function defaultValue(property: DatabaseProperty): JSONValue {
   if (property.type === "number") return 0;
   if (property.type === "checkbox") return false;
@@ -561,14 +522,6 @@ function withPrimaryAliases(selection: RangeSelectionState<DatabasePoint>): Data
 
 function samePoint(left: DatabasePoint, right: DatabasePoint): boolean {
   return left.recordId === right.recordId && left.propertyId === right.propertyId;
-}
-
-function assertUnique(ids: ReadonlyArray<string>, label: string): void {
-  const unique = new Set<string>();
-  for (const id of ids) {
-    if (id.length === 0 || unique.has(id)) throw new Error(`Database ${label} ids must be non-empty and unique.`);
-    unique.add(id);
-  }
 }
 
 function cellKey(recordId: string, propertyId: string): string {

@@ -85,6 +85,9 @@ const surfaces = {
 };
 const publicSurface = readJson("standards/json-document-v3/public-surface.json");
 const publicContract = readJson("packages/json-document/public-contract.json");
+const rootPackage = readJson("package.json");
+const implementationShape = read("standards/repository-implementation-shape.md");
+const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
 const activeCompanionPackages = new Set([
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-selection",
@@ -128,9 +131,36 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
 }
 
 if (JSON.stringify(fileNames("standards")) !== JSON.stringify([
+  "dom-editing-lifecycle.md",
+  "repository-implementation-shape.md",
   "repository-naming.md",
 ])) {
-  fail("standards: repository naming must be the only repository-wide standard file.");
+  fail("standards: repository naming and implementation shape must be the only repository-wide standard files.");
+}
+
+for (const token of [
+  "packages/json-document-contenteditable",
+  "packages/contenteditable-collaboration",
+  "packages/json-document-rich-text-web",
+  "createContentEditableBinding",
+  "createContentEditableAdapter",
+  "createRichTextContentEditableBinding",
+  "beforeinput",
+  "compositionstart",
+  "compositionend",
+  "Chromium",
+  "Firefox",
+  "WebKit",
+]) {
+  if (!domEditingLifecycle.includes(token)) {
+    fail(`DOM editing lifecycle: missing required mapping ${token}.`);
+  }
+}
+
+for (const workspace of rootPackage.workspaces.filter((path) => path.startsWith("packages/"))) {
+  if (!implementationShape.includes(`\`${workspace}\``)) {
+    fail(`implementation shape: missing library workspace classification for ${workspace}.`);
+  }
 }
 
 if (JSON.stringify(fileNames("standards/json-document-v3")) !== JSON.stringify([
