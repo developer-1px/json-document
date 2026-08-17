@@ -9,6 +9,7 @@ export function Inspector(props: {
   readonly items: ReadonlyArray<InspectorItem>;
   readonly label?: string;
   readonly className?: string;
+  readonly placement?: "overlay" | "inline";
 }) {
   const panelId = `inspector-${useId().replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
@@ -32,6 +33,8 @@ export function Inspector(props: {
 
   if (props.items.length === 0) return null;
 
+  const inline = props.placement === "inline";
+
   return (
     <div className={classes("min-w-0", props.className)} data-inspector>
       <DisclosureButton
@@ -47,15 +50,19 @@ export function Inspector(props: {
         hidden={!open}
         style={open ? undefined : { display: "none" }}
         aria-label={label}
-        className={classes(
-          "pointer-events-none fixed bottom-4 right-4 z-50 grid max-h-[calc(100vh-2rem)] w-[min(42rem,calc(100vw-2rem))] min-w-0 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden p-3 [&_button]:pointer-events-auto",
-          ui.surface.overlay,
-        )}
+        className={inline
+          ? "mt-3 grid min-w-0 gap-3"
+          : classes(
+            "pointer-events-none fixed bottom-4 right-4 z-50 grid max-h-[calc(100vh-2rem)] w-[min(42rem,calc(100vw-2rem))] min-w-0 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden p-3 [&_button]:pointer-events-auto",
+            ui.surface.overlay,
+          )}
       >
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <span className={ui.text.label}>Inspector</span>
-          <IconButton label="Close inspector" onClick={() => setOpen(false)}>×</IconButton>
-        </div>
+        {inline ? null : (
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className={ui.text.label}>Inspector</span>
+            <IconButton label="Close inspector" onClick={() => setOpen(false)}>×</IconButton>
+          </div>
+        )}
 
         <div className="mb-3 flex min-w-0 flex-wrap gap-1" role="tablist" aria-label="Inspector values">
           {props.items.map((item, index) => (

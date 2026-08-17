@@ -55,7 +55,7 @@ export function CatalogDemoPage(props: {
         ) : null}
       </section>
 
-      <div className={classes("mt-4 pt-4", ui.surface.sectionDivider)} data-connector-live-demo>
+      <div className="mt-8" data-connector-live-demo>
         <p className={classes("mb-3 mt-0", ui.text.label)}>Live demo</p>
         {props.children}
       </div>

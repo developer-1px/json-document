@@ -20,7 +20,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -163,23 +163,51 @@ export function DocumentDemoRoute() {
           )}
         >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
 
-        <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Document actions">
-          <Action label="Add" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
-          <Action label="Duplicate" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
-          <Action label="Move up" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
-          <Action label="Move down" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
-          <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-          <Action label="Copy" onClick={copySelection} />
-          <Action label="Cut" onClick={cutSelection} />
-          <Action label="Paste" onClick={pasteSelection} disabled={!clipboard} />
-          <Action label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
-          <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-          <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
-          <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
-        </div>
-
-        <div className="grid gap-4">
-          <section aria-label="Editable document" className={classes("p-3", ui.surface.raised)}>
+        <ProductApp
+          toolbarLabel="Document actions"
+          toolbar={(
+            <>
+              <Action label="Add" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
+              <Action label="Duplicate" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
+              <Action label="Move up" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
+              <Action label="Move down" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
+              <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+              <Action label="Copy" onClick={copySelection} />
+              <Action label="Cut" onClick={cutSelection} />
+              <Action label="Paste" onClick={pasteSelection} disabled={!clipboard} />
+              <Action label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
+              <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
+              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
+            </>
+          )}
+          inspector={(
+            <Inspector placement="inline" items={[
+              {
+                label: "Canonical JSON",
+                meta: "JSON Patch document",
+                value: snapshot.value,
+                testId: "canonical-json",
+                size: "tall",
+              },
+              {
+                label: "intent",
+                meta: lastIntent ? lastIntent.type : "dispatch only",
+                value: lastIntent,
+                testId: "document-intent-json",
+                size: "compact",
+              },
+              {
+                label: "result",
+                meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet",
+                value: lastResult,
+                testId: "document-result-json",
+                size: "compact",
+              },
+            ]} />
+          )}
+        >
+          <section aria-label="Editable document">
             <div
               ref={surfaceRef}
               tabIndex={0}
@@ -218,33 +246,7 @@ export function DocumentDemoRoute() {
             </div>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
-
-          <section className={classes("p-3", ui.surface.raised)}>
-            <Inspector items={[
-              {
-                label: "Canonical JSON",
-                meta: "JSON Patch document",
-                value: snapshot.value,
-                testId: "canonical-json",
-                size: "tall",
-              },
-              {
-                label: "intent",
-                meta: lastIntent ? lastIntent.type : "dispatch only",
-                value: lastIntent,
-                testId: "document-intent-json",
-                size: "compact",
-              },
-              {
-                label: "result",
-                meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet",
-                value: lastResult,
-                testId: "document-result-json",
-                size: "compact",
-              },
-            ]} />
-          </section>
-        </div>
+        </ProductApp>
     </PageFrame>
   );
 }

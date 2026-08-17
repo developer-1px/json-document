@@ -78,7 +78,7 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
             <PageHeader title={page.heading ?? page.label} illustration={docIllustrations[pageId]} />
             {demo ? (
               <div className="mb-5">
-                <ActionLink to={demo.path} kind="prominent">{demo.label} 열기</ActionLink>
+                <ActionLink to={demo.path}>{demo.label} 열기</ActionLink>
               </div>
             ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>

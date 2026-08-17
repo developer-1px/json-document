@@ -10,8 +10,8 @@ import {
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { ActionButton, IconButton, SelectableItem } from "../../shared/ui/interactive";
+import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialTree: TreeDocument = {
@@ -90,62 +90,66 @@ export function TreeDemoRoute() {
         A folded tree. The host owns expand state and sends only the visible ID line to the editor.
       </PageHeader>
 
-      <div className={classes("mb-3 flex flex-wrap gap-1 p-2", ui.surface.workspace)} role="toolbar" aria-label="Tree actions">
-        <ActionButton onClick={copySelection}>Copy</ActionButton>
-        <ActionButton onClick={cutSelection}>Cut</ActionButton>
-        <ActionButton
-          disabled={!clipboard}
-          onClick={() => {
-            if (!clipboard) return;
-            run({ type: "clipboard.paste", clipboard, topology }, `Pasted ${clipboard.nodes.length} node${clipboard.nodes.length === 1 ? "" : "s"}`);
-          }}
-        >
-          Paste
-        </ActionButton>
-        <ActionButton onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}>Delete</ActionButton>
-        <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-        <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-        <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
-      </div>
-
-      <section aria-label="Editable tree" className={classes("p-3", ui.surface.raised)}>
-        <ul className="m-0 grid list-none gap-1 p-0">
-          {walkVisible(document.nodes, expanded).map((row) => {
-            const childCount = document.nodes.filter((node) => node.parentId === row.id).length;
-            return (
-              <li key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
-                <div className="grid grid-cols-[2rem_minmax(0,1fr)]">
-                  {childCount > 0 ? (
-                    <ActionButton
-                      aria-label={expanded.has(row.id) ? `Collapse ${row.label}` : `Expand ${row.label}`}
-                      onClick={() => toggle(row.id)}
+      <ProductApp
+        toolbarLabel="Tree actions"
+        toolbar={(
+          <>
+            <ActionButton onClick={copySelection}>Copy</ActionButton>
+            <ActionButton onClick={cutSelection}>Cut</ActionButton>
+            <ActionButton
+              disabled={!clipboard}
+              onClick={() => {
+                if (!clipboard) return;
+                run({ type: "clipboard.paste", clipboard, topology }, `Pasted ${clipboard.nodes.length} node${clipboard.nodes.length === 1 ? "" : "s"}`);
+              }}
+            >
+              Paste
+            </ActionButton>
+            <ActionButton onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}>Delete</ActionButton>
+            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+            <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+          </>
+        )}
+        inspector={(
+          <Inspector placement="inline" items={[
+            { label: "Canonical JSON", value: snapshot.value, testId: "tree-demo-document", size: "tall" },
+            { label: "visibleIds", value: topology.visibleIds, testId: "tree-demo-visible", size: "compact" },
+            { label: "selection", value: snapshot.selection, testId: "tree-demo-selection", size: "compact" },
+          ]} />
+        )}
+      >
+        <section aria-label="Editable tree">
+          <ul className="m-0 grid list-none gap-1 p-0">
+            {walkVisible(document.nodes, expanded).map((row) => {
+              const childCount = document.nodes.filter((node) => node.parentId === row.id).length;
+              return (
+                <li key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
+                  <div className="grid grid-cols-[2rem_minmax(0,1fr)]">
+                    {childCount > 0 ? (
+                      <IconButton
+                        label={expanded.has(row.id) ? `Collapse ${row.label}` : `Expand ${row.label}`}
+                        onClick={() => toggle(row.id)}
+                      >
+                        {expanded.has(row.id) ? "−" : "+"}
+                      </IconButton>
+                    ) : <span />}
+                    <SelectableItem
+                      selected={selected.has(row.id)}
+                      data-node-id={row.id}
+                      onClick={(event) => handleClick(event, row.id)}
+                      className={classes("text-left", ui.surface.documentBlock)}
                     >
-                      {expanded.has(row.id) ? "−" : "+"}
-                    </ActionButton>
-                  ) : <span />}
-                  <SelectableItem
-                    selected={selected.has(row.id)}
-                    data-node-id={row.id}
-                    onClick={(event) => handleClick(event, row.id)}
-                    className={classes("text-left", ui.surface.documentBlock)}
-                  >
-                    {row.label}
-                  </SelectableItem>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
-      </section>
-
-      <section className={classes("mt-4 p-3", ui.surface.raised)}>
-        <Inspector items={[
-          { label: "Canonical JSON", value: snapshot.value, testId: "tree-demo-document", size: "tall" },
-          { label: "visibleIds", value: topology.visibleIds, testId: "tree-demo-visible", size: "compact" },
-          { label: "selection", value: snapshot.selection, testId: "tree-demo-selection", size: "compact" },
-        ]} />
-      </section>
+                      {row.label}
+                    </SelectableItem>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
+        </section>
+      </ProductApp>
     </PageFrame>
   );
 }

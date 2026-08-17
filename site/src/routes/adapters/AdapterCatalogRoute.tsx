@@ -13,7 +13,7 @@ export function AdapterCatalogRoute() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         {integrationPageDescriptors("adapter").map((adapter) => (
-          <article key={adapter.path} className={classes("flex min-h-44 flex-col py-4", ui.surface.sectionDivider)}>
+          <article key={adapter.path} className="flex min-h-44 flex-col py-4">
             <h2 className={classes("m-0", ui.text.heading)}>{adapter.label}</h2>
             <InlineCode className="mt-2 block">{adapter.integration!.packageName}</InlineCode>
             <p className={classes("mb-4 mt-3", ui.text.body)}>{adapter.description}</p>

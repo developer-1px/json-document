@@ -18,6 +18,7 @@ import {
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
+import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { initialDatabase } from "./initial-database";
 
@@ -119,66 +120,73 @@ export function DatabaseTableDemo() {
   }
 
   return (
-    <section aria-label="Database editor" className="grid gap-4">
-      <div className={classes("flex flex-wrap items-center gap-2 p-3", ui.database.toolbar)} role="toolbar" aria-label="Database and view actions">
-        <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
-        <ActionButton kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>
-        <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
-        <ToggleButton
-          pressed={view.filter !== null}
-          onClick={() => configure({
-            type: "view.configure",
-            viewId: view.id,
-            filter: view.filter === null
-              ? { propertyId: "status", operator: "equals", value: "backlog" }
-              : null,
-          })}
-        >Backlog only</ToggleButton>
-        <ToggleButton
-          pressed={view.sort !== null}
-          onClick={() => configure({
-            type: "view.configure",
-            viewId: view.id,
-            sort: view.sort === null ? { propertyId: "score", direction: "descending" } : null,
-          })}
-        >Score descending</ToggleButton>
-        <ToggleButton
-          pressed={view.propertyVisibility.note === false}
-          onClick={() => configure({
-            type: "view.configure",
-            viewId: view.id,
-            propertyVisibility: { ...view.propertyVisibility, note: view.propertyVisibility.note !== false ? false : true },
-          })}
-        >Hide notes</ToggleButton>
-        <ToggleButton
-          pressed={view.propertyOrder[0] === "score"}
-          onClick={() => configure({
-            type: "view.configure",
-            viewId: view.id,
-            propertyOrder: view.propertyOrder[0] === "score"
-              ? ["name", "note", "score", "status", "complete"]
-              : ["score", "name", "note", "status", "complete"],
-          })}
-        >Score first</ToggleButton>
-        <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
-        <ActionButton disabled={!snapshot.canUndo} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
-        <ActionButton disabled={!snapshot.canRedo} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <output aria-live="polite" className={ui.text.meta}>{announcement}</output>
-        <div className="flex flex-wrap items-center gap-2">
+    <ProductApp
+      toolbarLabel="Database and view actions"
+      canvasClassName="overflow-auto p-0"
+      toolbar={(
+        <>
+          <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
+          <ActionButton kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>
+          <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
+          <ToggleButton
+            pressed={view.filter !== null}
+            onClick={() => configure({
+              type: "view.configure",
+              viewId: view.id,
+              filter: view.filter === null
+                ? { propertyId: "status", operator: "equals", value: "backlog" }
+                : null,
+            })}
+          >Backlog only</ToggleButton>
+          <ToggleButton
+            pressed={view.sort !== null}
+            onClick={() => configure({
+              type: "view.configure",
+              viewId: view.id,
+              sort: view.sort === null ? { propertyId: "score", direction: "descending" } : null,
+            })}
+          >Score descending</ToggleButton>
+          <ToggleButton
+            pressed={view.propertyVisibility.note === false}
+            onClick={() => configure({
+              type: "view.configure",
+              viewId: view.id,
+              propertyVisibility: { ...view.propertyVisibility, note: view.propertyVisibility.note !== false ? false : true },
+            })}
+          >Hide notes</ToggleButton>
+          <ToggleButton
+            pressed={view.propertyOrder[0] === "score"}
+            onClick={() => configure({
+              type: "view.configure",
+              viewId: view.id,
+              propertyOrder: view.propertyOrder[0] === "score"
+                ? ["name", "note", "score", "status", "complete"]
+                : ["score", "name", "note", "status", "complete"],
+            })}
+          >Score first</ToggleButton>
+          <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
+          <ActionButton disabled={!snapshot.canUndo} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
+          <ActionButton disabled={!snapshot.canRedo} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
+          <output aria-live="polite" className={classes("ml-auto", ui.text.meta)}>{announcement}</output>
           {dragPreview ? <output data-testid="property-drag-preview" className={ui.database.lease}>Local drag preview · {dragPreview.join(" → ")}</output> : null}
           {lease ? (
             <output data-testid="native-text-lease" className={ui.database.lease}>
               Native text lease · {lease.recordId}/{lease.propertyId}{lease.composing ? " · composing" : ""}
             </output>
           ) : <output data-testid="native-text-lease" className={ui.text.meta}>Structural navigation</output>}
-        </div>
-      </div>
-
-      <div className="grid gap-4">
-        <div className={classes("overflow-auto", ui.surface.raised)}>
+        </>
+      )}
+      inspector={(
+        <Inspector placement="inline" label="Inspect database state" items={[
+          { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "database-intent-json" },
+          { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "database-result-json" },
+          { label: "Persistent Table view", value: view, testId: "database-view-json" },
+          { label: "Structural selection", value: snapshot.selection, testId: "database-selection-json", size: "compact" },
+          { label: "Canonical database", signal: `revision ${snapshot.revision}`, value: document, testId: "database-document-json" },
+        ]} />
+      )}
+    >
+        <section aria-label="Database editor">
           <table role="grid" aria-label="Notion-style database" aria-multiselectable="true" className={classes("w-full min-w-[52rem]", ui.database.table)}>
             <thead>
               <tr>
@@ -236,19 +244,8 @@ export function DatabaseTableDemo() {
             </tbody>
           </table>
           {records.length === 0 ? <div className={classes("m-3 p-6", ui.surface.empty)}>No records in this view.</div> : null}
-        </div>
-
-        <section className={classes("p-3", ui.surface.raised)}>
-          <Inspector label="Inspect database state" items={[
-            { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "database-intent-json" },
-            { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "database-result-json" },
-            { label: "Persistent Table view", value: view, testId: "database-view-json" },
-            { label: "Structural selection", value: snapshot.selection, testId: "database-selection-json", size: "compact" },
-            { label: "Canonical database", signal: `revision ${snapshot.revision}`, value: document, testId: "database-document-json" },
-          ]} />
         </section>
-      </div>
-    </section>
+    </ProductApp>
   );
 }
 

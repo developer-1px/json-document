@@ -290,6 +290,107 @@ test("inline code stays distinct without drawing a border", async ({ page }) => 
   });
 });
 
+test("docs chrome groups with paper and type instead of rest-state borders", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/docs/selection");
+
+  const navigation = page.getByRole("navigation", { name: "Site navigation" });
+  expect(await navigation.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderRightWidth: style.borderRightWidth,
+      borderBottomWidth: style.borderBottomWidth,
+    };
+  })).toEqual({
+    backgroundColor: "rgb(251, 248, 242)",
+    borderRightWidth: "0px",
+    borderBottomWidth: "0px",
+  });
+  expect(await navigation.getByRole("link", { name: "json-document" }).evaluate((element) => (
+    getComputedStyle(element).borderBottomWidth
+  ))).toBe("0px");
+  expect(await navigation.getByRole("link", { name: "Selection", exact: true }).evaluate((element) => (
+    getComputedStyle(element).borderLeftColor
+  ))).toBe("rgb(222, 109, 85)");
+
+  const heading = page.getByRole("heading", { level: 2, name: "대상을 하나 고르기" });
+  expect(await heading.evaluate((element) => ({
+    borderTopWidth: getComputedStyle(element).borderTopWidth,
+    fontSize: getComputedStyle(element).fontSize,
+  }))).toEqual({
+    borderTopWidth: "0px",
+    fontSize: "18px",
+  });
+
+  const horizon = page.locator("[data-page-header] [data-petite-cat]").locator("xpath=..");
+  expect(await horizon.evaluate((element) => getComputedStyle(element).borderBottomWidth)).toBe("1px");
+
+  const demoLink = page.getByRole("link", { name: "Selection Demo 열기" });
+  expect(await demoLink.evaluate((element) => getComputedStyle(element).borderWidth)).toBe("0px");
+
+  const code = page.getByRole("figure", { name: "TypeScript" }).first();
+  expect(await code.evaluate((element) => {
+    const lineNumber = element.querySelector("[data-line-number]");
+    return {
+      borderWidth: getComputedStyle(element).borderWidth,
+      backgroundColor: getComputedStyle(element.querySelector("pre")!).backgroundColor,
+      lineNumberBorderRightWidth: lineNumber ? getComputedStyle(lineNumber).borderRightWidth : null,
+    };
+  })).toEqual({
+    borderWidth: "0px",
+    backgroundColor: "rgb(251, 248, 242)",
+    lineNumberBorderRightWidth: "0px",
+  });
+
+  await page.goto("/connectors/react");
+  expect(await page.getByText("Install", { exact: true }).evaluate((element) => (
+    getComputedStyle(element.parentElement!).borderWidth
+  ))).toBe("0px");
+  expect(await page.getByLabel("Document title").evaluate((element) => (
+    getComputedStyle(element).borderColor
+  ))).toBe("rgb(216, 209, 197)");
+
+  await page.goto("/demo/selection");
+  expect(await page.getByRole("region", { name: "모드와 블록 선택하기" }).evaluate((element) => ({
+    borderWidth: getComputedStyle(element).borderWidth,
+    backgroundColor: getComputedStyle(element).backgroundColor,
+  }))).toEqual({
+    borderWidth: "0px",
+    backgroundColor: "rgb(251, 248, 242)",
+  });
+  const unselected = page.getByRole("button", { name: "bravo · Middle" });
+  expect(await unselected.getAttribute("data-selected")).not.toBe("true");
+
+  await unselected.click();
+  await expect(unselected).toHaveAttribute("data-selected", "true");
+  await expect.poll(async () => unselected.evaluate((element) => getComputedStyle(element).outlineColor))
+    .toBe("rgb(222, 109, 85)");
+
+  await page.goto("/demo/sheet");
+  expect(await page.getByRole("columnheader", { name: "Name" }).evaluate((element) => (
+    getComputedStyle(element).borderWidth
+  ))).not.toBe("0px");
+});
+
+test("editor demos keep one product app under the page lobby", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/demo/tree");
+
+  await expect(page.locator("[data-page-header]")).toHaveCount(1);
+  await expect(page.locator("[data-product-app]")).toHaveCount(1);
+  const app = page.locator("[data-product-app]");
+  await expect(app.getByRole("toolbar", { name: "Tree actions" })).toBeVisible();
+  await expect(app.getByRole("treeitem").or(app.getByText("Fruit", { exact: true })).first()).toBeVisible();
+  await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
+  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => (
+    getComputedStyle(element).backgroundColor
+  ))).toBe("rgba(0, 0, 0, 0)");
+
+  await page.goto("/demo/selection");
+  await expect(page.locator("[data-product-app]")).toHaveCount(0);
+});
+
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto("/connectors/react");
