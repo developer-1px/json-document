@@ -1,16 +1,14 @@
 {
+  "extends": "../../tsconfig/library.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "types": [],
-    "declaration": true,
-    "strict": true,
-    "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
+  "references": [
+    { "path": "../json-document" },
+    { "path": "../json-document-editing" },
+    { "path": "../json-document-selection" }
+  ],
   "include": ["src/**/*.ts"]
 }

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "files": [],
+  "references": [
+    { "path": "./packages/json-document" },
+    { "path": "./packages/json-document-selection" },
+    { "path": "./packages/json-document-editing" },
+    { "path": "./packages/json-document-react" },
+    { "path": "./packages/json-document-react-hook-form" },
+    { "path": "./packages/json-document-ajv" },
+    { "path": "./packages/json-document-zod" },
+    { "path": "./packages/json-document-tanstack-table" },
+    { "path": "./packages/json-document-web" },
+    { "path": "./packages/json-document-contenteditable" },
+    { "path": "./packages/json-document-rich-text" },
+    { "path": "./packages/json-document-rich-text-web" },
+    { "path": "./packages/json-document-rich-text-react" },
+    { "path": "./packages/json-document-collaboration" },
+    { "path": "./packages/contenteditable-collaboration" }
+  ]
+}
