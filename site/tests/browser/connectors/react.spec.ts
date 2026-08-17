@@ -6,7 +6,6 @@ test("Connector catalog exposes only implemented Live Demos", async ({ page }) =
   await expect(page.getByRole("heading", { level: 1, name: "Connectors" })).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(5);
   await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(5);
-  await expect(page.getByText("available", { exact: true })).toHaveCount(5);
 
   const reactArticle = page.getByRole("article").filter({
     has: page.getByRole("heading", { level: 2, name: "React", exact: true }),

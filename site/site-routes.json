@@ -316,8 +316,7 @@
     "navigationGroup": "Adapters",
     "integration": {
       "kind": "adapter",
-      "packageName": "@interactive-os/json-document-web",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-web"
     }
   },
   {
@@ -328,8 +327,7 @@
     "navigationGroup": "Adapters",
     "integration": {
       "kind": "adapter",
-      "packageName": "@interactive-os/json-document-web",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-web"
     }
   },
   {
@@ -340,8 +338,7 @@
     "navigationGroup": "Adapters",
     "integration": {
       "kind": "adapter",
-      "packageName": "@interactive-os/json-document-contenteditable",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-contenteditable"
     }
   },
   {
@@ -368,8 +365,7 @@
     "navigationGroup": "Connectors",
     "integration": {
       "kind": "connector",
-      "packageName": "@interactive-os/json-document-react",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-react"
     }
   },
   {
@@ -380,8 +376,7 @@
     "navigationGroup": "Connectors",
     "integration": {
       "kind": "connector",
-      "packageName": "@interactive-os/json-document-react-hook-form",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-react-hook-form"
     }
   },
   {
@@ -392,8 +387,7 @@
     "navigationGroup": "Connectors",
     "integration": {
       "kind": "connector",
-      "packageName": "@interactive-os/json-document-ajv",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-ajv"
     }
   },
   {
@@ -404,8 +398,7 @@
     "navigationGroup": "Connectors",
     "integration": {
       "kind": "connector",
-      "packageName": "@interactive-os/json-document-zod",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-zod"
     }
   },
   {
@@ -424,8 +417,7 @@
     "navigationGroup": "Connectors",
     "integration": {
       "kind": "connector",
-      "packageName": "@interactive-os/json-document-tanstack-table",
-      "status": "available"
+      "packageName": "@interactive-os/json-document-tanstack-table"
     }
   }
 ]

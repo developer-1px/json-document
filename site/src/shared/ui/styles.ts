@@ -5,8 +5,6 @@ export const ui = {
     app: "bg-paper font-sans text-ink antialiased",
     page: "min-h-full bg-paper px-page pb-8 pt-4 lg:px-page-wide",
     content: "mx-auto max-w-6xl",
-    header: "border-b border-pencil-light/60",
-    hero: "border-b border-pencil-light/60 bg-transparent",
     navigation: "border-b border-pencil-light/60 bg-paper text-sm md:border-b-0 md:border-r",
     brand: "font-mono text-ink-strong no-underline hover:text-ink md:border-b md:border-pencil-light/60",
   },
@@ -31,7 +29,6 @@ export const ui = {
   },
   accent: {
     impact: {
-      text: "text-impact-ink",
       stroke: "stroke-impact",
     },
   },
@@ -53,7 +50,6 @@ export const ui = {
     aside: "min-w-0",
   },
   surface: {
-    flat: "shadow-none",
     workspace: "rounded-[10px] border border-pencil-light bg-paper",
     raised: "rounded-[10px] border border-pencil-light bg-paper shadow-[0_1px_2px_rgba(69,67,62,0.04),0_12px_32px_rgba(69,67,62,0.06)]",
     overlay: "rounded-[10px] border border-pencil-light bg-paper shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)]",
@@ -61,7 +57,6 @@ export const ui = {
     tableHead: "border-b border-pencil-light text-ink",
     tableCell: "border-b border-pencil-light/70 text-ink",
     table: "border-collapse text-left",
-    divider: "border-t border-pencil-light/70",
     sectionDivider: "border-t border-pencil-light/70",
     navigationRule: "border-l border-transparent",
     separator: "bg-pencil-light",
@@ -127,10 +122,8 @@ export const ui = {
     },
   },
   state: {
-    current: "border-b border-transparent text-pencil no-underline hover:text-ink-strong aria-[current=page]:border-impact aria-[current=page]:font-medium aria-[current=page]:text-ink-strong md:border-b-0 md:border-l",
     focus: "outline-none focus-visible:ring-2 focus-visible:ring-impact/35",
     skipLink: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-xs font-medium text-ink-strong shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)] focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:ring-2 focus-visible:ring-impact/35",
-    disabled: "disabled:cursor-not-allowed disabled:text-pencil",
     error: "text-impact-ink",
   },
   database: {

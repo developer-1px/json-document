@@ -54,9 +54,6 @@ export function validateSiteRoutes(routes, fail) {
       if (typeof route.integration.packageName !== "string" || !route.integration.packageName.startsWith("@interactive-os/")) {
         fail(`site route ${route.path} has an invalid integration package.`);
       }
-      if (!new Set(["available", "planned"]).has(route.integration.status)) {
-        fail(`site route ${route.path} has an invalid integration status.`);
-      }
     }
 
     if (typeof route.path === "string") {
