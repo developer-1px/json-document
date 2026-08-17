@@ -14,6 +14,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { assertObjectDocument } from "./object-validation.js";
 
 export interface DocumentObject extends Record<string, JSONValue> {
   readonly id: string;
@@ -248,21 +249,6 @@ function selectionFor(
   primaryKey: string | null = keys.at(-1) ?? null,
 ): ObjectSelection {
   return { kind: "explicit", keys: [...keys], primaryKey };
-}
-
-function assertObjectDocument(document: ObjectDocument): void {
-  const ids = new Set<string>();
-  for (const object of document.objects) {
-    if (object.id.length === 0) throw new Error("Object ids must not be empty.");
-    if (ids.has(object.id)) throw new Error(`Object id must be unique: ${JSON.stringify(object.id)}.`);
-    if (![object.x, object.y, object.width, object.height].every(Number.isFinite)) {
-      throw new Error(`Object geometry must be finite: ${JSON.stringify(object.id)}.`);
-    }
-    if (object.width < 0 || object.height < 0) {
-      throw new Error(`Object dimensions must not be negative: ${JSON.stringify(object.id)}.`);
-    }
-    ids.add(object.id);
-  }
 }
 
 function success(snapshot: EditingSnapshot<ObjectSelection>): EditingResult<ObjectSelection> {

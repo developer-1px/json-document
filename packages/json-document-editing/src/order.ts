@@ -10,6 +10,7 @@ import {
   type RangeSelectionState,
 } from "./range-selection.js";
 import { lineInterval, lineTopology } from "./topology.js";
+import { assertOrderDocument } from "./order-validation.js";
 import {
   createEditingSession,
   type EditingResult,
@@ -216,15 +217,6 @@ function cloneItemsWithUniqueIds(
     occupied.push(copy);
     return copy;
   });
-}
-
-function assertOrderDocument(document: OrderDocument): void {
-  const ids = new Set<string>();
-  for (const item of document.items) {
-    if (item.id.length === 0) throw new Error("Order item ids must not be empty.");
-    if (ids.has(item.id)) throw new Error(`Order item id must be unique: ${JSON.stringify(item.id)}.`);
-    ids.add(item.id);
-  }
 }
 
 function success(snapshot: EditingSnapshot<OrderSelection>): EditingResult<OrderSelection> {

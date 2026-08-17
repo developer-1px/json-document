@@ -14,6 +14,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { assertKanbanDocument } from "./kanban-validation.js";
 
 export interface KanbanCard extends Record<string, JSONValue> {
   readonly id: string;
@@ -214,22 +215,4 @@ function success(snapshot: EditingSnapshot<KanbanSelection>): EditingResult<Kanb
 
 function failure(code: string): EditingResult<KanbanSelection> {
   return { ok: false, code };
-}
-
-function assertKanbanDocument(document: KanbanDocument): void {
-  const cardIds = new Set<string>();
-  for (const card of document.cards) {
-    if (card.id.length === 0) throw new Error("Kanban card ids must not be empty.");
-    if (cardIds.has(card.id)) throw new Error(`Kanban card id must be unique: ${JSON.stringify(card.id)}.`);
-    cardIds.add(card.id);
-  }
-  const columnIds = new Set<string>();
-  for (const column of document.columns) {
-    if (column.id.length === 0) throw new Error("Kanban column ids must not be empty.");
-    if (columnIds.has(column.id)) throw new Error(`Kanban column id must be unique: ${JSON.stringify(column.id)}.`);
-    columnIds.add(column.id);
-    for (const cardId of column.cardIds) {
-      if (!cardIds.has(cardId)) throw new Error(`Kanban column references unknown card: ${JSON.stringify(cardId)}.`);
-    }
-  }
 }
