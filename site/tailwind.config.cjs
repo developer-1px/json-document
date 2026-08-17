@@ -8,26 +8,33 @@ module.exports = {
     extend: {
       colors: {
         paper: {
-          DEFAULT: "#ffffff",
-          warm: "#fbf8f2",
+          DEFAULT: "rgb(var(--color-paper) / <alpha-value>)",
+          warm: "rgb(var(--color-paper-warm) / <alpha-value>)",
         },
         ink: {
-          DEFAULT: "#45433e",
-          strong: "#292824",
+          DEFAULT: "rgb(var(--color-ink) / <alpha-value>)",
+          strong: "rgb(var(--color-ink-strong) / <alpha-value>)",
         },
         pencil: {
-          DEFAULT: "#77736b",
-          light: "#d8d1c5",
+          DEFAULT: "rgb(var(--color-pencil) / <alpha-value>)",
+          light: "rgb(var(--color-pencil-light) / <alpha-value>)",
         },
-        sage: "#60786f",
+        sage: "rgb(var(--color-sage) / <alpha-value>)",
         impact: {
-          DEFAULT: "#de6d55",
-          ink: "#9f4937",
-          soft: "#fff3ee",
+          DEFAULT: "rgb(var(--color-impact) / <alpha-value>)",
+          ink: "rgb(var(--color-impact-ink) / <alpha-value>)",
+          soft: "rgb(var(--color-impact-soft) / <alpha-value>)",
         },
       },
+      spacing: {
+        page: "var(--space-page-inline)",
+        "page-wide": "var(--space-page-inline-wide)",
+      },
+      fontSize: {
+        "page-title": ["var(--font-size-page-title)", "var(--line-height-page-title)"],
+      },
       backgroundImage: {
-        "paper-grid": "linear-gradient(#d8d1c5 1px, transparent 1px), linear-gradient(90deg, #d8d1c5 1px, transparent 1px)",
+        "paper-grid": "linear-gradient(rgb(var(--color-pencil-light)) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--color-pencil-light)) 1px, transparent 1px)",
       },
     },
   },

@@ -14,6 +14,7 @@ import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { richTextStyles } from "./rich-text-styles";
 
 const initialDocument: RichTextDocument = {
   profile: "urn:interactive-os:json-document:rich-text:1",
@@ -207,7 +208,7 @@ export function RichTextDemoRoute() {
             spellCheck={false}
             aria-label="Rich Text 편집기"
             data-testid="rich-text-editor"
-            className={classes(ui.workbench.richTextEditor, ui.state.focus)}
+            className={classes(richTextStyles.editor, ui.state.focus)}
           />
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.

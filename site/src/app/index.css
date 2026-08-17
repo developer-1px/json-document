@@ -1,3 +1,24 @@
+@layer tokens, base, components, utilities;
+
+@layer tokens {
+  :root {
+    --color-paper: 255 255 255;
+    --color-paper-warm: 251 248 242;
+    --color-ink: 69 67 62;
+    --color-ink-strong: 41 40 36;
+    --color-pencil: 119 115 107;
+    --color-pencil-light: 216 209 197;
+    --color-sage: 96 120 111;
+    --color-impact: 222 109 85;
+    --color-impact-ink: 159 73 55;
+    --color-impact-soft: 255 243 238;
+    --space-page-inline: 1rem;
+    --space-page-inline-wide: 2rem;
+    --font-size-page-title: 1.875rem;
+    --line-height-page-title: 2.25rem;
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
