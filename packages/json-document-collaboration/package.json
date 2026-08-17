@@ -39,8 +39,7 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "prebuild": "npm run build -w @interactive-os/json-document",
-    "build": "npm run clean && tsc -p tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json",
     "prepack": "npm run build",
     "test": "vitest run --config vitest.config.ts",
     "test:soak": "JSON_DOCUMENT_COLLABORATION_SOAK_CASES=24 JSON_DOCUMENT_COLLABORATION_SOAK_STEPS=96 vitest run --config vitest.config.ts tests/convergence/soak.test.ts",

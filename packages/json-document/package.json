@@ -47,7 +47,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "layers:check": "node ./scripts/evaluate-layers.mjs",
-    "build": "npm run clean && tsc -p tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json",
     "prepack": "npm run build",
     "prepublishOnly": "npm --prefix ../.. run release:check",
     "smoke:package": "node ./tests/package/smoke.mjs",
