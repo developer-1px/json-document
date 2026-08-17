@@ -1,5 +1,7 @@
+import { integrationPageDescriptors } from "../../app/page-descriptors";
+
 export type AdapterCatalogEntry = {
-  readonly id: "keyboard" | "clipboard" | "contenteditable";
+  readonly id: string;
   readonly name: string;
   readonly packageName: string;
   readonly description: string;
@@ -7,29 +9,12 @@ export type AdapterCatalogEntry = {
   readonly demoPath: string;
 };
 
-export const adapterCatalog: ReadonlyArray<AdapterCatalogEntry> = [
-  {
-    id: "keyboard",
-    name: "Keyboard",
-    packageName: "@interactive-os/json-document-web",
-    description: "Official keyboard adapter. Conventional chords become semantic commands, then existing Intent, Clipboard, and History doors.",
-    status: "available",
-    demoPath: "/adapters/keyboard",
-  },
-  {
-    id: "clipboard",
-    name: "Clipboard",
-    packageName: "@interactive-os/json-document-web",
-    description: "Official clipboard adapter. Native ClipboardEvent copy, cut, and paste bind to editor clipboard contracts.",
-    status: "available",
-    demoPath: "/adapters/clipboard",
-  },
-  {
-    id: "contenteditable",
-    name: "Contenteditable",
-    packageName: "@interactive-os/json-document-contenteditable",
-    description: "Official DOM adapter. A React contenteditable root leases native input for one JSON Document string pointer.",
-    status: "available",
-    demoPath: "/adapters/contenteditable",
-  },
-];
+export const adapterCatalog: ReadonlyArray<AdapterCatalogEntry> =
+  integrationPageDescriptors("adapter").map((descriptor) => ({
+    id: descriptor.path.slice("/adapters/".length),
+    name: descriptor.label,
+    packageName: descriptor.integration!.packageName,
+    description: descriptor.description,
+    status: descriptor.integration!.status,
+    demoPath: descriptor.path,
+  }));

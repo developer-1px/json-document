@@ -1,26 +1,21 @@
 import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { pageDescriptor } from "../../app/page-descriptors";
 
 const demos = [
   {
-    path: "/demo",
-    label: "Document",
-    detail: "A block editor with range selection, structured clipboard, text input, and local history.",
+    ...pageDescriptor("/demo"),
     kind: "document" as const,
     illustration: "sleep" as const,
   },
   {
-    path: "/demo/sheet",
-    label: "Sheet",
-    detail: "A grid editor with rectangular selection, TSV clipboard, formulas, and visible-order projection.",
+    ...pageDescriptor("/demo/sheet"),
     kind: "sheet" as const,
     illustration: "cursor" as const,
   },
   {
-    path: "/demo/database",
-    label: "Database",
-    detail: "A typed table with persistent views, property editors, filters, sorting, and structural selection.",
+    ...pageDescriptor("/demo/database"),
     kind: "database" as const,
     illustration: "peek" as const,
   },
@@ -54,7 +49,7 @@ export function ShowcaseRoute() {
             </div>
 
             <div className="p-5">
-              <p className={classes("mt-0", ui.text.body)}>{demo.detail}</p>
+              <p className={classes("mt-0", ui.text.body)}>{demo.description}</p>
               <ActionLink to={demo.path} kind="prominent">Open {demo.label} Demo</ActionLink>
             </div>
           </article>
