@@ -77,8 +77,9 @@ Connectors
 
 Repository 전체의 개념과 이름 정본은
 `standards/repository-naming.md`, package 내부 책임 배치 정본은
-`standards/repository-implementation-shape.md`입니다. 현재 v3 portable root의
-compatibility 정본은 `standards/json-document-v3/profile.md`,
+`standards/repository-implementation-shape.md`, browser event부터 model
+reconciliation까지의 DOM 편집 정본은 `standards/dom-editing-lifecycle.md`입니다.
+현재 v3 portable root의 compatibility 정본은 `standards/json-document-v3/profile.md`,
 `standards/json-document-v3/public-surface.json`, 그리고 profile이
 지정한 conformance vector와 language binding입니다. 이름 정본은 stable v3
 identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
