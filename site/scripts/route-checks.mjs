@@ -37,6 +37,27 @@ export function validateSiteRoutes(routes, fail) {
     if (route.navigationGroup !== undefined && !navigationGroups.has(route.navigationGroup)) {
       fail(`site route ${route.path} has an invalid navigation group.`);
     }
+    if (route.heading !== undefined && (typeof route.heading !== "string" || route.heading.trim() === "")) {
+      fail(`site route ${route.path} has an invalid heading.`);
+    }
+    if (route.relatedDemoLabel !== undefined && (typeof route.relatedDemoLabel !== "string" || route.relatedDemoLabel.trim() === "")) {
+      fail(`site route ${route.path} has an invalid related demo label.`);
+    }
+    if (route.integration !== undefined) {
+      const expectedGroup = route.integration.kind === "adapter" ? "Adapters" : "Connectors";
+      if (!new Set(["adapter", "connector"]).has(route.integration.kind)) {
+        fail(`site route ${route.path} has an invalid integration kind.`);
+      }
+      if (route.navigationGroup !== expectedGroup) {
+        fail(`site route ${route.path} integration kind does not match its navigation group.`);
+      }
+      if (typeof route.integration.packageName !== "string" || !route.integration.packageName.startsWith("@interactive-os/")) {
+        fail(`site route ${route.path} has an invalid integration package.`);
+      }
+      if (!new Set(["available", "planned"]).has(route.integration.status)) {
+        fail(`site route ${route.path} has an invalid integration status.`);
+      }
+    }
 
     if (typeof route.path === "string") {
       if (paths.has(route.path)) fail(`site routes contain duplicate path ${route.path}.`);
@@ -60,6 +81,16 @@ export function validateSiteRoutes(routes, fail) {
 
   if (routes[0]?.path !== "/") {
     fail("site routes must start with the overview route.");
+  }
+
+  for (const route of routes) {
+    if (route.relatedDemoPath !== undefined && !paths.has(route.relatedDemoPath)) {
+      fail(`site route ${route.path} points to an unknown related demo ${route.relatedDemoPath}.`);
+    }
+    const isIntegrationDemo = /^\/(?:adapters|connectors)\/[^/]+$/.test(route.path);
+    if (isIntegrationDemo && route.integration === undefined) {
+      fail(`integration demo ${route.path} must declare catalog metadata.`);
+    }
   }
 }
 

@@ -1,20 +1,9 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import siteRoutesJson from "../../site-routes.json";
+import { pageDescriptors, type SiteRoute } from "./page-descriptors";
 
-export type SiteNavigationGroup = "JSON Document" | "Editing" | "Editors" | "Adapters" | "Connectors";
-
-export type SiteRoute = {
-  readonly path: string;
-  readonly label: string;
-  readonly title: string;
-  readonly description: string;
-  readonly language?: "en" | "ko";
-  readonly navigationGroup?: SiteNavigationGroup;
-  readonly parentPath?: string;
-};
-
-export const siteRoutes = siteRoutesJson as SiteRoute[];
+export { type SiteNavigationGroup, type SiteRoute } from "./page-descriptors";
+export const siteRoutes = pageDescriptors;
 
 const siteUrl = (import.meta.env.VITE_SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
 

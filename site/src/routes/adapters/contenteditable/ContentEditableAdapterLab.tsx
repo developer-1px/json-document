@@ -5,7 +5,7 @@ import { ContentEditable } from "@interactive-os/json-document-contenteditable";
 import { Inspector } from "../../../shared/ui/inspector";
 import { classes, ui } from "../../../shared/ui/styles";
 
-export function ContentEditableConnectorLab() {
+export function ContentEditableAdapterLab() {
   const [document] = useState(() => createJSONDocument({
     title: "Edit this title here.\nAdd a second line.",
     note: "This note is independent.\nIt stays unchanged.",

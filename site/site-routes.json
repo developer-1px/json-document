@@ -9,6 +9,7 @@
     "path": "/docs",
     "label": "Why",
     "title": "json-document Docs - json-document",
+    "heading": "왜 json-document인가",
     "description": "JSON 문서가 읽기, 검사, commit, 구독에 하나의 계약을 사용하는 이유를 설명합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
@@ -17,6 +18,7 @@
     "path": "/docs/tutorial",
     "label": "Quickstart",
     "title": "Tutorial - json-document",
+    "heading": "작은 카드 문서 만들기",
     "description": "JSON 문서를 만들고 읽고 검사해 commit한 뒤 변경을 구독하는 과정을 따라갑니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
@@ -33,6 +35,7 @@
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",
+    "heading": "json-document API",
     "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
@@ -41,6 +44,7 @@
     "path": "/docs/collaboration",
     "label": "Collaboration",
     "title": "Collaboration - json-document",
+    "heading": "Collaboration",
     "description": "같은 JSON Document 계약을 여러 참여자의 인과 변경으로 수렴시킵니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
@@ -49,6 +53,7 @@
     "path": "/docs/collaboration/replica",
     "label": "Replica",
     "title": "Replica - json-document",
+    "heading": "Replica",
     "description": "한 참여자가 소유한 인과 상태와 아직 적용하지 못한 변경을 설명합니다.",
     "language": "ko",
     "parentPath": "/docs/collaboration"
@@ -57,6 +62,7 @@
     "path": "/docs/collaboration/history",
     "label": "Collaborative History",
     "title": "Collaborative History - json-document",
+    "heading": "Collaborative History",
     "description": "다른 참여자를 덮어쓰지 않고 현재 참여자의 인과 기여를 끄거나 켭니다.",
     "language": "ko",
     "parentPath": "/docs/collaboration"
@@ -65,6 +71,7 @@
     "path": "/docs/collaboration/text",
     "label": "Text",
     "title": "Collaborative Text - json-document",
+    "heading": "Collaborative Text",
     "description": "같이 쓰는 문자열의 안정된 글자 단위와 상대 위치를 설명합니다.",
     "language": "ko",
     "parentPath": "/docs/collaboration"
@@ -73,6 +80,7 @@
     "path": "/docs/collaboration/text/lease",
     "label": "Contenteditable lease",
     "title": "Contenteditable lease - json-document",
+    "heading": "Contenteditable lease",
     "description": "협업 문자열이 입력 중에도 인과 변경을 멈추지 않게 하는 native-input DOM lease를 설명합니다.",
     "language": "ko",
     "parentPath": "/docs/collaboration/text"
@@ -81,6 +89,7 @@
     "path": "/docs/collaboration/lifecycle",
     "label": "Lifecycle",
     "title": "Collaboration Lifecycle - json-document",
+    "heading": "Lifecycle",
     "description": "epoch, checkpoint, restore, compaction이 협업 세대를 접고 되돌리는 방식을 설명합니다.",
     "language": "ko",
     "parentPath": "/docs/collaboration"
@@ -89,6 +98,7 @@
     "path": "/docs/intent-guide",
     "label": "Intent guide",
     "title": "Intent guide - json-document",
+    "heading": "Editor와 Intent 만들기",
     "description": "Document editor를 만들고 요청을 EditingIntent로 표현해 EditingResult를 처리합니다.",
     "language": "ko",
     "navigationGroup": "Editing"
@@ -97,6 +107,7 @@
     "path": "/docs/intent",
     "label": "Intent",
     "title": "Intent reference - json-document",
+    "heading": "Intent 레퍼런스",
     "description": "EditingIntent, dispatch, EditingResult와 editor별 Intent의 공개 시그니처를 정리합니다.",
     "language": "ko",
     "parentPath": "/docs/intent-guide"
@@ -105,9 +116,11 @@
     "path": "/docs/selection",
     "label": "Selection",
     "title": "Selection - json-document",
+    "heading": "Selection",
     "description": "문서 값을 바꾸지 않고 편집 대상을 기억하는 구조적 Selection을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "relatedDemoPath": "/demo/selection"
   },
   {
     "path": "/demo/selection",
@@ -121,9 +134,11 @@
     "path": "/docs/topology",
     "label": "Topology",
     "title": "Topology - json-document",
+    "heading": "Topology",
     "description": "Selection과 Clipboard가 공유하는 화면 순서인 LineTopology와 GridTopology를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "relatedDemoPath": "/demo/topology"
   },
   {
     "path": "/demo/topology",
@@ -137,9 +152,11 @@
     "path": "/docs/clipboard",
     "label": "Clipboard",
     "title": "Clipboard - json-document",
+    "heading": "Clipboard",
     "description": "현재 구조적 Selection에서 copy, cut, paste에 사용할 Clipboard payload를 만듭니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "relatedDemoPath": "/demo/clipboard"
   },
   {
     "path": "/demo/clipboard",
@@ -153,9 +170,11 @@
     "path": "/docs/history",
     "label": "History",
     "title": "History - json-document",
+    "heading": "History",
     "description": "document value와 구조적 Selection을 함께 복원하는 로컬 undo와 redo를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "relatedDemoPath": "/demo/history"
   },
   {
     "path": "/demo/history",
@@ -177,6 +196,7 @@
     "path": "/editors",
     "label": "Editors",
     "title": "Editors - json-document",
+    "heading": "Editors",
     "description": "Document, Canvas, Sheet, Tree, Kanban 최소 완성본을 고릅니다.",
     "language": "ko",
     "navigationGroup": "Editors"
@@ -227,6 +247,7 @@
     "path": "/docs/order",
     "label": "Order",
     "title": "Order - json-document",
+    "heading": "Order",
     "description": "한 줄 목록을 범위 선택으로 집고 옮기는 Order editor를 설명합니다.",
     "language": "ko",
     "parentPath": "/"
@@ -242,6 +263,7 @@
     "path": "/docs/object",
     "label": "Object",
     "title": "Object - json-document",
+    "heading": "Object",
     "description": "안정된 객체 ID를 키 가족으로 집는 Object editor를 설명합니다.",
     "language": "ko",
     "parentPath": "/"
@@ -257,9 +279,11 @@
     "path": "/docs/tree",
     "label": "Tree",
     "title": "Tree - json-document",
+    "heading": "Tree",
     "description": "호스트가 만든 보이는 노드 줄에서 범위를 집는 Tree editor를 설명합니다.",
     "language": "ko",
-    "parentPath": "/"
+    "parentPath": "/",
+    "relatedDemoPath": "/demo/tree"
   },
   {
     "path": "/demos",
@@ -279,6 +303,7 @@
     "path": "/docs/adapters",
     "label": "Adapter guide",
     "title": "Adapter Docs - json-document",
+    "heading": "json-document Adapters",
     "description": "Keyboard, Clipboard, Contenteditable 공식 adapter 계약을 설명합니다.",
     "language": "ko",
     "navigationGroup": "Adapters"
@@ -288,21 +313,36 @@
     "label": "Keyboard",
     "title": "Keyboard Adapter Live Demo - json-document",
     "description": "Official keyboard adapter: conventional chords become commands, then existing Intent, Clipboard, and History doors.",
-    "navigationGroup": "Adapters"
+    "navigationGroup": "Adapters",
+    "integration": {
+      "kind": "adapter",
+      "packageName": "@interactive-os/json-document-web",
+      "status": "available"
+    }
   },
   {
     "path": "/adapters/clipboard",
     "label": "Clipboard",
     "title": "Clipboard Adapter Live Demo - json-document",
     "description": "Official clipboard adapter: native ClipboardEvent copy, cut, and paste bind to public editing contracts.",
-    "navigationGroup": "Adapters"
+    "navigationGroup": "Adapters",
+    "integration": {
+      "kind": "adapter",
+      "packageName": "@interactive-os/json-document-web",
+      "status": "available"
+    }
   },
   {
     "path": "/adapters/contenteditable",
     "label": "Contenteditable",
     "title": "Contenteditable Adapter Live Demo - json-document",
     "description": "Official DOM adapter: a React contenteditable root leases native input and commits one JSON Document string pointer.",
-    "navigationGroup": "Adapters"
+    "navigationGroup": "Adapters",
+    "integration": {
+      "kind": "adapter",
+      "packageName": "@interactive-os/json-document-contenteditable",
+      "status": "available"
+    }
   },
   {
     "path": "/connectors",
@@ -315,6 +355,7 @@
     "path": "/docs/connectors",
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
+    "heading": "json-document Connectors",
     "description": "React, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
     "language": "ko",
     "navigationGroup": "Connectors"
@@ -324,32 +365,53 @@
     "label": "React",
     "title": "React Connector Live Demo - json-document",
     "description": "Live React integration for JSON Document subscriptions and component-owned editing lifecycle.",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connectors",
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-react",
+      "status": "available"
+    }
   },
   {
     "path": "/connectors/react-hook-form",
     "label": "React Hook Form",
     "title": "React Hook Form Connector Live Demo - json-document",
     "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connectors",
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-react-hook-form",
+      "status": "available"
+    }
   },
   {
     "path": "/connectors/ajv",
     "label": "Ajv",
     "title": "Ajv Connector Live Demo - json-document",
     "description": "Live Ajv validation with JSON Pointer diagnostics and non-adoption of validator mutations.",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connectors",
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-ajv",
+      "status": "available"
+    }
   },
   {
     "path": "/connectors/zod",
     "label": "Zod",
     "title": "Zod Connector Live Demo - json-document",
     "description": "A Zod object schema and record array become a Database admin table.",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connectors",
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-zod",
+      "status": "available"
+    }
   },
   {
     "path": "/connectors/zod/validate",
     "label": "Validate",
+    "relatedDemoLabel": "Validate commits",
     "title": "Zod Validate Live Demo - json-document",
     "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
     "parentPath": "/connectors/zod"
@@ -359,6 +421,11 @@
     "label": "TanStack Table",
     "title": "TanStack Table Connector Live Demo - json-document",
     "description": "Live TanStack Table v8 integration for visible-order Sheet selection, clipboard, history, and canonical JSON editing.",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connectors",
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-tanstack-table",
+      "status": "available"
+    }
   }
 ]

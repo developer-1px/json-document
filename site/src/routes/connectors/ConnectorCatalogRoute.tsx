@@ -22,20 +22,16 @@ export function ConnectorCatalogRoute() {
               </div>
               <InlineCode className="mt-2 block">{connector.packageName}</InlineCode>
               <p className={classes("mb-4 mt-3", ui.text.body)}>{connector.description}</p>
-              {connector.demoPath === null ? (
-                <span className={classes("mt-auto", ui.text.meta)}>Live Demo ships with the implementation.</span>
-              ) : (
-                <div className="mt-auto flex flex-wrap items-center gap-3">
-                  <ActionLink to={connector.demoPath} kind="prominent" className="self-start">
-                    Open Live Demo
+              <div className="mt-auto flex flex-wrap items-center gap-3">
+                <ActionLink to={connector.demoPath} kind="prominent" className="self-start">
+                  Open Live Demo
+                </ActionLink>
+                {connector.moreDemos.map((demo) => (
+                  <ActionLink key={demo.path} to={demo.path}>
+                    {demo.label}
                   </ActionLink>
-                  {connector.moreDemos?.map((demo) => (
-                    <ActionLink key={demo.path} to={demo.path}>
-                      {demo.label}
-                    </ActionLink>
-                  ))}
-                </div>
-              )}
+                ))}
+              </div>
             </article>
           ))}
         </div>

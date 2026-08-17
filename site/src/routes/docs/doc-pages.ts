@@ -19,134 +19,34 @@ import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
+import { pageDescriptor } from "../../app/page-descriptors";
+
+function docPage(path: string, source: string) {
+  return { ...pageDescriptor(path), source };
+}
 
 export const docPages = {
-  overview: {
-    path: "/docs",
-    label: "Why",
-    title: "왜 json-document인가",
-    source: overviewMarkdown,
-  },
-  quickstart: {
-    path: "/docs/tutorial",
-    label: "Quickstart",
-    title: "작은 카드 문서 만들기",
-    source: quickstartMarkdown,
-  },
-  adapters: {
-    path: "/docs/adapters",
-    label: "Adapter guide",
-    title: "json-document Adapters",
-    source: adaptersMarkdown,
-  },
-  connectors: {
-    path: "/docs/connectors",
-    label: "Connector guide",
-    title: "json-document Connectors",
-    source: connectorsMarkdown,
-  },
-  collaboration: {
-    path: "/docs/collaboration",
-    label: "Collaboration",
-    title: "Collaboration",
-    source: collaborationMarkdown,
-  },
-  collaborationReplica: {
-    path: "/docs/collaboration/replica",
-    label: "Replica",
-    title: "Replica",
-    source: collaborationReplicaMarkdown,
-  },
-  collaborationHistory: {
-    path: "/docs/collaboration/history",
-    label: "Collaborative History",
-    title: "Collaborative History",
-    source: collaborationHistoryMarkdown,
-  },
-  collaborationText: {
-    path: "/docs/collaboration/text",
-    label: "Text",
-    title: "Collaborative Text",
-    source: collaborationTextMarkdown,
-  },
-  collaborationLease: {
-    path: "/docs/collaboration/text/lease",
-    label: "Contenteditable lease",
-    title: "Contenteditable lease",
-    source: collaborationLeaseMarkdown,
-  },
-  collaborationLifecycle: {
-    path: "/docs/collaboration/lifecycle",
-    label: "Lifecycle",
-    title: "Lifecycle",
-    source: collaborationLifecycleMarkdown,
-  },
-  editors: {
-    path: "/editors",
-    label: "Editors",
-    title: "Editors",
-    source: editorsMarkdown,
-  },
-  order: {
-    path: "/docs/order",
-    label: "Order",
-    title: "Order",
-    source: orderMarkdown,
-  },
-  object: {
-    path: "/docs/object",
-    label: "Object",
-    title: "Object",
-    source: objectMarkdown,
-  },
-  tree: {
-    path: "/docs/tree",
-    label: "Tree",
-    title: "Tree",
-    source: treeMarkdown,
-  },
-  intent: {
-    path: "/docs/intent",
-    label: "Intent",
-    title: "Intent 레퍼런스",
-    source: intentMarkdown,
-  },
-  intentGuide: {
-    path: "/docs/intent-guide",
-    label: "Intent guide",
-    title: "Editor와 Intent 만들기",
-    source: intentGuideMarkdown,
-  },
-  api: {
-    path: "/docs/api",
-    label: "API Reference",
-    title: "json-document API",
-    source: apiReferenceMarkdown,
-  },
-  topology: {
-    path: "/docs/topology",
-    label: "Topology",
-    title: "Topology",
-    source: topologyMarkdown,
-  },
-  selection: {
-    path: "/docs/selection",
-    label: "Selection",
-    title: "Selection",
-    source: selectionMarkdown,
-  },
-  history: {
-    path: "/docs/history",
-    label: "History",
-    title: "History",
-    source: historyMarkdown,
-  },
-  clipboard: {
-    path: "/docs/clipboard",
-    label: "Clipboard",
-    title: "Clipboard",
-    source: clipboardMarkdown,
-  },
+  overview: docPage("/docs", overviewMarkdown),
+  quickstart: docPage("/docs/tutorial", quickstartMarkdown),
+  adapters: docPage("/docs/adapters", adaptersMarkdown),
+  connectors: docPage("/docs/connectors", connectorsMarkdown),
+  collaboration: docPage("/docs/collaboration", collaborationMarkdown),
+  collaborationReplica: docPage("/docs/collaboration/replica", collaborationReplicaMarkdown),
+  collaborationHistory: docPage("/docs/collaboration/history", collaborationHistoryMarkdown),
+  collaborationText: docPage("/docs/collaboration/text", collaborationTextMarkdown),
+  collaborationLease: docPage("/docs/collaboration/text/lease", collaborationLeaseMarkdown),
+  collaborationLifecycle: docPage("/docs/collaboration/lifecycle", collaborationLifecycleMarkdown),
+  editors: docPage("/editors", editorsMarkdown),
+  order: docPage("/docs/order", orderMarkdown),
+  object: docPage("/docs/object", objectMarkdown),
+  tree: docPage("/docs/tree", treeMarkdown),
+  intent: docPage("/docs/intent", intentMarkdown),
+  intentGuide: docPage("/docs/intent-guide", intentGuideMarkdown),
+  api: docPage("/docs/api", apiReferenceMarkdown),
+  topology: docPage("/docs/topology", topologyMarkdown),
+  selection: docPage("/docs/selection", selectionMarkdown),
+  history: docPage("/docs/history", historyMarkdown),
+  clipboard: docPage("/docs/clipboard", clipboardMarkdown),
 } as const;
 
 export type DocPageId = keyof typeof docPages;

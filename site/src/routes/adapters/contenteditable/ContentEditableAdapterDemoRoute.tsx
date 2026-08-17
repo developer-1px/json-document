@@ -1,5 +1,5 @@
-import { ContentEditableConnectorLab } from "./ContentEditableConnectorLab";
-import { ConnectorDemoPage } from "../ConnectorDemoPage";
+import { ContentEditableAdapterLab } from "./ContentEditableAdapterLab";
+import { CatalogDemoPage } from "../../../shared/ui/catalog-demo-page";
 
 const connectorCode = `const document = createJSONDocument({
   title: "Shared title",
@@ -8,9 +8,9 @@ const connectorCode = `const document = createJSONDocument({
 
 <ContentEditable document={document} pointer="/title" />`;
 
-export function ContentEditableConnectorDemoRoute() {
+export function ContentEditableAdapterDemoRoute() {
   return (
-    <ConnectorDemoPage
+    <CatalogDemoPage
       connectionCode={{ language: "tsx", source: connectorCode }}
       connectionDescription="The host supplies the document and string pointer. The adapter leases native input for that root and commits only the bound value; toolbar and rich-text meaning stay in the product."
       description="A React contenteditable root leases native input and commits the bound string through the public JSON Document API."
@@ -18,7 +18,7 @@ export function ContentEditableConnectorDemoRoute() {
       install="npm i @interactive-os/json-document-contenteditable"
       title="Contenteditable Adapter"
     >
-      <ContentEditableConnectorLab />
-    </ConnectorDemoPage>
+      <ContentEditableAdapterLab />
+    </CatalogDemoPage>
   );
 }
