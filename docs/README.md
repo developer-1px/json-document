@@ -76,8 +76,9 @@ Connectors
 ## 규범 우선순위
 
 Repository 전체의 개념과 이름 정본은
-`standards/repository-naming.md`입니다. 현재 v3 portable root의 compatibility
-정본은 `standards/json-document-v3/profile.md`,
+`standards/repository-naming.md`, package 내부 책임 배치 정본은
+`standards/repository-implementation-shape.md`입니다. 현재 v3 portable root의
+compatibility 정본은 `standards/json-document-v3/profile.md`,
 `standards/json-document-v3/public-surface.json`, 그리고 profile이
 지정한 conformance vector와 language binding입니다. 이름 정본은 stable v3
 identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
@@ -112,7 +113,8 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   앞뒤 페이지를 이어 읽는다.
 - 무엇을 하는지로 정의한다. 소유하지 않는 것의 목록으로 시작하지 않는다.
 - 같은 아키텍처 다이어그램과 패키지 카탈로그를 페이지마다 복제하지 않는다.
-- 이름 정본과 profile은 `standards/`에 두고 public 가이드에서 인용하지 않는다.
+- 이름·구현 모양 정본과 profile은 `standards/`에 두고 public 가이드에서 인용하지
+  않는다.
 - 릴리스 history, 검토 loop, maintainer-only gate는 public 문서에 쓰지 않는다.
 - 내부 구현 경로는 public 문서에 쓰지 않는다.
 - 새 문서는 기존 책임 폴더 중 하나에 들어가야 한다.
