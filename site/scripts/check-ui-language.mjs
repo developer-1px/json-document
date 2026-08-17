@@ -31,7 +31,7 @@ const violations = sourceRoots.flatMap((root) => collect(path.join(siteRoot, roo
   .flatMap((file) => visualUtilityViolations(fs.readFileSync(file, "utf8"), path.relative(siteRoot, file)));
 
 if (violations.length > 0) {
-  console.error("UI language violations must move to src/shared/ui:");
+  console.error("UI language violations must move to src/shared/ui or an explicit route-owned *-styles.ts module:");
   violations.forEach((violation) => console.error(`- ${violation}`));
   process.exitCode = 1;
 } else {
@@ -43,6 +43,7 @@ function collect(directory) {
     const entryPath = path.join(directory, entry.name);
     if (entry.isDirectory()) return collect(entryPath);
     if (entry.name.endsWith(".gen.ts") || entry.name.endsWith(".gen.tsx")) return [];
+    if (entry.name.endsWith("-styles.ts")) return [];
     return /\.tsx?$/.test(entry.name) ? [entryPath] : [];
   });
 }

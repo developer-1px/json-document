@@ -1,6 +1,7 @@
 import { InlineCode } from "../../shared/ui/code-block";
 import { ActionLink } from "../../shared/ui/interactive";
 import { ui } from "../../shared/ui/styles";
+import { homeStyles } from "./home-styles";
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -10,29 +11,29 @@ function sitePath(path: string): string {
 
 export function HomeRoute() {
   return (
-    <main className={ui.home.page}>
-      <section className={ui.home.hero} aria-labelledby="home-title">
-        <div className={ui.home.copy}>
-          <h1 id="home-title" className={ui.home.logoHeading}>
+    <main className={homeStyles.page}>
+      <section className={homeStyles.hero} aria-labelledby="home-title">
+        <div className={homeStyles.copy}>
+          <h1 id="home-title" className={homeStyles.logoHeading}>
             <span className="sr-only">json-document</span>
             <HomeWordmark />
           </h1>
-          <p className={ui.home.statement}>
+          <p className={homeStyles.statement}>
             One JSON document. Any editor.
           </p>
-          <p className={ui.home.description}>
+          <p className={homeStyles.description}>
             A tiny headless API to read, query, patch, and subscribe.
           </p>
 
-          <div className={ui.home.entry}>
-            <InlineCode className={ui.home.install} prompt>npm i @interactive-os/json-document</InlineCode>
+          <div className={homeStyles.entry}>
+            <InlineCode className={homeStyles.install} prompt>npm i @interactive-os/json-document</InlineCode>
             <ActionLink to="/docs/tutorial" kind="prominent">Get started</ActionLink>
           </div>
         </div>
 
-        <figure className={ui.home.artwork}>
+        <figure className={homeStyles.artwork}>
           <img
-            className={ui.home.artworkImage}
+            className={homeStyles.artworkImage}
             src={sitePath("/cat-enter.png")}
             alt="A small cat struggling to press an oversized Enter key."
             width="1200"
@@ -48,7 +49,7 @@ function HomeWordmark() {
   return (
     <svg
       aria-hidden="true"
-      className={ui.home.logo}
+      className={homeStyles.logo}
       viewBox="0 0 435 66"
       xmlns="http://www.w3.org/2000/svg"
     >

@@ -1,7 +1,9 @@
+// Public recipes for shared UI primitives and patterns only.
+// Page- or route-specific composition belongs beside its owning route.
 export const ui = {
   frame: {
     app: "bg-paper font-sans text-ink antialiased",
-    page: "min-h-full bg-paper px-4 pb-8 pt-4 lg:px-8",
+    page: "min-h-full bg-paper px-page pb-8 pt-4 lg:px-page-wide",
     content: "mx-auto max-w-6xl",
     header: "border-b border-pencil-light/60",
     hero: "border-b border-pencil-light/60 bg-transparent",
@@ -35,7 +37,7 @@ export const ui = {
   },
   text: {
     label: "text-xs font-medium text-ink",
-    title: "text-3xl font-semibold tracking-[-0.025em] text-ink-strong",
+    title: "text-page-title font-semibold tracking-[-0.025em] text-ink-strong",
     heading: "text-base font-semibold text-ink-strong",
     body: "text-sm leading-6 text-ink",
     meta: "text-xs leading-5 text-pencil",
@@ -131,29 +133,6 @@ export const ui = {
     disabled: "disabled:cursor-not-allowed disabled:text-pencil",
     error: "text-impact-ink",
   },
-  workbench: {
-    exampleShell: "overflow-hidden rounded-[10px] border border-pencil-light bg-paper shadow-[0_1px_2px_rgba(69,67,62,0.04),0_12px_32px_rgba(69,67,62,0.06)]",
-    exampleScenario: "flex items-center gap-3 border-b border-pencil-light bg-paper px-4 py-3",
-    exampleMarker: "h-8 w-1 rounded-full bg-impact",
-    exampleInspectors: "grid gap-3 border-t border-pencil-light bg-paper-warm p-3 lg:grid-cols-3",
-    darkStrip: "rounded-[10px] border border-ink bg-ink-strong text-paper",
-    darkLabel: "text-xs font-medium uppercase tracking-wide text-impact",
-    darkMeta: "text-[10px] text-pencil-light",
-    darkChip: "rounded-full border border-pencil text-xs text-paper-warm",
-    tab: "rounded-[6px] border border-transparent text-sm text-ink aria-pressed:border-impact aria-pressed:bg-paper-warm aria-pressed:text-ink-strong",
-    compactList: "rounded-[10px] border border-pencil-light bg-paper divide-y divide-pencil-light/70",
-    sidebar: "rounded-[6px] border border-pencil-light bg-paper-warm lg:border-l lg:border-t-0",
-    item: "rounded-[6px] border border-pencil-light bg-paper text-sm text-ink aria-pressed:border-impact aria-pressed:bg-paper-warm aria-pressed:ring-1 aria-pressed:ring-impact",
-    itemStrong: "rounded-[6px] border border-pencil-light bg-paper text-sm text-ink aria-pressed:border-impact aria-pressed:bg-paper-warm aria-pressed:ring-2 aria-pressed:ring-impact",
-    inspectorToggle: "bg-ink-strong text-xs font-medium text-paper",
-    inspectorGrid: "bg-ink",
-    inspectorCell: "bg-ink-strong text-paper-warm",
-    inspectorLabel: "text-[9px] font-medium uppercase tracking-wider text-impact",
-    canvas: "rounded-[10px] border border-pencil-light bg-paper-grid bg-[size:16px_16px]",
-    canvasObject: "rounded-[6px] border-2 border-paper text-xs font-medium text-paper shadow-[0_1px_2px_rgba(69,67,62,0.12)] outline-none aria-pressed:ring-2 aria-pressed:ring-impact aria-pressed:ring-offset-2",
-    marquee: "border border-impact bg-impact/10",
-    richTextEditor: "min-h-56 rounded-[6px] border border-pencil-light bg-paper p-5 text-base leading-7 text-ink-strong outline-none",
-  },
   database: {
     toolbar: "rounded-[10px] border border-pencil-light bg-paper shadow-[0_1px_2px_rgba(69,67,62,0.04)]",
     table: "border-collapse bg-paper text-left text-sm",
@@ -164,19 +143,6 @@ export const ui = {
     select: "rounded-[6px] border border-pencil-light bg-paper px-2 py-1 text-sm text-ink outline-none hover:border-pencil focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25",
     checkbox: "h-4 w-4 accent-impact",
     lease: "rounded-[6px] border border-impact/40 bg-impact-soft px-2 py-1 text-xs text-impact-ink",
-  },
-  home: {
-    page: "min-h-full overflow-hidden bg-paper",
-    hero: "relative isolate mx-auto min-h-[52rem] max-w-[92rem] overflow-hidden bg-paper lg:min-h-screen",
-    copy: "relative z-10 flex min-h-[52rem] max-w-2xl flex-col justify-start px-6 pb-[22rem] pt-20 sm:justify-center sm:px-12 sm:pb-[20rem] sm:pt-16 lg:min-h-screen lg:max-w-[42rem] lg:px-16 lg:pb-20 xl:px-24",
-    logoHeading: "m-0 w-full max-w-[29rem] text-ink-strong",
-    logo: "block h-auto w-full overflow-visible",
-    statement: "mb-0 mt-8 text-2xl font-semibold leading-tight tracking-[-0.035em] text-ink-strong sm:text-3xl",
-    description: "mb-0 mt-4 max-w-md text-base leading-7 text-ink",
-    entry: "mt-8 flex flex-wrap items-center gap-x-5 gap-y-3",
-    install: "font-mono text-xs leading-5 text-pencil",
-    artwork: "pointer-events-none absolute inset-0 z-0 m-0 overflow-hidden",
-    artworkImage: "absolute bottom-0 right-0 h-auto w-[140vw] max-w-none translate-x-[18%] sm:w-[112vw] sm:translate-x-[14%] lg:w-[78vw] lg:translate-x-[8%]",
   },
 } as const;
 

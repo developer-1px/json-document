@@ -7,8 +7,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "check:ui": "node scripts/check-ui-language.mjs",
+    "check:styles": "node scripts/check-style-ownership.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:styles && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-editing": "*",

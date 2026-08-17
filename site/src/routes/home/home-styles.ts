@@ -1,0 +1,13 @@
+export const homeStyles = {
+  page: "min-h-full overflow-hidden bg-paper",
+  hero: "relative isolate mx-auto min-h-[52rem] max-w-[92rem] overflow-hidden bg-paper lg:min-h-screen",
+  copy: "relative z-10 flex min-h-[52rem] max-w-2xl flex-col justify-start px-6 pb-[22rem] pt-20 sm:justify-center sm:px-12 sm:pb-[20rem] sm:pt-16 lg:min-h-screen lg:max-w-[42rem] lg:px-16 lg:pb-20 xl:px-24",
+  logoHeading: "m-0 w-full max-w-[29rem] text-ink-strong",
+  logo: "block h-auto w-full overflow-visible",
+  statement: "mb-0 mt-8 text-2xl font-semibold leading-tight tracking-[-0.035em] text-ink-strong sm:text-3xl",
+  description: "mb-0 mt-4 max-w-md text-base leading-7 text-ink",
+  entry: "mt-8 flex flex-wrap items-center gap-x-5 gap-y-3",
+  install: "font-mono text-xs leading-5 text-pencil",
+  artwork: "pointer-events-none absolute inset-0 z-0 m-0 overflow-hidden",
+  artworkImage: "absolute bottom-0 right-0 h-auto w-[140vw] max-w-none translate-x-[18%] sm:w-[112vw] sm:translate-x-[14%] lg:w-[78vw] lg:translate-x-[8%]",
+} as const;
