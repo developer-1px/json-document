@@ -17,7 +17,7 @@
     "provenance": true,
     "tag": "next"
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

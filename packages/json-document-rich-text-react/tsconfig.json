@@ -1,17 +1,15 @@
 {
+  "extends": "../../tsconfig/library-react.json",
   "compilerOptions": {
-    "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "jsx": "react-jsx",
-    "types": [],
-    "declaration": true,
-    "strict": true,
-    "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
+  "references": [
+    { "path": "../json-document-react" },
+    { "path": "../json-document-rich-text" },
+    { "path": "../json-document-rich-text-web" }
+  ],
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

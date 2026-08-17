@@ -191,12 +191,12 @@ for (const field of [
 equal(
   "package files",
   packageManifest.files,
-  ["dist", "README.md", "public-contract.json", "LICENSE"],
+  ["dist", "!dist/.tsbuildinfo", "README.md", "public-contract.json", "LICENSE"],
 );
 equal(
   "production build roots",
   buildConfig.include,
-  ["src/application/document/index.ts"],
+  ["src/**/*.ts"],
 );
 
 const documentedRequirements = [

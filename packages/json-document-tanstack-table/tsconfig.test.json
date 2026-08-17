@@ -1,9 +1,7 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "../../tsconfig/test-dom.json"],
   "compilerOptions": {
-    "noEmit": true,
-    "rootDir": ".",
-    "types": ["node", "vitest/globals"]
+    "rootDir": "."
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"]
 }

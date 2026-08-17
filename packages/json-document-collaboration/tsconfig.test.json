@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "composite": false,
     "baseUrl": ".",
     "paths": {
       "@interactive-os/json-document": [
