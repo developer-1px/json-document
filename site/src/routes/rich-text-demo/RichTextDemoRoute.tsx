@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import {
   createRichTextEditor,
   type RichTextDocument,
@@ -11,7 +11,7 @@ import {
 } from "@interactive-os/json-document-rich-text";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { richTextStyles } from "./rich-text-styles";
@@ -103,13 +103,31 @@ const initialDocument: RichTextDocument = {
 
 export function RichTextDemoRoute() {
   const [editor] = useState(() => createRichTextEditor({ document: createJSONDocument(initialDocument) }));
-  const snapshot = useEditingSnapshot(editor);
   const [lastPatch, setLastPatch] = useState<ReadonlyArray<JSONPatchOperation>>([]);
   const [lastAction, setLastAction] = useState("selection.ready");
-  const primary = snapshot.selection.primaryIndex === null
+  const document = editor.snapshot.value as RichTextDocument;
+  const primary = editor.snapshot.selection.primaryIndex === null
     ? null
-    : snapshot.selection.ranges[snapshot.selection.primaryIndex] ?? null;
+    : editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex] ?? null;
   const interval = primary === null ? [] : editor.topology.interval(primary.anchor, primary.focus);
+  const focus = primary?.focus ?? null;
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: interval.map((target) => target.nodeId),
+    focusKey: focus?.nodeId ?? null,
+    textOffset: focus?.kind === "text" ? focus.offset : null,
+    onSelect: (nodeId) => {
+      const text = findTextNode(document, nodeId);
+      const point: RichTextPoint = text
+        ? { kind: "text", nodeId, offset: 0, affinity: "forward" }
+        : { kind: "child", nodeId, offset: 0, affinity: "forward" };
+      editor.dispatch({
+        type: "selection.set",
+        selection: { kind: "range", ranges: [{ anchor: point, focus: point }], primaryIndex: 0 },
+      });
+    },
+  });
+  const snapshot = editing.snapshot;
 
   const onSurfaceAction = useCallback((action: string, result?: ReturnType<RichTextEditor["dispatch"]>) => {
     setLastAction(action);
@@ -210,6 +228,30 @@ export function RichTextDemoRoute() {
             data-testid="rich-text-editor"
             className={classes(richTextStyles.editor, ui.state.focus)}
           />
+          <ol className="mt-3 m-0 grid list-none gap-1 p-0" aria-label="Rich Text blocks">
+            {(snapshot.value as RichTextDocument).content.map((block) => {
+              const ids = collectNodeIds(block);
+              const selected = ids.some((id) => editing.getItem(id).getIsSelected());
+              const focused = ids.some((id) => editing.getItem(id).getIsFocus());
+              const offset = ids
+                .map((id) => editing.getItem(id).getTextOffset())
+                .find((value) => value !== null) ?? null;
+              return (
+                <li key={block.id}>
+                  <SelectableItem
+                    type="button"
+                    selected={selected}
+                    focus={focused}
+                    className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
+                    onClick={editing.getItem(block.id).getPressHandler()}
+                  >
+                    {block.type} · {block.id}
+                    {offset === null ? "" : ` · offset ${offset}`}
+                  </SelectableItem>
+                </li>
+              );
+            })}
+          </ol>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.
           </p>
@@ -253,4 +295,10 @@ function findTextNode(node: RichTextDocument | RichTextNode, id: string): RichTe
     if (found) return found;
   }
   return null;
+}
+
+function collectNodeIds(node: RichTextDocument | RichTextNode): string[] {
+  const ids = [node.id];
+  if (!("content" in node) || !Array.isArray(node.content)) return ids;
+  return ids.concat(node.content.flatMap((child) => collectNodeIds(child as RichTextNode)));
 }

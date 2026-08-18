@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { createDocumentEditor, createSheetEditor } from "@interactive-os/json-document-editing";
@@ -16,6 +17,43 @@ function resolveStroke(stroke: EditingKeyboardStroke): EditingKeyboardCommand | 
 }
 
 describe("useEditing", () => {
+  test("answers host keys without an editor source", () => {
+    function View() {
+      const [selected, setSelected] = useState<string[]>([]);
+      const editing = useEditing({
+        selectedKeys: selected,
+        focusKey: selected.at(-1) ?? null,
+        onSelect: (key, mode) => {
+          setSelected((current) => mode === "replace" ? [key] : [...current, key]);
+        },
+      });
+      return (
+        <div>
+          {["title", "note"].map((id) => {
+            const item = editing.getItem(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                data-selected={item.getIsSelected() ? "true" : "false"}
+                data-focus={item.getIsFocus() ? "true" : "false"}
+                onClick={item.getPressHandler()}
+              >
+                {id}
+              </button>
+            );
+          })}
+        </div>
+      );
+    }
+
+    render(<View />);
+    fireEvent.click(screen.getByRole("button", { name: "title" }));
+    expect(screen.getByRole("button", { name: "title" }).getAttribute("data-selected")).toBe("true");
+    expect(screen.getByRole("button", { name: "title" }).getAttribute("data-focus")).toBe("true");
+    expect(screen.getByRole("button", { name: "note" }).getAttribute("data-selected")).toBe("false");
+  });
+
   test("answers selection and press mode without owning markup", () => {
     const editor = createDocumentEditor({
       blocks: [

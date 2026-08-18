@@ -68,7 +68,7 @@ describe("official site shell", () => {
       "Database",
     ]);
     expect(groupLinks(nav, "Adapters")).toEqual(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
+    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React editing", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([

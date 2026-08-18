@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { createJSONDocument, type JSONPatchValidationResult } from "@interactive-os/json-document";
 import { createAjvValidator } from "@interactive-os/json-document-ajv";
-import { useReactConnector } from "@interactive-os/json-document-react";
+import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
 import { Ajv } from "ajv";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton } from "../../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const ajv = new Ajv({ useDefaults: true });
@@ -42,6 +42,14 @@ export function AjvConnectorLab() {
   const value = useReactConnector(document) as ProfileDocument;
   const [draft, setDraft] = useState(value.profile.title);
   const [result, setResult] = useState<JSONPatchValidationResult>(accepted);
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const failedPointer = result.ok ? null : result.pointer ?? null;
+  const editing = useEditing({
+    selectedKeys: [focusKey, failedPointer].filter((key): key is string => key !== null),
+    focusKey,
+    onSelect: (key) => setFocusKey(key),
+  });
+  const title = editing.getItem("/profile/title");
 
   function commitDraft() {
     setResult(document.commit([
@@ -59,14 +67,20 @@ export function AjvConnectorLab() {
         </p>
       </div>
 
-      <label className={classes("grid gap-1", ui.text.meta)}>
+      <SelectableItem
+        as="label"
+        selected={title.getIsSelected()}
+        focus={title.getIsFocus()}
+        className={classes("grid gap-1 p-2", ui.text.meta)}
+      >
         Profile title draft
         <input
           value={draft}
           onChange={(event) => setDraft(event.currentTarget.value)}
+          onFocus={title.getPressHandler()}
           className={ui.field.control}
         />
-      </label>
+      </SelectableItem>
       <ActionButton kind="primary" onClick={commitDraft} className="mt-3">
         Commit draft
       </ActionButton>
