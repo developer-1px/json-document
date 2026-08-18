@@ -46,4 +46,7 @@ JSON 값이 바뀌면 editor는 변경 전후의 Selection을 patch와 함께 �
 실행 취소는 값과 사용자가 작업하던 위치를 함께 복원합니다.
 
 다음 [Topology](topology.md) 문서에서는 범위 Selection에 화면 순서를
-더합니다.
+더합니다. React에서 그 범위와 커서를 그리려면
+[Connectors](connectors.md)의 `useEditing`
+질의를 씁니다. KeyboardEvent를 command로 바꾸는 일은
+[Adapters](adapters.md)입니다.
