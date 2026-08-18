@@ -2,11 +2,13 @@ import { useRef, useState, type ClipboardEvent } from "react";
 import {
   type BlockDocument,
   type DocumentClipboard,
+  type DocumentEditor,
   type DocumentIntent,
+  type DocumentPoint,
   type DocumentSelection,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing, useRestoreTextCursor } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   createWebKeyboardAdapter,
@@ -60,9 +62,12 @@ export function DocumentDemoRoute() {
     return result;
   }
 
+  const focus = documentFocus(editor);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
+    focusKey: focus?.blockId ?? null,
+    textOffset: focus?.offset ?? null,
     onSelect: (blockId, mode) => {
       run(() => dispatchIntent({ type: "selection.set", blockId, mode }), "Selection changed");
     },
@@ -84,6 +89,19 @@ export function DocumentDemoRoute() {
       },
       onRedo: () => {
         run(() => editor.redo(), "Redone");
+      },
+      text: {
+        offset: () => documentFocus(editor)?.offset ?? 0,
+        length: () => {
+          const blockId = documentFocus(editor)?.blockId;
+          const block = (editor.snapshot.value as BlockDocument).blocks.find((item) => item.id === blockId);
+          return block?.text.length ?? 0;
+        },
+        onOffset: (offset, mode) => {
+          const blockId = documentFocus(editor)?.blockId;
+          if (!blockId) return;
+          run(() => dispatchIntent({ type: "selection.set", blockId, mode, offset }), "Selection changed");
+        },
       },
     },
   });
@@ -207,35 +225,66 @@ export function DocumentDemoRoute() {
             >
               {document.blocks.length === 0 ? (
                 <ActionButton kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
-              ) : document.blocks.map((block, index) => (
+              ) : document.blocks.map((block, index) => {
+                const item = editing.getItem(block.id);
+                return (
                 <SelectableItem
                   as="article"
                   key={block.id}
-                  selected={editing.getItem(block.id).getIsSelected()}
+                  selected={item.getIsSelected()}
+                  focus={item.getIsFocus()}
                   data-block-id={block.id}
-                  onClick={editing.getItem(block.id).getPressHandler()}
+                  onClick={item.getPressHandler()}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                 >
                   <ActionButton
                     aria-label={`Select block ${index + 1}`}
                     className={classes(ui.surface.documentIndex, ui.text.meta)}
                   >{index + 1}</ActionButton>
-                  <textarea
-                    aria-label={`Block ${index + 1} text`}
-                    value={block.text}
-                    rows={Math.max(1, Math.ceil(block.text.length / 64))}
-                    onFocus={(event) => dispatchIntent({ type: "selection.set", blockId: block.id, offset: textInputFromControl(event).offset })}
-                    onClick={(event) => dispatchIntent({ type: "selection.set", blockId: block.id, offset: textInputFromControl(event).offset })}
-                    onChange={(event) => dispatchIntent({ type: "text.replace", blockId: block.id, ...textInputFromControl(event) })}
-                    className={classes("min-h-11 resize-none", ui.field.seamless)}
+                  <DocumentTextControl
+                    label={`Block ${index + 1} text`}
+                    text={block.text}
+                    offset={item.getTextOffset()}
+                    onFocusOffset={(offset) => dispatchIntent({ type: "selection.set", blockId: block.id, offset })}
+                    onChange={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
                   />
                 </SelectableItem>
-              ))}
+                );
+              })}
             </div>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
         </ProductApp>
     </PageFrame>
+  );
+}
+
+function documentFocus(editor: DocumentEditor): DocumentPoint | null {
+  const selection = editor.snapshot.selection;
+  if (selection.primaryIndex === null) return null;
+  return selection.ranges[selection.primaryIndex]?.focus ?? null;
+}
+
+function DocumentTextControl(props: {
+  readonly label: string;
+  readonly text: string;
+  readonly offset: number | null;
+  readonly onFocusOffset: (offset: number) => void;
+  readonly onChange: (next: { readonly text: string; readonly offset: number }) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useRestoreTextCursor(ref, props.offset);
+  return (
+    <textarea
+      ref={ref}
+      aria-label={props.label}
+      value={props.text}
+      rows={Math.max(1, Math.ceil(props.text.length / 64))}
+      onFocus={(event) => props.onFocusOffset(textInputFromControl(event).offset)}
+      onClick={(event) => props.onFocusOffset(textInputFromControl(event).offset)}
+      onChange={(event) => props.onChange(textInputFromControl(event))}
+      className={classes("min-h-11 resize-none", ui.field.seamless)}
+    />
   );
 }
 

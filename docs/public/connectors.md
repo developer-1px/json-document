@@ -47,8 +47,9 @@ function DocumentView({ document }) {
 | `useDocumentEditor(initial, options?)` | mounted component가 editor lifecycle을 가질 때 |
 | `useEditing({ source, selectedKeys, onSelect, keyboard? })` | 선택 표기, press, 표면 키보드를 같은 질의/핸들러로 붙일 때 |
 
-`useEditing`은 마크업을 그리지 않습니다. host가 `getIsSelected()`와
-`getPressHandler()`를 자기 요소에 붙이고, 장르 Intent는 `onSelect`에서
+`useEditing`은 마크업을 그리지 않습니다. `getIsSelected()`는 범위,
+`getIsFocus()`는 커서(primary/focus), `getTextOffset()`은 글자 위치입니다.
+host가 이 질의를 자기 요소에 붙이고, 장르 Intent는 `onSelect`에서
 번역합니다. [/connectors/react](/connectors/react) 데모는 구독 뒤 document
 value를 다시 렌더링합니다.
 

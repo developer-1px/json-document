@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Split object interval (`getIsSelected`) from focus (`getIsFocus`) and text
+  cursor offset (`getTextOffset` / `useRestoreTextCursor`) on the shared
+  React editing hook, and used that pair on every selection demo.
 - Added `useEditing` to `@interactive-os/json-document-react` so hosts attach
   selection marks, press, and optional surface keyboard through
   `getIsSelected` / `getPressHandler` / `getKeyDownHandler`, and dogfooded

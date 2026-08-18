@@ -41,6 +41,9 @@ export function KeyboardAdapterLab() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId
+      ?? editor.selectedBlockIds.at(-1)
+      ?? null,
     onSelect: (blockId, mode) => {
       const intent = { type: "selection.set" as const, blockId, mode };
       const result = editor.dispatch(intent);
@@ -126,6 +129,7 @@ export function KeyboardAdapterLab() {
               as="article"
               key={block.id}
               selected={editing.getItem(block.id).getIsSelected()}
+              focus={editing.getItem(block.id).getIsFocus()}
               data-block-id={block.id}
               onClick={editing.getItem(block.id).getPressHandler()}
               className={classes("p-3", ui.surface.workspace)}

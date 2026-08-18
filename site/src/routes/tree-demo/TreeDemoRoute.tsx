@@ -45,6 +45,7 @@ export function TreeDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedNodeIdsIn(topology),
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? null,
     onSelect: (nodeId, mode) => {
       run({ type: "selection.set", nodeId, topology, mode }, "Selection changed");
     },
@@ -136,6 +137,7 @@ export function TreeDemoRoute() {
                     ) : <span />}
                     <SelectableItem
                       selected={editing.getItem(row.id).getIsSelected()}
+                      focus={editing.getItem(row.id).getIsFocus()}
                       data-node-id={row.id}
                       onClick={editing.getItem(row.id).getPressHandler()}
                       className={classes("text-left", ui.surface.documentBlock)}

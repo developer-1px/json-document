@@ -36,6 +36,7 @@ export function OrderDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedItemIds,
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null,
     onSelect: (itemId, mode) => {
       run({ type: "selection.set", itemId, mode }, "Selection changed");
     },
@@ -107,6 +108,7 @@ export function OrderDemoRoute() {
               <SelectableItem
                 key={item.id}
                 selected={editing.getItem(item.id).getIsSelected()}
+                focus={editing.getItem(item.id).getIsFocus()}
                 data-item-id={item.id}
                 onClick={editing.getItem(item.id).getPressHandler()}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}

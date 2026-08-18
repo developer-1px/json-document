@@ -63,9 +63,11 @@ export function SheetDemo() {
     return result;
   }
 
+  const focus = editor.snapshot.selection.focus;
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCells.map((cell) => cellKey(cell.rowId, cell.columnId)),
+    focusKey: focus ? cellKey(focus.rowId, focus.columnId) : null,
     onSelect: (key, mode) => {
       const { rowId, columnId } = parseCellKey(key);
       run(
@@ -235,6 +237,7 @@ export function SheetDemo() {
                           as="td"
                           key={column.id}
                           selected={isSelected}
+                          focus={item.getIsFocus()}
                           role="gridcell"
                           aria-selected={isSelected}
                           data-row-id={row.id}

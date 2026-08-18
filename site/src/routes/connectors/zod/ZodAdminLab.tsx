@@ -43,9 +43,11 @@ export function ZodAdminLab() {
     action();
   }
 
+  const focus = editor.snapshot.selection.focus;
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCellsIn(topology).map((cell) => `${cell.recordId}\u0000${cell.propertyId}`),
+    focusKey: focus ? `${focus.recordId}\u0000${focus.propertyId}` : null,
     onSelect: (key, mode) => {
       const split = key.indexOf("\u0000");
       const recordId = key.slice(0, split);
@@ -135,6 +137,7 @@ export function ZodAdminLab() {
                       as="td"
                       key={property.id}
                       selected={isSelected}
+                      focus={item.getIsFocus()}
                       role="gridcell"
                       aria-selected={isSelected}
                       onClick={item.getPressHandler()}

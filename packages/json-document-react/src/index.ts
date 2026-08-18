@@ -12,8 +12,10 @@ export {
   type EditingSnapshotSource,
 } from "./editing-snapshot.js";
 export {
+  restoreTextCursor,
   selectionModeFromModifiers,
   useEditing,
+  useRestoreTextCursor,
   type Editing,
   type EditingItem,
   type EditingKeyDownEvent,
@@ -22,6 +24,7 @@ export {
   type EditingKeyboardStroke,
   type EditingPressEvent,
   type EditingSelectionMode,
+  type TextCursorControl,
   type UseEditingOptions,
 } from "./use-editing.js";
 

@@ -69,9 +69,11 @@ export function TanStackTableConnectorLab() {
     setAnnouncement(result.ok ? message : "That action is not available here");
   }
 
+  const focus = binding.snapshot.selection.focus;
   const editing = useEditing({
     source: binding,
     selectedKeys: binding.selectedCells(table).map((cell) => `${cell.rowId}\u0000${cell.columnId}`),
+    focusKey: focus ? `${focus.rowId}\u0000${focus.columnId}` : null,
     onSelect: (key, mode) => {
       const split = key.indexOf("\u0000");
       const rowId = key.slice(0, split);
@@ -186,6 +188,7 @@ export function TanStackTableConnectorLab() {
                         as="td"
                         key={cell.id}
                         selected={isSelected}
+                        focus={item.getIsFocus()}
                         role="gridcell"
                         aria-selected={isSelected}
                         data-row-id={row.id}

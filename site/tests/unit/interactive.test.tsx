@@ -57,7 +57,16 @@ describe("interactive design system", () => {
 
     const item = screen.getByRole("button", { name: "Block" });
     expect(item.getAttribute("data-selected")).toBe("true");
+    expect(item.getAttribute("data-focus")).toBe("false");
     expect(item.className).toContain("data-[selected=true]:outline-impact");
+  });
+
+  it("owns focus separately from selected", () => {
+    render(<SelectableItem selected focus type="button">Block</SelectableItem>);
+
+    const item = screen.getByRole("button", { name: "Block" });
+    expect(item.getAttribute("data-selected")).toBe("true");
+    expect(item.getAttribute("data-focus")).toBe("true");
   });
 
   it("gives icon-only actions a label and tooltip", () => {
