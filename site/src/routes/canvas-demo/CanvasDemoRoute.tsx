@@ -31,6 +31,7 @@ export function CanvasDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedObjects.map((object) => object.id),
+    focusKey: editor.snapshot.selection.primaryKey,
     onSelect: (objectId, mode) => {
       editor.dispatch({
         type: "selection.set",
@@ -95,6 +96,7 @@ export function CanvasDemoRoute() {
               <SelectableItem
                 key={object.id}
                 selected={editing.getItem(object.id).getIsSelected()}
+                focus={editing.getItem(object.id).getIsFocus()}
                 data-object-id={object.id}
                 onPointerDown={(event) => handlePointerDown(event, object.id)}
                 onPointerMove={handlePointerMove}

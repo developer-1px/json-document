@@ -22,6 +22,7 @@ export function SelectionDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId ?? null,
     onSelect: (blockId, nextMode) => {
       const intent: DocumentIntent = { type: "selection.set", blockId, mode: nextMode };
       const result = editor.dispatch(intent);
@@ -60,6 +61,7 @@ export function SelectionDemoRoute() {
                 key={block.id}
                 type="button"
                 selected={editing.getItem(block.id).getIsSelected()}
+                focus={editing.getItem(block.id).getIsFocus()}
                 className={classes("px-3 py-2", ui.surface.selectableBlock)}
                 onClick={editing.getItem(block.id).getPressHandler()}
               >

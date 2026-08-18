@@ -20,6 +20,9 @@ Adapter를 제거해도 canonical JSON과 Editing 의미는 바뀌지 않습니�
 `createWebKeyboardAdapter`는 공식 keyboard adapter입니다. 기본 keymap이
 화살표, Delete, Mod+Z 같은 관례적 chord를 의미 command로 바꿉니다. host는
 그 command를 Topology 이웃과 `editor.dispatch`로 이어 붙입니다.
+React에서 그 결과를 범위·focus·text 커서로 그리려면
+[React에서 선택과 커서 그리기](react-editing.md)의 `useEditing`을
+씁니다.
 
 ```ts
 const keyboard = createWebKeyboardAdapter();

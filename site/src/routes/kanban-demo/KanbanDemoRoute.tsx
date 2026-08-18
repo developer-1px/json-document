@@ -27,6 +27,7 @@ export function KanbanDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCardIds,
+    focusKey: editor.snapshot.selection.primaryKey,
     onSelect: (cardId) => {
       editor.dispatch({ type: "selection.set", cardId });
     },
@@ -80,6 +81,7 @@ export function KanbanDemoRoute() {
                   draggable
                   data-card-id={card.id}
                   data-selected={editing.getItem(card.id).getIsSelected() ? "true" : "false"}
+                  data-focus={editing.getItem(card.id).getIsFocus() ? "true" : "false"}
                   onClick={editing.getItem(card.id).getPressHandler()}
                   onDragStart={() => {
                     editor.dispatch({ type: "selection.set", cardId: card.id });

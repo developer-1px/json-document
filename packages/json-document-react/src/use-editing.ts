@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import type { JSONValue } from "@interactive-os/json-document";
 import type { EditingSnapshot } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot, type EditingSnapshotSource } from "./editing-snapshot.js";
@@ -35,14 +35,16 @@ export interface EditingKeyDownEvent extends EditingKeyboardStroke {
 }
 
 export interface EditingPressEvent {
-  readonly shiftKey: boolean;
-  readonly metaKey: boolean;
-  readonly ctrlKey: boolean;
+  readonly shiftKey?: boolean;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
   readonly target?: EventTarget | null;
 }
 
 export interface EditingItem<Key extends string = string> {
   getIsSelected(): boolean;
+  getIsFocus(): boolean;
+  getTextOffset(): number | null;
   getPressHandler(): (event: EditingPressEvent) => void;
 }
 
@@ -57,15 +59,35 @@ export interface EditingKeyboardOptions<Key extends string = string> {
   readonly onUndo?: () => void;
   readonly onRedo?: () => void;
   readonly afterMove?: (key: Key) => void;
+  readonly text?: {
+    readonly offset: () => number;
+    readonly length: () => number;
+    readonly onOffset: (offset: number, mode: "replace" | "extend") => void;
+  };
   readonly ignoreCommand?: (
     command: EditingKeyboardCommand,
     context: { readonly inField: boolean; readonly event: EditingKeyDownEvent },
   ) => boolean;
 }
 
+const emptyEditingSource: EditingSnapshotSource<JSONValue> = {
+  snapshot: {
+    value: null,
+    selection: null,
+    revision: 0,
+    canUndo: false,
+    canRedo: false,
+  },
+  subscribe() {
+    return () => undefined;
+  },
+};
+
 export interface UseEditingOptions<Selection extends JSONValue, Key extends string = string> {
-  readonly source: EditingSnapshotSource<Selection>;
+  readonly source?: EditingSnapshotSource<Selection>;
   readonly selectedKeys: Iterable<Key>;
+  readonly focusKey?: Key | null;
+  readonly textOffset?: number | null;
   readonly onSelect: (key: Key, mode: EditingSelectionMode) => void;
   readonly operationFromEvent?: (event: EditingPressEvent) => EditingSelectionMode;
   readonly ignorePress?: (event: EditingPressEvent) => boolean;
@@ -87,15 +109,25 @@ export function selectionModeFromModifiers(event: EditingPressEvent): EditingSel
 export function useEditing<Selection extends JSONValue, Key extends string = string>(
   options: UseEditingOptions<Selection, Key>,
 ): Editing<Selection, Key> {
-  const snapshot = useEditingSnapshot(options.source);
+  const snapshot = useEditingSnapshot(
+    (options.source ?? emptyEditingSource) as EditingSnapshotSource<Selection>,
+  );
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
   const selected = useMemo(() => new Set(options.selectedKeys), [options.selectedKeys]);
+  const focusKey = options.focusKey ?? null;
+  const textOffset = options.textOffset ?? null;
 
   const getItem = useCallback((key: Key): EditingItem<Key> => ({
     getIsSelected() {
       return selected.has(key);
+    },
+    getIsFocus() {
+      return focusKey !== null && key === focusKey;
+    },
+    getTextOffset() {
+      return focusKey !== null && key === focusKey ? textOffset : null;
     },
     getPressHandler() {
       return (event: EditingPressEvent) => {
@@ -105,7 +137,7 @@ export function useEditing<Selection extends JSONValue, Key extends string = str
         current.onSelect(key, mode);
       };
     },
-  }), [selected]);
+  }), [focusKey, selected, textOffset]);
 
   const getKeyDownHandler = useCallback(() => {
     return (event: EditingKeyDownEvent) => {
@@ -115,6 +147,14 @@ export function useEditing<Selection extends JSONValue, Key extends string = str
       const command = keyboard.resolve(event);
       if (command === null) return;
       const inField = isEditingField(event.target);
+      if (inField && keyboard.text && (command.type === "move" || command.type === "boundary")) {
+        const nextOffset = offsetAfterCommand(command, keyboard.text.offset(), keyboard.text.length());
+        if (nextOffset !== null) {
+          event.preventDefault();
+          keyboard.text.onOffset(nextOffset, command.operation);
+          return;
+        }
+      }
       const ignore = keyboard.ignoreCommand
         ?? ((next: EditingKeyboardCommand, context: { readonly inField: boolean }) => (
           context.inField && next.type !== "undo" && next.type !== "redo"
@@ -165,4 +205,39 @@ export function useEditing<Selection extends JSONValue, Key extends string = str
 
 function isEditingField(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest("textarea, input, [contenteditable]") !== null;
+}
+
+function offsetAfterCommand(
+  command: Extract<EditingKeyboardCommand, { readonly type: "move" } | { readonly type: "boundary" }>,
+  offset: number,
+  length: number,
+): number | null {
+  if (command.type === "boundary") {
+    return command.edge === "start" ? 0 : length;
+  }
+  if (command.direction === "left" || command.direction === "previous") {
+    return Math.max(0, offset - 1);
+  }
+  if (command.direction === "right" || command.direction === "next") {
+    return Math.min(length, offset + 1);
+  }
+  return null;
+}
+
+export type TextCursorControl = Pick<HTMLInputElement, "value" | "setSelectionRange">;
+
+export function restoreTextCursor(control: TextCursorControl, offset: number): void {
+  const next = Math.min(control.value.length, Math.max(0, offset));
+  control.setSelectionRange(next, next);
+}
+
+export function useRestoreTextCursor(
+  control: { readonly current: TextCursorControl | null },
+  offset: number | null,
+): void {
+  useLayoutEffect(() => {
+    const node = control.current;
+    if (node === null || offset === null) return;
+    restoreTextCursor(node, offset);
+  }, [control, offset]);
 }

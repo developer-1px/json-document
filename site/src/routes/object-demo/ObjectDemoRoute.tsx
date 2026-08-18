@@ -37,6 +37,7 @@ export function ObjectDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedObjects.map((object) => object.id),
+    focusKey: editor.snapshot.selection.primaryKey,
     onSelect: (objectId, mode) => {
       run({
         type: "selection.set",
@@ -128,6 +129,7 @@ export function ObjectDemoRoute() {
             <SelectableItem
               key={object.id}
               selected={editing.getItem(object.id).getIsSelected()}
+              focus={editing.getItem(object.id).getIsFocus()}
               data-object-id={object.id}
               onClick={editing.getItem(object.id).getPressHandler()}
               className="absolute grid place-items-center"

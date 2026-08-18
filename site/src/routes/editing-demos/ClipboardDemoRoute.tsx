@@ -21,6 +21,7 @@ export function ClipboardDemoRoute() {
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId ?? null,
     onSelect: (blockId) => {
       editor.dispatch({ type: "selection.set", blockId });
       setLastCall(`dispatch({ type: "selection.set", blockId: "${blockId}" })`);
@@ -65,6 +66,7 @@ export function ClipboardDemoRoute() {
                 key={block.id}
                 type="button"
                 selected={editing.getItem(block.id).getIsSelected()}
+                focus={editing.getItem(block.id).getIsFocus()}
                 className={classes("px-3 py-2", ui.surface.selectableBlock)}
                 onClick={editing.getItem(block.id).getPressHandler()}
               >

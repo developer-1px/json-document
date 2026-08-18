@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { lineInterval, lineTopology } from "@interactive-os/json-document-editing";
+import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ToggleButton } from "../../shared/ui/interactive";
+import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -20,8 +21,22 @@ const orders = {
 
 export function TopologyDemoRoute() {
   const [order, setOrder] = useState<keyof typeof orders>("source");
+  const [anchor, setAnchor] = useState("alpha");
+  const [focus, setFocus] = useState("charlie");
   const topology = useMemo(() => lineTopology(orders[order]), [order]);
-  const interval = lineInterval(topology, "alpha", "charlie");
+  const interval = lineInterval(topology, anchor, focus);
+  const editing = useEditing({
+    selectedKeys: interval,
+    focusKey: focus,
+    onSelect: (key, mode) => {
+      if (mode === "extend") {
+        setFocus(key);
+        return;
+      }
+      setAnchor(key);
+      setFocus(key);
+    },
+  });
 
   return (
     <PageFrame>
@@ -46,11 +61,22 @@ export function TopologyDemoRoute() {
             ))}
           </div>
           <ol className="m-0 grid list-none gap-1 p-0">
-            {topology.ids.map((id) => (
-              <li key={id} className={classes("px-3 py-2", ui.surface.inset)}>
-                {records[id as keyof typeof records]}
-              </li>
-            ))}
+            {topology.ids.map((id) => {
+              const item = editing.getItem(id);
+              return (
+                <li key={id}>
+                  <SelectableItem
+                    type="button"
+                    selected={item.getIsSelected()}
+                    focus={item.getIsFocus()}
+                    className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
+                    onClick={item.getPressHandler()}
+                  >
+                    {records[id as keyof typeof records]}
+                  </SelectableItem>
+                </li>
+              );
+            })}
           </ol>
         </section>
 
@@ -61,7 +87,7 @@ export function TopologyDemoRoute() {
             { label: "topology", value: topology, testId: "topology-demo-topology", size: "compact" },
             {
               label: "endpoints",
-              value: { anchor: "alpha", focus: "charlie" },
+              value: { anchor, focus },
               testId: "topology-demo-endpoints",
               size: "compact",
             },

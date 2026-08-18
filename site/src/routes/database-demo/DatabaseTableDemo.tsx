@@ -56,9 +56,11 @@ export function DatabaseTableDemo() {
     return result;
   }
 
+  const focus = editor.snapshot.selection.focus;
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)),
+    focusKey: focus ? cellKey(focus.recordId, focus.propertyId) : null,
     onSelect: (key, mode) => {
       const { recordId, propertyId } = parseCellKey(key);
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
@@ -220,6 +222,7 @@ export function DatabaseTableDemo() {
                         as="td"
                         key={property.id}
                         selected={isSelected}
+                        focus={item.getIsFocus()}
                         role="gridcell"
                         aria-selected={isSelected}
                         data-record-id={record.id}

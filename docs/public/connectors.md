@@ -13,7 +13,7 @@ Connector는 이런 번역을 패키지로 제공합니다. 대상 도구의 API
 
 | 연결할 도구 | 패키지 | 제공하는 연결 |
 | --- | --- | --- |
-| React | `@interactive-os/json-document-react` | document와 editor 구독 |
+| React | `@interactive-os/json-document-react` | document 구독과 선택·커서 질의 |
 | React Hook Form | `@interactive-os/json-document-react-hook-form` | form draft와 commit |
 | Ajv | `@interactive-os/json-document-ajv` | Ajv error와 document validation |
 | Zod | `@interactive-os/json-document-zod` | Zod validation과 Database 변환 |
@@ -45,12 +45,13 @@ function DocumentView({ document }) {
 | `useJSONDocumentValue(document)` | document value 구독만 필요할 때 |
 | `useEditingSnapshot(source)` | EditingSession이나 DocumentEditor 상태를 렌더링할 때 |
 | `useDocumentEditor(initial, options?)` | mounted component가 editor lifecycle을 가질 때 |
-| `useEditing({ source, selectedKeys, onSelect, keyboard? })` | 선택 표기, press, 표면 키보드를 같은 질의/핸들러로 붙일 때 |
+| `useEditing({ source, selectedKeys, focusKey?, textOffset?, onSelect, keyboard? })` | object 범위·focus와 text 커서를 같은 질의로 붙일 때 |
+| `useRestoreTextCursor(ref, offset)` | text offset을 input/textarea 캐럿으로 복원할 때 |
 
-`useEditing`은 마크업을 그리지 않습니다. host가 `getIsSelected()`와
-`getPressHandler()`를 자기 요소에 붙이고, 장르 Intent는 `onSelect`에서
-번역합니다. [/connectors/react](/connectors/react) 데모는 구독 뒤 document
-value를 다시 렌더링합니다.
+`useEditing`은 마크업을 그리지 않습니다. 장르 Intent는 `onSelect`에서
+번역합니다. 옵션과 키보드, text 커서 복원은
+[React에서 선택과 커서 그리기](react-editing.md)에 있습니다.
+[/connectors/react](/connectors/react) 데모는 구독과 선택 질의를 실행합니다.
 
 ## React Hook Form의 draft 제출하기
 

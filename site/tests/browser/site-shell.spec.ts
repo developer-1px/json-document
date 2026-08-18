@@ -46,7 +46,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Database",
   ]);
   await expect(navigation.getByRole("group", { name: "Adapters" }).getByRole("link")).toHaveText(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React editing", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([

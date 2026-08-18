@@ -142,15 +142,17 @@ export function DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElem
 type SelectableItemProps<T extends ElementType> = {
   readonly as?: T;
   readonly selected: boolean;
-} & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected">;
+  readonly focus?: boolean;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 
 export function SelectableItem<T extends ElementType = "button">(props: SelectableItemProps<T>) {
-  const { as, className, selected, ...itemProps } = props;
+  const { as, className, selected, focus = false, ...itemProps } = props;
   const Component = as ?? "button";
   return (
     <Component
       {...itemProps}
       data-selected={selected ? "true" : "false"}
+      data-focus={focus ? "true" : "false"}
       className={classes(ui.interactive.selectable, className)}
     />
   );
