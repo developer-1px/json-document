@@ -16,6 +16,7 @@ import objectMarkdown from "../../../../docs/public/object.md?raw";
 import orderMarkdown from "../../../../docs/public/order.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
 import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
+import reactEditingMarkdown from "../../../../docs/public/react-editing.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
@@ -30,6 +31,7 @@ export const docPages = {
   quickstart: docPage("/docs/tutorial", quickstartMarkdown),
   adapters: docPage("/docs/adapters", adaptersMarkdown),
   connectors: docPage("/docs/connectors", connectorsMarkdown),
+  reactEditing: docPage("/docs/react-editing", reactEditingMarkdown),
   collaboration: docPage("/docs/collaboration", collaborationMarkdown),
   collaborationReplica: docPage("/docs/collaboration/replica", collaborationReplicaMarkdown),
   collaborationHistory: docPage("/docs/collaboration/history", collaborationHistoryMarkdown),

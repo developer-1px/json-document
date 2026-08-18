@@ -11,6 +11,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   quickstart: "terminal",
   adapters: "peek",
   connectors: "connector",
+  reactEditing: "cursor",
   collaboration: "package",
   collaborationReplica: "debug",
   collaborationHistory: "branch",
@@ -60,6 +61,10 @@ export function IntentRoute() {
 
 export function IntentGuideRoute() {
   return <DocsRoute pageId="intentGuide" />;
+}
+
+export function ReactEditingDocsRoute() {
+  return <DocsRoute pageId="reactEditing" />;
 }
 
 export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {

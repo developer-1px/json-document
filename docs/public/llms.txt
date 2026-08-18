@@ -229,8 +229,9 @@ focus, geometry와 native text selection은 Host가 계속 소유한다.
 `@interactive-os/json-document-contenteditable`은 local JSONDocument 문자열
 포인터를 leased contenteditable React root에 붙이는 공식 Adapter다.
 툴바, atom, marks와 product chrome은 Host가 소유한다.
-`@interactive-os/json-document-react`는 React external-store subscription과
-Document editor component lifecycle을 제공하는 공식 Connector다.
+`@interactive-os/json-document-react`는 React external-store subscription,
+Document editor component lifecycle, 그리고 선택 범위·focus 커서·text
+offset 질의(`useEditing`)를 제공하는 공식 Connector다.
 `@interactive-os/json-document-react-hook-form`은 React Hook Form이 draft, dirty,
 touched와 field error를 소유하게 두고 유효한 submit만 하나의 canonical editing
 transaction으로 적용한다. Undo, redo와 외부 canonical 변경은 `reset`으로 form에

@@ -5,8 +5,8 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
-- Documented `useEditing` selection and cursor queries on the Connector
-  guide, with pointers from Selection and the Keyboard adapter.
+- Added the React editing guide for `useEditing` usage and API, and
+  linked it from the Connector, Selection, and Keyboard adapter docs.
 - Split object interval (`getIsSelected`) from focus (`getIsFocus`) and text
   cursor offset (`getTextOffset` / `useRestoreTextCursor`) on the shared
   React editing hook, and used that pair on every selection demo.

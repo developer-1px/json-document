@@ -26,6 +26,7 @@ docs
 |   |-- tree.md                # Editors: 보이는 나무
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
+|   |-- react-editing.md       # Connectors: React 선택·커서 질의
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
 
@@ -70,7 +71,8 @@ Adapters
 `-- Adapter guide
 
 Connectors
-`-- Connector guide
+|-- Connector guide
+`-- React editing
 ```
 
 ## 규범 우선순위
@@ -102,7 +104,8 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   선택, history는 로컬 undo/redo, clipboard는 구조화된 payload,
   topology는 화면 줄과 선택, intent는 편집 Intent 시그니처,
   intent-guide는 Intent 따라 하기, adapters는 플랫폼 변환,
-  connectors는 연결 방법이다.
+  connectors는 연결 방법이다. react-editing은 React에서 선택과 커서를
+  그리는 사용법이다.
   concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
   collaboration은 같은 JSON Document의 다른 구현이다. editors는
   Editing 모델로 만든 숙제 종류다. order·object·tree는 그 숙제의

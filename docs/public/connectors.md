@@ -49,49 +49,9 @@ function DocumentView({ document }) {
 | `useRestoreTextCursor(ref, offset)` | text offset을 input/textarea 캐럿으로 복원할 때 |
 
 `useEditing`은 마크업을 그리지 않습니다. 장르 Intent는 `onSelect`에서
-번역합니다. [/connectors/react](/connectors/react) 데모는 구독 뒤 document
-value를 다시 렌더링합니다.
-
-## React에서 선택과 커서를 그리기
-
-Selection 데이터와 [Topology](topology.md)는 Editing이 가지고 있습니다.
-화면에 그리는 일은 React Connector의 질의입니다. object와 text는 다른
-투영입니다.
-
-- `getIsSelected()`는 Topology가 푼 범위입니다. 여러 블록이나 셀이 켜질 수
-  있습니다.
-- `getIsFocus()`는 그 선택의 커서입니다. object는 `primaryKey`나 range
-  `focus`, text는 지금 글자를 가진 대상입니다.
-- `getTextOffset()`은 focus 대상 안의 글자 위치입니다. object 선택에는
-  없습니다.
-
-```tsx
-const focus = editor.snapshot.selection.ranges[0]?.focus;
-const editing = useEditing({
-  source: editor,
-  selectedKeys: editor.selectedBlockIds,
-  focusKey: focus?.blockId ?? null,
-  textOffset: focus?.offset ?? null,
-  onSelect: (blockId, mode) => {
-    editor.dispatch({ type: "selection.set", blockId, mode });
-  },
-});
-
-const item = editing.getItem(block.id);
-
-<article
-  data-selected={item.getIsSelected() ? "true" : "false"}
-  data-focus={item.getIsFocus() ? "true" : "false"}
-  onClick={item.getPressHandler()}
->
-  <textarea value={block.text} />
-</article>
-```
-
-text 컨트롤이 있으면 `useRestoreTextCursor`가 `getTextOffset()`을 캐럿으로
-되돌립니다. Keyboard Adapter의 command는 그대로 두고, hook의 `keyboard`에
-`resolve`와 Topology neighbor를 넘기면 됩니다. 플랫폼 chord 번역은
-[Adapters](adapters.md)가 맡습니다.
+번역합니다. 옵션과 키보드, text 커서 복원은
+[React에서 선택과 커서 그리기](react-editing.md)에 있습니다.
+[/connectors/react](/connectors/react) 데모는 구독과 선택 질의를 실행합니다.
 
 ## React Hook Form의 draft 제출하기
 
