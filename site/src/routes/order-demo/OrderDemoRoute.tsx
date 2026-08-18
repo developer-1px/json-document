@@ -1,12 +1,11 @@
-import { useState, type MouseEvent } from "react";
+import { useState } from "react";
 import {
   createOrderEditor,
   type OrderClipboard,
   type OrderDocument,
   type OrderIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
+import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
@@ -23,12 +22,9 @@ const initialOrder: OrderDocument = {
 
 export function OrderDemoRoute() {
   const [editor] = useState(() => createOrderEditor(initialOrder));
-  const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<OrderClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<OrderIntent | null>(null);
-  const document = snapshot.value as OrderDocument;
-  const selected = new Set(editor.selectedItemIds);
 
   function run(intent: OrderIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -36,6 +32,17 @@ export function OrderDemoRoute() {
     setAnnouncement(result.ok ? message : result.code);
     return result;
   }
+
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedItemIds,
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null,
+    onSelect: (itemId, mode) => {
+      run({ type: "selection.set", itemId, mode }, "Selection changed");
+    },
+  });
+  const snapshot = editing.snapshot;
+  const document = snapshot.value as OrderDocument;
 
   function copySelection() {
     const next = editor.copy();
@@ -49,10 +56,6 @@ export function OrderDemoRoute() {
     if (!result) return setAnnouncement("Select an item first");
     setClipboard(result.clipboard);
     setAnnouncement(`Cut ${result.clipboard.items.length} item${result.clipboard.items.length === 1 ? "" : "s"}`);
-  }
-
-  function handleClick(event: MouseEvent, itemId: string) {
-    run({ type: "selection.set", itemId, mode: selectionOperationFromModifiers(event) }, "Selection changed");
   }
 
   return (
@@ -104,9 +107,10 @@ export function OrderDemoRoute() {
             {document.items.map((item, index) => (
               <SelectableItem
                 key={item.id}
-                selected={selected.has(item.id)}
+                selected={editing.getItem(item.id).getIsSelected()}
+                focus={editing.getItem(item.id).getIsFocus()}
                 data-item-id={item.id}
-                onClick={(event) => handleClick(event, item.id)}
+                onClick={editing.getItem(item.id).getPressHandler()}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
               >
                 <span className={classes(ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>

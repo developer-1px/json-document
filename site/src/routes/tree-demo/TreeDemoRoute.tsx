@@ -1,4 +1,4 @@
-import { useMemo, useState, type MouseEvent } from "react";
+import { useMemo, useState } from "react";
 import {
   createTreeEditor,
   type TreeClipboard,
@@ -7,8 +7,7 @@ import {
   type TreeNode,
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
+import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
@@ -27,14 +26,14 @@ const initialTree: TreeDocument = {
 
 export function TreeDemoRoute() {
   const [editor] = useState(() => createTreeEditor(initialTree));
-  const snapshot = useEditingSnapshot(editor);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set(["fruit", "veg"]));
   const [clipboard, setClipboard] = useState<TreeClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<TreeIntent | null>(null);
-  const document = snapshot.value as TreeDocument;
-  const topology = useMemo(() => visibleTopology(document.nodes, expanded), [document.nodes, expanded]);
-  const selected = new Set(editor.selectedNodeIdsIn(topology));
+  const topology = useMemo(
+    () => visibleTopology((editor.snapshot.value as TreeDocument).nodes, expanded),
+    [editor.snapshot.value, expanded],
+  );
 
   function run(intent: TreeIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -42,6 +41,17 @@ export function TreeDemoRoute() {
     setAnnouncement(result.ok ? message : result.code);
     return result;
   }
+
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedNodeIdsIn(topology),
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? null,
+    onSelect: (nodeId, mode) => {
+      run({ type: "selection.set", nodeId, topology, mode }, "Selection changed");
+    },
+  });
+  const snapshot = editing.snapshot;
+  const document = snapshot.value as TreeDocument;
 
   function copySelection() {
     const next = editor.copy(topology);
@@ -55,15 +65,6 @@ export function TreeDemoRoute() {
     if (!result) return setAnnouncement("Select a visible node first");
     setClipboard(result.clipboard);
     setAnnouncement(`Cut ${result.clipboard.nodes.length} node${result.clipboard.nodes.length === 1 ? "" : "s"}`);
-  }
-
-  function handleClick(event: MouseEvent, nodeId: string) {
-    run({
-      type: "selection.set",
-      nodeId,
-      topology,
-      mode: selectionOperationFromModifiers(event),
-    }, "Selection changed");
   }
 
   function toggle(nodeId: string) {
@@ -82,7 +83,7 @@ export function TreeDemoRoute() {
         title="Tree"
         aside={(
           <div className={classes("text-right", ui.text.meta)}>
-            <div>{selected.size} selected · revision {snapshot.revision}</div>
+            <div>{editor.selectedNodeIdsIn(topology).length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
           </div>
         )}
@@ -135,9 +136,10 @@ export function TreeDemoRoute() {
                       </IconButton>
                     ) : <span />}
                     <SelectableItem
-                      selected={selected.has(row.id)}
+                      selected={editing.getItem(row.id).getIsSelected()}
+                      focus={editing.getItem(row.id).getIsFocus()}
                       data-node-id={row.id}
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={editing.getItem(row.id).getPressHandler()}
                       className={classes("text-left", ui.surface.documentBlock)}
                     >
                       {row.label}

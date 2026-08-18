@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
@@ -16,15 +16,19 @@ const initialDocument: BlockDocument = {
 
 export function ClipboardDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
-  const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
   const [lastCall, setLastCall] = useState("블록을 선택한 뒤 copy 또는 cut을 실행합니다.");
-  const selected = new Set(editor.selectedBlockIds);
-
-  function select(blockId: string) {
-    editor.dispatch({ type: "selection.set", blockId });
-    setLastCall(`dispatch({ type: "selection.set", blockId: "${blockId}" })`);
-  }
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedBlockIds,
+    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId ?? null,
+    onSelect: (blockId) => {
+      editor.dispatch({ type: "selection.set", blockId });
+      setLastCall(`dispatch({ type: "selection.set", blockId: "${blockId}" })`);
+    },
+    operationFromEvent: () => "replace",
+  });
+  const snapshot = editing.snapshot;
 
   function copy() {
     const payload = editor.copy();
@@ -61,9 +65,10 @@ export function ClipboardDemoRoute() {
               <SelectableItem
                 key={block.id}
                 type="button"
-                selected={selected.has(block.id)}
+                selected={editing.getItem(block.id).getIsSelected()}
+                focus={editing.getItem(block.id).getIsFocus()}
                 className={classes("px-3 py-2", ui.surface.selectableBlock)}
-                onClick={() => select(block.id)}
+                onClick={editing.getItem(block.id).getPressHandler()}
               >
                 {block.text}
               </SelectableItem>

@@ -23,9 +23,16 @@ and connects the six-member `JSONDocument` directly to React.
 `useJSONDocumentValue` remains the lower-level document-value hook.
 `useEditingSnapshot` accepts the structural snapshot/subscription surface
 shared by `EditingSession` and `DocumentEditor`.
+`useEditing` adds the shared selection loop. `getIsSelected` is the object
+interval, `getIsFocus` is the object/text focus, and `getTextOffset` is the
+text cursor on that focus. `source` is optional when the host already owns
+the keys. Hosts still own markup, class names, and genre Intent
+translation. `useRestoreTextCursor` writes a text offset onto an input or
+textarea.
 
-The Connector owns React subscription and component lifecycle only. It does not
-render UI, interpret selection, or add document semantics.
+The Connector does not render product chrome or force DOM attributes. Selection
+marking and keyboard policy stay in the host; the hook only answers selection
+and turns press/key events into the host's `onSelect` and command doors.
 
 ## Compatibility
 

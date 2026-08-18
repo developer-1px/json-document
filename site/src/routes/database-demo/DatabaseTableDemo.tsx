@@ -3,7 +3,6 @@ import {
   useState,
   type DragEvent,
   type FocusEvent,
-  type MouseEvent,
 } from "react";
 import {
   createDatabaseEditor,
@@ -15,7 +14,7 @@ import {
   type DatabaseSelection,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -30,7 +29,6 @@ type NativeTextLease = {
 
 export function DatabaseTableDemo() {
   const [editor] = useState<DatabaseEditor>(() => createDatabaseEditor(initialDatabase));
-  const snapshot = useEditingSnapshot(editor);
   const [lease, setLease] = useState<NativeTextLease | null>(null);
   const [dragPreview, setDragPreview] = useState<ReadonlyArray<string> | null>(null);
   const draggedProperty = useRef<string | null>(null);
@@ -38,15 +36,13 @@ export function DatabaseTableDemo() {
   const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
   const nextRecord = useRef(5);
-  const document = snapshot.value as DatabaseDocument;
+  const document = editor.snapshot.value as DatabaseDocument;
   const view = document.views[0]!;
   const topology = editor.tableTopology(view.id);
   const visiblePropertyIds = (dragPreview ?? view.propertyOrder)
     .filter((propertyId) => view.propertyVisibility[propertyId] !== false);
   const properties = visiblePropertyIds.map((id) => document.schema.properties.find((property) => property.id === id)!);
   const records = topology.recordIds.map((id) => document.records.find((record) => record.id === id)!);
-  const selected = new Set(editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)));
-
   function dispatchIntent(intent: DatabaseIntent) {
     const result: EditingResult<DatabaseSelection> = editor.dispatch(intent);
     setLastIntent(intent);
@@ -60,14 +56,17 @@ export function DatabaseTableDemo() {
     return result;
   }
 
-  function selectCell(event: MouseEvent, recordId: string, propertyId: string) {
-    const mode = event.shiftKey
-      ? "extend"
-      : event.metaKey || event.ctrlKey
-        ? "toggle"
-        : "replace";
-    run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
-  }
+  const focus = editor.snapshot.selection.focus;
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)),
+    focusKey: focus ? cellKey(focus.recordId, focus.propertyId) : null,
+    onSelect: (key, mode) => {
+      const { recordId, propertyId } = parseCellKey(key);
+      run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
+    },
+  });
+  const snapshot = editing.snapshot;
 
   function commit(recordId: string, propertyId: string, value: string | number | boolean) {
     run(() => dispatchIntent({ type: "cell.commit", recordId, propertyId, value }), `${propertyId} committed`);
@@ -216,17 +215,19 @@ export function DatabaseTableDemo() {
               {records.map((record) => (
                 <tr key={record.id} data-record-id={record.id}>
                   {properties.map((property) => {
-                    const isSelected = selected.has(cellKey(record.id, property.id));
+                    const item = editing.getItem(cellKey(record.id, property.id));
+                    const isSelected = item.getIsSelected();
                     return (
                       <SelectableItem
                         as="td"
                         key={property.id}
                         selected={isSelected}
+                        focus={item.getIsFocus()}
                         role="gridcell"
                         aria-selected={isSelected}
                         data-record-id={record.id}
                         data-property-id={property.id}
-                        onClick={(event) => selectCell(event, record.id, property.id)}
+                        onClick={item.getPressHandler()}
                         className={classes("min-w-32 p-0", ui.database.cell)}
                       >
                         <PropertyEditor
@@ -312,4 +313,9 @@ function commitInput(
 
 function cellKey(recordId: string, propertyId: string): string {
   return `${recordId}\u0000${propertyId}`;
+}
+
+function parseCellKey(key: string): { readonly recordId: string; readonly propertyId: string } {
+  const split = key.indexOf("\u0000");
+  return { recordId: key.slice(0, split), propertyId: key.slice(split + 1) };
 }

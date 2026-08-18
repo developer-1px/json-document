@@ -40,5 +40,9 @@ test("React Connector Live Demo publishes document and editing snapshots", async
   await expect(page.getByRole("textbox", { name: "Connector block 1" })).toHaveValue("React renders this editing snapshot.");
   await page.getByRole("button", { name: "Redo" }).click();
   await expect(page.getByRole("textbox", { name: "Connector block 1" })).toHaveValue("React snapshot updated.");
+
+  await expect(page.getByRole("heading", { name: "Selection and cursor" })).toBeVisible();
+  await page.getByText("react", { exact: true }).click();
+  await expect(page.locator("[data-focus=true]")).toHaveCount(1);
   expect(errors).toEqual([]);
 });

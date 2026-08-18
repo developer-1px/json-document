@@ -1,12 +1,11 @@
-import { useState, type MouseEvent } from "react";
+import { useState } from "react";
 import {
   createObjectEditor,
   type ObjectClipboard,
   type ObjectDocument,
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
+import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
@@ -24,12 +23,9 @@ const initialObjects: ObjectDocument = {
 
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjects));
-  const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<ObjectIntent | null>(null);
-  const document = snapshot.value as ObjectDocument;
-  const selected = new Set(editor.selectedObjects.map((object) => object.id));
 
   function run(intent: ObjectIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -37,6 +33,21 @@ export function ObjectDemoRoute() {
     setAnnouncement(result.ok ? message : result.code);
     return result;
   }
+
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedObjects.map((object) => object.id),
+    focusKey: editor.snapshot.selection.primaryKey,
+    onSelect: (objectId, mode) => {
+      run({
+        type: "selection.set",
+        objectIds: [objectId],
+        mode: mode === "extend" ? "add" : mode,
+      }, "Selection changed");
+    },
+  });
+  const snapshot = editing.snapshot;
+  const document = snapshot.value as ObjectDocument;
 
   function copySelection() {
     const next = editor.copy();
@@ -50,15 +61,6 @@ export function ObjectDemoRoute() {
     if (!result) return setAnnouncement("Select an object first");
     setClipboard(result.clipboard);
     setAnnouncement(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleClick(event: MouseEvent, objectId: string) {
-    const mode = selectionOperationFromModifiers(event);
-    run({
-      type: "selection.set",
-      objectIds: [objectId],
-      mode: mode === "extend" ? "add" : mode,
-    }, "Selection changed");
   }
 
   return (
@@ -126,9 +128,10 @@ export function ObjectDemoRoute() {
           {document.objects.map((object) => (
             <SelectableItem
               key={object.id}
-              selected={selected.has(object.id)}
+              selected={editing.getItem(object.id).getIsSelected()}
+              focus={editing.getItem(object.id).getIsFocus()}
               data-object-id={object.id}
-              onClick={(event) => handleClick(event, object.id)}
+              onClick={editing.getItem(object.id).getPressHandler()}
               className="absolute grid place-items-center"
               style={{
                 left: object.x,
