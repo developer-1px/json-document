@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent, type FocusEvent, type MouseEvent } from "react";
+import { useState, type ClipboardEvent, type FocusEvent } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -13,11 +13,10 @@ import {
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
 import {
   createWebClipboardBinding,
-  selectionOperationFromModifiers,
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
@@ -42,7 +41,6 @@ const initialSheet: SheetDocument = {
 export function TanStackTableConnectorLab() {
   const [document] = useState(() => createJSONDocument(initialSheet));
   const [binding] = useState(() => createTanStackTableConnector(document));
-  const snapshot = useEditingSnapshot(binding);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>(["name", "status", "score"]);
@@ -66,20 +64,25 @@ export function TanStackTableConnectorLab() {
     cut: () => binding.cut(table)?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => binding.paste(table, payload),
   });
-  const selected = new Set(binding.selectedCells(table).map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
-
   function run(action: () => { readonly ok: boolean }, message: string) {
     const result = action();
     setAnnouncement(result.ok ? message : "That action is not available here");
   }
 
-  function selectCell(event: MouseEvent, rowId: string, columnId: string) {
-    const mode = selectionOperationFromModifiers(event);
-    run(
-      () => binding.selectCell(table, { rowId, columnId, mode }),
-      mode === "extend" ? "Visible range extended" : mode === "toggle" ? "Visible range toggled" : "Cell selected",
-    );
-  }
+  const editing = useEditing({
+    source: binding,
+    selectedKeys: binding.selectedCells(table).map((cell) => `${cell.rowId}\u0000${cell.columnId}`),
+    onSelect: (key, mode) => {
+      const split = key.indexOf("\u0000");
+      const rowId = key.slice(0, split);
+      const columnId = key.slice(split + 1);
+      run(
+        () => binding.selectCell(table, { rowId, columnId, mode }),
+        mode === "extend" ? "Visible range extended" : mode === "toggle" ? "Visible range toggled" : "Cell selected",
+      );
+    },
+  });
+  const snapshot = editing.snapshot;
 
   function commitCell(event: FocusEvent<HTMLInputElement>, rowId: string, columnId: string, current: unknown) {
     const value = typeof current === "number" ? Number(event.currentTarget.value) : event.currentTarget.value;
@@ -175,7 +178,8 @@ export function TanStackTableConnectorLab() {
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id} data-row-id={row.id}>
                   {row.getVisibleCells().map((cell) => {
-                    const isSelected = selected.has(`${row.id}\u0000${cell.column.id}`);
+                    const item = editing.getItem(`${row.id}\u0000${cell.column.id}`);
+                    const isSelected = item.getIsSelected();
                     const value = row.original.cells[cell.column.id];
                     return (
                       <SelectableItem
@@ -186,7 +190,7 @@ export function TanStackTableConnectorLab() {
                         aria-selected={isSelected}
                         data-row-id={row.id}
                         data-column-id={cell.column.id}
-                        onClick={(event) => selectCell(event, row.id, cell.column.id)}
+                        onClick={item.getPressHandler()}
                         className={classes("p-0", ui.surface.gridCell)}
                       >
                           <input

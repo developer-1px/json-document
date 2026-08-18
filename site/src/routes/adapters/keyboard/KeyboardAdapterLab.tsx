@@ -1,18 +1,17 @@
-import { useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useState, type ClipboardEvent } from "react";
 import {
   createDocumentEditor,
   type BlockDocument,
   type DocumentEditor,
   type DocumentIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   createWebKeyboardAdapter,
   documentClipboardCodec,
   lineBoundary,
   moveLinePoint,
-  selectionOperationFromModifiers,
   type WebKeyboardCommand,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
@@ -36,17 +35,54 @@ export function KeyboardAdapterLab() {
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const [keyboard] = useState(() => createWebKeyboardAdapter());
-  const snapshot = useEditingSnapshot(editor);
   const [announcement, setAnnouncement] = useState("Click a block, then use arrows, Delete, or Mod+C / Mod+V");
   const [lastCommand, setLastCommand] = useState<WebKeyboardCommand | null>(null);
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedBlockIds,
+    onSelect: (blockId, mode) => {
+      const intent = { type: "selection.set" as const, blockId, mode };
+      const result = editor.dispatch(intent);
+      setLastIntent(intent);
+      setAnnouncement(result.ok ? `Selection ${mode}` : result.code);
+    },
+    keyboard: {
+      resolve: (stroke) => {
+        const command = keyboard.resolve(stroke);
+        if (command) setLastCommand(command);
+        return command;
+      },
+      focusKey: () => {
+        const primary = editor.snapshot.selection.primaryIndex;
+        return primary === null
+          ? editor.selectedBlockIds.at(-1)
+          : editor.snapshot.selection.ranges[primary]?.focus.blockId;
+      },
+      neighbor: (key, command) => {
+        const ids = (editor.snapshot.value as BlockDocument).blocks.map((block) => block.id);
+        return command.type === "move"
+          ? moveLinePoint(ids, key, command.direction)
+          : lineBoundary(ids, command.edge);
+      },
+      onDelete: () => {
+        const intent = { type: "selection.remove" as const };
+        const result = editor.dispatch(intent);
+        setLastIntent(intent);
+        setAnnouncement(result.ok ? "Keyboard delete" : result.code);
+      },
+      onUndo: () => {
+        const result = editor.undo();
+        setAnnouncement(result.ok ? "Undone" : result.code);
+      },
+      onRedo: () => {
+        const result = editor.redo();
+        setAnnouncement(result.ok ? "Redone" : result.code);
+      },
+    },
+  });
+  const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
-  const selected = new Set(editor.selectedBlockIds);
-
-  function focusId(): string | undefined {
-    const primary = snapshot.selection.primaryIndex;
-    return primary === null ? editor.selectedBlockIds.at(-1) : snapshot.selection.ranges[primary]?.focus.blockId;
-  }
 
   function handleCopy(event: ClipboardEvent<HTMLElement>) {
     const result = clipboard.copy(event);
@@ -64,61 +100,6 @@ export function KeyboardAdapterLab() {
     setAnnouncement(result.ok ? `Cut ${result.payload.blocks.length} structured block` : result.code);
   }
 
-  function select(event: MouseEvent, blockId: string) {
-    const intent = { type: "selection.set" as const, blockId, mode: selectionOperationFromModifiers(event) };
-    const result = editor.dispatch(intent);
-    setLastIntent(intent);
-    setAnnouncement(result.ok ? `Selection ${intent.mode}` : result.code);
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    const command = keyboard.resolve(event);
-    if (command === null) return;
-    const inField = (event.target as HTMLElement).closest("textarea, input, [contenteditable]");
-    if (inField && command.type === "toggle" && event.key === " ") return;
-    if (inField && (command.type === "move" || command.type === "boundary" || command.type === "delete")) return;
-
-    const ids = document.blocks.map((block) => block.id);
-    const current = focusId();
-    if (command.type === "move" || command.type === "boundary") {
-      if (current === undefined) return;
-      const next = command.type === "move"
-        ? moveLinePoint(ids, current, command.direction)
-        : lineBoundary(ids, command.edge);
-      if (next === null) return;
-      event.preventDefault();
-      setLastCommand(command);
-      const intent = { type: "selection.set" as const, blockId: next, mode: command.operation };
-      const result = editor.dispatch(intent);
-      setLastIntent(intent);
-      setAnnouncement(result.ok ? `Keyboard ${command.operation}` : result.code);
-      return;
-    }
-    if (command.type === "toggle") {
-      if (current === undefined) return;
-      event.preventDefault();
-      setLastCommand(command);
-      const intent = { type: "selection.set" as const, blockId: current, mode: "toggle" as const };
-      const result = editor.dispatch(intent);
-      setLastIntent(intent);
-      setAnnouncement(result.ok ? "Keyboard toggle" : result.code);
-      return;
-    }
-    if (command.type === "delete") {
-      event.preventDefault();
-      setLastCommand(command);
-      const intent = { type: "selection.remove" as const };
-      const result = editor.dispatch(intent);
-      setLastIntent(intent);
-      setAnnouncement(result.ok ? "Keyboard delete" : result.code);
-      return;
-    }
-    event.preventDefault();
-    setLastCommand(command);
-    const result = command.type === "redo" ? editor.redo() : editor.undo();
-    setAnnouncement(result.ok ? (command.type === "redo" ? "Redone" : "Undone") : result.code);
-  }
-
   return (
     <section
       aria-label="Keyboard adapter surface"
@@ -126,7 +107,7 @@ export function KeyboardAdapterLab() {
       onCopy={handleCopy}
       onCut={handleCut}
       onPaste={handlePaste}
-      onKeyDown={handleKeyDown}
+      onKeyDown={editing.getKeyDownHandler()}
       className={classes("p-4", ui.surface.raised, ui.state.focus)}
     >
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
@@ -144,9 +125,9 @@ export function KeyboardAdapterLab() {
             <SelectableItem
               as="article"
               key={block.id}
-              selected={selected.has(block.id)}
+              selected={editing.getItem(block.id).getIsSelected()}
               data-block-id={block.id}
-              onClick={(event) => select(event, block.id)}
+              onClick={editing.getItem(block.id).getPressHandler()}
               className={classes("p-3", ui.surface.workspace)}
             >
               <span className={ui.text.label}>{block.id}</span>

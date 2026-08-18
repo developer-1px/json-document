@@ -3,8 +3,7 @@ import {
   createObjectEditor,
   type ObjectDocument,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
-import { selectionOperationFromModifiers } from "@interactive-os/json-document-web";
+import { useEditing } from "@interactive-os/json-document-react";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 
@@ -28,18 +27,24 @@ type DragState = {
 
 export function CanvasDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjects));
-  const snapshot = useEditingSnapshot(editor);
   const [drag, setDrag] = useState<DragState | null>(null);
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedObjects.map((object) => object.id),
+    onSelect: (objectId, mode) => {
+      editor.dispatch({
+        type: "selection.set",
+        objectIds: [objectId],
+        mode: mode === "extend" ? "add" : mode,
+      });
+    },
+  });
+  const snapshot = editing.snapshot;
   const document = snapshot.value as ObjectDocument;
-  const selected = new Set(editor.selectedObjects.map((object) => object.id));
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, objectId: string) {
-    const mode = selectionOperationFromModifiers(event);
-    editor.dispatch({
-      type: "selection.set",
-      objectIds: [objectId],
-      mode: mode === "extend" ? "add" : mode,
-    });
+    editing.getItem(objectId).getPressHandler()(event);
+    const mode = event.shiftKey ? "extend" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
     const ids = mode === "toggle" || mode === "extend"
       ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
       : [objectId];
@@ -89,7 +94,7 @@ export function CanvasDemoRoute() {
             return (
               <SelectableItem
                 key={object.id}
-                selected={selected.has(object.id)}
+                selected={editing.getItem(object.id).getIsSelected()}
                 data-object-id={object.id}
                 onPointerDown={(event) => handlePointerDown(event, object.id)}
                 onPointerMove={handlePointerMove}

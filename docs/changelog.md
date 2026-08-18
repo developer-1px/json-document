@@ -5,6 +5,10 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Added `useEditing` to `@interactive-os/json-document-react` so hosts attach
+  selection marks, press, and optional surface keyboard through
+  `getIsSelected` / `getPressHandler` / `getKeyDownHandler`, and dogfooded
+  that interface on the selection demos.
 - Split official Adapters from Connectors and put Adapters before Connectors
   in the public concept tree. Keyboard and Clipboard are separate official
   adapters in `@interactive-os/json-document-web`, Contenteditable is an

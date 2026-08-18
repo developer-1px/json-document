@@ -1,14 +1,13 @@
-import { useState, type ClipboardEvent, type MouseEvent } from "react";
+import { useState, type ClipboardEvent } from "react";
 import {
   createDocumentEditor,
   type BlockDocument,
   type DocumentEditor,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   documentClipboardCodec,
-  selectionOperationFromModifiers,
   textInputFromControl,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
@@ -31,10 +30,17 @@ export function ClipboardAdapterLab() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const snapshot = useEditingSnapshot(editor);
   const [announcement, setAnnouncement] = useState("Click a block, then use Mod+C and Mod+V inside this surface");
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedBlockIds,
+    onSelect: (blockId, mode) => {
+      const result = editor.dispatch({ type: "selection.set", blockId, mode });
+      setAnnouncement(result.ok ? `Selection ${mode}` : result.code);
+    },
+  });
+  const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
-  const selected = new Set(editor.selectedBlockIds);
 
   function handleCopy(event: ClipboardEvent<HTMLElement>) {
     const result = clipboard.copy(event);
@@ -49,12 +55,6 @@ export function ClipboardAdapterLab() {
   function handleCut(event: ClipboardEvent<HTMLElement>) {
     const result = clipboard.cut(event);
     setAnnouncement(result.ok ? `Cut ${result.payload.blocks.length} structured block` : result.code);
-  }
-
-  function select(event: MouseEvent, blockId: string) {
-    const mode = selectionOperationFromModifiers(event);
-    const result = editor.dispatch({ type: "selection.set", blockId, mode });
-    setAnnouncement(result.ok ? `Selection ${mode}` : result.code);
   }
 
   return (
@@ -77,9 +77,9 @@ export function ClipboardAdapterLab() {
             <SelectableItem
               as="article"
               key={block.id}
-              selected={selected.has(block.id)}
+              selected={editing.getItem(block.id).getIsSelected()}
               data-block-id={block.id}
-              onClick={(event) => select(event, block.id)}
+              onClick={editing.getItem(block.id).getPressHandler()}
               className={classes("p-3", ui.surface.workspace)}
             >
               <label className={classes("grid gap-2", ui.text.label)}>

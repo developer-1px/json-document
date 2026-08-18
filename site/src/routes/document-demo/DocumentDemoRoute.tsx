@@ -1,4 +1,4 @@
-import { useRef, useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type ClipboardEvent } from "react";
 import {
   type BlockDocument,
   type DocumentClipboard,
@@ -6,16 +6,13 @@ import {
   type DocumentSelection,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import {
-  useDocumentEditor,
-  useEditingSnapshot,
-} from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   createWebKeyboardAdapter,
   documentClipboardCodec,
+  lineBoundary,
   moveLinePoint,
-  selectionOperationFromModifiers,
   textInputFromControl,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
@@ -34,7 +31,6 @@ const initialDocument: BlockDocument = {
 
 export function DocumentDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
-  const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
   const [webClipboard] = useState(() => createWebClipboardBinding({
     codec: documentClipboardCodec,
@@ -47,9 +43,6 @@ export function DocumentDemoRoute() {
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
-
-  const document = snapshot.value as BlockDocument;
-  const selected = new Set(editor.selectedBlockIds);
 
   function remember(intent: DocumentIntent, result: EditingResult<DocumentSelection>) {
     setLastIntent(intent);
@@ -66,6 +59,36 @@ export function DocumentDemoRoute() {
     setAnnouncement(result.ok ? message : "That action is not available here");
     return result;
   }
+
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedBlockIds,
+    onSelect: (blockId, mode) => {
+      run(() => dispatchIntent({ type: "selection.set", blockId, mode }), "Selection changed");
+    },
+    ignorePress: (event) => event.target instanceof Element && event.target.closest("textarea") !== null,
+    keyboard: {
+      resolve: (stroke) => keyboard.resolve(stroke),
+      focusKey: () => editor.selectedBlockIds.at(-1),
+      neighbor: (key, command) => {
+        const ids = (editor.snapshot.value as BlockDocument).blocks.map((block) => block.id);
+        return command.type === "move"
+          ? moveLinePoint(ids, key, command.direction)
+          : lineBoundary(ids, command.edge);
+      },
+      onDelete: () => {
+        run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted");
+      },
+      onUndo: () => {
+        run(() => editor.undo(), "Undone");
+      },
+      onRedo: () => {
+        run(() => editor.redo(), "Redone");
+      },
+    },
+  });
+  const snapshot = editing.snapshot;
+  const document = snapshot.value as BlockDocument;
 
   function copySelection() {
     const next = editor.copy();
@@ -86,12 +109,6 @@ export function DocumentDemoRoute() {
   function pasteSelection() {
     if (!clipboard) return setAnnouncement("Copy or cut blocks first");
     run(() => dispatchIntent({ type: "clipboard.paste", clipboard }), `Pasted ${clipboard.blocks.length} block${clipboard.blocks.length === 1 ? "" : "s"}`);
-  }
-
-  function handleBlockClick(event: MouseEvent, blockId: string) {
-    if ((event.target as HTMLElement).closest("textarea")) return;
-    const mode = selectionOperationFromModifiers(event);
-    run(() => dispatchIntent({ type: "selection.set", blockId, mode }), "Selection changed");
   }
 
   function handleNativeCopy(event: ClipboardEvent<HTMLDivElement>) {
@@ -117,35 +134,6 @@ export function DocumentDemoRoute() {
     setAnnouncement(result.ok
       ? `Pasted ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`
       : result.code);
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const command = keyboard.resolve(event);
-    if (command === null) return;
-    const inField = (event.target as HTMLElement).closest("textarea, input, [contenteditable]");
-    if (inField && command.type !== "undo" && command.type !== "redo") return;
-
-    const ids = document.blocks.map((block) => block.id);
-    const current = snapshot.selection.primaryIndex === null
-      ? undefined
-      : snapshot.selection.ranges[snapshot.selection.primaryIndex]?.focus.blockId;
-
-    if (command.type === "move") {
-      if (current === undefined) return;
-      const next = moveLinePoint(ids, current, command.direction);
-      if (next === null) return;
-      event.preventDefault();
-      run(() => dispatchIntent({ type: "selection.set", blockId: next, mode: command.operation }), "Selection changed");
-      return;
-    }
-    if (command.type === "delete") {
-      event.preventDefault();
-      run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted");
-      return;
-    }
-    if (command.type !== "undo" && command.type !== "redo") return;
-    event.preventDefault();
-    run(() => command.type === "redo" ? editor.redo() : editor.undo(), command.type === "redo" ? "Redone" : "Undone");
   }
 
   const lastSelectedId = editor.selectedBlockIds.at(-1);
@@ -214,7 +202,7 @@ export function DocumentDemoRoute() {
               onCopy={handleNativeCopy}
               onCut={handleNativeCut}
               onPaste={handleNativePaste}
-              onKeyDown={handleKeyDown}
+              onKeyDown={editing.getKeyDownHandler()}
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (
@@ -223,9 +211,9 @@ export function DocumentDemoRoute() {
                 <SelectableItem
                   as="article"
                   key={block.id}
-                  selected={selected.has(block.id)}
+                  selected={editing.getItem(block.id).getIsSelected()}
                   data-block-id={block.id}
-                  onClick={(event) => handleBlockClick(event, block.id)}
+                  onClick={editing.getItem(block.id).getPressHandler()}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                 >
                   <ActionButton

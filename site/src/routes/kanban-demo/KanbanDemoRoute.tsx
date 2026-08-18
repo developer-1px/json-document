@@ -3,7 +3,7 @@ import {
   createKanbanEditor,
   type KanbanDocument,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -23,11 +23,18 @@ const initialBoard: KanbanDocument = {
 
 export function KanbanDemoRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
-  const snapshot = useEditingSnapshot(editor);
   const [dragging, setDragging] = useState<string | null>(null);
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedCardIds,
+    onSelect: (cardId) => {
+      editor.dispatch({ type: "selection.set", cardId });
+    },
+    operationFromEvent: () => "replace",
+  });
+  const snapshot = editing.snapshot;
   const board = snapshot.value as KanbanDocument;
   const cards = new Map(board.cards.map((card) => [card.id, card]));
-  const selected = new Set(editor.selectedCardIds);
 
   function moveTo(columnId: string, beforeCardId?: string) {
     if (!dragging) return;
@@ -72,8 +79,8 @@ export function KanbanDemoRoute() {
                   type="button"
                   draggable
                   data-card-id={card.id}
-                  data-selected={selected.has(card.id) ? "true" : "false"}
-                  onClick={() => editor.dispatch({ type: "selection.set", cardId: card.id })}
+                  data-selected={editing.getItem(card.id).getIsSelected() ? "true" : "false"}
+                  onClick={editing.getItem(card.id).getPressHandler()}
                   onDragStart={() => {
                     editor.dispatch({ type: "selection.set", cardId: card.id });
                     setDragging(card.id);

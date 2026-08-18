@@ -45,9 +45,11 @@ function DocumentView({ document }) {
 | `useJSONDocumentValue(document)` | document value 구독만 필요할 때 |
 | `useEditingSnapshot(source)` | EditingSession이나 DocumentEditor 상태를 렌더링할 때 |
 | `useDocumentEditor(initial, options?)` | mounted component가 editor lifecycle을 가질 때 |
+| `useEditing({ source, selectedKeys, onSelect, keyboard? })` | 선택 표기, press, 표면 키보드를 같은 질의/핸들러로 붙일 때 |
 
-Selection을 어떤 모양으로 표시할지와 어떤 컴포넌트를 그릴지는 제품 화면이
-정합니다. [/connectors/react](/connectors/react) 데모는 구독 뒤 document
+`useEditing`은 마크업을 그리지 않습니다. host가 `getIsSelected()`와
+`getPressHandler()`를 자기 요소에 붙이고, 장르 Intent는 `onSelect`에서
+번역합니다. [/connectors/react](/connectors/react) 데모는 구독 뒤 document
 value를 다시 렌더링합니다.
 
 ## React Hook Form의 draft 제출하기

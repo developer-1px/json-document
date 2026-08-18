@@ -1,4 +1,4 @@
-import { useRef, useState, type FocusEvent, type MouseEvent } from "react";
+import { useRef, useState, type FocusEvent } from "react";
 import {
   createDatabaseEditor,
   type DatabaseDocument,
@@ -6,7 +6,7 @@ import {
   type DatabaseProperty,
   type DatabaseRecord,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
@@ -32,23 +32,28 @@ const initialAdmin = openAdminDocument(adminTaskSchema, initialTasks);
 
 export function ZodAdminLab() {
   const [editor] = useState<DatabaseEditor>(() => createDatabaseEditor(initialAdmin));
-  const snapshot = useEditingSnapshot(editor);
   const nextRecord = useRef(4);
-  const document = snapshot.value as DatabaseDocument;
+  const document = editor.snapshot.value as DatabaseDocument;
   const view = document.views[0]!;
   const topology = editor.tableTopology(view.id);
   const properties = topology.propertyIds.map((id) => document.schema.properties.find((property) => property.id === id)!);
   const records = topology.recordIds.map((id) => document.records.find((record) => record.id === id)!);
-  const selected = new Set(editor.selectedCellsIn(topology).map((cell) => `${cell.recordId}\u0000${cell.propertyId}`));
 
   function run(action: () => { readonly ok: boolean }) {
     action();
   }
 
-  function selectCell(event: MouseEvent, recordId: string, propertyId: string) {
-    const mode = event.shiftKey ? "extend" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
-    run(() => editor.dispatch({ type: "selection.set", recordId, propertyId, mode }));
-  }
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedCellsIn(topology).map((cell) => `${cell.recordId}\u0000${cell.propertyId}`),
+    onSelect: (key, mode) => {
+      const split = key.indexOf("\u0000");
+      const recordId = key.slice(0, split);
+      const propertyId = key.slice(split + 1);
+      run(() => editor.dispatch({ type: "selection.set", recordId, propertyId, mode }));
+    },
+  });
+  const snapshot = editing.snapshot;
 
   function addRecord() {
     const recordId = `t${nextRecord.current}`;
@@ -123,7 +128,8 @@ export function ZodAdminLab() {
             {records.map((record) => (
               <tr key={record.id} data-record-id={record.id}>
                 {properties.map((property) => {
-                  const isSelected = selected.has(`${record.id}\u0000${property.id}`);
+                  const item = editing.getItem(`${record.id}\u0000${property.id}`);
+                  const isSelected = item.getIsSelected();
                   return (
                     <SelectableItem
                       as="td"
@@ -131,7 +137,7 @@ export function ZodAdminLab() {
                       selected={isSelected}
                       role="gridcell"
                       aria-selected={isSelected}
-                      onClick={(event) => selectCell(event, record.id, property.id)}
+                      onClick={item.getPressHandler()}
                       className={classes("min-w-32 p-0", ui.database.cell)}
                     >
                         <AdminPropertyEditor

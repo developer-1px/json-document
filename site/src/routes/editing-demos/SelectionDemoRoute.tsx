@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type BlockDocument, type DocumentIntent } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
@@ -16,18 +16,21 @@ const initialDocument: BlockDocument = {
 
 export function SelectionDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
-  const snapshot = useEditingSnapshot(editor);
   const [mode, setMode] = useState<"replace" | "extend" | "toggle">("replace");
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: boolean; readonly code?: string } | null>(null);
-  const selected = new Set(editor.selectedBlockIds);
-
-  function select(blockId: string) {
-    const intent: DocumentIntent = { type: "selection.set", blockId, mode };
-    const result = editor.dispatch(intent);
-    setLastIntent(intent);
-    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
-  }
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedBlockIds,
+    onSelect: (blockId, nextMode) => {
+      const intent: DocumentIntent = { type: "selection.set", blockId, mode: nextMode };
+      const result = editor.dispatch(intent);
+      setLastIntent(intent);
+      setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
+    },
+    operationFromEvent: () => mode,
+  });
+  const snapshot = editing.snapshot;
 
   return (
     <PageFrame>
@@ -56,9 +59,9 @@ export function SelectionDemoRoute() {
               <SelectableItem
                 key={block.id}
                 type="button"
-                selected={selected.has(block.id)}
+                selected={editing.getItem(block.id).getIsSelected()}
                 className={classes("px-3 py-2", ui.surface.selectableBlock)}
-                onClick={() => select(block.id)}
+                onClick={editing.getItem(block.id).getPressHandler()}
               >
                 {block.id} · {block.text}
               </SelectableItem>

@@ -1,4 +1,4 @@
-import { useRef, useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useRef, useState, type ClipboardEvent } from "react";
 import {
   createSheetEditor,
   type EditingResult,
@@ -8,13 +8,12 @@ import {
   type SheetIntent,
   type SheetSelection,
 } from "@interactive-os/json-document-editing";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   createWebKeyboardAdapter,
   gridBoundary,
   moveGridPoint,
-  selectionOperationFromModifiers,
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
@@ -38,7 +37,6 @@ const initialSheet: SheetDocument = {
 
 export function SheetDemo() {
   const [editor] = useState<SheetEditor>(() => createSheetEditor(initialSheet));
-  const snapshot = useEditingSnapshot(editor);
   const [clipboard, setClipboard] = useState<SheetClipboard | null>(null);
   const [webClipboard] = useState(() => createWebClipboardBinding({
     codec: sheetClipboardCodec,
@@ -51,8 +49,6 @@ export function SheetDemo() {
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
-  const sheet = snapshot.value as SheetDocument;
-  const selected = new Set(editor.selectedCells.map((cell) => `${cell.rowId}\u0000${cell.columnId}`));
 
   function dispatchIntent(intent: SheetIntent) {
     const result: EditingResult<SheetSelection> = editor.dispatch(intent);
@@ -67,18 +63,56 @@ export function SheetDemo() {
     return result;
   }
 
-  function selectCell(event: MouseEvent, rowId: string, columnId: string) {
-    const mode = selectionOperationFromModifiers(event);
-    run(
-      () => dispatchIntent({
-        type: "selection.set",
-        rowId,
-        columnId,
-        mode,
-      }),
-      mode === "extend" ? "Range extended" : mode === "toggle" ? "Range toggled" : "Cell selected",
-    );
-  }
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedCells.map((cell) => cellKey(cell.rowId, cell.columnId)),
+    onSelect: (key, mode) => {
+      const { rowId, columnId } = parseCellKey(key);
+      run(
+        () => dispatchIntent({ type: "selection.set", rowId, columnId, mode }),
+        mode === "extend" ? "Range extended" : mode === "toggle" ? "Range toggled" : "Cell selected",
+      );
+    },
+    keyboard: {
+      resolve: (stroke) => keyboard.resolve(stroke),
+      focusKey: () => {
+        const focus = editor.snapshot.selection.focus;
+        return focus ? cellKey(focus.rowId, focus.columnId) : undefined;
+      },
+      neighbor: (key, command) => {
+        const sheet = editor.snapshot.value as SheetDocument;
+        const topology = {
+          rowIds: sheet.rows.map((row) => row.id),
+          columnIds: sheet.columns.map((column) => column.id),
+        };
+        const current = parseCellKey(key);
+        const next = command.type === "move"
+          ? moveGridPoint(topology, current, command.direction)
+          : gridBoundary(topology, current, command.edge);
+        return next ? cellKey(next.rowId, next.columnId) : null;
+      },
+      onDelete: () => {
+        run(() => dispatchIntent({ type: "selection.fill", value: null }), "Selected cells cleared");
+      },
+      onUndo: () => {
+        run(() => editor.undo(), "Undone");
+      },
+      onRedo: () => {
+        run(() => editor.redo(), "Redone");
+      },
+      afterMove: (key) => {
+        const { rowId, columnId } = parseCellKey(key);
+        focusCell(surfaceRef.current, rowId, columnId);
+      },
+      ignoreCommand: (command, context) => (
+        context.inField
+        && ((command.type === "toggle" && context.event.key === " ")
+          || (command.type === "delete" && context.event.key === "Backspace"))
+      ),
+    },
+  });
+  const snapshot = editing.snapshot;
+  const sheet = snapshot.value as SheetDocument;
 
   function copySelection() {
     const next = editor.copy();
@@ -131,69 +165,6 @@ export function SheetDemo() {
       : result.code);
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    const command = keyboard.resolve(event);
-    if (command === null) return;
-    const inField = (event.target as HTMLElement).closest("input, textarea, [contenteditable]");
-    if (command.type === "toggle" && inField && event.key === " ") return;
-    if (command.type === "delete" && inField && event.key === "Backspace") return;
-
-    const topology = {
-      rowIds: sheet.rows.map((row) => row.id),
-      columnIds: sheet.columns.map((column) => column.id),
-    };
-    const focus = snapshot.selection.focus;
-    if (focus === null) return;
-
-    if (command.type === "move" || command.type === "boundary") {
-      const next = command.type === "move"
-        ? moveGridPoint(topology, focus, command.direction)
-        : gridBoundary(topology, focus, command.edge);
-      if (next === null) return;
-      event.preventDefault();
-      run(
-        () => dispatchIntent({
-          type: "selection.set",
-          rowId: next.rowId,
-          columnId: next.columnId,
-          mode: command.operation,
-        }),
-        command.operation === "extend" ? "Range extended" : "Selection changed",
-      );
-      focusCell(surfaceRef.current, next.rowId, next.columnId);
-      return;
-    }
-
-    if (command.type === "toggle") {
-      event.preventDefault();
-      run(
-        () => dispatchIntent({
-          type: "selection.set",
-          rowId: focus.rowId,
-          columnId: focus.columnId,
-          mode: "toggle",
-        }),
-        "Range toggled",
-      );
-      return;
-    }
-
-    if (command.type === "delete") {
-      event.preventDefault();
-      run(
-        () => dispatchIntent({ type: "selection.fill", value: null }),
-        "Selected cells cleared",
-      );
-      return;
-    }
-
-    event.preventDefault();
-    run(
-      () => command.type === "redo" ? editor.redo() : editor.undo(),
-      command.type === "redo" ? "Redone" : "Undone",
-    );
-  }
-
   return (
     <PageFrame>
         <PageHeader
@@ -240,7 +211,7 @@ export function SheetDemo() {
             onCopy={handleNativeCopy}
             onCut={handleNativeCut}
             onPaste={handleNativePaste}
-            onKeyDown={handleKeyDown}
+            onKeyDown={editing.getKeyDownHandler()}
             className={classes("min-w-0 overflow-auto", ui.state.focus)}
           >
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
@@ -257,7 +228,8 @@ export function SheetDemo() {
                   <tr key={row.id}>
                     <th scope="row" className={classes("px-2 py-2 text-center", ui.surface.gridIndex, ui.text.meta)}>{rowIndex + 1}</th>
                     {sheet.columns.map((column) => {
-                      const isSelected = selected.has(`${row.id}\u0000${column.id}`);
+                      const item = editing.getItem(cellKey(row.id, column.id));
+                      const isSelected = item.getIsSelected();
                       return (
                         <SelectableItem
                           as="td"
@@ -267,7 +239,7 @@ export function SheetDemo() {
                           aria-selected={isSelected}
                           data-row-id={row.id}
                           data-column-id={column.id}
-                          onClick={(event) => selectCell(event, row.id, column.id)}
+                          onClick={item.getPressHandler()}
                           className={classes("p-0", ui.surface.gridCell)}
                         >
                             <input
@@ -291,6 +263,15 @@ export function SheetDemo() {
         </ProductApp>
     </PageFrame>
   );
+}
+
+function cellKey(rowId: string, columnId: string): string {
+  return `${rowId}\u0000${columnId}`;
+}
+
+function parseCellKey(key: string): { readonly rowId: string; readonly columnId: string } {
+  const split = key.indexOf("\u0000");
+  return { rowId: key.slice(0, split), columnId: key.slice(split + 1) };
 }
 
 function focusCell(surface: HTMLElement | null, rowId: string, columnId: string) {
