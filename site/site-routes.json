@@ -353,7 +353,7 @@
     "label": "Connector guide",
     "title": "Connector Docs - json-document",
     "heading": "json-document Connectors",
-    "description": "React, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
+    "description": "React 구독과 선택·커서 질의, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
     "language": "ko",
     "navigationGroup": "Connectors"
   },
@@ -361,7 +361,7 @@
     "path": "/connectors/react",
     "label": "React",
     "title": "React Connector Live Demo - json-document",
-    "description": "Live React integration for JSON Document subscriptions and component-owned editing lifecycle.",
+    "description": "Live React subscription plus shared queries for object range, focus cursor, and text offset.",
     "navigationGroup": "Connectors",
     "integration": {
       "kind": "connector",
