@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { createJSONDocument } from "@interactive-os/json-document";
-import { useReactConnector } from "@interactive-os/json-document-react";
+import { createJSONDocument, type JSONDocument, type JSONValue } from "@interactive-os/json-document";
+import { useEditing, useReactConnector, type Editing } from "@interactive-os/json-document-react";
 import { ContentEditable } from "@interactive-os/json-document-contenteditable";
 import { Inspector } from "../../../shared/ui/inspector";
+import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 export function ContentEditableAdapterLab() {
@@ -11,6 +12,12 @@ export function ContentEditableAdapterLab() {
     note: "This note is independent.\nIt stays unchanged.",
   }));
   const value = useReactConnector(document);
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const editing = useEditing({
+    selectedKeys: focusKey === null ? [] : [focusKey],
+    focusKey,
+    onSelect: (pointer) => setFocusKey(pointer),
+  });
 
   return (
     <section aria-label="Contenteditable document surface" className={classes("p-4", ui.surface.raised)}>
@@ -25,35 +32,55 @@ export function ContentEditableAdapterLab() {
               Click either canvas and edit its text. Every native input commits only the JSON pointer shown above it.
             </p>
           </header>
-          <label className="grid gap-1.5">
-            <span className="flex items-center justify-between gap-3">
-              <span className={ui.text.label}>Title canvas</span>
-              <code className={ui.code.inline}>/title</code>
-            </span>
-            <ContentEditable
-              aria-label="Title"
-              className={ui.contenteditable.canvas}
-              document={document}
-              pointer="/title"
-            />
-          </label>
-          <label className="grid gap-1.5">
-            <span className="flex items-center justify-between gap-3">
-              <span className={ui.text.label}>Note canvas</span>
-              <code className={ui.code.inline}>/note</code>
-            </span>
-            <ContentEditable
-              aria-label="Note"
-              className={ui.contenteditable.canvas}
-              document={document}
-              pointer="/note"
-            />
-          </label>
+          <PointerCanvas
+            document={document}
+            editing={editing}
+            label="Title canvas"
+            pointer="/title"
+            ariaLabel="Title"
+          />
+          <PointerCanvas
+            document={document}
+            editing={editing}
+            label="Note canvas"
+            pointer="/note"
+            ariaLabel="Note"
+          />
         </div>
         <Inspector label="Inspect contenteditable document" items={[
           { label: "document.value", testId: "contenteditable-document-json", value },
         ]} />
       </div>
     </section>
+  );
+}
+
+function PointerCanvas(props: {
+  readonly document: JSONDocument;
+  readonly editing: Editing<JSONValue, string>;
+  readonly label: string;
+  readonly pointer: string;
+  readonly ariaLabel: string;
+}) {
+  const item = props.editing.getItem(props.pointer);
+  return (
+    <SelectableItem
+      as="label"
+      selected={item.getIsSelected()}
+      focus={item.getIsFocus()}
+      className="grid gap-1.5 p-2"
+      onFocus={item.getPressHandler()}
+    >
+      <span className="flex items-center justify-between gap-3">
+        <span className={ui.text.label}>{props.label}</span>
+        <code className={ui.code.inline}>{props.pointer}</code>
+      </span>
+      <ContentEditable
+        aria-label={props.ariaLabel}
+        className={ui.contenteditable.canvas}
+        document={props.document}
+        pointer={props.pointer}
+      />
+    </SelectableItem>
   );
 }

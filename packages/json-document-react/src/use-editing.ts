@@ -35,9 +35,9 @@ export interface EditingKeyDownEvent extends EditingKeyboardStroke {
 }
 
 export interface EditingPressEvent {
-  readonly shiftKey: boolean;
-  readonly metaKey: boolean;
-  readonly ctrlKey: boolean;
+  readonly shiftKey?: boolean;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
   readonly target?: EventTarget | null;
 }
 
@@ -70,8 +70,21 @@ export interface EditingKeyboardOptions<Key extends string = string> {
   ) => boolean;
 }
 
+const emptyEditingSource: EditingSnapshotSource<JSONValue> = {
+  snapshot: {
+    value: null,
+    selection: null,
+    revision: 0,
+    canUndo: false,
+    canRedo: false,
+  },
+  subscribe() {
+    return () => undefined;
+  },
+};
+
 export interface UseEditingOptions<Selection extends JSONValue, Key extends string = string> {
-  readonly source: EditingSnapshotSource<Selection>;
+  readonly source?: EditingSnapshotSource<Selection>;
   readonly selectedKeys: Iterable<Key>;
   readonly focusKey?: Key | null;
   readonly textOffset?: number | null;
@@ -96,7 +109,9 @@ export function selectionModeFromModifiers(event: EditingPressEvent): EditingSel
 export function useEditing<Selection extends JSONValue, Key extends string = string>(
   options: UseEditingOptions<Selection, Key>,
 ): Editing<Selection, Key> {
-  const snapshot = useEditingSnapshot(options.source);
+  const snapshot = useEditingSnapshot(
+    (options.source ?? emptyEditingSource) as EditingSnapshotSource<Selection>,
+  );
   const optionsRef = useRef(options);
   optionsRef.current = options;
 

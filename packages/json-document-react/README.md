@@ -25,9 +25,10 @@ and connects the six-member `JSONDocument` directly to React.
 shared by `EditingSession` and `DocumentEditor`.
 `useEditing` adds the shared selection loop. `getIsSelected` is the object
 interval, `getIsFocus` is the object/text focus, and `getTextOffset` is the
-text cursor on that focus. Hosts still own markup, class names, and genre
-Intent translation. `useRestoreTextCursor` writes a text offset onto an
-input or textarea.
+text cursor on that focus. `source` is optional when the host already owns
+the keys. Hosts still own markup, class names, and genre Intent
+translation. `useRestoreTextCursor` writes a text offset onto an input or
+textarea.
 
 The Connector does not render product chrome or force DOM attributes. Selection
 marking and keyboard policy stay in the host; the hook only answers selection

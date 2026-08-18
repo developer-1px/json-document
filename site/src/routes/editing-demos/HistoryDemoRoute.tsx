@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditingSnapshot } from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
@@ -15,7 +15,18 @@ const initialDocument: BlockDocument = {
 
 export function HistoryDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
-  const snapshot = useEditingSnapshot(editor);
+  const focus = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus;
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedBlockIds,
+    focusKey: focus?.blockId ?? null,
+    textOffset: focus?.offset ?? null,
+    onSelect: (blockId, mode) => {
+      editor.dispatch({ type: "selection.set", blockId, mode });
+    },
+  });
+  const snapshot = editing.snapshot;
+  const document = snapshot.value as BlockDocument;
   const [lastCall, setLastCall] = useState("아직 편집하지 않았습니다");
 
   function edit() {
@@ -46,6 +57,24 @@ export function HistoryDemoRoute() {
           <p className={classes("mt-0", ui.text.meta)}>
             편집은 bravo 블록의 offset 0에서 시작해 Selection을 offset 6으로 옮깁니다.
           </p>
+          <div className="mb-3 grid gap-1">
+            {document.blocks.map((block) => {
+              const item = editing.getItem(block.id);
+              return (
+                <SelectableItem
+                  key={block.id}
+                  type="button"
+                  selected={item.getIsSelected()}
+                  focus={item.getIsFocus()}
+                  className={classes("px-3 py-2", ui.surface.selectableBlock)}
+                  onClick={item.getPressHandler()}
+                >
+                  {block.id} · {block.text}
+                  {item.getTextOffset() === null ? "" : ` · offset ${item.getTextOffset()}`}
+                </SelectableItem>
+              );
+            })}
+          </div>
           <ActionButton kind="primary" onClick={edit}>편집 적용</ActionButton>
         </section>
 

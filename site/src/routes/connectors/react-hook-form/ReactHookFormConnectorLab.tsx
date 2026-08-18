@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { useReactConnector } from "@interactive-os/json-document-react";
+import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
 import { useReactHookFormConnector } from "@interactive-os/json-document-react-hook-form";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton } from "../../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
 
 type ProfileForm = {
@@ -40,6 +40,18 @@ export function ReactHookFormConnectorLab() {
   const snapshot = binding.snapshot;
   const canonical = useReactConnector(document);
   const { register, formState } = binding.form;
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const editing = useEditing({
+    selectedKeys: [
+      focusKey,
+      formState.errors.profile?.name ? "profile.name" : null,
+    ].filter((key): key is string => key !== null),
+    focusKey,
+    onSelect: (key) => setFocusKey(key),
+  });
+  const nameField = register("profile.name");
+  const roleField = register("profile.role");
+  const activeField = register("profile.active");
 
   return (
     <section aria-label="React Hook Form lifecycle" className={classes("p-4", ui.surface.raised)}>
@@ -53,22 +65,50 @@ export function ReactHookFormConnectorLab() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(20rem,1.2fr)]">
         <form aria-label="Record detail" onSubmit={binding.submit} className="grid content-start gap-4">
-          <label className={classes("grid gap-1", ui.text.meta)}>
+          <SelectableItem
+            as="label"
+            selected={editing.getItem("profile.name").getIsSelected()}
+            focus={editing.getItem("profile.name").getIsFocus()}
+            className={classes("grid gap-1 p-2", ui.text.meta)}
+          >
             Name
-            <input aria-invalid={Boolean(formState.errors.profile?.name)} className={ui.field.control} {...register("profile.name")} />
+            <input
+              aria-invalid={Boolean(formState.errors.profile?.name)}
+              className={ui.field.control}
+              {...nameField}
+              onFocus={editing.getItem("profile.name").getPressHandler()}
+            />
             {formState.errors.profile?.name?.message && (
               <span role="alert" className={ui.state.error}>{formState.errors.profile.name.message}</span>
             )}
-          </label>
-          <label className={classes("grid gap-1", ui.text.meta)}>
+          </SelectableItem>
+          <SelectableItem
+            as="label"
+            selected={editing.getItem("profile.role").getIsSelected()}
+            focus={editing.getItem("profile.role").getIsFocus()}
+            className={classes("grid gap-1 p-2", ui.text.meta)}
+          >
             Role
-            <select className={ui.field.control} {...register("profile.role")}>
+            <select
+              className={ui.field.control}
+              {...roleField}
+              onFocus={editing.getItem("profile.role").getPressHandler()}
+            >
               <option>Viewer</option><option>Editor</option><option>Admin</option>
             </select>
-          </label>
-          <label className={classes("flex items-center gap-2", ui.text.meta)}>
-            <input type="checkbox" {...register("profile.active")} /> Active
-          </label>
+          </SelectableItem>
+          <SelectableItem
+            as="label"
+            selected={editing.getItem("profile.active").getIsSelected()}
+            focus={editing.getItem("profile.active").getIsFocus()}
+            className={classes("flex items-center gap-2 p-2", ui.text.meta)}
+          >
+            <input
+              type="checkbox"
+              {...activeField}
+              onFocus={editing.getItem("profile.active").getPressHandler()}
+            /> Active
+          </SelectableItem>
 
           <div className="flex flex-wrap gap-2">
             <ActionButton kind="primary" type="submit">Save record</ActionButton>

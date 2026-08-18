@@ -80,8 +80,9 @@ const editing = useEditing({
 ```
 
 `source`는 `snapshot`과 `subscribe`를 가진 editor입니다.
-`useEditingSnapshot`과 같은 구독 표면입니다. `onSelect`는 장르 Intent로
-번역하는 자리입니다. hook은 `selection.set`이라는 이름을 모릅니다.
+`useEditingSnapshot`과 같은 구독 표면입니다. editor가 없으면 생략하고
+host가 가진 키만 넘깁니다. `onSelect`는 장르 Intent로 번역하는
+자리입니다. hook은 `selection.set`이라는 이름을 모릅니다.
 
 항목마다 질의를 읽어 마크업에 붙입니다.
 
@@ -185,7 +186,7 @@ onSelect: (objectId, mode) => {
 
 | 옵션 | 역할 |
 | --- | --- |
-| `source` | editor 또는 `snapshot`/`subscribe` 표면 |
+| `source` | editor 또는 `snapshot`/`subscribe` 표면. 없으면 항목 질의만 동작 |
 | `selectedKeys` | 지금 범위에 들어 있는 키 |
 | `focusKey` | 커서 키. object는 primary/focus, text는 글자를 가진 대상 |
 | `textOffset` | `focusKey` 안의 글자 위치 |
@@ -453,7 +454,7 @@ function selectionModeFromModifiers(event: EditingPressEvent): EditingSelectionM
 
 ```ts
 interface UseEditingOptions<Selection extends JSONValue, Key extends string = string> {
-  readonly source: EditingSnapshotSource<Selection>;
+  readonly source?: EditingSnapshotSource<Selection>;
   readonly selectedKeys: Iterable<Key>;
   readonly focusKey?: Key | null;
   readonly textOffset?: number | null;
@@ -466,7 +467,7 @@ interface UseEditingOptions<Selection extends JSONValue, Key extends string = st
 
 | 필드 | 필수 | 설명 |
 | --- | --- | --- |
-| `source` | 예 | `snapshot`과 `subscribe`를 가진 editor 또는 같은 모양의 객체 |
+| `source` | 아니오 | `snapshot`과 `subscribe`를 가진 editor. 없으면 항목 질의만 동작 |
 | `selectedKeys` | 예 | 범위에 들어 있는 키. 매 렌더의 iterable |
 | `focusKey` | 아니오 | 커서 키. 없으면 `getIsFocus`는 항상 `false` |
 | `textOffset` | 아니오 | 커서 항목의 글자 위치. 없으면 `getTextOffset`은 `null` |
@@ -566,9 +567,9 @@ interface EditingKeyDownEvent extends EditingKeyboardStroke {
 }
 
 interface EditingPressEvent {
-  readonly shiftKey: boolean;
-  readonly metaKey: boolean;
-  readonly ctrlKey: boolean;
+  readonly shiftKey?: boolean;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
   readonly target?: EventTarget | null;
 }
 
