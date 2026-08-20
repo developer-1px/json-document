@@ -1,8 +1,9 @@
-export { dragOffset, dragShouldCommit } from "./drag.js";
-export type { DragOffset, Point } from "./drag.js";
-export { treeAffordance } from "./fold.js";
+export { dragAffordance, dragOffset, dragOperation, dragShouldCommit, dropAffordance, forbiddenCursor, hoverAffordance, marqueeAffordance, marqueeRect, nudgeAffordance, panAffordance, snapAffordance } from "./drag.js";
+export type { DragOffset, Point, Rect } from "./drag.js";
+export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";
-export { historyAffordance } from "./history.js";
+export { historyAffordance, historyCommandsFrom } from "./history.js";
 export type { HistoryAffordance, HistoryAffordanceMap, HistoryAffordanceName } from "./history.js";
-export { pointerSelect, resolveAffordanceKey } from "./select.js";
-export type { SelectOperation } from "./select.js";
+export { applyAffordance, keyboardCommandFrom, selectOperationFrom } from "./result.js";
+export type { AffordanceHand, AffordanceResult, SelectOperation } from "./result.js";
+export { activateAffordance, clickCountAffordance, escapeAffordance, focusAffordance, pointerSelect, resolveAffordanceKey, selectAllAffordance, typeaheadAffordance } from "./select.js";

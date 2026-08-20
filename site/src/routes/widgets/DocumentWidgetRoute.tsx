@@ -4,7 +4,12 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { pointerSelect, resolveAffordanceKey } from "@interactive-os/json-document-affordance";
+import {
+  keyboardCommandFrom,
+  pointerSelect,
+  resolveAffordanceKey,
+  selectOperationFrom,
+} from "@interactive-os/json-document-affordance";
 import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
@@ -28,16 +33,12 @@ export function DocumentWidgetRoute() {
     onSelect: (blockId, mode) => {
       editor.dispatch({ type: "selection.set", blockId, mode });
     },
-    operationFromEvent: (event) => pointerSelect({
-      shiftKey: event.shiftKey ?? false,
-      metaKey: event.metaKey ?? false,
-      ctrlKey: event.ctrlKey ?? false,
-    }),
+    operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
     keyboard: {
       resolve: (stroke) => {
-        const command = resolveAffordanceKey(stroke);
+        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return command;
+        return keyboardCommandFrom(result);
       },
       focusKey: () => editor.selectedBlockIds.at(-1),
       neighbor: (key, command) => {

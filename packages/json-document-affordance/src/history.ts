@@ -1,3 +1,5 @@
+import type { AffordanceResult } from "./result.js";
+
 export type HistoryAffordanceName = "undo" | "redo";
 
 export type HistoryAffordance = {
@@ -13,9 +15,22 @@ export type HistoryAffordanceMap = {
 export function historyAffordance(snapshot: {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
-}): HistoryAffordanceMap {
+}): AffordanceResult {
   return {
-    undo: { name: "undo", disabled: !snapshot.canUndo },
-    redo: { name: "redo", disabled: !snapshot.canRedo },
+    hand: {
+      type: "history",
+      undo: { name: "undo", disabled: !snapshot.canUndo },
+      redo: { name: "redo", disabled: !snapshot.canRedo },
+    },
   };
+}
+
+export function historyCommandsFrom(result: AffordanceResult): HistoryAffordanceMap {
+  if (result.hand?.type !== "history") {
+    return {
+      undo: { name: "undo", disabled: true },
+      redo: { name: "redo", disabled: true },
+    };
+  }
+  return { undo: result.hand.undo, redo: result.hand.redo };
 }

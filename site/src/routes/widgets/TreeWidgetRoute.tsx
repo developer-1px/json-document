@@ -9,7 +9,11 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { resolveAffordanceKey, treeAffordance } from "@interactive-os/json-document-affordance";
+import {
+  keyboardCommandFrom,
+  resolveAffordanceKey,
+  treeAffordance,
+} from "@interactive-os/json-document-affordance";
 import { treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
@@ -40,23 +44,23 @@ export function TreeWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const command = resolveAffordanceKey(stroke);
+        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return command;
+        return keyboardCommandFrom(result);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? undefined,
       neighbor: (key, command) => {
         const row = rows.find((item) => item.id === key);
         if (row && command.type === "move") {
-          const action = treeAffordance(command, {
+          const result = treeAffordance(command, {
             expanded: expanded.has(row.id),
             hasChildren: document.nodes.some((node) => node.parentId === row.id),
           });
-          if (action.type === "expand") {
+          if (result.hand?.type === "expand") {
             setExpanded((current) => new Set(current).add(row.id));
             return key;
           }
-          if (action.type === "collapse") {
+          if (result.hand?.type === "collapse") {
             setExpanded((current) => {
               const next = new Set(current);
               next.delete(row.id);

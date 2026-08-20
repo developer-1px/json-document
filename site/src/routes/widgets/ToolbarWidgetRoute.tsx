@@ -4,7 +4,12 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyAffordance, resolveAffordanceKey } from "@interactive-os/json-document-affordance";
+import {
+  historyAffordance,
+  historyCommandsFrom,
+  keyboardCommandFrom,
+  resolveAffordanceKey,
+} from "@interactive-os/json-document-affordance";
 import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
@@ -29,9 +34,9 @@ export function ToolbarWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const command = resolveAffordanceKey(stroke);
+        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return command;
+        return keyboardCommandFrom(result);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
@@ -50,7 +55,7 @@ export function ToolbarWidgetRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as OrderDocument;
-  const commands = historyAffordance(snapshot);
+  const commands = historyCommandsFrom(historyAffordance(snapshot));
 
   return (
     <WidgetDemoFrame

@@ -46,6 +46,13 @@ test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   expect(await json(page, "widget-toolbar-keyboard")).toEqual({ type: "undo" });
 });
 
+test("Listbox typeahead jumps to the matching label", async ({ page }) => {
+  await page.goto("/widgets/listbox");
+  await page.getByRole("listbox", { name: "Order items" }).focus();
+  await page.keyboard.type("T");
+  expect(await json(page, "widget-listbox-selected")).toEqual(["today"]);
+});
+
 test("Listbox reads selected keys and focus from Order", async ({ page }) => {
   await page.goto("/widgets/listbox");
   await page.getByRole("option", { name: "Today" }).click();

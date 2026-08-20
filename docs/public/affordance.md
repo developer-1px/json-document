@@ -14,19 +14,26 @@
 
 ```ts
 import {
-  pointerSelect,
+  applyAffordance,
   forbiddenCursor,
+  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerDown(event: PointerEvent, itemId: string) {
-  const mode = pointerSelect(event);
-  editor.dispatch({ type: "selection.set", itemId, mode });
+  applyAffordance(pointerSelect(event), {
+    hand: (hand) => {
+      if (hand.type === "select") {
+        editor.dispatch({ type: "selection.set", itemId, mode: hand.operation });
+      }
+    },
+  });
 }
 
 function onPointerMove(event: PointerEvent) {
-  event.currentTarget.style.cursor = forbiddenCursor({
-    allowed: hostCanDrop(event),
-    dropping: true,
+  applyAffordance(forbiddenCursor({ allowed: hostCanDrop(event), dropping: true }), {
+    cursor: (cursor) => {
+      event.currentTarget.style.cursor = cursor;
+    },
   });
 }
 ```

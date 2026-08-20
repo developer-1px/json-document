@@ -4,7 +4,12 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { gridBoundary, moveGridPoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { pointerSelect, resolveAffordanceKey } from "@interactive-os/json-document-affordance";
+import {
+  keyboardCommandFrom,
+  pointerSelect,
+  resolveAffordanceKey,
+  selectOperationFrom,
+} from "@interactive-os/json-document-affordance";
 import { gridCellProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
@@ -32,16 +37,12 @@ export function GridWidgetRoute() {
       const { rowId, columnId } = parseCellKey(key);
       editor.dispatch({ type: "selection.set", rowId, columnId, mode });
     },
-    operationFromEvent: (event) => pointerSelect({
-      shiftKey: event.shiftKey ?? false,
-      metaKey: event.metaKey ?? false,
-      ctrlKey: event.ctrlKey ?? false,
-    }),
+    operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
     keyboard: {
       resolve: (stroke) => {
-        const command = resolveAffordanceKey(stroke);
+        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return command;
+        return keyboardCommandFrom(result);
       },
       focusKey: () => {
         const next = editor.snapshot.selection.focus;

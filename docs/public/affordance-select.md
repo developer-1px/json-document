@@ -6,23 +6,31 @@ Select는 대상을 집는 손입니다. 클릭은 그 대상으로 바꾸고, S
 
 ```ts
 import {
+  applyAffordance,
+  keyboardCommandFrom,
   pointerSelect,
   resolveAffordanceKey,
+  selectOperationFrom,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerDown(event: PointerEvent, itemId: string) {
-  const mode = pointerSelect(event);
-  editor.dispatch({ type: "selection.set", itemId, mode });
+  applyAffordance(pointerSelect(event), {
+    hand: (hand) => {
+      if (hand.type === "select") {
+        editor.dispatch({ type: "selection.set", itemId, mode: hand.operation });
+      }
+    },
+  });
 }
 
 const editing = useEditing({
   source: editor,
-  operationFromEvent: (event) => pointerSelect(event),
+  operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
   onSelect: (itemId, mode) => {
     editor.dispatch({ type: "selection.set", itemId, mode });
   },
   keyboard: {
-    resolve: resolveAffordanceKey,
+    resolve: (stroke) => keyboardCommandFrom(resolveAffordanceKey(stroke)),
     neighbor: (key, command) => moveLinePoint(ids, key, command.direction),
   },
 });
