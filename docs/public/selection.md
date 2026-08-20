@@ -32,8 +32,8 @@ if (result.ok) {
 범위를 만듭니다. 첫 클릭은 기준점인 `anchor`와 현재 끝점인 `focus`를 같은
 대상에 둡니다. Shift 클릭은 `anchor`를 유지한 채 `focus`를 옮깁니다.
 
-두 점 사이에 어떤 항목이 포함되는지는 화면의 순서에 따라 달라집니다. 이
-순서를 Selection과 함께 사용하기 위해 [Topology](topology.md)를 넘깁니다.
+두 점 사이에 어떤 항목이 포함되는지는 화면의 순서에 따라 달라집니다. 그
+순서는 [Topology](topology.md)가 이미 정한 값입니다.
 
 [Selection Demo](/demo/selection)에서는 같은 블록 목록에 `replace`, `extend`,
 `toggle` 입력을 차례로 보내며 Selection만 어떻게 달라지는지 확인할 수
@@ -45,8 +45,9 @@ if (result.ok) {
 JSON 값이 바뀌면 editor는 변경 전후의 Selection을 patch와 함께 기록합니다.
 실행 취소는 값과 사용자가 작업하던 위치를 함께 복원합니다.
 
-다음 [Topology](topology.md) 문서에서는 범위 Selection에 화면 순서를
-더합니다. React에서 그 범위와 커서를 그리려면
+범위 Selection은 Topology가 정한 줄을 읽습니다. 그 줄을 복사 값으로 만드는
+과정은 [Clipboard](clipboard.md)에서 이어집니다. React에서 그 범위와 커서를
+그리려면
 [React에서 선택과 커서 그리기](react-editing.md)의 `useEditing`
 질의를 씁니다. KeyboardEvent를 command로 바꾸는 일은
 [Adapters](adapters.md)입니다.

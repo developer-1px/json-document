@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Ordered sitemap branches by dependency: Collaboration lists
+  Lifecycle next to Replica, Editing lists Topology before Selection,
+  and Intent reference sits beside the Intent guide instead of under it.
 - Made the site home a slim concept index and collapsed the desktop
   sidebar to layer names, the active layer's index, and the current
   branch. Order, Object, and Tree docs sit under Editors, Canvas sits

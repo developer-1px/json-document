@@ -12,6 +12,6 @@ Editing의 로컬 History와는 다릅니다. 로컬 History는 한 편집기의
 참여자의 기여를 끄거나 켭니다.
 
 - [Replica](collaboration-replica.md): 한 참여자가 아는 인과 상태
+- [Lifecycle](collaboration-lifecycle.md): epoch, checkpoint, restore
 - [Collaborative History](collaboration-history.md): 내 기여만 선택해 되돌리기
 - [Text](collaboration-text.md): 같이 쓰는 글자
-- [Lifecycle](collaboration-lifecycle.md): epoch, checkpoint, restore

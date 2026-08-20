@@ -1,8 +1,8 @@
 # Topology
 
-Selection의 `anchor`와 `focus`만으로는 두 점 사이에 무엇이 있는지 알 수
-없습니다. 편집기에는 현재 화면에 보이는 항목의 순서가 함께 필요합니다. 이
-순서를 나타내는 값이 Topology입니다.
+화면에 보이는 항목의 순서를 나타내는 값이 Topology입니다. 저장 순서와 다를
+수 있습니다. [Selection](selection.md)과 [Clipboard](clipboard.md)는 범위와
+복사 결과를 이 순서에서 읽습니다.
 
 ## 저장 순서와 화면 순서
 
@@ -84,6 +84,5 @@ function copyVisibleSelection(editor: SheetEditor) {
 화면 순서와 JSON 저장 순서가 같으면 Topology를 생략할 수 있습니다. 이때
 Sheet는 문서의 `rows`와 `columns` 순서를 사용합니다.
 
-Topology가 정한 범위는 선택 표시뿐 아니라 구조화된 복사 결과에도
-쓰입니다. 이 범위를 옮길 값으로 만드는 과정은
-[Clipboard](clipboard.md)에서 이어집니다.
+Topology가 정한 줄은 [Selection](selection.md)이 범위로 읽고, 그 줄을
+옮길 값으로 만드는 과정은 [Clipboard](clipboard.md)에서 이어집니다.

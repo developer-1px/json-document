@@ -46,19 +46,18 @@ JSON Document
 |-- API Reference
 `-- Collaboration
     |-- Replica
+    |-- Lifecycle
     |-- Collaborative History
     |-- Text
     |   `-- Contenteditable lease
-    `-- Lifecycle
 
 Editing
+|-- Intent guide
 |-- Intent
-|   |-- Intent guide
-|   `-- Intent
-|-- Selection
-|   `-- Selection Demo
 |-- Topology
 |   `-- Topology Demo
+|-- Selection
+|   `-- Selection Demo
 |-- Clipboard
 |   `-- Clipboard Demo
 |-- History
