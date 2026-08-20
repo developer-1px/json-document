@@ -5,6 +5,10 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Rewrote Why as the background of the editing-platform kernel: the
+  same JSON Document port for Collaboration, session state in Editing,
+  Hands as the genre shelf, and Adapter, Connector, and 제품 화면 as
+  parallel attachments.
 - Renamed the public genre shelf from Editors to Hands. Catalog title,
   navigation group, and home index say Hands; `/editors` stays as the
   path, and `createDocumentEditor` stays as the runtime API.

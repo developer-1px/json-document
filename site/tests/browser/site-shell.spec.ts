@@ -105,8 +105,8 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page).toHaveTitle("json-document Docs - json-document");
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "하나의 변경 형식" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 3, name: "하나의 변경 형식" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 2, name: "값을 다루는 하나의 계약" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "값을 다루는 하나의 계약" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
