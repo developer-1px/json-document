@@ -1,6 +1,6 @@
-# 되돌리기
+# Undo
 
-되돌리기는 값과 선택을 함께 되돌리는 손입니다. Mod+Z는 undo, Mod+Shift+Z는
+Undo는 값과 선택을 함께 되돌리는 손입니다. Mod+Z는 undo, Mod+Shift+Z는
 redo입니다. 버튼은 `canUndo` / `canRedo`를 읽어 꺼집니다.
 
 ```ts

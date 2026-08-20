@@ -77,31 +77,31 @@ Connector
 `-- TanStack Table
 
 Affordance
-|-- 초점
-|-- 캐럿
-|-- 고르기
-|-- 찾아 점프
-|-- 활성화
-|-- 취소
-|-- 접기
-|-- 되돌리기
-|-- 지우기
-|-- 이름 바꾸기
-|-- 살짝 밀기
-|-- 가리키기
-|-- 두 번 누르기
-|-- 세 번 누르기
-|-- 차 메뉴
-|-- 드래그
-|-- 쓸어 담기
-|-- 놓기
-|-- 복사해서 옮기기
-|-- 크기 바꾸기
-|-- 밀기
-|-- 굴리기
-|-- 확대
-|-- 붙이기
-`-- 금지
+|-- Focus
+|-- Caret
+|-- Select
+|-- Typeahead
+|-- Activate
+|-- Escape
+|-- Expand/Collapse
+|-- Undo
+|-- Delete
+|-- Rename
+|-- Nudge
+|-- Hover
+|-- Double-click
+|-- Triple-click
+|-- Context menu
+|-- Drag
+|-- Marquee
+|-- Drop
+|-- Duplicate
+|-- Resize
+|-- Pan
+|-- Scroll
+|-- Zoom
+|-- Snap
+`-- Not-allowed
 ```
 
 ## 규범 우선순위

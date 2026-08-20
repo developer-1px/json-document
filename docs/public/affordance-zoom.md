@@ -1,8 +1,8 @@
-# 확대
+# Zoom
 
 TBD.
 
-확대는 보이는 배율을 바꾸는 손입니다. `zoom-in` / `zoom-out` 커서가
+Zoom은 보이는 배율을 바꾸는 손입니다. `zoom-in` / `zoom-out` 커서가
 이 손을 가리킵니다. CSS `resize`와 무관합니다.
 
 ```ts

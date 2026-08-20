@@ -1,8 +1,8 @@
-# 세 번 누르기
+# Triple-click
 
 TBD.
 
-세 번 누르기는 `UIEvent.detail === 3`입니다. 글에서는 줄 또는 문단을
+Triple-click은 `UIEvent.detail === 3`입니다. 글에서는 줄 또는 문단을
 고릅니다. 항목 목록에서는 보통 쓰지 않습니다.
 
 ```ts

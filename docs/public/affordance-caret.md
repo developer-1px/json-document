@@ -1,8 +1,8 @@
-# 캐럿
+# Caret
 
 TBD.
 
-캐럿은 글 안의 삽입점입니다. 항목 [고르기](affordance-select.md)와 다릅니다.
+Caret은 글 안의 삽입점입니다. 항목 [Select](affordance-select.md)와 다릅니다.
 `text` / `vertical-text` 커서가 이 손을 가리킵니다. 클릭은 삽입점을 두고,
 드래그는 글 범위를 고릅니다.
 

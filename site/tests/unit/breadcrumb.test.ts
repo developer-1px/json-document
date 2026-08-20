@@ -91,12 +91,12 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/affordance/select")).toEqual([
       "Overview:/",
       "Affordance:/docs/affordance",
-      "고르기:/docs/affordance/select",
+      "Select:/docs/affordance/select",
     ]);
     expect(trail("/widgets/toolbar")).toEqual([
       "Overview:/",
       "Affordance:/docs/affordance",
-      "되돌리기:/docs/affordance/history",
+      "Undo:/docs/affordance/history",
       "Toolbar:/widgets/toolbar",
     ]);
   });

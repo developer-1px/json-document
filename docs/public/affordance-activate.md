@@ -1,8 +1,8 @@
-# 활성화
+# Activate
 
 TBD.
 
-활성화는 고른 대상의 기본 동작을 실행하는 손입니다. `pointer` 커서가 이
+Activate는 고른 대상의 기본 동작을 실행하는 손입니다. `pointer` 커서가 이
 손을 가리킵니다. 클릭과 Enter·Space는 같은 손입니다.
 
 ```ts

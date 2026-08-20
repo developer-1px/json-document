@@ -1,10 +1,10 @@
-# 초점
+# Focus
 
 TBD.
 
-초점은 키보드의 포인터입니다. Tab과 Shift+Tab은 컴포넌트 사이로 옮기고,
-화살표·Home·End는 컴포넌트 안에서 옮깁니다. 초점과 [고르기](affordance-select.md)는
-다릅니다. 초점 표시는 항상 보여야 하고, 선택 표시와 겹치면 안 됩니다.
+Focus는 키보드의 포인터입니다. Tab과 Shift+Tab은 컴포넌트 사이로 옮기고,
+화살표·Home·End는 컴포넌트 안에서 옮깁니다. Focus와 [Select](affordance-select.md)는
+다릅니다. Focus 표시는 항상 보여야 하고, 선택 표시와 겹치면 안 됩니다.
 
 ```ts
 import { /* TBD */ } from "@interactive-os/json-document-affordance";

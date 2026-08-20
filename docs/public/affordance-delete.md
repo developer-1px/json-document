@@ -1,8 +1,8 @@
-# 지우기
+# Delete
 
 TBD.
 
-지우기는 고른 대상을 없애는 손입니다. `resolveAffordanceKey`는 이미
+Delete는 고른 대상을 없애는 손입니다. `resolveAffordanceKey`는 이미
 Delete를 `delete` command로 닫습니다. Backspace와의 차이, 칸 비우기와
 항목 제거의 차이는 아직 닫히지 않았습니다.
 

@@ -1,9 +1,9 @@
-# 굴리기
+# Scroll
 
 TBD.
 
-굴리기는 휠로 보이는 내용을 옮기는 손입니다. 드래그 중 가장자리에 닿으면
-자동으로 더 굴러갑니다. [확대](affordance-zoom.md)의 Mod+휠과 구분합니다.
+Scroll은 휠로 보이는 내용을 옮기는 손입니다. 드래그 중 가장자리에 닿으면
+자동으로 더 굴러갑니다. [Zoom](affordance-zoom.md)의 Mod+휠과 구분합니다.
 
 ```ts
 import { /* TBD */ } from "@interactive-os/json-document-affordance";

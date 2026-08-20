@@ -1,9 +1,9 @@
-# 쓸어 담기
+# Marquee
 
 TBD.
 
-쓸어 담기는 빈 평면에서 사각형(또는 올가미)을 끌어 여러 대상을 집는
-손입니다. 고른 대상을 옮기는 [드래그](affordance-drag.md)와 다릅니다.
+Marquee는 빈 평면에서 사각형(또는 올가미)을 끌어 여러 대상을 집는
+손입니다. 고른 대상을 옮기는 [Drag](affordance-drag.md)와 다릅니다.
 `crosshair` / `cell` 커서가 이 손을 가리킬 수 있습니다.
 
 ```ts

@@ -1,10 +1,10 @@
-# 살짝 밀기
+# Nudge
 
 TBD.
 
-살짝 밀기는 고른 대상을 키보드로 조금 옮기는 손입니다. 화살표는 한 단위,
+Nudge는 고른 대상을 키보드로 조금 옮기는 손입니다. 화살표는 한 단위,
 Shift+화살표는 큰 단위입니다. 키를 누르면 반복됩니다. 항목 이웃으로 초점을
-옮기는 [고르기](affordance-select.md)와 다릅니다.
+옮기는 [Select](affordance-select.md)와 다릅니다.
 
 ```ts
 import { /* TBD */ } from "@interactive-os/json-document-affordance";

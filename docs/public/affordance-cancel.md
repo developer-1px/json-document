@@ -1,8 +1,8 @@
-# 취소
+# Escape
 
 TBD.
 
-취소는 진행 중인 손과 임시 UI를 버리는 손입니다. Escape는 메뉴·대화·드래그를
+Escape는 진행 중인 손과 임시 UI를 버리는 손입니다. Escape는 메뉴·대화·드래그를
 닫고, `pointercancel`은 포인터 제스처를 중단합니다.
 
 ```ts
