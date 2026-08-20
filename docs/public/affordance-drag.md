@@ -25,6 +25,16 @@ if (dragShouldCommit(offset)) {
 
 ## TBD
 
+```ts
+import { dragKeyboardAffordance } from "@interactive-os/json-document-affordance";
+
+dragKeyboardAffordance({ key: "ArrowDown", grab: true });
+// { type: "nudge", dy: 1 }
+
+dragKeyboardAffordance({ key: "Escape", grab: true });
+// "cancel"
+```
+
 - [Drop](affordance-drop.md) 대상과 `no-drop`
 - [Duplicate](affordance-copy-drag.md)
 - 키보드만으로 옮기기 (APG는 드래그의 키보드 대안을 요구함)

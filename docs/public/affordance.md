@@ -6,7 +6,8 @@
 
 `@interactive-os/json-document-affordance`가 그 계약을 닫습니다. 단축키를
 제품마다 바꾸지 않습니다. 구현이 없는 손은 TBD로 남기고, 화면 위젯으로
-대체하지 않습니다.
+대체하지 않습니다. TBD 페이지의 코드는 사용법 명세입니다. 패키지에
+아직 없습니다.
 
 ```sh
 npm i @interactive-os/json-document-affordance
@@ -39,32 +40,32 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 
 | Affordance | API | Hand |
 | --- | --- | --- |
-| [Focus](affordance-focus.md) | TBD | Tab 사이, 화살표 안, 초점 ≠ 선택 |
-| [Caret](affordance-caret.md) | TBD | I-beam 삽입점, 글 범위 |
-| [Typeahead](affordance-typeahead.md) | TBD | 인쇄 글쇠 prefix 점프 |
-| [Activate](affordance-activate.md) | TBD | Enter, Space, 기본 클릭 |
-| [Escape](affordance-cancel.md) | TBD | Escape, pointercancel |
-| [Delete](affordance-delete.md) | TBD | Delete, Backspace. Delete chord는 이미 닫힘 |
-| [Rename](affordance-rename.md) | TBD | F2, 느린 두 번 누르기 |
-| [Nudge](affordance-nudge.md) | TBD | 화살표 한 단위, Shift 큰 단위 |
+| [Focus](affordance-focus.md) | `focusAffordance` | Tab 사이, 화살표 안, 초점 ≠ 선택 |
+| [Caret](affordance-caret.md) | `caretAffordance`, `caretCursor` | I-beam 삽입점, 글 범위 |
+| [Typeahead](affordance-typeahead.md) | `typeaheadAffordance` | 인쇄 글쇠 prefix 점프 |
+| [Activate](affordance-activate.md) | `activateAffordance` | Enter, Space, 기본 클릭 |
+| [Escape](affordance-cancel.md) | `escapeAffordance` | Escape, pointercancel |
+| [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace. Delete chord는 이미 닫힘 |
+| [Rename](affordance-rename.md) | `renameAffordance` | F2, 느린 두 번 누르기 |
+| [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
 
 ## 마우스 TBD
 
 | Affordance | API | Hand |
 | --- | --- | --- |
-| [Hover](affordance-hover.md) | TBD | hover, 툴팁 지연, 커서 교체 |
-| [Double-click](affordance-double-click.md) | TBD | `detail` 2 |
-| [Triple-click](affordance-triple-click.md) | TBD | `detail` 3 |
-| [Context menu](affordance-context-menu.md) | TBD | 오른쪽 클릭, Shift+F10, Menu |
-| [Marquee](affordance-marquee.md) | TBD | 빈 곳에서 사각형으로 여러 대상 |
-| [Drop](affordance-drop.md) | TBD | drop 대상, no-drop |
-| [Duplicate](affordance-copy-drag.md) | TBD | Alt/Option 드래그 복제 |
-| [Resize](affordance-resize.md) | TBD | 모서리, 칸, 분할선 |
-| [Pan](affordance-pan.md) | TBD | Space+드래그, grab |
-| [Scroll](affordance-scroll.md) | TBD | wheel, autoscroll |
-| [Zoom](affordance-zoom.md) | TBD | Mod+휠, +/− |
-| [Snap](affordance-snap.md) | TBD | 그리드·가이드, 수정 키로 해제 |
-| [Not-allowed](affordance-forbid.md) | TBD | not-allowed, no-drop |
+| [Hover](affordance-hover.md) | `hoverAffordance`, `hoverCursor` | hover, 툴팁 지연, 커서 교체 |
+| [Double-click](affordance-double-click.md) | `clickCountAffordance` | `detail` 2 |
+| [Triple-click](affordance-triple-click.md) | `clickCountAffordance` | `detail` 3 |
+| [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, Shift+F10, Menu |
+| [Marquee](affordance-marquee.md) | `marqueeRect`, `marqueeShouldCommit` | 빈 곳에서 사각형으로 여러 대상 |
+| [Drop](affordance-drop.md) | `dropAffordance` | drop 대상, no-drop |
+| [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |
+| [Resize](affordance-resize.md) | `resizeCursor`, `resizeOffset` | 모서리, 칸, 분할선 |
+| [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
+| [Scroll](affordance-scroll.md) | `wheelAffordance`, `autoscrollAffordance` | wheel, autoscroll |
+| [Zoom](affordance-zoom.md) | `zoomAffordance`, `zoomCursor` | Mod+휠, +/− |
+| [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
+| [Not-allowed](affordance-forbid.md) | `forbiddenCursor` | not-allowed, no-drop |
 
 ## 커서가 닫는 손
 

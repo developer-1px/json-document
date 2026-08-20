@@ -31,9 +31,19 @@ replace인지 extend인지를 닫습니다.
 
 ## TBD
 
+```ts
+import { selectAllAffordance } from "@interactive-os/json-document-affordance";
+
+selectAllAffordance({ allSelected: false });
+// "select-all"
+
+selectAllAffordance({ allSelected: true });
+// "clear"
+```
+
 - Mod+A Select all 토글
-- Home / End / PageUp / PageDown
-- selection follows focus vs focus-only move
+- Home / End / PageUp / PageDown은 `resolveAffordanceKey`의 boundary
+- selection follows focus vs focus-only move는 [Focus](affordance-focus.md)
 - 글 단어·줄 범위는 [Double-click](affordance-double-click.md)·
   [Triple-click](affordance-triple-click.md)·[Caret](affordance-caret.md)
 - 빈 평면의 여러 대상은 [Marquee](affordance-marquee.md)

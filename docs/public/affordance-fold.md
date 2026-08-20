@@ -26,6 +26,16 @@ Topology 이웃으로 보냅니다.
 
 ## TBD
 
+```ts
+import { disclosureAffordance } from "@interactive-os/json-document-affordance";
+
+disclosureAffordance({ key: "Enter", expanded: false });
+// "expand"
+
+disclosureAffordance({ key: "Enter", expanded: true });
+// "collapse"
+```
+
 - Accordion / Disclosure의 Enter·Space 접힘
 - `aria-expanded`와 호스트 접힘 집합의 동기
 - 가로 나무에서 위·아래가 접힘인지 이웃인지

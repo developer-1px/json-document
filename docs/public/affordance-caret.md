@@ -7,15 +7,33 @@ Caret은 글 안의 삽입점입니다. 항목 [Select](affordance-select.md)와
 드래그는 글 범위를 고릅니다.
 
 ```ts
-import { /* TBD */ } from "@interactive-os/json-document-affordance";
+import { caretAffordance, caretCursor } from "@interactive-os/json-document-affordance";
+
+caretCursor("horizontal");
+// "text"
+
+caretCursor("vertical");
+// "vertical-text"
+
+caretAffordance({ key: "ArrowRight", shiftKey: false, altKey: false });
+// { type: "move", unit: "character", direction: "right", operation: "replace" }
+
+caretAffordance({ key: "ArrowRight", shiftKey: true, altKey: false });
+// { type: "move", unit: "character", direction: "right", operation: "extend" }
+
+caretAffordance({ key: "ArrowRight", shiftKey: false, altKey: true });
+// { type: "move", unit: "word", direction: "right", operation: "replace" }
+
+caretAffordance({ type: "pointer", detail: 1 });
+// { type: "place" }
 ```
+
+호스트는 I-beam과 글 기하를 그립니다. 값 삽입은 Hands입니다.
 
 닫는 손:
 - 클릭: 삽입점
 - 드래그: 글 범위
 - 화살표 / Home / End: 글자·줄 끝
-- IME composition은 삽입 경로. 값 편집 자체는 Hands
-
-호스트는 I-beam과 글 기하를 그립니다. 어포던스는 삽입점과 글 범위 손을 닫습니다.
+- IME composition은 삽입 경로
 
 근거: [CSS UI cursor `text`](https://www.w3.org/TR/css-ui-4/#cursor), [UI Events select](https://www.w3.org/TR/uievents/)
