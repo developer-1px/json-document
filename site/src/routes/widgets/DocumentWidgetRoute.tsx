@@ -5,10 +5,10 @@ import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  applyAffordance,
   keyboardCommandFrom,
   pointerSelect,
   resolveAffordanceKey,
-  selectOperationFrom,
 } from "@interactive-os/json-document-affordance";
 import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
@@ -33,7 +33,6 @@ export function DocumentWidgetRoute() {
     onSelect: (blockId, mode) => {
       editor.dispatch({ type: "selection.set", blockId, mode });
     },
-    operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
     keyboard: {
       resolve: (stroke) => {
         const result = resolveAffordanceKey(stroke);
@@ -64,7 +63,7 @@ export function DocumentWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Document"
-      description="The document line reads selected keys, focus, and text offset. It does not own insert or clipboard."
+      description="Select uses the same { hand, cursor, commit } result. Insert and clipboard stay off this layer."
       illustration="sleep"
       widgetLabel="Document"
       widget={(
@@ -82,6 +81,14 @@ export function DocumentWidgetRoute() {
               role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(block.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    editor.dispatch({ type: "selection.set", blockId: block.id, mode: hand.operation });
+                  },
+                });
+              }}
             >
               {block.text}
             </SelectableItem>

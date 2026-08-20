@@ -4,12 +4,13 @@ import { useEditing } from "@interactive-os/json-document-react";
 import {
   applyAffordance,
   dragAffordance,
+  escapeAffordance,
   forbiddenCursor,
+  marqueeAffordance,
   marqueeRect,
   nudgeAffordance,
   panAffordance,
   pointerSelect,
-  selectOperationFrom,
   snapAffordance,
 } from "@interactive-os/json-document-affordance";
 import { SelectableItem } from "../../shared/ui/interactive";
@@ -60,7 +61,6 @@ export function CanvasWidgetRoute() {
         mode: mode === "extend" ? "add" : mode,
       });
     },
-    operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
   });
   const document = editing.snapshot.value as ObjectDocument;
 
@@ -83,9 +83,9 @@ export function CanvasWidgetRoute() {
           });
         },
       });
-      const ids = selectOperationFrom(result) === "replace"
-        ? [objectId]
-        : [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])];
+      const ids = result.hand?.type === "select" && result.hand.operation !== "replace"
+        ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
+        : [objectId];
       setDrag({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
       return;
     }
@@ -129,11 +129,16 @@ export function CanvasWidgetRoute() {
       return;
     }
     if (marquee) {
-      const rect = marqueeRect(
-        { x: marquee.originX, y: marquee.originY },
-        { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY },
-      );
-      setMarquee({ ...marquee, ...rect });
+      const origin = { x: marquee.originX, y: marquee.originY };
+      const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+      applyAffordance(marqueeAffordance(origin, point), {
+        cursor: (cursor) => {
+          event.currentTarget.style.cursor = cursor;
+        },
+        hand: () => {
+          setMarquee({ ...marquee, ...marqueeRect(origin, point) });
+        },
+      });
     }
   }
 
@@ -156,14 +161,26 @@ export function CanvasWidgetRoute() {
       return;
     }
     if (marquee) {
+      const origin = { x: marquee.originX, y: marquee.originY };
+      const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+      const result = marqueeAffordance(origin, point);
       const hits = document.objects
         .filter((object) => intersects(marquee, object))
         .map((object) => object.id);
-      if (hits.length > 0) {
-        editor.dispatch({
-          type: "selection.set",
-          objectIds: hits,
-          mode: selectOperationFrom(pointerSelect(event)) === "extend" ? "add" : "replace",
+      if (result.commit && hits.length > 0) {
+        applyAffordance(result, {
+          hand: () => {
+            applyAffordance(pointerSelect(event), {
+              hand: (hand) => {
+                if (hand.type !== "select") return;
+                editor.dispatch({
+                  type: "selection.set",
+                  objectIds: hits,
+                  mode: hand.operation === "extend" ? "add" : hand.operation === "toggle" ? "toggle" : "replace",
+                });
+              },
+            });
+          },
         });
       }
       setMarquee(null);
@@ -175,6 +192,15 @@ export function CanvasWidgetRoute() {
       setSpace(true);
       event.preventDefault();
     }
+    applyAffordance(escapeAffordance(event), {
+      hand: (hand) => {
+        if (hand.type !== "cancel") return;
+        setDrag(null);
+        setMarquee(null);
+        setPan((current) => ({ ...current, active: false }));
+        event.preventDefault();
+      },
+    });
     applyAffordance(nudgeAffordance(event), {
       hand: (hand) => {
         if (hand.type !== "nudge") return;
@@ -203,6 +229,16 @@ export function CanvasWidgetRoute() {
           onPointerDown={(event) => handlePointerDown(event)}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerCancel={(event) => {
+            applyAffordance(escapeAffordance(event), {
+              hand: (hand) => {
+                if (hand.type !== "cancel") return;
+                setDrag(null);
+                setMarquee(null);
+                setPan((current) => ({ ...current, active: false }));
+              },
+            });
+          }}
           onKeyDown={onKeyDown}
           onKeyUp={(event) => {
             if (event.key === " ") setSpace(false);

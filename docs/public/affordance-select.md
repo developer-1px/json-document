@@ -7,10 +7,7 @@ Select는 대상을 집는 손입니다. 클릭은 그 대상으로 바꾸고, S
 ```ts
 import {
   applyAffordance,
-  keyboardCommandFrom,
   pointerSelect,
-  resolveAffordanceKey,
-  selectOperationFrom,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerDown(event: PointerEvent, itemId: string) {
@@ -22,18 +19,6 @@ function onPointerDown(event: PointerEvent, itemId: string) {
     },
   });
 }
-
-const editing = useEditing({
-  source: editor,
-  operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
-  onSelect: (itemId, mode) => {
-    editor.dispatch({ type: "selection.set", itemId, mode });
-  },
-  keyboard: {
-    resolve: (stroke) => keyboardCommandFrom(resolveAffordanceKey(stroke)),
-    neighbor: (key, command) => moveLinePoint(ids, key, command.direction),
-  },
-});
 ```
 
 호스트는 보이는 키와 장르 Intent만 넘깁니다. keymap을 덮어쓰지 않습니다.

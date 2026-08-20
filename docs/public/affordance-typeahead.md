@@ -6,22 +6,26 @@ Typeahead는 인쇄 글쇠로 목록·나무에서 이름으로 건너뛰는 손
 그 글자로 시작하는 다음 항목, 빠르게 이어 치면 그 문자열로 시작합니다.
 
 ```ts
-import { typeaheadAffordance } from "@interactive-os/json-document-affordance";
+import {
+  applyAffordance,
+  typeaheadAffordance,
+} from "@interactive-os/json-document-affordance";
 
 function onKeyDown(event: KeyboardEvent) {
-  const hand = typeaheadAffordance({
+  applyAffordance(typeaheadAffordance({
     buffer,
     key: event.key,
     elapsedMs: event.timeStamp - lastType,
     names: items.map((item) => item.label),
-    from: focusKey,
+    from: focusedLabel,
+  }), {
+    hand: (hand) => {
+      if (hand.type !== "typeahead") return;
+      setBuffer(hand.buffer);
+      const itemId = items.find((item) => item.label === hand.name)?.id;
+      if (itemId) editor.dispatch({ type: "selection.set", itemId, mode: "replace" });
+    },
   });
-  setBuffer(hand.buffer);
-  lastType = event.timeStamp;
-  if (hand.name) {
-    const itemId = items.find((item) => item.label === hand.name)?.id;
-    if (itemId) setFocusKey(itemId);
-  }
 }
 ```
 

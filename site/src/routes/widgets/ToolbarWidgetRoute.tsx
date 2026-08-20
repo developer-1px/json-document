@@ -5,9 +5,10 @@ import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  applyAffordance,
   historyAffordance,
-  historyCommandsFrom,
   keyboardCommandFrom,
+  pointerSelect,
   resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
 import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
@@ -55,12 +56,20 @@ export function ToolbarWidgetRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as OrderDocument;
-  const commands = historyCommandsFrom(historyAffordance(snapshot));
+  let commands = {
+    undo: { name: "undo" as const, disabled: true },
+    redo: { name: "redo" as const, disabled: true },
+  };
+  applyAffordance(historyAffordance(snapshot), {
+    hand: (hand) => {
+      if (hand.type === "history") commands = { undo: hand.undo, redo: hand.redo };
+    },
+  });
 
   return (
     <WidgetDemoFrame
       title="Toolbar"
-      description="The toolbar reads canUndo and canRedo. It does not own the list or the keymap."
+      description="Undo reads { hand, cursor, commit } from the same affordance result as Select."
       illustration="clipboard"
       widgetLabel="Toolbar"
       widget={(
@@ -85,6 +94,14 @@ export function ToolbarWidgetRoute() {
               role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(item.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    editor.dispatch({ type: "selection.set", itemId: item.id, mode: hand.operation });
+                  },
+                });
+              }}
             >
               {item.label}
             </SelectableItem>

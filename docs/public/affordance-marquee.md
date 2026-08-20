@@ -8,17 +8,31 @@ Marquee는 빈 평면에서 사각형을 끌어 여러 대상을 집는 손입�
 
 ```ts
 import {
+  applyAffordance,
+  marqueeAffordance,
   marqueeRect,
-  marqueeShouldCommit,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
 
+function onPointerMove(event: PointerEvent) {
+  const point = { x: event.offsetX, y: event.offsetY };
+  applyAffordance(marqueeAffordance(origin, point), {
+    cursor: (cursor) => {
+      event.currentTarget.style.cursor = cursor;
+    },
+    hand: () => setRect(marqueeRect(origin, point)),
+  });
+}
+
 function onPointerUp(event: PointerEvent) {
-  const rect = marqueeRect(origin, { x: event.clientX, y: event.clientY });
-  if (!marqueeShouldCommit(rect)) return;
-  const objectIds = hostHits(rect);
-  const mode = pointerSelect(event);
-  editor.dispatch({ type: "selection.set", objectIds, mode });
+  const result = marqueeAffordance(origin, { x: event.offsetX, y: event.offsetY });
+  if (!result.commit) return;
+  applyAffordance(pointerSelect(event), {
+    hand: (hand) => {
+      if (hand.type !== "select") return;
+      editor.dispatch({ type: "selection.set", objectIds: hostHits(rect), mode: hand.operation });
+    },
+  });
 }
 ```
 

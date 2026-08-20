@@ -6,10 +6,10 @@ import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
+  escapeAffordance,
   keyboardCommandFrom,
   pointerSelect,
   resolveAffordanceKey,
-  selectOperationFrom,
   typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
 import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
@@ -37,7 +37,6 @@ export function ListboxWidgetRoute() {
     onSelect: (itemId, mode) => {
       editor.dispatch({ type: "selection.set", itemId, mode });
     },
-    operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
     keyboard: {
       resolve: (stroke) => {
         const result = resolveAffordanceKey(stroke);
@@ -83,6 +82,12 @@ export function ListboxWidgetRoute() {
       event.preventDefault();
       return;
     }
+    applyAffordance(escapeAffordance(event), {
+      hand: (hand) => {
+        if (hand.type !== "cancel") return;
+        setTypeahead({ buffer: "", at: 0 });
+      },
+    });
     editing.getKeyDownHandler()(event);
   }
 
@@ -107,6 +112,14 @@ export function ListboxWidgetRoute() {
               role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(item.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    editor.dispatch({ type: "selection.set", itemId: item.id, mode: hand.operation });
+                  },
+                });
+              }}
             >
               {item.label}
             </SelectableItem>

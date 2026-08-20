@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 import {
   applyAffordance,
   dragAffordance,
+  dropAffordance,
+  escapeAffordance,
   historyAffordance,
   keyboardCommandFrom,
   pointerSelect,
@@ -115,5 +117,20 @@ describe("snapAffordance", () => {
   test("snaps to the grid unless disabled", () => {
     expect(snapAffordance({ x: 47, y: 51 }, { grid: 8 }).hand).toEqual({ type: "translate", dx: 48, dy: 48 });
     expect(snapAffordance({ x: 47, y: 51 }, { grid: 8, disable: true }).hand).toEqual({ type: "translate", dx: 47, dy: 51 });
+  });
+});
+
+describe("escapeAffordance", () => {
+  test("cancels Escape and pointercancel", () => {
+    expect(escapeAffordance({ key: "Escape" }).hand).toEqual({ type: "cancel" });
+    expect(escapeAffordance({ type: "pointercancel" }).hand).toEqual({ type: "cancel" });
+    expect(escapeAffordance({ key: "Enter" }).hand).toBeNull();
+  });
+});
+
+describe("dropAffordance", () => {
+  test("forbids a drop the host cannot accept", () => {
+    expect(dropAffordance({ canDrop: false })).toEqual({ hand: null, cursor: "no-drop", commit: false });
+    expect(dropAffordance({ canDrop: true }).hand).toEqual({ type: "move-drop" });
   });
 });

@@ -6,17 +6,27 @@ Escape는 진행 중인 손과 임시 UI를 버리는 손입니다. Escape 키�
 드래그를 닫고, `pointercancel`은 포인터 제스처를 중단합니다.
 
 ```ts
-import { escapeAffordance } from "@interactive-os/json-document-affordance";
+import {
+  applyAffordance,
+  escapeAffordance,
+} from "@interactive-os/json-document-affordance";
 
 function onKeyDown(event: KeyboardEvent) {
-  if (escapeAffordance(event) === "cancel") {
-    setMenu(null);
-    drag = null;
-  }
+  applyAffordance(escapeAffordance(event), {
+    hand: (hand) => {
+      if (hand.type !== "cancel") return;
+      setMarquee(null);
+      setDrag(null);
+    },
+  });
 }
 
 function onPointerCancel(event: PointerEvent) {
-  if (escapeAffordance(event) === "cancel") drag = null;
+  applyAffordance(escapeAffordance(event), {
+    hand: (hand) => {
+      if (hand.type === "cancel") setDrag(null);
+    },
+  });
 }
 ```
 

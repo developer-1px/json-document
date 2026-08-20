@@ -5,10 +5,10 @@ import { gridBoundary, moveGridPoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  applyAffordance,
   keyboardCommandFrom,
   pointerSelect,
   resolveAffordanceKey,
-  selectOperationFrom,
 } from "@interactive-os/json-document-affordance";
 import { gridCellProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
@@ -37,7 +37,6 @@ export function GridWidgetRoute() {
       const { rowId, columnId } = parseCellKey(key);
       editor.dispatch({ type: "selection.set", rowId, columnId, mode });
     },
-    operationFromEvent: (event) => selectOperationFrom(pointerSelect(event)),
     keyboard: {
       resolve: (stroke) => {
         const result = resolveAffordanceKey(stroke);
@@ -80,7 +79,7 @@ export function GridWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Grid"
-      description="The grid reads topology and selected cells. Pointer and keyboard selection come from the affordance package."
+      description="Select uses the same { hand, cursor, commit } result. Topology stays on the host."
       illustration="braces"
       widgetLabel="Grid"
       widget={(
@@ -110,6 +109,19 @@ export function GridWidgetRoute() {
                     key={column.id}
                     className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
                     {...gridCellProps(editing.getItem(cellKey(row.id, column.id)))}
+                    onClick={(event) => {
+                      applyAffordance(pointerSelect(event), {
+                        hand: (hand) => {
+                          if (hand.type !== "select") return;
+                          editor.dispatch({
+                            type: "selection.set",
+                            rowId: row.id,
+                            columnId: column.id,
+                            mode: hand.operation,
+                          });
+                        },
+                      });
+                    }}
                   >
                     {String(row.cells[column.id] ?? "")}
                   </SelectableItem>

@@ -6,23 +6,26 @@ Drop은 [Drag](affordance-drag.md)의 끝입니다. 어디에 둘 수 있는지�
 커서가 말하고, 못 두는 자리는 `no-drop`입니다.
 
 ```ts
-import { dropAffordance, dragOperation } from "@interactive-os/json-document-affordance";
+import {
+  applyAffordance,
+  dropAffordance,
+} from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
-  const drop = dropAffordance({
-    canDrop: hostCanDrop(event),
-    operation: dragOperation(event),
+  applyAffordance(dropAffordance({ canDrop: hostCanDrop(event) }), {
+    cursor: (cursor) => {
+      event.currentTarget.style.cursor = cursor;
+    },
   });
-  event.currentTarget.style.cursor = drop.cursor;
 }
 
 function onPointerUp(event: PointerEvent, cardId: string, columnId: string) {
-  const drop = dropAffordance({
-    canDrop: hostCanDrop(event),
-    operation: dragOperation(event),
+  applyAffordance(dropAffordance({ canDrop: hostCanDrop(event) }), {
+    hand: (hand) => {
+      if (hand.type !== "move-drop") return;
+      editor.dispatch({ type: "card.move", cardId, columnId });
+    },
   });
-  if (!drop.accept) return;
-  editor.dispatch({ type: "card.move", cardId, columnId });
 }
 ```
 

@@ -6,31 +6,35 @@ Expand/Collapse는 나무에서 가지를 접고 펼치는 손입니다. 오른�
 
 ```ts
 import {
-  resolveAffordanceKey,
+  applyAffordance,
   treeAffordance,
 } from "@interactive-os/json-document-affordance";
 
-function onKeyDown(event: KeyboardEvent, nodeId: string) {
-  const command = resolveAffordanceKey(event);
-  if (command?.type !== "move") return;
-  const hand = treeAffordance(command, {
+applyAffordance(
+  treeAffordance(command, {
     expanded: expanded.has(nodeId),
     hasChildren: hasChildren(nodeId),
-  });
-  if (hand.type === "expand") {
-    setExpanded((current) => new Set(current).add(nodeId));
-    return;
-  }
-  if (hand.type === "collapse") {
-    setExpanded((current) => {
-      const next = new Set(current);
-      next.delete(nodeId);
-      return next;
-    });
-    return;
-  }
-  editor.dispatch({ type: "selection.set", nodeId, topology, mode: "replace" });
-}
+  }),
+  {
+    hand: (hand) => {
+      if (hand.type === "expand") {
+        setExpanded((current) => new Set(current).add(nodeId));
+        return;
+      }
+      if (hand.type === "collapse") {
+        setExpanded((current) => {
+          const next = new Set(current);
+          next.delete(nodeId);
+          return next;
+        });
+        return;
+      }
+      if (hand.type === "move") {
+        editor.dispatch({ type: "selection.set", nodeId, topology, mode: "replace" });
+      }
+    },
+  },
+);
 ```
 
 접힘 상태는 호스트가 가진 화면 상태입니다. editor는 보이는 줄 Topology만

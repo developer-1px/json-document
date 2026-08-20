@@ -5,20 +5,22 @@ redo입니다. 버튼은 `canUndo` / `canRedo`를 읽어 꺼집니다.
 
 ```ts
 import {
+  applyAffordance,
   historyAffordance,
-  resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
 
-const commands = historyAffordance({
+let commands = {
+  undo: { name: "undo" as const, disabled: true },
+  redo: { name: "redo" as const, disabled: true },
+};
+applyAffordance(historyAffordance({
   canUndo: editor.snapshot.canUndo,
   canRedo: editor.snapshot.canRedo,
+}), {
+  hand: (hand) => {
+    if (hand.type === "history") commands = { undo: hand.undo, redo: hand.redo };
+  },
 });
-
-function onKeyDown(event: KeyboardEvent) {
-  const command = resolveAffordanceKey(event);
-  if (command?.type === "undo") editor.undo();
-  if (command?.type === "redo") editor.redo();
-}
 
 <button
   disabled={commands.undo.disabled}

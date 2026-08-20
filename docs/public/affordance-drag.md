@@ -6,29 +6,34 @@ Drag는 고른 대상을 포인터로 옮기는 손입니다. 누른 점에서 �
 
 ```ts
 import {
-  dragOffset,
-  dragShouldCommit,
-  pointerSelect,
+  applyAffordance,
+  dragAffordance,
 } from "@interactive-os/json-document-affordance";
 
-function onPointerDown(event: PointerEvent, objectId: string) {
-  const mode = pointerSelect(event);
-  editor.dispatch({ type: "selection.set", objectIds: [objectId], mode });
-  event.currentTarget.setPointerCapture(event.pointerId);
-  drag = { origin: { x: event.clientX, y: event.clientY } };
+function onPointerMove(event: PointerEvent) {
+  applyAffordance(
+    dragAffordance(origin, { x: event.clientX, y: event.clientY }),
+    {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+      hand: (hand) => {
+        if (hand.type === "translate") setOffset({ dx: hand.dx, dy: hand.dy });
+      },
+    },
+  );
 }
 
 function onPointerUp(event: PointerEvent) {
-  const offset = dragOffset(drag.origin, { x: event.clientX, y: event.clientY });
-  if (dragShouldCommit(offset)) {
+  const result = dragAffordance(origin, { x: event.clientX, y: event.clientY });
+  if (result.commit && result.hand?.type === "translate") {
     editor.dispatch({
       type: "object.translate",
-      objectIds: editor.selectedObjects.map((object) => object.id),
-      dx: offset.dx,
-      dy: offset.dy,
+      objectIds,
+      dx: result.hand.dx,
+      dy: result.hand.dy,
     });
   }
-  drag = null;
 }
 ```
 
