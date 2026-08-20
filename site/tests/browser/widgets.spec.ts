@@ -5,15 +5,17 @@ test("Widgets catalog redirects to affordance usage", async ({ page }) => {
   await expect(page).toHaveURL(/\/docs\/affordance$/);
   await expect(page.getByRole("heading", { level: 1, name: "어포던스" })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("link", { name: "고르기" })).toHaveAttribute("href", "/docs/affordance/select");
-  await expect(navigation.getByRole("link", { name: "접기" })).toHaveAttribute("href", "/docs/affordance/fold");
-  await expect(navigation.getByRole("link", { name: "드래그" })).toHaveAttribute("href", "/docs/affordance/drag");
-  await expect(navigation.getByRole("link", { name: "되돌리기" })).toHaveAttribute("href", "/docs/affordance/history");
+  await expect(navigation.getByRole("link", { name: "고르기", exact: true })).toHaveAttribute("href", "/docs/affordance/select");
+  await expect(navigation.getByRole("link", { name: "접기", exact: true })).toHaveAttribute("href", "/docs/affordance/fold");
+  await expect(navigation.getByRole("link", { name: "드래그", exact: true })).toHaveAttribute("href", "/docs/affordance/drag");
+  await expect(navigation.getByRole("link", { name: "되돌리기", exact: true })).toHaveAttribute("href", "/docs/affordance/history");
   const content = page.getByRole("main");
-  await expect(content.getByRole("link", { name: "고르기" })).toHaveAttribute("href", "/docs/affordance/select");
-  await expect(content.getByRole("link", { name: "접기" })).toHaveAttribute("href", "/docs/affordance/fold");
-  await expect(content.getByRole("link", { name: "드래그" })).toHaveAttribute("href", "/docs/affordance/drag");
-  await expect(content.getByRole("link", { name: "되돌리기" })).toHaveAttribute("href", "/docs/affordance/history");
+  await expect(content.getByRole("link", { name: "고르기" }).first()).toHaveAttribute("href", "/docs/affordance/select");
+  await expect(content.getByRole("link", { name: "접기" }).first()).toHaveAttribute("href", "/docs/affordance/fold");
+  await expect(content.getByRole("link", { name: "드래그" }).first()).toHaveAttribute("href", "/docs/affordance/drag");
+  await expect(content.getByRole("link", { name: "되돌리기" }).first()).toHaveAttribute("href", "/docs/affordance/history");
+  await expect(content.getByRole("link", { name: "초점" }).first()).toHaveAttribute("href", "/docs/affordance/focus");
+  await expect(content.getByRole("link", { name: "크기 바꾸기" }).first()).toHaveAttribute("href", "/docs/affordance/resize");
 });
 
 test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {

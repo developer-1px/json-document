@@ -2,12 +2,11 @@
 
 제품의 화면은 호스트가 그립니다. json-document가 최전선에서 주는 것은
 리스트박스나 나무가 아니라, 30년 동안 같은 손으로 학습된 키보드와
-마우스 행동입니다.
+마우스와 커서입니다.
 
-`@interactive-os/json-document-affordance`가 그 계약을 닫습니다. Shift는
-범위를 늘리고, Mod는 토글하고, 나무는 왼쪽이 접힘·오른쪽이 펼침이며,
-Delete는 고른 것을 지우고, Mod+Z는 되돌립니다. 단축키를 제품마다 바꾸지
-않습니다.
+`@interactive-os/json-document-affordance`가 그 계약을 닫습니다. 단축키를
+제품마다 바꾸지 않습니다. 구현이 없는 손은 TBD로 남기고, 화면 위젯으로
+대체하지 않습니다.
 
 ```sh
 npm i @interactive-os/json-document-affordance
@@ -17,6 +16,18 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 번역합니다. Connector는 구독과 질의를 붙입니다. 어포던스는 그 command가
 무슨 손인지를 정합니다. 호스트는 마크업과 장르 Intent만 가집니다.
 
+이 층이 닫히는 축은 세 개입니다.
+
+- 키보드: [APG Keyboard Interface](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)가
+  Tab은 컴포넌트 사이, 화살표는 컴포넌트 안, 초점과 선택은 다르다고 닫는다.
+- 마우스: [Pointer Events](https://www.w3.org/TR/pointerevents/)와
+  [UI Events](https://www.w3.org/TR/uievents/)가 click·auxclick·contextmenu·
+  wheel·pointer capture·`detail` 횟수를 닫는다.
+- 커서: [CSS UI 4 predefined cursors](https://www.w3.org/TR/css-ui-4/#cursor)가
+  지금 이 자리에서 가능한 손을 키워드 집합으로 닫는다.
+
+## 이미 닫힌 손
+
 | 어포던스 | API | 손 |
 | --- | --- | --- |
 | [고르기](affordance-select.md) | `pointerSelect`, `resolveAffordanceKey` | 클릭, Shift 범위, Mod 토글, 화살표 |
@@ -24,5 +35,66 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [드래그](affordance-drag.md) | `dragOffset`, `dragShouldCommit` | 고른 대상을 포인터로 옮김 |
 | [되돌리기](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
 
-라이브 화면은 이 손을 호스트 그림에 붙인 증명입니다. 위젯을 가져가는
+## 키보드 TBD
+
+| 어포던스 | API | 손 |
+| --- | --- | --- |
+| [초점](affordance-focus.md) | TBD | Tab 사이, 화살표 안, 초점 ≠ 선택 |
+| [캐럿](affordance-caret.md) | TBD | I-beam 삽입점, 글 범위 |
+| [찾아 점프](affordance-typeahead.md) | TBD | 인쇄 글쇠 prefix 점프 |
+| [활성화](affordance-activate.md) | TBD | Enter, Space, 기본 클릭 |
+| [취소](affordance-cancel.md) | TBD | Escape, pointercancel |
+| [지우기](affordance-delete.md) | TBD | Delete, Backspace. Delete chord는 이미 닫힘 |
+| [이름 바꾸기](affordance-rename.md) | TBD | F2, 느린 두 번 누르기 |
+| [살짝 밀기](affordance-nudge.md) | TBD | 화살표 한 단위, Shift 큰 단위 |
+
+## 마우스 TBD
+
+| 어포던스 | API | 손 |
+| --- | --- | --- |
+| [가리키기](affordance-hover.md) | TBD | hover, 툴팁 지연, 커서 교체 |
+| [두 번 누르기](affordance-double-click.md) | TBD | `detail` 2 |
+| [세 번 누르기](affordance-triple-click.md) | TBD | `detail` 3 |
+| [차 메뉴](affordance-context-menu.md) | TBD | 오른쪽 클릭, Shift+F10, Menu |
+| [쓸어 담기](affordance-marquee.md) | TBD | 빈 곳에서 사각형으로 여러 대상 |
+| [놓기](affordance-drop.md) | TBD | drop 대상, no-drop |
+| [복사해서 옮기기](affordance-copy-drag.md) | TBD | Alt/Option 드래그 복제 |
+| [크기 바꾸기](affordance-resize.md) | TBD | 모서리, 칸, 분할선 |
+| [밀기](affordance-pan.md) | TBD | Space+드래그, grab |
+| [굴리기](affordance-scroll.md) | TBD | wheel, autoscroll |
+| [확대](affordance-zoom.md) | TBD | Mod+휠, +/− |
+| [붙이기](affordance-snap.md) | TBD | 그리드·가이드, 수정 키로 해제 |
+| [금지](affordance-forbid.md) | TBD | not-allowed, no-drop |
+
+## 커서가 닫는 손
+
+CSS UI 4 `<cursor-predefined>`는 이 집합이 끝입니다. 새 커서 이름을
+만들지 않습니다.
+
+| 커서 | 손 |
+| --- | --- |
+| `auto`, `default`, `none` | 호스트·UA 기본. 이 층이 새 문법을 열지 않음 |
+| `pointer` | [활성화](affordance-activate.md) |
+| `text`, `vertical-text` | [캐럿](affordance-caret.md) |
+| `cell`, `crosshair` | [쓸어 담기](affordance-marquee.md), [고르기](affordance-select.md) |
+| `context-menu` | [차 메뉴](affordance-context-menu.md) |
+| `help` | [가리키기](affordance-hover.md) |
+| `move`, `grab`, `grabbing` | [드래그](affordance-drag.md), [밀기](affordance-pan.md) |
+| `copy`, `alias` | [복사해서 옮기기](affordance-copy-drag.md) |
+| `no-drop`, `not-allowed` | [금지](affordance-forbid.md), [놓기](affordance-drop.md) |
+| `n-resize` … `nwse-resize`, `col-resize`, `row-resize` | [크기 바꾸기](affordance-resize.md) |
+| `all-scroll` | [밀기](affordance-pan.md) |
+| `zoom-in`, `zoom-out` | [확대](affordance-zoom.md) |
+| `progress`, `wait` | UA 바쁨. 편집 손이 아님 |
+
+## 이 층이 아닌 것
+
+- 값 삽입, IME로 글자를 쓰는 일, 클립보드로 값을 옮기는 완전한 편집기는
+  Hands입니다.
+- chord를 command로 번역하는 일은 Adapter입니다.
+- 구독과 질의는 Connector입니다.
+- 마크업, ARIA role, 히트 테스트, 기하, 장르 Intent는 호스트입니다.
+- 터치·펜·눈은 이 패키지가 닫는 손이 아닙니다.
+
+라이브 화면은 닫힌 손을 호스트 그림에 붙인 증명입니다. 위젯을 가져가는
 입구가 아닙니다.

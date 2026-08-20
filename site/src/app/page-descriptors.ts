@@ -9,7 +9,7 @@ export type SiteNavigationGroup =
   | "Adapter"
   | "Connector"
   | "제품 화면"
-  | "어포던스";
+  | "Affordance";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {

@@ -435,13 +435,33 @@
   },
   {
     "path": "/docs/affordance",
-    "label": "어포던스",
+    "label": "Affordance",
     "title": "Affordance - json-document",
     "heading": "어포던스",
-    "description": "제품이 json-document를 만지는 최전선의 키보드·마우스 손을 API와 사용법으로 설명합니다.",
+    "description": "제품이 json-document를 만지는 최전선의 키보드·마우스·커서 손을 API와 사용법으로 설명합니다.",
     "language": "ko",
-    "navigationGroup": "어포던스",
+    "navigationGroup": "Affordance",
     "sidebar": false
+  },
+  {
+    "path": "/docs/affordance/focus",
+    "label": "초점",
+    "title": "초점 - json-document",
+    "heading": "초점",
+    "description": "Tab은 컴포넌트 사이로, 화살표는 컴포넌트 안에서 초점을 옮기는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/caret",
+    "label": "캐럿",
+    "title": "캐럿 - json-document",
+    "heading": "캐럿",
+    "description": "I-beam 클릭으로 글 삽입점을 두고, 화살표로 글자 사이를 옮기는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
   },
   {
     "path": "/docs/affordance/select",
@@ -450,9 +470,40 @@
     "heading": "고르기",
     "description": "클릭, Shift 범위, Mod 토글, 화살표로 대상을 집는 손을 붙입니다.",
     "language": "ko",
-    "navigationGroup": "어포던스",
+    "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/listbox",
-    "relatedDemoLabel": "증명 열기"
+    "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/typeahead",
+    "label": "찾아 점프",
+    "title": "찾아 점프 - json-document",
+    "heading": "찾아 점프",
+    "description": "글쇠를 누르면 그 글자로 시작하는 다음 항목으로 초점을 옮기는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/activate",
+    "label": "활성화",
+    "title": "활성화 - json-document",
+    "heading": "활성화",
+    "description": "클릭·Enter·Space로 대상의 기본 동작을 실행하는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/cancel",
+    "label": "취소",
+    "title": "취소 - json-document",
+    "heading": "취소",
+    "description": "Escape와 pointercancel로 진행 중인 손을 버리는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
   },
   {
     "path": "/docs/affordance/fold",
@@ -461,20 +512,10 @@
     "heading": "접기",
     "description": "나무에서 왼쪽은 접고 오른쪽은 펼치는 손을 붙입니다.",
     "language": "ko",
-    "navigationGroup": "어포던스",
+    "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/tree",
-    "relatedDemoLabel": "증명 열기"
-  },
-  {
-    "path": "/docs/affordance/drag",
-    "label": "드래그",
-    "title": "드래그 - json-document",
-    "heading": "드래그",
-    "description": "고른 대상을 포인터로 옮기는 손을 붙입니다.",
-    "language": "ko",
-    "navigationGroup": "어포던스",
-    "relatedDemoPath": "/widgets/canvas",
-    "relatedDemoLabel": "증명 열기"
+    "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
   },
   {
     "path": "/docs/affordance/history",
@@ -483,9 +524,182 @@
     "heading": "되돌리기",
     "description": "Mod+Z와 canUndo로 값과 선택을 함께 되돌리는 손을 붙입니다.",
     "language": "ko",
-    "navigationGroup": "어포던스",
+    "navigationGroup": "Affordance",
     "relatedDemoPath": "/widgets/toolbar",
-    "relatedDemoLabel": "증명 열기"
+    "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/delete",
+    "label": "지우기",
+    "title": "지우기 - json-document",
+    "heading": "지우기",
+    "description": "Delete와 Backspace로 고른 대상을 지우는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/rename",
+    "label": "이름 바꾸기",
+    "title": "이름 바꾸기 - json-document",
+    "heading": "이름 바꾸기",
+    "description": "F2와 느린 두 번 누르기로 고른 대상의 이름을 고치는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/nudge",
+    "label": "살짝 밀기",
+    "title": "살짝 밀기 - json-document",
+    "heading": "살짝 밀기",
+    "description": "화살표로 고른 대상을 한 단위 옮기고, Shift로 큰 단위를 쓰는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/hover",
+    "label": "가리키기",
+    "title": "가리키기 - json-document",
+    "heading": "가리키기",
+    "description": "누르지 않고 포인터를 올려 손과 도움말을 드러내는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/double-click",
+    "label": "두 번 누르기",
+    "title": "두 번 누르기 - json-document",
+    "heading": "두 번 누르기",
+    "description": "click detail 2로 열기·단어 고르기·이름 바꾸기를 여는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/triple-click",
+    "label": "세 번 누르기",
+    "title": "세 번 누르기 - json-document",
+    "heading": "세 번 누르기",
+    "description": "click detail 3으로 줄이나 문단을 고르는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/context-menu",
+    "label": "차 메뉴",
+    "title": "차 메뉴 - json-document",
+    "heading": "차 메뉴",
+    "description": "오른쪽 클릭, Shift+F10, Menu 키로 자리 메뉴를 여는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/drag",
+    "label": "드래그",
+    "title": "드래그 - json-document",
+    "heading": "드래그",
+    "description": "고른 대상을 포인터로 옮기는 손을 붙입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "relatedDemoPath": "/widgets/canvas",
+    "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/marquee",
+    "label": "쓸어 담기",
+    "title": "쓸어 담기 - json-document",
+    "heading": "쓸어 담기",
+    "description": "빈 곳에서 끌어서 여러 대상을 한 번에 고르는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/drop",
+    "label": "놓기",
+    "title": "놓기 - json-document",
+    "heading": "놓기",
+    "description": "드래그한 대상을 어디에 둘지 정하고, 못 두면 no-drop을 보여주는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/copy-drag",
+    "label": "복사해서 옮기기",
+    "title": "복사해서 옮기기 - json-document",
+    "heading": "복사해서 옮기기",
+    "description": "Alt/Option을 누른 채 드래그하면 원본을 복제하는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/resize",
+    "label": "크기 바꾸기",
+    "title": "크기 바꾸기 - json-document",
+    "heading": "크기 바꾸기",
+    "description": "모서리·칸·분할선을 끌어 크기를 바꾸고, 화살표로 미세 조절하는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/pan",
+    "label": "밀기",
+    "title": "밀기 - json-document",
+    "heading": "밀기",
+    "description": "손바닥 커서로 평면을 밀고, Space+드래그로 화면을 옮기는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/scroll",
+    "label": "굴리기",
+    "title": "굴리기 - json-document",
+    "heading": "굴리기",
+    "description": "휠과 드래그 중 자동 스크롤로 보이는 줄을 옮기는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/zoom",
+    "label": "확대",
+    "title": "확대 - json-document",
+    "heading": "확대",
+    "description": "Mod+휠과 +/- 키, zoom-in/out 커서로 보이는 배율을 바꾸는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/snap",
+    "label": "붙이기",
+    "title": "붙이기 - json-document",
+    "heading": "붙이기",
+    "description": "드래그와 크기 바꾸기 중 그리드·가이드에 붙고, 수정 키로 푸는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/forbid",
+    "label": "금지",
+    "title": "금지 - json-document",
+    "heading": "금지",
+    "description": "할 수 없는 자리에서 not-allowed와 no-drop 커서를 보여주는 손입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "parentPath": "/docs/affordance"
   },
   {
     "path": "/widgets/toolbar",

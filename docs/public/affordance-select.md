@@ -28,3 +28,12 @@ React에서 범위와 커서를 그리려면 `useEditing`의 `onSelect`에
 
 Keyboard Adapter는 chord를 command로 바꿉니다. 고르기는 그 command가
 replace인지 extend인지를 닫습니다.
+
+## TBD
+
+- Mod+A 모두 고르기 토글
+- Home / End / PageUp / PageDown
+- 초점 따라 선택 vs 초점만 이동
+- 글 단어·줄 범위는 [두 번 누르기](affordance-double-click.md)·
+  [세 번 누르기](affordance-triple-click.md)·[캐럿](affordance-caret.md)
+- 빈 평면의 여러 대상은 [쓸어 담기](affordance-marquee.md)

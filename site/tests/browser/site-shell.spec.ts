@@ -18,7 +18,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Hands",
     "Adapter",
     "Connector",
-    "어포던스",
+    "Affordance",
   ]);
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -60,12 +60,33 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-  await navigation.getByRole("button", { name: "어포던스" }).click();
-  await expect(navigation.getByRole("group", { name: "어포던스" }).getByRole("link")).toHaveText([
+  await navigation.getByRole("button", { name: "Affordance" }).click();
+  await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
+    "초점",
+    "캐럿",
     "고르기",
+    "찾아 점프",
+    "활성화",
+    "취소",
     "접기",
-    "드래그",
     "되돌리기",
+    "지우기",
+    "이름 바꾸기",
+    "살짝 밀기",
+    "가리키기",
+    "두 번 누르기",
+    "세 번 누르기",
+    "차 메뉴",
+    "드래그",
+    "쓸어 담기",
+    "놓기",
+    "복사해서 옮기기",
+    "크기 바꾸기",
+    "밀기",
+    "굴리기",
+    "확대",
+    "붙이기",
+    "금지",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
@@ -76,7 +97,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Hands",
     "Adapter",
     "Connector",
-    "어포던스",
+    "Affordance",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -94,7 +115,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "어포던스" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Affordance" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
 
   await page.goto("/docs/tutorial");

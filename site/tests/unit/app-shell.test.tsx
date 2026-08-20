@@ -42,7 +42,7 @@ describe("official site shell", () => {
       "Hands",
       "Adapter",
       "Connector",
-      "어포던스",
+      "Affordance",
     ]);
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
@@ -82,8 +82,34 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-    await user.click(nav.getByRole("button", { name: "어포던스" }));
-    expect(groupLinks(nav, "어포던스")).toEqual(["고르기", "접기", "드래그", "되돌리기"]);
+    await user.click(nav.getByRole("button", { name: "Affordance" }));
+    expect(groupLinks(nav, "Affordance")).toEqual([
+      "초점",
+      "캐럿",
+      "고르기",
+      "찾아 점프",
+      "활성화",
+      "취소",
+      "접기",
+      "되돌리기",
+      "지우기",
+      "이름 바꾸기",
+      "살짝 밀기",
+      "가리키기",
+      "두 번 누르기",
+      "세 번 누르기",
+      "차 메뉴",
+      "드래그",
+      "쓸어 담기",
+      "놓기",
+      "복사해서 옮기기",
+      "크기 바꾸기",
+      "밀기",
+      "굴리기",
+      "확대",
+      "붙이기",
+      "금지",
+    ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
@@ -93,7 +119,7 @@ describe("official site shell", () => {
       "Hands",
       "Adapter",
       "Connector",
-      "어포던스",
+      "Affordance",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 

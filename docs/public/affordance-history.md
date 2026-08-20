@@ -14,3 +14,9 @@ commands.redo.disabled; // true
 `resolveAffordanceKey`가 `undo` / `redo` command를 내면 호스트는
 `editor.undo()` / `editor.redo()`만 호출합니다. History 기록 자체는
 Editing이 가지고, 어포던스는 그 손을 닫습니다.
+
+## TBD
+
+- Mod+Y redo 변종
+- 연속 입력의 묶음 단위
+- 협업 replica에서 내 기여만 되돌리기는 Collaboration History

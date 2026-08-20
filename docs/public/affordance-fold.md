@@ -23,3 +23,9 @@ treeAffordance(
 접힘 상태는 호스트가 가진 화면 상태입니다. editor는 보이는 줄 Topology만
 받습니다. 호스트는 `expand` / `collapse`를 접힘 집합에 적용하고, `move`만
 Topology 이웃으로 보냅니다.
+
+## TBD
+
+- Accordion / Disclosure의 Enter·Space 접힘
+- `aria-expanded`와 호스트 접힘 집합의 동기
+- 가로 나무에서 위·아래가 접힘인지 이웃인지

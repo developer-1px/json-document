@@ -22,3 +22,10 @@ if (dragShouldCommit(offset)) {
 ```
 
 모양과 그림은 제품이 정합니다. 고른 것을 잡고 옮기는 문법은 닫혀 있습니다.
+
+## TBD
+
+- [놓기](affordance-drop.md) 대상과 `no-drop`
+- [복사해서 옮기기](affordance-copy-drag.md)
+- 키보드만으로 옮기기 (APG는 드래그의 키보드 대안을 요구함)
+- pointer capture 수명
