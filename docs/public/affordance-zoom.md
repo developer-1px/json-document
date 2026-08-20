@@ -12,20 +12,23 @@ import {
   wheelAffordance,
 } from "@interactive-os/json-document-affordance";
 
-zoomCursor("in");
-// "zoom-in"
+function onPointerMove(event: PointerEvent) {
+  event.currentTarget.style.cursor = zoomCursor("in");
+}
 
-zoomAffordance({ key: "=", metaKey: true, ctrlKey: false });
-// { type: "in" }
+function onWheel(event: WheelEvent) {
+  const hand = wheelAffordance(event);
+  if (hand.type === "zoom") setScale(hostZoom(scale, hand.delta));
+}
 
-zoomAffordance({ key: "-", metaKey: true, ctrlKey: false });
-// { type: "out" }
-
-wheelAffordance({ deltaY: -80, ctrlKey: true, metaKey: false });
-// { type: "zoom", delta: 80 }
+function onKeyDown(event: KeyboardEvent) {
+  const hand = zoomAffordance(event);
+  if (hand?.type === "in") setScale(scale * 1.1);
+  if (hand?.type === "out") setScale(scale / 1.1);
+}
 ```
 
-호스트는 배율 변환을 가집니다.
+이 손은 호스트 뷰포트입니다. 문서 값은 바꾸지 않습니다.
 
 닫는 손:
 - Mod + wheel

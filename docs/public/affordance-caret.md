@@ -9,23 +9,32 @@ Caret은 글 안의 삽입점입니다. 항목 [Select](affordance-select.md)와
 ```ts
 import { caretAffordance, caretCursor } from "@interactive-os/json-document-affordance";
 
-caretCursor("horizontal");
-// "text"
+function onPointerMove(event: PointerEvent) {
+  event.currentTarget.style.cursor = caretCursor("horizontal");
+}
 
-caretCursor("vertical");
-// "vertical-text"
+function onPointerDown(event: PointerEvent, blockId: string) {
+  const hand = caretAffordance({ type: "pointer", detail: event.detail });
+  if (hand.type === "place") {
+    editor.dispatch({
+      type: "selection.set",
+      blockId,
+      offset: hostHitOffset(event),
+    });
+  }
+}
 
-caretAffordance({ key: "ArrowRight", shiftKey: false, altKey: false });
-// { type: "move", unit: "character", direction: "right", operation: "replace" }
-
-caretAffordance({ key: "ArrowRight", shiftKey: true, altKey: false });
-// { type: "move", unit: "character", direction: "right", operation: "extend" }
-
-caretAffordance({ key: "ArrowRight", shiftKey: false, altKey: true });
-// { type: "move", unit: "word", direction: "right", operation: "replace" }
-
-caretAffordance({ type: "pointer", detail: 1 });
-// { type: "place" }
+function onKeyDown(event: KeyboardEvent) {
+  const hand = caretAffordance(event);
+  if (hand?.type === "move") {
+    editor.dispatch({
+      type: "selection.set",
+      blockId: focus.blockId,
+      offset: hostMoveOffset(focus.offset, hand),
+      mode: hand.operation,
+    });
+  }
+}
 ```
 
 호스트는 I-beam과 글 기하를 그립니다. 값 삽입은 Hands입니다.

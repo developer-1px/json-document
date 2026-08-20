@@ -9,17 +9,19 @@ Shift+화살표는 큰 단위입니다. 항목 이웃으로 초점을 옮기는
 ```ts
 import { nudgeAffordance } from "@interactive-os/json-document-affordance";
 
-nudgeAffordance({ key: "ArrowRight", shiftKey: false });
-// { dx: 1, dy: 0 }
-
-nudgeAffordance({ key: "ArrowUp", shiftKey: true });
-// { dx: 0, dy: -10 }
-
-nudgeAffordance({ key: "ArrowDown", shiftKey: false });
-// { dx: 0, dy: 1 }
+function onKeyDown(event: KeyboardEvent) {
+  const hand = nudgeAffordance(event);
+  if (!hand) return;
+  editor.dispatch({
+    type: "object.translate",
+    objectIds: editor.selectedObjects.map((object) => object.id),
+    dx: hand.dx * unit,
+    dy: hand.dy * unit,
+  });
+}
 ```
 
-호스트는 단위(px, 칸, 그리드)를 곱합니다. 어포던스는 손과 수정 키를 닫습니다.
+호스트는 단위(px, 칸, 그리드)를 곱합니다. 이동은 json-document로 갑니다.
 
 닫는 손:
 - Arrow: 1 단위

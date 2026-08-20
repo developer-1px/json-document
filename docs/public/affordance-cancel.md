@@ -8,17 +8,20 @@ Escape는 진행 중인 손과 임시 UI를 버리는 손입니다. Escape 키�
 ```ts
 import { escapeAffordance } from "@interactive-os/json-document-affordance";
 
-escapeAffordance({ key: "Escape" });
-// "cancel"
+function onKeyDown(event: KeyboardEvent) {
+  if (escapeAffordance(event) === "cancel") {
+    setMenu(null);
+    drag = null;
+  }
+}
 
-escapeAffordance({ type: "pointercancel" });
-// "cancel"
-
-escapeAffordance({ type: "lostpointercapture" });
-// "cancel"
+function onPointerCancel(event: PointerEvent) {
+  if (escapeAffordance(event) === "cancel") drag = null;
+}
 ```
 
-호스트는 무엇이 열려 있는지를 가집니다. 어포던스는 버리는 키와 포인터 취소를 닫습니다.
+호스트는 무엇이 열려 있는지를 가집니다. 버리는 손은 보통 호스트 화면
+상태입니다. 문서 값은 바꾸지 않습니다.
 
 닫는 손:
 - Escape: 메뉴, 대화, 드래그, Rename 중단

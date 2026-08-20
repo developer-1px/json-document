@@ -8,35 +8,25 @@ Typeahead는 인쇄 글쇠로 목록·나무에서 이름으로 건너뛰는 손
 ```ts
 import { typeaheadAffordance } from "@interactive-os/json-document-affordance";
 
-typeaheadAffordance({
-  buffer: "",
-  key: "A",
-  elapsedMs: 0,
-  names: ["Apple", "Apricot", "Pear"],
-  from: "Pear",
-});
-// { buffer: "A", name: "Apple" }
-
-typeaheadAffordance({
-  buffer: "A",
-  key: "p",
-  elapsedMs: 80,
-  names: ["Apple", "Apricot", "Pear"],
-  from: "Apple",
-});
-// { buffer: "Ap", name: "Apple" }
-
-typeaheadAffordance({
-  buffer: "Ap",
-  key: "x",
-  elapsedMs: 1200,
-  names: ["Apple", "Apricot", "Pear"],
-  from: "Apple",
-});
-// { buffer: "x", name: null }
+function onKeyDown(event: KeyboardEvent) {
+  const hand = typeaheadAffordance({
+    buffer,
+    key: event.key,
+    elapsedMs: event.timeStamp - lastType,
+    names: items.map((item) => item.label),
+    from: focusKey,
+  });
+  setBuffer(hand.buffer);
+  lastType = event.timeStamp;
+  if (hand.name) {
+    const itemId = items.find((item) => item.label === hand.name)?.id;
+    if (itemId) setFocusKey(itemId);
+  }
+}
 ```
 
-호스트는 보이는 이름을 줍니다. 어포던스는 버퍼 창과 점프 규칙을 닫습니다.
+호스트는 보이는 이름을 줍니다. 점프한 키는 호스트 Focus로 가고, 선택까지
+바꿀지는 장르 Intent입니다.
 
 닫는 손:
 - 한 문자: 그 prefix의 다음 항목

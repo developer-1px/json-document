@@ -12,22 +12,14 @@ import {
   resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
 
-resolveAffordanceKey({
-  key: "Delete",
-  shiftKey: false,
-  metaKey: false,
-  ctrlKey: false,
-});
-// { type: "delete" }
-
-deleteAffordance({ key: "Delete" });
-// { type: "delete", source: "forward" }
-
-deleteAffordance({ key: "Backspace" });
-// { type: "delete", source: "backward" }
-
-deleteAffordance({ key: "Backspace", hasSelection: true });
-// { type: "delete", source: "selection" }
+function onKeyDown(event: KeyboardEvent) {
+  const command = resolveAffordanceKey(event);
+  const hand = deleteAffordance(event);
+  if (command?.type !== "delete" || !hand) return;
+  if (hand.source === "selection" || hand.source === "forward") {
+    editor.dispatch({ type: "selection.remove" });
+  }
+}
 ```
 
 호스트는 장르 Intent만 가집니다. 값 삽입은 Hands입니다.

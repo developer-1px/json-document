@@ -7,24 +7,38 @@ Duplicate는 수정 키를 누른 채 드래그하면 원본을 복제하는 손
 
 ```ts
 import {
+  dragOffset,
   dragOperation,
+  dragShouldCommit,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
 
-dragOperation({ altKey: false, metaKey: false, ctrlKey: false });
-// "move"
+function onPointerMove(event: PointerEvent) {
+  const operation = dragOperation(event);
+  event.currentTarget.style.cursor = dropAffordance({
+    canDrop: true,
+    operation,
+  }).cursor;
+}
 
-dragOperation({ altKey: true, metaKey: false, ctrlKey: false });
-// "copy"
-
-dropAffordance({
-  canDrop: true,
-  operation: dragOperation({ altKey: true, metaKey: false, ctrlKey: false }),
-});
-// { accept: true, cursor: "copy" }
+function onPointerUp(event: PointerEvent) {
+  const offset = dragOffset(origin, { x: event.clientX, y: event.clientY });
+  if (!dragShouldCommit(offset)) return;
+  if (dragOperation(event) === "copy") {
+    hostDuplicate(objectIds, offset);
+    return;
+  }
+  editor.dispatch({
+    type: "object.translate",
+    objectIds,
+    dx: offset.dx,
+    dy: offset.dy,
+  });
+}
 ```
 
-값의 클립보드 복사/붙이기는 Hands입니다. 이 손은 포인터 복제입니다.
+복제 생성은 장르 Intent(호스트 또는 editor)이고, 옮기기는 json-document로
+갑니다. 값의 클립보드 복사/붙이기는 Hands입니다.
 
 닫는 손:
 - Alt/Option + 드래그 → copy

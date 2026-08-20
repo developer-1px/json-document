@@ -6,19 +6,27 @@ Drop은 [Drag](affordance-drag.md)의 끝입니다. 어디에 둘 수 있는지�
 커서가 말하고, 못 두는 자리는 `no-drop`입니다.
 
 ```ts
-import { dropAffordance } from "@interactive-os/json-document-affordance";
+import { dropAffordance, dragOperation } from "@interactive-os/json-document-affordance";
 
-dropAffordance({ canDrop: true, operation: "move" });
-// { accept: true, cursor: "move" }
+function onPointerMove(event: PointerEvent) {
+  const drop = dropAffordance({
+    canDrop: hostCanDrop(event),
+    operation: dragOperation(event),
+  });
+  event.currentTarget.style.cursor = drop.cursor;
+}
 
-dropAffordance({ canDrop: true, operation: "copy" });
-// { accept: true, cursor: "copy" }
-
-dropAffordance({ canDrop: false });
-// { accept: false, cursor: "no-drop" }
+function onPointerUp(event: PointerEvent, cardId: string, columnId: string) {
+  const drop = dropAffordance({
+    canDrop: hostCanDrop(event),
+    operation: dragOperation(event),
+  });
+  if (!drop.accept) return;
+  editor.dispatch({ type: "card.move", cardId, columnId });
+}
 ```
 
-호스트는 드롭 자리와 가능한지를 그립니다. 어포던스는 허용·거절 손을 닫습니다.
+커서는 호스트 화면 상태이고, 허용된 놓기만 json-document로 갑니다.
 
 닫는 손:
 - drop 대상 위: `move` / `copy` / `alias`

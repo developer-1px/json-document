@@ -4,29 +4,39 @@ Undo는 값과 선택을 함께 되돌리는 손입니다. Mod+Z는 undo, Mod+Sh
 redo입니다. 버튼은 `canUndo` / `canRedo`를 읽어 꺼집니다.
 
 ```ts
-import { historyAffordance } from "@interactive-os/json-document-affordance";
+import {
+  historyAffordance,
+  resolveAffordanceKey,
+} from "@interactive-os/json-document-affordance";
 
-const commands = historyAffordance({ canUndo: true, canRedo: false });
-commands.undo.disabled; // false
-commands.redo.disabled; // true
+const commands = historyAffordance({
+  canUndo: editor.snapshot.canUndo,
+  canRedo: editor.snapshot.canRedo,
+});
+
+function onKeyDown(event: KeyboardEvent) {
+  const command = resolveAffordanceKey(event);
+  if (command?.type === "undo") editor.undo();
+  if (command?.type === "redo") editor.redo();
+}
+
+<button
+  disabled={commands.undo.disabled}
+  onClick={() => editor.undo()}
+>
+  Undo
+</button>
 ```
 
-`resolveAffordanceKey`가 `undo` / `redo` command를 내면 호스트는
-`editor.undo()` / `editor.redo()`만 호출합니다. History 기록 자체는
-Editing이 가지고, 어포던스는 그 손을 닫습니다.
+History 기록 자체는 Editing이 가지고, 어포던스는 그 손을 닫습니다.
 
 ## TBD
 
 ```ts
-import { resolveAffordanceKey } from "@interactive-os/json-document-affordance";
-
-resolveAffordanceKey({
-  key: "y",
-  shiftKey: false,
-  metaKey: true,
-  ctrlKey: false,
-});
-// { type: "redo" }
+function onKeyDown(event: KeyboardEvent) {
+  const command = resolveAffordanceKey(event);
+  if (command?.type === "redo") editor.redo();
+}
 ```
 
 - Mod+Y redo 변종

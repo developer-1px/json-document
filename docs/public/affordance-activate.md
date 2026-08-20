@@ -12,22 +12,21 @@ import {
   resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
 
-activateAffordance({ key: "Enter" });
-// "activate"
+function onPointerDown(event: PointerEvent, itemId: string) {
+  if (activateAffordance(event) === "activate") hostOpen(itemId);
+}
 
-activateAffordance({ type: "pointer", button: 0, detail: 1 });
-// "activate"
-
-resolveAffordanceKey({
-  key: " ",
-  shiftKey: false,
-  metaKey: false,
-  ctrlKey: false,
-});
-// { type: "toggle" }
+function onKeyDown(event: KeyboardEvent) {
+  if (activateAffordance(event) === "activate") hostOpen(focusKey);
+  const command = resolveAffordanceKey(event);
+  if (command?.type === "toggle") {
+    editor.dispatch({ type: "selection.set", itemId: focusKey, mode: "toggle" });
+  }
+}
 ```
 
-호스트는 기본 동작이 무엇인지 정합니다. 어포던스는 그 동작을 부르는 손을 닫습니다.
+호스트는 기본 동작이 무엇인지 정합니다. 목록 toggle은 json-document 선택으로,
+열기는 호스트 Intent로 갑니다.
 
 닫는 손:
 - 기본 클릭 (`detail` 1)

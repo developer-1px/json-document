@@ -11,23 +11,25 @@ import {
   autoscrollAffordance,
 } from "@interactive-os/json-document-affordance";
 
-wheelAffordance({ deltaY: 80, ctrlKey: false, metaKey: false });
-// { type: "scroll", dy: 80 }
+function onWheel(event: WheelEvent) {
+  const hand = wheelAffordance(event);
+  if (hand.type === "scroll") scroller.scrollBy(0, hand.dy);
+  if (hand.type === "zoom") setScale(hostZoom(scale, hand.delta));
+}
 
-wheelAffordance({ deltaY: 80, ctrlKey: true, metaKey: false });
-// { type: "zoom", delta: -80 }
-
-autoscrollAffordance({
-  x: 4,
-  y: 80,
-  width: 240,
-  height: 180,
-  edge: 16,
-});
-// { dx: -1, dy: 0 }
+function onPointerMove(event: PointerEvent) {
+  const auto = autoscrollAffordance({
+    x: event.clientX,
+    y: event.clientY,
+    width: scroller.clientWidth,
+    height: scroller.clientHeight,
+    edge: 16,
+  });
+  if (auto) scroller.scrollBy(auto.dx, auto.dy);
+}
 ```
 
-호스트는 overflow를 그립니다. 어포던스는 휠과 자동 굴리기를 닫습니다.
+이 손은 호스트 overflow입니다. 문서 값은 바꾸지 않습니다.
 
 닫는 손:
 - wheel (수정 키 없음)

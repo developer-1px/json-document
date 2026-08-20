@@ -8,20 +8,21 @@ Context menu는 대상이 있는 자리에서 보조 동작을 여는 손입니�
 ```ts
 import { contextMenuAffordance } from "@interactive-os/json-document-affordance";
 
-contextMenuAffordance({ button: 2 });
-// "open"
+function onContextMenu(event: MouseEvent, itemId: string) {
+  if (contextMenuAffordance(event) !== "open") return;
+  event.preventDefault();
+  setMenu({ itemId, x: event.clientX, y: event.clientY });
+}
 
-contextMenuAffordance({ key: "ContextMenu" });
-// "open"
-
-contextMenuAffordance({ key: "F10", shiftKey: true });
-// "open"
-
-contextMenuAffordance({ key: "Escape" });
-// "cancel"
+function onKeyDown(event: KeyboardEvent) {
+  if (contextMenuAffordance(event) === "open") {
+    setMenu({ itemId: focusKey, x: 0, y: 0 });
+  }
+  if (contextMenuAffordance(event) === "cancel") setMenu(null);
+}
 ```
 
-호스트는 메뉴 항목을 그립니다. 어포던스는 여는 손을 닫습니다.
+호스트는 메뉴 항목을 그립니다. 여는 손은 호스트 화면 상태입니다.
 
 닫는 손:
 - 보조 버튼 / `contextmenu` / `auxclick`

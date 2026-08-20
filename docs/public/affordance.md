@@ -9,6 +9,28 @@
 대체하지 않습니다. TBD 페이지의 코드는 사용법 명세입니다. 패키지에
 아직 없습니다.
 
+호스트 이벤트와 json-document 사이를 이렇게 잇습니다. 손은 문서 작업이
+되기도 하고, 커서·접힘·뷰포트 같은 호스트 화면 상태가 되기도 합니다.
+
+```ts
+import {
+  pointerSelect,
+  forbiddenCursor,
+} from "@interactive-os/json-document-affordance";
+
+function onPointerDown(event: PointerEvent, itemId: string) {
+  const mode = pointerSelect(event);
+  editor.dispatch({ type: "selection.set", itemId, mode });
+}
+
+function onPointerMove(event: PointerEvent) {
+  event.currentTarget.style.cursor = forbiddenCursor({
+    allowed: hostCanDrop(event),
+    dropping: true,
+  });
+}
+```
+
 ```sh
 npm i @interactive-os/json-document-affordance
 ```

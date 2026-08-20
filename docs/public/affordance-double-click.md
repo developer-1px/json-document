@@ -9,14 +9,10 @@ Double-click은 `UIEvent.detail === 2`입니다. 글에서는 단어를 고르�
 ```ts
 import { clickCountAffordance } from "@interactive-os/json-document-affordance";
 
-clickCountAffordance(1);
-// "click"
-
-clickCountAffordance(2);
-// "double-click"
-
-clickCountAffordance(3);
-// "triple-click"
+function onClick(event: MouseEvent, itemId: string) {
+  if (clickCountAffordance(event.detail) !== "double-click") return;
+  hostOpen(itemId);
+}
 ```
 
 호스트는 장르 Intent만 가집니다. 글 단어 범위는 [Caret](affordance-caret.md)에

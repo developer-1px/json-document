@@ -5,35 +5,55 @@ Expand/Collapse는 나무에서 가지를 접고 펼치는 손입니다. 오른�
 남습니다. 위아래 화살표는 보이는 줄을 옮깁니다.
 
 ```ts
-import { treeAffordance } from "@interactive-os/json-document-affordance";
+import {
+  resolveAffordanceKey,
+  treeAffordance,
+} from "@interactive-os/json-document-affordance";
 
-treeAffordance(
-  { type: "move", direction: "right" },
-  { expanded: false, hasChildren: true },
-);
-// { type: "expand" }
-
-treeAffordance(
-  { type: "move", direction: "left" },
-  { expanded: true, hasChildren: true },
-);
-// { type: "collapse" }
+function onKeyDown(event: KeyboardEvent, nodeId: string) {
+  const command = resolveAffordanceKey(event);
+  if (command?.type !== "move") return;
+  const hand = treeAffordance(command, {
+    expanded: expanded.has(nodeId),
+    hasChildren: hasChildren(nodeId),
+  });
+  if (hand.type === "expand") {
+    setExpanded((current) => new Set(current).add(nodeId));
+    return;
+  }
+  if (hand.type === "collapse") {
+    setExpanded((current) => {
+      const next = new Set(current);
+      next.delete(nodeId);
+      return next;
+    });
+    return;
+  }
+  editor.dispatch({ type: "selection.set", nodeId, topology, mode: "replace" });
+}
 ```
 
 접힘 상태는 호스트가 가진 화면 상태입니다. editor는 보이는 줄 Topology만
-받습니다. 호스트는 `expand` / `collapse`를 접힘 집합에 적용하고, `move`만
-Topology 이웃으로 보냅니다.
+받습니다. expand/collapse는 호스트 접힘 집합으로, move는 json-document
+선택으로 갑니다.
 
 ## TBD
 
 ```ts
-import { disclosureAffordance } from "@interactive-os/json-document-affordance";
-
-disclosureAffordance({ key: "Enter", expanded: false });
-// "expand"
-
-disclosureAffordance({ key: "Enter", expanded: true });
-// "collapse"
+function onKeyDown(event: KeyboardEvent) {
+  const hand = disclosureAffordance({
+    key: event.key,
+    expanded: expanded.has(sectionId),
+  });
+  if (hand === "expand") setExpanded((current) => new Set(current).add(sectionId));
+  if (hand === "collapse") {
+    setExpanded((current) => {
+      const next = new Set(current);
+      next.delete(sectionId);
+      return next;
+    });
+  }
+}
 ```
 
 - Accordion / Disclosure의 Enter·Space 접힘

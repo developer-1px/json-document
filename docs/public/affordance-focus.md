@@ -9,17 +9,18 @@ Focus는 키보드의 포인터입니다. Tab과 Shift+Tab은 컴포넌트 사�
 ```ts
 import { focusAffordance } from "@interactive-os/json-document-affordance";
 
-focusAffordance({ key: "Tab", shiftKey: false });
-// { type: "tab", direction: "next" }
-
-focusAffordance({ key: "Tab", shiftKey: true });
-// { type: "tab", direction: "prev" }
-
-focusAffordance({ key: "ArrowDown", shiftKey: false });
-// { type: "move", direction: "down" }
-
-focusAffordance({ key: "Home", shiftKey: false });
-// { type: "boundary", edge: "start" }
+function onKeyDown(event: KeyboardEvent) {
+  const hand = focusAffordance(event);
+  if (hand?.type === "tab") return;
+  if (hand?.type === "move") {
+    const next = neighbor(focusKey, hand.direction);
+    setFocusKey(next);
+    return;
+  }
+  if (hand?.type === "boundary") {
+    setFocusKey(hand.edge === "start" ? ids[0] : ids.at(-1));
+  }
+}
 ```
 
 호스트는 마크업과 초점 고리를 그립니다. 화살표가 선택까지 바꿀지는

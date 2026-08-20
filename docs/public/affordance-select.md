@@ -10,35 +10,43 @@ import {
   resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
 
-pointerSelect({ shiftKey: true, metaKey: false, ctrlKey: false });
-// "extend"
+function onPointerDown(event: PointerEvent, itemId: string) {
+  const mode = pointerSelect(event);
+  editor.dispatch({ type: "selection.set", itemId, mode });
+}
 
-const command = resolveAffordanceKey({
-  key: "ArrowDown",
-  shiftKey: true,
-  metaKey: false,
-  ctrlKey: false,
+const editing = useEditing({
+  source: editor,
+  operationFromEvent: (event) => pointerSelect(event),
+  onSelect: (itemId, mode) => {
+    editor.dispatch({ type: "selection.set", itemId, mode });
+  },
+  keyboard: {
+    resolve: resolveAffordanceKey,
+    neighbor: (key, command) => moveLinePoint(ids, key, command.direction),
+  },
 });
-// { type: "move", direction: "down", operation: "extend" }
 ```
 
 호스트는 보이는 키와 장르 Intent만 넘깁니다. keymap을 덮어쓰지 않습니다.
-React에서 범위와 커서를 그리려면 `useEditing`의 `onSelect`에
-`pointerSelect` 결과를 연결합니다.
-
-Keyboard Adapter는 chord를 command로 바꿉니다. Select는 그 command가
-replace인지 extend인지를 닫습니다.
 
 ## TBD
 
 ```ts
-import { selectAllAffordance } from "@interactive-os/json-document-affordance";
-
-selectAllAffordance({ allSelected: false });
-// "select-all"
-
-selectAllAffordance({ allSelected: true });
-// "clear"
+function onKeyDown(event: KeyboardEvent) {
+  const hand = selectAllAffordance({
+    key: event.key,
+    metaKey: event.metaKey,
+    ctrlKey: event.ctrlKey,
+    allSelected: editor.selectedItemIds.length === ids.length,
+  });
+  if (hand === "select-all") {
+    editor.dispatch({ type: "selection.set", itemIds: ids, mode: "replace" });
+  }
+  if (hand === "clear") {
+    editor.dispatch({ type: "selection.set", itemIds: [], mode: "replace" });
+  }
+}
 ```
 
 - Mod+A Select all 토글

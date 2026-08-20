@@ -3,26 +3,22 @@
 TBD.
 
 Hover는 누르지 않은 포인터가 대상 위에 있을 때 가능한 손을 드러냅니다.
-커서가 바뀌고, 잠시 뒤 툴팁이 열릴 수 있습니다. `help` 커서는 도움말이
+커서가 바뀌고, 잠시 뒤 툴팁이 열릴 수 있습니다. `help` 커서가 도움말이
 있음을 가리킵니다.
 
 ```ts
 import { hoverAffordance, hoverCursor } from "@interactive-os/json-document-affordance";
 
-hoverCursor("help");
-// "help"
-
-hoverAffordance({ elapsedMs: 120 });
-// "hint"
-
-hoverAffordance({ elapsedMs: 400 });
-// "tooltip"
-
-hoverAffordance({ elapsedMs: 0, inside: false });
-// null
+function onPointerMove(event: PointerEvent, itemId: string) {
+  event.currentTarget.style.cursor = hoverCursor("help");
+  const hand = hoverAffordance({ elapsedMs, inside: true });
+  if (hand === "tooltip") setTooltip(itemId);
+  if (hand === null) setTooltip(null);
+}
 ```
 
-호스트는 툴팁 그림을 그립니다. 어포던스는 지연과 커서 손을 닫습니다.
+호스트는 툴팁 그림을 그립니다. 이 손은 json-document가 아니라 호스트
+화면 상태입니다.
 
 닫는 손:
 - pointerenter / pointerleave

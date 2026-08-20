@@ -13,18 +13,18 @@ import {
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
 
-const rect = marqueeRect({ x: 24, y: 40 }, { x: 120, y: 90 });
-// { x: 24, y: 40, width: 96, height: 50 }
-
-marqueeShouldCommit(rect);
-// true
-
-pointerSelect({ shiftKey: true, metaKey: false, ctrlKey: false });
-// "extend"
+function onPointerUp(event: PointerEvent) {
+  const rect = marqueeRect(origin, { x: event.clientX, y: event.clientY });
+  if (!marqueeShouldCommit(rect)) return;
+  const objectIds = hostHits(rect);
+  const mode = pointerSelect(event);
+  editor.dispatch({ type: "selection.set", objectIds, mode });
+}
 ```
 
 호스트는 히트 테스트와 기하를 계산합니다. 어떤 키가 범위에 들어오는지는
-호스트가 보고, 손이 replace인지 extend인지는 `pointerSelect`가 닫습니다.
+호스트가 보고, 손이 replace인지 extend인지는 Affordance가 닫고, 선택은
+json-document로 갑니다.
 
 닫는 손:
 - 빈 곳에서 pointerdown → move → up

@@ -7,22 +7,29 @@ Snap은 [Drag](affordance-drag.md)·[Resize](affordance-resize.md)·
 수정 키를 누르면 붙지 않습니다.
 
 ```ts
-import { snapAffordance } from "@interactive-os/json-document-affordance";
+import {
+  dragOffset,
+  dragShouldCommit,
+  snapAffordance,
+} from "@interactive-os/json-document-affordance";
 
-snapAffordance({ x: 47, y: 51 }, { grid: 8, disable: false });
-// { x: 48, y: 48 }
-
-snapAffordance({ x: 47, y: 51 }, { grid: 8, disable: true });
-// { x: 47, y: 51 }
-
-snapAffordance(
-  { x: 47, y: 51 },
-  { guides: [{ x: 50 }, { y: 48 }], disable: false },
-);
-// { x: 50, y: 48 }
+function onPointerUp(event: PointerEvent, object: { id: string; x: number; y: number }) {
+  const offset = dragOffset(origin, { x: event.clientX, y: event.clientY });
+  if (!dragShouldCommit(offset)) return;
+  const snapped = snapAffordance(
+    { x: object.x + offset.dx, y: object.y + offset.dy },
+    { grid: 8, disable: event.metaKey || event.ctrlKey },
+  );
+  editor.dispatch({
+    type: "object.translate",
+    objectIds: [object.id],
+    dx: snapped.x - object.x,
+    dy: snapped.y - object.y,
+  });
+}
 ```
 
-호스트는 가이드 기하를 가집니다. 어포던스는 붙임/해제 손을 닫습니다.
+가이드 기하는 호스트가 가지고, 붙은 좌표만 json-document로 갑니다.
 
 닫는 손:
 - 이동·리사이즈 중 스냅

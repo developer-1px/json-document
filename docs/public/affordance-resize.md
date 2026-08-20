@@ -6,45 +6,38 @@ Resize는 가장자리·모서리·칸 경계·창 분할선을 움직이는 손
 CSS predefined 리사이즈 커서가 이 손을 닫습니다.
 
 ```ts
-import {
-  resizeCursor,
-  resizeOffset,
-  resolveAffordanceKey,
-} from "@interactive-os/json-document-affordance";
+import { resizeCursor, resizeOffset } from "@interactive-os/json-document-affordance";
 
-resizeCursor("se");
-// "se-resize"
+function onPointerMove(event: PointerEvent, edge: "se") {
+  event.currentTarget.style.cursor = resizeCursor(edge);
+  const offset = resizeOffset(
+    origin,
+    { x: event.clientX, y: event.clientY },
+    edge,
+    event,
+  );
+  setPreview(offset);
+}
 
-resizeCursor("column");
-// "col-resize"
-
-resizeOffset(
-  { x: 80, y: 40 },
-  { x: 112, y: 72 },
-  "se",
-  { shiftKey: false, altKey: false },
-);
-// { dx: 32, dy: 32 }
-
-resizeOffset(
-  { x: 80, y: 40 },
-  { x: 112, y: 56 },
-  "se",
-  { shiftKey: true, altKey: false },
-);
-// { dx: 32, dy: 32 }
-
-resolveAffordanceKey({
-  key: "ArrowRight",
-  shiftKey: false,
-  metaKey: false,
-  ctrlKey: false,
-});
-// { type: "move", direction: "right", operation: "replace" }
+function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
+  const offset = resizeOffset(
+    origin,
+    { x: event.clientX, y: event.clientY },
+    edge,
+    event,
+  );
+  editor.dispatch({
+    type: "object.resize",
+    objectId,
+    dx: offset.dx,
+    dy: offset.dy,
+  });
+}
 ```
 
-호스트는 핸들과 기하를 그립니다. 분할선 화살표는 APG Window Splitter와
-같고, Shift는 비율, Alt는 가운데 기준입니다.
+커서는 호스트 화면 상태이고, 확정된 크기만 json-document로 갑니다.
+분할선 화살표는 APG Window Splitter와 같고, Shift는 비율, Alt는 가운데
+기준입니다.
 
 닫는 손:
 - 모서리: `n-resize` … `nwse-resize`

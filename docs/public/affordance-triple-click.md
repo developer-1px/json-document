@@ -8,8 +8,15 @@ Triple-click은 `UIEvent.detail === 3`입니다. 글에서는 줄 또는 문단�
 ```ts
 import { clickCountAffordance } from "@interactive-os/json-document-affordance";
 
-clickCountAffordance(3);
-// "triple-click"
+function onClick(event: MouseEvent, blockId: string) {
+  if (clickCountAffordance(event.detail) !== "triple-click") return;
+  editor.dispatch({
+    type: "selection.set",
+    blockId,
+    mode: "replace",
+    offset: 0,
+  });
+}
 ```
 
 호스트는 줄/문단 기하를 그립니다. 횟수는 [Double-click](affordance-double-click.md)과

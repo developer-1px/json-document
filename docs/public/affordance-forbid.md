@@ -8,17 +8,16 @@ Not-allowed는 지금 그 손을 쓸 수 없음을 커서로 말하는 손입니
 ```ts
 import { forbiddenCursor } from "@interactive-os/json-document-affordance";
 
-forbiddenCursor({ allowed: false, dropping: false });
-// "not-allowed"
-
-forbiddenCursor({ allowed: false, dropping: true });
-// "no-drop"
-
-forbiddenCursor({ allowed: true, dropping: true, operation: "move" });
-// "move"
+function onPointerMove(event: PointerEvent, itemId: string) {
+  event.currentTarget.style.cursor = forbiddenCursor({
+    allowed: hostCanEdit(itemId),
+    dropping: drag !== null,
+  });
+}
 ```
 
-호스트는 비활성 그림을 그립니다. 어포던스는 거절 커서를 닫습니다.
+이 손은 json-document가 아니라 호스트 커서입니다. 거절된 포인터는
+`editor.dispatch`를 호출하지 않습니다.
 
 닫는 손:
 - `not-allowed`: 요청한 동작 불가

@@ -8,16 +8,27 @@ Drag는 고른 대상을 포인터로 옮기는 손입니다. 누른 점에서 �
 import {
   dragOffset,
   dragShouldCommit,
+  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 
-const offset = dragOffset({ x: 24, y: 40 }, { x: 80, y: 36 });
-if (dragShouldCommit(offset)) {
-  editor.dispatch({
-    type: "object.translate",
-    objectIds: selectedIds,
-    dx: offset.dx,
-    dy: offset.dy,
-  });
+function onPointerDown(event: PointerEvent, objectId: string) {
+  const mode = pointerSelect(event);
+  editor.dispatch({ type: "selection.set", objectIds: [objectId], mode });
+  event.currentTarget.setPointerCapture(event.pointerId);
+  drag = { origin: { x: event.clientX, y: event.clientY } };
+}
+
+function onPointerUp(event: PointerEvent) {
+  const offset = dragOffset(drag.origin, { x: event.clientX, y: event.clientY });
+  if (dragShouldCommit(offset)) {
+    editor.dispatch({
+      type: "object.translate",
+      objectIds: editor.selectedObjects.map((object) => object.id),
+      dx: offset.dx,
+      dy: offset.dy,
+    });
+  }
+  drag = null;
 }
 ```
 
@@ -26,13 +37,18 @@ if (dragShouldCommit(offset)) {
 ## TBD
 
 ```ts
-import { dragKeyboardAffordance } from "@interactive-os/json-document-affordance";
-
-dragKeyboardAffordance({ key: "ArrowDown", grab: true });
-// { type: "nudge", dy: 1 }
-
-dragKeyboardAffordance({ key: "Escape", grab: true });
-// "cancel"
+function onKeyDown(event: KeyboardEvent) {
+  const hand = dragKeyboardAffordance({ key: event.key, grab: drag !== null });
+  if (hand === "cancel") drag = null;
+  if (hand?.type === "nudge") {
+    editor.dispatch({
+      type: "object.translate",
+      objectIds,
+      dx: hand.dx ?? 0,
+      dy: hand.dy ?? 0,
+    });
+  }
+}
 ```
 
 - [Drop](affordance-drop.md) 대상과 `no-drop`

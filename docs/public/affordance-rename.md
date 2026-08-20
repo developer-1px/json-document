@@ -8,23 +8,25 @@ Rename은 고른 대상의 레이블을 고치는 손입니다. F2와 느린 dou
 ```ts
 import { renameAffordance } from "@interactive-os/json-document-affordance";
 
-renameAffordance({ key: "F2" });
-// "begin"
+function onKeyDown(event: KeyboardEvent) {
+  const hand = renameAffordance(event);
+  if (hand === "begin") setRenaming(focusKey);
+  if (hand === "cancel") setRenaming(null);
+  if (hand === "commit" && renaming) {
+    editor.dispatch({ type: "item.rename", itemId: renaming, label: draft });
+    setRenaming(null);
+  }
+}
 
-renameAffordance({ type: "pointer", detail: 2, intervalMs: 900 });
-// "begin"
-
-renameAffordance({ type: "pointer", detail: 2, intervalMs: 200 });
-// null
-
-renameAffordance({ key: "Enter" });
-// "commit"
-
-renameAffordance({ key: "Escape" });
-// "cancel"
+function onClick(event: MouseEvent, itemId: string) {
+  if (renameAffordance({ type: "pointer", detail: event.detail, intervalMs }) === "begin") {
+    setRenaming(itemId);
+  }
+}
 ```
 
-호스트는 레이블 필드를 그립니다. 글 편집 자체는 Hands와 [Caret](affordance-caret.md)입니다.
+호스트는 레이블 필드를 그립니다. begin/cancel은 호스트 화면 상태이고,
+commit만 json-document로 갑니다. 글 편집 자체는 Hands와 [Caret](affordance-caret.md)입니다.
 
 닫는 손:
 - F2
