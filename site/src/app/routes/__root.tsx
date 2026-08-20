@@ -60,7 +60,9 @@ function AppShell() {
             </ActionLink>
           ))}
           {siteLayerGroups.map((group) => {
-            const groupRoutes = siteRoutes.filter((item) => item.navigationGroup === group);
+            const groupRoutes = siteRoutes.filter((item) =>
+              item.navigationGroup === group && item.sidebar !== false
+            );
             if (groupRoutes.length === 0) return null;
             const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
             const open = openGroups.has(group);

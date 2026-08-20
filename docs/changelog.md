@@ -5,6 +5,10 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Projected the site map as a forest of same-category siblings:
+  Collaboration is its own tree, single demos stay off the rail,
+  Adapter/Connector indexes are the integrations, and the former
+  Widgets group is 제품 화면.
 - Ordered sitemap branches by dependency: Collaboration lists
   Lifecycle next to Replica, Editing lists Topology before Selection,
   and Intent reference sits beside the Intent guide instead of under it.

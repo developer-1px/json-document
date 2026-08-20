@@ -35,13 +35,14 @@ describe("official site shell", () => {
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
-    expect(within(screen.getByRole("list", { name: "Concept index" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
+    expect(within(screen.getByRole("navigation", { name: "Concept index" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
       "JSON Document",
+      "Collaboration",
       "Editing",
       "Editors",
-      "Adapters",
-      "Connectors",
-      "Widgets",
+      "Adapter",
+      "Connector",
+      "제품 화면",
     ]);
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
@@ -49,17 +50,10 @@ describe("official site shell", () => {
       "Quickstart",
       "Concepts",
       "API Reference",
-      "Collaboration",
     ]);
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
-    await user.click(nav.getByRole("link", { name: "Collaboration" }));
-    await waitFor(() => expect(nav.getByRole("link", { name: "Replica" })).toBeTruthy());
-    expect(groupLinks(nav, "JSON Document")).toEqual([
-      "Why",
-      "Quickstart",
-      "Concepts",
-      "API Reference",
-      "Collaboration",
+    await user.click(nav.getByRole("button", { name: "Collaboration" }));
+    expect(groupLinks(nav, "Collaboration")).toEqual([
       "Replica",
       "Lifecycle",
       "Collaborative History",
@@ -73,11 +67,9 @@ describe("official site shell", () => {
       "Selection",
       "Clipboard",
       "History",
-      "Rich Text Lab",
     ]);
     await user.click(nav.getByRole("button", { name: "Editors" }));
     expect(groupLinks(nav, "Editors")).toEqual([
-      "Editors",
       "Document",
       "Order",
       "Object",
@@ -86,28 +78,29 @@ describe("official site shell", () => {
       "Kanban",
       "Database",
     ]);
-    await user.click(nav.getByRole("button", { name: "Adapters" }));
-    expect(groupLinks(nav, "Adapters")).toEqual(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
-    await user.click(nav.getByRole("button", { name: "Connectors" }));
-    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-    await user.click(nav.getByRole("button", { name: "Widgets" }));
-    expect(groupLinks(nav, "Widgets")).toEqual(["Widgets"]);
+    await user.click(nav.getByRole("button", { name: "Adapter" }));
+    expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);
+    await user.click(nav.getByRole("button", { name: "Connector" }));
+    expect(groupLinks(nav, "Connector")).toEqual(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
+    await user.click(nav.getByRole("button", { name: "제품 화면" }));
+    expect(groupLinks(nav, "제품 화면")).toEqual(["Toolbar", "Listbox", "Grid"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
+      "Collaboration",
       "Editing",
       "Editors",
-      "Adapters",
-      "Connectors",
-      "Widgets",
+      "Adapter",
+      "Connector",
+      "제품 화면",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
-    const connectors = within(nav.getByRole("group", { name: "Connectors" }));
-    await user.click(connectors.getByRole("link", { name: "Connectors", exact: true }));
+    await user.click(nav.getByRole("link", { name: "json-document" }));
+    await user.click(within(screen.getByRole("navigation", { name: "Concept index" })).getByRole("link", { name: "Connector", exact: true }));
     await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "Connectors" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Connector" })).toBeTruthy();
     const demos = screen.getAllByRole("link", { name: "Open Live Demo" });
     expect(demos.map((link) => link.getAttribute("href"))).toEqual([
       "/connectors/react",
@@ -124,18 +117,18 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByRole("link", { name: "Editors" }).getAttribute("href")).toBe("/editors");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
-    await user.click(connectors.getByRole("link", { name: "Zod", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Zod", exact: true }));
     const adminHeader = document.querySelector("[data-page-header]");
     expect(adminHeader?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
     const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(adminCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
-    expect(adminCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
+    expect(adminCrumb.getByRole("link", { name: "Connector" }).getAttribute("href")).toBe("/connectors");
     expect(adminCrumb.getByText("Zod")).toBeTruthy();
 
     await user.click(nav.getByRole("link", { name: "Validate", exact: true }));
     const validateCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(validateCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
-    expect(validateCrumb.getByRole("link", { name: "Connectors" }).getAttribute("href")).toBe("/connectors");
+    expect(validateCrumb.getByRole("link", { name: "Connector" }).getAttribute("href")).toBe("/connectors");
     expect(validateCrumb.getByRole("link", { name: "Zod" }).getAttribute("href")).toBe("/connectors/zod");
     expect(validateCrumb.getByText("Validate")).toBeTruthy();
   });

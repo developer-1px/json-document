@@ -34,66 +34,51 @@ docs
 폴더에 유지하고, 별도 중첩 폴더를 개념으로 추가하지 않는다.
 
 ```txt
-앞문
-|-- Home map
-|   JSON Document → Editing → Editors → Adapter → Connector → Widgets
-`-- Sidebar: 층 이름. 활성 층 인덱스. 현재 가지 자식
-
 JSON Document
 |-- Why
 |-- Quickstart
 |-- Concepts
-|-- API Reference
-`-- Collaboration
-    |-- Replica
-    |-- Lifecycle
-    |-- Collaborative History
-    |-- Text
-    |   `-- Contenteditable lease
+`-- API
+
+Collaboration
+|-- Replica
+|-- Lifecycle
+|-- Collaborative History
+`-- Text
+    `-- native-input DOM lease
 
 Editing
 |-- Intent guide
 |-- Intent
 |-- Topology
-|   `-- Topology Demo
 |-- Selection
-|   `-- Selection Demo
 |-- Clipboard
-|   `-- Clipboard Demo
-|-- History
-|   `-- History Demo
-`-- Rich Text Lab
+`-- History
 
 Editors
 |-- Document
 |-- Order
-|   `-- Order Demo
 |-- Object
-|   |-- Object Demo
-|   `-- Canvas
+|   |-- demo
+|   `-- demo
 |-- Sheet
 |-- Tree
-|   `-- Tree Demo
 |-- Kanban
 `-- Database
 
-Adapters
-|-- Adapter guide
+Adapter
 |-- Keyboard
-|-- Clipboard
+|-- Clipboard adapter
 `-- Contenteditable
 
-Connectors
-|-- Connector guide
-|   `-- React editing
+Connector
 |-- React
 |-- React Hook Form
 |-- Ajv
 |-- Zod
-|   `-- Validate
 `-- TanStack Table
 
-Widgets
+제품 화면
 |-- Toolbar
 |-- Listbox
 `-- Grid

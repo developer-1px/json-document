@@ -17,13 +17,17 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs")).toEqual(["Overview:/", "JSON Document:/docs", "Why:/docs"]);
     expect(trail("/docs/concepts")).toEqual(["Overview:/", "JSON Document:/docs", "Concepts:/docs/concepts"]);
     expect(trail("/docs/api")).toEqual(["Overview:/", "JSON Document:/docs", "API Reference:/docs/api"]);
-    expect(trail("/docs/collaboration")).toEqual(["Overview:/", "JSON Document:/docs", "Collaboration:/docs/collaboration"]);
+    expect(trail("/docs/collaboration")).toEqual(["Overview:/", "Collaboration:/docs/collaboration"]);
+    expect(trail("/docs/collaboration/replica")).toEqual([
+      "Overview:/",
+      "Collaboration:/docs/collaboration",
+      "Replica:/docs/collaboration/replica",
+    ]);
     expect(trail("/docs/collaboration/text/lease")).toEqual([
       "Overview:/",
-      "JSON Document:/docs",
       "Collaboration:/docs/collaboration",
       "Text:/docs/collaboration/text",
-      "Contenteditable lease:/docs/collaboration/text/lease",
+      "native-input DOM lease:/docs/collaboration/text/lease",
     ]);
     expect(trail("/docs/selection")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Selection:/docs/selection"]);
     expect(trail("/docs/history")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "History:/docs/history"]);
@@ -66,26 +70,27 @@ describe("breadcrumbTrail", () => {
       "History Demo:/demo/history",
     ]);
     expect(trail("/demo/database")).toEqual(["Overview:/", "Editors:/editors", "Database:/demo/database"]);
-    expect(trail("/adapters")).toEqual(["Overview:/", "Adapters:/adapters"]);
-    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapters:/adapters", "Keyboard:/adapters/keyboard"]);
+    expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/adapters"]);
+    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/adapters", "Keyboard:/adapters/keyboard"]);
+    expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/adapters", "Clipboard adapter:/adapters/clipboard"]);
     expect(trail("/docs/react-editing")).toEqual([
       "Overview:/",
-      "Connectors:/connectors",
+      "Connector:/connectors",
       "Connector guide:/docs/connectors",
       "React editing:/docs/react-editing",
     ]);
-    expect(trail("/connectors")).toEqual(["Overview:/", "Connectors:/connectors"]);
-    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connectors:/connectors", "Zod:/connectors/zod"]);
+    expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/connectors"]);
+    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/connectors", "Zod:/connectors/zod"]);
     expect(trail("/connectors/zod/validate")).toEqual([
       "Overview:/",
-      "Connectors:/connectors",
+      "Connector:/connectors",
       "Zod:/connectors/zod",
       "Validate:/connectors/zod/validate",
     ]);
-    expect(trail("/widgets")).toEqual(["Overview:/", "Widgets:/widgets"]);
+    expect(trail("/widgets")).toEqual(["Overview:/", "제품 화면:/widgets"]);
     expect(trail("/widgets/toolbar")).toEqual([
       "Overview:/",
-      "Widgets:/widgets",
+      "제품 화면:/widgets",
       "Toolbar:/widgets/toolbar",
     ]);
   });
@@ -96,12 +101,8 @@ describe("breadcrumbTrail", () => {
 
   test("shows nested nav children only on the current branch", () => {
     expect(visibleNavChildren("/docs/collaboration", "/docs", routes).map((route) => route.path)).toEqual([]);
-    expect(visibleNavChildren("/docs/collaboration", "/docs/collaboration", routes).map((route) => route.path)).toEqual([
-      "/docs/collaboration/replica",
-      "/docs/collaboration/lifecycle",
-      "/docs/collaboration/history",
-      "/docs/collaboration/text",
-    ]);
+    expect(visibleNavChildren("/docs/collaboration", "/docs/collaboration", routes).map((route) => route.path)).toEqual([]);
+    expect(visibleNavChildren("/docs/selection", "/docs/selection", routes).map((route) => route.path)).toEqual([]);
     expect(visibleNavChildren("/docs/collaboration/text", "/docs/collaboration/text/lease", routes).map((route) => route.path)).toEqual([
       "/docs/collaboration/text/lease",
     ]);

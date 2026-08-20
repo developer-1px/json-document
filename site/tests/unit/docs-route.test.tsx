@@ -38,11 +38,10 @@ describe("documentation routes", () => {
 
     expect(screen.queryByRole("navigation", { name: "Documentation pages" })).toBeNull();
 
-    await user.click(nav.getByRole("button", { name: "Connectors" }));
-    await user.click(within(nav.getByRole("group", { name: "Connectors" })).getByRole("link", { name: "Connector guide" }));
-    await waitFor(() => expect(document.title).toBe("Connector Docs - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "React에서 변경 구독하기" })).toBeTruthy();
+    await user.click(nav.getByRole("button", { name: "Connector" }));
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "React", exact: true }));
+    await waitFor(() => expect(document.title).toBe("React Connector Live Demo - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "React Connector" })).toBeTruthy();
 
     await user.click(nav.getByRole("button", { name: "Editing" }));
     await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Topology" }));

@@ -11,13 +11,14 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(page.getByRole("list", { name: "Concept index" }).getByRole("link")).toHaveText([
+  await expect(page.getByRole("navigation", { name: "Concept index" }).getByRole("link")).toHaveText([
     "JSON Document",
+    "Collaboration",
     "Editing",
     "Editors",
-    "Adapters",
-    "Connectors",
-    "Widgets",
+    "Adapter",
+    "Connector",
+    "제품 화면",
   ]);
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -27,16 +28,10 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Quickstart",
     "Concepts",
     "API Reference",
-    "Collaboration",
   ]);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
-  await navigation.getByRole("link", { name: "Collaboration" }).click();
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
-    "Why",
-    "Quickstart",
-    "Concepts",
-    "API Reference",
-    "Collaboration",
+  await navigation.getByRole("button", { name: "Collaboration" }).click();
+  await expect(navigation.getByRole("group", { name: "Collaboration" }).getByRole("link")).toHaveText([
     "Replica",
     "Lifecycle",
     "Collaborative History",
@@ -50,11 +45,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Selection",
     "Clipboard",
     "History",
-    "Rich Text Lab",
   ]);
   await navigation.getByRole("button", { name: "Editors" }).click();
   await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
-    "Editors",
     "Document",
     "Order",
     "Object",
@@ -63,21 +56,22 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Kanban",
     "Database",
   ]);
-  await navigation.getByRole("button", { name: "Adapters" }).click();
-  await expect(navigation.getByRole("group", { name: "Adapters" }).getByRole("link")).toHaveText(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
-  await navigation.getByRole("button", { name: "Connectors" }).click();
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-  await navigation.getByRole("button", { name: "Widgets" }).click();
-  await expect(navigation.getByRole("group", { name: "Widgets" }).getByRole("link")).toHaveText(["Widgets"]);
+  await navigation.getByRole("button", { name: "Adapter" }).click();
+  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);
+  await navigation.getByRole("button", { name: "Connector" }).click();
+  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
+  await navigation.getByRole("button", { name: "제품 화면" }).click();
+  await expect(navigation.getByRole("group", { name: "제품 화면" }).getByRole("link")).toHaveText(["Toolbar", "Listbox", "Grid"]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
+    "Collaboration",
     "Editing",
     "Editors",
-    "Adapters",
-    "Connectors",
-    "Widgets",
+    "Adapter",
+    "Connector",
+    "제품 화면",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -92,10 +86,11 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Editors" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Adapters" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
-  await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Widgets" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "제품 화면" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
@@ -115,10 +110,10 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
-  await siteNavigation.getByRole("button", { name: "Connectors" }).click();
-  await siteNavigation.getByRole("group", { name: "Connectors" }).getByRole("link", { name: "Connector guide" }).click();
-  await expect(page).toHaveTitle("Connector Docs - json-document");
-  await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
+  await siteNavigation.getByRole("button", { name: "Connector" }).click();
+  await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "React", exact: true }).click();
+  await expect(page).toHaveTitle("React Connector Live Demo - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "React Connector" })).toBeVisible();
 
   await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");

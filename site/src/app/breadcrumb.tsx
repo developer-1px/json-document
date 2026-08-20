@@ -40,9 +40,6 @@ export function breadcrumbTrail(
 }
 
 function crumbLabel(route: SiteRoute): string {
-  if (route.path === "/adapters") return "Adapters";
-  if (route.path === "/connectors") return "Connectors";
-  if (route.path === "/editors") return "Editors";
   return route.label;
 }
 
@@ -113,11 +110,17 @@ export function isNavBranch(currentPath: string, parentPath: string, routes: Rea
   return false;
 }
 
+export function isDemoRoute(route: SiteRoute): boolean {
+  return route.path === "/demo" || route.path.startsWith("/demo/");
+}
+
 export function visibleNavChildren(
   parentPath: string,
   currentPath: string,
   routes: ReadonlyArray<SiteRoute>,
 ): ReadonlyArray<SiteRoute> {
   if (currentPath !== parentPath && !isNavBranch(currentPath, parentPath, routes)) return [];
-  return childRoutes(parentPath, routes);
+  const children = childRoutes(parentPath, routes).filter((route) => route.sidebar !== false);
+  if (children.length === 1 && isDemoRoute(children[0]!)) return [];
+  return children;
 }

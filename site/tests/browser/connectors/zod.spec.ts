@@ -9,7 +9,7 @@ test("Zod Connector Live Demo opens a Database admin from a Zod schema without a
   await page.goto("/connectors/zod");
   const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
   await expect(breadcrumb.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/");
-  await expect(breadcrumb.getByRole("link", { name: "Connectors" })).toHaveAttribute("href", "/connectors");
+  await expect(breadcrumb.getByRole("link", { name: "Connector" })).toHaveAttribute("href", "/connectors");
   await expect(breadcrumb.getByText("Zod", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Connector" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "The table is the admin" })).toBeVisible();
