@@ -55,15 +55,6 @@ Editing
 |-- Clipboard
 `-- History
 
-Hands
-|-- Document
-|-- Order
-|-- Object
-|-- Sheet
-|-- Tree
-|-- Kanban
-`-- Database
-
 Adapter
 |-- Keyboard
 |-- Clipboard adapter
@@ -102,6 +93,15 @@ Affordance
 |-- Zoom
 |-- Snap
 `-- Not-allowed
+
+Hands
+|-- Document
+|-- Order
+|-- Object
+|-- Sheet
+|-- Tree
+|-- Kanban
+`-- Database
 ```
 
 ## 규범 우선순위

@@ -704,7 +704,7 @@
   {
     "path": "/widgets/toolbar",
     "label": "Toolbar",
-    "title": "Toolbar Widget - json-document",
+    "title": "Toolbar proof - json-document",
     "description": "Undo and Redo disabled states come from canUndo and canRedo.",
     "parentPath": "/docs/affordance/history",
     "sidebar": false
@@ -712,7 +712,7 @@
   {
     "path": "/widgets/listbox",
     "label": "Listbox",
-    "title": "Listbox Widget - json-document",
+    "title": "Listbox proof - json-document",
     "description": "A listbox reads selected keys and focus from Order selection.",
     "parentPath": "/docs/affordance/select",
     "sidebar": false
@@ -720,7 +720,7 @@
   {
     "path": "/widgets/grid",
     "label": "Grid",
-    "title": "Grid Widget - json-document",
+    "title": "Grid proof - json-document",
     "description": "A grid reads visible topology and selected cells from Sheet selection.",
     "parentPath": "/docs/affordance/select",
     "sidebar": false
@@ -728,7 +728,7 @@
   {
     "path": "/widgets/document",
     "label": "Document",
-    "title": "Document Widget - json-document",
+    "title": "Document proof - json-document",
     "description": "A document line reads selected keys, focus, and text offset from block selection.",
     "parentPath": "/docs/affordance/select",
     "sidebar": false
@@ -736,7 +736,7 @@
   {
     "path": "/widgets/canvas",
     "label": "Canvas",
-    "title": "Canvas Widget - json-document",
+    "title": "Canvas proof - json-document",
     "description": "A canvas reads selected objects on a plane from Object selection.",
     "parentPath": "/docs/affordance/drag",
     "sidebar": false
@@ -744,7 +744,7 @@
   {
     "path": "/widgets/tree",
     "label": "Tree",
-    "title": "Tree Widget - json-document",
+    "title": "Tree proof - json-document",
     "description": "A tree reads the visible hierarchical line from Tree selection.",
     "parentPath": "/docs/affordance/fold",
     "sidebar": false
@@ -752,7 +752,7 @@
   {
     "path": "/widgets/board",
     "label": "Board",
-    "title": "Board Widget - json-document",
+    "title": "Board proof - json-document",
     "description": "A board reads columns of cards and selected keys from Kanban selection.",
     "parentPath": "/docs/affordance/drag",
     "sidebar": false

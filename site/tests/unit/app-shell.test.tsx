@@ -39,10 +39,10 @@ describe("official site shell", () => {
       "JSON Document",
       "Collaboration",
       "Editing",
-      "Hands",
       "Adapter",
       "Connector",
       "Affordance",
+      "Hands",
     ]);
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
@@ -116,10 +116,10 @@ describe("official site shell", () => {
       "JSON Document",
       "Collaboration",
       "Editing",
-      "Hands",
       "Adapter",
       "Connector",
       "Affordance",
+      "Hands",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 

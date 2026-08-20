@@ -15,10 +15,10 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "JSON Document",
     "Collaboration",
     "Editing",
-    "Hands",
     "Adapter",
     "Connector",
     "Affordance",
+    "Hands",
   ]);
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -94,10 +94,10 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "JSON Document",
     "Collaboration",
     "Editing",
-    "Hands",
     "Adapter",
     "Connector",
     "Affordance",
+    "Hands",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
