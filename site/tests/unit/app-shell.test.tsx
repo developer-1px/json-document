@@ -42,7 +42,7 @@ describe("official site shell", () => {
       "Hands",
       "Adapter",
       "Connector",
-      "제품 화면",
+      "어포던스",
     ]);
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
@@ -82,8 +82,8 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-    await user.click(nav.getByRole("button", { name: "제품 화면" }));
-    expect(groupLinks(nav, "제품 화면")).toEqual(["Toolbar", "Listbox", "Grid", "Document", "Canvas", "Tree", "Board"]);
+    await user.click(nav.getByRole("button", { name: "어포던스" }));
+    expect(groupLinks(nav, "어포던스")).toEqual(["고르기", "접기", "드래그", "되돌리기"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
@@ -93,7 +93,7 @@ describe("official site shell", () => {
       "Hands",
       "Adapter",
       "Connector",
-      "제품 화면",
+      "어포던스",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 

@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Opened Affordance as the product-facing keyboard and mouse contract, with
+  usage and API for select, fold, drag, and undo/redo. Live widget screens
+  stay as proofs, not the catalog entrance.
 - Opened Document, Canvas, Tree, and Board on 제품 화면, and made Toolbar,
   Listbox, Grid, and those widgets share prop bindings that live demos
   consume without forking. Database stays on Grid.

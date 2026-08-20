@@ -63,8 +63,8 @@ export function HomeRoute() {
                 <span className={homeStyles.indexBlurb}>Library ecosystems</span>
               </li>
               <li className={homeStyles.indexItem}>
-                <ActionLink to="/widgets" className={homeStyles.indexLink}>제품 화면</ActionLink>
-                <span className={homeStyles.indexBlurb}>Toolbar, Listbox, Grid, Document, Canvas, Tree, and Board</span>
+                <ActionLink to="/docs/affordance" className={homeStyles.indexLink}>어포던스</ActionLink>
+                <span className={homeStyles.indexBlurb}>고르기, 접기, 드래그, 되돌리기</span>
               </li>
             </ul>
           </nav>

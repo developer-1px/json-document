@@ -1,5 +1,10 @@
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
+import affordanceMarkdown from "../../../../docs/public/affordance.md?raw";
+import affordanceDragMarkdown from "../../../../docs/public/affordance-drag.md?raw";
+import affordanceFoldMarkdown from "../../../../docs/public/affordance-fold.md?raw";
+import affordanceHistoryMarkdown from "../../../../docs/public/affordance-history.md?raw";
+import affordanceSelectMarkdown from "../../../../docs/public/affordance-select.md?raw";
 import adaptersMarkdown from "../../../../docs/public/adapters.md?raw";
 import collaborationMarkdown from "../../../../docs/public/collaboration.md?raw";
 import collaborationHistoryMarkdown from "../../../../docs/public/collaboration-history.md?raw";
@@ -30,6 +35,11 @@ export const docPages = {
   overview: docPage("/docs", overviewMarkdown),
   quickstart: docPage("/docs/tutorial", quickstartMarkdown),
   adapters: docPage("/docs/adapters", adaptersMarkdown),
+  affordance: docPage("/docs/affordance", affordanceMarkdown),
+  affordanceSelect: docPage("/docs/affordance/select", affordanceSelectMarkdown),
+  affordanceFold: docPage("/docs/affordance/fold", affordanceFoldMarkdown),
+  affordanceDrag: docPage("/docs/affordance/drag", affordanceDragMarkdown),
+  affordanceHistory: docPage("/docs/affordance/history", affordanceHistoryMarkdown),
   connectors: docPage("/docs/connectors", connectorsMarkdown),
   reactEditing: docPage("/docs/react-editing", reactEditingMarkdown),
   collaboration: docPage("/docs/collaboration", collaborationMarkdown),

@@ -76,14 +76,11 @@ Connector
 |-- Zod
 `-- TanStack Table
 
-제품 화면
-|-- Toolbar
-|-- Listbox
-|-- Grid
-|-- Document
-|-- Canvas
-|-- Tree
-`-- Board
+어포던스
+|-- 고르기
+|-- 접기
+|-- 드래그
+`-- 되돌리기
 ```
 
 ## 규범 우선순위

@@ -63,6 +63,11 @@ import { Route as PageWidgetsToolbarRouteImport } from "./routes/_page/widgets/t
 import { Route as PageWidgetsTreeRouteImport } from "./routes/_page/widgets/tree";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
+import { Route as PageDocsAffordanceIndexRouteImport } from "./routes/_page/docs/affordance/index";
+import { Route as PageDocsAffordanceDragRouteImport } from "./routes/_page/docs/affordance/drag";
+import { Route as PageDocsAffordanceFoldRouteImport } from "./routes/_page/docs/affordance/fold";
+import { Route as PageDocsAffordanceHistoryRouteImport } from "./routes/_page/docs/affordance/history";
+import { Route as PageDocsAffordanceSelectRouteImport } from "./routes/_page/docs/affordance/select";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
 import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
 import { Route as PageDocsCollaborationLifecycleRouteImport } from "./routes/_page/docs/collaboration/lifecycle";
@@ -344,6 +349,33 @@ const PageConnectorsZodValidateRoute =
     path: "/connectors/zod/validate",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAffordanceIndexRoute = PageDocsAffordanceIndexRouteImport.update({
+  id: "/docs/affordance/",
+  path: "/docs/affordance/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceDragRoute = PageDocsAffordanceDragRouteImport.update({
+  id: "/docs/affordance/drag",
+  path: "/docs/affordance/drag",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceFoldRoute = PageDocsAffordanceFoldRouteImport.update({
+  id: "/docs/affordance/fold",
+  path: "/docs/affordance/fold",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceHistoryRoute =
+  PageDocsAffordanceHistoryRouteImport.update({
+    id: "/docs/affordance/history",
+    path: "/docs/affordance/history",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceSelectRoute =
+  PageDocsAffordanceSelectRouteImport.update({
+    id: "/docs/affordance/select",
+    path: "/docs/affordance/select",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsCollaborationIndexRoute =
   PageDocsCollaborationIndexRouteImport.update({
     id: "/docs/collaboration/",
@@ -434,10 +466,15 @@ export interface FileRoutesByFullPath {
   "/docs/": typeof PageDocsIndexRoute;
   "/widgets/": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
+  "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
+  "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
+  "/docs/affordance/select": typeof PageDocsAffordanceSelectRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/connectors/zod/": typeof PageConnectorsZodIndexRoute;
+  "/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
   "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
@@ -495,10 +532,15 @@ export interface FileRoutesByTo {
   "/docs": typeof PageDocsIndexRoute;
   "/widgets": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
+  "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
+  "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
+  "/docs/affordance/select": typeof PageDocsAffordanceSelectRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/connectors/zod": typeof PageConnectorsZodIndexRoute;
+  "/docs/affordance": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration": typeof PageDocsCollaborationIndexRoute;
   "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/docs/collaboration/text": typeof PageDocsCollaborationTextIndexRoute;
@@ -558,10 +600,15 @@ export interface FileRoutesById {
   "/_page/docs/": typeof PageDocsIndexRoute;
   "/_page/widgets/": typeof PageWidgetsIndexRoute;
   "/_page/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/_page/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
+  "/_page/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
+  "/_page/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
+  "/_page/docs/affordance/select": typeof PageDocsAffordanceSelectRoute;
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/_page/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/_page/connectors/zod/": typeof PageConnectorsZodIndexRoute;
+  "/_page/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/_page/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
   "/_page/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/_page/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
@@ -621,10 +668,15 @@ export interface FileRouteTypes {
     | "/docs/"
     | "/widgets/"
     | "/connectors/zod/validate"
+    | "/docs/affordance/drag"
+    | "/docs/affordance/fold"
+    | "/docs/affordance/history"
+    | "/docs/affordance/select"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
     | "/connectors/zod/"
+    | "/docs/affordance/"
     | "/docs/collaboration/"
     | "/docs/collaboration/text/lease"
     | "/docs/collaboration/text/";
@@ -682,10 +734,15 @@ export interface FileRouteTypes {
     | "/docs"
     | "/widgets"
     | "/connectors/zod/validate"
+    | "/docs/affordance/drag"
+    | "/docs/affordance/fold"
+    | "/docs/affordance/history"
+    | "/docs/affordance/select"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
     | "/connectors/zod"
+    | "/docs/affordance"
     | "/docs/collaboration"
     | "/docs/collaboration/text/lease"
     | "/docs/collaboration/text";
@@ -744,10 +801,15 @@ export interface FileRouteTypes {
     | "/_page/docs/"
     | "/_page/widgets/"
     | "/_page/connectors/zod/validate"
+    | "/_page/docs/affordance/drag"
+    | "/_page/docs/affordance/fold"
+    | "/_page/docs/affordance/history"
+    | "/_page/docs/affordance/select"
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
     | "/_page/docs/collaboration/replica"
     | "/_page/connectors/zod/"
+    | "/_page/docs/affordance/"
     | "/_page/docs/collaboration/"
     | "/_page/docs/collaboration/text/lease"
     | "/_page/docs/collaboration/text/";
@@ -1138,6 +1200,41 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageConnectorsZodValidateRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/affordance/": {
+      id: "/_page/docs/affordance/";
+      path: "/docs/affordance";
+      fullPath: "/docs/affordance/";
+      preLoaderRoute: typeof PageDocsAffordanceIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/drag": {
+      id: "/_page/docs/affordance/drag";
+      path: "/docs/affordance/drag";
+      fullPath: "/docs/affordance/drag";
+      preLoaderRoute: typeof PageDocsAffordanceDragRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/fold": {
+      id: "/_page/docs/affordance/fold";
+      path: "/docs/affordance/fold";
+      fullPath: "/docs/affordance/fold";
+      preLoaderRoute: typeof PageDocsAffordanceFoldRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/history": {
+      id: "/_page/docs/affordance/history";
+      path: "/docs/affordance/history";
+      fullPath: "/docs/affordance/history";
+      preLoaderRoute: typeof PageDocsAffordanceHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/select": {
+      id: "/_page/docs/affordance/select";
+      path: "/docs/affordance/select";
+      fullPath: "/docs/affordance/select";
+      preLoaderRoute: typeof PageDocsAffordanceSelectRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/collaboration/": {
       id: "/_page/docs/collaboration/";
       path: "/docs/collaboration";
@@ -1235,10 +1332,15 @@ interface PageRouteChildren {
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
   PageWidgetsIndexRoute: typeof PageWidgetsIndexRoute;
   PageConnectorsZodValidateRoute: typeof PageConnectorsZodValidateRoute;
+  PageDocsAffordanceDragRoute: typeof PageDocsAffordanceDragRoute;
+  PageDocsAffordanceFoldRoute: typeof PageDocsAffordanceFoldRoute;
+  PageDocsAffordanceHistoryRoute: typeof PageDocsAffordanceHistoryRoute;
+  PageDocsAffordanceSelectRoute: typeof PageDocsAffordanceSelectRoute;
   PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
   PageDocsCollaborationLifecycleRoute: typeof PageDocsCollaborationLifecycleRoute;
   PageDocsCollaborationReplicaRoute: typeof PageDocsCollaborationReplicaRoute;
   PageConnectorsZodIndexRoute: typeof PageConnectorsZodIndexRoute;
+  PageDocsAffordanceIndexRoute: typeof PageDocsAffordanceIndexRoute;
   PageDocsCollaborationIndexRoute: typeof PageDocsCollaborationIndexRoute;
   PageDocsCollaborationTextLeaseRoute: typeof PageDocsCollaborationTextLeaseRoute;
   PageDocsCollaborationTextIndexRoute: typeof PageDocsCollaborationTextIndexRoute;
@@ -1296,10 +1398,15 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsIndexRoute: PageDocsIndexRoute,
   PageWidgetsIndexRoute: PageWidgetsIndexRoute,
   PageConnectorsZodValidateRoute: PageConnectorsZodValidateRoute,
+  PageDocsAffordanceDragRoute: PageDocsAffordanceDragRoute,
+  PageDocsAffordanceFoldRoute: PageDocsAffordanceFoldRoute,
+  PageDocsAffordanceHistoryRoute: PageDocsAffordanceHistoryRoute,
+  PageDocsAffordanceSelectRoute: PageDocsAffordanceSelectRoute,
   PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,
   PageDocsCollaborationLifecycleRoute: PageDocsCollaborationLifecycleRoute,
   PageDocsCollaborationReplicaRoute: PageDocsCollaborationReplicaRoute,
   PageConnectorsZodIndexRoute: PageConnectorsZodIndexRoute,
+  PageDocsAffordanceIndexRoute: PageDocsAffordanceIndexRoute,
   PageDocsCollaborationIndexRoute: PageDocsCollaborationIndexRoute,
   PageDocsCollaborationTextLeaseRoute: PageDocsCollaborationTextLeaseRoute,
   PageDocsCollaborationTextIndexRoute: PageDocsCollaborationTextIndexRoute,

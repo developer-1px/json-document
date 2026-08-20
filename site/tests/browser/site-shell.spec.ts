@@ -18,7 +18,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Hands",
     "Adapter",
     "Connector",
-    "제품 화면",
+    "어포던스",
   ]);
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -60,15 +60,12 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-  await navigation.getByRole("button", { name: "제품 화면" }).click();
-  await expect(navigation.getByRole("group", { name: "제품 화면" }).getByRole("link")).toHaveText([
-    "Toolbar",
-    "Listbox",
-    "Grid",
-    "Document",
-    "Canvas",
-    "Tree",
-    "Board",
+  await navigation.getByRole("button", { name: "어포던스" }).click();
+  await expect(navigation.getByRole("group", { name: "어포던스" }).getByRole("link")).toHaveText([
+    "고르기",
+    "접기",
+    "드래그",
+    "되돌리기",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
@@ -79,7 +76,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Hands",
     "Adapter",
     "Connector",
-    "제품 화면",
+    "어포던스",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -97,7 +94,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "제품 화면" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "어포던스" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
 
   await page.goto("/docs/tutorial");

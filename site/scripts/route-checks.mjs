@@ -7,6 +7,7 @@ const navigationGroups = new Set([
   "Adapter",
   "Connector",
   "제품 화면",
+  "어포던스",
 ]);
 
 export function validateSiteRoutes(routes, fail) {

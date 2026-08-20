@@ -32,6 +32,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-ajv/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-affordance",
+      replacement: sourceFile("packages/json-document-affordance/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-zod",
       replacement: sourceFile("packages/json-document-zod/src/index.ts"),
     },

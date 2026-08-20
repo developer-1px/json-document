@@ -434,60 +434,113 @@
     }
   },
   {
-    "path": "/widgets",
-    "label": "제품 화면",
-    "title": "Widgets - json-document",
-    "description": "Sample widgets that bind only editing affordances: Toolbar, Listbox, Grid, Document, Canvas, Tree, and Board.",
-    "navigationGroup": "제품 화면",
+    "path": "/docs/affordance",
+    "label": "어포던스",
+    "title": "Affordance - json-document",
+    "heading": "어포던스",
+    "description": "제품이 json-document를 만지는 최전선의 키보드·마우스 손을 API와 사용법으로 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "어포던스",
     "sidebar": false
+  },
+  {
+    "path": "/docs/affordance/select",
+    "label": "고르기",
+    "title": "고르기 - json-document",
+    "heading": "고르기",
+    "description": "클릭, Shift 범위, Mod 토글, 화살표로 대상을 집는 손을 붙입니다.",
+    "language": "ko",
+    "navigationGroup": "어포던스",
+    "relatedDemoPath": "/widgets/listbox",
+    "relatedDemoLabel": "증명 열기"
+  },
+  {
+    "path": "/docs/affordance/fold",
+    "label": "접기",
+    "title": "접기 - json-document",
+    "heading": "접기",
+    "description": "나무에서 왼쪽은 접고 오른쪽은 펼치는 손을 붙입니다.",
+    "language": "ko",
+    "navigationGroup": "어포던스",
+    "relatedDemoPath": "/widgets/tree",
+    "relatedDemoLabel": "증명 열기"
+  },
+  {
+    "path": "/docs/affordance/drag",
+    "label": "드래그",
+    "title": "드래그 - json-document",
+    "heading": "드래그",
+    "description": "고른 대상을 포인터로 옮기는 손을 붙입니다.",
+    "language": "ko",
+    "navigationGroup": "어포던스",
+    "relatedDemoPath": "/widgets/canvas",
+    "relatedDemoLabel": "증명 열기"
+  },
+  {
+    "path": "/docs/affordance/history",
+    "label": "되돌리기",
+    "title": "되돌리기 - json-document",
+    "heading": "되돌리기",
+    "description": "Mod+Z와 canUndo로 값과 선택을 함께 되돌리는 손을 붙입니다.",
+    "language": "ko",
+    "navigationGroup": "어포던스",
+    "relatedDemoPath": "/widgets/toolbar",
+    "relatedDemoLabel": "증명 열기"
   },
   {
     "path": "/widgets/toolbar",
     "label": "Toolbar",
     "title": "Toolbar Widget - json-document",
     "description": "Undo and Redo disabled states come from canUndo and canRedo.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/history",
+    "sidebar": false
   },
   {
     "path": "/widgets/listbox",
     "label": "Listbox",
     "title": "Listbox Widget - json-document",
     "description": "A listbox reads selected keys and focus from Order selection.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/select",
+    "sidebar": false
   },
   {
     "path": "/widgets/grid",
     "label": "Grid",
     "title": "Grid Widget - json-document",
     "description": "A grid reads visible topology and selected cells from Sheet selection.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/select",
+    "sidebar": false
   },
   {
     "path": "/widgets/document",
     "label": "Document",
     "title": "Document Widget - json-document",
     "description": "A document line reads selected keys, focus, and text offset from block selection.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/select",
+    "sidebar": false
   },
   {
     "path": "/widgets/canvas",
     "label": "Canvas",
     "title": "Canvas Widget - json-document",
     "description": "A canvas reads selected objects on a plane from Object selection.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/drag",
+    "sidebar": false
   },
   {
     "path": "/widgets/tree",
     "label": "Tree",
     "title": "Tree Widget - json-document",
     "description": "A tree reads the visible hierarchical line from Tree selection.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/fold",
+    "sidebar": false
   },
   {
     "path": "/widgets/board",
     "label": "Board",
     "title": "Board Widget - json-document",
     "description": "A board reads columns of cards and selected keys from Kanban selection.",
-    "navigationGroup": "제품 화면"
+    "parentPath": "/docs/affordance/drag",
+    "sidebar": false
   }
 ]

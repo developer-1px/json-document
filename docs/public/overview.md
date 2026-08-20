@@ -77,7 +77,7 @@ Hands는 그 전형적 손의 최소 완성본입니다. 한 줄 목록을 집�
 Object, Sheet, Tree, Kanban, Database가 그 목록입니다. 고르려면
 [Hands](hands.md)로 갑니다.
 
-## 플랫폼, 라이브러리, 제품 화면
+## 플랫폼, 라이브러리, 어포던스
 
 브라우저에서 쓰려면 키보드와 clipboard, contenteditable 같은 플랫폼
 계약을 같은 공개 API에 맞춰 번역해야 합니다. Adapter가 그 일을 합니다.
@@ -88,19 +88,19 @@ React로 그리거나 Zod로 검사하려면 이름 있는 라이브러리의 �
 계약에 맞춰야 합니다. Connector가 그 일을 합니다. document 변경은
 React 구독으로 흐르고, 표의 보이는 행과 열은 Sheet의 Topology가 됩니다.
 
-툴바, 리스트박스, 격자, 문서 줄, 캔버스, 나무, 보드는 제품이 그리는
-화면입니다. 편집 상태를 읽어 되돌리기 버튼을 끄거나, 고른 칸을 칠합니다.
+고르기, 접기, 드래그, 되돌리기는 제품이 json-document를 만지는 손입니다.
+화면은 호스트가 그리고, 단축키와 마우스 문법은 어포던스가 닫습니다.
 
 플랫폼 계약과 라이브러리 연결과 호스트 화면은 높이가 같고 하는 일만
 다릅니다. 필요한 것만 고릅니다. [Adapters](adapters.md)와
-[Connectors](connectors.md)에서 이어서 읽습니다.
+[Connectors](connectors.md), [어포던스](affordance.md)에서 이어서 읽습니다.
 
 ## 편집 플랫폼의 커널
 
 json-document는 여러 화면이 같은 문서를 쓰게 하는 편집 플랫폼의
 커널입니다. JSON Document와 Collaboration이 값을 다룹니다. Editing이
 손과 기억을 더합니다. Hands가 장르의 전형을 보여 줍니다. Adapter와
-Connector와 제품 화면이 그 손을 실제 환경에 붙입니다.
+Connector와 어포던스가 그 손을 실제 환경에 붙입니다.
 
 여러 화면이 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
 커널입니다. 먼저 값을 만져 보려면 [Quickstart](quickstart.md)에서 작은

@@ -1,16 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test("Widgets catalog lists only editing widgets", async ({ page }) => {
+test("Widgets catalog redirects to affordance usage", async ({ page }) => {
   await page.goto("/widgets");
-  await expect(page.getByRole("heading", { level: 1, name: "제품 화면" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Toolbar" })).toHaveAttribute("href", "/widgets/toolbar");
-  await expect(page.getByRole("link", { name: "Open Listbox" })).toHaveAttribute("href", "/widgets/listbox");
-  await expect(page.getByRole("link", { name: "Open Grid" })).toHaveAttribute("href", "/widgets/grid");
-  await expect(page.getByRole("link", { name: "Open Document" })).toHaveAttribute("href", "/widgets/document");
-  await expect(page.getByRole("link", { name: "Open Canvas" })).toHaveAttribute("href", "/widgets/canvas");
-  await expect(page.getByRole("link", { name: "Open Tree" })).toHaveAttribute("href", "/widgets/tree");
-  await expect(page.getByRole("link", { name: "Open Board" })).toHaveAttribute("href", "/widgets/board");
-  await expect(page.getByRole("link", { name: "Open Database" })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/docs\/affordance$/);
+  await expect(page.getByRole("heading", { level: 1, name: "어포던스" })).toBeVisible();
+  const navigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(navigation.getByRole("link", { name: "고르기" })).toHaveAttribute("href", "/docs/affordance/select");
+  await expect(navigation.getByRole("link", { name: "접기" })).toHaveAttribute("href", "/docs/affordance/fold");
+  await expect(navigation.getByRole("link", { name: "드래그" })).toHaveAttribute("href", "/docs/affordance/drag");
+  await expect(navigation.getByRole("link", { name: "되돌리기" })).toHaveAttribute("href", "/docs/affordance/history");
 });
 
 test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
