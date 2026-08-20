@@ -8,11 +8,17 @@ import {
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  applyAffordance,
+  pointerSelect,
+  treeAffordance,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands, optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialTree: TreeDocument = {
   nodes: [
@@ -35,6 +41,10 @@ export function TreeDemoRoute() {
     () => visibleTopology((editor.snapshot.value as TreeDocument).nodes, expanded),
     [editor.snapshot.value, expanded],
   );
+  const rows = useMemo(
+    () => walkVisible((editor.snapshot.value as TreeDocument).nodes, expanded),
+    [editor.snapshot.value, expanded],
+  );
 
   function run(intent: TreeIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -49,6 +59,54 @@ export function TreeDemoRoute() {
     focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? null,
     onSelect: (nodeId, mode) => {
       run({ type: "selection.set", nodeId, topology, mode }, "Selection changed");
+    },
+    keyboard: {
+      resolve: (stroke) => editingCommandFromStroke(stroke),
+      focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? undefined,
+      neighbor: (key, command) => {
+        const row = rows.find((item) => item.id === key);
+        const nodes = (editor.snapshot.value as TreeDocument).nodes;
+        if (row && command.type === "move") {
+          let stay = false;
+          applyAffordance(
+            treeAffordance(command, {
+              expanded: expanded.has(row.id),
+              hasChildren: nodes.some((node) => node.parentId === row.id),
+            }),
+            {
+              hand: (hand) => {
+                if (hand.type === "expand") {
+                  setExpanded((current) => new Set(current).add(row.id));
+                  stay = true;
+                }
+                if (hand.type === "collapse") {
+                  setExpanded((current) => {
+                    const next = new Set(current);
+                    next.delete(row.id);
+                    return next;
+                  });
+                  stay = true;
+                }
+              },
+            },
+          );
+          if (stay) return key;
+        }
+        return command.type === "move"
+          ? moveLinePoint(topology.visibleIds, key, command.direction)
+          : lineBoundary(topology.visibleIds, command.edge);
+      },
+      onDelete: () => {
+        run({ type: "selection.remove", topology }, "Selection deleted");
+      },
+      onUndo: () => {
+        editor.undo();
+        setAnnouncement("Undone");
+      },
+      onRedo: () => {
+        editor.redo();
+        setAnnouncement("Redone");
+      },
     },
   });
   const snapshot = editing.snapshot;
@@ -123,7 +181,11 @@ export function TreeDemoRoute() {
         )}
       >
         <section aria-label="Editable tree">
-          <ul className="m-0 grid list-none gap-1 p-0">
+          <ul
+            className="m-0 grid list-none gap-1 p-0"
+            tabIndex={0}
+            onKeyDown={editing.getKeyDownHandler()}
+          >
             {walkVisible(document.nodes, expanded).map((row) => {
               const childCount = document.nodes.filter((node) => node.parentId === row.id).length;
               return (
@@ -141,6 +203,14 @@ export function TreeDemoRoute() {
                       data-node-id={row.id}
                       className={classes("text-left", ui.surface.documentBlock)}
                       {...optionProps(editing.getItem(row.id))}
+                      onClick={(event) => {
+                        applyAffordance(pointerSelect(event), {
+                          hand: (hand) => {
+                            if (hand.type !== "select") return;
+                            run({ type: "selection.set", nodeId: row.id, topology, mode: hand.operation }, "Selection changed");
+                          },
+                        });
+                      }}
                     >
                       {row.label}
                     </SelectableItem>

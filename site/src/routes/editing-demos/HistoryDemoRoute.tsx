@@ -5,6 +5,10 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
@@ -68,6 +72,14 @@ export function HistoryDemoRoute() {
                   type="button"
                   className={classes("px-3 py-2", ui.surface.selectableBlock)}
                   {...optionProps(item)}
+                  onClick={(event) => {
+                    applyAffordance(pointerSelect(event), {
+                      hand: (hand) => {
+                        if (hand.type !== "select") return;
+                        editor.dispatch({ type: "selection.set", blockId: block.id, mode: hand.operation });
+                      },
+                    });
+                  }}
                 >
                   {block.id} · {block.text}
                   {item.getTextOffset() === null ? "" : ` · offset ${item.getTextOffset()}`}
