@@ -8,6 +8,82 @@ test("Canvas fills a selected object", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Note" })).toHaveCSS("background-color", "rgb(77, 106, 138)");
 });
 
+test("Order typeahead jumps to the matching label and Escape clears the buffer", async ({ page }) => {
+  await page.goto("/demo/order");
+  await page.getByLabel("Editable order").locator("ol").focus();
+  await page.keyboard.type("T");
+  await expect(page.getByRole("button", { name: /Today/ })).toHaveAttribute("data-selected", "true");
+  await page.keyboard.press("Escape");
+  await page.keyboard.type("I");
+  await expect(page.getByRole("button", { name: /Inbox/ })).toHaveAttribute("data-selected", "true");
+});
+
+test("Canvas marquee selects several objects and Escape cancels it", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  const card = page.getByRole("button", { name: "Card" });
+  const chip = page.getByRole("button", { name: "Chip" });
+  await card.click();
+  await expect(card).toHaveAttribute("data-selected", "true");
+  await expect(note).toHaveAttribute("data-selected", "false");
+
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("canvas bounding box");
+  await canvas.focus();
+  await page.mouse.move(box.x + box.width - 8, box.y + box.height - 8);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 24, box.y + box.height - 24);
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  await expect(card).toHaveAttribute("data-selected", "true");
+  await expect(note).toHaveAttribute("data-selected", "false");
+
+  await page.mouse.move(box.x + 8, box.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 8, box.y + box.height - 8);
+  await page.mouse.up();
+  await expect(note).toHaveAttribute("data-selected", "true");
+  await expect(card).toHaveAttribute("data-selected", "true");
+  await expect(chip).toHaveAttribute("data-selected", "true");
+});
+
+test("Canvas pan moves the viewport without writing object positions", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  const origin = await note.boundingBox();
+  if (!origin) throw new Error("note bounding box");
+  await canvas.focus();
+  await page.keyboard.down(" ");
+  await page.mouse.move(origin.x + origin.width / 2, origin.y + origin.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(origin.x + origin.width / 2 + 40, origin.y + origin.height / 2);
+  await page.mouse.up();
+  await page.keyboard.up(" ");
+  const moved = await note.boundingBox();
+  if (!moved) throw new Error("note bounding box after pan");
+  expect(moved.x).toBeGreaterThan(origin.x + 20);
+  await expect(note).toHaveCSS("left", "24px");
+});
+
+test("Canvas nudges a selected object and snaps a drag to the grid", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  await note.click();
+  await page.getByLabel("Canvas", { exact: true }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(note).toHaveCSS("left", "25px");
+
+  const box = await note.boundingBox();
+  if (!box) throw new Error("note bounding box");
+  await note.hover();
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2);
+  await page.mouse.up();
+  await expect(note).toHaveCSS("left", "33px");
+});
+
 test("Tree uses host visible order and restores a cut with undo", async ({ page }) => {
   await page.goto("/demo/tree");
   await page.getByText("Inspect editing state", { exact: true }).click();
