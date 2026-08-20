@@ -1,3 +1,4 @@
+import { siteLayers } from "../../app/site-layers";
 import { InlineCode } from "../../shared/ui/code-block";
 import { ActionLink } from "../../shared/ui/interactive";
 import { ui } from "../../shared/ui/styles";
@@ -29,6 +30,15 @@ export function HomeRoute() {
             <InlineCode className={homeStyles.install} prompt>npm i @interactive-os/json-document</InlineCode>
             <ActionLink to="/docs/tutorial" kind="prominent">Get started</ActionLink>
           </div>
+
+          <ol className={homeStyles.index} aria-label="Concept index">
+            {siteLayers.map((layer) => (
+              <li key={layer.group} className={homeStyles.indexItem}>
+                <ActionLink to={layer.path} className={homeStyles.indexLink}>{layer.label}</ActionLink>
+                <span className={homeStyles.indexBlurb}>{layer.blurb}</span>
+              </li>
+            ))}
+          </ol>
         </div>
 
         <figure className={homeStyles.artwork}>

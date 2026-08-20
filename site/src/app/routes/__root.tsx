@@ -7,9 +7,10 @@ import {
   siteRoutes,
   usePathname,
   useRouteMetadata,
-  type SiteNavigationGroup,
+  type SiteRoute,
 } from "../router";
-import { childRoutes, isNavBranch, rootNavRoutes, routeGroup } from "../breadcrumb";
+import { isNavBranch, rootNavRoutes, routeGroup, visibleNavChildren } from "../breadcrumb";
+import { siteLayerGroups } from "../site-layers";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
 export const Route = createRootRoute({
@@ -20,11 +21,10 @@ export const Route = createRootRoute({
 function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
-  const routeGroups: ReadonlyArray<SiteNavigationGroup> = ["JSON Document", "Editing", "Editors", "Adapters", "Connectors"];
 
   useRouteMetadata(route);
   const activeGroup = routeGroup(route, siteRoutes);
-  const [openGroups, setOpenGroups] = useState<ReadonlySet<SiteNavigationGroup>>(
+  const [openGroups, setOpenGroups] = useState<ReadonlySet<(typeof siteLayerGroups)[number]>>(
     () => new Set(activeGroup ? [activeGroup] : []),
   );
 
@@ -59,14 +59,13 @@ function AppShell() {
               {item.label}
             </ActionLink>
           ))}
-          {routeGroups.map((group) => {
+          {siteLayerGroups.map((group) => {
             const groupRoutes = siteRoutes.filter((item) => item.navigationGroup === group);
             if (groupRoutes.length === 0) return null;
             const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
             const open = openGroups.has(group);
             return (
               <div key={group} role="group" aria-label={group} className="grid content-start">
-                <span className={ui.nav.groupLabel}>{group}</span>
                 <DisclosureButton
                   className={ui.nav.groupToggle}
                   expanded={open}
@@ -83,56 +82,23 @@ function AppShell() {
                 >
                   {group}
                 </DisclosureButton>
-                <ul id={`${groupLabelId}-list`} className={ui.nav.panel} data-open={open ? "true" : undefined}>
-                  {groupRoutes.map((item) => {
-                    const children = childRoutes(item.path, siteRoutes);
-                    return (
-                      <li key={item.path} className="grid content-start">
-                        <ActionLink
-                          to={item.path}
-                          activePath={route.path}
-                          branch={isNavBranch(route.path, item.path, siteRoutes)}
-                          className={classes(ui.nav.item, ui.nav.current)}
-                        >
-                          {item.label}
-                        </ActionLink>
-                        {children.length > 0 ? (
-                          <ul className={ui.nav.list}>
-                            {children.map((child) => {
-                              const grandchildren = childRoutes(child.path, siteRoutes);
-                              return (
-                                <li key={child.path} className="grid content-start">
-                                  <ActionLink
-                                    to={child.path}
-                                    activePath={route.path}
-                                    branch={isNavBranch(route.path, child.path, siteRoutes)}
-                                    className={classes(ui.nav.child, ui.nav.current)}
-                                  >
-                                    {child.label}
-                                  </ActionLink>
-                                  {grandchildren.length > 0 ? (
-                                    <ul className={ui.nav.list}>
-                                      {grandchildren.map((grandchild) => (
-                                        <li key={grandchild.path}>
-                                          <ActionLink
-                                            to={grandchild.path}
-                                            activePath={route.path}
-                                            className={classes(ui.nav.child, ui.nav.current)}
-                                          >
-                                            {grandchild.label}
-                                          </ActionLink>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  ) : null}
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        ) : null}
-                      </li>
-                    );
-                  })}
+                <ul
+                  id={`${groupLabelId}-list`}
+                  className={ui.nav.panel}
+                  data-open={open ? "true" : undefined}
+                  hidden={!open}
+                >
+                  {open
+                    ? groupRoutes.map((item) => (
+                      <NavItem
+                        key={item.path}
+                        item={item}
+                        currentPath={route.path}
+                        routes={siteRoutes}
+                        depth={0}
+                      />
+                    ))
+                    : null}
                 </ul>
               </div>
             );
@@ -143,5 +109,39 @@ function AppShell() {
         <Outlet />
       </div>
     </div>
+  );
+}
+
+function NavItem(props: {
+  readonly item: SiteRoute;
+  readonly currentPath: string;
+  readonly routes: ReadonlyArray<SiteRoute>;
+  readonly depth: number;
+}) {
+  const children = visibleNavChildren(props.item.path, props.currentPath, props.routes);
+  return (
+    <li className="grid content-start">
+      <ActionLink
+        to={props.item.path}
+        activePath={props.currentPath}
+        branch={isNavBranch(props.currentPath, props.item.path, props.routes)}
+        className={classes(props.depth === 0 ? ui.nav.item : ui.nav.child, ui.nav.current)}
+      >
+        {props.item.label}
+      </ActionLink>
+      {children.length > 0 ? (
+        <ul className={ui.nav.list}>
+          {children.map((child) => (
+            <NavItem
+              key={child.path}
+              item={child}
+              currentPath={props.currentPath}
+              routes={props.routes}
+              depth={props.depth + 1}
+            />
+          ))}
+        </ul>
+      ) : null}
+    </li>
   );
 }

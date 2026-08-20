@@ -8,6 +8,10 @@ export const homeStyles = {
   description: "mb-0 mt-4 max-w-md text-base leading-7 text-ink",
   entry: "mt-8 flex flex-wrap items-center gap-x-5 gap-y-3",
   install: "font-mono text-xs leading-5 text-pencil",
+  index: "mt-12 m-0 grid max-w-md list-none gap-3 p-0",
+  indexItem: "m-0 grid gap-0.5",
+  indexLink: "text-sm font-medium",
+  indexBlurb: "text-xs leading-5 text-pencil",
   artwork: "pointer-events-none absolute inset-0 z-0 m-0 overflow-hidden",
   artworkImage: "absolute bottom-0 right-0 h-auto w-[140vw] max-w-none translate-x-[18%] sm:w-[112vw] sm:translate-x-[14%] lg:w-[78vw] lg:translate-x-[8%]",
 } as const;

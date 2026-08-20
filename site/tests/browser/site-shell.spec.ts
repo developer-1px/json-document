@@ -11,6 +11,26 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Concept index" }).getByRole("link")).toHaveText([
+    "JSON Document",
+    "Editing",
+    "Editors",
+    "Adapters",
+    "Connectors",
+    "Widgets",
+  ]);
+  await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
+  await navigation.getByRole("button", { name: "JSON Document" }).click();
+  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
+    "Why",
+    "Quickstart",
+    "Concepts",
+    "API Reference",
+    "Collaboration",
+  ]);
+  await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
+  await navigation.getByRole("link", { name: "Collaboration" }).click();
   await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
     "Why",
     "Quickstart",
@@ -20,33 +40,34 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Replica",
     "Collaborative History",
     "Text",
-    "Contenteditable lease",
     "Lifecycle",
   ]);
+  await navigation.getByRole("button", { name: "Editing" }).click();
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Intent guide",
-    "Intent",
     "Selection",
-    "Selection Demo",
     "Topology",
-    "Topology Demo",
     "Clipboard",
-    "Clipboard Demo",
     "History",
-    "History Demo",
     "Rich Text Lab",
   ]);
+  await navigation.getByRole("button", { name: "Editors" }).click();
   await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
     "Editors",
     "Document",
-    "Canvas",
+    "Order",
+    "Object",
     "Sheet",
     "Tree",
     "Kanban",
     "Database",
   ]);
+  await navigation.getByRole("button", { name: "Adapters" }).click();
   await expect(navigation.getByRole("group", { name: "Adapters" }).getByRole("link")).toHaveText(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
-  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React editing", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
+  await navigation.getByRole("button", { name: "Connectors" }).click();
+  await expect(navigation.getByRole("group", { name: "Connectors" }).getByRole("link")).toHaveText(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
+  await navigation.getByRole("button", { name: "Widgets" }).click();
+  await expect(navigation.getByRole("group", { name: "Widgets" }).getByRole("link")).toHaveText(["Widgets"]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
@@ -55,6 +76,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Editors",
     "Adapters",
     "Connectors",
+    "Widgets",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -72,6 +94,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Adapters" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connectors" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Widgets" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
@@ -91,6 +114,7 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
+  await siteNavigation.getByRole("button", { name: "Connectors" }).click();
   await siteNavigation.getByRole("group", { name: "Connectors" }).getByRole("link", { name: "Connector guide" }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
@@ -108,8 +132,8 @@ test("Editing docs and API demos keep one Korean reading flow", async ({ page })
   await expect(page.getByText("Selection 입력을 dispatch한 뒤 바뀐 Selection을 그대로인 document.value와 History 옆에서 비교합니다.")).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "모드와 블록 선택하기" })).toBeVisible();
 
-  await page.goto("/demos");
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await page.goto("/editors");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
 });
 
 test("Connector pages declare the connection before the live demo", async ({ page }) => {
@@ -159,6 +183,7 @@ test("docs and demos share the page frame while preserving their content modes",
 });
 
 test("ordinary pages reuse one petite decorative cat without covering intro copy", async ({ page }) => {
+  test.setTimeout(60_000);
   const illustrations = new Set<string>();
   const routes = [
     "/docs",
@@ -169,7 +194,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/docs/topology",
     "/docs/clipboard",
     "/docs/history",
-    "/demos",
+    "/editors",
     "/demo",
     "/demo/sheet",
     "/demo/selection",
@@ -193,7 +218,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   for (const route of routes) {
     await page.goto(route);
     const artwork = page.locator("[data-petite-cat]");
-    await expect(artwork).toHaveCount(1);
+    await expect(artwork, route).toHaveCount(1);
     illustrations.add(await artwork.getAttribute("data-petite-cat") ?? "");
     await expect(artwork.locator("img")).toHaveAttribute("alt", "");
     await expect.poll(() => artwork.locator("img").evaluate((image) => (

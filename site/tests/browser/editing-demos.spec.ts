@@ -54,12 +54,23 @@ test("History Demo restores document value and Selection together", async ({ pag
   expect(await json(page, "history-demo-selection")).toEqual(editedSelection);
 });
 
-test("Showcase presents every complete editor separately", async ({ page }) => {
+test("Editors catalog lists the idiom editors", async ({ page }) => {
+  await page.goto("/editors");
+  const article = page.getByRole("article");
+  await expect(page.getByRole("heading", { level: 1, name: "Editors" })).toBeVisible();
+  await expect(article.getByRole("link", { name: "Document" })).toHaveAttribute("href", "/demo");
+  await expect(article.getByRole("link", { name: "Order" })).toHaveAttribute("href", "/docs/order");
+  await expect(article.getByRole("link", { name: "Object" })).toHaveAttribute("href", "/docs/object");
+  await expect(article.getByRole("link", { name: "Sheet" })).toHaveAttribute("href", "/demo/sheet");
+  await expect(article.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/docs/tree");
+  await expect(article.getByRole("link", { name: "Kanban" })).toHaveAttribute("href", "/demo/kanban");
+  await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/demo/database");
+});
+
+test("legacy Showcase path opens Editors", async ({ page }) => {
   await page.goto("/demos");
-  await expect(page.getByRole("heading", { level: 1, name: "Demo Showcase" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Document Demo" })).toHaveAttribute("href", "/demo");
-  await expect(page.getByRole("link", { name: "Open Sheet Demo" })).toHaveAttribute("href", "/demo/sheet");
-  await expect(page.getByRole("link", { name: "Open Database Demo" })).toHaveAttribute("href", "/demo/database");
+  await expect(page).toHaveURL(/\/editors$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Editors" })).toBeVisible();
 });
 
 async function json(page: Page, testId: string): Promise<any> {

@@ -1,4 +1,5 @@
 import { type SiteNavigationGroup, type SiteRoute } from "./router";
+import { siteLayers } from "./site-layers";
 import { ActionLink } from "../shared/ui/interactive";
 import { ui } from "../shared/ui/styles";
 
@@ -9,13 +10,9 @@ export type BreadcrumbCrumb = {
 
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
-const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
-  "JSON Document": { path: "/docs", label: "JSON Document" },
-  Editing: { path: "/docs/intent-guide", label: "Editing" },
-  Editors: { path: "/editors", label: "Editors" },
-  Adapters: { path: "/adapters", label: "Adapters" },
-  Connectors: { path: "/connectors", label: "Connectors" },
-};
+const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = Object.fromEntries(
+  siteLayers.map((layer) => [layer.group, { path: layer.path, label: layer.label }]),
+) as Record<SiteNavigationGroup, BreadcrumbCrumb>;
 
 export function breadcrumbTrail(
   route: SiteRoute,
@@ -114,4 +111,13 @@ export function isNavBranch(currentPath: string, parentPath: string, routes: Rea
     current = routes.find((route) => route.path === current?.parentPath);
   }
   return false;
+}
+
+export function visibleNavChildren(
+  parentPath: string,
+  currentPath: string,
+  routes: ReadonlyArray<SiteRoute>,
+): ReadonlyArray<SiteRoute> {
+  if (currentPath !== parentPath && !isNavBranch(currentPath, parentPath, routes)) return [];
+  return childRoutes(parentPath, routes);
 }

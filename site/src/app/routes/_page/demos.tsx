@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ShowcaseRoute } from "../../../routes/showcase/ShowcaseRoute";
+import { Navigate, createFileRoute } from "@tanstack/react-router";
+import { legacyPageRedirects } from "../../page-descriptors";
 
 export const Route = createFileRoute("/_page/demos")({
-  component: ShowcaseRoute,
+  component: () => <Navigate to={legacyPageRedirects.showcase.to} />,
 });
