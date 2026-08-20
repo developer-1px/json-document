@@ -5,6 +5,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -60,10 +61,8 @@ export function SelectionDemoRoute() {
               <SelectableItem
                 key={block.id}
                 type="button"
-                selected={editing.getItem(block.id).getIsSelected()}
-                focus={editing.getItem(block.id).getIsFocus()}
                 className={classes("px-3 py-2", ui.surface.selectableBlock)}
-                onClick={editing.getItem(block.id).getPressHandler()}
+                {...optionProps(editing.getItem(block.id))}
               >
                 {block.id} · {block.text}
               </SelectableItem>

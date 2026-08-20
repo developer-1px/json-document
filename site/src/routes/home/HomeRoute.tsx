@@ -64,7 +64,7 @@ export function HomeRoute() {
               </li>
               <li className={homeStyles.indexItem}>
                 <ActionLink to="/widgets" className={homeStyles.indexLink}>제품 화면</ActionLink>
-                <span className={homeStyles.indexBlurb}>Toolbar, Listbox, and Grid</span>
+                <span className={homeStyles.indexBlurb}>Toolbar, Listbox, Grid, Document, Canvas, Tree, and Board</span>
               </li>
             </ul>
           </nav>

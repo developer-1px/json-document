@@ -6,6 +6,7 @@ import {
 import { useEditing } from "@interactive-os/json-document-react";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { optionProps } from "../../shared/widget-binding";
 
 const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
 
@@ -92,12 +93,13 @@ export function CanvasDemoRoute() {
         <section aria-label="Canvas" className="contents">
           {document.objects.map((object) => {
             const offset = drag?.ids.includes(object.id) ? drag : null;
+            const option = optionProps(editing.getItem(object.id));
             return (
               <SelectableItem
                 key={object.id}
-                selected={editing.getItem(object.id).getIsSelected()}
-                focus={editing.getItem(object.id).getIsFocus()}
                 data-object-id={object.id}
+                selected={option.selected}
+                focus={option.focus}
                 onPointerDown={(event) => handlePointerDown(event, object.id)}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}

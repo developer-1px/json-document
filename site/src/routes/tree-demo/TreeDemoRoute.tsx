@@ -12,6 +12,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialTree: TreeDocument = {
   nodes: [
@@ -52,6 +53,7 @@ export function TreeDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as TreeDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy(topology);
@@ -108,8 +110,8 @@ export function TreeDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
@@ -136,11 +138,9 @@ export function TreeDemoRoute() {
                       </IconButton>
                     ) : <span />}
                     <SelectableItem
-                      selected={editing.getItem(row.id).getIsSelected()}
-                      focus={editing.getItem(row.id).getIsFocus()}
                       data-node-id={row.id}
-                      onClick={editing.getItem(row.id).getPressHandler()}
                       className={classes("text-left", ui.surface.documentBlock)}
+                      {...optionProps(editing.getItem(row.id))}
                     >
                       {row.label}
                     </SelectableItem>

@@ -21,6 +21,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -107,6 +108,7 @@ export function DocumentDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy();
@@ -183,8 +185,8 @@ export function DocumentDemoRoute() {
               <Action label="Paste" onClick={pasteSelection} disabled={!clipboard} />
               <Action label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
-              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
+              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
+              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
             </>
           )}
           inspector={(
@@ -231,11 +233,9 @@ export function DocumentDemoRoute() {
                 <SelectableItem
                   as="article"
                   key={block.id}
-                  selected={item.getIsSelected()}
-                  focus={item.getIsFocus()}
                   data-block-id={block.id}
-                  onClick={item.getPressHandler()}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
+                  {...optionProps(item)}
                 >
                   <ActionButton
                     aria-label={`Select block ${index + 1}`}

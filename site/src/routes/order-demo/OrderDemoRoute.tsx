@@ -10,6 +10,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialOrder: OrderDocument = {
   items: [
@@ -43,6 +44,7 @@ export function OrderDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as OrderDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy();
@@ -90,8 +92,8 @@ export function OrderDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
@@ -107,11 +109,9 @@ export function OrderDemoRoute() {
             {document.items.map((item, index) => (
               <SelectableItem
                 key={item.id}
-                selected={editing.getItem(item.id).getIsSelected()}
-                focus={editing.getItem(item.id).getIsFocus()}
                 data-item-id={item.id}
-                onClick={editing.getItem(item.id).getPressHandler()}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
+                {...optionProps(editing.getItem(item.id))}
               >
                 <span className={classes(ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>
                 <span>{item.label}</span>

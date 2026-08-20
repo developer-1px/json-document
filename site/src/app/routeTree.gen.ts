@@ -54,9 +54,13 @@ import { Route as PageDocsTreeRouteImport } from "./routes/_page/docs/tree";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageEditingRichTextRouteImport } from "./routes/_page/editing/rich-text";
 import { Route as PageWidgetsIndexRouteImport } from "./routes/_page/widgets/index";
+import { Route as PageWidgetsBoardRouteImport } from "./routes/_page/widgets/board";
+import { Route as PageWidgetsCanvasRouteImport } from "./routes/_page/widgets/canvas";
+import { Route as PageWidgetsDocumentRouteImport } from "./routes/_page/widgets/document";
 import { Route as PageWidgetsGridRouteImport } from "./routes/_page/widgets/grid";
 import { Route as PageWidgetsListboxRouteImport } from "./routes/_page/widgets/listbox";
 import { Route as PageWidgetsToolbarRouteImport } from "./routes/_page/widgets/toolbar";
+import { Route as PageWidgetsTreeRouteImport } from "./routes/_page/widgets/tree";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
@@ -294,6 +298,21 @@ const PageWidgetsIndexRoute = PageWidgetsIndexRouteImport.update({
   path: "/widgets/",
   getParentRoute: () => PageRoute,
 } as any);
+const PageWidgetsBoardRoute = PageWidgetsBoardRouteImport.update({
+  id: "/widgets/board",
+  path: "/widgets/board",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageWidgetsCanvasRoute = PageWidgetsCanvasRouteImport.update({
+  id: "/widgets/canvas",
+  path: "/widgets/canvas",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageWidgetsDocumentRoute = PageWidgetsDocumentRouteImport.update({
+  id: "/widgets/document",
+  path: "/widgets/document",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageWidgetsGridRoute = PageWidgetsGridRouteImport.update({
   id: "/widgets/grid",
   path: "/widgets/grid",
@@ -307,6 +326,11 @@ const PageWidgetsListboxRoute = PageWidgetsListboxRouteImport.update({
 const PageWidgetsToolbarRoute = PageWidgetsToolbarRouteImport.update({
   id: "/widgets/toolbar",
   path: "/widgets/toolbar",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageWidgetsTreeRoute = PageWidgetsTreeRouteImport.update({
+  id: "/widgets/tree",
+  path: "/widgets/tree",
   getParentRoute: () => PageRoute,
 } as any);
 const PageConnectorsZodIndexRoute = PageConnectorsZodIndexRouteImport.update({
@@ -397,9 +421,13 @@ export interface FileRoutesByFullPath {
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/editing/rich-text": typeof PageEditingRichTextRoute;
+  "/widgets/board": typeof PageWidgetsBoardRoute;
+  "/widgets/canvas": typeof PageWidgetsCanvasRoute;
+  "/widgets/document": typeof PageWidgetsDocumentRoute;
   "/widgets/grid": typeof PageWidgetsGridRoute;
   "/widgets/listbox": typeof PageWidgetsListboxRoute;
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
+  "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters/": typeof PageAdaptersIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
@@ -454,9 +482,13 @@ export interface FileRoutesByTo {
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/editing/rich-text": typeof PageEditingRichTextRoute;
+  "/widgets/board": typeof PageWidgetsBoardRoute;
+  "/widgets/canvas": typeof PageWidgetsCanvasRoute;
+  "/widgets/document": typeof PageWidgetsDocumentRoute;
   "/widgets/grid": typeof PageWidgetsGridRoute;
   "/widgets/listbox": typeof PageWidgetsListboxRoute;
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
+  "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters": typeof PageAdaptersIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
@@ -513,9 +545,13 @@ export interface FileRoutesById {
   "/_page/docs/tree": typeof PageDocsTreeRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
   "/_page/editing/rich-text": typeof PageEditingRichTextRoute;
+  "/_page/widgets/board": typeof PageWidgetsBoardRoute;
+  "/_page/widgets/canvas": typeof PageWidgetsCanvasRoute;
+  "/_page/widgets/document": typeof PageWidgetsDocumentRoute;
   "/_page/widgets/grid": typeof PageWidgetsGridRoute;
   "/_page/widgets/listbox": typeof PageWidgetsListboxRoute;
   "/_page/widgets/toolbar": typeof PageWidgetsToolbarRoute;
+  "/_page/widgets/tree": typeof PageWidgetsTreeRoute;
   "/_page/adapters/": typeof PageAdaptersIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
@@ -572,9 +608,13 @@ export interface FileRouteTypes {
     | "/docs/tree"
     | "/docs/tutorial"
     | "/editing/rich-text"
+    | "/widgets/board"
+    | "/widgets/canvas"
+    | "/widgets/document"
     | "/widgets/grid"
     | "/widgets/listbox"
     | "/widgets/toolbar"
+    | "/widgets/tree"
     | "/adapters/"
     | "/connectors/"
     | "/demo/"
@@ -629,9 +669,13 @@ export interface FileRouteTypes {
     | "/docs/tree"
     | "/docs/tutorial"
     | "/editing/rich-text"
+    | "/widgets/board"
+    | "/widgets/canvas"
+    | "/widgets/document"
     | "/widgets/grid"
     | "/widgets/listbox"
     | "/widgets/toolbar"
+    | "/widgets/tree"
     | "/adapters"
     | "/connectors"
     | "/demo"
@@ -687,9 +731,13 @@ export interface FileRouteTypes {
     | "/_page/docs/tree"
     | "/_page/docs/tutorial"
     | "/_page/editing/rich-text"
+    | "/_page/widgets/board"
+    | "/_page/widgets/canvas"
+    | "/_page/widgets/document"
     | "/_page/widgets/grid"
     | "/_page/widgets/listbox"
     | "/_page/widgets/toolbar"
+    | "/_page/widgets/tree"
     | "/_page/adapters/"
     | "/_page/connectors/"
     | "/_page/demo/"
@@ -1027,6 +1075,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageWidgetsIndexRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/widgets/board": {
+      id: "/_page/widgets/board";
+      path: "/widgets/board";
+      fullPath: "/widgets/board";
+      preLoaderRoute: typeof PageWidgetsBoardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/widgets/canvas": {
+      id: "/_page/widgets/canvas";
+      path: "/widgets/canvas";
+      fullPath: "/widgets/canvas";
+      preLoaderRoute: typeof PageWidgetsCanvasRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/widgets/document": {
+      id: "/_page/widgets/document";
+      path: "/widgets/document";
+      fullPath: "/widgets/document";
+      preLoaderRoute: typeof PageWidgetsDocumentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/widgets/grid": {
       id: "/_page/widgets/grid";
       path: "/widgets/grid";
@@ -1046,6 +1115,13 @@ declare module "@tanstack/react-router" {
       path: "/widgets/toolbar";
       fullPath: "/widgets/toolbar";
       preLoaderRoute: typeof PageWidgetsToolbarRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/widgets/tree": {
+      id: "/_page/widgets/tree";
+      path: "/widgets/tree";
+      fullPath: "/widgets/tree";
+      preLoaderRoute: typeof PageWidgetsTreeRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/zod/": {
@@ -1146,9 +1222,13 @@ interface PageRouteChildren {
   PageDocsTreeRoute: typeof PageDocsTreeRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
   PageEditingRichTextRoute: typeof PageEditingRichTextRoute;
+  PageWidgetsBoardRoute: typeof PageWidgetsBoardRoute;
+  PageWidgetsCanvasRoute: typeof PageWidgetsCanvasRoute;
+  PageWidgetsDocumentRoute: typeof PageWidgetsDocumentRoute;
   PageWidgetsGridRoute: typeof PageWidgetsGridRoute;
   PageWidgetsListboxRoute: typeof PageWidgetsListboxRoute;
   PageWidgetsToolbarRoute: typeof PageWidgetsToolbarRoute;
+  PageWidgetsTreeRoute: typeof PageWidgetsTreeRoute;
   PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
@@ -1203,9 +1283,13 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsTreeRoute: PageDocsTreeRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
   PageEditingRichTextRoute: PageEditingRichTextRoute,
+  PageWidgetsBoardRoute: PageWidgetsBoardRoute,
+  PageWidgetsCanvasRoute: PageWidgetsCanvasRoute,
+  PageWidgetsDocumentRoute: PageWidgetsDocumentRoute,
   PageWidgetsGridRoute: PageWidgetsGridRoute,
   PageWidgetsListboxRoute: PageWidgetsListboxRoute,
   PageWidgetsToolbarRoute: PageWidgetsToolbarRoute,
+  PageWidgetsTreeRoute: PageWidgetsTreeRoute,
   PageAdaptersIndexRoute: PageAdaptersIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,

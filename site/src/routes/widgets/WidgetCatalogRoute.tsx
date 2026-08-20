@@ -16,13 +16,29 @@ const widgets = [
     ...pageDescriptor("/widgets/grid"),
     affordance: "topology / selected cells",
   },
+  {
+    ...pageDescriptor("/widgets/document"),
+    affordance: "block line / text offset",
+  },
+  {
+    ...pageDescriptor("/widgets/canvas"),
+    affordance: "selected objects",
+  },
+  {
+    ...pageDescriptor("/widgets/tree"),
+    affordance: "visible topology",
+  },
+  {
+    ...pageDescriptor("/widgets/board"),
+    affordance: "columns / selected cards",
+  },
 ] as const;
 
 export function WidgetCatalogRoute() {
   return (
     <PageFrame>
       <PageHeader illustration="connector" title="제품 화면">
-        Bindings turn editing values into Toolbar, Listbox, and Grid props. The demos only render. Button and Card are not widgets.
+        Bindings turn editing values into Toolbar, Listbox, Grid, Document, Canvas, Tree, and Board props. The demos only render. Button and Card are not widgets.
       </PageHeader>
 
       <div className="grid gap-3 sm:grid-cols-3">

@@ -437,7 +437,7 @@
     "path": "/widgets",
     "label": "제품 화면",
     "title": "Widgets - json-document",
-    "description": "Sample widgets that bind only editing affordances: Toolbar, Listbox, and Grid.",
+    "description": "Sample widgets that bind only editing affordances: Toolbar, Listbox, Grid, Document, Canvas, Tree, and Board.",
     "navigationGroup": "제품 화면",
     "sidebar": false
   },
@@ -460,6 +460,34 @@
     "label": "Grid",
     "title": "Grid Widget - json-document",
     "description": "A grid reads visible topology and selected cells from Sheet selection.",
+    "navigationGroup": "제품 화면"
+  },
+  {
+    "path": "/widgets/document",
+    "label": "Document",
+    "title": "Document Widget - json-document",
+    "description": "A document line reads selected keys, focus, and text offset from block selection.",
+    "navigationGroup": "제품 화면"
+  },
+  {
+    "path": "/widgets/canvas",
+    "label": "Canvas",
+    "title": "Canvas Widget - json-document",
+    "description": "A canvas reads selected objects on a plane from Object selection.",
+    "navigationGroup": "제품 화면"
+  },
+  {
+    "path": "/widgets/tree",
+    "label": "Tree",
+    "title": "Tree Widget - json-document",
+    "description": "A tree reads the visible hierarchical line from Tree selection.",
+    "navigationGroup": "제품 화면"
+  },
+  {
+    "path": "/widgets/board",
+    "label": "Board",
+    "title": "Board Widget - json-document",
+    "description": "A board reads columns of cards and selected keys from Kanban selection.",
     "navigationGroup": "제품 화면"
   }
 ]

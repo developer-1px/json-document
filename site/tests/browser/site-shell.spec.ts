@@ -61,7 +61,15 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
   await navigation.getByRole("button", { name: "제품 화면" }).click();
-  await expect(navigation.getByRole("group", { name: "제품 화면" }).getByRole("link")).toHaveText(["Toolbar", "Listbox", "Grid"]);
+  await expect(navigation.getByRole("group", { name: "제품 화면" }).getByRole("link")).toHaveText([
+    "Toolbar",
+    "Listbox",
+    "Grid",
+    "Document",
+    "Canvas",
+    "Tree",
+    "Board",
+  ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([

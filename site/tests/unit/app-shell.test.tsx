@@ -83,7 +83,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
     await user.click(nav.getByRole("button", { name: "제품 화면" }));
-    expect(groupLinks(nav, "제품 화면")).toEqual(["Toolbar", "Listbox", "Grid"]);
+    expect(groupLinks(nav, "제품 화면")).toEqual(["Toolbar", "Listbox", "Grid", "Document", "Canvas", "Tree", "Board"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([

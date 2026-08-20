@@ -7,6 +7,7 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialBoard: KanbanDocument = {
   columns: [
@@ -35,6 +36,7 @@ export function KanbanDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const board = snapshot.value as KanbanDocument;
+  const commands = historyCommands(snapshot);
   const cards = new Map(board.cards.map((card) => [card.id, card]));
 
   function moveTo(columnId: string, beforeCardId?: string) {
@@ -53,8 +55,8 @@ export function KanbanDemoRoute() {
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => editor.undo()}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => editor.redo()}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => editor.undo()}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => editor.redo()}>Redo</ActionButton>
           </>
         )}
       >
@@ -74,15 +76,17 @@ export function KanbanDemoRoute() {
             {column.cardIds.map((cardId) => {
               const card = cards.get(cardId);
               if (!card) return null;
+              const option = optionProps(editing.getItem(card.id));
               return (
                 <button
                   key={card.id}
                   type="button"
                   draggable
                   data-card-id={card.id}
-                  data-selected={editing.getItem(card.id).getIsSelected() ? "true" : "false"}
-                  data-focus={editing.getItem(card.id).getIsFocus() ? "true" : "false"}
-                  onClick={editing.getItem(card.id).getPressHandler()}
+                  data-selected={option.selected ? "true" : "false"}
+                  data-focus={option.focus ? "true" : "false"}
+                  aria-selected={option["aria-selected"]}
+                  onClick={option.onClick}
                   onDragStart={() => {
                     editor.dispatch({ type: "selection.set", cardId: card.id });
                     setDragging(card.id);

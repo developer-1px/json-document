@@ -10,6 +10,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
 
@@ -48,6 +49,7 @@ export function ObjectDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as ObjectDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy();
@@ -112,8 +114,8 @@ export function ObjectDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
@@ -128,11 +130,9 @@ export function ObjectDemoRoute() {
           {document.objects.map((object) => (
             <SelectableItem
               key={object.id}
-              selected={editing.getItem(object.id).getIsSelected()}
-              focus={editing.getItem(object.id).getIsFocus()}
               data-object-id={object.id}
-              onClick={editing.getItem(object.id).getPressHandler()}
               className="absolute grid place-items-center"
+              {...optionProps(editing.getItem(object.id))}
               style={{
                 left: object.x,
                 top: object.y,

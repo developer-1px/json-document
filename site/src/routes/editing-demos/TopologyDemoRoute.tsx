@@ -5,6 +5,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { optionProps } from "../../shared/widget-binding";
 
 const records = {
   alpha: "Alpha",
@@ -67,10 +68,8 @@ export function TopologyDemoRoute() {
                 <li key={id}>
                   <SelectableItem
                     type="button"
-                    selected={item.getIsSelected()}
-                    focus={item.getIsFocus()}
                     className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
-                    onClick={item.getPressHandler()}
+                    {...optionProps(item)}
                   >
                     {records[id as keyof typeof records]}
                   </SelectableItem>

@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Opened Document, Canvas, Tree, and Board on 제품 화면, and made Toolbar,
+  Listbox, Grid, and those widgets share prop bindings that live demos
+  consume without forking. Database stays on Grid.
 - Rewrote Why as the background of the editing-platform kernel: the
   same JSON Document port for Collaboration, session state in Editing,
   Hands as the genre shelf, and Adapter, Connector, and 제품 화면 as

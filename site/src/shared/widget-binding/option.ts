@@ -17,3 +17,10 @@ export function gridCellProps(item: EditingItem) {
     tabIndex: item.getIsFocus() ? 0 : -1,
   } as const;
 }
+
+export function treeItemProps(item: EditingItem) {
+  return {
+    ...optionProps(item),
+    role: "treeitem" as const,
+  } as const;
+}

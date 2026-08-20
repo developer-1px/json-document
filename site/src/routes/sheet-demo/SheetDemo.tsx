@@ -20,6 +20,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { gridCellProps, historyCommands } from "../../shared/widget-binding";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -115,6 +116,7 @@ export function SheetDemo() {
   });
   const snapshot = editing.snapshot;
   const sheet = snapshot.value as SheetDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy();
@@ -192,8 +194,8 @@ export function SheetDemo() {
                 "Selected cells filled",
               )} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={!snapshot.canUndo} />
-              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={!snapshot.canRedo} />
+              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
+              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
               <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
             </>
           )}
@@ -231,19 +233,14 @@ export function SheetDemo() {
                     <th scope="row" className={classes("px-2 py-2 text-center", ui.surface.gridIndex, ui.text.meta)}>{rowIndex + 1}</th>
                     {sheet.columns.map((column) => {
                       const item = editing.getItem(cellKey(row.id, column.id));
-                      const isSelected = item.getIsSelected();
                       return (
                         <SelectableItem
                           as="td"
                           key={column.id}
-                          selected={isSelected}
-                          focus={item.getIsFocus()}
-                          role="gridcell"
-                          aria-selected={isSelected}
                           data-row-id={row.id}
                           data-column-id={column.id}
-                          onClick={item.getPressHandler()}
                           className={classes("p-0", ui.surface.gridCell)}
+                          {...gridCellProps(item)}
                         >
                             <input
                               aria-label={`${column.label} row ${rowIndex + 1}`}

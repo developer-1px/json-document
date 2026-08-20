@@ -19,6 +19,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { gridCellProps, historyCommands } from "../../shared/widget-binding";
 import { initialDatabase } from "./initial-database";
 
 type NativeTextLease = {
@@ -67,6 +68,7 @@ export function DatabaseTableDemo() {
     },
   });
   const snapshot = editing.snapshot;
+  const commands = historyCommands(snapshot);
 
   function commit(recordId: string, propertyId: string, value: string | number | boolean) {
     run(() => dispatchIntent({ type: "cell.commit", recordId, propertyId, value }), `${propertyId} committed`);
@@ -164,8 +166,8 @@ export function DatabaseTableDemo() {
             })}
           >Score first</ToggleButton>
           <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
-          <ActionButton disabled={!snapshot.canUndo} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
-          <ActionButton disabled={!snapshot.canRedo} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
+          <ActionButton disabled={commands.undo.disabled} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
+          <ActionButton disabled={commands.redo.disabled} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
           <output aria-live="polite" className={classes("ml-auto", ui.text.meta)}>{announcement}</output>
           {dragPreview ? <output data-testid="property-drag-preview" className={ui.database.lease}>Local drag preview · {dragPreview.join(" → ")}</output> : null}
           {lease ? (
@@ -216,19 +218,14 @@ export function DatabaseTableDemo() {
                 <tr key={record.id} data-record-id={record.id}>
                   {properties.map((property) => {
                     const item = editing.getItem(cellKey(record.id, property.id));
-                    const isSelected = item.getIsSelected();
                     return (
                       <SelectableItem
                         as="td"
                         key={property.id}
-                        selected={isSelected}
-                        focus={item.getIsFocus()}
-                        role="gridcell"
-                        aria-selected={isSelected}
                         data-record-id={record.id}
                         data-property-id={property.id}
-                        onClick={item.getPressHandler()}
                         className={classes("min-w-32 p-0", ui.database.cell)}
+                        {...gridCellProps(item)}
                       >
                         <PropertyEditor
                           property={property}

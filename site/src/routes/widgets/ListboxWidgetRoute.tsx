@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { createOrderEditor, type OrderDocument } from "@interactive-os/json-document-editing";
+import { useEditing } from "@interactive-os/json-document-react";
+import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { useOrderWidget } from "./binding";
+import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -16,12 +18,39 @@ const initialOrder: OrderDocument = {
 
 export function ListboxWidgetRoute() {
   const [editor] = useState(() => createOrderEditor(initialOrder));
-  const widget = useOrderWidget(editor);
+  const keyboard = useWidgetKeyboard();
+  const ids = () => (editor.snapshot.value as OrderDocument).items.map((item) => item.id);
+  const focusKey = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
+  const editing = useEditing({
+    source: editor,
+    selectedKeys: editor.selectedItemIds,
+    focusKey,
+    onSelect: (itemId, mode) => {
+      editor.dispatch({ type: "selection.set", itemId, mode });
+    },
+    keyboard: {
+      resolve: (stroke) => keyboard.resolve(stroke),
+      focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
+      neighbor: (key, command) => command.type === "move"
+        ? moveLinePoint(ids(), key, command.direction)
+        : lineBoundary(ids(), command.edge),
+      onDelete: () => {
+        editor.dispatch({ type: "selection.remove" });
+      },
+      onUndo: () => {
+        editor.undo();
+      },
+      onRedo: () => {
+        editor.redo();
+      },
+    },
+  });
+  const document = editing.snapshot.value as OrderDocument;
 
   return (
     <WidgetDemoFrame
       title="Listbox"
-      description="The listbox reads selected keys and focus. Arrows, Shift+arrows, Delete, and Mod+Z come from the binding."
+      description="The listbox reads selected keys and focus. Arrows, Shift+arrows, Delete, and Mod+Z come from the host."
       illustration="cursor"
       widgetLabel="Listbox"
       widget={(
@@ -30,15 +59,15 @@ export function ListboxWidgetRoute() {
           aria-multiselectable="true"
           aria-label="Order items"
           tabIndex={0}
-          onKeyDown={widget.onKeyDown}
+          onKeyDown={editing.getKeyDownHandler()}
           className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
         >
-          {widget.document.items.map((item) => (
+          {document.items.map((item) => (
             <SelectableItem
               key={item.id}
               role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
-              {...widget.getOption(item.id)}
+              {...optionProps(editing.getItem(item.id))}
             >
               {item.label}
             </SelectableItem>
@@ -46,10 +75,10 @@ export function ListboxWidgetRoute() {
         </ul>
       )}
       values={[
-        { label: "selectedKeys", value: widget.selectedKeys, testId: "widget-listbox-selected", size: "compact" },
-        { label: "focus", value: widget.focusKey, testId: "widget-listbox-focus", size: "compact" },
-        { label: "keyboard", value: widget.lastCommand, testId: "widget-listbox-keyboard", size: "compact" },
-        { label: "selection", value: widget.snapshot.selection, testId: "widget-listbox-selection", size: "compact" },
+        { label: "selectedKeys", value: editor.selectedItemIds, testId: "widget-listbox-selected", size: "compact" },
+        { label: "focus", value: focusKey, testId: "widget-listbox-focus", size: "compact" },
+        { label: "keyboard", value: keyboard.lastCommand, testId: "widget-listbox-keyboard", size: "compact" },
+        { label: "selection", value: editing.snapshot.selection, testId: "widget-listbox-selection", size: "compact" },
       ]}
     />
   );

@@ -93,6 +93,11 @@ describe("breadcrumbTrail", () => {
       "제품 화면:/widgets",
       "Toolbar:/widgets/toolbar",
     ]);
+    expect(trail("/widgets/board")).toEqual([
+      "Overview:/",
+      "제품 화면:/widgets",
+      "Board:/widgets/board",
+    ]);
   });
 
   test("does not lift the concept map above layer groups", () => {

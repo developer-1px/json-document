@@ -13,6 +13,7 @@ import {
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
+import { optionProps } from "../../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -82,11 +83,9 @@ export function ClipboardAdapterLab() {
             <SelectableItem
               as="article"
               key={block.id}
-              selected={item.getIsSelected()}
-              focus={item.getIsFocus()}
               data-block-id={block.id}
-              onClick={item.getPressHandler()}
               className={classes("p-3", ui.surface.workspace)}
+              {...optionProps(item)}
             >
               <label className={classes("grid gap-2", ui.text.label)}>
                 {block.id}

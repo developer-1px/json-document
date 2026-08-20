@@ -5,6 +5,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -27,6 +28,7 @@ export function HistoryDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
+  const commands = historyCommands(snapshot);
   const [lastCall, setLastCall] = useState("아직 편집하지 않았습니다");
 
   function edit() {
@@ -64,10 +66,8 @@ export function HistoryDemoRoute() {
                 <SelectableItem
                   key={block.id}
                   type="button"
-                  selected={item.getIsSelected()}
-                  focus={item.getIsFocus()}
                   className={classes("px-3 py-2", ui.surface.selectableBlock)}
-                  onClick={item.getPressHandler()}
+                  {...optionProps(item)}
                 >
                   {block.id} · {block.text}
                   {item.getTextOffset() === null ? "" : ` · offset ${item.getTextOffset()}`}
@@ -82,8 +82,8 @@ export function HistoryDemoRoute() {
           <p className={ui.text.label}>2 · History API</p>
           <h2 id="history-call" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
           <div className="mb-3 flex gap-2">
-            <ActionButton onClick={undo} disabled={!snapshot.canUndo}>Undo</ActionButton>
-            <ActionButton onClick={redo} disabled={!snapshot.canRedo}>Redo</ActionButton>
+            <ActionButton onClick={undo} disabled={commands.undo.disabled}>Undo</ActionButton>
+            <ActionButton onClick={redo} disabled={commands.redo.disabled}>Redo</ActionButton>
           </div>
           <Inspector label="Inspect history state" items={[
             {
