@@ -1,7 +1,5 @@
 # Pan
 
-TBD.
-
 Pan은 대상을 옮기지 않고 보이는 평면을 옮기는 손입니다. `grab` /
 `grabbing` / `all-scroll` 커서가 이 손을 가리킵니다.
 

@@ -1,7 +1,5 @@
 # Marquee
 
-TBD.
-
 Marquee는 빈 평면에서 사각형을 끌어 여러 대상을 집는 손입니다. 고른
 대상을 옮기는 [Drag](affordance-drag.md)와 다릅니다. `crosshair` / `cell`
 커서가 이 손을 가리킬 수 있습니다.

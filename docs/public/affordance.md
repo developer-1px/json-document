@@ -62,9 +62,15 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | Affordance | API | Hand |
 | --- | --- | --- |
 | [Select](affordance-select.md) | `pointerSelect`, `resolveAffordanceKey` | 클릭, Shift 범위, Mod 토글, 화살표 |
+| [Typeahead](affordance-typeahead.md) | `typeaheadAffordance` | 인쇄 글쇠 prefix 점프 |
+| [Escape](affordance-cancel.md) | `escapeAffordance` | Escape, pointercancel |
 | [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |
-| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance` | 고른 대상을 포인터로 옮김 |
 | [Undo](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
+| [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
+| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance` | 고른 대상을 포인터로 옮김 |
+| [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
+| [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
+| [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
 
 ## 키보드 TBD
 
@@ -72,12 +78,9 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | --- | --- | --- |
 | [Focus](affordance-focus.md) | `focusAffordance` | Tab 사이, 화살표 안, 초점 ≠ 선택 |
 | [Caret](affordance-caret.md) | `caretAffordance`, `caretCursor` | I-beam 삽입점, 글 범위 |
-| [Typeahead](affordance-typeahead.md) | `typeaheadAffordance` | 인쇄 글쇠 prefix 점프 |
 | [Activate](affordance-activate.md) | `activateAffordance` | Enter, Space, 기본 클릭 |
-| [Escape](affordance-cancel.md) | `escapeAffordance` | Escape, pointercancel |
 | [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace. Delete chord는 이미 닫힘 |
 | [Rename](affordance-rename.md) | `renameAffordance` | F2, 느린 두 번 누르기 |
-| [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
 
 ## 마우스 TBD
 
@@ -87,14 +90,11 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Double-click](affordance-double-click.md) | `clickCountAffordance` | `detail` 2 |
 | [Triple-click](affordance-triple-click.md) | `clickCountAffordance` | `detail` 3 |
 | [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, Shift+F10, Menu |
-| [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Drop](affordance-drop.md) | `dropAffordance` | drop 대상, no-drop |
 | [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |
 | [Resize](affordance-resize.md) | `resizeCursor`, `resizeOffset` | 모서리, 칸, 분할선 |
-| [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Scroll](affordance-scroll.md) | `wheelAffordance`, `autoscrollAffordance` | wheel, autoscroll |
 | [Zoom](affordance-zoom.md) | `zoomAffordance`, `zoomCursor` | Mod+휠, +/− |
-| [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
 | [Not-allowed](affordance-forbid.md) | `forbiddenCursor` | not-allowed, no-drop |
 
 ## 커서가 닫는 손

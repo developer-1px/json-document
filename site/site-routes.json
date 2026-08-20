@@ -483,6 +483,8 @@
     "description": "글쇠를 누르면 그 글자로 시작하는 다음 항목으로 초점을 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/order",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -503,6 +505,8 @@
     "description": "Escape와 pointercancel로 진행 중인 손을 버리는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -557,6 +561,8 @@
     "description": "화살표로 고른 대상을 한 단위 옮기고, Shift로 큰 단위를 쓰는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -619,6 +625,8 @@
     "description": "빈 곳에서 끌어서 여러 대상을 한 번에 고르는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -659,6 +667,8 @@
     "description": "손바닥 커서로 평면을 밀고, Space+드래그로 화면을 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -689,6 +699,8 @@
     "description": "드래그와 크기 바꾸기 중 그리드·가이드에 붙고, 수정 키로 푸는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {

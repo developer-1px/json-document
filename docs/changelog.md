@@ -5,6 +5,8 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Attached typeahead to Order Hands and marquee, pan, snap, nudge, and
+  escape to Canvas Hands. Those catalog rows leave TBD.
 - Opened Affordance as the product-facing keyboard and mouse contract, with
   usage and API for select, fold, drag, and undo/redo. Live widget screens
   stay as proofs, not the catalog entrance.

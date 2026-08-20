@@ -1,7 +1,5 @@
 # Snap
 
-TBD.
-
 Snap은 [Drag](affordance-drag.md)·[Resize](affordance-resize.md)·
 [Nudge](affordance-nudge.md) 중에 그리드나 가이드에 붙는 손입니다.
 수정 키를 누르면 붙지 않습니다.
