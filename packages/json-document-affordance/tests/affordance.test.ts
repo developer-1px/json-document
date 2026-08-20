@@ -6,10 +6,8 @@ import {
   dropAffordance,
   escapeAffordance,
   historyAffordance,
-  keyboardCommandFrom,
   pointerSelect,
   resolveAffordanceKey,
-  selectOperationFrom,
   snapAffordance,
   treeAffordance,
   typeaheadAffordance,
@@ -17,28 +15,56 @@ import {
 
 describe("pointerSelect", () => {
   test("maps conventional modifiers to replace, extend, and toggle", () => {
-    expect(selectOperationFrom(pointerSelect({ shiftKey: false, metaKey: false, ctrlKey: false }))).toBe("replace");
-    expect(selectOperationFrom(pointerSelect({ shiftKey: true, metaKey: false, ctrlKey: false }))).toBe("extend");
-    expect(selectOperationFrom(pointerSelect({ shiftKey: false, metaKey: true, ctrlKey: false }))).toBe("toggle");
-    expect(selectOperationFrom(pointerSelect({ shiftKey: false, metaKey: false, ctrlKey: true }))).toBe("toggle");
+    const operations: string[] = [];
+    applyAffordance(pointerSelect({ shiftKey: false, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    applyAffordance(pointerSelect({ shiftKey: true, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    applyAffordance(pointerSelect({ shiftKey: false, metaKey: true, ctrlKey: false }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    applyAffordance(pointerSelect({ shiftKey: false, metaKey: false, ctrlKey: true }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    expect(operations).toEqual(["replace", "extend", "toggle", "toggle"]);
   });
 });
 
 describe("resolveAffordanceKey", () => {
   test("closes the conventional keymap without a host override", () => {
-    expect(keyboardCommandFrom(resolveAffordanceKey({ key: "ArrowDown", shiftKey: false, metaKey: false, ctrlKey: false }))).toEqual({
-      type: "move",
-      direction: "down",
-      operation: "replace",
+    const hands: unknown[] = [];
+    applyAffordance(resolveAffordanceKey({ key: "ArrowDown", shiftKey: false, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
     });
-    expect(keyboardCommandFrom(resolveAffordanceKey({ key: "ArrowDown", shiftKey: true, metaKey: false, ctrlKey: false }))).toEqual({
-      type: "move",
-      direction: "down",
-      operation: "extend",
+    applyAffordance(resolveAffordanceKey({ key: "ArrowDown", shiftKey: true, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
     });
-    expect(keyboardCommandFrom(resolveAffordanceKey({ key: "z", shiftKey: false, metaKey: true, ctrlKey: false }))).toEqual({ type: "undo" });
-    expect(keyboardCommandFrom(resolveAffordanceKey({ key: "z", shiftKey: true, metaKey: true, ctrlKey: false }))).toEqual({ type: "redo" });
-    expect(keyboardCommandFrom(resolveAffordanceKey({ key: "Delete", shiftKey: false, metaKey: false, ctrlKey: false }))).toEqual({ type: "delete" });
+    applyAffordance(resolveAffordanceKey({ key: "z", shiftKey: false, metaKey: true, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    applyAffordance(resolveAffordanceKey({ key: "z", shiftKey: true, metaKey: true, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    applyAffordance(resolveAffordanceKey({ key: "Delete", shiftKey: false, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    expect(hands).toEqual([
+      { type: "move", direction: "down", operation: "replace" },
+      { type: "move", direction: "down", operation: "extend" },
+      { type: "undo" },
+      { type: "redo" },
+      { type: "delete" },
+    ]);
   });
 });
 
@@ -154,9 +180,15 @@ describe("escapeAffordance", () => {
 });
 
 describe("dropAffordance", () => {
-  test("commits a drop the host can accept", () => {
+  test("previews a drop; only commitAffordance mints the write", () => {
     expect(dropAffordance({ canDrop: false })).toEqual({ hand: null, cursor: "no-drop" });
     expect(dropAffordance({ canDrop: true })).toEqual({
+      hand: { type: "move-drop" },
+      cursor: "move",
+    });
+    expect("commit" in dropAffordance({ canDrop: true })).toBe(false);
+    expect(commitAffordance(dropAffordance({ canDrop: false }))).toBeNull();
+    expect(commitAffordance(dropAffordance({ canDrop: true }))).toEqual({
       hand: { type: "move-drop" },
       cursor: "move",
       commit: true,

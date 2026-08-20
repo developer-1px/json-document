@@ -94,25 +94,4 @@ export function commitAffordance<H extends AffordanceHand>(
     : { hand, cursor: result.cursor, commit: true };
 }
 
-export function selectOperationFrom(result: AffordanceResult): SelectOperation {
-  return result.hand?.type === "select" ? result.hand.operation : "replace";
-}
 
-export function keyboardCommandFrom(result: AffordanceResult): Extract<
-  AffordanceHand,
-  { readonly type: "move" } | { readonly type: "boundary" } | { readonly type: "toggle" } | { readonly type: "delete" } | { readonly type: "undo" } | { readonly type: "redo" }
-> | null {
-  const hand = result.hand;
-  if (!hand) return null;
-  if (
-    hand.type === "move"
-    || hand.type === "boundary"
-    || hand.type === "toggle"
-    || hand.type === "delete"
-    || hand.type === "undo"
-    || hand.type === "redo"
-  ) {
-    return hand;
-  }
-  return null;
-}

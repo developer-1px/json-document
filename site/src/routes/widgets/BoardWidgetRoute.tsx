@@ -86,20 +86,11 @@ export function BoardWidgetRoute() {
         },
       },
     );
-    const hoverColumn = columnAt(event);
-    if (hoverColumn !== null) {
-      applyAffordance(dropAffordance({ canDrop: true }), {
-        cursor: (cursor) => {
-          event.currentTarget.style.cursor = cursor;
-        },
-      });
-    } else {
-      applyAffordance(dropAffordance({ canDrop: false }), {
-        cursor: (cursor) => {
-          event.currentTarget.style.cursor = cursor;
-        },
-      });
-    }
+    applyAffordance(dropAffordance({ canDrop: columnAt(event) !== null }), {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+    });
   }
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
@@ -108,17 +99,18 @@ export function BoardWidgetRoute() {
       dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
     );
     const columnId = columnAt(event);
-    if (moved && columnId !== null) {
-      applyAffordance(dropAffordance({ canDrop: true }), {
+    const drop = dropAffordance({ canDrop: moved !== null && columnId !== null });
+    applyAffordance(drop, {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+    });
+    const dropped = commitAffordance(drop);
+    if (dropped && columnId !== null) {
+      applyAffordance(dropped, {
         commit: (hand) => {
           if (hand.type !== "move-drop") return;
           editor.dispatch({ type: "card.move", cardId: drag.cardId, columnId, beforeCardId: null });
-        },
-      });
-    } else {
-      applyAffordance(dropAffordance({ canDrop: false }), {
-        cursor: (cursor) => {
-          event.currentTarget.style.cursor = cursor;
         },
       });
     }

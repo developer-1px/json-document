@@ -39,7 +39,9 @@ function onPointerUp(event: PointerEvent) {
         },
       });
       if (copied) return;
-      applyAffordance(dropAffordance({ canDrop: true }), {
+      const drop = commitAffordance(dropAffordance({ canDrop: true }));
+      if (!drop) return;
+      applyAffordance(drop, {
         commit: (hand) => {
           if (hand.type !== "move-drop") return;
           editor.dispatch({

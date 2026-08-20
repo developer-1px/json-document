@@ -8,19 +8,12 @@ Drop은 [Drag](affordance-drag.md)의 끝입니다. 어디에 둘 수 있는지�
 ```ts
 import {
   applyAffordance,
+  commitAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
-  if (hostCanDrop(event)) {
-    applyAffordance(dropAffordance({ canDrop: true }), {
-      cursor: (cursor) => {
-        event.currentTarget.style.cursor = cursor;
-      },
-    });
-    return;
-  }
-  applyAffordance(dropAffordance({ canDrop: false }), {
+  applyAffordance(dropAffordance({ canDrop: hostCanDrop(event) }), {
     cursor: (cursor) => {
       event.currentTarget.style.cursor = cursor;
     },
@@ -28,15 +21,15 @@ function onPointerMove(event: PointerEvent) {
 }
 
 function onPointerUp(event: PointerEvent, cardId: string, columnId: string) {
-  if (!hostCanDrop(event)) {
-    applyAffordance(dropAffordance({ canDrop: false }), {
-      cursor: (cursor) => {
-        event.currentTarget.style.cursor = cursor;
-      },
-    });
-    return;
-  }
-  applyAffordance(dropAffordance({ canDrop: true }), {
+  const drop = dropAffordance({ canDrop: hostCanDrop(event) });
+  applyAffordance(drop, {
+    cursor: (cursor) => {
+      event.currentTarget.style.cursor = cursor;
+    },
+  });
+  const committed = commitAffordance(drop);
+  if (!committed) return;
+  applyAffordance(committed, {
     commit: (hand) => {
       if (hand.type !== "move-drop") return;
       editor.dispatch({ type: "card.move", cardId, columnId });

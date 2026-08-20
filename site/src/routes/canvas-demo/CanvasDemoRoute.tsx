@@ -4,6 +4,12 @@ import {
   type ObjectDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  applyAffordance,
+  commitAffordance,
+  dragAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { optionProps } from "../../shared/widget-binding";
@@ -45,9 +51,19 @@ export function CanvasDemoRoute() {
   const document = snapshot.value as ObjectDocument;
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, objectId: string) {
-    editing.getItem(objectId).getPressHandler()(event);
-    const mode = event.shiftKey ? "extend" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
-    const ids = mode === "toggle" || mode === "extend"
+    let operation: "replace" | "extend" | "toggle" = "replace";
+    applyAffordance(pointerSelect(event), {
+      hand: (hand) => {
+        if (hand.type !== "select") return;
+        operation = hand.operation;
+        editor.dispatch({
+          type: "selection.set",
+          objectIds: [objectId],
+          mode: hand.operation === "extend" ? "add" : hand.operation,
+        });
+      },
+    });
+    const ids = operation !== "replace"
       ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
       : [objectId];
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -56,17 +72,33 @@ export function CanvasDemoRoute() {
 
   function handlePointerMove(event: PointerEvent<HTMLButtonElement>) {
     if (!drag) return;
-    setDrag({
-      ...drag,
-      dx: event.clientX - drag.originX,
-      dy: event.clientY - drag.originY,
-    });
+    applyAffordance(
+      dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
+      {
+        hand: (hand) => {
+          if (hand.type === "translate") setDrag({ ...drag, dx: hand.dx, dy: hand.dy });
+        },
+      },
+    );
   }
 
-  function handlePointerUp() {
+  function handlePointerUp(event: PointerEvent<HTMLButtonElement>) {
     if (!drag) return;
-    if (drag.dx !== 0 || drag.dy !== 0) {
-      editor.dispatch({ type: "object.translate", objectIds: drag.ids, dx: drag.dx, dy: drag.dy });
+    const committed = commitAffordance(
+      dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
+    );
+    if (committed) {
+      applyAffordance(committed, {
+        commit: (hand) => {
+          if (hand.type !== "translate") return;
+          editor.dispatch({
+            type: "object.translate",
+            objectIds: drag.ids,
+            dx: hand.dx,
+            dy: hand.dy,
+          });
+        },
+      });
     }
     setDrag(null);
   }

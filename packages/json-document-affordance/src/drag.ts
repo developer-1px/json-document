@@ -1,6 +1,5 @@
 import type { WebModifierState } from "@interactive-os/json-document-web";
 import type {
-  AffordanceCommit,
   AffordancePreview,
   AffordanceRect,
 } from "./result.js";
@@ -17,15 +16,11 @@ export type DragOffset = {
 
 export type Rect = AffordanceRect;
 
-export function dragOffset(origin: Point, point: Point): DragOffset {
+function dragOffset(origin: Point, point: Point): DragOffset {
   return {
     dx: point.x - origin.x,
     dy: point.y - origin.y,
   };
-}
-
-export function dragShouldCommit(offset: DragOffset): boolean {
-  return offset.dx !== 0 || offset.dy !== 0;
 }
 
 export function dragAffordance(origin: Point, point: Point): AffordancePreview {
@@ -41,7 +36,7 @@ export function dragOperation(modifiers: WebModifierState & { readonly altKey?: 
   return { hand: { type: "move-drop" }, cursor: "move" };
 }
 
-export function marqueeRect(origin: Point, point: Point): Rect {
+function marqueeRect(origin: Point, point: Point): Rect {
   return {
     x: Math.min(origin.x, point.x),
     y: Math.min(origin.y, point.y),
@@ -109,20 +104,12 @@ export function nudgeAffordance(stroke: {
 }
 
 export function dropAffordance(input: {
-  readonly canDrop: true;
-  readonly operation?: "move" | "copy";
-}): AffordanceCommit;
-export function dropAffordance(input: {
-  readonly canDrop: false;
-  readonly operation?: "move" | "copy";
-}): AffordancePreview;
-export function dropAffordance(input: {
   readonly canDrop: boolean;
   readonly operation?: "move" | "copy";
-}): AffordanceCommit | AffordancePreview {
+}): AffordancePreview {
   if (!input.canDrop) return { hand: null, cursor: "no-drop" };
-  if (input.operation === "copy") return { hand: { type: "copy" }, cursor: "copy", commit: true };
-  return { hand: { type: "move-drop" }, cursor: "move", commit: true };
+  if (input.operation === "copy") return { hand: { type: "copy" }, cursor: "copy" };
+  return { hand: { type: "move-drop" }, cursor: "move" };
 }
 
 export function forbiddenCursor(input: {

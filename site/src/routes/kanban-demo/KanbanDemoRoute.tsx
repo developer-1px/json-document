@@ -4,6 +4,12 @@ import {
   type KanbanDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  applyAffordance,
+  commitAffordance,
+  dropAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -65,10 +71,30 @@ export function KanbanDemoRoute() {
           <div
             key={column.id}
             data-column-id={column.id}
-            onDragOver={(event) => event.preventDefault()}
+            onDragOver={(event) => {
+              event.preventDefault();
+              applyAffordance(dropAffordance({ canDrop: true }), {
+                cursor: (cursor) => {
+                  event.currentTarget.style.cursor = cursor;
+                },
+              });
+            }}
             onDrop={(event: DragEvent<HTMLDivElement>) => {
               event.preventDefault();
-              moveTo(column.id);
+              const drop = dropAffordance({ canDrop: true });
+              applyAffordance(drop, {
+                cursor: (cursor) => {
+                  event.currentTarget.style.cursor = cursor;
+                },
+              });
+              const committed = commitAffordance(drop);
+              if (!committed) return;
+              applyAffordance(committed, {
+                commit: (hand) => {
+                  if (hand.type !== "move-drop") return;
+                  moveTo(column.id);
+                },
+              });
             }}
             className="grid content-start gap-2 p-3"
           >
@@ -87,8 +113,13 @@ export function KanbanDemoRoute() {
                   data-focus={option.focus ? "true" : "false"}
                   aria-selected={option["aria-selected"]}
                   onClick={option.onClick}
-                  onDragStart={() => {
-                    editor.dispatch({ type: "selection.set", cardId: card.id });
+                  onDragStart={(event) => {
+                    applyAffordance(pointerSelect(event), {
+                      hand: (hand) => {
+                        if (hand.type !== "select") return;
+                        editor.dispatch({ type: "selection.set", cardId: card.id });
+                      },
+                    });
                     setDragging(card.id);
                   }}
                   onDragEnd={() => setDragging(null)}
