@@ -5,7 +5,7 @@ export type SiteNavigationGroup =
   | "JSON Document"
   | "Collaboration"
   | "Editing"
-  | "Editors"
+  | "Hands"
   | "Adapter"
   | "Connector"
   | "제품 화면";

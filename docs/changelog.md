@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Renamed the public genre shelf from Editors to Hands. Catalog title,
+  navigation group, and home index say Hands; `/editors` stays as the
+  path, and `createDocumentEditor` stays as the runtime API.
 - Projected the site map as a forest of same-category siblings:
   Collaboration is its own tree, single demos stay off the rail,
   Adapter/Connector indexes are the integrations, and the former

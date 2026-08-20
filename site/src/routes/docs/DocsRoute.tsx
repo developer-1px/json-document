@@ -18,7 +18,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   collaborationText: "sleep",
   collaborationLease: "connector",
   collaborationLifecycle: "peek",
-  editors: "braces",
+  hands: "braces",
   order: "cursor",
   object: "peek",
   tree: "branch",

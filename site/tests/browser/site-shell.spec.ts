@@ -15,7 +15,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "JSON Document",
     "Collaboration",
     "Editing",
-    "Editors",
+    "Hands",
     "Adapter",
     "Connector",
     "제품 화면",
@@ -46,8 +46,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Clipboard",
     "History",
   ]);
-  await navigation.getByRole("button", { name: "Editors" }).click();
-  await expect(navigation.getByRole("group", { name: "Editors" }).getByRole("link")).toHaveText([
+  await navigation.getByRole("button", { name: "Hands" }).click();
+  await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
     "Document",
     "Order",
     "Object",
@@ -68,7 +68,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "JSON Document",
     "Collaboration",
     "Editing",
-    "Editors",
+    "Hands",
     "Adapter",
     "Connector",
     "제품 화면",
@@ -85,7 +85,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Editors" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Hands" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
