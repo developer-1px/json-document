@@ -97,7 +97,7 @@ describe("breadcrumbTrail", () => {
       "Overview:/",
       "Affordance:/docs/affordance",
       "Undo:/docs/affordance/history",
-      "Toolbar:/widgets/toolbar",
+      "Toolbar proof:/widgets/toolbar",
     ]);
   });
 

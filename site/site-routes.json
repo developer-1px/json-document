@@ -703,7 +703,7 @@
   },
   {
     "path": "/widgets/toolbar",
-    "label": "Toolbar",
+    "label": "Toolbar proof",
     "title": "Toolbar proof - json-document",
     "description": "Undo and Redo disabled states come from canUndo and canRedo.",
     "parentPath": "/docs/affordance/history",
@@ -711,7 +711,7 @@
   },
   {
     "path": "/widgets/listbox",
-    "label": "Listbox",
+    "label": "Listbox proof",
     "title": "Listbox proof - json-document",
     "description": "A listbox reads selected keys and focus from Order selection.",
     "parentPath": "/docs/affordance/select",
@@ -719,7 +719,7 @@
   },
   {
     "path": "/widgets/grid",
-    "label": "Grid",
+    "label": "Grid proof",
     "title": "Grid proof - json-document",
     "description": "A grid reads visible topology and selected cells from Sheet selection.",
     "parentPath": "/docs/affordance/select",
@@ -727,7 +727,7 @@
   },
   {
     "path": "/widgets/document",
-    "label": "Document",
+    "label": "Document proof",
     "title": "Document proof - json-document",
     "description": "A document line reads selected keys, focus, and text offset from block selection.",
     "parentPath": "/docs/affordance/select",
@@ -735,7 +735,7 @@
   },
   {
     "path": "/widgets/canvas",
-    "label": "Canvas",
+    "label": "Canvas proof",
     "title": "Canvas proof - json-document",
     "description": "A canvas reads selected objects on a plane from Object selection.",
     "parentPath": "/docs/affordance/drag",
@@ -743,7 +743,7 @@
   },
   {
     "path": "/widgets/tree",
-    "label": "Tree",
+    "label": "Tree proof",
     "title": "Tree proof - json-document",
     "description": "A tree reads the visible hierarchical line from Tree selection.",
     "parentPath": "/docs/affordance/fold",
@@ -751,7 +751,7 @@
   },
   {
     "path": "/widgets/board",
-    "label": "Board",
+    "label": "Board proof",
     "title": "Board proof - json-document",
     "description": "A board reads columns of cards and selected keys from Kanban selection.",
     "parentPath": "/docs/affordance/drag",
