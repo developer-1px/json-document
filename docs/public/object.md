@@ -7,4 +7,5 @@ editor에는 객체 ID만 넘깁니다.
 색을 채우거나 지우는 요청은 Intent로 들어갑니다. 기하와 히트 테스트는
 editor 밖에 남습니다.
 
-같은 동작을 [Object Demo](/demo/object)에서 만질 수 있습니다.
+같은 동작을 [Object Demo](/demo/object)에서 만질 수 있습니다. 그 손을 평면
+위에 그린 화면은 [Canvas](/demo/canvas)입니다.

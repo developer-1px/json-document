@@ -7,4 +7,8 @@ export const legacyPageRedirects = {
     from: "/connectors/web",
     to: "/adapters",
   },
+  showcase: {
+    from: "/demos",
+    to: "/editors",
+  },
 } as const;

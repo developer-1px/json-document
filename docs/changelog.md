@@ -5,6 +5,11 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Made the site home a slim concept index and collapsed the desktop
+  sidebar to layer names, the active layer's index, and the current
+  branch. Order, Object, and Tree docs sit under Editors, Canvas sits
+  under Object, Widgets is its own group, and `/demos` redirects to
+  Editors.
 - Attached `useEditing` to the remaining live demos. `source` is optional
   when the host owns keys, so History, Topology, Rich Text Lab,
   Contenteditable, React Hook Form, Ajv, and Zod validate use the same

@@ -53,6 +53,10 @@ import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topolo
 import { Route as PageDocsTreeRouteImport } from "./routes/_page/docs/tree";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
 import { Route as PageEditingRichTextRouteImport } from "./routes/_page/editing/rich-text";
+import { Route as PageWidgetsIndexRouteImport } from "./routes/_page/widgets/index";
+import { Route as PageWidgetsGridRouteImport } from "./routes/_page/widgets/grid";
+import { Route as PageWidgetsListboxRouteImport } from "./routes/_page/widgets/listbox";
+import { Route as PageWidgetsToolbarRouteImport } from "./routes/_page/widgets/toolbar";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
@@ -285,6 +289,26 @@ const PageEditingRichTextRoute = PageEditingRichTextRouteImport.update({
   path: "/editing/rich-text",
   getParentRoute: () => PageRoute,
 } as any);
+const PageWidgetsIndexRoute = PageWidgetsIndexRouteImport.update({
+  id: "/widgets/",
+  path: "/widgets/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageWidgetsGridRoute = PageWidgetsGridRouteImport.update({
+  id: "/widgets/grid",
+  path: "/widgets/grid",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageWidgetsListboxRoute = PageWidgetsListboxRouteImport.update({
+  id: "/widgets/listbox",
+  path: "/widgets/listbox",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageWidgetsToolbarRoute = PageWidgetsToolbarRouteImport.update({
+  id: "/widgets/toolbar",
+  path: "/widgets/toolbar",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsZodIndexRoute = PageConnectorsZodIndexRouteImport.update({
   id: "/connectors/zod/",
   path: "/connectors/zod/",
@@ -373,10 +397,14 @@ export interface FileRoutesByFullPath {
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/editing/rich-text": typeof PageEditingRichTextRoute;
+  "/widgets/grid": typeof PageWidgetsGridRoute;
+  "/widgets/listbox": typeof PageWidgetsListboxRoute;
+  "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/adapters/": typeof PageAdaptersIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
+  "/widgets/": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
@@ -426,10 +454,14 @@ export interface FileRoutesByTo {
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
   "/editing/rich-text": typeof PageEditingRichTextRoute;
+  "/widgets/grid": typeof PageWidgetsGridRoute;
+  "/widgets/listbox": typeof PageWidgetsListboxRoute;
+  "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/adapters": typeof PageAdaptersIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
+  "/widgets": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
@@ -481,10 +513,14 @@ export interface FileRoutesById {
   "/_page/docs/tree": typeof PageDocsTreeRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
   "/_page/editing/rich-text": typeof PageEditingRichTextRoute;
+  "/_page/widgets/grid": typeof PageWidgetsGridRoute;
+  "/_page/widgets/listbox": typeof PageWidgetsListboxRoute;
+  "/_page/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/_page/adapters/": typeof PageAdaptersIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
+  "/_page/widgets/": typeof PageWidgetsIndexRoute;
   "/_page/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
@@ -536,10 +572,14 @@ export interface FileRouteTypes {
     | "/docs/tree"
     | "/docs/tutorial"
     | "/editing/rich-text"
+    | "/widgets/grid"
+    | "/widgets/listbox"
+    | "/widgets/toolbar"
     | "/adapters/"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
+    | "/widgets/"
     | "/connectors/zod/validate"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
@@ -589,10 +629,14 @@ export interface FileRouteTypes {
     | "/docs/tree"
     | "/docs/tutorial"
     | "/editing/rich-text"
+    | "/widgets/grid"
+    | "/widgets/listbox"
+    | "/widgets/toolbar"
     | "/adapters"
     | "/connectors"
     | "/demo"
     | "/docs"
+    | "/widgets"
     | "/connectors/zod/validate"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
@@ -643,10 +687,14 @@ export interface FileRouteTypes {
     | "/_page/docs/tree"
     | "/_page/docs/tutorial"
     | "/_page/editing/rich-text"
+    | "/_page/widgets/grid"
+    | "/_page/widgets/listbox"
+    | "/_page/widgets/toolbar"
     | "/_page/adapters/"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
+    | "/_page/widgets/"
     | "/_page/connectors/zod/validate"
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
@@ -972,6 +1020,34 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageEditingRichTextRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/widgets/": {
+      id: "/_page/widgets/";
+      path: "/widgets";
+      fullPath: "/widgets/";
+      preLoaderRoute: typeof PageWidgetsIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/widgets/grid": {
+      id: "/_page/widgets/grid";
+      path: "/widgets/grid";
+      fullPath: "/widgets/grid";
+      preLoaderRoute: typeof PageWidgetsGridRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/widgets/listbox": {
+      id: "/_page/widgets/listbox";
+      path: "/widgets/listbox";
+      fullPath: "/widgets/listbox";
+      preLoaderRoute: typeof PageWidgetsListboxRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/widgets/toolbar": {
+      id: "/_page/widgets/toolbar";
+      path: "/widgets/toolbar";
+      fullPath: "/widgets/toolbar";
+      preLoaderRoute: typeof PageWidgetsToolbarRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/connectors/zod/": {
       id: "/_page/connectors/zod/";
       path: "/connectors/zod";
@@ -1070,10 +1146,14 @@ interface PageRouteChildren {
   PageDocsTreeRoute: typeof PageDocsTreeRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
   PageEditingRichTextRoute: typeof PageEditingRichTextRoute;
+  PageWidgetsGridRoute: typeof PageWidgetsGridRoute;
+  PageWidgetsListboxRoute: typeof PageWidgetsListboxRoute;
+  PageWidgetsToolbarRoute: typeof PageWidgetsToolbarRoute;
   PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
+  PageWidgetsIndexRoute: typeof PageWidgetsIndexRoute;
   PageConnectorsZodValidateRoute: typeof PageConnectorsZodValidateRoute;
   PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
   PageDocsCollaborationLifecycleRoute: typeof PageDocsCollaborationLifecycleRoute;
@@ -1123,10 +1203,14 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsTreeRoute: PageDocsTreeRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
   PageEditingRichTextRoute: PageEditingRichTextRoute,
+  PageWidgetsGridRoute: PageWidgetsGridRoute,
+  PageWidgetsListboxRoute: PageWidgetsListboxRoute,
+  PageWidgetsToolbarRoute: PageWidgetsToolbarRoute,
   PageAdaptersIndexRoute: PageAdaptersIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,
+  PageWidgetsIndexRoute: PageWidgetsIndexRoute,
   PageConnectorsZodValidateRoute: PageConnectorsZodValidateRoute,
   PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,
   PageDocsCollaborationLifecycleRoute: PageDocsCollaborationLifecycleRoute,

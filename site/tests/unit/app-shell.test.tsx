@@ -33,6 +33,27 @@ describe("official site shell", () => {
 
     expect(nav.queryByRole("group", { name: "Start" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
+    expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
+    expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
+    expect(within(screen.getByRole("list", { name: "Concept index" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
+      "JSON Document",
+      "Editing",
+      "Editors",
+      "Adapters",
+      "Connectors",
+      "Widgets",
+    ]);
+    await user.click(nav.getByRole("button", { name: "JSON Document" }));
+    expect(groupLinks(nav, "JSON Document")).toEqual([
+      "Why",
+      "Quickstart",
+      "Concepts",
+      "API Reference",
+      "Collaboration",
+    ]);
+    expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
+    await user.click(nav.getByRole("link", { name: "Collaboration" }));
+    await waitFor(() => expect(nav.getByRole("link", { name: "Replica" })).toBeTruthy());
     expect(groupLinks(nav, "JSON Document")).toEqual([
       "Why",
       "Quickstart",
@@ -42,33 +63,34 @@ describe("official site shell", () => {
       "Replica",
       "Collaborative History",
       "Text",
-      "Contenteditable lease",
       "Lifecycle",
     ]);
+    await user.click(nav.getByRole("button", { name: "Editing" }));
     expect(groupLinks(nav, "Editing")).toEqual([
       "Intent guide",
-      "Intent",
       "Selection",
-      "Selection Demo",
       "Topology",
-      "Topology Demo",
       "Clipboard",
-      "Clipboard Demo",
       "History",
-      "History Demo",
       "Rich Text Lab",
     ]);
+    await user.click(nav.getByRole("button", { name: "Editors" }));
     expect(groupLinks(nav, "Editors")).toEqual([
       "Editors",
       "Document",
-      "Canvas",
+      "Order",
+      "Object",
       "Sheet",
       "Tree",
       "Kanban",
       "Database",
     ]);
+    await user.click(nav.getByRole("button", { name: "Adapters" }));
     expect(groupLinks(nav, "Adapters")).toEqual(["Adapters", "Adapter guide", "Keyboard", "Clipboard", "Contenteditable"]);
-    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React editing", "React", "React Hook Form", "Ajv", "Zod", "Validate", "TanStack Table"]);
+    await user.click(nav.getByRole("button", { name: "Connectors" }));
+    expect(groupLinks(nav, "Connectors")).toEqual(["Connectors", "Connector guide", "React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
+    await user.click(nav.getByRole("button", { name: "Widgets" }));
+    expect(groupLinks(nav, "Widgets")).toEqual(["Widgets"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
@@ -77,6 +99,7 @@ describe("official site shell", () => {
       "Editors",
       "Adapters",
       "Connectors",
+      "Widgets",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -123,6 +146,7 @@ describe("official site shell", () => {
     const brand = screen.getByRole("link", { name: "json-document" });
     const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
 
+    await user.click(nav.getByRole("button", { name: "JSON Document" }));
     await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }));
     await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
     const frame = await waitFor(() => {
@@ -142,6 +166,7 @@ describe("official site shell", () => {
     expect(header?.contains(screen.getByRole("navigation", { name: "Breadcrumb" }))).toBe(true);
     expect(header?.querySelector("h1")).toBeTruthy();
 
+    await user.click(nav.getByRole("button", { name: "Editors" }));
     await user.click(within(nav.getByRole("group", { name: "Editors" })).getByRole("link", { name: "Document", exact: true }));
     await waitFor(() => expect(document.documentElement.lang).toBe("en"));
   });

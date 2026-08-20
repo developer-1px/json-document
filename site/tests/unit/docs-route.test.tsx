@@ -25,6 +25,7 @@ describe("documentation routes", () => {
     const user = userEvent.setup();
     const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
 
+    await user.click(nav.getByRole("button", { name: "JSON Document" }));
     await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs");
@@ -37,11 +38,13 @@ describe("documentation routes", () => {
 
     expect(screen.queryByRole("navigation", { name: "Documentation pages" })).toBeNull();
 
+    await user.click(nav.getByRole("button", { name: "Connectors" }));
     await user.click(within(nav.getByRole("group", { name: "Connectors" })).getByRole("link", { name: "Connector guide" }));
     await waitFor(() => expect(document.title).toBe("Connector Docs - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "React에서 변경 구독하기" })).toBeTruthy();
 
+    await user.click(nav.getByRole("button", { name: "Editing" }));
     await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Topology" }));
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Topology" })).toBeTruthy();

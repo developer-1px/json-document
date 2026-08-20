@@ -1,7 +1,7 @@
 import siteRoutesJson from "../../site-routes.json";
 export { legacyPageRedirects } from "./legacy-page-redirects";
 
-export type SiteNavigationGroup = "JSON Document" | "Editing" | "Editors" | "Adapters" | "Connectors";
+export type SiteNavigationGroup = "JSON Document" | "Editing" | "Editors" | "Adapters" | "Connectors" | "Widgets";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {

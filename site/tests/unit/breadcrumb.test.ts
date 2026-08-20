@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import siteRoutes from "../../site-routes.json";
-import { breadcrumbTrail, rootNavRoutes } from "../../src/app/breadcrumb";
+import { breadcrumbTrail, rootNavRoutes, visibleNavChildren } from "../../src/app/breadcrumb";
 import type { SiteRoute } from "../../src/app/router";
 
 const routes = siteRoutes as SiteRoute[];
@@ -36,13 +36,16 @@ describe("breadcrumbTrail", () => {
       "Intent:/docs/intent",
     ]);
     expect(trail("/docs/intent-guide")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Intent guide:/docs/intent-guide"]);
-    expect(trail("/demos")).toEqual(["Overview:/", "Showcase:/demos"]);
     expect(trail("/demo")).toEqual(["Overview:/", "Editors:/editors", "Document:/demo"]);
-    expect(trail("/demo/canvas")).toEqual(["Overview:/", "Editors:/editors", "Canvas:/demo/canvas"]);
+    expect(trail("/docs/order")).toEqual(["Overview:/", "Editors:/editors", "Order:/docs/order"]);
+    expect(trail("/demo/order")).toEqual(["Overview:/", "Editors:/editors", "Order:/docs/order", "Order Demo:/demo/order"]);
+    expect(trail("/docs/object")).toEqual(["Overview:/", "Editors:/editors", "Object:/docs/object"]);
+    expect(trail("/demo/object")).toEqual(["Overview:/", "Editors:/editors", "Object:/docs/object", "Object Demo:/demo/object"]);
+    expect(trail("/demo/canvas")).toEqual(["Overview:/", "Editors:/editors", "Object:/docs/object", "Canvas:/demo/canvas"]);
     expect(trail("/demo/kanban")).toEqual(["Overview:/", "Editors:/editors", "Kanban:/demo/kanban"]);
     expect(trail("/editors")).toEqual(["Overview:/", "Editors:/editors"]);
-    expect(trail("/docs/tree")).toEqual(["Overview:/", "Tree:/docs/tree"]);
-    expect(trail("/demo/tree")).toEqual(["Overview:/", "Editors:/editors", "Tree:/demo/tree"]);
+    expect(trail("/docs/tree")).toEqual(["Overview:/", "Editors:/editors", "Tree:/docs/tree"]);
+    expect(trail("/demo/tree")).toEqual(["Overview:/", "Editors:/editors", "Tree:/docs/tree", "Tree Demo:/demo/tree"]);
     expect(trail("/demo/selection")).toEqual([
       "Overview:/",
       "Editing:/docs/intent-guide",
@@ -84,9 +87,32 @@ describe("breadcrumbTrail", () => {
       "Zod:/connectors/zod",
       "Validate:/connectors/zod/validate",
     ]);
+    expect(trail("/widgets")).toEqual(["Overview:/", "Widgets:/widgets"]);
+    expect(trail("/widgets/toolbar")).toEqual([
+      "Overview:/",
+      "Widgets:/widgets",
+      "Toolbar:/widgets/toolbar",
+    ]);
   });
 
   test("does not lift the concept map above layer groups", () => {
     expect(rootNavRoutes(routes)).toEqual([]);
+  });
+
+  test("shows nested nav children only on the current branch", () => {
+    expect(visibleNavChildren("/docs/collaboration", "/docs", routes).map((route) => route.path)).toEqual([]);
+    expect(visibleNavChildren("/docs/collaboration", "/docs/collaboration", routes).map((route) => route.path)).toEqual([
+      "/docs/collaboration/replica",
+      "/docs/collaboration/history",
+      "/docs/collaboration/text",
+      "/docs/collaboration/lifecycle",
+    ]);
+    expect(visibleNavChildren("/docs/collaboration/text", "/docs/collaboration/text/lease", routes).map((route) => route.path)).toEqual([
+      "/docs/collaboration/text/lease",
+    ]);
+    expect(visibleNavChildren("/docs/object", "/demo/canvas", routes).map((route) => route.path)).toEqual([
+      "/demo/object",
+      "/demo/canvas",
+    ]);
   });
 });

@@ -34,6 +34,11 @@ docs
 폴더에 유지하고, 별도 중첩 폴더를 개념으로 추가하지 않는다.
 
 ```txt
+앞문
+|-- Home map
+|   JSON Document → Editing → Editors → Adapter → Connector → Widgets
+`-- Sidebar: 층 이름. 활성 층 인덱스. 현재 가지 자식
+
 JSON Document
 |-- Why
 |-- Quickstart
@@ -56,23 +61,43 @@ Editing
 |   `-- Topology Demo
 |-- Clipboard
 |   `-- Clipboard Demo
-`-- History
-    `-- History Demo
+|-- History
+|   `-- History Demo
+`-- Rich Text Lab
 
 Editors
 |-- Document
-|-- Canvas
+|-- Order
+|   `-- Order Demo
+|-- Object
+|   |-- Object Demo
+|   `-- Canvas
 |-- Sheet
 |-- Tree
+|   `-- Tree Demo
 |-- Kanban
 `-- Database
 
 Adapters
-`-- Adapter guide
+|-- Adapter guide
+|-- Keyboard
+|-- Clipboard
+`-- Contenteditable
 
 Connectors
 |-- Connector guide
-`-- React editing
+|   `-- React editing
+|-- React
+|-- React Hook Form
+|-- Ajv
+|-- Zod
+|   `-- Validate
+`-- TanStack Table
+
+Widgets
+|-- Toolbar
+|-- Listbox
+`-- Grid
 ```
 
 ## 규범 우선순위
