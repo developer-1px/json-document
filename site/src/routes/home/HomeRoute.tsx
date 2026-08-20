@@ -47,8 +47,8 @@ export function HomeRoute() {
                 <span className={homeStyles.indexBlurb}>Selection and work</span>
                 <ul className={homeStyles.indexChild}>
                   <li className={homeStyles.indexItem}>
-                    <ActionLink to="/editors" className={homeStyles.indexLink}>Editors</ActionLink>
-                    <span className={homeStyles.indexBlurb}>Genre editors</span>
+                    <ActionLink to="/editors" className={homeStyles.indexLink}>Hands</ActionLink>
+                    <span className={homeStyles.indexBlurb}>Genre hands</span>
                   </li>
                 </ul>
               </li>

@@ -8,7 +8,7 @@ import collaborationLifecycleMarkdown from "../../../../docs/public/collaboratio
 import collaborationReplicaMarkdown from "../../../../docs/public/collaboration-replica.md?raw";
 import collaborationTextMarkdown from "../../../../docs/public/collaboration-text.md?raw";
 import connectorsMarkdown from "../../../../docs/public/connectors.md?raw";
-import editorsMarkdown from "../../../../docs/public/editors.md?raw";
+import handsMarkdown from "../../../../docs/public/hands.md?raw";
 import historyMarkdown from "../../../../docs/public/history.md?raw";
 import intentGuideMarkdown from "../../../../docs/public/intent-guide.md?raw";
 import intentMarkdown from "../../../../docs/public/intent.md?raw";
@@ -38,7 +38,7 @@ export const docPages = {
   collaborationText: docPage("/docs/collaboration/text", collaborationTextMarkdown),
   collaborationLease: docPage("/docs/collaboration/text/lease", collaborationLeaseMarkdown),
   collaborationLifecycle: docPage("/docs/collaboration/lifecycle", collaborationLifecycleMarkdown),
-  editors: docPage("/editors", editorsMarkdown),
+  hands: docPage("/editors", handsMarkdown),
   order: docPage("/docs/order", orderMarkdown),
   object: docPage("/docs/object", objectMarkdown),
   tree: docPage("/docs/tree", treeMarkdown),

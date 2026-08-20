@@ -20,10 +20,10 @@ docs
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
 |   |-- collaboration.md       # JSON Document: 같은 계약의 협업 구현
-|   |-- editors.md             # Editors: 숙제 종류
-|   |-- order.md               # Editors: 한 줄 목록
-|   |-- object.md              # Editors: 키 선택 객체
-|   |-- tree.md                # Editors: 보이는 나무
+|   |-- hands.md               # Hands: 장르의 손
+|   |-- order.md               # Hands: 한 줄 목록
+|   |-- object.md              # Hands: 키 선택 객체
+|   |-- tree.md                # Hands: 보이는 나무
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
 |   |-- react-editing.md       # Connectors: React 선택·커서 질의
@@ -55,12 +55,10 @@ Editing
 |-- Clipboard
 `-- History
 
-Editors
+Hands
 |-- Document
 |-- Order
 |-- Object
-|   |-- demo
-|   `-- demo
 |-- Sheet
 |-- Tree
 |-- Kanban
@@ -116,8 +114,8 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   connectors는 연결 방법이다. react-editing은 React에서 선택과 커서를
   그리는 사용법이다.
   concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
-  collaboration은 같은 JSON Document의 다른 구현이다. editors는
-  Editing 모델로 만든 숙제 종류다. order·object·tree는 그 숙제의
+  collaboration은 같은 JSON Document의 다른 구현이다. hands는
+  Editing 위 장르의 손이다. order·object·tree는 그 손의
   나머지 slice다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.

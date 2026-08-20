@@ -86,4 +86,4 @@ React의 구독 방식으로 전달합니다. TanStack Table Connector는 화면
 - [React editing](react-editing.md): 선택 범위와 커서를 React 질의로 그리기
 
 같은 공책을 여러 참여자가 쓰려면 [Collaboration](collaboration.md)으로
-갑니다. 모델을 모아 만든 숙제는 [Editors](editors.md)에서 고릅니다.
+갑니다. 장르의 손은 [Hands](hands.md)에서 고릅니다.

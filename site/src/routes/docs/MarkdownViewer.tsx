@@ -101,7 +101,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "collaboration-text.md": "/docs/collaboration/text",
   "collaboration-lease.md": "/docs/collaboration/text/lease",
   "collaboration-lifecycle.md": "/docs/collaboration/lifecycle",
-  "editors.md": "/editors",
+  "hands.md": "/editors",
   "order.md": "/docs/order",
   "object.md": "/docs/object",
   "tree.md": "/docs/tree",
