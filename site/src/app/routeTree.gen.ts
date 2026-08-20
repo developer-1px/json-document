@@ -63,6 +63,32 @@ import { Route as PageWidgetsToolbarRouteImport } from "./routes/_page/widgets/t
 import { Route as PageWidgetsTreeRouteImport } from "./routes/_page/widgets/tree";
 import { Route as PageConnectorsZodIndexRouteImport } from "./routes/_page/connectors/zod/index";
 import { Route as PageConnectorsZodValidateRouteImport } from "./routes/_page/connectors/zod/validate";
+import { Route as PageDocsAffordanceIndexRouteImport } from "./routes/_page/docs/affordance/index";
+import { Route as PageDocsAffordanceActivateRouteImport } from "./routes/_page/docs/affordance/activate";
+import { Route as PageDocsAffordanceCancelRouteImport } from "./routes/_page/docs/affordance/cancel";
+import { Route as PageDocsAffordanceCaretRouteImport } from "./routes/_page/docs/affordance/caret";
+import { Route as PageDocsAffordanceContextMenuRouteImport } from "./routes/_page/docs/affordance/context-menu";
+import { Route as PageDocsAffordanceCopyDragRouteImport } from "./routes/_page/docs/affordance/copy-drag";
+import { Route as PageDocsAffordanceDeleteRouteImport } from "./routes/_page/docs/affordance/delete";
+import { Route as PageDocsAffordanceDoubleClickRouteImport } from "./routes/_page/docs/affordance/double-click";
+import { Route as PageDocsAffordanceDragRouteImport } from "./routes/_page/docs/affordance/drag";
+import { Route as PageDocsAffordanceDropRouteImport } from "./routes/_page/docs/affordance/drop";
+import { Route as PageDocsAffordanceFocusRouteImport } from "./routes/_page/docs/affordance/focus";
+import { Route as PageDocsAffordanceFoldRouteImport } from "./routes/_page/docs/affordance/fold";
+import { Route as PageDocsAffordanceForbidRouteImport } from "./routes/_page/docs/affordance/forbid";
+import { Route as PageDocsAffordanceHistoryRouteImport } from "./routes/_page/docs/affordance/history";
+import { Route as PageDocsAffordanceHoverRouteImport } from "./routes/_page/docs/affordance/hover";
+import { Route as PageDocsAffordanceMarqueeRouteImport } from "./routes/_page/docs/affordance/marquee";
+import { Route as PageDocsAffordanceNudgeRouteImport } from "./routes/_page/docs/affordance/nudge";
+import { Route as PageDocsAffordancePanRouteImport } from "./routes/_page/docs/affordance/pan";
+import { Route as PageDocsAffordanceRenameRouteImport } from "./routes/_page/docs/affordance/rename";
+import { Route as PageDocsAffordanceResizeRouteImport } from "./routes/_page/docs/affordance/resize";
+import { Route as PageDocsAffordanceScrollRouteImport } from "./routes/_page/docs/affordance/scroll";
+import { Route as PageDocsAffordanceSelectRouteImport } from "./routes/_page/docs/affordance/select";
+import { Route as PageDocsAffordanceSnapRouteImport } from "./routes/_page/docs/affordance/snap";
+import { Route as PageDocsAffordanceTripleClickRouteImport } from "./routes/_page/docs/affordance/triple-click";
+import { Route as PageDocsAffordanceTypeaheadRouteImport } from "./routes/_page/docs/affordance/typeahead";
+import { Route as PageDocsAffordanceZoomRouteImport } from "./routes/_page/docs/affordance/zoom";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
 import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
 import { Route as PageDocsCollaborationLifecycleRouteImport } from "./routes/_page/docs/collaboration/lifecycle";
@@ -344,6 +370,151 @@ const PageConnectorsZodValidateRoute =
     path: "/connectors/zod/validate",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAffordanceIndexRoute = PageDocsAffordanceIndexRouteImport.update({
+  id: "/docs/affordance/",
+  path: "/docs/affordance/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceActivateRoute =
+  PageDocsAffordanceActivateRouteImport.update({
+    id: "/docs/affordance/activate",
+    path: "/docs/affordance/activate",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceCancelRoute =
+  PageDocsAffordanceCancelRouteImport.update({
+    id: "/docs/affordance/cancel",
+    path: "/docs/affordance/cancel",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceCaretRoute = PageDocsAffordanceCaretRouteImport.update({
+  id: "/docs/affordance/caret",
+  path: "/docs/affordance/caret",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceContextMenuRoute =
+  PageDocsAffordanceContextMenuRouteImport.update({
+    id: "/docs/affordance/context-menu",
+    path: "/docs/affordance/context-menu",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceCopyDragRoute =
+  PageDocsAffordanceCopyDragRouteImport.update({
+    id: "/docs/affordance/copy-drag",
+    path: "/docs/affordance/copy-drag",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceDeleteRoute =
+  PageDocsAffordanceDeleteRouteImport.update({
+    id: "/docs/affordance/delete",
+    path: "/docs/affordance/delete",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceDoubleClickRoute =
+  PageDocsAffordanceDoubleClickRouteImport.update({
+    id: "/docs/affordance/double-click",
+    path: "/docs/affordance/double-click",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceDragRoute = PageDocsAffordanceDragRouteImport.update({
+  id: "/docs/affordance/drag",
+  path: "/docs/affordance/drag",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceDropRoute = PageDocsAffordanceDropRouteImport.update({
+  id: "/docs/affordance/drop",
+  path: "/docs/affordance/drop",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceFocusRoute = PageDocsAffordanceFocusRouteImport.update({
+  id: "/docs/affordance/focus",
+  path: "/docs/affordance/focus",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceFoldRoute = PageDocsAffordanceFoldRouteImport.update({
+  id: "/docs/affordance/fold",
+  path: "/docs/affordance/fold",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceForbidRoute =
+  PageDocsAffordanceForbidRouteImport.update({
+    id: "/docs/affordance/forbid",
+    path: "/docs/affordance/forbid",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceHistoryRoute =
+  PageDocsAffordanceHistoryRouteImport.update({
+    id: "/docs/affordance/history",
+    path: "/docs/affordance/history",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceHoverRoute = PageDocsAffordanceHoverRouteImport.update({
+  id: "/docs/affordance/hover",
+  path: "/docs/affordance/hover",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceMarqueeRoute =
+  PageDocsAffordanceMarqueeRouteImport.update({
+    id: "/docs/affordance/marquee",
+    path: "/docs/affordance/marquee",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceNudgeRoute = PageDocsAffordanceNudgeRouteImport.update({
+  id: "/docs/affordance/nudge",
+  path: "/docs/affordance/nudge",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordancePanRoute = PageDocsAffordancePanRouteImport.update({
+  id: "/docs/affordance/pan",
+  path: "/docs/affordance/pan",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceRenameRoute =
+  PageDocsAffordanceRenameRouteImport.update({
+    id: "/docs/affordance/rename",
+    path: "/docs/affordance/rename",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceResizeRoute =
+  PageDocsAffordanceResizeRouteImport.update({
+    id: "/docs/affordance/resize",
+    path: "/docs/affordance/resize",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceScrollRoute =
+  PageDocsAffordanceScrollRouteImport.update({
+    id: "/docs/affordance/scroll",
+    path: "/docs/affordance/scroll",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceSelectRoute =
+  PageDocsAffordanceSelectRouteImport.update({
+    id: "/docs/affordance/select",
+    path: "/docs/affordance/select",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceSnapRoute = PageDocsAffordanceSnapRouteImport.update({
+  id: "/docs/affordance/snap",
+  path: "/docs/affordance/snap",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAffordanceTripleClickRoute =
+  PageDocsAffordanceTripleClickRouteImport.update({
+    id: "/docs/affordance/triple-click",
+    path: "/docs/affordance/triple-click",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceTypeaheadRoute =
+  PageDocsAffordanceTypeaheadRouteImport.update({
+    id: "/docs/affordance/typeahead",
+    path: "/docs/affordance/typeahead",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceZoomRoute = PageDocsAffordanceZoomRouteImport.update({
+  id: "/docs/affordance/zoom",
+  path: "/docs/affordance/zoom",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsCollaborationIndexRoute =
   PageDocsCollaborationIndexRouteImport.update({
     id: "/docs/collaboration/",
@@ -434,10 +605,36 @@ export interface FileRoutesByFullPath {
   "/docs/": typeof PageDocsIndexRoute;
   "/widgets/": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/affordance/activate": typeof PageDocsAffordanceActivateRoute;
+  "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
+  "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
+  "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
+  "/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
+  "/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
+  "/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
+  "/docs/affordance/drop": typeof PageDocsAffordanceDropRoute;
+  "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
+  "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
+  "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
+  "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
+  "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
+  "/docs/affordance/nudge": typeof PageDocsAffordanceNudgeRoute;
+  "/docs/affordance/pan": typeof PageDocsAffordancePanRoute;
+  "/docs/affordance/rename": typeof PageDocsAffordanceRenameRoute;
+  "/docs/affordance/resize": typeof PageDocsAffordanceResizeRoute;
+  "/docs/affordance/scroll": typeof PageDocsAffordanceScrollRoute;
+  "/docs/affordance/select": typeof PageDocsAffordanceSelectRoute;
+  "/docs/affordance/snap": typeof PageDocsAffordanceSnapRoute;
+  "/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
+  "/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
+  "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/connectors/zod/": typeof PageConnectorsZodIndexRoute;
+  "/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
   "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
@@ -495,10 +692,36 @@ export interface FileRoutesByTo {
   "/docs": typeof PageDocsIndexRoute;
   "/widgets": typeof PageWidgetsIndexRoute;
   "/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/docs/affordance/activate": typeof PageDocsAffordanceActivateRoute;
+  "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
+  "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
+  "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
+  "/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
+  "/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
+  "/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
+  "/docs/affordance/drop": typeof PageDocsAffordanceDropRoute;
+  "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
+  "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
+  "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
+  "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
+  "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
+  "/docs/affordance/nudge": typeof PageDocsAffordanceNudgeRoute;
+  "/docs/affordance/pan": typeof PageDocsAffordancePanRoute;
+  "/docs/affordance/rename": typeof PageDocsAffordanceRenameRoute;
+  "/docs/affordance/resize": typeof PageDocsAffordanceResizeRoute;
+  "/docs/affordance/scroll": typeof PageDocsAffordanceScrollRoute;
+  "/docs/affordance/select": typeof PageDocsAffordanceSelectRoute;
+  "/docs/affordance/snap": typeof PageDocsAffordanceSnapRoute;
+  "/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
+  "/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
+  "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/connectors/zod": typeof PageConnectorsZodIndexRoute;
+  "/docs/affordance": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration": typeof PageDocsCollaborationIndexRoute;
   "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/docs/collaboration/text": typeof PageDocsCollaborationTextIndexRoute;
@@ -558,10 +781,36 @@ export interface FileRoutesById {
   "/_page/docs/": typeof PageDocsIndexRoute;
   "/_page/widgets/": typeof PageWidgetsIndexRoute;
   "/_page/connectors/zod/validate": typeof PageConnectorsZodValidateRoute;
+  "/_page/docs/affordance/activate": typeof PageDocsAffordanceActivateRoute;
+  "/_page/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
+  "/_page/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
+  "/_page/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/_page/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
+  "/_page/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
+  "/_page/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
+  "/_page/docs/affordance/drag": typeof PageDocsAffordanceDragRoute;
+  "/_page/docs/affordance/drop": typeof PageDocsAffordanceDropRoute;
+  "/_page/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
+  "/_page/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
+  "/_page/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/_page/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
+  "/_page/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
+  "/_page/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
+  "/_page/docs/affordance/nudge": typeof PageDocsAffordanceNudgeRoute;
+  "/_page/docs/affordance/pan": typeof PageDocsAffordancePanRoute;
+  "/_page/docs/affordance/rename": typeof PageDocsAffordanceRenameRoute;
+  "/_page/docs/affordance/resize": typeof PageDocsAffordanceResizeRoute;
+  "/_page/docs/affordance/scroll": typeof PageDocsAffordanceScrollRoute;
+  "/_page/docs/affordance/select": typeof PageDocsAffordanceSelectRoute;
+  "/_page/docs/affordance/snap": typeof PageDocsAffordanceSnapRoute;
+  "/_page/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
+  "/_page/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
+  "/_page/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/_page/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
   "/_page/connectors/zod/": typeof PageConnectorsZodIndexRoute;
+  "/_page/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/_page/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
   "/_page/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/_page/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
@@ -621,10 +870,36 @@ export interface FileRouteTypes {
     | "/docs/"
     | "/widgets/"
     | "/connectors/zod/validate"
+    | "/docs/affordance/activate"
+    | "/docs/affordance/cancel"
+    | "/docs/affordance/caret"
+    | "/docs/affordance/context-menu"
+    | "/docs/affordance/copy-drag"
+    | "/docs/affordance/delete"
+    | "/docs/affordance/double-click"
+    | "/docs/affordance/drag"
+    | "/docs/affordance/drop"
+    | "/docs/affordance/focus"
+    | "/docs/affordance/fold"
+    | "/docs/affordance/forbid"
+    | "/docs/affordance/history"
+    | "/docs/affordance/hover"
+    | "/docs/affordance/marquee"
+    | "/docs/affordance/nudge"
+    | "/docs/affordance/pan"
+    | "/docs/affordance/rename"
+    | "/docs/affordance/resize"
+    | "/docs/affordance/scroll"
+    | "/docs/affordance/select"
+    | "/docs/affordance/snap"
+    | "/docs/affordance/triple-click"
+    | "/docs/affordance/typeahead"
+    | "/docs/affordance/zoom"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
     | "/connectors/zod/"
+    | "/docs/affordance/"
     | "/docs/collaboration/"
     | "/docs/collaboration/text/lease"
     | "/docs/collaboration/text/";
@@ -682,10 +957,36 @@ export interface FileRouteTypes {
     | "/docs"
     | "/widgets"
     | "/connectors/zod/validate"
+    | "/docs/affordance/activate"
+    | "/docs/affordance/cancel"
+    | "/docs/affordance/caret"
+    | "/docs/affordance/context-menu"
+    | "/docs/affordance/copy-drag"
+    | "/docs/affordance/delete"
+    | "/docs/affordance/double-click"
+    | "/docs/affordance/drag"
+    | "/docs/affordance/drop"
+    | "/docs/affordance/focus"
+    | "/docs/affordance/fold"
+    | "/docs/affordance/forbid"
+    | "/docs/affordance/history"
+    | "/docs/affordance/hover"
+    | "/docs/affordance/marquee"
+    | "/docs/affordance/nudge"
+    | "/docs/affordance/pan"
+    | "/docs/affordance/rename"
+    | "/docs/affordance/resize"
+    | "/docs/affordance/scroll"
+    | "/docs/affordance/select"
+    | "/docs/affordance/snap"
+    | "/docs/affordance/triple-click"
+    | "/docs/affordance/typeahead"
+    | "/docs/affordance/zoom"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
     | "/connectors/zod"
+    | "/docs/affordance"
     | "/docs/collaboration"
     | "/docs/collaboration/text/lease"
     | "/docs/collaboration/text";
@@ -744,10 +1045,36 @@ export interface FileRouteTypes {
     | "/_page/docs/"
     | "/_page/widgets/"
     | "/_page/connectors/zod/validate"
+    | "/_page/docs/affordance/activate"
+    | "/_page/docs/affordance/cancel"
+    | "/_page/docs/affordance/caret"
+    | "/_page/docs/affordance/context-menu"
+    | "/_page/docs/affordance/copy-drag"
+    | "/_page/docs/affordance/delete"
+    | "/_page/docs/affordance/double-click"
+    | "/_page/docs/affordance/drag"
+    | "/_page/docs/affordance/drop"
+    | "/_page/docs/affordance/focus"
+    | "/_page/docs/affordance/fold"
+    | "/_page/docs/affordance/forbid"
+    | "/_page/docs/affordance/history"
+    | "/_page/docs/affordance/hover"
+    | "/_page/docs/affordance/marquee"
+    | "/_page/docs/affordance/nudge"
+    | "/_page/docs/affordance/pan"
+    | "/_page/docs/affordance/rename"
+    | "/_page/docs/affordance/resize"
+    | "/_page/docs/affordance/scroll"
+    | "/_page/docs/affordance/select"
+    | "/_page/docs/affordance/snap"
+    | "/_page/docs/affordance/triple-click"
+    | "/_page/docs/affordance/typeahead"
+    | "/_page/docs/affordance/zoom"
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
     | "/_page/docs/collaboration/replica"
     | "/_page/connectors/zod/"
+    | "/_page/docs/affordance/"
     | "/_page/docs/collaboration/"
     | "/_page/docs/collaboration/text/lease"
     | "/_page/docs/collaboration/text/";
@@ -1138,6 +1465,188 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageConnectorsZodValidateRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/affordance/": {
+      id: "/_page/docs/affordance/";
+      path: "/docs/affordance";
+      fullPath: "/docs/affordance/";
+      preLoaderRoute: typeof PageDocsAffordanceIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/activate": {
+      id: "/_page/docs/affordance/activate";
+      path: "/docs/affordance/activate";
+      fullPath: "/docs/affordance/activate";
+      preLoaderRoute: typeof PageDocsAffordanceActivateRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/cancel": {
+      id: "/_page/docs/affordance/cancel";
+      path: "/docs/affordance/cancel";
+      fullPath: "/docs/affordance/cancel";
+      preLoaderRoute: typeof PageDocsAffordanceCancelRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/caret": {
+      id: "/_page/docs/affordance/caret";
+      path: "/docs/affordance/caret";
+      fullPath: "/docs/affordance/caret";
+      preLoaderRoute: typeof PageDocsAffordanceCaretRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/context-menu": {
+      id: "/_page/docs/affordance/context-menu";
+      path: "/docs/affordance/context-menu";
+      fullPath: "/docs/affordance/context-menu";
+      preLoaderRoute: typeof PageDocsAffordanceContextMenuRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/copy-drag": {
+      id: "/_page/docs/affordance/copy-drag";
+      path: "/docs/affordance/copy-drag";
+      fullPath: "/docs/affordance/copy-drag";
+      preLoaderRoute: typeof PageDocsAffordanceCopyDragRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/delete": {
+      id: "/_page/docs/affordance/delete";
+      path: "/docs/affordance/delete";
+      fullPath: "/docs/affordance/delete";
+      preLoaderRoute: typeof PageDocsAffordanceDeleteRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/double-click": {
+      id: "/_page/docs/affordance/double-click";
+      path: "/docs/affordance/double-click";
+      fullPath: "/docs/affordance/double-click";
+      preLoaderRoute: typeof PageDocsAffordanceDoubleClickRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/drag": {
+      id: "/_page/docs/affordance/drag";
+      path: "/docs/affordance/drag";
+      fullPath: "/docs/affordance/drag";
+      preLoaderRoute: typeof PageDocsAffordanceDragRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/drop": {
+      id: "/_page/docs/affordance/drop";
+      path: "/docs/affordance/drop";
+      fullPath: "/docs/affordance/drop";
+      preLoaderRoute: typeof PageDocsAffordanceDropRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/focus": {
+      id: "/_page/docs/affordance/focus";
+      path: "/docs/affordance/focus";
+      fullPath: "/docs/affordance/focus";
+      preLoaderRoute: typeof PageDocsAffordanceFocusRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/fold": {
+      id: "/_page/docs/affordance/fold";
+      path: "/docs/affordance/fold";
+      fullPath: "/docs/affordance/fold";
+      preLoaderRoute: typeof PageDocsAffordanceFoldRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/forbid": {
+      id: "/_page/docs/affordance/forbid";
+      path: "/docs/affordance/forbid";
+      fullPath: "/docs/affordance/forbid";
+      preLoaderRoute: typeof PageDocsAffordanceForbidRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/history": {
+      id: "/_page/docs/affordance/history";
+      path: "/docs/affordance/history";
+      fullPath: "/docs/affordance/history";
+      preLoaderRoute: typeof PageDocsAffordanceHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/hover": {
+      id: "/_page/docs/affordance/hover";
+      path: "/docs/affordance/hover";
+      fullPath: "/docs/affordance/hover";
+      preLoaderRoute: typeof PageDocsAffordanceHoverRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/marquee": {
+      id: "/_page/docs/affordance/marquee";
+      path: "/docs/affordance/marquee";
+      fullPath: "/docs/affordance/marquee";
+      preLoaderRoute: typeof PageDocsAffordanceMarqueeRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/nudge": {
+      id: "/_page/docs/affordance/nudge";
+      path: "/docs/affordance/nudge";
+      fullPath: "/docs/affordance/nudge";
+      preLoaderRoute: typeof PageDocsAffordanceNudgeRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/pan": {
+      id: "/_page/docs/affordance/pan";
+      path: "/docs/affordance/pan";
+      fullPath: "/docs/affordance/pan";
+      preLoaderRoute: typeof PageDocsAffordancePanRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/rename": {
+      id: "/_page/docs/affordance/rename";
+      path: "/docs/affordance/rename";
+      fullPath: "/docs/affordance/rename";
+      preLoaderRoute: typeof PageDocsAffordanceRenameRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/resize": {
+      id: "/_page/docs/affordance/resize";
+      path: "/docs/affordance/resize";
+      fullPath: "/docs/affordance/resize";
+      preLoaderRoute: typeof PageDocsAffordanceResizeRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/scroll": {
+      id: "/_page/docs/affordance/scroll";
+      path: "/docs/affordance/scroll";
+      fullPath: "/docs/affordance/scroll";
+      preLoaderRoute: typeof PageDocsAffordanceScrollRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/select": {
+      id: "/_page/docs/affordance/select";
+      path: "/docs/affordance/select";
+      fullPath: "/docs/affordance/select";
+      preLoaderRoute: typeof PageDocsAffordanceSelectRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/snap": {
+      id: "/_page/docs/affordance/snap";
+      path: "/docs/affordance/snap";
+      fullPath: "/docs/affordance/snap";
+      preLoaderRoute: typeof PageDocsAffordanceSnapRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/triple-click": {
+      id: "/_page/docs/affordance/triple-click";
+      path: "/docs/affordance/triple-click";
+      fullPath: "/docs/affordance/triple-click";
+      preLoaderRoute: typeof PageDocsAffordanceTripleClickRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/typeahead": {
+      id: "/_page/docs/affordance/typeahead";
+      path: "/docs/affordance/typeahead";
+      fullPath: "/docs/affordance/typeahead";
+      preLoaderRoute: typeof PageDocsAffordanceTypeaheadRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/zoom": {
+      id: "/_page/docs/affordance/zoom";
+      path: "/docs/affordance/zoom";
+      fullPath: "/docs/affordance/zoom";
+      preLoaderRoute: typeof PageDocsAffordanceZoomRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/collaboration/": {
       id: "/_page/docs/collaboration/";
       path: "/docs/collaboration";
@@ -1235,10 +1744,36 @@ interface PageRouteChildren {
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
   PageWidgetsIndexRoute: typeof PageWidgetsIndexRoute;
   PageConnectorsZodValidateRoute: typeof PageConnectorsZodValidateRoute;
+  PageDocsAffordanceActivateRoute: typeof PageDocsAffordanceActivateRoute;
+  PageDocsAffordanceCancelRoute: typeof PageDocsAffordanceCancelRoute;
+  PageDocsAffordanceCaretRoute: typeof PageDocsAffordanceCaretRoute;
+  PageDocsAffordanceContextMenuRoute: typeof PageDocsAffordanceContextMenuRoute;
+  PageDocsAffordanceCopyDragRoute: typeof PageDocsAffordanceCopyDragRoute;
+  PageDocsAffordanceDeleteRoute: typeof PageDocsAffordanceDeleteRoute;
+  PageDocsAffordanceDoubleClickRoute: typeof PageDocsAffordanceDoubleClickRoute;
+  PageDocsAffordanceDragRoute: typeof PageDocsAffordanceDragRoute;
+  PageDocsAffordanceDropRoute: typeof PageDocsAffordanceDropRoute;
+  PageDocsAffordanceFocusRoute: typeof PageDocsAffordanceFocusRoute;
+  PageDocsAffordanceFoldRoute: typeof PageDocsAffordanceFoldRoute;
+  PageDocsAffordanceForbidRoute: typeof PageDocsAffordanceForbidRoute;
+  PageDocsAffordanceHistoryRoute: typeof PageDocsAffordanceHistoryRoute;
+  PageDocsAffordanceHoverRoute: typeof PageDocsAffordanceHoverRoute;
+  PageDocsAffordanceMarqueeRoute: typeof PageDocsAffordanceMarqueeRoute;
+  PageDocsAffordanceNudgeRoute: typeof PageDocsAffordanceNudgeRoute;
+  PageDocsAffordancePanRoute: typeof PageDocsAffordancePanRoute;
+  PageDocsAffordanceRenameRoute: typeof PageDocsAffordanceRenameRoute;
+  PageDocsAffordanceResizeRoute: typeof PageDocsAffordanceResizeRoute;
+  PageDocsAffordanceScrollRoute: typeof PageDocsAffordanceScrollRoute;
+  PageDocsAffordanceSelectRoute: typeof PageDocsAffordanceSelectRoute;
+  PageDocsAffordanceSnapRoute: typeof PageDocsAffordanceSnapRoute;
+  PageDocsAffordanceTripleClickRoute: typeof PageDocsAffordanceTripleClickRoute;
+  PageDocsAffordanceTypeaheadRoute: typeof PageDocsAffordanceTypeaheadRoute;
+  PageDocsAffordanceZoomRoute: typeof PageDocsAffordanceZoomRoute;
   PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
   PageDocsCollaborationLifecycleRoute: typeof PageDocsCollaborationLifecycleRoute;
   PageDocsCollaborationReplicaRoute: typeof PageDocsCollaborationReplicaRoute;
   PageConnectorsZodIndexRoute: typeof PageConnectorsZodIndexRoute;
+  PageDocsAffordanceIndexRoute: typeof PageDocsAffordanceIndexRoute;
   PageDocsCollaborationIndexRoute: typeof PageDocsCollaborationIndexRoute;
   PageDocsCollaborationTextLeaseRoute: typeof PageDocsCollaborationTextLeaseRoute;
   PageDocsCollaborationTextIndexRoute: typeof PageDocsCollaborationTextIndexRoute;
@@ -1296,10 +1831,36 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsIndexRoute: PageDocsIndexRoute,
   PageWidgetsIndexRoute: PageWidgetsIndexRoute,
   PageConnectorsZodValidateRoute: PageConnectorsZodValidateRoute,
+  PageDocsAffordanceActivateRoute: PageDocsAffordanceActivateRoute,
+  PageDocsAffordanceCancelRoute: PageDocsAffordanceCancelRoute,
+  PageDocsAffordanceCaretRoute: PageDocsAffordanceCaretRoute,
+  PageDocsAffordanceContextMenuRoute: PageDocsAffordanceContextMenuRoute,
+  PageDocsAffordanceCopyDragRoute: PageDocsAffordanceCopyDragRoute,
+  PageDocsAffordanceDeleteRoute: PageDocsAffordanceDeleteRoute,
+  PageDocsAffordanceDoubleClickRoute: PageDocsAffordanceDoubleClickRoute,
+  PageDocsAffordanceDragRoute: PageDocsAffordanceDragRoute,
+  PageDocsAffordanceDropRoute: PageDocsAffordanceDropRoute,
+  PageDocsAffordanceFocusRoute: PageDocsAffordanceFocusRoute,
+  PageDocsAffordanceFoldRoute: PageDocsAffordanceFoldRoute,
+  PageDocsAffordanceForbidRoute: PageDocsAffordanceForbidRoute,
+  PageDocsAffordanceHistoryRoute: PageDocsAffordanceHistoryRoute,
+  PageDocsAffordanceHoverRoute: PageDocsAffordanceHoverRoute,
+  PageDocsAffordanceMarqueeRoute: PageDocsAffordanceMarqueeRoute,
+  PageDocsAffordanceNudgeRoute: PageDocsAffordanceNudgeRoute,
+  PageDocsAffordancePanRoute: PageDocsAffordancePanRoute,
+  PageDocsAffordanceRenameRoute: PageDocsAffordanceRenameRoute,
+  PageDocsAffordanceResizeRoute: PageDocsAffordanceResizeRoute,
+  PageDocsAffordanceScrollRoute: PageDocsAffordanceScrollRoute,
+  PageDocsAffordanceSelectRoute: PageDocsAffordanceSelectRoute,
+  PageDocsAffordanceSnapRoute: PageDocsAffordanceSnapRoute,
+  PageDocsAffordanceTripleClickRoute: PageDocsAffordanceTripleClickRoute,
+  PageDocsAffordanceTypeaheadRoute: PageDocsAffordanceTypeaheadRoute,
+  PageDocsAffordanceZoomRoute: PageDocsAffordanceZoomRoute,
   PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,
   PageDocsCollaborationLifecycleRoute: PageDocsCollaborationLifecycleRoute,
   PageDocsCollaborationReplicaRoute: PageDocsCollaborationReplicaRoute,
   PageConnectorsZodIndexRoute: PageConnectorsZodIndexRoute,
+  PageDocsAffordanceIndexRoute: PageDocsAffordanceIndexRoute,
   PageDocsCollaborationIndexRoute: PageDocsCollaborationIndexRoute,
   PageDocsCollaborationTextLeaseRoute: PageDocsCollaborationTextLeaseRoute,
   PageDocsCollaborationTextIndexRoute: PageDocsCollaborationTextIndexRoute,

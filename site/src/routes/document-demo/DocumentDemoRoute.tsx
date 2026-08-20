@@ -11,17 +11,20 @@ import {
 import { useDocumentEditor, useEditing, useRestoreTextCursor } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
-  createWebKeyboardAdapter,
   documentClipboardCodec,
   lineBoundary,
   moveLinePoint,
   textInputFromControl,
 } from "@interactive-os/json-document-web";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands, optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -41,7 +44,6 @@ export function DocumentDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const [keyboard] = useState(() => createWebKeyboardAdapter());
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
@@ -74,7 +76,7 @@ export function DocumentDemoRoute() {
     },
     ignorePress: (event) => event.target instanceof Element && event.target.closest("textarea") !== null,
     keyboard: {
-      resolve: (stroke) => keyboard.resolve(stroke),
+      resolve: (stroke) => editingCommandFromStroke(stroke),
       focusKey: () => editor.selectedBlockIds.at(-1),
       neighbor: (key, command) => {
         const ids = (editor.snapshot.value as BlockDocument).blocks.map((block) => block.id);
@@ -236,6 +238,14 @@ export function DocumentDemoRoute() {
                   data-block-id={block.id}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                   {...optionProps(item)}
+                  onClick={(event) => {
+                    applyAffordance(pointerSelect(event), {
+                      hand: (hand) => {
+                        if (hand.type !== "select") return;
+                        run(() => dispatchIntent({ type: "selection.set", blockId: block.id, mode: hand.operation }), "Selection changed");
+                      },
+                    });
+                  }}
                 >
                   <ActionButton
                     aria-label={`Select block ${index + 1}`}

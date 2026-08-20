@@ -11,16 +11,19 @@ import {
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
-  createWebKeyboardAdapter,
   gridBoundary,
   moveGridPoint,
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { gridCellProps, historyCommands } from "../../shared/widget-binding";
+import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -45,7 +48,6 @@ export function SheetDemo() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const [keyboard] = useState(() => createWebKeyboardAdapter());
   const surfaceRef = useRef<HTMLElement>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
@@ -77,7 +79,7 @@ export function SheetDemo() {
       );
     },
     keyboard: {
-      resolve: (stroke) => keyboard.resolve(stroke),
+      resolve: (stroke) => editingCommandFromStroke(stroke),
       focusKey: () => {
         const focus = editor.snapshot.selection.focus;
         return focus ? cellKey(focus.rowId, focus.columnId) : undefined;
@@ -241,6 +243,22 @@ export function SheetDemo() {
                           data-column-id={column.id}
                           className={classes("p-0", ui.surface.gridCell)}
                           {...gridCellProps(item)}
+                          onClick={(event) => {
+                            applyAffordance(pointerSelect(event), {
+                              hand: (hand) => {
+                                if (hand.type !== "select") return;
+                                run(
+                                  () => dispatchIntent({
+                                    type: "selection.set",
+                                    rowId: row.id,
+                                    columnId: column.id,
+                                    mode: hand.operation,
+                                  }),
+                                  hand.operation === "extend" ? "Range extended" : hand.operation === "toggle" ? "Range toggled" : "Cell selected",
+                                );
+                              },
+                            });
+                          }}
                         >
                             <input
                               aria-label={`${column.label} row ${rowIndex + 1}`}

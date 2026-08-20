@@ -16,6 +16,7 @@
     "@interactive-os/json-document-react": "*",
     "@interactive-os/json-document-react-hook-form": "*",
     "@interactive-os/json-document-ajv": "*",
+    "@interactive-os/json-document-affordance": "*",
     "@interactive-os/json-document-tanstack-table": "*",
     "@interactive-os/json-document-web": "*",
     "@interactive-os/json-document-contenteditable": "*",

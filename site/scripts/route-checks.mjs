@@ -3,10 +3,10 @@ const navigationGroups = new Set([
   "JSON Document",
   "Collaboration",
   "Editing",
-  "Hands",
   "Adapter",
   "Connector",
-  "제품 화면",
+  "Affordance",
+  "Hands",
 ]);
 
 export function validateSiteRoutes(routes, fail) {

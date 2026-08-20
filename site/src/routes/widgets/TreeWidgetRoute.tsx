@@ -9,7 +9,12 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import {
+  applyAffordance,
+  pointerSelect,
+  treeAffordance,
+} from "@interactive-os/json-document-affordance";
+import { editingCommandFromStroke, treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialTree: TreeDocument = {
@@ -38,11 +43,43 @@ export function TreeWidgetRoute() {
       editor.dispatch({ type: "selection.set", nodeId, topology, mode });
     },
     keyboard: {
-      resolve: (stroke) => keyboard.resolve(stroke),
+      resolve: (stroke) => {
+        keyboard.resolve(stroke);
+        return editingCommandFromStroke(stroke);
+      },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? undefined,
-      neighbor: (key, command) => command.type === "move"
-        ? moveLinePoint(topology.visibleIds, key, command.direction)
-        : lineBoundary(topology.visibleIds, command.edge),
+      neighbor: (key, command) => {
+        const row = rows.find((item) => item.id === key);
+        if (row && command.type === "move") {
+          let stay = false;
+          applyAffordance(
+            treeAffordance(command, {
+              expanded: expanded.has(row.id),
+              hasChildren: document.nodes.some((node) => node.parentId === row.id),
+            }),
+            {
+              hand: (hand) => {
+                if (hand.type === "expand") {
+                  setExpanded((current) => new Set(current).add(row.id));
+                  stay = true;
+                }
+                if (hand.type === "collapse") {
+                  setExpanded((current) => {
+                    const next = new Set(current);
+                    next.delete(row.id);
+                    return next;
+                  });
+                  stay = true;
+                }
+              },
+            },
+          );
+          if (stay) return key;
+        }
+        return command.type === "move"
+          ? moveLinePoint(topology.visibleIds, key, command.direction)
+          : lineBoundary(topology.visibleIds, command.edge);
+      },
       onDelete: () => {
         editor.dispatch({ type: "selection.remove", topology });
       },
@@ -67,7 +104,7 @@ export function TreeWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Tree"
-      description="The tree reads the visible hierarchical line. Fold state stays on the host."
+      description="Expand, collapse, and select use applyAffordance. Fold stays on the host."
       illustration="branch"
       widgetLabel="Tree"
       widget={(
@@ -95,6 +132,19 @@ export function TreeWidgetRoute() {
                   <SelectableItem
                     className={classes("text-left", ui.surface.selectableBlock)}
                     {...treeItemProps(editing.getItem(row.id))}
+                    onClick={(event) => {
+                      applyAffordance(pointerSelect(event), {
+                        hand: (hand) => {
+                          if (hand.type !== "select") return;
+                          editor.dispatch({
+                            type: "selection.set",
+                            nodeId: row.id,
+                            topology,
+                            mode: hand.operation,
+                          });
+                        },
+                      });
+                    }}
                   >
                     {row.label}
                   </SelectableItem>

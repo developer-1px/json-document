@@ -4,7 +4,12 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import {
+  applyAffordance,
+  historyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -27,7 +32,10 @@ export function ToolbarWidgetRoute() {
       editor.dispatch({ type: "selection.set", itemId, mode });
     },
     keyboard: {
-      resolve: (stroke) => keyboard.resolve(stroke),
+      resolve: (stroke) => {
+        keyboard.resolve(stroke);
+        return editingCommandFromStroke(stroke);
+      },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
         ? moveLinePoint(ids(), key, command.direction)
@@ -45,12 +53,20 @@ export function ToolbarWidgetRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as OrderDocument;
-  const commands = historyCommands(snapshot);
+  let commands = {
+    undo: { name: "undo" as const, disabled: true },
+    redo: { name: "redo" as const, disabled: true },
+  };
+  applyAffordance(historyAffordance(snapshot), {
+    hand: (hand) => {
+      if (hand.type === "history") commands = { undo: hand.undo, redo: hand.redo };
+    },
+  });
 
   return (
     <WidgetDemoFrame
       title="Toolbar"
-      description="The toolbar reads canUndo and canRedo. It does not own the list or the keymap."
+      description="Undo uses applyAffordance the same way as Select."
       illustration="clipboard"
       widgetLabel="Toolbar"
       widget={(
@@ -75,6 +91,14 @@ export function ToolbarWidgetRoute() {
               role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(item.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    editor.dispatch({ type: "selection.set", itemId: item.id, mode: hand.operation });
+                  },
+                });
+              }}
             >
               {item.label}
             </SelectableItem>

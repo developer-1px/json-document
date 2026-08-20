@@ -8,7 +8,7 @@ export type SiteNavigationGroup =
   | "Hands"
   | "Adapter"
   | "Connector"
-  | "제품 화면";
+  | "Affordance";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {

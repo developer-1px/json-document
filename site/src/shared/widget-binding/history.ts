@@ -1,21 +1,25 @@
-export type HistoryCommandName = "undo" | "redo";
+import {
+  applyAffordance,
+  historyAffordance,
+  type HistoryAffordance,
+  type HistoryAffordanceMap,
+  type HistoryAffordanceName,
+} from "@interactive-os/json-document-affordance";
 
-export type HistoryCommand = {
-  readonly name: HistoryCommandName;
-  readonly disabled: boolean;
-};
-
-export type HistoryCommandMap = {
-  readonly undo: HistoryCommand;
-  readonly redo: HistoryCommand;
-};
+export type { HistoryAffordance as HistoryCommand, HistoryAffordanceMap as HistoryCommandMap, HistoryAffordanceName as HistoryCommandName };
 
 export function historyCommands(snapshot: {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
-}): HistoryCommandMap {
-  return {
-    undo: { name: "undo", disabled: !snapshot.canUndo },
-    redo: { name: "redo", disabled: !snapshot.canRedo },
+}): HistoryAffordanceMap {
+  let commands: HistoryAffordanceMap = {
+    undo: { name: "undo", disabled: true },
+    redo: { name: "redo", disabled: true },
   };
+  applyAffordance(historyAffordance(snapshot), {
+    hand: (hand) => {
+      if (hand.type === "history") commands = { undo: hand.undo, redo: hand.redo };
+    },
+  });
+  return commands;
 }

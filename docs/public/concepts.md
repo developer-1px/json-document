@@ -7,11 +7,11 @@ Quickstart에서는 JSON을 읽고, 변경을 적용하고, 결과를 구독했�
 json-document를 제품에 연결하는 흐름은 이렇게 이어집니다. 먼저 JSON
 Document가 값을 다루고, Editing이 사용자의 편집 상태를 더합니다.
 Adapter는 브라우저 플랫폼 계약을 붙이고, Connector는 라이브러리 생태계를
-연결합니다.
+연결합니다. Affordance는 키보드와 마우스의 관례적 손을 최전선에서 닫습니다.
 
 ```txt
-JSON Document  →  Editing  →  Adapter  →  Connector  →  제품 화면
-값과 변경         선택과 작업    플랫폼 계약    라이브러리      렌더링과 입력
+JSON Document  →  Editing  →  Adapter  →  Connector  →  Affordance
+값과 변경         선택과 작업    플랫폼 계약    라이브러리      키보드와 마우스
 ```
 
 ## JSON Document가 값을 다룬다
@@ -84,6 +84,8 @@ React의 구독 방식으로 전달합니다. TanStack Table Connector는 화면
 - [Adapters](adapters.md): 키보드, clipboard, contenteditable 플랫폼 변환
 - [Connectors](connectors.md): React, Zod, TanStack Table 같은 라이브러리 연결
 - [React editing](react-editing.md): 선택 범위와 커서를 React 질의로 그리기
+- [Affordance](affordance.md): 키보드와 마우스의 관례적 손
 
 같은 공책을 여러 참여자가 쓰려면 [Collaboration](collaboration.md)으로
-갑니다. 장르의 손은 [Hands](hands.md)에서 고릅니다.
+갑니다. 장르 선반은 [Hands](hands.md)에서 고릅니다. Hands는 위 파이프라인
+한 층이 아닙니다.

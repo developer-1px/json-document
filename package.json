@@ -9,6 +9,7 @@
     "packages/json-document-react",
     "packages/json-document-react-hook-form",
     "packages/json-document-ajv",
+    "packages/json-document-affordance",
     "packages/json-document-zod",
     "packages/json-document-tanstack-table",
     "packages/json-document-web",

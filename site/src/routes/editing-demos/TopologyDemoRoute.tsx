@@ -5,6 +5,10 @@ import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { optionProps } from "../../shared/widget-binding";
 
 const records = {
@@ -70,6 +74,19 @@ export function TopologyDemoRoute() {
                     type="button"
                     className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
                     {...optionProps(item)}
+                    onClick={(event) => {
+                      applyAffordance(pointerSelect(event), {
+                        hand: (hand) => {
+                          if (hand.type !== "select") return;
+                          if (hand.operation === "extend") {
+                            setFocus(id);
+                            return;
+                          }
+                          setAnchor(id);
+                          setFocus(id);
+                        },
+                      });
+                    }}
                   >
                     {records[id as keyof typeof records]}
                   </SelectableItem>

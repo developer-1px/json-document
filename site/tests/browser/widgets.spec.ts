@@ -1,16 +1,21 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test("Widgets catalog lists only editing widgets", async ({ page }) => {
+test("Widgets catalog redirects to affordance usage", async ({ page }) => {
   await page.goto("/widgets");
-  await expect(page.getByRole("heading", { level: 1, name: "제품 화면" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Toolbar" })).toHaveAttribute("href", "/widgets/toolbar");
-  await expect(page.getByRole("link", { name: "Open Listbox" })).toHaveAttribute("href", "/widgets/listbox");
-  await expect(page.getByRole("link", { name: "Open Grid" })).toHaveAttribute("href", "/widgets/grid");
-  await expect(page.getByRole("link", { name: "Open Document" })).toHaveAttribute("href", "/widgets/document");
-  await expect(page.getByRole("link", { name: "Open Canvas" })).toHaveAttribute("href", "/widgets/canvas");
-  await expect(page.getByRole("link", { name: "Open Tree" })).toHaveAttribute("href", "/widgets/tree");
-  await expect(page.getByRole("link", { name: "Open Board" })).toHaveAttribute("href", "/widgets/board");
-  await expect(page.getByRole("link", { name: "Open Database" })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/docs\/affordance$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Affordance" })).toBeVisible();
+  const navigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(navigation.getByRole("link", { name: "Select", exact: true })).toHaveAttribute("href", "/docs/affordance/select");
+  await expect(navigation.getByRole("link", { name: "Expand/Collapse", exact: true })).toHaveAttribute("href", "/docs/affordance/fold");
+  await expect(navigation.getByRole("link", { name: "Drag", exact: true })).toHaveAttribute("href", "/docs/affordance/drag");
+  await expect(navigation.getByRole("link", { name: "Undo", exact: true })).toHaveAttribute("href", "/docs/affordance/history");
+  const content = page.getByRole("main");
+  await expect(content.getByRole("link", { name: "Select" }).first()).toHaveAttribute("href", "/docs/affordance/select");
+  await expect(content.getByRole("link", { name: "Expand/Collapse" }).first()).toHaveAttribute("href", "/docs/affordance/fold");
+  await expect(content.getByRole("link", { name: "Drag" }).first()).toHaveAttribute("href", "/docs/affordance/drag");
+  await expect(content.getByRole("link", { name: "Undo" }).first()).toHaveAttribute("href", "/docs/affordance/history");
+  await expect(content.getByRole("link", { name: "Focus" }).first()).toHaveAttribute("href", "/docs/affordance/focus");
+  await expect(content.getByRole("link", { name: "Resize" }).first()).toHaveAttribute("href", "/docs/affordance/resize");
 });
 
 test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
@@ -39,6 +44,13 @@ test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   await expect(redo).toBeEnabled();
   await expect(page.getByRole("option", { name: "Inbox" })).toBeVisible();
   expect(await json(page, "widget-toolbar-keyboard")).toEqual({ type: "undo" });
+});
+
+test("Listbox typeahead jumps to the matching label", async ({ page }) => {
+  await page.goto("/widgets/listbox");
+  await page.getByRole("listbox", { name: "Order items" }).focus();
+  await page.keyboard.type("T");
+  expect(await json(page, "widget-listbox-selected")).toEqual(["today"]);
 });
 
 test("Listbox reads selected keys and focus from Order", async ({ page }) => {
@@ -122,6 +134,19 @@ test("Tree reads visible topology and selected keys", async ({ page }) => {
   expect(await json(page, "widget-tree-focus")).toBe("apple");
 });
 
+test("Tree left collapses and right expands the focused parent", async ({ page }) => {
+  await page.goto("/widgets/tree");
+  await page.getByRole("treeitem", { name: "Fruit" }).click();
+  await page.keyboard.press("ArrowLeft");
+  expect(await json(page, "widget-tree-topology")).toEqual({
+    visibleIds: ["fruit", "veg", "kale"],
+  });
+  await page.keyboard.press("ArrowRight");
+  expect(await json(page, "widget-tree-topology")).toEqual({
+    visibleIds: ["fruit", "apple", "pear", "veg", "kale"],
+  });
+});
+
 test("Board reads columns and selected cards", async ({ page }) => {
   await page.goto("/widgets/board");
   expect(await json(page, "widget-board-columns")).toEqual([
@@ -132,6 +157,38 @@ test("Board reads columns and selected cards", async ({ page }) => {
   await page.getByRole("option", { name: "Draw the board" }).click();
   expect(await json(page, "widget-board-selected")).toEqual(["draw"]);
   expect(await json(page, "widget-board-focus")).toBe("draw");
+});
+
+test("Board modifier click toggles cards and drag moves a card", async ({ page }) => {
+  await page.goto("/widgets/board");
+  await page.getByRole("option", { name: "Write the brief" }).click();
+  await page.keyboard.down("ControlOrMeta");
+  await page.getByRole("option", { name: "Review copy" }).click();
+  await page.keyboard.up("ControlOrMeta");
+  expect(await json(page, "widget-board-selected")).toEqual(["write", "review"]);
+
+  await page.getByRole("option", { name: "Write the brief" }).dragTo(page.getByRole("listbox", { name: "Done" }));
+  expect(await json(page, "widget-board-columns")).toEqual([
+    { id: "todo", cardIds: ["review"] },
+    { id: "doing", cardIds: ["draw"] },
+    { id: "done", cardIds: ["write"] },
+  ]);
+});
+
+test("Canvas escape cancels an in-progress marquee", async ({ page }) => {
+  await page.goto("/widgets/canvas");
+  await page.getByRole("option", { name: "Card" }).click();
+  expect(await json(page, "widget-canvas-selected")).toEqual(["card"]);
+  const canvas = page.getByRole("listbox", { name: "Canvas objects" });
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("canvas bounding box");
+  await canvas.focus();
+  await page.mouse.move(box.x + box.width - 24, box.y + box.height - 24);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 8, box.y + box.height - 8);
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  expect(await json(page, "widget-canvas-selected")).toEqual(["card"]);
 });
 
 async function json(page: Page, testId: string): Promise<unknown> {

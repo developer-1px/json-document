@@ -55,15 +55,6 @@ Editing
 |-- Clipboard
 `-- History
 
-Hands
-|-- Document
-|-- Order
-|-- Object
-|-- Sheet
-|-- Tree
-|-- Kanban
-`-- Database
-
 Adapter
 |-- Keyboard
 |-- Clipboard adapter
@@ -76,14 +67,41 @@ Connector
 |-- Zod
 `-- TanStack Table
 
-제품 화면
-|-- Toolbar
-|-- Listbox
-|-- Grid
+Affordance
+|-- Focus
+|-- Caret
+|-- Select
+|-- Typeahead
+|-- Activate
+|-- Escape
+|-- Expand/Collapse
+|-- Undo
+|-- Delete
+|-- Rename
+|-- Nudge
+|-- Hover
+|-- Double-click
+|-- Triple-click
+|-- Context menu
+|-- Drag
+|-- Marquee
+|-- Drop
+|-- Duplicate
+|-- Resize
+|-- Pan
+|-- Scroll
+|-- Zoom
+|-- Snap
+`-- Not-allowed
+
+Hands
 |-- Document
-|-- Canvas
+|-- Order
+|-- Object
+|-- Sheet
 |-- Tree
-`-- Board
+|-- Kanban
+`-- Database
 ```
 
 ## 규범 우선순위

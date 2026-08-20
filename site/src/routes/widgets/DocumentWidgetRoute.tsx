@@ -4,7 +4,11 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialDocument: BlockDocument = {
@@ -28,7 +32,10 @@ export function DocumentWidgetRoute() {
       editor.dispatch({ type: "selection.set", blockId, mode });
     },
     keyboard: {
-      resolve: (stroke) => keyboard.resolve(stroke),
+      resolve: (stroke) => {
+        keyboard.resolve(stroke);
+        return editingCommandFromStroke(stroke);
+      },
       focusKey: () => editor.selectedBlockIds.at(-1),
       neighbor: (key, command) => {
         const ids = (editor.snapshot.value as BlockDocument).blocks.map((block) => block.id);
@@ -53,7 +60,7 @@ export function DocumentWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Document"
-      description="The document line reads selected keys, focus, and text offset. It does not own insert or clipboard."
+      description="Select uses applyAffordance. Insert and clipboard stay off this layer."
       illustration="sleep"
       widgetLabel="Document"
       widget={(
@@ -71,6 +78,14 @@ export function DocumentWidgetRoute() {
               role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(block.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    editor.dispatch({ type: "selection.set", blockId: block.id, mode: hand.operation });
+                  },
+                });
+              }}
             >
               {block.text}
             </SelectableItem>

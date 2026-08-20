@@ -6,6 +6,10 @@ import {
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
@@ -133,6 +137,18 @@ export function ObjectDemoRoute() {
               data-object-id={object.id}
               className="absolute grid place-items-center"
               {...optionProps(editing.getItem(object.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    run({
+                      type: "selection.set",
+                      objectIds: [object.id],
+                      mode: hand.operation === "extend" ? "add" : hand.operation,
+                    }, "Selection changed");
+                  },
+                });
+              }}
               style={{
                 left: object.x,
                 top: object.y,

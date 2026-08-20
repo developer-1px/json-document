@@ -39,10 +39,10 @@ describe("official site shell", () => {
       "JSON Document",
       "Collaboration",
       "Editing",
-      "Hands",
       "Adapter",
       "Connector",
-      "제품 화면",
+      "Affordance",
+      "Hands",
     ]);
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
@@ -82,18 +82,44 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-    await user.click(nav.getByRole("button", { name: "제품 화면" }));
-    expect(groupLinks(nav, "제품 화면")).toEqual(["Toolbar", "Listbox", "Grid", "Document", "Canvas", "Tree", "Board"]);
+    await user.click(nav.getByRole("button", { name: "Affordance" }));
+    expect(groupLinks(nav, "Affordance")).toEqual([
+      "Focus",
+      "Caret",
+      "Select",
+      "Typeahead",
+      "Activate",
+      "Escape",
+      "Expand/Collapse",
+      "Undo",
+      "Delete",
+      "Rename",
+      "Nudge",
+      "Hover",
+      "Double-click",
+      "Triple-click",
+      "Context menu",
+      "Drag",
+      "Marquee",
+      "Drop",
+      "Duplicate",
+      "Resize",
+      "Pan",
+      "Scroll",
+      "Zoom",
+      "Snap",
+      "Not-allowed",
+    ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
       "Collaboration",
       "Editing",
-      "Hands",
       "Adapter",
       "Connector",
-      "제품 화면",
+      "Affordance",
+      "Hands",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 

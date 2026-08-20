@@ -22,7 +22,7 @@ export function WidgetDemoFrame(props: {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section className={classes("p-4", ui.surface.raised)} aria-label={props.widgetLabel}>
-          <p className={ui.text.label}>Widget</p>
+          <p className={ui.text.label}>Proof</p>
           <h2 className={classes("mb-3 mt-1", ui.text.heading)}>{props.widgetLabel}</h2>
           {props.widget}
           {props.surface != null ? (
@@ -34,7 +34,7 @@ export function WidgetDemoFrame(props: {
         </section>
         <section className={classes("p-4", ui.surface.raised)} aria-label="Editing values">
           <p className={ui.text.label}>Editing values</p>
-          <h2 className={classes("mb-3 mt-1", ui.text.heading)}>What the widget reads</h2>
+          <h2 className={classes("mb-3 mt-1", ui.text.heading)}>What this reads</h2>
           <div className="grid gap-3">
             {props.values.map((item) => (
               <JsonInspector key={item.testId} {...item} />

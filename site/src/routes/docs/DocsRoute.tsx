@@ -10,6 +10,32 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
   quickstart: "terminal",
   adapters: "peek",
+  affordance: "cursor",
+  affordanceSelect: "cursor",
+  affordanceFold: "branch",
+  affordanceDrag: "peek",
+  affordanceHistory: "clipboard",
+  affordanceFocus: "cursor",
+  affordanceCaret: "terminal",
+  affordanceTypeahead: "braces",
+  affordanceActivate: "peek",
+  affordanceCancel: "debug",
+  affordanceDelete: "patch",
+  affordanceRename: "terminal",
+  affordanceNudge: "peek",
+  affordanceHover: "cursor",
+  affordanceDoubleClick: "peek",
+  affordanceTripleClick: "peek",
+  affordanceContextMenu: "clipboard",
+  affordanceMarquee: "cursor",
+  affordanceDrop: "connector",
+  affordanceCopyDrag: "peek",
+  affordanceResize: "branch",
+  affordancePan: "sleep",
+  affordanceScroll: "sleep",
+  affordanceZoom: "peek",
+  affordanceSnap: "braces",
+  affordanceForbid: "debug",
   connectors: "connector",
   reactEditing: "cursor",
   collaboration: "package",
@@ -41,6 +67,10 @@ export function QuickstartRoute() {
 
 export function AdapterDocsRoute() {
   return <DocsRoute pageId="adapters" />;
+}
+
+export function AffordanceDocsRoute() {
+  return <DocsRoute pageId="affordance" />;
 }
 
 export function ConnectorDocsRoute() {
@@ -83,7 +113,7 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
             <PageHeader title={page.heading ?? page.label} illustration={docIllustrations[pageId]} />
             {demo ? (
               <div className="mb-5">
-                <ActionLink to={demo.path}>{demo.label} 열기</ActionLink>
+                <ActionLink to={demo.path}>{page.relatedDemoLabel ?? `${demo.label} 열기`}</ActionLink>
               </div>
             ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>

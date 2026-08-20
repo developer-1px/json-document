@@ -1,0 +1,197 @@
+import { describe, expect, test } from "vitest";
+import {
+  applyAffordance,
+  commitAffordance,
+  dragAffordance,
+  dropAffordance,
+  escapeAffordance,
+  historyAffordance,
+  pointerSelect,
+  resolveAffordanceKey,
+  snapAffordance,
+  treeAffordance,
+  typeaheadAffordance,
+} from "../src/index.js";
+
+describe("pointerSelect", () => {
+  test("maps conventional modifiers to replace, extend, and toggle", () => {
+    const operations: string[] = [];
+    applyAffordance(pointerSelect({ shiftKey: false, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    applyAffordance(pointerSelect({ shiftKey: true, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    applyAffordance(pointerSelect({ shiftKey: false, metaKey: true, ctrlKey: false }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    applyAffordance(pointerSelect({ shiftKey: false, metaKey: false, ctrlKey: true }), {
+      hand: (hand) => {
+        if (hand.type === "select") operations.push(hand.operation);
+      },
+    });
+    expect(operations).toEqual(["replace", "extend", "toggle", "toggle"]);
+  });
+});
+
+describe("resolveAffordanceKey", () => {
+  test("closes the conventional keymap without a host override", () => {
+    const hands: unknown[] = [];
+    applyAffordance(resolveAffordanceKey({ key: "ArrowDown", shiftKey: false, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    applyAffordance(resolveAffordanceKey({ key: "ArrowDown", shiftKey: true, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    applyAffordance(resolveAffordanceKey({ key: "z", shiftKey: false, metaKey: true, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    applyAffordance(resolveAffordanceKey({ key: "z", shiftKey: true, metaKey: true, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    applyAffordance(resolveAffordanceKey({ key: "Delete", shiftKey: false, metaKey: false, ctrlKey: false }), {
+      hand: (hand) => hands.push(hand),
+    });
+    expect(hands).toEqual([
+      { type: "move", direction: "down", operation: "replace" },
+      { type: "move", direction: "down", operation: "extend" },
+      { type: "undo" },
+      { type: "redo" },
+      { type: "delete" },
+    ]);
+  });
+});
+
+describe("treeAffordance", () => {
+  test("uses right to expand a collapsed parent and left to collapse an expanded parent", () => {
+    expect(treeAffordance({ type: "move", direction: "right" }, { expanded: false, hasChildren: true }).hand).toEqual({
+      type: "expand",
+    });
+    expect(treeAffordance({ type: "move", direction: "left" }, { expanded: true, hasChildren: true }).hand).toEqual({
+      type: "collapse",
+    });
+    expect(treeAffordance({ type: "move", direction: "right" }, { expanded: true, hasChildren: true }).hand).toEqual({
+      type: "move",
+      direction: "right",
+      operation: "replace",
+    });
+  });
+});
+
+describe("dragAffordance", () => {
+  test("preview carries translate facts without a commit slot", () => {
+    expect(dragAffordance({ x: 10, y: 20 }, { x: 14, y: 18 })).toEqual({
+      hand: { type: "translate", dx: 4, dy: -2 },
+      cursor: "grabbing",
+    });
+    expect("commit" in dragAffordance({ x: 10, y: 20 }, { x: 14, y: 18 })).toBe(false);
+  });
+});
+
+describe("commitAffordance", () => {
+  test("commits a moved drag and ignores a stationary one", () => {
+    expect(commitAffordance(dragAffordance({ x: 10, y: 20 }, { x: 14, y: 18 }))).toEqual({
+      hand: { type: "translate", dx: 4, dy: -2 },
+      cursor: "grabbing",
+      commit: true,
+    });
+    expect(commitAffordance(dragAffordance({ x: 10, y: 20 }, { x: 10, y: 20 }))).toBeNull();
+  });
+});
+
+describe("historyAffordance", () => {
+  test("binds disabled to canUndo and canRedo", () => {
+    expect(historyAffordance({ canUndo: false, canRedo: true }).hand).toEqual({
+      type: "history",
+      undo: { name: "undo", disabled: true },
+      redo: { name: "redo", disabled: false },
+    });
+  });
+});
+
+describe("applyAffordance", () => {
+  test("applies cursor and hand from a preview", () => {
+    const cursors: string[] = [];
+    const hands: string[] = [];
+    applyAffordance(
+      { hand: { type: "select", operation: "extend" }, cursor: "cell" },
+      {
+        cursor: (cursor) => cursors.push(cursor),
+        hand: (hand) => hands.push(hand.type),
+      },
+    );
+    expect(cursors).toEqual(["cell"]);
+    expect(hands).toEqual(["select"]);
+  });
+
+  test("applies commit only on a commit result", () => {
+    const committed: string[] = [];
+    const previewed: string[] = [];
+    applyAffordance(
+      { hand: { type: "translate", dx: 4, dy: -2 }, cursor: "grabbing", commit: true },
+      {
+        hand: (hand) => previewed.push(hand.type),
+        commit: (hand) => committed.push(hand.type),
+      },
+    );
+    expect(previewed).toEqual(["translate"]);
+    expect(committed).toEqual(["translate"]);
+  });
+});
+
+describe("typeaheadAffordance", () => {
+  test("jumps to the next name with the typed prefix", () => {
+    expect(typeaheadAffordance({
+      buffer: "",
+      key: "A",
+      elapsedMs: 0,
+      names: ["Inbox", "Today", "Later"],
+      from: "Inbox",
+    }).hand).toEqual({ type: "typeahead", buffer: "A", name: null });
+    expect(typeaheadAffordance({
+      buffer: "",
+      key: "T",
+      elapsedMs: 0,
+      names: ["Inbox", "Today", "Later"],
+      from: "Inbox",
+    }).hand).toEqual({ type: "typeahead", buffer: "T", name: "Today" });
+  });
+});
+
+describe("snapAffordance", () => {
+  test("snaps to the grid unless disabled", () => {
+    expect(snapAffordance({ x: 47, y: 51 }, { grid: 8 }).hand).toEqual({ type: "translate", dx: 48, dy: 48 });
+    expect(snapAffordance({ x: 47, y: 51 }, { grid: 8, disable: true }).hand).toEqual({ type: "translate", dx: 47, dy: 51 });
+  });
+});
+
+describe("escapeAffordance", () => {
+  test("cancels Escape and pointercancel", () => {
+    expect(escapeAffordance({ key: "Escape" }).hand).toEqual({ type: "cancel" });
+    expect(escapeAffordance({ type: "pointercancel" }).hand).toEqual({ type: "cancel" });
+    expect(escapeAffordance({ key: "Enter" }).hand).toBeNull();
+  });
+});
+
+describe("dropAffordance", () => {
+  test("previews a drop; only commitAffordance mints the write", () => {
+    expect(dropAffordance({ canDrop: false })).toEqual({ hand: null, cursor: "no-drop" });
+    expect(dropAffordance({ canDrop: true })).toEqual({
+      hand: { type: "move-drop" },
+      cursor: "move",
+    });
+    expect("commit" in dropAffordance({ canDrop: true })).toBe(false);
+    expect(commitAffordance(dropAffordance({ canDrop: false }))).toBeNull();
+    expect(commitAffordance(dropAffordance({ canDrop: true }))).toEqual({
+      hand: { type: "move-drop" },
+      cursor: "move",
+      commit: true,
+    });
+  });
+});

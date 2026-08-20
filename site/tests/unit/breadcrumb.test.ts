@@ -87,16 +87,17 @@ describe("breadcrumbTrail", () => {
       "Zod:/connectors/zod",
       "Validate:/connectors/zod/validate",
     ]);
-    expect(trail("/widgets")).toEqual(["Overview:/", "제품 화면:/widgets"]);
+    expect(trail("/docs/affordance")).toEqual(["Overview:/", "Affordance:/docs/affordance"]);
+    expect(trail("/docs/affordance/select")).toEqual([
+      "Overview:/",
+      "Affordance:/docs/affordance",
+      "Select:/docs/affordance/select",
+    ]);
     expect(trail("/widgets/toolbar")).toEqual([
       "Overview:/",
-      "제품 화면:/widgets",
-      "Toolbar:/widgets/toolbar",
-    ]);
-    expect(trail("/widgets/board")).toEqual([
-      "Overview:/",
-      "제품 화면:/widgets",
-      "Board:/widgets/board",
+      "Affordance:/docs/affordance",
+      "Undo:/docs/affordance/history",
+      "Toolbar proof:/widgets/toolbar",
     ]);
   });
 

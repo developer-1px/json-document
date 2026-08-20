@@ -8,6 +8,7 @@
     { "path": "./packages/json-document-react" },
     { "path": "./packages/json-document-react-hook-form" },
     { "path": "./packages/json-document-ajv" },
+    { "path": "./packages/json-document-affordance" },
     { "path": "./packages/json-document-zod" },
     { "path": "./packages/json-document-tanstack-table" },
     { "path": "./packages/json-document-web" },

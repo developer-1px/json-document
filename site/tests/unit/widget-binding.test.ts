@@ -1,5 +1,20 @@
 import { describe, expect, test } from "vitest";
-import { gridCellProps, historyCommands, optionProps, treeItemProps } from "../../src/shared/widget-binding";
+import { editingCommandFromStroke, gridCellProps, historyCommands, optionProps, treeItemProps } from "../../src/shared/widget-binding";
+
+describe("editingCommandFromStroke", () => {
+  test("fills the editing keyboard port from applyAffordance", () => {
+    expect(editingCommandFromStroke({
+      key: "ArrowDown",
+      shiftKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    })).toEqual({
+      type: "move",
+      direction: "down",
+      operation: "replace",
+    });
+  });
+});
 
 describe("historyCommands", () => {
   test("binds disabled to canUndo and canRedo", () => {

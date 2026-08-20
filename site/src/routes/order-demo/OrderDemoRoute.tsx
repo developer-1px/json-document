@@ -6,11 +6,16 @@ import {
   type OrderIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands, optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialOrder: OrderDocument = {
   items: [
@@ -34,12 +39,31 @@ export function OrderDemoRoute() {
     return result;
   }
 
+  const ids = () => (editor.snapshot.value as OrderDocument).items.map((item) => item.id);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedItemIds,
     focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null,
     onSelect: (itemId, mode) => {
       run({ type: "selection.set", itemId, mode }, "Selection changed");
+    },
+    keyboard: {
+      resolve: (stroke) => editingCommandFromStroke(stroke),
+      focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
+      neighbor: (key, command) => command.type === "move"
+        ? moveLinePoint(ids(), key, command.direction)
+        : lineBoundary(ids(), command.edge),
+      onDelete: () => {
+        run({ type: "selection.remove" }, "Selection deleted");
+      },
+      onUndo: () => {
+        editor.undo();
+        setAnnouncement("Undone");
+      },
+      onRedo: () => {
+        editor.redo();
+        setAnnouncement("Redone");
+      },
     },
   });
   const snapshot = editing.snapshot;
@@ -105,13 +129,25 @@ export function OrderDemoRoute() {
         )}
       >
         <section aria-label="Editable order">
-          <ol className="m-0 grid list-none gap-1 p-0">
+          <ol
+            className="m-0 grid list-none gap-1 p-0"
+            tabIndex={0}
+            onKeyDown={editing.getKeyDownHandler()}
+          >
             {document.items.map((item, index) => (
               <SelectableItem
                 key={item.id}
                 data-item-id={item.id}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
                 {...optionProps(editing.getItem(item.id))}
+                onClick={(event) => {
+                  applyAffordance(pointerSelect(event), {
+                    hand: (hand) => {
+                      if (hand.type !== "select") return;
+                      run({ type: "selection.set", itemId: item.id, mode: hand.operation }, "Selection changed");
+                    },
+                  });
+                }}
               >
                 <span className={classes(ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>
                 <span>{item.label}</span>

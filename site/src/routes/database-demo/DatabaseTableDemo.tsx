@@ -15,6 +15,12 @@ import {
   type EditingResult,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  applyAffordance,
+  commitAffordance,
+  dropAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -112,9 +118,11 @@ export function DatabaseTableDemo() {
   }
 
   function finishPropertyDrag() {
+    const source = draggedProperty.current;
     const next = dragPreview;
     draggedProperty.current = null;
     setDragPreview(null);
+    if (!source) return;
     if (next && next.join("\u0000") !== view.propertyOrder.join("\u0000")) {
       configure({ type: "view.configure", viewId: view.id, propertyOrder: next });
     }
@@ -199,8 +207,31 @@ export function DatabaseTableDemo() {
                     aria-grabbed={draggedProperty.current === property.id}
                     onDragStart={(event) => startPropertyDrag(event, property.id)}
                     onDragEnter={() => previewPropertyAt(property.id)}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => event.preventDefault()}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      applyAffordance(dropAffordance({ canDrop: true }), {
+                        cursor: (cursor) => {
+                          event.currentTarget.style.cursor = cursor;
+                        },
+                      });
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const drop = dropAffordance({ canDrop: true });
+                      applyAffordance(drop, {
+                        cursor: (cursor) => {
+                          event.currentTarget.style.cursor = cursor;
+                        },
+                      });
+                      const committed = commitAffordance(drop);
+                      if (!committed) return;
+                      applyAffordance(committed, {
+                        commit: (hand) => {
+                          if (hand.type !== "move-drop") return;
+                          finishPropertyDrag();
+                        },
+                      });
+                    }}
                     onDragEnd={finishPropertyDrag}
                     className={classes("cursor-move px-3 py-2", ui.database.head)}
                   >
@@ -226,6 +257,22 @@ export function DatabaseTableDemo() {
                         data-property-id={property.id}
                         className={classes("min-w-32 p-0", ui.database.cell)}
                         {...gridCellProps(item)}
+                        onClick={(event) => {
+                          applyAffordance(pointerSelect(event), {
+                            hand: (hand) => {
+                              if (hand.type !== "select") return;
+                              run(
+                                () => dispatchIntent({
+                                  type: "selection.set",
+                                  recordId: record.id,
+                                  propertyId: property.id,
+                                  mode: hand.operation,
+                                }),
+                                "Cell selection updated",
+                              );
+                            },
+                          });
+                        }}
                       >
                         <PropertyEditor
                           property={property}
