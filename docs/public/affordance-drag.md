@@ -7,6 +7,7 @@ Drag는 고른 대상을 포인터로 옮기는 손입니다. 누른 점에서 �
 ```ts
 import {
   applyAffordance,
+  commitAffordance,
   dragAffordance,
 } from "@interactive-os/json-document-affordance";
 
@@ -25,15 +26,21 @@ function onPointerMove(event: PointerEvent) {
 }
 
 function onPointerUp(event: PointerEvent) {
-  const result = dragAffordance(origin, { x: event.clientX, y: event.clientY });
-  if (result.commit && result.hand?.type === "translate") {
-    editor.dispatch({
-      type: "object.translate",
-      objectIds,
-      dx: result.hand.dx,
-      dy: result.hand.dy,
-    });
-  }
+  const committed = commitAffordance(
+    dragAffordance(origin, { x: event.clientX, y: event.clientY }),
+  );
+  if (!committed) return;
+  applyAffordance(committed, {
+    commit: (hand) => {
+      if (hand.type !== "translate") return;
+      editor.dispatch({
+        type: "object.translate",
+        objectIds,
+        dx: hand.dx,
+        dy: hand.dy,
+      });
+    },
+  });
 }
 ```
 

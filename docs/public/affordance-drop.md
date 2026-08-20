@@ -12,7 +12,15 @@ import {
 } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
-  applyAffordance(dropAffordance({ canDrop: hostCanDrop(event) }), {
+  if (hostCanDrop(event)) {
+    applyAffordance(dropAffordance({ canDrop: true }), {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+    });
+    return;
+  }
+  applyAffordance(dropAffordance({ canDrop: false }), {
     cursor: (cursor) => {
       event.currentTarget.style.cursor = cursor;
     },
@@ -20,8 +28,16 @@ function onPointerMove(event: PointerEvent) {
 }
 
 function onPointerUp(event: PointerEvent, cardId: string, columnId: string) {
-  applyAffordance(dropAffordance({ canDrop: hostCanDrop(event) }), {
-    hand: (hand) => {
+  if (!hostCanDrop(event)) {
+    applyAffordance(dropAffordance({ canDrop: false }), {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+    });
+    return;
+  }
+  applyAffordance(dropAffordance({ canDrop: true }), {
+    commit: (hand) => {
       if (hand.type !== "move-drop") return;
       editor.dispatch({ type: "card.move", cardId, columnId });
     },

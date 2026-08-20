@@ -11,12 +11,10 @@ import { IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
-  keyboardCommandFrom,
   pointerSelect,
-  resolveAffordanceKey,
   treeAffordance,
 } from "@interactive-os/json-document-affordance";
-import { treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialTree: TreeDocument = {
@@ -46,9 +44,8 @@ export function TreeWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return keyboardCommandFrom(result);
+        return editingCommandFromStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? undefined,
       neighbor: (key, command) => {
@@ -107,7 +104,7 @@ export function TreeWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Tree"
-      description="Expand, collapse, and select use the same { hand, cursor, commit } result. Fold stays on the host."
+      description="Expand, collapse, and select use applyAffordance. Fold stays on the host."
       illustration="branch"
       widgetLabel="Tree"
       widget={(

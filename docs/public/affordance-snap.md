@@ -8,23 +8,38 @@ Snap은 [Drag](affordance-drag.md)·[Resize](affordance-resize.md)·
 
 ```ts
 import {
-  dragOffset,
-  dragShouldCommit,
+  applyAffordance,
+  commitAffordance,
+  dragAffordance,
   snapAffordance,
 } from "@interactive-os/json-document-affordance";
 
-function onPointerUp(event: PointerEvent, object: { id: string; x: number; y: number }) {
-  const offset = dragOffset(origin, { x: event.clientX, y: event.clientY });
-  if (!dragShouldCommit(offset)) return;
-  const snapped = snapAffordance(
-    { x: object.x + offset.dx, y: object.y + offset.dy },
-    { grid: 8, disable: event.metaKey || event.ctrlKey },
+function onPointerUp(event: PointerEvent) {
+  const committed = commitAffordance(
+    dragAffordance(origin, { x: event.clientX, y: event.clientY }),
   );
-  editor.dispatch({
-    type: "object.translate",
-    objectIds: [object.id],
-    dx: snapped.x - object.x,
-    dy: snapped.y - object.y,
+  if (!committed) return;
+  applyAffordance(committed, {
+    commit: (hand) => {
+      if (hand.type !== "translate") return;
+      applyAffordance(
+        snapAffordance(
+          { x: hand.dx, y: hand.dy },
+          { grid: 8, disable: event.metaKey || event.ctrlKey },
+        ),
+        {
+          hand: (snapped) => {
+            if (snapped.type !== "translate") return;
+            editor.dispatch({
+              type: "object.translate",
+              objectIds,
+              dx: snapped.dx,
+              dy: snapped.dy,
+            });
+          },
+        },
+      );
+    },
   });
 }
 ```

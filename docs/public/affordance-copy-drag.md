@@ -7,32 +7,50 @@ Duplicate는 수정 키를 누른 채 드래그하면 원본을 복제하는 손
 
 ```ts
 import {
-  dragOffset,
+  applyAffordance,
+  commitAffordance,
+  dragAffordance,
   dragOperation,
-  dragShouldCommit,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
-  const operation = dragOperation(event);
-  event.currentTarget.style.cursor = dropAffordance({
-    canDrop: true,
-    operation,
-  }).cursor;
+  applyAffordance(dragOperation(event), {
+    cursor: (cursor) => {
+      event.currentTarget.style.cursor = cursor;
+    },
+  });
 }
 
 function onPointerUp(event: PointerEvent) {
-  const offset = dragOffset(origin, { x: event.clientX, y: event.clientY });
-  if (!dragShouldCommit(offset)) return;
-  if (dragOperation(event) === "copy") {
-    hostDuplicate(objectIds, offset);
-    return;
-  }
-  editor.dispatch({
-    type: "object.translate",
-    objectIds,
-    dx: offset.dx,
-    dy: offset.dy,
+  const committed = commitAffordance(
+    dragAffordance(origin, { x: event.clientX, y: event.clientY }),
+  );
+  if (!committed) return;
+  applyAffordance(committed, {
+    commit: (translate) => {
+      if (translate.type !== "translate") return;
+      let copied = false;
+      applyAffordance(dragOperation(event), {
+        hand: (operation) => {
+          if (operation.type !== "copy") return;
+          copied = true;
+          hostDuplicate(objectIds, translate);
+        },
+      });
+      if (copied) return;
+      applyAffordance(dropAffordance({ canDrop: true }), {
+        commit: (hand) => {
+          if (hand.type !== "move-drop") return;
+          editor.dispatch({
+            type: "object.translate",
+            objectIds,
+            dx: translate.dx,
+            dy: translate.dy,
+          });
+        },
+      });
+    },
   });
 }
 ```

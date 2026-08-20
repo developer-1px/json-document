@@ -1,8 +1,9 @@
 # @interactive-os/json-document-affordance
 
 Official keyboard and mouse editing affordances for json-document hosts.
-Every affordance returns `{ hand, cursor?, commit? }`. Hosts keep markup
-and genre Intent. It does not render widgets.
+Preview results are `{ hand, cursor? }`. A write is `commitAffordance`
+then `applyAffordance(..., { commit })`. Hosts keep markup and genre
+Intent. It does not render widgets.
 
 ```sh
 npm i @interactive-os/json-document-affordance

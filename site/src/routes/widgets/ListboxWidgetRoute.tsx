@@ -7,12 +7,10 @@ import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
   escapeAffordance,
-  keyboardCommandFrom,
   pointerSelect,
-  resolveAffordanceKey,
   typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -39,9 +37,8 @@ export function ListboxWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return keyboardCommandFrom(result);
+        return editingCommandFromStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
@@ -70,15 +67,17 @@ export function ListboxWidgetRoute() {
       names,
       from,
     });
+    let consumed = false;
     applyAffordance(result, {
       hand: (hand) => {
         if (hand.type !== "typeahead") return;
+        consumed = true;
         setTypeahead({ buffer: hand.buffer, at: event.timeStamp });
         const item = document.items.find((candidate) => candidate.label === hand.name);
         if (item) editor.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" });
       },
     });
-    if (result.hand?.type === "typeahead") {
+    if (consumed) {
       event.preventDefault();
       return;
     }
@@ -94,7 +93,7 @@ export function ListboxWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Listbox"
-      description="Select and typeahead use the same affordance result: hand, cursor, commit."
+      description="Select and typeahead use applyAffordance."
       illustration="cursor"
       widgetLabel="Listbox"
       widget={(

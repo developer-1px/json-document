@@ -1,4 +1,4 @@
-import type { AffordanceResult } from "./result.js";
+import type { AffordancePreview } from "./result.js";
 
 export type TreeFoldNode = {
   readonly expanded: boolean;
@@ -15,7 +15,7 @@ export type TreeAffordance =
 export function treeAffordance(
   command: { readonly type: "move"; readonly direction: TreeMoveDirection },
   node: TreeFoldNode,
-): AffordanceResult {
+): AffordancePreview {
   if (command.direction === "right" && node.hasChildren && !node.expanded) {
     return { hand: { type: "expand" } };
   }
@@ -28,7 +28,7 @@ export function treeAffordance(
 export function disclosureAffordance(input: {
   readonly key: string;
   readonly expanded: boolean;
-}): AffordanceResult {
+}): AffordancePreview {
   if (input.key !== "Enter" && input.key !== " ") return { hand: null };
   return { hand: { type: input.expanded ? "collapse" : "expand" } };
 }

@@ -3,6 +3,7 @@ import { createKanbanEditor, type KanbanDocument } from "@interactive-os/json-do
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   applyAffordance,
+  commitAffordance,
   dragAffordance,
   dropAffordance,
   pointerSelect,
@@ -85,28 +86,42 @@ export function BoardWidgetRoute() {
         },
       },
     );
-    applyAffordance(dropAffordance({ canDrop: columnAt(event) !== null }), {
-      cursor: (cursor) => {
-        event.currentTarget.style.cursor = cursor;
-      },
-    });
+    const hoverColumn = columnAt(event);
+    if (hoverColumn !== null) {
+      applyAffordance(dropAffordance({ canDrop: true }), {
+        cursor: (cursor) => {
+          event.currentTarget.style.cursor = cursor;
+        },
+      });
+    } else {
+      applyAffordance(dropAffordance({ canDrop: false }), {
+        cursor: (cursor) => {
+          event.currentTarget.style.cursor = cursor;
+        },
+      });
+    }
   }
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
     if (!drag) return;
-    const offset = dragAffordance(
-      { x: drag.originX, y: drag.originY },
-      { x: event.clientX, y: event.clientY },
+    const moved = commitAffordance(
+      dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
     );
     const columnId = columnAt(event);
-    applyAffordance(dropAffordance({ canDrop: columnId !== null }), {
-      hand: (hand) => {
-        if (!offset.commit || columnId === null) return;
-        if (hand.type === "move-drop") {
+    if (moved && columnId !== null) {
+      applyAffordance(dropAffordance({ canDrop: true }), {
+        commit: (hand) => {
+          if (hand.type !== "move-drop") return;
           editor.dispatch({ type: "card.move", cardId: drag.cardId, columnId, beforeCardId: null });
-        }
-      },
-    });
+        },
+      });
+    } else {
+      applyAffordance(dropAffordance({ canDrop: false }), {
+        cursor: (cursor) => {
+          event.currentTarget.style.cursor = cursor;
+        },
+      });
+    }
     setDrag(null);
     event.currentTarget.style.cursor = "default";
   }
@@ -114,7 +129,7 @@ export function BoardWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Board"
-      description="Select and drag use the same { hand, cursor, commit } result. Column membership is host Intent."
+      description="Select and drag use applyAffordance. Column membership is host Intent."
       illustration="braces"
       widgetLabel="Board"
       widget={(

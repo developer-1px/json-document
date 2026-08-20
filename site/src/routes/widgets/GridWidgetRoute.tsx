@@ -6,11 +6,9 @@ import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
-  keyboardCommandFrom,
   pointerSelect,
-  resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
-import { gridCellProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, gridCellProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialSheet: SheetDocument = {
@@ -39,9 +37,8 @@ export function GridWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return keyboardCommandFrom(result);
+        return editingCommandFromStroke(stroke);
       },
       focusKey: () => {
         const next = editor.snapshot.selection.focus;
@@ -79,7 +76,7 @@ export function GridWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Grid"
-      description="Select uses the same { hand, cursor, commit } result. Topology stays on the host."
+      description="Select uses applyAffordance. Topology stays on the host."
       illustration="braces"
       widgetLabel="Grid"
       widget={(

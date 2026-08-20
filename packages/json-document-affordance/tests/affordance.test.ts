@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   applyAffordance,
+  commitAffordance,
   dragAffordance,
   dropAffordance,
   escapeAffordance,
@@ -58,13 +59,23 @@ describe("treeAffordance", () => {
 });
 
 describe("dragAffordance", () => {
-  test("commits only when the pointer actually moved", () => {
+  test("preview carries translate facts without a commit slot", () => {
     expect(dragAffordance({ x: 10, y: 20 }, { x: 14, y: 18 })).toEqual({
+      hand: { type: "translate", dx: 4, dy: -2 },
+      cursor: "grabbing",
+    });
+    expect("commit" in dragAffordance({ x: 10, y: 20 }, { x: 14, y: 18 })).toBe(false);
+  });
+});
+
+describe("commitAffordance", () => {
+  test("commits a moved drag and ignores a stationary one", () => {
+    expect(commitAffordance(dragAffordance({ x: 10, y: 20 }, { x: 14, y: 18 }))).toEqual({
       hand: { type: "translate", dx: 4, dy: -2 },
       cursor: "grabbing",
       commit: true,
     });
-    expect(dragAffordance({ x: 10, y: 20 }, { x: 10, y: 20 }).commit).toBe(false);
+    expect(commitAffordance(dragAffordance({ x: 10, y: 20 }, { x: 10, y: 20 }))).toBeNull();
   });
 });
 
@@ -79,7 +90,7 @@ describe("historyAffordance", () => {
 });
 
 describe("applyAffordance", () => {
-  test("applies cursor and hand from the same result", () => {
+  test("applies cursor and hand from a preview", () => {
     const cursors: string[] = [];
     const hands: string[] = [];
     applyAffordance(
@@ -91,6 +102,20 @@ describe("applyAffordance", () => {
     );
     expect(cursors).toEqual(["cell"]);
     expect(hands).toEqual(["select"]);
+  });
+
+  test("applies commit only on a commit result", () => {
+    const committed: string[] = [];
+    const previewed: string[] = [];
+    applyAffordance(
+      { hand: { type: "translate", dx: 4, dy: -2 }, cursor: "grabbing", commit: true },
+      {
+        hand: (hand) => previewed.push(hand.type),
+        commit: (hand) => committed.push(hand.type),
+      },
+    );
+    expect(previewed).toEqual(["translate"]);
+    expect(committed).toEqual(["translate"]);
   });
 });
 
@@ -129,8 +154,12 @@ describe("escapeAffordance", () => {
 });
 
 describe("dropAffordance", () => {
-  test("forbids a drop the host cannot accept", () => {
-    expect(dropAffordance({ canDrop: false })).toEqual({ hand: null, cursor: "no-drop", commit: false });
-    expect(dropAffordance({ canDrop: true }).hand).toEqual({ type: "move-drop" });
+  test("commits a drop the host can accept", () => {
+    expect(dropAffordance({ canDrop: false })).toEqual({ hand: null, cursor: "no-drop" });
+    expect(dropAffordance({ canDrop: true })).toEqual({
+      hand: { type: "move-drop" },
+      cursor: "move",
+      commit: true,
+    });
   });
 });

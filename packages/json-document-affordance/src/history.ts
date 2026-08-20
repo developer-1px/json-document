@@ -1,4 +1,4 @@
-import type { AffordanceResult } from "./result.js";
+import type { AffordancePreview, AffordanceResult } from "./result.js";
 
 export type HistoryAffordanceName = "undo" | "redo";
 
@@ -15,7 +15,7 @@ export type HistoryAffordanceMap = {
 export function historyAffordance(snapshot: {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
-}): AffordanceResult {
+}): AffordancePreview {
   return {
     hand: {
       type: "history",

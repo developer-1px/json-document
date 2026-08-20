@@ -6,11 +6,9 @@ import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
-  keyboardCommandFrom,
   pointerSelect,
-  resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialDocument: BlockDocument = {
@@ -35,9 +33,8 @@ export function DocumentWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return keyboardCommandFrom(result);
+        return editingCommandFromStroke(stroke);
       },
       focusKey: () => editor.selectedBlockIds.at(-1),
       neighbor: (key, command) => {
@@ -63,7 +60,7 @@ export function DocumentWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Document"
-      description="Select uses the same { hand, cursor, commit } result. Insert and clipboard stay off this layer."
+      description="Select uses applyAffordance. Insert and clipboard stay off this layer."
       illustration="sleep"
       widgetLabel="Document"
       widget={(

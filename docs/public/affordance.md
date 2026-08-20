@@ -9,8 +9,9 @@
 대체하지 않습니다. TBD 페이지의 코드는 사용법 명세입니다. 패키지에
 아직 없습니다.
 
-호스트 이벤트와 json-document 사이를 이렇게 잇습니다. 손은 문서 작업이
-되기도 하고, 커서·접힘·뷰포트 같은 호스트 화면 상태가 되기도 합니다.
+호스트 이벤트와 json-document 사이를 이렇게 잇습니다. 시점은 리스너가
+고르고, 읽는 법은 `applyAffordance` 하나입니다. 미리보기는 `{ hand, cursor }`
+이고, 쓰기는 `commitAffordance` 다음 `{ commit }` 포트입니다.
 
 ```ts
 import {
@@ -62,7 +63,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | --- | --- | --- |
 | [Select](affordance-select.md) | `pointerSelect`, `resolveAffordanceKey` | 클릭, Shift 범위, Mod 토글, 화살표 |
 | [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |
-| [Drag](affordance-drag.md) | `dragOffset`, `dragShouldCommit` | 고른 대상을 포인터로 옮김 |
+| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance` | 고른 대상을 포인터로 옮김 |
 | [Undo](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
 
 ## 키보드 TBD
@@ -86,7 +87,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Double-click](affordance-double-click.md) | `clickCountAffordance` | `detail` 2 |
 | [Triple-click](affordance-triple-click.md) | `clickCountAffordance` | `detail` 3 |
 | [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, Shift+F10, Menu |
-| [Marquee](affordance-marquee.md) | `marqueeRect`, `marqueeShouldCommit` | 빈 곳에서 사각형으로 여러 대상 |
+| [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Drop](affordance-drop.md) | `dropAffordance` | drop 대상, no-drop |
 | [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |
 | [Resize](affordance-resize.md) | `resizeCursor`, `resizeOffset` | 모서리, 칸, 분할선 |

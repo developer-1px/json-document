@@ -3,11 +3,11 @@ import { createObjectEditor, type ObjectDocument } from "@interactive-os/json-do
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   applyAffordance,
+  commitAffordance,
   dragAffordance,
   escapeAffordance,
   forbiddenCursor,
   marqueeAffordance,
-  marqueeRect,
   nudgeAffordance,
   panAffordance,
   pointerSelect,
@@ -65,17 +65,26 @@ export function CanvasWidgetRoute() {
   const document = editing.snapshot.value as ObjectDocument;
 
   function handlePointerDown(event: PointerEvent<HTMLElement>, objectId?: string) {
-    const panResult = panAffordance({ spaceKey: space, buttons: event.buttons });
     surface.current?.setPointerCapture(event.pointerId);
-    if (panResult.cursor === "grabbing" || (space && event.buttons === 1)) {
+    let grabbing = false;
+    applyAffordance(panAffordance({ spaceKey: space, buttons: event.buttons }), {
+      cursor: (cursor) => {
+        grabbing = cursor === "grabbing";
+      },
+      hand: (hand) => {
+        if (hand.type === "translate") grabbing = true;
+      },
+    });
+    if (grabbing || (space && event.buttons === 1)) {
       setPan({ x: pan.x, y: pan.y, originX: event.clientX - pan.x, originY: event.clientY - pan.y, active: true });
       return;
     }
     if (objectId) {
-      const result = pointerSelect(event);
-      applyAffordance(result, {
+      let operation: "replace" | "extend" | "toggle" = "replace";
+      applyAffordance(pointerSelect(event), {
         hand: (hand) => {
           if (hand.type !== "select") return;
+          operation = hand.operation;
           editor.dispatch({
             type: "selection.set",
             objectIds: [objectId],
@@ -83,7 +92,7 @@ export function CanvasWidgetRoute() {
           });
         },
       });
-      const ids = result.hand?.type === "select" && result.hand.operation !== "replace"
+      const ids = operation !== "replace"
         ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
         : [objectId];
       setDrag({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
@@ -100,18 +109,23 @@ export function CanvasWidgetRoute() {
       },
     });
     if (pan.active) {
-      applyAffordance(panAffordance({ spaceKey: true, buttons: event.buttons }), {
-        cursor: (cursor) => {
-          event.currentTarget.style.cursor = cursor;
+      applyAffordance(
+        panAffordance({
+          spaceKey: true,
+          buttons: event.buttons,
+          origin: { x: pan.originX, y: pan.originY },
+          point: { x: event.clientX, y: event.clientY },
+        }),
+        {
+          cursor: (cursor) => {
+            event.currentTarget.style.cursor = cursor;
+          },
+          hand: (hand) => {
+            if (hand.type !== "translate") return;
+            setPan((current) => ({ ...current, x: hand.dx, y: hand.dy }));
+          },
         },
-        hand: () => {
-          setPan((current) => ({
-            ...current,
-            x: event.clientX - current.originX,
-            y: event.clientY - current.originY,
-          }));
-        },
-      });
+      );
       return;
     }
     if (drag) {
@@ -135,8 +149,9 @@ export function CanvasWidgetRoute() {
         cursor: (cursor) => {
           event.currentTarget.style.cursor = cursor;
         },
-        hand: () => {
-          setMarquee({ ...marquee, ...marqueeRect(origin, point) });
+        hand: (hand) => {
+          if (hand.type !== "select" || !hand.rect) return;
+          setMarquee({ originX: origin.x, originY: origin.y, ...hand.rect });
         },
       });
     }
@@ -148,14 +163,32 @@ export function CanvasWidgetRoute() {
       return;
     }
     if (drag) {
-      const result = dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY });
-      if (result.commit && result.hand?.type === "translate") {
-        const snapped = snapAffordance(
-          { x: result.hand.dx, y: result.hand.dy },
-          { grid: 8, disable: event.metaKey || event.ctrlKey },
-        );
-        const point = snapped.hand?.type === "translate" ? snapped.hand : result.hand;
-        editor.dispatch({ type: "object.translate", objectIds: drag.ids, dx: point.dx, dy: point.dy });
+      const committed = commitAffordance(
+        dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
+      );
+      if (committed) {
+        applyAffordance(committed, {
+          commit: (hand) => {
+            if (hand.type !== "translate") return;
+            applyAffordance(
+              snapAffordance(
+                { x: hand.dx, y: hand.dy },
+                { grid: 8, disable: event.metaKey || event.ctrlKey },
+              ),
+              {
+                hand: (snapped) => {
+                  if (snapped.type !== "translate") return;
+                  editor.dispatch({
+                    type: "object.translate",
+                    objectIds: drag.ids,
+                    dx: snapped.dx,
+                    dy: snapped.dy,
+                  });
+                },
+              },
+            );
+          },
+        });
       }
       setDrag(null);
       return;
@@ -163,20 +196,22 @@ export function CanvasWidgetRoute() {
     if (marquee) {
       const origin = { x: marquee.originX, y: marquee.originY };
       const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-      const result = marqueeAffordance(origin, point);
-      const hits = document.objects
-        .filter((object) => intersects(marquee, object))
-        .map((object) => object.id);
-      if (result.commit && hits.length > 0) {
-        applyAffordance(result, {
-          hand: () => {
+      const committed = commitAffordance(marqueeAffordance(origin, point));
+      if (committed) {
+        applyAffordance(committed, {
+          commit: (hand) => {
+            if (hand.type !== "select" || !hand.rect) return;
+            const hits = document.objects
+              .filter((object) => intersects(hand.rect!, object))
+              .map((object) => object.id);
+            if (hits.length === 0) return;
             applyAffordance(pointerSelect(event), {
-              hand: (hand) => {
-                if (hand.type !== "select") return;
+              hand: (selectHand) => {
+                if (selectHand.type !== "select") return;
                 editor.dispatch({
                   type: "selection.set",
                   objectIds: hits,
-                  mode: hand.operation === "extend" ? "add" : hand.operation === "toggle" ? "toggle" : "replace",
+                  mode: selectHand.operation === "extend" ? "add" : selectHand.operation === "toggle" ? "toggle" : "replace",
                 });
               },
             });
@@ -215,7 +250,7 @@ export function CanvasWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Canvas"
-      description="Drag, marquee, nudge, snap, and pan all read { hand, cursor, commit }."
+      description="Drag, marquee, nudge, snap, and pan use applyAffordance. Writes go through commitAffordance."
       illustration="peek"
       widgetLabel="Canvas"
       widget={(

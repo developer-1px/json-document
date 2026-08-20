@@ -6,22 +6,31 @@ Pan은 대상을 옮기지 않고 보이는 평면을 옮기는 손입니다. `g
 `grabbing` / `all-scroll` 커서가 이 손을 가리킵니다.
 
 ```ts
-import { panAffordance, dragOffset } from "@interactive-os/json-document-affordance";
+import { applyAffordance, panAffordance } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
-  const pan = panAffordance({ spaceKey, buttons: event.buttons });
-  if (!pan) return;
-  event.currentTarget.style.cursor = pan.cursor;
-  const offset = dragOffset(origin, { x: event.clientX, y: event.clientY });
-  setViewport({
-    x: viewport.x + offset.dx,
-    y: viewport.y + offset.dy,
-  });
+  applyAffordance(
+    panAffordance({
+      spaceKey,
+      buttons: event.buttons,
+      origin,
+      point: { x: event.clientX, y: event.clientY },
+    }),
+    {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+      hand: (hand) => {
+        if (hand.type !== "translate") return;
+        setViewport({ x: hand.dx, y: hand.dy });
+      },
+    },
+  );
 }
 ```
 
 이 손은 json-document가 아니라 호스트 뷰포트입니다. 이동량은
-[Drag](affordance-drag.md)와 같은 `dragOffset`입니다.
+[Drag](affordance-drag.md)와 같은 `translate` 손입니다.
 
 닫는 손:
 - Space + 드래그

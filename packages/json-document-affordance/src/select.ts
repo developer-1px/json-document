@@ -4,9 +4,10 @@ import {
   type WebKeyboardStroke,
 } from "@interactive-os/json-document-web";
 import {
-  type AffordanceResult,
+  type AffordancePreview,
   type SelectOperation,
 } from "./result.js";
+
 
 const keyboard = createWebKeyboardAdapter();
 
@@ -16,7 +17,7 @@ export function pointerSelect(modifiers: {
   readonly shiftKey?: boolean;
   readonly metaKey?: boolean;
   readonly ctrlKey?: boolean;
-}): AffordanceResult {
+}): AffordancePreview {
   return {
     hand: {
       type: "select",
@@ -29,14 +30,14 @@ export function pointerSelect(modifiers: {
   };
 }
 
-export function resolveAffordanceKey(stroke: WebKeyboardStroke): AffordanceResult {
+export function resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview {
   return { hand: keyboard.resolve(stroke) };
 }
 
 export function selectAllAffordance(
   stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">,
   state: { readonly allSelected: boolean },
-): AffordanceResult {
+): AffordancePreview {
   const mod = stroke.metaKey || stroke.ctrlKey;
   if (!mod || stroke.key.toLowerCase() !== "a") return { hand: null };
   return { hand: { type: state.allSelected ? "clear" : "select-all" } };
@@ -49,7 +50,7 @@ export function typeaheadAffordance(input: {
   readonly names: ReadonlyArray<string>;
   readonly from: string | null;
   readonly windowMs?: number;
-}): AffordanceResult {
+}): AffordancePreview {
   if (input.key.length !== 1 || input.key < " ") return { hand: null };
   const windowMs = input.windowMs ?? 500;
   const buffer = input.elapsedMs <= windowMs ? `${input.buffer}${input.key}` : input.key;
@@ -60,25 +61,25 @@ export function typeaheadAffordance(input: {
   return { hand: { type: "typeahead", buffer, name } };
 }
 
-export function clickCountAffordance(detail: number): AffordanceResult {
+export function clickCountAffordance(detail: number): AffordancePreview {
   if (detail < 1) return { hand: null };
   return { hand: { type: "click", count: detail } };
 }
 
-export function activateAffordance(input: { readonly key?: string; readonly detail?: number; readonly button?: number }): AffordanceResult {
+export function activateAffordance(input: { readonly key?: string; readonly detail?: number; readonly button?: number }): AffordancePreview {
   if (input.key === "Enter") return { hand: { type: "activate" } };
   if (input.button === 0 && (input.detail ?? 1) === 1) return { hand: { type: "activate" } };
   return { hand: null };
 }
 
-export function escapeAffordance(input: { readonly key?: string; readonly type?: string }): AffordanceResult {
+export function escapeAffordance(input: { readonly key?: string; readonly type?: string }): AffordancePreview {
   if (input.key === "Escape" || input.type === "pointercancel" || input.type === "lostpointercapture") {
     return { hand: { type: "cancel" } };
   }
   return { hand: null };
 }
 
-export function focusAffordance(stroke: Pick<WebKeyboardStroke, "key" | "shiftKey">): AffordanceResult {
+export function focusAffordance(stroke: Pick<WebKeyboardStroke, "key" | "shiftKey">): AffordancePreview {
   if (stroke.key === "Tab") {
     return { hand: { type: "tab", direction: stroke.shiftKey ? "prev" : "next" } };
   }

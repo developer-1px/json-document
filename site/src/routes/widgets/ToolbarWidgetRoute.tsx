@@ -7,11 +7,9 @@ import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
   historyAffordance,
-  keyboardCommandFrom,
   pointerSelect,
-  resolveAffordanceKey,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -35,9 +33,8 @@ export function ToolbarWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const result = resolveAffordanceKey(stroke);
         keyboard.resolve(stroke);
-        return keyboardCommandFrom(result);
+        return editingCommandFromStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
@@ -69,7 +66,7 @@ export function ToolbarWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Toolbar"
-      description="Undo reads { hand, cursor, commit } from the same affordance result as Select."
+      description="Undo uses applyAffordance the same way as Select."
       illustration="clipboard"
       widgetLabel="Toolbar"
       widget={(
