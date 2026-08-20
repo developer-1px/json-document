@@ -60,7 +60,7 @@ export function ListboxWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Listbox"
-      description="The listbox reads selected keys and focus. Arrows, Shift+arrows, Delete, and Mod+Z come from the host."
+      description="The listbox reads selected keys and focus. Pointer and keyboard selection come from the affordance package."
       illustration="cursor"
       widgetLabel="Listbox"
       widget={(

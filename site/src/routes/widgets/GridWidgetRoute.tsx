@@ -4,6 +4,7 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { gridBoundary, moveGridPoint } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
+import { pointerSelect, resolveAffordanceKey } from "@interactive-os/json-document-affordance";
 import { gridCellProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
@@ -31,8 +32,17 @@ export function GridWidgetRoute() {
       const { rowId, columnId } = parseCellKey(key);
       editor.dispatch({ type: "selection.set", rowId, columnId, mode });
     },
+    operationFromEvent: (event) => pointerSelect({
+      shiftKey: event.shiftKey ?? false,
+      metaKey: event.metaKey ?? false,
+      ctrlKey: event.ctrlKey ?? false,
+    }),
     keyboard: {
-      resolve: (stroke) => keyboard.resolve(stroke),
+      resolve: (stroke) => {
+        const command = resolveAffordanceKey(stroke);
+        keyboard.resolve(stroke);
+        return command;
+      },
       focusKey: () => {
         const next = editor.snapshot.selection.focus;
         return next ? cellKey(next.rowId, next.columnId) : undefined;
@@ -69,7 +79,7 @@ export function GridWidgetRoute() {
   return (
     <WidgetDemoFrame
       title="Grid"
-      description="The grid reads topology and selected cells. Arrows, Shift+arrows, Delete, and Mod+Z come from the host."
+      description="The grid reads topology and selected cells. Pointer and keyboard selection come from the affordance package."
       illustration="braces"
       widgetLabel="Grid"
       widget={(

@@ -9,6 +9,11 @@ test("Widgets catalog redirects to affordance usage", async ({ page }) => {
   await expect(navigation.getByRole("link", { name: "접기" })).toHaveAttribute("href", "/docs/affordance/fold");
   await expect(navigation.getByRole("link", { name: "드래그" })).toHaveAttribute("href", "/docs/affordance/drag");
   await expect(navigation.getByRole("link", { name: "되돌리기" })).toHaveAttribute("href", "/docs/affordance/history");
+  const content = page.getByRole("main");
+  await expect(content.getByRole("link", { name: "고르기" })).toHaveAttribute("href", "/docs/affordance/select");
+  await expect(content.getByRole("link", { name: "접기" })).toHaveAttribute("href", "/docs/affordance/fold");
+  await expect(content.getByRole("link", { name: "드래그" })).toHaveAttribute("href", "/docs/affordance/drag");
+  await expect(content.getByRole("link", { name: "되돌리기" })).toHaveAttribute("href", "/docs/affordance/history");
 });
 
 test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
