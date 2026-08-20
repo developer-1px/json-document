@@ -38,15 +38,16 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "API Reference",
     "Collaboration",
     "Replica",
+    "Lifecycle",
     "Collaborative History",
     "Text",
-    "Lifecycle",
   ]);
   await navigation.getByRole("button", { name: "Editing" }).click();
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
     "Intent guide",
-    "Selection",
+    "Intent",
     "Topology",
+    "Selection",
     "Clipboard",
     "History",
     "Rich Text Lab",

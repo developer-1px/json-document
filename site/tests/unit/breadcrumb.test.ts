@@ -29,12 +29,7 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/history")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "History:/docs/history"]);
     expect(trail("/docs/clipboard")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Clipboard:/docs/clipboard"]);
     expect(trail("/docs/topology")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Topology:/docs/topology"]);
-    expect(trail("/docs/intent")).toEqual([
-      "Overview:/",
-      "Editing:/docs/intent-guide",
-      "Intent guide:/docs/intent-guide",
-      "Intent:/docs/intent",
-    ]);
+    expect(trail("/docs/intent")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Intent:/docs/intent"]);
     expect(trail("/docs/intent-guide")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Intent guide:/docs/intent-guide"]);
     expect(trail("/demo")).toEqual(["Overview:/", "Editors:/editors", "Document:/demo"]);
     expect(trail("/docs/order")).toEqual(["Overview:/", "Editors:/editors", "Order:/docs/order"]);
@@ -103,9 +98,9 @@ describe("breadcrumbTrail", () => {
     expect(visibleNavChildren("/docs/collaboration", "/docs", routes).map((route) => route.path)).toEqual([]);
     expect(visibleNavChildren("/docs/collaboration", "/docs/collaboration", routes).map((route) => route.path)).toEqual([
       "/docs/collaboration/replica",
+      "/docs/collaboration/lifecycle",
       "/docs/collaboration/history",
       "/docs/collaboration/text",
-      "/docs/collaboration/lifecycle",
     ]);
     expect(visibleNavChildren("/docs/collaboration/text", "/docs/collaboration/text/lease", routes).map((route) => route.path)).toEqual([
       "/docs/collaboration/text/lease",

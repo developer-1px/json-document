@@ -76,8 +76,9 @@ React의 구독 방식으로 전달합니다. TanStack Table Connector는 화면
 이제 Editing의 각 개념을 실제 입력과 결과로 연결합니다.
 
 - [Intent guide](intent-guide.md): editor를 만들고 요청을 보내는 진입점
-- [Selection](selection.md): 편집 대상과 선택 상태
+- [Intent](intent.md): Intent 시그니처
 - [Topology](topology.md): 화면에 보이는 순서와 범위
+- [Selection](selection.md): 편집 대상과 선택 상태
 - [Clipboard](clipboard.md): 선택한 데이터의 복사, 잘라내기와 붙여넣기
 - [History](history.md): 값과 선택을 함께 되돌리는 기록
 - [Adapters](adapters.md): 키보드, clipboard, contenteditable 플랫폼 변환

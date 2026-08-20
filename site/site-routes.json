@@ -59,6 +59,15 @@
     "parentPath": "/docs/collaboration"
   },
   {
+    "path": "/docs/collaboration/lifecycle",
+    "label": "Lifecycle",
+    "title": "Collaboration Lifecycle - json-document",
+    "heading": "Lifecycle",
+    "description": "epoch, checkpoint, restore, compaction이 협업 세대를 접고 되돌리는 방식을 설명합니다.",
+    "language": "ko",
+    "parentPath": "/docs/collaboration"
+  },
+  {
     "path": "/docs/collaboration/history",
     "label": "Collaborative History",
     "title": "Collaborative History - json-document",
@@ -86,15 +95,6 @@
     "parentPath": "/docs/collaboration/text"
   },
   {
-    "path": "/docs/collaboration/lifecycle",
-    "label": "Lifecycle",
-    "title": "Collaboration Lifecycle - json-document",
-    "heading": "Lifecycle",
-    "description": "epoch, checkpoint, restore, compaction이 협업 세대를 접고 되돌리는 방식을 설명합니다.",
-    "language": "ko",
-    "parentPath": "/docs/collaboration"
-  },
-  {
     "path": "/docs/intent-guide",
     "label": "Intent guide",
     "title": "Intent guide - json-document",
@@ -110,25 +110,7 @@
     "heading": "Intent 레퍼런스",
     "description": "EditingIntent, dispatch, EditingResult와 editor별 Intent의 공개 시그니처를 정리합니다.",
     "language": "ko",
-    "parentPath": "/docs/intent-guide"
-  },
-  {
-    "path": "/docs/selection",
-    "label": "Selection",
-    "title": "Selection - json-document",
-    "heading": "Selection",
-    "description": "문서 값을 바꾸지 않고 편집 대상을 기억하는 구조적 Selection을 설명합니다.",
-    "language": "ko",
-    "navigationGroup": "Editing",
-    "relatedDemoPath": "/demo/selection"
-  },
-  {
-    "path": "/demo/selection",
-    "label": "Selection Demo",
-    "title": "Selection Demo - json-document",
-    "description": "document value와 History를 유지한 채 구조적 Selection만 바꿔 봅니다.",
-    "language": "ko",
-    "parentPath": "/docs/selection"
+    "navigationGroup": "Editing"
   },
   {
     "path": "/docs/topology",
@@ -147,6 +129,24 @@
     "description": "같은 anchor와 focus에서 화면 순서에 따라 계산되는 범위를 비교합니다.",
     "language": "ko",
     "parentPath": "/docs/topology"
+  },
+  {
+    "path": "/docs/selection",
+    "label": "Selection",
+    "title": "Selection - json-document",
+    "heading": "Selection",
+    "description": "문서 값을 바꾸지 않고 편집 대상을 기억하는 구조적 Selection을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Editing",
+    "relatedDemoPath": "/demo/selection"
+  },
+  {
+    "path": "/demo/selection",
+    "label": "Selection Demo",
+    "title": "Selection Demo - json-document",
+    "description": "document value와 History를 유지한 채 구조적 Selection만 바꿔 봅니다.",
+    "language": "ko",
+    "parentPath": "/docs/selection"
   },
   {
     "path": "/docs/clipboard",

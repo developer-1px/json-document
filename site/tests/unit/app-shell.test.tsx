@@ -61,15 +61,16 @@ describe("official site shell", () => {
       "API Reference",
       "Collaboration",
       "Replica",
+      "Lifecycle",
       "Collaborative History",
       "Text",
-      "Lifecycle",
     ]);
     await user.click(nav.getByRole("button", { name: "Editing" }));
     expect(groupLinks(nav, "Editing")).toEqual([
       "Intent guide",
-      "Selection",
+      "Intent",
       "Topology",
+      "Selection",
       "Clipboard",
       "History",
       "Rich Text Lab",
