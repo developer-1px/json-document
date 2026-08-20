@@ -7,7 +7,7 @@ import { classes, ui } from "../../shared/ui/styles";
 export function AdapterCatalogRoute() {
   return (
     <PageFrame>
-      <PageHeader illustration="peek" title="Adapters">
+      <PageHeader illustration="peek" title="Adapter">
         Official platform adapters attach headless JSON Document and Editing to native input without changing those contracts.
       </PageHeader>
 

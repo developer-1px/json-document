@@ -1,5 +1,13 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
-const navigationGroups = new Set(["JSON Document", "Editing", "Editors", "Adapters", "Connectors", "Widgets"]);
+const navigationGroups = new Set([
+  "JSON Document",
+  "Collaboration",
+  "Editing",
+  "Editors",
+  "Adapter",
+  "Connector",
+  "제품 화면",
+]);
 
 export function validateSiteRoutes(routes, fail) {
   if (!Array.isArray(routes) || routes.length === 0) {
@@ -44,7 +52,7 @@ export function validateSiteRoutes(routes, fail) {
       fail(`site route ${route.path} has an invalid related demo label.`);
     }
     if (route.integration !== undefined) {
-      const expectedGroup = route.integration.kind === "adapter" ? "Adapters" : "Connectors";
+      const expectedGroup = route.integration.kind === "adapter" ? "Adapter" : "Connector";
       if (!new Set(["adapter", "connector"]).has(route.integration.kind)) {
         fail(`site route ${route.path} has an invalid integration kind.`);
       }

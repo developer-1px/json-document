@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 test("Widgets catalog lists only editing widgets", async ({ page }) => {
   await page.goto("/widgets");
-  await expect(page.getByRole("heading", { level: 1, name: "Widgets" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "제품 화면" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Open Toolbar" })).toHaveAttribute("href", "/widgets/toolbar");
   await expect(page.getByRole("link", { name: "Open Listbox" })).toHaveAttribute("href", "/widgets/listbox");
   await expect(page.getByRole("link", { name: "Open Grid" })).toHaveAttribute("href", "/widgets/grid");

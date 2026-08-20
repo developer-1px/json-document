@@ -1,4 +1,3 @@
-import { siteLayers } from "../../app/site-layers";
 import { InlineCode } from "../../shared/ui/code-block";
 import { ActionLink } from "../../shared/ui/interactive";
 import { ui } from "../../shared/ui/styles";
@@ -31,14 +30,44 @@ export function HomeRoute() {
             <ActionLink to="/docs/tutorial" kind="prominent">Get started</ActionLink>
           </div>
 
-          <ol className={homeStyles.index} aria-label="Concept index">
-            {siteLayers.map((layer) => (
-              <li key={layer.group} className={homeStyles.indexItem}>
-                <ActionLink to={layer.path} className={homeStyles.indexLink}>{layer.label}</ActionLink>
-                <span className={homeStyles.indexBlurb}>{layer.blurb}</span>
+          <nav className={homeStyles.index} aria-label="Concept index">
+            <ul className={homeStyles.indexList}>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/docs" className={homeStyles.indexLink}>JSON Document</ActionLink>
+                <span className={homeStyles.indexBlurb}>Values and changes</span>
               </li>
-            ))}
-          </ol>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/docs/collaboration" className={homeStyles.indexLink}>Collaboration</ActionLink>
+                <span className={homeStyles.indexBlurb}>Same contract, other implementation</span>
+              </li>
+            </ul>
+            <ul className={homeStyles.indexList}>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/docs/intent-guide" className={homeStyles.indexLink}>Editing</ActionLink>
+                <span className={homeStyles.indexBlurb}>Selection and work</span>
+                <ul className={homeStyles.indexChild}>
+                  <li className={homeStyles.indexItem}>
+                    <ActionLink to="/editors" className={homeStyles.indexLink}>Editors</ActionLink>
+                    <span className={homeStyles.indexBlurb}>Genre editors</span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <ul className={homeStyles.indexList}>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/adapters" className={homeStyles.indexLink}>Adapter</ActionLink>
+                <span className={homeStyles.indexBlurb}>Platform contracts</span>
+              </li>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/connectors" className={homeStyles.indexLink}>Connector</ActionLink>
+                <span className={homeStyles.indexBlurb}>Library ecosystems</span>
+              </li>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/widgets" className={homeStyles.indexLink}>제품 화면</ActionLink>
+                <span className={homeStyles.indexBlurb}>Toolbar, Listbox, and Grid</span>
+              </li>
+            </ul>
+          </nav>
         </div>
 
         <figure className={homeStyles.artwork}>

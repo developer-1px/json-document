@@ -1,7 +1,14 @@
 import siteRoutesJson from "../../site-routes.json";
 export { legacyPageRedirects } from "./legacy-page-redirects";
 
-export type SiteNavigationGroup = "JSON Document" | "Editing" | "Editors" | "Adapters" | "Connectors" | "Widgets";
+export type SiteNavigationGroup =
+  | "JSON Document"
+  | "Collaboration"
+  | "Editing"
+  | "Editors"
+  | "Adapter"
+  | "Connector"
+  | "제품 화면";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {
@@ -13,6 +20,7 @@ export type SiteRoute = {
   readonly language?: "en" | "ko";
   readonly navigationGroup?: SiteNavigationGroup;
   readonly parentPath?: string;
+  readonly sidebar?: false;
   readonly relatedDemoPath?: string;
   readonly relatedDemoLabel?: string;
   readonly integration?: {

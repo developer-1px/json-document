@@ -21,7 +21,7 @@ const widgets = [
 export function WidgetCatalogRoute() {
   return (
     <PageFrame>
-      <PageHeader illustration="connector" title="Widgets">
+      <PageHeader illustration="connector" title="제품 화면">
         Bindings turn editing values into Toolbar, Listbox, and Grid props. The demos only render. Button and Card are not widgets.
       </PageHeader>
 

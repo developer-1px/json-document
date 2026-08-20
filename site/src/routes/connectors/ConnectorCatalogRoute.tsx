@@ -7,7 +7,7 @@ import { classes, ui } from "../../shared/ui/styles";
 export function ConnectorCatalogRoute() {
   return (
     <PageFrame>
-        <PageHeader illustration="connector" title="Connectors">
+        <PageHeader illustration="connector" title="Connector">
             Optional packages that connect external tools without changing the JSON Document and Editing contracts.
         </PageHeader>
 

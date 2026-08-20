@@ -9,11 +9,12 @@ export type SiteLayer = {
 
 export const siteLayers: ReadonlyArray<SiteLayer> = [
   { group: "JSON Document", path: "/docs", label: "JSON Document", blurb: "Values and changes" },
+  { group: "Collaboration", path: "/docs/collaboration", label: "Collaboration", blurb: "The same contract, other implementation" },
   { group: "Editing", path: "/docs/intent-guide", label: "Editing", blurb: "Selection and work" },
-  { group: "Editors", path: "/editors", label: "Editors", blurb: "Genre idioms" },
-  { group: "Adapters", path: "/adapters", label: "Adapters", blurb: "Platform contracts" },
-  { group: "Connectors", path: "/connectors", label: "Connectors", blurb: "Library ecosystems" },
-  { group: "Widgets", path: "/widgets", label: "Widgets", blurb: "Editing values as widget props" },
+  { group: "Editors", path: "/editors", label: "Editors", blurb: "Genre editors" },
+  { group: "Adapter", path: "/adapters", label: "Adapter", blurb: "Platform contracts" },
+  { group: "Connector", path: "/connectors", label: "Connector", blurb: "Library ecosystems" },
+  { group: "제품 화면", path: "/widgets", label: "제품 화면", blurb: "Toolbar, Listbox, and Grid" },
 ];
 
 export const siteLayerGroups: ReadonlyArray<SiteNavigationGroup> = siteLayers.map((layer) => layer.group);

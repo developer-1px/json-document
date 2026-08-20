@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("Connector catalog exposes only implemented Live Demos", async ({ page }) => {
   await page.goto("/connectors");
 
-  await expect(page.getByRole("heading", { level: 1, name: "Connectors" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Connector" })).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(5);
   await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(5);
 

@@ -47,7 +47,8 @@
     "heading": "Collaboration",
     "description": "같은 JSON Document 계약을 여러 참여자의 인과 변경으로 수렴시킵니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "navigationGroup": "Collaboration",
+    "sidebar": false
   },
   {
     "path": "/docs/collaboration/replica",
@@ -56,7 +57,7 @@
     "heading": "Replica",
     "description": "한 참여자가 소유한 인과 상태와 아직 적용하지 못한 변경을 설명합니다.",
     "language": "ko",
-    "parentPath": "/docs/collaboration"
+    "navigationGroup": "Collaboration"
   },
   {
     "path": "/docs/collaboration/lifecycle",
@@ -65,7 +66,7 @@
     "heading": "Lifecycle",
     "description": "epoch, checkpoint, restore, compaction이 협업 세대를 접고 되돌리는 방식을 설명합니다.",
     "language": "ko",
-    "parentPath": "/docs/collaboration"
+    "navigationGroup": "Collaboration"
   },
   {
     "path": "/docs/collaboration/history",
@@ -74,7 +75,7 @@
     "heading": "Collaborative History",
     "description": "다른 참여자를 덮어쓰지 않고 현재 참여자의 인과 기여를 끄거나 켭니다.",
     "language": "ko",
-    "parentPath": "/docs/collaboration"
+    "navigationGroup": "Collaboration"
   },
   {
     "path": "/docs/collaboration/text",
@@ -83,11 +84,11 @@
     "heading": "Collaborative Text",
     "description": "같이 쓰는 문자열의 안정된 글자 단위와 상대 위치를 설명합니다.",
     "language": "ko",
-    "parentPath": "/docs/collaboration"
+    "navigationGroup": "Collaboration"
   },
   {
     "path": "/docs/collaboration/text/lease",
-    "label": "Contenteditable lease",
+    "label": "native-input DOM lease",
     "title": "Contenteditable lease - json-document",
     "heading": "Contenteditable lease",
     "description": "협업 문자열이 입력 중에도 인과 변경을 멈추지 않게 하는 native-input DOM lease를 설명합니다.",
@@ -190,7 +191,8 @@
     "title": "Rich Text Lab - json-document",
     "description": "Draft Official Rich Text Schema가 JSONDocument, Selection, Topology와 Editing History를 통과하는 최소 수직 슬라이스를 검증합니다.",
     "language": "ko",
-    "navigationGroup": "Editing"
+    "navigationGroup": "Editing",
+    "sidebar": false
   },
   {
     "path": "/editors",
@@ -199,7 +201,8 @@
     "heading": "Editors",
     "description": "Document, Order, Object, Sheet, Tree, Kanban, Database 최소 완성본을 고릅니다.",
     "language": "ko",
-    "navigationGroup": "Editors"
+    "navigationGroup": "Editors",
+    "sidebar": false
   },
   {
     "path": "/demo",
@@ -289,10 +292,11 @@
   },
   {
     "path": "/adapters",
-    "label": "Adapters",
+    "label": "Adapter",
     "title": "Adapters - json-document",
     "description": "Official json-document platform adapters with live keyboard, clipboard, and contenteditable demos.",
-    "navigationGroup": "Adapters"
+    "navigationGroup": "Adapter",
+    "sidebar": false
   },
   {
     "path": "/docs/adapters",
@@ -301,14 +305,15 @@
     "heading": "json-document Adapters",
     "description": "Keyboard, Clipboard, Contenteditable 공식 adapter 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Adapters"
+    "navigationGroup": "Adapter",
+    "sidebar": false
   },
   {
     "path": "/adapters/keyboard",
     "label": "Keyboard",
     "title": "Keyboard Adapter Live Demo - json-document",
     "description": "Official keyboard adapter: conventional chords become commands, then existing Intent, Clipboard, and History doors.",
-    "navigationGroup": "Adapters",
+    "navigationGroup": "Adapter",
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-web"
@@ -316,10 +321,10 @@
   },
   {
     "path": "/adapters/clipboard",
-    "label": "Clipboard",
+    "label": "Clipboard adapter",
     "title": "Clipboard Adapter Live Demo - json-document",
     "description": "Official clipboard adapter: native ClipboardEvent copy, cut, and paste bind to public editing contracts.",
-    "navigationGroup": "Adapters",
+    "navigationGroup": "Adapter",
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-web"
@@ -330,7 +335,7 @@
     "label": "Contenteditable",
     "title": "Contenteditable Adapter Live Demo - json-document",
     "description": "Official DOM adapter: a React contenteditable root leases native input and commits one JSON Document string pointer.",
-    "navigationGroup": "Adapters",
+    "navigationGroup": "Adapter",
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-contenteditable"
@@ -338,10 +343,11 @@
   },
   {
     "path": "/connectors",
-    "label": "Connectors",
+    "label": "Connector",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connector",
+    "sidebar": false
   },
   {
     "path": "/docs/connectors",
@@ -350,7 +356,8 @@
     "heading": "json-document Connectors",
     "description": "React 구독과 선택·커서 질의, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Connectors"
+    "navigationGroup": "Connector",
+    "sidebar": false
   },
   {
     "path": "/docs/react-editing",
@@ -368,7 +375,7 @@
     "label": "React",
     "title": "React Connector Live Demo - json-document",
     "description": "Live React subscription plus shared queries for object range, focus cursor, and text offset.",
-    "navigationGroup": "Connectors",
+    "navigationGroup": "Connector",
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-react"
@@ -379,7 +386,7 @@
     "label": "React Hook Form",
     "title": "React Hook Form Connector Live Demo - json-document",
     "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
-    "navigationGroup": "Connectors",
+    "navigationGroup": "Connector",
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-react-hook-form"
@@ -390,7 +397,7 @@
     "label": "Ajv",
     "title": "Ajv Connector Live Demo - json-document",
     "description": "Live Ajv validation with JSON Pointer diagnostics and non-adoption of validator mutations.",
-    "navigationGroup": "Connectors",
+    "navigationGroup": "Connector",
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-ajv"
@@ -401,7 +408,7 @@
     "label": "Zod",
     "title": "Zod Connector Live Demo - json-document",
     "description": "A Zod object schema and record array become a Database admin table.",
-    "navigationGroup": "Connectors",
+    "navigationGroup": "Connector",
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-zod"
@@ -420,7 +427,7 @@
     "label": "TanStack Table",
     "title": "TanStack Table Connector Live Demo - json-document",
     "description": "Live TanStack Table v8 integration for visible-order Sheet selection, clipboard, history, and canonical JSON editing.",
-    "navigationGroup": "Connectors",
+    "navigationGroup": "Connector",
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-tanstack-table"
@@ -428,30 +435,31 @@
   },
   {
     "path": "/widgets",
-    "label": "Widgets",
+    "label": "제품 화면",
     "title": "Widgets - json-document",
     "description": "Sample widgets that bind only editing affordances: Toolbar, Listbox, and Grid.",
-    "navigationGroup": "Widgets"
+    "navigationGroup": "제품 화면",
+    "sidebar": false
   },
   {
     "path": "/widgets/toolbar",
     "label": "Toolbar",
     "title": "Toolbar Widget - json-document",
     "description": "Undo and Redo disabled states come from canUndo and canRedo.",
-    "parentPath": "/widgets"
+    "navigationGroup": "제품 화면"
   },
   {
     "path": "/widgets/listbox",
     "label": "Listbox",
     "title": "Listbox Widget - json-document",
     "description": "A listbox reads selected keys and focus from Order selection.",
-    "parentPath": "/widgets"
+    "navigationGroup": "제품 화면"
   },
   {
     "path": "/widgets/grid",
     "label": "Grid",
     "title": "Grid Widget - json-document",
     "description": "A grid reads visible topology and selected cells from Sheet selection.",
-    "parentPath": "/widgets"
+    "navigationGroup": "제품 화면"
   }
 ]
