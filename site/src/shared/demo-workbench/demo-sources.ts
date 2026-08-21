@@ -3,10 +3,10 @@ import type { CodeLanguage } from "../ui/code-tokens";
 export type DemoSourceFile = {
   readonly path: string;
   readonly language: CodeLanguage;
-  readonly source: string;
+  readonly load: () => Promise<string>;
 };
 
-const sourceModules = import.meta.glob<true, string, () => Promise<string>>(
+const sourceModules = import.meta.glob<string>(
   [
     "/src/routes/**/*.{ts,tsx}",
     "/src/shared/**/*.{ts,tsx}",
@@ -16,99 +16,83 @@ const sourceModules = import.meta.glob<true, string, () => Promise<string>>(
   { import: "default", query: "?raw" },
 );
 
-const demoSourceEntries: Readonly<Record<string, string>> = {
-  "/demo": "routes/document-demo/DocumentDemoRoute.tsx",
-  "/demo/order": "routes/order-demo/OrderDemoRoute.tsx",
-  "/demo/object": "routes/object-demo/ObjectDemoRoute.tsx",
-  "/demo/canvas": "routes/canvas-demo/CanvasDemoRoute.tsx",
-  "/demo/sheet": "routes/sheet-demo/SheetDemoRoute.tsx",
-  "/demo/database": "routes/database-demo/DatabaseDemoRoute.tsx",
-  "/demo/tree": "routes/tree-demo/TreeDemoRoute.tsx",
-  "/demo/kanban": "routes/kanban-demo/KanbanDemoRoute.tsx",
-  "/demo/topology": "routes/editing-demos/TopologyDemoRoute.tsx",
-  "/demo/selection": "routes/editing-demos/SelectionDemoRoute.tsx",
-  "/demo/clipboard": "routes/editing-demos/ClipboardDemoRoute.tsx",
-  "/demo/history": "routes/editing-demos/HistoryDemoRoute.tsx",
-  "/editing/rich-text": "routes/rich-text-demo/RichTextDemoRoute.tsx",
-  "/widgets/listbox": "routes/widgets/ListboxWidgetRoute.tsx",
-  "/widgets/grid": "routes/widgets/GridWidgetRoute.tsx",
-  "/widgets/toolbar": "routes/widgets/ToolbarWidgetRoute.tsx",
-  "/adapters/clipboard": "routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx",
-  "/adapters/contenteditable": "routes/adapters/contenteditable/ContentEditableAdapterDemoRoute.tsx",
-  "/adapters/keyboard": "routes/adapters/keyboard/KeyboardAdapterDemoRoute.tsx",
-  "/connectors/react": "routes/connectors/react/ReactConnectorDemoRoute.tsx",
-  "/connectors/react-hook-form": "routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute.tsx",
-  "/connectors/tanstack-table": "routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute.tsx",
-  "/connectors/ajv": "routes/connectors/ajv/AjvConnectorDemoRoute.tsx",
-  "/connectors/zod": "routes/connectors/zod/ZodConnectorDemoRoute.tsx",
-  "/connectors/zod/validate": "routes/connectors/zod/ZodValidateDemoRoute.tsx",
+const demoSourcePaths: Readonly<Record<string, ReadonlyArray<string>>> = {
+  "/demo": ["routes/document-demo/DocumentDemoRoute.tsx"],
+  "/demo/order": ["routes/order-demo/OrderDemoRoute.tsx"],
+  "/demo/object": ["routes/object-demo/ObjectDemoRoute.tsx"],
+  "/demo/canvas": ["routes/canvas-demo/CanvasDemoRoute.tsx"],
+  "/demo/sheet": ["routes/sheet-demo/SheetDemoRoute.tsx", "routes/sheet-demo/SheetDemo.tsx"],
+  "/demo/database": [
+    "routes/database-demo/DatabaseDemoRoute.tsx",
+    "routes/database-demo/DatabaseTableDemo.tsx",
+    "routes/database-demo/initial-database.ts",
+  ],
+  "/demo/tree": ["routes/tree-demo/TreeDemoRoute.tsx"],
+  "/demo/kanban": ["routes/kanban-demo/KanbanDemoRoute.tsx"],
+  "/demo/topology": ["routes/editing-demos/TopologyDemoRoute.tsx"],
+  "/demo/selection": ["routes/editing-demos/SelectionDemoRoute.tsx"],
+  "/demo/clipboard": ["routes/editing-demos/ClipboardDemoRoute.tsx"],
+  "/demo/history": ["routes/editing-demos/HistoryDemoRoute.tsx"],
+  "/editing/rich-text": [
+    "routes/rich-text-demo/RichTextDemoRoute.tsx",
+    "routes/rich-text-demo/rich-text-styles.ts",
+  ],
+  "/widgets/listbox": widgetSources("ListboxWidgetRoute.tsx"),
+  "/widgets/grid": widgetSources("GridWidgetRoute.tsx"),
+  "/widgets/toolbar": widgetSources("ToolbarWidgetRoute.tsx"),
+  "/adapters/clipboard": adapterSources("clipboard", "Clipboard"),
+  "/adapters/contenteditable": adapterSources("contenteditable", "ContentEditable"),
+  "/adapters/keyboard": adapterSources("keyboard", "Keyboard"),
+  "/connectors/react": connectorSources("react", "ReactConnector"),
+  "/connectors/react-hook-form": connectorSources("react-hook-form", "ReactHookFormConnector"),
+  "/connectors/tanstack-table": connectorSources("tanstack-table", "TanStackTableConnector"),
+  "/connectors/ajv": connectorSources("ajv", "AjvConnector"),
+  "/connectors/zod": [
+    "routes/connectors/zod/ZodConnectorDemoRoute.tsx",
+    "routes/connectors/zod/ZodAdminLab.tsx",
+  ],
+  "/connectors/zod/validate": [
+    "routes/connectors/zod/ZodValidateDemoRoute.tsx",
+    "routes/connectors/zod/ZodConnectorLab.tsx",
+  ],
 };
 
-const chromeFiles = new Set([
-  "routes/connectors/ConnectorDemoPage.tsx",
-  "routes/widgets/WidgetDemoFrame.tsx",
-]);
-
-export async function loadDemoSources(pathname: string): Promise<ReadonlyArray<DemoSourceFile> | undefined> {
-  const entry = demoSourceEntries[pathname];
-  if (entry === undefined) return undefined;
-  const paths = await sourceClosure(entry);
-  return Promise.all(paths.map(async (path) => ({
+export function demoSources(pathname: string): ReadonlyArray<DemoSourceFile> | undefined {
+  return demoSourcePaths[pathname]?.map((path) => ({
     path,
     language: path.endsWith(".tsx") ? "tsx" : "typescript",
-    source: await source(path),
-  } as const)));
+    load: sourceLoader(path),
+  }));
 }
 
-export function hasDemoSources(pathname: string): boolean {
-  return demoSourceEntries[pathname] !== undefined;
+function widgetSources(route: string): ReadonlyArray<string> {
+  return [
+    `routes/widgets/${route}`,
+    "routes/widgets/binding/index.ts",
+    "routes/widgets/binding/order.ts",
+    "routes/widgets/binding/sheet.ts",
+    "routes/widgets/binding/keyboard.ts",
+    "routes/widgets/binding/history.ts",
+    "routes/widgets/binding/option.ts",
+  ];
 }
 
-async function sourceClosure(entry: string): Promise<ReadonlyArray<string>> {
-  const paths: string[] = [];
-  const visited = new Set<string>();
-  async function visit(path: string): Promise<void> {
-    if (visited.has(path) || isChrome(path)) return;
-    visited.add(path);
-    paths.push(path);
-    for (const specifier of relativeSpecifiers(await source(path))) {
-      const resolved = resolveSource(path, specifier);
-      if (resolved !== undefined) await visit(resolved);
-    }
-  }
-  await visit(entry);
-  return paths;
+function adapterSources(folder: string, name: string): ReadonlyArray<string> {
+  return [
+    `routes/adapters/${folder}/${name}AdapterDemoRoute.tsx`,
+    `routes/adapters/${folder}/${name}AdapterLab.tsx`,
+  ];
 }
 
-function isChrome(path: string): boolean {
-  return path.startsWith("app/")
-    || path.startsWith("shared/ui/")
-    || path.startsWith("shared/demo-workbench/")
-    || chromeFiles.has(path);
+function connectorSources(folder: string, name: string): ReadonlyArray<string> {
+  return [
+    `routes/connectors/${folder}/${name}DemoRoute.tsx`,
+    `routes/connectors/${folder}/${name}Lab.tsx`,
+  ];
 }
 
-async function source(path: string): Promise<string> {
+function sourceLoader(path: string): () => Promise<string> {
   const load = sourceModules[`/src/${path}`];
   if (load === undefined) throw new Error(`Unknown demo source: ${path}`);
-  return load();
-}
-
-function relativeSpecifiers(value: string): ReadonlyArray<string> {
-  const specifiers: string[] = [];
-  const pattern = /(?:import|export)\s+(?:[\s\S]*?\s+from\s+)?["'](\.[^"']+)["']/g;
-  for (const match of value.matchAll(pattern)) specifiers.push(match[1]!);
-  return specifiers;
-}
-
-function resolveSource(importer: string, specifier: string): string | undefined {
-  const parts = importer.split("/");
-  parts.pop();
-  for (const part of specifier.split("/")) {
-    if (part === "." || part === "") continue;
-    if (part === "..") parts.pop();
-    else parts.push(part);
-  }
-  const base = parts.join("/");
-  return [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]
-    .find((candidate) => sourceModules[`/src/${candidate}`] !== undefined);
+  return load;
 }

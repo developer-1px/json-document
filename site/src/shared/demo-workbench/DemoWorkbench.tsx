@@ -1,4 +1,4 @@
-import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { CodeBlock } from "../ui/code-block";
 import { classes, ui } from "../ui/styles";
 import type { DemoSourceFile } from "./demo-sources";
@@ -17,6 +17,17 @@ export function DemoWorkbench(props: {
   ];
   const activeSourceIndex = typeof activeTab === "number" ? activeTab : undefined;
   const activeSource = activeSourceIndex === undefined ? undefined : props.sources[activeSourceIndex];
+  const [sourceText, setSourceText] = useState<Readonly<Record<string, string>>>({});
+  const activeSourceText = activeSource === undefined ? undefined : sourceText[activeSource.path];
+
+  useEffect(() => {
+    if (activeSource === undefined || activeSourceText !== undefined) return;
+    let current = true;
+    void activeSource.load().then((source) => {
+      if (current) setSourceText((loaded) => ({ ...loaded, [activeSource.path]: source }));
+    });
+    return () => { current = false; };
+  }, [activeSource?.path, activeSourceText]);
 
   function selectNeighbor(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
@@ -73,7 +84,11 @@ export function DemoWorkbench(props: {
         >
           <div className="min-w-0 p-3">
             <p className={classes("mb-2 mt-0 font-mono", ui.text.meta)}>{activeSource.path}</p>
-            <CodeBlock language={activeSource.language} size="content" source={activeSource.source} />
+            {activeSourceText === undefined ? (
+              <p className={classes("m-0 p-3", ui.text.meta)}>Loading source…</p>
+            ) : (
+              <CodeBlock language={activeSource.language} size="content" source={activeSourceText} />
+            )}
           </div>
         </div>
       )}
