@@ -60,6 +60,10 @@ export async function loadDemoSources(pathname: string): Promise<ReadonlyArray<D
   } as const)));
 }
 
+export function hasDemoSources(pathname: string): boolean {
+  return demoSourceEntries[pathname] !== undefined;
+}
+
 async function sourceClosure(entry: string): Promise<ReadonlyArray<string>> {
   const paths: string[] = [];
   const visited = new Set<string>();

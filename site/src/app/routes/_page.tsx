@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { DemoWorkbench } from "../../shared/demo-workbench/DemoWorkbench";
-import { loadDemoSources, type DemoSourceFile } from "../../shared/demo-workbench/demo-sources";
+import {
+  hasDemoSources,
+  loadDemoSources,
+  type DemoSourceFile,
+} from "../../shared/demo-workbench/demo-sources";
 import { PageFrame, PageLeadProvider } from "../../shared/ui/primitives";
 import { SiteBreadcrumb } from "../breadcrumb";
 import { findSiteRoute, siteRoutes, usePathname } from "../router";
@@ -18,9 +22,9 @@ function InteriorPage() {
   return (
     <PageLeadProvider lead={<SiteBreadcrumb route={route} routes={siteRoutes} />}>
       <PageFrame>
-        {sources === undefined ? content : (
-          <DemoWorkbench sources={sources}>{content}</DemoWorkbench>
-        )}
+        {hasDemoSources(route.path)
+          ? <DemoWorkbench sources={sources ?? []}>{content}</DemoWorkbench>
+          : content}
       </PageFrame>
     </PageLeadProvider>
   );
