@@ -131,6 +131,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "order.md": "/docs/order",
   "object.md": "/docs/object",
   "tree.md": "/docs/tree",
+  "database.md": "/docs/database",
 };
 
 function rewriteMarkdownHref(href: string | undefined): string | undefined {

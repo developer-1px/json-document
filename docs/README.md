@@ -24,6 +24,7 @@ docs
 |   |-- order.md               # Hands: 한 줄 목록
 |   |-- object.md              # Hands: 키 선택 객체
 |   |-- tree.md                # Hands: 보이는 나무
+|   |-- database.md            # Hands: 저장된 표 view
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
 |   |-- react-editing.md       # Connectors: React 선택·커서 질의

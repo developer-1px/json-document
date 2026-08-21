@@ -63,6 +63,7 @@ describe("editing intent door", () => {
         type: "table",
         propertyOrder: ["title"],
         propertyVisibility: { title: true },
+        propertyWidths: {},
         sort: null,
         filter: null,
       }],

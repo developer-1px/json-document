@@ -89,6 +89,7 @@ const publicDocs = {
   order: read("docs/public/order.md"),
   object: read("docs/public/object.md"),
   tree: read("docs/public/tree.md"),
+  database: read("docs/public/database.md"),
 };
 const surfaces = {
   rootReadme: read("README.md"),
@@ -168,6 +169,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "collaboration.md",
   "concepts.md",
   "connectors.md",
+  "database.md",
   "hands.md",
   "history.md",
   "intent-guide.md",

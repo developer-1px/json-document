@@ -224,6 +224,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/demo/clipboard",
     "/demo/history",
     "/editing/rich-text",
+    "/docs/database",
     "/demo/database",
     "/connectors",
     "/connectors/react",
