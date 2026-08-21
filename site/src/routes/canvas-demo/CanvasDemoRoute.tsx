@@ -1,12 +1,12 @@
 import { useState, type PointerEvent } from "react";
-import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createObjectEditor,
   type ObjectDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 
 const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
 
@@ -72,12 +72,12 @@ export function CanvasDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader illustration="peek" title="Canvas">
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
 
-        <DemoSurface>
+    )}>
       <ProductApp
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
@@ -119,7 +119,6 @@ export function CanvasDemoRoute() {
           })}
         </section>
       </ProductApp>
-        </DemoSurface>
-    </PageFrame>
+    </DemoPage>
   );
 }

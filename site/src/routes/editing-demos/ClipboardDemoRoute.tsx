@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialDocument: BlockDocument = {
@@ -52,12 +52,12 @@ export function ClipboardDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader title="Clipboard Demo" illustration="braces">
         Selection에서 시작해 copy 또는 cut으로 구조화된 payload를 만들고 paste에 넘깁니다.
       </PageHeader>
 
-      <DemoSurface>
+    )}>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-input">
           <p className={ui.text.label}>1 · Selection</p>
@@ -100,7 +100,6 @@ export function ClipboardDemoRoute() {
           ]} />
         </section>
       </div>
-      </DemoSurface>
-    </PageFrame>
+    </DemoPage>
   );
 }

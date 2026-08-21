@@ -16,79 +16,86 @@ const sourceModules = import.meta.glob<string>(
   { import: "default", query: "?raw" },
 );
 
-const demoSourcePaths: Readonly<Record<string, ReadonlyArray<string>>> = {
-  "/demo": ["routes/document-demo/DocumentDemoRoute.tsx"],
-  "/demo/order": ["routes/order-demo/OrderDemoRoute.tsx"],
-  "/demo/object": ["routes/object-demo/ObjectDemoRoute.tsx"],
-  "/demo/canvas": ["routes/canvas-demo/CanvasDemoRoute.tsx"],
-  "/demo/sheet": ["routes/sheet-demo/SheetDemoRoute.tsx", "routes/sheet-demo/SheetDemo.tsx"],
-  "/demo/database": [
-    "routes/database-demo/DatabaseDemoRoute.tsx",
-    "routes/database-demo/DatabaseTableDemo.tsx",
-    "routes/database-demo/initial-database.ts",
-  ],
-  "/demo/tree": ["routes/tree-demo/TreeDemoRoute.tsx"],
-  "/demo/kanban": ["routes/kanban-demo/KanbanDemoRoute.tsx"],
-  "/demo/topology": ["routes/editing-demos/TopologyDemoRoute.tsx"],
-  "/demo/selection": ["routes/editing-demos/SelectionDemoRoute.tsx"],
-  "/demo/clipboard": ["routes/editing-demos/ClipboardDemoRoute.tsx"],
-  "/demo/history": ["routes/editing-demos/HistoryDemoRoute.tsx"],
-  "/editing/rich-text": [
-    "routes/rich-text-demo/RichTextDemoRoute.tsx",
-    "routes/rich-text-demo/rich-text-styles.ts",
-  ],
-  "/widgets/listbox": widgetSources("ListboxWidgetRoute.tsx"),
-  "/widgets/grid": widgetSources("GridWidgetRoute.tsx"),
-  "/widgets/toolbar": widgetSources("ToolbarWidgetRoute.tsx"),
-  "/adapters/clipboard": adapterSources("clipboard", "Clipboard"),
-  "/adapters/contenteditable": adapterSources("contenteditable", "ContentEditable"),
-  "/adapters/keyboard": adapterSources("keyboard", "Keyboard"),
-  "/connectors/react": connectorSources("react", "ReactConnector"),
-  "/connectors/react-hook-form": connectorSources("react-hook-form", "ReactHookFormConnector"),
-  "/connectors/tanstack-table": connectorSources("tanstack-table", "TanStackTableConnector"),
-  "/connectors/ajv": connectorSources("ajv", "AjvConnector"),
-  "/connectors/zod": [
-    "routes/connectors/zod/ZodConnectorDemoRoute.tsx",
-    "routes/connectors/zod/ZodAdminLab.tsx",
-  ],
-  "/connectors/zod/validate": [
-    "routes/connectors/zod/ZodValidateDemoRoute.tsx",
-    "routes/connectors/zod/ZodConnectorLab.tsx",
-  ],
-};
+const sourceText = new Map<string, Promise<string>>();
+const sourceClosures = new Map<string, Promise<ReadonlyArray<DemoSourceFile>>>();
+const excludedSources = new Set([
+  "routes/connectors/ConnectorDemoPage.tsx",
+  "routes/widgets/WidgetDemoFrame.tsx",
+]);
 
-export function demoSources(pathname: string): ReadonlyArray<DemoSourceFile> | undefined {
-  return demoSourcePaths[pathname]?.map((path) => ({
+export function demoEntrySource(path: string): DemoSourceFile {
+  return sourceFile(path);
+}
+
+export function discoverDemoSources(entry: string): Promise<ReadonlyArray<DemoSourceFile>> {
+  const cached = sourceClosures.get(entry);
+  if (cached !== undefined) return cached;
+  const discovered = discoverSourceClosure(entry);
+  sourceClosures.set(entry, discovered);
+  return discovered;
+}
+
+async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoSourceFile>> {
+  const paths: string[] = [];
+  const visited = new Set<string>();
+
+  async function visit(path: string): Promise<void> {
+    if (visited.has(path) || isExcluded(path)) return;
+    visited.add(path);
+    paths.push(path);
+    const source = await loadSource(path);
+    for (const specifier of relativeSpecifiers(source)) {
+      const resolved = resolveSource(path, specifier);
+      if (resolved !== undefined) await visit(resolved);
+    }
+  }
+
+  await visit(entry);
+  return paths.map(sourceFile);
+}
+
+function sourceFile(path: string): DemoSourceFile {
+  if (sourceModules[`/src/${path}`] === undefined) throw new Error(`Unknown demo source: ${path}`);
+  return {
     path,
     language: path.endsWith(".tsx") ? "tsx" : "typescript",
-    load: sourceLoader(path),
-  }));
+    load: () => loadSource(path),
+  };
 }
 
-function widgetSources(route: string): ReadonlyArray<string> {
-  return [
-    `routes/widgets/${route}`,
-    "routes/widgets/binding/index.ts",
-    "routes/widgets/binding/order.ts",
-    "routes/widgets/binding/sheet.ts",
-    "routes/widgets/binding/keyboard.ts",
-    "routes/widgets/binding/history.ts",
-    "routes/widgets/binding/option.ts",
-  ];
+function isExcluded(path: string): boolean {
+  return path.startsWith("app/")
+    || path.startsWith("shared/ui/")
+    || path.startsWith("shared/demo-workbench/")
+    || excludedSources.has(path);
 }
 
-function adapterSources(folder: string, name: string): ReadonlyArray<string> {
-  return [
-    `routes/adapters/${folder}/${name}AdapterDemoRoute.tsx`,
-    `routes/adapters/${folder}/${name}AdapterLab.tsx`,
-  ];
+function relativeSpecifiers(source: string): ReadonlyArray<string> {
+  const specifiers: string[] = [];
+  const pattern = /(?:import|export)\s+(?:[\s\S]*?\s+from\s+)?["'](\.[^"']+)["']/g;
+  for (const match of source.matchAll(pattern)) specifiers.push(match[1]!);
+  return specifiers;
 }
 
-function connectorSources(folder: string, name: string): ReadonlyArray<string> {
-  return [
-    `routes/connectors/${folder}/${name}DemoRoute.tsx`,
-    `routes/connectors/${folder}/${name}Lab.tsx`,
-  ];
+function resolveSource(importer: string, specifier: string): string | undefined {
+  const parts = importer.split("/");
+  parts.pop();
+  for (const part of specifier.split("/")) {
+    if (part === "." || part === "") continue;
+    if (part === "..") parts.pop();
+    else parts.push(part);
+  }
+  const base = parts.join("/");
+  return [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]
+    .find((candidate) => sourceModules[`/src/${candidate}`] !== undefined);
+}
+
+function loadSource(path: string): Promise<string> {
+  const cached = sourceText.get(path);
+  if (cached !== undefined) return cached;
+  const loaded = sourceLoader(path)();
+  sourceText.set(path, loaded);
+  return loaded;
 }
 
 function sourceLoader(path: string): () => Promise<string> {

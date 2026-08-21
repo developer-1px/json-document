@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
@@ -13,7 +13,7 @@ import {
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { richTextStyles } from "./rich-text-styles";
 
@@ -192,7 +192,7 @@ export function RichTextDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader
         label="Draft reference implementation"
         title="Rich Text Lab"
@@ -202,7 +202,7 @@ export function RichTextDemoRoute() {
         DOM은 입력 경계일 뿐입니다. 아래 편집은 Rich Text intent, Selection mapping, EditingSession과 atomic JSON Patch를 차례로 통과합니다.
       </PageHeader>
 
-      <DemoSurface>
+    )}>
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
         <ActionButton kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
         <ActionButton onClick={() => runHistory("undo")} disabled={!snapshot.canUndo}>Undo</ActionButton>
@@ -285,8 +285,7 @@ export function RichTextDemoRoute() {
           </div>
         </section>
       </div>
-      </DemoSurface>
-    </PageFrame>
+    </DemoPage>
   );
 }
 

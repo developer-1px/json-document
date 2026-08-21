@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { lineInterval, lineTopology } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const records = {
@@ -40,12 +40,12 @@ export function TopologyDemoRoute() {
   });
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader title="Topology Demo" illustration="cursor">
         anchor와 focus를 유지한 채 화면 순서를 바꾸고, 그 순서에서 계산된 범위를 확인합니다.
       </PageHeader>
 
-      <DemoSurface>
+    )}>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-input">
           <p className={ui.text.label}>1 · 입력</p>
@@ -107,7 +107,6 @@ export function TopologyDemoRoute() {
           </p>
         </section>
       </div>
-      </DemoSurface>
-    </PageFrame>
+    </DemoPage>
   );
 }

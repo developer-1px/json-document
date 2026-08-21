@@ -28,6 +28,8 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
   await page.goto("/demo/database");
 
   const tablist = page.getByRole("tablist", { name: "Demo and source files" });
+  await expect(tablist.getByRole("tab")).toHaveText(["Demo", "DatabaseDemoRoute.tsx"]);
+  await tablist.getByRole("tab", { name: "DatabaseDemoRoute.tsx" }).click();
   await expect(tablist.getByRole("tab")).toHaveText([
     "Demo",
     "DatabaseDemoRoute.tsx",

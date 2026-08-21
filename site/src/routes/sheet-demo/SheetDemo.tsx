@@ -1,5 +1,5 @@
 import { useRef, useState, type ClipboardEvent } from "react";
-import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createSheetEditor,
   type EditingResult,
@@ -19,7 +19,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initialSheet: SheetDocument = {
@@ -169,7 +169,7 @@ export function SheetDemo() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
         <PageHeader
           illustration="braces"
           title="Sheet"
@@ -181,7 +181,7 @@ export function SheetDemo() {
           )}
         >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
 
-        <DemoSurface>
+    )}>
         <ProductApp
           toolbarLabel="Sheet actions"
           toolbar={(
@@ -266,8 +266,7 @@ export function SheetDemo() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
           </section>
         </ProductApp>
-        </DemoSurface>
-    </PageFrame>
+    </DemoPage>
   );
 }
 
