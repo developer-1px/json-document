@@ -69,7 +69,8 @@ describe("breadcrumbTrail", () => {
       "History:/docs/history",
       "History Demo:/demo/history",
     ]);
-    expect(trail("/demo/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/demo/database"]);
+    expect(trail("/docs/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database"]);
+    expect(trail("/demo/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database", "Database Demo:/demo/database"]);
     expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/adapters"]);
     expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/adapters", "Keyboard:/adapters/keyboard"]);
     expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/adapters", "Clipboard adapter:/adapters/clipboard"]);

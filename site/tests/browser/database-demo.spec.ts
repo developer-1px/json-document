@@ -32,28 +32,53 @@ test("Database Table edits five property types while native text lease stays out
   await expect(page.getByTestId("database-selection-json")).not.toContainText("composition");
 });
 
-test("Database Table persists view projection and restores record plus selection with history", async ({ page }) => {
+test("Database Table header hands persist view projection and restore records with history", async ({ page }) => {
   await page.goto("/demo/database");
-  await page.getByRole("button", { name: "Score descending" }).click();
-  await page.getByRole("button", { name: "Backlog only" }).click();
-  await page.getByRole("button", { name: "Hide notes" }).click();
-  await page.getByRole("button", { name: "Score first" }).click();
+  await expect(page.getByRole("button", { name: "Backlog only" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Score descending" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Hide notes" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Score first" })).toHaveCount(0);
+
+  const scoreHeader = page.getByRole("columnheader", { name: /Score number/ });
+  await scoreHeader.click();
+  await expect(scoreHeader).toHaveAttribute("aria-sort", "ascending");
+  await scoreHeader.click();
+  await expect(scoreHeader).toHaveAttribute("aria-sort", "descending");
+  await expect(page.getByTestId("database-view-json")).toContainText('"direction": "descending"');
 
   const rows = page.getByRole("grid", { name: "Notion-style database" }).locator("tbody tr");
+  await expect(rows.nth(0)).toHaveAttribute("data-record-id", "page-2");
+
+  const noteHeader = page.getByRole("columnheader", { name: /Note text/ });
+  await noteHeader.click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Hide" }).click();
+  await expect(page.getByRole("columnheader", { name: /Note text/ })).toHaveCount(0);
+  await expect(page.getByTestId("database-view-json")).toContainText('"note": false');
+
+  await page.getByRole("columnheader", { name: "Show Note" }).click();
+  await expect(page.getByRole("columnheader", { name: /Note text/ })).toBeVisible();
+
+  const statusHeader = page.getByRole("columnheader", { name: /Status select/ });
+  await statusHeader.click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Filter Backlog" }).click();
   await expect(rows).toHaveCount(2);
   await expect(rows.nth(0)).toHaveAttribute("data-record-id", "page-3");
   await expect(rows.nth(1)).toHaveAttribute("data-record-id", "page-4");
-  await expect(page.getByTestId("database-view-json")).toContainText('"propertyOrder"');
-  await expect(page.getByTestId("database-view-json")).toContainText('"note": false');
-  await expect(page.getByTestId("database-view-json")).toContainText('"direction": "descending"');
   await expect(page.getByTestId("database-view-json")).toContainText('"value": "backlog"');
 
   const nameHeader = page.getByRole("columnheader", { name: /Name title/ });
-  const scoreHeader = page.getByRole("columnheader", { name: /Score number/ });
   await nameHeader.dragTo(scoreHeader);
-  await expect(page.getByTestId("database-view-json")).toContainText('"name",\n    "score"');
+  await expect(page.getByTestId("database-view-json")).toContainText('"propertyOrder"');
 
-  await page.getByRole("button", { name: "Backlog only" }).click();
+  const handle = page.locator("[data-resize-edge=e][data-property-id=score]");
+  const box = await handle.boundingBox();
+  if (!box) throw new Error("resize handle");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 80, box.y + box.height / 2);
+  await page.mouse.up();
+  await expect(page.getByTestId("database-view-json")).toContainText('"score":');
+
   await page.getByRole("button", { name: "New record" }).click();
   await expect(page.getByTestId("database-document-json")).toContainText('"id": "page-5"');
   await expect(page.getByTestId("database-selection-json")).toContainText('"recordId": "page-5"');

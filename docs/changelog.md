@@ -5,6 +5,11 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Closed Database Hands on the header and cell: order, width, sort,
+  hide, and filter persist in the saved Table view, and the named
+  toolbar toggles no longer replace those hands.
+- Added the Database guide as the Hands entrance, with the existing
+  Demo as its table surface.
 - Closed empty-canvas press as `clear`, and Escape as one layer at a time:
   cancel an open gesture, then clear selection. `pointercancel` still
   cancels only the gesture.

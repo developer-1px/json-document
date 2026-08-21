@@ -64,7 +64,7 @@ test("Hands catalog lists the genre hands", async ({ page }) => {
   await expect(article.getByRole("link", { name: "Sheet" })).toHaveAttribute("href", "/demo/sheet");
   await expect(article.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/docs/tree");
   await expect(article.getByRole("link", { name: "Kanban" })).toHaveAttribute("href", "/demo/kanban");
-  await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/demo/database");
+  await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/docs/database");
 });
 
 test("legacy Showcase path opens Hands", async ({ page }) => {

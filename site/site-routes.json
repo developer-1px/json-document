@@ -284,11 +284,21 @@
     "navigationGroup": "Hands"
   },
   {
-    "path": "/demo/database",
+    "path": "/docs/database",
     "label": "Database",
+    "title": "Database - json-document",
+    "heading": "Database",
+    "description": "저장된 Table view가 순서·숨김·너비·정렬·필터를 투사하는 Database editor를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Hands",
+    "relatedDemoPath": "/demo/database"
+  },
+  {
+    "path": "/demo/database",
+    "label": "Database Demo",
     "title": "Database Demo - json-document",
     "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
-    "navigationGroup": "Hands"
+    "parentPath": "/docs/database"
   },
   {
     "path": "/adapters",

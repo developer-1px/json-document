@@ -9,4 +9,4 @@ Hands는 idiom의 최소 완성본입니다. 제품이 아니고 컴포넌트도
 - [Sheet](/demo/sheet)
 - [Tree](/docs/tree)
 - [Kanban](/demo/kanban)
-- [Database](/demo/database)
+- [Database](/docs/database)

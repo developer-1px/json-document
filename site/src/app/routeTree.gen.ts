@@ -42,6 +42,7 @@ import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
+import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
@@ -262,6 +263,11 @@ const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
 const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
   id: "/docs/connectors",
   path: "/docs/connectors",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
+  id: "/docs/database",
+  path: "/docs/database",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
@@ -581,6 +587,7 @@ export interface FileRoutesByFullPath {
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/docs/database": typeof PageDocsDatabaseRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
@@ -668,6 +675,7 @@ export interface FileRoutesByTo {
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/docs/database": typeof PageDocsDatabaseRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
@@ -757,6 +765,7 @@ export interface FileRoutesById {
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
+  "/_page/docs/database": typeof PageDocsDatabaseRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
@@ -846,6 +855,7 @@ export interface FileRouteTypes {
     | "/docs/clipboard"
     | "/docs/concepts"
     | "/docs/connectors"
+    | "/docs/database"
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
@@ -933,6 +943,7 @@ export interface FileRouteTypes {
     | "/docs/clipboard"
     | "/docs/concepts"
     | "/docs/connectors"
+    | "/docs/database"
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
@@ -1021,6 +1032,7 @@ export interface FileRouteTypes {
     | "/_page/docs/clipboard"
     | "/_page/docs/concepts"
     | "/_page/docs/connectors"
+    | "/_page/docs/database"
     | "/_page/docs/history"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
@@ -1316,6 +1328,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/connectors";
       fullPath: "/docs/connectors";
       preLoaderRoute: typeof PageDocsConnectorsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/database": {
+      id: "/_page/docs/database";
+      path: "/docs/database";
+      fullPath: "/docs/database";
+      preLoaderRoute: typeof PageDocsDatabaseRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/history": {
@@ -1720,6 +1739,7 @@ interface PageRouteChildren {
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
+  PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
@@ -1807,6 +1827,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
+  PageDocsDatabaseRoute: PageDocsDatabaseRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,

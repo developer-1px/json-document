@@ -92,6 +92,8 @@ export const ui = {
     selectable: "cursor-pointer outline-none transition-[background-color,border-color,box-shadow] duration-150 hover:bg-paper-warm focus-visible:ring-2 focus-visible:ring-impact/25 focus-within:ring-2 focus-within:ring-impact/25 data-[selected=true]:relative data-[selected=true]:border-impact data-[selected=true]:bg-paper-warm data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-impact data-[focus=true]:outline data-[focus=true]:outline-2 data-[focus=true]:-outline-offset-1 data-[focus=true]:outline-ink",
     planeItem: "absolute !absolute grid place-items-center",
     icon: "flex h-7 w-7 cursor-pointer items-center justify-center rounded-[4px] border border-transparent bg-transparent text-pencil outline-none transition-colors hover:border-pencil-light hover:bg-paper hover:text-ink-strong active:bg-paper-warm focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-pencil-light",
+    contextMenu: "absolute z-10 min-w-28 rounded-[6px] border border-pencil-light bg-paper py-1 shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)]",
+    contextMenuItem: "block w-full px-3 py-1 text-left text-xs text-ink hover:bg-paper-warm",
   },
   field: {
     control: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-sm leading-6 text-ink-strong outline-none hover:border-pencil focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:bg-paper-warm disabled:text-pencil",

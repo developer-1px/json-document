@@ -46,6 +46,7 @@ import reactEditingMarkdown from "../../../../docs/public/react-editing.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
+import databaseMarkdown from "../../../../docs/public/database.md?raw";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 function docPage(path: string, source: string) {
@@ -94,6 +95,7 @@ export const docPages = {
   order: docPage("/docs/order", orderMarkdown),
   object: docPage("/docs/object", objectMarkdown),
   tree: docPage("/docs/tree", treeMarkdown),
+  database: docPage("/docs/database", databaseMarkdown),
   intent: docPage("/docs/intent", intentMarkdown),
   intentGuide: docPage("/docs/intent-guide", intentGuideMarkdown),
   api: docPage("/docs/api", apiReferenceMarkdown),
