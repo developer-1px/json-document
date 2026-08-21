@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
@@ -50,6 +51,7 @@ export function HistoryDemoRoute() {
         편집을 한 번 commit하고, 만들어진 History 항목으로 document.value와 Selection을 함께 복원합니다.
       </PageHeader>
 
+      <DemoSurface>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-input">
           <p className={ui.text.label}>1 · 편집</p>
@@ -104,6 +106,7 @@ export function HistoryDemoRoute() {
           ]} />
         </section>
       </div>
+      </DemoSurface>
     </PageFrame>
   );
 }

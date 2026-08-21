@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { type BlockDocument, type DocumentIntent } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
@@ -39,6 +40,7 @@ export function SelectionDemoRoute() {
         Selection 입력을 dispatch한 뒤 바뀐 Selection을 그대로인 document.value와 History 옆에서 비교합니다.
       </PageHeader>
 
+      <DemoSurface>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-input">
           <p className={ui.text.label}>1 · 입력</p>
@@ -95,6 +97,7 @@ export function SelectionDemoRoute() {
           ]} />
         </section>
       </div>
+      </DemoSurface>
     </PageFrame>
   );
 }

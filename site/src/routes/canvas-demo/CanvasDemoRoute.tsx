@@ -1,4 +1,5 @@
 import { useState, type PointerEvent } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   createObjectEditor,
   type ObjectDocument,
@@ -76,6 +77,7 @@ export function CanvasDemoRoute() {
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
 
+        <DemoSurface>
       <ProductApp
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
@@ -117,6 +119,7 @@ export function CanvasDemoRoute() {
           })}
         </section>
       </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

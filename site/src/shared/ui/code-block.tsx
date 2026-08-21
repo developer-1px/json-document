@@ -5,6 +5,11 @@ import { classes, ui } from "./styles";
 
 type CodeBlockSize = "compact" | "content" | "standard" | "tall";
 
+export type HighlightedCodeToken = {
+  readonly content: string;
+  readonly color?: string;
+};
+
 export function CodeBlock(props: {
   readonly source: string;
   readonly language: CodeLanguage;
@@ -14,6 +19,7 @@ export function CodeBlock(props: {
   readonly size?: CodeBlockSize;
   readonly className?: string;
   readonly testId?: string;
+  readonly highlightedLines?: ReadonlyArray<ReadonlyArray<HighlightedCodeToken>>;
 }) {
   const source = withoutTerminalLineBreak(props.source.replace(/\r\n/g, "\n"));
   const label = props.label ?? codeLanguageLabel(props.language);
@@ -61,7 +67,11 @@ export function CodeBlock(props: {
                   data-code-line
                   {...(props.language === "json" ? { "data-json-line": true } : {})}
                 >
-                  {tokenizeCodeLine(line, props.language).map((token, tokenIndex) => token.kind ? (
+                  {props.highlightedLines?.[lineIndex]?.map((token, tokenIndex) => (
+                    <span key={`${tokenIndex}:${token.content}`} style={{ color: token.color }}>
+                      {token.content}
+                    </span>
+                  )) ?? tokenizeCodeLine(line, props.language).map((token, tokenIndex) => token.kind ? (
                     <span
                       className={ui.code.block.token[token.kind]}
                       data-code-token={token.kind}

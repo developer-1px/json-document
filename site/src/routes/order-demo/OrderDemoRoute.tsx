@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   createOrderEditor,
   type OrderClipboard,
@@ -73,6 +74,7 @@ export function OrderDemoRoute() {
         A one-line list with range selection, structured clipboard, delete, and local history.
       </PageHeader>
 
+        <DemoSurface>
       <ProductApp
         toolbarLabel="Order actions"
         toolbar={(
@@ -121,6 +123,7 @@ export function OrderDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes an item.</p>
         </section>
       </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

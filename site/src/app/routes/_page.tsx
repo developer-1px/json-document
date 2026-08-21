@@ -1,4 +1,6 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { DemoSourcesProvider } from "../../shared/demo-workbench/DemoSurface";
+import { demoSources } from "../../shared/demo-workbench/demo-sources";
 import { PageFrame, PageLeadProvider } from "../../shared/ui/primitives";
 import { SiteBreadcrumb } from "../breadcrumb";
 import { findSiteRoute, siteRoutes, usePathname } from "../router";
@@ -9,10 +11,20 @@ export const Route = createFileRoute("/_page")({
 
 function InteriorPage() {
   const route = findSiteRoute(usePathname());
+  const sources = demoSources(route.path);
+  const content = <Outlet />;
+  if (sources !== undefined) {
+    return (
+      <PageFrame>
+        <SiteBreadcrumb route={route} routes={siteRoutes} />
+        <DemoSourcesProvider sources={sources}>{content}</DemoSourcesProvider>
+      </PageFrame>
+    );
+  }
   return (
     <PageLeadProvider lead={<SiteBreadcrumb route={route} routes={siteRoutes} />}>
       <PageFrame>
-        <Outlet />
+        {content}
       </PageFrame>
     </PageLeadProvider>
   );
