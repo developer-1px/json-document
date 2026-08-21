@@ -1,17 +1,18 @@
 # Double-click
 
-TBD.
-
 Double-click은 `UIEvent.detail === 2`입니다. 글에서는 단어를 고르고,
 목록·파일에서는 열거나 [Rename](affordance-rename.md)으로 갈 수 있습니다.
 횟수 손 자체는 닫혀 있고, 뜻은 장르 Intent입니다.
 
 ```ts
-import { clickCountAffordance } from "@interactive-os/json-document-affordance";
+import { applyAffordance, clickCountAffordance } from "@interactive-os/json-document-affordance";
 
 function onClick(event: MouseEvent, itemId: string) {
-  if (clickCountAffordance(event.detail) !== "double-click") return;
-  hostOpen(itemId);
+  applyAffordance(clickCountAffordance(event.detail), {
+    hand: (hand) => {
+      if (hand.type === "click" && hand.count === 2) hostOpen(itemId);
+    },
+  });
 }
 ```
 

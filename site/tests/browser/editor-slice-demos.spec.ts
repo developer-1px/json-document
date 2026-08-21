@@ -35,6 +35,38 @@ test("Order typeahead jumps to the matching label and Escape clears the buffer",
   await expect(page.getByRole("button", { name: /Inbox/ })).toHaveAttribute("data-selected", "true");
 });
 
+test("Order moves focus without changing selection and renames the focused item", async ({ page }) => {
+  await page.goto("/demo/order");
+  const order = page.getByLabel("Editable order").locator("ol");
+  const inbox = page.getByRole("button", { name: /Inbox/ });
+  const today = page.getByRole("button", { name: /Today/ });
+  await order.focus();
+  await expect(inbox).toHaveAttribute("data-selected", "true");
+  await expect(inbox).toHaveAttribute("data-focus", "true");
+
+  await page.keyboard.press("ArrowDown");
+  await expect(today).toHaveAttribute("data-focus", "true");
+  await expect(today).toHaveAttribute("data-selected", "false");
+  await expect(inbox).toHaveAttribute("data-selected", "true");
+
+  await page.keyboard.press("F2");
+  const rename = page.getByRole("textbox", { name: "Rename Today" });
+  await rename.fill("Now");
+  await rename.press("Enter");
+  await expect(page.getByRole("button", { name: /Now/ })).toBeVisible();
+  await expect(inbox).toHaveAttribute("data-selected", "true");
+});
+
+test("Document dogfoods caret and native double and triple click counts", async ({ page }) => {
+  await page.goto("/demo");
+  const text = page.getByRole("textbox", { name: "Block 1 text" });
+  await expect(text).toHaveCSS("cursor", "text");
+  await text.click({ clickCount: 2 });
+  await expect(page.getByTestId("document-click-count")).toHaveText("click count 2");
+  await text.click({ clickCount: 3 });
+  await expect(page.getByTestId("document-click-count")).toHaveText("click count 3");
+});
+
 test("Canvas marquee selects several objects and Escape cancels it", async ({ page }) => {
   await page.goto("/demo/canvas");
   const note = page.getByRole("button", { name: "Note" });

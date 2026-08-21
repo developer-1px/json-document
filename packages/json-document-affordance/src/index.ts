@@ -16,4 +16,4 @@ export type {
   AffordanceResult,
   SelectOperation,
 } from "./result.js";
-export { activateAffordance, clickCountAffordance, escapeAffordance, focusAffordance, planeHitAffordance, pointerSelect, resolveAffordanceKey, selectAllAffordance, typeaheadAffordance } from "./select.js";
+export { activateAffordance, caretAffordance, caretCursor, clickCountAffordance, escapeAffordance, focusAffordance, planeHitAffordance, pointerSelect, renameAffordance, resolveAffordanceKey, selectAllAffordance, typeaheadAffordance } from "./select.js";

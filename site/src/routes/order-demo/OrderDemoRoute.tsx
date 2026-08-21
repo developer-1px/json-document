@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import {
   createOrderEditor,
   type OrderClipboard,
@@ -10,7 +10,9 @@ import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import {
   applyAffordance,
   escapeAffordance,
+  focusAffordance,
   pointerSelect,
+  renameAffordance,
   typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
@@ -34,6 +36,9 @@ export function OrderDemoRoute() {
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<OrderIntent | null>(null);
   const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
+  const [focusId, setFocusId] = useState(initialOrder.items[0]?.id ?? null);
+  const [renaming, setRenaming] = useState<{ readonly id: string; readonly draft: string } | null>(null);
+  const lastClick = useRef<{ readonly id: string; readonly at: number } | null>(null);
 
   function run(intent: OrderIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -87,9 +92,52 @@ export function OrderDemoRoute() {
     setAnnouncement(`Cut ${result.clipboard.items.length} item${result.clipboard.items.length === 1 ? "" : "s"}`);
   }
 
-  const focusKey = snapshot.selection.ranges[snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
+  const focusKey = focusId;
+
+  function beginRename(itemId: string) {
+    const item = document.items.find((candidate) => candidate.id === itemId);
+    if (item) setRenaming({ id: item.id, draft: item.label });
+  }
+
+  function finishRename() {
+    if (!renaming) return;
+    run({ type: "item.rename", itemId: renaming.id, label: renaming.draft }, "Item renamed");
+    setRenaming(null);
+  }
 
   function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
+    let focused = false;
+    applyAffordance(focusAffordance(event), {
+      hand: (hand) => {
+        if (hand.type === "tab") return;
+        if (hand.type === "move") {
+          focused = true;
+          const keys = ids();
+          const from = focusId ?? keys[0];
+          const next = from === undefined ? null : moveLinePoint(keys, from, hand.direction);
+          setFocusId(next);
+          if (next) event.currentTarget.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(next)}"]`)?.focus();
+        }
+        if (hand.type === "boundary") {
+          focused = true;
+          const next = lineBoundary(ids(), hand.edge);
+          setFocusId(next);
+          if (next) event.currentTarget.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(next)}"]`)?.focus();
+        }
+      },
+    });
+    if (focused) {
+      event.preventDefault();
+      return;
+    }
+    applyAffordance(renameAffordance(event), {
+      hand: (hand) => {
+        if (hand.type !== "rename" || hand.action !== "begin" || !focusId) return;
+        event.preventDefault();
+        beginRename(focusId);
+      },
+    });
+    if (event.defaultPrevented) return;
     const names = document.items.map((item) => item.label);
     const from = document.items.find((item) => item.id === focusKey)?.label ?? null;
     const result = typeaheadAffordance({
@@ -169,20 +217,56 @@ export function OrderDemoRoute() {
         <section aria-label="Editable order">
           <ol
             className="m-0 grid list-none gap-1 p-0"
-            tabIndex={0}
+            tabIndex={-1}
             onKeyDown={onKeyDown}
           >
-            {document.items.map((item, index) => (
+            {document.items.map((item, index) => renaming?.id === item.id ? (
+              <input
+                key={item.id}
+                autoFocus
+                aria-label={`Rename ${item.label}`}
+                value={renaming.draft}
+                onChange={(event) => setRenaming({ id: item.id, draft: event.currentTarget.value })}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                  applyAffordance(renameAffordance(event), {
+                    hand: (hand) => {
+                      if (hand.type !== "rename") return;
+                      if (hand.action === "commit") finishRename();
+                      if (hand.action === "cancel") setRenaming(null);
+                    },
+                  });
+                }}
+                className={classes("w-full", ui.field.seamless)}
+              />
+            ) : (
               <SelectableItem
                 key={item.id}
+                id={`order-item-${item.id}`}
                 data-item-id={item.id}
+                tabIndex={focusId === item.id ? 0 : -1}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
                 {...optionProps(editing.getItem(item.id))}
+                focus={focusId === item.id}
+                onFocus={() => setFocusId(item.id)}
                 onClick={(event) => {
+                  const previous = lastClick.current;
+                  const intervalMs = previous?.id === item.id ? event.timeStamp - previous.at : 0;
+                  lastClick.current = { id: item.id, at: event.timeStamp };
+                  setFocusId(item.id);
                   applyAffordance(pointerSelect(event), {
                     hand: (hand) => {
                       if (hand.type !== "select") return;
                       run({ type: "selection.set", itemId: item.id, mode: hand.operation }, "Selection changed");
+                    },
+                  });
+                  applyAffordance(renameAffordance({
+                    type: "pointer",
+                    detail: event.detail,
+                    intervalMs,
+                  }), {
+                    hand: (hand) => {
+                      if (hand.type === "rename" && hand.action === "begin") beginRename(item.id);
                     },
                   });
                 }}

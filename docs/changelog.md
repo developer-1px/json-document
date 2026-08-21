@@ -5,6 +5,8 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Closed Focus, Caret, Rename, Double-click, and Triple-click as package hands,
+  and dogfooded them on the Order and Document product screens.
 - Closed Database Hands on the header and cell: order, width, sort,
   hide, and filter persist in the saved Table view, and the named
   toolbar toggles no longer replace those hands.
