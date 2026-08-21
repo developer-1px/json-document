@@ -7,23 +7,14 @@ import {
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
-const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
-
-const initialObjects: ObjectDocument = {
-  objects: [
-    { id: "note", label: "Note", x: 24, y: 24, width: 120, height: 72, color: "#de6d55" },
-    { id: "card", label: "Card", x: 168, y: 40, width: 120, height: 72, color: "#60786f" },
-    { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
-  ],
-};
-
 export function ObjectDemoRoute() {
-  const [editor] = useState(() => createObjectEditor(initialObjects));
+  const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
   const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<ObjectIntent | null>(null);
@@ -85,7 +76,7 @@ export function ObjectDemoRoute() {
         canvasClassName="relative min-h-[20rem] overflow-hidden"
         toolbar={(
           <>
-            {colors.map((color) => (
+            {objectDemoColors.map((color) => (
               <ActionButton
                 key={color}
                 aria-label={`Fill ${color}`}
@@ -141,7 +132,7 @@ export function ObjectDemoRoute() {
                 width: object.width,
                 height: object.height,
                 backgroundColor: object.color,
-                color: "#fff8f2",
+                color: "rgb(var(--color-foreground-canvas-object))",
               }}
             >
               {object.label}

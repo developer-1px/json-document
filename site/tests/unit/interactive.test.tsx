@@ -19,7 +19,7 @@ describe("interactive design system", () => {
     const button = screen.getByRole("button", { name: "Delete" });
     expect((button as HTMLButtonElement).disabled).toBe(true);
     expect(button.className).toContain("disabled:cursor-not-allowed");
-    expect(button.className).toContain("text-impact-ink");
+    expect(button.className).toContain("text-foreground-accent");
   });
 
   it("shows navigation direction only on prominent ActionLink", () => {
@@ -58,7 +58,7 @@ describe("interactive design system", () => {
     const item = screen.getByRole("button", { name: "Block" });
     expect(item.getAttribute("data-selected")).toBe("true");
     expect(item.getAttribute("data-focus")).toBe("false");
-    expect(item.className).toContain("data-[selected=true]:outline-impact");
+    expect(item.className).toContain("data-[selected=true]:outline-line-accent");
   });
 
   it("owns focus separately from selected", () => {

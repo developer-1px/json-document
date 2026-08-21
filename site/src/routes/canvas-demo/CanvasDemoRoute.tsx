@@ -5,18 +5,9 @@ import {
   type ObjectDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
-
-const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
-
-const initialObjects: ObjectDocument = {
-  objects: [
-    { id: "note", label: "Note", x: 24, y: 24, width: 120, height: 72, color: "#de6d55" },
-    { id: "card", label: "Card", x: 168, y: 40, width: 120, height: 72, color: "#60786f" },
-    { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
-  ],
-};
 
 type DragState = {
   readonly ids: ReadonlyArray<string>;
@@ -27,7 +18,7 @@ type DragState = {
 };
 
 export function CanvasDemoRoute() {
-  const [editor] = useState(() => createObjectEditor(initialObjects));
+  const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
   const [drag, setDrag] = useState<DragState | null>(null);
   const editing = useEditing({
     source: editor,
@@ -81,7 +72,7 @@ export function CanvasDemoRoute() {
       <ProductApp
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
-        toolbar={colors.map((color) => (
+        toolbar={objectDemoColors.map((color) => (
           <ActionButton
             key={color}
             aria-label={`Fill ${color}`}
@@ -110,7 +101,7 @@ export function CanvasDemoRoute() {
                   width: object.width,
                   height: object.height,
                   backgroundColor: object.color,
-                  color: "#fff8f2",
+                  color: "rgb(var(--color-foreground-canvas-object))",
                 }}
               >
                 {object.label}

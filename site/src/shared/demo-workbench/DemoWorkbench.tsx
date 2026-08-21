@@ -56,9 +56,9 @@ export function DemoWorkbench(props: {
 
   return (
     <section className={classes("min-w-0", ui.product.frame)} aria-label="Demo workbench">
-      <div className="sticky top-0 z-20 bg-paper-warm">
+      <div className={ui.demoWorkbench.header}>
         <div
-          className="flex overflow-x-auto border-b border-pencil-light/40 px-2 pt-2"
+          className={ui.demoWorkbench.tabList}
           role="tablist"
           aria-label="Demo and source files"
         >
@@ -73,7 +73,7 @@ export function DemoWorkbench(props: {
                 aria-controls={`${id}-panel-${index}`}
                 aria-selected={selected}
                 tabIndex={selected ? 0 : -1}
-                className="-mb-px shrink-0 cursor-pointer border-x-0 border-b-2 border-t-0 border-transparent bg-transparent px-3 py-2 font-mono text-xs text-pencil outline-none hover:text-ink-strong aria-selected:border-impact aria-selected:bg-paper aria-selected:text-ink-strong focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-impact/25"
+                className={ui.demoWorkbench.tab}
                 onClick={() => setActiveTab(tab.key)}
                 onKeyDown={(event) => selectNeighbor(event, index)}
               >
@@ -88,7 +88,7 @@ export function DemoWorkbench(props: {
         id={`${id}-panel-0`}
         role="tabpanel"
         aria-labelledby={`${id}-tab-0`}
-        className="min-w-0 bg-paper"
+        className={ui.demoWorkbench.panel}
         hidden={activeTab !== "demo"}
       >
         {props.children}
@@ -98,7 +98,7 @@ export function DemoWorkbench(props: {
           id={`${id}-panel-${activeSourceIndex + 1}`}
           role="tabpanel"
           aria-labelledby={`${id}-tab-${activeSourceIndex + 1}`}
-          className="min-w-0 bg-paper"
+          className={ui.demoWorkbench.panel}
         >
           <div className="min-w-0 p-3">
             <p className={classes("mb-2 mt-0 font-mono", ui.text.meta)}>{activeSource.path}</p>
