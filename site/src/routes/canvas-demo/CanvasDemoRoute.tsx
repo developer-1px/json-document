@@ -47,13 +47,27 @@ type MarqueeState = {
   readonly height: number;
 };
 
+type PanState = {
+  readonly x: number;
+  readonly y: number;
+  readonly originX: number;
+  readonly originY: number;
+  readonly active: boolean;
+};
+
 export function CanvasDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjects));
   const [drag, setDrag] = useState<DragState | null>(null);
   const [marquee, setMarquee] = useState<MarqueeState | null>(null);
-  const [pan, setPan] = useState({ x: 0, y: 0, originX: 0, originY: 0, active: false });
+  const [pan, setPan] = useState<PanState>({ x: 0, y: 0, originX: 0, originY: 0, active: false });
   const [space, setSpace] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const marqueeRef = useRef<MarqueeState | null>(null);
+  const panRef = useRef(pan);
+  const spaceRef = useRef(space);
+  panRef.current = pan;
+  spaceRef.current = space;
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedObjects.map((object) => object.id),
@@ -68,10 +82,24 @@ export function CanvasDemoRoute() {
   });
   const document = editing.snapshot.value as ObjectDocument;
 
-  function handlePointerDown(event: PointerEvent<HTMLElement>, objectId?: string) {
-    surface.current?.setPointerCapture(event.pointerId);
+  function setDragState(next: DragState | null) {
+    dragRef.current = next;
+    setDrag(next);
+  }
+
+  function setMarqueeState(next: MarqueeState | null) {
+    marqueeRef.current = next;
+    setMarquee(next);
+  }
+
+  function setPanState(next: PanState) {
+    panRef.current = next;
+    setPan(next);
+  }
+
+  function isPanStart(event: PointerEvent<HTMLElement>) {
     let grabbing = false;
-    applyAffordance(panAffordance({ spaceKey: space, buttons: event.buttons }), {
+    applyAffordance(panAffordance({ spaceKey: spaceRef.current, buttons: event.buttons }), {
       cursor: (cursor) => {
         grabbing = cursor === "grabbing";
       },
@@ -79,40 +107,125 @@ export function CanvasDemoRoute() {
         if (hand.type === "translate") grabbing = true;
       },
     });
-    if (grabbing || (space && event.buttons === 1)) {
-      setPan({ x: pan.x, y: pan.y, originX: event.clientX - pan.x, originY: event.clientY - pan.y, active: true });
-      return;
-    }
-    if (objectId) {
-      let operation: "replace" | "extend" | "toggle" = "replace";
-      applyAffordance(pointerSelect(event), {
-        hand: (hand) => {
-          if (hand.type !== "select") return;
-          operation = hand.operation;
-          editor.dispatch({
-            type: "selection.set",
-            objectIds: [objectId],
-            mode: hand.operation === "extend" ? "add" : hand.operation,
-          });
-        },
-      });
-      const ids = operation !== "replace"
-        ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
-        : [objectId];
-      setDrag({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
-      return;
-    }
-    const origin = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-    setMarquee({ originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
+    return grabbing || (spaceRef.current && event.buttons === 1);
   }
 
-  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    if (pan.active) {
+  function startPan(event: PointerEvent<HTMLElement>) {
+    const current = panRef.current;
+    surface.current?.setPointerCapture(event.pointerId);
+    setPanState({
+      x: current.x,
+      y: current.y,
+      originX: event.clientX - current.x,
+      originY: event.clientY - current.y,
+      active: true,
+    });
+  }
+
+  function planePoint(event: PointerEvent<HTMLElement>) {
+    return {
+      x: event.nativeEvent.offsetX - panRef.current.x,
+      y: event.nativeEvent.offsetY - panRef.current.y,
+    };
+  }
+
+  function commitCurrentDrag(event: PointerEvent<HTMLElement>) {
+    const current = dragRef.current;
+    if (!current) return;
+    const committed = commitAffordance(
+      dragAffordance({ x: current.originX, y: current.originY }, { x: event.clientX, y: event.clientY }),
+    );
+    if (committed) {
+      applyAffordance(committed, {
+        commit: (hand) => {
+          if (hand.type !== "translate") return;
+          applyAffordance(
+            snapAffordance(
+              { x: hand.dx, y: hand.dy },
+              { grid: 8, disable: event.metaKey || event.ctrlKey },
+            ),
+            {
+              hand: (snapped) => {
+                if (snapped.type !== "translate") return;
+                editor.dispatch({
+                  type: "object.translate",
+                  objectIds: current.ids,
+                  dx: snapped.dx,
+                  dy: snapped.dy,
+                });
+              },
+            },
+          );
+        },
+      });
+    }
+    setDragState(null);
+  }
+
+  function handleObjectPointerDown(event: PointerEvent<HTMLElement>, objectId: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    surface.current?.focus({ preventScroll: true });
+    if (isPanStart(event)) {
+      startPan(event);
+      return;
+    }
+    event.currentTarget.setPointerCapture(event.pointerId);
+    let operation: "replace" | "extend" | "toggle" = "replace";
+    applyAffordance(pointerSelect(event), {
+      hand: (hand) => {
+        if (hand.type !== "select") return;
+        operation = hand.operation;
+        editor.dispatch({
+          type: "selection.set",
+          objectIds: [objectId],
+          mode: hand.operation === "extend" ? "add" : hand.operation,
+        });
+      },
+    });
+    const ids = operation !== "replace"
+      ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
+      : [objectId];
+    setDragState({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
+  }
+
+  function handleObjectPointerMove(event: PointerEvent<HTMLElement>) {
+    const current = dragRef.current;
+    if (!current) return;
+    applyAffordance(
+      dragAffordance({ x: current.originX, y: current.originY }, { x: event.clientX, y: event.clientY }),
+      {
+        cursor: (cursor) => {
+          event.currentTarget.style.cursor = cursor;
+        },
+        hand: (hand) => {
+          if (hand.type !== "translate") return;
+          setDragState({ ...current, dx: hand.dx, dy: hand.dy });
+        },
+      },
+    );
+  }
+
+  function handleSurfacePointerDown(event: PointerEvent<HTMLDivElement>) {
+    event.preventDefault();
+    surface.current?.focus({ preventScroll: true });
+    if (isPanStart(event)) {
+      startPan(event);
+      return;
+    }
+    surface.current?.setPointerCapture(event.pointerId);
+    const origin = planePoint(event);
+    setMarqueeState({ originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
+  }
+
+  function handleSurfacePointerMove(event: PointerEvent<HTMLDivElement>) {
+    const currentPan = panRef.current;
+    if (currentPan.active) {
       applyAffordance(
         panAffordance({
           spaceKey: true,
           buttons: event.buttons,
-          origin: { x: pan.originX, y: pan.originY },
+          origin: { x: currentPan.originX, y: currentPan.originY },
           point: { x: event.clientX, y: event.clientY },
         }),
         {
@@ -121,110 +234,66 @@ export function CanvasDemoRoute() {
           },
           hand: (hand) => {
             if (hand.type !== "translate") return;
-            setPan((current) => ({ ...current, x: hand.dx, y: hand.dy }));
+            setPanState({ ...currentPan, x: hand.dx, y: hand.dy });
           },
         },
       );
       return;
     }
-    if (drag) {
-      applyAffordance(
-        dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
-        {
-          cursor: (cursor) => {
-            event.currentTarget.style.cursor = cursor;
-          },
-          hand: (hand) => {
-            if (hand.type === "translate") setDrag({ ...drag, dx: hand.dx, dy: hand.dy });
-          },
-        },
-      );
+    const currentMarquee = marqueeRef.current;
+    if (!currentMarquee) return;
+    const origin = { x: currentMarquee.originX, y: currentMarquee.originY };
+    const point = planePoint(event);
+    applyAffordance(marqueeAffordance(origin, point), {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+      hand: (hand) => {
+        if (hand.type !== "select" || !hand.rect) return;
+        setMarqueeState({ originX: origin.x, originY: origin.y, ...hand.rect });
+      },
+    });
+  }
+
+  function handleSurfacePointerUp(event: PointerEvent<HTMLDivElement>) {
+    const currentPan = panRef.current;
+    if (currentPan.active) {
+      setPanState({ ...currentPan, active: false });
       return;
     }
-    if (marquee) {
-      const origin = { x: marquee.originX, y: marquee.originY };
-      const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-      applyAffordance(marqueeAffordance(origin, point), {
-        cursor: (cursor) => {
-          event.currentTarget.style.cursor = cursor;
-        },
-        hand: (hand) => {
+    const currentMarquee = marqueeRef.current;
+    if (!currentMarquee) return;
+    const origin = { x: currentMarquee.originX, y: currentMarquee.originY };
+    const point = planePoint(event);
+    const committed = commitAffordance(marqueeAffordance(origin, point));
+    if (committed) {
+      applyAffordance(committed, {
+        commit: (hand) => {
           if (hand.type !== "select" || !hand.rect) return;
-          setMarquee({ originX: origin.x, originY: origin.y, ...hand.rect });
+          const hits = document.objects
+            .filter((object) => intersects(hand.rect!, object))
+            .map((object) => object.id);
+          if (hits.length === 0) return;
+          applyAffordance(pointerSelect(event), {
+            hand: (selectHand) => {
+              if (selectHand.type !== "select") return;
+              editor.dispatch({
+                type: "selection.set",
+                objectIds: hits,
+                mode: selectHand.operation === "extend" ? "add" : selectHand.operation === "toggle" ? "toggle" : "replace",
+              });
+            },
+          });
         },
       });
     }
-  }
-
-  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
-    if (pan.active) {
-      setPan((current) => ({ ...current, active: false }));
-      return;
-    }
-    if (drag) {
-      const committed = commitAffordance(
-        dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
-      );
-      if (committed) {
-        applyAffordance(committed, {
-          commit: (hand) => {
-            if (hand.type !== "translate") return;
-            applyAffordance(
-              snapAffordance(
-                { x: hand.dx, y: hand.dy },
-                { grid: 8, disable: event.metaKey || event.ctrlKey },
-              ),
-              {
-                hand: (snapped) => {
-                  if (snapped.type !== "translate") return;
-                  editor.dispatch({
-                    type: "object.translate",
-                    objectIds: drag.ids,
-                    dx: snapped.dx,
-                    dy: snapped.dy,
-                  });
-                },
-              },
-            );
-          },
-        });
-      }
-      setDrag(null);
-      return;
-    }
-    if (marquee) {
-      const origin = { x: marquee.originX, y: marquee.originY };
-      const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-      const committed = commitAffordance(marqueeAffordance(origin, point));
-      if (committed) {
-        applyAffordance(committed, {
-          commit: (hand) => {
-            if (hand.type !== "select" || !hand.rect) return;
-            const hits = document.objects
-              .filter((object) => intersects(hand.rect!, object))
-              .map((object) => object.id);
-            if (hits.length === 0) return;
-            applyAffordance(pointerSelect(event), {
-              hand: (selectHand) => {
-                if (selectHand.type !== "select") return;
-                editor.dispatch({
-                  type: "selection.set",
-                  objectIds: hits,
-                  mode: selectHand.operation === "extend" ? "add" : selectHand.operation === "toggle" ? "toggle" : "replace",
-                });
-              },
-            });
-          },
-        });
-      }
-      setMarquee(null);
-    }
+    setMarqueeState(null);
   }
 
   function cancelHands() {
-    setDrag(null);
-    setMarquee(null);
-    setPan((current) => ({ ...current, active: false }));
+    setDragState(null);
+    setMarqueeState(null);
+    setPanState({ ...panRef.current, active: false });
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -271,17 +340,18 @@ export function CanvasDemoRoute() {
       >
         <div
           ref={surface}
-          className="relative min-h-[22rem] overflow-hidden"
+          className={classes("relative min-h-[22rem] overflow-hidden", ui.state.focus)}
           aria-label="Canvas"
           tabIndex={0}
-          onPointerDown={(event) => handlePointerDown(event)}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+          onPointerDown={handleSurfacePointerDown}
+          onPointerMove={handleSurfacePointerMove}
+          onPointerUp={handleSurfacePointerUp}
           onPointerCancel={(event) => {
             applyAffordance(escapeAffordance(event), {
               hand: (hand) => {
                 if (hand.type !== "cancel") return;
-                cancelHands();
+                setMarqueeState(null);
+                setPanState({ ...panRef.current, active: false });
               },
             });
           }}
@@ -300,9 +370,12 @@ export function CanvasDemoRoute() {
                   data-object-id={object.id}
                   selected={option.selected}
                   focus={option.focus}
-                  onPointerDown={(event) => {
-                    event.stopPropagation();
-                    handlePointerDown(event, object.id);
+                  onPointerDown={(event) => handleObjectPointerDown(event, object.id)}
+                  onPointerMove={handleObjectPointerMove}
+                  onPointerUp={commitCurrentDrag}
+                  onLostPointerCapture={(event) => {
+                    if (event.buttons !== 0) return;
+                    commitCurrentDrag(event);
                   }}
                   className="absolute grid place-items-center"
                   style={{

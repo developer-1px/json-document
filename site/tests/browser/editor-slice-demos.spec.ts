@@ -82,6 +82,9 @@ test("Canvas nudges a selected object and snaps a drag to the grid", async ({ pa
   await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2);
   await page.mouse.up();
   await expect(note).toHaveCSS("left", "33px");
+  await page.getByRole("button", { name: "Card" }).click();
+  await expect(note).toHaveCSS("left", "33px");
+  await expect(page.getByRole("button", { name: "Card" })).toHaveAttribute("data-selected", "true");
 });
 
 test("Tree uses host visible order and restores a cut with undo", async ({ page }) => {
