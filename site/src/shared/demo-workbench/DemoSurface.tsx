@@ -1,11 +1,11 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { DemoWorkbench } from "./DemoWorkbench";
-import type { DemoSource } from "./demo-sources";
+import type { DemoSourceFile } from "./demo-sources";
 
-const DemoSourcesContext = createContext<ReadonlyArray<DemoSource> | undefined>(undefined);
+const DemoSourcesContext = createContext<ReadonlyArray<DemoSourceFile> | undefined>(undefined);
 
 export function DemoSourcesProvider(props: {
-  readonly sources: ReadonlyArray<DemoSource> | undefined;
+  readonly sources: ReadonlyArray<DemoSourceFile> | undefined;
   readonly children: ReactNode;
 }) {
   return <DemoSourcesContext value={props.sources}>{props.children}</DemoSourcesContext>;
