@@ -33,3 +33,23 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "initial-database.ts",
   ]);
 });
+
+test("keeps the page breadcrumb above sticky workbench tabs", async ({ page }) => {
+  await page.goto("/demo");
+
+  const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
+  const tablist = page.getByRole("tablist", { name: "Demo and source files" });
+  const initialBreadcrumb = await breadcrumb.boundingBox();
+  const initialTabs = await tablist.boundingBox();
+  expect(initialBreadcrumb).not.toBeNull();
+  expect(initialTabs).not.toBeNull();
+  expect(initialBreadcrumb!.y + initialBreadcrumb!.height).toBeLessThanOrEqual(initialTabs!.y);
+  await expect(page.locator("[data-page-header] >> nav[aria-label='Breadcrumb']")).toHaveCount(0);
+
+  await tablist.getByRole("tab", { name: "DocumentDemoRoute.tsx" }).click();
+  await expect(page.getByText("routes/document-demo/DocumentDemoRoute.tsx")).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 900));
+  const stickyTabs = await tablist.boundingBox();
+  expect(stickyTabs).not.toBeNull();
+  expect(stickyTabs!.y).toBeLessThanOrEqual(1);
+});

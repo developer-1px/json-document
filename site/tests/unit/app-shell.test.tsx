@@ -119,7 +119,8 @@ describe("official site shell", () => {
 
     await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Zod", exact: true }));
     const adminHeader = document.querySelector("[data-page-header]");
-    expect(adminHeader?.querySelector('[aria-label="Breadcrumb"]')).toBeTruthy();
+    expect(adminHeader?.querySelector('[aria-label="Breadcrumb"]')).toBeNull();
+    expect(await screen.findByRole("region", { name: "Demo workbench" })).toBeTruthy();
     const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
     expect(adminCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
     expect(adminCrumb.getByRole("link", { name: "Connector" }).getAttribute("href")).toBe("/connectors");

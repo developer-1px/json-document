@@ -13,12 +13,18 @@ function InteriorPage() {
   const route = findSiteRoute(usePathname());
   const sources = demoSources(route.path);
   const content = <Outlet />;
+  if (sources !== undefined) {
+    return (
+      <PageFrame>
+        <SiteBreadcrumb route={route} routes={siteRoutes} />
+        <DemoWorkbench sources={sources}>{content}</DemoWorkbench>
+      </PageFrame>
+    );
+  }
   return (
     <PageLeadProvider lead={<SiteBreadcrumb route={route} routes={siteRoutes} />}>
       <PageFrame>
-        {sources === undefined ? content : (
-          <DemoWorkbench sources={sources}>{content}</DemoWorkbench>
-        )}
+        {content}
       </PageFrame>
     </PageLeadProvider>
   );
