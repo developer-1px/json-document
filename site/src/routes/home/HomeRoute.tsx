@@ -112,7 +112,7 @@ function HomeWordmark() {
         <circle cx="70" cy="31" r="1.7" />
         <circle cx="80" cy="30" r="1.7" />
       </g>
-      <path className={ui.accent.impact.stroke} d="M137 34c7-1 14 0 21-1" fill="none" strokeLinecap="round" strokeWidth="4" />
+      <path className={ui.accent.stroke} d="M137 34c7-1 14 0 21-1" fill="none" strokeLinecap="round" strokeWidth="4" />
     </svg>
   );
 }

@@ -2,20 +2,71 @@
 
 @layer tokens {
   :root {
-    --color-paper: 255 255 255;
-    --color-paper-warm: 251 248 242;
-    --color-ink: 69 67 62;
-    --color-ink-strong: 41 40 36;
-    --color-pencil: 119 115 107;
-    --color-pencil-light: 216 209 197;
-    --color-sage: 96 120 111;
-    --color-impact: 222 109 85;
-    --color-impact-ink: 159 73 55;
-    --color-impact-soft: 255 243 238;
-    --space-page-inline: 1rem;
-    --space-page-inline-wide: 2rem;
+    /* Reference tokens are raw materials. Product styles consume semantic tokens below. */
+    --ref-color-paper: 255 255 255;
+    --ref-color-paper-warm: 251 248 242;
+    --ref-color-ink: 69 67 62;
+    --ref-color-ink-strong: 41 40 36;
+    --ref-color-pencil: 119 115 107;
+    --ref-color-pencil-light: 216 209 197;
+    --ref-color-sage: 96 120 111;
+    --ref-color-impact: 222 109 85;
+    --ref-color-impact-ink: 159 73 55;
+    --ref-color-impact-soft: 255 243 238;
+    --ref-color-canvas-object-label: 255 248 242;
+    --ref-radius-2: 2px;
+    --ref-radius-3: 3px;
+    --ref-radius-4: 4px;
+    --ref-radius-6: 6px;
+    --ref-radius-10: 10px;
+
+    /* Semantic tokens name stable design roles, independent of the active theme. */
+    --color-background-canvas: var(--ref-color-paper);
+    --color-background-subtle: var(--ref-color-paper-warm);
+    --color-background-accent: var(--ref-color-impact);
+    --color-background-accent-subtle: var(--ref-color-impact-soft);
+    --color-background-action-primary: var(--ref-color-ink-strong);
+    --color-background-action-primary-hovered: var(--ref-color-ink);
+    --color-foreground-default: var(--ref-color-ink);
+    --color-foreground-strong: var(--ref-color-ink-strong);
+    --color-foreground-muted: var(--ref-color-pencil);
+    --color-foreground-disabled: var(--ref-color-pencil-light);
+    --color-foreground-inverse: var(--ref-color-paper);
+    --color-foreground-canvas-object: var(--ref-color-canvas-object-label);
+    --color-foreground-accent: var(--ref-color-impact-ink);
+    --color-foreground-success: var(--ref-color-sage);
+    --color-border-subtle: var(--ref-color-pencil-light);
+    --color-border-default: var(--ref-color-pencil);
+    --color-border-accent: var(--ref-color-impact);
+    --color-border-action-primary: var(--ref-color-pencil);
+
+    --radius-inline: var(--ref-radius-2);
+    --radius-code: var(--ref-radius-3);
+    --radius-icon: var(--ref-radius-4);
+    --radius-control: var(--ref-radius-6);
+    --radius-surface: var(--ref-radius-10);
+
+    --shadow-surface: 0 1px 2px rgb(var(--ref-color-ink) / 0.04), 0 16px 40px rgb(var(--ref-color-ink) / 0.08);
+    --shadow-overlay: 0 2px 4px rgb(var(--ref-color-ink) / 0.06), 0 20px 48px rgb(var(--ref-color-ink) / 0.10);
+    --shadow-control: 0 1px 2px rgb(var(--ref-color-ink) / 0.05);
+    --shadow-control-prominent: 0 1px 2px rgb(var(--ref-color-ink) / 0.05), 0 5px 14px rgb(var(--ref-color-ink) / 0.05);
+    --shadow-control-primary: 0 1px 2px rgb(var(--ref-color-ink) / 0.10), 0 5px 14px rgb(var(--ref-color-ink) / 0.10);
+    --shadow-inset: inset 0 1px 2px rgb(var(--ref-color-ink) / 0.04);
+
+    --space-layout-page-inline: 1rem;
+    --space-layout-page-inline-wide: 2rem;
     --font-size-page-title: 1.875rem;
     --line-height-page-title: 2.25rem;
+    --font-size-overline: 0.625rem;
+    --font-size-code: 0.8125rem;
+    --line-height-code: 1.55;
+    --font-size-code-line-number: 0.5625rem;
+    --font-size-inline-code: 0.85em;
+    --letter-spacing-overline: 0.16em;
+    --letter-spacing-page-title: -0.025em;
+    --letter-spacing-section-title: -0.015em;
+    --letter-spacing-display: -0.035em;
+    --duration-interaction: 150ms;
   }
 }
 
@@ -32,7 +83,7 @@
 
   body {
     margin: 0;
-    background: theme("colors.paper.DEFAULT");
-    color: theme("colors.ink.DEFAULT");
+    background: theme("colors.background-canvas");
+    color: theme("colors.foreground-default");
   }
 }

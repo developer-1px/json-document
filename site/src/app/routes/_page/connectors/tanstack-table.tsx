@@ -3,5 +3,6 @@ import { defineDemo } from "../../../../shared/demo-workbench/define-demo";
 import { TanStackTableConnectorDemoRoute } from "../../../../routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute";
 
 export const Route = createFileRoute("/_page/connectors/tanstack-table")({
-  ...defineDemo({ component: TanStackTableConnectorDemoRoute, source: "routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute.tsx" }),
+  component: TanStackTableConnectorDemoRoute,
+  ...defineDemo({ source: "routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute.tsx" }),
 });

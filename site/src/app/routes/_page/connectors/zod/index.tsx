@@ -3,5 +3,6 @@ import { defineDemo } from "../../../../../shared/demo-workbench/define-demo";
 import { ZodConnectorDemoRoute } from "../../../../../routes/connectors/zod/ZodConnectorDemoRoute";
 
 export const Route = createFileRoute("/_page/connectors/zod/")({
-  ...defineDemo({ component: ZodConnectorDemoRoute, source: "routes/connectors/zod/ZodConnectorDemoRoute.tsx" }),
+  component: ZodConnectorDemoRoute,
+  ...defineDemo({ source: "routes/connectors/zod/ZodConnectorDemoRoute.tsx" }),
 });

@@ -3,5 +3,6 @@ import { defineDemo } from "../../../../shared/demo-workbench/define-demo";
 import { TreeDemoRoute } from "../../../../routes/tree-demo/TreeDemoRoute";
 
 export const Route = createFileRoute("/_page/demo/tree")({
-  ...defineDemo({ component: TreeDemoRoute, source: "routes/tree-demo/TreeDemoRoute.tsx" }),
+  component: TreeDemoRoute,
+  ...defineDemo({ source: "routes/tree-demo/TreeDemoRoute.tsx" }),
 });
