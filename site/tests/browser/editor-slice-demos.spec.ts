@@ -1,5 +1,22 @@
 import { expect, test } from "@playwright/test";
 
+test("Canvas selection keeps objects absolutely positioned", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  const card = page.getByRole("button", { name: "Card" });
+  const chip = page.getByRole("button", { name: "Chip" });
+  const before = await Promise.all([note, card, chip].map((item) => item.boundingBox()));
+  await card.click();
+  for (const item of [note, card, chip]) {
+    await expect.poll(() => item.evaluate((el) => getComputedStyle(el).position)).toBe("absolute");
+  }
+  const after = await Promise.all([note, card, chip].map((item) => item.boundingBox()));
+  after.forEach((box, index) => {
+    expect(box?.x).toBeCloseTo(before[index]?.x ?? 0, 0);
+    expect(box?.y).toBeCloseTo(before[index]?.y ?? 0, 0);
+  });
+});
+
 test("Canvas fills a selected object", async ({ page }) => {
   await page.goto("/demo/canvas");
   await expect(page.getByRole("heading", { level: 1, name: "Canvas", exact: true })).toBeVisible();

@@ -377,7 +377,7 @@ export function CanvasDemoRoute() {
                     if (event.buttons !== 0) return;
                     commitCurrentDrag(event);
                   }}
-                  className="absolute grid place-items-center"
+                  className={ui.interactive.planeItem}
                   style={{
                     left: object.x + (offset?.dx ?? 0),
                     top: object.y + (offset?.dy ?? 0),

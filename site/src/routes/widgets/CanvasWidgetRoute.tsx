@@ -287,7 +287,7 @@ export function CanvasWidgetRoute() {
                 <SelectableItem
                   key={object.id}
                   role="option"
-                  className="absolute grid place-items-center"
+                  className={ui.interactive.planeItem}
                   style={{
                     left: object.x + (offset?.dx ?? 0),
                     top: object.y + (offset?.dy ?? 0),
