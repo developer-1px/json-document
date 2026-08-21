@@ -73,6 +73,7 @@ export const ui = {
     documentBlock: "border-b border-pencil-light/70 bg-transparent px-2 py-1.5 last:border-b-0",
     documentIndex: "rounded-none border-0 border-r border-pencil-light bg-paper-warm text-pencil shadow-none",
     empty: "rounded-[6px] border border-dashed border-pencil-light bg-paper-warm text-pencil",
+    marquee: "rounded-[6px] border border-dashed border-impact/50 bg-impact/10",
   },
   interactive: {
     control: "cursor-pointer rounded-[6px] border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:translate-y-px focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-pencil-light/60 disabled:bg-transparent disabled:text-pencil disabled:shadow-none",

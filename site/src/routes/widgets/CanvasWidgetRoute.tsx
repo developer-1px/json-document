@@ -310,7 +310,7 @@ export function CanvasWidgetRoute() {
             })}
             {marquee ? (
               <div
-                className={classes("pointer-events-none absolute", ui.surface.empty)}
+                className={classes("pointer-events-none absolute", ui.surface.marquee)}
                 style={{ left: marquee.x, top: marquee.y, width: marquee.width, height: marquee.height }}
               />
             ) : null}
