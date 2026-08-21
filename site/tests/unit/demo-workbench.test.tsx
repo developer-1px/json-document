@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { DemoWorkbench } from "../../src/shared/demo-workbench/DemoWorkbench";
-import { demoSources } from "../../src/shared/demo-workbench/demo-sources";
+import { loadDemoSources } from "../../src/shared/demo-workbench/demo-sources";
 
 afterEach(cleanup);
 
@@ -51,8 +51,8 @@ describe("DemoWorkbench", () => {
 });
 
 describe("demoSources", () => {
-  test("loads actual full demo files without following package or site chrome imports", () => {
-    const document = demoSources("/demo")!;
+  test("loads actual full demo files without following package or site chrome imports", async () => {
+    const document = (await loadDemoSources("/demo"))!;
     expect(document.map((file) => file.path)).toEqual(["routes/document-demo/DocumentDemoRoute.tsx"]);
     expect(document[0]!.source).toContain("export function DocumentDemoRoute()");
     expect(document[0]!.source).toContain('from "@interactive-os/json-document-react"');
@@ -60,18 +60,18 @@ describe("demoSources", () => {
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
   });
 
-  test("includes demo-owned helpers and shared behavioral glue", () => {
-    expect(demoSources("/demo/database")!.map((file) => file.path)).toEqual([
+  test("includes demo-owned helpers and shared behavioral glue", async () => {
+    expect((await loadDemoSources("/demo/database"))!.map((file) => file.path)).toEqual([
       "routes/database-demo/DatabaseDemoRoute.tsx",
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
     ]);
-    expect(demoSources("/widgets/listbox")!.map((file) => file.path)).toContain(
+    expect((await loadDemoSources("/widgets/listbox"))!.map((file) => file.path)).toContain(
       "routes/widgets/binding/order.ts",
     );
   });
 
-  test("covers every public interactive demo route", () => {
+  test("covers every public interactive demo route", async () => {
     const paths = [
       "/demo", "/demo/order", "/demo/object", "/demo/canvas", "/demo/sheet", "/demo/database",
       "/demo/tree", "/demo/kanban", "/demo/topology", "/demo/selection", "/demo/clipboard", "/demo/history",
@@ -80,6 +80,6 @@ describe("demoSources", () => {
       "/connectors/react", "/connectors/react-hook-form", "/connectors/tanstack-table", "/connectors/ajv",
       "/connectors/zod", "/connectors/zod/validate",
     ];
-    for (const path of paths) expect(demoSources(path), path).not.toBeUndefined();
+    for (const path of paths) expect(await loadDemoSources(path), path).not.toBeUndefined();
   });
 });

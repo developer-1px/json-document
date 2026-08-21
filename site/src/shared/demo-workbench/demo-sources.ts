@@ -6,14 +6,14 @@ export type DemoSourceFile = {
   readonly source: string;
 };
 
-const sourceModules = import.meta.glob<string>(
+const sourceModules = import.meta.glob<true, string, () => Promise<string>>(
   [
     "/src/routes/**/*.{ts,tsx}",
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
     "!/src/shared/demo-workbench/**",
   ],
-  { eager: true, import: "default", query: "?raw" },
+  { import: "default", query: "?raw" },
 );
 
 const demoSourceEntries: Readonly<Record<string, string>> = {
@@ -49,29 +49,30 @@ const chromeFiles = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 
-export function demoSources(pathname: string): ReadonlyArray<DemoSourceFile> | undefined {
+export async function loadDemoSources(pathname: string): Promise<ReadonlyArray<DemoSourceFile> | undefined> {
   const entry = demoSourceEntries[pathname];
   if (entry === undefined) return undefined;
-  return sourceClosure(entry).map((path) => ({
+  const paths = await sourceClosure(entry);
+  return Promise.all(paths.map(async (path) => ({
     path,
     language: path.endsWith(".tsx") ? "tsx" : "typescript",
-    source: source(path),
-  }));
+    source: await source(path),
+  } as const)));
 }
 
-function sourceClosure(entry: string): ReadonlyArray<string> {
+async function sourceClosure(entry: string): Promise<ReadonlyArray<string>> {
   const paths: string[] = [];
   const visited = new Set<string>();
-  function visit(path: string) {
+  async function visit(path: string): Promise<void> {
     if (visited.has(path) || isChrome(path)) return;
     visited.add(path);
     paths.push(path);
-    for (const specifier of relativeSpecifiers(source(path))) {
+    for (const specifier of relativeSpecifiers(await source(path))) {
       const resolved = resolveSource(path, specifier);
-      if (resolved !== undefined) visit(resolved);
+      if (resolved !== undefined) await visit(resolved);
     }
   }
-  visit(entry);
+  await visit(entry);
   return paths;
 }
 
@@ -82,10 +83,10 @@ function isChrome(path: string): boolean {
     || chromeFiles.has(path);
 }
 
-function source(path: string): string {
-  const value = sourceModules[`/src/${path}`];
-  if (value === undefined) throw new Error(`Unknown demo source: ${path}`);
-  return value;
+async function source(path: string): Promise<string> {
+  const load = sourceModules[`/src/${path}`];
+  if (load === undefined) throw new Error(`Unknown demo source: ${path}`);
+  return load();
 }
 
 function relativeSpecifiers(value: string): ReadonlyArray<string> {
