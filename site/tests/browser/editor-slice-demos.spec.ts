@@ -55,6 +55,20 @@ test("Order moves focus without changing selection and renames the focused item"
   await rename.press("Enter");
   await expect(page.getByRole("button", { name: /Now/ })).toBeVisible();
   await expect(inbox).toHaveAttribute("data-selected", "true");
+
+  await page.keyboard.press("ControlOrMeta+Z");
+  await expect(page.getByRole("button", { name: /Today/ })).toBeVisible();
+});
+
+test("Order native copy and paste bypass typeahead", async ({ page }) => {
+  await page.goto("/demo/order");
+  const today = page.getByRole("button", { name: /Today/ });
+  const later = page.getByRole("button", { name: /Later/ });
+  await today.click();
+  await page.keyboard.press("ControlOrMeta+C");
+  await later.click();
+  await page.keyboard.press("ControlOrMeta+V");
+  await expect(page.getByRole("button", { name: /Today/ })).toHaveCount(2);
 });
 
 test("Document dogfoods caret and native double and triple click counts", async ({ page }) => {

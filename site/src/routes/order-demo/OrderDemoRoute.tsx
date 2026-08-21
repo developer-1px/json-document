@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import {
   createOrderEditor,
   type OrderClipboard,
@@ -6,7 +6,12 @@ import {
   type OrderIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  createWebClipboardBinding,
+  lineBoundary,
+  moveLinePoint,
+  orderClipboardCodec,
+} from "@interactive-os/json-document-web";
 import {
   applyAffordance,
   escapeAffordance,
@@ -33,12 +38,19 @@ const initialOrder: OrderDocument = {
 export function OrderDemoRoute() {
   const [editor] = useState(() => createOrderEditor(initialOrder));
   const [clipboard, setClipboard] = useState<OrderClipboard | null>(null);
+  const [webClipboard] = useState(() => createWebClipboardBinding({
+    codec: orderClipboardCodec,
+    read: () => editor.copy(),
+    cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
+    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+  }));
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<OrderIntent | null>(null);
   const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const [focusId, setFocusId] = useState(initialOrder.items[0]?.id ?? null);
   const [renaming, setRenaming] = useState<{ readonly id: string; readonly draft: string } | null>(null);
   const lastClick = useRef<{ readonly id: string; readonly at: number } | null>(null);
+  const orderRef = useRef<HTMLOListElement>(null);
 
   function run(intent: OrderIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -101,11 +113,30 @@ export function OrderDemoRoute() {
 
   function finishRename() {
     if (!renaming) return;
+    const itemId = renaming.id;
     run({ type: "item.rename", itemId: renaming.id, label: renaming.draft }, "Item renamed");
     setRenaming(null);
+    restoreItemFocus(itemId);
+  }
+
+  function cancelRename() {
+    if (!renaming) return;
+    const itemId = renaming.id;
+    setRenaming(null);
+    restoreItemFocus(itemId);
+  }
+
+  function restoreItemFocus(itemId: string) {
+    requestAnimationFrame(() => {
+      orderRef.current?.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(itemId)}"]`)?.focus();
+    });
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      editing.getKeyDownHandler()(event);
+      return;
+    }
     let focused = false;
     applyAffordance(focusAffordance(event), {
       hand: (hand) => {
@@ -170,6 +201,27 @@ export function OrderDemoRoute() {
     editing.getKeyDownHandler()(event);
   }
 
+  function handleNativeCopy(event: ClipboardEvent<HTMLOListElement>) {
+    const result = webClipboard.copy(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Copied ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
+  }
+
+  function handleNativeCut(event: ClipboardEvent<HTMLOListElement>) {
+    const result = webClipboard.cut(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Cut ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
+  }
+
+  function handleNativePaste(event: ClipboardEvent<HTMLOListElement>) {
+    const result = webClipboard.paste(event);
+    setAnnouncement(result.ok
+      ? `Pasted ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`
+      : result.code);
+  }
+
   return (
     <PageFrame>
       <PageHeader
@@ -216,9 +268,13 @@ export function OrderDemoRoute() {
       >
         <section aria-label="Editable order">
           <ol
+            ref={orderRef}
             className="m-0 grid list-none gap-1 p-0"
             tabIndex={-1}
             onKeyDown={onKeyDown}
+            onCopy={handleNativeCopy}
+            onCut={handleNativeCut}
+            onPaste={handleNativePaste}
           >
             {document.items.map((item, index) => renaming?.id === item.id ? (
               <input
@@ -233,7 +289,7 @@ export function OrderDemoRoute() {
                     hand: (hand) => {
                       if (hand.type !== "rename") return;
                       if (hand.action === "commit") finishRename();
-                      if (hand.action === "cancel") setRenaming(null);
+                      if (hand.action === "cancel") cancelRename();
                     },
                   });
                 }}
