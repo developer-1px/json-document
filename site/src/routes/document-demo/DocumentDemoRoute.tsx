@@ -1,4 +1,5 @@
 import { useRef, useState, type ClipboardEvent } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   type BlockDocument,
   type DocumentClipboard,
@@ -169,6 +170,7 @@ export function DocumentDemoRoute() {
           )}
         >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
 
+        <DemoSurface>
         <ProductApp
           toolbarLabel="Document actions"
           toolbar={(
@@ -255,6 +257,7 @@ export function DocumentDemoRoute() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
         </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

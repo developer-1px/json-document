@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { DemoWorkbench } from "../../shared/demo-workbench/DemoWorkbench";
+import { DemoSourcesProvider } from "../../shared/demo-workbench/DemoSurface";
 import { demoSources } from "../../shared/demo-workbench/demo-sources";
 import { PageFrame, PageLeadProvider } from "../../shared/ui/primitives";
 import { SiteBreadcrumb } from "../breadcrumb";
@@ -17,7 +17,7 @@ function InteriorPage() {
     return (
       <PageFrame>
         <SiteBreadcrumb route={route} routes={siteRoutes} />
-        <DemoWorkbench sources={sources}>{content}</DemoWorkbench>
+        <DemoSourcesProvider sources={sources}>{content}</DemoSourcesProvider>
       </PageFrame>
     );
   }

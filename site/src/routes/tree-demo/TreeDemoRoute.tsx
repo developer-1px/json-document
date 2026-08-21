@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   createTreeEditor,
   type TreeClipboard,
@@ -91,6 +92,7 @@ export function TreeDemoRoute() {
         A folded tree. The host owns expand state and sends only the visible ID line to the editor.
       </PageHeader>
 
+        <DemoSurface>
       <ProductApp
         toolbarLabel="Tree actions"
         toolbar={(
@@ -152,6 +154,7 @@ export function TreeDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
         </section>
       </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

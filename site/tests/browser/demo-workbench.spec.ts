@@ -34,17 +34,24 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
   ]);
 });
 
-test("keeps the page breadcrumb above sticky workbench tabs", async ({ page }) => {
+test("keeps documentation above the sticky product workbench", async ({ page }) => {
   await page.goto("/demo");
 
   const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
+  const pageHeader = page.locator("[data-page-header]");
+  const workbench = page.getByRole("region", { name: "Demo workbench" });
   const tablist = page.getByRole("tablist", { name: "Demo and source files" });
   const initialBreadcrumb = await breadcrumb.boundingBox();
+  const initialHeader = await pageHeader.boundingBox();
   const initialTabs = await tablist.boundingBox();
   expect(initialBreadcrumb).not.toBeNull();
+  expect(initialHeader).not.toBeNull();
   expect(initialTabs).not.toBeNull();
-  expect(initialBreadcrumb!.y + initialBreadcrumb!.height).toBeLessThanOrEqual(initialTabs!.y);
+  expect(initialBreadcrumb!.y + initialBreadcrumb!.height).toBeLessThanOrEqual(initialHeader!.y);
+  expect(initialHeader!.y + initialHeader!.height).toBeLessThanOrEqual(initialTabs!.y);
   await expect(page.locator("[data-page-header] >> nav[aria-label='Breadcrumb']")).toHaveCount(0);
+  await expect(workbench.getByRole("heading", { name: "Document" })).toHaveCount(0);
+  await expect(workbench.locator("[data-page-header]")).toHaveCount(0);
 
   await tablist.getByRole("tab", { name: "DocumentDemoRoute.tsx" }).click();
   await expect(page.getByText("routes/document-demo/DocumentDemoRoute.tsx")).toBeVisible();

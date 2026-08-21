@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { lineInterval, lineTopology } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
@@ -44,6 +45,7 @@ export function TopologyDemoRoute() {
         anchor와 focus를 유지한 채 화면 순서를 바꾸고, 그 순서에서 계산된 범위를 확인합니다.
       </PageHeader>
 
+      <DemoSurface>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-input">
           <p className={ui.text.label}>1 · 입력</p>
@@ -105,6 +107,7 @@ export function TopologyDemoRoute() {
           </p>
         </section>
       </div>
+      </DemoSurface>
     </PageFrame>
   );
 }

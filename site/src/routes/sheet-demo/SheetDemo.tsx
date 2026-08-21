@@ -1,4 +1,5 @@
 import { useRef, useState, type ClipboardEvent } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   createSheetEditor,
   type EditingResult,
@@ -180,6 +181,7 @@ export function SheetDemo() {
           )}
         >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
 
+        <DemoSurface>
         <ProductApp
           toolbarLabel="Sheet actions"
           toolbar={(
@@ -264,6 +266,7 @@ export function SheetDemo() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
           </section>
         </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

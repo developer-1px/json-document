@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { DemoSurface } from "../demo-workbench/DemoSurface";
 import { CodeBlock, InlineCode } from "./code-block";
 import type { CodeLanguage } from "./code-tokens";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "./primitives";
@@ -55,10 +56,10 @@ export function CatalogDemoPage(props: {
         ) : null}
       </section>
 
-      <div className="mt-8" data-connector-live-demo>
-        <p className={classes("mb-3 mt-0", ui.text.label)}>Live demo</p>
-        {props.children}
-      </div>
+      <p className={classes("mb-3 mt-8", ui.text.label)}>Live demo</p>
+      <DemoSurface>
+        <div data-connector-live-demo>{props.children}</div>
+      </DemoSurface>
     </PageFrame>
   );
 }

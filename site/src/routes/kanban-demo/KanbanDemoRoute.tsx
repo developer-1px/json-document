@@ -1,4 +1,5 @@
 import { useState, type DragEvent } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   createKanbanEditor,
   type KanbanDocument,
@@ -49,6 +50,7 @@ export function KanbanDemoRoute() {
         Drag a card into another column. One JSON document keeps the board.
       </PageHeader>
 
+        <DemoSurface>
       <ProductApp
         toolbarLabel="Kanban actions"
         toolbar={(
@@ -98,6 +100,7 @@ export function KanbanDemoRoute() {
         ))}
       </section>
       </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

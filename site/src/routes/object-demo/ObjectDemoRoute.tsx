@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import {
   createObjectEditor,
   type ObjectClipboard,
@@ -78,6 +79,7 @@ export function ObjectDemoRoute() {
         A key-family board. The host hit-tests boxes and sends only stable IDs. Fill changes color without moving geometry.
       </PageHeader>
 
+        <DemoSurface>
       <ProductApp
         toolbarLabel="Object actions"
         canvasClassName="relative min-h-[20rem] overflow-hidden"
@@ -148,6 +150,7 @@ export function ObjectDemoRoute() {
           <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Fill uses the selected IDs only.</p>
         </section>
       </ProductApp>
+        </DemoSurface>
     </PageFrame>
   );
 }

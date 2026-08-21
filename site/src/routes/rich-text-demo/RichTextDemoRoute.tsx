@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
@@ -201,6 +202,7 @@ export function RichTextDemoRoute() {
         DOM은 입력 경계일 뿐입니다. 아래 편집은 Rich Text intent, Selection mapping, EditingSession과 atomic JSON Patch를 차례로 통과합니다.
       </PageHeader>
 
+      <DemoSurface>
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
         <ActionButton kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
         <ActionButton onClick={() => runHistory("undo")} disabled={!snapshot.canUndo}>Undo</ActionButton>
@@ -283,6 +285,7 @@ export function RichTextDemoRoute() {
           </div>
         </section>
       </div>
+      </DemoSurface>
     </PageFrame>
   );
 }

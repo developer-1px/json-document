@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { type InspectorItem } from "../../shared/ui/inspector";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
@@ -20,6 +21,7 @@ export function WidgetDemoFrame(props: {
         {props.description}
       </PageHeader>
 
+      <DemoSurface>
       <div className="grid gap-4 lg:grid-cols-2">
         <section className={classes("p-4", ui.surface.raised)} aria-label={props.widgetLabel}>
           <p className={ui.text.label}>Widget</p>
@@ -42,6 +44,7 @@ export function WidgetDemoFrame(props: {
           </div>
         </section>
       </div>
+      </DemoSurface>
     </PageFrame>
   );
 }
