@@ -17,6 +17,8 @@ test("switches between the live demo and its actual full source without resettin
   const source = workbench.getByRole("tabpanel").locator("pre");
   await expect(source).toContainText("export function DocumentDemoRoute()");
   await expect(source).toContainText('from "@interactive-os/json-document-react"');
+  await expect(workbench.locator('[data-source-highlighter="shiki"]')).toBeVisible();
+  await expect(source.locator('span[style*="color"]').first()).toBeVisible();
 
   await tabs.nth(0).click();
   await expect(page.locator('article[data-block-id="welcome"]')).toHaveAttribute("data-selected", "true");

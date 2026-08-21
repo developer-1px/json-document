@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
-import { CodeBlock } from "../ui/code-block";
 import { classes, ui } from "../ui/styles";
+import { ShikiSourceCodeBlock } from "./ShikiSourceCodeBlock";
 import type { DemoSourceFile } from "./demo-sources";
 
 type WorkbenchTab = "demo" | number;
@@ -89,7 +89,7 @@ export function DemoWorkbench(props: {
             {activeSourceText === undefined ? (
               <p className={classes("m-0 p-3", ui.text.meta)}>Loading source…</p>
             ) : (
-              <CodeBlock language={activeSource.language} size="content" source={activeSourceText} />
+              <ShikiSourceCodeBlock language={activeSource.language} source={activeSourceText} />
             )}
           </div>
         </div>
