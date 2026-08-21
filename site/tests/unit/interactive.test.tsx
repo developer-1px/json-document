@@ -60,14 +60,15 @@ describe("interactive design system", () => {
     expect(item.getAttribute("data-selected")).toBe("true");
     expect(item.getAttribute("data-focus")).toBe("false");
     expect(item.className).toContain("data-[selected=true]:outline-line-accent");
+    expect(item.className).not.toContain("data-[selected=true]:relative");
   });
 
   it("keeps plane items absolutely positioned while selected", () => {
     render(<SelectableItem selected className={ui.interactive.planeItem}>Block</SelectableItem>);
 
     const item = screen.getByRole("button", { name: "Block" });
-    expect(item.className).toContain("data-[selected=true]:relative");
-    expect(item.className).toContain("!absolute");
+    expect(item.className).toContain("absolute");
+    expect(item.className).not.toContain("!absolute");
   });
 
   it("owns focus separately from selected", () => {
