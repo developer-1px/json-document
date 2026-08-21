@@ -1,24 +1,40 @@
 import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { classes, ui } from "../ui/styles";
 import { ShikiSourceCodeBlock } from "./ShikiSourceCodeBlock";
-import type { DemoSourceFile } from "./demo-sources";
+import { demoEntrySource, discoverDemoSources, type DemoSourceFile } from "./demo-sources";
 
 type WorkbenchTab = "demo" | number;
 
 export function DemoWorkbench(props: {
   readonly children: ReactNode;
-  readonly sources: ReadonlyArray<DemoSourceFile>;
+  readonly source: string;
 }) {
   const [activeTab, setActiveTab] = useState<WorkbenchTab>("demo");
+  const [sources, setSources] = useState<ReadonlyArray<DemoSourceFile>>(() => [demoEntrySource(props.source)]);
   const id = useId();
   const tabs: ReadonlyArray<{ readonly key: WorkbenchTab; readonly label: string }> = [
     { key: "demo", label: "Demo" },
-    ...props.sources.map((source, index) => ({ key: index, label: source.path.split("/").at(-1) ?? source.path })),
+    ...sources.map((source, index) => ({ key: index, label: source.path.split("/").at(-1) ?? source.path })),
   ];
   const activeSourceIndex = typeof activeTab === "number" ? activeTab : undefined;
-  const activeSource = activeSourceIndex === undefined ? undefined : props.sources[activeSourceIndex];
+  const activeSource = activeSourceIndex === undefined ? undefined : sources[activeSourceIndex];
   const [sourceText, setSourceText] = useState<Readonly<Record<string, string>>>({});
   const activeSourceText = activeSource === undefined ? undefined : sourceText[activeSource.path];
+
+  useEffect(() => {
+    setActiveTab("demo");
+    setSources([demoEntrySource(props.source)]);
+    setSourceText({});
+  }, [props.source]);
+
+  useEffect(() => {
+    if (activeSourceIndex === undefined) return;
+    let current = true;
+    void discoverDemoSources(props.source).then((discovered) => {
+      if (current) setSources(discovered);
+    });
+    return () => { current = false; };
+  }, [activeSourceIndex, props.source]);
 
   useEffect(() => {
     if (activeSource === undefined || activeSourceText !== undefined) return;

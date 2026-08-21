@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createObjectEditor,
   type ObjectClipboard,
@@ -9,7 +9,7 @@ import {
 import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
@@ -65,7 +65,7 @@ export function ObjectDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader
         illustration="peek"
         title="Object Demo"
@@ -79,7 +79,7 @@ export function ObjectDemoRoute() {
         A key-family board. The host hit-tests boxes and sends only stable IDs. Fill changes color without moving geometry.
       </PageHeader>
 
-        <DemoSurface>
+    )}>
       <ProductApp
         toolbarLabel="Object actions"
         canvasClassName="relative min-h-[20rem] overflow-hidden"
@@ -150,7 +150,6 @@ export function ObjectDemoRoute() {
           <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Fill uses the selected IDs only.</p>
         </section>
       </ProductApp>
-        </DemoSurface>
-    </PageFrame>
+    </DemoPage>
   );
 }
