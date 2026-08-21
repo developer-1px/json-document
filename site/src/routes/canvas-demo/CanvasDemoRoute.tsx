@@ -8,6 +8,7 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { ui } from "../../shared/ui/styles";
 
 type DragState = {
   readonly ids: ReadonlyArray<string>;
@@ -94,7 +95,7 @@ export function CanvasDemoRoute() {
                 onPointerDown={(event) => handlePointerDown(event, object.id)}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
-                className="absolute grid place-items-center"
+                className={ui.interactive.planeItem}
                 style={{
                   left: object.x + (offset?.dx ?? 0),
                   top: object.y + (offset?.dy ?? 0),

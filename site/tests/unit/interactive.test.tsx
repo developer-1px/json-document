@@ -9,6 +9,7 @@ import {
   SelectableItem,
   ToggleButton,
 } from "../../src/shared/ui/interactive";
+import { ui } from "../../src/shared/ui/styles";
 
 afterEach(cleanup);
 
@@ -59,6 +60,14 @@ describe("interactive design system", () => {
     expect(item.getAttribute("data-selected")).toBe("true");
     expect(item.getAttribute("data-focus")).toBe("false");
     expect(item.className).toContain("data-[selected=true]:outline-line-accent");
+  });
+
+  it("keeps plane items absolutely positioned while selected", () => {
+    render(<SelectableItem selected className={ui.interactive.planeItem}>Block</SelectableItem>);
+
+    const item = screen.getByRole("button", { name: "Block" });
+    expect(item.className).toContain("data-[selected=true]:relative");
+    expect(item.className).toContain("!absolute");
   });
 
   it("owns focus separately from selected", () => {

@@ -125,7 +125,7 @@ export function ObjectDemoRoute() {
               focus={editing.getItem(object.id).getIsFocus()}
               data-object-id={object.id}
               onClick={editing.getItem(object.id).getPressHandler()}
-              className="absolute grid place-items-center"
+              className={ui.interactive.planeItem}
               style={{
                 left: object.x,
                 top: object.y,
