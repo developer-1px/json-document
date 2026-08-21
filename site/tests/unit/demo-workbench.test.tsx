@@ -42,11 +42,10 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
-  test("keeps the component and only explicit source entry in one definition", () => {
-    function ExampleDemo() { return null; }
-    const route = defineDemo({ component: ExampleDemo, source: "routes/example/ExampleDemo.tsx" });
-    expect(route.component).toBe(ExampleDemo);
+  test("keeps source metadata separate from the route component split point", () => {
+    const route = defineDemo({ source: "routes/example/ExampleDemo.tsx" });
     expect(route.staticData.demo).toEqual({ source: "routes/example/ExampleDemo.tsx" });
+    expect(route).not.toHaveProperty("component");
   });
 
   test("loads actual full demo files without following package or site chrome imports", async () => {

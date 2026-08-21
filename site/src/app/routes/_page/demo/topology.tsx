@@ -3,5 +3,6 @@ import { defineDemo } from "../../../../shared/demo-workbench/define-demo";
 import { TopologyDemoRoute } from "../../../../routes/editing-demos/TopologyDemoRoute";
 
 export const Route = createFileRoute("/_page/demo/topology")({
-  ...defineDemo({ component: TopologyDemoRoute, source: "routes/editing-demos/TopologyDemoRoute.tsx" }),
+  component: TopologyDemoRoute,
+  ...defineDemo({ source: "routes/editing-demos/TopologyDemoRoute.tsx" }),
 });

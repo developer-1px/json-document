@@ -3,5 +3,6 @@ import { defineDemo } from "../../../../shared/demo-workbench/define-demo";
 import { KanbanDemoRoute } from "../../../../routes/kanban-demo/KanbanDemoRoute";
 
 export const Route = createFileRoute("/_page/demo/kanban")({
-  ...defineDemo({ component: KanbanDemoRoute, source: "routes/kanban-demo/KanbanDemoRoute.tsx" }),
+  component: KanbanDemoRoute,
+  ...defineDemo({ source: "routes/kanban-demo/KanbanDemoRoute.tsx" }),
 });
