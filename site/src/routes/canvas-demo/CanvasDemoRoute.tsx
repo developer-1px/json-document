@@ -279,6 +279,10 @@ export function CanvasDemoRoute() {
     if (committed) {
       applyAffordance(committed, {
         commit: (hand) => {
+          if (hand.type === "clear") {
+            editor.dispatch({ type: "selection.set", objectIds: [], mode: "replace" });
+            return;
+          }
           if (hand.type !== "select" || !hand.rect) return;
           const hits = document.objects
             .filter((object) => intersects(hand.rect!, object))
@@ -306,13 +310,25 @@ export function CanvasDemoRoute() {
       setSpace(true);
       event.preventDefault();
     }
-    applyAffordance(escapeAffordance(event), {
-      hand: (hand) => {
-        if (hand.type !== "cancel") return;
-        cancelHands();
-        event.preventDefault();
+    applyAffordance(
+      escapeAffordance({
+        key: event.key,
+        grabbing: dragRef.current != null || marqueeRef.current != null || panRef.current.active,
+        selected: editor.selectedObjects.length > 0,
+      }),
+      {
+        hand: (hand) => {
+          if (hand.type === "cancel") {
+            cancelHands();
+            event.preventDefault();
+            return;
+          }
+          if (hand.type !== "clear") return;
+          editor.dispatch({ type: "selection.set", objectIds: [], mode: "replace" });
+          event.preventDefault();
+        },
       },
-    });
+    );
     applyAffordance(nudgeAffordance(event), {
       hand: (hand) => {
         if (hand.type !== "nudge") return;

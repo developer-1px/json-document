@@ -58,6 +58,9 @@ export function marqueeAffordance(
   },
 ): AffordancePreview {
   const rect = marqueeRect(origin, point);
+  if (rect.width === 0 && rect.height === 0) {
+    return { hand: { type: "clear" } };
+  }
   const operation = selectionOperationFromModifiers({
     shiftKey: modifiers?.shiftKey ?? false,
     metaKey: modifiers?.metaKey ?? false,

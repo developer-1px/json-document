@@ -180,6 +180,14 @@ describe("marqueeAffordance", () => {
       operation: "toggle",
     });
   });
+
+  test("a stationary empty press is clear, not a zero rect", () => {
+    expect(marqueeAffordance({ x: 12, y: 8 }, { x: 12, y: 8 }).hand).toEqual({ type: "clear" });
+    expect(commitAffordance(marqueeAffordance({ x: 12, y: 8 }, { x: 12, y: 8 }))).toEqual({
+      hand: { type: "clear" },
+      commit: true,
+    });
+  });
 });
 
 describe("snapAffordance", () => {
@@ -194,6 +202,13 @@ describe("escapeAffordance", () => {
     expect(escapeAffordance({ key: "Escape" }).hand).toEqual({ type: "cancel" });
     expect(escapeAffordance({ type: "pointercancel" }).hand).toEqual({ type: "cancel" });
     expect(escapeAffordance({ key: "Enter" }).hand).toBeNull();
+  });
+
+  test("pops a gesture before clearing selection", () => {
+    expect(escapeAffordance({ key: "Escape", grabbing: true, selected: true }).hand).toEqual({ type: "cancel" });
+    expect(escapeAffordance({ key: "Escape", grabbing: false, selected: true }).hand).toEqual({ type: "clear" });
+    expect(escapeAffordance({ key: "Escape", grabbing: false, selected: false }).hand).toBeNull();
+    expect(escapeAffordance({ type: "pointercancel", selected: true }).hand).toEqual({ type: "cancel" });
   });
 });
 

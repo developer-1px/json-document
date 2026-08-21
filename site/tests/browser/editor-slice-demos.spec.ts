@@ -104,6 +104,26 @@ test("Canvas drags every selected object together", async ({ page }) => {
   expect(after[2].top).toBe(before[2].top);
 });
 
+test("Canvas empty click and idle Escape clear selection", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  const card = page.getByRole("button", { name: "Card" });
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  await card.click();
+  await expect(card).toHaveAttribute("data-selected", "true");
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("canvas bounding box");
+  await canvas.click({ position: { x: box.width - 12, y: box.height - 12 } });
+  await expect(card).toHaveAttribute("data-selected", "false");
+  await expect(note).toHaveAttribute("data-selected", "false");
+
+  await note.click();
+  await expect(note).toHaveAttribute("data-selected", "true");
+  await canvas.focus();
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveAttribute("data-selected", "false");
+});
+
 test("Canvas pan moves the viewport without writing object positions", async ({ page }) => {
   await page.goto("/demo/canvas");
   const note = page.getByRole("button", { name: "Note" });

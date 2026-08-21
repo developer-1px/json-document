@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Closed empty-canvas press as `clear`, and Escape as one layer at a time:
+  cancel an open gesture, then clear selection. `pointercancel` still
+  cancels only the gesture.
 - Closed plane hit selection: pressing an already selected object keeps
   the set so a drag moves every selected object. Canvas Hands apply
   `planeHitAffordance`.

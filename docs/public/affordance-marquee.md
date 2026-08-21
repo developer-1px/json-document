@@ -41,7 +41,7 @@ function onPointerUp(event: PointerEvent) {
 
 호스트는 히트 테스트와 기하를 계산합니다. 어떤 키가 범위에 들어오는지는
 호스트가 보고, 손이 replace인지 extend인지는 Affordance가 닫고, 선택은
-json-document로 갑니다.
+json-document로 갑니다. 이동이 없는 빈 곳 누르기는 `clear`입니다.
 
 닫는 손:
 - 빈 곳에서 pointerdown → move → up

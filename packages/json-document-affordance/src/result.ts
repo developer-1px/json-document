@@ -91,9 +91,6 @@ export function commitAffordance<H extends AffordanceHand>(
   const hand = result.hand;
   if (hand == null) return null;
   if (hand.type === "translate" && hand.dx === 0 && hand.dy === 0) return null;
-  if (hand.type === "select" && hand.rect && hand.rect.width === 0 && hand.rect.height === 0) {
-    return null;
-  }
   return result.cursor === undefined
     ? { hand, commit: true }
     : { hand, cursor: result.cursor, commit: true };

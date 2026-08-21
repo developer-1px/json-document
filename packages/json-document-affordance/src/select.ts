@@ -114,11 +114,19 @@ export function activateAffordance(input: { readonly key?: string; readonly deta
   return { hand: null };
 }
 
-export function escapeAffordance(input: { readonly key?: string; readonly type?: string }): AffordancePreview {
-  if (input.key === "Escape" || input.type === "pointercancel" || input.type === "lostpointercapture") {
-    return { hand: { type: "cancel" } };
-  }
-  return { hand: null };
+export function escapeAffordance(input: {
+  readonly key?: string;
+  readonly type?: string;
+  readonly grabbing?: boolean;
+  readonly selected?: boolean;
+}): AffordancePreview {
+  const pointerAbort = input.type === "pointercancel" || input.type === "lostpointercapture";
+  if (pointerAbort) return { hand: { type: "cancel" } };
+  if (input.key !== "Escape") return { hand: null };
+  if (input.grabbing === true) return { hand: { type: "cancel" } };
+  if (input.selected === true) return { hand: { type: "clear" } };
+  if (input.grabbing === false && input.selected === false) return { hand: null };
+  return { hand: { type: "cancel" } };
 }
 
 export function focusAffordance(stroke: Pick<WebKeyboardStroke, "key" | "shiftKey">): AffordancePreview {
