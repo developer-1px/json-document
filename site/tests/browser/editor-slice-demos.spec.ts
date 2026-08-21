@@ -65,6 +65,45 @@ test("Canvas marquee selects several objects and Escape cancels it", async ({ pa
   await expect(chip).toHaveAttribute("data-selected", "true");
 });
 
+test("Canvas drags every selected object together", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  const card = page.getByRole("button", { name: "Card" });
+  const chip = page.getByRole("button", { name: "Chip" });
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("canvas bounding box");
+  await page.mouse.move(box.x + 8, box.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 8, box.y + box.height - 8);
+  await page.mouse.up();
+  await expect(note).toHaveAttribute("data-selected", "true");
+  await expect(card).toHaveAttribute("data-selected", "true");
+  await expect(chip).toHaveAttribute("data-selected", "true");
+
+  const before = await Promise.all([note, card, chip].map((item) => item.evaluate((el) => ({
+    left: parseFloat((el as HTMLElement).style.left),
+    top: parseFloat((el as HTMLElement).style.top),
+  }))));
+  const noteBox = await note.boundingBox();
+  if (!noteBox) throw new Error("note bounding box");
+  await note.hover();
+  await page.mouse.down();
+  await page.mouse.move(noteBox.x + noteBox.width / 2 + 40, noteBox.y + noteBox.height / 2);
+  await page.mouse.up();
+  const after = await Promise.all([note, card, chip].map((item) => item.evaluate((el) => ({
+    left: parseFloat((el as HTMLElement).style.left),
+    top: parseFloat((el as HTMLElement).style.top),
+  }))));
+  const dx = after[0].left - before[0].left;
+  expect(dx).toBeGreaterThan(0);
+  expect(after[1].left - before[1].left).toBe(dx);
+  expect(after[2].left - before[2].left).toBe(dx);
+  expect(after[0].top).toBe(before[0].top);
+  expect(after[1].top).toBe(before[1].top);
+  expect(after[2].top).toBe(before[2].top);
+});
+
 test("Canvas pan moves the viewport without writing object positions", async ({ page }) => {
   await page.goto("/demo/canvas");
   const note = page.getByRole("button", { name: "Note" });

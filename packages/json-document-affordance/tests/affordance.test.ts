@@ -4,8 +4,10 @@ import {
   commitAffordance,
   dragAffordance,
   dropAffordance,
+  marqueeAffordance,
   escapeAffordance,
   historyAffordance,
+  planeHitAffordance,
   pointerSelect,
   resolveAffordanceKey,
   snapAffordance,
@@ -164,6 +166,22 @@ describe("typeaheadAffordance", () => {
   });
 });
 
+describe("marqueeAffordance", () => {
+  test("carries replace, extend, and toggle from modifiers", () => {
+    const origin = { x: 0, y: 0 };
+    const point = { x: 10, y: 8 };
+    expect(marqueeAffordance(origin, point).hand).toMatchObject({ type: "select", operation: "replace" });
+    expect(marqueeAffordance(origin, point, { shiftKey: true }).hand).toMatchObject({
+      type: "select",
+      operation: "extend",
+    });
+    expect(marqueeAffordance(origin, point, { metaKey: true }).hand).toMatchObject({
+      type: "select",
+      operation: "toggle",
+    });
+  });
+});
+
 describe("snapAffordance", () => {
   test("snaps to the grid unless disabled", () => {
     expect(snapAffordance({ x: 47, y: 51 }, { grid: 8 }).hand).toEqual({ type: "translate", dx: 48, dy: 48 });
@@ -176,6 +194,48 @@ describe("escapeAffordance", () => {
     expect(escapeAffordance({ key: "Escape" }).hand).toEqual({ type: "cancel" });
     expect(escapeAffordance({ type: "pointercancel" }).hand).toEqual({ type: "cancel" });
     expect(escapeAffordance({ key: "Enter" }).hand).toBeNull();
+  });
+});
+
+describe("planeHitAffordance", () => {
+  test("keeps the selected set when pressing an already selected object", () => {
+    expect(planeHitAffordance({
+      hitId: "card",
+      selectedIds: ["note", "card"],
+    }).hand).toEqual({
+      type: "select",
+      operation: "replace",
+      objectIds: ["note", "card"],
+    });
+    expect(planeHitAffordance({
+      hitId: "chip",
+      selectedIds: ["note", "card"],
+    }).hand).toEqual({
+      type: "select",
+      operation: "replace",
+      objectIds: ["chip"],
+    });
+  });
+
+  test("extends and toggles the hit against the current set", () => {
+    expect(planeHitAffordance({
+      hitId: "chip",
+      selectedIds: ["note"],
+      shiftKey: true,
+    }).hand).toEqual({
+      type: "select",
+      operation: "extend",
+      objectIds: ["note", "chip"],
+    });
+    expect(planeHitAffordance({
+      hitId: "note",
+      selectedIds: ["note", "card"],
+      metaKey: true,
+    }).hand).toEqual({
+      type: "select",
+      operation: "toggle",
+      objectIds: ["card"],
+    });
   });
 });
 

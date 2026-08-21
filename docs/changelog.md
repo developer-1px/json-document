@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Closed plane hit selection: pressing an already selected object keeps
+  the set so a drag moves every selected object. Canvas Hands apply
+  `planeHitAffordance`.
 - Attached typeahead to Order Hands and marquee, pan, snap, nudge, and
   escape to Canvas Hands. Those catalog rows leave TBD.
 - Opened Affordance as the product-facing keyboard and mouse contract, with

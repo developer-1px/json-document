@@ -8,6 +8,7 @@ Select는 대상을 집는 손입니다. 클릭은 그 대상으로 바꾸고, S
 import {
   applyAffordance,
   pointerSelect,
+  planeHitAffordance,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerDown(event: PointerEvent, itemId: string) {
@@ -19,9 +20,20 @@ function onPointerDown(event: PointerEvent, itemId: string) {
     },
   });
 }
+
+function onPlanePointerDown(event: PointerEvent, hitId: string, selectedIds: ReadonlyArray<string>) {
+  applyAffordance(planeHitAffordance({ hitId, selectedIds, ...event }), {
+    hand: (hand) => {
+      if (hand.type !== "select" || !hand.objectIds) return;
+      editor.dispatch({ type: "selection.set", objectIds: hand.objectIds, mode: "replace" });
+    },
+  });
+}
 ```
 
 호스트는 보이는 키와 장르 Intent만 넘깁니다. keymap을 덮어쓰지 않습니다.
+이미 고른 상자를 수정 키 없이 누르면 집합을 유지합니다. 안 고른 상자는
+그 상자만으로 바꿉니다.
 
 ## TBD
 

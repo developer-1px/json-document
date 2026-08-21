@@ -12,7 +12,7 @@ import {
   marqueeAffordance,
   nudgeAffordance,
   panAffordance,
-  pointerSelect,
+  planeHitAffordance,
   snapAffordance,
 } from "@interactive-os/json-document-affordance";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
@@ -171,22 +171,32 @@ export function CanvasDemoRoute() {
       return;
     }
     event.currentTarget.setPointerCapture(event.pointerId);
-    let operation: "replace" | "extend" | "toggle" = "replace";
-    applyAffordance(pointerSelect(event), {
-      hand: (hand) => {
-        if (hand.type !== "select") return;
-        operation = hand.operation;
-        editor.dispatch({
-          type: "selection.set",
-          objectIds: [objectId],
-          mode: hand.operation === "extend" ? "add" : hand.operation,
-        });
+    applyAffordance(
+      planeHitAffordance({
+        hitId: objectId,
+        selectedIds: editor.selectedObjects.map((object) => object.id),
+        shiftKey: event.shiftKey,
+        metaKey: event.metaKey,
+        ctrlKey: event.ctrlKey,
+      }),
+      {
+        hand: (hand) => {
+          if (hand.type !== "select" || !hand.objectIds) return;
+          editor.dispatch({
+            type: "selection.set",
+            objectIds: hand.objectIds,
+            mode: "replace",
+          });
+          setDragState({
+            ids: hand.objectIds,
+            originX: event.clientX,
+            originY: event.clientY,
+            dx: 0,
+            dy: 0,
+          });
+        },
       },
-    });
-    const ids = operation !== "replace"
-      ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
-      : [objectId];
-    setDragState({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
+    );
   }
 
   function handleObjectPointerMove(event: PointerEvent<HTMLElement>) {
@@ -244,7 +254,7 @@ export function CanvasDemoRoute() {
     if (!currentMarquee) return;
     const origin = { x: currentMarquee.originX, y: currentMarquee.originY };
     const point = planePoint(event);
-    applyAffordance(marqueeAffordance(origin, point), {
+    applyAffordance(marqueeAffordance(origin, point, event), {
       cursor: (cursor) => {
         event.currentTarget.style.cursor = cursor;
       },
@@ -265,7 +275,7 @@ export function CanvasDemoRoute() {
     if (!currentMarquee) return;
     const origin = { x: currentMarquee.originX, y: currentMarquee.originY };
     const point = planePoint(event);
-    const committed = commitAffordance(marqueeAffordance(origin, point));
+    const committed = commitAffordance(marqueeAffordance(origin, point, event));
     if (committed) {
       applyAffordance(committed, {
         commit: (hand) => {
@@ -274,15 +284,10 @@ export function CanvasDemoRoute() {
             .filter((object) => intersects(hand.rect!, object))
             .map((object) => object.id);
           if (hits.length === 0) return;
-          applyAffordance(pointerSelect(event), {
-            hand: (selectHand) => {
-              if (selectHand.type !== "select") return;
-              editor.dispatch({
-                type: "selection.set",
-                objectIds: hits,
-                mode: selectHand.operation === "extend" ? "add" : selectHand.operation === "toggle" ? "toggle" : "replace",
-              });
-            },
+          editor.dispatch({
+            type: "selection.set",
+            objectIds: hits,
+            mode: hand.operation === "extend" ? "add" : hand.operation === "toggle" ? "toggle" : "replace",
           });
         },
       });

@@ -9,12 +9,11 @@ import {
   applyAffordance,
   commitAffordance,
   marqueeAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
   const point = { x: event.offsetX, y: event.offsetY };
-  applyAffordance(marqueeAffordance(origin, point), {
+  applyAffordance(marqueeAffordance(origin, point, event), {
     cursor: (cursor) => {
       event.currentTarget.style.cursor = cursor;
     },
@@ -25,20 +24,15 @@ function onPointerMove(event: PointerEvent) {
 }
 
 function onPointerUp(event: PointerEvent) {
-  const committed = commitAffordance(marqueeAffordance(origin, { x: event.offsetX, y: event.offsetY }));
+  const committed = commitAffordance(marqueeAffordance(origin, { x: event.offsetX, y: event.offsetY }, event));
   if (!committed) return;
   applyAffordance(committed, {
     commit: (hand) => {
       if (hand.type !== "select" || !hand.rect) return;
-      applyAffordance(pointerSelect(event), {
-        hand: (selectHand) => {
-          if (selectHand.type !== "select") return;
-          editor.dispatch({
-            type: "selection.set",
-            objectIds: hostHits(hand.rect),
-            mode: selectHand.operation,
-          });
-        },
+      editor.dispatch({
+        type: "selection.set",
+        objectIds: hostHits(hand.rect),
+        mode: hand.operation === "extend" ? "add" : hand.operation,
       });
     },
   });

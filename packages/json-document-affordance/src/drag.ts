@@ -1,4 +1,7 @@
-import type { WebModifierState } from "@interactive-os/json-document-web";
+import {
+  selectionOperationFromModifiers,
+  type WebModifierState,
+} from "@interactive-os/json-document-web";
 import type {
   AffordancePreview,
   AffordanceRect,
@@ -45,10 +48,23 @@ function marqueeRect(origin: Point, point: Point): Rect {
   };
 }
 
-export function marqueeAffordance(origin: Point, point: Point): AffordancePreview {
+export function marqueeAffordance(
+  origin: Point,
+  point: Point,
+  modifiers?: {
+    readonly shiftKey?: boolean;
+    readonly metaKey?: boolean;
+    readonly ctrlKey?: boolean;
+  },
+): AffordancePreview {
   const rect = marqueeRect(origin, point);
+  const operation = selectionOperationFromModifiers({
+    shiftKey: modifiers?.shiftKey ?? false,
+    metaKey: modifiers?.metaKey ?? false,
+    ctrlKey: modifiers?.ctrlKey ?? false,
+  });
   return {
-    hand: { type: "select", operation: "replace", rect },
+    hand: { type: "select", operation, rect },
     cursor: "crosshair",
   };
 }

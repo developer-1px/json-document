@@ -61,7 +61,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 
 | Affordance | API | Hand |
 | --- | --- | --- |
-| [Select](affordance-select.md) | `pointerSelect`, `resolveAffordanceKey` | 클릭, Shift 범위, Mod 토글, 화살표 |
+| [Select](affordance-select.md) | `pointerSelect`, `planeHitAffordance`, `resolveAffordanceKey` | 클릭, 이미 고른 집합 유지, Shift 범위, Mod 토글, 화살표 |
 | [Typeahead](affordance-typeahead.md) | `typeaheadAffordance` | 인쇄 글쇠 prefix 점프 |
 | [Escape](affordance-cancel.md) | `escapeAffordance` | Escape, pointercancel |
 | [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |

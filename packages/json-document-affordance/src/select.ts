@@ -30,6 +30,48 @@ export function pointerSelect(modifiers: {
   };
 }
 
+export function planeHitAffordance(input: {
+  readonly hitId: string;
+  readonly selectedIds: ReadonlyArray<string>;
+  readonly shiftKey?: boolean;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
+}): AffordancePreview {
+  const operation = selectionOperationFromModifiers({
+    shiftKey: input.shiftKey ?? false,
+    metaKey: input.metaKey ?? false,
+    ctrlKey: input.ctrlKey ?? false,
+  });
+  const selected = input.selectedIds;
+  const hitId = input.hitId;
+  const hitSelected = selected.includes(hitId);
+  if (operation === "replace") {
+    return {
+      hand: {
+        type: "select",
+        operation,
+        objectIds: hitSelected ? selected : [hitId],
+      },
+    };
+  }
+  if (operation === "extend") {
+    return {
+      hand: {
+        type: "select",
+        operation,
+        objectIds: [...new Set([...selected, hitId])],
+      },
+    };
+  }
+  return {
+    hand: {
+      type: "select",
+      operation,
+      objectIds: hitSelected ? selected.filter((id) => id !== hitId) : [...selected, hitId],
+    },
+  };
+}
+
 export function resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview {
   return { hand: keyboard.resolve(stroke) };
 }

@@ -10,7 +10,12 @@ export type AffordanceRect = {
 };
 
 export type AffordanceHand =
-  | { readonly type: "select"; readonly operation: SelectOperation; readonly rect?: AffordanceRect }
+  | {
+    readonly type: "select";
+    readonly operation: SelectOperation;
+    readonly rect?: AffordanceRect;
+    readonly objectIds?: ReadonlyArray<string>;
+  }
   | { readonly type: "move"; readonly direction: AffordanceMoveDirection; readonly operation: "replace" | "extend" }
   | { readonly type: "boundary"; readonly edge: "start" | "end"; readonly operation: "replace" | "extend" }
   | { readonly type: "toggle" }
