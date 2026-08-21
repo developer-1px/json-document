@@ -165,7 +165,7 @@ export function CanvasDemoRoute() {
   function handleObjectPointerDown(event: PointerEvent<HTMLElement>, objectId: string) {
     event.preventDefault();
     event.stopPropagation();
-    surface.current?.focus({ preventScroll: true });
+    surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
     if (isPanStart(event)) {
       startPan(event);
       return;
@@ -208,7 +208,7 @@ export function CanvasDemoRoute() {
 
   function handleSurfacePointerDown(event: PointerEvent<HTMLDivElement>) {
     event.preventDefault();
-    surface.current?.focus({ preventScroll: true });
+    surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
     if (isPanStart(event)) {
       startPan(event);
       return;
