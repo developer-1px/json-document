@@ -1,6 +1,5 @@
-import { InlineCode } from "../../shared/ui/code-block";
 import { ActionLink } from "../../shared/ui/interactive";
-import { ui } from "../../shared/ui/styles";
+import { JsonDocumentWordmark } from "../../shared/ui/brand";
 import { homeStyles } from "./home-styles";
 
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -16,58 +15,41 @@ export function HomeRoute() {
         <div className={homeStyles.copy}>
           <h1 id="home-title" className={homeStyles.logoHeading}>
             <span className="sr-only">json-document</span>
-            <HomeWordmark />
+            <JsonDocumentWordmark className={homeStyles.logo} />
           </h1>
           <p className={homeStyles.statement}>
-            One JSON document. Any editor.
+            Agent-native artifact editing의 개발 정본.
           </p>
           <p className={homeStyles.description}>
-            A tiny headless API to read, query, patch, and subscribe.
+            구현보다 먼저 공유해야 할 Why, 계층의 의존 순서, public contract와
+            TBD를 한곳에서 관리합니다.
           </p>
 
           <div className={homeStyles.entry}>
-            <InlineCode className={homeStyles.install} prompt>npm i @interactive-os/json-document</InlineCode>
-            <ActionLink to="/docs/tutorial" kind="prominent">Get started</ActionLink>
+            <ActionLink to="/docs" kind="prominent">JSON Document부터 읽기</ActionLink>
+            <ActionLink to="/viewer">Artifact prototype 보기</ActionLink>
           </div>
 
-          <nav className={homeStyles.index} aria-label="Concept index">
-            <ul className={homeStyles.indexList}>
+          <nav className={homeStyles.index} aria-label="Dependency map">
+            <ol className={homeStyles.indexList}>
               <li className={homeStyles.indexItem}>
-                <ActionLink to="/docs" className={homeStyles.indexLink}>JSON Document</ActionLink>
-                <span className={homeStyles.indexBlurb}>Values and changes</span>
+                <span className={homeStyles.indexNumber}>01</span>
+                <span><ActionLink to="/docs" className={homeStyles.indexLink}>JSON Document</ActionLink>
+                <span className={homeStyles.indexBlurb}>JSON 값·선택·변경·협업의 기반 계약</span></span>
               </li>
               <li className={homeStyles.indexItem}>
-                <ActionLink to="/docs/collaboration" className={homeStyles.indexLink}>Collaboration</ActionLink>
-                <span className={homeStyles.indexBlurb}>Same contract, other implementation</span>
-              </li>
-            </ul>
-            <ul className={homeStyles.indexList}>
-              <li className={homeStyles.indexItem}>
-                <ActionLink to="/docs/intent-guide" className={homeStyles.indexLink}>Editing</ActionLink>
-                <span className={homeStyles.indexBlurb}>Selection and work</span>
-              </li>
-            </ul>
-            <ul className={homeStyles.indexList}>
-              <li className={homeStyles.indexItem}>
-                <ActionLink to="/adapters" className={homeStyles.indexLink}>Adapter</ActionLink>
-                <span className={homeStyles.indexBlurb}>Platform contracts</span>
+                <span className={homeStyles.indexNumber}>02</span>
+                <span><ActionLink to="/editors" className={homeStyles.indexLink}>Hands</ActionLink>
+                <span className={homeStyles.indexBlurb}>Core 위에서 사람이 artifact와 agent를 다루는 편집 도구</span></span>
               </li>
               <li className={homeStyles.indexItem}>
-                <ActionLink to="/connectors" className={homeStyles.indexLink}>Connector</ActionLink>
-                <span className={homeStyles.indexBlurb}>Library ecosystems</span>
+                <span className={homeStyles.indexNumber}>03</span>
+                <span><ActionLink to="/viewer" className={homeStyles.indexLink}>Artifact</ActionLink>
+                <span className={homeStyles.indexBlurb}>아래 계층을 조합한 MD·PPT·Sheet prototype · TBD</span></span>
               </li>
-              <li className={homeStyles.indexItem}>
-                <ActionLink to="/docs/affordance" className={homeStyles.indexLink}>Affordance</ActionLink>
-                <span className={homeStyles.indexBlurb}>Keyboard, mouse, and cursor</span>
-              </li>
-              <li className={homeStyles.indexItem}>
-                <ActionLink to="/editors" className={homeStyles.indexLink}>Hands</ActionLink>
-                <span className={homeStyles.indexBlurb}>Genre hands</span>
-              </li>
-            </ul>
+            </ol>
           </nav>
         </div>
-
         <figure className={homeStyles.artwork}>
           <img
             className={homeStyles.artworkImage}
@@ -79,38 +61,5 @@ export function HomeRoute() {
         </figure>
       </section>
     </main>
-  );
-}
-
-function HomeWordmark() {
-  return (
-    <svg
-      aria-hidden="true"
-      className={homeStyles.logo}
-      viewBox="0 0 435 66"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3">
-        <path d="M15 20v25c0 10-7 12-13 7" />
-        <path d="M45 23c-4-6-16-5-17 3-1 5 5 6 10 7 6 1 10 4 8 9-3 7-16 7-20 1" />
-        <path d="M61 30c0-9 5-14 13-14 10 0 15 6 15 15 0 11-6 17-15 17-9 0-13-7-13-18Z" />
-        <path d="m64 20 2-8 7 6m7-1 7-6v11" />
-        <path d="M101 47V21m0 9c4-8 10-11 16-8 5 2 6 6 6 13v12" />
-        <path d="M192 8v39m-1-18c-3-8-11-10-16-5-6 6-5 18 2 22 7 4 14-2 14-11" />
-        <path d="M206 34c0-9 4-14 12-14 9 0 13 6 13 14 0 9-5 14-13 14s-12-6-12-14Z" />
-        <path d="M260 24c-9-7-18-1-18 10s9 17 19 10" />
-        <path d="M272 21v17c0 8 4 11 10 10 6-1 10-8 10-15V21m0 0v26" />
-        <path d="M305 47V21m0 9c4-8 10-11 15-7 3 2 4 6 4 12v12m0-16c4-9 10-11 15-7 3 3 3 7 3 13v10" />
-        <path d="M369 42c-6 8-18 7-20-5-2-10 5-18 13-17 8 1 10 11 6 15l-18 1" />
-        <path d="M380 47V21m0 9c4-8 10-11 16-8 5 2 6 6 6 13v12" />
-        <path d="M417 10v28c0 8 4 11 10 8m-17-23h18" />
-      </g>
-      <g fill="currentColor">
-        <circle cx="15" cy="9" r="2.5" />
-        <circle cx="70" cy="31" r="1.7" />
-        <circle cx="80" cy="30" r="1.7" />
-      </g>
-      <path className={ui.accent.stroke} d="M137 34c7-1 14 0 21-1" fill="none" strokeLinecap="round" strokeWidth="4" />
-    </svg>
   );
 }

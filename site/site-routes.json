@@ -2,8 +2,17 @@
   {
     "path": "/",
     "label": "Overview",
-    "title": "json-document - Headless JSON editing",
-    "description": "A tiny API to read, query, patch, and subscribe to JSON."
+    "title": "json-document - Agent artifact editing",
+    "description": "Agent가 만든 artifact를 사람이 Hands로 이어서 편집하는 미래를 보여 줍니다."
+  },
+  {
+    "path": "/viewer",
+    "label": "MD · PPT · Sheet",
+    "title": "Artifact - json-document",
+    "heading": "Artifact",
+    "description": "MD·PPT·Sheet artifact가 한 host에 나타나고 서로 다른 Hands를 얻는 미래의 mock입니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact"
   },
   {
     "path": "/docs",
@@ -301,56 +310,20 @@
     "parentPath": "/docs/database"
   },
   {
-    "path": "/docs/chat",
-    "label": "Chat",
-    "title": "Chat - json-document",
-    "heading": "Chat",
-    "description": "DM 말풍선으로 메시지를 주고받는 Chat Hands를 설명합니다. TBD.",
+    "path": "/docs/composer",
+    "label": "Composer",
+    "title": "Composer Hands - json-document",
+    "heading": "Composer",
+    "description": "사람이 agent에게 지시와 artifact context를 한 턴으로 건네는 Hands입니다. TBD.",
     "language": "ko",
     "navigationGroup": "Hands"
   },
   {
-    "path": "/docs/agent",
-    "label": "Agent",
-    "title": "Agent - json-document",
-    "heading": "Agent",
-    "description": "버블 없는 트랜스크립트와 생성 애니메이션을 집는 Agent Hands를 설명합니다. TBD.",
-    "language": "ko",
-    "navigationGroup": "Hands"
-  },
-  {
-    "path": "/docs/code",
-    "label": "Code",
-    "title": "Code - json-document",
-    "heading": "Code",
-    "description": "줄 범위를 드래그해 코멘트를 다는 Code Hands를 설명합니다. TBD.",
-    "language": "ko",
-    "navigationGroup": "Hands"
-  },
-  {
-    "path": "/docs/slides",
-    "label": "Slides",
-    "title": "Slides - json-document",
-    "heading": "Slides",
-    "description": "필름스트립 순서와 슬라이드 위 객체를 집는 Slides Hands를 설명합니다. TBD.",
-    "language": "ko",
-    "navigationGroup": "Hands"
-  },
-  {
-    "path": "/docs/calendar",
-    "label": "Calendar",
-    "title": "Calendar - json-document",
-    "heading": "Calendar",
-    "description": "시간 격자 위 이벤트를 집는 Calendar Hands를 설명합니다. TBD.",
-    "language": "ko",
-    "navigationGroup": "Hands"
-  },
-  {
-    "path": "/docs/form",
-    "label": "Form",
-    "title": "Form - json-document",
-    "heading": "Form",
-    "description": "질문 카드를 넣고 정렬하는 Form Hands를 설명합니다. TBD.",
+    "path": "/docs/mention",
+    "label": "Mention",
+    "title": "Mention Hands - json-document",
+    "heading": "Mention",
+    "description": "이름으로 보이는 안정적인 entity reference를 글 속에 삽입하는 Hands입니다. TBD.",
     "language": "ko",
     "navigationGroup": "Hands"
   },

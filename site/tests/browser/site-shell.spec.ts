@@ -6,19 +6,14 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
 
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "json-document" })).toBeVisible();
-  await expect(page.getByText("One JSON document. Any editor.")).toBeVisible();
-  await expect(page.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeVisible();
+  await expect(page.getByText("Agent-native artifact editing의 개발 정본.")).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Concept index" }).getByRole("link")).toHaveText([
+  await expect(page.getByRole("navigation", { name: "Dependency map" }).getByRole("link")).toHaveText([
     "JSON Document",
-    "Collaboration",
-    "Editing",
-    "Adapter",
-    "Connector",
-    "Affordance",
     "Hands",
+    "Artifact",
   ]);
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -55,12 +50,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Tree",
     "Kanban",
     "Database",
-    "Chat",
-    "Agent",
-    "Code",
-    "Slides",
-    "Calendar",
-    "Form",
+    "Composer",
+    "Mention",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);
@@ -96,6 +87,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
+  await navigation.getByRole("button", { name: "Artifact" }).click();
+  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet"]);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
     "Collaboration",
@@ -104,6 +97,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Connector",
     "Affordance",
     "Hands",
+    "Artifact",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -118,6 +112,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Hands" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Artifact" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
@@ -364,9 +359,13 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   expect(await navigation.getByRole("link", { name: "json-document" }).evaluate((element) => (
     getComputedStyle(element).borderBottomWidth
   ))).toBe("0px");
-  expect(await navigation.getByRole("link", { name: "Selection", exact: true }).evaluate((element) => (
+  expect(await navigation.getByRole("button", { name: "Editing" }).evaluate((element) => (
     getComputedStyle(element).borderLeftColor
   ))).toBe("rgb(222, 109, 85)");
+  const currentCat = navigation.getByRole("link", { name: "Selection", exact: true }).locator("svg");
+  await expect(currentCat).toHaveCount(1);
+  expect(await currentCat.evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
+  await expect(navigation.locator('a[aria-current="page"] svg')).toHaveCount(1);
 
   const heading = page.getByRole("heading", { level: 2, name: "대상을 하나 고르기" });
   expect(await heading.evaluate((element) => ({
@@ -462,7 +461,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
   const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "React", exact: true });
-  expect(await currentLink.evaluate((element) => getComputedStyle(element).borderLeftColor)).toBe("rgb(222, 109, 85)");
+  expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
 
   const code = page.getByRole("figure", { name: "TypeScript" }).first();
   const codePalette = await code.evaluate((element) => ({
@@ -514,7 +513,7 @@ test("official site uses window scroll with sticky desktop navigation", async ({
   await page.getByRole("navigation", { name: "Site navigation" })
     .getByRole("link", { name: "json-document" })
     .click();
-  await expect(page).toHaveTitle("json-document - Headless JSON editing");
+  await expect(page).toHaveTitle("json-document - Agent artifact editing");
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 

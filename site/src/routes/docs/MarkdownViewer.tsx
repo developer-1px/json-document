@@ -128,16 +128,12 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "collaboration-lease.md": "/docs/collaboration/text/lease",
   "collaboration-lifecycle.md": "/docs/collaboration/lifecycle",
   "hands.md": "/editors",
+  "composer.md": "/docs/composer",
+  "mention.md": "/docs/mention",
   "order.md": "/docs/order",
   "object.md": "/docs/object",
   "tree.md": "/docs/tree",
   "database.md": "/docs/database",
-  "chat.md": "/docs/chat",
-  "agent.md": "/docs/agent",
-  "code.md": "/docs/code",
-  "slides.md": "/docs/slides",
-  "calendar.md": "/docs/calendar",
-  "form.md": "/docs/form",
 };
 
 function rewriteMarkdownHref(href: string | undefined): string | undefined {

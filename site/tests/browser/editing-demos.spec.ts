@@ -54,7 +54,7 @@ test("History Demo restores document value and Selection together", async ({ pag
   expect(await json(page, "history-demo-selection")).toEqual(editedSelection);
 });
 
-test("Hands catalog lists the genre hands", async ({ page }) => {
+test("Hands catalog separates editing primitives from agent-facing hands", async ({ page }) => {
   await page.goto("/editors");
   const article = page.getByRole("article");
   await expect(page.getByRole("heading", { level: 1, name: "Hands" })).toBeVisible();
@@ -65,12 +65,8 @@ test("Hands catalog lists the genre hands", async ({ page }) => {
   await expect(article.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/docs/tree");
   await expect(article.getByRole("link", { name: "Kanban" })).toHaveAttribute("href", "/demo/kanban");
   await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/docs/database");
-  await expect(article.getByRole("link", { name: "Chat" })).toHaveAttribute("href", "/docs/chat");
-  await expect(article.getByRole("link", { name: "Agent" })).toHaveAttribute("href", "/docs/agent");
-  await expect(article.getByRole("link", { name: "Code" })).toHaveAttribute("href", "/docs/code");
-  await expect(article.getByRole("link", { name: "Slides" })).toHaveAttribute("href", "/docs/slides");
-  await expect(article.getByRole("link", { name: "Calendar" })).toHaveAttribute("href", "/docs/calendar");
-  await expect(article.getByRole("link", { name: "Form" })).toHaveAttribute("href", "/docs/form");
+  await expect(article.getByRole("link", { name: "Composer" })).toHaveAttribute("href", "/docs/composer");
+  await expect(article.getByRole("link", { name: "Mention" })).toHaveAttribute("href", "/docs/mention");
 });
 
 test("legacy Showcase path opens Hands", async ({ page }) => {

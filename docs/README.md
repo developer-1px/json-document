@@ -20,17 +20,13 @@ docs
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
 |   |-- collaboration.md       # JSON Document: 같은 계약의 협업 구현
-|   |-- hands.md               # Hands: 장르의 손
+|   |-- hands.md               # Hands: 사람의 편집 도구
+|   |-- composer.md            # Hands TBD: agent 지시와 맥락
+|   |-- mention.md             # Hands TBD: 안정 entity reference
 |   |-- order.md               # Hands: 한 줄 목록
 |   |-- object.md              # Hands: 키 선택 객체
 |   |-- tree.md                # Hands: 보이는 나무
 |   |-- database.md            # Hands: 저장된 표 view
-|   |-- chat.md                # Hands TBD: DM 말풍선
-|   |-- agent.md               # Hands TBD: 버블 없는 에이전트
-|   |-- code.md                # Hands TBD: 줄 코멘트
-|   |-- slides.md              # Hands TBD: 슬라이드
-|   |-- calendar.md            # Hands TBD: 달력
-|   |-- form.md                # Hands TBD: 질문 카드
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
 |   |-- react-editing.md       # Connectors: React 선택·커서 질의
@@ -109,12 +105,8 @@ Hands
 |-- Tree
 |-- Kanban
 |-- Database
-|-- Chat
-|-- Agent
-|-- Code
-|-- Slides
-|-- Calendar
-`-- Form
+|-- Composer (TBD)
+`-- Mention (TBD)
 ```
 
 ## 규범 우선순위
@@ -152,7 +144,8 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   collaboration은 같은 JSON Document의 다른 구현이다. hands는
   Editing 위 장르의 손이다. order·object·tree는 그 손의
   나머지 slice다. database는 저장된 표 view의 손이다.
-  chat·agent·code·slides·calendar·form은 구현이 없는 TBD 손이다.
+  composer·mention은 구현이 없는 TBD 손이다. App 이름과 출력 표현은
+  Hands로 올리지 않는다.
 - 배경 문서는 왜 만들었는지부터 쓴다. 컨셉 페이지는 그 아이디어를
   한 문서 위에서 만져보게 한다. 레퍼런스는 호출과 계약부터 쓴다.
 - 새 개념은 독자가 그 개념을 필요로 하는 상황을 본 뒤에 이름 붙인다.

@@ -6,6 +6,7 @@ export type SiteNavigationGroup =
   | "Collaboration"
   | "Editing"
   | "Hands"
+  | "Artifact"
   | "Adapter"
   | "Connector"
   | "Affordance";

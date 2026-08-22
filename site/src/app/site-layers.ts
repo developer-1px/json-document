@@ -14,7 +14,8 @@ export const siteLayers: ReadonlyArray<SiteLayer> = [
   { group: "Adapter", path: "/adapters", label: "Adapter", blurb: "Platform contracts" },
   { group: "Connector", path: "/connectors", label: "Connector", blurb: "Library ecosystems" },
   { group: "Affordance", path: "/docs/affordance", label: "Affordance", blurb: "Keyboard, mouse, and cursor" },
-  { group: "Hands", path: "/editors", label: "Hands", blurb: "Genre hands" },
+  { group: "Hands", path: "/editors", label: "Hands", blurb: "Tools for people" },
+  { group: "Artifact", path: "/viewer", label: "Artifact", blurb: "The complete experience" },
 ];
 
 export const siteLayerGroups: ReadonlyArray<SiteNavigationGroup> = siteLayers.map((layer) => layer.group);

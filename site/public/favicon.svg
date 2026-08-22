@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="@interactive-os/json-document">
-  <rect width="64" height="64" rx="12" fill="#1c1917"/>
-  <path d="M17 20h30v6L27 44h21v6H16v-6l20-18H17z" fill="#fafaf9"/>
-  <path d="M16 14h32v4H16z" fill="#38bdf8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 8 38 44" role="img" aria-label="json-document cat">
+  <g fill="#fafaf9" stroke="#1c1917" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+    <path d="M61 30c0-9 5-14 13-14 10 0 15 6 15 15 0 11-6 17-15 17-9 0-13-7-13-18Z"/>
+    <path d="m64 20 2-8 7 6m7-1 7-6v11" fill="none"/>
+  </g>
+  <circle cx="70" cy="31" r="1.7" fill="#1c1917"/>
+  <circle cx="80" cy="30" r="1.7" fill="#1c1917"/>
 </svg>

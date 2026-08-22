@@ -15,12 +15,10 @@ describe("official site shell", () => {
 
     expect((await screen.findByRole("link", { name: "Skip to content" })).getAttribute("href")).toBe("#main-content");
     expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
-    expect(screen.getByText("One JSON document. Any editor.")).toBeTruthy();
-    expect(screen.getByText("A tiny headless API to read, query, patch, and subscribe.")).toBeTruthy();
-    expect(screen.getByText(/npm i @interactive-os\/json-document/)).toBeTruthy();
-    expect(screen.getByRole("img", { name: "A small cat struggling to press an oversized Enter key." })).toBeTruthy();
+    expect(screen.getByText("Agent-native artifact editing의 개발 정본.")).toBeTruthy();
+    expect(screen.getByText(/구현보다 먼저 공유해야 할 Why/)).toBeTruthy();
     const home = within(screen.getByRole("main"));
-    expect(home.getByRole("link", { name: "Get started" }).getAttribute("href")).toBe("/docs/tutorial");
+    expect(home.getByRole("link", { name: "Artifact prototype 보기" }).getAttribute("href")).toBe("/viewer");
     expect(home.queryByText("v3.0.0")).toBeNull();
     expect(home.queryByRole("link", { name: "Read the API" })).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Breadcrumb" })).toBeNull();
@@ -35,14 +33,10 @@ describe("official site shell", () => {
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
-    expect(within(screen.getByRole("navigation", { name: "Concept index" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
+    expect(within(screen.getByRole("navigation", { name: "Dependency map" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
       "JSON Document",
-      "Collaboration",
-      "Editing",
-      "Adapter",
-      "Connector",
-      "Affordance",
       "Hands",
+      "Artifact",
     ]);
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
@@ -77,12 +71,8 @@ describe("official site shell", () => {
       "Tree",
       "Kanban",
       "Database",
-      "Chat",
-      "Agent",
-      "Code",
-      "Slides",
-      "Calendar",
-      "Form",
+      "Composer",
+      "Mention",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
     expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);
@@ -118,6 +108,8 @@ describe("official site shell", () => {
     ]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
+    await user.click(nav.getByRole("button", { name: "Artifact" }));
+    expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet"]);
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
       "Collaboration",
@@ -126,11 +118,13 @@ describe("official site shell", () => {
       "Connector",
       "Affordance",
       "Hands",
+      "Artifact",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
     await user.click(nav.getByRole("link", { name: "json-document" }));
-    await user.click(within(screen.getByRole("navigation", { name: "Concept index" })).getByRole("link", { name: "Connector", exact: true }));
+    window.history.pushState(null, "", "/connectors");
+    window.dispatchEvent(new PopStateEvent("popstate"));
     await waitFor(() => expect(document.title).toBe("Connectors - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Connector" })).toBeTruthy();
     const demos = screen.getAllByRole("link", { name: "Open Live Demo" });

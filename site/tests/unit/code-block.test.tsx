@@ -29,12 +29,12 @@ describe("shared code language", () => {
   });
 
   test("rewrites markdown file hashes onto site paths", () => {
-    render(<MarkdownViewer source={"See [평면 TBD](affordance.md#평면-tbd) and [Code](code.md)."} />);
+    render(<MarkdownViewer source={"See [평면 TBD](affordance.md#평면-tbd) and [Mention](mention.md)."} />);
 
     expect(decodeURIComponent(screen.getByRole("link", { name: "평면 TBD" }).getAttribute("href") ?? "")).toBe(
       "/docs/affordance#평면-tbd",
     );
-    expect(screen.getByRole("link", { name: "Code" }).getAttribute("href")).toBe("/docs/code");
+    expect(screen.getByRole("link", { name: "Mention" }).getAttribute("href")).toBe("/docs/mention");
   });
 
   test("renders Markdown blocks and inline code through the same shared components", () => {

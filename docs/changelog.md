@@ -5,6 +5,9 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Reframed the development SSOT around JSON Document, Hands, and Artifact. Composer and
+  Mention are the open Hands; App names and transcript animation no longer
+  stand in for human editing tools.
 - Opened Hands TBD for Chat, Agent, Code, Slides, Calendar, and Form.
   Chat is DM bubbles. Agent is a bubble-less transcript whose typical
   hand is think·stream·tool animation. Code is a drag-range comment,
