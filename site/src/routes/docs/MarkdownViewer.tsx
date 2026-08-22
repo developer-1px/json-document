@@ -1,10 +1,12 @@
 import ReactMarkdown from "react-markdown";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
-import { CodeBlock, InlineCode } from "../../shared/ui/code-block";
+import { InlineCode } from "../../shared/ui/code-block";
 import { codeLanguage } from "../../shared/ui/code-tokens";
+import { ShikiSourceCodeBlock } from "../../shared/demo-workbench/ShikiSourceCodeBlock";
 import { ActionLink } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
+import { LiveDemo } from "./live-demo-registry";
 
 type MarkdownHeading = { id: string; level: number; text: string };
 
@@ -48,8 +50,12 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
           code: ({ children, className }) => {
             if (!className) return <InlineCode>{children}</InlineCode>;
 
+            if (className === "language-live-demo") {
+              return <LiveDemo path={String(children).trim()} />;
+            }
+
             const language = codeLanguage(/^language-(.+)$/.exec(className)?.[1]);
-            return <CodeBlock language={language} size="content" source={String(children)} />;
+            return <ShikiSourceCodeBlock language={language} source={String(children)} />;
           },
           pre: ({ children }) => <>{children}</>,
           a: ({ href, children }) => {

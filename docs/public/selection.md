@@ -35,7 +35,7 @@ if (result.ok) {
 두 점 사이에 어떤 항목이 포함되는지는 화면의 순서에 따라 달라집니다. 그
 순서는 [Topology](topology.md)가 이미 정한 값입니다.
 
-[Selection Demo](/demo/selection)에서는 같은 블록 목록에 `replace`, `extend`,
+아래 Live Demo에서는 같은 블록 목록에 `replace`, `extend`,
 `toggle` 입력을 차례로 보내며 Selection만 어떻게 달라지는지 확인할 수
 있습니다. 문서 값과 History가 그대로인 것도 결과 옆에서 함께 보입니다.
 
@@ -51,3 +51,9 @@ JSON 값이 바뀌면 editor는 변경 전후의 Selection을 patch와 함께 �
 [React에서 선택과 커서 그리기](react-editing.md)의 `useEditing`
 질의를 씁니다. KeyboardEvent를 command로 바꾸는 일은
 [Adapters](adapters.md)입니다.
+
+## Live Demo
+
+```live-demo
+/demo/selection
+```

@@ -51,3 +51,13 @@ Shift는 축을 구속하고, Alt는 [Duplicate](affordance-copy-drag.md)입니�
 
 - 키보드만으로 옮기기 (APG는 드래그의 키보드 대안을 요구함)
 - pointer capture 수명
+
+## Live Demo
+
+```live-demo
+/widgets/canvas
+```
+
+```live-demo
+/widgets/board
+```

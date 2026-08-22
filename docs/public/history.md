@@ -32,3 +32,9 @@ History 항목은 JSON 값이 실제로 바뀐 편집에서 생깁니다. Select
 여기까지 `editor.dispatch`로 시작한 요청이 Selection과 Topology를 읽고,
 Clipboard를 거쳐 문서와 History를 바꾸는 흐름을 살펴봤습니다. editor가
 받는 전체 요청은 [Intent 레퍼런스](intent.md)에서 확인할 수 있습니다.
+
+## Live Demo
+
+```live-demo
+/demo/history
+```

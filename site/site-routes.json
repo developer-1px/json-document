@@ -1,7 +1,7 @@
 [
   {
     "path": "/",
-    "label": "Overview",
+    "label": "Hands",
     "title": "json-document - Agent artifact editing",
     "description": "Agent가 만든 artifact를 사람이 Hands로 이어서 편집하는 미래를 보여 줍니다."
   },
@@ -210,15 +210,15 @@
     "heading": "Hands",
     "description": "닫힌 장르의 손과 TBD 손을 고릅니다.",
     "language": "ko",
-    "navigationGroup": "Hands",
-    "sidebar": false
+    "navigationGroup": "Hands"
   },
   {
     "path": "/demo",
     "label": "Document",
     "title": "Document - json-document",
     "description": "A simple minimal document editor: type in the line, move blocks, copy, and undo.",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "sidebar": false
   },
   {
     "path": "/docs/order",
@@ -266,7 +266,8 @@
     "label": "Sheet",
     "title": "Sheet - json-document",
     "description": "A simple minimal sheet: select cells, type, and fill a rectangle.",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "sidebar": false
   },
   {
     "path": "/docs/tree",
@@ -290,7 +291,8 @@
     "label": "Kanban",
     "title": "Kanban - json-document",
     "description": "A simple minimal kanban: move cards between columns in one JSON document.",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "sidebar": false
   },
   {
     "path": "/docs/database",
@@ -337,13 +339,12 @@
   },
   {
     "path": "/docs/adapters",
-    "label": "Adapter guide",
+    "label": "Adapter",
     "title": "Adapter Docs - json-document",
     "heading": "json-document Adapters",
     "description": "Keyboard, Clipboard, Contenteditable 공식 adapter 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Adapter",
-    "sidebar": false
+    "navigationGroup": "Adapter"
   },
   {
     "path": "/adapters/keyboard",
@@ -351,6 +352,7 @@
     "title": "Keyboard Adapter Live Demo - json-document",
     "description": "Official keyboard adapter: conventional chords become commands, then existing Intent, Clipboard, and History doors.",
     "navigationGroup": "Adapter",
+    "sidebar": false,
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-web"
@@ -362,6 +364,7 @@
     "title": "Clipboard Adapter Live Demo - json-document",
     "description": "Official clipboard adapter: native ClipboardEvent copy, cut, and paste bind to public editing contracts.",
     "navigationGroup": "Adapter",
+    "sidebar": false,
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-web"
@@ -373,6 +376,7 @@
     "title": "Contenteditable Adapter Live Demo - json-document",
     "description": "Official DOM adapter: a React contenteditable root leases native input and commits one JSON Document string pointer.",
     "navigationGroup": "Adapter",
+    "sidebar": false,
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-contenteditable"
@@ -388,13 +392,12 @@
   },
   {
     "path": "/docs/connectors",
-    "label": "Connector guide",
+    "label": "Connector",
     "title": "Connector Docs - json-document",
     "heading": "json-document Connectors",
     "description": "React 구독과 선택·커서 질의, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "Connector",
-    "sidebar": false
+    "navigationGroup": "Connector"
   },
   {
     "path": "/docs/react-editing",
@@ -413,6 +416,7 @@
     "title": "React Connector Live Demo - json-document",
     "description": "Live React subscription plus shared queries for object range, focus cursor, and text offset.",
     "navigationGroup": "Connector",
+    "sidebar": false,
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-react"
@@ -424,6 +428,7 @@
     "title": "React Hook Form Connector Live Demo - json-document",
     "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
     "navigationGroup": "Connector",
+    "sidebar": false,
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-react-hook-form"
@@ -435,6 +440,7 @@
     "title": "Ajv Connector Live Demo - json-document",
     "description": "Live Ajv validation with JSON Pointer diagnostics and non-adoption of validator mutations.",
     "navigationGroup": "Connector",
+    "sidebar": false,
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-ajv"
@@ -446,6 +452,7 @@
     "title": "Zod Connector Live Demo - json-document",
     "description": "A Zod object schema and record array become a Database admin table.",
     "navigationGroup": "Connector",
+    "sidebar": false,
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-zod"
@@ -465,6 +472,7 @@
     "title": "TanStack Table Connector Live Demo - json-document",
     "description": "Live TanStack Table v8 integration for visible-order Sheet selection, clipboard, history, and canonical JSON editing.",
     "navigationGroup": "Connector",
+    "sidebar": false,
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-tanstack-table"

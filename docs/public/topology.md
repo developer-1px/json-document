@@ -86,3 +86,9 @@ Sheet는 문서의 `rows`와 `columns` 순서를 사용합니다.
 
 Topology가 정한 줄은 [Selection](selection.md)이 범위로 읽고, 그 줄을
 옮길 값으로 만드는 과정은 [Clipboard](clipboard.md)에서 이어집니다.
+
+## Live Demo
+
+```live-demo
+/demo/topology
+```

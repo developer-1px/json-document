@@ -13,7 +13,7 @@ Intent는 제품이 가지고, hook은 범위·커서·글자 위치만 답합�
 npm i @interactive-os/json-document-react
 ```
 
-실제 동작은 [/connectors/react](/connectors/react)에서 범위와 커서를 눌러
+실제 동작은 아래 Live Demo에서 범위와 커서를 눌러
 확인할 수 있습니다. KeyboardEvent를 command로 바꾸는 일은
 [Adapters](adapters.md)가, 값 구독과 다른 Connector는
 [Connectors](connectors.md)가 정본입니다.
@@ -587,3 +587,9 @@ type TextCursorControl = Pick<HTMLInputElement, "value" | "setSelectionRange">;
 
 `EditingSnapshotSource`는 Document editor, Sheet editor, TanStack Table
 binding처럼 `snapshot`과 `subscribe`가 있으면 됩니다.
+
+## Live Demo
+
+```live-demo
+/editing/rich-text
+```

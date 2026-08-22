@@ -31,12 +31,12 @@ Hands가 아닙니다.
 
 | Hands | 관찰한 표면 | 사람이 하는 일 |
 | --- | --- | --- |
-| [Document](/demo) | Bear | 줄에 쓰고 옮김. Markdown caret이 전형 |
+| Document | Bear | 줄에 쓰고 옮김. Markdown caret이 전형 |
 | [Order](order.md) | Linear | 한 줄 항목을 고르고 옮김 |
 | [Object](object.md) | Figma | 안정 ID 객체를 평면에서 고르고 옮김 |
-| [Sheet](/demo/sheet) | Excel | cell을 고르고 채움 |
+| Sheet | Excel | cell을 고르고 채움 |
 | [Tree](tree.md) | Finder | 보이는 가지를 접고 범위를 고름 |
-| [Kanban](/demo/kanban) | Trello | card를 열 사이로 옮김 |
+| Kanban | Trello | card를 열 사이로 옮김 |
 | [Database](database.md) | Airtable | 같은 record를 저장된 view로 봄 |
 
 Slides, Form, Calendar 같은 App 이름은 먼저 기존 Hands로 분해합니다. 예를 들어
@@ -46,3 +46,17 @@ Slides는 Order와 Object의 조합일 수 있습니다. 끝까지 환원되지 
 전체 흐름은 [Artifact](/viewer) prototype에서 봅니다. Artifact는 적절한
 surface를 고르고, Hands는 사람이 만지는 방법을 제공하며, Core는 사람과
 agent의 변경을 같은 계약에 남깁니다.
+
+## Live Demo
+
+```live-demo
+/demo
+```
+
+```live-demo
+/demo/sheet
+```
+
+```live-demo
+/demo/kanban
+```

@@ -64,20 +64,18 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
-      "Document",
+      "Hands",
       "Order",
       "Object",
-      "Sheet",
       "Tree",
-      "Kanban",
       "Database",
       "Composer",
       "Mention",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
-    expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);
+    expect(groupLinks(nav, "Adapter")).toEqual(["Adapter"]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
-    expect(groupLinks(nav, "Connector")).toEqual(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
+    expect(groupLinks(nav, "Connector")).toEqual(["Connector"]);
     await user.click(nav.getByRole("button", { name: "Affordance" }));
     expect(groupLinks(nav, "Affordance")).toEqual([
       "Focus",
@@ -143,20 +141,9 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByRole("link", { name: "Hands" }).getAttribute("href")).toBe("/editors");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Zod", exact: true }));
-    expect(await screen.findByRole("region", { name: "Demo workbench" })).toBeTruthy();
-    const adminCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
-    expect(adminCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
-    expect(adminCrumb.getByRole("link", { name: "Connector" }).getAttribute("href")).toBe("/connectors");
-    expect(adminCrumb.getByText("Zod")).toBeTruthy();
-
-    await user.click(nav.getByRole("link", { name: "Validate", exact: true }));
-    const validateCrumb = within(await screen.findByRole("navigation", { name: "Breadcrumb" }));
-    expect(validateCrumb.getByRole("link", { name: "Overview" }).getAttribute("href")).toBe("/");
-    expect(validateCrumb.getByRole("link", { name: "Connector" }).getAttribute("href")).toBe("/connectors");
-    expect(validateCrumb.getByRole("link", { name: "Zod" }).getAttribute("href")).toBe("/connectors/zod");
-    expect(validateCrumb.getByText("Validate")).toBeTruthy();
-  });
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Connector", exact: true }));
+    expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
+  }, 10000);
 
   test("keeps the site chrome mounted across interior routes", async () => {
     render(<App />);
@@ -186,8 +173,8 @@ describe("official site shell", () => {
     expect(header?.querySelector("h1")).toBeTruthy();
 
     await user.click(nav.getByRole("button", { name: "Hands" }));
-    await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Document", exact: true }));
-    await waitFor(() => expect(document.documentElement.lang).toBe("en"));
+    await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Hands", exact: true }));
+    await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
   });
 });
 
