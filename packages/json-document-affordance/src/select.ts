@@ -102,11 +102,15 @@ export function selectAllAffordance(
 export function typeaheadAffordance(input: {
   readonly buffer: string;
   readonly key: string;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
+  readonly altKey?: boolean;
   readonly elapsedMs: number;
   readonly names: ReadonlyArray<string>;
   readonly from: string | null;
   readonly windowMs?: number;
 }): AffordancePreview {
+  if (input.metaKey || input.ctrlKey || input.altKey) return { hand: null };
   if (input.key.length !== 1 || input.key < " ") return { hand: null };
   const windowMs = input.windowMs ?? 500;
   const buffer = input.elapsedMs <= windowMs ? `${input.buffer}${input.key}` : input.key;

@@ -53,6 +53,18 @@ test("Listbox typeahead jumps to the matching label", async ({ page }) => {
   expect(await json(page, "widget-listbox-selected")).toEqual(["today"]);
 });
 
+test("Listbox leaves modified printable keys for history commands", async ({ page }) => {
+  await page.goto("/widgets/listbox");
+  const listbox = page.getByRole("listbox", { name: "Order items" });
+  await page.getByRole("option", { name: "Today" }).click();
+  await page.keyboard.press("Delete");
+  await expect(page.getByRole("option", { name: "Today" })).toHaveCount(0);
+  await listbox.focus();
+  await page.keyboard.press("ControlOrMeta+Z");
+  await expect(page.getByRole("option", { name: "Today" })).toBeVisible();
+  await expect(listbox).toBeFocused();
+});
+
 test("Listbox reads selected keys and focus from Order", async ({ page }) => {
   await page.goto("/widgets/listbox");
   await page.getByRole("option", { name: "Today" }).click();

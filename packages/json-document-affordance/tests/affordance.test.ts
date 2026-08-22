@@ -181,6 +181,21 @@ describe("typeaheadAffordance", () => {
       from: "Inbox",
     }).hand).toEqual({ type: "typeahead", buffer: "T", name: "Today" });
   });
+
+  test.each([
+    { metaKey: true },
+    { ctrlKey: true },
+    { altKey: true },
+  ])("leaves modified printable keys for host commands", (modifier) => {
+    expect(typeaheadAffordance({
+      buffer: "",
+      key: "T",
+      elapsedMs: 0,
+      names: ["Inbox", "Today", "Later"],
+      from: "Inbox",
+      ...modifier,
+    }).hand).toBeNull();
+  });
 });
 
 describe("focusAffordance", () => {
