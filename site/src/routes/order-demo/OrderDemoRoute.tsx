@@ -133,10 +133,6 @@ export function OrderDemoRoute() {
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
-    if (event.metaKey || event.ctrlKey || event.altKey) {
-      editing.getKeyDownHandler()(event);
-      return;
-    }
     let focused = false;
     applyAffordance(focusAffordance(event), {
       hand: (hand) => {
@@ -174,6 +170,9 @@ export function OrderDemoRoute() {
     const result = typeaheadAffordance({
       buffer: typeahead.buffer,
       key: event.key,
+      metaKey: event.metaKey,
+      ctrlKey: event.ctrlKey,
+      altKey: event.altKey,
       elapsedMs: event.timeStamp - typeahead.at,
       names,
       from,

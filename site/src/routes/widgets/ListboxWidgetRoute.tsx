@@ -63,6 +63,9 @@ export function ListboxWidgetRoute() {
     const result = typeaheadAffordance({
       buffer: typeahead.buffer,
       key: event.key,
+      metaKey: event.metaKey,
+      ctrlKey: event.ctrlKey,
+      altKey: event.altKey,
       elapsedMs: event.timeStamp - typeahead.at,
       names,
       from,
