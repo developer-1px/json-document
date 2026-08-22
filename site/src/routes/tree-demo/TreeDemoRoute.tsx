@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type ClipboardEvent } from "react";
 import {
   createTreeEditor,
   type TreeClipboard,
@@ -8,7 +8,12 @@ import {
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  createWebClipboardBinding,
+  lineBoundary,
+  moveLinePoint,
+  treeClipboardCodec,
+} from "@interactive-os/json-document-web";
 import {
   applyAffordance,
   pointerSelect,
@@ -45,6 +50,14 @@ export function TreeDemoRoute() {
     () => walkVisible((editor.snapshot.value as TreeDocument).nodes, expanded),
     [editor.snapshot.value, expanded],
   );
+  const topologyRef = useRef(topology);
+  topologyRef.current = topology;
+  const [webClipboard] = useState(() => createWebClipboardBinding({
+    codec: treeClipboardCodec,
+    read: () => editor.copy(topologyRef.current),
+    cut: () => editor.cut(topologyRef.current)?.result ?? { ok: false, code: "selection.empty" },
+    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload, topology: topologyRef.current }),
+  }));
 
   function run(intent: TreeIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -127,6 +140,27 @@ export function TreeDemoRoute() {
     setAnnouncement(`Cut ${result.clipboard.nodes.length} node${result.clipboard.nodes.length === 1 ? "" : "s"}`);
   }
 
+  function handleNativeCopy(event: ClipboardEvent<HTMLUListElement>) {
+    const result = webClipboard.copy(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Copied ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`);
+  }
+
+  function handleNativeCut(event: ClipboardEvent<HTMLUListElement>) {
+    const result = webClipboard.cut(event);
+    if (!result.ok) return setAnnouncement(result.code);
+    setClipboard(result.payload);
+    setAnnouncement(`Cut ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`);
+  }
+
+  function handleNativePaste(event: ClipboardEvent<HTMLUListElement>) {
+    const result = webClipboard.paste(event);
+    setAnnouncement(result.ok
+      ? `Pasted ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`
+      : result.code);
+  }
+
   function toggle(nodeId: string) {
     setExpanded((current) => {
       const next = new Set(current);
@@ -184,6 +218,9 @@ export function TreeDemoRoute() {
           <ul
             className="m-0 grid list-none gap-1 p-0"
             tabIndex={0}
+            onCopy={handleNativeCopy}
+            onCut={handleNativeCut}
+            onPaste={handleNativePaste}
             onKeyDown={editing.getKeyDownHandler()}
           >
             {walkVisible(document.nodes, expanded).map((row) => {
