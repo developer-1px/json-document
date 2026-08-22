@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import {
   createOrderEditor,
   type OrderClipboard,
@@ -9,7 +9,9 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
 import {
   applyAffordance,
+  escapeAffordance,
   pointerSelect,
+  typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
@@ -31,6 +33,7 @@ export function OrderDemoRoute() {
   const [clipboard, setClipboard] = useState<OrderClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<OrderIntent | null>(null);
+  const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
 
   function run(intent: OrderIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -84,6 +87,41 @@ export function OrderDemoRoute() {
     setAnnouncement(`Cut ${result.clipboard.items.length} item${result.clipboard.items.length === 1 ? "" : "s"}`);
   }
 
+  const focusKey = snapshot.selection.ranges[snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
+
+  function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
+    const names = document.items.map((item) => item.label);
+    const from = document.items.find((item) => item.id === focusKey)?.label ?? null;
+    const result = typeaheadAffordance({
+      buffer: typeahead.buffer,
+      key: event.key,
+      elapsedMs: event.timeStamp - typeahead.at,
+      names,
+      from,
+    });
+    let consumed = false;
+    applyAffordance(result, {
+      hand: (hand) => {
+        if (hand.type !== "typeahead") return;
+        consumed = true;
+        setTypeahead({ buffer: hand.buffer, at: event.timeStamp });
+        const item = document.items.find((candidate) => candidate.label === hand.name);
+        if (item) run({ type: "selection.set", itemId: item.id, mode: "replace" }, "Selection changed");
+      },
+    });
+    if (consumed) {
+      event.preventDefault();
+      return;
+    }
+    applyAffordance(escapeAffordance(event), {
+      hand: (hand) => {
+        if (hand.type !== "cancel") return;
+        setTypeahead({ buffer: "", at: 0 });
+      },
+    });
+    editing.getKeyDownHandler()(event);
+  }
+
   return (
     <PageFrame>
       <PageHeader
@@ -132,7 +170,7 @@ export function OrderDemoRoute() {
           <ol
             className="m-0 grid list-none gap-1 p-0"
             tabIndex={0}
-            onKeyDown={editing.getKeyDownHandler()}
+            onKeyDown={onKeyDown}
           >
             {document.items.map((item, index) => (
               <SelectableItem

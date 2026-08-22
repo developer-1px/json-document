@@ -55,6 +55,12 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Tree",
     "Kanban",
     "Database",
+    "Chat",
+    "Agent",
+    "Code",
+    "Slides",
+    "Calendar",
+    "Form",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);
@@ -224,6 +230,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/demo/clipboard",
     "/demo/history",
     "/editing/rich-text",
+    "/docs/database",
     "/demo/database",
     "/connectors",
     "/connectors/react",

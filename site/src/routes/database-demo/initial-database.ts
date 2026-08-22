@@ -31,6 +31,7 @@ export const initialDatabase: DatabaseDocument = {
     type: "table",
     propertyOrder: ["name", "note", "score", "status", "complete"],
     propertyVisibility: {},
+    propertyWidths: {},
     sort: null,
     filter: null,
   }],

@@ -10,7 +10,7 @@ import {
   marqueeAffordance,
   nudgeAffordance,
   panAffordance,
-  pointerSelect,
+  planeHitAffordance,
   snapAffordance,
 } from "@interactive-os/json-document-affordance";
 import { SelectableItem } from "../../shared/ui/interactive";
@@ -80,22 +80,32 @@ export function CanvasWidgetRoute() {
       return;
     }
     if (objectId) {
-      let operation: "replace" | "extend" | "toggle" = "replace";
-      applyAffordance(pointerSelect(event), {
-        hand: (hand) => {
-          if (hand.type !== "select") return;
-          operation = hand.operation;
-          editor.dispatch({
-            type: "selection.set",
-            objectIds: [objectId],
-            mode: hand.operation === "extend" ? "add" : hand.operation,
-          });
+      applyAffordance(
+        planeHitAffordance({
+          hitId: objectId,
+          selectedIds: editor.selectedObjects.map((object) => object.id),
+          shiftKey: event.shiftKey,
+          metaKey: event.metaKey,
+          ctrlKey: event.ctrlKey,
+        }),
+        {
+          hand: (hand) => {
+            if (hand.type !== "select" || !hand.objectIds) return;
+            editor.dispatch({
+              type: "selection.set",
+              objectIds: hand.objectIds,
+              mode: "replace",
+            });
+            setDrag({
+              ids: hand.objectIds,
+              originX: event.clientX,
+              originY: event.clientY,
+              dx: 0,
+              dy: 0,
+            });
+          },
         },
-      });
-      const ids = operation !== "replace"
-        ? [...new Set([...editor.selectedObjects.map((object) => object.id), objectId])]
-        : [objectId];
-      setDrag({ ids, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
+      );
       return;
     }
     const origin = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
@@ -145,7 +155,7 @@ export function CanvasWidgetRoute() {
     if (marquee) {
       const origin = { x: marquee.originX, y: marquee.originY };
       const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-      applyAffordance(marqueeAffordance(origin, point), {
+      applyAffordance(marqueeAffordance(origin, point, event), {
         cursor: (cursor) => {
           event.currentTarget.style.cursor = cursor;
         },
@@ -196,24 +206,23 @@ export function CanvasWidgetRoute() {
     if (marquee) {
       const origin = { x: marquee.originX, y: marquee.originY };
       const point = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-      const committed = commitAffordance(marqueeAffordance(origin, point));
+      const committed = commitAffordance(marqueeAffordance(origin, point, event));
       if (committed) {
         applyAffordance(committed, {
           commit: (hand) => {
+            if (hand.type === "clear") {
+              editor.dispatch({ type: "selection.set", objectIds: [], mode: "replace" });
+              return;
+            }
             if (hand.type !== "select" || !hand.rect) return;
             const hits = document.objects
               .filter((object) => intersects(hand.rect!, object))
               .map((object) => object.id);
             if (hits.length === 0) return;
-            applyAffordance(pointerSelect(event), {
-              hand: (selectHand) => {
-                if (selectHand.type !== "select") return;
-                editor.dispatch({
-                  type: "selection.set",
-                  objectIds: hits,
-                  mode: selectHand.operation === "extend" ? "add" : selectHand.operation === "toggle" ? "toggle" : "replace",
-                });
-              },
+            editor.dispatch({
+              type: "selection.set",
+              objectIds: hits,
+              mode: hand.operation === "extend" ? "add" : hand.operation === "toggle" ? "toggle" : "replace",
             });
           },
         });
@@ -227,15 +236,27 @@ export function CanvasWidgetRoute() {
       setSpace(true);
       event.preventDefault();
     }
-    applyAffordance(escapeAffordance(event), {
-      hand: (hand) => {
-        if (hand.type !== "cancel") return;
-        setDrag(null);
-        setMarquee(null);
-        setPan((current) => ({ ...current, active: false }));
-        event.preventDefault();
+    applyAffordance(
+      escapeAffordance({
+        key: event.key,
+        grabbing: drag != null || marquee != null || pan.active,
+        selected: editor.selectedObjects.length > 0,
+      }),
+      {
+        hand: (hand) => {
+          if (hand.type === "cancel") {
+            setDrag(null);
+            setMarquee(null);
+            setPan((current) => ({ ...current, active: false }));
+            event.preventDefault();
+            return;
+          }
+          if (hand.type !== "clear") return;
+          editor.dispatch({ type: "selection.set", objectIds: [], mode: "replace" });
+          event.preventDefault();
+        },
       },
-    });
+    );
     applyAffordance(nudgeAffordance(event), {
       hand: (hand) => {
         if (hand.type !== "nudge") return;
@@ -287,7 +308,7 @@ export function CanvasWidgetRoute() {
                 <SelectableItem
                   key={object.id}
                   role="option"
-                  className="absolute grid place-items-center"
+                  className={ui.interactive.planeItem}
                   style={{
                     left: object.x + (offset?.dx ?? 0),
                     top: object.y + (offset?.dy ?? 0),
@@ -310,7 +331,7 @@ export function CanvasWidgetRoute() {
             })}
             {marquee ? (
               <div
-                className={classes("pointer-events-none absolute", ui.surface.empty)}
+                className={classes("pointer-events-none absolute", ui.surface.marquee)}
                 style={{ left: marquee.x, top: marquee.y, width: marquee.width, height: marquee.height }}
               />
             ) : null}

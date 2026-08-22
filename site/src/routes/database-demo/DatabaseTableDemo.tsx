@@ -1,32 +1,42 @@
 import {
   useRef,
   useState,
-  type DragEvent,
   type FocusEvent,
+  type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
   createDatabaseEditor,
   type DatabaseDocument,
   type DatabaseEditor,
+  type DatabaseFilter,
   type DatabaseIntent,
   type DatabaseProperty,
   type DatabaseRecord,
   type DatabaseSelection,
+  type DatabaseSort,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
+  activateAffordance,
   applyAffordance,
   commitAffordance,
+  disclosureAffordance,
+  dragAffordance,
   dropAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { gridCellProps, historyCommands } from "../../shared/widget-binding";
 import { initialDatabase } from "./initial-database";
+
+const defaultWidth = 160;
+const minWidth = 88;
+const stubWidth = 36;
 
 type NativeTextLease = {
   readonly recordId: string;
@@ -34,11 +44,33 @@ type NativeTextLease = {
   readonly composing: boolean;
 };
 
+type HeaderMenu = {
+  readonly propertyId: string;
+  readonly x: number;
+  readonly y: number;
+};
+
+type HeaderDrag = {
+  readonly propertyId: string;
+  readonly originX: number;
+  readonly originY: number;
+  moved: boolean;
+};
+
+type HeaderResize = {
+  readonly propertyId: string;
+  readonly originX: number;
+  readonly originWidth: number;
+};
+
 export function DatabaseTableDemo() {
   const [editor] = useState<DatabaseEditor>(() => createDatabaseEditor(initialDatabase));
   const [lease, setLease] = useState<NativeTextLease | null>(null);
   const [dragPreview, setDragPreview] = useState<ReadonlyArray<string> | null>(null);
-  const draggedProperty = useRef<string | null>(null);
+  const [widthPreview, setWidthPreview] = useState<Readonly<Record<string, number>> | null>(null);
+  const [menu, setMenu] = useState<HeaderMenu | null>(null);
+  const headerDrag = useRef<HeaderDrag | null>(null);
+  const headerResize = useRef<HeaderResize | null>(null);
   const [announcement, setAnnouncement] = useState("Database ready");
   const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
@@ -48,8 +80,12 @@ export function DatabaseTableDemo() {
   const topology = editor.tableTopology(view.id);
   const visiblePropertyIds = (dragPreview ?? view.propertyOrder)
     .filter((propertyId) => view.propertyVisibility[propertyId] !== false);
+  const hiddenPropertyIds = view.propertyOrder.filter((propertyId) => view.propertyVisibility[propertyId] === false);
   const properties = visiblePropertyIds.map((id) => document.schema.properties.find((property) => property.id === id)!);
+  const hiddenProperties = hiddenPropertyIds.map((id) => document.schema.properties.find((property) => property.id === id)!);
   const records = topology.recordIds.map((id) => document.records.find((record) => record.id === id)!);
+  const widths = { ...view.propertyWidths, ...widthPreview };
+
   function dispatchIntent(intent: DatabaseIntent) {
     const result: EditingResult<DatabaseSelection> = editor.dispatch(intent);
     setLastIntent(intent);
@@ -80,7 +116,7 @@ export function DatabaseTableDemo() {
     run(() => dispatchIntent({ type: "cell.commit", recordId, propertyId, value }), `${propertyId} committed`);
   }
 
-  function configure(patch: Parameters<DatabaseEditor["dispatch"]>[0] & { readonly type: "view.configure" }) {
+  function configure(patch: Extract<DatabaseIntent, { readonly type: "view.configure" }>) {
     run(() => dispatchIntent(patch), "Table view saved in canonical JSON");
   }
 
@@ -96,83 +132,173 @@ export function DatabaseTableDemo() {
     run(() => dispatchIntent({ type: "record.delete", recordId }), "Record deleted");
   }
 
-  function startPropertyDrag(event: DragEvent, propertyId: string) {
-    draggedProperty.current = propertyId;
-    setDragPreview([...view.propertyOrder]);
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", propertyId);
+  function propertyWidth(propertyId: string) {
+    return Math.max(minWidth, widths[propertyId] ?? defaultWidth);
   }
 
-  function previewPropertyAt(propertyId: string) {
-    const source = draggedProperty.current;
-    if (!source || source === propertyId) return;
+  function cycleSort(propertyId: string) {
+    configure({ type: "view.configure", viewId: view.id, sort: nextSort(view.sort, propertyId) });
+  }
+
+  function hideProperty(propertyId: string) {
+    configure({
+      type: "view.configure",
+      viewId: view.id,
+      propertyVisibility: { ...view.propertyVisibility, [propertyId]: false },
+    });
+  }
+
+  function showProperty(propertyId: string) {
+    configure({
+      type: "view.configure",
+      viewId: view.id,
+      propertyVisibility: { ...view.propertyVisibility, [propertyId]: true },
+    });
+  }
+
+  function setFilter(filter: DatabaseFilter | null) {
+    configure({ type: "view.configure", viewId: view.id, filter });
+  }
+
+  function startHeaderDrag(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
+    if (event.button !== 0) return;
+    headerDrag.current = { propertyId, originX: event.clientX, originY: event.clientY, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveHeaderDrag(event: ReactPointerEvent<HTMLElement>) {
+    const drag = headerDrag.current;
+    if (!drag) return;
+    applyAffordance(dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }), {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+    });
+    if (!drag.moved && Math.hypot(event.clientX - drag.originX, event.clientY - drag.originY) < 6) return;
+    drag.moved = true;
+    const target = globalThis.document.elementFromPoint(event.clientX, event.clientY);
+    const propertyId = target instanceof Element
+      ? target.closest("[data-property-id]")?.getAttribute("data-property-id")
+      : null;
+    if (!propertyId || propertyId === drag.propertyId) return;
+    applyAffordance(dropAffordance({ canDrop: true }), {
+      cursor: (cursor) => {
+        event.currentTarget.style.cursor = cursor;
+      },
+    });
     setDragPreview((current) => {
       const order = [...(current ?? view.propertyOrder)];
-      const sourceIndex = order.indexOf(source);
+      const sourceIndex = order.indexOf(drag.propertyId);
       const targetIndex = order.indexOf(propertyId);
       if (sourceIndex < 0 || targetIndex < 0) return order;
       order.splice(sourceIndex, 1);
-      order.splice(targetIndex, 0, source);
+      order.splice(targetIndex, 0, drag.propertyId);
       return order;
     });
   }
 
-  function finishPropertyDrag() {
-    const source = draggedProperty.current;
+  function finishHeaderDrag(event: ReactPointerEvent<HTMLElement>) {
+    const drag = headerDrag.current;
+    headerDrag.current = null;
+    event.currentTarget.style.cursor = "";
     const next = dragPreview;
-    draggedProperty.current = null;
     setDragPreview(null);
-    if (!source) return;
-    if (next && next.join("\u0000") !== view.propertyOrder.join("\u0000")) {
-      configure({ type: "view.configure", viewId: view.id, propertyOrder: next });
+    if (!drag) return;
+    if (drag.moved) {
+      const committed = commitAffordance(dragAffordance(
+        { x: drag.originX, y: drag.originY },
+        { x: event.clientX, y: event.clientY },
+      ));
+      if (committed) {
+        applyAffordance(committed, {
+          commit: () => {
+            if (next && next.join("\u0000") !== view.propertyOrder.join("\u0000")) {
+              configure({ type: "view.configure", viewId: view.id, propertyOrder: next });
+            }
+          },
+        });
+      }
+      return;
     }
+    applyAffordance(activateAffordance({ button: 0, detail: 1 }), {
+      hand: (hand) => {
+        if (hand.type !== "activate") return;
+        cycleSort(drag.propertyId);
+      },
+    });
   }
+
+  function startResize(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
+    event.stopPropagation();
+    headerDrag.current = null;
+    headerResize.current = { propertyId, originX: event.clientX, originWidth: propertyWidth(propertyId) };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveResize(event: ReactPointerEvent<HTMLElement>) {
+    event.stopPropagation();
+    const resize = headerResize.current;
+    if (!resize) return;
+    event.currentTarget.style.cursor = "col-resize";
+    setWidthPreview({
+      ...view.propertyWidths,
+      [resize.propertyId]: Math.max(minWidth, resize.originWidth + (event.clientX - resize.originX)),
+    });
+  }
+
+  function finishResize(event: ReactPointerEvent<HTMLElement>) {
+    event.stopPropagation();
+    const resize = headerResize.current;
+    headerResize.current = null;
+    const preview = widthPreview;
+    setWidthPreview(null);
+    event.currentTarget.style.cursor = "";
+    if (!resize || !preview) return;
+    if (preview[resize.propertyId] === view.propertyWidths[resize.propertyId]) return;
+    configure({ type: "view.configure", viewId: view.id, propertyWidths: preview });
+  }
+
+  function openHeaderMenu(event: { preventDefault(): void; clientX: number; clientY: number }, propertyId: string) {
+    event.preventDefault();
+    setMenu({ propertyId, x: event.clientX, y: event.clientY });
+  }
+
+  function onHeaderKeyDown(event: KeyboardEvent<HTMLElement>, propertyId: string, hidden: boolean) {
+    if (hidden) {
+      applyAffordance(disclosureAffordance({ key: event.key, expanded: false }), {
+        hand: (hand) => {
+          if (hand.type !== "expand") return;
+          event.preventDefault();
+          showProperty(propertyId);
+        },
+      });
+      return;
+    }
+    if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey)) {
+      event.preventDefault();
+      const rect = event.currentTarget.getBoundingClientRect();
+      setMenu({ propertyId, x: rect.left, y: rect.bottom });
+      return;
+    }
+    applyAffordance(activateAffordance(event), {
+      hand: (hand) => {
+        if (hand.type !== "activate") return;
+        event.preventDefault();
+        cycleSort(propertyId);
+      },
+    });
+  }
+
+  const menuProperty = menu ? document.schema.properties.find((property) => property.id === menu.propertyId) : null;
 
   return (
     <ProductApp
       toolbarLabel="Database and view actions"
-      canvasClassName="overflow-auto p-0"
+      canvasClassName="relative overflow-auto p-0"
       toolbar={(
         <>
           <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
           <ActionButton kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>
-          <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
-          <ToggleButton
-            pressed={view.filter !== null}
-            onClick={() => configure({
-              type: "view.configure",
-              viewId: view.id,
-              filter: view.filter === null
-                ? { propertyId: "status", operator: "equals", value: "backlog" }
-                : null,
-            })}
-          >Backlog only</ToggleButton>
-          <ToggleButton
-            pressed={view.sort !== null}
-            onClick={() => configure({
-              type: "view.configure",
-              viewId: view.id,
-              sort: view.sort === null ? { propertyId: "score", direction: "descending" } : null,
-            })}
-          >Score descending</ToggleButton>
-          <ToggleButton
-            pressed={view.propertyVisibility.note === false}
-            onClick={() => configure({
-              type: "view.configure",
-              viewId: view.id,
-              propertyVisibility: { ...view.propertyVisibility, note: view.propertyVisibility.note !== false ? false : true },
-            })}
-          >Hide notes</ToggleButton>
-          <ToggleButton
-            pressed={view.propertyOrder[0] === "score"}
-            onClick={() => configure({
-              type: "view.configure",
-              viewId: view.id,
-              propertyOrder: view.propertyOrder[0] === "score"
-                ? ["name", "note", "score", "status", "complete"]
-                : ["score", "name", "note", "status", "complete"],
-            })}
-          >Score first</ToggleButton>
           <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
           <ActionButton disabled={commands.undo.disabled} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
           <ActionButton disabled={commands.redo.disabled} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
@@ -195,50 +321,62 @@ export function DatabaseTableDemo() {
         ]} />
       )}
     >
-        <section aria-label="Database editor">
-          <table role="grid" aria-label="Notion-style database" aria-multiselectable="true" className={classes("w-full min-w-[52rem]", ui.database.table)}>
+        <section aria-label="Database editor" className="relative">
+          <table role="grid" aria-label="Notion-style database" aria-multiselectable="true" className={classes("w-full", ui.database.table)}>
             <thead>
               <tr>
                 {properties.map((property) => (
                   <th
                     key={property.id}
                     scope="col"
-                    draggable
-                    aria-grabbed={draggedProperty.current === property.id}
-                    onDragStart={(event) => startPropertyDrag(event, property.id)}
-                    onDragEnter={() => previewPropertyAt(property.id)}
-                    onDragOver={(event) => {
-                      event.preventDefault();
-                      applyAffordance(dropAffordance({ canDrop: true }), {
-                        cursor: (cursor) => {
-                          event.currentTarget.style.cursor = cursor;
-                        },
-                      });
-                    }}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      const drop = dropAffordance({ canDrop: true });
-                      applyAffordance(drop, {
-                        cursor: (cursor) => {
-                          event.currentTarget.style.cursor = cursor;
-                        },
-                      });
-                      const committed = commitAffordance(drop);
-                      if (!committed) return;
-                      applyAffordance(committed, {
-                        commit: (hand) => {
-                          if (hand.type !== "move-drop") return;
-                          finishPropertyDrag();
-                        },
-                      });
-                    }}
-                    onDragEnd={finishPropertyDrag}
-                    className={classes("cursor-move px-3 py-2", ui.database.head)}
+                    tabIndex={0}
+                    data-property-id={property.id}
+                    aria-sort={ariaSort(view.sort, property.id)}
+                    onPointerDown={(event) => startHeaderDrag(event, property.id)}
+                    onPointerMove={moveHeaderDrag}
+                    onPointerUp={finishHeaderDrag}
+                    onContextMenu={(event) => openHeaderMenu(event, property.id)}
+                    onKeyDown={(event) => onHeaderKeyDown(event, property.id, false)}
+                    className={classes("relative cursor-grab px-3 py-2", ui.database.head)}
+                    style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                   >
                     <span className="flex items-center justify-between gap-2">
                       <span>{property.name}</span>
-                      <span className={ui.database.type}>{property.type}</span>
+                      <span className={ui.database.type}>{property.type}{sortMark(view.sort, property.id)}</span>
                     </span>
+                    <span
+                      data-resize-edge="e"
+                      data-property-id={property.id}
+                      className="absolute inset-y-0 right-0 w-1.5 cursor-col-resize"
+                      onPointerDown={(event) => startResize(event, property.id)}
+                      onPointerMove={moveResize}
+                      onPointerUp={finishResize}
+                    />
+                  </th>
+                ))}
+                {hiddenProperties.map((property) => (
+                  <th
+                    key={property.id}
+                    scope="col"
+                    tabIndex={0}
+                    data-property-id={property.id}
+                    data-hidden-property={property.id}
+                    aria-expanded={false}
+                    aria-label={`Show ${property.name}`}
+                    onClick={(event) => {
+                      applyAffordance(activateAffordance(event), {
+                        hand: (hand) => {
+                          if (hand.type !== "activate") return;
+                          showProperty(property.id);
+                        },
+                      });
+                    }}
+                    onKeyDown={(event) => onHeaderKeyDown(event, property.id, true)}
+                    className={classes("cursor-pointer px-1 py-2", ui.database.head)}
+                    style={{ width: stubWidth, minWidth: stubWidth }}
+                  >
+                    <span className="sr-only">{property.name}</span>
+                    <span aria-hidden="true">·</span>
                   </th>
                 ))}
                 <th scope="col" className={classes("w-10 px-2 py-2", ui.database.rowAction)}>Row</th>
@@ -255,7 +393,8 @@ export function DatabaseTableDemo() {
                         key={property.id}
                         data-record-id={record.id}
                         data-property-id={property.id}
-                        className={classes("min-w-32 p-0", ui.database.cell)}
+                        className={classes("p-0", ui.database.cell)}
+                        style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                         {...gridCellProps(item)}
                         onClick={(event) => {
                           applyAffordance(pointerSelect(event), {
@@ -283,12 +422,46 @@ export function DatabaseTableDemo() {
                       </SelectableItem>
                     );
                   })}
+                  {hiddenProperties.map((property) => (
+                    <td key={property.id} className={classes("p-0", ui.database.cell)} style={{ width: stubWidth, minWidth: stubWidth }} />
+                  ))}
                   <td className={classes("px-2 py-2", ui.database.rowAction)}>{record.id}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {records.length === 0 ? <div className={classes("m-3 p-6", ui.surface.empty)}>No records in this view.</div> : null}
+          {menu && menuProperty ? (
+            <div
+              role="menu"
+              aria-label={`${menuProperty.name} property`}
+              className={classes("fixed", ui.interactive.contextMenu)}
+              style={{ left: menu.x, top: menu.y }}
+            >
+              <button type="button" role="menuitem" className={ui.interactive.contextMenuItem} onClick={() => { hideProperty(menuProperty.id); setMenu(null); }}>
+                Hide
+              </button>
+              {filterItems(menuProperty).map((item) => (
+                <button
+                  key={String(item.value)}
+                  type="button"
+                  role="menuitem"
+                  className={ui.interactive.contextMenuItem}
+                  onClick={() => {
+                    setFilter({ propertyId: menuProperty.id, operator: "equals", value: item.value });
+                    setMenu(null);
+                  }}
+                >
+                  Filter {item.label}
+                </button>
+              ))}
+              {view.filter?.propertyId === menuProperty.id ? (
+                <button type="button" role="menuitem" className={ui.interactive.contextMenuItem} onClick={() => { setFilter(null); setMenu(null); }}>
+                  Clear filter
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </section>
     </ProductApp>
   );
@@ -353,6 +526,28 @@ function commitInput(
   commit: (value: string | number) => void,
 ) {
   commit(property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value);
+}
+
+function nextSort(sort: DatabaseSort | null, propertyId: string): DatabaseSort | null {
+  if (sort?.propertyId !== propertyId) return { propertyId, direction: "ascending" };
+  if (sort.direction === "ascending") return { propertyId, direction: "descending" };
+  return null;
+}
+
+function ariaSort(sort: DatabaseSort | null, propertyId: string): "ascending" | "descending" | "none" {
+  if (sort?.propertyId !== propertyId) return "none";
+  return sort.direction;
+}
+
+function sortMark(sort: DatabaseSort | null, propertyId: string): string {
+  if (sort?.propertyId !== propertyId) return "";
+  return sort.direction === "ascending" ? " ↑" : " ↓";
+}
+
+function filterItems(property: DatabaseProperty): ReadonlyArray<{ readonly label: string; readonly value: string | boolean }> {
+  if (property.type === "select") return property.options.map((option) => ({ label: option.name, value: option.id }));
+  if (property.type === "checkbox") return [{ label: "checked", value: true }, { label: "unchecked", value: false }];
+  return [];
 }
 
 function cellKey(recordId: string, propertyId: string): string {

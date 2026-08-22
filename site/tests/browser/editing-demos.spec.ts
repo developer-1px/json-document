@@ -64,7 +64,13 @@ test("Hands catalog lists the genre hands", async ({ page }) => {
   await expect(article.getByRole("link", { name: "Sheet" })).toHaveAttribute("href", "/demo/sheet");
   await expect(article.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/docs/tree");
   await expect(article.getByRole("link", { name: "Kanban" })).toHaveAttribute("href", "/demo/kanban");
-  await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/demo/database");
+  await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/docs/database");
+  await expect(article.getByRole("link", { name: "Chat" })).toHaveAttribute("href", "/docs/chat");
+  await expect(article.getByRole("link", { name: "Agent" })).toHaveAttribute("href", "/docs/agent");
+  await expect(article.getByRole("link", { name: "Code" })).toHaveAttribute("href", "/docs/code");
+  await expect(article.getByRole("link", { name: "Slides" })).toHaveAttribute("href", "/docs/slides");
+  await expect(article.getByRole("link", { name: "Calendar" })).toHaveAttribute("href", "/docs/calendar");
+  await expect(article.getByRole("link", { name: "Form" })).toHaveAttribute("href", "/docs/form");
 });
 
 test("legacy Showcase path opens Hands", async ({ page }) => {

@@ -36,6 +36,7 @@ export interface DatabaseDocumentFromZod extends Record<string, JSONValue> {
     readonly type: "table";
     readonly propertyOrder: ReadonlyArray<string>;
     readonly propertyVisibility: Readonly<Record<string, boolean>>;
+    readonly propertyWidths: Readonly<Record<string, number>>;
     readonly sort: null;
     readonly filter: null;
   }>;
@@ -143,6 +144,7 @@ export function databaseDocumentFromZod(
         type: "table",
         propertyOrder,
         propertyVisibility: {},
+        propertyWidths: {},
         sort: null,
         filter: null,
       }],

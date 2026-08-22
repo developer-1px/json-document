@@ -73,6 +73,7 @@ export const ui = {
     documentBlock: "border-b border-pencil-light/70 bg-transparent px-2 py-1.5 last:border-b-0",
     documentIndex: "rounded-none border-0 border-r border-pencil-light bg-paper-warm text-pencil shadow-none",
     empty: "rounded-[6px] border border-dashed border-pencil-light bg-paper-warm text-pencil",
+    marquee: "rounded-[6px] border border-dashed border-impact/50 bg-impact/10",
   },
   interactive: {
     control: "cursor-pointer rounded-[6px] border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:translate-y-px focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-pencil-light/60 disabled:bg-transparent disabled:text-pencil disabled:shadow-none",
@@ -89,7 +90,13 @@ export const ui = {
     disclosure: "group flex w-full cursor-pointer items-center justify-between gap-3 rounded-[6px] border border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-ink-strong outline-none transition-colors hover:border-pencil-light hover:bg-paper-warm focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:text-pencil",
     chevron: "text-pencil transition-transform group-aria-expanded:rotate-180",
     selectable: "cursor-pointer outline-none transition-[background-color,border-color,box-shadow] duration-150 hover:bg-paper-warm focus-visible:ring-2 focus-visible:ring-impact/25 focus-within:ring-2 focus-within:ring-impact/25 data-[selected=true]:relative data-[selected=true]:border-impact data-[selected=true]:bg-paper-warm data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-impact data-[focus=true]:outline data-[focus=true]:outline-2 data-[focus=true]:-outline-offset-1 data-[focus=true]:outline-ink",
+    planeItem: "absolute !absolute grid place-items-center data-[hover=true]:outline data-[hover=true]:outline-1 data-[hover=true]:outline-impact/50",
+    resizeHandle: "absolute h-2 w-2 border border-paper bg-impact",
+    contextMenu: "absolute z-10 min-w-28 rounded-[6px] border border-pencil-light bg-paper py-1 shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)]",
+    contextMenuItem: "block w-full px-3 py-1 text-left text-xs text-ink hover:bg-paper-warm",
     icon: "flex h-7 w-7 cursor-pointer items-center justify-center rounded-[4px] border border-transparent bg-transparent text-pencil outline-none transition-colors hover:border-pencil-light hover:bg-paper hover:text-ink-strong active:bg-paper-warm focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-pencil-light",
+    contextMenu: "absolute z-10 min-w-28 rounded-[6px] border border-pencil-light bg-paper py-1 shadow-[0_2px_4px_rgba(69,67,62,0.06),0_20px_48px_rgba(69,67,62,0.10)]",
+    contextMenuItem: "block w-full px-3 py-1 text-left text-xs text-ink hover:bg-paper-warm",
   },
   field: {
     control: "rounded-[6px] border border-pencil-light bg-paper px-3 py-2 text-sm leading-6 text-ink-strong outline-none hover:border-pencil focus-visible:border-impact focus-visible:ring-2 focus-visible:ring-impact/25 disabled:cursor-not-allowed disabled:bg-paper-warm disabled:text-pencil",

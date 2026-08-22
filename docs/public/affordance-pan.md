@@ -1,7 +1,5 @@
 # Pan
 
-TBD.
-
 Pan은 대상을 옮기지 않고 보이는 평면을 옮기는 손입니다. `grab` /
 `grabbing` / `all-scroll` 커서가 이 손을 가리킵니다.
 
@@ -35,7 +33,9 @@ function onPointerMove(event: PointerEvent) {
 닫는 손:
 - Space + 드래그
 - 가운데 버튼 드래그
+- 선택이 없을 때 화살표로 평면 팬
 - `grab` → `grabbing`
 - `all-scroll`
+- 휠로 스크롤/팬은 [Scroll](affordance-scroll.md)
 
 근거: [CSS UI cursor `grab` / `all-scroll`](https://www.w3.org/TR/css-ui-4/#cursor)

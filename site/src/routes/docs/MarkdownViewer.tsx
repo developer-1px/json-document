@@ -131,12 +131,23 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "order.md": "/docs/order",
   "object.md": "/docs/object",
   "tree.md": "/docs/tree",
+  "database.md": "/docs/database",
+  "chat.md": "/docs/chat",
+  "agent.md": "/docs/agent",
+  "code.md": "/docs/code",
+  "slides.md": "/docs/slides",
+  "calendar.md": "/docs/calendar",
+  "form.md": "/docs/form",
 };
 
 function rewriteMarkdownHref(href: string | undefined): string | undefined {
   if (!href) return href;
   const file = href.replace(/^\.\//, "");
-  return markdownHrefs[file] ?? href;
+  const hashIndex = file.indexOf("#");
+  const path = hashIndex === -1 ? file : file.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? "" : file.slice(hashIndex);
+  const rewritten = markdownHrefs[path];
+  return rewritten ? `${rewritten}${hash}` : href;
 }
 
 function headingId(text: string): string {

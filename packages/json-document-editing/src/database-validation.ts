@@ -18,6 +18,12 @@ export function assertDatabaseView(view: DatabaseTableView, properties: Readonly
   assertUnique(view.propertyOrder, "view property");
   if (view.propertyOrder.length !== properties.length || view.propertyOrder.some((id) => !available.has(id))) throw new Error(`Database view ${JSON.stringify(view.id)} must order every property exactly once.`);
   for (const propertyId of Object.keys(view.propertyVisibility)) if (!available.has(propertyId)) throw new Error(`Database view references unknown property ${JSON.stringify(propertyId)}.`);
+  for (const [propertyId, width] of Object.entries(view.propertyWidths)) {
+    if (!available.has(propertyId)) throw new Error(`Database view references unknown property ${JSON.stringify(propertyId)}.`);
+    if (typeof width !== "number" || !Number.isFinite(width) || width <= 0) {
+      throw new Error(`Database view ${JSON.stringify(view.id)} has an invalid width for ${JSON.stringify(propertyId)}.`);
+    }
+  }
   if (view.sort && !available.has(view.sort.propertyId)) throw new Error("Database sort property was not found.");
   if (view.filter && !available.has(view.filter.propertyId)) throw new Error("Database filter property was not found.");
 }

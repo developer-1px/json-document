@@ -56,6 +56,7 @@ export interface DatabaseTableView extends Record<string, JSONValue> {
   readonly type: "table";
   readonly propertyOrder: ReadonlyArray<string>;
   readonly propertyVisibility: Readonly<Record<string, boolean>>;
+  readonly propertyWidths: Readonly<Record<string, number>>;
   readonly sort: DatabaseSort | null;
   readonly filter: DatabaseFilter | null;
 }
@@ -127,6 +128,7 @@ export type DatabaseIntent =
       readonly viewId: string;
       readonly propertyOrder?: ReadonlyArray<string>;
       readonly propertyVisibility?: Readonly<Record<string, boolean>>;
+      readonly propertyWidths?: Readonly<Record<string, number>>;
       readonly sort?: DatabaseSort | null;
       readonly filter?: DatabaseFilter | null;
     }
@@ -413,6 +415,7 @@ function configureView(
     ...current,
     ...(intent.propertyOrder === undefined ? {} : { propertyOrder: [...intent.propertyOrder] }),
     ...(intent.propertyVisibility === undefined ? {} : { propertyVisibility: { ...intent.propertyVisibility } }),
+    ...(intent.propertyWidths === undefined ? {} : { propertyWidths: { ...intent.propertyWidths } }),
     ...(intent.sort === undefined ? {} : { sort: intent.sort }),
     ...(intent.filter === undefined ? {} : { filter: intent.filter }),
   };
