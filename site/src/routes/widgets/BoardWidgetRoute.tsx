@@ -1,6 +1,13 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 import { createKanbanEditor, type KanbanDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  lineBoundary,
+  moveLinePoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
 import {
   applyAffordance,
   commitAffordance,
@@ -10,7 +17,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialBoard: KanbanDocument = {
@@ -38,6 +45,8 @@ export function BoardWidgetRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
   const [drag, setDrag] = useState<DragState | null>(null);
   const surface = useRef<HTMLDivElement>(null);
+  const columnListboxes = useRef(new Map<string, HTMLUListElement>());
+  const cardIds = () => (editor.snapshot.value as KanbanDocument).columns.flatMap((column) => column.cardIds);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCardIds,
@@ -49,6 +58,16 @@ export function BoardWidgetRoute() {
         mode: mode === "replace" ? "replace" : "toggle",
       });
     },
+    keyboard: {
+      resolve: editingCommandFromStroke,
+      focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
+      neighbor: (key, command) => command.type === "move"
+        ? moveLinePoint(cardIds(), key, command.direction)
+        : lineBoundary(cardIds(), command.edge),
+      onDelete: () => {
+        editor.dispatch({ type: "selection.remove" });
+      },
+    },
   });
   const board = editing.snapshot.value as KanbanDocument;
   const cards = new Map(board.cards.map((card) => [card.id, card]));
@@ -56,9 +75,20 @@ export function BoardWidgetRoute() {
     id: column.id,
     cardIds: column.cardIds,
   }));
+  const focusKey = editor.snapshot.selection.primaryKey;
+  const focusColumnId = focusKey === null
+    ? null
+    : board.columns.find((column) => column.cardIds.includes(focusKey))?.id ?? null;
+
+  useLayoutEffect(() => {
+    if (focusColumnId === null) return;
+    columnListboxes.current.get(focusColumnId)?.focus();
+  }, [focusColumnId, focusKey]);
 
   function handleCardPointerDown(event: PointerEvent<HTMLElement>, cardId: string) {
+    event.preventDefault();
     event.stopPropagation();
+    (event.currentTarget.closest("[role=listbox]") as HTMLElement | null)?.focus();
     surface.current?.setPointerCapture(event.pointerId);
     applyAffordance(pointerSelect(event), {
       hand: (hand) => {
@@ -137,8 +167,16 @@ export function BoardWidgetRoute() {
             <div key={column.id} data-column-id={column.id} className="grid content-start gap-2">
               <p className={classes("mb-0 mt-0", ui.text.label)}>{column.title}</p>
               <ul
+                ref={(node) => {
+                  if (node === null) columnListboxes.current.delete(column.id);
+                  else columnListboxes.current.set(column.id, node);
+                }}
                 role="listbox"
                 aria-label={column.title}
+                {...activeDescendantContainerProps(
+                  focusColumnId === column.id && focusKey !== null ? boardCardId(focusKey) : null,
+                )}
+                onKeyDown={editing.getKeyDownHandler()}
                 className="m-0 grid min-h-[4rem] list-none gap-1 p-0"
               >
                 {column.cardIds.map((cardId) => {
@@ -149,11 +187,12 @@ export function BoardWidgetRoute() {
                   return (
                     <li key={card.id}>
                       <SelectableItem
-                        role="option"
+                        as="div"
                         className={classes("w-full text-left", ui.surface.selectableBlock)}
                         selected={option.selected}
                         focus={option.focus}
-                        aria-selected={option["aria-selected"]}
+                        {...activeDescendantItemProps(boardCardId(card.id))}
+                        {...projectWebWidgetState({ role: "option", selected: option.selected })}
                         style={{
                           transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
                           pointerEvents: drag ? "none" : undefined,
@@ -178,6 +217,10 @@ export function BoardWidgetRoute() {
       ]}
     />
   );
+}
+
+function boardCardId(cardId: string): string {
+  return `widget-board-option-${cardId}`;
 }
 
 function columnAt(event: PointerEvent<HTMLElement>): string | null {

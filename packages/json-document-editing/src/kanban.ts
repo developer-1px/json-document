@@ -168,6 +168,12 @@ export function createKanbanEditor(source: EditingDocumentSource<KanbanDocument>
   function removeCards(ids: ReadonlyArray<string>): EditingResult<KanbanSelection> {
     const board = value();
     const removing = new Set(ids);
+    const orderedIds = board.columns.flatMap((column) => column.cardIds);
+    const firstRemoved = orderedIds.findIndex((id) => removing.has(id));
+    const remainingIds = orderedIds.filter((id) => !removing.has(id));
+    const successor = firstRemoved < 0
+      ? null
+      : remainingIds[Math.min(firstRemoved, remainingIds.length - 1)] ?? null;
     const operations: JSONPatchOperation[] = [];
     board.columns.forEach((column, index) => {
       const nextIds = column.cardIds.filter((id) => !removing.has(id));
@@ -190,7 +196,7 @@ export function createKanbanEditor(source: EditingDocumentSource<KanbanDocument>
     operations.push(...replacements, ...removals);
     return session.apply({
       operations,
-      selectionAfter: selectionFor([]),
+      selectionAfter: selectionFor(successor === null ? [] : [successor]),
       origin: "selection.remove",
     });
   }

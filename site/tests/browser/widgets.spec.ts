@@ -20,6 +20,7 @@ test("Widgets catalog redirects to affordance usage", async ({ page }) => {
 
 test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   await page.goto("/widgets/toolbar");
+  const listbox = page.getByRole("listbox", { name: "Order items" });
   const undo = page.getByRole("toolbar", { name: "History" }).getByRole("button", { name: "Undo" });
   const redo = page.getByRole("toolbar", { name: "History" }).getByRole("button", { name: "Redo" });
   await expect(undo).toBeDisabled();
@@ -30,7 +31,11 @@ test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   });
 
   await page.getByRole("option", { name: "Inbox" }).click();
+  await expect(listbox).toBeFocused();
+  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-toolbar-option-inbox");
   await page.keyboard.press("Delete");
+  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-toolbar-option-today");
+  await expect(page.locator("#widget-toolbar-option-today")).toHaveCount(1);
   await expect(undo).toBeEnabled();
   expect(await json(page, "widget-toolbar-history")).toEqual({ canUndo: true, canRedo: false });
   expect(await json(page, "widget-toolbar-commands")).toEqual({
@@ -44,6 +49,13 @@ test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   await expect(redo).toBeEnabled();
   await expect(page.getByRole("option", { name: "Inbox" })).toBeVisible();
   expect(await json(page, "widget-toolbar-keyboard")).toEqual({ type: "undo" });
+
+  await redo.focus();
+  await page.keyboard.press("Space");
+  await expect(page.getByRole("option", { name: "Inbox" })).toHaveCount(0);
+  await undo.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("option", { name: "Inbox" })).toBeVisible();
 });
 
 test("Listbox typeahead jumps to the matching label", async ({ page }) => {
@@ -134,7 +146,10 @@ test("Grid reads topology and selected cells from Sheet", async ({ page }) => {
 
 test("Document reads selected keys, focus, and text offset", async ({ page }) => {
   await page.goto("/widgets/document");
+  const document = page.getByRole("listbox", { name: "Document blocks" });
   await page.getByRole("option", { name: "Select a range" }).click();
+  await expect(document).toBeFocused();
+  await expect(document).toHaveAttribute("aria-activedescendant", "widget-document-option-select");
   expect(await json(page, "widget-document-selected")).toEqual(["select"]);
   expect(await json(page, "widget-document-focus")).toBe("select");
   expect(await json(page, "widget-document-offset")).toEqual({
@@ -142,13 +157,26 @@ test("Document reads selected keys, focus, and text offset", async ({ page }) =>
     select: 0,
     move: null,
   });
+  await page.keyboard.press("Delete");
+  await expect(page.getByRole("option", { name: "Select a range" })).toHaveCount(0);
+  await expect(document).toBeFocused();
+  await expect(document).toHaveAttribute("aria-activedescendant", "widget-document-option-move");
+  await expect(page.locator("#widget-document-option-move")).toHaveCount(1);
 });
 
 test("Canvas reads selected objects on a plane", async ({ page }) => {
   await page.goto("/widgets/canvas");
+  const canvas = page.getByRole("listbox", { name: "Canvas objects" });
   await page.getByRole("option", { name: "Card" }).click();
+  await expect(canvas).toBeFocused();
+  await expect(canvas).toHaveAttribute("aria-activedescendant", "widget-canvas-option-card");
   expect(await json(page, "widget-canvas-selected")).toEqual(["card"]);
   expect(await json(page, "widget-canvas-focus")).toBe("card");
+  await page.keyboard.press("Delete");
+  await expect(page.getByRole("option", { name: "Card" })).toHaveCount(0);
+  await expect(canvas).toBeFocused();
+  await expect(canvas).toHaveAttribute("aria-activedescendant", "widget-canvas-option-chip");
+  await expect(page.locator("#widget-canvas-option-chip")).toHaveCount(1);
 });
 
 test("Tree reads visible topology and selected keys", async ({ page }) => {
@@ -202,8 +230,23 @@ test("Board reads columns and selected cards", async ({ page }) => {
     { id: "done", cardIds: [] },
   ]);
   await page.getByRole("option", { name: "Draw the board" }).click();
+  const doing = page.getByRole("listbox", { name: "Doing" });
+  await expect(doing).toBeFocused();
+  await expect(doing).toHaveAttribute("aria-activedescendant", "widget-board-option-draw");
   expect(await json(page, "widget-board-selected")).toEqual(["draw"]);
   expect(await json(page, "widget-board-focus")).toBe("draw");
+
+  await page.keyboard.press("ArrowUp");
+  const todo = page.getByRole("listbox", { name: "Todo" });
+  await expect(todo).toBeFocused();
+  await expect(todo).toHaveAttribute("aria-activedescendant", "widget-board-option-review");
+  await expect(doing).not.toHaveAttribute("aria-activedescendant", /.+/);
+  await page.keyboard.press("Delete");
+  await expect(page.getByRole("option", { name: "Review copy" })).toHaveCount(0);
+  await expect(doing).toBeFocused();
+  await expect(doing).toHaveAttribute("aria-activedescendant", "widget-board-option-draw");
+  await expect(todo).not.toHaveAttribute("aria-activedescendant", /.+/);
+  await expect(page.locator("#widget-board-option-draw")).toHaveCount(1);
 });
 
 test("Board modifier click toggles cards and drag moves a card", async ({ page }) => {
