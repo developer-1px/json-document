@@ -1,25 +1,20 @@
 # Focus
 
-TBD.
-
 Focus는 키보드의 포인터입니다. Tab과 Shift+Tab은 컴포넌트 사이로 옮기고,
 화살표·Home·End는 컴포넌트 안에서 옮깁니다. Focus와 [Select](affordance-select.md)는
 다릅니다. Focus 표시는 항상 보여야 하고, 선택 표시와 겹치면 안 됩니다.
 
 ```ts
-import { focusAffordance } from "@interactive-os/json-document-affordance";
+import { applyAffordance, focusAffordance } from "@interactive-os/json-document-affordance";
 
 function onKeyDown(event: KeyboardEvent) {
-  const hand = focusAffordance(event);
-  if (hand?.type === "tab") return;
-  if (hand?.type === "move") {
-    const next = neighbor(focusKey, hand.direction);
-    setFocusKey(next);
-    return;
-  }
-  if (hand?.type === "boundary") {
-    setFocusKey(hand.edge === "start" ? ids[0] : ids.at(-1));
-  }
+  applyAffordance(focusAffordance(event), {
+    hand: (hand) => {
+      if (hand.type === "tab") return;
+      if (hand.type === "move") setFocusKey(neighbor(focusKey, hand.direction));
+      if (hand.type === "boundary") setFocusKey(hand.edge === "start" ? ids[0] : ids.at(-1));
+    },
+  });
 }
 ```
 

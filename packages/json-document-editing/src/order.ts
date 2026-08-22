@@ -54,6 +54,7 @@ export type OrderIntent =
       readonly mode?: "replace" | "extend" | "toggle";
     }
   | { readonly type: "selection.remove" }
+  | { readonly type: "item.rename"; readonly itemId: string; readonly label: string }
   | { readonly type: "clipboard.paste"; readonly clipboard: OrderClipboard; readonly afterId?: string };
 
 export interface OrderEditor {
@@ -119,6 +120,16 @@ export function createOrderEditor(
       return session.apply({
         operations: pasted.map((item, offset) => ({ op: "add", path: `/items/${targetIndex + 1 + offset}`, value: item })),
         selectionAfter: rangesFor(pasted),
+        origin: intent.type,
+      });
+    }
+
+    if (intent.type === "item.rename") {
+      const index = items.findIndex((item) => item.id === intent.itemId);
+      if (index < 0) return failure("rename.item-not-found");
+      return session.apply({
+        operations: [{ op: "replace", path: `/items/${index}/label`, value: intent.label }],
+        selectionAfter: session.snapshot.selection,
         origin: intent.type,
       });
     }

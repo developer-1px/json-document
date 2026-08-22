@@ -122,6 +122,72 @@ export function clickCountAffordance(detail: number): AffordancePreview {
   return { hand: { type: "click", count: detail } };
 }
 
+export function caretCursor(direction: "horizontal" | "vertical"): "text" | "vertical-text" {
+  return direction === "vertical" ? "vertical-text" : "text";
+}
+
+export function caretAffordance(input:
+  | { readonly type: "pointer"; readonly dragging?: boolean }
+  | Pick<WebKeyboardStroke, "key" | "shiftKey">
+): AffordancePreview {
+  if (!("key" in input)) {
+    return {
+      hand: {
+        type: "caret",
+        action: input.dragging ? "range" : "place",
+        operation: input.dragging ? "extend" : "replace",
+      },
+      cursor: "text",
+    };
+  }
+  const command = keyboard.resolve({
+    key: input.key,
+    shiftKey: input.shiftKey,
+    metaKey: false,
+    ctrlKey: false,
+  });
+  if (command?.type === "move") {
+    return {
+      hand: {
+        type: "caret-move",
+        direction: command.direction,
+        operation: command.operation,
+      },
+    };
+  }
+  if (command?.type === "boundary") {
+    return {
+      hand: {
+        type: "caret-move",
+        edge: command.edge,
+        operation: command.operation,
+      },
+    };
+  }
+  return { hand: null };
+}
+
+export function renameAffordance(input:
+  | Pick<WebKeyboardStroke, "key">
+  | {
+    readonly type: "pointer";
+    readonly detail: number;
+    readonly intervalMs: number;
+    readonly slowMs?: number;
+  }
+): AffordancePreview {
+  if (!("key" in input)) {
+    const slowMs = input.slowMs ?? 400;
+    return input.detail === 2 && input.intervalMs >= slowMs
+      ? { hand: { type: "rename", action: "begin" } }
+      : { hand: null };
+  }
+  if (input.key === "F2") return { hand: { type: "rename", action: "begin" } };
+  if (input.key === "Enter") return { hand: { type: "rename", action: "commit" } };
+  if (input.key === "Escape") return { hand: { type: "rename", action: "cancel" } };
+  return { hand: null };
+}
+
 export function activateAffordance(input: { readonly key?: string; readonly detail?: number; readonly button?: number }): AffordancePreview {
   if (input.key === "Enter") return { hand: { type: "activate" } };
   if (input.button === 0 && (input.detail ?? 1) >= 1) return { hand: { type: "activate" } };

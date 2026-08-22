@@ -52,4 +52,15 @@ describe("ordered structural selection", () => {
     expect(editor.undo().ok).toBe(true);
     expect(editor.selectedItemIds).toEqual(["n1", "n2"]);
   });
+
+  test("renames an item and preserves its selection through undo", () => {
+    const editor = createOrderEditor(initial);
+    editor.dispatch({ type: "selection.set", itemId: "b" });
+    expect(editor.dispatch({ type: "item.rename", itemId: "b", label: "Bravo" }).ok).toBe(true);
+    expect((editor.snapshot.value as OrderDocument).items[1]?.label).toBe("Bravo");
+    expect(editor.selectedItemIds).toEqual(["b"]);
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as OrderDocument).items[1]?.label).toBe("Beta");
+    expect(editor.selectedItemIds).toEqual(["b"]);
+  });
 });

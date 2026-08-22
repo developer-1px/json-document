@@ -81,20 +81,10 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Scroll](affordance-scroll.md) | `wheelAffordance` | wheel 팬 |
 | [Zoom](affordance-zoom.md) | `wheelAffordance`, `zoomAffordance` | Mod+휠, +/− |
 | [Not-allowed](affordance-forbid.md) | `forbiddenCursor` | not-allowed, 잠긴 객체 |
-
-## 키보드 TBD
-
-| Affordance | API | Hand |
-| --- | --- | --- |
 | [Focus](affordance-focus.md) | `focusAffordance` | Tab 사이, 화살표 안, 초점 ≠ 선택 |
 | [Caret](affordance-caret.md) | `caretAffordance`, `caretCursor` | I-beam 삽입점, 글 범위 |
 | [Rename](affordance-rename.md) | `renameAffordance` | F2, 느린 두 번 누르기 |
-
-## 마우스 TBD
-
-| Affordance | API | Hand |
-| --- | --- | --- |
-| [Double-click](affordance-double-click.md) | `clickCountAffordance` | 글 단어 범위 |
+| [Double-click](affordance-double-click.md) | `clickCountAffordance` | `detail` 2, 글 단어 범위 |
 | [Triple-click](affordance-triple-click.md) | `clickCountAffordance` | `detail` 3 |
 
 ## 평면

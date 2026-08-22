@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 import {
   activateAffordance,
   applyAffordance,
+  caretAffordance,
+  caretCursor,
   clickCountAffordance,
   commitAffordance,
   contextMenuAffordance,
@@ -12,12 +14,14 @@ import {
   escapeAffordance,
   forbiddenCursor,
   historyAffordance,
+  focusAffordance,
+  planeHitAffordance,
+  pointerSelect,
+  renameAffordance,
   hoverAffordance,
   marqueeAffordance,
   marqueeHitsAffordance,
   panAffordance,
-  planeHitAffordance,
-  pointerSelect,
   resizeAffordance,
   resolveAffordanceKey,
   selectAllAffordance,
@@ -176,6 +180,65 @@ describe("typeaheadAffordance", () => {
       names: ["Inbox", "Today", "Later"],
       from: "Inbox",
     }).hand).toEqual({ type: "typeahead", buffer: "T", name: "Today" });
+  });
+});
+
+describe("focusAffordance", () => {
+  test("keeps component traversal separate from internal movement", () => {
+    expect(focusAffordance({ key: "Tab", shiftKey: false }).hand).toEqual({ type: "tab", direction: "next" });
+    expect(focusAffordance({ key: "Tab", shiftKey: true }).hand).toEqual({ type: "tab", direction: "prev" });
+    expect(focusAffordance({ key: "ArrowDown", shiftKey: true }).hand).toEqual({
+      type: "move",
+      direction: "down",
+      operation: "replace",
+    });
+    expect(focusAffordance({ key: "Home", shiftKey: false }).hand).toEqual({
+      type: "boundary",
+      edge: "start",
+      operation: "replace",
+    });
+  });
+});
+
+describe("caretAffordance", () => {
+  test("leaves text geometry to the host while closing pointer and key intent", () => {
+    expect(caretAffordance({ type: "pointer" })).toEqual({
+      hand: { type: "caret", action: "place", operation: "replace" },
+      cursor: "text",
+    });
+    expect(caretAffordance({ type: "pointer", dragging: true }).hand).toEqual({
+      type: "caret",
+      action: "range",
+      operation: "extend",
+    });
+    expect(caretAffordance({ key: "ArrowRight", shiftKey: true }).hand).toEqual({
+      type: "caret-move",
+      direction: "right",
+      operation: "extend",
+    });
+    expect(caretCursor("horizontal")).toBe("text");
+    expect(caretCursor("vertical")).toBe("vertical-text");
+  });
+});
+
+describe("renameAffordance", () => {
+  test("begins, commits, and cancels without owning the draft", () => {
+    expect(renameAffordance({ key: "F2" }).hand).toEqual({ type: "rename", action: "begin" });
+    expect(renameAffordance({ key: "Enter" }).hand).toEqual({ type: "rename", action: "commit" });
+    expect(renameAffordance({ key: "Escape" }).hand).toEqual({ type: "rename", action: "cancel" });
+    expect(renameAffordance({ type: "pointer", detail: 2, intervalMs: 500 }).hand).toEqual({
+      type: "rename",
+      action: "begin",
+    });
+    expect(renameAffordance({ type: "pointer", detail: 2, intervalMs: 200 }).hand).toBeNull();
+  });
+});
+
+describe("clickCountAffordance", () => {
+  test("reports native double and triple click counts", () => {
+    expect(clickCountAffordance(2).hand).toEqual({ type: "click", count: 2 });
+    expect(clickCountAffordance(3).hand).toEqual({ type: "click", count: 3 });
+    expect(clickCountAffordance(0).hand).toBeNull();
   });
 });
 

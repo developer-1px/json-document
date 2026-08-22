@@ -39,6 +39,14 @@ export type AffordanceHand =
   | { readonly type: "clear" }
   | { readonly type: "typeahead"; readonly buffer: string; readonly name: string | null }
   | { readonly type: "click"; readonly count: number }
+  | { readonly type: "caret"; readonly action: "place" | "range"; readonly operation: "replace" | "extend" }
+  | {
+    readonly type: "caret-move";
+    readonly direction?: AffordanceMoveDirection;
+    readonly edge?: "start" | "end";
+    readonly operation: "replace" | "extend";
+  }
+  | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel" }
   | { readonly type: "activate" }
   | { readonly type: "cancel" }
   | { readonly type: "tab"; readonly direction: "next" | "prev" }
@@ -94,7 +102,6 @@ export function applyAffordance<H extends AffordanceHand>(
   if (result.hand) actions.hand?.(result.hand);
   if ("commit" in result && result.commit && result.hand) actions.commit?.(result.hand);
 }
-
 export function commitAffordance<H extends AffordanceHand>(
   result: AffordancePreview<H>,
 ): AffordanceCommit<H> | null {
@@ -109,5 +116,3 @@ export function commitAffordance<H extends AffordanceHand>(
     ? { hand, commit: true }
     : { hand, cursor: result.cursor, commit: true };
 }
-
-

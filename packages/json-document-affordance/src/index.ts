@@ -32,6 +32,8 @@ export type {
 } from "./result.js";
 export {
   activateAffordance,
+  caretAffordance,
+  caretCursor,
   clickCountAffordance,
   contextMenuAffordance,
   deleteAffordance,
@@ -39,6 +41,7 @@ export {
   focusAffordance,
   planeHitAffordance,
   pointerSelect,
+  renameAffordance,
   resolveAffordanceKey,
   selectAllAffordance,
   typeaheadAffordance,

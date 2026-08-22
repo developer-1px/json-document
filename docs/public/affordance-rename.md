@@ -1,27 +1,31 @@
 # Rename
 
-TBD.
-
 Rename은 고른 대상의 레이블을 고치는 손입니다. F2와 느린 double-click이
 같은 손을 엽니다. Escape는 [Escape](affordance-cancel.md)입니다.
 
 ```ts
-import { renameAffordance } from "@interactive-os/json-document-affordance";
+import { applyAffordance, renameAffordance } from "@interactive-os/json-document-affordance";
 
 function onKeyDown(event: KeyboardEvent) {
-  const hand = renameAffordance(event);
-  if (hand === "begin") setRenaming(focusKey);
-  if (hand === "cancel") setRenaming(null);
-  if (hand === "commit" && renaming) {
-    editor.dispatch({ type: "item.rename", itemId: renaming, label: draft });
-    setRenaming(null);
-  }
+  applyAffordance(renameAffordance(event), {
+    hand: (hand) => {
+      if (hand.type !== "rename") return;
+      if (hand.action === "begin") setRenaming(focusKey);
+      if (hand.action === "cancel") setRenaming(null);
+      if (hand.action === "commit" && renaming) {
+        editor.dispatch({ type: "item.rename", itemId: renaming, label: draft });
+        setRenaming(null);
+      }
+    },
+  });
 }
 
 function onClick(event: MouseEvent, itemId: string) {
-  if (renameAffordance({ type: "pointer", detail: event.detail, intervalMs }) === "begin") {
-    setRenaming(itemId);
-  }
+  applyAffordance(renameAffordance({ type: "pointer", detail: event.detail, intervalMs }), {
+    hand: (hand) => {
+      if (hand.type === "rename" && hand.action === "begin") setRenaming(itemId);
+    },
+  });
 }
 ```
 
