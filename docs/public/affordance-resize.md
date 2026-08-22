@@ -1,36 +1,39 @@
 # Resize
 
-TBD.
-
 Resize는 가장자리·모서리·칸 경계·창 분할선을 움직이는 손입니다.
 CSS predefined 리사이즈 커서가 이 손을 닫습니다.
 
 ```ts
-import { resizeCursor, resizeOffset } from "@interactive-os/json-document-affordance";
+import { applyAffordance, commitAffordance, resizeAffordance } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent, edge: "se") {
-  event.currentTarget.style.cursor = resizeCursor(edge);
-  const offset = resizeOffset(
-    origin,
-    { x: event.clientX, y: event.clientY },
-    edge,
-    event,
-  );
-  setPreview(offset);
+  applyAffordance(resizeAffordance(origin, { x: event.clientX, y: event.clientY }, edge, event), {
+    cursor: (cursor) => {
+      event.currentTarget.style.cursor = cursor;
+    },
+    hand: (hand) => {
+      if (hand.type === "resize") setPreview(hand);
+    },
+  });
 }
 
 function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
-  const offset = resizeOffset(
-    origin,
-    { x: event.clientX, y: event.clientY },
-    edge,
-    event,
+  const committed = commitAffordance(
+    resizeAffordance(origin, { x: event.clientX, y: event.clientY }, edge, event),
   );
-  editor.dispatch({
-    type: "object.resize",
-    objectId,
-    dx: offset.dx,
-    dy: offset.dy,
+  if (!committed) return;
+  applyAffordance(committed, {
+    commit: (hand) => {
+      if (hand.type !== "resize") return;
+      editor.dispatch({
+        type: "object.resize",
+        objectIds: [objectId],
+        dx: hand.dx,
+        dy: hand.dy,
+        dw: hand.dw,
+        dh: hand.dh,
+      });
+    },
   });
 }
 ```
@@ -40,10 +43,12 @@ function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
 기준입니다.
 
 닫는 손:
+- 선택 바운딩 박스 핸들
 - 모서리: `n-resize` … `nwse-resize`
 - 칸/행: `col-resize` / `row-resize`
 - 분할선: 화살표, Enter로 접기
 - Shift: 비율 고정
 - Alt: 가운데 기준
+- 스냅은 [Snap](affordance-snap.md)
 
-근거: [CSS UI cursor resize](https://www.w3.org/TR/css-ui-4/#cursor), [CSS UI resize](https://www.w3.org/TR/css-ui-4/#resize), [APG Window Splitter](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/)
+근거: [CSS UI cursor resize](https://www.w3.org/TR/css-ui-4/#cursor), [CSS UI resize](https://www.w3.org/TR/css-ui-4/#resize), [APG Window Splitter](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/), Figma/Keynote/Illustrator 바운딩 박스

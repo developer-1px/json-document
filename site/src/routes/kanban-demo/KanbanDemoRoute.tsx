@@ -1,4 +1,5 @@
 import { useState, type DragEvent } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createKanbanEditor,
   type KanbanDocument,
@@ -11,7 +12,7 @@ import {
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { ActionButton } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
@@ -59,11 +60,12 @@ export function KanbanDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader illustration="braces" title="Kanban">
         Drag a card into another column. One JSON document keeps the board.
       </PageHeader>
 
+    )}>
       <ProductApp
         toolbarLabel="Kanban actions"
         toolbar={(
@@ -145,6 +147,6 @@ export function KanbanDemoRoute() {
         ))}
       </section>
       </ProductApp>
-    </PageFrame>
+    </DemoPage>
   );
 }

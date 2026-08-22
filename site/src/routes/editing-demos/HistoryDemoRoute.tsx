@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
@@ -51,11 +52,12 @@ export function HistoryDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader title="History Demo" illustration="cursor">
         편집을 한 번 commit하고, 만들어진 History 항목으로 document.value와 Selection을 함께 복원합니다.
       </PageHeader>
 
+    )}>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-input">
           <p className={ui.text.label}>1 · 편집</p>
@@ -116,6 +118,6 @@ export function HistoryDemoRoute() {
           ]} />
         </section>
       </div>
-    </PageFrame>
+    </DemoPage>
   );
 }

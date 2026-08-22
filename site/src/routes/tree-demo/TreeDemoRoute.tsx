@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type ClipboardEvent } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createTreeEditor,
   type TreeClipboard,
@@ -21,7 +22,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
@@ -171,7 +172,7 @@ export function TreeDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader
         illustration="branch"
         title="Tree"
@@ -185,6 +186,7 @@ export function TreeDemoRoute() {
         A folded tree. The host owns expand state and sends only the visible ID line to the editor.
       </PageHeader>
 
+    )}>
       <ProductApp
         toolbarLabel="Tree actions"
         toolbar={(
@@ -259,7 +261,7 @@ export function TreeDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
         </section>
       </ProductApp>
-    </PageFrame>
+    </DemoPage>
   );
 }
 

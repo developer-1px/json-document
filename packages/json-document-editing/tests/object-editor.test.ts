@@ -52,6 +52,25 @@ describe("object editing selection family", () => {
     expect(editor.snapshot.value).toEqual(initial);
   });
 
+  test("resizes selected objects and keeps them selected", () => {
+    const editor = createObjectEditor(initial);
+    expect(editor.dispatch({
+      type: "object.resize",
+      objectIds: ["a"],
+      dx: 0,
+      dy: 0,
+      dw: 10,
+      dh: -4,
+    }).ok).toBe(true);
+    expect((editor.snapshot.value as ObjectDocument).objects[0]).toMatchObject({
+      x: 10,
+      y: 10,
+      width: 70,
+      height: 36,
+    });
+    expect(editor.selectedObjects.map((object) => object.id)).toEqual(["a"]);
+  });
+
   test("deletes selected objects and restores them selected", () => {
     const editor = createObjectEditor(initial);
     editor.dispatch({ type: "selection.set", objectIds: ["a", "c"] });

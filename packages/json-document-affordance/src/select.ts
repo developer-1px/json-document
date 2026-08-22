@@ -38,40 +38,54 @@ export function planeHitAffordance(input: {
   readonly shiftKey?: boolean;
   readonly metaKey?: boolean;
   readonly ctrlKey?: boolean;
+  readonly nestedId?: string;
+  readonly locked?: boolean;
 }): AffordancePreview {
-  const operation = selectionOperationFromModifiers({
-    shiftKey: input.shiftKey ?? false,
-    metaKey: input.metaKey ?? false,
-    ctrlKey: input.ctrlKey ?? false,
-  });
+  if (input.locked) return { hand: null, cursor: "not-allowed" };
   const selected = input.selectedIds;
-  const hitId = input.hitId;
-  const hitSelected = selected.includes(hitId);
-  if (operation === "replace") {
+  const deep = (input.metaKey || input.ctrlKey) && input.nestedId;
+  if (deep) {
     return {
-      hand: {
-        type: "select",
-        operation,
-        objectIds: hitSelected ? selected : [hitId],
-      },
+      hand: { type: "select", operation: "replace", objectIds: [input.nestedId!] },
     };
   }
-  if (operation === "extend") {
+  const hitId = input.hitId;
+  const hitSelected = selected.includes(hitId);
+  if (input.shiftKey) {
     return {
       hand: {
         type: "select",
-        operation,
-        objectIds: [...new Set([...selected, hitId])],
+        operation: hitSelected ? "replace" : "extend",
+        objectIds: hitSelected ? selected.filter((id) => id !== hitId) : [...new Set([...selected, hitId])],
       },
     };
   }
   return {
     hand: {
       type: "select",
-      operation,
-      objectIds: hitSelected ? selected.filter((id) => id !== hitId) : [...selected, hitId],
+      operation: "replace",
+      objectIds: hitSelected ? selected : [hitId],
     },
   };
+}
+
+export function deleteAffordance(input: { readonly key?: string }): AffordancePreview {
+  if (input.key === "Delete" || input.key === "Backspace") return { hand: { type: "delete" } };
+  return { hand: null };
+}
+
+export function contextMenuAffordance(input: {
+  readonly type?: string;
+  readonly button?: number;
+  readonly key?: string;
+  readonly shiftKey?: boolean;
+}): AffordancePreview {
+  if (input.key === "Escape") return { hand: { type: "menu", action: "cancel" } };
+  if (input.type === "contextmenu" || input.button === 2) return { hand: { type: "menu", action: "open" } };
+  if (input.key === "ContextMenu" || (input.key === "F10" && input.shiftKey)) {
+    return { hand: { type: "menu", action: "open" } };
+  }
+  return { hand: null };
 }
 
 export function resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview {

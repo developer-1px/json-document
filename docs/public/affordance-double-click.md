@@ -23,5 +23,6 @@ function onClick(event: MouseEvent, itemId: string) {
 - click / dblclick, `detail` 2
 - 글: 단어 범위
 - 항목: 열기 또는 Rename
+- 평면: 그룹이면 한 단계 들어가기, 텍스트면 편집. [Activate](affordance-activate.md)
 
-근거: [UIEvent.detail](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/detail)
+근거: [UIEvent.detail](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/detail), Figma double-click or Enter = child

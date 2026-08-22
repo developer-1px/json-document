@@ -18,18 +18,11 @@ import {
   planeHitAffordance,
   snapAffordance,
 } from "@interactive-os/json-document-affordance";
+import { initialObjectDemoDocument } from "../../shared/demo-workbench/object-demo-document";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
-
-const initialObjects: ObjectDocument = {
-  objects: [
-    { id: "note", label: "Note", x: 24, y: 24, width: 120, height: 72, color: "#de6d55" },
-    { id: "card", label: "Card", x: 168, y: 40, width: 120, height: 72, color: "#60786f" },
-    { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
-  ],
-};
 
 type DragState = {
   readonly ids: ReadonlyArray<string>;
@@ -49,7 +42,7 @@ type MarqueeState = {
 };
 
 export function CanvasWidgetRoute() {
-  const [editor] = useState(() => createObjectEditor(initialObjects));
+  const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
   const [drag, setDrag] = useState<DragState | null>(null);
   const [marquee, setMarquee] = useState<MarqueeState | null>(null);
   const [pan, setPan] = useState({ x: 0, y: 0, originX: 0, originY: 0, active: false });
@@ -338,7 +331,7 @@ export function CanvasWidgetRoute() {
                     width: object.width,
                     height: object.height,
                     backgroundColor: object.color,
-                    color: "#fff8f2",
+                    color: "rgb(var(--color-foreground-canvas-object))",
                   }}
                   selected={option.selected}
                   focus={option.focus}

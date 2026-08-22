@@ -199,7 +199,7 @@
     "label": "Hands",
     "title": "Hands - json-document",
     "heading": "Hands",
-    "description": "Document, Order, Object, Sheet, Tree, Kanban, Database 최소 완성본을 고릅니다.",
+    "description": "닫힌 장르의 손과 TBD 손을 고릅니다.",
     "language": "ko",
     "navigationGroup": "Hands",
     "sidebar": false
@@ -299,6 +299,60 @@
     "title": "Database Demo - json-document",
     "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
     "parentPath": "/docs/database"
+  },
+  {
+    "path": "/docs/chat",
+    "label": "Chat",
+    "title": "Chat - json-document",
+    "heading": "Chat",
+    "description": "DM 말풍선으로 메시지를 주고받는 Chat Hands를 설명합니다. TBD.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/agent",
+    "label": "Agent",
+    "title": "Agent - json-document",
+    "heading": "Agent",
+    "description": "버블 없는 트랜스크립트와 생성 애니메이션을 집는 Agent Hands를 설명합니다. TBD.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/code",
+    "label": "Code",
+    "title": "Code - json-document",
+    "heading": "Code",
+    "description": "줄 범위를 드래그해 코멘트를 다는 Code Hands를 설명합니다. TBD.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/slides",
+    "label": "Slides",
+    "title": "Slides - json-document",
+    "heading": "Slides",
+    "description": "필름스트립 순서와 슬라이드 위 객체를 집는 Slides Hands를 설명합니다. TBD.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/calendar",
+    "label": "Calendar",
+    "title": "Calendar - json-document",
+    "heading": "Calendar",
+    "description": "시간 격자 위 이벤트를 집는 Calendar Hands를 설명합니다. TBD.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/form",
+    "label": "Form",
+    "title": "Form - json-document",
+    "heading": "Form",
+    "description": "질문 카드를 넣고 정렬하는 Form Hands를 설명합니다. TBD.",
+    "language": "ko",
+    "navigationGroup": "Hands"
   },
   {
     "path": "/adapters",
@@ -505,6 +559,8 @@
     "description": "클릭·Enter·Space로 대상의 기본 동작을 실행하는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -551,6 +607,8 @@
     "description": "Delete와 Backspace로 고른 대상을 지우는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -583,6 +641,8 @@
     "description": "누르지 않고 포인터를 올려 손과 도움말을 드러내는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -613,6 +673,8 @@
     "description": "오른쪽 클릭, Shift+F10, Menu 키로 자리 메뉴를 여는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -647,6 +709,8 @@
     "description": "드래그한 대상을 어디에 둘지 정하고, 못 두면 no-drop을 보여주는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -657,6 +721,8 @@
     "description": "Alt/Option을 누른 채 드래그하면 원본을 복제하는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -667,6 +733,8 @@
     "description": "모서리·칸·분할선을 끌어 크기를 바꾸고, 화살표로 미세 조절하는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -689,6 +757,8 @@
     "description": "휠과 드래그 중 자동 스크롤로 보이는 줄을 옮기는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -699,6 +769,8 @@
     "description": "Mod+휠과 +/- 키, zoom-in/out 커서로 보이는 배율을 바꾸는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {
@@ -721,6 +793,8 @@
     "description": "할 수 없는 자리에서 not-allowed와 no-drop 커서를 보여주는 손입니다.",
     "language": "ko",
     "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/canvas",
+    "relatedDemoLabel": "증명 열기",
     "parentPath": "/docs/affordance"
   },
   {

@@ -1,7 +1,5 @@
 # Drop
 
-TBD.
-
 Drop은 [Drag](affordance-drag.md)의 끝입니다. 어디에 둘 수 있는지를
 커서가 말하고, 못 두는 자리는 `no-drop`입니다.
 
@@ -44,5 +42,6 @@ function onPointerUp(event: PointerEvent, cardId: string, columnId: string) {
 - drop 대상 위: `move` / `copy` / `alias`
 - 불가능한 자리: `no-drop`
 - Escape: [Escape](affordance-cancel.md)
+- 드롭 후 옮긴 집합이 선택된 채로 남음
 
-근거: [HTML Drag and Drop](https://html.spec.whatwg.org/multipage/dnd.html), [CSS UI cursor `no-drop`](https://www.w3.org/TR/css-ui-4/#cursor)
+근거: [HTML Drag and Drop](https://html.spec.whatwg.org/multipage/dnd.html), [CSS UI cursor `no-drop`](https://www.w3.org/TR/css-ui-4/#cursor), [Apple HIG Drag and drop](https://developer.apple.com/design/human-interface-guidelines/drag-and-drop)

@@ -1,4 +1,5 @@
 import { useState, type ClipboardEvent } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createObjectEditor,
   type ObjectClipboard,
@@ -11,24 +12,15 @@ import {
   applyAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
+import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
-const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
-
-const initialObjects: ObjectDocument = {
-  objects: [
-    { id: "note", label: "Note", x: 24, y: 24, width: 120, height: 72, color: "#de6d55" },
-    { id: "card", label: "Card", x: 168, y: 40, width: 120, height: 72, color: "#60786f" },
-    { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
-  ],
-};
-
 export function ObjectDemoRoute() {
-  const [editor] = useState(() => createObjectEditor(initialObjects));
+  const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
   const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
   const [webClipboard] = useState(() => createWebClipboardBinding({
     codec: objectClipboardCodec,
@@ -111,7 +103,7 @@ export function ObjectDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader
         illustration="peek"
         title="Object Demo"
@@ -125,12 +117,13 @@ export function ObjectDemoRoute() {
         A key-family board. The host hit-tests boxes and sends only stable IDs. Fill changes color without moving geometry.
       </PageHeader>
 
+    )}>
       <ProductApp
         toolbarLabel="Object actions"
         canvasClassName="relative min-h-[20rem] overflow-hidden"
         toolbar={(
           <>
-            {colors.map((color) => (
+            {objectDemoColors.map((color) => (
               <ActionButton
                 key={color}
                 aria-label={`Fill ${color}`}
@@ -183,7 +176,7 @@ export function ObjectDemoRoute() {
             <SelectableItem
               key={object.id}
               data-object-id={object.id}
-              className="absolute grid place-items-center"
+              className={ui.interactive.planeItem}
               {...optionProps(editing.getItem(object.id))}
               onClick={(event) => {
                 applyAffordance(pointerSelect(event), {
@@ -203,7 +196,7 @@ export function ObjectDemoRoute() {
                 width: object.width,
                 height: object.height,
                 backgroundColor: object.color,
-                color: "#fff8f2",
+                color: "rgb(var(--color-foreground-canvas-object))",
               }}
             >
               {object.label}
@@ -212,6 +205,6 @@ export function ObjectDemoRoute() {
           <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Fill uses the selected IDs only.</p>
         </section>
       </ProductApp>
-    </PageFrame>
+    </DemoPage>
   );
 }

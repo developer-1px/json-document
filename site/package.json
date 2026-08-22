@@ -6,9 +6,10 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview",
+    "check:tokens": "node scripts/check-design-tokens.mjs",
     "check:ui": "node scripts/check-ui-language.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",
@@ -33,6 +34,7 @@
     "react-markdown": "^10.1.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
+    "shiki": "^4.4.3",
     "zod": "^4.0.0"
   },
   "devDependencies": {

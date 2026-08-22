@@ -49,5 +49,7 @@ Toggle button의 지속 상태인 `aria-pressed`와 다릅니다. disabled이면
 - custom pointer lifecycle 뒤 compatibility click은 무시하고, `detail === 0` virtual click만 별도 activation으로 받음
 - repeat keydown은 새 Press를 만들지 않음
 - Space는 장르 Intent: 버튼은 activate, 목록은 toggle
+- 평면 Enter / 더블클릭: 그룹이면 한 단계 들어가기, 텍스트면 편집
+- 평면 Enter / 더블클릭: 그룹이면 한 단계 들어가기, 텍스트면 편집
 
-근거: [APG Button](https://www.w3.org/WAI/ARIA/apg/patterns/button/), [CSS UI cursor `pointer`](https://www.w3.org/TR/css-ui-4/#cursor)
+근거: [APG Button](https://www.w3.org/WAI/ARIA/apg/patterns/button/), [CSS UI cursor `pointer`](https://www.w3.org/TR/css-ui-4/#cursor), Figma double-click or Enter = child

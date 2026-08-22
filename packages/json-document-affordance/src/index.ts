@@ -1,5 +1,19 @@
-export { dragAffordance, dragOperation, dropAffordance, forbiddenCursor, hoverAffordance, marqueeAffordance, nudgeAffordance, panAffordance, snapAffordance } from "./drag.js";
-export type { Point, Rect } from "./drag.js";
+export {
+  dragAffordance,
+  dragOperation,
+  dropAffordance,
+  forbiddenCursor,
+  hoverAffordance,
+  marqueeAffordance,
+  marqueeHitsAffordance,
+  nudgeAffordance,
+  panAffordance,
+  resizeAffordance,
+  snapAffordance,
+  wheelAffordance,
+  zoomAffordance,
+} from "./drag.js";
+export type { Point, Rect, ResizeEdge } from "./drag.js";
 export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";
 export { historyAffordance } from "./history.js";
@@ -18,4 +32,19 @@ export type {
   AffordanceResult,
   SelectOperation,
 } from "./result.js";
-export { activateAffordance, caretAffordance, caretCursor, clickCountAffordance, escapeAffordance, focusAffordance, planeHitAffordance, pointerSelect, renameAffordance, resolveAffordanceKey, selectAllAffordance, typeaheadAffordance } from "./select.js";
+export {
+  activateAffordance,
+  caretAffordance,
+  caretCursor,
+  clickCountAffordance,
+  contextMenuAffordance,
+  deleteAffordance,
+  escapeAffordance,
+  focusAffordance,
+  planeHitAffordance,
+  pointerSelect,
+  renameAffordance,
+  resolveAffordanceKey,
+  selectAllAffordance,
+  typeaheadAffordance,
+} from "./select.js";

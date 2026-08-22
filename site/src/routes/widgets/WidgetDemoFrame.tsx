@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { type InspectorItem } from "../../shared/ui/inspector";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
+import { PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 
 export function WidgetDemoFrame(props: {
@@ -15,11 +16,11 @@ export function WidgetDemoFrame(props: {
   readonly values: ReadonlyArray<InspectorItem>;
 }) {
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader illustration={props.illustration ?? "cursor"} title={props.title}>
         {props.description}
       </PageHeader>
-
+    )}>
       <div className="grid gap-4 lg:grid-cols-2">
         <section className={classes("p-4", ui.surface.raised)} aria-label={props.widgetLabel}>
           <p className={ui.text.label}>Proof</p>
@@ -42,6 +43,6 @@ export function WidgetDemoFrame(props: {
           </div>
         </section>
       </div>
-    </PageFrame>
+    </DemoPage>
   );
 }
