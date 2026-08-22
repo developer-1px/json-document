@@ -71,7 +71,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
-| [Activate](affordance-activate.md) | `activateAffordance` | Enter, 기본 클릭 |
+| [Press / Activate](affordance-activate.md) | `pressAffordance`, `activateAffordance` | custom Press lifecycle, native activation |
 | [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace |
 | [Hover](affordance-hover.md) | `hoverAffordance` | 평면 윤곽, 툴팁 지연 |
 | [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, 선택은 유지 |

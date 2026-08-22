@@ -76,6 +76,7 @@ describe("object editing selection family", () => {
     editor.dispatch({ type: "selection.set", objectIds: ["a", "c"] });
     expect(editor.dispatch({ type: "selection.remove" }).ok).toBe(true);
     expect((editor.snapshot.value as ObjectDocument).objects.map((object) => object.id)).toEqual(["b"]);
+    expect(editor.snapshot.selection.primaryKey).toBe("b");
 
     expect(editor.undo().ok).toBe(true);
     expect(editor.selectedObjects.map((object) => object.id)).toEqual(["a", "c"]);

@@ -27,11 +27,12 @@ import {
   dropAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
+import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { gridCellProps, historyCommands } from "../../shared/widget-binding";
+import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
 import { initialDatabase } from "./initial-database";
 
 const defaultWidth = 160;
@@ -107,6 +108,16 @@ export function DatabaseTableDemo() {
     onSelect: (key, mode) => {
       const { recordId, propertyId } = parseCellKey(key);
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
+    },
+    keyboard: {
+      resolve: editingCommandFromStroke,
+      focusKey: () => {
+        const current = editor.snapshot.selection.focus;
+        return current ? cellKey(current.recordId, current.propertyId) : undefined;
+      },
+      neighbor: () => null,
+      onUndo: () => { run(editor.undo, "Undone"); },
+      onRedo: () => { run(editor.redo, "Redone"); },
     },
   });
   const snapshot = editing.snapshot;
@@ -220,7 +231,7 @@ export function DatabaseTableDemo() {
       }
       return;
     }
-    applyAffordance(activateAffordance({ button: 0, detail: 1 }), {
+    applyAffordance(activateAffordance(pressInteractionFromWeb({ type: "click", button: 0, detail: 1 })), {
       hand: (hand) => {
         if (hand.type !== "activate") return;
         cycleSort(drag.propertyId);
@@ -280,7 +291,11 @@ export function DatabaseTableDemo() {
       setMenu({ propertyId, x: rect.left, y: rect.bottom });
       return;
     }
-    applyAffordance(activateAffordance(event), {
+    const interaction = pressInteractionFromWeb(event);
+    if (interaction?.source === "keyboard" && "key" in interaction && interaction.key === "Space" && interaction.phase === "start") {
+      event.preventDefault();
+    }
+    applyAffordance(activateAffordance(interaction), {
       hand: (hand) => {
         if (hand.type !== "activate") return;
         event.preventDefault();
@@ -321,7 +336,12 @@ export function DatabaseTableDemo() {
         ]} />
       )}
     >
-        <section aria-label="Database editor" className="relative">
+        <section
+          aria-label="Database editor"
+          className="relative"
+          tabIndex={0}
+          onKeyDown={editing.getKeyDownHandler()}
+        >
           <table role="grid" aria-label="Notion-style database" aria-multiselectable="true" className={classes("w-full", ui.database.table)}>
             <thead>
               <tr>
@@ -337,6 +357,7 @@ export function DatabaseTableDemo() {
                     onPointerUp={finishHeaderDrag}
                     onContextMenu={(event) => openHeaderMenu(event, property.id)}
                     onKeyDown={(event) => onHeaderKeyDown(event, property.id, false)}
+                    onKeyUp={(event) => onHeaderKeyDown(event, property.id, false)}
                     className={classes("relative cursor-grab px-3 py-2", ui.database.head)}
                     style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                   >
@@ -364,7 +385,7 @@ export function DatabaseTableDemo() {
                     aria-expanded={false}
                     aria-label={`Show ${property.name}`}
                     onClick={(event) => {
-                      applyAffordance(activateAffordance(event), {
+                      applyAffordance(activateAffordance(pressInteractionFromWeb(event)), {
                         hand: (hand) => {
                           if (hand.type !== "activate") return;
                           showProperty(property.id);

@@ -4,8 +4,8 @@ Official keyboard and clipboard adapters for the public editing
 contracts from `@interactive-os/json-document-editing` and
 `@interactive-os/json-document-selection`.
 
-The package provides official Web adapters for clipboard, keyboard, and text
-input. It translates native `ClipboardEvent`/`DataTransfer` shapes and
+The package provides official Web adapters for clipboard, keyboard, Press,
+ARIA projection, composite focus, and text input. It translates native `ClipboardEvent`/`DataTransfer` shapes and
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
@@ -82,10 +82,13 @@ The Adapter owns:
 - the official keyboard adapter: conventional chords, a host-overridable keymap,
   and visible-order neighbor helpers.
 - native text control value and caret observation without owning text selection.
+- Web Press event facts without assigning a role action;
+- canonical widget state to role-valid ARIA attributes;
+- `aria-activedescendant` and roving-tabindex focus props without owning logical focus.
 
 The host owns:
 
-- the event target, focus, when a command applies, and accessibility wiring;
+- the event target, canonical focus, when a command applies, and role workflow policy;
 - DOM/canvas geometry and hit testing;
 - external plain-text interpretation and product-specific paste policy;
 - native text selection, IME, drag/drop, persistence, and remote protocols.

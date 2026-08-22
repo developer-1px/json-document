@@ -11,6 +11,24 @@ const initial: OrderDocument = {
 };
 
 describe("ordered structural selection", () => {
+  test("keeps logical focus on the next survivor, then previous, then null", () => {
+    const next = createOrderEditor(initial);
+    next.dispatch({ type: "selection.set", itemId: "b" });
+    next.dispatch({ type: "selection.remove" });
+    expect(next.snapshot.selection.ranges[0]?.focus.itemId).toBe("c");
+
+    const previous = createOrderEditor(initial);
+    previous.dispatch({ type: "selection.set", itemId: "d" });
+    previous.dispatch({ type: "selection.remove" });
+    expect(previous.snapshot.selection.ranges[0]?.focus.itemId).toBe("c");
+
+    const empty = createOrderEditor(initial);
+    empty.dispatch({ type: "selection.set", itemId: "a" });
+    empty.dispatch({ type: "selection.set", itemId: "d", mode: "extend" });
+    empty.dispatch({ type: "selection.remove" });
+    expect(empty.snapshot.selection).toEqual({ kind: "range", ranges: [], primaryIndex: null });
+  });
+
   test("selects ranges without text offsets and restores deletion selection", () => {
     const editor = createOrderEditor(initial);
     editor.dispatch({ type: "selection.set", itemId: "b" });
@@ -25,6 +43,7 @@ describe("ordered structural selection", () => {
     });
     expect(editor.dispatch({ type: "selection.remove" }).ok).toBe(true);
     expect((editor.snapshot.value as OrderDocument).items.map((item) => item.id)).toEqual(["a"]);
+    expect(editor.snapshot.selection.ranges[0]?.focus.itemId).toBe("a");
 
     expect(editor.undo().ok).toBe(true);
     expect(editor.snapshot.selection).toEqual(selectionBefore);

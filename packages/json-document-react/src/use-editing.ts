@@ -147,6 +147,7 @@ export function useEditing<Selection extends JSONValue, Key extends string = str
       const command = keyboard.resolve(event);
       if (command === null) return;
       const inField = isEditingField(event.target);
+      const inNativeControl = isNativeInteractiveControl(event.target);
       if (inField && keyboard.text && (command.type === "move" || command.type === "boundary")) {
         const nextOffset = offsetAfterCommand(command, keyboard.text.offset(), keyboard.text.length());
         if (nextOffset !== null) {
@@ -157,7 +158,7 @@ export function useEditing<Selection extends JSONValue, Key extends string = str
       }
       const ignore = keyboard.ignoreCommand
         ?? ((next: EditingKeyboardCommand, context: { readonly inField: boolean }) => (
-          context.inField && next.type !== "undo" && next.type !== "redo"
+          (context.inField || inNativeControl) && next.type !== "undo" && next.type !== "redo"
         ));
       if (ignore(command, { inField, event })) return;
 
@@ -207,6 +208,14 @@ function isEditingField(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest("textarea, input, [contenteditable]") !== null;
 }
 
+function isNativeInteractiveControl(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  const control = target.closest("button, a[href], select, summary, input, textarea, [contenteditable]");
+  if (control === null) return false;
+  const compositeItem = target.closest("[role=option], [role=treeitem], [role=gridcell]");
+  return control !== compositeItem;
+}
+
 function offsetAfterCommand(
   command: Extract<EditingKeyboardCommand, { readonly type: "move" } | { readonly type: "boundary" }>,
   offset: number,
@@ -225,6 +234,7 @@ function offsetAfterCommand(
 }
 
 export type TextCursorControl = Pick<HTMLInputElement, "value" | "setSelectionRange">;
+export type ElementFocusControl = Pick<HTMLElement, "focus">;
 
 export function restoreTextCursor(control: TextCursorControl, offset: number): void {
   const next = Math.min(control.value.length, Math.max(0, offset));
@@ -240,4 +250,15 @@ export function useRestoreTextCursor(
     if (node === null || offset === null) return;
     restoreTextCursor(node, offset);
   }, [control, offset]);
+}
+
+/** Realizes canonical roving focus after React has rendered the focused item. */
+export function useRestoreElementFocus(
+  control: { readonly current: ElementFocusControl | null },
+  focused: boolean,
+): void {
+  useLayoutEffect(() => {
+    if (!focused) return;
+    control.current?.focus();
+  }, [control, focused]);
 }

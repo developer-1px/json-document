@@ -14,7 +14,7 @@ import {
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands, optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialBoard: KanbanDocument = {
   columns: [
@@ -40,6 +40,13 @@ export function KanbanDemoRoute() {
       editor.dispatch({ type: "selection.set", cardId });
     },
     operationFromEvent: () => "replace",
+    keyboard: {
+      resolve: editingCommandFromStroke,
+      focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
+      neighbor: () => null,
+      onUndo: () => { editor.undo(); },
+      onRedo: () => { editor.redo(); },
+    },
   });
   const snapshot = editing.snapshot;
   const board = snapshot.value as KanbanDocument;
@@ -68,7 +75,12 @@ export function KanbanDemoRoute() {
           </>
         )}
       >
-      <section aria-label="Kanban board" className="grid gap-3 md:grid-cols-3">
+      <section
+        aria-label="Kanban board"
+        className="grid gap-3 md:grid-cols-3"
+        tabIndex={0}
+        onKeyDown={editing.getKeyDownHandler()}
+      >
         {board.columns.map((column) => (
           <div
             key={column.id}

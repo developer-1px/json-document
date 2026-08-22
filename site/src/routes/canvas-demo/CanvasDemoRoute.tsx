@@ -30,6 +30,7 @@ import {
   zoomAffordance,
   type ResizeEdge,
 } from "@interactive-os/json-document-affordance";
+import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -567,7 +568,7 @@ export function CanvasDemoRoute() {
         event.preventDefault();
       },
     });
-    applyAffordance(activateAffordance(event), {
+    applyAffordance(activateAffordance(pressInteractionFromWeb(event)), {
       hand: (hand) => {
         if (hand.type !== "activate") return;
         event.preventDefault();
@@ -705,7 +706,7 @@ export function CanvasDemoRoute() {
                     applyAffordance(clickCountAffordance(event.detail), {
                       hand: (hand) => {
                         if (hand.type !== "click" || hand.count !== 2) return;
-                        applyAffordance(activateAffordance({ button: 0, detail: 2 }), {
+                        applyAffordance(activateAffordance(pressInteractionFromWeb(event)), {
                           hand: (activated) => {
                             if (activated.type === "activate") event.preventDefault();
                           },

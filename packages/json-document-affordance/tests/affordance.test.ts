@@ -17,6 +17,7 @@ import {
   focusAffordance,
   planeHitAffordance,
   pointerSelect,
+  pressAffordance,
   renameAffordance,
   hoverAffordance,
   marqueeAffordance,
@@ -31,6 +32,7 @@ import {
   wheelAffordance,
   zoomAffordance,
 } from "../src/index.js";
+import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 
 describe("pointerSelect", () => {
   test("maps conventional modifiers to replace, extend, and toggle", () => {
@@ -56,6 +58,80 @@ describe("pointerSelect", () => {
       },
     });
     expect(operations).toEqual(["replace", "extend", "toggle", "toggle"]);
+  });
+});
+
+describe("pressAffordance", () => {
+  test("owns start, end, cancel, disabled, and native activation without persistent ARIA state", () => {
+    const start = pressAffordance(
+      pressInteractionFromWeb({ type: "keydown", key: " " }),
+      { status: "idle" },
+    );
+    expect(start).toEqual({
+      hand: { type: "press", phase: "start", source: "keyboard", key: "Space" },
+      state: { status: "active", source: "keyboard", key: "Space" },
+    });
+
+    const repeated = pressAffordance(
+      pressInteractionFromWeb({ type: "keydown", key: " ", repeat: true }),
+      start.state,
+    );
+    expect(repeated).toEqual({ hand: null, state: start.state });
+
+    const end = pressAffordance(
+      pressInteractionFromWeb({ type: "keyup", key: " " }),
+      repeated.state,
+    );
+    expect(end).toEqual({
+      hand: { type: "press", phase: "end", source: "keyboard", key: "Space" },
+      state: { status: "idle" },
+    });
+
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "blur" }),
+      start.state,
+    )).toEqual({
+      hand: { type: "press", phase: "cancel", source: "keyboard", key: "Space" },
+      state: { status: "idle" },
+    });
+
+    const pointerStart = pressAffordance(
+      pressInteractionFromWeb({ type: "pointerdown", button: 0 }),
+      { status: "idle" },
+    );
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "pointerleave" }),
+      pointerStart.state,
+    )).toEqual({
+      hand: { type: "press", phase: "cancel", source: "pointer" },
+      state: { status: "idle" },
+    });
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "keydown", key: "Enter" }),
+      { status: "idle" },
+      { disabled: true },
+    )).toEqual({ hand: null, state: { status: "idle" } });
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "click", detail: 0 }),
+      { status: "idle" },
+    )).toEqual({ hand: { type: "activate" }, state: { status: "idle" } });
+  });
+
+  test("maps normalized native and completed custom Press to activation once", () => {
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keyup", key: "Enter" })).hand).toBeNull();
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: " " })).hand).toBeNull();
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keyup", key: " " })).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance({ type: "press", phase: "start", source: "keyboard", key: "Enter" }).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance({ type: "press", phase: "end", source: "keyboard", key: "Space" }).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance({ type: "press", phase: "end", source: "pointer" }).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance(pressInteractionFromWeb({ type: "click", detail: 0 })).hand)
+      .toEqual({ type: "activate" });
   });
 });
 
@@ -492,11 +568,11 @@ describe("forbiddenCursor", () => {
 
 describe("activateAffordance and clickCountAffordance", () => {
   test("Enter and primary click activate; detail 2 is a double-click", () => {
-    expect(activateAffordance({ key: "Enter" }).hand).toEqual({ type: "activate" });
-    expect(activateAffordance({ button: 0, detail: 1 }).hand).toEqual({ type: "activate" });
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).hand).toEqual({ type: "activate" });
+    expect(activateAffordance(pressInteractionFromWeb({ type: "click", button: 0, detail: 1 })).hand).toEqual({ type: "activate" });
     expect(clickCountAffordance(2).hand).toEqual({ type: "click", count: 2 });
     const hands: string[] = [];
-    applyAffordance(activateAffordance({ button: 0, detail: 2 }), {
+    applyAffordance(activateAffordance(pressInteractionFromWeb({ type: "click", button: 0, detail: 2 })), {
       hand: (hand) => hands.push(hand.type),
     });
     expect(hands).toEqual(["activate"]);

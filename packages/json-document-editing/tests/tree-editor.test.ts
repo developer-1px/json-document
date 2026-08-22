@@ -65,6 +65,7 @@ describe("tree editing selection family", () => {
       "b",
       "b-1",
     ]);
+    expect(editor.snapshot.selection.ranges[0]?.focus.nodeId).toBe("b");
 
     expect(editor.undo().ok).toBe(true);
     expect(editor.snapshot.value).toEqual(initial);

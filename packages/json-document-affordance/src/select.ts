@@ -1,9 +1,11 @@
 import {
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
+  type WebPressInteraction,
   type WebKeyboardStroke,
 } from "@interactive-os/json-document-web";
 import {
+  type AffordanceHand,
   type AffordancePreview,
   type SelectOperation,
 } from "./result.js";
@@ -192,9 +194,18 @@ export function renameAffordance(input:
   return { hand: null };
 }
 
-export function activateAffordance(input: { readonly key?: string; readonly detail?: number; readonly button?: number }): AffordancePreview {
-  if (input.key === "Enter") return { hand: { type: "activate" } };
-  if (input.button === 0 && (input.detail ?? 1) >= 1) return { hand: { type: "activate" } };
+export function activateAffordance(
+  input: WebPressInteraction | Extract<AffordanceHand, { readonly type: "press" }> | null,
+): AffordancePreview {
+  if (input === null) return { hand: null };
+  if (input.phase === "activation") return { hand: { type: "activate" } };
+  if (input.source === "pointer" && input.phase === "end") return { hand: { type: "activate" } };
+  if (input.source === "keyboard" && "key" in input && (
+    (input.key === "Enter" && input.phase === "start")
+    || (input.key === "Space" && input.phase === "end")
+  )) {
+    return { hand: { type: "activate" } };
+  }
   return { hand: null };
 }
 

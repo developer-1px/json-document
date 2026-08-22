@@ -2,6 +2,11 @@ import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { createObjectEditor, type ObjectDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
+import {
   applyAffordance,
   commitAffordance,
   dragAffordance,
@@ -16,7 +21,7 @@ import {
 import { initialObjectDemoDocument } from "../../shared/demo-workbench/object-demo-document";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 type DragState = {
@@ -54,10 +59,23 @@ export function CanvasWidgetRoute() {
         mode: mode === "extend" ? "add" : mode,
       });
     },
+    keyboard: {
+      resolve: (stroke) => {
+        const command = editingCommandFromStroke(stroke);
+        return command?.type === "delete" ? command : null;
+      },
+      focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
+      neighbor: () => null,
+      onDelete: () => {
+        editor.dispatch({ type: "selection.remove" });
+      },
+    },
   });
   const document = editing.snapshot.value as ObjectDocument;
 
   function handlePointerDown(event: PointerEvent<HTMLElement>, objectId?: string) {
+    event.preventDefault();
+    surface.current?.focus();
     surface.current?.setPointerCapture(event.pointerId);
     let grabbing = false;
     applyAffordance(panAffordance({ spaceKey: space, buttons: event.buttons }), {
@@ -259,6 +277,7 @@ export function CanvasWidgetRoute() {
         event.preventDefault();
       },
     });
+    editing.getKeyDownHandler()(event);
   }
 
   return (
@@ -274,7 +293,11 @@ export function CanvasWidgetRoute() {
           role="listbox"
           aria-multiselectable="true"
           aria-label="Canvas objects"
-          tabIndex={0}
+          {...activeDescendantContainerProps(
+            editor.snapshot.selection.primaryKey === null
+              ? null
+              : canvasObjectId(editor.snapshot.selection.primaryKey),
+          )}
           onPointerDown={(event) => handlePointerDown(event)}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -299,8 +322,8 @@ export function CanvasWidgetRoute() {
               const option = optionProps(editing.getItem(object.id));
               return (
                 <SelectableItem
+                  as="div"
                   key={object.id}
-                  role="option"
                   className={ui.interactive.planeItem}
                   style={{
                     left: object.x + (offset?.dx ?? 0),
@@ -312,7 +335,8 @@ export function CanvasWidgetRoute() {
                   }}
                   selected={option.selected}
                   focus={option.focus}
-                  aria-selected={option["aria-selected"]}
+                  {...activeDescendantItemProps(canvasObjectId(object.id))}
+                  {...projectWebWidgetState({ role: "option", selected: option.selected })}
                   onPointerDown={(event) => {
                     event.stopPropagation();
                     handlePointerDown(event, object.id);
@@ -338,6 +362,10 @@ export function CanvasWidgetRoute() {
       ]}
     />
   );
+}
+
+function canvasObjectId(objectId: string): string {
+  return `widget-canvas-option-${objectId}`;
 }
 
 function intersects(
