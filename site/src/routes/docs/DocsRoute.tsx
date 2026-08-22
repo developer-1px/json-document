@@ -4,7 +4,6 @@ import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/
 import { classes, ui } from "../../shared/ui/styles";
 import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
 import { docPages, type DocPageId } from "./doc-pages";
-import { pageDescriptor } from "../../app/page-descriptors";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
@@ -45,16 +44,12 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   collaborationLease: "connector",
   collaborationLifecycle: "peek",
   hands: "braces",
+  composer: "terminal",
+  mention: "cursor",
   order: "cursor",
   object: "peek",
   tree: "branch",
   database: "database",
-  chat: "terminal",
-  agent: "sleep",
-  code: "braces",
-  slides: "peek",
-  calendar: "cursor",
-  form: "patch",
   intent: "braces",
   intentGuide: "terminal",
   api: "patch",
@@ -106,7 +101,6 @@ export function ReactEditingDocsRoute() {
 
 export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   const page = docPages[pageId];
-  const demo = page.relatedDemoPath === undefined ? undefined : pageDescriptor(page.relatedDemoPath);
   const headings = useMemo(
     () => markdownHeadings(page.source).filter((heading) => heading.level === 2),
     [page.source],
@@ -118,11 +112,6 @@ export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
         <div className="min-w-0" data-doc-content>
           <div className="mx-auto max-w-3xl">
             <PageHeader title={page.heading ?? page.label} illustration={docIllustrations[pageId]} />
-            {demo ? (
-              <div className="mb-5">
-                <ActionLink to={demo.path}>{page.relatedDemoLabel ?? `${demo.label} 열기`}</ActionLink>
-              </div>
-            ) : null}
             <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
               <div className="flex gap-1 whitespace-nowrap">
                 {headings.map((heading) => (

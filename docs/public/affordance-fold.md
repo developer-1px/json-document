@@ -63,3 +63,9 @@ function onKeyDown(event: KeyboardEvent) {
 - Accordion / Disclosure의 Enter·Space 접힘
 - `aria-expanded`와 호스트 접힘 집합의 동기
 - 가로 나무에서 위·아래가 접힘인지 이웃인지
+
+## Live Demo
+
+```live-demo
+/widgets/tree
+```

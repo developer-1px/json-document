@@ -21,7 +21,7 @@ Connector는 이런 번역을 패키지로 제공합니다. 대상 도구의 API
 
 필요한 Connector만 연결 대상 라이브러리와 함께 설치하면 됩니다. 지원하는
 버전은 각 패키지 README에서 확인할 수 있고, 실제 동작은 사이트의
-[Connector catalog](/connectors)에서 실행할 수 있습니다.
+아래 Live Demo에서 실행할 수 있습니다.
 
 ## React에서 변경 구독하기
 
@@ -51,7 +51,7 @@ function DocumentView({ document }) {
 `useEditing`은 마크업을 그리지 않습니다. 장르 Intent는 `onSelect`에서
 번역합니다. 옵션과 키보드, text 커서 복원은
 [React에서 선택과 커서 그리기](react-editing.md)에 있습니다.
-[/connectors/react](/connectors/react) 데모는 구독과 선택 질의를 실행합니다.
+React Live Demo는 구독과 선택 질의를 실행합니다.
 
 ## React Hook Form의 draft 제출하기
 
@@ -75,7 +75,7 @@ History는 유지되고, `errorName`이 JSON Pointer를 폼 필드 이름으로 
 
 undo, redo 또는 외부 commit으로 document 값이 바뀌면 Connector가 `reset`을
 호출해 폼을 새 값에 맞춥니다. Selection만 달라진 경우에는 입력 중인 초안을
-유지합니다. [/connectors/react-hook-form](/connectors/react-hook-form) 데모에서
+유지합니다. React Hook Form Live Demo에서
 submit과 reset을 차례로 실행해 볼 수 있습니다.
 
 ## Ajv validator 연결하기
@@ -99,7 +99,7 @@ document에 들어가지 않습니다.
 
 JSON Schema draft, format, custom keyword는 Ajv를 만들 때 구성합니다. document
 검사가 동기식이므로 여기 연결하는 validator도 동기식이어야 합니다.
-[/connectors/ajv](/connectors/ajv)에서 성공과 실패 결과를 확인할 수 있습니다.
+Ajv Live Demo에서 성공과 실패 결과를 확인할 수 있습니다.
 
 ## Zod schema 사용하기
 
@@ -130,8 +130,8 @@ field를 Database property로 만들고 record 배열을 옮깁니다. `id` stri
 record ID로 사용합니다. 변환할 수 없는 nested object, array, date가 있으면
 어느 타입에서 멈췄는지 실패 결과로 알려 줍니다.
 
-[/connectors/zod](/connectors/zod)에서는 schema에서 만든 Database를,
-[/connectors/zod/validate](/connectors/zod/validate)에서는 commit validation을
+Zod Live Demo에서는 schema에서 만든 Database를, Validate Live Demo에서는
+commit validation을
 실행해 볼 수 있습니다.
 
 ## TanStack Table의 화면 순서 사용하기
@@ -159,7 +159,7 @@ Table과 제품이 관리합니다.
 
 이 Connector는 `@tanstack/table-core`를 사용합니다. React 화면에서는
 TanStack의 React adapter와 json-document React Connector를 함께 조합합니다.
-[/connectors/tanstack-table](/connectors/tanstack-table) 데모는 화면 순서가
+TanStack Table Live Demo는 화면 순서가
 편집 결과에 반영되는 모습을 보여줍니다.
 
 키보드, clipboard, contenteditable 같은 플랫폼 계약은
@@ -180,3 +180,29 @@ Connector를 바꾸어도 JSON Document와 Editing은 같은 입력을 같은 �
 
 문서에서 사용한 `JSONDocument`의 전체 시그니처와 Pointer helper는 마지막
 [API Reference](api.md)에서 찾을 수 있습니다.
+
+## Live Demo
+
+```live-demo
+/connectors/react
+```
+
+```live-demo
+/connectors/react-hook-form
+```
+
+```live-demo
+/connectors/ajv
+```
+
+```live-demo
+/connectors/zod
+```
+
+```live-demo
+/connectors/zod/validate
+```
+
+```live-demo
+/connectors/tanstack-table
+```

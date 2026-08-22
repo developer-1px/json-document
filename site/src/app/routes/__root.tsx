@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { ActionLink, DisclosureButton } from "../../shared/ui/interactive";
+import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   findSiteRoute,
@@ -46,7 +47,8 @@ function AppShell() {
         className={classes("shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", ui.frame.navigation)}
       >
         <ActionLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
-          json-document
+          <span className="sr-only">json-document</span>
+          <JsonDocumentWordmark className="h-auto w-full max-w-40" />
         </ActionLink>
         <div className={ui.nav.menu}>
           {rootNavRoutes(siteRoutes).map((item) => (
@@ -69,7 +71,7 @@ function AppShell() {
             return (
               <div key={group} role="group" aria-label={group} className="grid content-start">
                 <DisclosureButton
-                  className={ui.nav.groupToggle}
+                  className={classes(ui.nav.groupToggle, activeGroup === group ? ui.nav.groupActive : ui.nav.groupIdle)}
                   expanded={open}
                   controls={`${groupLabelId}-list`}
                   chevronClassName={ui.nav.chevron}
@@ -121,6 +123,7 @@ function NavItem(props: {
   readonly depth: number;
 }) {
   const children = visibleNavChildren(props.item.path, props.currentPath, props.routes);
+  const current = props.currentPath === props.item.path;
   return (
     <li className="grid content-start">
       <ActionLink
@@ -129,6 +132,7 @@ function NavItem(props: {
         branch={isNavBranch(props.currentPath, props.item.path, props.routes)}
         className={classes(props.depth === 0 ? ui.nav.item : ui.nav.child, ui.nav.current)}
       >
+        <span className="grid size-4 shrink-0 place-items-center text-line-accent">{current ? <CatMenuMark /> : null}</span>
         {props.item.label}
       </ActionLink>
       {children.length > 0 ? (

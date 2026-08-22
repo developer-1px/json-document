@@ -54,23 +54,19 @@ test("History Demo restores document value and Selection together", async ({ pag
   expect(await json(page, "history-demo-selection")).toEqual(editedSelection);
 });
 
-test("Hands catalog lists the genre hands", async ({ page }) => {
+test("Hands document embeds genre demos instead of linking standalone pages", async ({ page }) => {
   await page.goto("/editors");
   const article = page.getByRole("article");
   await expect(page.getByRole("heading", { level: 1, name: "Hands" })).toBeVisible();
-  await expect(article.getByRole("link", { name: "Document" })).toHaveAttribute("href", "/demo");
+  await expect(article.locator('[data-live-demo="/demo"]')).toBeVisible();
   await expect(article.getByRole("link", { name: "Order" })).toHaveAttribute("href", "/docs/order");
   await expect(article.getByRole("link", { name: "Object" })).toHaveAttribute("href", "/docs/object");
-  await expect(article.getByRole("link", { name: "Sheet" })).toHaveAttribute("href", "/demo/sheet");
   await expect(article.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/docs/tree");
-  await expect(article.getByRole("link", { name: "Kanban" })).toHaveAttribute("href", "/demo/kanban");
+  await expect(article.locator('[data-live-demo="/demo/sheet"]')).toBeVisible();
+  await expect(article.locator('[data-live-demo="/demo/kanban"]')).toBeVisible();
   await expect(article.getByRole("link", { name: "Database" })).toHaveAttribute("href", "/docs/database");
-  await expect(article.getByRole("link", { name: "Chat" })).toHaveAttribute("href", "/docs/chat");
-  await expect(article.getByRole("link", { name: "Agent" })).toHaveAttribute("href", "/docs/agent");
-  await expect(article.getByRole("link", { name: "Code" })).toHaveAttribute("href", "/docs/code");
-  await expect(article.getByRole("link", { name: "Slides" })).toHaveAttribute("href", "/docs/slides");
-  await expect(article.getByRole("link", { name: "Calendar" })).toHaveAttribute("href", "/docs/calendar");
-  await expect(article.getByRole("link", { name: "Form" })).toHaveAttribute("href", "/docs/form");
+  await expect(article.getByRole("link", { name: "Composer" })).toHaveAttribute("href", "/docs/composer");
+  await expect(article.getByRole("link", { name: "Mention" })).toHaveAttribute("href", "/docs/mention");
 });
 
 test("legacy Showcase path opens Hands", async ({ page }) => {

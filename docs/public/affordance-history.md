@@ -44,3 +44,9 @@ function onKeyDown(event: KeyboardEvent) {
 - Mod+Y redo 변종
 - 연속 입력의 묶음 단위
 - 협업 replica에서 내 기여만 되돌리기는 Collaboration History
+
+## Live Demo
+
+```live-demo
+/widgets/toolbar
+```

@@ -49,3 +49,17 @@ function onPlanePointerDown(event: PointerEvent, hitId: string, selectedIds: Rea
 - 글 단어·줄 범위는 [Double-click](affordance-double-click.md)·
   [Triple-click](affordance-triple-click.md)·[Caret](affordance-caret.md)
 - 빈 평면의 여러 대상은 [Marquee](affordance-marquee.md)
+
+## Live Demo
+
+```live-demo
+/widgets/listbox
+```
+
+```live-demo
+/widgets/grid
+```
+
+```live-demo
+/widgets/document
+```

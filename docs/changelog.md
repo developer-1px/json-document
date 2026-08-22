@@ -5,6 +5,11 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Reframed the development SSOT around JSON Document, Hands, and Artifact. Composer and
+  Mention are the open Hands; App names and transcript animation no longer
+  stand in for human editing tools.
+- Moved every standalone demo into its canonical Markdown document through a lazy Live
+  Demo Bench with interactive preview, source tabs, and shared Shiki highlighting.
 - Closed Focus, Caret, Rename, Double-click, and Triple-click as package hands,
   and dogfooded them on the Order and Document product screens.
 - Opened Hands TBD for Chat, Agent, Code, Slides, Calendar, and Form.

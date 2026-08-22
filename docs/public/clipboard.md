@@ -48,3 +48,9 @@ if (cut?.result.ok) {
 표에서 복사할 때는 [Topology](topology.md)를 함께 넘겨 현재 보이는 직사각형의
 행과 열 순서를 유지합니다. [History](history.md)는 이렇게 기록된 문서 값과
 Selection을 함께 복원합니다.
+
+## Live Demo
+
+```live-demo
+/demo/clipboard
+```

@@ -33,7 +33,7 @@ surface.addEventListener("keydown", (event) => {
 });
 ```
 
-[/adapters/keyboard](/adapters/keyboard) 데모는 이 adapter가 기존 Intent,
+Keyboard Live Demo는 이 adapter가 기존 Intent,
 Clipboard, History와 같은 문을 쓰는지 확인합니다. 화살표는 Selection만
 바꾸고, Delete는 `selection.remove`로 History에 남으며, Mod+Z는
 `undo()`를 호출합니다. 그 선택에서 copy/paste는 Clipboard adapter를
@@ -79,7 +79,7 @@ Document, Sheet, Order, Object, Tree, Database codec은 구조화된 MIME과
 `toggle`로 바꿉니다. `textInputFromControl`은 브라우저 입력 요소의 값과
 caret을 관찰합니다.
 
-[/adapters/clipboard](/adapters/clipboard)에서 실제 ClipboardEvent와
+Clipboard Live Demo에서 실제 ClipboardEvent와
 modifier selection, text input을 연결합니다.
 
 ## Contenteditable adapter
@@ -98,7 +98,7 @@ const document = createJSONDocument({ title: "Shared title" });
 ```
 
 툴바, 슬래시 팔레트, 전송 버튼과 atom·marks 의미는 이 패키지에 없습니다.
-[/adapters/contenteditable](/adapters/contenteditable)에서 두 필드를
+Contenteditable Live Demo에서 두 필드를
 동시에 붙여 다른 경로 변경이 leased root를 덮어쓰지 않는 모습을 볼 수
 있습니다.
 
@@ -111,3 +111,17 @@ const document = createJSONDocument({ title: "Shared title" });
 | Adapter | 플랫폼 계약과 공개 API 사이의 변환 |
 | Connector | 이름 있는 라이브러리 생태계와 공개 API 사이의 번역 |
 | 제품 | UI, 제품별 의미, 입력과 외부 상태 조립 |
+
+## Live Demo
+
+```live-demo
+/adapters/keyboard
+```
+
+```live-demo
+/adapters/clipboard
+```
+
+```live-demo
+/adapters/contenteditable
+```

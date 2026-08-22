@@ -71,26 +71,21 @@ describe("breadcrumbTrail", () => {
     ]);
     expect(trail("/docs/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database"]);
     expect(trail("/demo/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database", "Database Demo:/demo/database"]);
-    expect(trail("/docs/chat")).toEqual(["Overview:/", "Hands:/editors", "Chat:/docs/chat"]);
-    expect(trail("/docs/agent")).toEqual(["Overview:/", "Hands:/editors", "Agent:/docs/agent"]);
-    expect(trail("/docs/code")).toEqual(["Overview:/", "Hands:/editors", "Code:/docs/code"]);
-    expect(trail("/docs/slides")).toEqual(["Overview:/", "Hands:/editors", "Slides:/docs/slides"]);
-    expect(trail("/docs/calendar")).toEqual(["Overview:/", "Hands:/editors", "Calendar:/docs/calendar"]);
-    expect(trail("/docs/form")).toEqual(["Overview:/", "Hands:/editors", "Form:/docs/form"]);
-    expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/adapters"]);
-    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/adapters", "Keyboard:/adapters/keyboard"]);
-    expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/adapters", "Clipboard adapter:/adapters/clipboard"]);
+    expect(trail("/docs/composer")).toEqual(["Overview:/", "Hands:/editors", "Composer:/docs/composer"]);
+    expect(trail("/docs/mention")).toEqual(["Overview:/", "Hands:/editors", "Mention:/docs/mention"]);
+    expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Adapter demos:/adapters"]);
+    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Keyboard:/adapters/keyboard"]);
+    expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Clipboard adapter:/adapters/clipboard"]);
     expect(trail("/docs/react-editing")).toEqual([
       "Overview:/",
-      "Connector:/connectors",
-      "Connector guide:/docs/connectors",
+      "Connector:/docs/connectors",
       "React editing:/docs/react-editing",
     ]);
-    expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/connectors"]);
-    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/connectors", "Zod:/connectors/zod"]);
+    expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/docs/connectors", "Connector demos:/connectors"]);
+    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/docs/connectors", "Zod:/connectors/zod"]);
     expect(trail("/connectors/zod/validate")).toEqual([
       "Overview:/",
-      "Connector:/connectors",
+      "Connector:/docs/connectors",
       "Zod:/connectors/zod",
       "Validate:/connectors/zod/validate",
     ]);
@@ -108,8 +103,8 @@ describe("breadcrumbTrail", () => {
     ]);
   });
 
-  test("does not lift the concept map above layer groups", () => {
-    expect(rootNavRoutes(routes)).toEqual([]);
+  test("keeps Artifact in the final dependency group", () => {
+    expect(rootNavRoutes(routes).map((route) => route.path)).toEqual([]);
   });
 
   test("shows nested nav children only on the current branch", () => {

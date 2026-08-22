@@ -1,4 +1,15 @@
-# 왜 json-document인가
+# 왜 이 기반을 만드는가
+
+에이전트는 이제 답변만 생성하지 않습니다. 문서와 표, 발표 자료 같은
+artifact를 만들고, 사람은 그 결과를 곧바로 고쳐서 일을 이어 갑니다.
+생성될 artifact마다 예전 방식의 제품 FE를 따로 설계하고 구현할 수는 없지만,
+사람에게 익숙하고 신뢰할 수 있는 편집 도구는 여전히 필요합니다.
+
+이 프로젝트는 agent와 사람이 같은 구조화된 값을 공유하고, artifact에 맞는
+Hands를 붙여 함께 작업할 수 있는 기반을 만듭니다. [Artifact](/viewer)는
+서로 다른 artifact가 나타나는 최종 경험을, [Hands](hands.md)는 사람이 그것을
+다루는 방법을 보여 줍니다. json-document는 그 아래에서 값과 변경을 지키는
+Core입니다.
 
 문서 앱에서 제목을 고치고, 표에서 셀을 고르고, 보드에서 카드를 옮기는
 모습은 서로 다릅니다. 노트는 블록을 밀고, 표는 칸을 채우며, 보드는
@@ -66,16 +77,16 @@ Editing은 이 상태를 JSON Document 옆에 둡니다. 화면은 클릭과 키
 같은 문서 위에 선택과 작업을 더하는 일이 Editing입니다. 따라 가려면
 [Intent guide](intent-guide.md)에서 시작합니다.
 
-## 장르의 손
+## Artifact에 손을 붙이기
 
 문서 한 줄, 키로 집는 객체, 격자, 나무, 칸반, 데이터베이스는 서로 다른
 제품처럼 보입니다. 그 아래에서는 같은 문서와 같은 편집 상태를 씁니다.
 다른 것은 그 장르가 손을 얹는 방식입니다.
 
-Hands는 그 전형적 손의 최소 완성본입니다. 한 줄 목록을 집어 옮기는 손,
-칸을 채우는 손, 가지를 접는 손이 선반에 있습니다. Document, Order,
-Object, Sheet, Tree, Kanban, Database가 닫혀 있고, Chat, Agent, Code,
-Slides, Calendar, Form은 TBD입니다. 고르려면 [Hands](hands.md)로 갑니다.
+Hands는 사람이 artifact와 agent를 다루는 편집 도구의 최소 완성본입니다.
+한 줄 목록을 집어 옮기는 손, 칸을 채우는 손, 가지를 접는 손이 선반에
+있습니다. Agent에게 지시와 맥락을 건네는 Composer와, 안정적인 대상을 글에
+넣는 Mention은 TBD입니다. 고르려면 [Hands](hands.md)로 갑니다.
 
 ## 플랫폼, 라이브러리, Affordance
 
@@ -96,14 +107,14 @@ Adapter와 Connector는 환경에 붙입니다. Affordance는 그 위에서 호�
 [Adapters](adapters.md)와 [Connectors](connectors.md),
 [Affordance](affordance.md)에서 이어서 읽습니다.
 
-## 편집 플랫폼의 커널
+## Artifact editing의 Core
 
-json-document는 여러 화면이 같은 문서를 쓰게 하는 편집 플랫폼의
-커널입니다. JSON Document와 Collaboration이 값을 다룹니다. Editing이
+json-document는 agent와 사람이 여러 화면에서 같은 artifact를 쓰게 하는
+편집 기반의 Core입니다. JSON Document와 Collaboration이 값을 다룹니다. Editing이
 손과 기억을 더합니다. Adapter와 Connector가 환경에 붙이고, Affordance가
 최전선의 손을 닫습니다. Hands는 그 다음에 보는 장르 선반입니다.
 
-여러 화면이 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
-커널입니다. 먼저 값을 만져 보려면 [Quickstart](quickstart.md)에서 작은
+여러 artifact가 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
+Core입니다. 먼저 값을 만져 보려면 [Quickstart](quickstart.md)에서 작은
 카드 문서를 만듭니다. 층이 어떻게 이어지는지는 [Concepts](concepts.md)가
 지도입니다.
