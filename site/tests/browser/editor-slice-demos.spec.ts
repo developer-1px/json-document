@@ -38,6 +38,20 @@ test("Object routes platform history shortcuts from its editing surface", async 
   await expect(note).toHaveCSS("background-color", "rgb(77, 106, 138)");
 });
 
+test("Object composes native clipboard events with its paste offset", async ({ page }) => {
+  await page.goto("/demo/object");
+  const note = page.getByRole("button", { name: "Note" });
+  await note.click();
+  await page.keyboard.press("ControlOrMeta+C");
+  await page.getByRole("button", { name: "Card" }).click();
+  await page.keyboard.press("ControlOrMeta+V");
+  await expect(page.getByRole("button", { name: "Note" })).toHaveCount(2);
+  const notes = (await json(page, "object-demo-document")).objects
+    .filter((object: { readonly label: string }) => object.label === "Note");
+  expect(notes.map((object: { readonly x: number; readonly y: number }) => [object.x, object.y]))
+    .toEqual([[24, 24], [48, 48]]);
+});
+
 test("Order typeahead jumps to the matching label and Escape clears the buffer", async ({ page }) => {
   await page.goto("/demo/order");
   await page.getByLabel("Editable order").locator("ol").focus();
@@ -240,6 +254,15 @@ test("Tree uses host visible order and restores a cut with undo", async ({ page 
   await page.getByLabel("Tree actions").getByRole("button", { name: "Undo" }).click();
   expect((await json(page, "tree-demo-document")).nodes.map((node: { readonly id: string }) => node.id))
     .toEqual(["fruit", "apple", "pear"]);
+});
+
+test("Tree composes native clipboard events with visible topology", async ({ page }) => {
+  await page.goto("/demo/tree");
+  await page.getByRole("button", { name: "Vegetables", exact: true }).click();
+  await page.keyboard.press("ControlOrMeta+C");
+  await page.getByRole("button", { name: "Fruit", exact: true }).click();
+  await page.keyboard.press("ControlOrMeta+V");
+  await expect(page.getByRole("button", { name: "Vegetables", exact: true })).toHaveCount(2);
 });
 
 test("Kanban moves a card to another column", async ({ page }) => {
