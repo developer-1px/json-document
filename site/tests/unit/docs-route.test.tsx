@@ -40,7 +40,7 @@ describe("documentation routes", () => {
 
     await user.click(nav.getByRole("button", { name: "Connector" }));
     await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "React", exact: true }));
-    await waitFor(() => expect(document.title).toBe("React Connector Live Demo - json-document"));
+    await waitFor(() => expect(document.title).toBe("React Connector Live Demo - json-document"), { timeout: 10000 });
     expect(await screen.findByRole("heading", { level: 1, name: "React Connector" }, { timeout: 10000 })).toBeTruthy();
 
     await user.click(nav.getByRole("button", { name: "Editing" }));

@@ -95,6 +95,32 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "connectors.md": "/docs/connectors",
   "react-editing.md": "/docs/react-editing",
   "adapters.md": "/docs/adapters",
+  "affordance.md": "/docs/affordance",
+  "affordance-select.md": "/docs/affordance/select",
+  "affordance-fold.md": "/docs/affordance/fold",
+  "affordance-drag.md": "/docs/affordance/drag",
+  "affordance-history.md": "/docs/affordance/history",
+  "affordance-focus.md": "/docs/affordance/focus",
+  "affordance-caret.md": "/docs/affordance/caret",
+  "affordance-typeahead.md": "/docs/affordance/typeahead",
+  "affordance-activate.md": "/docs/affordance/activate",
+  "affordance-cancel.md": "/docs/affordance/cancel",
+  "affordance-delete.md": "/docs/affordance/delete",
+  "affordance-rename.md": "/docs/affordance/rename",
+  "affordance-nudge.md": "/docs/affordance/nudge",
+  "affordance-hover.md": "/docs/affordance/hover",
+  "affordance-double-click.md": "/docs/affordance/double-click",
+  "affordance-triple-click.md": "/docs/affordance/triple-click",
+  "affordance-context-menu.md": "/docs/affordance/context-menu",
+  "affordance-marquee.md": "/docs/affordance/marquee",
+  "affordance-drop.md": "/docs/affordance/drop",
+  "affordance-copy-drag.md": "/docs/affordance/copy-drag",
+  "affordance-resize.md": "/docs/affordance/resize",
+  "affordance-pan.md": "/docs/affordance/pan",
+  "affordance-scroll.md": "/docs/affordance/scroll",
+  "affordance-zoom.md": "/docs/affordance/zoom",
+  "affordance-snap.md": "/docs/affordance/snap",
+  "affordance-forbid.md": "/docs/affordance/forbid",
   "collaboration.md": "/docs/collaboration",
   "collaboration-replica.md": "/docs/collaboration/replica",
   "collaboration-history.md": "/docs/collaboration/history",
@@ -105,12 +131,23 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "order.md": "/docs/order",
   "object.md": "/docs/object",
   "tree.md": "/docs/tree",
+  "database.md": "/docs/database",
+  "chat.md": "/docs/chat",
+  "agent.md": "/docs/agent",
+  "code.md": "/docs/code",
+  "slides.md": "/docs/slides",
+  "calendar.md": "/docs/calendar",
+  "form.md": "/docs/form",
 };
 
 function rewriteMarkdownHref(href: string | undefined): string | undefined {
   if (!href) return href;
   const file = href.replace(/^\.\//, "");
-  return markdownHrefs[file] ?? href;
+  const hashIndex = file.indexOf("#");
+  const path = hashIndex === -1 ? file : file.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? "" : file.slice(hashIndex);
+  const rewritten = markdownHrefs[path];
+  return rewritten ? `${rewritten}${hash}` : href;
 }
 
 function headingId(text: string): string {

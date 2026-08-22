@@ -64,9 +64,9 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
     ]);
-    expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toContain(
-      "routes/widgets/binding/order.ts",
-    );
+    expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/widgets/ListboxWidgetRoute.tsx",
+    ]);
   });
 
 });

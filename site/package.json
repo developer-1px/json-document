@@ -12,6 +12,7 @@
     "typecheck": "npm run check:ui && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@interactive-os/json-document-affordance": "*",
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-selection": "*",
     "@interactive-os/json-document-react": "*",

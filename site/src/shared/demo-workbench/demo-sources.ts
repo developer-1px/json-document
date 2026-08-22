@@ -12,6 +12,7 @@ const sourceModules = import.meta.glob<string>(
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
     "!/src/shared/demo-workbench/**",
+    "!/src/shared/widget-binding/**",
   ],
   { import: "default", query: "?raw" },
 );
@@ -67,6 +68,7 @@ function isExcluded(path: string): boolean {
   return path.startsWith("app/")
     || path.startsWith("shared/ui/")
     || path.startsWith("shared/demo-workbench/")
+    || path.startsWith("shared/widget-binding/")
     || excludedSources.has(path);
 }
 

@@ -5,9 +5,16 @@ import {
   type KanbanDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  applyAffordance,
+  commitAffordance,
+  dropAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialBoard: KanbanDocument = {
   columns: [
@@ -36,6 +43,7 @@ export function KanbanDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const board = snapshot.value as KanbanDocument;
+  const commands = historyCommands(snapshot);
   const cards = new Map(board.cards.map((card) => [card.id, card]));
 
   function moveTo(columnId: string, beforeCardId?: string) {
@@ -55,8 +63,8 @@ export function KanbanDemoRoute() {
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => editor.undo()}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => editor.redo()}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => editor.undo()}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => editor.redo()}>Redo</ActionButton>
           </>
         )}
       >
@@ -65,10 +73,30 @@ export function KanbanDemoRoute() {
           <div
             key={column.id}
             data-column-id={column.id}
-            onDragOver={(event) => event.preventDefault()}
+            onDragOver={(event) => {
+              event.preventDefault();
+              applyAffordance(dropAffordance({ canDrop: true }), {
+                cursor: (cursor) => {
+                  event.currentTarget.style.cursor = cursor;
+                },
+              });
+            }}
             onDrop={(event: DragEvent<HTMLDivElement>) => {
               event.preventDefault();
-              moveTo(column.id);
+              const drop = dropAffordance({ canDrop: true });
+              applyAffordance(drop, {
+                cursor: (cursor) => {
+                  event.currentTarget.style.cursor = cursor;
+                },
+              });
+              const committed = commitAffordance(drop);
+              if (!committed) return;
+              applyAffordance(committed, {
+                commit: (hand) => {
+                  if (hand.type !== "move-drop") return;
+                  moveTo(column.id);
+                },
+              });
             }}
             className="grid content-start gap-2 p-3"
           >
@@ -76,17 +104,24 @@ export function KanbanDemoRoute() {
             {column.cardIds.map((cardId) => {
               const card = cards.get(cardId);
               if (!card) return null;
+              const option = optionProps(editing.getItem(card.id));
               return (
                 <button
                   key={card.id}
                   type="button"
                   draggable
                   data-card-id={card.id}
-                  data-selected={editing.getItem(card.id).getIsSelected() ? "true" : "false"}
-                  data-focus={editing.getItem(card.id).getIsFocus() ? "true" : "false"}
-                  onClick={editing.getItem(card.id).getPressHandler()}
-                  onDragStart={() => {
-                    editor.dispatch({ type: "selection.set", cardId: card.id });
+                  data-selected={option.selected ? "true" : "false"}
+                  data-focus={option.focus ? "true" : "false"}
+                  aria-selected={option["aria-selected"]}
+                  onClick={option.onClick}
+                  onDragStart={(event) => {
+                    applyAffordance(pointerSelect(event), {
+                      hand: (hand) => {
+                        if (hand.type !== "select") return;
+                        editor.dispatch({ type: "selection.set", cardId: card.id });
+                      },
+                    });
                     setDragging(card.id);
                   }}
                   onDragEnd={() => setDragging(null)}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createOrderEditor,
@@ -7,10 +7,18 @@ import {
   type OrderIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  applyAffordance,
+  escapeAffordance,
+  pointerSelect,
+  typeaheadAffordance,
+} from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
 const initialOrder: OrderDocument = {
   items: [
@@ -26,6 +34,7 @@ export function OrderDemoRoute() {
   const [clipboard, setClipboard] = useState<OrderClipboard | null>(null);
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<OrderIntent | null>(null);
+  const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
 
   function run(intent: OrderIntent, message: string) {
     const result = editor.dispatch(intent);
@@ -34,6 +43,7 @@ export function OrderDemoRoute() {
     return result;
   }
 
+  const ids = () => (editor.snapshot.value as OrderDocument).items.map((item) => item.id);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedItemIds,
@@ -41,9 +51,28 @@ export function OrderDemoRoute() {
     onSelect: (itemId, mode) => {
       run({ type: "selection.set", itemId, mode }, "Selection changed");
     },
+    keyboard: {
+      resolve: (stroke) => editingCommandFromStroke(stroke),
+      focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
+      neighbor: (key, command) => command.type === "move"
+        ? moveLinePoint(ids(), key, command.direction)
+        : lineBoundary(ids(), command.edge),
+      onDelete: () => {
+        run({ type: "selection.remove" }, "Selection deleted");
+      },
+      onUndo: () => {
+        editor.undo();
+        setAnnouncement("Undone");
+      },
+      onRedo: () => {
+        editor.redo();
+        setAnnouncement("Redone");
+      },
+    },
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as OrderDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy();
@@ -57,6 +86,41 @@ export function OrderDemoRoute() {
     if (!result) return setAnnouncement("Select an item first");
     setClipboard(result.clipboard);
     setAnnouncement(`Cut ${result.clipboard.items.length} item${result.clipboard.items.length === 1 ? "" : "s"}`);
+  }
+
+  const focusKey = snapshot.selection.ranges[snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
+
+  function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
+    const names = document.items.map((item) => item.label);
+    const from = document.items.find((item) => item.id === focusKey)?.label ?? null;
+    const result = typeaheadAffordance({
+      buffer: typeahead.buffer,
+      key: event.key,
+      elapsedMs: event.timeStamp - typeahead.at,
+      names,
+      from,
+    });
+    let consumed = false;
+    applyAffordance(result, {
+      hand: (hand) => {
+        if (hand.type !== "typeahead") return;
+        consumed = true;
+        setTypeahead({ buffer: hand.buffer, at: event.timeStamp });
+        const item = document.items.find((candidate) => candidate.label === hand.name);
+        if (item) run({ type: "selection.set", itemId: item.id, mode: "replace" }, "Selection changed");
+      },
+    });
+    if (consumed) {
+      event.preventDefault();
+      return;
+    }
+    applyAffordance(escapeAffordance(event), {
+      hand: (hand) => {
+        if (hand.type !== "cancel") return;
+        setTypeahead({ buffer: "", at: 0 });
+      },
+    });
+    editing.getKeyDownHandler()(event);
   }
 
   return (
@@ -92,8 +156,8 @@ export function OrderDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
@@ -105,15 +169,25 @@ export function OrderDemoRoute() {
         )}
       >
         <section aria-label="Editable order">
-          <ol className="m-0 grid list-none gap-1 p-0">
+          <ol
+            className="m-0 grid list-none gap-1 p-0"
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+          >
             {document.items.map((item, index) => (
               <SelectableItem
                 key={item.id}
-                selected={editing.getItem(item.id).getIsSelected()}
-                focus={editing.getItem(item.id).getIsFocus()}
                 data-item-id={item.id}
-                onClick={editing.getItem(item.id).getPressHandler()}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
+                {...optionProps(editing.getItem(item.id))}
+                onClick={(event) => {
+                  applyAffordance(pointerSelect(event), {
+                    hand: (hand) => {
+                      if (hand.type !== "select") return;
+                      run({ type: "selection.set", itemId: item.id, mode: hand.operation }, "Selection changed");
+                    },
+                  });
+                }}
               >
                 <span className={classes(ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>
                 <span>{item.label}</span>

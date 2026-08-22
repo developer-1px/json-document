@@ -7,6 +7,7 @@ import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
+import { historyCommands } from "../../../shared/widget-binding";
 
 type ProfileForm = {
   profile: {
@@ -38,6 +39,7 @@ export function ReactHookFormConnectorLab() {
       : "root.canonical",
   });
   const snapshot = binding.snapshot;
+  const commands = historyCommands(snapshot);
   const canonical = useReactConnector(document);
   const { register, formState } = binding.form;
   const [focusKey, setFocusKey] = useState<string | null>(null);
@@ -112,8 +114,8 @@ export function ReactHookFormConnectorLab() {
 
           <div className="flex flex-wrap gap-2">
             <ActionButton kind="primary" type="submit">Save record</ActionButton>
-            <ActionButton type="button" disabled={!snapshot.canUndo} onClick={binding.undo}>Undo</ActionButton>
-            <ActionButton type="button" disabled={!snapshot.canRedo} onClick={binding.redo}>Redo</ActionButton>
+            <ActionButton type="button" disabled={commands.undo.disabled} onClick={binding.undo}>Undo</ActionButton>
+            <ActionButton type="button" disabled={commands.redo.disabled} onClick={binding.redo}>Redo</ActionButton>
           </div>
 
           <dl className={classes("grid grid-cols-2 gap-2 p-3", ui.surface.inset)}>

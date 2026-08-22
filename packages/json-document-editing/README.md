@@ -34,7 +34,7 @@ history. Native text selection remains input/editor-owned and connects through
 an explicit edit lease rather than becoming a structural selection variant.
 
 `Database` keeps typed property schema and records in canonical JSON while its
-saved Table views own property order and visibility, sort, and filter. The
+saved Table views own property order, visibility, width, sort, and filter. The
 editor projects each saved view into a visible record/property topology for
 range selection, keeps native title/text caret state in the host, and restores
 structural selection with record and view mutations through history.

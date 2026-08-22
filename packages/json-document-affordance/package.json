@@ -1,0 +1,44 @@
+{
+  "name": "@interactive-os/json-document-affordance",
+  "version": "0.1.0-rc.0",
+  "description": "Official keyboard and mouse editing affordances for json-document hosts.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-affordance"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -b tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@interactive-os/json-document-web": ">=0.1.0-rc.0 <1"
+  },
+  "devDependencies": {
+    "@interactive-os/json-document-web": "*",
+    "@types/node": "^25.9.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7"
+  }
+}

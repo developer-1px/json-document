@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig/library.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "references": [{ "path": "../json-document-web" }],
+  "include": ["src/**/*.ts"]
+}

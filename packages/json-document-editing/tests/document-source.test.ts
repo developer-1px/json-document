@@ -89,6 +89,7 @@ describe("document-backed domain editors", () => {
             type: "table",
             propertyOrder: ["title"],
             propertyVisibility: { title: true },
+            propertyWidths: {},
             sort: null,
             filter: null,
           }],

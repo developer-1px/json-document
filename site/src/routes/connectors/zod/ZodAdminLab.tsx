@@ -12,6 +12,7 @@ import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
+import { gridCellProps, historyCommands } from "../../../shared/widget-binding";
 
 export const adminTaskSchema = z.object({
   id: z.string(),
@@ -56,6 +57,7 @@ export function ZodAdminLab() {
     },
   });
   const snapshot = editing.snapshot;
+  const commands = historyCommands(snapshot);
 
   function addRecord() {
     const recordId = `t${nextRecord.current}`;
@@ -108,8 +110,8 @@ export function ZodAdminLab() {
         >
           Points descending
         </ToggleButton>
-        <ActionButton disabled={!snapshot.canUndo} onClick={() => run(editor.undo)}>Undo</ActionButton>
-        <ActionButton disabled={!snapshot.canRedo} onClick={() => run(editor.redo)}>Redo</ActionButton>
+        <ActionButton disabled={commands.undo.disabled} onClick={() => run(editor.undo)}>Undo</ActionButton>
+        <ActionButton disabled={commands.redo.disabled} onClick={() => run(editor.redo)}>Redo</ActionButton>
       </div>
 
       <div className={classes("overflow-auto", ui.surface.raised)}>
@@ -131,17 +133,12 @@ export function ZodAdminLab() {
               <tr key={record.id} data-record-id={record.id}>
                 {properties.map((property) => {
                   const item = editing.getItem(`${record.id}\u0000${property.id}`);
-                  const isSelected = item.getIsSelected();
                   return (
                     <SelectableItem
                       as="td"
                       key={property.id}
-                      selected={isSelected}
-                      focus={item.getIsFocus()}
-                      role="gridcell"
-                      aria-selected={isSelected}
-                      onClick={item.getPressHandler()}
                       className={classes("min-w-32 p-0", ui.database.cell)}
+                      {...gridCellProps(item)}
                     >
                         <AdminPropertyEditor
                           property={property}

@@ -15,6 +15,7 @@ import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands } from "../../shared/widget-binding";
 import { richTextStyles } from "./rich-text-styles";
 
 const initialDocument: RichTextDocument = {
@@ -129,6 +130,7 @@ export function RichTextDemoRoute() {
     },
   });
   const snapshot = editing.snapshot;
+  const commands = historyCommands(snapshot);
 
   const onSurfaceAction = useCallback((action: string, result?: ReturnType<RichTextEditor["dispatch"]>) => {
     setLastAction(action);
@@ -197,7 +199,7 @@ export function RichTextDemoRoute() {
         label="Draft reference implementation"
         title="Rich Text Lab"
         illustration="patch"
-        aside={<div className={ui.text.meta}>revision {snapshot.revision} · {snapshot.canUndo ? "undo ready" : "clean"}</div>}
+        aside={<div className={ui.text.meta}>revision {snapshot.revision} · {commands.undo.disabled ? "clean" : "undo ready"}</div>}
       >
         DOM은 입력 경계일 뿐입니다. 아래 편집은 Rich Text intent, Selection mapping, EditingSession과 atomic JSON Patch를 차례로 통과합니다.
       </PageHeader>
@@ -205,8 +207,8 @@ export function RichTextDemoRoute() {
     )}>
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
         <ActionButton kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
-        <ActionButton onClick={() => runHistory("undo")} disabled={!snapshot.canUndo}>Undo</ActionButton>
-        <ActionButton onClick={() => runHistory("redo")} disabled={!snapshot.canRedo}>Redo</ActionButton>
+        <ActionButton onClick={() => runHistory("undo")} disabled={commands.undo.disabled}>Undo</ActionButton>
+        <ActionButton onClick={() => runHistory("redo")} disabled={commands.redo.disabled}>Redo</ActionButton>
         <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
       </div>
 

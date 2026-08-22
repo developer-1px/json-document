@@ -23,6 +23,7 @@ import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
+import { gridCellProps, historyCommands } from "../../../shared/widget-binding";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -85,6 +86,7 @@ export function TanStackTableConnectorLab() {
     },
   });
   const snapshot = editing.snapshot;
+  const commands = historyCommands(snapshot);
 
   function commitCell(event: FocusEvent<HTMLInputElement>, rowId: string, columnId: string, current: unknown) {
     const value = typeof current === "number" ? Number(event.currentTarget.value) : event.currentTarget.value;
@@ -153,8 +155,8 @@ export function TanStackTableConnectorLab() {
           () => binding.fillSelected(table, "Selected"),
           "Visible selected cells filled",
         )} />
-        <Control label="Undo" disabled={!snapshot.canUndo} onClick={() => run(binding.undo, "Undone")} />
-        <Control label="Redo" disabled={!snapshot.canRedo} onClick={() => run(binding.redo, "Redone")} />
+        <Control label="Undo" disabled={commands.undo.disabled} onClick={() => run(binding.undo, "Undone")} />
+        <Control label="Redo" disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
       </div>
 
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
@@ -181,20 +183,15 @@ export function TanStackTableConnectorLab() {
                 <tr key={row.id} data-row-id={row.id}>
                   {row.getVisibleCells().map((cell) => {
                     const item = editing.getItem(`${row.id}\u0000${cell.column.id}`);
-                    const isSelected = item.getIsSelected();
                     const value = row.original.cells[cell.column.id];
                     return (
                       <SelectableItem
                         as="td"
                         key={cell.id}
-                        selected={isSelected}
-                        focus={item.getIsFocus()}
-                        role="gridcell"
-                        aria-selected={isSelected}
                         data-row-id={row.id}
                         data-column-id={cell.column.id}
-                        onClick={item.getPressHandler()}
                         className={classes("p-0", ui.surface.gridCell)}
+                        {...gridCellProps(item)}
                       >
                           <input
                             aria-label={`${cell.column.id} ${row.id}`}

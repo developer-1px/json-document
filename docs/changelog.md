@@ -5,6 +5,37 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Opened Hands TBD for Chat, Agent, Code, Slides, Calendar, and Form.
+  Chat is DM bubbles. Agent is a bubble-less transcript whose typical
+  hand is think·stream·tool animation. Code is a drag-range comment,
+  not a typing buffer.
+- Closed Database Hands on the header and cell: order, width, sort,
+  hide, and filter persist in the saved Table view, and the named
+  toolbar toggles no longer replace those hands.
+- Added the Database guide as the Hands entrance, with the existing
+  Demo as its table surface.
+- Closed the remaining canvas plane hands: select-all, Shift-constrain,
+  Option copy-drag, intersect marquee, wheel pan, Mod+wheel zoom, empty
+  arrows pan, Mod snap-off, resize handles, delete, context menu,
+  activate, locked objects, and hover highlight. Canvas Hands is the
+  close surface.
+- Recorded the canvas plane grammar in Affordance docs as TBD: empty
+  click and marquee, selected-set drag, Space pan, Escape one layer,
+  and the remaining hands (copy-drag, resize, zoom, select-all, delete).
+- Closed empty-canvas press as `clear`, and Escape as one layer at a time:
+  cancel an open gesture, then clear selection. `pointercancel` still
+  cancels only the gesture.
+- Closed plane hit selection: pressing an already selected object keeps
+  the set so a drag moves every selected object. Canvas Hands apply
+  `planeHitAffordance`.
+- Attached typeahead to Order Hands and marquee, pan, snap, nudge, and
+  escape to Canvas Hands. Those catalog rows leave TBD.
+- Opened Affordance as the product-facing keyboard and mouse contract, with
+  usage and API for select, fold, drag, and undo/redo. Live widget screens
+  stay as proofs, not the catalog entrance.
+- Opened Document, Canvas, Tree, and Board on 제품 화면, and made Toolbar,
+  Listbox, Grid, and those widgets share prop bindings that live demos
+  consume without forking. Database stays on Grid.
 - Rewrote Why as the background of the editing-platform kernel: the
   same JSON Document port for Collaboration, session state in Editing,
   Hands as the genre shelf, and Adapter, Connector, and 제품 화면 as

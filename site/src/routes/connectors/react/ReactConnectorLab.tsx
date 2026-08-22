@@ -11,6 +11,7 @@ import {
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../../shared/widget-binding";
 
 const initialEditorDocument: BlockDocument = {
   blocks: [
@@ -71,6 +72,7 @@ function EditingSnapshotLab() {
   const editor = useDocumentEditor(initialEditorDocument);
   const snapshot = useEditingSnapshot(editor);
   const value = snapshot.value as BlockDocument;
+  const commands = historyCommands(snapshot);
 
   return (
     <section aria-label="Editing snapshot subscription" className={classes("p-4", ui.surface.raised)}>
@@ -103,13 +105,13 @@ function EditingSnapshotLab() {
       </div>
       <div className="mt-3 flex gap-2">
         <ActionButton
-          disabled={!snapshot.canUndo}
+          disabled={commands.undo.disabled}
           onClick={() => editor.undo()}
         >
           Undo
         </ActionButton>
         <ActionButton
-          disabled={!snapshot.canRedo}
+          disabled={commands.redo.disabled}
           onClick={() => editor.redo()}
         >
           Redo
@@ -151,10 +153,8 @@ function UseEditingLab() {
           return (
             <SelectableItem
               key={block.id}
-              selected={item.getIsSelected()}
-              focus={item.getIsFocus()}
-              onClick={item.getPressHandler()}
               className={classes("grid gap-2 p-3 text-left", ui.surface.workspace)}
+              {...optionProps(item)}
             >
               <span className={ui.text.label}>{block.id}</span>
               <EditingTextControl

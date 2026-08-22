@@ -7,11 +7,16 @@ import {
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import {
+  applyAffordance,
+  pointerSelect,
+} from "@interactive-os/json-document-affordance";
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { historyCommands, optionProps } from "../../shared/widget-binding";
 
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
@@ -40,6 +45,7 @@ export function ObjectDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as ObjectDocument;
+  const commands = historyCommands(snapshot);
 
   function copySelection() {
     const next = editor.copy();
@@ -105,8 +111,8 @@ export function ObjectDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={!snapshot.canUndo} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={!snapshot.canRedo} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
@@ -121,11 +127,21 @@ export function ObjectDemoRoute() {
           {document.objects.map((object) => (
             <SelectableItem
               key={object.id}
-              selected={editing.getItem(object.id).getIsSelected()}
-              focus={editing.getItem(object.id).getIsFocus()}
               data-object-id={object.id}
-              onClick={editing.getItem(object.id).getPressHandler()}
               className={ui.interactive.planeItem}
+              {...optionProps(editing.getItem(object.id))}
+              onClick={(event) => {
+                applyAffordance(pointerSelect(event), {
+                  hand: (hand) => {
+                    if (hand.type !== "select") return;
+                    run({
+                      type: "selection.set",
+                      objectIds: [object.id],
+                      mode: hand.operation === "extend" ? "add" : hand.operation,
+                    }, "Selection changed");
+                  },
+                });
+              }}
               style={{
                 left: object.x,
                 top: object.y,

@@ -1,5 +1,20 @@
 import { describe, expect, test } from "vitest";
-import { historyCommands, optionProps } from "../../src/routes/widgets/binding";
+import { editingCommandFromStroke, gridCellProps, historyCommands, optionProps, treeItemProps } from "../../src/shared/widget-binding";
+
+describe("editingCommandFromStroke", () => {
+  test("fills the editing keyboard port from applyAffordance", () => {
+    expect(editingCommandFromStroke({
+      key: "ArrowDown",
+      shiftKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    })).toEqual({
+      type: "move",
+      direction: "down",
+      operation: "replace",
+    });
+  });
+});
 
 describe("historyCommands", () => {
   test("binds disabled to canUndo and canRedo", () => {
@@ -29,6 +44,35 @@ describe("optionProps", () => {
     expect(props.selected).toBe(true);
     expect(props.focus).toBe(false);
     expect(props["aria-selected"]).toBe(true);
+    expect(props.onClick).toBe(handler);
+  });
+});
+
+describe("gridCellProps", () => {
+  test("maps selection marks to gridcell props", () => {
+    const props = gridCellProps({
+      getIsSelected: () => true,
+      getIsFocus: () => true,
+      getTextOffset: () => null,
+      getPressHandler: () => handler,
+    });
+    expect(props.role).toBe("gridcell");
+    expect(props.tabIndex).toBe(0);
+    expect(props.selected).toBe(true);
+    expect(props.onClick).toBe(handler);
+  });
+});
+
+describe("treeItemProps", () => {
+  test("maps selection marks to treeitem props", () => {
+    const props = treeItemProps({
+      getIsSelected: () => false,
+      getIsFocus: () => true,
+      getTextOffset: () => null,
+      getPressHandler: () => handler,
+    });
+    expect(props.role).toBe("treeitem");
+    expect(props.focus).toBe(true);
     expect(props.onClick).toBe(handler);
   });
 });

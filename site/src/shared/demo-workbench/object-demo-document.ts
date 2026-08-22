@@ -10,3 +10,10 @@ export const initialObjectDemoDocument: ObjectDocument = {
     { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
   ],
 };
+
+export const canvasDemoDocument: ObjectDocument = {
+  objects: [
+    ...initialObjectDemoDocument.objects,
+    { id: "lock", label: "Lock", x: 248, y: 136, width: 72, height: 72, color: "#8a8a8a" },
+  ],
+};

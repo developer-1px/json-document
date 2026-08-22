@@ -25,6 +25,7 @@ const initial: DatabaseDocument = {
     type: "table",
     propertyOrder: ["name", "note", "score", "status", "done"],
     propertyVisibility: {},
+    propertyWidths: {},
     sort: null,
     filter: null,
   }],
@@ -65,6 +66,13 @@ describe("Database editor", () => {
     const document = editor.snapshot.value as DatabaseDocument;
     expect(document.records).toEqual(initial.records);
     expect(document.views[0]?.sort).toEqual({ propertyId: "score", direction: "descending" });
+    expect(editor.dispatch({
+      type: "view.configure",
+      viewId: "table",
+      propertyWidths: { score: 160, name: 220 },
+    }).ok).toBe(true);
+    expect((editor.snapshot.value as DatabaseDocument).views[0]?.propertyWidths).toEqual({ score: 160, name: 220 });
+    expect(editor.undo().ok).toBe(true);
     expect(editor.undo().ok).toBe(true);
     expect(editor.tableTopology("table").recordIds).toEqual(["r1", "r2", "r3"]);
   });

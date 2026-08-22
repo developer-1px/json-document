@@ -204,7 +204,7 @@ foundation으로 유지한다.
 
 ## 현재 package 분류
 
-아래 표는 현재 15개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
+아래 표는 현재 16개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
 `후속`은 이 RFC가 source를 이동하지 않고 별도 이슈가 책임짐을 뜻한다.
 
 | Package path | 정본 모형 | 현재 판단 |
@@ -215,6 +215,7 @@ foundation으로 유지한다.
 | `packages/json-document-react` | Single-native Connector | 하나의 React subscription/lifecycle entry로 flat 유지 |
 | `packages/json-document-react-hook-form` | Single-native Connector | RHF lifecycle이 하나인 동안 flat 유지; 독립 binding이 생기면 분리 |
 | `packages/json-document-ajv` | Single-native Connector | 하나의 validator translation으로 flat 유지 |
+| `packages/json-document-affordance` | Responsibility family | select/fold/drag/history 책임 file과 root facade 유지 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-tanstack-table` | Single-native Connector | 하나의 Table/Sheet binding으로 flat 유지 |
 | `packages/json-document-web` | Adapter family | keyboard/clipboard/input/modifier 책임 file과 root facade 유지 |

@@ -45,12 +45,6 @@ export function HomeRoute() {
               <li className={homeStyles.indexItem}>
                 <ActionLink to="/docs/intent-guide" className={homeStyles.indexLink}>Editing</ActionLink>
                 <span className={homeStyles.indexBlurb}>Selection and work</span>
-                <ul className={homeStyles.indexChild}>
-                  <li className={homeStyles.indexItem}>
-                    <ActionLink to="/editors" className={homeStyles.indexLink}>Hands</ActionLink>
-                    <span className={homeStyles.indexBlurb}>Genre hands</span>
-                  </li>
-                </ul>
               </li>
             </ul>
             <ul className={homeStyles.indexList}>
@@ -63,8 +57,12 @@ export function HomeRoute() {
                 <span className={homeStyles.indexBlurb}>Library ecosystems</span>
               </li>
               <li className={homeStyles.indexItem}>
-                <ActionLink to="/widgets" className={homeStyles.indexLink}>제품 화면</ActionLink>
-                <span className={homeStyles.indexBlurb}>Toolbar, Listbox, and Grid</span>
+                <ActionLink to="/docs/affordance" className={homeStyles.indexLink}>Affordance</ActionLink>
+                <span className={homeStyles.indexBlurb}>Keyboard, mouse, and cursor</span>
+              </li>
+              <li className={homeStyles.indexItem}>
+                <ActionLink to="/editors" className={homeStyles.indexLink}>Hands</ActionLink>
+                <span className={homeStyles.indexBlurb}>Genre hands</span>
               </li>
             </ul>
           </nav>

@@ -11,4 +11,8 @@ export const legacyPageRedirects = {
     from: "/demos",
     to: "/editors",
   },
+  widgetsCatalog: {
+    from: "/widgets",
+    to: "/docs/affordance",
+  },
 } as const;

@@ -17,6 +17,7 @@ import {
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
+import { optionProps } from "../../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -128,11 +129,9 @@ export function KeyboardAdapterLab() {
             <SelectableItem
               as="article"
               key={block.id}
-              selected={editing.getItem(block.id).getIsSelected()}
-              focus={editing.getItem(block.id).getIsFocus()}
               data-block-id={block.id}
-              onClick={editing.getItem(block.id).getPressHandler()}
               className={classes("p-3", ui.surface.workspace)}
+              {...optionProps(editing.getItem(block.id))}
             >
               <span className={ui.text.label}>{block.id}</span>
             </SelectableItem>

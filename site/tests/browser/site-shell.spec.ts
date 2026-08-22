@@ -15,10 +15,10 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "JSON Document",
     "Collaboration",
     "Editing",
-    "Hands",
     "Adapter",
     "Connector",
-    "제품 화면",
+    "Affordance",
+    "Hands",
   ]);
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -55,23 +55,55 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Tree",
     "Kanban",
     "Database",
+    "Chat",
+    "Agent",
+    "Code",
+    "Slides",
+    "Calendar",
+    "Form",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["React", "React Hook Form", "Ajv", "Zod", "TanStack Table"]);
-  await navigation.getByRole("button", { name: "제품 화면" }).click();
-  await expect(navigation.getByRole("group", { name: "제품 화면" }).getByRole("link")).toHaveText(["Toolbar", "Listbox", "Grid"]);
+  await navigation.getByRole("button", { name: "Affordance" }).click();
+  await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
+    "Focus",
+    "Caret",
+    "Select",
+    "Typeahead",
+    "Activate",
+    "Escape",
+    "Expand/Collapse",
+    "Undo",
+    "Delete",
+    "Rename",
+    "Nudge",
+    "Hover",
+    "Double-click",
+    "Triple-click",
+    "Context menu",
+    "Drag",
+    "Marquee",
+    "Drop",
+    "Duplicate",
+    "Resize",
+    "Pan",
+    "Scroll",
+    "Zoom",
+    "Snap",
+    "Not-allowed",
+  ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
     "Collaboration",
     "Editing",
-    "Hands",
     "Adapter",
     "Connector",
-    "제품 화면",
+    "Affordance",
+    "Hands",
   ]);
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
@@ -89,7 +121,7 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "제품 화면" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Affordance" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
 
   await page.goto("/docs/tutorial");
@@ -198,6 +230,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/demo/clipboard",
     "/demo/history",
     "/editing/rich-text",
+    "/docs/database",
     "/demo/database",
     "/connectors",
     "/connectors/react",
