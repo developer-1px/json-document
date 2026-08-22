@@ -1,7 +1,5 @@
 # Activate
 
-TBD.
-
 Activate는 대상의 기본 동작을 실행하는 손입니다. `pointer` 커서가 이
 손을 가리킵니다. Enter와 기본 클릭은 같은 손입니다. Listbox에서 Space는
 [Select](affordance-select.md)의 toggle입니다.
@@ -32,5 +30,6 @@ function onKeyDown(event: KeyboardEvent) {
 - 기본 클릭 (`detail` 1)
 - Enter
 - Space는 장르 Intent: 버튼은 activate, 목록은 toggle
+- 평면 Enter / 더블클릭: 그룹이면 한 단계 들어가기, 텍스트면 편집
 
-근거: [APG Button](https://www.w3.org/WAI/ARIA/apg/patterns/button/), [CSS UI cursor `pointer`](https://www.w3.org/TR/css-ui-4/#cursor)
+근거: [APG Button](https://www.w3.org/WAI/ARIA/apg/patterns/button/), [CSS UI cursor `pointer`](https://www.w3.org/TR/css-ui-4/#cursor), Figma double-click or Enter = child

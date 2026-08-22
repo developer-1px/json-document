@@ -77,6 +77,12 @@ describe("official site shell", () => {
       "Tree",
       "Kanban",
       "Database",
+      "Chat",
+      "Agent",
+      "Code",
+      "Slides",
+      "Calendar",
+      "Form",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
     expect(groupLinks(nav, "Adapter")).toEqual(["Keyboard", "Clipboard adapter", "Contenteditable"]);

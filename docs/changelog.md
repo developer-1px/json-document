@@ -5,11 +5,23 @@ source and release history remains available from Git commits and version tags.
 
 ## Next
 
+- Opened Hands TBD for Chat, Agent, Code, Slides, Calendar, and Form.
+  Chat is DM bubbles. Agent is a bubble-less transcript whose typical
+  hand is think·stream·tool animation. Code is a drag-range comment,
+  not a typing buffer.
 - Closed Database Hands on the header and cell: order, width, sort,
   hide, and filter persist in the saved Table view, and the named
   toolbar toggles no longer replace those hands.
 - Added the Database guide as the Hands entrance, with the existing
   Demo as its table surface.
+- Closed the remaining canvas plane hands: select-all, Shift-constrain,
+  Option copy-drag, intersect marquee, wheel pan, Mod+wheel zoom, empty
+  arrows pan, Mod snap-off, resize handles, delete, context menu,
+  activate, locked objects, and hover highlight. Canvas Hands is the
+  close surface.
+- Recorded the canvas plane grammar in Affordance docs as TBD: empty
+  click and marquee, selected-set drag, Space pan, Escape one layer,
+  and the remaining hands (copy-drag, resize, zoom, select-all, delete).
 - Closed empty-canvas press as `clear`, and Escape as one layer at a time:
   cancel an open gesture, then clear selection. `pointercancel` still
   cancels only the gesture.

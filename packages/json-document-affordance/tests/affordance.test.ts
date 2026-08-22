@@ -1,18 +1,31 @@
 import { describe, expect, test } from "vitest";
 import {
+  activateAffordance,
   applyAffordance,
+  clickCountAffordance,
   commitAffordance,
+  contextMenuAffordance,
+  deleteAffordance,
   dragAffordance,
+  dragOperation,
   dropAffordance,
-  marqueeAffordance,
   escapeAffordance,
+  forbiddenCursor,
   historyAffordance,
+  hoverAffordance,
+  marqueeAffordance,
+  marqueeHitsAffordance,
+  panAffordance,
   planeHitAffordance,
   pointerSelect,
+  resizeAffordance,
   resolveAffordanceKey,
+  selectAllAffordance,
   snapAffordance,
   treeAffordance,
   typeaheadAffordance,
+  wheelAffordance,
+  zoomAffordance,
 } from "../src/index.js";
 
 describe("pointerSelect", () => {
@@ -167,7 +180,7 @@ describe("typeaheadAffordance", () => {
 });
 
 describe("marqueeAffordance", () => {
-  test("carries replace, extend, and toggle from modifiers", () => {
+  test("Shift extends; Mod without host nesting is replace, not toggle", () => {
     const origin = { x: 0, y: 0 };
     const point = { x: 10, y: 8 };
     expect(marqueeAffordance(origin, point).hand).toMatchObject({ type: "select", operation: "replace" });
@@ -175,9 +188,9 @@ describe("marqueeAffordance", () => {
       type: "select",
       operation: "extend",
     });
-    expect(marqueeAffordance(origin, point, { metaKey: true }).hand).toMatchObject({
+    expect(marqueeAffordance(origin, point, { nested: true }).hand).toMatchObject({
       type: "select",
-      operation: "toggle",
+      operation: "replace",
     });
   });
 
@@ -232,7 +245,7 @@ describe("planeHitAffordance", () => {
     });
   });
 
-  test("extends and toggles the hit against the current set", () => {
+  test("Shift adds or removes; Mod deep-selects only when nestedId is reported", () => {
     expect(planeHitAffordance({
       hitId: "chip",
       selectedIds: ["note"],
@@ -245,12 +258,39 @@ describe("planeHitAffordance", () => {
     expect(planeHitAffordance({
       hitId: "note",
       selectedIds: ["note", "card"],
+      shiftKey: true,
+    }).hand).toEqual({
+      type: "select",
+      operation: "replace",
+      objectIds: ["card"],
+    });
+    expect(planeHitAffordance({
+      hitId: "note",
+      selectedIds: ["note", "card"],
       metaKey: true,
     }).hand).toEqual({
       type: "select",
-      operation: "toggle",
-      objectIds: ["card"],
+      operation: "replace",
+      objectIds: ["note", "card"],
     });
+    expect(planeHitAffordance({
+      hitId: "frame",
+      selectedIds: ["frame"],
+      metaKey: true,
+      nestedId: "child",
+    }).hand).toEqual({
+      type: "select",
+      operation: "replace",
+      objectIds: ["child"],
+    });
+  });
+
+  test("a locked object is not-allowed and is not picked", () => {
+    expect(planeHitAffordance({
+      hitId: "lock",
+      selectedIds: ["note"],
+      locked: true,
+    })).toEqual({ hand: null, cursor: "not-allowed" });
   });
 });
 
@@ -258,15 +298,152 @@ describe("dropAffordance", () => {
   test("previews a drop; only commitAffordance mints the write", () => {
     expect(dropAffordance({ canDrop: false })).toEqual({ hand: null, cursor: "no-drop" });
     expect(dropAffordance({ canDrop: true })).toEqual({
-      hand: { type: "move-drop" },
+      hand: { type: "move-drop", keepSelection: true },
       cursor: "move",
     });
     expect("commit" in dropAffordance({ canDrop: true })).toBe(false);
     expect(commitAffordance(dropAffordance({ canDrop: false }))).toBeNull();
     expect(commitAffordance(dropAffordance({ canDrop: true }))).toEqual({
-      hand: { type: "move-drop" },
+      hand: { type: "move-drop", keepSelection: true },
       cursor: "move",
       commit: true,
     });
+  });
+});
+
+describe("selectAllAffordance", () => {
+  test("toggles Mod+A between select-all and clear", () => {
+    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: false }).hand)
+      .toEqual({ type: "select-all" });
+    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: true }).hand)
+      .toEqual({ type: "clear" });
+    expect(selectAllAffordance({ key: "a", metaKey: false, ctrlKey: false }, { allSelected: false }).hand)
+      .toBeNull();
+  });
+});
+
+describe("drag constrain and copy", () => {
+  test("Shift constrains to the dominant axis and Alt shows copy", () => {
+    expect(dragAffordance({ x: 0, y: 0 }, { x: 12, y: 3 }, { shiftKey: true }).hand)
+      .toEqual({ type: "translate", dx: 12, dy: 0 });
+    expect(dragAffordance({ x: 0, y: 0 }, { x: 3, y: 12 }, { shiftKey: true }).hand)
+      .toEqual({ type: "translate", dx: 0, dy: 12 });
+    expect(dragAffordance({ x: 0, y: 0 }, { x: 8, y: 2 }, { altKey: true }).cursor).toBe("copy");
+    expect(dragOperation({ shiftKey: false, metaKey: false, ctrlKey: false, altKey: true })).toEqual({
+      hand: { type: "copy" },
+      cursor: "copy",
+    });
+  });
+});
+
+describe("marqueeHitsAffordance", () => {
+  const items = [
+    { id: "touch", x: 8, y: 8, width: 20, height: 20 },
+    { id: "inside", x: 4, y: 4, width: 8, height: 8 },
+  ];
+
+  test("closes intersect as the plane pick", () => {
+    const rect = { x: 0, y: 0, width: 12, height: 12 };
+    expect(marqueeHitsAffordance({ rect, items }).hand).toEqual({
+      type: "select",
+      operation: "replace",
+      objectIds: ["touch", "inside"],
+    });
+    expect(marqueeHitsAffordance({ rect, items, contain: "inside" }).hand).toEqual({
+      type: "select",
+      operation: "replace",
+      objectIds: ["inside"],
+    });
+  });
+});
+
+describe("wheelAffordance and zoomAffordance", () => {
+  test("plain wheel pans; Mod+wheel zooms with CSS UI cursors", () => {
+    expect(wheelAffordance({ deltaX: 4, deltaY: 10 }).hand).toEqual({ type: "translate", dx: -4, dy: -10 });
+    expect(wheelAffordance({ deltaY: -20, metaKey: true })).toEqual({
+      hand: { type: "zoom", factor: 1.1 },
+      cursor: "zoom-in",
+    });
+    expect(wheelAffordance({ deltaY: 20, ctrlKey: true })).toEqual({
+      hand: { type: "zoom", factor: 1 / 1.1 },
+      cursor: "zoom-out",
+    });
+    expect(zoomAffordance({ key: "+" })).toEqual({ hand: { type: "zoom", factor: 1.1 }, cursor: "zoom-in" });
+    expect(zoomAffordance({ key: "-" })).toEqual({ hand: { type: "zoom", factor: 1 / 1.1 }, cursor: "zoom-out" });
+  });
+});
+
+describe("resizeAffordance", () => {
+  test("maps edges onto CSS UI 4 resize cursors and offsets", () => {
+    expect(resizeAffordance({ x: 0, y: 0 }, { x: 10, y: 6 }, "se")).toEqual({
+      hand: { type: "resize", dx: 0, dy: 0, dw: 10, dh: 6, edge: "se" },
+      cursor: "se-resize",
+    });
+    expect(resizeAffordance({ x: 10, y: 10 }, { x: 4, y: 6 }, "nw").cursor).toBe("nw-resize");
+    expect(resizeAffordance({ x: 0, y: 0 }, { x: 8, y: 2 }, "se", { shiftKey: true }).hand).toMatchObject({
+      dw: 8,
+      dh: 8,
+    });
+    expect(commitAffordance(resizeAffordance({ x: 0, y: 0 }, { x: 0, y: 0 }, "se"))).toBeNull();
+  });
+});
+
+describe("deleteAffordance", () => {
+  test("Delete and Backspace delete the selection", () => {
+    expect(deleteAffordance({ key: "Delete" }).hand).toEqual({ type: "delete" });
+    expect(deleteAffordance({ key: "Backspace" }).hand).toEqual({ type: "delete" });
+    expect(deleteAffordance({ key: "a" }).hand).toBeNull();
+  });
+});
+
+describe("hoverAffordance", () => {
+  test("plane highlight is immediate and does not use the help cursor", () => {
+    expect(hoverAffordance({ elapsedMs: 0, inside: true, highlight: true }).hand)
+      .toEqual({ type: "hover", phase: "highlight" });
+    expect(hoverAffordance({ elapsedMs: 0, inside: false, highlight: true }).hand).toBeNull();
+  });
+});
+
+describe("forbiddenCursor", () => {
+  test("maps allowed and dropping onto not-allowed and no-drop", () => {
+    expect(forbiddenCursor({ allowed: false }).cursor).toBe("not-allowed");
+    expect(forbiddenCursor({ allowed: false, dropping: true }).cursor).toBe("no-drop");
+    expect(forbiddenCursor({ allowed: true, dropping: true }).cursor).toBe("move");
+  });
+});
+
+describe("activateAffordance and clickCountAffordance", () => {
+  test("Enter and primary click activate; detail 2 is a double-click", () => {
+    expect(activateAffordance({ key: "Enter" }).hand).toEqual({ type: "activate" });
+    expect(activateAffordance({ button: 0, detail: 1 }).hand).toEqual({ type: "activate" });
+    expect(clickCountAffordance(2).hand).toEqual({ type: "click", count: 2 });
+    const hands: string[] = [];
+    applyAffordance(activateAffordance({ button: 0, detail: 2 }), {
+      hand: (hand) => hands.push(hand.type),
+    });
+    expect(hands).toEqual(["activate"]);
+  });
+});
+
+describe("contextMenuAffordance", () => {
+  test("opens without clearing and Escape cancels the menu", () => {
+    expect(contextMenuAffordance({ type: "contextmenu" }).hand).toEqual({ type: "menu", action: "open" });
+    expect(contextMenuAffordance({ button: 2 }).hand).toEqual({ type: "menu", action: "open" });
+    expect(contextMenuAffordance({ key: "Escape" }).hand).toEqual({ type: "menu", action: "cancel" });
+  });
+});
+
+describe("panAffordance empty arrows", () => {
+  test("empty selection arrows pan; selected arrows stay with nudge", () => {
+    expect(panAffordance({ key: "ArrowRight", selected: false }).hand)
+      .toEqual({ type: "translate", dx: 16, dy: 0 });
+    expect(panAffordance({ key: "ArrowRight", selected: true }).hand).toBeNull();
+  });
+});
+
+describe("snapAffordance disable key", () => {
+  test("Mod disable is the closed snap-off hand", () => {
+    expect(snapAffordance({ x: 47, y: 51 }, { grid: 8, disable: true }).hand)
+      .toEqual({ type: "translate", dx: 47, dy: 51 });
   });
 });

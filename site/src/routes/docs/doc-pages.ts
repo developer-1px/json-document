@@ -34,7 +34,13 @@ import collaborationLifecycleMarkdown from "../../../../docs/public/collaboratio
 import collaborationReplicaMarkdown from "../../../../docs/public/collaboration-replica.md?raw";
 import collaborationTextMarkdown from "../../../../docs/public/collaboration-text.md?raw";
 import connectorsMarkdown from "../../../../docs/public/connectors.md?raw";
+import agentMarkdown from "../../../../docs/public/agent.md?raw";
+import calendarMarkdown from "../../../../docs/public/calendar.md?raw";
+import chatMarkdown from "../../../../docs/public/chat.md?raw";
+import codeMarkdown from "../../../../docs/public/code.md?raw";
+import formMarkdown from "../../../../docs/public/form.md?raw";
 import handsMarkdown from "../../../../docs/public/hands.md?raw";
+import slidesMarkdown from "../../../../docs/public/slides.md?raw";
 import historyMarkdown from "../../../../docs/public/history.md?raw";
 import intentGuideMarkdown from "../../../../docs/public/intent-guide.md?raw";
 import intentMarkdown from "../../../../docs/public/intent.md?raw";
@@ -96,6 +102,12 @@ export const docPages = {
   object: docPage("/docs/object", objectMarkdown),
   tree: docPage("/docs/tree", treeMarkdown),
   database: docPage("/docs/database", databaseMarkdown),
+  chat: docPage("/docs/chat", chatMarkdown),
+  agent: docPage("/docs/agent", agentMarkdown),
+  code: docPage("/docs/code", codeMarkdown),
+  slides: docPage("/docs/slides", slidesMarkdown),
+  calendar: docPage("/docs/calendar", calendarMarkdown),
+  form: docPage("/docs/form", formMarkdown),
   intent: docPage("/docs/intent", intentMarkdown),
   intentGuide: docPage("/docs/intent-guide", intentGuideMarkdown),
   api: docPage("/docs/api", apiReferenceMarkdown),

@@ -46,7 +46,8 @@ json-document로 갑니다. 이동이 없는 빈 곳 누르기는 `clear`입니�
 닫는 손:
 - 빈 곳에서 pointerdown → move → up
 - Shift: 기존 고르기에 더함
-- Mod: 토글
+- 평면 히트는 닿으면 포함 (`marqueeHitsAffordance`)
+- Mod는 토글이 아님. 중첩 히트는 호스트가 줌
 - 칸 위 `cell` 커서, 그림 위 `crosshair`
 
 근거: [Apple HIG band selection](https://developer.apple.com/design/human-interface-guidelines/pointing-devices), [CSS UI cursor `cell` / `crosshair`](https://www.w3.org/TR/css-ui-4/#cursor)

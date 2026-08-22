@@ -35,26 +35,15 @@ function onPlanePointerDown(event: PointerEvent, hitId: string, selectedIds: Rea
 이미 고른 상자를 수정 키 없이 누르면 집합을 유지합니다. 안 고른 상자는
 그 상자만으로 바꿉니다.
 
+닫는 손:
+- 클릭 replace, 이미 고른 집합 유지
+- Shift+click 추가/제거
+- Mod+click은 `nestedId`가 있을 때만 자식
+- Mod+A `selectAllAffordance`
+- 잠긴 객체는 [Not-allowed](affordance-forbid.md)
+
 ## TBD
 
-```ts
-function onKeyDown(event: KeyboardEvent) {
-  const hand = selectAllAffordance({
-    key: event.key,
-    metaKey: event.metaKey,
-    ctrlKey: event.ctrlKey,
-    allSelected: editor.selectedItemIds.length === ids.length,
-  });
-  if (hand === "select-all") {
-    editor.dispatch({ type: "selection.set", itemIds: ids, mode: "replace" });
-  }
-  if (hand === "clear") {
-    editor.dispatch({ type: "selection.set", itemIds: [], mode: "replace" });
-  }
-}
-```
-
-- Mod+A Select all 토글
 - Home / End / PageUp / PageDown은 `resolveAffordanceKey`의 boundary
 - selection follows focus vs focus-only move는 [Focus](affordance-focus.md)
 - 글 단어·줄 범위는 [Double-click](affordance-double-click.md)·

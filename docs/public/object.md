@@ -8,4 +8,5 @@ editor에는 객체 ID만 넘깁니다.
 editor 밖에 남습니다.
 
 같은 동작을 [Object Demo](/demo/object)에서 만질 수 있습니다. 그 손을 평면
-위에 그린 화면은 [Canvas](/demo/canvas)입니다.
+위에 그린 화면은 [Canvas](/demo/canvas)입니다. 빈 곳·객체·집합을 만지는
+손은 [Affordance 평면](affordance.md#평면)을 따릅니다.
