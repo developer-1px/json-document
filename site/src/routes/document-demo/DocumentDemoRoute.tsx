@@ -1,4 +1,5 @@
 import { useRef, useState, type ClipboardEvent } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   type BlockDocument,
   type DocumentClipboard,
@@ -22,7 +23,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
@@ -161,7 +162,7 @@ export function DocumentDemoRoute() {
   const lastSelectedId = editor.selectedBlockIds.at(-1);
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
         <PageHeader
           illustration="clipboard"
           title="Document"
@@ -173,6 +174,7 @@ export function DocumentDemoRoute() {
           )}
         >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
 
+    )}>
         <ProductApp
           toolbarLabel="Document actions"
           toolbar={(
@@ -265,7 +267,7 @@ export function DocumentDemoRoute() {
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
         </ProductApp>
-    </PageFrame>
+    </DemoPage>
   );
 }
 

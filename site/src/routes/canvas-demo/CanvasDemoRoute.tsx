@@ -1,4 +1,6 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type WheelEvent } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
+import { canvasDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import {
   createObjectEditor,
   type ObjectDocument,
@@ -29,22 +31,12 @@ import {
   type ResizeEdge,
 } from "@interactive-os/json-document-affordance";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
 
-const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
 const lockedIds = new Set(["lock"]);
 const resizeEdges: ReadonlyArray<ResizeEdge> = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
-
-const initialObjects: ObjectDocument = {
-  objects: [
-    { id: "note", label: "Note", x: 24, y: 24, width: 120, height: 72, color: "#de6d55" },
-    { id: "card", label: "Card", x: 168, y: 40, width: 120, height: 72, color: "#60786f" },
-    { id: "chip", label: "Chip", x: 96, y: 136, width: 120, height: 72, color: "#c4a35a" },
-    { id: "lock", label: "Lock", x: 248, y: 136, width: 72, height: 72, color: "#8a8a8a" },
-  ],
-};
 
 type DragState = {
   readonly ids: ReadonlyArray<string>;
@@ -89,7 +81,7 @@ type MenuState = {
 };
 
 export function CanvasDemoRoute() {
-  const [editor] = useState(() => createObjectEditor(initialObjects));
+  const [editor] = useState(() => createObjectEditor(canvasDemoDocument));
   const [drag, setDrag] = useState<DragState | null>(null);
   const [marquee, setMarquee] = useState<MarqueeState | null>(null);
   const [pan, setPan] = useState<PanState>({ x: 0, y: 0, originX: 0, originY: 0, active: false });
@@ -631,15 +623,15 @@ export function CanvasDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader illustration="peek" title="Canvas">
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
-
+    )}>
       <ProductApp
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
-        toolbar={colors.map((color) => (
+        toolbar={objectDemoColors.map((color) => (
           <ActionButton
             key={color}
             aria-label={`Fill ${color}`}
@@ -732,7 +724,7 @@ export function CanvasDemoRoute() {
                     width: object.width + (resizing?.dw ?? 0),
                     height: object.height + (resizing?.dh ?? 0),
                     backgroundColor: object.color,
-                    color: "#fff8f2",
+                    color: "rgb(var(--color-foreground-canvas-object))",
                   }}
                 >
                   {object.label}
@@ -813,7 +805,7 @@ export function CanvasDemoRoute() {
           ) : null}
         </div>
       </ProductApp>
-    </PageFrame>
+    </DemoPage>
   );
 }
 

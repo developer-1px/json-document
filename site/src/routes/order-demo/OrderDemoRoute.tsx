@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createOrderEditor,
   type OrderClipboard,
@@ -15,7 +16,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
@@ -123,7 +124,7 @@ export function OrderDemoRoute() {
   }
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader
         illustration="cursor"
         title="Order Demo"
@@ -137,6 +138,7 @@ export function OrderDemoRoute() {
         A one-line list with range selection, structured clipboard, delete, and local history.
       </PageHeader>
 
+    )}>
       <ProductApp
         toolbarLabel="Order actions"
         toolbar={(
@@ -195,6 +197,6 @@ export function OrderDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes an item.</p>
         </section>
       </ProductApp>
-    </PageFrame>
+    </DemoPage>
   );
 }
