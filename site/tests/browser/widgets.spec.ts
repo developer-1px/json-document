@@ -67,7 +67,10 @@ test("Listbox leaves modified printable keys for history commands", async ({ pag
 
 test("Listbox reads selected keys and focus from Order", async ({ page }) => {
   await page.goto("/widgets/listbox");
+  const listbox = page.getByRole("listbox", { name: "Order items" });
   await page.getByRole("option", { name: "Today" }).click();
+  await expect(listbox).toBeFocused();
+  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-listbox-option-today");
   expect(await json(page, "widget-listbox-selected")).toEqual(["today"]);
   expect(await json(page, "widget-listbox-focus")).toBe("today");
 
@@ -85,6 +88,13 @@ test("Listbox reads selected keys and focus from Order", async ({ page }) => {
     direction: "down",
     operation: "replace",
   });
+  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-listbox-option-later");
+
+  await page.keyboard.press("Delete");
+  await expect(page.getByRole("option", { name: "Later" })).toHaveCount(0);
+  await expect(listbox).toBeFocused();
+  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-listbox-option-done");
+  await expect(page.locator("#widget-listbox-option-done")).toHaveCount(1);
 });
 
 test("Grid reads topology and selected cells from Sheet", async ({ page }) => {
@@ -95,6 +105,9 @@ test("Grid reads topology and selected cells from Sheet", async ({ page }) => {
   });
 
   await page.getByRole("gridcell", { name: "Alpha" }).click();
+  const grid = page.getByRole("grid", { name: "Sheet cells" });
+  await expect(grid).toBeFocused();
+  await expect(grid).toHaveAttribute("aria-activedescendant", "widget-grid-cell-alpha-task");
   expect(await json(page, "widget-grid-selected")).toEqual([{ rowId: "alpha", columnId: "task" }]);
 
   await page.keyboard.down("Shift");
@@ -115,6 +128,8 @@ test("Grid reads topology and selected cells from Sheet", async ({ page }) => {
     direction: "right",
     operation: "replace",
   });
+  await expect(grid).toHaveAttribute("aria-activedescendant", "widget-grid-cell-alpha-owner");
+  await expect(page.locator("#widget-grid-cell-alpha-owner")).toHaveCount(1);
 });
 
 test("Document reads selected keys, focus, and text offset", async ({ page }) => {
@@ -141,7 +156,11 @@ test("Tree reads visible topology and selected keys", async ({ page }) => {
   expect(await json(page, "widget-tree-topology")).toEqual({
     visibleIds: ["fruit", "apple", "pear", "veg", "kale"],
   });
+  const tree = page.getByRole("tree", { name: "Visible nodes" });
   await page.getByRole("treeitem", { name: "Apple" }).click();
+  await expect(tree).toBeFocused();
+  await expect(tree).toHaveAttribute("aria-activedescendant", "widget-tree-item-apple");
+  await expect(page.getByRole("treeitem", { name: "Fruit" })).toHaveAttribute("aria-expanded", "true");
   expect(await json(page, "widget-tree-selected")).toEqual(["apple"]);
   expect(await json(page, "widget-tree-focus")).toBe("apple");
 });
@@ -154,6 +173,22 @@ test("Tree left collapses and right expands the focused parent", async ({ page }
     visibleIds: ["fruit", "veg", "kale"],
   });
   await page.keyboard.press("ArrowRight");
+  expect(await json(page, "widget-tree-topology")).toEqual({
+    visibleIds: ["fruit", "apple", "pear", "veg", "kale"],
+  });
+});
+
+test("native disclosure keeps browser Enter and Space activation", async ({ page }) => {
+  await page.goto("/widgets/tree");
+  const collapse = page.getByRole("button", { name: "Collapse Fruit" });
+  await collapse.focus();
+  await page.keyboard.press("Space");
+  expect(await json(page, "widget-tree-topology")).toEqual({
+    visibleIds: ["fruit", "veg", "kale"],
+  });
+  const expand = page.getByRole("button", { name: "Expand Fruit" });
+  await expand.focus();
+  await page.keyboard.press("Enter");
   expect(await json(page, "widget-tree-topology")).toEqual({
     visibleIds: ["fruit", "apple", "pear", "veg", "kale"],
   });

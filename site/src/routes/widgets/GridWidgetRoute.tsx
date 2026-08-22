@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createSheetEditor, gridTopology, type SheetDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { gridBoundary, moveGridPoint } from "@interactive-os/json-document-web";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  gridBoundary,
+  moveGridPoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, gridCellProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialSheet: SheetDocument = {
@@ -24,6 +30,7 @@ const initialSheet: SheetDocument = {
 };
 
 export function GridWidgetRoute() {
+  const containerRef = useRef<HTMLTableElement>(null);
   const [editor] = useState(() => createSheetEditor(initialSheet));
   const keyboard = useWidgetKeyboard();
   const focus = editor.snapshot.selection.focus;
@@ -81,10 +88,11 @@ export function GridWidgetRoute() {
       widgetLabel="Grid"
       widget={(
         <table
+          ref={containerRef}
           role="grid"
           aria-multiselectable="true"
           aria-label="Sheet cells"
-          tabIndex={0}
+          {...activeDescendantContainerProps(focus === null ? null : gridCellId(focus.rowId, focus.columnId))}
           onKeyDown={editing.getKeyDownHandler()}
           className={classes("w-full", ui.surface.table, ui.state.focus)}
         >
@@ -105,8 +113,14 @@ export function GridWidgetRoute() {
                     as="td"
                     key={column.id}
                     className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
-                    {...gridCellProps(editing.getItem(cellKey(row.id, column.id)))}
+                    {...optionProps(editing.getItem(cellKey(row.id, column.id)))}
+                    {...activeDescendantItemProps(gridCellId(row.id, column.id))}
+                    {...projectWebWidgetState({
+                      role: "gridcell",
+                      selected: editing.getItem(cellKey(row.id, column.id)).getIsSelected(),
+                    })}
                     onClick={(event) => {
+                      containerRef.current?.focus();
                       applyAffordance(pointerSelect(event), {
                         hand: (hand) => {
                           if (hand.type !== "select") return;
@@ -140,6 +154,10 @@ export function GridWidgetRoute() {
 
 function cellKey(rowId: string, columnId: string): string {
   return `${rowId}\u0000${columnId}`;
+}
+
+function gridCellId(rowId: string, columnId: string): string {
+  return `widget-grid-cell-${rowId}-${columnId}`;
 }
 
 function parseCellKey(key: string): { readonly rowId: string; readonly columnId: string } {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   createTreeEditor,
   type TreeDocument,
@@ -6,7 +6,13 @@ import {
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  lineBoundary,
+  moveLinePoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
 import { IconButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -14,7 +20,7 @@ import {
   pointerSelect,
   treeAffordance,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialTree: TreeDocument = {
@@ -28,6 +34,7 @@ const initialTree: TreeDocument = {
 };
 
 export function TreeWidgetRoute() {
+  const containerRef = useRef<HTMLUListElement>(null);
   const [editor] = useState(() => createTreeEditor(initialTree));
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set(["fruit", "veg"]));
   const keyboard = useWidgetKeyboard();
@@ -109,10 +116,11 @@ export function TreeWidgetRoute() {
       widgetLabel="Tree"
       widget={(
         <ul
+          ref={containerRef}
           role="tree"
           aria-multiselectable="true"
           aria-label="Visible nodes"
-          tabIndex={0}
+          {...activeDescendantContainerProps(focusKey === null ? null : treeItemId(focusKey))}
           onKeyDown={editing.getKeyDownHandler()}
           className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
         >
@@ -130,9 +138,17 @@ export function TreeWidgetRoute() {
                     </IconButton>
                   ) : <span />}
                   <SelectableItem
+                    as="div"
                     className={classes("text-left", ui.surface.selectableBlock)}
-                    {...treeItemProps(editing.getItem(row.id))}
+                    {...optionProps(editing.getItem(row.id))}
+                    {...activeDescendantItemProps(treeItemId(row.id))}
+                    {...projectWebWidgetState({
+                      role: "treeitem",
+                      selected: editing.getItem(row.id).getIsSelected(),
+                      expanded: childCount > 0 ? expanded.has(row.id) : undefined,
+                    })}
                     onClick={(event) => {
+                      containerRef.current?.focus();
                       applyAffordance(pointerSelect(event), {
                         hand: (hand) => {
                           if (hand.type !== "select") return;
@@ -162,6 +178,10 @@ export function TreeWidgetRoute() {
       ]}
     />
   );
+}
+
+function treeItemId(nodeId: string): string {
+  return `widget-tree-item-${nodeId}`;
 }
 
 function walkVisible(

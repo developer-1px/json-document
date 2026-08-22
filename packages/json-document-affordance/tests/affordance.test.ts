@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  activateAffordance,
   applyAffordance,
   caretAffordance,
   caretCursor,
@@ -13,12 +14,14 @@ import {
   focusAffordance,
   planeHitAffordance,
   pointerSelect,
+  pressAffordance,
   renameAffordance,
   resolveAffordanceKey,
   snapAffordance,
   treeAffordance,
   typeaheadAffordance,
 } from "../src/index.js";
+import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 
 describe("pointerSelect", () => {
   test("maps conventional modifiers to replace, extend, and toggle", () => {
@@ -44,6 +47,53 @@ describe("pointerSelect", () => {
       },
     });
     expect(operations).toEqual(["replace", "extend", "toggle", "toggle"]);
+  });
+});
+
+describe("pressAffordance", () => {
+  test("owns start, end, cancel, disabled, and native activation without persistent ARIA state", () => {
+    const start = pressAffordance(
+      pressInteractionFromWeb({ type: "keydown", key: " " }),
+      { pressing: false },
+    );
+    expect(start).toEqual({ hand: { type: "press", phase: "start" }, pressing: true });
+
+    const repeated = pressAffordance(
+      pressInteractionFromWeb({ type: "keydown", key: " ", repeat: true }),
+      { pressing: start.pressing },
+    );
+    expect(repeated).toEqual({ hand: null, pressing: true });
+
+    const end = pressAffordance(
+      pressInteractionFromWeb({ type: "keyup", key: " " }),
+      { pressing: repeated.pressing },
+    );
+    expect(end).toEqual({ hand: { type: "press", phase: "end" }, pressing: false });
+
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "pointercancel" }),
+      { pressing: true },
+    )).toEqual({ hand: { type: "press", phase: "cancel" }, pressing: false });
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "keydown", key: "Enter" }),
+      { pressing: false, disabled: true },
+    )).toEqual({ hand: null, pressing: false });
+    expect(pressAffordance(
+      pressInteractionFromWeb({ type: "click", detail: 0 }),
+      { pressing: false },
+    )).toEqual({ hand: { type: "activate" }, pressing: false });
+  });
+
+  test("maps normalized native and completed custom Press to activation once", () => {
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keyup", key: "Enter" })).hand).toBeNull();
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keydown", key: " " })).hand).toBeNull();
+    expect(activateAffordance(pressInteractionFromWeb({ type: "keyup", key: " " })).hand)
+      .toEqual({ type: "activate" });
+    expect(activateAffordance({ type: "press", phase: "end" }).hand).toEqual({ type: "activate" });
+    expect(activateAffordance(pressInteractionFromWeb({ type: "click", detail: 0 })).hand)
+      .toEqual({ type: "activate" });
   });
 });
 

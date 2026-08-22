@@ -9,6 +9,13 @@ export {
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";
+export { pressInteractionFromWeb } from "./press.js";
+export {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  projectWebWidgetState,
+  rovingFocusItemProps,
+} from "./widget.js";
 export {
   chordFromStroke,
   createWebKeyboardAdapter,
@@ -39,3 +46,9 @@ export type {
   WebKeyboardStroke,
   WebKeymap,
 } from "./keyboard.js";
+export type {
+  WebPressInput,
+  WebPressInteraction,
+  WebPressSource,
+} from "./press.js";
+export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
