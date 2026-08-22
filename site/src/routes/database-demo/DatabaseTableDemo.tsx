@@ -31,7 +31,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { gridCellProps, historyCommands } from "../../shared/widget-binding";
+import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
 import { initialDatabase } from "./initial-database";
 
 const defaultWidth = 160;
@@ -107,6 +107,16 @@ export function DatabaseTableDemo() {
     onSelect: (key, mode) => {
       const { recordId, propertyId } = parseCellKey(key);
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
+    },
+    keyboard: {
+      resolve: editingCommandFromStroke,
+      focusKey: () => {
+        const current = editor.snapshot.selection.focus;
+        return current ? cellKey(current.recordId, current.propertyId) : undefined;
+      },
+      neighbor: () => null,
+      onUndo: () => { run(editor.undo, "Undone"); },
+      onRedo: () => { run(editor.redo, "Redone"); },
     },
   });
   const snapshot = editing.snapshot;
@@ -321,7 +331,12 @@ export function DatabaseTableDemo() {
         ]} />
       )}
     >
-        <section aria-label="Database editor" className="relative">
+        <section
+          aria-label="Database editor"
+          className="relative"
+          tabIndex={0}
+          onKeyDown={editing.getKeyDownHandler()}
+        >
           <table role="grid" aria-label="Notion-style database" aria-multiselectable="true" className={classes("w-full", ui.database.table)}>
             <thead>
               <tr>

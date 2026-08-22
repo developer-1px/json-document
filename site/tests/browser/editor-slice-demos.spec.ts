@@ -25,6 +25,19 @@ test("Canvas fills a selected object", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Note" })).toHaveCSS("background-color", "rgb(77, 106, 138)");
 });
 
+test("Object routes platform history shortcuts from its editing surface", async ({ page }) => {
+  await page.goto("/demo/object");
+  const note = page.getByRole("button", { name: "Note" });
+  await note.click();
+  await page.getByRole("button", { name: "Fill #4d6a8a" }).click();
+  await expect(note).toHaveCSS("background-color", "rgb(77, 106, 138)");
+  await note.focus();
+  await page.keyboard.press("ControlOrMeta+Z");
+  await expect(note).toHaveCSS("background-color", "rgb(222, 109, 85)");
+  await page.keyboard.press("ControlOrMeta+Shift+Z");
+  await expect(note).toHaveCSS("background-color", "rgb(77, 106, 138)");
+});
+
 test("Order typeahead jumps to the matching label and Escape clears the buffer", async ({ page }) => {
   await page.goto("/demo/order");
   await page.getByLabel("Editable order").locator("ol").focus();
@@ -236,8 +249,11 @@ test("Kanban moves a card to another column", async ({ page }) => {
   const done = page.locator("[data-column-id=done]");
   await card.dragTo(done);
   await expect(done.getByRole("button", { name: "Write the brief" })).toBeVisible();
-  await page.getByRole("button", { name: "Undo" }).click();
+  await page.getByLabel("Kanban board").focus();
+  await page.keyboard.press("ControlOrMeta+Z");
   await expect(page.locator("[data-column-id=todo]").getByRole("button", { name: "Write the brief" })).toBeVisible();
+  await page.keyboard.press("ControlOrMeta+Shift+Z");
+  await expect(done.getByRole("button", { name: "Write the brief" })).toBeVisible();
 });
 
 async function json(page: import("@playwright/test").Page, testId: string) {

@@ -14,7 +14,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands, optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
 
 const colors = ["#de6d55", "#60786f", "#c4a35a", "#4d6a8a"] as const;
 
@@ -49,6 +49,13 @@ export function ObjectDemoRoute() {
         objectIds: [objectId],
         mode: mode === "extend" ? "add" : mode,
       }, "Selection changed");
+    },
+    keyboard: {
+      resolve: editingCommandFromStroke,
+      focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
+      neighbor: () => null,
+      onUndo: () => { editor.undo(); setAnnouncement("Undone"); },
+      onRedo: () => { editor.redo(); setAnnouncement("Redone"); },
     },
   });
   const snapshot = editing.snapshot;
@@ -130,7 +137,11 @@ export function ObjectDemoRoute() {
           ]} />
         )}
       >
-        <section aria-label="Editable objects" className="contents">
+        <section
+          aria-label="Editable objects"
+          className="contents"
+          onKeyDown={editing.getKeyDownHandler()}
+        >
           {document.objects.map((object) => (
             <SelectableItem
               key={object.id}

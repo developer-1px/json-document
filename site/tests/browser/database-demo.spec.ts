@@ -84,9 +84,10 @@ test("Database Table header hands persist view projection and restore records wi
   await expect(page.getByTestId("database-selection-json")).toContainText('"recordId": "page-5"');
   await page.getByRole("button", { name: "Delete selected" }).click();
   await expect(page.getByTestId("database-document-json")).not.toContainText('"id": "page-5"');
-  await page.getByRole("button", { name: "Undo" }).click();
+  await page.getByLabel("Database editor").focus();
+  await page.keyboard.press("ControlOrMeta+Z");
   await expect(page.getByTestId("database-document-json")).toContainText('"id": "page-5"');
   await expect(page.getByTestId("database-selection-json")).toContainText('"recordId": "page-5"');
-  await page.getByRole("button", { name: "Redo" }).click();
+  await page.keyboard.press("ControlOrMeta+Shift+Z");
   await expect(page.getByTestId("database-document-json")).not.toContainText('"id": "page-5"');
 });
