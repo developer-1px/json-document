@@ -73,7 +73,7 @@ describe("breadcrumbTrail", () => {
     expect(trail("/demo/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database", "Database Demo:/demo/database"]);
     expect(trail("/docs/composer")).toEqual(["Overview:/", "Hands:/editors", "Composer:/docs/composer"]);
     expect(trail("/docs/mention")).toEqual(["Overview:/", "Hands:/editors", "Mention:/docs/mention"]);
-    expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/adapters"]);
+    expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Adapter demos:/adapters"]);
     expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Keyboard:/adapters/keyboard"]);
     expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Clipboard adapter:/adapters/clipboard"]);
     expect(trail("/docs/react-editing")).toEqual([
@@ -81,7 +81,7 @@ describe("breadcrumbTrail", () => {
       "Connector:/docs/connectors",
       "React editing:/docs/react-editing",
     ]);
-    expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/connectors"]);
+    expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/docs/connectors", "Connector demos:/connectors"]);
     expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/docs/connectors", "Zod:/connectors/zod"]);
     expect(trail("/connectors/zod/validate")).toEqual([
       "Overview:/",

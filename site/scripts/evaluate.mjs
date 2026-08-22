@@ -112,7 +112,7 @@ const sitemap = read("sitemap.xml");
 const manifest = JSON.parse(read("site.webmanifest"));
 
 for (const pattern of [
-  /<title>json-document - Headless JSON editing<\/title>/,
+  /<title>json-document - Agent artifact editing<\/title>/,
   /name="description"/,
   /property="og:title"/,
   /property="og:description"/,

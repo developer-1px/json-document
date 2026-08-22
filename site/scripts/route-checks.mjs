@@ -7,6 +7,7 @@ const navigationGroups = new Set([
   "Connector",
   "Affordance",
   "Hands",
+  "Artifact",
 ]);
 
 export function validateSiteRoutes(routes, fail) {

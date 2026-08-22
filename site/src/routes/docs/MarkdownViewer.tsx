@@ -6,7 +6,7 @@ import { codeLanguage } from "../../shared/ui/code-tokens";
 import { ShikiSourceCodeBlock } from "../../shared/demo-workbench/ShikiSourceCodeBlock";
 import { ActionLink } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { LiveDemo } from "./live-demo-registry";
+import { LiveDemo } from "../../app/live-demo-registry";
 
 type MarkdownHeading = { id: string; level: number; text: string };
 

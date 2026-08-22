@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { docPages } from "../../src/routes/docs/doc-pages";
-import { liveDemoPaths } from "../../src/routes/docs/live-demo-registry";
+import { liveDemoPaths } from "../../src/app/live-demo-registry";
 
 describe("Markdown live demos", () => {
   test("declares every registered standalone demo exactly once in the documentation SSOT", () => {

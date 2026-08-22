@@ -331,7 +331,7 @@
   },
   {
     "path": "/adapters",
-    "label": "Adapter",
+    "label": "Adapter demos",
     "title": "Adapters - json-document",
     "description": "Official json-document platform adapters with live keyboard, clipboard, and contenteditable demos.",
     "navigationGroup": "Adapter",
@@ -384,7 +384,7 @@
   },
   {
     "path": "/connectors",
-    "label": "Connector",
+    "label": "Connector demos",
     "title": "Connectors - json-document",
     "description": "Official json-document Connector catalog with live integration demos.",
     "navigationGroup": "Connector",
