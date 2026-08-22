@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   createTreeEditor,
   type TreeDocument,
@@ -6,15 +6,21 @@ import {
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
-import { IconButton, SelectableItem } from "../../shared/ui/interactive";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  lineBoundary,
+  moveLinePoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
+import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
   pointerSelect,
   treeAffordance,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, treeItemProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialTree: TreeDocument = {
@@ -28,6 +34,7 @@ const initialTree: TreeDocument = {
 };
 
 export function TreeWidgetRoute() {
+  const containerRef = useRef<HTMLUListElement>(null);
   const [editor] = useState(() => createTreeEditor(initialTree));
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set(["fruit", "veg"]));
   const keyboard = useWidgetKeyboard();
@@ -77,7 +84,7 @@ export function TreeWidgetRoute() {
           if (stay) return key;
         }
         return command.type === "move"
-          ? moveLinePoint(topology.visibleIds, key, command.direction)
+          ? treeNeighbor(rows, key, command.direction)
           : lineBoundary(topology.visibleIds, command.edge);
       },
       onDelete: () => {
@@ -92,15 +99,6 @@ export function TreeWidgetRoute() {
     },
   });
 
-  function toggle(nodeId: string) {
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(nodeId)) next.delete(nodeId);
-      else next.add(nodeId);
-      return next;
-    });
-  }
-
   return (
     <WidgetDemoFrame
       title="Tree"
@@ -109,30 +107,33 @@ export function TreeWidgetRoute() {
       widgetLabel="Tree"
       widget={(
         <ul
+          ref={containerRef}
           role="tree"
           aria-multiselectable="true"
           aria-label="Visible nodes"
-          tabIndex={0}
+          {...activeDescendantContainerProps(focusKey === null ? null : treeItemId(focusKey))}
           onKeyDown={editing.getKeyDownHandler()}
           className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
         >
           {rows.map((row) => {
             const childCount = document.nodes.filter((node) => node.parentId === row.id).length;
             return (
-              <li key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
-                <div className="grid grid-cols-[2rem_minmax(0,1fr)]">
-                  {childCount > 0 ? (
-                    <IconButton
-                      label={expanded.has(row.id) ? `Collapse ${row.label}` : `Expand ${row.label}`}
-                      onClick={() => toggle(row.id)}
-                    >
-                      {expanded.has(row.id) ? "−" : "+"}
-                    </IconButton>
-                  ) : <span />}
+              <li role="none" key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
                   <SelectableItem
-                    className={classes("text-left", ui.surface.selectableBlock)}
-                    {...treeItemProps(editing.getItem(row.id))}
+                    as="div"
+                    className={classes("grid grid-cols-[2rem_minmax(0,1fr)] text-left", ui.surface.selectableBlock)}
+                    {...optionProps(editing.getItem(row.id))}
+                    {...activeDescendantItemProps(treeItemId(row.id))}
+                    {...projectWebWidgetState({
+                      role: "treeitem",
+                      selected: editing.getItem(row.id).getIsSelected(),
+                      expanded: childCount > 0 ? expanded.has(row.id) : undefined,
+                      level: row.depth + 1,
+                      posInSet: row.posInSet,
+                      setSize: row.setSize,
+                    })}
                     onClick={(event) => {
+                      containerRef.current?.focus();
                       applyAffordance(pointerSelect(event), {
                         hand: (hand) => {
                           if (hand.type !== "select") return;
@@ -146,9 +147,9 @@ export function TreeWidgetRoute() {
                       });
                     }}
                   >
-                    {row.label}
+                    <span aria-hidden="true">{childCount > 0 ? expanded.has(row.id) ? "−" : "+" : ""}</span>
+                    <span>{row.label}</span>
                   </SelectableItem>
-                </div>
               </li>
             );
           })}
@@ -164,23 +165,48 @@ export function TreeWidgetRoute() {
   );
 }
 
+function treeItemId(nodeId: string): string {
+  return `widget-tree-item-${nodeId}`;
+}
+
 function walkVisible(
   nodes: ReadonlyArray<TreeNode>,
   expanded: ReadonlySet<string>,
-): ReadonlyArray<TreeNode & { readonly depth: number }> {
+): ReadonlyArray<TreeRow> {
   const byParent = new Map<string | null, TreeNode[]>();
   for (const node of nodes) {
     const siblings = byParent.get(node.parentId) ?? [];
     siblings.push(node);
     byParent.set(node.parentId, siblings);
   }
-  const rows: Array<TreeNode & { readonly depth: number }> = [];
+  const rows: TreeRow[] = [];
   function visit(parentId: string | null, depth: number) {
-    for (const node of byParent.get(parentId) ?? []) {
-      rows.push({ ...node, depth });
+    const siblings = byParent.get(parentId) ?? [];
+    siblings.forEach((node, index) => {
+      rows.push({ ...node, depth, posInSet: index + 1, setSize: siblings.length });
       if (expanded.has(node.id)) visit(node.id, depth + 1);
-    }
+    });
   }
   visit(null, 0);
   return rows;
+}
+
+type TreeRow = TreeNode & {
+  readonly depth: number;
+  readonly posInSet: number;
+  readonly setSize: number;
+};
+
+function treeNeighbor(
+  rows: ReadonlyArray<TreeRow>,
+  key: string,
+  direction: "previous" | "next" | "up" | "down" | "left" | "right",
+): string | null {
+  const row = rows.find((item) => item.id === key);
+  if (row === undefined) return null;
+  if (direction === "left") return row.parentId;
+  if (direction === "right") {
+    return rows.find((item) => item.parentId === row.id)?.id ?? null;
+  }
+  return moveLinePoint(rows.map((item) => item.id), key, direction);
 }

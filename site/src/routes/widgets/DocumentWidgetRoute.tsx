@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createDocumentEditor, type BlockDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  lineBoundary,
+  moveLinePoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -20,6 +26,7 @@ const initialDocument: BlockDocument = {
 };
 
 export function DocumentWidgetRoute() {
+  const listboxRef = useRef<HTMLUListElement>(null);
   const [editor] = useState(() => createDocumentEditor(initialDocument));
   const keyboard = useWidgetKeyboard();
   const focus = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus ?? null;
@@ -65,20 +72,27 @@ export function DocumentWidgetRoute() {
       widgetLabel="Document"
       widget={(
         <ul
+          ref={listboxRef}
           role="listbox"
           aria-multiselectable="true"
           aria-label="Document blocks"
-          tabIndex={0}
+          {...activeDescendantContainerProps(focus === null ? null : documentItemId(focus.blockId))}
           onKeyDown={editing.getKeyDownHandler()}
           className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
         >
           {document.blocks.map((block) => (
             <SelectableItem
+              as="li"
               key={block.id}
-              role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(block.id))}
+              {...activeDescendantItemProps(documentItemId(block.id))}
+              {...projectWebWidgetState({
+                role: "option",
+                selected: editing.getItem(block.id).getIsSelected(),
+              })}
               onClick={(event) => {
+                listboxRef.current?.focus();
                 applyAffordance(pointerSelect(event), {
                   hand: (hand) => {
                     if (hand.type !== "select") return;
@@ -100,4 +114,8 @@ export function DocumentWidgetRoute() {
       ]}
     />
   );
+}
+
+function documentItemId(blockId: string): string {
+  return `widget-document-option-${blockId}`;
 }

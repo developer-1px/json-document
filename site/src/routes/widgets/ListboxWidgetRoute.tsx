@@ -1,7 +1,13 @@
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { createOrderEditor, type OrderDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { lineBoundary, moveLinePoint } from "@interactive-os/json-document-web";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  lineBoundary,
+  moveLinePoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -23,6 +29,7 @@ const initialOrder: OrderDocument = {
 };
 
 export function ListboxWidgetRoute() {
+  const containerRef = useRef<HTMLUListElement>(null);
   const [editor] = useState(() => createOrderEditor(initialOrder));
   const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const keyboard = useWidgetKeyboard();
@@ -101,20 +108,27 @@ export function ListboxWidgetRoute() {
       widgetLabel="Listbox"
       widget={(
         <ul
+          ref={containerRef}
           role="listbox"
           aria-multiselectable="true"
           aria-label="Order items"
-          tabIndex={0}
+          {...activeDescendantContainerProps(focusKey === null ? null : listboxItemId(focusKey))}
           onKeyDown={onKeyDown}
           className={classes("m-0 grid list-none gap-1 p-0", ui.state.focus)}
         >
           {document.items.map((item) => (
             <SelectableItem
+              as="li"
               key={item.id}
-              role="option"
               className={classes("w-full text-left", ui.surface.selectableBlock)}
               {...optionProps(editing.getItem(item.id))}
+              {...activeDescendantItemProps(listboxItemId(item.id))}
+              {...projectWebWidgetState({
+                role: "option",
+                selected: editing.getItem(item.id).getIsSelected(),
+              })}
               onClick={(event) => {
+                containerRef.current?.focus();
                 applyAffordance(pointerSelect(event), {
                   hand: (hand) => {
                     if (hand.type !== "select") return;
@@ -136,4 +150,8 @@ export function ListboxWidgetRoute() {
       ]}
     />
   );
+}
+
+function listboxItemId(itemId: string): string {
+  return `widget-listbox-option-${itemId}`;
 }

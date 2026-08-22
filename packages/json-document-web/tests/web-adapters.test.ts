@@ -15,11 +15,16 @@ import {
   documentClipboardCodec,
   orderClipboardCodec,
   createWebKeyboardAdapter,
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
   defaultWebKeymap,
   gridBoundary,
   lineBoundary,
   moveGridPoint,
   moveLinePoint,
+  pressInteractionFromWeb,
+  projectWebWidgetState,
+  rovingFocusItemProps,
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
@@ -247,6 +252,69 @@ describe("Web clipboard Adapter", () => {
       ok: true,
       payload: { text: "HTML", source: "html" },
     });
+  });
+});
+
+describe("Web Press and ARIA Adapters", () => {
+  test("normalizes keyboard, pointer, cancellation, and native activation facts", () => {
+    expect(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).toEqual({
+      phase: "start", source: "keyboard", key: "Enter",
+    });
+    expect(pressInteractionFromWeb({ type: "keyup", key: " " })).toEqual({
+      phase: "end", source: "keyboard", key: "Space",
+    });
+    expect(pressInteractionFromWeb({ type: "keydown", key: "Enter", repeat: true })).toBeNull();
+    expect(pressInteractionFromWeb({ type: "pointerdown", button: 0 })).toEqual({
+      phase: "start", source: "pointer",
+    });
+    expect(pressInteractionFromWeb({ type: "pointercancel" })).toEqual({
+      phase: "cancel", source: "pointer",
+    });
+    expect(pressInteractionFromWeb({ type: "pointerleave" })).toEqual({
+      phase: "cancel", source: "pointer",
+    });
+    expect(pressInteractionFromWeb({ type: "click", detail: 0 })).toEqual({
+      phase: "activation", source: "virtual",
+    });
+    expect(pressInteractionFromWeb({ type: "click", detail: 1 })).toEqual({
+      phase: "activation", source: "pointer",
+    });
+    expect(pressInteractionFromWeb({ type: "click", button: 2 })).toBeNull();
+  });
+
+  test("projects persistent role state without confusing transient press with ARIA", () => {
+    expect(projectWebWidgetState({ role: "button" })).toEqual({ role: "button" });
+    expect(projectWebWidgetState({ role: "button", pressed: true })).toEqual({
+      role: "button", "aria-pressed": true,
+    });
+    expect(projectWebWidgetState({ role: "option", selected: true, disabled: true })).toEqual({
+      role: "option", "aria-selected": true, "aria-disabled": true,
+    });
+    expect(projectWebWidgetState({ role: "treeitem", selected: false, expanded: true })).toEqual({
+      role: "treeitem", "aria-selected": false, "aria-expanded": true,
+    });
+    expect(projectWebWidgetState({
+      role: "treeitem", selected: false, level: 2, posInSet: 1, setSize: 3,
+    })).toEqual({
+      role: "treeitem",
+      "aria-selected": false,
+      "aria-level": 2,
+      "aria-posinset": 1,
+      "aria-setsize": 3,
+    });
+    expect(projectWebWidgetState({ role: "disclosure", expanded: false })).toEqual({
+      role: "button", "aria-expanded": false,
+    });
+  });
+
+  test("projects exactly one composite focus strategy", () => {
+    expect(activeDescendantContainerProps("option-b")).toEqual({
+      tabIndex: 0, "aria-activedescendant": "option-b",
+    });
+    expect(activeDescendantContainerProps(null)).toEqual({ tabIndex: 0 });
+    expect(activeDescendantItemProps("option-b")).toEqual({ id: "option-b" });
+    expect(rovingFocusItemProps(true)).toEqual({ tabIndex: 0 });
+    expect(rovingFocusItemProps(false)).toEqual({ tabIndex: -1 });
   });
 });
 

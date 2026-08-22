@@ -16,6 +16,7 @@ export {
   selectionModeFromModifiers,
   useEditing,
   useRestoreTextCursor,
+  useRestoreElementFocus,
   type Editing,
   type EditingItem,
   type EditingKeyDownEvent,
@@ -24,6 +25,7 @@ export {
   type EditingKeyboardStroke,
   type EditingPressEvent,
   type EditingSelectionMode,
+  type ElementFocusControl,
   type TextCursorControl,
   type UseEditingOptions,
 } from "./use-editing.js";

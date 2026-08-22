@@ -71,6 +71,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
+| [Press / Activate](affordance-activate.md) | `pressAffordance`, `activateAffordance` | custom Press lifecycle, native activation |
 | [Focus](affordance-focus.md) | `focusAffordance` | Tab 사이, 화살표 안, 초점 ≠ 선택 |
 | [Caret](affordance-caret.md) | `caretAffordance`, `caretCursor` | I-beam 삽입점, 글 범위 |
 | [Rename](affordance-rename.md) | `renameAffordance` | F2, 느린 두 번 누르기 |
@@ -81,7 +82,6 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 
 | Affordance | API | Hand |
 | --- | --- | --- |
-| [Activate](affordance-activate.md) | `activateAffordance` | Enter, Space, 기본 클릭 |
 | [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace. Delete chord는 이미 닫힘 |
 
 ## 마우스 TBD

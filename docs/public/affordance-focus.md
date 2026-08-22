@@ -21,6 +21,11 @@ function onKeyDown(event: KeyboardEvent) {
 호스트는 마크업과 초점 고리를 그립니다. 화살표가 선택까지 바꿀지는
 장르 Intent입니다. keymap을 제품마다 열지 않습니다.
 
+Web Adapter는 logical focus를 `roving tabindex` 또는 `aria-activedescendant`로
+투영합니다. 한 composite는 둘 중 하나만 사용합니다. active descendant는 항상
+현재 DOM에 있는 descendant ID를 가리키고, 빈 collection이면 속성을 제거한 채
+container DOM focus를 유지합니다.
+
 닫는 손:
 - Tab / Shift+Tab: 컴포넌트 사이 탭 순서
 - 화살표 / Home / End / PageUp / PageDown: 컴포넌트 안

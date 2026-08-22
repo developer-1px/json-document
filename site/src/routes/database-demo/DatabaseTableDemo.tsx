@@ -27,6 +27,7 @@ import {
   dropAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
+import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -230,7 +231,7 @@ export function DatabaseTableDemo() {
       }
       return;
     }
-    applyAffordance(activateAffordance({ button: 0, detail: 1 }), {
+    applyAffordance(activateAffordance(pressInteractionFromWeb({ type: "click", button: 0, detail: 1 })), {
       hand: (hand) => {
         if (hand.type !== "activate") return;
         cycleSort(drag.propertyId);
@@ -290,7 +291,11 @@ export function DatabaseTableDemo() {
       setMenu({ propertyId, x: rect.left, y: rect.bottom });
       return;
     }
-    applyAffordance(activateAffordance(event), {
+    const interaction = pressInteractionFromWeb(event);
+    if (interaction?.source === "keyboard" && "key" in interaction && interaction.key === "Space" && interaction.phase === "start") {
+      event.preventDefault();
+    }
+    applyAffordance(activateAffordance(interaction), {
       hand: (hand) => {
         if (hand.type !== "activate") return;
         event.preventDefault();
@@ -352,6 +357,7 @@ export function DatabaseTableDemo() {
                     onPointerUp={finishHeaderDrag}
                     onContextMenu={(event) => openHeaderMenu(event, property.id)}
                     onKeyDown={(event) => onHeaderKeyDown(event, property.id, false)}
+                    onKeyUp={(event) => onHeaderKeyDown(event, property.id, false)}
                     className={classes("relative cursor-grab px-3 py-2", ui.database.head)}
                     style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                   >
@@ -379,7 +385,7 @@ export function DatabaseTableDemo() {
                     aria-expanded={false}
                     aria-label={`Show ${property.name}`}
                     onClick={(event) => {
-                      applyAffordance(activateAffordance(event), {
+                      applyAffordance(activateAffordance(pressInteractionFromWeb(event)), {
                         hand: (hand) => {
                           if (hand.type !== "activate") return;
                           showProperty(property.id);

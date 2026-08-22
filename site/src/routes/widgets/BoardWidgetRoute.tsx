@@ -1,6 +1,13 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type KeyboardEventHandler, type PointerEvent, type ReactNode } from "react";
 import { createKanbanEditor, type KanbanDocument } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useRestoreElementFocus } from "@interactive-os/json-document-react";
+import {
+  activeDescendantContainerProps,
+  activeDescendantItemProps,
+  lineBoundary,
+  moveLinePoint,
+  projectWebWidgetState,
+} from "@interactive-os/json-document-web";
 import {
   applyAffordance,
   commitAffordance,
@@ -10,7 +17,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingCommandFromStroke, optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialBoard: KanbanDocument = {
@@ -38,6 +45,7 @@ export function BoardWidgetRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
   const [drag, setDrag] = useState<DragState | null>(null);
   const surface = useRef<HTMLDivElement>(null);
+  const cardIds = () => (editor.snapshot.value as KanbanDocument).columns.flatMap((column) => column.cardIds);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCardIds,
@@ -49,6 +57,16 @@ export function BoardWidgetRoute() {
         mode: mode === "replace" ? "replace" : "toggle",
       });
     },
+    keyboard: {
+      resolve: editingCommandFromStroke,
+      focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
+      neighbor: (key, command) => command.type === "move"
+        ? moveLinePoint(cardIds(), key, command.direction)
+        : lineBoundary(cardIds(), command.edge),
+      onDelete: () => {
+        editor.dispatch({ type: "selection.remove" });
+      },
+    },
   });
   const board = editing.snapshot.value as KanbanDocument;
   const cards = new Map(board.cards.map((card) => [card.id, card]));
@@ -56,9 +74,15 @@ export function BoardWidgetRoute() {
     id: column.id,
     cardIds: column.cardIds,
   }));
+  const focusKey = editor.snapshot.selection.primaryKey;
+  const focusColumnId = focusKey === null
+    ? null
+    : board.columns.find((column) => column.cardIds.includes(focusKey))?.id ?? null;
 
   function handleCardPointerDown(event: PointerEvent<HTMLElement>, cardId: string) {
+    event.preventDefault();
     event.stopPropagation();
+    (event.currentTarget.closest("[role=listbox]") as HTMLElement | null)?.focus();
     surface.current?.setPointerCapture(event.pointerId);
     applyAffordance(pointerSelect(event), {
       hand: (hand) => {
@@ -128,7 +152,7 @@ export function BoardWidgetRoute() {
         <div
           ref={surface}
           className="grid gap-3 sm:grid-cols-3"
-          role="list"
+          role="group"
           aria-label="Board columns"
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -136,10 +160,10 @@ export function BoardWidgetRoute() {
           {board.columns.map((column) => (
             <div key={column.id} data-column-id={column.id} className="grid content-start gap-2">
               <p className={classes("mb-0 mt-0", ui.text.label)}>{column.title}</p>
-              <ul
-                role="listbox"
-                aria-label={column.title}
-                className="m-0 grid min-h-[4rem] list-none gap-1 p-0"
+              <BoardListbox
+                label={column.title}
+                activeId={focusColumnId === column.id && focusKey !== null ? boardCardId(focusKey) : null}
+                onKeyDown={editing.getKeyDownHandler()}
               >
                 {column.cardIds.map((cardId) => {
                   const card = cards.get(cardId);
@@ -147,13 +171,14 @@ export function BoardWidgetRoute() {
                   const option = optionProps(editing.getItem(card.id));
                   const offset = drag?.cardId === card.id ? drag : null;
                   return (
-                    <li key={card.id}>
+                    <li role="none" key={card.id}>
                       <SelectableItem
-                        role="option"
+                        as="div"
                         className={classes("w-full text-left", ui.surface.selectableBlock)}
                         selected={option.selected}
                         focus={option.focus}
-                        aria-selected={option["aria-selected"]}
+                        {...activeDescendantItemProps(boardCardId(card.id))}
+                        {...projectWebWidgetState({ role: "option", selected: option.selected })}
                         style={{
                           transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
                           pointerEvents: drag ? "none" : undefined,
@@ -165,7 +190,7 @@ export function BoardWidgetRoute() {
                     </li>
                   );
                 })}
-              </ul>
+              </BoardListbox>
             </div>
           ))}
         </div>
@@ -178,6 +203,32 @@ export function BoardWidgetRoute() {
       ]}
     />
   );
+}
+
+function BoardListbox(props: {
+  readonly label: string;
+  readonly activeId: string | null;
+  readonly onKeyDown: KeyboardEventHandler<HTMLUListElement>;
+  readonly children: ReactNode;
+}) {
+  const ref = useRef<HTMLUListElement>(null);
+  useRestoreElementFocus(ref, props.activeId !== null);
+  return (
+    <ul
+      ref={ref}
+      role="listbox"
+      aria-label={props.label}
+      {...activeDescendantContainerProps(props.activeId)}
+      onKeyDown={props.onKeyDown}
+      className="m-0 grid min-h-[4rem] list-none gap-1 p-0"
+    >
+      {props.children}
+    </ul>
+  );
+}
+
+function boardCardId(cardId: string): string {
+  return `widget-board-option-${cardId}`;
 }
 
 function columnAt(event: PointerEvent<HTMLElement>): string | null {
