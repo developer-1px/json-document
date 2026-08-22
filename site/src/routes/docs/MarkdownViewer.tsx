@@ -90,7 +90,6 @@ function stripInlineMarkdown(text: string): string {
 const markdownHrefs: Readonly<Record<string, string>> = {
   "overview.md": "/docs",
   "api.md": "/docs/api",
-  "quickstart.md": "/docs/tutorial",
   "concepts.md": "/docs/concepts",
   "selection.md": "/docs/selection",
   "history.md": "/docs/history",

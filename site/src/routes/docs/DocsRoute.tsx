@@ -7,7 +7,6 @@ import { docPages, type DocPageId } from "./doc-pages";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
-  quickstart: "terminal",
   adapters: "peek",
   affordance: "cursor",
   affordanceSelect: "cursor",
@@ -61,10 +60,6 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
-}
-
-export function QuickstartRoute() {
-  return <DocsRoute pageId="quickstart" />;
 }
 
 export function AdapterDocsRoute() {

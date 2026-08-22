@@ -41,8 +41,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
       "Why",
-      "Quickstart",
-      "Concepts",
+      "Concept Map",
       "API Reference",
     ]);
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();

@@ -43,7 +43,6 @@ import intentMarkdown from "../../../../docs/public/intent.md?raw";
 import objectMarkdown from "../../../../docs/public/object.md?raw";
 import orderMarkdown from "../../../../docs/public/order.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
-import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
 import reactEditingMarkdown from "../../../../docs/public/react-editing.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
@@ -57,7 +56,6 @@ function docPage(path: string, source: string) {
 
 export const docPages = {
   overview: docPage("/docs", overviewMarkdown),
-  quickstart: docPage("/docs/tutorial", quickstartMarkdown),
   adapters: docPage("/docs/adapters", adaptersMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),
   affordanceSelect: docPage("/docs/affordance/select", affordanceSelectMarkdown),

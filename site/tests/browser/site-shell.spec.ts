@@ -20,8 +20,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "JSON Document" }).click();
   await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
     "Why",
-    "Quickstart",
-    "Concepts",
+    "Concept Map",
     "API Reference",
   ]);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -117,10 +116,10 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Affordance" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
 
-  await page.goto("/docs/tutorial");
+  await page.goto("/docs/concepts");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation sections" })).toBeVisible();
-  await expect(siteNavigation.getByRole("link", { name: "Quickstart" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("link", { name: "Concept Map" })).toHaveAttribute("aria-current", "page");
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -209,7 +208,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   const illustrations = new Set<string>();
   const routes = [
     "/docs",
-    "/docs/tutorial",
+    "/docs/concepts",
     "/docs/connectors",
     "/docs/adapters",
     "/docs/api",
@@ -266,7 +265,6 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "patch",
     "peek",
     "sleep",
-    "terminal",
   ]);
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -286,7 +284,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
 test("code blocks preserve source whitespace with a compact visual rhythm", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/docs/tutorial");
+  await page.goto("/docs/api");
 
   const block = page.getByRole("figure", { name: "TypeScript" }).first();
   await expect(block).toBeVisible();
@@ -313,16 +311,16 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
   expect(snapshot.fontSize).toBe("13px");
   expect(snapshot.topInset).toBeLessThanOrEqual(1);
   expect(snapshot.lineGaps.every((gap) => gap >= 20 && gap <= 21)).toBe(true);
-  expect(snapshot.source).toContain('";\n\nconst initialBoard');
+  expect(snapshot.source).toContain('import { createJSONDocument } from "@interactive-os/json-document";');
   expect(snapshot.pageOverflow).toBe(false);
 
   await block.getByRole("button", { name: "Copy" }).click();
   await expect(block.getByRole("button", { name: "Copied" })).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const initialBoard");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("createJSONDocument");
 });
 
 test("inline code stays distinct without drawing a border", async ({ page }) => {
-  await page.goto("/docs/tutorial");
+  await page.goto("/docs/api");
 
   const inlineCode = page.locator("code").filter({ hasText: /^document\.value$/ }).first();
   await expect(inlineCode).toBeVisible();

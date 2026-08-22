@@ -13,9 +13,8 @@ function trail(path: string) {
 
 describe("breadcrumbTrail", () => {
   test("uses the same Overview root on every interior page", () => {
-    expect(trail("/docs/tutorial")).toEqual(["Overview:/", "JSON Document:/docs", "Quickstart:/docs/tutorial"]);
     expect(trail("/docs")).toEqual(["Overview:/", "JSON Document:/docs", "Why:/docs"]);
-    expect(trail("/docs/concepts")).toEqual(["Overview:/", "JSON Document:/docs", "Concepts:/docs/concepts"]);
+    expect(trail("/docs/concepts")).toEqual(["Overview:/", "JSON Document:/docs", "Concept Map:/docs/concepts"]);
     expect(trail("/docs/api")).toEqual(["Overview:/", "JSON Document:/docs", "API Reference:/docs/api"]);
     expect(trail("/docs/collaboration")).toEqual(["Overview:/", "Collaboration:/docs/collaboration"]);
     expect(trail("/docs/collaboration/replica")).toEqual([

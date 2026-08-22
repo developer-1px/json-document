@@ -24,19 +24,10 @@
     "navigationGroup": "JSON Document"
   },
   {
-    "path": "/docs/tutorial",
-    "label": "Quickstart",
-    "title": "Tutorial - json-document",
-    "heading": "작은 카드 문서 만들기",
-    "description": "JSON 문서를 만들고 읽고 검사해 commit한 뒤 변경을 구독하는 과정을 따라갑니다.",
-    "language": "ko",
-    "navigationGroup": "JSON Document"
-  },
-  {
     "path": "/docs/concepts",
-    "label": "Concepts",
-    "title": "Core Concepts - json-document",
-    "description": "JSON Document에서 Editing, Adapter, Connector로 이어지는 개념 지도를 설명합니다.",
+    "label": "Concept Map",
+    "title": "Concept Map - json-document",
+    "description": "JSON Document에서 Artifact까지 책임이 쌓이는 순서와 각 계층의 경계를 설명합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
   },

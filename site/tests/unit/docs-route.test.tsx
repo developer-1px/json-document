@@ -32,9 +32,9 @@ describe("documentation routes", () => {
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
-    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Quickstart" }));
-    await waitFor(() => expect(document.title).toBe("Tutorial - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "작은 카드 문서 만들기" })).toBeTruthy();
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Concept Map" }));
+    await waitFor(() => expect(document.title).toBe("Concept Map - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Concept Map" })).toBeTruthy();
 
     expect(screen.queryByRole("navigation", { name: "Documentation pages" })).toBeNull();
 

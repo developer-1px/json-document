@@ -15,10 +15,10 @@ const editingConceptIllustrations: Record<"selection" | "history" | "clipboard",
 export function ConceptsRoute() {
   return (
     <EditingConceptRoute
-      title="코어 컨셉"
+      title="Concept Map"
       source={conceptsMarkdown}
       illustration="sleep"
-      summary="JSON Document에 Editing, Adapter, Connector가 차례로 이어집니다."
+      summary="JSON 값에서 시작해 사람이 편집하는 artifact가 되기까지의 책임과 의존 순서입니다."
     />
   );
 }
@@ -57,7 +57,7 @@ function EditingConceptRoute(props: {
             {props.summary}
           </PageHeader>
 
-          <nav aria-label="On this page" className={classes("mb-6 lg:hidden", ui.text.meta)}>
+          <nav aria-label="Documentation sections" className={classes("mb-6 lg:hidden", ui.text.meta)}>
             <div className="flex flex-wrap gap-1">
               {headings.map((heading) => (
                 <ActionLink key={heading.id} href={`#${heading.id}`} className={classes("px-2 py-1 no-underline", ui.text.meta)}>
