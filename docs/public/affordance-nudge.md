@@ -28,5 +28,6 @@ function onKeyDown(event: KeyboardEvent) {
 - Arrow: 1 단위
 - Shift+Arrow: 10 단위
 - 키 반복은 호스트 플랫폼 기본
+- 선택이 없을 때 화살표는 [Pan](affordance-pan.md)
 
 근거: 캔버스·슬라이드 편집기 관례. Object 장르 Intent가 단위를 가짐.

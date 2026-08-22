@@ -71,6 +71,12 @@ describe("breadcrumbTrail", () => {
     ]);
     expect(trail("/docs/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database"]);
     expect(trail("/demo/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database", "Database Demo:/demo/database"]);
+    expect(trail("/docs/chat")).toEqual(["Overview:/", "Hands:/editors", "Chat:/docs/chat"]);
+    expect(trail("/docs/agent")).toEqual(["Overview:/", "Hands:/editors", "Agent:/docs/agent"]);
+    expect(trail("/docs/code")).toEqual(["Overview:/", "Hands:/editors", "Code:/docs/code"]);
+    expect(trail("/docs/slides")).toEqual(["Overview:/", "Hands:/editors", "Slides:/docs/slides"]);
+    expect(trail("/docs/calendar")).toEqual(["Overview:/", "Hands:/editors", "Calendar:/docs/calendar"]);
+    expect(trail("/docs/form")).toEqual(["Overview:/", "Hands:/editors", "Form:/docs/form"]);
     expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/adapters"]);
     expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/adapters", "Keyboard:/adapters/keyboard"]);
     expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/adapters", "Clipboard adapter:/adapters/clipboard"]);

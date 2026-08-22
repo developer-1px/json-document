@@ -110,6 +110,7 @@ JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 | `selection.remove` | | 선택한 객체 제거 |
 | `selection.fill` | `color` | 선택한 객체 색 변경 |
 | `object.translate` | `objectIds`, `dx`, `dy` | 선택한 객체 위치 이동 |
+| `object.resize` | `objectIds`, `dx`, `dy`, `dw`, `dh` | 선택한 객체 크기 |
 | `clipboard.paste` | `clipboard` | 붙여넣기 |
 
 `selection.set`의 `mode`는 `"replace" | "add" | "subtract" | "toggle"`입니다.

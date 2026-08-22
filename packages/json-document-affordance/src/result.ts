@@ -26,6 +26,15 @@ export type AffordanceHand =
   | { readonly type: "collapse" }
   | { readonly type: "translate"; readonly dx: number; readonly dy: number }
   | { readonly type: "nudge"; readonly dx: number; readonly dy: number }
+  | {
+    readonly type: "resize";
+    readonly dx: number;
+    readonly dy: number;
+    readonly dw: number;
+    readonly dh: number;
+    readonly edge: "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
+  }
+  | { readonly type: "zoom"; readonly factor: number }
   | { readonly type: "select-all" }
   | { readonly type: "clear" }
   | { readonly type: "typeahead"; readonly buffer: string; readonly name: string | null }
@@ -41,9 +50,10 @@ export type AffordanceHand =
   | { readonly type: "activate" }
   | { readonly type: "cancel" }
   | { readonly type: "tab"; readonly direction: "next" | "prev" }
-  | { readonly type: "hover"; readonly phase: "hint" | "tooltip" }
+  | { readonly type: "hover"; readonly phase: "hint" | "tooltip" | "highlight" }
   | { readonly type: "copy" }
-  | { readonly type: "move-drop" }
+  | { readonly type: "move-drop"; readonly keepSelection: true }
+  | { readonly type: "menu"; readonly action: "open" | "cancel" }
   | {
     readonly type: "history";
     readonly undo: { readonly name: "undo"; readonly disabled: boolean };
@@ -98,6 +108,10 @@ export function commitAffordance<H extends AffordanceHand>(
   const hand = result.hand;
   if (hand == null) return null;
   if (hand.type === "translate" && hand.dx === 0 && hand.dy === 0) return null;
+  if (hand.type === "resize" && hand.dx === 0 && hand.dy === 0 && hand.dw === 0 && hand.dh === 0) {
+    return null;
+  }
+  if (hand.type === "zoom" && hand.factor === 1) return null;
   return result.cursor === undefined
     ? { hand, commit: true }
     : { hand, cursor: result.cursor, commit: true };

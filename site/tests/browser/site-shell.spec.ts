@@ -55,6 +55,12 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Tree",
     "Kanban",
     "Database",
+    "Chat",
+    "Agent",
+    "Code",
+    "Slides",
+    "Calendar",
+    "Form",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Keyboard", "Clipboard adapter", "Contenteditable"]);

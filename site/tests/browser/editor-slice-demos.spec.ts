@@ -209,6 +209,100 @@ test("Canvas nudges a selected object and snaps a drag to the grid", async ({ pa
   await expect(page.getByRole("button", { name: "Card" })).toHaveAttribute("data-selected", "true");
 });
 
+test("Canvas select-all, delete, and locked objects", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  const note = page.getByRole("button", { name: "Note" });
+  const lock = page.getByRole("button", { name: "Lock" });
+  await canvas.focus();
+  await page.keyboard.press("ControlOrMeta+A");
+  await expect(note).toHaveAttribute("data-selected", "true");
+  await expect(page.getByRole("button", { name: "Card" })).toHaveAttribute("data-selected", "true");
+  await expect(lock).toHaveAttribute("data-selected", "false");
+
+  await lock.click();
+  await expect(lock).toHaveAttribute("data-selected", "false");
+  await expect(note).toHaveAttribute("data-selected", "true");
+
+  await note.click();
+  await canvas.focus();
+  await page.keyboard.press("Delete");
+  await expect(page.getByRole("button", { name: "Note" })).toHaveCount(0);
+});
+
+test("Canvas right-click opens a menu without clearing selection", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const card = page.getByRole("button", { name: "Card" });
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  await card.click();
+  await expect(card).toHaveAttribute("data-selected", "true");
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("canvas bounding box");
+  await canvas.click({ button: "right", position: { x: box.width - 12, y: box.height - 12 } });
+  await expect(page.getByRole("menu", { name: "Canvas menu" })).toBeVisible();
+  await expect(card).toHaveAttribute("data-selected", "true");
+  await expect(page.getByRole("button", { name: "Note" })).toHaveAttribute("data-selected", "false");
+});
+
+test("Canvas copy-drag, constrain, resize, and zoom", async ({ page }) => {
+  await page.goto("/demo/canvas");
+  const note = page.getByRole("button", { name: "Note" });
+  const canvas = page.getByLabel("Canvas", { exact: true });
+  await note.click();
+  const before = await note.evaluate((el) => ({
+    left: parseFloat((el as HTMLElement).style.left),
+    top: parseFloat((el as HTMLElement).style.top),
+    width: parseFloat((el as HTMLElement).style.width),
+  }));
+
+  const box = await note.boundingBox();
+  if (!box) throw new Error("note bounding box");
+  await note.hover();
+  await page.mouse.down();
+  await page.keyboard.down("Shift");
+  await page.mouse.move(box.x + box.width / 2 + 48, box.y + box.height / 2 + 6);
+  await page.mouse.up();
+  await page.keyboard.up("Shift");
+  const constrained = await note.evaluate((el) => ({
+    left: parseFloat((el as HTMLElement).style.left),
+    top: parseFloat((el as HTMLElement).style.top),
+  }));
+  expect(constrained.left).toBeGreaterThan(before.left);
+  expect(constrained.top).toBe(before.top);
+
+  await note.click();
+  const handle = page.locator("[data-resize-edge=se][data-object-id=note]");
+  const handleBox = await handle.boundingBox();
+  if (!handleBox) throw new Error("resize handle");
+  await handle.hover();
+  await page.mouse.down();
+  await page.mouse.move(handleBox.x + handleBox.width / 2 + 24, handleBox.y + handleBox.height / 2 + 16);
+  await page.mouse.up();
+  const resized = await note.evaluate((el) => parseFloat((el as HTMLElement).style.width));
+  expect(resized).toBeGreaterThan(before.width);
+
+  await note.click();
+  await page.keyboard.down("Alt");
+  const noteBox = await note.boundingBox();
+  if (!noteBox) throw new Error("note bounding box");
+  await note.hover();
+  await page.mouse.down();
+  await page.mouse.move(noteBox.x + noteBox.width / 2 + 40, noteBox.y + noteBox.height / 2);
+  await page.mouse.up();
+  await page.keyboard.up("Alt");
+  await expect(page.getByRole("button", { name: "Note" })).toHaveCount(2);
+
+  await canvas.focus();
+  await canvas.evaluate((element) => {
+    element.dispatchEvent(new WheelEvent("wheel", { deltaY: -80, ctrlKey: true, bubbles: true, cancelable: true }));
+  });
+  const scale = await canvas.evaluate((element) => {
+    const inner = element.querySelector(":scope > div");
+    return inner ? getComputedStyle(inner).transform : "";
+  });
+  expect(scale).toMatch(/matrix\((1\.[1-9]|[2-9])/);
+});
+
 test("Tree uses host visible order and restores a cut with undo", async ({ page }) => {
   await page.goto("/demo/tree");
   await page.getByText("Inspect editing state", { exact: true }).click();

@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { type BlockDocument, type DocumentIntent } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
 
@@ -35,11 +36,12 @@ export function SelectionDemoRoute() {
   const snapshot = editing.snapshot;
 
   return (
-    <PageFrame>
+    <DemoPage documentation={(
       <PageHeader title="Selection Demo" illustration="cursor">
         Selection 입력을 dispatch한 뒤 바뀐 Selection을 그대로인 document.value와 History 옆에서 비교합니다.
       </PageHeader>
 
+    )}>
       <div className="grid gap-4 lg:grid-cols-3">
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-input">
           <p className={ui.text.label}>1 · 입력</p>
@@ -94,6 +96,6 @@ export function SelectionDemoRoute() {
           ]} />
         </section>
       </div>
-    </PageFrame>
+    </DemoPage>
   );
 }
