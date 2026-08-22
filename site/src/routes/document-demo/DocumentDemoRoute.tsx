@@ -19,6 +19,9 @@ import {
 } from "@interactive-os/json-document-web";
 import {
   applyAffordance,
+  caretAffordance,
+  caretCursor,
+  clickCountAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
@@ -48,6 +51,7 @@ export function DocumentDemoRoute() {
   const [announcement, setAnnouncement] = useState("Ready");
   const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const [lastClickCount, setLastClickCount] = useState(0);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
   function remember(intent: DocumentIntent, result: EditingResult<DocumentSelection>) {
@@ -170,6 +174,7 @@ export function DocumentDemoRoute() {
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
             <div aria-live="polite">{announcement}</div>
+            <div data-testid="document-click-count">click count {lastClickCount}</div>
           </div>
           )}
         >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
@@ -257,7 +262,13 @@ export function DocumentDemoRoute() {
                     label={`Block ${index + 1} text`}
                     text={block.text}
                     offset={item.getTextOffset()}
-                    onFocusOffset={(offset) => dispatchIntent({ type: "selection.set", blockId: block.id, offset })}
+                    onCaretRange={(from, to, mode) => {
+                      dispatchIntent({ type: "selection.set", blockId: block.id, offset: from });
+                      if (mode === "extend" || to !== from) {
+                        dispatchIntent({ type: "selection.set", blockId: block.id, offset: to, mode: "extend" });
+                      }
+                    }}
+                    onClickCount={setLastClickCount}
                     onChange={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
                   />
                 </SelectableItem>
@@ -281,7 +292,8 @@ function DocumentTextControl(props: {
   readonly label: string;
   readonly text: string;
   readonly offset: number | null;
-  readonly onFocusOffset: (offset: number) => void;
+  readonly onCaretRange: (from: number, to: number, mode: "replace" | "extend") => void;
+  readonly onClickCount: (count: number) => void;
   readonly onChange: (next: { readonly text: string; readonly offset: number }) => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -292,10 +304,34 @@ function DocumentTextControl(props: {
       aria-label={props.label}
       value={props.text}
       rows={Math.max(1, Math.ceil(props.text.length / 64))}
-      onFocus={(event) => props.onFocusOffset(textInputFromControl(event).offset)}
-      onClick={(event) => props.onFocusOffset(textInputFromControl(event).offset)}
+      onFocus={(event) => {
+        const offset = textInputFromControl(event).offset;
+        props.onCaretRange(offset, offset, "replace");
+      }}
+      onClick={(event) => {
+        applyAffordance(caretAffordance({ type: "pointer" }), {
+          hand: (hand) => {
+            if (hand.type !== "caret") return;
+            props.onCaretRange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd, hand.operation);
+          },
+        });
+        applyAffordance(clickCountAffordance(event.detail), {
+          hand: (hand) => {
+            if (hand.type === "click") props.onClickCount(hand.count);
+          },
+        });
+      }}
+      onSelect={(event) => {
+        applyAffordance(caretAffordance({ type: "pointer", dragging: true }), {
+          hand: (hand) => {
+            if (hand.type !== "caret") return;
+            props.onCaretRange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd, hand.operation);
+          },
+        });
+      }}
       onChange={(event) => props.onChange(textInputFromControl(event))}
       className={classes("min-h-11 resize-none", ui.field.seamless)}
+      style={{ cursor: caretCursor("horizontal") }}
     />
   );
 }

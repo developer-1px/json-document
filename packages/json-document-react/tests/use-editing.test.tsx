@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { createDocumentEditor, createSheetEditor } from "@interactive-os/json-document-editing";
-import { useEditing, type EditingKeyboardCommand, type EditingKeyboardStroke } from "../src/index.js";
+import {
+  useEditing,
+  useRestoreElementFocus,
+  type EditingKeyboardCommand,
+  type EditingKeyboardStroke,
+} from "../src/index.js";
 
 afterEach(cleanup);
 
@@ -17,6 +22,36 @@ function resolveStroke(stroke: EditingKeyboardStroke): EditingKeyboardCommand | 
 }
 
 describe("useEditing", () => {
+  test("restores roving DOM focus after a focused item is deleted", () => {
+    const editor = createDocumentEditor({
+      blocks: [{ id: "alpha", text: "Alpha" }, { id: "bravo", text: "Bravo" }],
+    });
+
+    function Item(props: { readonly id: string; readonly focused: boolean }) {
+      const ref = useRef<HTMLButtonElement>(null);
+      useRestoreElementFocus(ref, props.focused);
+      return <button ref={ref} type="button">{props.id}</button>;
+    }
+
+    function View() {
+      const focus = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId ?? null;
+      const editing = useEditing({
+        source: editor,
+        selectedKeys: editor.selectedBlockIds,
+        focusKey: focus,
+        onSelect: (key, mode) => editor.dispatch({ type: "selection.set", blockId: key, mode }),
+      });
+      const blocks = (editing.snapshot.value as { blocks: Array<{ id: string }> }).blocks;
+      return <>{blocks.map((block) => <Item key={block.id} id={block.id} focused={editing.getItem(block.id).getIsFocus()} />)}</>;
+    }
+
+    render(<View />);
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "alpha" }));
+    act(() => { editor.dispatch({ type: "selection.remove" }); });
+    expect(screen.queryByRole("button", { name: "alpha" })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "bravo" }));
+  });
+
   test("answers host keys without an editor source", () => {
     function View() {
       const [selected, setSelected] = useState<string[]>([]);
@@ -244,6 +279,57 @@ describe("useEditing", () => {
     render(<View />);
     fireEvent.keyDown(screen.getByLabelText("cell"), { key: "ArrowDown" });
     expect(editor.snapshot.selection.focus).toEqual({ rowId: "row-1", columnId: "name" });
+  });
+
+  test("leaves Enter and Space activation on nested native controls", () => {
+    const commands: string[] = [];
+    const activations: string[] = [];
+
+    function View() {
+      const editing = useEditing({
+        selectedKeys: ["alpha"],
+        focusKey: "alpha",
+        onSelect: (_key, mode) => commands.push(mode),
+        keyboard: {
+          resolve: (stroke) => stroke.key === " " ? { type: "toggle" } : null,
+          focusKey: () => "alpha",
+          neighbor: () => null,
+        },
+      });
+      return (
+        <div onKeyDown={editing.getKeyDownHandler()}>
+          <button type="button" onClick={() => activations.push("click")}>Disclosure</button>
+        </div>
+      );
+    }
+
+    render(<View />);
+    const button = screen.getByRole("button", { name: "Disclosure" });
+    fireEvent.keyDown(button, { key: " " });
+    fireEvent.keyUp(button, { key: " " });
+    fireEvent.click(button);
+    expect(commands).toEqual([]);
+    expect(activations).toEqual(["click"]);
+  });
+
+  test("keeps structural commands on composite items rendered with a native element", () => {
+    const modes: string[] = [];
+    function View() {
+      const editing = useEditing({
+        selectedKeys: ["alpha"],
+        focusKey: "alpha",
+        onSelect: (_key, mode) => modes.push(mode),
+        keyboard: {
+          resolve: (stroke) => stroke.key === " " ? { type: "toggle" } : null,
+          focusKey: () => "alpha",
+          neighbor: () => null,
+        },
+      });
+      return <button role="option" aria-selected="true" onKeyDown={editing.getKeyDownHandler()}>Alpha</button>;
+    }
+    render(<View />);
+    fireEvent.keyDown(screen.getByRole("option", { name: "Alpha" }), { key: " " });
+    expect(modes).toEqual(["toggle"]);
   });
 
   test("moves text offset inside a field without changing the object neighbor", () => {

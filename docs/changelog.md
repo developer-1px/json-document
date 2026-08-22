@@ -10,6 +10,8 @@ source and release history remains available from Git commits and version tags.
   stand in for human editing tools.
 - Moved every standalone demo into its canonical Markdown document through a lazy Live
   Demo Bench with interactive preview, source tabs, and shared Shiki highlighting.
+- Closed Focus, Caret, Rename, Double-click, and Triple-click as package hands,
+  and dogfooded them on the Order and Document product screens.
 - Opened Hands TBD for Chat, Agent, Code, Slides, Calendar, and Form.
   Chat is DM bubbles. Agent is a bubble-less transcript whose typical
   hand is think·stream·tool animation. Code is a drag-range comment,

@@ -17,6 +17,8 @@ export type { Point, Rect, ResizeEdge } from "./drag.js";
 export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";
 export { historyAffordance } from "./history.js";
+export { pressAffordance } from "./press.js";
+export type { PressAffordanceResult, PressAffordanceState } from "./press.js";
 export type { HistoryAffordance, HistoryAffordanceMap, HistoryAffordanceName } from "./history.js";
 export { applyAffordance, commitAffordance } from "./result.js";
 export type {
@@ -32,6 +34,8 @@ export type {
 } from "./result.js";
 export {
   activateAffordance,
+  caretAffordance,
+  caretCursor,
   clickCountAffordance,
   contextMenuAffordance,
   deleteAffordance,
@@ -39,6 +43,7 @@ export {
   focusAffordance,
   planeHitAffordance,
   pointerSelect,
+  renameAffordance,
   resolveAffordanceKey,
   selectAllAffordance,
   typeaheadAffordance,

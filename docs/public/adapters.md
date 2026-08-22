@@ -8,7 +8,8 @@ contenteditable root 같은 플랫폼 계약은 공식 Adapter가 번역합니�
 
 | 붙일 플랫폼 계약 | 패키지 | 제공하는 변환 |
 | --- | --- | --- |
-| Keyboard | `@interactive-os/json-document-web` | `KeyboardEvent` chord → semantic command |
+| Keyboard / Press | `@interactive-os/json-document-web` | Web event → semantic command 또는 Press fact |
+| ARIA / Focus | `@interactive-os/json-document-web` | canonical widget state → ARIA·composite focus props |
 | Clipboard | `@interactive-os/json-document-web` | `ClipboardEvent` → copy, cut, paste |
 | Contenteditable | `@interactive-os/json-document-contenteditable` | contenteditable root ↔ JSON Document string pointer |
 
@@ -37,6 +38,18 @@ Clipboard, History와 같은 문을 쓰는지 확인합니다. 화살표는 Sele
 바꾸고, Delete는 `selection.remove`로 History에 남으며, Mod+Z는
 `undo()`를 호출합니다. 그 선택에서 copy/paste는 Clipboard adapter를
 그대로 씁니다.
+
+## Press와 ARIA projection
+
+`pressInteractionFromWeb`은 Enter·Space·primary pointer·pointer cancellation·click을 제품 action
+없는 Press fact로 번역합니다. Affordance가 transient Press lifecycle을 닫고,
+host가 role Intent를 고릅니다. Native button activation은 다시 구현하지 않습니다.
+Click은 `detail === 0`이면 virtual, 그 외에는 pointer activation으로 구분합니다.
+
+`projectWebWidgetState`는 canonical `selected`·`pressed`·`expanded`·`disabled`를
+role에 맞는 ARIA state로 투영합니다. `activeDescendantContainerProps`와
+`rovingFocusItemProps`는 composite focus 전략을 표현하지만 logical focus를
+소유하지 않습니다. ARIA는 state의 출력이며 입력이나 실행 차단을 대신하지 않습니다.
 
 ## Clipboard adapter
 

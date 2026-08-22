@@ -1,20 +1,17 @@
 # Triple-click
 
-TBD.
-
 Triple-click은 `UIEvent.detail === 3`입니다. 글에서는 줄 또는 문단을
 고릅니다. 항목 목록에서는 보통 쓰지 않습니다.
 
 ```ts
-import { clickCountAffordance } from "@interactive-os/json-document-affordance";
+import { applyAffordance, clickCountAffordance } from "@interactive-os/json-document-affordance";
 
 function onClick(event: MouseEvent, blockId: string) {
-  if (clickCountAffordance(event.detail) !== "triple-click") return;
-  editor.dispatch({
-    type: "selection.set",
-    blockId,
-    mode: "replace",
-    offset: 0,
+  applyAffordance(clickCountAffordance(event.detail), {
+    hand: (hand) => {
+      if (hand.type !== "click" || hand.count !== 3) return;
+      editor.dispatch({ type: "selection.set", blockId, mode: "replace", offset: 0 });
+    },
   });
 }
 ```

@@ -1,39 +1,37 @@
 # Caret
 
-TBD.
-
 Caret은 글 안의 삽입점입니다. 항목 [Select](affordance-select.md)와 다릅니다.
 `text` / `vertical-text` 커서가 이 손을 가리킵니다. 클릭은 삽입점을 두고,
 드래그는 글 범위를 고릅니다.
 
 ```ts
-import { caretAffordance, caretCursor } from "@interactive-os/json-document-affordance";
+import { applyAffordance, caretAffordance, caretCursor } from "@interactive-os/json-document-affordance";
 
 function onPointerMove(event: PointerEvent) {
   event.currentTarget.style.cursor = caretCursor("horizontal");
 }
 
 function onPointerDown(event: PointerEvent, blockId: string) {
-  const hand = caretAffordance({ type: "pointer", detail: event.detail });
-  if (hand.type === "place") {
-    editor.dispatch({
-      type: "selection.set",
-      blockId,
-      offset: hostHitOffset(event),
-    });
-  }
+  applyAffordance(caretAffordance({ type: "pointer" }), {
+    hand: (hand) => {
+      if (hand.type !== "caret" || hand.action !== "place") return;
+      editor.dispatch({ type: "selection.set", blockId, offset: hostHitOffset(event) });
+    },
+  });
 }
 
 function onKeyDown(event: KeyboardEvent) {
-  const hand = caretAffordance(event);
-  if (hand?.type === "move") {
-    editor.dispatch({
-      type: "selection.set",
-      blockId: focus.blockId,
-      offset: hostMoveOffset(focus.offset, hand),
-      mode: hand.operation,
-    });
-  }
+  applyAffordance(caretAffordance(event), {
+    hand: (hand) => {
+      if (hand.type !== "caret-move") return;
+      editor.dispatch({
+        type: "selection.set",
+        blockId: focus.blockId,
+        offset: hostMoveOffset(focus.offset, hand),
+        mode: hand.operation,
+      });
+    },
+  });
 }
 ```
 

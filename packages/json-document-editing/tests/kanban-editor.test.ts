@@ -38,5 +38,21 @@ describe("kanban editor", () => {
     const next = editor.snapshot.value as KanbanDocument;
     expect(next.cards.map((card) => card.id)).toEqual(["a", "c"]);
     expect(next.columns[0]?.cardIds).toEqual(["a"]);
+    expect(editor.snapshot.selection).toEqual({ kind: "explicit", keys: ["c"], primaryKey: "c" });
+  });
+
+  test("keeps focus on the next or previous survivor and clears it for an empty board", () => {
+    const previous = createKanbanEditor(initial);
+    previous.dispatch({ type: "selection.set", cardId: "c" });
+    previous.dispatch({ type: "selection.remove" });
+    expect(previous.snapshot.selection).toEqual({ kind: "explicit", keys: ["b"], primaryKey: "b" });
+
+    const empty = createKanbanEditor({
+      columns: [{ id: "todo", title: "Todo", cardIds: ["a"] }],
+      cards: [{ id: "a", title: "Write" }],
+    });
+    empty.dispatch({ type: "selection.set", cardId: "a" });
+    empty.dispatch({ type: "selection.remove" });
+    expect(empty.snapshot.selection).toEqual({ kind: "explicit", keys: [], primaryKey: null });
   });
 });
