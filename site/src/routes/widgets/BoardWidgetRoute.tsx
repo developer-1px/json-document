@@ -152,7 +152,7 @@ export function BoardWidgetRoute() {
         <div
           ref={surface}
           className="grid gap-3 sm:grid-cols-3"
-          role="list"
+          role="group"
           aria-label="Board columns"
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -171,7 +171,7 @@ export function BoardWidgetRoute() {
                   const option = optionProps(editing.getItem(card.id));
                   const offset = drag?.cardId === card.id ? drag : null;
                   return (
-                    <li key={card.id}>
+                    <li role="none" key={card.id}>
                       <SelectableItem
                         as="div"
                         className={classes("w-full text-left", ui.surface.selectableBlock)}

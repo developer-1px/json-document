@@ -4,7 +4,7 @@ export type WebPressInteraction =
   | { readonly phase: "start" | "end"; readonly source: "keyboard"; readonly key: "Enter" | "Space" }
   | { readonly phase: "start" | "end"; readonly source: "pointer" }
   | { readonly phase: "cancel"; readonly source: "keyboard" | "pointer" }
-  | { readonly phase: "activation"; readonly source: "virtual" };
+  | { readonly phase: "activation"; readonly source: "pointer" | "virtual" };
 
 export type WebPressInput = {
   readonly type: string;
@@ -20,9 +20,10 @@ export function pressInteractionFromWeb(input: WebPressInput): WebPressInteracti
   if (input.defaultPrevented) return null;
   if (input.type === "click") {
     const primary = input.button === undefined || input.button === 0;
-    return primary ? { phase: "activation", source: "virtual" } : null;
+    if (!primary) return null;
+    return { phase: "activation", source: input.detail === 0 ? "virtual" : "pointer" };
   }
-  if (input.type === "pointercancel" || input.type === "lostpointercapture") {
+  if (input.type === "pointercancel" || input.type === "pointerleave" || input.type === "lostpointercapture") {
     return { phase: "cancel", source: "pointer" };
   }
   if (input.type === "blur") return { phase: "cancel", source: "keyboard" };

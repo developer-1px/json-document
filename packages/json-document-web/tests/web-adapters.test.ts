@@ -270,8 +270,14 @@ describe("Web Press and ARIA Adapters", () => {
     expect(pressInteractionFromWeb({ type: "pointercancel" })).toEqual({
       phase: "cancel", source: "pointer",
     });
+    expect(pressInteractionFromWeb({ type: "pointerleave" })).toEqual({
+      phase: "cancel", source: "pointer",
+    });
     expect(pressInteractionFromWeb({ type: "click", detail: 0 })).toEqual({
       phase: "activation", source: "virtual",
+    });
+    expect(pressInteractionFromWeb({ type: "click", detail: 1 })).toEqual({
+      phase: "activation", source: "pointer",
     });
     expect(pressInteractionFromWeb({ type: "click", button: 2 })).toBeNull();
   });

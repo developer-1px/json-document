@@ -4,7 +4,7 @@ export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";
 export { historyAffordance } from "./history.js";
 export { pressAffordance } from "./press.js";
-export type { PressAffordanceResult } from "./press.js";
+export type { PressAffordanceResult, PressAffordanceState } from "./press.js";
 export type { HistoryAffordance, HistoryAffordanceMap, HistoryAffordanceName } from "./history.js";
 export { applyAffordance, commitAffordance } from "./result.js";
 export type {

@@ -13,7 +13,7 @@ import {
   moveLinePoint,
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
-import { IconButton, SelectableItem } from "../../shared/ui/interactive";
+import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   applyAffordance,
@@ -99,15 +99,6 @@ export function TreeWidgetRoute() {
     },
   });
 
-  function toggle(nodeId: string) {
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(nodeId)) next.delete(nodeId);
-      else next.add(nodeId);
-      return next;
-    });
-  }
-
   return (
     <WidgetDemoFrame
       title="Tree"
@@ -127,19 +118,10 @@ export function TreeWidgetRoute() {
           {rows.map((row) => {
             const childCount = document.nodes.filter((node) => node.parentId === row.id).length;
             return (
-              <li key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
-                <div className="grid grid-cols-[2rem_minmax(0,1fr)]">
-                  {childCount > 0 ? (
-                    <IconButton
-                      label={expanded.has(row.id) ? `Collapse ${row.label}` : `Expand ${row.label}`}
-                      onClick={() => toggle(row.id)}
-                    >
-                      {expanded.has(row.id) ? "−" : "+"}
-                    </IconButton>
-                  ) : <span />}
+              <li role="none" key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
                   <SelectableItem
                     as="div"
-                    className={classes("text-left", ui.surface.selectableBlock)}
+                    className={classes("grid grid-cols-[2rem_minmax(0,1fr)] text-left", ui.surface.selectableBlock)}
                     {...optionProps(editing.getItem(row.id))}
                     {...activeDescendantItemProps(treeItemId(row.id))}
                     {...projectWebWidgetState({
@@ -162,9 +144,9 @@ export function TreeWidgetRoute() {
                       });
                     }}
                   >
-                    {row.label}
+                    <span aria-hidden="true">{childCount > 0 ? expanded.has(row.id) ? "−" : "+" : ""}</span>
+                    <span>{row.label}</span>
                   </SelectableItem>
-                </div>
               </li>
             );
           })}

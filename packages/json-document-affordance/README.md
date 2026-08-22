@@ -25,8 +25,8 @@ applyAffordance(pointerSelect(event), {
 ```
 
 Keyboard Adapter still translates chords. This package decides the
-affordance those commands mean. `pressAffordance` owns transient custom-control
-Press start/end/cancel and disabled gating; persistent toggle state remains in
+affordance those commands mean. `pressAffordance` owns source-aware transient
+custom-control Press start/end/cancel and disabled gating; persistent toggle state remains in
 the product and ARIA projection remains in the Web Adapter. React Connector still answers selection
 queries through `useEditing` ports.
 

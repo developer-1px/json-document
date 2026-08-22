@@ -58,6 +58,39 @@ test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   await expect(page.getByRole("option", { name: "Inbox" })).toBeVisible();
 });
 
+test("Toolbar dogfoods custom Press timing and pointer cancellation", async ({ page }) => {
+  await page.goto("/widgets/toolbar");
+  const custom = page.getByRole("button", { name: "Select Today" });
+
+  await custom.focus();
+  await page.keyboard.press("Enter");
+  expect(await json(page, "widget-toolbar-press-count")).toBe(1);
+  await page.keyboard.press("Space");
+  expect(await json(page, "widget-toolbar-press-count")).toBe(2);
+
+  await custom.click();
+  expect(await json(page, "widget-toolbar-press-count")).toBe(3);
+
+  const box = await custom.boundingBox();
+  if (!box) throw new Error("custom Press bounding box");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width + 20, box.y + box.height + 20);
+  await page.mouse.up();
+  expect(await json(page, "widget-toolbar-press-count")).toBe(3);
+  await expect(custom).not.toHaveAttribute("data-pressed", "true");
+
+  await custom.focus();
+  await page.keyboard.down("Space");
+  await page.keyboard.press("Tab");
+  await page.keyboard.up("Space");
+  expect(await json(page, "widget-toolbar-press-count")).toBe(3);
+  await expect(custom).not.toHaveAttribute("data-pressed", "true");
+
+  await custom.dispatchEvent("click", { detail: 0 });
+  expect(await json(page, "widget-toolbar-press-count")).toBe(4);
+});
+
 test("Listbox typeahead jumps to the matching label", async ({ page }) => {
   await page.goto("/widgets/listbox");
   await page.getByRole("listbox", { name: "Order items" }).focus();
@@ -206,24 +239,16 @@ test("Tree left collapses and right expands the focused parent", async ({ page }
   });
 });
 
-test("native disclosure keeps browser Enter and Space activation", async ({ page }) => {
+test("Tree exposes treeitems without nested native controls", async ({ page }) => {
   await page.goto("/widgets/tree");
-  const collapse = page.getByRole("button", { name: "Collapse Fruit" });
-  await collapse.focus();
-  await page.keyboard.press("Space");
-  expect(await json(page, "widget-tree-topology")).toEqual({
-    visibleIds: ["fruit", "veg", "kale"],
-  });
-  const expand = page.getByRole("button", { name: "Expand Fruit" });
-  await expand.focus();
-  await page.keyboard.press("Enter");
-  expect(await json(page, "widget-tree-topology")).toEqual({
-    visibleIds: ["fruit", "apple", "pear", "veg", "kale"],
-  });
+  const tree = page.getByRole("tree", { name: "Visible nodes" });
+  await expect(tree.getByRole("button")).toHaveCount(0);
+  await expect(tree.getByRole("treeitem")).toHaveCount(5);
 });
 
 test("Board reads columns and selected cards", async ({ page }) => {
   await page.goto("/widgets/board");
+  await expect(page.getByRole("group", { name: "Board columns" })).toBeVisible();
   expect(await json(page, "widget-board-columns")).toEqual([
     { id: "todo", cardIds: ["write", "review"] },
     { id: "doing", cardIds: ["draw"] },

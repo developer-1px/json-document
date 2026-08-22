@@ -41,9 +41,10 @@ Clipboard, History와 같은 문을 쓰는지 확인합니다. 화살표는 Sele
 
 ## Press와 ARIA projection
 
-`pressInteractionFromWeb`은 Enter·Space·primary pointer·virtual click을 제품 action
+`pressInteractionFromWeb`은 Enter·Space·primary pointer·pointer cancellation·click을 제품 action
 없는 Press fact로 번역합니다. Affordance가 transient Press lifecycle을 닫고,
 host가 role Intent를 고릅니다. Native button activation은 다시 구현하지 않습니다.
+Click은 `detail === 0`이면 virtual, 그 외에는 pointer activation으로 구분합니다.
 
 `projectWebWidgetState`는 canonical `selected`·`pressed`·`expanded`·`disabled`를
 role에 맞는 ARIA state로 투영합니다. `activeDescendantContainerProps`와

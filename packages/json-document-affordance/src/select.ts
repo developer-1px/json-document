@@ -185,9 +185,6 @@ export function activateAffordance(
 ): AffordancePreview {
   if (input === null) return { hand: null };
   if (input.phase === "activation") return { hand: { type: "activate" } };
-  if (!("source" in input)) {
-    return input.phase === "end" ? { hand: { type: "activate" } } : { hand: null };
-  }
   if (input.source === "pointer" && input.phase === "end") return { hand: { type: "activate" } };
   if (input.source === "keyboard" && "key" in input && (
     (input.key === "Enter" && input.phase === "start")

@@ -39,7 +39,17 @@ export type AffordanceHand =
   }
   | { readonly type: "rename"; readonly action: "begin" | "commit" | "cancel" }
   | { readonly type: "activate" }
-  | { readonly type: "press"; readonly phase: "start" | "end" | "cancel" }
+  | {
+    readonly type: "press";
+    readonly phase: "start" | "end" | "cancel";
+    readonly source: "pointer";
+  }
+  | {
+    readonly type: "press";
+    readonly phase: "start" | "end" | "cancel";
+    readonly source: "keyboard";
+    readonly key: "Enter" | "Space";
+  }
   | { readonly type: "cancel" }
   | { readonly type: "tab"; readonly direction: "next" | "prev" }
   | { readonly type: "hover"; readonly phase: "hint" | "tooltip" }
