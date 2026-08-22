@@ -293,6 +293,15 @@ describe("Web Press and ARIA Adapters", () => {
     expect(projectWebWidgetState({ role: "treeitem", selected: false, expanded: true })).toEqual({
       role: "treeitem", "aria-selected": false, "aria-expanded": true,
     });
+    expect(projectWebWidgetState({
+      role: "treeitem", selected: false, level: 2, posInSet: 1, setSize: 3,
+    })).toEqual({
+      role: "treeitem",
+      "aria-selected": false,
+      "aria-level": 2,
+      "aria-posinset": 1,
+      "aria-setsize": 3,
+    });
     expect(projectWebWidgetState({ role: "disclosure", expanded: false })).toEqual({
       role: "button", "aria-expanded": false,
     });

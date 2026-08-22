@@ -237,6 +237,15 @@ test("Tree left collapses and right expands the focused parent", async ({ page }
   expect(await json(page, "widget-tree-topology")).toEqual({
     visibleIds: ["fruit", "apple", "pear", "veg", "kale"],
   });
+
+  await page.keyboard.press("ArrowRight");
+  expect(await json(page, "widget-tree-focus")).toBe("apple");
+  await page.getByRole("treeitem", { name: "Pear" }).click();
+  await page.keyboard.press("ArrowLeft");
+  expect(await json(page, "widget-tree-focus")).toBe("fruit");
+  await page.getByRole("treeitem", { name: "Apple" }).click();
+  await page.keyboard.press("ArrowRight");
+  expect(await json(page, "widget-tree-focus")).toBe("apple");
 });
 
 test("Tree exposes treeitems without nested native controls", async ({ page }) => {
@@ -244,6 +253,12 @@ test("Tree exposes treeitems without nested native controls", async ({ page }) =
   const tree = page.getByRole("tree", { name: "Visible nodes" });
   await expect(tree.getByRole("button")).toHaveCount(0);
   await expect(tree.getByRole("treeitem")).toHaveCount(5);
+  await expect(page.getByRole("treeitem", { name: "Fruit" })).toHaveAttribute("aria-level", "1");
+  await expect(page.getByRole("treeitem", { name: "Fruit" })).toHaveAttribute("aria-posinset", "1");
+  await expect(page.getByRole("treeitem", { name: "Fruit" })).toHaveAttribute("aria-setsize", "2");
+  await expect(page.getByRole("treeitem", { name: "Pear" })).toHaveAttribute("aria-level", "2");
+  await expect(page.getByRole("treeitem", { name: "Pear" })).toHaveAttribute("aria-posinset", "2");
+  await expect(page.getByRole("treeitem", { name: "Pear" })).toHaveAttribute("aria-setsize", "2");
 });
 
 test("Board reads columns and selected cards", async ({ page }) => {

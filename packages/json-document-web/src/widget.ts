@@ -1,7 +1,15 @@
 export type WebWidgetState =
   | { readonly role: "button"; readonly pressed?: boolean; readonly disabled?: boolean }
   | { readonly role: "option" | "gridcell"; readonly selected: boolean; readonly disabled?: boolean }
-  | { readonly role: "treeitem"; readonly selected: boolean; readonly expanded?: boolean; readonly disabled?: boolean }
+  | {
+    readonly role: "treeitem";
+    readonly selected: boolean;
+    readonly expanded?: boolean;
+    readonly disabled?: boolean;
+    readonly level?: number;
+    readonly posInSet?: number;
+    readonly setSize?: number;
+  }
   | { readonly role: "disclosure"; readonly expanded: boolean; readonly disabled?: boolean };
 
 export type WebWidgetARIA = Readonly<{
@@ -10,6 +18,9 @@ export type WebWidgetARIA = Readonly<{
   "aria-selected"?: boolean;
   "aria-expanded"?: boolean;
   "aria-disabled"?: true;
+  "aria-level"?: number;
+  "aria-posinset"?: number;
+  "aria-setsize"?: number;
 }>;
 
 /** Projects canonical widget state to ARIA without owning that state. */
@@ -24,9 +35,14 @@ export function projectWebWidgetState(state: WebWidgetState): WebWidgetARIA {
     return { role: "button", "aria-expanded": state.expanded, ...disabled };
   }
   if (state.role === "treeitem") {
+    const hierarchy = {
+      ...(state.level === undefined ? {} : { "aria-level": state.level }),
+      ...(state.posInSet === undefined ? {} : { "aria-posinset": state.posInSet }),
+      ...(state.setSize === undefined ? {} : { "aria-setsize": state.setSize }),
+    };
     return state.expanded === undefined
-      ? { role: state.role, "aria-selected": state.selected, ...disabled }
-      : { role: state.role, "aria-selected": state.selected, "aria-expanded": state.expanded, ...disabled };
+      ? { role: state.role, "aria-selected": state.selected, ...hierarchy, ...disabled }
+      : { role: state.role, "aria-selected": state.selected, "aria-expanded": state.expanded, ...hierarchy, ...disabled };
   }
   return { role: state.role, "aria-selected": state.selected, ...disabled };
 }

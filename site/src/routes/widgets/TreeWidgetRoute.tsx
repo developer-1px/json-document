@@ -84,7 +84,7 @@ export function TreeWidgetRoute() {
           if (stay) return key;
         }
         return command.type === "move"
-          ? moveLinePoint(topology.visibleIds, key, command.direction)
+          ? treeNeighbor(rows, key, command.direction)
           : lineBoundary(topology.visibleIds, command.edge);
       },
       onDelete: () => {
@@ -128,6 +128,9 @@ export function TreeWidgetRoute() {
                       role: "treeitem",
                       selected: editing.getItem(row.id).getIsSelected(),
                       expanded: childCount > 0 ? expanded.has(row.id) : undefined,
+                      level: row.depth + 1,
+                      posInSet: row.posInSet,
+                      setSize: row.setSize,
                     })}
                     onClick={(event) => {
                       containerRef.current?.focus();
@@ -169,20 +172,41 @@ function treeItemId(nodeId: string): string {
 function walkVisible(
   nodes: ReadonlyArray<TreeNode>,
   expanded: ReadonlySet<string>,
-): ReadonlyArray<TreeNode & { readonly depth: number }> {
+): ReadonlyArray<TreeRow> {
   const byParent = new Map<string | null, TreeNode[]>();
   for (const node of nodes) {
     const siblings = byParent.get(node.parentId) ?? [];
     siblings.push(node);
     byParent.set(node.parentId, siblings);
   }
-  const rows: Array<TreeNode & { readonly depth: number }> = [];
+  const rows: TreeRow[] = [];
   function visit(parentId: string | null, depth: number) {
-    for (const node of byParent.get(parentId) ?? []) {
-      rows.push({ ...node, depth });
+    const siblings = byParent.get(parentId) ?? [];
+    siblings.forEach((node, index) => {
+      rows.push({ ...node, depth, posInSet: index + 1, setSize: siblings.length });
       if (expanded.has(node.id)) visit(node.id, depth + 1);
-    }
+    });
   }
   visit(null, 0);
   return rows;
+}
+
+type TreeRow = TreeNode & {
+  readonly depth: number;
+  readonly posInSet: number;
+  readonly setSize: number;
+};
+
+function treeNeighbor(
+  rows: ReadonlyArray<TreeRow>,
+  key: string,
+  direction: "previous" | "next" | "up" | "down" | "left" | "right",
+): string | null {
+  const row = rows.find((item) => item.id === key);
+  if (row === undefined) return null;
+  if (direction === "left") return row.parentId;
+  if (direction === "right") {
+    return rows.find((item) => item.parentId === row.id)?.id ?? null;
+  }
+  return moveLinePoint(rows.map((item) => item.id), key, direction);
 }
