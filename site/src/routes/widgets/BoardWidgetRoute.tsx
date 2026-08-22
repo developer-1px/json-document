@@ -1,6 +1,6 @@
-import { useLayoutEffect, useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type KeyboardEventHandler, type PointerEvent, type ReactNode } from "react";
 import { createKanbanEditor, type KanbanDocument } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useRestoreElementFocus } from "@interactive-os/json-document-react";
 import {
   activeDescendantContainerProps,
   activeDescendantItemProps,
@@ -45,7 +45,6 @@ export function BoardWidgetRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
   const [drag, setDrag] = useState<DragState | null>(null);
   const surface = useRef<HTMLDivElement>(null);
-  const columnListboxes = useRef(new Map<string, HTMLUListElement>());
   const cardIds = () => (editor.snapshot.value as KanbanDocument).columns.flatMap((column) => column.cardIds);
   const editing = useEditing({
     source: editor,
@@ -79,11 +78,6 @@ export function BoardWidgetRoute() {
   const focusColumnId = focusKey === null
     ? null
     : board.columns.find((column) => column.cardIds.includes(focusKey))?.id ?? null;
-
-  useLayoutEffect(() => {
-    if (focusColumnId === null) return;
-    columnListboxes.current.get(focusColumnId)?.focus();
-  }, [focusColumnId, focusKey]);
 
   function handleCardPointerDown(event: PointerEvent<HTMLElement>, cardId: string) {
     event.preventDefault();
@@ -166,18 +160,10 @@ export function BoardWidgetRoute() {
           {board.columns.map((column) => (
             <div key={column.id} data-column-id={column.id} className="grid content-start gap-2">
               <p className={classes("mb-0 mt-0", ui.text.label)}>{column.title}</p>
-              <ul
-                ref={(node) => {
-                  if (node === null) columnListboxes.current.delete(column.id);
-                  else columnListboxes.current.set(column.id, node);
-                }}
-                role="listbox"
-                aria-label={column.title}
-                {...activeDescendantContainerProps(
-                  focusColumnId === column.id && focusKey !== null ? boardCardId(focusKey) : null,
-                )}
+              <BoardListbox
+                label={column.title}
+                activeId={focusColumnId === column.id && focusKey !== null ? boardCardId(focusKey) : null}
                 onKeyDown={editing.getKeyDownHandler()}
-                className="m-0 grid min-h-[4rem] list-none gap-1 p-0"
               >
                 {column.cardIds.map((cardId) => {
                   const card = cards.get(cardId);
@@ -204,7 +190,7 @@ export function BoardWidgetRoute() {
                     </li>
                   );
                 })}
-              </ul>
+              </BoardListbox>
             </div>
           ))}
         </div>
@@ -216,6 +202,28 @@ export function BoardWidgetRoute() {
         { label: "selection", value: editing.snapshot.selection, testId: "widget-board-selection", size: "compact" },
       ]}
     />
+  );
+}
+
+function BoardListbox(props: {
+  readonly label: string;
+  readonly activeId: string | null;
+  readonly onKeyDown: KeyboardEventHandler<HTMLUListElement>;
+  readonly children: ReactNode;
+}) {
+  const ref = useRef<HTMLUListElement>(null);
+  useRestoreElementFocus(ref, props.activeId !== null);
+  return (
+    <ul
+      ref={ref}
+      role="listbox"
+      aria-label={props.label}
+      {...activeDescendantContainerProps(props.activeId)}
+      onKeyDown={props.onKeyDown}
+      className="m-0 grid min-h-[4rem] list-none gap-1 p-0"
+    >
+      {props.children}
+    </ul>
   );
 }
 
