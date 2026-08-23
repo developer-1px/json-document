@@ -272,6 +272,29 @@ describe("Official Rich Text local edit costs", () => {
     expect(editor.redo().ok).toBe(true);
     expect(textAt(document.value as RichTextDocument, 3)).toBe("xQ");
   });
+
+  it("records adjacent JSON document operations in the same history", () => {
+    const instruction = createRichTextBlockFixture(2);
+    const document = createJSONDocument({ instruction, attachments: [] });
+    const editor = createRichTextEditor({
+      document,
+      pointer: "/instruction",
+      selection: collapsed("block-text-0", 1),
+    });
+
+    expect(editor.dispatch({ type: "text.insert", text: "Q" }).ok).toBe(true);
+    expect(editor.apply([{ op: "add", path: "/attachments/0", value: { name: "brief.txt" } }], { origin: "composer.attachments.add" }).ok).toBe(true);
+    expect(document.at("/attachments/0")).toMatchObject({ ok: true, value: { name: "brief.txt" } });
+
+    const attachmentUndo = editor.undo();
+    expect(attachmentUndo, JSON.stringify(attachmentUndo)).toMatchObject({ ok: true });
+    expect(document.at("/attachments/0")).toMatchObject({ ok: false });
+    expect(editor.undo().ok).toBe(true);
+    expect(document.value).toEqual({ instruction, attachments: [] });
+    expect(editor.redo().ok).toBe(true);
+    expect(editor.redo().ok).toBe(true);
+    expect(document.at("/attachments/0")).toMatchObject({ ok: true, value: { name: "brief.txt" } });
+  });
 });
 
 function collapsed(nodeId: string, offset: number) {

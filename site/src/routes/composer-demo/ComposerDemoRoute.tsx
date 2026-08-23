@@ -1,8 +1,10 @@
-import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
 import {
   createRichTextEditor,
+  createRichTextNodeId,
   createRichTextSchema,
+  RICH_TEXT_CLIPBOARD_MIME,
   type RichTextDocument,
   type RichTextEditor,
   type RichTextNode,
@@ -39,7 +41,7 @@ const composerSchema = createRichTextSchema({
 });
 
 type Attachment = { readonly id: string; readonly kind: "document" | "image"; readonly name: string; readonly size: number };
-type ComposerDraft = { readonly instruction: RichTextDocument; readonly attachments: ReadonlyArray<Attachment> };
+type ComposerDraft = { readonly instruction: RichTextDocument; readonly attachments: ReadonlyArray<Attachment>; readonly model: (typeof models)[number] };
 type Suggestion = { readonly id: string; readonly kind: "mention" | "skill"; readonly label: string; readonly description: string };
 
 const suggestions: ReadonlyArray<Suggestion> = [
@@ -51,6 +53,8 @@ const suggestions: ReadonlyArray<Suggestion> = [
   { id: "agent-review", kind: "mention", label: "코드 리뷰 에이전트", description: "변경점과 위험 검토" },
 ];
 
+const models = ["GPT-5.6", "GPT-5.5", "Claude Opus", "Claude Sonnet"] as const;
+
 function initialDraft(): ComposerDraft {
   return {
     instruction: {
@@ -60,6 +64,7 @@ function initialDraft(): ComposerDraft {
       content: [{ id: "composer-paragraph", type: "paragraph", content: [] }],
     },
     attachments: [],
+    model: models[0],
   };
 }
 
@@ -78,7 +83,9 @@ export function ComposerDemoRoute() {
   const fileInput = useRef<HTMLInputElement>(null);
   const trigger = activeTrigger(instructionValue, editor);
   const visibleSuggestions = suggestions.filter((item) => item.kind === trigger?.kind && item.label.toLowerCase().includes(trigger.query));
-  const attachments = (draft.value as ComposerDraft).attachments;
+  const draftValue = draft.value as ComposerDraft;
+  const attachments = draftValue.attachments;
+  const model = draftValue.model;
   const hasContent = documentText(instructionValue).trim().length > 0 || attachments.length > 0;
 
   const onAction = useCallback(() => undefined, []);
@@ -113,6 +120,15 @@ export function ComposerDemoRoute() {
     submit();
   }
 
+  function handleHistoryKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "z") return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    if (event.shiftKey) editor.redo();
+    else editor.undo();
+  }
+
   function attachFiles(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.currentTarget.files ?? []);
     addFiles(files);
@@ -127,8 +143,16 @@ export function ComposerDemoRoute() {
       name: file.name,
       size: file.size,
     }));
-    draft.commit([{ op: "add", path: "/attachments/-", value: next[0]! }, ...next.slice(1).map((value) => ({ op: "add" as const, path: "/attachments/-", value }))]);
+    editor.apply(next.map((value, index) => ({ op: "add" as const, path: `/attachments/${attachments.length + index}`, value })), { origin: "composer.attachments.add" });
     setAddOpen(false);
+  }
+
+  function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
+    const files = Array.from(event.clipboardData.files);
+    if (files.length === 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    addFiles(files);
   }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
@@ -138,7 +162,7 @@ export function ComposerDemoRoute() {
   }
 
   function removeAttachment(index: number) {
-    draft.commit([{ op: "remove", path: `/attachments/${index}` }]);
+    editor.apply([{ op: "remove", path: `/attachments/${index}` }], { origin: "composer.attachments.remove" });
   }
 
   return (
@@ -160,6 +184,8 @@ export function ComposerDemoRoute() {
           onDragOver={(event) => event.preventDefault()}
           onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropActive(false); }}
           onDrop={handleDrop}
+          onPasteCapture={handlePaste}
+          onKeyDownCapture={handleHistoryKeyDown}
         >
           {dropActive ? <div className="composer-dropzone-overlay"><div className="composer-dropzone-card"><strong>여기에 파일을 놓아주세요</strong><span>이미지와 문서를 Composer context에 첨부합니다.</span></div></div> : null}
           {attachments.length > 0 ? (
@@ -193,7 +219,7 @@ export function ComposerDemoRoute() {
                 spellCheck={false}
               />
             </div>
-            <button className="composer-model-pill" type="button" aria-expanded={modelOpen} onClick={() => setModelOpen((value) => !value)}>HCX 30B⌄</button>
+            <button className="composer-model-pill" type="button" aria-label="모델 선택" aria-expanded={modelOpen} onClick={() => setModelOpen((value) => !value)}>{model}⌄</button>
             <button className="composer-icon-button" type="button" aria-label="음성 입력">♩</button>
             <button className={`composer-send-button${hasContent ? " is-active" : ""}`} type="button" aria-label="전송 (Enter)" disabled={!hasContent} onClick={submit}>↑</button>
           </div>
@@ -208,8 +234,12 @@ export function ComposerDemoRoute() {
 
           {modelOpen ? (
             <div className="composer-layer composer-model-layer" role="listbox" aria-label="모델 선택">
-              <button className="selected" type="button" role="option" aria-selected="true" onClick={() => setModelOpen(false)}><strong>HCX 30B</strong><small>빠르고 균형 잡힌 기본 모델</small></button>
-              <button type="button" role="option" aria-selected="false" onClick={() => setModelOpen(false)}><strong>HCX Thinking</strong><small>복잡한 추론과 계획에 적합</small></button>
+              {models.map((candidate) => (
+                <button key={candidate} className={candidate === model ? "selected" : ""} type="button" role="option" aria-selected={candidate === model} onClick={() => { editor.apply([{ op: "replace", path: "/model", value: candidate }], { origin: "composer.model.select" }); setModelOpen(false); }}>
+                  <strong>{candidate}</strong>
+                  <small>{candidate.startsWith("GPT") ? "OpenAI GPT 계열" : "Anthropic Claude 계열"}</small>
+                </button>
+              ))}
             </div>
           ) : null}
 
@@ -267,18 +297,23 @@ function insertSuggestion(editor: RichTextEditor, trigger: NonNullable<ReturnTyp
   const anchor: RichTextPoint = { kind: "text", nodeId: trigger.textNodeId, offset: trigger.from, affinity: "forward" };
   const caret: RichTextPoint = { kind: "text", nodeId: trigger.textNodeId, offset: trigger.to, affinity: "forward" };
   editor.dispatch({ type: "selection.set", selection: { kind: "range", ranges: [{ anchor, ["fo" + "cus"]: caret } as never], primaryIndex: 0 } });
-  editor.dispatch({ type: "selection.remove" });
-  const selectedRange = editor.snapshot.selection.primaryIndex === null ? null : editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex];
-  const point = selectedRange ? Object.values(selectedRange)[1] as RichTextPoint : null;
-  if (!point) return;
+  const atom: RichTextNode = suggestion.kind === "skill"
+    ? { id: createRichTextNodeId(), type: SKILL_TYPE, attrs: { skillId: suggestion.id, label: suggestion.label } }
+    : { id: createRichTextNodeId(), type: MENTION_TYPE, attrs: { entityId: suggestion.id, label: suggestion.label } };
   editor.dispatch({
-    type: "node.insert",
-    point,
-    node: suggestion.kind === "skill"
-      ? { id: `skill-${Date.now()}`, type: SKILL_TYPE, attrs: { skillId: suggestion.id, label: suggestion.label } }
-      : { id: `mention-${Date.now()}`, type: MENTION_TYPE, attrs: { entityId: suggestion.id, label: suggestion.label } },
+    type: "clipboard.paste",
+    clipboard: {
+      type: RICH_TEXT_CLIPBOARD_MIME,
+      slice: {
+        profile: COMPOSER_PROFILE,
+        content: [atom, { id: createRichTextNodeId(), type: "text", text: " ", marks: [] }],
+        openStart: 1,
+        openEnd: 1,
+      },
+      text: `${suggestion.kind === "skill" ? "/" : "@"}${suggestion.label} `,
+      html: `<span>${suggestion.kind === "skill" ? "/" : "@"}${suggestion.label}</span> `,
+    },
   });
-  editor.dispatch({ type: "text.insert", text: " " });
 }
 
 function insertTrigger(editor: RichTextEditor, trigger: "/" | "@") {

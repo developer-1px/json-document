@@ -16,6 +16,11 @@ describe("Agent Chat Composer Hands", () => {
     expect(screen.getByTestId("composer-draft-json").textContent).toContain("요구사항.md");
     expect(screen.getByRole("button", { name: "전송 (Enter)" }).hasAttribute("disabled")).toBe(false);
 
+    fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true });
+    expect(screen.queryByText("요구사항.md")).toBeNull();
+    fireEvent.keyDown(screen.getByTestId("agent-chat-composer"), { key: "z", metaKey: true, shiftKey: true });
+    expect(screen.getByText("요구사항.md")).toBeTruthy();
+
     fireEvent.click(screen.getByRole("button", { name: "요구사항.md 제거" }));
     expect(screen.queryByText("요구사항.md")).toBeNull();
     expect(screen.getByTestId("composer-draft-json").textContent).not.toContain("요구사항.md");
@@ -28,8 +33,11 @@ describe("Agent Chat Composer Hands", () => {
     expect(screen.getByRole("menuitem", { name: /스킬/ })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /에이전트/ })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "HCX 30B⌄" }));
+    fireEvent.click(screen.getByRole("button", { name: "모델 선택" }));
     expect(screen.getByRole("listbox", { name: "모델 선택" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: /GPT-5.6/ })).toBeTruthy();
+    expect(screen.getByRole("option", { name: /Claude Sonnet/ })).toBeTruthy();
+    expect(screen.queryByText(/HCX/)).toBeNull();
   });
 
   test("routes dropped files through the same canonical attachment context", () => {
