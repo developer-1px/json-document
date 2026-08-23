@@ -20,8 +20,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "JSON Document" }).click();
   await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
     "Why",
-    "Quickstart",
-    "Concepts",
+    "Concept Map",
     "API Reference",
   ]);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
@@ -43,7 +42,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
-    "Hands",
+    "Overview",
     "Order",
     "Object",
     "Tree",
@@ -52,9 +51,21 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Mention",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
-  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Adapter"]);
+  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Keyboard",
+    "Clipboard",
+    "Contenteditable",
+  ]);
   await navigation.getByRole("button", { name: "Connector" }).click();
-  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["Connector"]);
+  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
+    "Overview",
+    "React",
+    "React Hook Form",
+    "Ajv",
+    "Zod",
+    "TanStack Table",
+  ]);
   await navigation.getByRole("button", { name: "Affordance" }).click();
   await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
     "Focus",
@@ -89,14 +100,18 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet"]);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
-    "Collaboration",
     "Editing",
     "Adapter",
     "Connector",
     "Affordance",
     "Hands",
     "Artifact",
+    "Collaboration",
   ]);
+  expect(await navigation.getByRole("group", { name: "Collaboration" }).evaluate((element) => ({
+    borderTopWidth: getComputedStyle(element).borderTopWidth,
+    paddingTop: getComputedStyle(element).paddingTop,
+  }))).toEqual({ borderTopWidth: "1px", paddingTop: "16px" });
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });
@@ -117,10 +132,10 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("group", { name: "Affordance" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
 
-  await page.goto("/docs/tutorial");
+  await page.goto("/docs/concepts");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation sections" })).toBeVisible();
-  await expect(siteNavigation.getByRole("link", { name: "Quickstart" })).toHaveAttribute("aria-current", "page");
+  await expect(siteNavigation.getByRole("link", { name: "Concept Map" })).toHaveAttribute("aria-current", "page");
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -136,10 +151,10 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("button", { name: "Connector" }).click();
-  await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "Connector", exact: true }).click();
+  await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "Overview", exact: true }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
-  await expect(page.locator("[data-live-demo]")).toHaveCount(6);
+  await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
   await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");
@@ -185,6 +200,32 @@ test("Connector pages declare the connection before the live demo", async ({ pag
   }
 });
 
+test("Adapter and Connector menus expose contract docs while demos stay embedded", async ({ page }) => {
+  await page.goto("/docs/adapter-keyboard");
+  const navigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Keyboard",
+    "Clipboard",
+    "Contenteditable",
+  ]);
+  await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
+  await expect(page.locator("[data-live-demo]")).toHaveCount(1);
+
+  await page.goto("/docs/connector-zod-validate");
+  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
+    "Overview",
+    "React",
+    "React Hook Form",
+    "Ajv",
+    "Zod",
+    "Validate",
+    "TanStack Table",
+  ]);
+  await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
+  await expect(page.locator("[data-live-demo]")).toHaveCount(1);
+});
+
 test("docs and demos share the page frame while preserving their content modes", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
 
@@ -209,7 +250,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
   const illustrations = new Set<string>();
   const routes = [
     "/docs",
-    "/docs/tutorial",
+    "/docs/concepts",
     "/docs/connectors",
     "/docs/adapters",
     "/docs/api",
@@ -266,7 +307,6 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "patch",
     "peek",
     "sleep",
-    "terminal",
   ]);
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -286,7 +326,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
 test("code blocks preserve source whitespace with a compact visual rhythm", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/docs/tutorial");
+  await page.goto("/docs/api");
 
   const block = page.getByRole("figure", { name: "TypeScript" }).first();
   await expect(block).toBeVisible();
@@ -313,16 +353,16 @@ test("code blocks preserve source whitespace with a compact visual rhythm", asyn
   expect(snapshot.fontSize).toBe("13px");
   expect(snapshot.topInset).toBeLessThanOrEqual(1);
   expect(snapshot.lineGaps.every((gap) => gap >= 20 && gap <= 21)).toBe(true);
-  expect(snapshot.source).toContain('";\n\nconst initialBoard');
+  expect(snapshot.source).toContain('import { createJSONDocument } from "@interactive-os/json-document";');
   expect(snapshot.pageOverflow).toBe(false);
 
   await block.getByRole("button", { name: "Copy" }).click();
   await expect(block.getByRole("button", { name: "Copied" })).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("const initialBoard");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("createJSONDocument");
 });
 
 test("inline code stays distinct without drawing a border", async ({ page }) => {
-  await page.goto("/docs/tutorial");
+  await page.goto("/docs/api");
 
   const inlineCode = page.locator("code").filter({ hasText: /^document\.value$/ }).first();
   await expect(inlineCode).toBeVisible();
@@ -396,7 +436,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
     lineNumberBorderRightWidth: "0px",
   });
 
-  await page.goto("/docs/connectors");
+  await page.goto("/docs/connector-react");
   await page.locator('[data-live-demo="/connectors/react"]').scrollIntoViewIfNeeded();
   expect(await page.getByLabel("Document title").evaluate((element) => (
     getComputedStyle(element).borderColor
@@ -444,7 +484,7 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
-  await page.goto("/docs/connectors");
+  await page.goto("/docs/connector-react");
   await page.locator('[data-live-demo="/connectors/react"]').scrollIntoViewIfNeeded();
 
   const titleInput = page.getByLabel("Document title");
@@ -459,25 +499,32 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   await page.keyboard.press("Tab");
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
-  const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Connector", exact: true });
+  const currentLink = page.getByRole("navigation", { name: "Site navigation" })
+    .getByRole("group", { name: "Connector" })
+    .getByRole("link", { name: "React", exact: true });
   expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
 
+  await page.goto("/docs/api");
   const code = page.getByRole("figure", { name: "TypeScript" }).first();
+  await expect(code.locator("pre")).toBeVisible();
+  await expect(code.locator("xpath=..")).toHaveAttribute("data-source-highlighter", "shiki");
   const codePalette = await code.evaluate((element) => ({
     backgroundColor: getComputedStyle(element.querySelector("pre")!).backgroundColor,
     fontSize: getComputedStyle(element.querySelector("code")!).fontSize,
-    keyword: getComputedStyle(element.querySelector('[data-code-token="keyword"]')!).color,
-    usesImpactSyntax: [...element.querySelectorAll("[data-code-token]")]
+    keyword: getComputedStyle([...element.querySelectorAll("[data-code-line] > span")]
+      .find((token) => token.textContent === "import")!).color,
+    usesImpactSyntax: [...element.querySelectorAll("[data-code-line] > span")]
       .some((token) => getComputedStyle(token).color === "rgb(222, 109, 85)"),
   }));
   expect(codePalette).toEqual({
     backgroundColor: "rgb(251, 248, 242)",
     fontSize: "13px",
-    keyword: "rgb(41, 40, 36)",
+    keyword: "rgb(207, 34, 46)",
     usesImpactSyntax: false,
   });
-  expect(await page.locator('[data-code-token="string"]').first().evaluate((element) => getComputedStyle(element).color))
-    .toBe("rgb(96, 120, 111)");
+  expect(await code.locator("[data-code-line] > span").filter({ hasText: '"@interactive-os/json-document"' })
+    .evaluate((element) => getComputedStyle(element).color))
+    .toBe("rgb(10, 48, 105)");
 
   await page.goto("/demo/database");
   const selectedCell = page.locator('[role="gridcell"][data-selected="true"]').first();

@@ -32,14 +32,14 @@ describe("documentation routes", () => {
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
-    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Quickstart" }));
-    await waitFor(() => expect(document.title).toBe("Tutorial - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "작은 카드 문서 만들기" })).toBeTruthy();
+    await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Concept Map" }));
+    await waitFor(() => expect(document.title).toBe("Concept Map - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Concept Map" })).toBeTruthy();
 
     expect(screen.queryByRole("navigation", { name: "Documentation pages" })).toBeNull();
 
     await user.click(nav.getByRole("button", { name: "Connector" }));
-    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Connector", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Overview", exact: true }));
     await waitFor(() => expect(document.title).toBe("Connector Docs - json-document"), { timeout: 10000 });
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" }, { timeout: 10000 })).toBeTruthy();
 

@@ -27,6 +27,9 @@ import affordanceZoomMarkdown from "../../../../docs/public/affordance-zoom.md?r
 import affordanceSnapMarkdown from "../../../../docs/public/affordance-snap.md?raw";
 import affordanceForbidMarkdown from "../../../../docs/public/affordance-forbid.md?raw";
 import adaptersMarkdown from "../../../../docs/public/adapters.md?raw";
+import adapterKeyboardMarkdown from "../../../../docs/public/adapter-keyboard.md?raw";
+import adapterClipboardMarkdown from "../../../../docs/public/adapter-clipboard.md?raw";
+import adapterContenteditableMarkdown from "../../../../docs/public/adapter-contenteditable.md?raw";
 import collaborationMarkdown from "../../../../docs/public/collaboration.md?raw";
 import collaborationHistoryMarkdown from "../../../../docs/public/collaboration-history.md?raw";
 import collaborationLeaseMarkdown from "../../../../docs/public/collaboration-lease.md?raw";
@@ -34,6 +37,12 @@ import collaborationLifecycleMarkdown from "../../../../docs/public/collaboratio
 import collaborationReplicaMarkdown from "../../../../docs/public/collaboration-replica.md?raw";
 import collaborationTextMarkdown from "../../../../docs/public/collaboration-text.md?raw";
 import connectorsMarkdown from "../../../../docs/public/connectors.md?raw";
+import connectorReactMarkdown from "../../../../docs/public/connector-react.md?raw";
+import connectorReactHookFormMarkdown from "../../../../docs/public/connector-react-hook-form.md?raw";
+import connectorAjvMarkdown from "../../../../docs/public/connector-ajv.md?raw";
+import connectorZodMarkdown from "../../../../docs/public/connector-zod.md?raw";
+import connectorZodValidateMarkdown from "../../../../docs/public/connector-zod-validate.md?raw";
+import connectorTanStackTableMarkdown from "../../../../docs/public/connector-tanstack-table.md?raw";
 import composerMarkdown from "../../../../docs/public/composer.md?raw";
 import handsMarkdown from "../../../../docs/public/hands.md?raw";
 import mentionMarkdown from "../../../../docs/public/mention.md?raw";
@@ -43,7 +52,6 @@ import intentMarkdown from "../../../../docs/public/intent.md?raw";
 import objectMarkdown from "../../../../docs/public/object.md?raw";
 import orderMarkdown from "../../../../docs/public/order.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
-import quickstartMarkdown from "../../../../docs/public/quickstart.md?raw";
 import reactEditingMarkdown from "../../../../docs/public/react-editing.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
@@ -57,8 +65,10 @@ function docPage(path: string, source: string) {
 
 export const docPages = {
   overview: docPage("/docs", overviewMarkdown),
-  quickstart: docPage("/docs/tutorial", quickstartMarkdown),
   adapters: docPage("/docs/adapters", adaptersMarkdown),
+  adapterKeyboard: docPage("/docs/adapter-keyboard", adapterKeyboardMarkdown),
+  adapterClipboard: docPage("/docs/adapter-clipboard", adapterClipboardMarkdown),
+  adapterContenteditable: docPage("/docs/adapter-contenteditable", adapterContenteditableMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),
   affordanceSelect: docPage("/docs/affordance/select", affordanceSelectMarkdown),
   affordanceFold: docPage("/docs/affordance/fold", affordanceFoldMarkdown),
@@ -86,6 +96,12 @@ export const docPages = {
   affordanceSnap: docPage("/docs/affordance/snap", affordanceSnapMarkdown),
   affordanceForbid: docPage("/docs/affordance/forbid", affordanceForbidMarkdown),
   connectors: docPage("/docs/connectors", connectorsMarkdown),
+  connectorReact: docPage("/docs/connector-react", connectorReactMarkdown),
+  connectorReactHookForm: docPage("/docs/connector-react-hook-form", connectorReactHookFormMarkdown),
+  connectorAjv: docPage("/docs/connector-ajv", connectorAjvMarkdown),
+  connectorZod: docPage("/docs/connector-zod", connectorZodMarkdown),
+  connectorZodValidate: docPage("/docs/connector-zod-validate", connectorZodValidateMarkdown),
+  connectorTanStackTable: docPage("/docs/connector-tanstack-table", connectorTanStackTableMarkdown),
   reactEditing: docPage("/docs/react-editing", reactEditingMarkdown),
   collaboration: docPage("/docs/collaboration", collaborationMarkdown),
   collaborationReplica: docPage("/docs/collaboration/replica", collaborationReplicaMarkdown),

@@ -10,7 +10,7 @@ test("Zod Connector Live Demo opens a Database admin from a Zod schema without a
   const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
   await expect(breadcrumb.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/");
   await expect(breadcrumb.getByRole("link", { name: "Connector" })).toHaveAttribute("href", "/docs/connectors");
-  await expect(breadcrumb.getByText("Zod", { exact: true })).toBeVisible();
+  await expect(breadcrumb.getByText("Zod Live Demo", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Connector" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "The table is the admin" })).toBeVisible();
   await expect(page.getByRole("form")).toHaveCount(0);
@@ -45,8 +45,8 @@ test("Zod Connector Live Demo rejects invalid changes and preserves canonical JS
   await page.goto("/connectors/zod/validate");
   const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
   await expect(breadcrumb.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/");
-  await expect(breadcrumb.getByRole("link", { name: "Zod" })).toHaveAttribute("href", "/connectors/zod");
-  await expect(breadcrumb.getByText("Validate", { exact: true })).toBeVisible();
+  await expect(breadcrumb.getByRole("link", { name: "Zod Live Demo" })).toHaveAttribute("href", "/connectors/zod");
+  await expect(breadcrumb.getByText("Validate Live Demo", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
   await expect(page.getByRole("grid", { name: "Admin records" })).toHaveCount(0);
 

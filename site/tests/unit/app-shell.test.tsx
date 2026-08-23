@@ -41,8 +41,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "JSON Document" }));
     expect(groupLinks(nav, "JSON Document")).toEqual([
       "Why",
-      "Quickstart",
-      "Concepts",
+      "Concept Map",
       "API Reference",
     ]);
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
@@ -64,7 +63,7 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
-      "Hands",
+      "Overview",
       "Order",
       "Object",
       "Tree",
@@ -73,9 +72,16 @@ describe("official site shell", () => {
       "Mention",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
-    expect(groupLinks(nav, "Adapter")).toEqual(["Adapter"]);
+    expect(groupLinks(nav, "Adapter")).toEqual(["Overview", "Keyboard", "Clipboard", "Contenteditable"]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
-    expect(groupLinks(nav, "Connector")).toEqual(["Connector"]);
+    expect(groupLinks(nav, "Connector")).toEqual([
+      "Overview",
+      "React",
+      "React Hook Form",
+      "Ajv",
+      "Zod",
+      "TanStack Table",
+    ]);
     await user.click(nav.getByRole("button", { name: "Affordance" }));
     expect(groupLinks(nav, "Affordance")).toEqual([
       "Focus",
@@ -110,13 +116,13 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet"]);
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
-      "Collaboration",
       "Editing",
       "Adapter",
       "Connector",
       "Affordance",
       "Hands",
       "Artifact",
+      "Collaboration",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 
@@ -141,7 +147,7 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByRole("link", { name: "Hands" }).getAttribute("href")).toBe("/editors");
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
-    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Connector", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Overview", exact: true }));
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
   }, 10000);
 
@@ -173,7 +179,7 @@ describe("official site shell", () => {
     expect(header?.querySelector("h1")).toBeTruthy();
 
     await user.click(nav.getByRole("button", { name: "Hands" }));
-    await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Hands", exact: true }));
+    await user.click(within(nav.getByRole("group", { name: "Hands" })).getByRole("link", { name: "Overview", exact: true }));
     await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
   });
 });

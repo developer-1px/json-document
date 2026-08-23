@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { QuickstartRoute } from "../../../../routes/docs/DocsRoute";
+import { Navigate, createFileRoute } from "@tanstack/react-router";
+import { legacyPageRedirects } from "../../../page-descriptors";
 
 export const Route = createFileRoute("/_page/docs/tutorial")({
-  component: QuickstartRoute,
+  component: () => <Navigate to={legacyPageRedirects.tutorial.to} />,
 });

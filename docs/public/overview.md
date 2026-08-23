@@ -115,6 +115,5 @@ json-document는 agent와 사람이 여러 화면에서 같은 artifact를 쓰�
 최전선의 손을 닫습니다. Hands는 그 다음에 보는 장르 선반입니다.
 
 여러 artifact가 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
-Core입니다. 먼저 값을 만져 보려면 [Quickstart](quickstart.md)에서 작은
-카드 문서를 만듭니다. 층이 어떻게 이어지는지는 [Concepts](concepts.md)가
-지도입니다.
+Core입니다. 각 책임의 경계와 의존 순서는 [Concept Map](concepts.md)에서
+이어집니다.

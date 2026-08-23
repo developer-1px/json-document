@@ -1,91 +1,112 @@
-# Concepts
+# Concept Map
 
-Quickstart에서는 JSON을 읽고, 변경을 적용하고, 결과를 구독했습니다. 실제
-편집기에서는 여기에 사용자가 고른 위치와 복사한 내용, 되돌릴 변경이
-필요합니다. 브라우저 플랫폼과 스키마 도구를 붙이는 일도 남아 있습니다.
-
-json-document를 제품에 연결하는 흐름은 이렇게 이어집니다. 먼저 JSON
-Document가 값을 다루고, Editing이 사용자의 편집 상태를 더합니다.
-Adapter는 브라우저 플랫폼 계약을 붙이고, Connector는 라이브러리 생태계를
-연결합니다. Affordance는 키보드와 마우스의 관례적 손을 최전선에서 닫습니다.
+이 문서 트리는 아래 순서로 읽습니다. JSON 값을 다루는 계약에서 시작해,
+편집과 실행 환경에 필요한 책임을 더하고, 마지막에 사람이 직접 다루는
+artifact를 만듭니다. Collaboration은 이 흐름과 분리해 읽습니다.
 
 ```txt
-JSON Document  →  Editing  →  Adapter  →  Connector  →  Affordance
-값과 변경         선택과 작업    플랫폼 계약    라이브러리      키보드와 마우스
+JSON Document
+  값 · 주소 · 변경 · 구독
+        ↓
+Editing
+  Intent · Selection · Topology · Clipboard · History
+        ↓
+Adapter
+  브라우저 플랫폼 계약
+        ↓
+Connector
+  라이브러리 생태계 연결
+        ↓
+Affordance
+  키보드와 포인터의 입력 문법
+        ↓
+Hands
+  artifact 장르별 편집 도구
+        ↓
+Artifact
+  사람이 보고 고치는 최종 결과
+
+────────────────────────────────
+Collaboration
+  같은 Core 계약의 협업 구현
 ```
 
-## JSON Document가 값을 다룬다
+화살표는 책임이 쌓이는 방향을 나타냅니다. Adapter와 Connector는 실행
+환경에 맞춰 고릅니다. Collaboration은 이 흐름의 다음 계층이 아닙니다.
+JSON Document와 같은 Core 계약을 협업 방식으로 구현하므로 구분선 아래에
+따로 둡니다.
 
-모든 편집은 현재 JSON에서 시작합니다. `JSONDocument`는 값을 읽고, 위치를
-찾고, JSON Patch를 검사해 적용합니다. 적용된 변경은 구독자에게 전달합니다.
+## JSON Document
 
-이 책임을 작게 유지하면 같은 문서를 카드 화면과 표, 저장소가 함께 사용할
-수 있습니다. 각 화면은 서로 다른 방식으로 보여 주더라도 변경의 주소와
-순서는 같은 형식으로 읽습니다.
+JSON Document는 현재 값을 보관하고, JSON Pointer와 JSONPath로 위치를 찾고,
+JSON Patch를 검사해 적용합니다. 적용된 변경은 구독자에게 전달합니다.
 
-문서의 값만으로는 사용자가 어느 블록을 보고 있는지 알 수 없습니다. 블록을
-클릭했을 때 JSON을 바꿀 이유도 없습니다. 이처럼 편집하는 동안만 필요한
-상태는 다음 단계에서 더합니다.
+이 계약에는 화면이나 편집 장르가 들어가지 않습니다. 문서, 표, 보드의
+생김새가 달라도 값의 주소와 변경 형식은 여기서 같습니다. 공개 호출은
+[API](api.md)에 정리되어 있습니다.
 
-## Editing이 사용자 작업을 더한다
+## Editing
 
-Editing을 시작할 때 현재 JSON으로 editor를 만듭니다. 화면은 클릭이나 키
-입력을 사용자의 요청인 Intent로 바꾸고 `editor.dispatch`에 넘깁니다. editor는
-현재 문서와 편집 상태를 읽어 요청을 처리하고 결과를 돌려줍니다.
+Editing은 문서 값 옆에 편집 중에만 필요한 상태를 둡니다. 화면에서 들어온
+요청은 Intent가 되고, Selection은 대상을, Topology는 보이는 순서를,
+Clipboard는 옮길 내용을 기억합니다. History는 값과 선택을 함께 되돌립니다.
 
-사용자가 블록이나 셀을 고르는 Intent를 보내면 editor는 현재 대상을
-Selection에 기억합니다. Selection은 JSON 옆에 있으므로 위치를 옮기는
-것만으로는 문서 변경이나 실행 취소 기록이 생기지 않습니다.
+Editing은 화면을 그리지 않습니다. 화면이 보낸 Intent를 현재 문서와 편집
+상태에 적용합니다. 시작점은 [Intent guide](intent-guide.md)입니다.
 
-Shift 키로 범위를 늘리거나 표의 여러 셀을 복사하려면 화면에 보이는 순서도
-알아야 합니다. 정렬과 필터를 거친 행·열의 순서를 나타내는 값이
-Topology입니다. Selection과 복사 기능은 같은 Topology를 읽어 같은 범위를
-사용합니다.
+## Adapter
 
-선택한 내용을 다른 위치로 옮기려면 JSON과 사람이 읽을 수 있는 텍스트를
-함께 보관합니다. 이 구조화된 값이 Clipboard payload입니다. 복사는 payload만
-만들고, 잘라내기와 붙여넣기는 문서에 변경을 적용합니다.
+Adapter는 keyboard, clipboard, contenteditable 같은 플랫폼 계약을 공개
+API에 맞춰 번역합니다. 예를 들어 key chord는 의미 command가 되고,
+브라우저의 clipboard event는 Editing의 copy, cut, paste로 이어집니다.
 
-문서 값이 바뀌면 Editing은 적용된 patch와 그때의 Selection을 기록합니다.
-History는 이 기록을 사용해 값과 선택을 함께 되돌리거나 다시 적용합니다.
+플랫폼마다 다른 event와 lifecycle은 [Adapter](adapters.md)가 맡습니다.
 
-## Adapter가 플랫폼을 붙인다
+## Connector
 
-Editing까지 조합하면 화면과 독립된 편집 동작이 완성됩니다. 브라우저에서
-쓰려면 키보드, clipboard, contenteditable 같은 플랫폼 계약을 붙여야
-합니다.
+Connector는 React, Zod, Ajv, TanStack Table처럼 이름 있는 라이브러리의
+입출력을 기존 계약에 연결합니다. 문서 변경을 React 구독으로 전달하거나,
+화면에 보이는 행과 열을 Sheet의 Topology로 바꾸는 식입니다.
 
-Adapter는 이런 플랫폼 계약을 json-document의 공개 API에 맞게 변환합니다.
-Keyboard adapter는 키 chord를 의미 command로 바꾸고, Clipboard adapter는
-복사와 붙여넣기를 Editing의 copy, cut, paste에 연결합니다.
+라이브러리를 교체해도 문서와 편집 계약은 바뀌지 않습니다. 지원 범위는
+[Connector](connectors.md)에 있습니다.
 
-필요한 Adapter만 골라 기존 편집 동작과 조합할 수 있습니다.
+## Affordance
 
-## Connector가 외부 도구를 연결한다
+Affordance는 고르기, 입력하기, 접기, drag, undo처럼 사람이 이미 알고 있는
+조작을 정의합니다. Adapter가 플랫폼 event를 번역한다면, Affordance는 그
+event를 어떤 입력 문법으로 해석할지 정합니다.
 
-제품에서는 같은 편집 동작을 React로 렌더링하거나 Zod와 Ajv로 값을 검사할
-수 있습니다.
+화면의 모양은 host가 정합니다. 입력의 의미와 조합은
+[Affordance](affordance.md)에서 다룹니다.
 
-Connector는 이름 있는 라이브러리 생태계의 입력과 출력을 json-document의
-공개 API에 맞게 번역합니다. 예를 들어 React Connector는 document 변경을
-React의 구독 방식으로 전달합니다. TanStack Table Connector는 화면에
-보이는 행과 열을 Sheet의 Topology로 바꿉니다.
+## Hands
 
-필요한 Connector만 골라 기존 도구와 조합할 수 있습니다.
+Hands는 Core 위에서 사람과 agent가 artifact를 다루는 편집 도구입니다.
+Order는 한 줄 목록을 집어 옮기고, Object는 key를 고치며, Tree는 가지를
+접습니다. Composer는 agent에게 지시와 맥락을 건네는 손이고, Mention은
+안정적인 대상을 글 안에 넣는 손입니다. 둘은 아직 TBD입니다.
 
-이제 Editing의 각 개념을 실제 입력과 결과로 연결합니다.
+Hands는 App이나 완성된 제품 화면의 목록이 아닙니다. 한 장르에서 필요한
+조작이 함께 동작하는 최소 단위입니다. 현재 목록은 [Hands](hands.md)에
+있습니다.
 
-- [Intent guide](intent-guide.md): editor를 만들고 요청을 보내는 진입점
-- [Intent](intent.md): Intent 시그니처
-- [Topology](topology.md): 화면에 보이는 순서와 범위
-- [Selection](selection.md): 편집 대상과 선택 상태
-- [Clipboard](clipboard.md): 선택한 데이터의 복사, 잘라내기와 붙여넣기
-- [History](history.md): 값과 선택을 함께 되돌리는 기록
-- [Adapters](adapters.md): 키보드, clipboard, contenteditable 플랫폼 변환
-- [Connectors](connectors.md): React, Zod, TanStack Table 같은 라이브러리 연결
-- [React editing](react-editing.md): 선택 범위와 커서를 React 질의로 그리기
-- [Affordance](affordance.md): 키보드와 마우스의 관례적 손
+## Artifact
 
-같은 공책을 여러 참여자가 쓰려면 [Collaboration](collaboration.md)으로
-갑니다. 장르 선반은 [Hands](hands.md)에서 고릅니다. Hands는 위 파이프라인
-한 층이 아닙니다.
+Artifact는 아래 계층을 조합해 사람이 보고 고칠 수 있게 만든 결과입니다.
+MD, PPT, Sheet는 서로 다른 화면과 Hands를 사용해도 같은 문서와 편집 계약을
+공유할 수 있습니다.
+
+현재 Artifact 페이지는 파일 포맷 호환성을 약속하는 구현이 아니라
+prototype입니다. 앞의 계약들이 최종 경험에서 어떻게 만나는지 확인하는
+자리입니다.
+
+## Collaboration
+
+Collaboration은 JSON Document 계약을 여러 참여자의 인과 변경으로 구현합니다.
+로컬 구현과 마찬가지로 값을 읽고, 변경을 적용하고, 결과를 구독하지만 내부
+기록은 참여자의 변경 순서와 수렴을 다룹니다.
+
+위치가 Artifact 다음인 것은 의존 방향이 아니라 문서 분류를 나타냅니다.
+협업 구현을 붙여도 위 계층이 새 문서 API를 배울 필요는 없습니다. replica와
+협업 History의 경계는 [Collaboration](collaboration.md)에 있습니다.

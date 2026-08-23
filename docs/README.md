@@ -11,8 +11,7 @@ docs
 `-- public
 |   |-- overview.md            # JSON Document: Why / How / What
 |   |-- api.md                 # JSON Document: 레퍼런스
-|   |-- quickstart.md          # JSON Document: 사용 시작
-|   |-- concepts.md            # JSON Document: 읽기 → 편집 → 확장 지도
+|   |-- concepts.md            # Core에서 Artifact까지의 책임·의존 지도
 |   |-- selection.md           # Editing: 구조 선택
 |   |-- history.md             # Editing: 로컬 undo/redo
 |   |-- clipboard.md           # Editing: 구조화된 payload
@@ -28,7 +27,16 @@ docs
 |   |-- tree.md                # Hands: 보이는 나무
 |   |-- database.md            # Hands: 저장된 표 view
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
+|   |-- adapter-keyboard.md    # Adapter: Keyboard / Press / ARIA
+|   |-- adapter-clipboard.md   # Adapter: ClipboardEvent
+|   |-- adapter-contenteditable.md # Adapter: native-input DOM
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
+|   |-- connector-react.md     # Connector: React 구독
+|   |-- connector-react-hook-form.md # Connector: form draft와 commit
+|   |-- connector-ajv.md       # Connector: Ajv validation
+|   |-- connector-zod.md       # Connector: Zod database 변환
+|   |-- connector-zod-validate.md # Connector: Zod validation
+|   |-- connector-tanstack-table.md # Connector: visible table topology
 |   |-- react-editing.md       # Connectors: React 선택·커서 질의
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
@@ -39,16 +47,8 @@ docs
 ```txt
 JSON Document
 |-- Why
-|-- Quickstart
-|-- Concepts
+|-- Concept Map
 `-- API
-
-Collaboration
-|-- Replica
-|-- Lifecycle
-|-- Collaborative History
-`-- Text
-    `-- native-input DOM lease
 
 Editing
 |-- Intent guide
@@ -59,15 +59,19 @@ Editing
 `-- History
 
 Adapter
+|-- Overview
 |-- Keyboard
-|-- Clipboard adapter
+|-- Clipboard
 `-- Contenteditable
 
 Connector
+|-- Overview
 |-- React
+|   `-- React editing
 |-- React Hook Form
 |-- Ajv
 |-- Zod
+|   `-- Validate
 `-- TanStack Table
 
 Affordance
@@ -98,15 +102,22 @@ Affordance
 `-- Not-allowed
 
 Hands
-|-- Document
+|-- Overview
 |-- Order
 |-- Object
-|-- Sheet
 |-- Tree
-|-- Kanban
 |-- Database
 |-- Composer (TBD)
 `-- Mention (TBD)
+
+----------------------------------------
+
+Collaboration
+|-- Replica
+|-- Lifecycle
+|-- Collaborative History
+`-- Text
+    `-- native-input DOM lease
 ```
 
 ## 규범 우선순위
@@ -134,13 +145,13 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
 - 코드 식별자, 명령어, 파일 경로, 표준명은 원문을 유지한다.
 - public 문서는 usage와 프로젝트 이해만 다룬다.
 - 페이지마다 할 일 하나만 쓴다. overview는 Why/How/What 배경,
-  api는 시그니처 레퍼런스, quickstart는 실습, selection은 구조
+  api는 시그니처 레퍼런스, selection은 구조
   선택, history는 로컬 undo/redo, clipboard는 구조화된 payload,
   topology는 화면 줄과 선택, intent는 편집 Intent 시그니처,
   intent-guide는 Intent 따라 하기, adapters는 플랫폼 변환,
   connectors는 연결 방법이다. react-editing은 React에서 선택과 커서를
   그리는 사용법이다.
-  concepts는 읽기 → 편집 → 확장 전체 지도다. JSON Document 섹션에서 시작한다.
+  concepts는 JSON Document에서 Artifact까지의 책임과 의존 지도다.
   collaboration은 같은 JSON Document의 다른 구현이다. hands는
   Editing 위 장르의 손이다. order·object·tree는 그 손의
   나머지 slice다. database는 저장된 표 view의 손이다.

@@ -31,8 +31,10 @@ export function breadcrumbTrail(
   }
 
   const group = routeGroup(route, routes);
-  if (group && stack[0]?.label !== group) {
-    stack.unshift(groupLandings[group]);
+  if (group) {
+    const landing = groupLandings[group];
+    if (stack[0]?.path === landing.path && stack[0]?.label === "Overview") stack[0] = landing;
+    else if (stack[0]?.label !== group) stack.unshift(landing);
   }
   if (stack[0]?.path !== overview.path) stack.unshift(overview);
 

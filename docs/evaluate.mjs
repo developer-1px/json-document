@@ -48,7 +48,6 @@ const publicDocs = {
   topology: read("docs/public/topology.md"),
   intent: read("docs/public/intent.md"),
   intentGuide: read("docs/public/intent-guide.md"),
-  quickstart: read("docs/public/quickstart.md"),
   api: read("docs/public/api.md"),
   adapters: read("docs/public/adapters.md"),
   affordance: read("docs/public/affordance.md"),
@@ -134,6 +133,9 @@ const activeCompanionPackages = new Set([
 ]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
+  "adapter-clipboard.md",
+  "adapter-contenteditable.md",
+  "adapter-keyboard.md",
   "adapters.md",
   "affordance-activate.md",
   "affordance-cancel.md",
@@ -171,6 +173,12 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "collaboration.md",
   "composer.md",
   "concepts.md",
+  "connector-ajv.md",
+  "connector-react-hook-form.md",
+  "connector-react.md",
+  "connector-tanstack-table.md",
+  "connector-zod-validate.md",
+  "connector-zod.md",
   "connectors.md",
   "database.md",
   "hands.md",
@@ -182,7 +190,6 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "object.md",
   "order.md",
   "overview.md",
-  "quickstart.md",
   "react-editing.md",
   "selection.md",
   "topology.md",

@@ -38,11 +38,20 @@ import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDemoTopologyRouteImport } from "./routes/_page/demo/topology";
 import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
+import { Route as PageDocsAdapterClipboardRouteImport } from "./routes/_page/docs/adapter-clipboard";
+import { Route as PageDocsAdapterContenteditableRouteImport } from "./routes/_page/docs/adapter-contenteditable";
+import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs/adapter-keyboard";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsComposerRouteImport } from "./routes/_page/docs/composer";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
+import { Route as PageDocsConnectorAjvRouteImport } from "./routes/_page/docs/connector-ajv";
+import { Route as PageDocsConnectorReactRouteImport } from "./routes/_page/docs/connector-react";
+import { Route as PageDocsConnectorReactHookFormRouteImport } from "./routes/_page/docs/connector-react-hook-form";
+import { Route as PageDocsConnectorTanstackTableRouteImport } from "./routes/_page/docs/connector-tanstack-table";
+import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/connector-zod";
+import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
@@ -248,6 +257,23 @@ const PageDocsIndexRoute = PageDocsIndexRouteImport.update({
   path: "/docs/",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsAdapterClipboardRoute =
+  PageDocsAdapterClipboardRouteImport.update({
+    id: "/docs/adapter-clipboard",
+    path: "/docs/adapter-clipboard",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAdapterContenteditableRoute =
+  PageDocsAdapterContenteditableRouteImport.update({
+    id: "/docs/adapter-contenteditable",
+    path: "/docs/adapter-contenteditable",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAdapterKeyboardRoute = PageDocsAdapterKeyboardRouteImport.update({
+  id: "/docs/adapter-keyboard",
+  path: "/docs/adapter-keyboard",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsAdaptersRoute = PageDocsAdaptersRouteImport.update({
   id: "/docs/adapters",
   path: "/docs/adapters",
@@ -273,6 +299,39 @@ const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
   path: "/docs/concepts",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsConnectorAjvRoute = PageDocsConnectorAjvRouteImport.update({
+  id: "/docs/connector-ajv",
+  path: "/docs/connector-ajv",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsConnectorReactRoute = PageDocsConnectorReactRouteImport.update({
+  id: "/docs/connector-react",
+  path: "/docs/connector-react",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsConnectorReactHookFormRoute =
+  PageDocsConnectorReactHookFormRouteImport.update({
+    id: "/docs/connector-react-hook-form",
+    path: "/docs/connector-react-hook-form",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsConnectorTanstackTableRoute =
+  PageDocsConnectorTanstackTableRouteImport.update({
+    id: "/docs/connector-tanstack-table",
+    path: "/docs/connector-tanstack-table",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsConnectorZodRoute = PageDocsConnectorZodRouteImport.update({
+  id: "/docs/connector-zod",
+  path: "/docs/connector-zod",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsConnectorZodValidateRoute =
+  PageDocsConnectorZodValidateRouteImport.update({
+    id: "/docs/connector-zod-validate",
+    path: "/docs/connector-zod-validate",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
   id: "/docs/connectors",
   path: "/docs/connectors",
@@ -601,11 +660,20 @@ export interface FileRoutesByFullPath {
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
+  "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
+  "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
+  "/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
+  "/docs/connector-react": typeof PageDocsConnectorReactRoute;
+  "/docs/connector-react-hook-form": typeof PageDocsConnectorReactHookFormRoute;
+  "/docs/connector-tanstack-table": typeof PageDocsConnectorTanstackTableRoute;
+  "/docs/connector-zod": typeof PageDocsConnectorZodRoute;
+  "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
@@ -692,11 +760,20 @@ export interface FileRoutesByTo {
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
+  "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
+  "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
+  "/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
+  "/docs/connector-react": typeof PageDocsConnectorReactRoute;
+  "/docs/connector-react-hook-form": typeof PageDocsConnectorReactHookFormRoute;
+  "/docs/connector-tanstack-table": typeof PageDocsConnectorTanstackTableRoute;
+  "/docs/connector-zod": typeof PageDocsConnectorZodRoute;
+  "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
@@ -785,11 +862,20 @@ export interface FileRoutesById {
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/demo/topology": typeof PageDemoTopologyRoute;
   "/_page/demo/tree": typeof PageDemoTreeRoute;
+  "/_page/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
+  "/_page/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
+  "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
+  "/_page/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
+  "/_page/docs/connector-react": typeof PageDocsConnectorReactRoute;
+  "/_page/docs/connector-react-hook-form": typeof PageDocsConnectorReactHookFormRoute;
+  "/_page/docs/connector-tanstack-table": typeof PageDocsConnectorTanstackTableRoute;
+  "/_page/docs/connector-zod": typeof PageDocsConnectorZodRoute;
+  "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
@@ -878,11 +964,20 @@ export interface FileRouteTypes {
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/docs/adapter-clipboard"
+    | "/docs/adapter-contenteditable"
+    | "/docs/adapter-keyboard"
     | "/docs/adapters"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
+    | "/docs/connector-ajv"
+    | "/docs/connector-react"
+    | "/docs/connector-react-hook-form"
+    | "/docs/connector-tanstack-table"
+    | "/docs/connector-zod"
+    | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
     | "/docs/history"
@@ -969,11 +1064,20 @@ export interface FileRouteTypes {
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/docs/adapter-clipboard"
+    | "/docs/adapter-contenteditable"
+    | "/docs/adapter-keyboard"
     | "/docs/adapters"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
+    | "/docs/connector-ajv"
+    | "/docs/connector-react"
+    | "/docs/connector-react-hook-form"
+    | "/docs/connector-tanstack-table"
+    | "/docs/connector-zod"
+    | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
     | "/docs/history"
@@ -1061,11 +1165,20 @@ export interface FileRouteTypes {
     | "/_page/demo/sheet"
     | "/_page/demo/topology"
     | "/_page/demo/tree"
+    | "/_page/docs/adapter-clipboard"
+    | "/_page/docs/adapter-contenteditable"
+    | "/_page/docs/adapter-keyboard"
     | "/_page/docs/adapters"
     | "/_page/docs/api"
     | "/_page/docs/clipboard"
     | "/_page/docs/composer"
     | "/_page/docs/concepts"
+    | "/_page/docs/connector-ajv"
+    | "/_page/docs/connector-react"
+    | "/_page/docs/connector-react-hook-form"
+    | "/_page/docs/connector-tanstack-table"
+    | "/_page/docs/connector-zod"
+    | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
     | "/_page/docs/history"
@@ -1338,6 +1451,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsIndexRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/adapter-clipboard": {
+      id: "/_page/docs/adapter-clipboard";
+      path: "/docs/adapter-clipboard";
+      fullPath: "/docs/adapter-clipboard";
+      preLoaderRoute: typeof PageDocsAdapterClipboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/adapter-contenteditable": {
+      id: "/_page/docs/adapter-contenteditable";
+      path: "/docs/adapter-contenteditable";
+      fullPath: "/docs/adapter-contenteditable";
+      preLoaderRoute: typeof PageDocsAdapterContenteditableRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/adapter-keyboard": {
+      id: "/_page/docs/adapter-keyboard";
+      path: "/docs/adapter-keyboard";
+      fullPath: "/docs/adapter-keyboard";
+      preLoaderRoute: typeof PageDocsAdapterKeyboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/adapters": {
       id: "/_page/docs/adapters";
       path: "/docs/adapters";
@@ -1371,6 +1505,48 @@ declare module "@tanstack/react-router" {
       path: "/docs/concepts";
       fullPath: "/docs/concepts";
       preLoaderRoute: typeof PageDocsConceptsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-ajv": {
+      id: "/_page/docs/connector-ajv";
+      path: "/docs/connector-ajv";
+      fullPath: "/docs/connector-ajv";
+      preLoaderRoute: typeof PageDocsConnectorAjvRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-react": {
+      id: "/_page/docs/connector-react";
+      path: "/docs/connector-react";
+      fullPath: "/docs/connector-react";
+      preLoaderRoute: typeof PageDocsConnectorReactRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-react-hook-form": {
+      id: "/_page/docs/connector-react-hook-form";
+      path: "/docs/connector-react-hook-form";
+      fullPath: "/docs/connector-react-hook-form";
+      preLoaderRoute: typeof PageDocsConnectorReactHookFormRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-tanstack-table": {
+      id: "/_page/docs/connector-tanstack-table";
+      path: "/docs/connector-tanstack-table";
+      fullPath: "/docs/connector-tanstack-table";
+      preLoaderRoute: typeof PageDocsConnectorTanstackTableRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-zod": {
+      id: "/_page/docs/connector-zod";
+      path: "/docs/connector-zod";
+      fullPath: "/docs/connector-zod";
+      preLoaderRoute: typeof PageDocsConnectorZodRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-zod-validate": {
+      id: "/_page/docs/connector-zod-validate";
+      path: "/docs/connector-zod-validate";
+      fullPath: "/docs/connector-zod-validate";
+      preLoaderRoute: typeof PageDocsConnectorZodValidateRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/connectors": {
@@ -1792,11 +1968,20 @@ interface PageRouteChildren {
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDemoTopologyRoute: typeof PageDemoTopologyRoute;
   PageDemoTreeRoute: typeof PageDemoTreeRoute;
+  PageDocsAdapterClipboardRoute: typeof PageDocsAdapterClipboardRoute;
+  PageDocsAdapterContenteditableRoute: typeof PageDocsAdapterContenteditableRoute;
+  PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
+  PageDocsConnectorAjvRoute: typeof PageDocsConnectorAjvRoute;
+  PageDocsConnectorReactRoute: typeof PageDocsConnectorReactRoute;
+  PageDocsConnectorReactHookFormRoute: typeof PageDocsConnectorReactHookFormRoute;
+  PageDocsConnectorTanstackTableRoute: typeof PageDocsConnectorTanstackTableRoute;
+  PageDocsConnectorZodRoute: typeof PageDocsConnectorZodRoute;
+  PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
@@ -1883,11 +2068,20 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDemoTopologyRoute: PageDemoTopologyRoute,
   PageDemoTreeRoute: PageDemoTreeRoute,
+  PageDocsAdapterClipboardRoute: PageDocsAdapterClipboardRoute,
+  PageDocsAdapterContenteditableRoute: PageDocsAdapterContenteditableRoute,
+  PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsApiRoute: PageDocsApiRoute,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
+  PageDocsConnectorAjvRoute: PageDocsConnectorAjvRoute,
+  PageDocsConnectorReactRoute: PageDocsConnectorReactRoute,
+  PageDocsConnectorReactHookFormRoute: PageDocsConnectorReactHookFormRoute,
+  PageDocsConnectorTanstackTableRoute: PageDocsConnectorTanstackTableRoute,
+  PageDocsConnectorZodRoute: PageDocsConnectorZodRoute,
+  PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
