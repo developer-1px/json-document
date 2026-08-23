@@ -28,6 +28,10 @@ test("Comment creates point and region marks with one editable comment", async (
   await expect(instruction).toHaveValue("목줄을 짙은 파란색으로 바꿔 주세요.\n채도는 낮게 유지해 주세요.");
   await instruction.press("Enter");
   expect((await structured(page)).annotations[0].body.instruction).toContain("채도는 낮게");
+  await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeHidden();
+  await expect(page.locator("[data-annotation-id]").first()).toHaveAttribute("data-selected", "true");
+  await page.locator("[data-annotation-id]").first().click();
+  await expect(page.getByLabel("Annotation instruction")).toBeFocused();
 
   await page.getByRole("button", { name: "Comment", exact: true }).click();
   await drag(page, box.x + box.width * 0.45, box.y + box.height * 0.25, box.x + box.width * 0.7, box.y + box.height * 0.55);

@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -53,6 +52,7 @@ const annotationDemoStyles = annotationDemoRecipe();
 export function AnnotationDemoRoute() {
   const history = useAnnotationHistory(initialAnnotationSnapshot);
   const [tool, setTool] = useState<Tool>("comment");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [gesture, setGesture] = useState<Gesture | null>(null);
   const [savedState, setSavedState] = useState<string | null>(null);
   const [output, setOutput] = useState<Output>("structured");
@@ -106,6 +106,11 @@ export function AnnotationDemoRoute() {
     setAnnouncement("수정 요청을 추가했습니다.");
   }
 
+  function submitComment(annotation: RasterAnnotation, instruction: string) {
+    sendComment(annotation, instruction);
+    setEditingId(null);
+  }
+
   function cancelComment(annotation: RasterAnnotation) {
     if (annotation.body.instruction === "") {
       history.commit({
@@ -116,13 +121,16 @@ export function AnnotationDemoRoute() {
         selectedId: null,
       });
       setAnnouncement("작성 중인 요청을 취소했습니다.");
+      setEditingId(null);
       return;
     }
     history.replace({ ...snapshot, selectedId: null });
+    setEditingId(null);
   }
 
   function chooseTool(nextTool: Tool) {
     setTool(nextTool);
+    setEditingId(null);
     if (snapshot.selectedId !== null) {
       history.replace({ ...snapshot, selectedId: null });
     }
@@ -137,6 +145,7 @@ export function AnnotationDemoRoute() {
       },
       selectedId: null,
     });
+    setEditingId(null);
     setAnnouncement("선택한 annotation을 삭제했습니다.");
   }
 
@@ -154,6 +163,7 @@ export function AnnotationDemoRoute() {
 
   function handleAnnotationPointerDown(event: PointerEvent<SVGGElement>, annotation: RasterAnnotation) {
     event.stopPropagation();
+    setEditingId(annotation.id);
     if (tool !== "select") {
       setSelected(annotation.id);
       return;
@@ -201,6 +211,7 @@ export function AnnotationDemoRoute() {
       if (annotation !== null) {
         history.commit(appendAnnotation(snapshot, annotation));
         setTool("select");
+        setEditingId(annotation.id);
         setAnnouncement("자유선 코멘트를 만들었습니다.");
       }
     } else if (gesture.type === "create") {
@@ -208,6 +219,7 @@ export function AnnotationDemoRoute() {
       if (annotation !== null) {
         history.commit(appendAnnotation(snapshot, annotation));
         setTool("select");
+        setEditingId(annotation.id);
         setAnnouncement(annotationAnnouncement(annotation));
       }
     } else {
@@ -319,8 +331,8 @@ export function AnnotationDemoRoute() {
               {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
               {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
             </svg>
-            {selected ? (
-              <CommentComposer annotation={selected} index={snapshot.document.annotations.indexOf(selected) + 1} source={source} onCancel={() => cancelComment(selected)} onSend={(instruction) => sendComment(selected, instruction)} />
+            {selected && editingId === selected.id ? (
+              <CommentComposer annotation={selected} index={snapshot.document.annotations.indexOf(selected) + 1} source={source} onCancel={() => cancelComment(selected)} onSave={(instruction) => sendComment(selected, instruction)} onSubmit={(instruction) => submitComment(selected, instruction)} />
             ) : null}
           </div>
           <nav aria-label="Annotation tools" className={annotationDemoStyles.toolDock()}>
@@ -347,16 +359,20 @@ function CommentComposer(props: {
   readonly index: number;
   readonly source: AnnotationSource;
   readonly onCancel: () => void;
-  readonly onSend: (instruction: string) => void;
+  readonly onSave: (instruction: string) => void;
+  readonly onSubmit: (instruction: string) => void;
 }) {
   const [draft, setDraft] = useState(props.annotation.body.instruction);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => setDraft(props.annotation.body.instruction), [props.annotation.id, props.annotation.body.instruction]);
-  useLayoutEffect(() => {
-    const input = inputRef.current;
-    if (input === null) return;
-    input.focus();
-    input.setSelectionRange(input.value.length, input.value.length);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (input === null) return;
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [props.annotation.id]);
   const dock = annotationDock(props.annotation, props.source);
   const opensLeft = dock.horizontal === "left";
@@ -381,13 +397,13 @@ function CommentComposer(props: {
         aria-label="Annotation instruction"
         className={classes(ui.field.control, annotationDemoStyles.commentInput())}
         onBlur={() => {
-          if (draft.trim() !== "") props.onSend(draft);
+          if (draft.trim() !== "") props.onSave(draft);
         }}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
             event.preventDefault();
-            if (draft.trim() !== "") props.onSend(draft);
+            if (draft.trim() !== "") props.onSubmit(draft);
           }
           if (event.key === "Escape") props.onCancel();
         }}
@@ -400,7 +416,7 @@ function CommentComposer(props: {
         className={annotationDemoStyles.sendButton()}
         disabled={draft.trim() === ""}
         kind="primary"
-        onClick={() => props.onSend(draft)}
+        onClick={() => props.onSubmit(draft)}
         onMouseDown={(event) => event.preventDefault()}
         title="Send comment"
       >
