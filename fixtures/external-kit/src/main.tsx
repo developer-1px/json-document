@@ -58,13 +58,15 @@ const operations: DatabaseOperations<Task> = {
 function AdminApp() {
   const [view, setView] = useState(allTasks);
   const [saved, setSaved] = useState(0);
-  return <main><header className="admin-header"><div><p className="eyebrow">Operations / Tasks</p><h1>Delivery database</h1><p>API-backed Database Hands with host-owned schema, commands, and branding.</p></div><div className="metric"><strong>240</strong><span>server records</span></div></header>
-    <div className="failure-controls" role="toolbar" aria-label="Failure scenarios"><span>Enterprise scenarios</span><button type="button" onClick={() => { failureMode = "network"; }}>Next save: network failure</button><button type="button" onClick={() => { failureMode = "conflict"; }}>Next save: conflict</button><output data-testid="saved-views">{saved} views saved</output></div>
-    <Database.Provider resource={resource} operations={operations} defaultView={allTasks} view={view} views={[allTasks, triageView]} onViewChange={setView} onSaveView={async () => { setSaved((value) => value + 1); }} pageSize={50}>
-      <Database.RecordActions /><Database.ViewToolbar /><Database.StatusBar />
-      <Database.Table<Task> className="company-database" renderCell={{ status: (props) => <select className={`status status--${props.value}`} data-testid="custom-status" aria-label={`Status ${props.record.id}`} value={String(props.value)} onChange={(event) => props.commit(event.currentTarget.value)}><option value="backlog">Backlog</option><option value="progress">In progress</option><option value="done">Done</option></select> }} />
-      <Database.Pagination /><Database.RecordPanel />
-    </Database.Provider><footer><span>Host persistence, authorization, and business rules remain outside the Hands.</span></footer></main>;
+  return <main><h1>Delivery database</h1><p>Host schema and CRUD operations.</p>
+    <Database.Admin<Task>
+      className="company-database"
+      resource={resource} operations={operations} defaultView={allTasks} view={view} views={[allTasks, triageView]}
+      onViewChange={setView} onSaveView={async () => { setSaved((value) => value + 1); }} pageSize={50}
+      toolbar={<div className="failure-controls" aria-label="Failure scenarios"><button type="button" onClick={() => { failureMode = "network"; }}>Next save: network failure</button><button type="button" onClick={() => { failureMode = "conflict"; }}>Next save: conflict</button><output data-testid="saved-views">{saved} views saved</output></div>}
+      renderCell={{ status: (props) => <select data-testid="custom-status" aria-label={`Status ${props.record.id}`} value={String(props.value)} onChange={(event) => props.commit(event.currentTarget.value)}><option value="backlog">Backlog</option><option value="progress">In progress</option><option value="done">Done</option></select> }}
+    />
+  </main>;
 }
 
 function matchesGroup(row: Task, group: DatabaseFilterGroup): boolean {
