@@ -30,8 +30,7 @@ const operations: DatabaseOperations<Task> = {
   },
   async create(input) {
     await latency();
-    if (!input.title) throw new DatabaseOperationError("validation", "Record needs a title", { title: "Enter a title" });
-    const row: Task = { id: `task-${sequence++}`, title: input.title, owner: input.owner ?? "Unassigned", points: input.points ?? 0, status: input.status ?? "backlog", shipped: input.shipped ?? false };
+    const row: Task = { id: `task-${sequence++}`, title: input.title ?? "", owner: input.owner ?? "Unassigned", points: input.points ?? 0, status: input.status ?? "backlog", shipped: input.shipped ?? false };
     serverRows = [row, ...serverRows];
     return { row, version: "1" };
   },
@@ -55,16 +54,15 @@ const operations: DatabaseOperations<Task> = {
   },
 };
 
-function AdminApp() {
+function DatabaseApp() {
   const [view, setView] = useState(allTasks);
   const [saved, setSaved] = useState(0);
   return <main><h1>Delivery database</h1><p>Host schema and CRUD operations.</p>
-    <Database.Admin<Task>
+    <Database.Workspace<Task>
       className="company-database"
       resource={resource} operations={operations} defaultView={allTasks} view={view} views={[allTasks, triageView]}
       onViewChange={setView} onSaveView={async () => { setSaved((value) => value + 1); }} pageSize={50}
-      toolbar={<div className="failure-controls" aria-label="Failure scenarios"><button type="button" onClick={() => { failureMode = "network"; }}>Next save: network failure</button><button type="button" onClick={() => { failureMode = "conflict"; }}>Next save: conflict</button><output data-testid="saved-views">{saved} views saved</output></div>}
-      renderCell={{ status: (props) => <select data-testid="custom-status" aria-label={`Status ${props.record.id}`} value={String(props.value)} onChange={(event) => props.commit(event.currentTarget.value)}><option value="backlog">Backlog</option><option value="progress">In progress</option><option value="done">Done</option></select> }}
+      toolbar={<div className="failure-controls" aria-label="Failure scenarios"><button type="button" aria-label="Next save: network failure" title="Next save: network failure" onClick={() => { failureMode = "network"; }}><span aria-hidden="true">⚡</span></button><button type="button" aria-label="Next save: conflict" title="Next save: conflict" onClick={() => { failureMode = "conflict"; }}><span aria-hidden="true">⇄</span></button><output data-testid="saved-views">{saved} views saved</output></div>}
     />
   </main>;
 }
@@ -89,4 +87,4 @@ function compare(left: unknown, right: unknown): number { return typeof left ===
 async function latency(signal?: AbortSignal) { await new Promise<void>((resolve, reject) => { const timer = window.setTimeout(resolve, 35); signal?.addEventListener("abort", () => { window.clearTimeout(timer); reject(new DOMException("Aborted", "AbortError")); }, { once: true }); }); }
 const root = window.document.querySelector("#root");
 if (root === null) throw new Error("Missing root element");
-createRoot(root).render(<AdminApp />);
+createRoot(root).render(<DatabaseApp />);

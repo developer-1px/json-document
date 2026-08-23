@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod/v4";
@@ -24,7 +24,10 @@ describe("DatabaseHand", () => {
     const onRecordsChange = vi.fn();
     render(<DatabaseHand schema={schema} records={records} onRecordsChange={onRecordsChange} />);
 
-    fireEvent.change(screen.getByRole("combobox", { name: "Status a" }), { target: { value: "done" } });
+    fireEvent.doubleClick(screen.getByRole("gridcell", { name: "backlog" }));
+    const status = screen.getByRole("combobox", { name: "Status a" });
+    fireEvent.change(status, { target: { value: "done" } });
+    fireEvent.blur(status);
     expect(onRecordsChange).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ id: "a", status: "done" })]),
       expect.objectContaining({ origin: "cell.commit" }),
@@ -67,5 +70,25 @@ describe("DatabaseHand", () => {
     const clipboard = { getData: (type: string) => type === "text/plain" ? "Pasted" : "", setData: vi.fn() };
     fireEvent.paste(title.closest(".jd-database__viewport")!, { clipboardData: clipboard });
     expect(onRecordsChange).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ id: "a", title: "Pasted" })]), expect.objectContaining({ origin: "cell.commit" }));
+  });
+
+  it("uses structural focus for navigation and Escape cancels cell editing", async () => {
+    const onRecordsChange = vi.fn();
+    render(<DatabaseHand schema={schema} records={records} onRecordsChange={onRecordsChange} />);
+    const title = screen.getByRole("gridcell", { name: "Alpha" });
+    fireEvent.click(title);
+    title.focus();
+    fireEvent.keyDown(title.closest(".jd-database__viewport")!, { key: "ArrowRight" });
+    await waitFor(() => expect(document.activeElement?.getAttribute("data-property-id")).toBe("points"));
+
+    fireEvent.click(title);
+    title.focus();
+    fireEvent.keyDown(title.closest(".jd-database__viewport")!, { key: "Enter" });
+    const input = screen.getByRole("textbox", { name: "Title a" });
+    fireEvent.change(input, { target: { value: "Draft" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("gridcell", { name: "Alpha" })));
+    expect(onRecordsChange).not.toHaveBeenCalled();
   });
 });

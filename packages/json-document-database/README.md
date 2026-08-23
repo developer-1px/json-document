@@ -16,11 +16,15 @@ const resource = createDatabaseResource({
 });
 const view = createDatabaseView("all", "All tasks", ["title", "owner", "status"], "shared");
 
-<Database.Admin resource={resource} operations={taskOperations} defaultView={view} />
+<Database.Workspace resource={resource} operations={taskOperations} defaultView={view} />
 ```
 
-`Database.Admin` is the shortest preset. Products that own their composition
+`Database.Workspace` is the shortest preset. Products that own their composition
 can use the same behavior as individual Hands:
+
+The workspace follows a sheet interaction model: arrow keys move structural
+cell focus, Enter/F2 or double-click starts editing, Escape discards the draft,
+and New record inserts `createDraft()` as a row. A record panel is opt-in.
 
 ```tsx
 <Database.Provider resource={resource} operations={taskOperations} defaultView={view}>
@@ -41,7 +45,7 @@ partial results, optimistic mutation, rollback, validation errors, conflicts,
 retry, request cancellation, and stale response rejection.
 
 The original `DatabaseHand` remains as a compatibility preset for controlled
-in-memory records. It is not the primary contract for API-backed admin products.
+in-memory records. It is not the primary contract for API-backed products.
 
 This package does not implement a backend, authentication, authorization
 policy, database migration, formula runtime, or product business rules.

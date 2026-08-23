@@ -59,7 +59,7 @@ export function DatabaseStatusBar() {
   return (
     <div className="jd-database__status" role={database.status.phase === "error" ? "alert" : "status"} data-phase={database.status.phase}>
       <span>{database.status.message}</span>
-      {database.status.phase === "error" ? <button type="button" onClick={() => void database.refresh()}>Retry</button> : null}
+      {database.status.phase === "error" ? <button type="button" aria-label="Retry" title="Retry" onClick={() => void database.refresh()}><span aria-hidden="true">↻</span></button> : null}
     </div>
   );
 }
@@ -121,7 +121,7 @@ export function DatabaseViewToolbar() {
         onChange={(columns) => projection({ columns })}
       />
       {database.capabilities.saveView && view.ownership !== "locked" ? (
-        <button type="button" onClick={() => void database.saveView(view)}>Save view</button>
+        <button type="button" aria-label="Save view" title="Save view" onClick={() => void database.saveView(view)}><span aria-hidden="true">✓</span></button>
       ) : <span aria-label="Locked view">Locked</span>}
     </div>
   );
@@ -131,7 +131,7 @@ export function DatabaseRecordActions() {
   const database = useDatabase();
   return (
     <div className="jd-database__toolbar-group" aria-label="Record actions">
-      <button type="button" disabled={!database.capabilities.create} onClick={database.startCreate}>New record</button>
+      <button type="button" aria-label="New record" title="New record" disabled={!database.capabilities.create} onClick={() => void database.create(database.resource.createDraft())}><span aria-hidden="true">＋</span></button>
       <button
         type="button"
         disabled={!database.capabilities.delete || database.selectedRowIds.length === 0 || (database.selectedRowIds.length > 1 && !database.capabilities.bulkDelete)}
@@ -140,8 +140,9 @@ export function DatabaseRecordActions() {
             void database.remove(database.selectedRowIds);
           }
         }}
-      >Delete selected{database.selectedRowIds.length > 0 ? ` (${database.selectedRowIds.length})` : ""}</button>
-      <button type="button" disabled={database.status.phase === "loading"} onClick={() => void database.refresh()}>Refresh</button>
+        aria-label="Delete selected" title="Delete selected"
+      ><span aria-hidden="true">−</span>{database.selectedRowIds.length > 0 ? <small>{database.selectedRowIds.length}</small> : null}</button>
+      <button type="button" aria-label="Refresh" title="Refresh" disabled={database.status.phase === "loading"} onClick={() => void database.refresh()}><span aria-hidden="true">↻</span></button>
       <span>{database.total} records</span>
     </div>
   );
@@ -211,7 +212,7 @@ export function DatabaseRecordPanel() {
   );
 }
 
-export function DatabaseAdmin<Row extends DatabaseRow, Create = Partial<Row>, Update = Partial<Row>>(
+export function DatabaseWorkspace<Row extends DatabaseRow, Create = Partial<Row>, Update = Partial<Row>>(
   props: Omit<DatabaseProviderProps<Row, Create, Update>, "children"> & DatabaseTableProps<Row>,
 ) {
   const { renderCell, toolbar, className, density, ...provider } = props;
@@ -225,7 +226,6 @@ export function DatabaseAdmin<Row extends DatabaseRow, Create = Partial<Row>, Up
           {...(density === undefined ? {} : { density })}
         />
         <DatabasePagination />
-        <DatabaseRecordPanel />
       </div>
     </DatabaseProvider>
   );
@@ -239,7 +239,7 @@ export function DatabasePagination() {
 
 function FilterBuilder(props: { readonly value: DatabaseFilterGroup; readonly propertyIds: ReadonlyArray<string>; readonly disabled: boolean; readonly onChange: (value: DatabaseFilterGroup) => void }) {
   const rules = props.value.items.filter((item): item is DatabaseFilterRule => "propertyId" in item);
-  return <details><summary>Filter{rules.length ? ` (${rules.length})` : ""}</summary><div className="jd-database__column-menu">
+  return <details><summary aria-label="Filter" title="Filter"><span aria-hidden="true">⌕</span>{rules.length ? <small>{rules.length}</small> : null}</summary><div className="jd-database__column-menu">
     <label>Match <select disabled={props.disabled} value={props.value.conjunction} onChange={(event) => props.onChange({ ...props.value, conjunction: event.currentTarget.value as "and" | "or" })}><option value="and">all</option><option value="or">any</option></select></label>
     {rules.map((rule) => <div key={rule.id} className="jd-database__control-row">
       <select aria-label="Filter property" disabled={props.disabled} value={rule.propertyId} onChange={(event) => props.onChange(replaceRule(props.value, { ...rule, propertyId: event.currentTarget.value }))}>{props.propertyIds.map((id) => <option key={id}>{id}</option>)}</select>
@@ -252,7 +252,7 @@ function FilterBuilder(props: { readonly value: DatabaseFilterGroup; readonly pr
 }
 
 function SortBuilder(props: { readonly value: DatabaseViewDocument["projection"]["sorts"]; readonly propertyIds: ReadonlyArray<string>; readonly disabled: boolean; readonly onChange: (value: DatabaseViewDocument["projection"]["sorts"]) => void }) {
-  return <details><summary>Sort{props.value.length ? ` (${props.value.length})` : ""}</summary><div className="jd-database__column-menu">
+  return <details><summary aria-label="Sort" title="Sort"><span aria-hidden="true">↕</span>{props.value.length ? <small>{props.value.length}</small> : null}</summary><div className="jd-database__column-menu">
     {props.value.map((sort, index) => <div key={`${sort.propertyId}:${index}`} className="jd-database__control-row"><select aria-label={`Sort property ${index + 1}`} value={sort.propertyId} onChange={(event) => props.onChange(props.value.map((item, position) => position === index ? { ...item, propertyId: event.currentTarget.value } : item))}>{props.propertyIds.map((id) => <option key={id}>{id}</option>)}</select><select aria-label={`Sort direction ${index + 1}`} value={sort.direction} onChange={(event) => props.onChange(props.value.map((item, position) => position === index ? { ...item, direction: event.currentTarget.value as "ascending" | "descending" } : item))}><option value="ascending">ascending</option><option value="descending">descending</option></select><button type="button" aria-label={`Remove sort ${index + 1}`} onClick={() => props.onChange(props.value.filter((_, position) => position !== index))}>×</button></div>)}
     <button type="button" disabled={props.disabled || props.propertyIds.length === 0} onClick={() => props.onChange([...props.value, { propertyId: props.propertyIds[0]!, direction: "ascending" }])}>Add sort</button>
   </div></details>;
@@ -263,7 +263,7 @@ function GroupBuilder(props: { readonly propertyId: string; readonly propertyIds
 }
 
 function ColumnBuilder(props: { readonly columns: ReadonlyArray<DatabaseColumnProjection>; readonly disabled: boolean; readonly onChange: (value: ReadonlyArray<DatabaseColumnProjection>) => void }) {
-  return <details><summary>Columns</summary><div className="jd-database__column-menu">{props.columns.map((column, index) => <div key={column.propertyId} className="jd-database__control-row"><label><input type="checkbox" checked={column.visible} disabled={props.disabled} onChange={(event) => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? { ...item, visible: event.currentTarget.checked } : item))} />{column.propertyId}</label><input aria-label={`Width ${column.propertyId}`} type="number" min="80" max="600" value={column.width ?? 160} onChange={(event) => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? { ...item, width: Number(event.currentTarget.value) } : item))} /><button type="button" disabled={index === 0} aria-label={`Move ${column.propertyId} left`} onClick={() => props.onChange(move(props.columns, index, index - 1))}>←</button><button type="button" disabled={index === props.columns.length - 1} aria-label={`Move ${column.propertyId} right`} onClick={() => props.onChange(move(props.columns, index, index + 1))}>→</button><button type="button" aria-label={`Pin ${column.propertyId}`} onClick={() => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? togglePin(item) : item))}>{column.pinned ? "Unpin" : "Pin"}</button></div>)}</div></details>;
+  return <details><summary aria-label="Columns" title="Columns"><span aria-hidden="true">▥</span></summary><div className="jd-database__column-menu">{props.columns.map((column, index) => <div key={column.propertyId} className="jd-database__control-row"><label><input type="checkbox" checked={column.visible} disabled={props.disabled} onChange={(event) => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? { ...item, visible: event.currentTarget.checked } : item))} />{column.propertyId}</label><input aria-label={`Width ${column.propertyId}`} type="number" min="80" max="600" value={column.width ?? 160} onChange={(event) => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? { ...item, width: Number(event.currentTarget.value) } : item))} /><button type="button" disabled={index === 0} aria-label={`Move ${column.propertyId} left`} onClick={() => props.onChange(move(props.columns, index, index - 1))}>←</button><button type="button" disabled={index === props.columns.length - 1} aria-label={`Move ${column.propertyId} right`} onClick={() => props.onChange(move(props.columns, index, index + 1))}>→</button><button type="button" aria-label={`Pin ${column.propertyId}`} onClick={() => props.onChange(props.columns.map((item) => item.propertyId === column.propertyId ? togglePin(item) : item))}>{column.pinned ? "Unpin" : "Pin"}</button></div>)}</div></details>;
 }
 
 function togglePin(column: DatabaseColumnProjection): DatabaseColumnProjection {
@@ -292,7 +292,7 @@ function resourceProperties(schema: Parameters<typeof databaseDocumentFromZod>[0
 
 export const Database = {
   Provider: DatabaseProvider,
-  Admin: DatabaseAdmin,
+  Workspace: DatabaseWorkspace,
   Table: DatabaseTable,
   ViewToolbar: DatabaseViewToolbar,
   RecordActions: DatabaseRecordActions,

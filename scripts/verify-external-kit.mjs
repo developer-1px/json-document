@@ -133,25 +133,32 @@ async function verifyBrowser() {
       await page.goto(`http://127.0.0.1:${port}`);
       await page.getByRole("heading", { name: "Delivery database" }).waitFor();
       await page.getByText("240 records loaded").waitFor();
-      if (await page.getByTestId("custom-status").count() !== 50) throw new Error("Host status renderer or server pagination was not used");
+      if (await page.locator("tbody tr").count() !== 50) throw new Error("Server pagination was not used");
       const database = page.locator(".company-database");
       const accent = await database.evaluate((node) => getComputedStyle(node).getPropertyValue("--jd-db-accent").trim());
       if (accent !== "#6750d8") throw new Error("Host theme token was not applied");
 
+      const titleCell = page.locator('td[data-record-id="task-1"][data-property-id="title"]');
+      await titleCell.dblclick();
       const title = page.getByRole("textbox", { name: "Title task-1", exact: true });
       await title.fill("Triage enterprise feedback");
       await title.press("Enter");
       await page.getByText("Changes saved").waitFor();
 
+      const statusCell = page.locator('td[data-record-id="task-1"][data-property-id="status"]');
+      await statusCell.dblclick();
       await page.getByRole("combobox", { name: "Status task-1", exact: true }).selectOption("done");
+      await page.getByRole("heading", { name: "Delivery database" }).click();
       await page.getByText("Changes saved").waitFor();
 
       await page.getByRole("button", { name: "Next save: network failure" }).click();
+      const ownerCell = page.locator('td[data-record-id="task-1"][data-property-id="owner"]');
+      await ownerCell.dblclick();
       const owner = page.getByRole("textbox", { name: "Owner task-1", exact: true });
       await owner.fill("Network rollback");
       await owner.press("Enter");
       await page.getByText("Connection lost. Local change was rolled back.").waitFor();
-      if (await page.getByRole("textbox", { name: "Owner task-1", exact: true }).inputValue() !== "Ada") throw new Error("Optimistic rollback did not restore the row");
+      if ((await ownerCell.textContent())?.trim() !== "Ada") throw new Error("Optimistic rollback did not restore the row");
 
       const search = page.getByRole("searchbox", { name: "Search records" });
       await search.fill("Archive legacy exports");
@@ -164,31 +171,47 @@ async function verifyBrowser() {
       await page.getByRole("button", { name: "Save view" }).click();
       await page.getByText("1 views saved").waitFor();
 
-      await page.getByText("Columns", { exact: true }).click();
+      await page.locator('summary[aria-label="Columns"]').click();
       await page.getByRole("checkbox", { name: "owner" }).uncheck();
       await page.getByRole("columnheader").filter({ hasText: "Owner" }).waitFor({ state: "detached" });
+      await page.locator('summary[aria-label="Columns"]').click();
 
       await page.getByRole("button", { name: "New record" }).click();
-      const recordDialog = page.getByRole("dialog");
-      await recordDialog.getByRole("textbox").nth(0).fill("Enterprise acceptance record");
-      await recordDialog.getByRole("textbox").nth(1).fill("Grace");
-      await recordDialog.getByRole("button", { name: "Save record" }).click();
       await page.getByText("Record created").waitFor();
+      const createdTitleCell = page.locator('td[data-record-id="task-241"][data-property-id="title"]');
+      await createdTitleCell.focus();
+      await createdTitleCell.press("Enter");
+      const createdTitle = page.getByRole("textbox", { name: "Title task-241", exact: true });
+      await createdTitle.fill("Enterprise acceptance record");
+      await createdTitle.press("Enter");
+      await page.getByText("Changes saved").waitFor();
 
       await page.getByRole("button", { name: "Load more" }).click();
       await page.waitForFunction(() => document.querySelectorAll("tbody tr").length === 100);
 
       await page.getByRole("button", { name: "Next save: conflict" }).click();
+      const task2StatusCell = page.locator('td[data-record-id="task-2"][data-property-id="status"]');
+      await task2StatusCell.dblclick();
       await page.getByRole("combobox", { name: "Status task-2", exact: true }).selectOption("done");
+      await page.getByRole("heading", { name: "Delivery database" }).click();
       await page.getByText("This record changed on the server. Refresh before retrying.").waitFor();
-      if (await page.getByRole("combobox", { name: "Status task-2", exact: true }).inputValue() !== "progress") throw new Error("Conflict rollback did not restore the row");
+      if ((await task2StatusCell.textContent())?.trim() !== "progress") throw new Error("Conflict rollback did not restore the row");
 
-      await page.getByRole("gridcell", { name: "Polish billing settings", exact: true }).dblclick();
-      const detail = page.getByRole("dialog");
-      await detail.getByRole("textbox").nth(0).fill("");
-      await detail.getByRole("button", { name: "Save record" }).click();
-      await detail.getByText("Enter a title").waitFor();
-      await detail.getByRole("button", { name: "Close record" }).click();
+      const task2TitleCell = page.locator('td[data-record-id="task-2"][data-property-id="title"]');
+      await task2TitleCell.evaluate((cell) => cell.scrollIntoView({ block: "center" }));
+      await task2TitleCell.click();
+      await task2TitleCell.press("Enter");
+      const task2Title = page.getByRole("textbox", { name: "Title task-2", exact: true });
+      await task2Title.fill("");
+      await task2Title.press("Enter");
+      await page.getByText("Title is required").waitFor();
+
+      await task2TitleCell.click();
+      await task2TitleCell.press("Enter");
+      const cancelTitle = page.getByRole("textbox", { name: "Title task-2", exact: true });
+      await cancelTitle.fill("Canceled draft");
+      await cancelTitle.press("Escape");
+      if ((await task2TitleCell.textContent())?.trim() !== "Polish billing settings") throw new Error("Escape did not cancel cell editing");
 
       const firstCell = page.locator('td[data-record-id="task-2"][data-property-id="title"]');
       await firstCell.click();
@@ -198,9 +221,8 @@ async function verifyBrowser() {
 
       await firstCell.click();
       await page.locator('td[data-record-id="task-4"][data-property-id="title"]').click({ modifiers: ["Shift"] });
-      await page.getByRole("button", { name: "Delete selected (2)", exact: true }).waitFor();
       page.once("dialog", (dialog) => dialog.accept());
-      await page.getByRole("button", { name: "Delete selected (2)", exact: true }).click();
+      await page.getByRole("button", { name: "Delete selected", exact: true }).click();
       await page.getByText("1 of 2 records could not be deleted").waitFor();
       if (pageErrors.length > 0) throw new Error(`Browser errors: ${pageErrors.join(" | ")}`);
     } finally {
@@ -258,7 +280,7 @@ try {
   const tarballs = await packKit();
   await installFixture(tarballs);
   await verifyBrowser();
-  console.log(`external Database Hand ok: ${kitWorkspaces.length} tarballs, one package import, typecheck, build, admin browser`);
+  console.log(`external Database Hand ok: ${kitWorkspaces.length} tarballs, one package import, typecheck, build, database browser`);
 } finally {
   if (keep) console.log(`external fixture retained at ${temporaryRoot}`);
   else await rm(temporaryRoot, { recursive: true, force: true });

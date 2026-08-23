@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("Zod Connector Live Demo opens a Database admin from a Zod schema without a form", async ({ page }) => {
+test("Zod Connector Live Demo opens a Database workspace from a Zod schema without a form", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error" || message.type() === "warning") errors.push(message.text());
@@ -12,11 +12,14 @@ test("Zod Connector Live Demo opens a Database admin from a Zod schema without a
   await expect(breadcrumb.getByRole("link", { name: "Connector" })).toHaveAttribute("href", "/docs/connectors");
   await expect(breadcrumb.getByText("Zod Live Demo", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Connector" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "The table is the admin" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "The table is the workspace" })).toBeVisible();
   await expect(page.getByRole("form")).toHaveCount(0);
   await expect(page.getByRole("textbox", { name: "Profile title draft" })).toHaveCount(0);
-  await expect(page.getByRole("grid", { name: "Admin records" })).toBeVisible();
+  await expect(page.getByRole("grid", { name: "Database records" })).toBeVisible();
 
+  const titleCell = page.locator('td[data-record-id="t1"][data-property-id="title"]');
+  await titleCell.click();
+  await titleCell.press("Enter");
   const title = page.getByRole("textbox", { name: "Title t1" });
   await title.fill("Ready for review");
   await title.blur();

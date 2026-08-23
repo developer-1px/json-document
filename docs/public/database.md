@@ -1,6 +1,6 @@
 # Database
 
-Database Hands는 이미 존재하는 resource schema와 CRUD API 위에 완성된 admin
+Database Hands는 이미 존재하는 resource schema와 CRUD API 위에 완성된 database
 UX를 놓습니다. 데이터·권한 정책·업무 규칙은 host가 소유하고, Hands는 query,
 projection, editing, async failure와 접근성 품질을 소유합니다.
 
@@ -19,7 +19,7 @@ Database Hands
 └─ Table
 ```
 
-## 가장 짧은 Admin
+## 가장 짧은 Database workspace
 
 ```bash
 npm i @interactive-os/json-document-database zod
@@ -37,7 +37,7 @@ const resource = createDatabaseResource({
 });
 const view = createDatabaseView("all", "All tasks", ["title", "owner", "status"], "shared");
 
-<Database.Admin resource={resource} operations={taskOperations} defaultView={view} />
+<Database.Workspace resource={resource} operations={taskOperations} defaultView={view} />
 ```
 
 `operations`는 특정 REST 형태가 아닙니다. 기존 REST, GraphQL, RPC 또는 local
@@ -46,9 +46,14 @@ cursor pagination, request cancellation, stale response 거부, optimistic updat
 rollback, validation, conflict, retry와 bulk partial failure를 일관된 UI 상태로
 만듭니다.
 
+기본 Workspace는 Sheet 방식으로 동작합니다. 방향키는 셀 선택을 이동하고,
+Enter/F2 또는 더블클릭은 셀 편집을 시작합니다. Escape는 draft를 버리고 같은
+셀 선택으로 돌아옵니다. New record는 별도 form을 열지 않고 `createDraft()`를
+새 행으로 추가합니다. Record panel이 필요한 제품만 조합형 Hand로 붙입니다.
+
 ## 자유로운 Experience 구성
 
-Admin preset과 composable Hands는 같은 provider와 동작을 공유합니다.
+Workspace preset과 composable Hands는 같은 provider와 동작을 공유합니다.
 
 ```tsx
 <Database.Provider resource={resource} operations={taskOperations} defaultView={view}>
@@ -68,8 +73,8 @@ column visibility/order/width/pinning과 `personal | shared | locked` ownership�
 될 수 있고, `defaultView`만 주면 Hand가 내부 상태를 소유합니다.
 
 기존 `DatabaseHand`의 `records/onRecordsChange` API는 in-memory compatibility
-preset으로 유지됩니다. 실제 API-backed admin의 중심 계약은
-`Database.Provider`와 `Database.Admin`입니다.
+preset으로 유지됩니다. 실제 API-backed database의 중심 계약은
+`Database.Provider`와 `Database.Workspace`입니다.
 
 Hands는 backend, 인증, 권한 정책, database migration, formula runtime 또는
 제품 업무 규칙을 대신 구현하지 않습니다.

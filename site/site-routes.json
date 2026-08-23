@@ -531,7 +531,7 @@
     "path": "/connectors/zod",
     "label": "Zod Live Demo",
     "title": "Zod Connector Live Demo - json-document",
-    "description": "A Zod object schema and record array become a Database admin table.",
+    "description": "A Zod object schema and record array become a Database workspace.",
     "navigationGroup": "Connector",
     "sidebar": false,
     "integration": {

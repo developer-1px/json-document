@@ -19,6 +19,7 @@ import {
   type DatabaseSort,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { createWebKeyboardAdapter } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
@@ -112,6 +113,8 @@ const defaultLabels: Required<DatabaseHandLabels> = {
   loading: "Loading records…",
 };
 
+const keyboard = createWebKeyboardAdapter();
+
 export function DatabaseHand<Row extends Record<string, unknown>>(props: DatabaseHandProps<Row>) {
   const features = { ...defaultFeatures, ...props.features };
   const labels = { ...defaultLabels, ...props.labels };
@@ -164,6 +167,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
   const { editor } = props;
   const [announcement, setAnnouncement] = useState("Database ready");
   const [filterPropertyId, setFilterPropertyId] = useState("");
+  const [editingKey, setEditingKey] = useState<string | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const nextRecord = useRef(1);
   const snapshot = useEditingSnapshot(editor);
@@ -182,8 +186,28 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
     selectedKeys: editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)),
     focusKey: focus ? cellKey(focus.recordId, focus.propertyId) : null,
     onSelect: (key, mode) => {
+      setEditingKey(null);
       const point = parseCellKey(key);
       editor.dispatch({ type: "selection.set", ...point, mode });
+    },
+    keyboard: {
+      resolve: keyboard.resolve,
+      focusKey: () => focus ? cellKey(focus.recordId, focus.propertyId) : undefined,
+      neighbor: (key, command) => {
+        const point = parseCellKey(key);
+        if (command.type === "boundary") {
+          const propertyId = command.edge === "start" ? topology.propertyIds[0] : topology.propertyIds[topology.propertyIds.length - 1];
+          return propertyId ? cellKey(point.recordId, propertyId) : null;
+        }
+        const next = neighbor(topology, point, command.direction);
+        return next ? cellKey(next.recordId, next.propertyId) : null;
+      },
+      onUndo: () => history("undo"),
+      onRedo: () => history("redo"),
+      afterMove: (key) => {
+        const point = parseCellKey(key);
+        requestAnimationFrame(() => findCell(tableRef.current, point.recordId, point.propertyId)?.focus());
+      },
     },
   });
 
@@ -249,25 +273,23 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
   }
 
   function keyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
-      event.preventDefault();
-      history(event.shiftKey ? "redo" : "undo");
+    const control = event.target instanceof Element ? event.target.closest<HTMLElement>("input, select") : null;
+    if (control && editingKey !== null) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setEditingKey(null);
+        requestAnimationFrame(() => control.closest<HTMLElement>("[role=gridcell]")?.focus());
+      }
       return;
     }
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "y") {
+    if ((event.key === "Enter" || event.key === "F2") && snapshot.selection.focus !== null && !props.readOnly) {
       event.preventDefault();
-      history("redo");
+      const key = cellKey(snapshot.selection.focus.recordId, snapshot.selection.focus.propertyId);
+      setEditingKey(key);
+      requestAnimationFrame(() => findCell(tableRef.current, snapshot.selection.focus!.recordId, snapshot.selection.focus!.propertyId)?.querySelector<HTMLElement>("input, select")?.focus());
       return;
     }
-    if (event.target instanceof Element && event.target.closest("input, select, button") !== null) return;
-    const direction = arrowDirection(event.key);
-    if (direction === null || snapshot.selection.focus === null) return;
-    const next = neighbor(topology, snapshot.selection.focus, direction);
-    if (next === null) return;
-    event.preventDefault();
-    editor.dispatch({ type: "selection.set", ...next, mode: event.shiftKey ? "extend" : "replace" });
-    requestAnimationFrame(() => tableRef.current
-      ?.querySelector<HTMLElement>(cellSelector(next.recordId, next.propertyId))?.focus());
+    editing.getKeyDownHandler()(event);
   }
 
   if (props.loading) {
@@ -286,12 +308,12 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
       data-readonly={props.readOnly ? "true" : "false"}
     >
       <div className="jd-database__toolbar" role="toolbar" aria-label="Database actions">
-        {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" onClick={addRecord}>{props.labels.newRecord}</button> : null}
-        {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" onClick={deleteSelected}>{props.labels.deleteRecord}</button> : null}
+        {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" aria-label={props.labels.newRecord} title={props.labels.newRecord} onClick={addRecord}><span aria-hidden="true">＋</span></button> : null}
+        {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" aria-label={props.labels.deleteRecord} title={props.labels.deleteRecord} onClick={deleteSelected}><span aria-hidden="true">−</span></button> : null}
         {props.features.history && !props.readOnly ? (
           <>
-            <button type="button" disabled={!snapshot.canUndo} onClick={() => history("undo")}>{props.labels.undo}</button>
-            <button type="button" disabled={!snapshot.canRedo} onClick={() => history("redo")}>{props.labels.redo}</button>
+            <button type="button" aria-label={props.labels.undo} title={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><span aria-hidden="true">↶</span></button>
+            <button type="button" aria-label={props.labels.redo} title={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><span aria-hidden="true">↷</span></button>
           </>
         ) : null}
         {props.features.filter ? (
@@ -306,7 +328,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
         ) : null}
         {props.features.columns ? (
           <details className="jd-database__columns">
-            <summary>{props.labels.columns}{hiddenProperties.length > 0 ? ` (${hiddenProperties.length} hidden)` : ""}</summary>
+            <summary aria-label={props.labels.columns} title={props.labels.columns}><span aria-hidden="true">▥</span>{hiddenProperties.length > 0 ? <small>{hiddenProperties.length}</small> : null}</summary>
             <div className="jd-database__column-menu">
               {document.schema.properties.map((property) => (
                 <label key={property.id}>
@@ -386,7 +408,12 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                       data-record-id={record.id}
                       data-property-id={property.id}
                       onClick={item.getPressHandler()}
-                      onDoubleClick={() => props.onRecordOpen?.(hostRecord)}
+                      data-editing={editingKey === key ? "true" : "false"}
+                      onDoubleClick={() => {
+                        if (props.readOnly) return props.onRecordOpen?.(hostRecord);
+                        setEditingKey(key);
+                        requestAnimationFrame(() => findCell(tableRef.current, record.id, property.id)?.querySelector<HTMLElement>("input, select")?.focus());
+                      }}
                       style={columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned)}
                       data-pinned={props.presentation?.propertyPinned?.[property.id]}
                     >
@@ -401,7 +428,9 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                           property={property}
                           record={record}
                           readOnly={props.readOnly ?? false}
+                          editing={editingKey === key}
                           commit={(value) => commit(record.id, property.id, value)}
+                          finish={() => setEditingKey(null)}
                         />
                       )}
                     </td>
@@ -421,17 +450,19 @@ function DefaultCell(props: {
   readonly property: DatabaseProperty;
   readonly record: DatabaseRecord;
   readonly readOnly: boolean;
+  readonly editing: boolean;
   readonly commit: (value: string | number | boolean) => void;
+  readonly finish: () => void;
 }) {
   const value = props.record.values[props.property.id] as string | number | boolean;
   const label = `${props.property.name} ${props.record.id}`;
-  if (props.readOnly) return <span className="jd-database__readonly">{String(value)}</span>;
+  if (props.readOnly || !props.editing) return <span className="jd-database__readonly">{String(value)}</span>;
   if (props.property.type === "checkbox") {
-    return <input type="checkbox" aria-label={label} checked={Boolean(value)} onChange={(event) => props.commit(event.currentTarget.checked)} />;
+    return <input key={String(value)} type="checkbox" aria-label={label} defaultChecked={Boolean(value)} onBlur={(event) => { props.commit(event.currentTarget.checked); props.finish(); }} />;
   }
   if (props.property.type === "select") {
     return (
-      <select aria-label={label} value={String(value)} onChange={(event) => props.commit(event.currentTarget.value)}>
+      <select key={String(value)} aria-label={label} defaultValue={String(value)} onBlur={(event) => { props.commit(event.currentTarget.value); props.finish(); }}>
         {props.property.options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
       </select>
     );
@@ -442,7 +473,7 @@ function DefaultCell(props: {
       type={props.property.type === "number" ? "number" : "text"}
       aria-label={label}
       defaultValue={String(value)}
-      onBlur={(event) => commitInput(event, props.property, props.commit)}
+      onBlur={(event) => { commitInput(event, props.property, props.commit); props.finish(); }}
       onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
     />
   );
@@ -468,7 +499,7 @@ function FilterControl(props: {
         </select>
       </label>
       {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      <button type="button" disabled={props.filter === null} onClick={() => props.onFilter(null)}>{props.labels.clearFilter}</button>
+      <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} disabled={props.filter === null} onClick={() => props.onFilter(null)}><span aria-hidden="true">×</span></button>
     </div>
   );
 }
@@ -559,8 +590,10 @@ function parseCellKey(key: string) {
   return { recordId: key.slice(0, split), propertyId: key.slice(split + 1) };
 }
 
-function cellSelector(recordId: string, propertyId: string): string {
-  return `[data-record-id="${CSS.escape(recordId)}"][data-property-id="${CSS.escape(propertyId)}"]`;
+function findCell(table: HTMLTableElement | null, recordId: string, propertyId: string): HTMLElement | null {
+  if (table === null) return null;
+  return Array.from(table.querySelectorAll<HTMLElement>("[role=gridcell]"))
+    .find((cell) => cell.dataset.recordId === recordId && cell.dataset.propertyId === propertyId) ?? null;
 }
 
 function clipboardFromData(
@@ -600,12 +633,14 @@ function arrowDirection(key: string): "up" | "down" | "left" | "right" | null {
   return null;
 }
 
-function neighbor(topology: { readonly recordIds: ReadonlyArray<string>; readonly propertyIds: ReadonlyArray<string> }, point: { readonly recordId: string; readonly propertyId: string }, direction: "up" | "down" | "left" | "right") {
+function neighbor(topology: { readonly recordIds: ReadonlyArray<string>; readonly propertyIds: ReadonlyArray<string> }, point: { readonly recordId: string; readonly propertyId: string }, direction: "up" | "down" | "left" | "right" | "previous" | "next") {
   const row = topology.recordIds.indexOf(point.recordId);
   const column = topology.propertyIds.indexOf(point.propertyId);
   if (row < 0 || column < 0) return null;
-  const nextRow = Math.max(0, Math.min(topology.recordIds.length - 1, row + (direction === "up" ? -1 : direction === "down" ? 1 : 0)));
-  const nextColumn = Math.max(0, Math.min(topology.propertyIds.length - 1, column + (direction === "left" ? -1 : direction === "right" ? 1 : 0)));
+  const vertical = direction === "up" ? -1 : direction === "down" ? 1 : 0;
+  const horizontal = direction === "left" || direction === "previous" ? -1 : direction === "right" || direction === "next" ? 1 : 0;
+  const nextRow = Math.max(0, Math.min(topology.recordIds.length - 1, row + vertical));
+  const nextColumn = Math.max(0, Math.min(topology.propertyIds.length - 1, column + horizontal));
   const recordId = topology.recordIds[nextRow];
   const propertyId = topology.propertyIds[nextColumn];
   return recordId && propertyId ? { recordId, propertyId } : null;
