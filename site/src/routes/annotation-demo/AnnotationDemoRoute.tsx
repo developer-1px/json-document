@@ -3,6 +3,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
@@ -11,22 +12,23 @@ import { ActionButton, ToggleButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
-  annotationSource,
   initialAnnotationSnapshot,
   renderAnnotationImage,
   restoreAnnotationSnapshot,
   serializeAnnotationSnapshot,
   type AnnotationSnapshot,
+  type AnnotationSource,
   type PointTarget,
   type RasterAnnotation,
 } from "./annotation-state";
 import { annotationDemoStyles } from "./annotation-demo-styles";
 import { useAnnotationHistory } from "./use-annotation-history";
 
-type Tool = "select" | "comment" | "arrow";
+type Tool = "select" | "comment" | "draw" | "arrow";
 type Output = "structured" | "image";
 type Gesture =
   | { readonly type: "create"; readonly tool: "comment" | "arrow"; readonly start: PointTarget; readonly current: PointTarget }
+  | { readonly type: "draw"; readonly points: ReadonlyArray<PointTarget> }
   | { readonly type: "move"; readonly id: string; readonly start: PointTarget; readonly before: AnnotationSnapshot }
   | { readonly type: "resize"; readonly id: string; readonly start: PointTarget; readonly before: AnnotationSnapshot };
 
@@ -39,11 +41,13 @@ export function AnnotationDemoRoute() {
   const [savedState, setSavedState] = useState<string | null>(null);
   const [output, setOutput] = useState<Output>("structured");
   const [renderedImage, setRenderedImage] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const [announcement, setAnnouncement] = useState("클릭하거나 드래그해서 수정 코멘트를 남기세요.");
   const svgRef = useRef<SVGSVGElement>(null);
   const snapshot = history.snapshot;
   const selected = snapshot.document.annotations.find((annotation) => annotation.id === snapshot.selectedId) ?? null;
-  const sourceUrl = sitePath(annotationSource.src);
+  const source = snapshot.document.source;
+  const sourceUrl = sourcePath(source.src);
 
   useEffect(() => {
     if (output !== "image") return;
@@ -55,10 +59,7 @@ export function AnnotationDemoRoute() {
     return () => { active = false; };
   }, [output, snapshot, sourceUrl]);
 
-  const structuredOutput = useMemo(() => ({
-    ...snapshot.document,
-    selectedId: snapshot.selectedId,
-  }), [snapshot]);
+  const structuredOutput = useMemo(() => presentStructuredSnapshot(snapshot), [snapshot]);
 
   function setSelected(selectedId: string | null) {
     history.commit({ ...snapshot, selectedId });
@@ -88,6 +89,10 @@ export function AnnotationDemoRoute() {
     const point = eventPoint(event);
     event.currentTarget.setPointerCapture(event.pointerId);
     if (tool === "select") return setSelected(null);
+    if (tool === "draw") {
+      setGesture({ type: "draw", points: [point] });
+      return;
+    }
     setGesture({ type: "create", tool, start: point, current: point });
   }
 
@@ -112,6 +117,13 @@ export function AnnotationDemoRoute() {
   function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
     if (gesture === null) return;
     const point = eventPoint(event);
+    if (gesture.type === "draw") {
+      const previous = gesture.points.at(-1);
+      if (previous !== undefined && distance(previous, point) >= 4) {
+        setGesture({ type: "draw", points: [...gesture.points, point] });
+      }
+      return;
+    }
     if (gesture.type === "create") {
       setGesture({ ...gesture, current: point });
       return;
@@ -124,7 +136,13 @@ export function AnnotationDemoRoute() {
   function handlePointerUp(event: PointerEvent<SVGSVGElement>) {
     if (gesture === null) return;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    if (gesture.type === "create") {
+    if (gesture.type === "draw") {
+      const annotation = createDrawAnnotation(gesture.points);
+      if (annotation !== null) {
+        history.commit(appendAnnotation(snapshot, annotation));
+        setAnnouncement("자유선 코멘트를 만들었습니다.");
+      }
+    } else if (gesture.type === "create") {
       const annotation = createAnnotation(gesture.tool, gesture.start, gesture.current);
       if (annotation !== null) {
         history.commit(appendAnnotation(snapshot, annotation));
@@ -137,12 +155,32 @@ export function AnnotationDemoRoute() {
     setGesture(null);
   }
 
+  function handlePointerCancel(event: PointerEvent<SVGSVGElement>) {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (gesture?.type === "move" || gesture?.type === "resize") history.replace(gesture.before);
+    setGesture(null);
+    setAnnouncement("진행 중인 조작을 취소했습니다.");
+  }
+
   function handleKeyDown(event: KeyboardEvent<SVGSVGElement>) {
     const command = event.metaKey || event.ctrlKey;
     if (command && event.key.toLowerCase() === "z") {
       event.preventDefault();
       if (event.shiftKey) history.redo();
       else history.undo();
+      return;
+    }
+    if (!command) {
+      const shortcutTool = toolFromShortcut(event.key);
+      if (shortcutTool !== null) {
+        event.preventDefault();
+        chooseTool(shortcutTool);
+        return;
+      }
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      chooseTool("select");
       return;
     }
     if (event.key === "Delete" || event.key === "Backspace") {
@@ -162,6 +200,23 @@ export function AnnotationDemoRoute() {
     setAnnouncement("저장한 state에서 overlay를 복원했습니다.");
   }
 
+  async function replaceImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file === undefined) return;
+    try {
+      const nextSource = await readRasterSource(file);
+      history.commit({
+        document: { version: 1, source: nextSource, annotations: [] },
+        selectedId: null,
+      });
+      setZoom(1);
+      setAnnouncement(`${file.name} 이미지로 교체했습니다.`);
+    } catch {
+      setAnnouncement("지원하는 raster 이미지를 불러오지 못했습니다.");
+    }
+  }
+
   return (
     <DemoPage documentation={(
       <PageHeader
@@ -177,22 +232,31 @@ export function AnnotationDemoRoute() {
         canvasClassName="grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]"
         toolbar={(
           <>
-            {(["select", "comment", "arrow"] as const).map((value) => (
-              <ToggleButton key={value} pressed={tool === value} onClick={() => chooseTool(value)}>
+            {(["select", "comment", "draw", "arrow"] as const).map((value) => (
+              <ToggleButton aria-keyshortcuts={toolShortcut(value)} key={value} pressed={tool === value} onClick={() => chooseTool(value)}>
                 {toolLabel(value)}
               </ToggleButton>
             ))}
+            <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+            <label className={annotationDemoStyles.uploadControl}>
+              Replace image
+              <input accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(event) => void replaceImage(event)} type="file" />
+            </label>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
             <ActionButton disabled={!history.canUndo} onClick={history.undo}>Undo</ActionButton>
             <ActionButton disabled={!history.canRedo} onClick={history.redo}>Redo</ActionButton>
             <ActionButton disabled={selected === null} onClick={deleteSelected}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton onClick={saveState}>Save state</ActionButton>
-            <ActionButton disabled={savedState === null} onClick={restoreState}>Restore state</ActionButton>
+            <ActionButton aria-label="Zoom out" disabled={zoom <= 1} onClick={() => setZoom((value) => Math.max(1, value - 0.25))}>−</ActionButton>
+            <span className={ui.text.meta} aria-live="polite">{Math.round(zoom * 100)}%</span>
+            <ActionButton aria-label="Zoom in" disabled={zoom >= 2.5} onClick={() => setZoom((value) => Math.min(2.5, value + 0.25))}>+</ActionButton>
           </>
         )}
         inspector={(
           <OutputPanel
+            canRestore={savedState !== null}
+            onRestore={restoreState}
+            onSave={saveState}
             output={output}
             setOutput={setOutput}
             structured={structuredOutput}
@@ -200,44 +264,49 @@ export function AnnotationDemoRoute() {
           />
         )}
       >
-        <div className={annotationDemoStyles.canvasFrame}>
-          <svg
-            ref={svgRef}
-            aria-label="Raster annotation canvas"
-            className={classes(annotationDemoStyles.canvas, tool === "select" ? "cursor-default" : "cursor-crosshair")}
-            data-tool={tool}
-            onKeyDown={handleKeyDown}
-            onPointerDown={handleCanvasPointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            role="application"
-            tabIndex={0}
-            viewBox={`0 0 ${annotationSource.width} ${annotationSource.height}`}
-          >
-            <image href={sourceUrl} width={annotationSource.width} height={annotationSource.height} pointerEvents="none" />
-            {snapshot.document.annotations.map((annotation, index) => (
-              <AnnotationShape
-                key={annotation.id}
-                annotation={annotation}
-                index={index + 1}
-                selected={annotation.id === snapshot.selectedId}
-                onPointerDown={handleAnnotationPointerDown}
-                onResizePointerDown={handleResizePointerDown}
+        <div className={annotationDemoStyles.canvasFrame} style={{ aspectRatio: `${source.width} / ${source.height}` }}>
+          <div className={annotationDemoStyles.stage} style={{ width: `${zoom * 100}%` }}>
+            <svg
+              ref={svgRef}
+              aria-label="Raster annotation canvas"
+              className={classes(annotationDemoStyles.canvas, tool === "select" ? "cursor-default" : "cursor-crosshair")}
+              data-tool={tool}
+              onKeyDown={handleKeyDown}
+              onPointerDown={handleCanvasPointerDown}
+              onPointerCancel={handlePointerCancel}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              role="application"
+              tabIndex={0}
+              viewBox={`0 0 ${source.width} ${source.height}`}
+            >
+              <image href={sourceUrl} width={source.width} height={source.height} pointerEvents="none" />
+              {snapshot.document.annotations.map((annotation, index) => (
+                <AnnotationShape
+                  key={annotation.id}
+                  annotation={annotation}
+                  index={index + 1}
+                  selected={annotation.id === snapshot.selectedId}
+                  onPointerDown={handleAnnotationPointerDown}
+                  onResizePointerDown={handleResizePointerDown}
+                />
+              ))}
+              {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
+              {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
+            </svg>
+            {selected ? (
+              <CommentComposer
+                annotation={selected}
+                index={snapshot.document.annotations.indexOf(selected) + 1}
+                source={source}
+                onChange={(instruction) => history.commit(updateAnnotation(snapshot, selected.id, (annotation) => ({
+                  ...annotation,
+                  body: { instruction },
+                })))}
+                onDone={() => setSelected(null)}
               />
-            ))}
-            {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
-          </svg>
-          {selected ? (
-            <CommentComposer
-              annotation={selected}
-              index={snapshot.document.annotations.indexOf(selected) + 1}
-              onChange={(instruction) => history.commit(updateAnnotation(snapshot, selected.id, (annotation) => ({
-                ...annotation,
-                body: { instruction },
-              })))}
-              onDone={() => setSelected(null)}
-            />
-          ) : null}
+            ) : null}
+          </div>
         </div>
 
         <aside className={classes(annotationDemoStyles.threadList, ui.surface.raised)} aria-label="Annotation threads">
@@ -268,19 +337,20 @@ export function AnnotationDemoRoute() {
 function CommentComposer(props: {
   readonly annotation: RasterAnnotation;
   readonly index: number;
+  readonly source: AnnotationSource;
   readonly onChange: (instruction: string) => void;
   readonly onDone: () => void;
 }) {
   const anchor = annotationAnchor(props.annotation);
-  const opensLeft = anchor.x > annotationSource.width * 0.68;
+  const opensLeft = anchor.x > props.source.width * 0.68;
   return (
     <section
       aria-label={`Request ${props.index} comment`}
       className={annotationDemoStyles.commentCard}
       data-side={opensLeft ? "left" : "right"}
       style={{
-        left: `${(anchor.x / annotationSource.width) * 100}%`,
-        top: `${(anchor.y / annotationSource.height) * 100}%`,
+        left: `${(anchor.x / props.source.width) * 100}%`,
+        top: `${(anchor.y / props.source.height) * 100}%`,
         transform: opensLeft ? "translate(calc(-100% - 0.75rem), -50%)" : "translate(0.75rem, -50%)",
       }}
     >
@@ -294,6 +364,10 @@ function CommentComposer(props: {
         autoFocus
         className={classes("min-h-24 w-full resize-y", ui.field.control)}
         onChange={(event) => props.onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") props.onDone();
+          if (event.key === "Escape") props.onDone();
+        }}
         placeholder="어떻게 수정할까요?"
         value={props.annotation.body.instruction}
       />
@@ -359,6 +433,9 @@ function AnnotationShape(props: {
           ) : null}
         </>
       ) : null}
+      {annotation.mark.type === "draw" ? (
+        <StrokeLine points={annotation.mark.points} selected={props.selected} />
+      ) : null}
       {annotation.mark.type === "arrow" ? (
         <>
           <ArrowLine from={annotation.mark.from} to={annotation.mark.to} selected={props.selected} />
@@ -376,6 +453,28 @@ function AnnotationShape(props: {
         </>
       ) : null}
     </g>
+  );
+}
+
+function StrokeLine(props: {
+  readonly points: ReadonlyArray<PointTarget>;
+  readonly selected?: boolean;
+  readonly draft?: boolean;
+}) {
+  const first = props.points[0];
+  if (first === undefined) return null;
+  const path = props.points.slice(1).reduce((value, point) => `${value} L ${point.x} ${point.y}`, `M ${first.x} ${first.y}`);
+  return (
+    <path
+      d={path}
+      fill="none"
+      opacity={props.draft ? 0.7 : 1}
+      stroke={accent}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={props.selected ? 12 : 9}
+      vectorEffect="non-scaling-stroke"
+    />
   );
 }
 
@@ -407,6 +506,9 @@ function DraftShape({ gesture }: { readonly gesture: Extract<Gesture, { type: "c
 }
 
 function OutputPanel(props: {
+  readonly canRestore: boolean;
+  readonly onRestore: () => void;
+  readonly onSave: () => void;
   readonly output: Output;
   readonly setOutput: (output: Output) => void;
   readonly structured: unknown;
@@ -419,9 +521,15 @@ function OutputPanel(props: {
         <ToggleButton role="tab" pressed={props.output === "image"} aria-selected={props.output === "image"} onClick={() => props.setOutput("image")}>Image</ToggleButton>
       </div>
       {props.output === "structured" ? (
-        <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput, ui.surface.inset)}>
-          {JSON.stringify(props.structured, null, 2)}
-        </pre>
+        <div className="grid gap-2">
+          <div className="flex flex-wrap gap-1">
+            <ActionButton onClick={props.onSave}>Save state</ActionButton>
+            <ActionButton disabled={!props.canRestore} onClick={props.onRestore}>Restore state</ActionButton>
+          </div>
+          <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput, ui.surface.inset)}>
+            {JSON.stringify(props.structured, null, 2)}
+          </pre>
+        </div>
       ) : props.renderedImage === null ? (
         <p className={classes("m-0", ui.text.meta)}>Rasterizing…</p>
       ) : (
@@ -447,6 +555,25 @@ function createAnnotation(
   }
   if (distance(start, end) < 8) return null;
   return { id, target: end, body: { instruction: "" }, mark: { type: "arrow", from: start, to: end } };
+}
+
+function createDrawAnnotation(points: ReadonlyArray<PointTarget>): RasterAnnotation | null {
+  if (points.length < 2 || pathLength(points) < 16) return null;
+  const xs = points.map(({ x }) => x);
+  const ys = points.map(({ y }) => y);
+  const target = {
+    type: "rectangle" as const,
+    x: Math.min(...xs),
+    y: Math.min(...ys),
+    width: Math.max(...xs) - Math.min(...xs),
+    height: Math.max(...ys) - Math.min(...ys),
+  };
+  return {
+    id: `annotation-${crypto.randomUUID()}`,
+    target,
+    body: { instruction: "" },
+    mark: { type: "draw", points },
+  };
 }
 
 function appendAnnotation(snapshot: AnnotationSnapshot, annotation: RasterAnnotation): AnnotationSnapshot {
@@ -488,6 +615,16 @@ function moveAnnotation(annotation: RasterAnnotation, dx: number, dy: number): R
     const to = movePoint(annotation.mark.to, dx, dy);
     return { ...annotation, target: to, mark: { ...annotation.mark, from, to } };
   }
+  if (annotation.mark.type === "draw") {
+    const points = annotation.mark.points.map((point) => movePoint(point, dx, dy));
+    return {
+      ...annotation,
+      target: annotation.target.type === "rectangle"
+        ? { ...annotation.target, x: annotation.target.x + dx, y: annotation.target.y + dy }
+        : annotation.target,
+      mark: { ...annotation.mark, points },
+    };
+  }
   if (annotation.target.type === "point") return { ...annotation, target: movePoint(annotation.target, dx, dy) };
   return { ...annotation, target: { ...annotation.target, x: annotation.target.x + dx, y: annotation.target.y + dy } };
 }
@@ -525,10 +662,11 @@ function annotationAnchor(annotation: RasterAnnotation): PointTarget {
 function eventPoint(event: PointerEvent<SVGElement>): PointTarget {
   const svg = event.currentTarget.ownerSVGElement ?? event.currentTarget as SVGSVGElement;
   const bounds = svg.getBoundingClientRect();
+  const viewBox = svg.viewBox.baseVal;
   return {
     type: "point",
-    x: ((event.clientX - bounds.left) / bounds.width) * annotationSource.width,
-    y: ((event.clientY - bounds.top) / bounds.height) * annotationSource.height,
+    x: ((event.clientX - bounds.left) / bounds.width) * viewBox.width,
+    y: ((event.clientY - bounds.top) / bounds.height) * viewBox.height,
   };
 }
 
@@ -545,17 +683,82 @@ function distance(start: PointTarget, end: PointTarget): number {
   return Math.hypot(end.x - start.x, end.y - start.y);
 }
 
+function pathLength(points: ReadonlyArray<PointTarget>): number {
+  return points.slice(1).reduce((total, point, index) => total + distance(points[index] ?? point, point), 0);
+}
+
 function toolLabel(tool: Tool): string {
-  return ({ select: "Select", comment: "Comment", arrow: "Arrow" })[tool];
+  return ({ select: "Select", comment: "Comment", draw: "Draw", arrow: "Arrow" })[tool];
+}
+
+function toolShortcut(tool: Tool): string {
+  return ({ select: "V", comment: "C", draw: "D", arrow: "A" })[tool];
+}
+
+function toolFromShortcut(key: string): Tool | null {
+  const normalized = key.toLowerCase();
+  if (normalized === "v") return "select";
+  if (normalized === "c") return "comment";
+  if (normalized === "d") return "draw";
+  if (normalized === "a") return "arrow";
+  return null;
 }
 
 function annotationAnnouncement(annotation: RasterAnnotation): string {
   if (annotation.mark.type === "marker") return "위치 코멘트를 만들었습니다.";
   if (annotation.mark.type === "rectangle") return "영역 코멘트를 만들었습니다.";
+  if (annotation.mark.type === "draw") return "자유선 코멘트를 만들었습니다.";
   return "화살표 코멘트를 만들었습니다.";
 }
 
 function sitePath(path: string): string {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
   return `${basePath}${path}` || "/";
+}
+
+function sourcePath(path: string): string {
+  return path.startsWith("data:") ? path : sitePath(path);
+}
+
+function presentStructuredSnapshot(snapshot: AnnotationSnapshot) {
+  const { source } = snapshot.document;
+  return {
+    ...snapshot.document,
+    source: {
+      ...source,
+      src: source.src.startsWith("data:")
+        ? `[embedded ${Math.ceil(source.src.length / 1024)}KB data URL]`
+        : source.src,
+    },
+    selectedId: snapshot.selectedId,
+  };
+}
+
+async function readRasterSource(file: File): Promise<AnnotationSource> {
+  const src = await readFileAsDataUrl(file);
+  const image = await loadRaster(src);
+  return {
+    id: `upload-${file.name}-${file.lastModified}`,
+    src,
+    width: image.naturalWidth,
+    height: image.naturalHeight,
+  };
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Unable to read image"));
+    reader.onerror = () => reject(reader.error ?? new Error("Unable to read image"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadRaster(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Unable to decode image"));
+    image.src = src;
+  });
 }

@@ -78,6 +78,75 @@ test("Annotation Hands restores structured state and rasterizes a flattened imag
   await expect(page.getByRole("link", { name: "Download PNG" })).toHaveAttribute("download", "annotation-request.png");
 });
 
+test("Annotation Hands draws an irregular revision region with a linked comment", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  const box = await requiredBox(canvas);
+
+  await page.getByRole("button", { name: "Draw" }).click();
+  await drawPath(page, [
+    { x: box.x + box.width * 0.28, y: box.y + box.height * 0.56 },
+    { x: box.x + box.width * 0.35, y: box.y + box.height * 0.48 },
+    { x: box.x + box.width * 0.45, y: box.y + box.height * 0.53 },
+    { x: box.x + box.width * 0.39, y: box.y + box.height * 0.64 },
+  ]);
+
+  const state = await structured(page);
+  expect(state.annotations[0].mark.type).toBe("draw");
+  expect(state.annotations[0].mark.points.length).toBeGreaterThan(3);
+  await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
+  await page.getByLabel("Annotation instruction").fill("목도리 윤곽을 더 부드럽게 정리해 주세요.");
+  await expect(page.getByRole("button", { name: /Request 1 · draw/ })).toContainText("목도리 윤곽을 더 부드럽게 정리해 주세요.");
+});
+
+test("Annotation Hands zooms the raster stage for precise markup", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  const before = await requiredBox(canvas);
+
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await expect(page.getByText("125%", { exact: true })).toBeVisible();
+  const after = await requiredBox(canvas);
+  expect(after.width).toBeGreaterThan(before.width);
+
+  await page.getByRole("button", { name: "Zoom out" }).click();
+  await expect(page.getByText("100%", { exact: true })).toBeVisible();
+});
+
+test("Annotation Hands switches professional tools with keyboard shortcuts", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.focus();
+
+  await canvas.press("d");
+  await expect(page.getByRole("button", { name: "Draw" })).toHaveAttribute("aria-pressed", "true");
+  await canvas.press("a");
+  await expect(page.getByRole("button", { name: "Arrow" })).toHaveAttribute("aria-pressed", "true");
+  await canvas.press("c");
+  await expect(page.getByRole("button", { name: "Comment" })).toHaveAttribute("aria-pressed", "true");
+  await canvas.press("Escape");
+  await expect(page.getByRole("button", { name: "Select" })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("Annotation Hands replaces the single raster source and clears stale annotations", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.click({ position: { x: 240, y: 180 } });
+  expect((await structured(page)).annotations).toHaveLength(1);
+
+  await page.getByLabel("Replace image").setInputFiles({
+    name: "pixel.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+  });
+
+  const state = await structured(page);
+  expect(state.source.id).toContain("pixel.png");
+  expect(state.source).toMatchObject({ width: 1, height: 1 });
+  expect(state.source.src).toMatch(/^\[embedded /);
+  expect(state.annotations).toHaveLength(0);
+});
+
 async function structured(page: Page) {
   return JSON.parse(await page.getByTestId("annotation-structured-output").textContent() ?? "null");
 }
@@ -92,5 +161,14 @@ async function drag(page: Page, fromX: number, fromY: number, toX: number, toY: 
   await page.mouse.move(fromX, fromY);
   await page.mouse.down();
   await page.mouse.move(toX, toY, { steps: 4 });
+  await page.mouse.up();
+}
+
+async function drawPath(page: Page, points: ReadonlyArray<{ x: number; y: number }>) {
+  const first = points[0];
+  if (first === undefined) throw new Error("Expected a path start");
+  await page.mouse.move(first.x, first.y);
+  await page.mouse.down();
+  for (const point of points.slice(1)) await page.mouse.move(point.x, point.y, { steps: 3 });
   await page.mouse.up();
 }

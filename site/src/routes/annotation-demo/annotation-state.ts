@@ -1,4 +1,11 @@
-export const annotationSource = {
+export type AnnotationSource = {
+  readonly id: string;
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+};
+
+export const annotationSource: AnnotationSource = {
   id: "cat-enter",
   src: "/cat-enter.png",
   width: 1200,
@@ -24,6 +31,7 @@ export type AnnotationTarget = PointTarget | RectangleTarget;
 export type AnnotationMark =
   | { readonly type: "marker" }
   | { readonly type: "rectangle" }
+  | { readonly type: "draw"; readonly points: ReadonlyArray<PointTarget> }
   | {
     readonly type: "arrow";
     readonly from: PointTarget;
@@ -39,7 +47,7 @@ export type RasterAnnotation = {
 
 export type AnnotationDocument = {
   readonly version: 1;
-  readonly source: typeof annotationSource;
+  readonly source: AnnotationSource;
   readonly annotations: ReadonlyArray<RasterAnnotation>;
 };
 
@@ -63,7 +71,12 @@ export function serializeAnnotationSnapshot(snapshot: AnnotationSnapshot): strin
 
 export function restoreAnnotationSnapshot(serialized: string): AnnotationSnapshot {
   const value = JSON.parse(serialized) as AnnotationSnapshot;
-  if (value.document.version !== 1 || value.document.source.id !== annotationSource.id) {
+  if (
+    value.document.version !== 1
+    || value.document.source.width <= 0
+    || value.document.source.height <= 0
+    || value.document.source.src.length === 0
+  ) {
     throw new Error("Unsupported annotation document");
   }
   return value;
@@ -128,9 +141,26 @@ function drawMark(
     return;
   }
 
+  if (annotation.mark.type === "draw") {
+    drawStroke(context, annotation.mark.points);
+    return;
+  }
+
   if (annotation.mark.type === "arrow") {
     drawArrow(context, annotation.mark.from, annotation.mark.to);
   }
+}
+
+function drawStroke(
+  context: CanvasRenderingContext2D,
+  points: ReadonlyArray<PointTarget>,
+) {
+  const first = points[0];
+  if (first === undefined) return;
+  context.beginPath();
+  context.moveTo(first.x, first.y);
+  points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
+  context.stroke();
 }
 
 function drawArrow(

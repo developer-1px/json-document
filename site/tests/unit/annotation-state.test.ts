@@ -27,12 +27,24 @@ describe("annotation state", () => {
     expect(restoreAnnotationSnapshot(serialized)).toEqual(snapshot);
   });
 
-  test("rejects a state for a different source contract", () => {
+  test("accepts a valid replacement raster source", () => {
+    const replacement = {
+      ...initialAnnotationSnapshot,
+      document: {
+        ...initialAnnotationSnapshot.document,
+        source: { id: "replacement", src: "data:image/png;base64,AA==", width: 640, height: 480 },
+      },
+    };
+
+    expect(restoreAnnotationSnapshot(JSON.stringify(replacement))).toEqual(replacement);
+  });
+
+  test("rejects an invalid raster source contract", () => {
     const unsupported = JSON.stringify({
       ...initialAnnotationSnapshot,
       document: {
         ...initialAnnotationSnapshot.document,
-        source: { ...initialAnnotationSnapshot.document.source, id: "another-image" },
+        source: { ...initialAnnotationSnapshot.document.source, width: 0 },
       },
     });
 
