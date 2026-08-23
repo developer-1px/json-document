@@ -4,7 +4,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -454,15 +453,30 @@ function DefaultCell(props: {
   readonly commit: (value: string | number | boolean) => void;
   readonly finish: () => void;
 }) {
+  const canceling = useRef(false);
   const value = props.record.values[props.property.id] as string | number | boolean;
   const label = `${props.property.name} ${props.record.id}`;
+  function cancel(event: KeyboardEvent<HTMLInputElement | HTMLSelectElement>) {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    event.stopPropagation();
+    canceling.current = true;
+    const cell = event.currentTarget.closest<HTMLElement>("[role=gridcell]");
+    props.finish();
+    requestAnimationFrame(() => cell?.focus());
+  }
+  function finish(next: string | number | boolean) {
+    if (canceling.current) return;
+    props.commit(next);
+    props.finish();
+  }
   if (props.readOnly || !props.editing) return <span className="jd-database__readonly">{String(value)}</span>;
   if (props.property.type === "checkbox") {
-    return <input key={String(value)} type="checkbox" aria-label={label} defaultChecked={Boolean(value)} onBlur={(event) => { props.commit(event.currentTarget.checked); props.finish(); }} />;
+    return <input key={String(value)} type="checkbox" aria-label={label} defaultChecked={Boolean(value)} onKeyDown={cancel} onBlur={(event) => finish(event.currentTarget.checked)} />;
   }
   if (props.property.type === "select") {
     return (
-      <select key={String(value)} aria-label={label} defaultValue={String(value)} onBlur={(event) => { props.commit(event.currentTarget.value); props.finish(); }}>
+      <select key={String(value)} aria-label={label} defaultValue={String(value)} onKeyDown={cancel} onBlur={(event) => finish(event.currentTarget.value)}>
         {props.property.options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
       </select>
     );
@@ -473,8 +487,8 @@ function DefaultCell(props: {
       type={props.property.type === "number" ? "number" : "text"}
       aria-label={label}
       defaultValue={String(value)}
-      onBlur={(event) => { commitInput(event, props.property, props.commit); props.finish(); }}
-      onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
+      onBlur={(event) => finish(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value)}
+      onKeyDown={(event) => { cancel(event); if (event.key === "Enter") event.currentTarget.blur(); }}
     />
   );
 }
@@ -575,10 +589,6 @@ function hostRecordFor<Row>(record: DatabaseRecord): Row {
 
 function recordsFingerprint(records: ReadonlyArray<unknown>): string {
   return JSON.stringify(records);
-}
-
-function commitInput(event: FocusEvent<HTMLInputElement>, property: DatabaseProperty, commit: (value: string | number) => void) {
-  commit(property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value);
 }
 
 function cellKey(recordId: string, propertyId: string): string {
