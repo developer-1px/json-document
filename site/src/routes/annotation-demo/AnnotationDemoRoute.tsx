@@ -385,27 +385,27 @@ function CommentComposer(props: {
         }}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
-          if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && draft.trim() !== "") props.onSend(draft);
+          if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+            if (draft.trim() !== "") props.onSend(draft);
+          }
           if (event.key === "Escape") props.onCancel();
         }}
         placeholder="수정 요청을 입력하세요…"
         rows={1}
         value={draft}
       />
-      <div className={annotationDemoStyles.commentActions()}>
-        <span className={annotationDemoStyles.sendHint()}>⌘ Enter</span>
-        <ActionButton
-          aria-label="Send comment"
-          className={annotationDemoStyles.sendButton()}
-          disabled={draft.trim() === ""}
-          kind="primary"
-          onClick={() => props.onSend(draft)}
-          onMouseDown={(event) => event.preventDefault()}
-          title="Send comment (⌘ Enter)"
-        >
-          <Send aria-hidden="true" size={15} />
-        </ActionButton>
-      </div>
+      <ActionButton
+        aria-label="Send comment"
+        className={annotationDemoStyles.sendButton()}
+        disabled={draft.trim() === ""}
+        kind="primary"
+        onClick={() => props.onSend(draft)}
+        onMouseDown={(event) => event.preventDefault()}
+        title="Send comment"
+      >
+        <Send aria-hidden="true" size={15} />
+      </ActionButton>
     </section>
   );
 }

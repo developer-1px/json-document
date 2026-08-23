@@ -23,8 +23,11 @@ test("Comment creates point and region marks with one editable comment", async (
   await expect(instruction).toHaveValue("목줄을 파란색으로 바꿔 주세요.");
   expect((await structured(page)).annotations[0].body.instruction).toContain("파란색");
   await instruction.fill("목줄을 짙은 파란색으로 바꿔 주세요.");
-  await instruction.press("Tab");
-  expect((await structured(page)).annotations[0].body.instruction).toContain("짙은");
+  await instruction.press("Shift+Enter");
+  await instruction.type("채도는 낮게 유지해 주세요.");
+  await expect(instruction).toHaveValue("목줄을 짙은 파란색으로 바꿔 주세요.\n채도는 낮게 유지해 주세요.");
+  await instruction.press("Enter");
+  expect((await structured(page)).annotations[0].body.instruction).toContain("채도는 낮게");
 
   await page.getByRole("button", { name: "Comment", exact: true }).click();
   await drag(page, box.x + box.width * 0.45, box.y + box.height * 0.25, box.x + box.width * 0.7, box.y + box.height * 0.55);
