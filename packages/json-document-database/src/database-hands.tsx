@@ -27,7 +27,7 @@ export function DatabaseTable<Row extends DatabaseRow>(props: DatabaseTableProps
     propertyWidths: Object.fromEntries(columns.flatMap((column) => column.width === undefined ? [] : [[column.propertyId, column.width]])),
     propertyPinned: Object.fromEntries(columns.flatMap((column) => column.pinned === undefined ? [] : [[column.propertyId, column.pinned]])),
   };
-  return <DatabaseHand
+  return <div className="jd-database__sheet"><DatabaseHand
     schema={database.resource.schema}
     records={database.rows}
     {...(props.className === undefined ? {} : { className: props.className })}
@@ -51,7 +51,9 @@ export function DatabaseTable<Row extends DatabaseRow>(props: DatabaseTableProps
         }
       }
     }}
-  />;
+  />
+    {database.capabilities.create ? <button className="jd-database__append-row" type="button" aria-label="New record" title="New record" onClick={() => void database.create(database.resource.createDraft())}><span aria-hidden="true">＋</span></button> : null}
+  </div>;
 }
 
 export function DatabaseStatusBar() {
@@ -131,7 +133,6 @@ export function DatabaseRecordActions() {
   const database = useDatabase();
   return (
     <div className="jd-database__toolbar-group" aria-label="Record actions">
-      <button type="button" aria-label="New record" title="New record" disabled={!database.capabilities.create} onClick={() => void database.create(database.resource.createDraft())}><span aria-hidden="true">＋</span></button>
       <button
         type="button"
         disabled={!database.capabilities.delete || database.selectedRowIds.length === 0 || (database.selectedRowIds.length > 1 && !database.capabilities.bulkDelete)}

@@ -23,8 +23,11 @@ const view = createDatabaseView("all", "All tasks", ["title", "owner", "status"]
 can use the same behavior as individual Hands:
 
 The workspace follows a sheet interaction model: arrow keys move structural
-cell focus, Enter/F2 or double-click starts editing, Escape discards the draft,
-and New record inserts `createDraft()` as a row. A record panel is opt-in.
+cell focus, Enter/F2 or double-click starts editing, Enter commits text and
+number drafts and moves vertically, Tab commits and moves horizontally, and
+typing replaces the selected cell immediately. Escape or blur discards drafts.
+New record is an attached row affordance that appends `createDraft()` to the
+grid. A record panel is opt-in.
 
 ```tsx
 <Database.Provider resource={resource} operations={taskOperations} defaultView={view}>

@@ -144,7 +144,7 @@ export function DatabaseProvider<Row extends DatabaseRow, Create = Partial<Row>,
       const result = await props.operations.create(input as Create, { signal: controller.signal });
       const id = props.resource.getRowId(result.row);
       if (result.version) rowVersions.current.set(id, result.version);
-      setRows((current) => [result.row, ...current]);
+      setRows((current) => [...current, result.row]);
       setTotal((value) => value + 1);
       setStatus({ phase: "ready", message: "Record created" });
       return true;

@@ -167,6 +167,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
   const [announcement, setAnnouncement] = useState("Database ready");
   const [filterPropertyId, setFilterPropertyId] = useState("");
   const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editingInitialValue, setEditingInitialValue] = useState<string>();
   const tableRef = useRef<HTMLTableElement>(null);
   const nextRecord = useRef(1);
   const snapshot = useEditingSnapshot(editor);
@@ -284,6 +285,15 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
     if ((event.key === "Enter" || event.key === "F2") && snapshot.selection.focus !== null && !props.readOnly) {
       event.preventDefault();
       const key = cellKey(snapshot.selection.focus.recordId, snapshot.selection.focus.propertyId);
+      setEditingInitialValue(undefined);
+      setEditingKey(key);
+      requestAnimationFrame(() => findCell(tableRef.current, snapshot.selection.focus!.recordId, snapshot.selection.focus!.propertyId)?.querySelector<HTMLElement>("input, select")?.focus());
+      return;
+    }
+    if (!props.readOnly && snapshot.selection.focus !== null && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      const key = cellKey(snapshot.selection.focus.recordId, snapshot.selection.focus.propertyId);
+      setEditingInitialValue(event.key);
       setEditingKey(key);
       requestAnimationFrame(() => findCell(tableRef.current, snapshot.selection.focus!.recordId, snapshot.selection.focus!.propertyId)?.querySelector<HTMLElement>("input, select")?.focus());
       return;
@@ -410,6 +420,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                       data-editing={editingKey === key ? "true" : "false"}
                       onDoubleClick={() => {
                         if (props.readOnly) return props.onRecordOpen?.(hostRecord);
+                        setEditingInitialValue(undefined);
                         setEditingKey(key);
                         requestAnimationFrame(() => findCell(tableRef.current, record.id, property.id)?.querySelector<HTMLElement>("input, select")?.focus());
                       }}
@@ -428,8 +439,15 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                           record={record}
                           readOnly={props.readOnly ?? false}
                           editing={editingKey === key}
+                          {...(editingKey === key && editingInitialValue !== undefined ? { initialValue: editingInitialValue } : {})}
                           commit={(value) => commit(record.id, property.id, value)}
-                          finish={() => setEditingKey(null)}
+                          finish={() => { setEditingKey(null); setEditingInitialValue(undefined); }}
+                          moveAfterCommit={(direction) => {
+                            const next = neighbor(topology, { recordId: record.id, propertyId: property.id }, direction);
+                            if (!next) return;
+                            editor.dispatch({ type: "selection.set", ...next, mode: "replace" });
+                            requestAnimationFrame(() => findCell(tableRef.current, next.recordId, next.propertyId)?.focus());
+                          }}
                         />
                       )}
                     </td>
@@ -450,33 +468,34 @@ function DefaultCell(props: {
   readonly record: DatabaseRecord;
   readonly readOnly: boolean;
   readonly editing: boolean;
+  readonly initialValue?: string;
   readonly commit: (value: string | number | boolean) => void;
   readonly finish: () => void;
+  readonly moveAfterCommit: (direction: "up" | "down" | "left" | "right") => void;
 }) {
-  const canceling = useRef(false);
   const value = props.record.values[props.property.id] as string | number | boolean;
   const label = `${props.property.name} ${props.record.id}`;
   function cancel(event: KeyboardEvent<HTMLInputElement | HTMLSelectElement>) {
     if (event.key !== "Escape") return;
     event.preventDefault();
     event.stopPropagation();
-    canceling.current = true;
     const cell = event.currentTarget.closest<HTMLElement>("[role=gridcell]");
     props.finish();
     requestAnimationFrame(() => cell?.focus());
   }
-  function finish(next: string | number | boolean) {
-    if (canceling.current) return;
+  function finish(next: string | number | boolean, control: HTMLInputElement | HTMLSelectElement) {
+    const cell = control.closest<HTMLElement>("[role=gridcell]");
     props.commit(next);
     props.finish();
+    requestAnimationFrame(() => cell?.focus());
   }
   if (props.readOnly || !props.editing) return <span className="jd-database__readonly">{String(value)}</span>;
   if (props.property.type === "checkbox") {
-    return <input key={String(value)} type="checkbox" aria-label={label} defaultChecked={Boolean(value)} onKeyDown={cancel} onBlur={(event) => finish(event.currentTarget.checked)} />;
+    return <input key={String(value)} type="checkbox" aria-label={label} defaultChecked={Boolean(value)} onKeyDown={cancel} onChange={(event) => finish(event.currentTarget.checked, event.currentTarget)} onBlur={props.finish} />;
   }
   if (props.property.type === "select") {
     return (
-      <select key={String(value)} aria-label={label} defaultValue={String(value)} onKeyDown={cancel} onBlur={(event) => finish(event.currentTarget.value)}>
+      <select key={String(value)} aria-label={label} defaultValue={String(value)} onKeyDown={cancel} onChange={(event) => finish(event.currentTarget.value, event.currentTarget)} onBlur={props.finish}>
         {props.property.options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
       </select>
     );
@@ -486,9 +505,17 @@ function DefaultCell(props: {
       key={String(value)}
       type={props.property.type === "number" ? "number" : "text"}
       aria-label={label}
-      defaultValue={String(value)}
-      onBlur={(event) => finish(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value)}
-      onKeyDown={(event) => { cancel(event); if (event.key === "Enter") event.currentTarget.blur(); }}
+      defaultValue={props.initialValue ?? String(value)}
+      autoFocus
+      onBlur={props.finish}
+      onKeyDown={(event) => {
+        cancel(event);
+        if (event.key === "Enter" || event.key === "Tab") {
+          event.preventDefault();
+          finish(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value, event.currentTarget);
+          props.moveAfterCommit(event.key === "Tab" ? (event.shiftKey ? "left" : "right") : (event.shiftKey ? "up" : "down"));
+        }
+      }}
     />
   );
 }

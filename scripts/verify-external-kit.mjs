@@ -179,7 +179,7 @@ async function verifyBrowser() {
       await page.getByRole("button", { name: "New record" }).click();
       await page.getByText("Record created").waitFor();
       const createdTitleCell = page.locator('td[data-record-id="task-241"][data-property-id="title"]');
-      await createdTitleCell.focus();
+      await createdTitleCell.click();
       await createdTitleCell.press("Enter");
       const createdTitle = page.getByRole("textbox", { name: "Title task-241", exact: true });
       await createdTitle.fill("Enterprise acceptance record");
@@ -206,12 +206,16 @@ async function verifyBrowser() {
       await task2Title.press("Enter");
       await page.getByText("Title is required").waitFor();
 
-      await task2TitleCell.click();
-      await task2TitleCell.press("Enter");
-      const cancelTitle = page.getByRole("textbox", { name: "Title task-2", exact: true });
+      const task4TitleCell = page.locator('td[data-record-id="task-4"][data-property-id="title"]');
+      await task4TitleCell.click();
+      await task4TitleCell.press("Enter");
+      const cancelTitle = page.getByRole("textbox", { name: "Title task-4", exact: true });
       await cancelTitle.fill("Canceled draft");
       await cancelTitle.press("Escape");
-      if ((await task2TitleCell.textContent())?.trim() !== "Polish billing settings") throw new Error("Escape did not cancel cell editing");
+      await page.waitForTimeout(150);
+      if ((await task4TitleCell.textContent())?.trim() !== "Archive legacy exports") throw new Error("Escape did not cancel cell editing");
+      if (await page.getByRole("textbox", { name: "Title task-4", exact: true }).count()) throw new Error("Escape left the cell editor open");
+      if (await task4TitleCell.evaluate((cell) => document.activeElement !== cell)) throw new Error("Escape did not restore cell focus");
 
       const firstCell = page.locator('td[data-record-id="task-2"][data-property-id="title"]');
       await firstCell.click();

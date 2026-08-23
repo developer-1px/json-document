@@ -47,9 +47,12 @@ rollback, validation, conflict, retry와 bulk partial failure를 일관된 UI �
 만듭니다.
 
 기본 Workspace는 Sheet 방식으로 동작합니다. 방향키는 셀 선택을 이동하고,
-Enter/F2 또는 더블클릭은 셀 편집을 시작합니다. Escape는 draft를 버리고 같은
-셀 선택으로 돌아옵니다. New record는 별도 form을 열지 않고 `createDraft()`를
-새 행으로 추가합니다. Record panel이 필요한 제품만 조합형 Hand로 붙입니다.
+Enter/F2 또는 더블클릭은 셀 편집을 시작합니다. 텍스트와 숫자는 Enter로
+commit한 뒤 세로로, Tab으로 commit한 뒤 가로로 이동합니다. 선택 상태에서
+문자를 입력하면 그 문자부터 즉시 편집합니다. Escape 또는 blur는 draft를
+버리고 같은 셀 선택으로 돌아옵니다. New record는 toolbar 명령이 아니라
+grid 끝에 붙은 행 affordance이며 `createDraft()`를 마지막 행으로 추가합니다.
+Record panel이 필요한 제품만 조합형 Hand로 붙입니다.
 
 ## 자유로운 Experience 구성
 

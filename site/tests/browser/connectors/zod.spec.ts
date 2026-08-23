@@ -22,7 +22,7 @@ test("Zod Connector Live Demo opens a Database workspace from a Zod schema witho
   await titleCell.press("Enter");
   const title = page.getByRole("textbox", { name: "Title t1" });
   await title.fill("Ready for review");
-  await title.blur();
+  await title.press("Enter");
 
   const records = JSON.parse(await page.getByTestId("zod-admin-records").innerText()) as ReadonlyArray<{ readonly id: string; readonly title: string }>;
   expect(records.find((record) => record.id === "t1")?.title).toBe("Ready for review");

@@ -90,5 +90,40 @@ describe("DatabaseHand", () => {
 
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("gridcell", { name: "Alpha" })));
     expect(onRecordsChange).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(document.activeElement!, { key: "Enter" });
+    const blurredDraft = screen.getByRole("textbox", { name: "Title a" });
+    fireEvent.change(blurredDraft, { target: { value: "Blurred draft" } });
+    fireEvent.blur(blurredDraft);
+    expect(screen.getByRole("gridcell", { name: "Alpha" })).toBeTruthy();
+    expect(onRecordsChange).not.toHaveBeenCalled();
+
+    fireEvent.click(title);
+    title.focus();
+    fireEvent.keyDown(title.closest(".jd-database__viewport")!, { key: "Enter" });
+    const committed = screen.getByRole("textbox", { name: "Title a" });
+    fireEvent.change(committed, { target: { value: "Committed" } });
+    fireEvent.keyDown(committed, { key: "Enter" });
+    expect(onRecordsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: "a", title: "Committed" })]),
+      expect.objectContaining({ origin: "cell.commit" }),
+    );
+  });
+
+  it("starts editing from typing and moves across cells after commit", async () => {
+    const onRecordsChange = vi.fn();
+    render(<DatabaseHand schema={schema} records={records} onRecordsChange={onRecordsChange} />);
+    const title = screen.getByRole("gridcell", { name: "Alpha" });
+    fireEvent.click(title);
+    title.focus();
+    fireEvent.keyDown(title.closest(".jd-database__viewport")!, { key: "Z" });
+    const input = screen.getByRole("textbox", { name: "Title a" });
+    expect(input.getAttribute("value")).toBe("Z");
+    fireEvent.keyDown(input, { key: "Tab" });
+    await waitFor(() => expect(document.activeElement?.getAttribute("data-property-id")).toBe("points"));
+    expect(onRecordsChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: "a", title: "Z" })]),
+      expect.objectContaining({ origin: "cell.commit" }),
+    );
   });
 });
