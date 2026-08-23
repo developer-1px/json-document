@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-test("Annotation Hands creates point, rectangle, and arrow instructions", async ({ page }) => {
+test("Annotation Hands creates a point on click, a rectangle on drag, and an arrow", async ({ page }) => {
   await page.goto("/demo/annotation");
   await expect(page.getByRole("heading", { name: "Annotation Hands Demo" })).toBeVisible();
   const canvas = page.getByLabel("Raster annotation canvas");
@@ -8,9 +8,9 @@ test("Annotation Hands creates point, rectangle, and arrow instructions", async 
 
   await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.42 } });
   await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
-  await page.getByRole("button", { name: "Rectangle" }).click();
+  await page.getByRole("button", { name: "Comment" }).click();
   await drag(page, box.x + box.width * 0.5, box.y + box.height * 0.25, box.x + box.width * 0.72, box.y + box.height * 0.5);
-  const rectangleStroke = await page.locator("[data-annotation-id] rect").evaluate((element) => getComputedStyle(element).stroke);
+  const rectangleStroke = await page.locator("[data-annotation-id]").nth(1).locator("rect").evaluate((element) => getComputedStyle(element).stroke);
   expect(rectangleStroke).not.toBe("none");
   expect(rectangleStroke).not.toBe("rgb(0, 0, 0)");
   await page.getByRole("button", { name: "Arrow" }).click();
@@ -19,7 +19,7 @@ test("Annotation Hands creates point, rectangle, and arrow instructions", async 
   const state = await structured(page);
   expect(state.annotations.map((annotation: { mark: { type: string } }) => annotation.mark.type))
     .toEqual(["marker", "rectangle", "arrow"]);
-  await expect(page.getByLabel("Annotation instruction")).toHaveValue("화살표가 가리키는 위치를 수정해 주세요.");
+  await expect(page.getByLabel("Annotation instruction")).toHaveValue("");
   await page.getByLabel("Annotation instruction").fill("고양이 쪽으로 화살표를 옮겨 주세요.");
   expect((await structured(page)).annotations[2].body.instruction).toBe("고양이 쪽으로 화살표를 옮겨 주세요.");
   await expect(page.getByRole("button", { name: /Request 3 · arrow/ })).toContainText("고양이 쪽으로 화살표를 옮겨 주세요.");
@@ -32,7 +32,7 @@ test("Annotation Hands moves, resizes, deletes, and restores history", async ({ 
   const canvas = page.getByLabel("Raster annotation canvas");
   const box = await requiredBox(canvas);
 
-  await page.getByRole("button", { name: "Rectangle" }).click();
+  await page.getByRole("button", { name: "Comment" }).click();
   await drag(page, box.x + box.width * 0.45, box.y + box.height * 0.28, box.x + box.width * 0.68, box.y + box.height * 0.52);
   const created = (await structured(page)).annotations[0].target;
 

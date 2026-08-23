@@ -23,10 +23,10 @@ import {
 import { annotationDemoStyles } from "./annotation-demo-styles";
 import { useAnnotationHistory } from "./use-annotation-history";
 
-type Tool = "select" | "point" | "rectangle" | "arrow";
+type Tool = "select" | "comment" | "arrow";
 type Output = "structured" | "image";
 type Gesture =
-  | { readonly type: "create"; readonly tool: "rectangle" | "arrow"; readonly start: PointTarget; readonly current: PointTarget }
+  | { readonly type: "create"; readonly tool: "comment" | "arrow"; readonly start: PointTarget; readonly current: PointTarget }
   | { readonly type: "move"; readonly id: string; readonly start: PointTarget; readonly before: AnnotationSnapshot }
   | { readonly type: "resize"; readonly id: string; readonly start: PointTarget; readonly before: AnnotationSnapshot };
 
@@ -34,12 +34,12 @@ const accent = "rgb(var(--color-border-accent))";
 
 export function AnnotationDemoRoute() {
   const history = useAnnotationHistory(initialAnnotationSnapshot);
-  const [tool, setTool] = useState<Tool>("point");
+  const [tool, setTool] = useState<Tool>("comment");
   const [gesture, setGesture] = useState<Gesture | null>(null);
   const [savedState, setSavedState] = useState<string | null>(null);
   const [output, setOutput] = useState<Output>("structured");
   const [renderedImage, setRenderedImage] = useState<string | null>(null);
-  const [announcement, setAnnouncement] = useState("Point, rectangle, or arrow로 수정 위치를 표시하세요.");
+  const [announcement, setAnnouncement] = useState("클릭하거나 드래그해서 수정 코멘트를 남기세요.");
   const svgRef = useRef<SVGSVGElement>(null);
   const snapshot = history.snapshot;
   const selected = snapshot.document.annotations.find((annotation) => annotation.id === snapshot.selectedId) ?? null;
@@ -71,13 +71,6 @@ export function AnnotationDemoRoute() {
     }
   }
 
-  function addPoint(point: PointTarget) {
-    const annotation = createAnnotation("marker", point, point);
-    if (annotation === null) return;
-    history.commit(appendAnnotation(snapshot, annotation));
-    setAnnouncement("Point target과 instruction을 만들었습니다.");
-  }
-
   function deleteSelected() {
     if (snapshot.selectedId === null) return;
     history.commit({
@@ -94,7 +87,6 @@ export function AnnotationDemoRoute() {
     if (event.target !== event.currentTarget && (event.target as Element).closest("[data-annotation-id]")) return;
     const point = eventPoint(event);
     event.currentTarget.setPointerCapture(event.pointerId);
-    if (tool === "point") return addPoint(point);
     if (tool === "select") return setSelected(null);
     setGesture({ type: "create", tool, start: point, current: point });
   }
@@ -136,7 +128,7 @@ export function AnnotationDemoRoute() {
       const annotation = createAnnotation(gesture.tool, gesture.start, gesture.current);
       if (annotation !== null) {
         history.commit(appendAnnotation(snapshot, annotation));
-        setAnnouncement(`${gesture.tool} annotation과 instruction을 만들었습니다.`);
+        setAnnouncement(annotationAnnouncement(annotation));
       }
     } else {
       history.finishTransient(gesture.before, snapshot);
@@ -185,7 +177,7 @@ export function AnnotationDemoRoute() {
         canvasClassName="grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]"
         toolbar={(
           <>
-            {(["select", "point", "rectangle", "arrow"] as const).map((value) => (
+            {(["select", "comment", "arrow"] as const).map((value) => (
               <ToggleButton key={value} pressed={tool === value} onClick={() => chooseTool(value)}>
                 {toolLabel(value)}
               </ToggleButton>
@@ -285,12 +277,14 @@ function CommentComposer(props: {
     <section
       aria-label={`Request ${props.index} comment`}
       className={annotationDemoStyles.commentCard}
+      data-side={opensLeft ? "left" : "right"}
       style={{
         left: `${(anchor.x / annotationSource.width) * 100}%`,
         top: `${(anchor.y / annotationSource.height) * 100}%`,
-        transform: opensLeft ? "translate(calc(-100% - 1rem), -50%)" : "translate(1rem, -50%)",
+        transform: opensLeft ? "translate(calc(-100% - 0.75rem), -50%)" : "translate(0.75rem, -50%)",
       }}
     >
+      <span className={opensLeft ? annotationDemoStyles.connectorLeft : annotationDemoStyles.connectorRight} aria-hidden="true" />
       <div className={annotationDemoStyles.commentHeader}>
         <strong className={ui.text.label}>Request {props.index}</strong>
         <span className={ui.text.meta}>{props.annotation.mark.type}</span>
@@ -335,6 +329,14 @@ function AnnotationShape(props: {
     >
       {annotation.mark.type === "marker" && annotation.target.type === "point" ? (
         <>
+          <rect
+            x={annotation.target.x + 10}
+            y={annotation.target.y + 10}
+            width="24"
+            height="24"
+            fill={accent}
+            transform={`rotate(45 ${annotation.target.x + 22} ${annotation.target.y + 22})`}
+          />
           <circle cx={annotation.target.x} cy={annotation.target.y} r="32" fill={accent} />
           <text x={annotation.target.x} y={annotation.target.y + 2} fill="white" fontSize="32" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
             {props.index}
@@ -397,6 +399,9 @@ function ArrowLine(props: { readonly from: PointTarget; readonly to: PointTarget
 
 function DraftShape({ gesture }: { readonly gesture: Extract<Gesture, { type: "create" }> }) {
   if (gesture.tool === "arrow") return <ArrowLine from={gesture.start} to={gesture.current} selected />;
+  if (distance(gesture.start, gesture.current) < 16) {
+    return <circle cx={gesture.start.x} cy={gesture.start.y} r="32" fill={accent} opacity="0.7" />;
+  }
   const rectangle = rectangleFromPoints(gesture.start, gesture.current);
   return <rect {...rectangle} fill="transparent" stroke={accent} strokeDasharray="18 12" strokeWidth="8" />;
 }
@@ -430,19 +435,18 @@ function OutputPanel(props: {
 }
 
 function createAnnotation(
-  kind: "marker" | "rectangle" | "arrow",
+  kind: "comment" | "arrow",
   start: PointTarget,
   end: PointTarget,
 ): RasterAnnotation | null {
   const id = `annotation-${crypto.randomUUID()}`;
-  if (kind === "marker") return { id, target: start, body: { instruction: "이 위치를 수정해 주세요." }, mark: { type: "marker" } };
-  if (kind === "rectangle") {
+  if (kind === "comment") {
+    if (distance(start, end) < 16) return { id, target: start, body: { instruction: "" }, mark: { type: "marker" } };
     const target = rectangleFromPoints(start, end);
-    if (target.width < 8 || target.height < 8) return null;
-    return { id, target: { type: "rectangle", ...target }, body: { instruction: "이 영역을 수정해 주세요." }, mark: { type: "rectangle" } };
+    return { id, target: { type: "rectangle", ...target }, body: { instruction: "" }, mark: { type: "rectangle" } };
   }
   if (distance(start, end) < 8) return null;
-  return { id, target: end, body: { instruction: "화살표가 가리키는 위치를 수정해 주세요." }, mark: { type: "arrow", from: start, to: end } };
+  return { id, target: end, body: { instruction: "" }, mark: { type: "arrow", from: start, to: end } };
 }
 
 function appendAnnotation(snapshot: AnnotationSnapshot, annotation: RasterAnnotation): AnnotationSnapshot {
@@ -542,7 +546,13 @@ function distance(start: PointTarget, end: PointTarget): number {
 }
 
 function toolLabel(tool: Tool): string {
-  return ({ select: "Select", point: "Point", rectangle: "Rectangle", arrow: "Arrow" })[tool];
+  return ({ select: "Select", comment: "Comment", arrow: "Arrow" })[tool];
+}
+
+function annotationAnnouncement(annotation: RasterAnnotation): string {
+  if (annotation.mark.type === "marker") return "위치 코멘트를 만들었습니다.";
+  if (annotation.mark.type === "rectangle") return "영역 코멘트를 만들었습니다.";
+  return "화살표 코멘트를 만들었습니다.";
 }
 
 function sitePath(path: string): string {

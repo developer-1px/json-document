@@ -102,6 +102,11 @@ function drawMark(
   accent: string,
 ) {
   if (annotation.mark.type === "marker" && annotation.target.type === "point") {
+    context.save();
+    context.translate(annotation.target.x + 20, annotation.target.y + 20);
+    context.rotate(Math.PI / 4);
+    context.fillRect(-11, -11, 22, 22);
+    context.restore();
     context.beginPath();
     context.arc(annotation.target.x, annotation.target.y, 28, 0, Math.PI * 2);
     context.fill();
