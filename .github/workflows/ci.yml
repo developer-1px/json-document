@@ -10,8 +10,56 @@ permissions:
   contents: read
 
 jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.plan.outputs.full }}
+      package_required: ${{ steps.plan.outputs.package_required }}
+      package_workspaces: ${{ steps.plan.outputs.package_workspaces }}
+      browser_specs: ${{ steps.plan.outputs.browser_specs }}
+      docs: ${{ steps.plan.outputs.docs }}
+      site: ${{ steps.plan.outputs.site }}
+      standards: ${{ steps.plan.outputs.standards }}
+      reason: ${{ steps.plan.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Select verification scope
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            node scripts/ci-plan.mjs --base "$BASE_SHA" --head "$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/ci-plan.mjs --full >> "$GITHUB_OUTPUT"
+          fi
+      - name: Summarize verification scope
+        env:
+          PLAN_REASON: ${{ steps.plan.outputs.reason }}
+          PACKAGE_WORKSPACES: ${{ steps.plan.outputs.package_workspaces }}
+          BROWSER_SPECS: ${{ steps.plan.outputs.browser_specs }}
+        run: |
+          {
+            echo "## CI 검증 계획"
+            echo "- 판단: $PLAN_REASON"
+            echo "- 패키지: $PACKAGE_WORKSPACES"
+            echo "- 브라우저: $BROWSER_SPECS"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify workspace contract and planner
+        run: npm run workspace:check && npm run ci:plan:test
+
   package:
     name: Package
+    needs: plan
+    if: needs.plan.outputs.package_required == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -20,13 +68,31 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
-      - name: Verify release graph
+      - name: Verify full release graph
+        if: needs.plan.outputs.full == 'true'
         env:
           npm_config_cache: ${{ runner.temp }}/npm-cache
         run: npm run release:check
+      - name: Verify affected libraries
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.package_workspaces != '[]'
+        env:
+          AFFECTED_WORKSPACES: ${{ needs.plan.outputs.package_workspaces }}
+        run: >-
+          node --input-type=module --eval
+          'import { spawnSync } from "node:child_process";
+          const workspaces = JSON.parse(process.env.AFFECTED_WORKSPACES);
+          const result = spawnSync("node", ["scripts/workspace-tasks.mjs", "verify", ...workspaces], { stdio: "inherit" });
+          process.exit(result.status ?? 1);'
+      - name: Verify standards
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.standards == 'true'
+        run: npm run standard:check
+      - name: Verify documentation
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.docs == 'true'
+        run: npm run docs:evaluate
 
   playground-site:
     name: Site
+    needs: plan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -36,6 +102,14 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
       - name: Verify site
+        if: needs.plan.outputs.site == 'true'
         run: npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages
       - name: Verify browser behavior
-        run: npm run browser:test
+        env:
+          BROWSER_SPECS: ${{ needs.plan.outputs.browser_specs }}
+        run: >-
+          node --input-type=module --eval
+          'import { spawnSync } from "node:child_process";
+          const specs = JSON.parse(process.env.BROWSER_SPECS);
+          const result = spawnSync("npm", ["run", "browser:test", "--", ...specs], { stdio: "inherit" });
+          process.exit(result.status ?? 1);'

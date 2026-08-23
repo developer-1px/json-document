@@ -1,56 +1,14 @@
-import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { dirname, join, normalize } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, normalize } from "node:path";
 
-const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-
-function readJson(path) {
-  return JSON.parse(readFileSync(join(repositoryRoot, path), "utf8"));
-}
-
-const rootPackage = readJson("package.json");
-const libraryDirectories = rootPackage.workspaces.filter((directory) =>
-  directory.startsWith("packages/"),
-);
-const libraries = libraryDirectories.map((directory) => ({
-  directory,
-  manifest: readJson(`${directory}/package.json`),
-  tsconfig: readJson(`${directory}/tsconfig.json`),
-}));
-const libraryByName = new Map(libraries.map((library) => [library.manifest.name, library]));
-
-function internalDependencies(library) {
-  const manifest = library.manifest;
-  const names = Object.keys({
-    ...manifest.dependencies,
-    ...manifest.optionalDependencies,
-    ...manifest.peerDependencies,
-    ...manifest.devDependencies,
-  });
-  return names.flatMap((name) => {
-    const dependency = libraryByName.get(name);
-    return dependency === undefined ? [] : [dependency];
-  });
-}
-
-function topologicalLibraries() {
-  const result = [];
-  const visiting = new Set();
-  const visited = new Set();
-  function visit(library) {
-    const name = library.manifest.name;
-    if (visited.has(name)) return;
-    if (visiting.has(name)) throw new Error(`workspace dependency cycle: ${name}`);
-    visiting.add(name);
-    for (const dependency of internalDependencies(library)) visit(dependency);
-    visiting.delete(name);
-    visited.add(name);
-    result.push(library);
-  }
-  for (const library of libraries) visit(library);
-  return result;
-}
+import {
+  internalDependencies,
+  libraries,
+  libraryDirectories,
+  readJson,
+  repositoryRoot,
+  topologicalLibraries,
+} from "./workspace-graph.mjs";
 
 function run(command, args) {
   const result = spawnSync(command, args, {
@@ -78,7 +36,9 @@ function runCaptured(command, args) {
 }
 
 function runOptionalScript(script) {
+  const requested = new Set(process.argv.slice(3));
   for (const library of topologicalLibraries()) {
+    if (requested.size > 0 && !requested.has(library.manifest.name)) continue;
     if (library.manifest.scripts?.[script] === undefined) {
       console.log(`[workspace:${script}] skip ${library.manifest.name}: no script`);
       continue;
@@ -163,6 +123,6 @@ else if (command === "pack") packLibraries();
 else if (command === "build-dependencies") buildDependencies();
 else if (command === "list") console.log(topologicalLibraries().map(({ manifest }) => manifest.name).join("\n"));
 else {
-  console.error("usage: node scripts/workspace-tasks.mjs <build-dependencies|check|list|verify|pack>");
+  console.error("usage: node scripts/workspace-tasks.mjs <build-dependencies|check|list|verify [workspace...]|pack>");
   process.exit(2);
 }

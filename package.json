@@ -40,6 +40,7 @@
     "standard:check": "node standards/json-document-v3/evaluate.mjs && node standards/json-document-rich-text-v1/evaluate.mjs && node standards/json-document-rich-text-v1/evaluate-corpora.mjs && npm test -w @interactive-os/json-document -- conformance",
     "verify": "npm run workspace:check && npm run verify:libraries && npm run docs:evaluate && npm run typecheck -w @interactive-os/json-document-site && npm test -w @interactive-os/json-document-site && npm run site:verify:pages && npm run browser:test",
     "workspace:check": "node scripts/workspace-tasks.mjs check",
+    "ci:plan:test": "node --test scripts/ci-plan.test.mjs",
     "verify:libraries": "node scripts/workspace-tasks.mjs verify",
     "pack:libraries": "node scripts/workspace-tasks.mjs pack",
     "browser:test": "playwright test --config site/playwright.config.ts",
