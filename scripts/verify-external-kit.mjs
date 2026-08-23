@@ -128,40 +128,81 @@ async function verifyBrowser() {
     const browser = await chromium.launch(channel === undefined ? {} : { channel });
     try {
       const page = await browser.newPage();
+      const pageErrors = [];
+      page.on("pageerror", (error) => pageErrors.push(error.message));
       await page.goto(`http://127.0.0.1:${port}`);
       await page.getByRole("heading", { name: "Delivery database" }).waitFor();
-      if (await page.getByTestId("custom-status").count() !== 4) throw new Error("Host status renderer was not used");
+      await page.getByText("240 records loaded").waitFor();
+      if (await page.getByTestId("custom-status").count() !== 50) throw new Error("Host status renderer or server pagination was not used");
       const database = page.locator(".company-database");
       const accent = await database.evaluate((node) => getComputedStyle(node).getPropertyValue("--jd-db-accent").trim());
       if (accent !== "#6750d8") throw new Error("Host theme token was not applied");
 
-      const title = page.getByRole("textbox", { name: "Title task-1" });
+      const title = page.getByRole("textbox", { name: "Title task-1", exact: true });
       await title.fill("Triage enterprise feedback");
       await title.press("Enter");
-      await page.getByText("1 changes proposed").waitFor();
+      await page.getByText("Changes saved").waitFor();
 
-      await page.getByRole("combobox", { name: "Status task-1" }).selectOption("done");
-      await page.getByText("2 changes proposed").waitFor();
-      await page.getByRole("checkbox", { name: "Shipped task-1" }).check();
-      await page.getByText("3 changes proposed").waitFor();
+      await page.getByRole("combobox", { name: "Status task-1", exact: true }).selectOption("done");
+      await page.getByText("Changes saved").waitFor();
 
-      const pointsHeader = page.getByRole("columnheader").filter({ hasText: "Points" });
-      await pointsHeader.getByRole("button").click();
-      await expectAttribute(pointsHeader, "aria-sort", "ascending");
+      await page.getByRole("button", { name: "Next save: network failure" }).click();
+      const owner = page.getByRole("textbox", { name: "Owner task-1", exact: true });
+      await owner.fill("Network rollback");
+      await owner.press("Enter");
+      await page.getByText("Connection lost. Local change was rolled back.").waitFor();
+      if (await page.getByRole("textbox", { name: "Owner task-1", exact: true }).inputValue() !== "Ada") throw new Error("Optimistic rollback did not restore the row");
 
-      await page.getByRole("combobox", { name: "Filter property" }).selectOption("status");
-      await page.getByRole("combobox", { name: "Filter value" }).selectOption("done");
-      if (await page.locator("tbody tr").count() !== 2) throw new Error("Database filter did not project records");
-      await page.getByRole("button", { name: "Clear filter" }).click();
+      const search = page.getByRole("searchbox", { name: "Search records" });
+      await search.fill("Archive legacy exports");
+      await page.getByText("60 records loaded").waitFor();
+      await search.fill("");
+      await page.getByText("240 records loaded").waitFor();
 
-      await page.getByText("Columns", { exact: false }).click();
-      await page.getByLabel("Owner", { exact: true }).uncheck();
-      if (await page.getByRole("columnheader").filter({ hasText: "Owner" }).count() !== 0) throw new Error("Column visibility did not update");
+      await page.getByRole("combobox", { name: "Active view" }).selectOption("triage");
+      await page.getByText("159 records loaded").waitFor();
+      await page.getByRole("button", { name: "Save view" }).click();
+      await page.getByText("1 views saved").waitFor();
 
-      await page.getByRole("button", { name: "Add task" }).click();
-      await page.locator(".metric strong").filter({ hasText: "5" }).waitFor();
-      await page.getByRole("button", { name: "Undo" }).click();
-      await page.locator(".metric strong").filter({ hasText: "4" }).waitFor();
+      await page.getByText("Columns", { exact: true }).click();
+      await page.getByRole("checkbox", { name: "owner" }).uncheck();
+      await page.getByRole("columnheader").filter({ hasText: "Owner" }).waitFor({ state: "detached" });
+
+      await page.getByRole("button", { name: "New record" }).click();
+      const recordDialog = page.getByRole("dialog");
+      await recordDialog.getByRole("textbox").nth(0).fill("Enterprise acceptance record");
+      await recordDialog.getByRole("textbox").nth(1).fill("Grace");
+      await recordDialog.getByRole("button", { name: "Save record" }).click();
+      await page.getByText("Record created").waitFor();
+
+      await page.getByRole("button", { name: "Load more" }).click();
+      await page.waitForFunction(() => document.querySelectorAll("tbody tr").length === 100);
+
+      await page.getByRole("button", { name: "Next save: conflict" }).click();
+      await page.getByRole("combobox", { name: "Status task-2", exact: true }).selectOption("done");
+      await page.getByText("This record changed on the server. Refresh before retrying.").waitFor();
+      if (await page.getByRole("combobox", { name: "Status task-2", exact: true }).inputValue() !== "progress") throw new Error("Conflict rollback did not restore the row");
+
+      await page.getByRole("gridcell", { name: "Polish billing settings", exact: true }).dblclick();
+      const detail = page.getByRole("dialog");
+      await detail.getByRole("textbox").nth(0).fill("");
+      await detail.getByRole("button", { name: "Save record" }).click();
+      await detail.getByText("Enter a title").waitFor();
+      await detail.getByRole("button", { name: "Close record" }).click();
+
+      const firstCell = page.locator('td[data-record-id="task-2"][data-property-id="title"]');
+      await firstCell.click();
+      await firstCell.press("ArrowRight");
+      const focusedProperty = await page.locator("td:focus").getAttribute("data-property-id");
+      if (focusedProperty !== "points") throw new Error(`Keyboard focus did not follow projected order: ${focusedProperty}`);
+
+      await firstCell.click();
+      await page.locator('td[data-record-id="task-4"][data-property-id="title"]').click({ modifiers: ["Shift"] });
+      await page.getByRole("button", { name: "Delete selected (2)", exact: true }).waitFor();
+      page.once("dialog", (dialog) => dialog.accept());
+      await page.getByRole("button", { name: "Delete selected (2)", exact: true }).click();
+      await page.getByText("1 of 2 records could not be deleted").waitFor();
+      if (pageErrors.length > 0) throw new Error(`Browser errors: ${pageErrors.join(" | ")}`);
     } finally {
       await browser.close();
     }

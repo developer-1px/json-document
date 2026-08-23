@@ -9,10 +9,15 @@ main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 56px 0; }
 .metric strong { font-size: 24px; }
 .metric span { color: #667085; font-size: 12px; }
 .company-database { --jd-db-accent: #6750d8; --jd-db-accent-soft: #f0edff; --jd-db-radius: 16px; --jd-db-canvas: #f8f9fc; }
+.jd-database-workspace { --jd-db-accent: #6750d8; --jd-db-border: #e2e6ef; }
+.failure-controls { display: flex; align-items: center; gap: 8px; margin: -8px 0 12px; color: #596174; font-size: 12px; }
+.failure-controls span { margin-right: auto; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+.failure-controls button { min-height: 32px; border: 1px solid #dfe3eb; border-radius: 8px; background: #fff; padding: 5px 9px; color: #343a4a; }
+.failure-controls output { min-width: 92px; text-align: right; }
 .status { width: calc(100% - 16px); min-height: 30px; margin: 6px 8px; border: 0; border-radius: 999px; padding: 4px 10px; font-weight: 700; }
 .status--backlog { color: #475467; background: #f2f4f7; }
 .status--progress { color: #6941c6; background: #f4f0ff; }
 .status--done { color: #067647; background: #ecfdf3; }
 .environment { margin-left: auto; color: #067647; font-size: 12px; font-weight: 700; }
 footer { display: flex; justify-content: space-between; padding: 14px 4px; color: #667085; font-size: 12px; }
-@media (max-width: 720px) { main { width: min(100% - 24px, 1180px); padding-top: 28px; } .admin-header { align-items: stretch; flex-direction: column; } .metric { align-self: start; } }
+@media (max-width: 720px) { main { width: min(100% - 24px, 1180px); padding-top: 28px; } .admin-header { align-items: stretch; flex-direction: column; } .metric { align-self: start; } .failure-controls { align-items: stretch; flex-direction: column; } .failure-controls span { margin: 0; } }

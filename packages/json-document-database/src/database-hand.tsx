@@ -58,10 +58,19 @@ export interface DatabaseHandCellRenderProps<Row> {
   readonly commit: (value: string | number | boolean) => void;
 }
 
+export interface DatabaseHandPresentation {
+  readonly propertyOrder?: ReadonlyArray<string>;
+  readonly propertyVisibility?: Readonly<Record<string, boolean>>;
+  readonly propertyWidths?: Readonly<Record<string, number>>;
+  readonly propertyPinned?: Readonly<Record<string, "start" | "end">>;
+}
+
 export interface DatabaseHandProps<Row extends Record<string, unknown>> {
   readonly schema: ZodType<Row>;
   readonly records: ReadonlyArray<Row>;
   readonly onRecordsChange?: (records: ReadonlyArray<Row>, change: DatabaseHandChange<Row>) => void;
+  readonly onSelectionChange?: (recordIds: ReadonlyArray<string>) => void;
+  readonly onRecordOpen?: (record: Row) => void;
   readonly createRecord?: () => Row;
   readonly renderCell?: Readonly<Record<string, (props: DatabaseHandCellRenderProps<Row>) => ReactNode>>;
   readonly features?: DatabaseHandFeatures;
@@ -75,6 +84,7 @@ export interface DatabaseHandProps<Row extends Record<string, unknown>> {
   readonly className?: string;
   readonly style?: CSSProperties;
   readonly density?: "comfortable" | "compact";
+  readonly presentation?: DatabaseHandPresentation;
 }
 
 type OpenDatabase =
@@ -105,8 +115,8 @@ const defaultLabels: Required<DatabaseHandLabels> = {
 export function DatabaseHand<Row extends Record<string, unknown>>(props: DatabaseHandProps<Row>) {
   const features = { ...defaultFeatures, ...props.features };
   const labels = { ...defaultLabels, ...props.labels };
-  const externalFingerprint = recordsFingerprint(props.records);
-  const [open, setOpen] = useState<OpenDatabase>(() => openDatabase(props.schema, props.records));
+  const externalFingerprint = recordsFingerprint([props.records, props.presentation]);
+  const [open, setOpen] = useState<OpenDatabase>(() => openDatabase(props.schema, props.records, props.presentation));
   const lastEmitted = useRef<string | null>(null);
 
   useEffect(() => {
@@ -114,8 +124,8 @@ export function DatabaseHand<Row extends Record<string, unknown>>(props: Databas
       lastEmitted.current = null;
       return;
     }
-    if (open.fingerprint !== externalFingerprint) setOpen(openDatabase(props.schema, props.records));
-  }, [externalFingerprint, open.fingerprint, props.records, props.schema]);
+    if (open.fingerprint !== externalFingerprint) setOpen(openDatabase(props.schema, props.records, props.presentation));
+  }, [externalFingerprint, open.fingerprint, props.presentation, props.records, props.schema]);
 
   if (!open.ok) {
     return (
@@ -133,7 +143,7 @@ export function DatabaseHand<Row extends Record<string, unknown>>(props: Databas
       labels={labels}
       onEmit={(origin) => {
         const records = hostRecords<Row>(open.editor.snapshot.value as DatabaseDocument);
-        const fingerprint = recordsFingerprint(records);
+        const fingerprint = recordsFingerprint([records, props.presentation]);
         lastEmitted.current = fingerprint;
         props.onRecordsChange?.(records, {
           records,
@@ -176,6 +186,11 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
       editor.dispatch({ type: "selection.set", ...point, mode });
     },
   });
+
+  useEffect(() => {
+    const selected = [...new Set(editor.selectedCellsIn(topology).map((cell) => cell.recordId))];
+    props.onSelectionChange?.(selected);
+  }, [editor, props.onSelectionChange, snapshot.selection, topology]);
 
   function announce(message: string) {
     setAnnouncement(message);
@@ -312,12 +327,38 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
         <output className="jd-database__announcement" aria-live="polite">{announcement}</output>
       </div>
 
-      <div className="jd-database__viewport" onKeyDown={keyDown}>
+      <div
+        className="jd-database__viewport"
+        onKeyDown={keyDown}
+        onCopy={(event) => {
+          const clipboard = editor.copy(topology);
+          if (clipboard === null) return;
+          event.preventDefault();
+          event.clipboardData.setData(clipboard.type, JSON.stringify(clipboard));
+          event.clipboardData.setData("text/plain", clipboard.text);
+          announce("Selection copied");
+        }}
+        onPaste={(event) => {
+          if (props.readOnly) return;
+          const clipboard = clipboardFromData(event.clipboardData, document, topology, snapshot.selection.focus);
+          if (clipboard === null) return;
+          event.preventDefault();
+          const result = editor.dispatch({ type: "clipboard.paste", clipboard, topology });
+          if (result.ok) emit("cell.commit", "Selection pasted");
+          else announce(result.code);
+        }}
+      >
         <table ref={tableRef} role="grid" aria-label={props.labels.ariaLabel} aria-multiselectable="true">
           <thead>
             <tr>
               {properties.map((property) => (
-                <th key={property.id} scope="col" aria-sort={ariaSort(view.sort, property.id)}>
+                <th
+                  key={property.id}
+                  scope="col"
+                  aria-sort={ariaSort(view.sort, property.id)}
+                  style={columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned)}
+                  data-pinned={props.presentation?.propertyPinned?.[property.id]}
+                >
                   <button type="button" onClick={() => configure({ sort: nextSort(view.sort, property.id) })}>
                     <span>{property.name}</span>
                     <small>{property.type}{sortMark(view.sort, property.id)}</small>
@@ -345,6 +386,9 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                       data-record-id={record.id}
                       data-property-id={property.id}
                       onClick={item.getPressHandler()}
+                      onDoubleClick={() => props.onRecordOpen?.(hostRecord)}
+                      style={columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned)}
+                      data-pinned={props.presentation?.propertyPinned?.[property.id]}
                     >
                       {custom ? custom({
                         property,
@@ -462,14 +506,32 @@ function useEditingSnapshot(editor: DatabaseEditor) {
   return editor.snapshot;
 }
 
-function openDatabase<Row extends Record<string, unknown>>(schema: ZodType<Row>, records: ReadonlyArray<Row>): OpenDatabase {
-  const fingerprint = recordsFingerprint(records);
+function openDatabase<Row extends Record<string, unknown>>(
+  schema: ZodType<Row>,
+  records: ReadonlyArray<Row>,
+  presentation?: DatabaseHandPresentation,
+): OpenDatabase {
+  const fingerprint = recordsFingerprint([records, presentation]);
   const translated = databaseDocumentFromZod(schema, records);
   if (!translated.ok) return { ok: false, message: translated.reason ?? translated.code, fingerprint };
   if (!translated.value.schema.properties.some((property) => property.id !== "id")) {
     return { ok: false, message: "Database schema needs at least one editable property.", fingerprint };
   }
-  return { ok: true, editor: createDatabaseEditor(translated.value), fingerprint };
+  const firstView = translated.value.views[0]!;
+  const available = translated.value.schema.properties.map((property) => property.id);
+  const order = presentation?.propertyOrder
+    ? [...presentation.propertyOrder.filter((id) => available.includes(id)), ...available.filter((id) => !presentation.propertyOrder!.includes(id))]
+    : firstView.propertyOrder;
+  const value: DatabaseDocument = {
+    ...translated.value,
+    views: [{
+      ...firstView,
+      propertyOrder: order,
+      propertyVisibility: presentation?.propertyVisibility ?? firstView.propertyVisibility,
+      propertyWidths: presentation?.propertyWidths ?? firstView.propertyWidths,
+    }],
+  };
+  return { ok: true, editor: createDatabaseEditor(value), fingerprint };
 }
 
 function hostRecords<Row>(document: DatabaseDocument): ReadonlyArray<Row> {
@@ -499,6 +561,35 @@ function parseCellKey(key: string) {
 
 function cellSelector(recordId: string, propertyId: string): string {
   return `[data-record-id="${CSS.escape(recordId)}"][data-property-id="${CSS.escape(propertyId)}"]`;
+}
+
+function clipboardFromData(
+  data: DataTransfer,
+  document: DatabaseDocument,
+  topology: { readonly propertyIds: ReadonlyArray<string> },
+  focus: { readonly propertyId: string } | null,
+) {
+  const structured = data.getData("application/vnd.interactive-os.database+json");
+  if (structured) {
+    try {
+      const value = JSON.parse(structured);
+      if (value?.type === "application/vnd.interactive-os.database+json" && Array.isArray(value.cells)) return value;
+    } catch {}
+  }
+  const text = data.getData("text/plain");
+  if (!text || focus === null) return null;
+  const start = topology.propertyIds.indexOf(focus.propertyId);
+  if (start < 0) return null;
+  const rows = text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").map((line) => line.split("\t"));
+  const cells = rows.map((row) => row.map((value, offset) => {
+    const propertyId = topology.propertyIds[start + offset];
+    const property = document.schema.properties.find((candidate) => candidate.id === propertyId);
+    if (!property) return value;
+    if (property.type === "number") return Number(value);
+    if (property.type === "checkbox") return value === "true";
+    return value;
+  }));
+  return { type: "application/vnd.interactive-os.database+json" as const, cells, text };
 }
 
 function arrowDirection(key: string): "up" | "down" | "left" | "right" | null {
@@ -537,4 +628,19 @@ function sortMark(sort: DatabaseSort | null, propertyId: string): string {
 
 function join(...values: ReadonlyArray<string | undefined>): string {
   return values.filter(Boolean).join(" ");
+}
+
+function columnStyle(
+  propertyId: string,
+  properties: ReadonlyArray<DatabaseProperty>,
+  widths: Readonly<Record<string, number>>,
+  pinned?: Readonly<Record<string, "start" | "end">>,
+): CSSProperties {
+  const width = widths[propertyId];
+  const pin = pinned?.[propertyId];
+  const base = width === undefined ? {} : { width, minWidth: width, maxWidth: width };
+  if (pin !== "start") return base;
+  const index = properties.findIndex((property) => property.id === propertyId);
+  const left = properties.slice(0, index).reduce((sum, property) => sum + (widths[property.id] ?? 150), 0);
+  return { ...base, position: "sticky", left, zIndex: 2 };
 }

@@ -56,4 +56,16 @@ describe("DatabaseHand", () => {
     fireEvent.click(screen.getByRole("button", { name: "Undo" }));
     expect(within(grid).getAllByRole("row")).toHaveLength(3);
   });
+
+  it("reports selected rows and composes native clipboard paste", () => {
+    const onSelectionChange = vi.fn();
+    const onRecordsChange = vi.fn();
+    render(<DatabaseHand schema={schema} records={records} onSelectionChange={onSelectionChange} onRecordsChange={onRecordsChange} />);
+    const title = screen.getByRole("gridcell", { name: "Alpha" });
+    fireEvent.click(title);
+    expect(onSelectionChange).toHaveBeenLastCalledWith(["a"]);
+    const clipboard = { getData: (type: string) => type === "text/plain" ? "Pasted" : "", setData: vi.fn() };
+    fireEvent.paste(title.closest(".jd-database__viewport")!, { clipboardData: clipboard });
+    expect(onRecordsChange).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ id: "a", title: "Pasted" })]), expect.objectContaining({ origin: "cell.commit" }));
+  });
 });
