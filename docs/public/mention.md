@@ -1,7 +1,5 @@
 # Mention
 
-TBD.
-
 Mention은 사람이 글 속에 이름으로 보이는 안정적인 entity reference를
 삽입하는 Hands입니다. Slack이라는 App이나 message row가 아니라, `@`로
 사람·agent·대상을 찾아 문맥에 넣는 손을 관찰합니다.
@@ -19,6 +17,10 @@ Mention은 사람이 글 속에 이름으로 보이는 안정적인 entity refer
 - Backspace로 하나의 token처럼 지웁니다.
 - 이름이 바뀌어도 reference의 대상은 유지됩니다.
 
+Mention은 Rich Text extension schema의 inline atom입니다. label은 화면 표현이고
+entity ID가 reference 정체성입니다. Selection과 Clipboard는 atom 전체를 한 단위로
+다루므로 이름 일부만 지우거나 대상 ID를 잃은 평문으로 퇴화하지 않습니다.
+
 Host는 suggestion popup과 token을 그립니다. 검색 source, 권한, 알림 전송은
-Mention이 소유하지 않습니다. Composer 안에서 먼저 증명하지만 문서 comment나
-다른 rich text에서도 같은 이름이 자연스러운지는 TBD입니다.
+Mention이 소유하지 않습니다. Composer demo가 @ typeahead, atom 삽입, 삭제,
+copy와 undo를 같은 Rich Text 경로로 증명합니다.

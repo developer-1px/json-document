@@ -316,16 +316,25 @@
     "label": "Composer",
     "title": "Composer Hands - json-document",
     "heading": "Composer",
-    "description": "사람이 agent에게 지시와 artifact context를 한 턴으로 건네는 Hands입니다. TBD.",
+    "description": "사람이 agent에게 지시와 구조화된 context를 한 턴으로 건네는 Composer Hands입니다.",
     "language": "ko",
-    "navigationGroup": "Hands"
+    "navigationGroup": "Hands",
+    "relatedDemoPath": "/demo/composer"
+  },
+  {
+    "path": "/demo/composer",
+    "label": "Composer Demo",
+    "title": "Agent Chat Composer - json-document",
+    "description": "Cstar 디자인을 이식하고 canonical Rich Text, inline atom, 파일 context, history와 clipboard로 재구현한 Agent Chat Composer입니다.",
+    "parentPath": "/docs/composer",
+    "sidebar": false
   },
   {
     "path": "/docs/mention",
     "label": "Mention",
     "title": "Mention Hands - json-document",
     "heading": "Mention",
-    "description": "이름으로 보이는 안정적인 entity reference를 글 속에 삽입하는 Hands입니다. TBD.",
+    "description": "이름으로 보이는 안정적인 entity reference를 inline atom으로 삽입하는 Hands입니다.",
     "language": "ko",
     "navigationGroup": "Hands"
   },

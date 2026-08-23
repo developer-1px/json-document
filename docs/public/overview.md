@@ -86,7 +86,7 @@ Editing은 이 상태를 JSON Document 옆에 둡니다. 화면은 클릭과 키
 Hands는 사람이 artifact와 agent를 다루는 편집 도구의 최소 완성본입니다.
 한 줄 목록을 집어 옮기는 손, 칸을 채우는 손, 가지를 접는 손이 선반에
 있습니다. Agent에게 지시와 맥락을 건네는 Composer와, 안정적인 대상을 글에
-넣는 Mention은 TBD입니다. 고르려면 [Hands](hands.md)로 갑니다.
+넣는 Mention도 Rich Text와 구조화된 context로 동작합니다. 고르려면 [Hands](hands.md)로 갑니다.
 
 ## 플랫폼, 라이브러리, Affordance
 
