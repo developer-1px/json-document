@@ -31,4 +31,17 @@ describe("Agent Chat Composer Hands", () => {
     fireEvent.click(screen.getByRole("button", { name: "HCX 30B⌄" }));
     expect(screen.getByRole("listbox", { name: "모델 선택" })).toBeTruthy();
   });
+
+  test("routes dropped files through the same canonical attachment context", () => {
+    render(<ComposerDemoRoute />);
+    const composer = screen.getByTestId("agent-chat-composer");
+    const file = new File(["drop"], "드롭.pdf", { type: "application/pdf" });
+
+    fireEvent.dragEnter(composer, { dataTransfer: { files: [file] } });
+    expect(screen.getByText("여기에 파일을 놓아주세요")).toBeTruthy();
+    fireEvent.drop(composer, { dataTransfer: { files: [file] } });
+
+    expect(screen.getByText("드롭.pdf")).toBeTruthy();
+    expect(screen.getByTestId("composer-draft-json").textContent).toContain("드롭.pdf");
+  });
 });

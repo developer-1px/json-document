@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
 import {
   createRichTextEditor,
@@ -72,6 +72,8 @@ export function ComposerDemoRoute() {
   const instructionValue = instruction.value as unknown as RichTextDocument;
   const [addOpen, setAddOpen] = useState(false);
   const [modelOpen, setModelOpen] = useState(false);
+  const [dropActive, setDropActive] = useState(false);
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [submitted, setSubmitted] = useState<ComposerDraft | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const trigger = activeTrigger(instructionValue, editor);
@@ -92,10 +94,17 @@ export function ComposerDemoRoute() {
       setModelOpen(false);
       return;
     }
+    if (trigger && visibleSuggestions.length > 0 && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+      event.preventDefault();
+      const direction = event.key === "ArrowDown" ? 1 : -1;
+      setSuggestionIndex((value) => (value + direction + visibleSuggestions.length) % visibleSuggestions.length);
+      return;
+    }
     if (trigger && visibleSuggestions.length > 0 && event.key === "Enter") {
       event.preventDefault();
       event.stopPropagation();
-      insertSuggestion(editor, trigger, visibleSuggestions[0]!);
+      insertSuggestion(editor, trigger, visibleSuggestions[suggestionIndex % visibleSuggestions.length]!);
+      setSuggestionIndex(0);
       return;
     }
     if (event.key !== "Enter" || event.shiftKey) return;
@@ -106,6 +115,11 @@ export function ComposerDemoRoute() {
 
   function attachFiles(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.currentTarget.files ?? []);
+    addFiles(files);
+    event.currentTarget.value = "";
+  }
+
+  function addFiles(files: ReadonlyArray<File>) {
     if (files.length === 0) return;
     const next = files.map((file, index): Attachment => ({
       id: `attachment-${Date.now()}-${index}`,
@@ -114,8 +128,13 @@ export function ComposerDemoRoute() {
       size: file.size,
     }));
     draft.commit([{ op: "add", path: "/attachments/-", value: next[0]! }, ...next.slice(1).map((value) => ({ op: "add" as const, path: "/attachments/-", value }))]);
-    event.currentTarget.value = "";
     setAddOpen(false);
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDropActive(false);
+    addFiles(Array.from(event.dataTransfer.files));
   }
 
   function removeAttachment(index: number) {
@@ -134,7 +153,15 @@ export function ComposerDemoRoute() {
           <p>파일을 첨부하거나 <kbd>/</kbd> 스킬, <kbd>@</kbd> 에이전트를 함께 입력해 보세요.</p>
         </div>
 
-        <div className={`home-composer-single${hasContent ? " home-composer-single-filled" : ""}`} data-testid="agent-chat-composer">
+        <div
+          className={`home-composer-single${hasContent ? " home-composer-single-filled" : ""}`}
+          data-testid="agent-chat-composer"
+          onDragEnter={(event) => { event.preventDefault(); setDropActive(true); }}
+          onDragOver={(event) => event.preventDefault()}
+          onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropActive(false); }}
+          onDrop={handleDrop}
+        >
+          {dropActive ? <div className="composer-dropzone-overlay"><div className="composer-dropzone-card"><strong>여기에 파일을 놓아주세요</strong><span>이미지와 문서를 Composer context에 첨부합니다.</span></div></div> : null}
           {attachments.length > 0 ? (
             <div className="composer-attachments" aria-label="첨부 파일">
               {attachments.map((file, index) => (
@@ -188,8 +215,8 @@ export function ComposerDemoRoute() {
 
           {trigger && visibleSuggestions.length > 0 ? (
             <div className="composer-layer composer-command-layer" role="listbox" aria-label={trigger.kind === "skill" ? "스킬 선택" : "에이전트 선택"}>
-              {visibleSuggestions.map((item) => (
-                <button key={item.id} type="button" role="option" aria-selected="false" onMouseDown={(event) => event.preventDefault()} onClick={() => insertSuggestion(editor, trigger, item)}>
+              {visibleSuggestions.map((item, index) => (
+                <button key={item.id} className={index === suggestionIndex % visibleSuggestions.length ? "selected" : ""} type="button" role="option" aria-selected={index === suggestionIndex % visibleSuggestions.length} onMouseDown={(event) => event.preventDefault()} onClick={() => { insertSuggestion(editor, trigger, item); setSuggestionIndex(0); }}>
                   <span className={`composer-command-icon ${item.kind}`}>{item.kind === "skill" ? "/" : "@"}</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
                   <em>{item.kind === "skill" ? "Skill" : "Agent"}</em>
