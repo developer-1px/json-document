@@ -15,6 +15,8 @@ const kitWorkspaces = [
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-web",
   "@interactive-os/json-document-react",
+  "@interactive-os/json-document-zod",
+  "@interactive-os/json-document-database",
 ];
 const fixtureSource = join(repositoryRoot, "fixtures", "external-kit");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "json-document-external-kit-"));
@@ -67,6 +69,7 @@ async function installFixture(tarballs) {
   const dependencies = {
     react: site.dependencies.react,
     "react-dom": site.dependencies["react-dom"],
+    zod: site.dependencies.zod,
   };
   for (const [workspace, tarball] of tarballs) dependencies[workspace] = pathToFileURL(tarball).href;
   await writeFile(join(fixtureRoot, "package.json"), JSON.stringify({
@@ -92,6 +95,10 @@ async function installFixture(tarballs) {
   const source = await readFile(join(fixtureRoot, "src", "main.tsx"), "utf8");
   if (source.includes("packages/") || source.includes("site/") || source.includes("workspace:")) {
     throw new Error("External fixture source imported a repository-owned path");
+  }
+  const publicImports = [...source.matchAll(/from\s+["'](@interactive-os\/[^"']+)["']/g)].map((match) => match[1]);
+  if (publicImports.some((name) => name !== "@interactive-os/json-document-database")) {
+    throw new Error(`External admin leaked internal package imports: ${publicImports.join(", ")}`);
   }
   for (const workspace of kitWorkspaces) {
     const packagePath = join(fixtureRoot, "node_modules", ...workspace.split("/"), "package.json");
@@ -122,31 +129,39 @@ async function verifyBrowser() {
     try {
       const page = await browser.newPage();
       await page.goto(`http://127.0.0.1:${port}`);
-      const editor = page.getByTestId("external-editor");
-      await expectAttribute(editor, "data-selection-contract", "range");
+      await page.getByRole("heading", { name: "Delivery database" }).waitFor();
+      if (await page.getByTestId("custom-status").count() !== 4) throw new Error("Host status renderer was not used");
+      const database = page.locator(".company-database");
+      const accent = await database.evaluate((node) => getComputedStyle(node).getPropertyValue("--jd-db-accent").trim());
+      if (accent !== "#6750d8") throw new Error("Host theme token was not applied");
 
-      await page.locator('[data-block-id="beta"]').click();
-      await expectAttribute(page.locator('[data-block-id="beta"]'), "data-selected", "true");
+      const title = page.getByRole("textbox", { name: "Title task-1" });
+      await title.fill("Triage enterprise feedback");
+      await title.press("Enter");
+      await page.getByText("1 changes proposed").waitFor();
 
-      await editor.focus();
-      await page.keyboard.press("ArrowUp");
-      await expectAttribute(page.locator('[data-block-id="alpha"]'), "data-selected", "true");
+      await page.getByRole("combobox", { name: "Status task-1" }).selectOption("done");
+      await page.getByText("2 changes proposed").waitFor();
+      await page.getByRole("checkbox", { name: "Shipped task-1" }).check();
+      await page.getByText("3 changes proposed").waitFor();
 
-      await page.getByRole("textbox", { name: "alpha text" }).fill("Alpha edited");
-      await page.getByText("undo-ready").waitFor();
+      const pointsHeader = page.getByRole("columnheader").filter({ hasText: "Points" });
+      await pointsHeader.getByRole("button").click();
+      await expectAttribute(pointsHeader, "aria-sort", "ascending");
 
-      await editor.evaluate((node) => {
-        const data = new DataTransfer();
-        node.dispatchEvent(new ClipboardEvent("copy", { bubbles: true, cancelable: true, clipboardData: data }));
-        node.dispatchEvent(new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: data }));
-      });
-      await page.locator("[data-block-id]").nth(2).waitFor();
-      if (await page.locator("[data-block-id]").count() !== 3) throw new Error("Clipboard paste did not add a block");
+      await page.getByRole("combobox", { name: "Filter property" }).selectOption("status");
+      await page.getByRole("combobox", { name: "Filter value" }).selectOption("done");
+      if (await page.locator("tbody tr").count() !== 2) throw new Error("Database filter did not project records");
+      await page.getByRole("button", { name: "Clear filter" }).click();
 
-      await editor.focus();
-      await page.keyboard.press("ControlOrMeta+z");
-      await page.locator("[data-block-id]").nth(2).waitFor({ state: "detached" });
-      if (await page.locator("[data-block-id]").count() !== 2) throw new Error("History undo did not restore the document");
+      await page.getByText("Columns", { exact: false }).click();
+      await page.getByLabel("Owner", { exact: true }).uncheck();
+      if (await page.getByRole("columnheader").filter({ hasText: "Owner" }).count() !== 0) throw new Error("Column visibility did not update");
+
+      await page.getByRole("button", { name: "Add task" }).click();
+      await page.locator(".metric strong").filter({ hasText: "5" }).waitFor();
+      await page.getByRole("button", { name: "Undo" }).click();
+      await page.locator(".metric strong").filter({ hasText: "4" }).waitFor();
     } finally {
       await browser.close();
     }
@@ -202,7 +217,7 @@ try {
   const tarballs = await packKit();
   await installFixture(tarballs);
   await verifyBrowser();
-  console.log(`external npm kit ok: ${kitWorkspaces.length} tarballs, typecheck, build, browser`);
+  console.log(`external Database Hand ok: ${kitWorkspaces.length} tarballs, one package import, typecheck, build, admin browser`);
 } finally {
   if (keep) console.log(`external fixture retained at ${temporaryRoot}`);
   else await rm(temporaryRoot, { recursive: true, force: true });

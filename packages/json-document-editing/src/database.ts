@@ -118,6 +118,7 @@ export type DatabaseIntent =
   | {
       readonly type: "record.add";
       readonly recordId: string;
+      readonly values?: Readonly<Record<string, JSONValue>>;
     }
   | {
       readonly type: "record.delete";
@@ -215,12 +216,15 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       if (index(document).recordById.has(intent.recordId)) {
         return failure("record.duplicate-id");
       }
+      const values: Record<string, JSONValue> = {};
+      for (const property of document.schema.properties) {
+        const value = intent.values?.[property.id] ?? defaultValue(property);
+        if (!acceptsDatabaseValue(property, value)) return failure("record.invalid-value");
+        values[property.id] = value;
+      }
       const record: DatabaseRecord = {
         id: intent.recordId,
-        values: Object.fromEntries(document.schema.properties.map((property) => [
-          property.id,
-          defaultValue(property),
-        ])),
+        values,
       };
       const firstProperty = document.schema.properties[0];
       return session.apply({

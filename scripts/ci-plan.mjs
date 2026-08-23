@@ -22,6 +22,7 @@ const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-affordance", ["site/tests/browser/widgets.spec.ts"]],
   ["@interactive-os/json-document-ajv", ["site/tests/browser/connectors/ajv.spec.ts"]],
   ["@interactive-os/json-document-contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
+  ["@interactive-os/json-document-database", ["site/tests/browser/database-demo.spec.ts"]],
   ["@interactive-os/json-document-editing", [
     "site/tests/browser/editing-demos.spec.ts",
     "site/tests/browser/editor-slice-demos.spec.ts",
@@ -70,6 +71,8 @@ const firstKitWorkspaces = new Set([
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-web",
   "@interactive-os/json-document-react",
+  "@interactive-os/json-document-zod",
+  "@interactive-os/json-document-database",
 ]);
 
 function internalDependencyNames(library) {

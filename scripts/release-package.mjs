@@ -14,6 +14,7 @@ export const releases = [
   release("json-document-contenteditable", "packages/json-document-contenteditable/package.json", "@interactive-os/json-document-contenteditable"),
   release("json-document-tanstack-table", "packages/json-document-tanstack-table/package.json", "@interactive-os/json-document-tanstack-table"),
   release("json-document-zod", "packages/json-document-zod/package.json", "@interactive-os/json-document-zod"),
+  release("json-document-database", "packages/json-document-database/package.json", "@interactive-os/json-document-database"),
   release("json-document-contenteditable-collaboration", "packages/contenteditable-collaboration/package.json", "@interactive-os/json-document-contenteditable-collaboration"),
   release("json-document-collaboration", "packages/json-document-collaboration/package.json", "@interactive-os/json-document-collaboration"),
   release("json-document", "packages/json-document/package.json", "@interactive-os/json-document"),

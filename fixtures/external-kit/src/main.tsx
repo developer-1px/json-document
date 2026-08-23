@@ -1,113 +1,45 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { createJSONDocument } from "@interactive-os/json-document";
-import { emptyRangeSelection } from "@interactive-os/json-document-selection";
-import {
-  createDocumentEditor,
-  type BlockDocument,
-  type DocumentSelection,
-} from "@interactive-os/json-document-editing";
-import {
-  createWebClipboardBinding,
-  createWebKeyboardAdapter,
-  documentClipboardCodec,
-} from "@interactive-os/json-document-web";
-import { useEditingSnapshot } from "@interactive-os/json-document-react";
+import { DatabaseHand, type DatabaseHandCellRenderProps } from "@interactive-os/json-document-database";
+import "@interactive-os/json-document-database/styles.css";
+import * as z from "zod/v4";
 import "./styles.css";
 
-const documentModel = createJSONDocument({
-  blocks: [
-    { id: "alpha", text: "Alpha" },
-    { id: "beta", text: "Beta" },
-  ],
+const taskSchema = z.object({
+  id: z.string(), title: z.string(), owner: z.string(), points: z.number(),
+  status: z.enum(["backlog", "progress", "done"]), shipped: z.boolean(),
 });
-const editor = createDocumentEditor(documentModel, {
-  createId: (() => {
-    let sequence = 0;
-    return () => `external-${++sequence}`;
-  })(),
-});
-const keyboard = createWebKeyboardAdapter();
+type Task = z.infer<typeof taskSchema>;
+const initialTasks: ReadonlyArray<Task> = [
+  { id: "task-1", title: "Triage customer feedback", owner: "Ada", points: 3, status: "backlog", shipped: false },
+  { id: "task-2", title: "Polish billing settings", owner: "Lin", points: 5, status: "progress", shipped: false },
+  { id: "task-3", title: "Publish August changelog", owner: "Mina", points: 2, status: "done", shipped: true },
+  { id: "task-4", title: "Archive legacy exports", owner: "Theo", points: 1, status: "backlog", shipped: false },
+];
 
-function ExternalEditor() {
-  const snapshot = useEditingSnapshot<DocumentSelection>(editor);
-  const value = snapshot.value as BlockDocument;
-  const selected = new Set(editor.selectedBlockIds);
-  const focusId = snapshot.selection.primaryIndex === null
-    ? undefined
-    : snapshot.selection.ranges[snapshot.selection.primaryIndex]?.focus.blockId;
-  const clipboard = useMemo(() => createWebClipboardBinding({
-    codec: documentClipboardCodec,
-    read: () => editor.copy(),
-    cut: () => editor.cut()?.result ?? { ok: false },
-    paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
-  }), []);
+function StatusCell(props: DatabaseHandCellRenderProps<Task>) {
+  return <select className={`status status--${props.value}`} data-testid="custom-status" aria-label={`Status ${props.record.id}`} value={String(props.value)} onChange={(event) => props.commit(event.currentTarget.value)}>
+    <option value="backlog">Backlog</option><option value="progress">In progress</option><option value="done">Done</option>
+  </select>;
+}
 
-  return (
-    <main
-      data-testid="external-editor"
-      data-selection-contract={emptyRangeSelection().kind}
-      tabIndex={0}
-      onCopy={(event) => clipboard.copy(event.nativeEvent)}
-      onCut={(event) => clipboard.cut(event.nativeEvent)}
-      onPaste={(event) => clipboard.paste(event.nativeEvent)}
-      onKeyDown={(event) => {
-        const command = keyboard.resolve(event);
-        if (command === null) return;
-        if (command.type === "undo") {
-          event.preventDefault();
-          editor.undo();
-          return;
-        }
-        if (command.type === "redo") {
-          event.preventDefault();
-          editor.redo();
-          return;
-        }
-        if (command.type !== "move") return;
-        const current = Math.max(0, value.blocks.findIndex((block) => block.id === focusId));
-        const previous = command.direction === "previous"
-          || command.direction === "up"
-          || command.direction === "left";
-        const nextIndex = Math.max(0, Math.min(value.blocks.length - 1, current + (previous ? -1 : 1)));
-        const next = value.blocks[nextIndex];
-        if (next === undefined) return;
-        event.preventDefault();
-        editor.dispatch({ type: "selection.set", blockId: next.id, mode: command.operation });
-      }}
-    >
-      <header>
-        <p>Consumer-owned React UI</p>
-        <output data-testid="history">{snapshot.canUndo ? "undo-ready" : "clean"}</output>
-      </header>
-      <section aria-label="Document blocks">
-        {value.blocks.map((block) => (
-          <article
-            key={block.id}
-            data-block-id={block.id}
-            data-selected={selected.has(block.id) ? "true" : "false"}
-            onClick={() => editor.dispatch({ type: "selection.set", blockId: block.id })}
-          >
-            <label>
-              <span>{block.id}</span>
-              <input
-                aria-label={`${block.id} text`}
-                value={block.text}
-                onChange={(event) => editor.dispatch({
-                  type: "text.replace",
-                  blockId: block.id,
-                  text: event.currentTarget.value,
-                  offset: event.currentTarget.selectionStart ?? event.currentTarget.value.length,
-                })}
-              />
-            </label>
-          </article>
-        ))}
-      </section>
-    </main>
-  );
+function AdminApp() {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [changes, setChanges] = useState(0);
+  return <main>
+    <header className="admin-header">
+      <div><p className="eyebrow">Operations / Tasks</p><h1>Delivery database</h1><p>Schema-driven admin UI with host-owned data and branding.</p></div>
+      <div className="metric"><strong>{tasks.length}</strong><span>records</span></div>
+    </header>
+    <DatabaseHand className="company-database" schema={taskSchema} records={tasks}
+      onRecordsChange={(records) => { setTasks(records); setChanges((value) => value + 1); }}
+      renderCell={{ status: (props) => <StatusCell {...props} /> }}
+      toolbar={<span className="environment">Production data</span>}
+      labels={{ newRecord: "Add task", deleteRecord: "Delete task" }} />
+    <footer><span>Host persistence boundary</span><output data-testid="change-count">{changes} changes proposed</output></footer>
+  </main>;
 }
 
 const root = window.document.querySelector("#root");
 if (root === null) throw new Error("Missing root element");
-createRoot(root).render(<ExternalEditor />);
+createRoot(root).render(<AdminApp />);

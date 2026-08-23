@@ -12,6 +12,13 @@ const firstKit = [
   ["json-document-react-v0.1.0-rc.0", "@interactive-os/json-document-react", "next", "packages/json-document-react/package.json"],
 ];
 
+const databaseHand = [
+  "json-document-database-v0.1.0-rc.0",
+  "@interactive-os/json-document-database",
+  "next",
+  "packages/json-document-database/package.json",
+];
+
 test("첫 npm kit의 stable과 RC release stream을 구분한다", () => {
   for (const [tag, workspace, distTag, packageFile] of firstKit) {
     assert.deepEqual(resolveRelease(tag), {
@@ -25,6 +32,11 @@ test("첫 npm kit의 stable과 RC release stream을 구분한다", () => {
 
 test("manifest version과 다른 tag를 거부한다", () => {
   assert.throws(() => resolveRelease("json-document-editing-v0.1.0-rc.9"), /does not match/);
+});
+
+test("Database Hand를 next release stream으로 해석한다", () => {
+  const [tag, workspace, distTag, packageFile] = databaseHand;
+  assert.deepEqual(resolveRelease(tag), { workspace, distTag, version: "0.1.0-rc.0", packageFile });
 });
 
 test("지원하지 않는 package tag를 거부한다", () => {

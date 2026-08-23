@@ -1,17 +1,10 @@
-# External npm kit fixture
+# External Database Hand fixture
 
-This fixture is intentionally outside the repository workspaces. The verification
-script copies it into an empty temporary project, installs five real package
-tarballs plus React, then typechecks, builds, and drives the consumer-owned UI in
-a browser.
+This fixture is outside the repository workspaces. The verifier copies it into
+an empty project, installs real npm tarballs, typechecks, builds, and drives an
+admin in a browser.
 
-It must import only public package names. Repository source paths and `workspace:`
-resolutions invalidate the proof.
-
-The fixture exercises:
-
-- `@interactive-os/json-document` as the canonical document;
-- `@interactive-os/json-document-selection` as the DOM-free selection contract;
-- `@interactive-os/json-document-editing` for editing and history;
-- `@interactive-os/json-document-web` for keyboard and structured clipboard;
-- `@interactive-os/json-document-react` for the subscription bridge.
+The host imports only `@interactive-os/json-document-database`, its stylesheet,
+React, and Zod. Branding and a status cell renderer belong to the host; grid
+semantics and editing behavior belong to the Hand. Repository source paths and
+`workspace:` resolutions invalidate the proof.

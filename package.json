@@ -11,6 +11,7 @@
     "packages/json-document-ajv",
     "packages/json-document-affordance",
     "packages/json-document-zod",
+    "packages/json-document-database",
     "packages/json-document-tanstack-table",
     "packages/json-document-web",
     "packages/json-document-contenteditable",

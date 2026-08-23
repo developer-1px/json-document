@@ -10,11 +10,13 @@ test("첫 kit package 변경은 외부 소비자 검증을 선택한다", () => 
     "json-document-editing",
     "json-document-web",
     "json-document-react",
+    "json-document-zod",
+    "json-document-database",
   ]) {
     assert.equal(createPlan([`packages/${directory}/src/index.ts`]).externalKit, true, directory);
   }
 });
 
-test("kit 밖의 독립 connector 변경은 외부 소비자 검증을 선택하지 않는다", () => {
-  assert.equal(createPlan(["packages/json-document-zod/src/index.ts"]).externalKit, false);
+test("Database Hand 밖의 독립 connector 변경은 외부 소비자 검증을 선택하지 않는다", () => {
+  assert.equal(createPlan(["packages/json-document-ajv/src/index.ts"]).externalKit, false);
 });

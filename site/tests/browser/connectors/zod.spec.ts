@@ -21,17 +21,16 @@ test("Zod Connector Live Demo opens a Database admin from a Zod schema without a
   await title.fill("Ready for review");
   await title.blur();
 
-  const document = JSON.parse(await page.getByTestId("zod-admin-document").innerText()) as {
-    readonly records: ReadonlyArray<{ readonly id: string; readonly values: { readonly title: string } }>;
-  };
-  expect(document.records.find((record) => record.id === "t1")?.values.title).toBe("Ready for review");
+  const records = JSON.parse(await page.getByTestId("zod-admin-records").innerText()) as ReadonlyArray<{ readonly id: string; readonly title: string }>;
+  expect(records.find((record) => record.id === "t1")?.title).toBe("Ready for review");
 
   await page.getByRole("button", { name: "New record" }).click();
   await expect(page.locator("tr[data-record-id='t4']")).toBeVisible();
   await page.getByRole("button", { name: "Delete selected" }).click();
   await expect(page.locator("tr[data-record-id='t4']")).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Backlog only" }).click();
+  await page.getByRole("combobox", { name: "Filter property" }).selectOption("status");
+  await page.getByRole("combobox", { name: "Filter value" }).selectOption("backlog");
   await expect(page.locator("tr[data-record-id]")).toHaveCount(1);
   expect(errors).toEqual([]);
 });
