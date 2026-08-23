@@ -1,0 +1,42 @@
+:root {
+  color: #172033;
+  background: #f5f1e8;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+body { margin: 0; }
+
+main {
+  width: min(36rem, calc(100% - 2rem));
+  margin: 3rem auto;
+  outline: none;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+section { display: grid; gap: 0.75rem; }
+
+article {
+  border: 2px solid transparent;
+  background: white;
+  padding: 1rem;
+}
+
+article[data-selected="true"] { border-color: #ee6b4d; }
+
+label {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  align-items: center;
+}
+
+input {
+  border: 0;
+  border-bottom: 1px solid #9aa2b2;
+  padding: 0.5rem;
+  font: inherit;
+}

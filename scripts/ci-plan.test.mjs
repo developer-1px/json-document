@@ -8,6 +8,7 @@ test("문서 변경은 문서·사이트와 최소 browser smoke만 선택한다
   const plan = createPlan(["docs/architecture.md"]);
 
   assert.equal(plan.full, false);
+  assert.equal(plan.externalKit, false);
   assert.equal(plan.docs, true);
   assert.equal(plan.site, true);
   assert.deepEqual(plan.packageWorkspaces, []);
@@ -38,6 +39,7 @@ test("기반 패키지 변경은 모든 역방향 소비자를 선택한다", ()
   assert.equal(plan.full, false);
   assert.equal(plan.packageWorkspaces.length, 15);
   assert.equal(plan.standards, true);
+  assert.equal(plan.externalKit, true);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
 });
 
@@ -85,6 +87,7 @@ test("main 계획은 현재 전체 품질 검사를 요구한다", () => {
   assert.equal(plan.docs, true);
   assert.equal(plan.site, true);
   assert.equal(plan.standards, true);
+  assert.equal(plan.externalKit, true);
   assert.equal(plan.packageWorkspaces.length, 16);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
 });

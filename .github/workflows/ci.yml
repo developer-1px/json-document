@@ -21,6 +21,7 @@ jobs:
       docs: ${{ steps.plan.outputs.docs }}
       site: ${{ steps.plan.outputs.site }}
       standards: ${{ steps.plan.outputs.standards }}
+      external_kit: ${{ steps.plan.outputs.external_kit }}
       reason: ${{ steps.plan.outputs.reason }}
     steps:
       - uses: actions/checkout@v6
@@ -46,12 +47,14 @@ jobs:
           PLAN_REASON: ${{ steps.plan.outputs.reason }}
           PACKAGE_WORKSPACES: ${{ steps.plan.outputs.package_workspaces }}
           BROWSER_SPECS: ${{ steps.plan.outputs.browser_specs }}
+          EXTERNAL_KIT: ${{ steps.plan.outputs.external_kit }}
         run: |
           {
             echo "## CI 검증 계획"
             echo "- 판단: $PLAN_REASON"
             echo "- 패키지: $PACKAGE_WORKSPACES"
             echo "- 브라우저: $BROWSER_SPECS"
+            echo "- 외부 kit: $EXTERNAL_KIT"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Verify workspace contract and planner
         run: npm run workspace:check && npm run ci:plan:test
@@ -113,3 +116,18 @@ jobs:
           const specs = JSON.parse(process.env.BROWSER_SPECS);
           const result = spawnSync("npm", ["run", "browser:test", "--", ...specs], { stdio: "inherit" });
           process.exit(result.status ?? 1);'
+
+  external-kit:
+    name: External kit
+    needs: plan
+    if: needs.plan.outputs.external_kit == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify packed external consumer
+        run: npm run external-kit:verify

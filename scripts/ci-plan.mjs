@@ -64,6 +64,13 @@ const routeBrowserSpecs = new Map([
   ["widgets", ["site/tests/browser/widgets.spec.ts"]],
 ]);
 const editorSliceRoutes = new Set(["canvas-demo", "kanban-demo", "object-demo", "order-demo", "tree-demo"]);
+const firstKitWorkspaces = new Set([
+  "@interactive-os/json-document",
+  "@interactive-os/json-document-selection",
+  "@interactive-os/json-document-editing",
+  "@interactive-os/json-document-web",
+  "@interactive-os/json-document-react",
+]);
 
 function internalDependencyNames(library) {
   return internalDependencies(library).map(({ manifest }) => manifest.name);
@@ -199,6 +206,7 @@ export function createPlan(changedFiles, { full = false } = {}) {
     docs,
     site,
     standards,
+    externalKit: packageWorkspaces.some((workspace) => firstKitWorkspaces.has(workspace)),
     reason: "변경 영향도에 따른 선택 검사",
   };
 }
@@ -211,6 +219,7 @@ function fullPlan(reason) {
     docs: true,
     site: true,
     standards: true,
+    externalKit: true,
     reason,
   };
 }
@@ -231,6 +240,7 @@ function emitGitHubOutput(plan) {
     docs: String(plan.docs),
     site: String(plan.site),
     standards: String(plan.standards),
+    external_kit: String(plan.externalKit),
     reason: plan.reason,
   };
   for (const [name, value] of Object.entries(output)) console.log(`${name}=${value}`);
