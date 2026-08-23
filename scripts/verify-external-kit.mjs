@@ -104,7 +104,8 @@ async function installFixture(tarballs) {
 
 async function verifyBrowser() {
   const port = await availablePort();
-  const server = spawn("npm", ["exec", "vite", "--", "--host", "127.0.0.1", "--port", String(port), "--strictPort"], {
+  const viteEntry = join(fixtureRoot, "node_modules", "vite", "bin", "vite.js");
+  const server = spawn(process.execPath, [viteEntry, "--host", "127.0.0.1", "--port", String(port), "--strictPort"], {
     cwd: fixtureRoot,
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
@@ -152,8 +153,21 @@ async function verifyBrowser() {
   } catch (error) {
     throw new Error(`External browser verification failed\n${serverOutput}`, { cause: error });
   } finally {
-    server.kill("SIGTERM");
+    await stopServer(server);
   }
+}
+
+async function stopServer(server) {
+  if (server.exitCode !== null) return;
+  server.kill("SIGTERM");
+  const closed = new Promise((resolve) => server.once("close", resolve));
+  const timedOut = await Promise.race([
+    closed.then(() => false),
+    new Promise((resolve) => setTimeout(() => resolve(true), 5_000)),
+  ]);
+  if (!timedOut) return;
+  server.kill("SIGKILL");
+  await closed;
 }
 
 async function expectAttribute(locator, name, value) {
