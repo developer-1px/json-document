@@ -73,20 +73,32 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/composer")).toEqual(["Overview:/", "Hands:/editors", "Composer:/docs/composer"]);
     expect(trail("/docs/mention")).toEqual(["Overview:/", "Hands:/editors", "Mention:/docs/mention"]);
     expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Adapter demos:/adapters"]);
-    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Keyboard:/adapters/keyboard"]);
+    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Keyboard Live Demo:/adapters/keyboard"]);
     expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Clipboard adapter:/adapters/clipboard"]);
     expect(trail("/docs/react-editing")).toEqual([
       "Overview:/",
       "Connector:/docs/connectors",
+      "React:/docs/connector-react",
       "React editing:/docs/react-editing",
     ]);
+    expect(trail("/docs/adapter-keyboard")).toEqual([
+      "Overview:/",
+      "Adapter:/docs/adapters",
+      "Keyboard:/docs/adapter-keyboard",
+    ]);
+    expect(trail("/docs/connector-zod-validate")).toEqual([
+      "Overview:/",
+      "Connector:/docs/connectors",
+      "Zod:/docs/connector-zod",
+      "Validate:/docs/connector-zod-validate",
+    ]);
     expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/docs/connectors", "Connector demos:/connectors"]);
-    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/docs/connectors", "Zod:/connectors/zod"]);
+    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/docs/connectors", "Zod Live Demo:/connectors/zod"]);
     expect(trail("/connectors/zod/validate")).toEqual([
       "Overview:/",
       "Connector:/docs/connectors",
-      "Zod:/connectors/zod",
-      "Validate:/connectors/zod/validate",
+      "Zod Live Demo:/connectors/zod",
+      "Validate Live Demo:/connectors/zod/validate",
     ]);
     expect(trail("/docs/affordance")).toEqual(["Overview:/", "Affordance:/docs/affordance"]);
     expect(trail("/docs/affordance/select")).toEqual([

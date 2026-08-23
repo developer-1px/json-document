@@ -72,9 +72,16 @@ describe("official site shell", () => {
       "Mention",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
-    expect(groupLinks(nav, "Adapter")).toEqual(["Overview"]);
+    expect(groupLinks(nav, "Adapter")).toEqual(["Overview", "Keyboard", "Clipboard", "Contenteditable"]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
-    expect(groupLinks(nav, "Connector")).toEqual(["Overview"]);
+    expect(groupLinks(nav, "Connector")).toEqual([
+      "Overview",
+      "React",
+      "React Hook Form",
+      "Ajv",
+      "Zod",
+      "TanStack Table",
+    ]);
     await user.click(nav.getByRole("button", { name: "Affordance" }));
     expect(groupLinks(nav, "Affordance")).toEqual([
       "Focus",

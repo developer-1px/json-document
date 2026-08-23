@@ -133,6 +133,9 @@ const activeCompanionPackages = new Set([
 ]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
+  "adapter-clipboard.md",
+  "adapter-contenteditable.md",
+  "adapter-keyboard.md",
   "adapters.md",
   "affordance-activate.md",
   "affordance-cancel.md",
@@ -170,6 +173,12 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "collaboration.md",
   "composer.md",
   "concepts.md",
+  "connector-ajv.md",
+  "connector-react-hook-form.md",
+  "connector-react.md",
+  "connector-tanstack-table.md",
+  "connector-zod-validate.md",
+  "connector-zod.md",
   "connectors.md",
   "database.md",
   "hands.md",

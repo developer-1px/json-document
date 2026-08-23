@@ -8,6 +8,9 @@ import { docPages, type DocPageId } from "./doc-pages";
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
   adapters: "peek",
+  adapterKeyboard: "terminal",
+  adapterClipboard: "clipboard",
+  adapterContenteditable: "cursor",
   affordance: "cursor",
   affordanceSelect: "cursor",
   affordanceFold: "branch",
@@ -35,6 +38,12 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   affordanceSnap: "braces",
   affordanceForbid: "debug",
   connectors: "connector",
+  connectorReact: "connector",
+  connectorReactHookForm: "clipboard",
+  connectorAjv: "debug",
+  connectorZod: "braces",
+  connectorZodValidate: "patch",
+  connectorTanStackTable: "database",
   reactEditing: "cursor",
   collaboration: "package",
   collaborationReplica: "debug",
@@ -66,12 +75,48 @@ export function AdapterDocsRoute() {
   return <DocsRoute pageId="adapters" />;
 }
 
+export function AdapterKeyboardDocsRoute() {
+  return <DocsRoute pageId="adapterKeyboard" />;
+}
+
+export function AdapterClipboardDocsRoute() {
+  return <DocsRoute pageId="adapterClipboard" />;
+}
+
+export function AdapterContenteditableDocsRoute() {
+  return <DocsRoute pageId="adapterContenteditable" />;
+}
+
 export function AffordanceDocsRoute() {
   return <DocsRoute pageId="affordance" />;
 }
 
 export function ConnectorDocsRoute() {
   return <DocsRoute pageId="connectors" />;
+}
+
+export function ConnectorReactDocsRoute() {
+  return <DocsRoute pageId="connectorReact" />;
+}
+
+export function ConnectorReactHookFormDocsRoute() {
+  return <DocsRoute pageId="connectorReactHookForm" />;
+}
+
+export function ConnectorAjvDocsRoute() {
+  return <DocsRoute pageId="connectorAjv" />;
+}
+
+export function ConnectorZodDocsRoute() {
+  return <DocsRoute pageId="connectorZod" />;
+}
+
+export function ConnectorZodValidateDocsRoute() {
+  return <DocsRoute pageId="connectorZodValidate" />;
+}
+
+export function ConnectorTanStackTableDocsRoute() {
+  return <DocsRoute pageId="connectorTanStackTable" />;
 }
 
 export function ApiReferenceRoute() {

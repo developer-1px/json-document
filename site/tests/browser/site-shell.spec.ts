@@ -51,9 +51,21 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Mention",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
-  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Overview"]);
+  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Keyboard",
+    "Clipboard",
+    "Contenteditable",
+  ]);
   await navigation.getByRole("button", { name: "Connector" }).click();
-  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["Overview"]);
+  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
+    "Overview",
+    "React",
+    "React Hook Form",
+    "Ajv",
+    "Zod",
+    "TanStack Table",
+  ]);
   await navigation.getByRole("button", { name: "Affordance" }).click();
   await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
     "Focus",
@@ -186,6 +198,32 @@ test("Connector pages declare the connection before the live demo", async ({ pag
         && Boolean(connection.compareDocumentPosition(demo) & Node.DOCUMENT_POSITION_FOLLOWING);
     })).toBe(true);
   }
+});
+
+test("Adapter and Connector menus expose contract docs while demos stay embedded", async ({ page }) => {
+  await page.goto("/docs/adapter-keyboard");
+  const navigation = page.getByRole("navigation", { name: "Site navigation" });
+  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Keyboard",
+    "Clipboard",
+    "Contenteditable",
+  ]);
+  await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
+  await expect(page.locator("[data-live-demo]")).toHaveCount(1);
+
+  await page.goto("/docs/connector-zod-validate");
+  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
+    "Overview",
+    "React",
+    "React Hook Form",
+    "Ajv",
+    "Zod",
+    "Validate",
+    "TanStack Table",
+  ]);
+  await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
+  await expect(page.locator("[data-live-demo]")).toHaveCount(1);
 });
 
 test("docs and demos share the page frame while preserving their content modes", async ({ page }) => {

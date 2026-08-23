@@ -347,8 +347,35 @@
     "navigationGroup": "Adapter"
   },
   {
-    "path": "/adapters/keyboard",
+    "path": "/docs/adapter-keyboard",
     "label": "Keyboard",
+    "title": "Keyboard Adapter - json-document",
+    "heading": "Keyboard Adapter",
+    "description": "Keyboard, Press와 ARIA platform contract를 Editing 입력으로 번역합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/docs/adapter-clipboard",
+    "label": "Clipboard",
+    "title": "Clipboard Adapter - json-document",
+    "heading": "Clipboard Adapter",
+    "description": "ClipboardEvent를 구조화된 copy, cut, paste 계약에 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/docs/adapter-contenteditable",
+    "label": "Contenteditable",
+    "title": "Contenteditable Adapter - json-document",
+    "heading": "Contenteditable Adapter",
+    "description": "문자열 pointer와 native-input DOM lifecycle을 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/adapters/keyboard",
+    "label": "Keyboard Live Demo",
     "title": "Keyboard Adapter Live Demo - json-document",
     "description": "Official keyboard adapter: conventional chords become commands, then existing Intent, Clipboard, and History doors.",
     "navigationGroup": "Adapter",
@@ -372,7 +399,7 @@
   },
   {
     "path": "/adapters/contenteditable",
-    "label": "Contenteditable",
+    "label": "Contenteditable Live Demo",
     "title": "Contenteditable Adapter Live Demo - json-document",
     "description": "Official DOM adapter: a React contenteditable root leases native input and commits one JSON Document string pointer.",
     "navigationGroup": "Adapter",
@@ -400,19 +427,73 @@
     "navigationGroup": "Connector"
   },
   {
+    "path": "/docs/connector-react",
+    "label": "React",
+    "title": "React Connector - json-document",
+    "heading": "React Connector",
+    "description": "document와 editor의 변경을 React 구독과 선택 질의로 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
     "path": "/docs/react-editing",
     "label": "React editing",
     "title": "React editing - json-document",
     "heading": "React에서 선택과 커서 그리기",
     "description": "useEditing으로 object 범위, focus 커서, text offset을 화면에 붙이는 방법과 API를 설명합니다.",
     "language": "ko",
-    "parentPath": "/docs/connectors",
+    "parentPath": "/docs/connector-react",
     "relatedDemoPath": "/connectors/react",
     "relatedDemoLabel": "React"
   },
   {
+    "path": "/docs/connector-react-hook-form",
+    "label": "React Hook Form",
+    "title": "React Hook Form Connector - json-document",
+    "heading": "React Hook Form Connector",
+    "description": "form draft와 canonical document commit을 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/connector-ajv",
+    "label": "Ajv",
+    "title": "Ajv Connector - json-document",
+    "heading": "Ajv Connector",
+    "description": "Ajv validator와 JSON Document validation을 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/connector-zod",
+    "label": "Zod",
+    "title": "Zod Connector - json-document",
+    "heading": "Zod Connector",
+    "description": "Zod schema와 Database document 변환을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/connector-zod-validate",
+    "label": "Validate",
+    "title": "Zod Validate - json-document",
+    "heading": "Zod Validate",
+    "description": "Zod issue path를 JSON Pointer validation 결과로 번역합니다.",
+    "language": "ko",
+    "parentPath": "/docs/connector-zod"
+  },
+  {
+    "path": "/docs/connector-tanstack-table",
+    "label": "TanStack Table",
+    "title": "TanStack Table Connector - json-document",
+    "heading": "TanStack Table Connector",
+    "description": "visible row와 column 순서를 SheetTopology에 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
     "path": "/connectors/react",
-    "label": "React",
+    "label": "React Live Demo",
     "title": "React Connector Live Demo - json-document",
     "description": "Live React subscription plus shared queries for object range, focus cursor, and text offset.",
     "navigationGroup": "Connector",
@@ -424,7 +505,7 @@
   },
   {
     "path": "/connectors/react-hook-form",
-    "label": "React Hook Form",
+    "label": "React Hook Form Live Demo",
     "title": "React Hook Form Connector Live Demo - json-document",
     "description": "Live React Hook Form drafts, canonical validation, atomic submit history, and undo/redo reset.",
     "navigationGroup": "Connector",
@@ -436,7 +517,7 @@
   },
   {
     "path": "/connectors/ajv",
-    "label": "Ajv",
+    "label": "Ajv Live Demo",
     "title": "Ajv Connector Live Demo - json-document",
     "description": "Live Ajv validation with JSON Pointer diagnostics and non-adoption of validator mutations.",
     "navigationGroup": "Connector",
@@ -448,7 +529,7 @@
   },
   {
     "path": "/connectors/zod",
-    "label": "Zod",
+    "label": "Zod Live Demo",
     "title": "Zod Connector Live Demo - json-document",
     "description": "A Zod object schema and record array become a Database admin table.",
     "navigationGroup": "Connector",
@@ -460,7 +541,7 @@
   },
   {
     "path": "/connectors/zod/validate",
-    "label": "Validate",
+    "label": "Validate Live Demo",
     "relatedDemoLabel": "Validate commits",
     "title": "Zod Validate Live Demo - json-document",
     "description": "Live Zod validation with JSON Pointer diagnostics and canonical JSON preservation.",
@@ -468,7 +549,7 @@
   },
   {
     "path": "/connectors/tanstack-table",
-    "label": "TanStack Table",
+    "label": "TanStack Table Live Demo",
     "title": "TanStack Table Connector Live Demo - json-document",
     "description": "Live TanStack Table v8 integration for visible-order Sheet selection, clipboard, history, and canonical JSON editing.",
     "navigationGroup": "Connector",

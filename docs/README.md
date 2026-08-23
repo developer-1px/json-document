@@ -27,7 +27,16 @@ docs
 |   |-- tree.md                # Hands: 보이는 나무
 |   |-- database.md            # Hands: 저장된 표 view
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
+|   |-- adapter-keyboard.md    # Adapter: Keyboard / Press / ARIA
+|   |-- adapter-clipboard.md   # Adapter: ClipboardEvent
+|   |-- adapter-contenteditable.md # Adapter: native-input DOM
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결
+|   |-- connector-react.md     # Connector: React 구독
+|   |-- connector-react-hook-form.md # Connector: form draft와 commit
+|   |-- connector-ajv.md       # Connector: Ajv validation
+|   |-- connector-zod.md       # Connector: Zod database 변환
+|   |-- connector-zod-validate.md # Connector: Zod validation
+|   |-- connector-tanstack-table.md # Connector: visible table topology
 |   |-- react-editing.md       # Connectors: React 선택·커서 질의
 |   `-- llms.txt               # machine-readable 공개 문서
 ```
@@ -50,11 +59,20 @@ Editing
 `-- History
 
 Adapter
-`-- Overview
+|-- Overview
+|-- Keyboard
+|-- Clipboard
+`-- Contenteditable
 
 Connector
 |-- Overview
-`-- React editing
+|-- React
+|   `-- React editing
+|-- React Hook Form
+|-- Ajv
+|-- Zod
+|   `-- Validate
+`-- TanStack Table
 
 Affordance
 |-- Focus
