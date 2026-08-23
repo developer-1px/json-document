@@ -64,6 +64,13 @@ export function AnnotationDemoRoute() {
     history.commit({ ...snapshot, selectedId });
   }
 
+  function chooseTool(nextTool: Tool) {
+    setTool(nextTool);
+    if (snapshot.selectedId !== null) {
+      history.replace({ ...snapshot, selectedId: null });
+    }
+  }
+
   function addPoint(point: PointTarget) {
     const annotation = createAnnotation("marker", point, point);
     if (annotation === null) return;
@@ -179,7 +186,7 @@ export function AnnotationDemoRoute() {
         toolbar={(
           <>
             {(["select", "point", "rectangle", "arrow"] as const).map((value) => (
-              <ToggleButton key={value} pressed={tool === value} onClick={() => setTool(value)}>
+              <ToggleButton key={value} pressed={tool === value} onClick={() => chooseTool(value)}>
                 {toolLabel(value)}
               </ToggleButton>
             ))}
@@ -228,33 +235,78 @@ export function AnnotationDemoRoute() {
             ))}
             {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
           </svg>
+          {selected ? (
+            <CommentComposer
+              annotation={selected}
+              index={snapshot.document.annotations.indexOf(selected) + 1}
+              onChange={(instruction) => history.commit(updateAnnotation(snapshot, selected.id, (annotation) => ({
+                ...annotation,
+                body: { instruction },
+              })))}
+              onDone={() => setSelected(null)}
+            />
+          ) : null}
         </div>
 
-        <aside className={classes("grid content-start gap-3 p-3", ui.surface.raised)} aria-label="Selected annotation">
+        <aside className={classes(annotationDemoStyles.threadList, ui.surface.raised)} aria-label="Annotation threads">
           <div>
-            <p className={classes("mb-1 mt-0", ui.text.label)}>Instruction</p>
-            <p className={classes("m-0", ui.text.meta)}>{selected ? `${selected.mark.type} · ${selected.id}` : "표시를 선택하세요."}</p>
+            <p className={classes("mb-1 mt-0", ui.text.label)}>Requests</p>
+            <p className={classes("m-0", ui.text.meta)}>{snapshot.document.annotations.length}개의 이미지 수정 요청</p>
           </div>
-          <textarea
-            aria-label="Annotation instruction"
-            className={classes("min-h-28 w-full resize-y", ui.field.control)}
-            disabled={selected === null}
-            value={selected?.body.instruction ?? ""}
-            onChange={(event) => {
-              if (selected === null) return;
-              history.commit(updateAnnotation(snapshot, selected.id, (annotation) => ({
-                ...annotation,
-                body: { instruction: event.target.value },
-              })));
-            }}
-            placeholder="이 영역을 어떻게 바꿀까요?"
-          />
-          <p className={classes("m-0", ui.text.meta)}>
-            Select에서 표시를 drag하세요. Rectangle과 arrow의 끝 handle로 크기를 바꿀 수 있습니다.
-          </p>
+          {snapshot.document.annotations.length === 0 ? (
+            <p className={classes("m-0", ui.text.meta)}>이미지를 클릭하거나 영역을 그리면 코멘트를 입력할 수 있습니다.</p>
+          ) : snapshot.document.annotations.map((annotation, index) => (
+            <button
+              key={annotation.id}
+              className={annotationDemoStyles.threadButton}
+              data-selected={annotation.id === snapshot.selectedId ? "true" : "false"}
+              onClick={() => setSelected(annotation.id)}
+              type="button"
+            >
+              <span className={ui.text.label}>Request {index + 1} · {annotation.mark.type}</span>
+              <span className={ui.text.meta}>{annotation.body.instruction || "내용을 입력하세요."}</span>
+            </button>
+          ))}
         </aside>
       </ProductApp>
     </DemoPage>
+  );
+}
+
+function CommentComposer(props: {
+  readonly annotation: RasterAnnotation;
+  readonly index: number;
+  readonly onChange: (instruction: string) => void;
+  readonly onDone: () => void;
+}) {
+  const anchor = annotationAnchor(props.annotation);
+  const opensLeft = anchor.x > annotationSource.width * 0.68;
+  return (
+    <section
+      aria-label={`Request ${props.index} comment`}
+      className={annotationDemoStyles.commentCard}
+      style={{
+        left: `${(anchor.x / annotationSource.width) * 100}%`,
+        top: `${(anchor.y / annotationSource.height) * 100}%`,
+        transform: opensLeft ? "translate(calc(-100% - 1rem), -50%)" : "translate(1rem, -50%)",
+      }}
+    >
+      <div className={annotationDemoStyles.commentHeader}>
+        <strong className={ui.text.label}>Request {props.index}</strong>
+        <span className={ui.text.meta}>{props.annotation.mark.type}</span>
+      </div>
+      <textarea
+        aria-label="Annotation instruction"
+        autoFocus
+        className={classes("min-h-24 w-full resize-y", ui.field.control)}
+        onChange={(event) => props.onChange(event.target.value)}
+        placeholder="어떻게 수정할까요?"
+        value={props.annotation.body.instruction}
+      />
+      <div className="flex justify-end">
+        <ActionButton onClick={props.onDone}>Done</ActionButton>
+      </div>
+    </section>
   );
 }
 
@@ -362,7 +414,7 @@ function OutputPanel(props: {
         <ToggleButton role="tab" pressed={props.output === "image"} aria-selected={props.output === "image"} onClick={() => props.setOutput("image")}>Image</ToggleButton>
       </div>
       {props.output === "structured" ? (
-        <pre data-testid="annotation-structured-output" className={classes("m-0 max-h-64 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs", ui.surface.inset)}>
+        <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput, ui.surface.inset)}>
           {JSON.stringify(props.structured, null, 2)}
         </pre>
       ) : props.renderedImage === null ? (
@@ -454,6 +506,16 @@ function resizeAnnotation(annotation: RasterAnnotation, dx: number, dy: number):
 
 function movePoint(point: PointTarget, dx: number, dy: number): PointTarget {
   return { type: "point", x: point.x + dx, y: point.y + dy };
+}
+
+function annotationAnchor(annotation: RasterAnnotation): PointTarget {
+  if (annotation.mark.type === "arrow") return annotation.mark.to;
+  if (annotation.target.type === "point") return annotation.target;
+  return {
+    type: "point",
+    x: annotation.target.x + annotation.target.width,
+    y: annotation.target.y,
+  };
 }
 
 function eventPoint(event: PointerEvent<SVGElement>): PointTarget {

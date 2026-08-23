@@ -7,6 +7,7 @@ test("Annotation Hands creates point, rectangle, and arrow instructions", async 
   const box = await requiredBox(canvas);
 
   await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.42 } });
+  await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
   await page.getByRole("button", { name: "Rectangle" }).click();
   await drag(page, box.x + box.width * 0.5, box.y + box.height * 0.25, box.x + box.width * 0.72, box.y + box.height * 0.5);
   const rectangleStroke = await page.locator("[data-annotation-id] rect").evaluate((element) => getComputedStyle(element).stroke);
@@ -21,6 +22,9 @@ test("Annotation Hands creates point, rectangle, and arrow instructions", async 
   await expect(page.getByLabel("Annotation instruction")).toHaveValue("화살표가 가리키는 위치를 수정해 주세요.");
   await page.getByLabel("Annotation instruction").fill("고양이 쪽으로 화살표를 옮겨 주세요.");
   expect((await structured(page)).annotations[2].body.instruction).toBe("고양이 쪽으로 화살표를 옮겨 주세요.");
+  await expect(page.getByRole("button", { name: /Request 3 · arrow/ })).toContainText("고양이 쪽으로 화살표를 옮겨 주세요.");
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.getByRole("region", { name: "Request 3 comment" })).toBeHidden();
 });
 
 test("Annotation Hands moves, resizes, deletes, and restores history", async ({ page }) => {
