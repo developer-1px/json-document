@@ -154,7 +154,7 @@ test("official docs routes render with route metadata in a real browser", async 
   await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "Overview", exact: true }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
-  await expect(page.locator("[data-live-demo]")).toHaveCount(6);
+  await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
   await page.getByRole("link", { name: "API Reference" }).first().click();
   await expect(page).toHaveTitle("json-document API - json-document");
@@ -436,7 +436,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
     lineNumberBorderRightWidth: "0px",
   });
 
-  await page.goto("/docs/connectors");
+  await page.goto("/docs/connector-react");
   await page.locator('[data-live-demo="/connectors/react"]').scrollIntoViewIfNeeded();
   expect(await page.getByLabel("Document title").evaluate((element) => (
     getComputedStyle(element).borderColor
@@ -484,7 +484,7 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
-  await page.goto("/docs/connectors");
+  await page.goto("/docs/connector-react");
   await page.locator('[data-live-demo="/connectors/react"]').scrollIntoViewIfNeeded();
 
   const titleInput = page.getByLabel("Document title");
@@ -501,25 +501,30 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
 
   const currentLink = page.getByRole("navigation", { name: "Site navigation" })
     .getByRole("group", { name: "Connector" })
-    .getByRole("link", { name: "Overview", exact: true });
+    .getByRole("link", { name: "React", exact: true });
   expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
 
+  await page.goto("/docs/api");
   const code = page.getByRole("figure", { name: "TypeScript" }).first();
+  await expect(code.locator("pre")).toBeVisible();
+  await expect(code.locator("xpath=..")).toHaveAttribute("data-source-highlighter", "shiki");
   const codePalette = await code.evaluate((element) => ({
     backgroundColor: getComputedStyle(element.querySelector("pre")!).backgroundColor,
     fontSize: getComputedStyle(element.querySelector("code")!).fontSize,
-    keyword: getComputedStyle(element.querySelector('[data-code-token="keyword"]')!).color,
-    usesImpactSyntax: [...element.querySelectorAll("[data-code-token]")]
+    keyword: getComputedStyle([...element.querySelectorAll("[data-code-line] > span")]
+      .find((token) => token.textContent === "import")!).color,
+    usesImpactSyntax: [...element.querySelectorAll("[data-code-line] > span")]
       .some((token) => getComputedStyle(token).color === "rgb(222, 109, 85)"),
   }));
   expect(codePalette).toEqual({
     backgroundColor: "rgb(251, 248, 242)",
     fontSize: "13px",
-    keyword: "rgb(41, 40, 36)",
+    keyword: "rgb(207, 34, 46)",
     usesImpactSyntax: false,
   });
-  expect(await page.locator('[data-code-token="string"]').first().evaluate((element) => getComputedStyle(element).color))
-    .toBe("rgb(96, 120, 111)");
+  expect(await code.locator("[data-code-line] > span").filter({ hasText: '"@interactive-os/json-document"' })
+    .evaluate((element) => getComputedStyle(element).color))
+    .toBe("rgb(10, 48, 105)");
 
   await page.goto("/demo/database");
   const selectedCell = page.locator('[role="gridcell"][data-selected="true"]').first();

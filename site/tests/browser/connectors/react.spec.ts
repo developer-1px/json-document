@@ -8,7 +8,7 @@ test("Connector catalog exposes only implemented Live Demos", async ({ page }) =
   await expect(page.getByRole("link", { name: "Open Live Demo" })).toHaveCount(5);
 
   const reactArticle = page.getByRole("article").filter({
-    has: page.getByRole("heading", { level: 2, name: "React", exact: true }),
+    has: page.getByRole("heading", { level: 2, name: "React Live Demo", exact: true }),
   });
   await reactArticle.getByRole("link", { name: "Open Live Demo" }).click();
   await expect(page).toHaveURL(/\/connectors\/react$/);
