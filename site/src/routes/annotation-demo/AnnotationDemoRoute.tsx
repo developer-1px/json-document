@@ -463,7 +463,7 @@ function StrokeLine(props: {
 }) {
   const first = props.points[0];
   if (first === undefined) return null;
-  const path = props.points.slice(1).reduce((value, point) => `${value} L ${point.x} ${point.y}`, `M ${first.x} ${first.y}`);
+  const path = strokePathData(props.points);
   return (
     <path
       d={path}
@@ -476,6 +476,21 @@ function StrokeLine(props: {
       vectorEffect="non-scaling-stroke"
     />
   );
+}
+
+function strokePathData(points: ReadonlyArray<PointTarget>): string {
+  const first = points[0];
+  if (first === undefined) return "";
+  if (points.length === 2) {
+    const last = points[1] ?? first;
+    return `M ${first.x} ${first.y} L ${last.x} ${last.y}`;
+  }
+  const curves = points.slice(1, -1).map((point, index) => {
+    const next = points[index + 2] ?? point;
+    return `Q ${point.x} ${point.y} ${(point.x + next.x) / 2} ${(point.y + next.y) / 2}`;
+  });
+  const last = points.at(-1) ?? first;
+  return [`M ${first.x} ${first.y}`, ...curves, `L ${last.x} ${last.y}`].join(" ");
 }
 
 function ArrowLine(props: { readonly from: PointTarget; readonly to: PointTarget; readonly selected: boolean }) {

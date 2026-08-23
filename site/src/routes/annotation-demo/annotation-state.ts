@@ -159,7 +159,17 @@ function drawStroke(
   if (first === undefined) return;
   context.beginPath();
   context.moveTo(first.x, first.y);
-  points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
+  if (points.length === 2) {
+    const last = points[1];
+    if (last !== undefined) context.lineTo(last.x, last.y);
+  } else {
+    points.slice(1, -1).forEach((point, index) => {
+      const next = points[index + 2] ?? point;
+      context.quadraticCurveTo(point.x, point.y, (point.x + next.x) / 2, (point.y + next.y) / 2);
+    });
+    const last = points.at(-1);
+    if (last !== undefined) context.lineTo(last.x, last.y);
+  }
   context.stroke();
 }
 
