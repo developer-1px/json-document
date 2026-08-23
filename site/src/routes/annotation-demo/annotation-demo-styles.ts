@@ -8,7 +8,7 @@ export const annotationDemoStyles = {
   commentTailBelowLeft: "absolute -right-2 -top-2 size-4 rotate-45 border-r border-t border-line-subtle bg-background-canvas",
   commentTailBelowRight: "absolute -left-2 -top-2 size-4 rotate-45 border-l border-t border-line-subtle bg-background-canvas",
   commentHeader: "flex items-center justify-between gap-2",
-  commentInput: "min-h-16 w-full resize-none !border-0 !bg-transparent !p-0 !shadow-none focus-visible:!border-0 focus-visible:!ring-0",
+  commentInput: "min-h-6 max-h-40 w-full resize-none overflow-y-auto [field-sizing:content] !border-0 !bg-transparent !p-0 !shadow-none focus-visible:!border-0 focus-visible:!ring-0",
   threadList: "grid content-start gap-2 p-3",
   threadButton: "grid w-full cursor-pointer gap-1 rounded-surface border border-line-subtle bg-background-canvas p-3 text-left outline-none hover:border-line-default focus-visible:ring-2 focus-visible:ring-line-accent/25 data-[selected=true]:border-line-accent data-[selected=true]:bg-background-subtle",
   structuredOutput: "m-0 max-h-64 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs",

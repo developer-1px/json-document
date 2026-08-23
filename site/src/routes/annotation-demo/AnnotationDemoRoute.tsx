@@ -384,6 +384,7 @@ function CommentComposer(props: {
           if (event.key === "Escape") props.onDone();
         }}
         placeholder="어떻게 수정할까요?"
+        rows={1}
         value={props.annotation.body.instruction}
       />
       <div className="flex justify-end">

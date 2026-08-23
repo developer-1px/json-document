@@ -27,6 +27,22 @@ test("Annotation Hands creates a point on click, a rectangle on drag, and an arr
   await expect(page.getByRole("region", { name: "Request 3 comment" })).toBeHidden();
 });
 
+test("Annotation Hands grows and shrinks the comment input with its content", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  await page.getByLabel("Raster annotation canvas").click();
+  const input = page.getByLabel("Annotation instruction");
+  const initial = await requiredBox(input);
+
+  await input.fill("첫 줄\n둘째 줄\n셋째 줄\n넷째 줄");
+  const expanded = await requiredBox(input);
+  expect(expanded.height).toBeGreaterThan(initial.height);
+
+  await input.fill("한 줄");
+  const collapsed = await requiredBox(input);
+  expect(collapsed.height).toBeLessThan(expanded.height);
+  expect(collapsed.height).toBeLessThanOrEqual(initial.height + 2);
+});
+
 test("Annotation Hands moves, resizes, deletes, and restores history", async ({ page }) => {
   await page.goto("/demo/annotation");
   const canvas = page.getByLabel("Raster annotation canvas");
