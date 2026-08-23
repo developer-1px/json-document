@@ -7,8 +7,21 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
+import {
+  ArrowUpRight,
+  ImagePlus,
+  MessageSquare,
+  MousePointer2,
+  Pencil,
+  Redo2,
+  Send,
+  Trash2,
+  Undo2,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { ActionButton, ToggleButton } from "../../shared/ui/interactive";
+import { ActionButton, IconButton, ToggleButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -70,7 +83,33 @@ export function AnnotationDemoRoute() {
   );
 
   function setSelected(selectedId: string | null) {
-    history.commit({ ...snapshot, selectedId });
+    history.replace({ ...snapshot, selectedId });
+  }
+
+  function sendComment(annotation: RasterAnnotation, instruction: string) {
+    history.commit({
+      ...updateAnnotation(snapshot, annotation.id, (current) => ({
+        ...current,
+        body: { instruction: instruction.trim() },
+      })),
+      selectedId: null,
+    });
+    setAnnouncement("수정 요청을 추가했습니다.");
+  }
+
+  function cancelComment(annotation: RasterAnnotation) {
+    if (annotation.body.instruction === "") {
+      history.commit({
+        document: {
+          ...snapshot.document,
+          annotations: snapshot.document.annotations.filter(({ id }) => id !== annotation.id),
+        },
+        selectedId: null,
+      });
+      setAnnouncement("작성 중인 요청을 취소했습니다.");
+      return;
+    }
+    history.replace({ ...snapshot, selectedId: null });
   }
 
   function chooseTool(nextTool: Tool) {
@@ -242,24 +281,31 @@ export function AnnotationDemoRoute() {
         toolbar={(
           <>
             {(["select", "comment", "draw", "arrow"] as const).map((value) => (
-              <ToggleButton aria-keyshortcuts={toolShortcut(value)} key={value} pressed={tool === value} onClick={() => chooseTool(value)}>
-                {toolLabel(value)}
-                <kbd aria-hidden="true" className={annotationDemoStyles.toolKey}>{toolShortcut(value)}</kbd>
+              <ToggleButton
+                aria-label={toolLabel(value)}
+                aria-keyshortcuts={toolShortcut(value)}
+                className={annotationDemoStyles.toolButton}
+                key={value}
+                pressed={tool === value}
+                onClick={() => chooseTool(value)}
+                title={`${toolLabel(value)} (${toolShortcut(value)})`}
+              >
+                <ToolIcon tool={value} />
               </ToggleButton>
             ))}
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <label className={annotationDemoStyles.uploadControl}>
-              Replace image
+            <label aria-label="Replace image" className={annotationDemoStyles.uploadControl} title="Replace image">
+              <ImagePlus aria-hidden="true" size={16} />
               <input accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(event) => void replaceImage(event)} type="file" />
             </label>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={!history.canUndo} onClick={history.undo}>Undo</ActionButton>
-            <ActionButton disabled={!history.canRedo} onClick={history.redo}>Redo</ActionButton>
-            <ActionButton disabled={selected === null} onClick={deleteSelected}>Delete</ActionButton>
+            <IconButton disabled={!history.canUndo} label="Undo" onClick={history.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton disabled={!history.canRedo} label="Redo" onClick={history.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton disabled={selected === null} label="Delete" onClick={deleteSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton aria-label="Zoom out" disabled={zoom <= 1} onClick={() => setZoom((value) => Math.max(1, value - 0.25))}>−</ActionButton>
+            <IconButton disabled={zoom <= 1} label="Zoom out" onClick={() => setZoom((value) => Math.max(1, value - 0.25))}><ZoomOut aria-hidden="true" size={16} /></IconButton>
             <span className={ui.text.meta} aria-live="polite">{Math.round(zoom * 100)}%</span>
-            <ActionButton aria-label="Zoom in" disabled={zoom >= 2.5} onClick={() => setZoom((value) => Math.min(2.5, value + 0.25))}>+</ActionButton>
+            <IconButton disabled={zoom >= 2.5} label="Zoom in" onClick={() => setZoom((value) => Math.min(2.5, value + 0.25))}><ZoomIn aria-hidden="true" size={16} /></IconButton>
           </>
         )}
         inspector={(
@@ -310,11 +356,8 @@ export function AnnotationDemoRoute() {
                 annotation={selected}
                 index={snapshot.document.annotations.indexOf(selected) + 1}
                 source={source}
-                onChange={(instruction) => history.commit(updateAnnotation(snapshot, selected.id, (annotation) => ({
-                  ...annotation,
-                  body: { instruction },
-                })))}
-                onDone={() => setSelected(null)}
+                onCancel={() => cancelComment(selected)}
+                onSend={(instruction) => sendComment(selected, instruction)}
               />
             ) : null}
           </div>
@@ -335,8 +378,8 @@ export function AnnotationDemoRoute() {
               onClick={() => setSelected(annotation.id)}
               type="button"
             >
-              <span className={ui.text.label}>Request {index + 1} · {markLabel(annotation)}</span>
-              <span className={ui.text.meta}>{annotation.body.instruction || "내용을 입력하세요."}</span>
+              <span className={annotationDemoStyles.threadBadge}>{index + 1}</span>
+              <span className={ui.text.meta}>{annotation.body.instruction || "작성 중인 요청"}</span>
             </button>
           ))}
         </aside>
@@ -349,9 +392,11 @@ function CommentComposer(props: {
   readonly annotation: RasterAnnotation;
   readonly index: number;
   readonly source: AnnotationSource;
-  readonly onChange: (instruction: string) => void;
-  readonly onDone: () => void;
+  readonly onCancel: () => void;
+  readonly onSend: (instruction: string) => void;
 }) {
+  const [draft, setDraft] = useState(props.annotation.body.instruction);
+  useEffect(() => setDraft(props.annotation.body.instruction), [props.annotation.id, props.annotation.body.instruction]);
   const dock = annotationDock(props.annotation, props.source);
   const opensLeft = dock.horizontal === "left";
   const opensAbove = dock.vertical === "above";
@@ -370,28 +415,41 @@ function CommentComposer(props: {
       }}
     >
       <span className={tailStyle} aria-hidden="true" />
-      <div className={annotationDemoStyles.commentHeader}>
-        <strong className={ui.text.label}>Request {props.index}</strong>
-        <span className={ui.text.meta}>{markLabel(props.annotation)}</span>
-      </div>
       <textarea
         aria-label="Annotation instruction"
         autoFocus
         className={classes(ui.field.control, annotationDemoStyles.commentInput)}
-        onChange={(event) => props.onChange(event.target.value)}
+        onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
-          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") props.onDone();
-          if (event.key === "Escape") props.onDone();
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && draft.trim() !== "") props.onSend(draft);
+          if (event.key === "Escape") props.onCancel();
         }}
-        placeholder="어떻게 수정할까요?"
+        placeholder="수정 요청을 입력하세요…"
         rows={1}
-        value={props.annotation.body.instruction}
+        value={draft}
       />
-      <div className="flex justify-end">
-        <ActionButton onClick={props.onDone}>Done</ActionButton>
+      <div className={annotationDemoStyles.commentActions}>
+        <span className={annotationDemoStyles.sendHint}>⌘ Enter</span>
+        <ActionButton
+          aria-label="Send comment"
+          className={annotationDemoStyles.sendButton}
+          disabled={draft.trim() === ""}
+          kind="primary"
+          onClick={() => props.onSend(draft)}
+          title="Send comment (⌘ Enter)"
+        >
+          <Send aria-hidden="true" size={15} />
+        </ActionButton>
       </div>
     </section>
   );
+}
+
+function ToolIcon(props: { readonly tool: Tool }) {
+  if (props.tool === "select") return <MousePointer2 aria-hidden="true" size={16} />;
+  if (props.tool === "comment") return <MessageSquare aria-hidden="true" size={16} />;
+  if (props.tool === "draw") return <Pencil aria-hidden="true" size={16} />;
+  return <ArrowUpRight aria-hidden="true" size={16} />;
 }
 
 function AnnotationShape(props: {

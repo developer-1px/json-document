@@ -8,7 +8,7 @@ test("Annotation Hands creates a point on click, a rectangle on drag, and an arr
 
   await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.42 } });
   await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
-  await page.getByRole("button", { name: "Comment" }).click();
+  await page.getByRole("button", { name: "Comment", exact: true }).click();
   await drag(page, box.x + box.width * 0.5, box.y + box.height * 0.25, box.x + box.width * 0.72, box.y + box.height * 0.5);
   const rectangleStroke = await page.locator("[data-annotation-id]").nth(1).locator("rect").evaluate((element) => getComputedStyle(element).stroke);
   expect(rectangleStroke).not.toBe("none");
@@ -21,9 +21,10 @@ test("Annotation Hands creates a point on click, a rectangle on drag, and an arr
     .toEqual(["marker", "rectangle", "arrow"]);
   await expect(page.getByLabel("Annotation instruction")).toHaveValue("");
   await page.getByLabel("Annotation instruction").fill("고양이 쪽으로 화살표를 옮겨 주세요.");
+  expect((await structured(page)).annotations[2].body.instruction).toBe("");
+  await page.getByRole("button", { name: "Send comment" }).click();
   expect((await structured(page)).annotations[2].body.instruction).toBe("고양이 쪽으로 화살표를 옮겨 주세요.");
-  await expect(page.getByRole("button", { name: /Request 3 · Arrow/ })).toContainText("고양이 쪽으로 화살표를 옮겨 주세요.");
-  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.getByRole("button", { name: /3 고양이 쪽으로/ })).toBeVisible();
   await expect(page.getByRole("region", { name: "Request 3 comment" })).toBeHidden();
 });
 
@@ -41,6 +42,21 @@ test("Annotation Hands grows and shrinks the comment input with its content", as
   const collapsed = await requiredBox(input);
   expect(collapsed.height).toBeLessThan(expanded.height);
   expect(collapsed.height).toBeLessThanOrEqual(initial.height + 2);
+});
+
+test("Annotation Hands cancels an empty draft and submits a comment once", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.click();
+  await page.getByLabel("Annotation instruction").press("Escape");
+  expect((await structured(page)).annotations).toHaveLength(0);
+
+  await canvas.click();
+  await page.getByLabel("Annotation instruction").fill("키캡 색을 더 진하게 해 주세요.");
+  expect((await structured(page)).annotations[0].body.instruction).toBe("");
+  await page.getByLabel("Annotation instruction").press("Control+Enter");
+  expect((await structured(page)).annotations[0].body.instruction).toBe("키캡 색을 더 진하게 해 주세요.");
+  await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeHidden();
 });
 
 test("Annotation Hands moves, resizes, deletes, and restores history", async ({ page }) => {
@@ -113,7 +129,9 @@ test("Annotation Hands draws an irregular revision region with a linked comment"
   expect(state.annotations[0].mark.points.length).toBeGreaterThan(3);
   await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
   await page.getByLabel("Annotation instruction").fill("목도리 윤곽을 더 부드럽게 정리해 주세요.");
-  await expect(page.getByRole("button", { name: /Request 1 · Draw/ })).toContainText("목도리 윤곽을 더 부드럽게 정리해 주세요.");
+  expect((await structured(page)).annotations[0].body.instruction).toBe("");
+  await page.getByRole("button", { name: "Send comment" }).click();
+  await expect(page.getByRole("button", { name: /1 목도리 윤곽을/ })).toBeVisible();
 });
 
 test("Annotation Hands zooms the raster stage for precise markup", async ({ page }) => {
