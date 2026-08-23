@@ -57,16 +57,7 @@ import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
 import databaseMarkdown from "../../../../docs/public/database.md?raw";
-import domainsMarkdown from "../../../../docs/public/domains.md?raw";
-import domainSchemaMarkdown from "../../../../docs/public/domain-schema.md?raw";
-import domainDocumentMarkdown from "../../../../docs/public/domain-document.md?raw";
-import domainOrderMarkdown from "../../../../docs/public/domain-order.md?raw";
-import domainObjectMarkdown from "../../../../docs/public/domain-object.md?raw";
-import domainSheetMarkdown from "../../../../docs/public/domain-sheet.md?raw";
-import domainTreeMarkdown from "../../../../docs/public/domain-tree.md?raw";
-import domainKanbanMarkdown from "../../../../docs/public/domain-kanban.md?raw";
-import domainDatabaseMarkdown from "../../../../docs/public/domain-database.md?raw";
-import domainRichTextMarkdown from "../../../../docs/public/domain-rich-text.md?raw";
+import officialHandsMarkdown from "../../../../docs/public/official-hands.md?raw";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 function docPage(path: string, source: string) {
@@ -126,16 +117,7 @@ export const docPages = {
   object: docPage("/docs/object", objectMarkdown),
   tree: docPage("/docs/tree", treeMarkdown),
   database: docPage("/docs/database", databaseMarkdown),
-  domains: docPage("/docs/domains", domainsMarkdown),
-  domainSchema: docPage("/docs/domains/schema", domainSchemaMarkdown),
-  domainDocument: docPage("/docs/domains/document", domainDocumentMarkdown),
-  domainOrder: docPage("/docs/domains/order", domainOrderMarkdown),
-  domainObject: docPage("/docs/domains/object", domainObjectMarkdown),
-  domainSheet: docPage("/docs/domains/sheet", domainSheetMarkdown),
-  domainTree: docPage("/docs/domains/tree", domainTreeMarkdown),
-  domainKanban: docPage("/docs/domains/kanban", domainKanbanMarkdown),
-  domainDatabase: docPage("/docs/domains/database", domainDatabaseMarkdown),
-  domainRichText: docPage("/docs/domains/rich-text", domainRichTextMarkdown),
+  officialHands: docPage("/docs/official-hands", officialHandsMarkdown),
   intent: docPage("/docs/intent", intentMarkdown),
   intentGuide: docPage("/docs/intent-guide", intentGuideMarkdown),
   api: docPage("/docs/api", apiReferenceMarkdown),

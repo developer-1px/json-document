@@ -54,12 +54,12 @@ import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/co
 import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
-import { Route as PageDocsDomainsRouteImport } from "./routes/_page/docs/domains";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsMentionRouteImport } from "./routes/_page/docs/mention";
 import { Route as PageDocsObjectRouteImport } from "./routes/_page/docs/object";
+import { Route as PageDocsOfficialHandsRouteImport } from "./routes/_page/docs/official-hands";
 import { Route as PageDocsOrderRouteImport } from "./routes/_page/docs/order";
 import { Route as PageDocsReactEditingRouteImport } from "./routes/_page/docs/react-editing";
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
@@ -107,15 +107,6 @@ import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/d
 import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
 import { Route as PageDocsCollaborationLifecycleRouteImport } from "./routes/_page/docs/collaboration/lifecycle";
 import { Route as PageDocsCollaborationReplicaRouteImport } from "./routes/_page/docs/collaboration/replica";
-import { Route as PageDocsDomainsDatabaseRouteImport } from "./routes/_page/docs/domains/database";
-import { Route as PageDocsDomainsDocumentRouteImport } from "./routes/_page/docs/domains/document";
-import { Route as PageDocsDomainsKanbanRouteImport } from "./routes/_page/docs/domains/kanban";
-import { Route as PageDocsDomainsObjectRouteImport } from "./routes/_page/docs/domains/object";
-import { Route as PageDocsDomainsOrderRouteImport } from "./routes/_page/docs/domains/order";
-import { Route as PageDocsDomainsRichTextRouteImport } from "./routes/_page/docs/domains/rich-text";
-import { Route as PageDocsDomainsSchemaRouteImport } from "./routes/_page/docs/domains/schema";
-import { Route as PageDocsDomainsSheetRouteImport } from "./routes/_page/docs/domains/sheet";
-import { Route as PageDocsDomainsTreeRouteImport } from "./routes/_page/docs/domains/tree";
 import { Route as PageDocsCollaborationTextIndexRouteImport } from "./routes/_page/docs/collaboration/text/index";
 import { Route as PageDocsCollaborationTextLeaseRouteImport } from "./routes/_page/docs/collaboration/text/lease";
 
@@ -352,11 +343,6 @@ const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
   path: "/docs/database",
   getParentRoute: () => PageRoute,
 } as any);
-const PageDocsDomainsRoute = PageDocsDomainsRouteImport.update({
-  id: "/docs/domains",
-  path: "/docs/domains",
-  getParentRoute: () => PageRoute,
-} as any);
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
   id: "/docs/history",
   path: "/docs/history",
@@ -380,6 +366,11 @@ const PageDocsMentionRoute = PageDocsMentionRouteImport.update({
 const PageDocsObjectRoute = PageDocsObjectRouteImport.update({
   id: "/docs/object",
   path: "/docs/object",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsOfficialHandsRoute = PageDocsOfficialHandsRouteImport.update({
+  id: "/docs/official-hands",
+  path: "/docs/official-hands",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsOrderRoute = PageDocsOrderRouteImport.update({
@@ -637,51 +628,6 @@ const PageDocsCollaborationReplicaRoute =
     path: "/docs/collaboration/replica",
     getParentRoute: () => PageRoute,
   } as any);
-const PageDocsDomainsDatabaseRoute = PageDocsDomainsDatabaseRouteImport.update({
-  id: "/database",
-  path: "/database",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsDocumentRoute = PageDocsDomainsDocumentRouteImport.update({
-  id: "/document",
-  path: "/document",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsKanbanRoute = PageDocsDomainsKanbanRouteImport.update({
-  id: "/kanban",
-  path: "/kanban",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsObjectRoute = PageDocsDomainsObjectRouteImport.update({
-  id: "/object",
-  path: "/object",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsOrderRoute = PageDocsDomainsOrderRouteImport.update({
-  id: "/order",
-  path: "/order",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsRichTextRoute = PageDocsDomainsRichTextRouteImport.update({
-  id: "/rich-text",
-  path: "/rich-text",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsSchemaRoute = PageDocsDomainsSchemaRouteImport.update({
-  id: "/schema",
-  path: "/schema",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsSheetRoute = PageDocsDomainsSheetRouteImport.update({
-  id: "/sheet",
-  path: "/sheet",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
-const PageDocsDomainsTreeRoute = PageDocsDomainsTreeRouteImport.update({
-  id: "/tree",
-  path: "/tree",
-  getParentRoute: () => PageDocsDomainsRoute,
-} as any);
 const PageDocsCollaborationTextIndexRoute =
   PageDocsCollaborationTextIndexRouteImport.update({
     id: "/docs/collaboration/text/",
@@ -736,12 +682,12 @@ export interface FileRoutesByFullPath {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
-  "/docs/domains": typeof PageDocsDomainsRouteWithChildren;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
   "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
@@ -790,15 +736,6 @@ export interface FileRoutesByFullPath {
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
-  "/docs/domains/database": typeof PageDocsDomainsDatabaseRoute;
-  "/docs/domains/document": typeof PageDocsDomainsDocumentRoute;
-  "/docs/domains/kanban": typeof PageDocsDomainsKanbanRoute;
-  "/docs/domains/object": typeof PageDocsDomainsObjectRoute;
-  "/docs/domains/order": typeof PageDocsDomainsOrderRoute;
-  "/docs/domains/rich-text": typeof PageDocsDomainsRichTextRoute;
-  "/docs/domains/schema": typeof PageDocsDomainsSchemaRoute;
-  "/docs/domains/sheet": typeof PageDocsDomainsSheetRoute;
-  "/docs/domains/tree": typeof PageDocsDomainsTreeRoute;
   "/connectors/zod/": typeof PageConnectorsZodIndexRoute;
   "/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
@@ -846,12 +783,12 @@ export interface FileRoutesByTo {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
-  "/docs/domains": typeof PageDocsDomainsRouteWithChildren;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
   "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
@@ -900,15 +837,6 @@ export interface FileRoutesByTo {
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
-  "/docs/domains/database": typeof PageDocsDomainsDatabaseRoute;
-  "/docs/domains/document": typeof PageDocsDomainsDocumentRoute;
-  "/docs/domains/kanban": typeof PageDocsDomainsKanbanRoute;
-  "/docs/domains/object": typeof PageDocsDomainsObjectRoute;
-  "/docs/domains/order": typeof PageDocsDomainsOrderRoute;
-  "/docs/domains/rich-text": typeof PageDocsDomainsRichTextRoute;
-  "/docs/domains/schema": typeof PageDocsDomainsSchemaRoute;
-  "/docs/domains/sheet": typeof PageDocsDomainsSheetRoute;
-  "/docs/domains/tree": typeof PageDocsDomainsTreeRoute;
   "/connectors/zod": typeof PageConnectorsZodIndexRoute;
   "/docs/affordance": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration": typeof PageDocsCollaborationIndexRoute;
@@ -958,12 +886,12 @@ export interface FileRoutesById {
   "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
-  "/_page/docs/domains": typeof PageDocsDomainsRouteWithChildren;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/mention": typeof PageDocsMentionRoute;
   "/_page/docs/object": typeof PageDocsObjectRoute;
+  "/_page/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/_page/docs/order": typeof PageDocsOrderRoute;
   "/_page/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
@@ -1012,15 +940,6 @@ export interface FileRoutesById {
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/_page/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
-  "/_page/docs/domains/database": typeof PageDocsDomainsDatabaseRoute;
-  "/_page/docs/domains/document": typeof PageDocsDomainsDocumentRoute;
-  "/_page/docs/domains/kanban": typeof PageDocsDomainsKanbanRoute;
-  "/_page/docs/domains/object": typeof PageDocsDomainsObjectRoute;
-  "/_page/docs/domains/order": typeof PageDocsDomainsOrderRoute;
-  "/_page/docs/domains/rich-text": typeof PageDocsDomainsRichTextRoute;
-  "/_page/docs/domains/schema": typeof PageDocsDomainsSchemaRoute;
-  "/_page/docs/domains/sheet": typeof PageDocsDomainsSheetRoute;
-  "/_page/docs/domains/tree": typeof PageDocsDomainsTreeRoute;
   "/_page/connectors/zod/": typeof PageConnectorsZodIndexRoute;
   "/_page/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/_page/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
@@ -1070,12 +989,12 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
-    | "/docs/domains"
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
     | "/docs/object"
+    | "/docs/official-hands"
     | "/docs/order"
     | "/docs/react-editing"
     | "/docs/selection"
@@ -1124,15 +1043,6 @@ export interface FileRouteTypes {
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
-    | "/docs/domains/database"
-    | "/docs/domains/document"
-    | "/docs/domains/kanban"
-    | "/docs/domains/object"
-    | "/docs/domains/order"
-    | "/docs/domains/rich-text"
-    | "/docs/domains/schema"
-    | "/docs/domains/sheet"
-    | "/docs/domains/tree"
     | "/connectors/zod/"
     | "/docs/affordance/"
     | "/docs/collaboration/"
@@ -1180,12 +1090,12 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
-    | "/docs/domains"
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
     | "/docs/object"
+    | "/docs/official-hands"
     | "/docs/order"
     | "/docs/react-editing"
     | "/docs/selection"
@@ -1234,15 +1144,6 @@ export interface FileRouteTypes {
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
-    | "/docs/domains/database"
-    | "/docs/domains/document"
-    | "/docs/domains/kanban"
-    | "/docs/domains/object"
-    | "/docs/domains/order"
-    | "/docs/domains/rich-text"
-    | "/docs/domains/schema"
-    | "/docs/domains/sheet"
-    | "/docs/domains/tree"
     | "/connectors/zod"
     | "/docs/affordance"
     | "/docs/collaboration"
@@ -1291,12 +1192,12 @@ export interface FileRouteTypes {
     | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
-    | "/_page/docs/domains"
     | "/_page/docs/history"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
     | "/_page/docs/mention"
     | "/_page/docs/object"
+    | "/_page/docs/official-hands"
     | "/_page/docs/order"
     | "/_page/docs/react-editing"
     | "/_page/docs/selection"
@@ -1345,15 +1246,6 @@ export interface FileRouteTypes {
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
     | "/_page/docs/collaboration/replica"
-    | "/_page/docs/domains/database"
-    | "/_page/docs/domains/document"
-    | "/_page/docs/domains/kanban"
-    | "/_page/docs/domains/object"
-    | "/_page/docs/domains/order"
-    | "/_page/docs/domains/rich-text"
-    | "/_page/docs/domains/schema"
-    | "/_page/docs/domains/sheet"
-    | "/_page/docs/domains/tree"
     | "/_page/connectors/zod/"
     | "/_page/docs/affordance/"
     | "/_page/docs/collaboration/"
@@ -1683,13 +1575,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsDatabaseRouteImport;
       parentRoute: typeof PageRoute;
     };
-    "/_page/docs/domains": {
-      id: "/_page/docs/domains";
-      path: "/docs/domains";
-      fullPath: "/docs/domains";
-      preLoaderRoute: typeof PageDocsDomainsRouteImport;
-      parentRoute: typeof PageRoute;
-    };
     "/_page/docs/history": {
       id: "/_page/docs/history";
       path: "/docs/history";
@@ -1723,6 +1608,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/object";
       fullPath: "/docs/object";
       preLoaderRoute: typeof PageDocsObjectRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/official-hands": {
+      id: "/_page/docs/official-hands";
+      path: "/docs/official-hands";
+      fullPath: "/docs/official-hands";
+      preLoaderRoute: typeof PageDocsOfficialHandsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/order": {
@@ -2054,69 +1946,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsCollaborationReplicaRouteImport;
       parentRoute: typeof PageRoute;
     };
-    "/_page/docs/domains/database": {
-      id: "/_page/docs/domains/database";
-      path: "/database";
-      fullPath: "/docs/domains/database";
-      preLoaderRoute: typeof PageDocsDomainsDatabaseRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/document": {
-      id: "/_page/docs/domains/document";
-      path: "/document";
-      fullPath: "/docs/domains/document";
-      preLoaderRoute: typeof PageDocsDomainsDocumentRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/kanban": {
-      id: "/_page/docs/domains/kanban";
-      path: "/kanban";
-      fullPath: "/docs/domains/kanban";
-      preLoaderRoute: typeof PageDocsDomainsKanbanRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/object": {
-      id: "/_page/docs/domains/object";
-      path: "/object";
-      fullPath: "/docs/domains/object";
-      preLoaderRoute: typeof PageDocsDomainsObjectRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/order": {
-      id: "/_page/docs/domains/order";
-      path: "/order";
-      fullPath: "/docs/domains/order";
-      preLoaderRoute: typeof PageDocsDomainsOrderRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/rich-text": {
-      id: "/_page/docs/domains/rich-text";
-      path: "/rich-text";
-      fullPath: "/docs/domains/rich-text";
-      preLoaderRoute: typeof PageDocsDomainsRichTextRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/schema": {
-      id: "/_page/docs/domains/schema";
-      path: "/schema";
-      fullPath: "/docs/domains/schema";
-      preLoaderRoute: typeof PageDocsDomainsSchemaRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/sheet": {
-      id: "/_page/docs/domains/sheet";
-      path: "/sheet";
-      fullPath: "/docs/domains/sheet";
-      preLoaderRoute: typeof PageDocsDomainsSheetRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
-    "/_page/docs/domains/tree": {
-      id: "/_page/docs/domains/tree";
-      path: "/tree";
-      fullPath: "/docs/domains/tree";
-      preLoaderRoute: typeof PageDocsDomainsTreeRouteImport;
-      parentRoute: typeof PageDocsDomainsRoute;
-    };
     "/_page/docs/collaboration/text/": {
       id: "/_page/docs/collaboration/text/";
       path: "/docs/collaboration/text";
@@ -2133,34 +1962,6 @@ declare module "@tanstack/react-router" {
     };
   }
 }
-
-interface PageDocsDomainsRouteChildren {
-  PageDocsDomainsDatabaseRoute: typeof PageDocsDomainsDatabaseRoute;
-  PageDocsDomainsDocumentRoute: typeof PageDocsDomainsDocumentRoute;
-  PageDocsDomainsKanbanRoute: typeof PageDocsDomainsKanbanRoute;
-  PageDocsDomainsObjectRoute: typeof PageDocsDomainsObjectRoute;
-  PageDocsDomainsOrderRoute: typeof PageDocsDomainsOrderRoute;
-  PageDocsDomainsRichTextRoute: typeof PageDocsDomainsRichTextRoute;
-  PageDocsDomainsSchemaRoute: typeof PageDocsDomainsSchemaRoute;
-  PageDocsDomainsSheetRoute: typeof PageDocsDomainsSheetRoute;
-  PageDocsDomainsTreeRoute: typeof PageDocsDomainsTreeRoute;
-}
-
-const PageDocsDomainsRouteChildren: PageDocsDomainsRouteChildren = {
-  PageDocsDomainsDatabaseRoute: PageDocsDomainsDatabaseRoute,
-  PageDocsDomainsDocumentRoute: PageDocsDomainsDocumentRoute,
-  PageDocsDomainsKanbanRoute: PageDocsDomainsKanbanRoute,
-  PageDocsDomainsObjectRoute: PageDocsDomainsObjectRoute,
-  PageDocsDomainsOrderRoute: PageDocsDomainsOrderRoute,
-  PageDocsDomainsRichTextRoute: PageDocsDomainsRichTextRoute,
-  PageDocsDomainsSchemaRoute: PageDocsDomainsSchemaRoute,
-  PageDocsDomainsSheetRoute: PageDocsDomainsSheetRoute,
-  PageDocsDomainsTreeRoute: PageDocsDomainsTreeRoute,
-};
-
-const PageDocsDomainsRouteWithChildren = PageDocsDomainsRoute._addFileChildren(
-  PageDocsDomainsRouteChildren,
-);
 
 interface PageRouteChildren {
   PageDemosRoute: typeof PageDemosRoute;
@@ -2202,12 +2003,12 @@ interface PageRouteChildren {
   PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
-  PageDocsDomainsRoute: typeof PageDocsDomainsRouteWithChildren;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsMentionRoute: typeof PageDocsMentionRoute;
   PageDocsObjectRoute: typeof PageDocsObjectRoute;
+  PageDocsOfficialHandsRoute: typeof PageDocsOfficialHandsRoute;
   PageDocsOrderRoute: typeof PageDocsOrderRoute;
   PageDocsReactEditingRoute: typeof PageDocsReactEditingRoute;
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
@@ -2303,12 +2104,12 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
-  PageDocsDomainsRoute: PageDocsDomainsRouteWithChildren,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsMentionRoute: PageDocsMentionRoute,
   PageDocsObjectRoute: PageDocsObjectRoute,
+  PageDocsOfficialHandsRoute: PageDocsOfficialHandsRoute,
   PageDocsOrderRoute: PageDocsOrderRoute,
   PageDocsReactEditingRoute: PageDocsReactEditingRoute,
   PageDocsSelectionRoute: PageDocsSelectionRoute,

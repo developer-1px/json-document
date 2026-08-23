@@ -40,22 +40,10 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Clipboard",
     "History",
   ]);
-  await navigation.getByRole("button", { name: "Domains" }).click();
-  await expect(navigation.getByRole("group", { name: "Domains" }).getByRole("link")).toHaveText([
-    "Official Domains · TBD",
-    "Schema · TBD",
-    "Document · TBD",
-    "Order · TBD",
-    "Object · TBD",
-    "Sheet · TBD",
-    "Tree · TBD",
-    "Kanban · TBD",
-    "Database · TBD",
-    "Rich Text · TBD",
-  ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
     "Overview",
+    "Official Hands · TBD",
     "Order",
     "Object",
     "Tree",
@@ -114,7 +102,6 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
     "Editing",
-    "Domains",
     "Adapter",
     "Connector",
     "Affordance",

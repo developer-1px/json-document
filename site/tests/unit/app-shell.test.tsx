@@ -61,22 +61,10 @@ describe("official site shell", () => {
       "Clipboard",
       "History",
     ]);
-    await user.click(nav.getByRole("button", { name: "Domains" }));
-    expect(groupLinks(nav, "Domains")).toEqual([
-      "Official Domains · TBD",
-      "Schema · TBD",
-      "Document · TBD",
-      "Order · TBD",
-      "Object · TBD",
-      "Sheet · TBD",
-      "Tree · TBD",
-      "Kanban · TBD",
-      "Database · TBD",
-      "Rich Text · TBD",
-    ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
       "Overview",
+      "Official Hands · TBD",
       "Order",
       "Object",
       "Tree",
@@ -130,7 +118,6 @@ describe("official site shell", () => {
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
       "Editing",
-      "Domains",
       "Adapter",
       "Connector",
       "Affordance",
