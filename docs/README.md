@@ -18,6 +18,7 @@ docs
 |   |-- topology.md            # Editing: 화면 줄과 선택
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
+|   |-- domains.md             # Domains TBD: UI와 분리한 장르 편집 의미
 |   |-- collaboration.md       # JSON Document: 같은 계약의 협업 구현
 |   |-- hands.md               # Hands: 사람의 편집 도구
 |   |-- composer.md            # Hands TBD: agent 지시와 맥락
@@ -57,6 +58,9 @@ Editing
 |-- Selection
 |-- Clipboard
 `-- History
+
+Domains
+`-- Official Domains (TBD)
 
 Adapter
 |-- Overview
@@ -152,6 +156,7 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   connectors는 연결 방법이다. react-editing은 React에서 선택과 커서를
   그리는 사용법이다.
   concepts는 JSON Document에서 Artifact까지의 책임과 의존 지도다.
+  domains는 UI와 분리해 설계하는 opinionated한 장르 의미의 TBD 관점이다.
   collaboration은 같은 JSON Document의 다른 구현이다. hands는
   Editing 위 장르의 손이다. order·object·tree는 그 손의
   나머지 slice다. database는 저장된 표 view의 손이다.

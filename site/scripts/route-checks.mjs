@@ -3,6 +3,7 @@ const navigationGroups = new Set([
   "JSON Document",
   "Collaboration",
   "Editing",
+  "Domains",
   "Adapter",
   "Connector",
   "Affordance",

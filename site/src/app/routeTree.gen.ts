@@ -54,6 +54,7 @@ import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/co
 import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
+import { Route as PageDocsDomainsRouteImport } from "./routes/_page/docs/domains";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
@@ -340,6 +341,11 @@ const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
 const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
   id: "/docs/database",
   path: "/docs/database",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsDomainsRoute = PageDocsDomainsRouteImport.update({
+  id: "/docs/domains",
+  path: "/docs/domains",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
@@ -676,6 +682,7 @@ export interface FileRoutesByFullPath {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/domains": typeof PageDocsDomainsRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
@@ -776,6 +783,7 @@ export interface FileRoutesByTo {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/domains": typeof PageDocsDomainsRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
@@ -878,6 +886,7 @@ export interface FileRoutesById {
   "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
+  "/_page/docs/domains": typeof PageDocsDomainsRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
@@ -980,6 +989,7 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/domains"
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
@@ -1080,6 +1090,7 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/domains"
     | "/docs/history"
     | "/docs/intent"
     | "/docs/intent-guide"
@@ -1181,6 +1192,7 @@ export interface FileRouteTypes {
     | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
+    | "/_page/docs/domains"
     | "/_page/docs/history"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
@@ -1561,6 +1573,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/database";
       fullPath: "/docs/database";
       preLoaderRoute: typeof PageDocsDatabaseRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/domains": {
+      id: "/_page/docs/domains";
+      path: "/docs/domains";
+      fullPath: "/docs/domains";
+      preLoaderRoute: typeof PageDocsDomainsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/history": {
@@ -1984,6 +2003,7 @@ interface PageRouteChildren {
   PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
+  PageDocsDomainsRoute: typeof PageDocsDomainsRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
@@ -2084,6 +2104,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
+  PageDocsDomainsRoute: PageDocsDomainsRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,

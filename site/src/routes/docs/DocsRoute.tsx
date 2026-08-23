@@ -58,6 +58,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   object: "peek",
   tree: "branch",
   database: "database",
+  domains: "braces",
   intent: "braces",
   intentGuide: "terminal",
   api: "patch",

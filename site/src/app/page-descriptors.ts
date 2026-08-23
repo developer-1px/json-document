@@ -5,6 +5,7 @@ export type SiteNavigationGroup =
   | "JSON Document"
   | "Collaboration"
   | "Editing"
+  | "Domains"
   | "Hands"
   | "Artifact"
   | "Adapter"

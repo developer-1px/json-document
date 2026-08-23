@@ -41,6 +41,15 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/domains",
+    "label": "Official Domains · TBD",
+    "title": "Official Domains · TBD - json-document",
+    "heading": "Official Domains · TBD",
+    "description": "UI와 분리해 설계하는 opinionated한 장르 편집 의미와 Host 경계를 TBD 관점으로 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
     "path": "/docs/collaboration",
     "label": "Collaboration",
     "title": "Collaboration - json-document",

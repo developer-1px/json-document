@@ -117,6 +117,7 @@ describe("official site shell", () => {
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
       "Editing",
+      "Domains",
       "Adapter",
       "Connector",
       "Affordance",
