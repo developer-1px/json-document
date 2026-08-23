@@ -2,9 +2,10 @@ import { useState } from "react";
 import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { artifactViewerStyles as styles } from "./artifact-viewer-styles";
+import { artifactViewerRecipe } from "./artifact-viewer-styles";
 
 type ArtifactKind = "md" | "ppt" | "sheet";
+const styles = artifactViewerRecipe();
 
 const artifacts: ReadonlyArray<{ kind: ArtifactKind; name: string; label: string }> = [
   { kind: "md", name: "launch-brief.md", label: "MD" },
@@ -41,14 +42,14 @@ export function ArtifactViewerRoute() {
           </>
         )}
         inspector={<Composer artifactName={artifact.name} />}
-        canvasClassName={styles.canvas}
+        canvasClassName={styles.canvas()}
       >
         {active === "md" ? <MarkdownArtifact /> : null}
         {active === "ppt" ? <PresentationArtifact /> : null}
         {active === "sheet" ? <SheetArtifact /> : null}
       </ProductApp>
 
-      <section className={styles.futureMap} aria-labelledby="viewer-model-title">
+      <section className={styles.futureMap()} aria-labelledby="viewer-model-title">
         <p className={ui.text.label}>Dependency map</p>
         <h2 id="viewer-model-title" className={ui.text.section}>Core에서 시작해 Hands를 거쳐 Artifact가 됩니다.</h2>
         <ol>
@@ -63,8 +64,8 @@ export function ArtifactViewerRoute() {
 
 function Composer({ artifactName }: { readonly artifactName: string }) {
   return (
-    <section className={styles.composer} aria-label="Composer mock">
-      <div className={styles.context} aria-label="Composer context">
+    <section className={styles.composer()} aria-label="Composer mock">
+      <div className={styles.context()} aria-label="Composer context">
         <span>@Agent</span>
         <span>#{artifactName}</span>
       </div>
@@ -80,7 +81,7 @@ function Composer({ artifactName }: { readonly artifactName: string }) {
 
 function MarkdownArtifact() {
   return (
-    <article className={styles.document} aria-label="Markdown artifact mock">
+    <article className={styles.document()} aria-label="Markdown artifact mock">
       <p className={ui.text.label}>LAUNCH BRIEF · AUGUST 2026</p>
       <h2 contentEditable suppressContentEditableWarning>Artifacts should stay useful after generation.</h2>
       <p contentEditable suppressContentEditableWarning>
@@ -98,15 +99,15 @@ function MarkdownArtifact() {
 
 function PresentationArtifact() {
   return (
-    <div className={styles.presentation} aria-label="Presentation artifact mock">
-      <div className={styles.filmstrip} aria-label="Slide filmstrip">
+    <div className={styles.presentation()} aria-label="Presentation artifact mock">
+      <div className={styles.filmstrip()} aria-label="Slide filmstrip">
         {[1, 2, 3].map((number) => (
           <SelectableItem key={number} selected={number === 2} className={ui.surface.selectableBlock}>
             {number}
           </SelectableItem>
         ))}
       </div>
-      <article className={styles.slide}>
+      <article className={styles.slide()}>
         <p className={ui.text.label}>02 / 03 · FROM OUTPUT TO TOOL</p>
         <h2>Generation is only the first move.</h2>
         <div>
@@ -126,9 +127,9 @@ function SheetArtifact() {
     ["Core contract", "Team", "Ready", "W36"],
   ];
   return (
-    <div className={styles.sheet} aria-label="Spreadsheet artifact mock">
+    <div className={styles.sheet()} aria-label="Spreadsheet artifact mock">
       <p className={classes("m-0 px-2 py-1", ui.text.meta)}>fx&nbsp;&nbsp;=COUNTIF(C2:C5, “Ready”)</p>
-      <div className={styles.grid} role="grid" aria-label="Launch plan">
+      <div className={styles.grid()} role="grid" aria-label="Launch plan">
         {cells.flatMap((row, rowIndex) => row.map((cell, columnIndex) => (
           <div
             key={`${rowIndex}-${columnIndex}`}
@@ -136,7 +137,7 @@ function SheetArtifact() {
             className={classes(
               rowIndex === 0 ? ui.surface.gridHead : ui.surface.gridCell,
               rowIndex === 2 && columnIndex === 2 && ui.surface.previewSelected,
-              styles.cell,
+              styles.cell(),
             )}
           >{cell}</div>
         )))}
