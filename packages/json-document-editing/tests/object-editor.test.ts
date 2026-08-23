@@ -82,7 +82,7 @@ describe("object editing selection family", () => {
     expect(editor.selectedObjects.map((object) => object.id)).toEqual(["a", "c"]);
   });
 
-  test("copies, pastes, and cuts selected objects with new ids", () => {
+  test("selects newly created paste results, then copies and cuts that selection", () => {
     let sequence = 0;
     const editor = createObjectEditor(initial, { createId: () => `n${++sequence}` });
     editor.dispatch({ type: "selection.set", objectIds: ["a", "c"] });
