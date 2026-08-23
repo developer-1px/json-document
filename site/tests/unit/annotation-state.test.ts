@@ -32,7 +32,7 @@ describe("annotation state", () => {
       ...initialAnnotationSnapshot,
       document: {
         ...initialAnnotationSnapshot.document,
-        source: { id: "replacement", src: "data:image/png;base64,AA==", width: 640, height: 480 },
+        source: { id: "replacement", src: "replacement.png", width: 640, height: 480 },
       },
     };
 

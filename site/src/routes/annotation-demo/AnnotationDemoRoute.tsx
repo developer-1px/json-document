@@ -44,10 +44,14 @@ export function AnnotationDemoRoute() {
   const [zoom, setZoom] = useState(1);
   const [announcement, setAnnouncement] = useState("클릭하거나 드래그해서 수정 코멘트를 남기세요.");
   const svgRef = useRef<SVGSVGElement>(null);
+  const rasterUrlsRef = useRef(new Map<string, string>([[
+    initialAnnotationSnapshot.document.source.id,
+    sitePath(initialAnnotationSnapshot.document.source.src),
+  ]]));
   const snapshot = history.snapshot;
   const selected = snapshot.document.annotations.find((annotation) => annotation.id === snapshot.selectedId) ?? null;
   const source = snapshot.document.source;
-  const sourceUrl = sourcePath(source.src);
+  const sourceUrl = rasterUrlsRef.current.get(source.id) ?? sourcePath(source.src);
 
   useEffect(() => {
     if (output !== "image") return;
@@ -60,6 +64,10 @@ export function AnnotationDemoRoute() {
   }, [output, snapshot, sourceUrl]);
 
   const structuredOutput = useMemo(() => presentStructuredSnapshot(snapshot), [snapshot]);
+  const structuredDownloadUrl = useMemo(
+    () => `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(structuredOutput, null, 2))}`,
+    [structuredOutput],
+  );
 
   function setSelected(selectedId: string | null) {
     history.commit({ ...snapshot, selectedId });
@@ -205,7 +213,8 @@ export function AnnotationDemoRoute() {
     event.target.value = "";
     if (file === undefined) return;
     try {
-      const nextSource = await readRasterSource(file);
+      const { source: nextSource, url } = await readRasterSource(file);
+      rasterUrlsRef.current.set(nextSource.id, url);
       history.commit({
         document: { version: 1, source: nextSource, annotations: [] },
         selectedId: null,
@@ -260,6 +269,7 @@ export function AnnotationDemoRoute() {
             output={output}
             setOutput={setOutput}
             structured={structuredOutput}
+            structuredDownloadUrl={structuredDownloadUrl}
             renderedImage={renderedImage}
           />
         )}
@@ -527,6 +537,7 @@ function OutputPanel(props: {
   readonly output: Output;
   readonly setOutput: (output: Output) => void;
   readonly structured: unknown;
+  readonly structuredDownloadUrl: string;
   readonly renderedImage: string | null;
 }) {
   return (
@@ -540,6 +551,7 @@ function OutputPanel(props: {
           <div className="flex flex-wrap gap-1">
             <ActionButton onClick={props.onSave}>Save state</ActionButton>
             <ActionButton disabled={!props.canRestore} onClick={props.onRestore}>Restore state</ActionButton>
+            <a className={ui.interactive.link.prominent} download="annotation-request.json" href={props.structuredDownloadUrl}>Download JSON</a>
           </div>
           <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput, ui.surface.inset)}>
             {JSON.stringify(props.structured, null, 2)}
@@ -736,27 +748,23 @@ function sourcePath(path: string): string {
 }
 
 function presentStructuredSnapshot(snapshot: AnnotationSnapshot) {
-  const { source } = snapshot.document;
   return {
     ...snapshot.document,
-    source: {
-      ...source,
-      src: source.src.startsWith("data:")
-        ? `[embedded ${Math.ceil(source.src.length / 1024)}KB data URL]`
-        : source.src,
-    },
     selectedId: snapshot.selectedId,
   };
 }
 
-async function readRasterSource(file: File): Promise<AnnotationSource> {
-  const src = await readFileAsDataUrl(file);
-  const image = await loadRaster(src);
+async function readRasterSource(file: File): Promise<{ source: AnnotationSource; url: string }> {
+  const url = await readFileAsDataUrl(file);
+  const image = await loadRaster(url);
   return {
-    id: `upload-${file.name}-${file.lastModified}`,
-    src,
-    width: image.naturalWidth,
-    height: image.naturalHeight,
+    source: {
+      id: `upload-${file.name}-${file.lastModified}`,
+      src: file.name,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+    },
+    url,
   };
 }
 

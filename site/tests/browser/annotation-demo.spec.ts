@@ -70,6 +70,7 @@ test("Annotation Hands restores structured state and rasterizes a flattened imag
   expect((await structured(page)).annotations).toHaveLength(0);
   await page.getByRole("button", { name: "Restore state" }).click();
   expect((await structured(page)).annotations).toHaveLength(1);
+  await expect(page.getByRole("link", { name: "Download JSON" })).toHaveAttribute("download", "annotation-request.json");
 
   await page.getByRole("tab", { name: "Image" }).click();
   const output = page.getByTestId("annotation-image-output");
@@ -143,7 +144,7 @@ test("Annotation Hands replaces the single raster source and clears stale annota
   const state = await structured(page);
   expect(state.source.id).toContain("pixel.png");
   expect(state.source).toMatchObject({ width: 1, height: 1 });
-  expect(state.source.src).toMatch(/^\[embedded /);
+  expect(state.source.src).toBe("pixel.png");
   expect(state.annotations).toHaveLength(0);
 });
 
