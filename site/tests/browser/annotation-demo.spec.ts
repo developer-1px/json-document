@@ -14,17 +14,22 @@ test("Comment creates point and region marks with one editable comment", async (
   const canvas = page.getByLabel("Raster annotation canvas");
   const box = await requiredBox(canvas);
   await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.4 } });
-  await page.getByLabel("Annotation instruction").fill("목줄을 파란색으로 바꿔 주세요.");
-  await page.getByRole("button", { name: "Send comment" }).click();
+  const instruction = page.getByLabel("Annotation instruction");
+  await expect(instruction).toBeFocused();
   await expect(page.getByRole("button", { name: "Select", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await instruction.fill("목줄을 파란색으로 바꿔 주세요.");
+  await page.getByRole("heading", { name: "Annotation Hands Demo" }).click();
   await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
-  await expect(page.getByLabel("Annotation instruction")).toHaveValue("목줄을 파란색으로 바꿔 주세요.");
-  await page.getByLabel("Annotation instruction").fill("목줄을 짙은 파란색으로 바꿔 주세요.");
-  await page.getByRole("button", { name: "Send comment" }).click();
+  await expect(instruction).toHaveValue("목줄을 파란색으로 바꿔 주세요.");
+  expect((await structured(page)).annotations[0].body.instruction).toContain("파란색");
+  await instruction.fill("목줄을 짙은 파란색으로 바꿔 주세요.");
+  await instruction.press("Tab");
   expect((await structured(page)).annotations[0].body.instruction).toContain("짙은");
 
   await page.getByRole("button", { name: "Comment", exact: true }).click();
   await drag(page, box.x + box.width * 0.45, box.y + box.height * 0.25, box.x + box.width * 0.7, box.y + box.height * 0.55);
+  await expect(page.getByLabel("Annotation instruction")).toBeFocused();
+  await expect(page.getByRole("button", { name: "Select", exact: true })).toHaveAttribute("aria-pressed", "true");
   expect((await structured(page)).annotations.map((item: any) => item.mark.type)).toEqual(["marker", "rectangle"]);
 });
 

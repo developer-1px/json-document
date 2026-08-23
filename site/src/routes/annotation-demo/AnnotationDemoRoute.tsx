@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -89,10 +90,15 @@ export function AnnotationDemoRoute() {
   }
 
   function sendComment(annotation: RasterAnnotation, instruction: string) {
+    const nextInstruction = instruction.trim();
+    if (annotation.body.instruction === nextInstruction) {
+      setTool("select");
+      return;
+    }
     history.commit({
       ...updateAnnotation(snapshot, annotation.id, (current) => ({
         ...current,
-        body: { instruction: instruction.trim() },
+        body: { instruction: nextInstruction },
       })),
       selectedId: annotation.id,
     });
@@ -194,12 +200,14 @@ export function AnnotationDemoRoute() {
       const annotation = createDrawAnnotation(gesture.points);
       if (annotation !== null) {
         history.commit(appendAnnotation(snapshot, annotation));
+        setTool("select");
         setAnnouncement("자유선 코멘트를 만들었습니다.");
       }
     } else if (gesture.type === "create") {
       const annotation = createAnnotation(gesture.tool, gesture.start, gesture.current);
       if (annotation !== null) {
         history.commit(appendAnnotation(snapshot, annotation));
+        setTool("select");
         setAnnouncement(annotationAnnouncement(annotation));
       }
     } else {
@@ -342,7 +350,14 @@ function CommentComposer(props: {
   readonly onSend: (instruction: string) => void;
 }) {
   const [draft, setDraft] = useState(props.annotation.body.instruction);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => setDraft(props.annotation.body.instruction), [props.annotation.id, props.annotation.body.instruction]);
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (input === null) return;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [props.annotation.id]);
   const dock = annotationDock(props.annotation, props.source);
   const opensLeft = dock.horizontal === "left";
   const opensAbove = dock.vertical === "above";
@@ -362,9 +377,12 @@ function CommentComposer(props: {
     >
       <span className={tailStyle} aria-hidden="true" />
       <textarea
+        ref={inputRef}
         aria-label="Annotation instruction"
-        autoFocus
         className={classes(ui.field.control, annotationDemoStyles.commentInput())}
+        onBlur={() => {
+          if (draft.trim() !== "") props.onSend(draft);
+        }}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
           if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && draft.trim() !== "") props.onSend(draft);
@@ -382,6 +400,7 @@ function CommentComposer(props: {
           disabled={draft.trim() === ""}
           kind="primary"
           onClick={() => props.onSend(draft)}
+          onMouseDown={(event) => event.preventDefault()}
           title="Send comment (⌘ Enter)"
         >
           <Send aria-hidden="true" size={15} />
