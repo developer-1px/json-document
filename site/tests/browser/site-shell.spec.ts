@@ -42,7 +42,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
-    "Hands",
+    "Overview",
     "Order",
     "Object",
     "Tree",
@@ -51,9 +51,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Mention",
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
-  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Adapter"]);
+  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText(["Overview"]);
   await navigation.getByRole("button", { name: "Connector" }).click();
-  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["Connector"]);
+  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText(["Overview"]);
   await navigation.getByRole("button", { name: "Affordance" }).click();
   await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
     "Focus",
@@ -139,7 +139,7 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("button", { name: "Connector" }).click();
-  await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "Connector", exact: true }).click();
+  await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "Overview", exact: true }).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(6);
@@ -461,7 +461,9 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   await page.keyboard.press("Tab");
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
-  const currentLink = page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Connector", exact: true });
+  const currentLink = page.getByRole("navigation", { name: "Site navigation" })
+    .getByRole("group", { name: "Connector" })
+    .getByRole("link", { name: "Overview", exact: true });
   expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
 
   const code = page.getByRole("figure", { name: "TypeScript" }).first();

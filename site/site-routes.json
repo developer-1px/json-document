@@ -129,7 +129,8 @@
     "title": "Topology Demo - json-document",
     "description": "같은 anchor와 focus에서 화면 순서에 따라 계산되는 범위를 비교합니다.",
     "language": "ko",
-    "parentPath": "/docs/topology"
+    "parentPath": "/docs/topology",
+    "sidebar": false
   },
   {
     "path": "/docs/selection",
@@ -147,7 +148,8 @@
     "title": "Selection Demo - json-document",
     "description": "document value와 History를 유지한 채 구조적 Selection만 바꿔 봅니다.",
     "language": "ko",
-    "parentPath": "/docs/selection"
+    "parentPath": "/docs/selection",
+    "sidebar": false
   },
   {
     "path": "/docs/clipboard",
@@ -165,7 +167,8 @@
     "title": "Clipboard Demo - json-document",
     "description": "구조적 Selection이 copy 또는 cut을 거쳐 payload와 paste로 이어지는 과정을 확인합니다.",
     "language": "ko",
-    "parentPath": "/docs/clipboard"
+    "parentPath": "/docs/clipboard",
+    "sidebar": false
   },
   {
     "path": "/docs/history",
@@ -183,7 +186,8 @@
     "title": "History Demo - json-document",
     "description": "문서를 편집한 뒤 undo와 redo로 value와 Selection을 함께 복원합니다.",
     "language": "ko",
-    "parentPath": "/docs/history"
+    "parentPath": "/docs/history",
+    "sidebar": false
   },
   {
     "path": "/editing/rich-text",
@@ -196,7 +200,7 @@
   },
   {
     "path": "/editors",
-    "label": "Hands",
+    "label": "Overview",
     "title": "Hands - json-document",
     "heading": "Hands",
     "description": "닫힌 장르의 손과 TBD 손을 고릅니다.",
@@ -226,7 +230,8 @@
     "label": "Order Demo",
     "title": "Order Demo - json-document",
     "description": "A one-line Order editor with range selection, structured clipboard, delete, and local history.",
-    "parentPath": "/docs/order"
+    "parentPath": "/docs/order",
+    "sidebar": false
   },
   {
     "path": "/docs/object",
@@ -243,14 +248,16 @@
     "label": "Object Demo",
     "title": "Object Demo - json-document",
     "description": "A key-family Object board with ID selection, color fill, structured clipboard, and local history.",
-    "parentPath": "/docs/object"
+    "parentPath": "/docs/object",
+    "sidebar": false
   },
   {
     "path": "/demo/canvas",
     "label": "Canvas",
     "title": "Canvas - json-document",
     "description": "A simple minimal canvas: pick, drag, and fill objects on a plane.",
-    "parentPath": "/docs/object"
+    "parentPath": "/docs/object",
+    "sidebar": false
   },
   {
     "path": "/demo/sheet",
@@ -275,7 +282,8 @@
     "label": "Tree Demo",
     "title": "Tree Demo - json-document",
     "description": "A simple minimal tree: fold branches and select on the visible line.",
-    "parentPath": "/docs/tree"
+    "parentPath": "/docs/tree",
+    "sidebar": false
   },
   {
     "path": "/demo/kanban",
@@ -300,7 +308,8 @@
     "label": "Database Demo",
     "title": "Database Demo - json-document",
     "description": "A complete Database editor with typed properties, persistent views, selection, native text editing, and history.",
-    "parentPath": "/docs/database"
+    "parentPath": "/docs/database",
+    "sidebar": false
   },
   {
     "path": "/docs/composer",
@@ -330,7 +339,7 @@
   },
   {
     "path": "/docs/adapters",
-    "label": "Adapter",
+    "label": "Overview",
     "title": "Adapter Docs - json-document",
     "heading": "json-document Adapters",
     "description": "Keyboard, Clipboard, Contenteditable 공식 adapter 계약을 설명합니다.",
@@ -383,7 +392,7 @@
   },
   {
     "path": "/docs/connectors",
-    "label": "Connector",
+    "label": "Overview",
     "title": "Connector Docs - json-document",
     "heading": "json-document Connectors",
     "description": "React 구독과 선택·커서 질의, React Hook Form, Ajv, Zod, TanStack Table 연결 계약을 설명합니다.",

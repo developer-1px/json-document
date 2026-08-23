@@ -113,9 +113,6 @@ describe("breadcrumbTrail", () => {
     expect(visibleNavChildren("/docs/collaboration/text", "/docs/collaboration/text/lease", routes).map((route) => route.path)).toEqual([
       "/docs/collaboration/text/lease",
     ]);
-    expect(visibleNavChildren("/docs/object", "/demo/canvas", routes).map((route) => route.path)).toEqual([
-      "/demo/object",
-      "/demo/canvas",
-    ]);
+    expect(visibleNavChildren("/docs/object", "/demo/canvas", routes).map((route) => route.path)).toEqual([]);
   });
 });

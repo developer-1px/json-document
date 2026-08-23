@@ -50,16 +50,11 @@ Editing
 `-- History
 
 Adapter
-|-- Keyboard
-|-- Clipboard adapter
-`-- Contenteditable
+`-- Overview
 
 Connector
-|-- React
-|-- React Hook Form
-|-- Ajv
-|-- Zod
-`-- TanStack Table
+|-- Overview
+`-- React editing
 
 Affordance
 |-- Focus
@@ -89,12 +84,10 @@ Affordance
 `-- Not-allowed
 
 Hands
-|-- Document
+|-- Overview
 |-- Order
 |-- Object
-|-- Sheet
 |-- Tree
-|-- Kanban
 |-- Database
 |-- Composer (TBD)
 `-- Mention (TBD)
