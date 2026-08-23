@@ -362,10 +362,10 @@ function CommentComposer(props: {
       style={{
         left: `${(anchor.x / props.source.width) * 100}%`,
         top: `${(anchor.y / props.source.height) * 100}%`,
-        transform: opensLeft ? "translate(calc(-100% - 0.75rem), -50%)" : "translate(0.75rem, -50%)",
+        transform: opensLeft ? "translate(-100%, -100%)" : "translate(0, -100%)",
       }}
     >
-      <span className={opensLeft ? annotationDemoStyles.connectorLeft : annotationDemoStyles.connectorRight} aria-hidden="true" />
+      <span className={opensLeft ? annotationDemoStyles.commentTailLeft : annotationDemoStyles.commentTailRight} aria-hidden="true" />
       <div className={annotationDemoStyles.commentHeader}>
         <strong className={ui.text.label}>Request {props.index}</strong>
         <span className={ui.text.meta}>{markLabel(props.annotation)}</span>
@@ -373,7 +373,7 @@ function CommentComposer(props: {
       <textarea
         aria-label="Annotation instruction"
         autoFocus
-        className={classes("min-h-24 w-full resize-y", ui.field.control)}
+        className={classes(ui.field.control, annotationDemoStyles.commentInput)}
         onChange={(event) => props.onChange(event.target.value)}
         onKeyDown={(event) => {
           if ((event.metaKey || event.ctrlKey) && event.key === "Enter") props.onDone();
@@ -679,7 +679,13 @@ function movePoint(point: PointTarget, dx: number, dy: number): PointTarget {
 
 function annotationAnchor(annotation: RasterAnnotation): PointTarget {
   if (annotation.mark.type === "arrow") return annotation.mark.to;
-  if (annotation.target.type === "point") return annotation.target;
+  if (annotation.target.type === "point") {
+    return {
+      type: "point",
+      x: annotation.target.x + 24,
+      y: annotation.target.y - 24,
+    };
+  }
   return {
     type: "point",
     x: annotation.target.x + annotation.target.width,
