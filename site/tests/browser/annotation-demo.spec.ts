@@ -22,7 +22,7 @@ test("Annotation Hands creates a point on click, a rectangle on drag, and an arr
   await expect(page.getByLabel("Annotation instruction")).toHaveValue("");
   await page.getByLabel("Annotation instruction").fill("고양이 쪽으로 화살표를 옮겨 주세요.");
   expect((await structured(page)).annotations[2].body.instruction).toBe("고양이 쪽으로 화살표를 옮겨 주세요.");
-  await expect(page.getByRole("button", { name: /Request 3 · arrow/ })).toContainText("고양이 쪽으로 화살표를 옮겨 주세요.");
+  await expect(page.getByRole("button", { name: /Request 3 · Arrow/ })).toContainText("고양이 쪽으로 화살표를 옮겨 주세요.");
   await page.getByRole("button", { name: "Done" }).click();
   await expect(page.getByRole("region", { name: "Request 3 comment" })).toBeHidden();
 });
@@ -97,7 +97,7 @@ test("Annotation Hands draws an irregular revision region with a linked comment"
   expect(state.annotations[0].mark.points.length).toBeGreaterThan(3);
   await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
   await page.getByLabel("Annotation instruction").fill("목도리 윤곽을 더 부드럽게 정리해 주세요.");
-  await expect(page.getByRole("button", { name: /Request 1 · draw/ })).toContainText("목도리 윤곽을 더 부드럽게 정리해 주세요.");
+  await expect(page.getByRole("button", { name: /Request 1 · Draw/ })).toContainText("목도리 윤곽을 더 부드럽게 정리해 주세요.");
 });
 
 test("Annotation Hands zooms the raster stage for precise markup", async ({ page }) => {

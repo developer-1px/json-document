@@ -10,4 +10,5 @@ export const annotationDemoStyles = {
   threadButton: "grid w-full cursor-pointer gap-1 rounded-surface border border-line-subtle bg-background-canvas p-3 text-left outline-none hover:border-line-default focus-visible:ring-2 focus-visible:ring-line-accent/25 data-[selected=true]:border-line-accent data-[selected=true]:bg-background-subtle",
   structuredOutput: "m-0 max-h-64 overflow-auto whitespace-pre-wrap p-3 font-mono text-xs",
   uploadControl: "inline-flex cursor-pointer items-center rounded-none border border-line-subtle bg-background-canvas px-3 py-2 text-xs font-medium text-foreground-strong shadow-control-prominent hover:border-line-default hover:bg-background-subtle focus-within:border-line-accent focus-within:ring-2 focus-within:ring-line-accent/25",
+  toolKey: "ml-1 font-mono text-foreground-muted",
 } as const;

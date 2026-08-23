@@ -233,7 +233,7 @@ export function AnnotationDemoRoute() {
         title="Annotation Hands Demo"
         aside={<p className={classes("m-0 text-right", ui.text.meta)} aria-live="polite">{announcement}</p>}
       >
-        원본 raster는 그대로 두고 target, instruction, visible mark를 함께 편집한 뒤 structured state 또는 한 장의 이미지로 투영합니다.
+        수정할 위치를 클릭하거나 드래그하고 요청을 적어 주세요. 원본은 그대로 두고 코멘트가 포함된 이미지와 구조화된 요청을 만듭니다.
       </PageHeader>
     )}>
       <ProductApp
@@ -244,6 +244,7 @@ export function AnnotationDemoRoute() {
             {(["select", "comment", "draw", "arrow"] as const).map((value) => (
               <ToggleButton aria-keyshortcuts={toolShortcut(value)} key={value} pressed={tool === value} onClick={() => chooseTool(value)}>
                 {toolLabel(value)}
+                <kbd aria-hidden="true" className={annotationDemoStyles.toolKey}>{toolShortcut(value)}</kbd>
               </ToggleButton>
             ))}
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
@@ -334,7 +335,7 @@ export function AnnotationDemoRoute() {
               onClick={() => setSelected(annotation.id)}
               type="button"
             >
-              <span className={ui.text.label}>Request {index + 1} · {annotation.mark.type}</span>
+              <span className={ui.text.label}>Request {index + 1} · {markLabel(annotation)}</span>
               <span className={ui.text.meta}>{annotation.body.instruction || "내용을 입력하세요."}</span>
             </button>
           ))}
@@ -367,7 +368,7 @@ function CommentComposer(props: {
       <span className={opensLeft ? annotationDemoStyles.connectorLeft : annotationDemoStyles.connectorRight} aria-hidden="true" />
       <div className={annotationDemoStyles.commentHeader}>
         <strong className={ui.text.label}>Request {props.index}</strong>
-        <span className={ui.text.meta}>{props.annotation.mark.type}</span>
+        <span className={ui.text.meta}>{markLabel(props.annotation)}</span>
       </div>
       <textarea
         aria-label="Annotation instruction"
@@ -736,6 +737,13 @@ function annotationAnnouncement(annotation: RasterAnnotation): string {
   if (annotation.mark.type === "rectangle") return "영역 코멘트를 만들었습니다.";
   if (annotation.mark.type === "draw") return "자유선 코멘트를 만들었습니다.";
   return "화살표 코멘트를 만들었습니다.";
+}
+
+function markLabel(annotation: RasterAnnotation): string {
+  if (annotation.mark.type === "marker") return "Point";
+  if (annotation.mark.type === "rectangle") return "Area";
+  if (annotation.mark.type === "draw") return "Draw";
+  return "Arrow";
 }
 
 function sitePath(path: string): string {
