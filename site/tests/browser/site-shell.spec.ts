@@ -88,14 +88,18 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet"]);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
-    "Collaboration",
     "Editing",
     "Adapter",
     "Connector",
     "Affordance",
     "Hands",
     "Artifact",
+    "Collaboration",
   ]);
+  expect(await navigation.getByRole("group", { name: "Collaboration" }).evaluate((element) => ({
+    borderTopWidth: getComputedStyle(element).borderTopWidth,
+    paddingTop: getComputedStyle(element).paddingTop,
+  }))).toEqual({ borderTopWidth: "1px", paddingTop: "16px" });
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });

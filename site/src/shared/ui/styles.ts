@@ -10,6 +10,7 @@ export const ui = {
   },
   nav: {
     menu: "grid gap-3 px-3 pb-3 md:px-2",
+    separatedGroup: "mt-1 border-t border-line-subtle/40 pt-4",
     groupToggle: "px-2 py-1 text-overline font-medium uppercase tracking-overline text-foreground-default hover:border-transparent hover:bg-transparent",
     groupActive: "border-l-2 border-l-line-accent",
     groupIdle: "border-l-2 border-l-transparent",

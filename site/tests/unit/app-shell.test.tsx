@@ -109,13 +109,13 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet"]);
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
-      "Collaboration",
       "Editing",
       "Adapter",
       "Connector",
       "Affordance",
       "Hands",
       "Artifact",
+      "Collaboration",
     ]);
     expect(nav.queryByRole("link", { name: "Extensions" })).toBeNull();
 

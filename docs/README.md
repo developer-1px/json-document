@@ -41,13 +41,6 @@ JSON Document
 |-- Concept Map
 `-- API
 
-Collaboration
-|-- Replica
-|-- Lifecycle
-|-- Collaborative History
-`-- Text
-    `-- native-input DOM lease
-
 Editing
 |-- Intent guide
 |-- Intent
@@ -105,6 +98,15 @@ Hands
 |-- Database
 |-- Composer (TBD)
 `-- Mention (TBD)
+
+----------------------------------------
+
+Collaboration
+|-- Replica
+|-- Lifecycle
+|-- Collaborative History
+`-- Text
+    `-- native-input DOM lease
 ```
 
 ## 규범 우선순위

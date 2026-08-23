@@ -11,7 +11,7 @@ import {
   type SiteRoute,
 } from "../router";
 import { isNavBranch, rootNavRoutes, routeGroup, visibleNavChildren } from "../breadcrumb";
-import { siteLayerGroups } from "../site-layers";
+import { siteLayerGroups, siteLayers } from "../site-layers";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
 export const Route = createRootRoute({
@@ -61,7 +61,8 @@ function AppShell() {
               {item.label}
             </ActionLink>
           ))}
-          {siteLayerGroups.map((group) => {
+          {siteLayers.map((layer) => {
+            const group = layer.group;
             const groupRoutes = siteRoutes.filter((item) =>
               item.navigationGroup === group && item.sidebar !== false
             );
@@ -69,7 +70,12 @@ function AppShell() {
             const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
             const open = openGroups.has(group);
             return (
-              <div key={group} role="group" aria-label={group} className="grid content-start">
+              <div
+                key={group}
+                role="group"
+                aria-label={group}
+                className={classes("grid content-start", layer.separated ? ui.nav.separatedGroup : undefined)}
+              >
                 <DisclosureButton
                   className={classes(ui.nav.groupToggle, activeGroup === group ? ui.nav.groupActive : ui.nav.groupIdle)}
                   expanded={open}
