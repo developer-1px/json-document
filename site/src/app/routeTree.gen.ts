@@ -26,6 +26,7 @@ import { Route as PageConnectorsReactHookFormRouteImport } from "./routes/_page/
 import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/connectors/tanstack-table";
 import { Route as PageConnectorsWebRouteImport } from "./routes/_page/connectors/web";
 import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
+import { Route as PageDemoAnnotationRouteImport } from "./routes/_page/demo/annotation";
 import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
@@ -195,6 +196,11 @@ const PageConnectorsWebRoute = PageConnectorsWebRouteImport.update({
 const PageDemoIndexRoute = PageDemoIndexRouteImport.update({
   id: "/demo/",
   path: "/demo/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoAnnotationRoute = PageDemoAnnotationRouteImport.update({
+  id: "/demo/annotation",
+  path: "/demo/annotation",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoCanvasRoute = PageDemoCanvasRouteImport.update({
@@ -649,6 +655,7 @@ export interface FileRoutesByFullPath {
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
@@ -749,6 +756,7 @@ export interface FileRoutesByTo {
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
@@ -851,6 +859,7 @@ export interface FileRoutesById {
   "/_page/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/_page/connectors/web": typeof PageConnectorsWebRoute;
+  "/_page/demo/annotation": typeof PageDemoAnnotationRoute;
   "/_page/demo/canvas": typeof PageDemoCanvasRoute;
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
@@ -953,6 +962,7 @@ export interface FileRouteTypes {
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/annotation"
     | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/database"
@@ -1053,6 +1063,7 @@ export interface FileRouteTypes {
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/annotation"
     | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/database"
@@ -1154,6 +1165,7 @@ export interface FileRouteTypes {
     | "/_page/connectors/react-hook-form"
     | "/_page/connectors/tanstack-table"
     | "/_page/connectors/web"
+    | "/_page/demo/annotation"
     | "/_page/demo/canvas"
     | "/_page/demo/clipboard"
     | "/_page/demo/database"
@@ -1365,6 +1377,13 @@ declare module "@tanstack/react-router" {
       path: "/demo";
       fullPath: "/demo/";
       preLoaderRoute: typeof PageDemoIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/annotation": {
+      id: "/_page/demo/annotation";
+      path: "/demo/annotation";
+      fullPath: "/demo/annotation";
+      preLoaderRoute: typeof PageDemoAnnotationRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/canvas": {
@@ -1957,6 +1976,7 @@ interface PageRouteChildren {
   PageConnectorsReactHookFormRoute: typeof PageConnectorsReactHookFormRoute;
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
   PageConnectorsWebRoute: typeof PageConnectorsWebRoute;
+  PageDemoAnnotationRoute: typeof PageDemoAnnotationRoute;
   PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
@@ -2057,6 +2077,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageConnectorsReactHookFormRoute: PageConnectorsReactHookFormRoute,
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,
   PageConnectorsWebRoute: PageConnectorsWebRoute,
+  PageDemoAnnotationRoute: PageDemoAnnotationRoute,
   PageDemoCanvasRoute: PageDemoCanvasRoute,
   PageDemoClipboardRoute: PageDemoClipboardRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
