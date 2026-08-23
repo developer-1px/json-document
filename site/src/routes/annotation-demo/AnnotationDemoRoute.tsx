@@ -352,20 +352,24 @@ function CommentComposer(props: {
   readonly onChange: (instruction: string) => void;
   readonly onDone: () => void;
 }) {
-  const anchor = annotationAnchor(props.annotation);
-  const opensLeft = anchor.x > props.source.width * 0.68;
+  const dock = annotationDock(props.annotation, props.source);
+  const opensLeft = dock.horizontal === "left";
+  const opensAbove = dock.vertical === "above";
+  const tailStyle = opensAbove
+    ? opensLeft ? annotationDemoStyles.commentTailAboveLeft : annotationDemoStyles.commentTailAboveRight
+    : opensLeft ? annotationDemoStyles.commentTailBelowLeft : annotationDemoStyles.commentTailBelowRight;
   return (
     <section
       aria-label={`Request ${props.index} comment`}
       className={annotationDemoStyles.commentCard}
-      data-side={opensLeft ? "left" : "right"}
+      data-side={`${dock.vertical}-${dock.horizontal}`}
       style={{
-        left: `${(anchor.x / props.source.width) * 100}%`,
-        top: `${(anchor.y / props.source.height) * 100}%`,
-        transform: opensLeft ? "translate(-100%, -100%)" : "translate(0, -100%)",
+        left: `${(dock.anchor.x / props.source.width) * 100}%`,
+        top: `${(dock.anchor.y / props.source.height) * 100}%`,
+        transform: `translate(${opensLeft ? "-100%" : "0"}, ${opensAbove ? "-100%" : "0"})`,
       }}
     >
-      <span className={opensLeft ? annotationDemoStyles.commentTailLeft : annotationDemoStyles.commentTailRight} aria-hidden="true" />
+      <span className={tailStyle} aria-hidden="true" />
       <div className={annotationDemoStyles.commentHeader}>
         <strong className={ui.text.label}>Request {props.index}</strong>
         <span className={ui.text.meta}>{markLabel(props.annotation)}</span>
@@ -400,7 +404,7 @@ function AnnotationShape(props: {
   const common = {
     fill: "none",
     stroke: accent,
-    strokeWidth: props.selected ? 10 : 8,
+    strokeWidth: props.selected ? 6 : 4,
     vectorEffect: "non-scaling-stroke" as const,
   };
   return (
@@ -417,13 +421,13 @@ function AnnotationShape(props: {
           <rect
             x={annotation.target.x + 10}
             y={annotation.target.y + 10}
-            width="24"
-            height="24"
+            width="16"
+            height="16"
             fill={accent}
-            transform={`rotate(45 ${annotation.target.x + 22} ${annotation.target.y + 22})`}
+            transform={`rotate(45 ${annotation.target.x + 18} ${annotation.target.y + 18})`}
           />
-          <circle cx={annotation.target.x} cy={annotation.target.y} r="32" fill={accent} />
-          <text x={annotation.target.x} y={annotation.target.y + 2} fill="white" fontSize="32" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
+          <circle cx={annotation.target.x} cy={annotation.target.y} r="24" fill={accent} />
+          <text x={annotation.target.x} y={annotation.target.y + 1} fill="white" fontSize="24" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
             {props.index}
           </text>
         </>
@@ -677,20 +681,26 @@ function movePoint(point: PointTarget, dx: number, dy: number): PointTarget {
   return { type: "point", x: point.x + dx, y: point.y + dy };
 }
 
-function annotationAnchor(annotation: RasterAnnotation): PointTarget {
-  if (annotation.mark.type === "arrow") return annotation.mark.to;
-  if (annotation.target.type === "point") {
-    return {
-      type: "point",
-      x: annotation.target.x + 24,
-      y: annotation.target.y - 24,
-    };
-  }
+function annotationDock(annotation: RasterAnnotation, source: AnnotationSource) {
+  const bounds = annotationBounds(annotation);
+  const horizontal = bounds.x + bounds.width / 2 >= source.width / 2 ? "left" : "right";
+  const vertical = bounds.y + bounds.height / 2 >= source.height / 2 ? "above" : "below";
+  const pointOffset = annotation.target.type === "point" ? 24 : 0;
   return {
-    type: "point",
-    x: annotation.target.x + annotation.target.width,
-    y: annotation.target.y,
+    horizontal,
+    vertical,
+    anchor: {
+      type: "point" as const,
+      x: horizontal === "left" ? bounds.x - pointOffset : bounds.x + bounds.width + pointOffset,
+      y: vertical === "above" ? bounds.y - pointOffset : bounds.y + bounds.height + pointOffset,
+    },
   };
+}
+
+function annotationBounds(annotation: RasterAnnotation) {
+  if (annotation.mark.type === "arrow") return rectangleFromPoints(annotation.mark.from, annotation.mark.to);
+  if (annotation.target.type === "rectangle") return annotation.target;
+  return { x: annotation.target.x, y: annotation.target.y, width: 0, height: 0 };
 }
 
 function eventPoint(event: PointerEvent<SVGElement>): PointTarget {
