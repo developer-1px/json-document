@@ -109,6 +109,28 @@ describe("Rich Text React locality", () => {
     expect(structureNotifies).toBe(1);
     expect(store.getBlockIds().length).toBe(beforeIds.length + 1);
   });
+
+  it("renders a Rich Text document bound below the JSON root", async () => {
+    const value = createRichTextBlockFixture(2, { idPrefix: "nested" });
+    const jsonDocument = createJSONDocument({ instruction: value, attachments: [] });
+    const editor = createRichTextEditor({
+      document: jsonDocument,
+      pointer: "/instruction",
+      selection: collapsed("nested-text-0", 1),
+    });
+    const store = richTextRenderStore(editor);
+    expect(store.getDocumentId()).toBe(value.id);
+    expect(store.getBlockIds()).toEqual(["nested-0", "nested-1"]);
+
+    const root = globalThis.document.createElement("div");
+    globalThis.document.body.append(root);
+    const reactRoot = createRoot(root);
+    await act(async () => reactRoot.render(<RichTextEditorSurface editor={editor} />));
+    expect(root.querySelector('[data-rich-text-node-id="nested-0"]')).not.toBeNull();
+    await act(async () => { editor.dispatch({ type: "text.insert", text: "x" }); });
+    expect(root.textContent).toContain("x");
+    await act(async () => reactRoot.unmount());
+  });
 });
 
 function collapsed(nodeId: string, offset: number) {

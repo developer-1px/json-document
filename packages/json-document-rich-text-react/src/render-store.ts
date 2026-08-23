@@ -32,17 +32,19 @@ export function richTextRenderStore(editor: RichTextEditor): RichTextRenderStore
 }
 
 function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
-  let document = editor.snapshot.value as RichTextDocument;
+  const pointer = editor.pointer ?? "";
+  let document = documentAtPointer(editor.snapshot.value, pointer);
   let blockIds: ReadonlyArray<string> = document.content.map((node) => node.id);
   const nodeListeners = new Map<string, Set<() => void>>();
   const structureListeners = new Set<() => void>();
 
   editor.subscribe((snapshot) => {
-    const next = snapshot.value as RichTextDocument;
+    const next = documentAtPointer(snapshot.value, pointer);
     if (next === document) return;
     const previous = document;
     document = next;
-    const applied = appliedOperationsFor(next);
+    const recorded = appliedOperationsFor(next);
+    const applied = recorded === null ? null : relativeOperations(recorded, pointer);
     if (applied !== null && !contentStructureChanged(applied)) {
       lastBlockScan = applied.length;
       for (const operation of applied) notifyAppliedPath(next, operation.path, nodeListeners);
@@ -86,6 +88,26 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
       return () => { structureListeners.delete(notify); };
     },
   };
+}
+
+function relativeOperations(
+  operations: ReadonlyArray<{ readonly op: string; readonly path: string }>,
+  pointer: string,
+): ReadonlyArray<{ readonly op: string; readonly path: string }> {
+  if (pointer === "") return operations;
+  return operations
+    .filter((operation) => operation.path === pointer || operation.path.startsWith(`${pointer}/`))
+    .map((operation) => ({ ...operation, path: operation.path.slice(pointer.length) }));
+}
+
+function documentAtPointer(value: unknown, pointer: string): RichTextDocument {
+  if (pointer === "") return value as RichTextDocument;
+  let current = value;
+  for (const segment of pointer.slice(1).split("/").map((part) => part.replaceAll("~1", "/").replaceAll("~0", "~"))) {
+    if (current === null || typeof current !== "object") throw new TypeError(`Rich Text document was not found at ${JSON.stringify(pointer)}.`);
+    current = (current as Readonly<Record<string, unknown>>)[segment];
+  }
+  return current as RichTextDocument;
 }
 
 function contentStructureChanged(
