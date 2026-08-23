@@ -96,6 +96,7 @@ export function AnnotationDemoRoute() {
       })),
       selectedId: annotation.id,
     });
+    setTool("select");
     setAnnouncement("수정 요청을 추가했습니다.");
   }
 

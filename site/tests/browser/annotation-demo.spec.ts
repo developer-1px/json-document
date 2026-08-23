@@ -16,7 +16,9 @@ test("Comment creates point and region marks with one editable comment", async (
   await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.4 } });
   await page.getByLabel("Annotation instruction").fill("목줄을 파란색으로 바꿔 주세요.");
   await page.getByRole("button", { name: "Send comment" }).click();
+  await expect(page.getByRole("button", { name: "Select", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("region", { name: "Request 1 comment" })).toBeVisible();
+  await expect(page.getByLabel("Annotation instruction")).toHaveValue("목줄을 파란색으로 바꿔 주세요.");
   await page.getByLabel("Annotation instruction").fill("목줄을 짙은 파란색으로 바꿔 주세요.");
   await page.getByRole("button", { name: "Send comment" }).click();
   expect((await structured(page)).annotations[0].body.instruction).toContain("짙은");
