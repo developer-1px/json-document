@@ -19,6 +19,7 @@ docs
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
 |   |-- domains.md             # Domains TBD: UI와 분리한 장르 편집 의미
+|   |-- domain-*.md            # Domains TBD: Schema와 장르별 후보
 |   |-- collaboration.md       # JSON Document: 같은 계약의 협업 구현
 |   |-- hands.md               # Hands: 사람의 편집 도구
 |   |-- composer.md            # Hands TBD: agent 지시와 맥락
@@ -60,7 +61,11 @@ Editing
 `-- History
 
 Domains
-`-- Official Domains (TBD)
+|-- Official Domains (TBD)
+|-- Schema (TBD)
+|-- Document / Order / Object (TBD)
+|-- Sheet / Tree / Kanban (TBD)
+`-- Database / Rich Text (TBD)
 
 Adapter
 |-- Overview

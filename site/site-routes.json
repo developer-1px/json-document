@@ -50,6 +50,87 @@
     "navigationGroup": "Domains"
   },
   {
+    "path": "/docs/domains/schema",
+    "label": "Schema · TBD",
+    "title": "Schema Domain · TBD - json-document",
+    "heading": "Schema · TBD",
+    "description": "Schema가 독립 Domain인지 공통 capability인지 검토하는 TBD 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/document",
+    "label": "Document · TBD",
+    "title": "Document Domain · TBD - json-document",
+    "heading": "Document · TBD",
+    "description": "Block identity와 text range 편집 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/order",
+    "label": "Order · TBD",
+    "title": "Order Domain · TBD - json-document",
+    "heading": "Order · TBD",
+    "description": "순서가 있는 항목의 selection과 rename 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/object",
+    "label": "Object · TBD",
+    "title": "Object Domain · TBD - json-document",
+    "heading": "Object · TBD",
+    "description": "평면 object identity와 transform 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/sheet",
+    "label": "Sheet · TBD",
+    "title": "Sheet Domain · TBD - json-document",
+    "heading": "Sheet · TBD",
+    "description": "행과 열 topology 및 cell 편집 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/tree",
+    "label": "Tree · TBD",
+    "title": "Tree Domain · TBD - json-document",
+    "heading": "Tree · TBD",
+    "description": "Parent 관계와 visible tree 편집 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/kanban",
+    "label": "Kanban · TBD",
+    "title": "Kanban Domain · TBD - json-document",
+    "heading": "Kanban · TBD",
+    "description": "Column과 card 이동 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/database",
+    "label": "Database · TBD",
+    "title": "Database Domain · TBD - json-document",
+    "heading": "Database · TBD",
+    "description": "Typed property와 record 및 view 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
+    "path": "/docs/domains/rich-text",
+    "label": "Rich Text · TBD",
+    "title": "Rich Text Domain · TBD - json-document",
+    "heading": "Rich Text · TBD",
+    "description": "Versioned rich text vocabulary와 transform 의미를 검토하는 TBD Domain 후보입니다.",
+    "language": "ko",
+    "navigationGroup": "Domains"
+  },
+  {
     "path": "/docs/collaboration",
     "label": "Collaboration",
     "title": "Collaboration - json-document",

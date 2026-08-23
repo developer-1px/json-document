@@ -61,6 +61,19 @@ describe("official site shell", () => {
       "Clipboard",
       "History",
     ]);
+    await user.click(nav.getByRole("button", { name: "Domains" }));
+    expect(groupLinks(nav, "Domains")).toEqual([
+      "Official Domains · TBD",
+      "Schema · TBD",
+      "Document · TBD",
+      "Order · TBD",
+      "Object · TBD",
+      "Sheet · TBD",
+      "Tree · TBD",
+      "Kanban · TBD",
+      "Database · TBD",
+      "Rich Text · TBD",
+    ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
       "Overview",

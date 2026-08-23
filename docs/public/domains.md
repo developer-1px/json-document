@@ -81,28 +81,31 @@ Clipboard, History와 익숙한 입력이 함께 동작한다는 완료 상태�
 Artifact는 그 조합이 사람이 보고 고치는 결과입니다. 이 해석도 아직 TBD이며
 현재 [Hands](hands.md)와 [Concept Map](concepts.md)을 재분류하지 않습니다.
 
-## 현재 관찰되는 후보
+## 현재 관찰되는 후보 · 모두 TBD
 
-현재 repository에는 다음 장르의 headless 편집 의미가 있습니다.
+현재 repository에는 다음 headless 편집 의미가 있습니다. 각 항목은 검토를
+위해 이름을 붙인 후보일 뿐 Official Domain catalog로 승인되지 않았습니다.
 
 | 후보 | UI 없이 정의하는 중심 의미 |
 | --- | --- |
-| Document | 안정된 block, text point와 line-range Selection |
-| Order | 한 줄 항목의 range Selection과 순서 변경 |
-| Object | 안정 ID key family와 translate·resize |
-| Sheet | row×column topology와 rectangular Selection |
-| Tree | visible line topology와 subtree Clipboard |
-| Kanban | column과 card identity, card move |
-| Database | typed property, record와 저장된 view topology |
-| Rich Text | versioned schema, stable node identity와 schema-aware transform |
+| Schema · TBD | JSON shape, validation vocabulary와 schema-aware operation |
+| Document · TBD | 안정된 block, text point와 line-range Selection |
+| Order · TBD | 한 줄 항목의 range Selection과 순서 변경 |
+| Object · TBD | 안정 ID key family와 translate·resize |
+| Sheet · TBD | row×column topology와 rectangular Selection |
+| Tree · TBD | visible line topology와 subtree Clipboard |
+| Kanban · TBD | column과 card identity, card move |
+| Database · TBD | typed property, record와 저장된 view topology |
+| Rich Text · TBD | versioned schema, stable node identity와 schema-aware transform |
 
-이 목록은 Official Domain catalog를 승인하지 않습니다. 각 후보가 공통 최소
+각 후보의 상세 페이지도 같은 `TBD` 상태를 유지합니다. 후보가 공통 최소
 의미를 충분히 증명했는지, package와 문서에서 어디에 위치해야 하는지는
 아직 열려 있습니다.
 
 ## 열린 질문
 
 - 어떤 장르가 Official Domain으로 들어올 수 있는가?
+- Schema는 독립 Domain인가, 다른 Domain이 사용하는 capability인가?
 - 여러 제품에 공통인 최소 의미와 product policy를 어디서 가르는가?
 - 공통 Editing capability와 장르별 Domain의 package 배치는 어떻게 구분하는가?
 - 기존 Domain 후보 중 어느 범위까지 compatibility를 약속하는가?

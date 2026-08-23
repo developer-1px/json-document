@@ -41,7 +41,18 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "History",
   ]);
   await navigation.getByRole("button", { name: "Domains" }).click();
-  await expect(navigation.getByRole("group", { name: "Domains" }).getByRole("link")).toHaveText(["Official Domains · TBD"]);
+  await expect(navigation.getByRole("group", { name: "Domains" }).getByRole("link")).toHaveText([
+    "Official Domains · TBD",
+    "Schema · TBD",
+    "Document · TBD",
+    "Order · TBD",
+    "Object · TBD",
+    "Sheet · TBD",
+    "Tree · TBD",
+    "Kanban · TBD",
+    "Database · TBD",
+    "Rich Text · TBD",
+  ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
     "Overview",
