@@ -8,6 +8,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import {
+  createCanvasGestureSession,
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
   commitAffordance,
@@ -27,6 +28,7 @@ import { optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 type DragState = {
+  readonly type: "drag";
   readonly ids: ReadonlyArray<string>;
   readonly originX: number;
   readonly originY: number;
@@ -35,6 +37,7 @@ type DragState = {
 };
 
 type MarqueeState = {
+  readonly type: "marquee";
   readonly originX: number;
   readonly originY: number;
   readonly x: number;
@@ -43,20 +46,32 @@ type MarqueeState = {
   readonly height: number;
 };
 
+type PanGesture = {
+  readonly type: "pan";
+  readonly originX: number;
+  readonly originY: number;
+};
+
+type CanvasGesture = DragState | MarqueeState | PanGesture;
+
 export function CanvasWidgetRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
-  const [drag, setDrag] = useState<DragState | null>(null);
-  const [marquee, setMarquee] = useState<MarqueeState | null>(null);
-  const [pan, setPan] = useState({ x: 0, y: 0, originX: 0, originY: 0, active: false });
+  const [gesture, setGesture] = useState<CanvasGesture | null>(null);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const [space, setSpace] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
-  const [pointerSession] = useState(() => createWebPointerSession<"drag" | "marquee" | "pan">({
-    onCancel: (kind) => {
-      if (kind === "drag") setDrag(null);
-      if (kind === "marquee") setMarquee(null);
-      if (kind === "pan") setPan((current) => ({ ...current, active: false }));
-    },
+  const [gestureSession] = useState(() => createCanvasGestureSession<CanvasGesture>({
+    onBegin: setGesture,
+    onPreview: setGesture,
+    onCommit: () => setGesture(null),
+    onCancel: () => setGesture(null),
   }));
+  const [pointerSession] = useState(() => createWebPointerSession<"drag" | "marquee" | "pan">({
+    onCancel: (_kind, reason) => gestureSession.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel"),
+  }));
+  const drag = gesture?.type === "drag" ? gesture : null;
+  const marquee = gesture?.type === "marquee" ? gesture : null;
+  const panGesture = gesture?.type === "pan" ? gesture : null;
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedObjects.map((object) => object.id),
@@ -97,7 +112,7 @@ export function CanvasWidgetRoute() {
     });
     if (grabbing || (space && event.buttons === 1)) {
       pointerSession.begin(surface.current, event.pointerId, "pan");
-      setPan({ x: pan.x, y: pan.y, originX: event.clientX - pan.x, originY: event.clientY - pan.y, active: true });
+      gestureSession.begin({ type: "pan", originX: event.clientX - pan.x, originY: event.clientY - pan.y });
       return;
     }
     if (objectId) {
@@ -118,7 +133,8 @@ export function CanvasWidgetRoute() {
               mode: "replace",
             });
             pointerSession.begin(surface.current!, event.pointerId, "drag");
-            setDrag({
+            gestureSession.begin({
+              type: "drag",
               ids: hand.objectIds,
               originX: event.clientX,
               originY: event.clientY,
@@ -132,7 +148,7 @@ export function CanvasWidgetRoute() {
     }
     const origin = { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
     pointerSession.begin(surface.current, event.pointerId, "marquee");
-    setMarquee({ originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
+    gestureSession.begin({ type: "marquee", originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
@@ -142,12 +158,12 @@ export function CanvasWidgetRoute() {
         event.currentTarget.style.cursor = space ? "grab" : cursor;
       },
     });
-    if (pan.active) {
+    if (panGesture) {
       applyAffordance(
         panAffordance({
           spaceKey: true,
           buttons: event.buttons,
-          origin: { x: pan.originX, y: pan.originY },
+          origin: { x: panGesture.originX, y: panGesture.originY },
           point: { x: event.clientX, y: event.clientY },
         }),
         {
@@ -156,7 +172,7 @@ export function CanvasWidgetRoute() {
           },
           hand: (hand) => {
             if (hand.type !== "translate") return;
-            setPan((current) => ({ ...current, x: hand.dx, y: hand.dy }));
+            setPan({ x: hand.dx, y: hand.dy });
           },
         },
       );
@@ -170,7 +186,7 @@ export function CanvasWidgetRoute() {
             event.currentTarget.style.cursor = cursor;
           },
           hand: (hand) => {
-            if (hand.type === "translate") setDrag({ ...drag, dx: hand.dx, dy: hand.dy });
+          if (hand.type === "translate") gestureSession.preview({ ...drag, dx: hand.dx, dy: hand.dy });
           },
         },
       );
@@ -185,7 +201,7 @@ export function CanvasWidgetRoute() {
         },
         hand: (hand) => {
           if (hand.type !== "select" || !hand.rect) return;
-          setMarquee({ originX: origin.x, originY: origin.y, ...hand.rect });
+          gestureSession.preview({ type: "marquee", originX: origin.x, originY: origin.y, ...hand.rect });
         },
       });
     }
@@ -193,8 +209,8 @@ export function CanvasWidgetRoute() {
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
     pointerSession.commit(event.pointerId);
-    if (pan.active) {
-      setPan((current) => ({ ...current, active: false }));
+    if (panGesture) {
+      gestureSession.commit();
       return;
     }
     if (drag) {
@@ -225,7 +241,7 @@ export function CanvasWidgetRoute() {
           },
         });
       }
-      setDrag(null);
+      gestureSession.commit();
       return;
     }
     if (marquee) {
@@ -252,7 +268,7 @@ export function CanvasWidgetRoute() {
           },
         });
       }
-      setMarquee(null);
+      gestureSession.commit();
     }
   }
 
@@ -264,15 +280,15 @@ export function CanvasWidgetRoute() {
     applyAffordance(
       escapeAffordance({
         key: event.key,
-        grabbing: drag != null || marquee != null || pan.active,
+        grabbing: gesture !== null,
         selected: editor.selectedObjects.length > 0,
       }),
       {
         hand: (hand) => {
           if (hand.type === "cancel") {
-            setDrag(null);
-            setMarquee(null);
-            setPan((current) => ({ ...current, active: false }));
+            const activePointer = pointerSession.getSnapshot();
+            if (activePointer) pointerSession.cancel(activePointer.pointerId);
+            else gestureSession.cancel();
             event.preventDefault();
             return;
           }

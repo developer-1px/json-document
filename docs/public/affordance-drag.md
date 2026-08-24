@@ -47,10 +47,40 @@ function onPointerUp(event: PointerEvent) {
 모양과 그림은 제품이 정합니다. 고른 것을 잡고 옮기는 문법은 닫혀 있습니다.
 Shift는 축을 구속하고, Alt는 [Duplicate](affordance-copy-drag.md)입니다.
 
+## Canvas gesture session
+
+`createCanvasGestureSession`은 Canvas에서 동시에 하나만 활성화되는 semantic gesture의
+`begin → preview → commit/cancel` 수명을 소유합니다. `drag`, `marquee`, `pan`, `resize`처럼
+입력 장치와 무관한 gesture state를 전달하며, Web pointer capture는
+`createWebPointerSession`이 별도로 소유합니다.
+
+```ts
+import { createCanvasGestureSession } from "@interactive-os/json-document-affordance";
+
+const gestures = createCanvasGestureSession<CanvasGesture>({
+  onBegin: setGesture,
+  onPreview: setGesture,
+  onCommit: () => setGesture(null),
+  onCancel: () => setGesture(null),
+});
+
+gestures.begin({ type: "drag", ids, originX, originY, dx: 0, dy: 0 });
+gestures.preview((drag) => ({ ...drag, dx, dy }));
+gestures.commit();
+```
+
+### Public API
+
+- `createCanvasGestureSession(options?)`
+- `CanvasGestureSession<Gesture>`: `getActive`, `begin`, `preview`, `commit`, `cancel`
+- `CanvasGestureState`, `CanvasGestureType`, `CanvasGestureCancelReason`
+
+좌표 변환, hit test, 잠금 정책, renderer, tool/viewport 정책은 Host 책임입니다.
+
 ## TBD
 
 - 키보드만으로 옮기기 (APG는 드래그의 키보드 대안을 요구함)
-- pointer capture 수명
+- pointer capture 수명은 Web Adapter의 `createWebPointerSession`이 소유함
 
 ## Live Demo
 

@@ -12,6 +12,7 @@ import treeEditingSource from "../../../../packages/json-document-react/src/use-
 import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
+import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -49,6 +50,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
+  ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -120,6 +122,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "createBoardDragSession",
     sourcePath: "packages/json-document-affordance/src/board-drag-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createCanvasGestureSession",
+    sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
   },
 ] as const;
 
