@@ -501,6 +501,19 @@ function event(clipboardData: WebClipboardData | null): WebClipboardEvent & { re
   };
 }
 
+function addressElement(attributes: {
+  readonly "data-grid-row-id": string;
+  readonly "data-grid-column-id": string;
+}) {
+  return {
+    getAttribute(name: string) {
+      if (name === "data-grid-row-id") return attributes["data-grid-row-id"];
+      if (name === "data-grid-column-id") return attributes["data-grid-column-id"];
+      return null;
+    },
+  };
+}
+
 function pointerCaptureTarget() {
   const captured = new Set<number>();
   return {
@@ -513,19 +526,6 @@ function pointerCaptureTarget() {
     },
     releasePointerCapture(pointerId: number) {
       captured.delete(pointerId);
-    },
-  };
-}
-
-function addressElement(attributes: {
-  readonly "data-grid-row-id": string;
-  readonly "data-grid-column-id": string;
-}) {
-  return {
-    getAttribute(name: string) {
-      if (name === "data-grid-row-id") return attributes["data-grid-row-id"];
-      if (name === "data-grid-column-id") return attributes["data-grid-column-id"];
-      return null;
     },
   };
 }
