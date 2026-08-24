@@ -55,6 +55,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
     "Overview",
     "Keyboard",
+    "Grid cell",
     "Clipboard Reference",
     "Contenteditable",
   ]);
@@ -207,6 +208,7 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
     "Overview",
     "Keyboard",
+    "Grid cell",
     "Clipboard Reference",
     "Contenteditable",
   ]);
