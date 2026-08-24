@@ -1,5 +1,6 @@
 import { useRef, useState, type ClipboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
+import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   createSheetEditor,
   type EditingResult,
@@ -50,21 +51,15 @@ export function SheetDemo() {
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const surfaceRef = useRef<HTMLElement>(null);
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<SheetIntent | null>(null);
-  const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const observation = useDemoObservation<SheetIntent>("Ready");
 
   function dispatchIntent(intent: SheetIntent) {
     const result: EditingResult<SheetSelection> = editor.dispatch(intent);
-    setLastIntent(intent);
-    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
-    return result;
+    return observation.observe(intent, result);
   }
 
   function run(action: () => { readonly ok: boolean }, successMessage: string) {
-    const result = action();
-    setAnnouncement(result.ok ? successMessage : "That action is not available here");
-    return result;
+    return observation.run(action, successMessage, "That action is not available here");
   }
 
   const focus = editor.snapshot.selection.focus;
@@ -123,25 +118,25 @@ export function SheetDemo() {
 
   function copySelection() {
     const next = editor.copy();
-    if (next === null) return setAnnouncement("Select a cell first");
+    if (next === null) return observation.announce("Select a cell first");
     setClipboard(next);
     void navigator.clipboard?.writeText(next.text).catch(() => undefined);
-    setAnnouncement(`Copied ${next.cells.length} × ${next.cells[0]?.length ?? 0} cells`);
+    observation.announce(`Copied ${next.cells.length} × ${next.cells[0]?.length ?? 0} cells`);
   }
 
   function cutSelection() {
     const next = editor.cut();
-    if (next === null) return setAnnouncement("Select a cell first");
+    if (next === null) return observation.announce("Select a cell first");
     setClipboard(next.clipboard);
-    setLastResult(next.result.ok ? { ok: true } : { ok: false, code: next.result.code });
+    observation.observeResult(next.result);
     void navigator.clipboard?.writeText(next.clipboard.text).catch(() => undefined);
-    setAnnouncement(next.result.ok
+    observation.announce(next.result.ok
       ? `Cut ${next.clipboard.cells.length} × ${next.clipboard.cells[0]?.length ?? 0} cells`
       : next.result.code);
   }
 
   function pasteSelection() {
-    if (clipboard === null) return setAnnouncement("Copy cells first");
+    if (clipboard === null) return observation.announce("Copy cells first");
     run(
       () => dispatchIntent({ type: "clipboard.paste", clipboard }),
       `Pasted ${clipboard.cells.length} × ${clipboard.cells[0]?.length ?? 0} cells`,
@@ -150,24 +145,24 @@ export function SheetDemo() {
 
   function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
+    observation.announce(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
   }
 
   function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
     if (result.operation === "cut") {
-      setLastResult(result.result.ok ? { ok: true } : { ok: false, code: result.result.code ?? "editing.rejected" });
+      observation.observeResult(result.result);
     }
-    setAnnouncement(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
+    observation.announce(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
   }
 
   function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.paste(event);
-    setAnnouncement(result.ok
+    observation.announce(result.ok
       ? `Pasted ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`
       : result.code);
   }
@@ -180,7 +175,7 @@ export function SheetDemo() {
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedCells.length} cells · {snapshot.selection.ranges.length} ranges · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
           </div>
           )}
         >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
@@ -206,8 +201,8 @@ export function SheetDemo() {
           inspector={(
             <Inspector placement="inline" items={[
               { label: "Canonical JSON", meta: "stable row + column ids", value: snapshot.value, testId: "sheet-canonical-json", size: "tall" },
-              { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "sheet-intent-json", size: "compact" },
-              { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "sheet-result-json", size: "compact" },
+              { label: "intent", meta: observation.lastIntent ? observation.lastIntent.type : "dispatch only", value: observation.lastIntent, testId: "sheet-intent-json", size: "compact" },
+              { label: "result", meta: observation.lastResult?.ok === false ? observation.lastResult.code : observation.lastResult?.ok ? "ok" : "none yet", value: observation.lastResult, testId: "sheet-result-json", size: "compact" },
               { label: "Selection", value: snapshot.selection, testId: "sheet-selection-json", size: "compact" },
             ]} />
           )}

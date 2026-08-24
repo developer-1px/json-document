@@ -1,5 +1,6 @@
 import { useState, type ClipboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
+import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   createObjectEditor,
   type ObjectClipboard,
@@ -34,14 +35,10 @@ export function ObjectDemoRoute() {
       },
     }),
   }));
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<ObjectIntent | null>(null);
+  const observation = useDemoObservation<ObjectIntent>("Ready");
 
   function run(intent: ObjectIntent, message: string) {
-    const result = editor.dispatch(intent);
-    setLastIntent(intent);
-    setAnnouncement(result.ok ? message : result.code);
-    return result;
+    return observation.dispatch(intent, editor.dispatch, message);
   }
 
   const editing = useEditing({
@@ -59,8 +56,8 @@ export function ObjectDemoRoute() {
       resolve: editingCommandFromStroke,
       focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
       neighbor: () => null,
-      onUndo: () => { editor.undo(); setAnnouncement("Undone"); },
-      onRedo: () => { editor.redo(); setAnnouncement("Redone"); },
+      onUndo: () => { editor.undo(); observation.announce("Undone"); },
+      onRedo: () => { editor.redo(); observation.announce("Redone"); },
     },
   });
   const snapshot = editing.snapshot;
@@ -69,35 +66,35 @@ export function ObjectDemoRoute() {
 
   function copySelection() {
     const next = editor.copy();
-    if (!next) return setAnnouncement("Select an object first");
+    if (!next) return observation.announce("Select an object first");
     setClipboard(next);
-    setAnnouncement(`Copied ${next.objects.length} object${next.objects.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${next.objects.length} object${next.objects.length === 1 ? "" : "s"}`);
   }
 
   function cutSelection() {
     const result = editor.cut();
-    if (!result) return setAnnouncement("Select an object first");
+    if (!result) return observation.announce("Select an object first");
     setClipboard(result.clipboard);
-    setAnnouncement(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
   }
 
   function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
     const result = webClipboard.paste(event);
-    setAnnouncement(result.ok
+    observation.announce(result.ok
       ? `Pasted ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`
       : result.code);
   }
@@ -110,7 +107,7 @@ export function ObjectDemoRoute() {
         aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedObjects.length} selected · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
           </div>
         )}
       >
@@ -152,14 +149,14 @@ export function ObjectDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
           <Inspector placement="inline" items={[
             { label: "Canonical JSON", value: snapshot.value, testId: "object-demo-document", size: "tall" },
-            { label: "intent", value: lastIntent, testId: "object-demo-intent", size: "compact" },
+            { label: "intent", value: observation.lastIntent, testId: "object-demo-intent", size: "compact" },
             { label: "selection", value: snapshot.selection, testId: "object-demo-selection", size: "compact" },
           ]} />
         )}
