@@ -45,6 +45,7 @@ object 그림이고, textarea 캐럿은 text 그림입니다. 두 질의를 하�
 | `useEditingSnapshot(source)` | `EditingSnapshot` | 값·선택·revision·undo 가능 여부만 그릴 때 |
 | `useEditing(options)` | snapshot + 항목 질의 + 키 입력 | 범위·커서·글자 위치를 화면에 붙일 때 |
 | `useGridEditing(options)` | snapshot + `GridPoint` 셀 질의 + 키 입력 | 격자 좌표를 문자열 키로 번역하지 않고 붙일 때 |
+| `useTreeEditing(options)` | snapshot + visible rows/topology + fold | 접힌 Tree의 선택·키보드·expanded state를 붙일 때 |
 | `useEditingObservation(initialAnnouncement)` | 마지막 Intent·결과·announcement | 실행 결과를 inspector와 접근성 피드백에 함께 투영할 때 |
 | `useRestoreTextCursor(ref, offset)` | 없음. 캐럿만 맞춤 | 모델 offset을 input/textarea에 되돌릴 때 |
 
@@ -510,6 +511,38 @@ interface GridEditing<Selection extends JSONValue> {
 주고받습니다. 내부 key encoding은 공개 계약이 아니며 Host가 조립하거나
 해석하지 않습니다. 나머지 click mode와 keyboard command door는
 `useEditing`과 같습니다.
+
+### `useTreeEditing` 계약
+
+```ts
+interface UseTreeEditingOptions<Selection extends JSONValue> {
+  readonly source?: EditingSnapshotSource<Selection>;
+  readonly nodes: ReadonlyArray<TreeNode>;
+  readonly initialExpandedIds?: Iterable<string>;
+  readonly selectedNodeIds: (topology: TreeTopology) => Iterable<string>;
+  readonly focusNodeId?: string | null;
+  readonly onSelect: (nodeId: string, mode: EditingSelectionMode, topology: TreeTopology) => void;
+  readonly keyboard?: TreeEditingKeyboardOptions;
+}
+
+interface TreeEditing<Selection extends JSONValue> {
+  readonly snapshot: EditingSnapshot<Selection>;
+  readonly visibility: TreeVisibility;
+  readonly expandedIds: ReadonlySet<string>;
+  getItem(nodeId: string): EditingItem;
+  getKeyDownHandler(): (event: EditingKeyDownEvent) => void;
+  isExpanded(nodeId: string): boolean;
+  expand(nodeId: string): void;
+  collapse(nodeId: string): void;
+  toggle(nodeId: string): void;
+}
+```
+
+`initialExpandedIds`는 초기 제품 정책만 주입합니다. 이후 fold state와
+projection은 hook이 같은 수명주기로 유지합니다. `selectedNodeIds`,
+`onSelect`, keyboard `onDelete`가 받는 `TreeTopology`는 현재 visible rows와
+항상 같은 snapshot입니다. node markup과 clipboard·announcement 실행은
+Host 책임입니다.
 
 ### 키보드 옵션과 command
 

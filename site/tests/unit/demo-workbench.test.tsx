@@ -100,4 +100,14 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
+  test("registers Tree visibility and React binding sources next to Tree usage", async () => {
+    expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-react/src/use-tree-editing.ts",
+      "packages/json-document-editing/src/tree-visibility.ts",
+    ]);
+  });
+
 });

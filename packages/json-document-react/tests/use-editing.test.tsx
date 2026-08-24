@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
-import { createDocumentEditor, createSheetEditor } from "@interactive-os/json-document-editing";
+import { createDocumentEditor, createSheetEditor, createTreeEditor } from "@interactive-os/json-document-editing";
 import {
   useEditing,
   useGridEditing,
+  useTreeEditing,
   useRestoreElementFocus,
   type EditingKeyboardCommand,
   type EditingKeyboardStroke,
@@ -15,6 +16,7 @@ afterEach(cleanup);
 function resolveStroke(stroke: EditingKeyboardStroke): EditingKeyboardCommand | null {
   if (stroke.key === "ArrowDown") return { type: "move", direction: "down", operation: stroke.shiftKey ? "extend" : "replace" };
   if (stroke.key === "ArrowLeft") return { type: "move", direction: "left", operation: stroke.shiftKey ? "extend" : "replace" };
+  if (stroke.key === "ArrowRight") return { type: "move", direction: "right", operation: stroke.shiftKey ? "extend" : "replace" };
   if (stroke.key === " ") return { type: "toggle" };
   if (stroke.key === "Delete" || stroke.key === "Backspace") return { type: "delete" };
   if (stroke.key === "z" && (stroke.metaKey || stroke.ctrlKey) && stroke.shiftKey) return { type: "redo" };
@@ -23,6 +25,46 @@ function resolveStroke(stroke: EditingKeyboardStroke): EditingKeyboardCommand | 
 }
 
 describe("useEditing", () => {
+  test("owns visible-tree fold state while keeping the initial policy injectable", () => {
+    const editor = createTreeEditor({
+      nodes: [
+        { id: "fruit", parentId: null, label: "Fruit" },
+        { id: "apple", parentId: "fruit", label: "Apple" },
+        { id: "veg", parentId: null, label: "Vegetables" },
+      ],
+    });
+
+    function View() {
+      const focusNodeId = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? null;
+      const editing = useTreeEditing({
+        source: editor,
+        nodes: (editor.snapshot.value as { nodes: Array<{ id: string; parentId: string | null; label: string }> }).nodes,
+        initialExpandedIds: [],
+        selectedNodeIds: (topology) => editor.selectedNodeIdsIn(topology),
+        focusNodeId,
+        onSelect: (nodeId, mode, topology) => editor.dispatch({ type: "selection.set", nodeId, mode, topology }),
+        keyboard: {
+          resolve: resolveStroke,
+          focusNodeId: () => editor.snapshot.selection.ranges[0]?.focus.nodeId,
+        },
+      });
+      return (
+        <div data-testid="tree" tabIndex={0} onKeyDown={editing.getKeyDownHandler()}>
+          {editing.visibility.rows.map((row) => <span key={row.id}>{row.id}</span>)}
+          <output data-testid="expanded">{String(editing.isExpanded("fruit"))}</output>
+        </div>
+      );
+    }
+
+    render(<View />);
+    expect(screen.queryByText("apple")).toBeNull();
+    fireEvent.keyDown(screen.getByTestId("tree"), { key: "ArrowRight" });
+    expect(screen.getByText("apple")).toBeTruthy();
+    expect(screen.getByTestId("expanded").textContent).toBe("true");
+    fireEvent.keyDown(screen.getByTestId("tree"), { key: "ArrowLeft" });
+    expect(screen.queryByText("apple")).toBeNull();
+  });
+
   test("connects GridPoint selection and keyboard movement without exposing key encoding", () => {
     const editor = createSheetEditor({
       columns: [{ id: "name", label: "Name" }, { id: "status", label: "Status" }],
