@@ -7,6 +7,39 @@ editor에는 객체 ID만 넘깁니다.
 색을 채우거나 지우는 요청은 Intent로 들어갑니다. 기하와 히트 테스트는
 editor 밖에 남습니다.
 
+## API Reference
+
+### `createObjectEditor(source, options?)`
+
+Object document의 editing session을 만듭니다. 반환된 `ObjectEditor`는
+`snapshot`, `selectedObjects`, `dispatch`, `copy`, `cut`, `undo`, `redo`,
+`subscribe`를 공개합니다. `source`는 `ObjectDocument` 또는 기존
+`JSONDocument<ObjectDocument>`이며, `options.createId`는 paste가 만드는 객체의
+ID 정책을 Host가 주입하는 자리입니다.
+
+### `ObjectIntent`
+
+`dispatch`가 받는 Object domain command입니다. 공개 variant는
+`selection.set`, `selection.remove`, `selection.fill`, `object.translate`,
+`object.resize`, `clipboard.paste`입니다. DOM event, pointer 좌표, clipboard
+event를 Intent에 넣지 않습니다.
+
+### `ObjectSelectionMode`
+
+`selection.set`은 `replace`, `extend`, `toggle`의 공통 selection vocabulary를
+직접 받습니다. key-family 고유 집합 연산이 필요한 호출자는 `add`와
+`subtract`도 사용할 수 있습니다. `extend`는 Object editor 안에서 `add`와
+같은 합집합 선택으로 해석되므로 React·Affordance 소비처가 이를 번역하지
+않습니다.
+
+### `ObjectEditor.copy()` / `ObjectEditor.cut()`
+
+현재 선택을 `ObjectClipboard`로 투영합니다. Web clipboard event의
+직렬화·`preventDefault()`·paste 판정은 Web Adapter의
+[`createWebClipboardSurface`](adapter-clipboard.md#createwebclipboardsurface)가
+소유하며, paste offset처럼 제품에 따라 달라지는 배치 정책은 Host가
+`clipboard.paste` 전에 적용합니다.
+
 ## 상태의 주인
 
 Object Hands는 서로 다른 수명의 상태를 한 덩어리로 만들지 않습니다.

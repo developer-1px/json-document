@@ -1,6 +1,7 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
+import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -27,6 +28,7 @@ const excludedSources = new Set([
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
+  ["packages/json-document-editing/src/object.ts", objectEditingSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -38,6 +40,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "createWebClipboardSurface",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createObjectEditor",
+    sourcePath: "packages/json-document-editing/src/object.ts",
   },
 ] as const;
 

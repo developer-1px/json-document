@@ -109,7 +109,7 @@ export function CanvasDemoRoute() {
       editor.dispatch({
         type: "selection.set",
         objectIds: [objectId],
-        mode: mode === "extend" ? "add" : mode,
+        mode,
       });
     },
   });
@@ -492,7 +492,7 @@ export function CanvasDemoRoute() {
                 editor.dispatch({
                   type: "selection.set",
                   objectIds: hits.objectIds,
-                  mode: hand.operation === "extend" ? "add" : "replace",
+                  mode: hand.operation,
                 });
               },
             },
