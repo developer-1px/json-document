@@ -92,6 +92,22 @@ describe("selection-aware editing history", () => {
     expect(committed.at(-1)).toEqual([{ op: "replace", path: "/items/16/title" }]);
   });
 
+  test("resolves an appended array index before recording its inverse", () => {
+    const session = createEditingSession<{ readonly current: string | null }>({
+      document: createJSONDocument({ items: ["a"] }),
+      selection: { current: "a" },
+    });
+    session.apply({
+      operations: [{ op: "add", path: "/items/-", value: "b" }],
+      selectionAfter: { current: "b" },
+      origin: "append",
+    });
+    expect(session.undo().ok).toBe(true);
+    expect(session.snapshot.value).toEqual({ items: ["a"] });
+    expect(session.redo().ok).toBe(true);
+    expect(session.snapshot.value).toEqual({ items: ["a", "b"] });
+  });
+
   test("does not record selection-only or semantic no-op changes", () => {
     const session = createEditingSession<{ readonly current: string | null }>({
       document: createJSONDocument({ name: "alpha" }),

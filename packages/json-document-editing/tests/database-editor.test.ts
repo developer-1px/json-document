@@ -90,6 +90,21 @@ describe("Database editor", () => {
     expect((editor.snapshot.value as DatabaseDocument).records).toHaveLength(4);
   });
 
+  test("adds a record with host-provided typed defaults", () => {
+    const editor = createDatabaseEditor(initial);
+    expect(editor.dispatch({
+      type: "record.add",
+      recordId: "r4",
+      values: { name: "Delta", note: "", score: 9, status: "done", done: true },
+    }).ok).toBe(true);
+    expect((editor.snapshot.value as DatabaseDocument).records.at(-1)).toMatchObject({
+      id: "r4",
+      values: { name: "Delta", score: 9, status: "done", done: true },
+    });
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as DatabaseDocument).records).toHaveLength(3);
+  });
+
   test("selects ranges against the projected table topology", () => {
     const editor = createDatabaseEditor(initial);
     editor.dispatch({ type: "selection.set", recordId: "r1", propertyId: "name" });

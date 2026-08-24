@@ -7,6 +7,10 @@ on:
       - "json-document-ajv-v*"
       - "json-document-zod-v*"
       - "json-document-react-hook-form-v*"
+      - "json-document-react-v*"
+      - "json-document-selection-v*"
+      - "json-document-editing-v*"
+      - "json-document-database-v*"
       - "json-document-tanstack-table-v*"
       - "json-document-web-v*"
       - "json-document-contenteditable-v*"
@@ -42,80 +46,7 @@ jobs:
         id: release
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          node --input-type=module --eval '
-            import { appendFileSync, readFileSync } from "node:fs";
-
-            const releases = [
-              {
-                prefix: "json-document-ajv-v",
-                packageFile: "packages/json-document-ajv/package.json",
-                workspace: "@interactive-os/json-document-ajv",
-              },
-              {
-                prefix: "json-document-react-hook-form-v",
-                packageFile: "packages/json-document-react-hook-form/package.json",
-                workspace: "@interactive-os/json-document-react-hook-form",
-              },
-              {
-                prefix: "json-document-web-v",
-                packageFile: "packages/json-document-web/package.json",
-                workspace: "@interactive-os/json-document-web",
-              },
-              {
-                prefix: "json-document-contenteditable-v",
-                packageFile: "packages/json-document-contenteditable/package.json",
-                workspace: "@interactive-os/json-document-contenteditable",
-              },
-              {
-                prefix: "json-document-tanstack-table-v",
-                packageFile: "packages/json-document-tanstack-table/package.json",
-                workspace: "@interactive-os/json-document-tanstack-table",
-              },
-              {
-                prefix: "json-document-zod-v",
-                packageFile: "packages/json-document-zod/package.json",
-                workspace: "@interactive-os/json-document-zod",
-              },
-              {
-                prefix: "json-document-contenteditable-collaboration-v",
-                packageFile: "packages/contenteditable-collaboration/package.json",
-                workspace: "@interactive-os/json-document-contenteditable-collaboration",
-              },
-              {
-                prefix: "json-document-collaboration-v",
-                packageFile: "packages/json-document-collaboration/package.json",
-                workspace: "@interactive-os/json-document-collaboration",
-              },
-              {
-                prefix: "json-document-v",
-                packageFile: "packages/json-document/package.json",
-                workspace: "@interactive-os/json-document",
-              },
-            ];
-
-            const release = releases.find(({ prefix }) => process.env.RELEASE_TAG.startsWith(prefix));
-            if (release === undefined) {
-              throw new Error(`unsupported release tag ${process.env.RELEASE_TAG}`);
-            }
-
-            const pkg = JSON.parse(readFileSync(release.packageFile, "utf8"));
-            const expectedTag = `${release.prefix}${pkg.version}`;
-            if (process.env.RELEASE_TAG !== expectedTag) {
-              throw new Error(`release tag ${process.env.RELEASE_TAG} does not match ${expectedTag}`);
-            }
-            const prerelease = /^\d+\.\d+\.\d+-rc\.\d+$/.test(pkg.version);
-            const stable = /^\d+\.\d+\.\d+$/.test(pkg.version);
-            if (!prerelease && !stable) {
-              throw new Error(`package version is not a supported stable or rc version: ${pkg.version}`);
-            }
-            const distTag = prerelease ? "next" : "latest";
-            if (pkg.publishConfig?.tag !== distTag) {
-              throw new Error(`publishConfig.tag must be ${distTag} for ${pkg.version}`);
-            }
-            appendFileSync(process.env.GITHUB_OUTPUT, `workspace=${release.workspace}\n`);
-            appendFileSync(process.env.GITHUB_OUTPUT, `dist_tag=${distTag}\n`);
-          '
+        run: node scripts/release-package.mjs
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
       - name: Verify v3 release graph
