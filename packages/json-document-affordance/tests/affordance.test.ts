@@ -30,6 +30,7 @@ import {
   snapAffordance,
   treeAffordance,
   createBoardDragSession,
+  createCanvasGestureSession,
   typeaheadAffordance,
   wheelAffordance,
   zoomAffordance,
@@ -63,6 +64,34 @@ describe("createBoardDragSession", () => {
       "cancel:review:superseded",
       "begin:draw",
       "cancel:draw:drop-rejected",
+    ]);
+  });
+});
+
+describe("createCanvasGestureSession", () => {
+  test("keeps one typed gesture through preview, commit, cancel, and supersede", () => {
+    type Gesture =
+      | { readonly type: "drag"; readonly dx: number }
+      | { readonly type: "marquee"; readonly width: number };
+    const events: string[] = [];
+    const session = createCanvasGestureSession<Gesture>({
+      onPreview: (gesture) => events.push(`preview:${gesture.type}`),
+      onCommit: (gesture) => events.push(`commit:${gesture.type}`),
+      onCancel: (gesture, reason) => events.push(`cancel:${gesture.type}:${reason}`),
+    });
+
+    session.begin({ type: "drag", dx: 0 });
+    expect(session.preview((gesture) => gesture.type === "drag" ? { ...gesture, dx: 12 } : gesture))
+      .toEqual({ type: "drag", dx: 12 });
+    expect(session.commit()).toEqual({ type: "drag", dx: 12 });
+    session.begin({ type: "marquee", width: 0 });
+    session.begin({ type: "drag", dx: 0 });
+    expect(session.cancel("lost-capture")).toEqual({ type: "drag", dx: 0 });
+    expect(events).toEqual([
+      "preview:drag",
+      "commit:drag",
+      "cancel:marquee:superseded",
+      "cancel:drag:lost-capture",
     ]);
   });
 });

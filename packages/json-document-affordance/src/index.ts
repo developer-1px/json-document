@@ -14,6 +14,7 @@ export {
   zoomAffordance,
 } from "./drag.js";
 export { createBoardDragSession } from "./board-drag-session.js";
+export { createCanvasGestureSession } from "./canvas-gesture-session.js";
 export type {
   BoardDragCancelReason,
   BoardDragSession,
@@ -21,6 +22,13 @@ export type {
   BoardDragSnapshot,
   BoardDrop,
 } from "./board-drag-session.js";
+export type {
+  CanvasGestureCancelReason,
+  CanvasGestureSession,
+  CanvasGestureSessionOptions,
+  CanvasGestureState,
+  CanvasGestureType,
+} from "./canvas-gesture-session.js";
 export type { Point, Rect, ResizeEdge } from "./drag.js";
 export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";

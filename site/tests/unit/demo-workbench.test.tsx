@@ -124,4 +124,13 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
+  test("registers the Canvas gesture owner source next to Canvas usages", async () => {
+    expect((await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx")).map((file) => file.path)).toContain(
+      "packages/json-document-affordance/src/canvas-gesture-session.ts",
+    );
+    expect((await discoverDemoSources("routes/widgets/CanvasWidgetRoute.tsx")).map((file) => file.path)).toContain(
+      "packages/json-document-affordance/src/canvas-gesture-session.ts",
+    );
+  });
+
 });

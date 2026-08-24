@@ -67,7 +67,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |
 | [Undo](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
 | [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
-| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance` | 고른 대상을 포인터로 옮김 |
+| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance`, `createCanvasGestureSession` | 대상 이동, Canvas gesture preview/commit/cancel |
 | [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |

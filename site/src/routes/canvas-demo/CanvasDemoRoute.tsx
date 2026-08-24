@@ -9,6 +9,7 @@ import { useEditing } from "@interactive-os/json-document-react";
 import {
   activateAffordance,
   applyAffordance,
+  createCanvasGestureSession,
   clickCountAffordance,
   commitAffordance,
   contextMenuAffordance,
@@ -40,6 +41,7 @@ const lockedIds = new Set(["lock"]);
 const resizeEdges: ReadonlyArray<ResizeEdge> = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
 
 type DragState = {
+  readonly type: "drag";
   readonly ids: ReadonlyArray<string>;
   readonly originX: number;
   readonly originY: number;
@@ -49,6 +51,7 @@ type DragState = {
 };
 
 type MarqueeState = {
+  readonly type: "marquee";
   readonly originX: number;
   readonly originY: number;
   readonly x: number;
@@ -58,6 +61,7 @@ type MarqueeState = {
 };
 
 type PanState = {
+  readonly type: "pan";
   readonly x: number;
   readonly y: number;
   readonly originX: number;
@@ -66,6 +70,7 @@ type PanState = {
 };
 
 type ResizeState = {
+  readonly type: "resize";
   readonly id: string;
   readonly edge: ResizeEdge;
   readonly originX: number;
@@ -81,11 +86,13 @@ type MenuState = {
   readonly y: number;
 };
 
+type CanvasGesture = DragState | MarqueeState | PanState | ResizeState;
+
 export function CanvasDemoRoute() {
   const [editor] = useState(() => createObjectEditor(canvasDemoDocument));
   const [drag, setDrag] = useState<DragState | null>(null);
   const [marquee, setMarquee] = useState<MarqueeState | null>(null);
-  const [pan, setPan] = useState<PanState>({ x: 0, y: 0, originX: 0, originY: 0, active: false });
+  const [pan, setPan] = useState<PanState>({ type: "pan", x: 0, y: 0, originX: 0, originY: 0, active: false });
   const [resize, setResize] = useState<ResizeState | null>(null);
   const [space, setSpace] = useState(false);
   const [scale, setScale] = useState(1);
@@ -98,13 +105,14 @@ export function CanvasDemoRoute() {
   const resizeRef = useRef<ResizeState | null>(null);
   const spaceRef = useRef(space);
   const scaleRef = useRef(scale);
+  const [gestureSession] = useState(() => createCanvasGestureSession<CanvasGesture>({
+    onBegin: projectGesture,
+    onPreview: projectGesture,
+    onCommit: clearGesture,
+    onCancel: clearGesture,
+  }));
   const [pointerSession] = useState(() => createWebPointerSession<"drag" | "marquee" | "pan" | "resize">({
-    onCancel: (kind) => {
-      if (kind === "drag") setDragState(null);
-      if (kind === "marquee") setMarqueeState(null);
-      if (kind === "resize") setResizeState(null);
-      if (kind === "pan") setPanState({ ...panRef.current, active: false });
-    },
+    onCancel: (_kind, reason) => gestureSession.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel"),
   }));
   panRef.current = pan;
   spaceRef.current = space;
@@ -124,24 +132,57 @@ export function CanvasDemoRoute() {
   const document = editing.snapshot.value as ObjectDocument;
   const unlockedIds = document.objects.map((object) => object.id).filter((id) => !lockedIds.has(id));
 
+  function projectGesture(next: CanvasGesture) {
+    dragRef.current = next.type === "drag" ? next : null;
+    marqueeRef.current = next.type === "marquee" ? next : null;
+    resizeRef.current = next.type === "resize" ? next : null;
+    setDrag(dragRef.current);
+    setMarquee(marqueeRef.current);
+    setResize(resizeRef.current);
+    if (next.type === "pan") {
+      panRef.current = next;
+      setPan(next);
+    }
+  }
+
+  function clearGesture() {
+    dragRef.current = null;
+    marqueeRef.current = null;
+    resizeRef.current = null;
+    setDrag(null);
+    setMarquee(null);
+    setResize(null);
+    if (panRef.current.active) {
+      panRef.current = { ...panRef.current, active: false };
+      setPan(panRef.current);
+    }
+  }
+
   function setDragState(next: DragState | null) {
-    dragRef.current = next;
-    setDrag(next);
+    if (next === null) gestureSession.cancel();
+    else if (gestureSession.getActive()?.type === "drag") gestureSession.preview(next);
+    else gestureSession.begin(next);
   }
 
   function setMarqueeState(next: MarqueeState | null) {
-    marqueeRef.current = next;
-    setMarquee(next);
+    if (next === null) gestureSession.cancel();
+    else if (gestureSession.getActive()?.type === "marquee") gestureSession.preview(next);
+    else gestureSession.begin(next);
   }
 
   function setPanState(next: PanState) {
-    panRef.current = next;
-    setPan(next);
+    if (!next.active) {
+      gestureSession.commit();
+      panRef.current = next;
+      setPan(next);
+    } else if (gestureSession.getActive()?.type === "pan") gestureSession.preview(next);
+    else gestureSession.begin(next);
   }
 
   function setResizeState(next: ResizeState | null) {
-    resizeRef.current = next;
-    setResize(next);
+    if (next === null) gestureSession.cancel();
+    else if (gestureSession.getActive()?.type === "resize") gestureSession.preview(next);
+    else gestureSession.begin(next);
   }
 
   function isPanStart(event: PointerEvent<HTMLElement>) {
@@ -162,6 +203,7 @@ export function CanvasDemoRoute() {
     if (surface.current === null) return;
     pointerSession.begin(surface.current, event.pointerId, "pan");
     setPanState({
+      type: "pan",
       x: current.x,
       y: current.y,
       originX: event.clientX - current.x,
@@ -255,7 +297,7 @@ export function CanvasDemoRoute() {
         },
       });
     }
-    setDragState(null);
+    gestureSession.commit();
   }
 
   function commitCurrentResize(event: PointerEvent<HTMLElement>) {
@@ -286,7 +328,7 @@ export function CanvasDemoRoute() {
         },
       });
     }
-    setResizeState(null);
+    gestureSession.commit();
   }
 
   function handleObjectPointerDown(event: PointerEvent<HTMLElement>, objectId: string) {
@@ -325,6 +367,7 @@ export function CanvasDemoRoute() {
             mode: "replace",
           });
           setDragState({
+            type: "drag",
             ids: hand.objectIds,
             originX: event.clientX,
             originY: event.clientY,
@@ -370,6 +413,7 @@ export function CanvasDemoRoute() {
     surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
     pointerSession.begin(event.currentTarget, event.pointerId, "resize");
     setResizeState({
+      type: "resize",
       id: objectId,
       edge,
       originX: event.clientX,
@@ -425,7 +469,7 @@ export function CanvasDemoRoute() {
     if (surface.current === null) return;
     pointerSession.begin(surface.current, event.pointerId, "marquee");
     const origin = planePoint(event);
-    setMarqueeState({ originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
+    setMarqueeState({ type: "marquee", originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
   }
 
   function handleSurfacePointerMove(event: PointerEvent<HTMLDivElement>) {
@@ -466,7 +510,7 @@ export function CanvasDemoRoute() {
       },
       hand: (hand) => {
         if (hand.type !== "select" || !hand.rect) return;
-        setMarqueeState({ originX: origin.x, originY: origin.y, ...hand.rect });
+        setMarqueeState({ type: "marquee", originX: origin.x, originY: origin.y, ...hand.rect });
       },
     });
   }
@@ -515,15 +559,14 @@ export function CanvasDemoRoute() {
         },
       });
     }
-    setMarqueeState(null);
+    gestureSession.commit();
   }
 
   function cancelHands() {
-    setDragState(null);
-    setMarqueeState(null);
-    setResizeState(null);
     setMenu(null);
-    setPanState({ ...panRef.current, active: false });
+    const activePointer = pointerSession.getSnapshot();
+    if (activePointer) pointerSession.cancel(activePointer.pointerId);
+    else gestureSession.cancel();
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {

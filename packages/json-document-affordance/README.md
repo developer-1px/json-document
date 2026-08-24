@@ -53,4 +53,8 @@ preview, commit, and cancel lifecycle for Board Hands. Web pointer and HTML
 Drag and Drop sessions feed it; Hosts still resolve targets and dispatch the
 domain move Intent.
 
+`createCanvasGestureSession` owns one active semantic Canvas gesture and its
+preview, commit, cancel, and supersede lifecycle. Web pointer capture and Host
+coordinate, hit-test, renderer, lock, and viewport policies stay outside it.
+
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
