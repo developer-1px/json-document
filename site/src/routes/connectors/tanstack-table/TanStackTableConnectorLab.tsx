@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent, type FocusEvent } from "react";
+import { useState, type FocusEvent } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -17,7 +17,7 @@ import { useEditing } from "@interactive-os/json-document-react";
 import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
@@ -60,11 +60,17 @@ export function TanStackTableConnectorLab() {
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  const webClipboard = createWebClipboardBinding({
+  const clipboardSurface = createWebClipboardSurface({
     codec: sheetClipboardCodec,
     read: () => binding.copy(table),
     cut: () => binding.cut(table)?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => binding.paste(table, payload),
+    onResult: (result) => {
+      if (!result.ok) return setAnnouncement(result.code);
+      if (result.operation === "paste") return setAnnouncement("Pasted structured visible rectangle");
+      setClipboard(result.payload);
+      setAnnouncement(`${result.operation === "copy" ? "Copied" : "Cut"} ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
+    },
   });
   function run(action: () => { readonly ok: boolean }, message: string) {
     const result = action();
@@ -116,31 +122,10 @@ export function TanStackTableConnectorLab() {
     run(() => binding.paste(table, clipboard), "Pasted visible rectangle");
   }
 
-  function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.paste(event);
-    setAnnouncement(result.ok ? "Pasted structured visible rectangle" : result.code);
-  }
-
   return (
     <section
       aria-label="TanStack Table editing"
-      onCopy={handleNativeCopy}
-      onCut={handleNativeCut}
-      onPaste={handleNativePaste}
+      {...clipboardSurface}
       className={classes("p-4", ui.surface.raised)}
     >
       <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">

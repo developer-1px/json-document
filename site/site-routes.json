@@ -384,7 +384,7 @@
   },
   {
     "path": "/docs/adapter-clipboard",
-    "label": "Clipboard",
+    "label": "Clipboard Reference",
     "title": "Clipboard Adapter - json-document",
     "heading": "Clipboard Adapter",
     "description": "ClipboardEvent를 구조화된 copy, cut, paste 계약에 연결합니다.",

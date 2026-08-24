@@ -10,14 +10,14 @@ const table = useReactTable({
   getSortedRowModel: getSortedRowModel(),
 });`;
 
-const webCompositionCode = `const clipboard = createWebClipboardBinding({
+const webCompositionCode = `const clipboardSurface = createWebClipboardSurface({
   codec: sheetClipboardCodec,
   read: () => binding.copy(table),
   paste: (payload) => binding.paste(table, payload),
+  onResult: (result) => observeClipboardResult(result),
 });
 
-surface.addEventListener("copy", (event) => clipboard.copy(event));
-surface.addEventListener("paste", (event) => clipboard.paste(event));`;
+return <section {...clipboardSurface} />;`;
 
 export function TanStackTableConnectorDemoRoute() {
   return (
