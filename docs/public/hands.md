@@ -1,8 +1,8 @@
 # Hands
 
-Hands는 사람이 artifact와 agent를 다루는 편집 도구의 최소 완성본입니다.
-App도, 화면 component도, 제품 장르의 축소판도 아닙니다. 실제 제품을 끝까지
-만져 보며 발견한 전형적인 인간의 손만 남깁니다.
+Hands는 사람이 artifact와 agent를 다루게 하는 장르별 완료 기준입니다.
+App도, 단일 화면 component도, 하나의 공통 package도 아닙니다. 실제 제품을
+끝까지 만져 보며 발견한 전형적인 인간의 손과 그 조합 증거를 가리킵니다.
 
 Agent가 값을 생성하고 Viewer가 그 값을 보여 주는 것만으로는 artifact가
 도구가 되지 않습니다. 사람이 고르고, 쓰고, 옮기고, 맥락을 건넬 수 있을 때
@@ -16,6 +16,21 @@ Agent output + Viewer + Hands   = 이어서 작업할 수 있는 artifact
 구현이 없는 Hands는 TBD로 남깁니다. TBD는 빈 화면이 아니라 필요한 상황과
 사람의 동사, host와 Hand의 경계를 먼저 적은 사용법 명세입니다. 아직 존재하지
 않는 package API를 약속하지 않습니다.
+
+## 닫힘 판정
+
+Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
+
+- 장르 document, Selection과 Intent가 owner package의 공개 계약으로 존재함
+- Clipboard/History 등 필요한 editing capability가 연결됨
+- 대표 keyboard·pointer Affordance와 browser lifecycle이 실제 Host에서 동작함
+- package contract와 Live Demo browser test가 같은 행동을 증명함
+- 반복 책임은 owner package API, 제품 고유 정책은 이름 붙은 Host module에 있음
+
+따라서 “닫힘”은 모든 제품 기능이나 모든 접근성 변형이 끝났다는 뜻이 아닙니다.
+현재 장르의 최소 편집 loop가 public contract와 실제 소비 경로에서 함께
+성립한다는 뜻입니다. 설치 가능한 package와 실제 source 위치는
+[Official Hands](official-hands.md)에서 확인합니다.
 
 ## Agent에게 건네는 Hands
 

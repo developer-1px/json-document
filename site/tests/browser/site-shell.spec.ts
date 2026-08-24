@@ -39,6 +39,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Selection",
     "Clipboard",
     "History",
+    "Rich Text vertical",
   ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([

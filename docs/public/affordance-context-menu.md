@@ -4,19 +4,26 @@ Context menu는 대상이 있는 자리에서 보조 동작을 여는 손입니�
 `context-menu` 커서가 이 손을 가리킵니다.
 
 ```ts
-import { contextMenuAffordance } from "@interactive-os/json-document-affordance";
+import { applyAffordance, contextMenuAffordance } from "@interactive-os/json-document-affordance";
 
 function onContextMenu(event: MouseEvent, itemId: string) {
-  if (contextMenuAffordance(event) !== "open") return;
-  event.preventDefault();
-  setMenu({ itemId, x: event.clientX, y: event.clientY });
+  applyAffordance(contextMenuAffordance(event), {
+    hand(hand) {
+      if (hand.type !== "menu" || hand.action !== "open") return;
+      event.preventDefault();
+      setMenu({ itemId, x: event.clientX, y: event.clientY });
+    },
+  });
 }
 
 function onKeyDown(event: KeyboardEvent) {
-  if (contextMenuAffordance(event) === "open") {
-    setMenu({ itemId: focusKey, x: 0, y: 0 });
-  }
-  if (contextMenuAffordance(event) === "cancel") setMenu(null);
+  applyAffordance(contextMenuAffordance(event), {
+    hand(hand) {
+      if (hand.type !== "menu") return;
+      if (hand.action === "open") setMenu({ itemId: focusKey, x: 0, y: 0 });
+      if (hand.action === "cancel") setMenu(null);
+    },
+  });
 }
 ```
 

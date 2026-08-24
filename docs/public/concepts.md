@@ -1,40 +1,33 @@
 # Concept Map
 
-이 문서 트리는 아래 순서로 읽습니다. JSON 값을 다루는 계약에서 시작해,
-편집과 실행 환경에 필요한 책임을 더하고, 마지막에 사람이 직접 다루는
-artifact를 만듭니다. Collaboration은 이 흐름과 분리해 읽습니다.
+이 사이트의 권장 읽기 순서와 package 의존 방향은 같은 것이 아닙니다.
+먼저 Core를 배우고 실제 편집 경험까지 읽어 가지만, 필요한 책임은 아래처럼
+Core 주위에 선택적으로 붙습니다.
 
 ```txt
-JSON Document
-  값 · 주소 · 변경 · 구독
-        ↓
-Editing
-  Intent · Selection · Topology · Clipboard · History
-        ↓
-Adapter
-  브라우저 플랫폼 계약
-        ↓
-Connector
-  라이브러리 생태계 연결
-        ↓
-Affordance
-  키보드와 포인터의 입력 문법
-        ↓
-Hands
-  artifact 장르별 편집 도구
-        ↓
-Artifact
-  사람이 보고 고치는 최종 결과
+                         ┌─ Editing ─ Selection · Intent · History
+local JSON Document ─────┤
+                         ├─ Adapter ─ platform contract
+collaborative Document ──┤
+                         ├─ Connector ─ named ecosystem
+                         └─ optional domain / UI composition
 
-────────────────────────────────
-Collaboration
-  같은 Core 계약의 협업 구현
+Affordance ─ input grammar ─┐
+UI Primitives ─ standard UI ├─ Host가 장르별 Hands를 조합
+Rich Text 등 domain ────────┘
+
+Hands를 제품 surface에 조합한 결과가 사람이 다루는 Artifact가 됩니다.
 ```
 
-화살표는 책임이 쌓이는 방향을 나타냅니다. Adapter와 Connector는 실행
-환경에 맞춰 고릅니다. Collaboration은 이 흐름의 다음 계층이 아닙니다.
-JSON Document와 같은 Core 계약을 협업 방식으로 구현하므로 구분선 아래에
-따로 둡니다.
+이 그림의 선은 허용된 의존·조합 방향입니다. 모든 노드를 순서대로 설치하라는
+뜻이 아닙니다. Adapter와 Connector는 서로의 선행 계층이 아니며, 각각 플랫폼과
+외부 라이브러리가 필요할 때 고릅니다. Collaboration은 다음 계층이 아니라
+같은 `JSONDocument` 계약의 다른 구현입니다.
+
+권장 읽기 순서는 `JSON Document → Editing → Adapter → Connector → Affordance
+→ UI Primitives → Hands → Artifact`입니다. 이 순서는 학습을 위한 서사일 뿐
+package dependency를 주장하지 않습니다. Collaboration은 Core의 대체 구현과
+profile 포함 관계를 따로 보기 위해 별도 묶음에서 읽습니다.
 
 ## JSON Document
 
@@ -60,6 +53,10 @@ Adapter는 keyboard, clipboard, contenteditable 같은 플랫폼 계약을 공�
 API에 맞춰 번역합니다. 예를 들어 key chord는 의미 command가 되고,
 브라우저의 clipboard event는 Editing의 copy, cut, paste로 이어집니다.
 
+Adapter는 책임 종류입니다. Web Adapter는 Editing을 소비하지만
+Contenteditable Adapter는 JSON Document와 DOM/React lifecycle을 직접 잇습니다.
+따라서 모든 Adapter가 Editing 다음 dependency라는 뜻은 아닙니다.
+
 플랫폼마다 다른 event와 lifecycle은 [Adapter](adapters.md)가 맡습니다.
 
 ## Connector
@@ -69,37 +66,45 @@ Connector는 React, Zod, Ajv, TanStack Table처럼 이름 있는 라이브러리
 화면에 보이는 행과 열을 Sheet의 Topology로 바꾸는 식입니다.
 
 라이브러리를 교체해도 문서와 편집 계약은 바뀌지 않습니다. 지원 범위는
-[Connector](connectors.md)에 있습니다.
+[Connector](connectors.md)에 있습니다. Connector는 JSON Document, Editing,
+Hands capability 중 자신이 연결하는 계약에 직접 붙으며 Adapter를 전제로 하지
+않습니다.
 
 ## Affordance
 
 Affordance는 고르기, 입력하기, 접기, drag, undo처럼 사람이 이미 알고 있는
-조작을 정의합니다. Adapter가 플랫폼 event를 번역한다면, Affordance는 그
-event를 어떤 입력 문법으로 해석할지 정합니다.
+조작을 정의합니다. 일부 API는 Adapter가 만든 command를 받고, 일부 Web 편의
+API는 event-shaped input을 내부 Adapter와 함께 해석합니다. 각 reference의
+입력 type이 어느 경계인지 정본입니다.
 
 화면의 모양은 host가 정합니다. 입력의 의미와 조합은
 [Affordance](affordance.md)에서 다룹니다.
 
 ## Hands
 
-Hands는 Core 위에서 사람과 agent가 artifact를 다루는 편집 도구입니다.
+Hands는 Core와 필요한 선택 책임을 조합해 사람과 agent가 artifact를 다루게
+하는 장르별 완료 기준입니다.
 Order는 한 줄 목록을 집어 옮기고, Object는 key를 고치며, Tree는 가지를
 접습니다. Composer는 agent에게 지시와 맥락을 건네는 손이고, Mention은
 안정적인 대상을 글 안에 넣는 손입니다. 둘은 아직 TBD입니다.
 
-Hands는 App이나 완성된 제품 화면의 목록이 아닙니다. 한 장르에서 필요한
-조작이 함께 동작하는 최소 단위입니다. 현재 목록은 [Hands](hands.md)에
-있습니다.
+Hands는 하나의 공통 package나 화면 component 이름이 아닙니다. 장르 document와
+Intent, Selection/Clipboard/History, 대표 Affordance, platform lifecycle이 실제
+Host 조합에서 함께 동작해야 닫힙니다. 재사용 책임은 owner package API로,
+제품 고유 정책은 이름 붙은 Host module로 남습니다. 현재 증거와 목록은
+[Hands](hands.md)에 있습니다.
 
 ## Artifact
 
-Artifact는 아래 계층을 조합해 사람이 보고 고칠 수 있게 만든 결과입니다.
+Artifact는 다음 책임 계층이 아니라 앞의 책임을 조합해 사람이 보고 고칠 수
+있게 만든 결과입니다.
 MD, PPT, Sheet는 서로 다른 화면과 Hands를 사용해도 같은 문서와 편집 계약을
 공유할 수 있습니다.
 
-현재 Artifact 페이지는 파일 포맷 호환성을 약속하는 구현이 아니라
-prototype입니다. 앞의 계약들이 최종 경험에서 어떻게 만나는지 확인하는
-자리입니다.
+현재 Artifact 페이지는 file compatibility나 Core/Hands interoperability를
+증명하지 않는 visual prototype입니다. 여러 artifact surface를 한 Host chrome에
+놓는 정보 구조와 시각 가설만 확인하며, 실제 계약 증거는 각 Hands Live Demo와
+package test에서 봅니다.
 
 ## Collaboration
 
@@ -108,5 +113,14 @@ Collaboration은 JSON Document 계약을 여러 참여자의 인과 변경으로
 기록은 참여자의 변경 순서와 수렴을 다룹니다.
 
 위치가 Artifact 다음인 것은 의존 방향이 아니라 문서 분류를 나타냅니다.
-협업 구현을 붙여도 위 계층이 새 문서 API를 배울 필요는 없습니다. replica와
-협업 History의 경계는 [Collaboration](collaboration.md)에 있습니다.
+협업 document를 Editing에 주입할 수 있지만 History command는 editor-local
+History 대신 actor-local `runtime.history`로 연결해야 합니다. base → History →
+Text profile의 포함 관계는 [Collaboration](collaboration.md)에 있습니다.
+
+## Reference vertical: Rich Text
+
+Rich Text는 새 최상위 계층이 아니라 이 책임 graph를 끝까지 적용한 대표
+vertical입니다. JSON Document와 Selection/Editing 위에 versioned domain schema를
+두고, Web와 React integration을 분리한 뒤 Host UI가 조합합니다. profile,
+conformance vector와 browser evidence는 다른 Hands가 경계를 판단할 때 참고하는
+구현 증거입니다.

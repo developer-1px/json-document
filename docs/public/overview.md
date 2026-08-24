@@ -55,7 +55,9 @@ json-document는 그 공통 층을 화면과 분리된 문서 커널로 둡니�
 
 편집기가 받는 문은 같습니다. 현재 값을 읽고, 주소를 찾고, patch를
 검사하고, 적용하고, 구독합니다. 로컬에서 그리던 화면은 같은 문서 API로
-협업 구현을 받습니다. 엔진이 계산하는 것은 변경의 인과와 현재 값입니다.
+협업 구현을 받습니다. 다만 Undo/Redo command는 editor-local History 대신
+actor-local Collaboration History로 교체합니다. 엔진이 계산하는 것은 변경의
+인과와 현재 값입니다.
 
 협업은 값을 다루는 같은 계약을 인과 변경으로 구현합니다. 한 사람의
 값과 손가락을 되돌리는 로컬 History와, 다른 참여자를 덮어쓰지 않고 내
@@ -102,17 +104,18 @@ React 구독으로 흐르고, 표의 보이는 행과 열은 Sheet의 Topology�
 고르기, 접기, 드래그, 되돌리기는 제품이 json-document를 만지는 손입니다.
 화면은 호스트가 그리고, 단축키와 마우스 문법은 Affordance가 닫습니다.
 
-Adapter와 Connector는 환경에 붙입니다. Affordance는 그 위에서 호스트가
-만지는 최전선입니다. 필요한 Adapter와 Connector만 고릅니다.
+Adapter와 Connector는 서로 직렬인 계층이 아니라 환경에 따라 독립적으로
+고르는 책임입니다. Affordance도 필요한 입력 문법을 선택해 Host에 조합합니다.
 [Adapters](adapters.md)와 [Connectors](connectors.md),
 [Affordance](affordance.md)에서 이어서 읽습니다.
 
 ## Artifact editing의 Core
 
 json-document는 agent와 사람이 여러 화면에서 같은 artifact를 쓰게 하는
-편집 기반의 Core입니다. JSON Document와 Collaboration이 값을 다룹니다. Editing이
-손과 기억을 더합니다. Adapter와 Connector가 환경에 붙이고, Affordance가
-최전선의 손을 닫습니다. Hands는 그 다음에 보는 장르 선반입니다.
+편집 기반의 Core입니다. JSON Document와 Collaboration이 같은 계약의 서로 다른
+구현으로 값을 다룹니다. Editing은 선택적으로 손과 기억을 더합니다. Adapter,
+Connector, Affordance와 UI Primitive는 필요한 환경과 입력 문법에 맞춰 조합하며,
+Hands는 그 조합이 장르별 최소 편집 loop를 완성했는지 판정합니다.
 
 여러 artifact가 같은 주소와 실행 취소와 협업을 쓰게 하려는 자리가 이
 Core입니다. 각 책임의 경계와 의존 순서는 [Concept Map](concepts.md)에서
