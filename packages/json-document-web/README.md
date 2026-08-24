@@ -9,6 +9,30 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
+Pointer Events and HTML Drag and Drop keep separate public sessions:
+
+```ts
+import {
+  createWebDragDropSession,
+  createWebPointerSession,
+} from "@interactive-os/json-document-web";
+
+const pointer = createWebPointerSession({
+  onPreview: renderPreview,
+  onCommit: commitProductIntent,
+  onCancel: clearPreview,
+});
+
+const dragDrop = createWebDragDropSession({
+  onPreview: showDropTarget,
+  onCommit: moveItem,
+  onCancel: clearDropTarget,
+});
+```
+
+The sessions own platform lifecycle state. Hit testing, valid targets, geometry,
+and document Intent remain in the host.
+
 ```ts
 import { createDocumentEditor } from "@interactive-os/json-document-editing";
 import {

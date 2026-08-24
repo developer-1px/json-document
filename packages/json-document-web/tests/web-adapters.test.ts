@@ -10,6 +10,8 @@ import {
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import {
+  createWebDragDropSession,
+  createWebPointerSession,
   createWebClipboardBinding,
   databaseClipboardCodec,
   documentClipboardCodec,
@@ -255,6 +257,50 @@ describe("Web clipboard Adapter", () => {
   });
 });
 
+describe("Web interaction sessions", () => {
+  test("owns pointer capture, preview, commit, and lost-capture cancellation", () => {
+    const events: string[] = [];
+    const target = pointerCaptureTarget();
+    const session = createWebPointerSession<{ readonly x: number }>({
+      onPreview: (state) => events.push(`preview:${state.x}`),
+      onCommit: (state) => events.push(`commit:${state.x}`),
+      onCancel: (state, reason) => events.push(`${reason}:${state.x}`),
+    });
+
+    session.begin(target, 7, { x: 1 });
+    expect(session.preview(8, (state) => ({ x: state.x + 1 }))).toBeNull();
+    expect(session.preview(7, (state) => ({ x: state.x + 2 }))).toEqual({ x: 3 });
+    expect(session.commit(7)).toEqual({ x: 3 });
+    expect(target.captured.size).toBe(0);
+
+    session.begin(target, 9, { x: 4 });
+    expect(session.cancel(9, "lost-capture")).toEqual({ x: 4 });
+    expect(events).toEqual(["preview:3", "commit:3", "lost-capture:4"]);
+  });
+
+  test("owns HTML drag and drop preview, commit, rejection, and supersession", () => {
+    const events: string[] = [];
+    const session = createWebDragDropSession<string, string>({
+      onPreview: (item, target) => events.push(`preview:${item}:${target}`),
+      onCommit: (item, target) => events.push(`commit:${item}:${target}`),
+      onCancel: (item, reason) => events.push(`${reason}:${item}`),
+    });
+
+    session.begin("a");
+    expect(session.preview("column-1")).toBe(true);
+    session.begin("b");
+    expect(session.commit("column-2")).toBe("b");
+    session.begin("c");
+    expect(session.cancel("drop-rejected")).toBe("c");
+    expect(events).toEqual([
+      "preview:a:column-1",
+      "superseded:a",
+      "commit:b:column-2",
+      "drop-rejected:c",
+    ]);
+  });
+});
+
 describe("Web Press and ARIA Adapters", () => {
   test("normalizes keyboard, pointer, cancellation, and native activation facts", () => {
     expect(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).toEqual({
@@ -409,5 +455,21 @@ function event(clipboardData: WebClipboardData | null): WebClipboardEvent & { re
     clipboardData,
     get defaultPrevented() { return defaultPrevented; },
     preventDefault() { defaultPrevented = true; },
+  };
+}
+
+function pointerCaptureTarget() {
+  const captured = new Set<number>();
+  return {
+    captured,
+    setPointerCapture(pointerId: number) {
+      captured.add(pointerId);
+    },
+    hasPointerCapture(pointerId: number) {
+      return captured.has(pointerId);
+    },
+    releasePointerCapture(pointerId: number) {
+      captured.delete(pointerId);
+    },
   };
 }

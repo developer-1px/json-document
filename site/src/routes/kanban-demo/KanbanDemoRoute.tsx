@@ -5,6 +5,7 @@ import {
   type KanbanDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
+import { createWebDragDropSession } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
@@ -32,7 +33,19 @@ const initialBoard: KanbanDocument = {
 
 export function KanbanDemoRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
-  const [dragging, setDragging] = useState<string | null>(null);
+  const [dragSession] = useState(() => createWebDragDropSession<string, {
+    readonly columnId: string;
+    readonly beforeCardId?: string;
+  }>({
+    onCommit: (cardId, target) => {
+      editor.dispatch({
+        type: "card.move",
+        cardId,
+        columnId: target.columnId,
+        beforeCardId: target.beforeCardId ?? null,
+      });
+    },
+  }));
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedCardIds,
@@ -53,12 +66,6 @@ export function KanbanDemoRoute() {
   const board = snapshot.value as KanbanDocument;
   const commands = historyAffordance(snapshot).hand;
   const cards = new Map(board.cards.map((card) => [card.id, card]));
-
-  function moveTo(columnId: string, beforeCardId?: string) {
-    if (!dragging) return;
-    editor.dispatch({ type: "card.move", cardId: dragging, columnId, beforeCardId: beforeCardId ?? null });
-    setDragging(null);
-  }
 
   return (
     <DemoPage documentation={(
@@ -88,6 +95,7 @@ export function KanbanDemoRoute() {
             data-column-id={column.id}
             onDragOver={(event) => {
               event.preventDefault();
+              dragSession.preview({ columnId: column.id });
               applyAffordance(dropAffordance({ canDrop: true }), {
                 cursor: (cursor) => {
                   event.currentTarget.style.cursor = cursor;
@@ -107,7 +115,7 @@ export function KanbanDemoRoute() {
               applyAffordance(committed, {
                 commit: (hand) => {
                   if (hand.type !== "move-drop") return;
-                  moveTo(column.id);
+                  dragSession.commit({ columnId: column.id });
                 },
               });
             }}
@@ -130,9 +138,9 @@ export function KanbanDemoRoute() {
                   onClick={option.onClick}
                   onDragStart={(event) => {
                     editing.getItem(card.id).getPressHandler()(event);
-                    setDragging(card.id);
+                    dragSession.begin(card.id);
                   }}
-                  onDragEnd={() => setDragging(null)}
+                  onDragEnd={() => dragSession.cancel()}
                   className={classes("w-full p-3 text-left", ui.surface.documentBlock, ui.interactive.selectable)}
                 >
                   {card.title}

@@ -28,7 +28,7 @@ import {
   dragAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -71,8 +71,12 @@ export function DatabaseTableDemo() {
   const [dragPreview, setDragPreview] = useState<ReadonlyArray<string> | null>(null);
   const [widthPreview, setWidthPreview] = useState<Readonly<Record<string, number>> | null>(null);
   const [menu, setMenu] = useState<HeaderMenu | null>(null);
-  const headerDrag = useRef<HeaderDrag | null>(null);
-  const headerResize = useRef<HeaderResize | null>(null);
+  const [headerDragSession] = useState(() => createWebPointerSession<HeaderDrag>({
+    onCancel: () => setDragPreview(null),
+  }));
+  const [headerResizeSession] = useState(() => createWebPointerSession<HeaderResize>({
+    onCancel: () => setWidthPreview(null),
+  }));
   const observation = useEditingObservation<DatabaseIntent>("Database ready");
   const nextRecord = useRef(5);
   const document = editor.snapshot.value as DatabaseDocument;
@@ -168,12 +172,16 @@ export function DatabaseTableDemo() {
 
   function startHeaderDrag(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
     if (event.button !== 0) return;
-    headerDrag.current = { propertyId, originX: event.clientX, originY: event.clientY, moved: false };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    headerDragSession.begin(event.currentTarget, event.pointerId, {
+      propertyId,
+      originX: event.clientX,
+      originY: event.clientY,
+      moved: false,
+    });
   }
 
   function moveHeaderDrag(event: ReactPointerEvent<HTMLElement>) {
-    const drag = headerDrag.current;
+    let drag = headerDragSession.getSnapshot()?.state;
     if (!drag) return;
     applyAffordance(dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }), {
       cursor: (cursor) => {
@@ -181,7 +189,7 @@ export function DatabaseTableDemo() {
       },
     });
     if (!drag.moved && Math.hypot(event.clientX - drag.originX, event.clientY - drag.originY) < 6) return;
-    drag.moved = true;
+    drag = headerDragSession.preview(event.pointerId, (state) => ({ ...state, moved: true })) ?? drag;
     const target = globalThis.document.elementFromPoint(event.clientX, event.clientY);
     const propertyId = target instanceof Element
       ? target.closest("[data-property-id]")?.getAttribute("data-property-id")
@@ -204,8 +212,7 @@ export function DatabaseTableDemo() {
   }
 
   function finishHeaderDrag(event: ReactPointerEvent<HTMLElement>) {
-    const drag = headerDrag.current;
-    headerDrag.current = null;
+    const drag = headerDragSession.commit(event.pointerId);
     event.currentTarget.style.cursor = "";
     const next = dragPreview;
     setDragPreview(null);
@@ -236,14 +243,18 @@ export function DatabaseTableDemo() {
 
   function startResize(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
     event.stopPropagation();
-    headerDrag.current = null;
-    headerResize.current = { propertyId, originX: event.clientX, originWidth: propertyWidth(propertyId) };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    const activeDrag = headerDragSession.getSnapshot();
+    if (activeDrag !== null) headerDragSession.cancel(activeDrag.pointerId, "superseded");
+    headerResizeSession.begin(event.currentTarget, event.pointerId, {
+      propertyId,
+      originX: event.clientX,
+      originWidth: propertyWidth(propertyId),
+    });
   }
 
   function moveResize(event: ReactPointerEvent<HTMLElement>) {
     event.stopPropagation();
-    const resize = headerResize.current;
+    const resize = headerResizeSession.getSnapshot()?.state;
     if (!resize) return;
     event.currentTarget.style.cursor = "col-resize";
     setWidthPreview({
@@ -254,8 +265,7 @@ export function DatabaseTableDemo() {
 
   function finishResize(event: ReactPointerEvent<HTMLElement>) {
     event.stopPropagation();
-    const resize = headerResize.current;
-    headerResize.current = null;
+    const resize = headerResizeSession.commit(event.pointerId);
     const preview = widthPreview;
     setWidthPreview(null);
     event.currentTarget.style.cursor = "";
@@ -350,6 +360,8 @@ export function DatabaseTableDemo() {
                     onPointerDown={(event) => startHeaderDrag(event, property.id)}
                     onPointerMove={moveHeaderDrag}
                     onPointerUp={finishHeaderDrag}
+                    onPointerCancel={(event) => headerDragSession.cancel(event.pointerId)}
+                    onLostPointerCapture={(event) => headerDragSession.cancel(event.pointerId, "lost-capture")}
                     onContextMenu={(event) => openHeaderMenu(event, property.id)}
                     onKeyDown={(event) => onHeaderKeyDown(event, property.id, false)}
                     onKeyUp={(event) => onHeaderKeyDown(event, property.id, false)}
@@ -367,6 +379,8 @@ export function DatabaseTableDemo() {
                       onPointerDown={(event) => startResize(event, property.id)}
                       onPointerMove={moveResize}
                       onPointerUp={finishResize}
+                      onPointerCancel={(event) => headerResizeSession.cancel(event.pointerId)}
+                      onLostPointerCapture={(event) => headerResizeSession.cancel(event.pointerId, "lost-capture")}
                     />
                   </th>
                 ))}

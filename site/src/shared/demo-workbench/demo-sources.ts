@@ -1,5 +1,7 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
+import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -25,12 +27,24 @@ const excludedSources = new Set([
 ]);
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
+  ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
+  ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
 ]);
 const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-react",
     symbol: "useEditingObservation",
     sourcePath: "packages/json-document-react/src/editing-observation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebDragDropSession",
+    sourcePath: "packages/json-document-web/src/drag-drop-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebPointerSession",
+    sourcePath: "packages/json-document-web/src/pointer-session.ts",
   },
 ] as const;
 

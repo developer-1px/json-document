@@ -30,7 +30,7 @@ import {
   zoomAffordance,
   type ResizeEdge,
 } from "@interactive-os/json-document-affordance";
-import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -98,6 +98,14 @@ export function CanvasDemoRoute() {
   const resizeRef = useRef<ResizeState | null>(null);
   const spaceRef = useRef(space);
   const scaleRef = useRef(scale);
+  const [pointerSession] = useState(() => createWebPointerSession<"drag" | "marquee" | "pan" | "resize">({
+    onCancel: (kind) => {
+      if (kind === "drag") setDragState(null);
+      if (kind === "marquee") setMarqueeState(null);
+      if (kind === "resize") setResizeState(null);
+      if (kind === "pan") setPanState({ ...panRef.current, active: false });
+    },
+  }));
   panRef.current = pan;
   spaceRef.current = space;
   scaleRef.current = scale;
@@ -151,7 +159,8 @@ export function CanvasDemoRoute() {
 
   function startPan(event: PointerEvent<HTMLElement>) {
     const current = panRef.current;
-    surface.current?.setPointerCapture(event.pointerId);
+    if (surface.current === null) return;
+    pointerSession.begin(surface.current, event.pointerId, "pan");
     setPanState({
       x: current.x,
       y: current.y,
@@ -169,6 +178,7 @@ export function CanvasDemoRoute() {
   }
 
   function commitCurrentDrag(event: PointerEvent<HTMLElement>) {
+    pointerSession.commit(event.pointerId);
     const current = dragRef.current;
     if (!current) return;
     const committed = commitAffordance(
@@ -249,6 +259,7 @@ export function CanvasDemoRoute() {
   }
 
   function commitCurrentResize(event: PointerEvent<HTMLElement>) {
+    pointerSession.commit(event.pointerId);
     const current = resizeRef.current;
     if (!current) return;
     const committed = commitAffordance(
@@ -307,7 +318,7 @@ export function CanvasDemoRoute() {
         },
         hand: (hand) => {
           if (hand.type !== "select" || !hand.objectIds) return;
-          event.currentTarget.setPointerCapture(event.pointerId);
+          pointerSession.begin(event.currentTarget, event.pointerId, "drag");
           editor.dispatch({
             type: "selection.set",
             objectIds: hand.objectIds,
@@ -357,7 +368,7 @@ export function CanvasDemoRoute() {
     event.preventDefault();
     event.stopPropagation();
     surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    pointerSession.begin(event.currentTarget, event.pointerId, "resize");
     setResizeState({
       id: objectId,
       edge,
@@ -411,12 +422,14 @@ export function CanvasDemoRoute() {
     event.preventDefault();
     surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
     setMenu(null);
-    surface.current?.setPointerCapture(event.pointerId);
+    if (surface.current === null) return;
+    pointerSession.begin(surface.current, event.pointerId, "marquee");
     const origin = planePoint(event);
     setMarqueeState({ originX: origin.x, originY: origin.y, x: origin.x, y: origin.y, width: 0, height: 0 });
   }
 
   function handleSurfacePointerMove(event: PointerEvent<HTMLDivElement>) {
+    pointerSession.preview(event.pointerId, (kind) => kind);
     const currentResize = resizeRef.current;
     if (currentResize) {
       handleResizePointerMove(event);
@@ -465,11 +478,13 @@ export function CanvasDemoRoute() {
     }
     const currentPan = panRef.current;
     if (currentPan.active) {
+      pointerSession.commit(event.pointerId);
       setPanState({ ...currentPan, active: false });
       return;
     }
     const currentMarquee = marqueeRef.current;
     if (!currentMarquee) return;
+    pointerSession.commit(event.pointerId);
     const origin = { x: currentMarquee.originX, y: currentMarquee.originY };
     const point = planePoint(event);
     const committed = commitAffordance(marqueeAffordance(origin, point, { shiftKey: event.shiftKey }));
@@ -661,6 +676,7 @@ export function CanvasDemoRoute() {
             });
           }}
           onPointerCancel={(event) => {
+            pointerSession.cancel(event.pointerId);
             applyAffordance(escapeAffordance(event), {
               hand: (hand) => {
                 if (hand.type !== "cancel") return;
@@ -715,8 +731,7 @@ export function CanvasDemoRoute() {
                     });
                   }}
                   onLostPointerCapture={(event) => {
-                    if (event.buttons !== 0) return;
-                    commitCurrentDrag(event);
+                    pointerSession.cancel(event.pointerId, "lost-capture");
                   }}
                   className={ui.interactive.planeItem}
                   style={{
