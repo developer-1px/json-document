@@ -50,7 +50,10 @@ describe("Demo definition and source discovery", () => {
 
   test("loads actual full demo files without following package or site chrome imports", async () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
-    expect(document.map((file) => file.path)).toEqual(["routes/document-demo/DocumentDemoRoute.tsx"]);
+    expect(document.map((file) => file.path)).toEqual([
+      "routes/document-demo/DocumentDemoRoute.tsx",
+      "shared/demo-workbench/use-demo-observation.ts",
+    ]);
     const source = await document[0]!.load();
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
@@ -62,6 +65,7 @@ describe("Demo definition and source discovery", () => {
     expect((await discoverDemoSources("routes/database-demo/DatabaseDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/database-demo/DatabaseDemoRoute.tsx",
       "routes/database-demo/DatabaseTableDemo.tsx",
+      "shared/demo-workbench/use-demo-observation.ts",
       "routes/database-demo/initial-database.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([

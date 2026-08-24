@@ -11,7 +11,6 @@ const sourceModules = import.meta.glob<string>(
     "/src/routes/**/*.{ts,tsx}",
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
-    "!/src/shared/demo-workbench/**",
     "!/src/shared/widget-binding/**",
   ],
   { import: "default", query: "?raw" },
@@ -22,6 +21,9 @@ const sourceClosures = new Map<string, Promise<ReadonlyArray<DemoSourceFile>>>()
 const excludedSources = new Set([
   "routes/connectors/ConnectorDemoPage.tsx",
   "routes/widgets/WidgetDemoFrame.tsx",
+]);
+const registeredUsageSources = new Set([
+  "shared/demo-workbench/use-demo-observation.ts",
 ]);
 
 export function demoEntrySource(path: string): DemoSourceFile {
@@ -65,6 +67,7 @@ function sourceFile(path: string): DemoSourceFile {
 }
 
 function isExcluded(path: string): boolean {
+  if (registeredUsageSources.has(path)) return false;
   return path.startsWith("app/")
     || path.startsWith("shared/ui/")
     || path.startsWith("shared/demo-workbench/")

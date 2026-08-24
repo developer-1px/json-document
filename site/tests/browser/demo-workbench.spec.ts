@@ -34,6 +34,7 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "Demo",
     "DatabaseDemoRoute.tsx",
     "DatabaseTableDemo.tsx",
+    "use-demo-observation.ts",
     "initial-database.ts",
   ]);
 });
