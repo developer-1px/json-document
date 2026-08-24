@@ -55,7 +55,7 @@ export function ObjectDemoRoute() {
       run({
         type: "selection.set",
         objectIds: [objectId],
-        mode: mode === "extend" ? "add" : mode,
+        mode,
       }, "Selection changed");
     },
     keyboard: {

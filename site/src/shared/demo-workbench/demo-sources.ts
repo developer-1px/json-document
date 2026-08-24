@@ -3,6 +3,7 @@ import editingObservationSource from "../../../../packages/json-document-react/s
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
+import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -31,6 +32,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
+  ["packages/json-document-editing/src/object.ts", objectEditingSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -52,6 +54,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "documentSelectionFocus",
     sourcePath: "packages/json-document-editing/src/document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createObjectEditor",
+    sourcePath: "packages/json-document-editing/src/object.ts",
   },
 ] as const;
 
