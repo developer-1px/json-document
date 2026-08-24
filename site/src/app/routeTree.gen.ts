@@ -66,6 +66,7 @@ import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selec
 import { Route as PageDocsTopologyRouteImport } from "./routes/_page/docs/topology";
 import { Route as PageDocsTreeRouteImport } from "./routes/_page/docs/tree";
 import { Route as PageDocsTutorialRouteImport } from "./routes/_page/docs/tutorial";
+import { Route as PageDocsUiPrimitivesRouteImport } from "./routes/_page/docs/ui-primitives";
 import { Route as PageEditingRichTextRouteImport } from "./routes/_page/editing/rich-text";
 import { Route as PageWidgetsIndexRouteImport } from "./routes/_page/widgets/index";
 import { Route as PageWidgetsBoardRouteImport } from "./routes/_page/widgets/board";
@@ -403,6 +404,11 @@ const PageDocsTutorialRoute = PageDocsTutorialRouteImport.update({
   path: "/docs/tutorial",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsUiPrimitivesRoute = PageDocsUiPrimitivesRouteImport.update({
+  id: "/docs/ui-primitives",
+  path: "/docs/ui-primitives",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageEditingRichTextRoute = PageEditingRichTextRouteImport.update({
   id: "/editing/rich-text",
   path: "/editing/rich-text",
@@ -694,6 +700,7 @@ export interface FileRoutesByFullPath {
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/docs/ui-primitives": typeof PageDocsUiPrimitivesRoute;
   "/editing/rich-text": typeof PageEditingRichTextRoute;
   "/widgets/board": typeof PageWidgetsBoardRoute;
   "/widgets/canvas": typeof PageWidgetsCanvasRoute;
@@ -795,6 +802,7 @@ export interface FileRoutesByTo {
   "/docs/topology": typeof PageDocsTopologyRoute;
   "/docs/tree": typeof PageDocsTreeRoute;
   "/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/docs/ui-primitives": typeof PageDocsUiPrimitivesRoute;
   "/editing/rich-text": typeof PageEditingRichTextRoute;
   "/widgets/board": typeof PageWidgetsBoardRoute;
   "/widgets/canvas": typeof PageWidgetsCanvasRoute;
@@ -898,6 +906,7 @@ export interface FileRoutesById {
   "/_page/docs/topology": typeof PageDocsTopologyRoute;
   "/_page/docs/tree": typeof PageDocsTreeRoute;
   "/_page/docs/tutorial": typeof PageDocsTutorialRoute;
+  "/_page/docs/ui-primitives": typeof PageDocsUiPrimitivesRoute;
   "/_page/editing/rich-text": typeof PageEditingRichTextRoute;
   "/_page/widgets/board": typeof PageWidgetsBoardRoute;
   "/_page/widgets/canvas": typeof PageWidgetsCanvasRoute;
@@ -1001,6 +1010,7 @@ export interface FileRouteTypes {
     | "/docs/topology"
     | "/docs/tree"
     | "/docs/tutorial"
+    | "/docs/ui-primitives"
     | "/editing/rich-text"
     | "/widgets/board"
     | "/widgets/canvas"
@@ -1102,6 +1112,7 @@ export interface FileRouteTypes {
     | "/docs/topology"
     | "/docs/tree"
     | "/docs/tutorial"
+    | "/docs/ui-primitives"
     | "/editing/rich-text"
     | "/widgets/board"
     | "/widgets/canvas"
@@ -1204,6 +1215,7 @@ export interface FileRouteTypes {
     | "/_page/docs/topology"
     | "/_page/docs/tree"
     | "/_page/docs/tutorial"
+    | "/_page/docs/ui-primitives"
     | "/_page/editing/rich-text"
     | "/_page/widgets/board"
     | "/_page/widgets/canvas"
@@ -1659,6 +1671,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsTutorialRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/ui-primitives": {
+      id: "/_page/docs/ui-primitives";
+      path: "/docs/ui-primitives";
+      fullPath: "/docs/ui-primitives";
+      preLoaderRoute: typeof PageDocsUiPrimitivesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/editing/rich-text": {
       id: "/_page/editing/rich-text";
       path: "/editing/rich-text";
@@ -2015,6 +2034,7 @@ interface PageRouteChildren {
   PageDocsTopologyRoute: typeof PageDocsTopologyRoute;
   PageDocsTreeRoute: typeof PageDocsTreeRoute;
   PageDocsTutorialRoute: typeof PageDocsTutorialRoute;
+  PageDocsUiPrimitivesRoute: typeof PageDocsUiPrimitivesRoute;
   PageEditingRichTextRoute: typeof PageEditingRichTextRoute;
   PageWidgetsBoardRoute: typeof PageWidgetsBoardRoute;
   PageWidgetsCanvasRoute: typeof PageWidgetsCanvasRoute;
@@ -2116,6 +2136,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsTopologyRoute: PageDocsTopologyRoute,
   PageDocsTreeRoute: PageDocsTreeRoute,
   PageDocsTutorialRoute: PageDocsTutorialRoute,
+  PageDocsUiPrimitivesRoute: PageDocsUiPrimitivesRoute,
   PageEditingRichTextRoute: PageEditingRichTextRoute,
   PageWidgetsBoardRoute: PageWidgetsBoardRoute,
   PageWidgetsCanvasRoute: PageWidgetsCanvasRoute,

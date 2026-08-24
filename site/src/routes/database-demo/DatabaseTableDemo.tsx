@@ -28,8 +28,9 @@ import {
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import { GridCell, ResizeHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
@@ -58,12 +59,6 @@ type HeaderDrag = {
   moved: boolean;
 };
 
-type HeaderResize = {
-  readonly propertyId: string;
-  readonly originX: number;
-  readonly originWidth: number;
-};
-
 export function DatabaseTableDemo() {
   const [editor] = useState<DatabaseEditor>(() => createDatabaseEditor(initialDatabase));
   const [lease, setLease] = useState<NativeTextLease | null>(null);
@@ -71,7 +66,6 @@ export function DatabaseTableDemo() {
   const [widthPreview, setWidthPreview] = useState<Readonly<Record<string, number>> | null>(null);
   const [menu, setMenu] = useState<HeaderMenu | null>(null);
   const headerDrag = useRef<HeaderDrag | null>(null);
-  const headerResize = useRef<HeaderResize | null>(null);
   const [announcement, setAnnouncement] = useState("Database ready");
   const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
   const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
@@ -239,34 +233,14 @@ export function DatabaseTableDemo() {
     });
   }
 
-  function startResize(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
-    event.stopPropagation();
-    headerDrag.current = null;
-    headerResize.current = { propertyId, originX: event.clientX, originWidth: propertyWidth(propertyId) };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function moveResize(event: ReactPointerEvent<HTMLElement>) {
-    event.stopPropagation();
-    const resize = headerResize.current;
-    if (!resize) return;
-    event.currentTarget.style.cursor = "col-resize";
-    setWidthPreview({
-      ...view.propertyWidths,
-      [resize.propertyId]: Math.max(minWidth, resize.originWidth + (event.clientX - resize.originX)),
-    });
-  }
-
-  function finishResize(event: ReactPointerEvent<HTMLElement>) {
-    event.stopPropagation();
-    const resize = headerResize.current;
-    headerResize.current = null;
-    const preview = widthPreview;
+  function resizeProperty(propertyId: string, delta: number, phase: "preview" | "commit") {
+    const next = Math.max(minWidth, (view.propertyWidths[propertyId] ?? defaultWidth) + delta);
+    if (phase === "preview") {
+      setWidthPreview({ ...view.propertyWidths, [propertyId]: next });
+      return;
+    }
     setWidthPreview(null);
-    event.currentTarget.style.cursor = "";
-    if (!resize || !preview) return;
-    if (preview[resize.propertyId] === view.propertyWidths[resize.propertyId]) return;
-    configure({ type: "view.configure", viewId: view.id, propertyWidths: preview });
+    if (next !== view.propertyWidths[propertyId]) configure({ type: "view.configure", viewId: view.id, propertyWidths: { ...view.propertyWidths, [propertyId]: next } });
   }
 
   function openHeaderMenu(event: { preventDefault(): void; clientX: number; clientY: number }, propertyId: string) {
@@ -365,13 +339,13 @@ export function DatabaseTableDemo() {
                       <span>{property.name}</span>
                       <span className={ui.database.type}>{property.type}{sortMark(view.sort, property.id)}</span>
                     </span>
-                    <span
+                    <ResizeHandle
+                      label={`${property.name} 열 너비 조절`}
+                      orientation="horizontal"
                       data-resize-edge="e"
                       data-property-id={property.id}
                       className="absolute inset-y-0 right-0 w-1.5 cursor-col-resize"
-                      onPointerDown={(event) => startResize(event, property.id)}
-                      onPointerMove={moveResize}
-                      onPointerUp={finishResize}
+                      onResize={(delta, phase) => resizeProperty(property.id, delta, phase)}
                     />
                   </th>
                 ))}
@@ -409,8 +383,7 @@ export function DatabaseTableDemo() {
                   {properties.map((property) => {
                     const item = editing.getItem(cellKey(record.id, property.id));
                     return (
-                      <SelectableItem
-                        as="td"
+                      <GridCell
                         key={property.id}
                         data-record-id={record.id}
                         data-property-id={property.id}
@@ -440,7 +413,7 @@ export function DatabaseTableDemo() {
                           onCommit={(value) => commit(record.id, property.id, value)}
                           onLease={(next) => setLease(next ? { recordId: record.id, propertyId: property.id, composing: next.composing } : null)}
                         />
-                      </SelectableItem>
+                      </GridCell>
                     );
                   })}
                   {hiddenProperties.map((property) => (

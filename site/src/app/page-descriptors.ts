@@ -9,7 +9,8 @@ export type SiteNavigationGroup =
   | "Artifact"
   | "Adapter"
   | "Connector"
-  | "Affordance";
+  | "Affordance"
+  | "UI Primitives";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {

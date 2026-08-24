@@ -12,6 +12,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   adapterClipboard: "clipboard",
   adapterContenteditable: "cursor",
   affordance: "cursor",
+  uiPrimitives: "braces",
   affordanceSelect: "cursor",
   affordanceFold: "branch",
   affordanceDrag: "peek",

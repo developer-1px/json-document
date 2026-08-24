@@ -569,6 +569,16 @@
     }
   },
   {
+    "path": "/docs/ui-primitives",
+    "label": "UI Primitives",
+    "title": "UI Primitives - json-document",
+    "heading": "UI Primitives",
+    "description": "표준화된 Hands 행동과 디자인 시스템을 갖춘 minimalist React UI를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives",
+    "sidebar": false
+  },
+  {
     "path": "/docs/affordance",
     "label": "Affordance",
     "title": "Affordance - json-document",

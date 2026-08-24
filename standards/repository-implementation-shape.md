@@ -216,6 +216,7 @@ foundation으로 유지한다.
 | `packages/json-document-react-hook-form` | Single-native Connector | RHF lifecycle이 하나인 동안 flat 유지; 독립 binding이 생기면 분리 |
 | `packages/json-document-ajv` | Single-native Connector | 하나의 validator translation으로 flat 유지 |
 | `packages/json-document-affordance` | Responsibility family | select/fold/drag/history 책임 file과 root facade 유지 |
+| `packages/json-document-ui-primitives-react` | React UI Primitive family | 수렴한 Hands의 minimalist surface와 framework lifecycle을 책임별 module로 유지 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-tanstack-table` | Single-native Connector | 하나의 Table/Sheet binding으로 flat 유지 |
 | `packages/json-document-web` | Adapter family | keyboard/clipboard/input/modifier 책임 file과 root facade 유지 |

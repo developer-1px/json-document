@@ -30,6 +30,8 @@
 .home-composer-single-filled:focus-within { box-shadow: var(--shadow-control-prominent); }
 
 .composer-input-row { display: flex; min-height: 48px; align-items: flex-end; gap: 6px; }
+.composer-menu-root,
+.composer-select-root { display: contents; }
 .composer-editor-wrap { position: relative; display: flex; min-width: 0; flex: 1; align-self: stretch; align-items: center; }
 .composer-input-box { width: 100%; min-height: 26px; max-height: 132px; padding: 11px 2px 8px; overflow: auto; border: 0; outline: 0; color: var(--color-foreground-strong); font-size: 16px; line-height: 1.55; }
 .composer-input-box p { margin: 0; }

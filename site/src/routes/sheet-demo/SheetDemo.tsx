@@ -20,8 +20,9 @@ import {
   applyAffordance,
   pointerSelect,
 } from "@interactive-os/json-document-affordance";
+import { GridCell } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
@@ -238,8 +239,7 @@ export function SheetDemo() {
                     {sheet.columns.map((column) => {
                       const item = editing.getItem(cellKey(row.id, column.id));
                       return (
-                        <SelectableItem
-                          as="td"
+                        <GridCell
                           key={column.id}
                           data-row-id={row.id}
                           data-column-id={column.id}
@@ -271,7 +271,7 @@ export function SheetDemo() {
                               )}
                               className={classes("w-full min-w-0", ui.field.seamless)}
                             />
-                        </SelectableItem>
+                        </GridCell>
                       );
                     })}
                   </tr>

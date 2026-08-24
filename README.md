@@ -50,6 +50,7 @@ stateless JSON Patch
 | --- | --- |
 | [packages/json-document](packages/json-document) | 배포되는 v3 Kernel |
 | [packages/json-document-editing](packages/json-document-editing) | headless transaction, structural selection, clipboard, history와 Document·Order·Sheet·Object·Tree·Database slice |
+| [packages/json-document-ui-primitives-react](packages/json-document-ui-primitives-react) | 표준화된 Hands 행동과 디자인 시스템을 갖춘 minimalist React UI Primitives |
 | [packages/json-document-selection](packages/json-document-selection) | DOM-free key·range·mask family, topology/geometry port와 semantic interaction controller |
 | [packages/json-document-web](packages/json-document-web) | official keyboard adapter, ClipboardEvent, text-control input과 modifier state를 editing contract로 번역하는 Adapter |
 | [packages/json-document-contenteditable](packages/json-document-contenteditable) | local JSONDocument 문자열을 leased contenteditable React root에 붙이는 Adapter |
