@@ -7,6 +7,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import {
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   commitAffordance,
   dragAffordance,
@@ -21,7 +22,7 @@ import {
 import { initialObjectDemoDocument } from "../../shared/demo-workbench/object-demo-document";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 type DragState = {
@@ -61,7 +62,7 @@ export function CanvasWidgetRoute() {
     },
     keyboard: {
       resolve: (stroke) => {
-        const command = editingCommandFromStroke(stroke);
+        const command = editingCommandFromWebKeyboardStroke(stroke);
         return command?.type === "delete" ? command : null;
       },
       focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,

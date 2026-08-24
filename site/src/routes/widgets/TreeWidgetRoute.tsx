@@ -16,11 +16,11 @@ import {
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
-  pointerSelect,
   treeAffordance,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialTree: TreeDocument = {
@@ -52,7 +52,7 @@ export function TreeWidgetRoute() {
     keyboard: {
       resolve: (stroke) => {
         keyboard.resolve(stroke);
-        return editingCommandFromStroke(stroke);
+        return editingCommandFromWebKeyboardStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.nodeId ?? undefined,
       neighbor: (key, command) => {
@@ -134,17 +134,7 @@ export function TreeWidgetRoute() {
                     })}
                     onClick={(event) => {
                       containerRef.current?.focus();
-                      applyAffordance(pointerSelect(event), {
-                        hand: (hand) => {
-                          if (hand.type !== "select") return;
-                          editor.dispatch({
-                            type: "selection.set",
-                            nodeId: row.id,
-                            topology,
-                            mode: hand.operation,
-                          });
-                        },
-                      });
+                      editing.getItem(row.id).getPressHandler()(event);
                     }}
                   >
                     <span aria-hidden="true">{childCount > 0 ? expanded.has(row.id) ? "−" : "+" : ""}</span>

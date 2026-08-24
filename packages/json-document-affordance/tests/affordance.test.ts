@@ -11,6 +11,7 @@ import {
   dragAffordance,
   dragOperation,
   dropAffordance,
+  editingCommandFromWebKeyboardStroke,
   escapeAffordance,
   forbiddenCursor,
   historyAffordance,
@@ -58,6 +59,29 @@ describe("pointerSelect", () => {
       },
     });
     expect(operations).toEqual(["replace", "extend", "toggle", "toggle"]);
+  });
+});
+
+describe("editingCommandFromWebKeyboardStroke", () => {
+  test("projects supported Web strokes to editing commands", () => {
+    expect(editingCommandFromWebKeyboardStroke({
+      key: "ArrowDown",
+      shiftKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    })).toEqual({ type: "move", direction: "down", operation: "replace" });
+    expect(editingCommandFromWebKeyboardStroke({
+      key: "z",
+      shiftKey: false,
+      metaKey: true,
+      ctrlKey: false,
+    })).toEqual({ type: "undo" });
+    expect(editingCommandFromWebKeyboardStroke({
+      key: "Escape",
+      shiftKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    })).toBeNull();
   });
 });
 

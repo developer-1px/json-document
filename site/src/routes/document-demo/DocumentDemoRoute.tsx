@@ -18,17 +18,18 @@ import {
   textInputFromControl,
 } from "@interactive-os/json-document-web";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   caretAffordance,
   caretCursor,
   clickCountAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -85,7 +86,7 @@ export function DocumentDemoRoute() {
     },
     ignorePress: (event) => event.target instanceof Element && event.target.closest("textarea") !== null,
     keyboard: {
-      resolve: (stroke) => editingCommandFromStroke(stroke),
+      resolve: (stroke) => editingCommandFromWebKeyboardStroke(stroke),
       focusKey: () => editor.selectedBlockIds.at(-1),
       neighbor: (key, command) => {
         const ids = (editor.snapshot.value as BlockDocument).blocks.map((block) => block.id);
@@ -119,7 +120,7 @@ export function DocumentDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function copySelection() {
     const next = editor.copy();
@@ -222,14 +223,6 @@ export function DocumentDemoRoute() {
                   data-block-id={block.id}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                   {...optionProps(item)}
-                  onClick={(event) => {
-                    applyAffordance(pointerSelect(event), {
-                      hand: (hand) => {
-                        if (hand.type !== "select") return;
-                        run(() => dispatchIntent({ type: "selection.set", blockId: block.id, mode: hand.operation }), "Selection changed");
-                      },
-                    });
-                  }}
                 >
                   <ActionButton
                     aria-label={`Select block ${index + 1}`}

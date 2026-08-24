@@ -6,15 +6,16 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   commitAffordance,
   dropAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 const initialBoard: KanbanDocument = {
   columns: [
@@ -41,7 +42,7 @@ export function KanbanDemoRoute() {
     },
     operationFromEvent: () => "replace",
     keyboard: {
-      resolve: editingCommandFromStroke,
+      resolve: editingCommandFromWebKeyboardStroke,
       focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
       neighbor: () => null,
       onUndo: () => { editor.undo(); },
@@ -50,7 +51,7 @@ export function KanbanDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const board = snapshot.value as KanbanDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
   const cards = new Map(board.cards.map((card) => [card.id, card]));
 
   function moveTo(columnId: string, beforeCardId?: string) {
@@ -128,12 +129,7 @@ export function KanbanDemoRoute() {
                   aria-selected={option["aria-selected"]}
                   onClick={option.onClick}
                   onDragStart={(event) => {
-                    applyAffordance(pointerSelect(event), {
-                      hand: (hand) => {
-                        if (hand.type !== "select") return;
-                        editor.dispatch({ type: "selection.set", cardId: card.id });
-                      },
-                    });
+                    editing.getItem(card.id).getPressHandler()(event);
                     setDragging(card.id);
                   }}
                   onDragEnd={() => setDragging(null)}

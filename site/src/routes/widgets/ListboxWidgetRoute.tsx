@@ -11,12 +11,12 @@ import {
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   escapeAffordance,
-  pointerSelect,
   typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -45,7 +45,7 @@ export function ListboxWidgetRoute() {
     keyboard: {
       resolve: (stroke) => {
         keyboard.resolve(stroke);
-        return editingCommandFromStroke(stroke);
+        return editingCommandFromWebKeyboardStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
@@ -129,12 +129,7 @@ export function ListboxWidgetRoute() {
               })}
               onClick={(event) => {
                 containerRef.current?.focus();
-                applyAffordance(pointerSelect(event), {
-                  hand: (hand) => {
-                    if (hand.type !== "select") return;
-                    editor.dispatch({ type: "selection.set", itemId: item.id, mode: hand.operation });
-                  },
-                });
+                editing.getItem(item.id).getPressHandler()(event);
               }}
             >
               {item.label}

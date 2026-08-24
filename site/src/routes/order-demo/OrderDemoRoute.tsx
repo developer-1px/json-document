@@ -14,10 +14,11 @@ import {
   orderClipboardCodec,
 } from "@interactive-os/json-document-web";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   escapeAffordance,
   focusAffordance,
-  pointerSelect,
   renameAffordance,
   typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
@@ -25,7 +26,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 const initialOrder: OrderDocument = {
   items: [
@@ -71,7 +72,7 @@ export function OrderDemoRoute() {
       run({ type: "selection.set", itemId, mode }, "Selection changed");
     },
     keyboard: {
-      resolve: (stroke) => editingCommandFromStroke(stroke),
+      resolve: (stroke) => editingCommandFromWebKeyboardStroke(stroke),
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
         ? moveLinePoint(ids(), key, command.direction)
@@ -91,7 +92,7 @@ export function OrderDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as OrderDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function copySelection() {
     const next = editor.copy();
@@ -290,12 +291,7 @@ export function OrderDemoRoute() {
                   const intervalMs = previous?.id === item.id ? event.timeStamp - previous.at : 0;
                   lastClick.current = { id: item.id, at: event.timeStamp };
                   setFocusId(item.id);
-                  applyAffordance(pointerSelect(event), {
-                    hand: (hand) => {
-                      if (hand.type !== "select") return;
-                      run({ type: "selection.set", itemId: item.id, mode: hand.operation }, "Selection changed");
-                    },
-                  });
+                  editing.getItem(item.id).getPressHandler()(event);
                   applyAffordance(renameAffordance({
                     type: "pointer",
                     detail: event.detail,

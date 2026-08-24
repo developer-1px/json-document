@@ -30,4 +30,22 @@ custom-control Press start/end/cancel and disabled gating; persistent toggle sta
 the product and ARIA projection remains in the Web Adapter. React Connector still answers selection
 queries through `useEditing` ports.
 
+The public keyboard projection fills that port without a site-local adapter:
+
+```ts
+import { editingCommandFromWebKeyboardStroke } from "@interactive-os/json-document-affordance";
+
+useEditing({
+  keyboard: {
+    resolve: editingCommandFromWebKeyboardStroke,
+    focusKey,
+    neighbor,
+  },
+  // selection state and dispatch stay with the host
+});
+```
+
+`historyAffordance(snapshot).hand` exposes the typed Undo/Redo availability map
+directly. The editing runtime still owns history state and execution.
+
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)

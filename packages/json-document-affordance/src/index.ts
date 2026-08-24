@@ -19,7 +19,12 @@ export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js"
 export { historyAffordance } from "./history.js";
 export { pressAffordance } from "./press.js";
 export type { PressAffordanceResult, PressAffordanceState } from "./press.js";
-export type { HistoryAffordance, HistoryAffordanceMap, HistoryAffordanceName } from "./history.js";
+export type {
+  HistoryAffordance,
+  HistoryAffordanceMap,
+  HistoryAffordanceName,
+  HistoryAffordanceResult,
+} from "./history.js";
 export { applyAffordance, commitAffordance } from "./result.js";
 export type {
   AffordanceCommit,
@@ -39,6 +44,7 @@ export {
   clickCountAffordance,
   contextMenuAffordance,
   deleteAffordance,
+  editingCommandFromWebKeyboardStroke,
   escapeAffordance,
   focusAffordance,
   planeHitAffordance,

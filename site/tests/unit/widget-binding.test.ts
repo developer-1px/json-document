@@ -1,37 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { editingCommandFromStroke, gridCellProps, historyCommands, optionProps, treeItemProps } from "../../src/shared/widget-binding";
-
-describe("editingCommandFromStroke", () => {
-  test("fills the editing keyboard port from applyAffordance", () => {
-    expect(editingCommandFromStroke({
-      key: "ArrowDown",
-      shiftKey: false,
-      metaKey: false,
-      ctrlKey: false,
-    })).toEqual({
-      type: "move",
-      direction: "down",
-      operation: "replace",
-    });
-  });
-});
-
-describe("historyCommands", () => {
-  test("binds disabled to canUndo and canRedo", () => {
-    expect(historyCommands({ canUndo: false, canRedo: false })).toEqual({
-      undo: { name: "undo", disabled: true },
-      redo: { name: "redo", disabled: true },
-    });
-    expect(historyCommands({ canUndo: true, canRedo: false })).toEqual({
-      undo: { name: "undo", disabled: false },
-      redo: { name: "redo", disabled: true },
-    });
-    expect(historyCommands({ canUndo: true, canRedo: true })).toEqual({
-      undo: { name: "undo", disabled: false },
-      redo: { name: "redo", disabled: false },
-    });
-  });
-});
+import { gridCellProps, optionProps, treeItemProps } from "../../src/shared/widget-binding";
 
 describe("optionProps", () => {
   test("maps selection marks to widget props", () => {

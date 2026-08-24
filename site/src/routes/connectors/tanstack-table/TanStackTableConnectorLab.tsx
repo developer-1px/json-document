@@ -15,6 +15,7 @@ import {
 import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditing } from "@interactive-os/json-document-react";
 import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
+import { historyAffordance } from "@interactive-os/json-document-affordance";
 import {
   createWebClipboardSurface,
   sheetClipboardCodec,
@@ -23,7 +24,7 @@ import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
-import { gridCellProps, historyCommands } from "../../../shared/widget-binding";
+import { gridCellProps } from "../../../shared/widget-binding";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -92,7 +93,7 @@ export function TanStackTableConnectorLab() {
     },
   });
   const snapshot = editing.snapshot;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function commitCell(event: FocusEvent<HTMLInputElement>, rowId: string, columnId: string, current: unknown) {
     const value = typeof current === "number" ? Number(event.currentTarget.value) : event.currentTarget.value;
