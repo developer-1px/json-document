@@ -185,6 +185,97 @@ Connector들은 대상 peer와 독립적인 release lifecycle을 가지며 Kerne
 따라 lockstep release하지 않는다. 각 package README는 지원하는 Kernel,
 companion과 외부 peer version 범위를 기록한다.
 
+## 책임 위치와 naming projection
+
+이름은 코드 위치를 결정하지 않는다. 먼저 책임 증거로 위치를 결정하고, 그 결과를
+이름에 checksum처럼 투영한다.
+
+```text
+책임 분석 → Position Admission → Naming Projection
+                               ↓
+실제 위치 ← Location Smell Audit ← 이름 해석
+```
+
+### Position Admission
+
+| 위치 | 판정 질문 |
+| --- | --- |
+| Core | UI·편집·platform 없이 JSON 값과 표준 연산만으로 성립하는가? |
+| Editing | Intent, Selection, Topology, Clipboard, History처럼 편집 의미를 소유하는가? |
+| Collaboration | 여러 참여자의 causal state와 수렴을 소유하는가? |
+| Adapter | Web/DOM 같은 platform contract를 기존 public contract로 번역하는가? |
+| Connector | React, Zod, Ajv, TanStack Table처럼 이름 있는 외부 생태계의 public contract를 연결하는가? |
+| Affordance | platform input을 사람이 아는 조작 문법으로 해석하는가? |
+| Hands | 한 artifact 장르에서 여러 capability를 조합한 최소 편집 도구인가? |
+| Host | 제품 고유 정책·메시지·UI composition·payload 의미를 결정하는가? |
+| Page-local | 한 page의 교육·fixture·presentation 목적 때문에 함께 바뀌는가? |
+| Etc | 아직 위 위치로 설명할 수 없는가? 임시 분류이며 identifier 조각으로 쓰지 않는다. |
+
+위치를 결정할 때 최소한 다음 네 질문에 답한다.
+
+1. 무엇을 아는가?
+2. 무엇을 결정하는가?
+3. 무엇 때문에 변경되는가?
+4. 무엇을 제거하거나 교체해도 기존 의미가 유지되는가?
+
+### 최소 위치 조각
+
+심볼 하나는 책임군을 판별할 수 있어야 한다. `package + symbol`은 공식 owner를
+정확히 판별할 수 있어야 한다. 물리적 경로 전체를 반복하지 않고 다른 책임 위치와
+구별되는 최소 조각만 쓴다.
+
+| 위치 신호 | canonical 조각 | 예 |
+| --- | --- | --- |
+| 표준 경계 | normative term | `JSONPatchOperation`, `JSONDocument` |
+| Web/DOM Adapter | `Web`, `DOM`, `ContentEditable` | `createWebPointerSession`, `webGridCellAddressProps` |
+| React Connector | React Hook의 `use` | `useGridEditing`, `useEditingObservation` |
+| 외부 생태계 Connector | 생태계 이름 | `createZodValidator`, `TableDocumentBinding` |
+| 장르별 Editing/Hands | domain subject | `createDatabaseEditor`, `projectTreeVisibility` |
+| 장르별 interaction runtime | domain + 구체 role | `createBoardDragSession`, `createCanvasGestureSession` |
+| Page-local/Host | page·product subject | `useTopologyLab`, `useRichTextDemoCommands` |
+
+표준·platform·framework의 안정된 native vocabulary가 local 위치 표식보다 우선한다.
+따라서 React Hook에 `React`를 반복하지 않고 `use`를 사용한다. Package namespace가
+이미 `Affordance`를 제공하므로 모든 public 심볼에 `Affordance`를 반복하지 않는다.
+새 input 해석 함수는 의미가 모호하지 않도록 기본적으로 `...Affordance`를 쓰되,
+`pointerSelect`처럼 이미 canonical hand vocabulary로 닫힌 기존 API는 breaking rename
+없이 유지하고 reference에서 분류를 명시한다.
+
+`Adapter`, `Connector`, `Binding`, `Surface`, `Document`, `Clipboard`는 단독으로
+위치를 확정하지 않는다. 이 조각을 쓸 때는 package namespace 또는 가장 가까운
+platform·framework·domain qualifier가 책임군을 유일하게 만들어야 한다.
+
+### Position Passport
+
+새 public API와 owner가 바뀌는 module은 구현 전에 다음을 기록한다.
+
+| 항목 | 기록할 증거 |
+| --- | --- |
+| Position | 무엇을 알고·결정하며·무엇 때문에 바뀌는가 |
+| Residency | package public/internal, app-shared, Page-local, Host 중 어디인가 |
+| Naming | 표준·platform·framework·domain·role 중 사용한 최소 조각 |
+| Surface | 외부 소비자가 필요한 이유 또는 non-public 판정 근거 |
+| Docs | owner 위치의 API reference와 usage |
+| Source | 실제 usage가 가리키는 canonical implementation |
+| Verification | contract test, 실제 consumer/browser, workspace 검증 |
+
+### Location smell
+
+다음은 이름 또는 배치를 다시 검토해야 하는 신호다.
+
+- 이름이 예고한 위치와 실제 owner가 다르다.
+- 책임군을 판별하는 데 필요한 위치 조각이 없다.
+- 책임과 맞지 않는 위치 조각 또는 서로 경쟁하는 위치 조각이 있다.
+- Package namespace와 심볼이 같은 위치를 불필요하게 반복한다.
+- 이름이 표현한 책임보다 구현 책임이 크거나, 실제 책임보다 이름이 광범위하다.
+- `Host`, `Etc`, `utils`, `common`, `misc`, `helpers`를 미분류 책임의 쓰레기통으로 쓴다.
+- 같은 의도의 local 구현이 둘 이상 존재한다. 이는 이름 문제가 아니라 ecosystem
+  capability 또는 owner가 빠졌다는 선행 smell이다.
+
+기존 public API는 이 규칙으로 `keep`, `clarify`, `rename candidate`만 분류한다.
+실제 breaking rename은 별도 versioned evolution에서 수행한다. 자동 검사는 예약
+조각과 금지 suffix처럼 기계적으로 확정 가능한 규칙에만 적용한다.
+
 ## 이름 문법
 
 Public TypeScript 이름은 다음 순서로 만든다.
