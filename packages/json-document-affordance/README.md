@@ -48,4 +48,8 @@ useEditing({
 `historyAffordance(snapshot).hand` exposes the typed Undo/Redo availability map
 directly. The editing runtime still owns history state and execution.
 
+`createTypeaheadSession`, `createRenameSession`, and `createLineFocusSession`
+own the reusable state that spans several events. Product selection and rename
+Intents remain callbacks supplied by the host.
+
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)

@@ -9,18 +9,21 @@ import {
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
+  focusWebItem,
   lineBoundary,
   moveLinePoint,
   orderClipboardCodec,
+  webFocusItemProps,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
+  createLineFocusSession,
+  createRenameSession,
+  createTypeaheadSession,
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
   escapeAffordance,
-  focusAffordance,
   renameAffordance,
-  typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
@@ -47,11 +50,23 @@ export function OrderDemoRoute() {
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const observation = useEditingObservation<OrderIntent>("Ready");
-  const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const [focusId, setFocusId] = useState(initialOrder.items[0]?.id ?? null);
   const [renaming, setRenaming] = useState<{ readonly id: string; readonly draft: string } | null>(null);
-  const lastClick = useRef<{ readonly id: string; readonly at: number } | null>(null);
   const orderRef = useRef<HTMLOListElement>(null);
+  const [typeaheadSession] = useState(() => createTypeaheadSession<string>({
+    onMatch: (itemId) => run({ type: "selection.set", itemId, mode: "replace" }, "Selection changed"),
+  }));
+  const [focusSession] = useState(() => createLineFocusSession<string>({
+    initialKey: initialOrder.items[0]?.id ?? null,
+    onFocus: (itemId) => {
+      setFocusId(itemId);
+    },
+  }));
+  const [renameSession] = useState(() => createRenameSession<string>({
+    onCommit: (itemId, label) => run({ type: "item.rename", itemId, label }, "Item renamed"),
+    onFinish: (itemId) => requestAnimationFrame(() => focusWebItem<HTMLElement>(orderRef.current, itemId)),
+    onSnapshot: (snapshot) => setRenaming(snapshot === null ? null : { id: snapshot.key, draft: snapshot.draft }),
+  }));
 
   function run(intent: OrderIntent, message: string) {
     return observation.dispatch(intent, editor.dispatch, message);
@@ -106,53 +121,14 @@ export function OrderDemoRoute() {
 
   function beginRename(itemId: string) {
     const item = document.items.find((candidate) => candidate.id === itemId);
-    if (item) setRenaming({ id: item.id, draft: item.label });
-  }
-
-  function finishRename() {
-    if (!renaming) return;
-    const itemId = renaming.id;
-    run({ type: "item.rename", itemId: renaming.id, label: renaming.draft }, "Item renamed");
-    setRenaming(null);
-    restoreItemFocus(itemId);
-  }
-
-  function cancelRename() {
-    if (!renaming) return;
-    const itemId = renaming.id;
-    setRenaming(null);
-    restoreItemFocus(itemId);
-  }
-
-  function restoreItemFocus(itemId: string) {
-    requestAnimationFrame(() => {
-      orderRef.current?.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(itemId)}"]`)?.focus();
-    });
+    if (item) renameSession.begin(item.id, item.label);
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
-    let focused = false;
-    applyAffordance(focusAffordance(event), {
-      hand: (hand) => {
-        if (hand.type === "tab") return;
-        if (hand.type === "move") {
-          focused = true;
-          const keys = ids();
-          const from = focusId ?? keys[0];
-          const next = from === undefined ? null : moveLinePoint(keys, from, hand.direction);
-          setFocusId(next);
-          if (next) event.currentTarget.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(next)}"]`)?.focus();
-        }
-        if (hand.type === "boundary") {
-          focused = true;
-          const next = lineBoundary(ids(), hand.edge);
-          setFocusId(next);
-          if (next) event.currentTarget.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(next)}"]`)?.focus();
-        }
-      },
-    });
-    if (focused) {
+    if (focusSession.handle(event, ids())) {
       event.preventDefault();
+      const next = focusSession.getFocusKey();
+      if (next !== null) focusWebItem<HTMLElement>(orderRef.current, next);
       return;
     }
     applyAffordance(renameAffordance(event), {
@@ -163,27 +139,14 @@ export function OrderDemoRoute() {
       },
     });
     if (event.defaultPrevented) return;
-    const names = document.items.map((item) => item.label);
-    const from = document.items.find((item) => item.id === focusKey)?.label ?? null;
-    const result = typeaheadAffordance({
-      buffer: typeahead.buffer,
+    const consumed = typeaheadSession.handle({
       key: event.key,
       metaKey: event.metaKey,
       ctrlKey: event.ctrlKey,
       altKey: event.altKey,
-      elapsedMs: event.timeStamp - typeahead.at,
-      names,
-      from,
-    });
-    let consumed = false;
-    applyAffordance(result, {
-      hand: (hand) => {
-        if (hand.type !== "typeahead") return;
-        consumed = true;
-        setTypeahead({ buffer: hand.buffer, at: event.timeStamp });
-        const item = document.items.find((candidate) => candidate.label === hand.name);
-        if (item) run({ type: "selection.set", itemId: item.id, mode: "replace" }, "Selection changed");
-      },
+      timeStamp: event.timeStamp,
+      items: document.items.map((item) => ({ key: item.id, name: item.label })),
+      fromKey: focusKey,
     });
     if (consumed) {
       event.preventDefault();
@@ -192,7 +155,7 @@ export function OrderDemoRoute() {
     applyAffordance(escapeAffordance(event), {
       hand: (hand) => {
         if (hand.type !== "cancel") return;
-        setTypeahead({ buffer: "", at: 0 });
+        typeaheadSession.reset();
       },
     });
     editing.getKeyDownHandler()(event);
@@ -280,16 +243,10 @@ export function OrderDemoRoute() {
                 autoFocus
                 aria-label={`Rename ${item.label}`}
                 value={renaming.draft}
-                onChange={(event) => setRenaming({ id: item.id, draft: event.currentTarget.value })}
+                onChange={(event) => renameSession.update(event.currentTarget.value)}
                 onKeyDown={(event) => {
                   event.stopPropagation();
-                  applyAffordance(renameAffordance(event), {
-                    hand: (hand) => {
-                      if (hand.type !== "rename") return;
-                      if (hand.action === "commit") finishRename();
-                      if (hand.action === "cancel") cancelRename();
-                    },
-                  });
+                  if (renameSession.handleKey(event.key)) event.preventDefault();
                 }}
                 className={classes("w-full", ui.field.seamless)}
               />
@@ -298,26 +255,15 @@ export function OrderDemoRoute() {
                 key={item.id}
                 id={`order-item-${item.id}`}
                 data-item-id={item.id}
-                tabIndex={focusId === item.id ? 0 : -1}
+                {...webFocusItemProps(item.id, focusId === item.id)}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
                 {...optionProps(editing.getItem(item.id))}
                 focus={focusId === item.id}
-                onFocus={() => setFocusId(item.id)}
+                onFocus={() => focusSession.setFocus(item.id)}
                 onClick={(event) => {
-                  const previous = lastClick.current;
-                  const intervalMs = previous?.id === item.id ? event.timeStamp - previous.at : 0;
-                  lastClick.current = { id: item.id, at: event.timeStamp };
-                  setFocusId(item.id);
+                  focusSession.setFocus(item.id);
                   editing.getItem(item.id).getPressHandler()(event);
-                  applyAffordance(renameAffordance({
-                    type: "pointer",
-                    detail: event.detail,
-                    intervalMs,
-                  }), {
-                    hand: (hand) => {
-                      if (hand.type === "rename" && hand.action === "begin") beginRename(item.id);
-                    },
-                  });
+                  renameSession.handlePointer(item.id, item.label, event.detail, event.timeStamp);
                 }}
               >
                 <span className={classes(ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>

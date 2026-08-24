@@ -10,6 +10,7 @@ export {
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";
 export { pressInteractionFromWeb } from "./press.js";
+export { focusWebItem, webFocusItemProps } from "./focus-item.js";
 export {
   activeDescendantContainerProps,
   activeDescendantItemProps,
@@ -52,3 +53,8 @@ export type {
   WebPressSource,
 } from "./press.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
+export type {
+  WebFocusableItem,
+  WebFocusItemAttributes,
+  WebFocusItemRoot,
+} from "./focus-item.js";

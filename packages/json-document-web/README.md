@@ -85,6 +85,8 @@ The Adapter owns:
 - Web Press event facts without assigning a role action;
 - canonical widget state to role-valid ARIA attributes;
 - `aria-activedescendant` and roving-tabindex focus props without owning logical focus.
+- stable focus-item attributes and DOM focus realization through
+  `webFocusItemProps` and `focusWebItem`.
 
 The host owns:
 

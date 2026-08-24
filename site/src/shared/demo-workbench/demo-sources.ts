@@ -1,5 +1,7 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
+import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -25,12 +27,34 @@ const excludedSources = new Set([
 ]);
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
+  ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
+  ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
 ]);
 const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-react",
     symbol: "useEditingObservation",
     sourcePath: "packages/json-document-react/src/editing-observation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createTypeaheadSession",
+    sourcePath: "packages/json-document-affordance/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createRenameSession",
+    sourcePath: "packages/json-document-affordance/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createLineFocusSession",
+    sourcePath: "packages/json-document-affordance/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "webFocusItemProps",
+    sourcePath: "packages/json-document-web/src/focus-item.ts",
   },
 ] as const;
 

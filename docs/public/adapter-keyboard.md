@@ -16,6 +16,10 @@ surface.addEventListener("keydown", (event) => {
 canonical state를 ARIA state로 투영합니다. 둘 다 제품 Intent를 고르거나
 logical focus를 소유하지 않습니다.
 
+`webFocusItemProps(key, focused)`는 roving item에 `tabIndex`와 안정된 Web focus
+key를 붙입니다. `focusWebItem(root, key)`는 그 key의 element를 찾아 focus하고
+반환합니다. product identifier를 CSS selector에 보간하지 않습니다.
+
 ## Live Demo
 
 ```live-demo

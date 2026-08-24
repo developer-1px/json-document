@@ -72,6 +72,7 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
+      "packages/json-document-affordance/src/session.ts",
     ]);
   });
 
