@@ -1,17 +1,17 @@
 import { ClipboardAdapterLab } from "./ClipboardAdapterLab";
 import { CatalogDemoPage } from "../../../shared/ui/catalog-demo-page";
 
-const connectionCode = `const clipboard = createWebClipboardBinding({
+const connectionCode = `const clipboardSurface = createWebClipboardSurface({
   codec: documentClipboardCodec,
   read: () => editor.copy(),
   paste: (payload) => editor.dispatch({
     type: "clipboard.paste",
     clipboard: payload,
   }),
+  onResult: (result) => setAnnouncement(messageFor(result)),
 });
 
-surface.addEventListener("copy", (event) => clipboard.copy(event));
-surface.addEventListener("paste", (event) => clipboard.paste(event));`;
+return <section {...clipboardSurface} />;`;
 
 export function ClipboardAdapterDemoRoute() {
   return (

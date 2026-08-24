@@ -25,6 +25,8 @@ pretending that every topology is the same:
   Patch planning.
 - `Object` uses the key family. The host owns pointer
   geometry and hit-testing, then sends only stable object IDs to the editor.
+  Its public `selection.set` accepts the shared `replace`, `extend`, and
+  `toggle` vocabulary directly; `extend` has key-family union semantics.
 
 All slices keep renderer, DOM, physical keyboard policy, geometry, and expansion
 state outside the common engines. Value-changing transactions store forward and

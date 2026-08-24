@@ -1,5 +1,7 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
+import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
 import webGridCellSource from "../../../../packages/json-document-web/src/grid-cell.ts?raw";
 
@@ -27,6 +29,8 @@ const excludedSources = new Set([
 ]);
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
+  ["packages/json-document-web/src/clipboard.ts", clipboardSource],
+  ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
   ["packages/json-document-web/src/grid-cell.ts", webGridCellSource],
 ]);
@@ -35,6 +39,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-react",
     symbol: "useEditingObservation",
     sourcePath: "packages/json-document-react/src/editing-observation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebClipboardSurface",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createObjectEditor",
+    sourcePath: "packages/json-document-editing/src/object.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

@@ -43,6 +43,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
     "Overview",
+    "Official Hands · TBD",
     "Order",
     "Object",
     "Tree",
@@ -54,7 +55,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
     "Overview",
     "Keyboard",
-    "Clipboard",
+    "Grid cell",
+    "Clipboard Reference",
     "Contenteditable",
   ]);
   await navigation.getByRole("button", { name: "Connector" }).click();
@@ -206,7 +208,8 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
     "Overview",
     "Keyboard",
-    "Clipboard",
+    "Grid cell",
+    "Clipboard Reference",
     "Contenteditable",
   ]);
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();

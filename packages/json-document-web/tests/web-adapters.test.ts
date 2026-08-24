@@ -11,6 +11,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import {
   createWebClipboardBinding,
+  createWebClipboardSurface,
   databaseClipboardCodec,
   documentClipboardCodec,
   orderClipboardCodec,
@@ -53,6 +54,28 @@ describe("Web grid cell address", () => {
 });
 
 describe("Web clipboard Adapter", () => {
+  test("projects copy, cut, and paste results through one surface callback", () => {
+    const editor = createDocumentEditor({
+      blocks: [{ id: "a", text: "Alpha" }, { id: "b", text: "Beta" }],
+    });
+    const results: string[] = [];
+    const surface = createWebClipboardSurface({
+      codec: documentClipboardCodec,
+      read: () => editor.copy(),
+      cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
+      paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard }),
+      onResult: (result) => results.push(result.ok ? result.operation : result.code),
+    });
+    const data = new MemoryClipboardData();
+
+    expect(surface.onCopy(event(data))).toMatchObject({ ok: true, operation: "copy" });
+    expect(editor.dispatch({ type: "selection.set", blockId: "b" }).ok).toBe(true);
+    expect(surface.onPaste(event(data))).toMatchObject({ ok: true, operation: "paste" });
+    expect(surface.onCut(event(data))).toMatchObject({ ok: true, operation: "cut" });
+    expect(surface.onCopy(event(null))).toMatchObject({ ok: false, code: "clipboard.unavailable" });
+    expect(results).toEqual(["copy", "paste", "cut", "clipboard.unavailable"]);
+  });
+
   test("copies and pastes a structured Document payload through ClipboardEvent contracts", () => {
     const editor = createDocumentEditor({
       blocks: [

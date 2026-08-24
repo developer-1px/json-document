@@ -1,4 +1,4 @@
-import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createOrderEditor,
@@ -8,7 +8,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   lineBoundary,
   moveLinePoint,
   orderClipboardCodec,
@@ -40,13 +40,19 @@ const initialOrder: OrderDocument = {
 export function OrderDemoRoute() {
   const [editor] = useState(() => createOrderEditor(initialOrder));
   const [clipboard, setClipboard] = useState<OrderClipboard | null>(null);
-  const [webClipboard] = useState(() => createWebClipboardBinding({
+  const observation = useEditingObservation<OrderIntent>("Ready");
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: orderClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+    onResult(result) {
+      if (!result.ok) return observation.announce(result.code);
+      if (result.operation !== "paste") setClipboard(result.payload);
+      const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
+      observation.announce(`${verb} ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
+    },
   }));
-  const observation = useEditingObservation<OrderIntent>("Ready");
   const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const [focusId, setFocusId] = useState(initialOrder.items[0]?.id ?? null);
   const [renaming, setRenaming] = useState<{ readonly id: string; readonly draft: string } | null>(null);
@@ -198,27 +204,6 @@ export function OrderDemoRoute() {
     editing.getKeyDownHandler()(event);
   }
 
-  function handleNativeCopy(event: ClipboardEvent<HTMLOListElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return observation.announce(result.code);
-    setClipboard(result.payload);
-    observation.announce(`Copied ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLOListElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return observation.announce(result.code);
-    setClipboard(result.payload);
-    observation.announce(`Cut ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLOListElement>) {
-    const result = webClipboard.paste(event);
-    observation.announce(result.ok
-      ? `Pasted ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`
-      : result.code);
-  }
-
   return (
     <DemoPage documentation={(
       <PageHeader
@@ -270,9 +255,7 @@ export function OrderDemoRoute() {
             className="m-0 grid list-none gap-1 p-0"
             tabIndex={-1}
             onKeyDown={onKeyDown}
-            onCopy={handleNativeCopy}
-            onCut={handleNativeCut}
-            onPaste={handleNativePaste}
+            {...clipboardSurface}
           >
             {document.items.map((item, index) => renaming?.id === item.id ? (
               <input

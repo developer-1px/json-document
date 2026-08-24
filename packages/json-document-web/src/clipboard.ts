@@ -50,6 +50,23 @@ export interface WebClipboardBinding<Payload extends WebClipboardPayload, Editin
   paste(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
 }
 
+export interface WebClipboardBindingOptions<
+  Payload extends WebClipboardPayload,
+  EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
+> {
+  readonly codec: WebClipboardCodec<Payload>;
+  readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
+  readonly read: () => Payload | null;
+  readonly cut?: (payload: Payload) => EditingResult;
+  readonly paste: (payload: Payload) => EditingResult;
+}
+
+export interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult> {
+  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+}
+
 export const documentClipboardCodec: WebClipboardCodec<DocumentClipboard> = jsonCodec(
   "application/vnd.interactive-os.blocks+json",
   isDocumentClipboard,
@@ -83,13 +100,7 @@ export const databaseClipboardCodec: WebClipboardCodec<DatabaseClipboard> = json
 export function createWebClipboardBinding<
   Payload extends WebClipboardPayload,
   EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
->(options: {
-  readonly codec: WebClipboardCodec<Payload>;
-  readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
-  readonly read: () => Payload | null;
-  readonly cut?: (payload: Payload) => EditingResult;
-  readonly paste: (payload: Payload) => EditingResult;
-}): WebClipboardBinding<Payload, EditingResult> {
+>(options: WebClipboardBindingOptions<Payload, EditingResult>): WebClipboardBinding<Payload, EditingResult> {
   function write(event: WebClipboardEvent):
     | { readonly ok: true; readonly payload: Payload }
     | Extract<WebClipboardResult<never, never>, { readonly ok: false }> {
@@ -156,6 +167,30 @@ export function createWebClipboardBinding<
       event.preventDefault();
       return { ok: true, operation: "paste", payload, result };
     },
+  };
+}
+
+export function createWebClipboardSurface<
+  Payload extends WebClipboardPayload,
+  EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
+>(options: WebClipboardBindingOptions<Payload, EditingResult> & {
+  readonly onResult: (result: WebClipboardResult<Payload, EditingResult>) => void;
+}): WebClipboardSurface<Payload, EditingResult> {
+  const binding = createWebClipboardBinding(options);
+
+  function handle(
+    operation: keyof WebClipboardBinding<Payload, EditingResult>,
+    event: WebClipboardEvent,
+  ): WebClipboardResult<Payload, EditingResult> {
+    const result = binding[operation](event);
+    options.onResult(result);
+    return result;
+  }
+
+  return {
+    onCopy: (event) => handle("copy", event),
+    onCut: (event) => handle("cut", event),
+    onPaste: (event) => handle("paste", event),
   };
 }
 
