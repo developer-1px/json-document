@@ -7,10 +7,10 @@ import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  historyAffordance,
   applyAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
-import { historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -33,7 +33,7 @@ export function HistoryDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
   const [lastCall, setLastCall] = useState("아직 편집하지 않았습니다");
 
   function edit() {
@@ -74,14 +74,6 @@ export function HistoryDemoRoute() {
                   type="button"
                   className={classes("px-3 py-2", ui.surface.selectableBlock)}
                   {...optionProps(item)}
-                  onClick={(event) => {
-                    applyAffordance(pointerSelect(event), {
-                      hand: (hand) => {
-                        if (hand.type !== "select") return;
-                        editor.dispatch({ type: "selection.set", blockId: block.id, mode: hand.operation });
-                      },
-                    });
-                  }}
                 >
                   {block.id} · {block.text}
                   {item.getTextOffset() === null ? "" : ` · offset ${item.getTextOffset()}`}

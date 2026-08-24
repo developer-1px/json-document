@@ -9,15 +9,16 @@ import {
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import { createWebClipboardBinding, objectClipboardCodec } from "@interactive-os/json-document-web";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
@@ -52,7 +53,7 @@ export function ObjectDemoRoute() {
       }, "Selection changed");
     },
     keyboard: {
-      resolve: editingCommandFromStroke,
+      resolve: editingCommandFromWebKeyboardStroke,
       focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
       neighbor: () => null,
       onUndo: () => { editor.undo(); observation.announce("Undone"); },
@@ -61,7 +62,7 @@ export function ObjectDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as ObjectDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function copySelection() {
     const next = editor.copy();
@@ -174,18 +175,6 @@ export function ObjectDemoRoute() {
               data-object-id={object.id}
               className={ui.interactive.planeItem}
               {...optionProps(editing.getItem(object.id))}
-              onClick={(event) => {
-                applyAffordance(pointerSelect(event), {
-                  hand: (hand) => {
-                    if (hand.type !== "select") return;
-                    run({
-                      type: "selection.set",
-                      objectIds: [object.id],
-                      mode: hand.operation === "extend" ? "add" : hand.operation,
-                    }, "Selection changed");
-                  },
-                });
-              }}
               style={{
                 left: object.x,
                 top: object.y,

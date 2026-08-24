@@ -8,10 +8,11 @@ import {
   useReactConnector,
   useRestoreTextCursor,
 } from "@interactive-os/json-document-react";
+import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
-import { historyCommands, optionProps } from "../../../shared/widget-binding";
+import { optionProps } from "../../../shared/widget-binding";
 
 const initialEditorDocument: BlockDocument = {
   blocks: [
@@ -72,7 +73,7 @@ function EditingSnapshotLab() {
   const editor = useDocumentEditor(initialEditorDocument);
   const snapshot = useEditingSnapshot(editor);
   const value = snapshot.value as BlockDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   return (
     <section aria-label="Editing snapshot subscription" className={classes("p-4", ui.surface.raised)}>

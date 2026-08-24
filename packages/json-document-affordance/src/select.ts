@@ -1,6 +1,7 @@
 import {
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
+  type WebKeyboardCommand,
   type WebPressInteraction,
   type WebKeyboardStroke,
 } from "@interactive-os/json-document-web";
@@ -30,6 +31,24 @@ export function pointerSelect(modifiers: {
       }),
     },
   };
+}
+
+/** Projects a Web keyboard stroke to the editing command represented by its affordance. */
+export function editingCommandFromWebKeyboardStroke(
+  stroke: WebKeyboardStroke,
+): WebKeyboardCommand | null {
+  const hand = resolveAffordanceKey(stroke).hand;
+  if (
+    hand?.type === "move"
+    || hand?.type === "boundary"
+    || hand?.type === "toggle"
+    || hand?.type === "delete"
+    || hand?.type === "undo"
+    || hand?.type === "redo"
+  ) {
+    return hand;
+  }
+  return null;
 }
 
 export function planeHitAffordance(input: {

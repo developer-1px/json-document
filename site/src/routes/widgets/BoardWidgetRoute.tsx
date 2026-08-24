@@ -9,15 +9,15 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import {
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   commitAffordance,
   dragAffordance,
   dropAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialBoard: KanbanDocument = {
@@ -58,7 +58,7 @@ export function BoardWidgetRoute() {
       });
     },
     keyboard: {
-      resolve: editingCommandFromStroke,
+      resolve: editingCommandFromWebKeyboardStroke,
       focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
       neighbor: (key, command) => command.type === "move"
         ? moveLinePoint(cardIds(), key, command.direction)
@@ -84,16 +84,7 @@ export function BoardWidgetRoute() {
     event.stopPropagation();
     (event.currentTarget.closest("[role=listbox]") as HTMLElement | null)?.focus();
     surface.current?.setPointerCapture(event.pointerId);
-    applyAffordance(pointerSelect(event), {
-      hand: (hand) => {
-        if (hand.type !== "select") return;
-        editor.dispatch({
-          type: "selection.set",
-          cardId,
-          mode: hand.operation === "replace" ? "replace" : "toggle",
-        });
-      },
-    });
+    editing.getItem(cardId).getPressHandler()(event);
     setDrag({ cardId, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
   }
 
