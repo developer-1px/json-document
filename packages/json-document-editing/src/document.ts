@@ -33,6 +33,12 @@ export interface DocumentSelection extends Record<string, JSONValue> {
   readonly primaryIndex: number | null;
 }
 
+/** Returns the focus point of the primary Document range. */
+export function documentSelectionFocus(selection: DocumentSelection): DocumentPoint | null {
+  if (selection.primaryIndex === null) return null;
+  return selection.ranges[selection.primaryIndex]?.focus ?? null;
+}
+
 export interface DocumentClipboard extends Record<string, JSONValue> {
   readonly type: "application/vnd.interactive-os.blocks+json";
   readonly blocks: ReadonlyArray<DocumentBlock>;

@@ -30,6 +30,10 @@ the keys. Hosts still own markup, class names, and genre Intent
 translation. `useRestoreTextCursor` writes a text offset onto an input or
 textarea.
 
+`useDocumentTextControl` composes cursor restoration, Web text input, and
+caret/click affordances into reusable textarea props. `DocumentTextControl`
+renders that same lifecycle while the host keeps layout and Document Intent.
+
 `useEditingObservation(initialAnnouncement)` records the last Intent and
 result while leaving announcement wording in the Host. Its `dispatch`, `run`,
 `observe`, and `observeResult` doors let demos and inspectors expose the same

@@ -36,6 +36,13 @@ export {
   type TextCursorControl,
   type UseEditingOptions,
 } from "./use-editing.js";
+export {
+  DocumentTextControl,
+  useDocumentTextControl,
+  type DocumentTextControlBinding,
+  type DocumentTextControlProps,
+  type UseDocumentTextControlOptions,
+} from "./use-document-text-control.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(
