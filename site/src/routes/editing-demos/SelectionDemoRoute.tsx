@@ -1,39 +1,13 @@
-import { useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { type BlockDocument, type DocumentIntent } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
-
-const initialDocument: BlockDocument = {
-  blocks: [
-    { id: "alpha", text: "Anchor" },
-    { id: "bravo", text: "Middle" },
-    { id: "charlie", text: "Focus" },
-  ],
-};
+import { selectionLabDocument, useSelectionLab } from "./useSelectionLab";
 
 export function SelectionDemoRoute() {
-  const editor = useDocumentEditor(initialDocument);
-  const [mode, setMode] = useState<"replace" | "extend" | "toggle">("replace");
-  const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
-  const [lastResult, setLastResult] = useState<{ readonly ok: boolean; readonly code?: string } | null>(null);
-  const editing = useEditing({
-    source: editor,
-    selectedKeys: editor.selectedBlockIds,
-    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId ?? null,
-    onSelect: (blockId, nextMode) => {
-      const intent: DocumentIntent = { type: "selection.set", blockId, mode: nextMode };
-      const result = editor.dispatch(intent);
-      setLastIntent(intent);
-      setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
-    },
-    operationFromEvent: () => mode,
-  });
-  const snapshot = editing.snapshot;
+  const { editing, lastIntent, lastResult, mode, setMode, snapshot } = useSelectionLab();
 
   return (
     <DemoPage documentation={(
@@ -59,7 +33,7 @@ export function SelectionDemoRoute() {
             ))}
           </div>
           <div className="grid gap-1">
-            {initialDocument.blocks.map((block) => (
+            {selectionLabDocument.blocks.map((block) => (
               <SelectableItem
                 key={block.id}
                 type="button"

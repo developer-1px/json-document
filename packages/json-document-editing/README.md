@@ -25,6 +25,8 @@ pretending that every topology is the same:
   Patch planning.
 - `Object` uses the key family. The host owns pointer
   geometry and hit-testing, then sends only stable object IDs to the editor.
+  Its public `selection.set` accepts the shared `replace`, `extend`, and
+  `toggle` vocabulary directly; `extend` has key-family union semantics.
 
 All slices keep renderer, DOM, physical keyboard policy, geometry, and expansion
 state outside the common engines. Value-changing transactions store forward and
@@ -39,7 +41,19 @@ editor projects each saved view into a visible record/property topology for
 range selection, keeps native title/text caret state in the host, and restores
 structural selection with record and view mutations through history.
 
+
+`nextDatabasePropertySort(sort, propertyId)` is the canonical saved-view sort
+transition: a property cycles through ascending, descending, and unsorted. UI
+packages and Hosts share this rule instead of repeating local sort helpers.
+
 Visible order is a value, not a command. `LineTopology` and `GridTopology` are
 the shared shapes. Sheet aliases Grid as `SheetTopology`. Database projects a
 saved view into `{ recordIds, propertyIds }`. Tree takes host `visibleIds`.
 Selection and clipboard read that line.
+
+`projectTreeVisibility(nodes, expandedIds)` is the canonical Tree projection.
+It publishes rows with hierarchy/ARIA facts and the matching `TreeTopology`.
+`treeVisibilityNeighbor` resolves movement only within that projection.
+
+`gridPointKey` and `gridPointFromKey` provide the canonical reversible string
+identity when a selection or rendering adapter needs to key a `GridPoint`.

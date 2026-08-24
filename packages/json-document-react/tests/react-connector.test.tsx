@@ -1,8 +1,9 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createDocumentEditor, type DocumentEditor } from "@interactive-os/json-document-editing";
 import {
+  DocumentTextControl,
   useDocumentEditor,
   useEditingSnapshot,
   useJSONDocumentValue,
@@ -12,6 +13,33 @@ import {
 afterEach(cleanup);
 
 describe("React Connector", () => {
+  test("composes Document textarea caret, click count, input, and cursor restoration", () => {
+    const caretRanges: unknown[] = [];
+    const inputs: unknown[] = [];
+    const clicks: number[] = [];
+    render(
+      <DocumentTextControl
+        aria-label="Document text"
+        text="Alpha"
+        offset={2}
+        onCaretRange={(from, to, mode) => caretRanges.push({ from, to, mode })}
+        onTextInput={(input) => inputs.push(input)}
+        onClickCount={(count) => clicks.push(count)}
+      />,
+    );
+    const control = screen.getByRole("textbox", { name: "Document text" }) as HTMLTextAreaElement;
+    expect(control.selectionStart).toBe(2);
+    expect(control.style.cursor).toBe("text");
+
+    control.setSelectionRange(1, 3);
+    fireEvent.click(control, { detail: 2 });
+    fireEvent.change(control, { target: { value: "Alps", selectionStart: 4 } });
+
+    expect(caretRanges).toContainEqual({ from: 1, to: 3, mode: "replace" });
+    expect(clicks).toEqual([2]);
+    expect(inputs).toEqual([{ text: "Alps", offset: 4 }]);
+  });
+
   test("exposes the shared document through the official Connector entry point", () => {
     const document = createJSONDocument({ title: "Draft" });
     function View() {

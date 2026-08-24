@@ -1,19 +1,22 @@
-export { createDocumentEditor } from "./document.js";
+export { createDocumentEditor, documentSelectionFocus } from "./document.js";
 export {
   gridCellsInRange,
   gridPointIndex,
+  gridPointFromKey,
+  gridPointKey,
   gridRangeBounds,
   gridTopology,
   lineInterval,
   lineTopology,
 } from "./topology.js";
 export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./topology.js";
-export { createDatabaseEditor } from "./database.js";
+export { createDatabaseEditor, nextDatabasePropertySort } from "./database.js";
 export { createObjectEditor } from "./object.js";
 export { createOrderEditor } from "./order.js";
 export { createEditingSession } from "./session.js";
 export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
+export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
 export type {
   DatabaseCell,
@@ -50,6 +53,7 @@ export type {
   ObjectEditor,
   ObjectIntent,
   ObjectSelection,
+  ObjectSelectionMode,
 } from "./object.js";
 export type {
   BlockDocument,
@@ -92,6 +96,11 @@ export type {
   TreeSelection,
   TreeTopology,
 } from "./tree.js";
+export type {
+  TreeVisibility,
+  TreeVisibilityNavigation,
+  TreeVisibilityRow,
+} from "./tree-visibility.js";
 export type {
   KanbanCard,
   KanbanColumn,

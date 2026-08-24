@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent } from "react";
+import { useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createObjectEditor,
@@ -6,23 +6,25 @@ import {
   type ObjectDocument,
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
-import { createWebClipboardBinding, objectClipboardCodec } from "@interactive-os/json-document-web";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
+import { createWebClipboardSurface, objectClipboardCodec } from "@interactive-os/json-document-web";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
   const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
-  const [webClipboard] = useState(() => createWebClipboardBinding({
+  const observation = useEditingObservation<ObjectIntent>("Ready");
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: objectClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
@@ -33,15 +35,16 @@ export function ObjectDemoRoute() {
         objects: payload.objects.map((object) => ({ ...object, x: object.x + 24, y: object.y + 24 })),
       },
     }),
+    onResult(result) {
+      if (!result.ok) return observation.announce(result.code);
+      if (result.operation !== "paste") setClipboard(result.payload);
+      const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
+      observation.announce(`${verb} ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
+    },
   }));
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<ObjectIntent | null>(null);
 
   function run(intent: ObjectIntent, message: string) {
-    const result = editor.dispatch(intent);
-    setLastIntent(intent);
-    setAnnouncement(result.ok ? message : result.code);
-    return result;
+    return observation.dispatch(intent, editor.dispatch, message);
   }
 
   const editing = useEditing({
@@ -52,54 +55,33 @@ export function ObjectDemoRoute() {
       run({
         type: "selection.set",
         objectIds: [objectId],
-        mode: mode === "extend" ? "add" : mode,
+        mode,
       }, "Selection changed");
     },
     keyboard: {
-      resolve: editingCommandFromStroke,
+      resolve: editingCommandFromWebKeyboardStroke,
       focusKey: () => editor.snapshot.selection.primaryKey ?? undefined,
       neighbor: () => null,
-      onUndo: () => { editor.undo(); setAnnouncement("Undone"); },
-      onRedo: () => { editor.redo(); setAnnouncement("Redone"); },
+      onUndo: () => { editor.undo(); observation.announce("Undone"); },
+      onRedo: () => { editor.redo(); observation.announce("Redone"); },
     },
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as ObjectDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function copySelection() {
     const next = editor.copy();
-    if (!next) return setAnnouncement("Select an object first");
+    if (!next) return observation.announce("Select an object first");
     setClipboard(next);
-    setAnnouncement(`Copied ${next.objects.length} object${next.objects.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${next.objects.length} object${next.objects.length === 1 ? "" : "s"}`);
   }
 
   function cutSelection() {
     const result = editor.cut();
-    if (!result) return setAnnouncement("Select an object first");
+    if (!result) return observation.announce("Select an object first");
     setClipboard(result.clipboard);
-    setAnnouncement(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.paste(event);
-    setAnnouncement(result.ok
-      ? `Pasted ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`
-      : result.code);
+    observation.announce(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
   }
 
   return (
@@ -110,7 +92,7 @@ export function ObjectDemoRoute() {
         aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedObjects.length} selected · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
           </div>
         )}
       >
@@ -152,14 +134,14 @@ export function ObjectDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
           <Inspector placement="inline" items={[
             { label: "Canonical JSON", value: snapshot.value, testId: "object-demo-document", size: "tall" },
-            { label: "intent", value: lastIntent, testId: "object-demo-intent", size: "compact" },
+            { label: "intent", value: observation.lastIntent, testId: "object-demo-intent", size: "compact" },
             { label: "selection", value: snapshot.selection, testId: "object-demo-selection", size: "compact" },
           ]} />
         )}
@@ -167,9 +149,7 @@ export function ObjectDemoRoute() {
         <section
           aria-label="Editable objects"
           className="contents"
-          onCopy={handleNativeCopy}
-          onCut={handleNativeCut}
-          onPaste={handleNativePaste}
+          {...clipboardSurface}
           onKeyDown={editing.getKeyDownHandler()}
         >
           {document.objects.map((object) => (
@@ -178,18 +158,6 @@ export function ObjectDemoRoute() {
               data-object-id={object.id}
               className={ui.interactive.planeItem}
               {...optionProps(editing.getItem(object.id))}
-              onClick={(event) => {
-                applyAffordance(pointerSelect(event), {
-                  hand: (hand) => {
-                    if (hand.type !== "select") return;
-                    run({
-                      type: "selection.set",
-                      objectIds: [object.id],
-                      mode: hand.operation === "extend" ? "add" : hand.operation,
-                    }, "Selection changed");
-                  },
-                });
-              }}
               style={{
                 left: object.x,
                 top: object.y,

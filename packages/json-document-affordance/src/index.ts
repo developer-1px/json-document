@@ -13,14 +13,48 @@ export {
   wheelAffordance,
   zoomAffordance,
 } from "./drag.js";
+export { createBoardDragSession } from "./board-drag-session.js";
+export { createCanvasGestureSession } from "./canvas-gesture-session.js";
+export type {
+  BoardDragCancelReason,
+  BoardDragSession,
+  BoardDragSessionOptions,
+  BoardDragSnapshot,
+  BoardDrop,
+} from "./board-drag-session.js";
+export type {
+  CanvasGestureCancelReason,
+  CanvasGestureSession,
+  CanvasGestureSessionOptions,
+  CanvasGestureState,
+  CanvasGestureType,
+} from "./canvas-gesture-session.js";
 export type { Point, Rect, ResizeEdge } from "./drag.js";
 export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";
 export { historyAffordance } from "./history.js";
 export { pressAffordance } from "./press.js";
 export type { PressAffordanceResult, PressAffordanceState } from "./press.js";
-export type { HistoryAffordance, HistoryAffordanceMap, HistoryAffordanceName } from "./history.js";
+export type {
+  HistoryAffordance,
+  HistoryAffordanceMap,
+  HistoryAffordanceName,
+  HistoryAffordanceResult,
+} from "./history.js";
 export { applyAffordance, commitAffordance } from "./result.js";
+export {
+  createLineFocusSession,
+  createRenameSession,
+  createTypeaheadSession,
+} from "./session.js";
+export type {
+  LineFocusSession,
+  RenameSession,
+  RenameSessionSnapshot,
+  TypeaheadSession,
+  TypeaheadSessionInput,
+  TypeaheadSessionSnapshot,
+} from "./session.js";
 export type {
   AffordanceCommit,
   AffordanceCommitActions,
@@ -39,6 +73,7 @@ export {
   clickCountAffordance,
   contextMenuAffordance,
   deleteAffordance,
+  editingCommandFromWebKeyboardStroke,
   escapeAffordance,
   focusAffordance,
   planeHitAffordance,

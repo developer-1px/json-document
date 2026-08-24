@@ -11,12 +11,12 @@ import {
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
+  createTypeaheadSession,
   escapeAffordance,
-  pointerSelect,
-  typeaheadAffordance,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -31,8 +31,10 @@ const initialOrder: OrderDocument = {
 export function ListboxWidgetRoute() {
   const containerRef = useRef<HTMLUListElement>(null);
   const [editor] = useState(() => createOrderEditor(initialOrder));
-  const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const keyboard = useWidgetKeyboard();
+  const [typeaheadSession] = useState(() => createTypeaheadSession<string>({
+    onMatch: (itemId) => editor.dispatch({ type: "selection.set", itemId, mode: "replace" }),
+  }));
   const ids = () => (editor.snapshot.value as OrderDocument).items.map((item) => item.id);
   const focusKey = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
   const editing = useEditing({
@@ -45,7 +47,7 @@ export function ListboxWidgetRoute() {
     keyboard: {
       resolve: (stroke) => {
         keyboard.resolve(stroke);
-        return editingCommandFromStroke(stroke);
+        return editingCommandFromWebKeyboardStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
@@ -65,27 +67,14 @@ export function ListboxWidgetRoute() {
   const document = editing.snapshot.value as OrderDocument;
 
   function onKeyDown(event: KeyboardEvent<HTMLUListElement>) {
-    const names = document.items.map((item) => item.label);
-    const from = document.items.find((item) => item.id === focusKey)?.label ?? null;
-    const result = typeaheadAffordance({
-      buffer: typeahead.buffer,
+    const consumed = typeaheadSession.handle({
       key: event.key,
       metaKey: event.metaKey,
       ctrlKey: event.ctrlKey,
       altKey: event.altKey,
-      elapsedMs: event.timeStamp - typeahead.at,
-      names,
-      from,
-    });
-    let consumed = false;
-    applyAffordance(result, {
-      hand: (hand) => {
-        if (hand.type !== "typeahead") return;
-        consumed = true;
-        setTypeahead({ buffer: hand.buffer, at: event.timeStamp });
-        const item = document.items.find((candidate) => candidate.label === hand.name);
-        if (item) editor.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" });
-      },
+      timeStamp: event.timeStamp,
+      items: document.items.map((item) => ({ key: item.id, name: item.label })),
+      fromKey: focusKey,
     });
     if (consumed) {
       event.preventDefault();
@@ -94,7 +83,7 @@ export function ListboxWidgetRoute() {
     applyAffordance(escapeAffordance(event), {
       hand: (hand) => {
         if (hand.type !== "cancel") return;
-        setTypeahead({ buffer: "", at: 0 });
+        typeaheadSession.reset();
       },
     });
     editing.getKeyDownHandler()(event);
@@ -129,12 +118,7 @@ export function ListboxWidgetRoute() {
               })}
               onClick={(event) => {
                 containerRef.current?.focus();
-                applyAffordance(pointerSelect(event), {
-                  hand: (hand) => {
-                    if (hand.type !== "select") return;
-                    editor.dispatch({ type: "selection.set", itemId: item.id, mode: hand.operation });
-                  },
-                });
+                editing.getItem(item.id).getPressHandler()(event);
               }}
             >
               {item.label}

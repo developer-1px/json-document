@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent, type FocusEvent } from "react";
+import { useState, type FocusEvent } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -13,17 +13,19 @@ import {
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useGridEditing } from "@interactive-os/json-document-react";
 import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
+import { historyAffordance } from "@interactive-os/json-document-affordance";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   sheetClipboardCodec,
+  webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
-import { gridCellProps, historyCommands } from "../../../shared/widget-binding";
+import { gridCellProps } from "../../../shared/widget-binding";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -59,11 +61,17 @@ export function TanStackTableConnectorLab() {
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  const webClipboard = createWebClipboardBinding({
+  const clipboardSurface = createWebClipboardSurface({
     codec: sheetClipboardCodec,
     read: () => binding.copy(table),
     cut: () => binding.cut(table)?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => binding.paste(table, payload),
+    onResult: (result) => {
+      if (!result.ok) return setAnnouncement(result.code);
+      if (result.operation === "paste") return setAnnouncement("Pasted structured visible rectangle");
+      setClipboard(result.payload);
+      setAnnouncement(`${result.operation === "copy" ? "Copied" : "Cut"} ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
+    },
   });
   function run(action: () => { readonly ok: boolean }, message: string) {
     const result = action();
@@ -71,14 +79,12 @@ export function TanStackTableConnectorLab() {
   }
 
   const focus = binding.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: binding,
-    selectedKeys: binding.selectedCells(table).map((cell) => `${cell.rowId}\u0000${cell.columnId}`),
-    focusKey: focus ? `${focus.rowId}\u0000${focus.columnId}` : null,
-    onSelect: (key, mode) => {
-      const split = key.indexOf("\u0000");
-      const rowId = key.slice(0, split);
-      const columnId = key.slice(split + 1);
+    selectedPoints: binding.selectedCells(table),
+    focusPoint: focus,
+    onSelect: (point, mode) => {
+      const { rowId, columnId } = point;
       run(
         () => binding.selectCell(table, { rowId, columnId, mode }),
         mode === "extend" ? "Visible range extended" : mode === "toggle" ? "Visible range toggled" : "Cell selected",
@@ -86,7 +92,7 @@ export function TanStackTableConnectorLab() {
     },
   });
   const snapshot = editing.snapshot;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function commitCell(event: FocusEvent<HTMLInputElement>, rowId: string, columnId: string, current: unknown) {
     const value = typeof current === "number" ? Number(event.currentTarget.value) : event.currentTarget.value;
@@ -115,31 +121,10 @@ export function TanStackTableConnectorLab() {
     run(() => binding.paste(table, clipboard), "Pasted visible rectangle");
   }
 
-  function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured visible cells`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.paste(event);
-    setAnnouncement(result.ok ? "Pasted structured visible rectangle" : result.code);
-  }
-
   return (
     <section
       aria-label="TanStack Table editing"
-      onCopy={handleNativeCopy}
-      onCut={handleNativeCut}
-      onPaste={handleNativePaste}
+      {...clipboardSurface}
       className={classes("p-4", ui.surface.raised)}
     >
       <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">
@@ -182,7 +167,8 @@ export function TanStackTableConnectorLab() {
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id} data-row-id={row.id}>
                   {row.getVisibleCells().map((cell) => {
-                    const item = editing.getItem(`${row.id}\u0000${cell.column.id}`);
+                    const point = { rowId: row.id, columnId: cell.column.id };
+                    const item = editing.getCell(point);
                     const value = row.original.cells[cell.column.id];
                     return (
                       <SelectableItem
@@ -190,6 +176,7 @@ export function TanStackTableConnectorLab() {
                         key={cell.id}
                         data-row-id={row.id}
                         data-column-id={cell.column.id}
+                        {...webGridCellAddressProps(point)}
                         className={classes("p-0", ui.surface.gridCell)}
                         {...gridCellProps(item)}
                       >

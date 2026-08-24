@@ -9,10 +9,12 @@ JSON Document와 Editing은 브라우저 event를 직접 해석하지 않습니�
 | 계약 | package | 문서 |
 | --- | --- | --- |
 | Keyboard / Press / ARIA | `@interactive-os/json-document-web` | [Keyboard](adapter-keyboard.md) |
+| Grid cell address | `@interactive-os/json-document-web` | [Grid cell](adapter-grid-cell.md) |
+| Pointer / Drag and Drop session | `@interactive-os/json-document-web` | [Interaction](adapter-interaction.md) |
 | Clipboard | `@interactive-os/json-document-web` | [Clipboard](adapter-clipboard.md) |
 | Contenteditable | `@interactive-os/json-document-contenteditable` | [Contenteditable](adapter-contenteditable.md) |
 
-Keyboard와 Clipboard는 같은 package에 있지만 서로 다른 플랫폼 계약을
+Keyboard, Interaction, Clipboard는 같은 package에 있지만 서로 다른 플랫폼 계약을
 번역합니다. 제품은 필요한 Adapter만 붙입니다.
 
 ## 경계

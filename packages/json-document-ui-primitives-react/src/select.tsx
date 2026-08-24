@@ -7,6 +7,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { createLineFocusSession, createTypeaheadSession } from "@interactive-os/json-document-affordance";
 
 export type SelectOption = {
   readonly id: string;
@@ -40,7 +41,14 @@ export function Select(props: {
   const listboxRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [focusId, setFocusId] = useState(props.value);
-  const typeahead = useRef({ text: "", at: 0 });
+  const [focusSession] = useState(() => createLineFocusSession<string>({
+    initialKey: props.value,
+    wrap: true,
+    onFocus: (key) => { if (key !== null) setFocusId(key); },
+  }));
+  const [typeaheadSession] = useState(() => createTypeaheadSession<string>({
+    onMatch: (key) => focusSession.setFocus(key),
+  }));
   const selected = props.options.find((option) => option.id === props.value) ?? props.options[0];
   const enabled = props.options.filter((option) => !option.disabled);
 
@@ -55,15 +63,12 @@ export function Select(props: {
 
   function openListbox() {
     if (props.disabled || enabled.length === 0) return;
-    setFocusId(enabled.some((option) => option.id === props.value) ? props.value : enabled[0]!.id);
+    focusSession.setFocus(enabled.some((option) => option.id === props.value) ? props.value : enabled[0]!.id);
     setOpen(true);
   }
 
   function move(delta: -1 | 1) {
-    if (enabled.length === 0) return;
-    const index = enabled.findIndex((option) => option.id === focusId);
-    const next = index < 0 ? 0 : (index + delta + enabled.length) % enabled.length;
-    setFocusId(enabled[next]!.id);
+    focusSession.handle({ key: delta === 1 ? "ArrowDown" : "ArrowUp", shiftKey: false }, enabled.map((option) => option.id));
   }
 
   function commit(id = focusId) {
@@ -81,7 +86,7 @@ export function Select(props: {
     }
     if (event.key === "Home" || event.key === "End") {
       event.preventDefault();
-      setFocusId((event.key === "Home" ? enabled[0] : enabled.at(-1))?.id ?? focusId);
+      focusSession.handle(event, enabled.map((option) => option.id));
       return;
     }
     if (event.key === "Enter" || event.key === " ") {
@@ -98,12 +103,15 @@ export function Select(props: {
       close(false);
       return;
     }
-    if (event.key.length !== 1 || event.metaKey || event.ctrlKey || event.altKey) return;
-    const now = Date.now();
-    const text = `${now - typeahead.current.at > 500 ? "" : typeahead.current.text}${event.key}`.toLocaleLowerCase();
-    typeahead.current = { text, at: now };
-    const match = enabled.find((option) => option.label.toLocaleLowerCase().startsWith(text));
-    if (match) setFocusId(match.id);
+    if (typeaheadSession.handle({
+      key: event.key,
+      metaKey: event.metaKey,
+      ctrlKey: event.ctrlKey,
+      altKey: event.altKey,
+      timeStamp: event.timeStamp,
+      items: enabled.map((option) => ({ key: option.id, name: option.label })),
+      fromKey: focusSession.getFocusKey(),
+    })) event.preventDefault();
   }
 
   return (
@@ -159,7 +167,7 @@ export function Select(props: {
                   isSelected && props.classNames?.selectedOption,
                 )}
                 style={unstyledButton}
-                onPointerMove={() => { if (!option.disabled) setFocusId(option.id); }}
+                onPointerMove={() => { if (!option.disabled) focusSession.setFocus(option.id); }}
                 onClick={() => commit(option.id)}
               >
                 {props.renderOption?.(option) ?? option.label}

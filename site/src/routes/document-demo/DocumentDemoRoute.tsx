@@ -1,34 +1,34 @@
-import { useRef, useState, type ClipboardEvent } from "react";
+import { useRef, useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   type BlockDocument,
   type DocumentClipboard,
-  type DocumentEditor,
   type DocumentIntent,
-  type DocumentPoint,
   type DocumentSelection,
   type EditingResult,
+  documentSelectionFocus,
 } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditing, useRestoreTextCursor } from "@interactive-os/json-document-react";
 import {
-  createWebClipboardBinding,
+  DocumentTextControl,
+  useDocumentEditor,
+  useEditing,
+  useEditingObservation,
+} from "@interactive-os/json-document-react";
+import {
+  createWebClipboardSurface,
   documentClipboardCodec,
   lineBoundary,
   moveLinePoint,
-  textInputFromControl,
 } from "@interactive-os/json-document-web";
 import {
-  applyAffordance,
-  caretAffordance,
-  caretCursor,
-  clickCountAffordance,
-  pointerSelect,
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, historyCommands, optionProps } from "../../shared/widget-binding";
+import { optionProps } from "../../shared/widget-binding";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -42,22 +42,28 @@ const initialDocument: BlockDocument = {
 export function DocumentDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
-  const [webClipboard] = useState(() => createWebClipboardBinding({
+  const observation = useEditingObservation<DocumentIntent>("Ready");
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: documentClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+    onResult(result) {
+      if (!result.ok) return observation.announce(result.code);
+      if (result.operation === "paste") {
+        observation.observe({ type: "clipboard.paste", clipboard: result.payload }, result.result);
+      } else {
+        setClipboard(result.payload);
+      }
+      const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
+      observation.announce(`${verb} ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
+    },
   }));
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
-  const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
   const [lastClickCount, setLastClickCount] = useState(0);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
   function remember(intent: DocumentIntent, result: EditingResult<DocumentSelection>) {
-    setLastIntent(intent);
-    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
-    return result;
+    return observation.observe(intent, result);
   }
 
   function dispatchIntent(intent: DocumentIntent) {
@@ -65,12 +71,10 @@ export function DocumentDemoRoute() {
   }
 
   function run(action: () => { readonly ok: boolean }, message: string) {
-    const result = action();
-    setAnnouncement(result.ok ? message : "That action is not available here");
-    return result;
+    return observation.run(action, message, "That action is not available here");
   }
 
-  const focus = documentFocus(editor);
+  const focus = documentSelectionFocus(editor.snapshot.selection);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
@@ -81,7 +85,7 @@ export function DocumentDemoRoute() {
     },
     ignorePress: (event) => event.target instanceof Element && event.target.closest("textarea") !== null,
     keyboard: {
-      resolve: (stroke) => editingCommandFromStroke(stroke),
+      resolve: (stroke) => editingCommandFromWebKeyboardStroke(stroke),
       focusKey: () => editor.selectedBlockIds.at(-1),
       neighbor: (key, command) => {
         const ids = (editor.snapshot.value as BlockDocument).blocks.map((block) => block.id);
@@ -99,14 +103,14 @@ export function DocumentDemoRoute() {
         run(() => editor.redo(), "Redone");
       },
       text: {
-        offset: () => documentFocus(editor)?.offset ?? 0,
+        offset: () => documentSelectionFocus(editor.snapshot.selection)?.offset ?? 0,
         length: () => {
-          const blockId = documentFocus(editor)?.blockId;
+          const blockId = documentSelectionFocus(editor.snapshot.selection)?.blockId;
           const block = (editor.snapshot.value as BlockDocument).blocks.find((item) => item.id === blockId);
           return block?.text.length ?? 0;
         },
         onOffset: (offset, mode) => {
-          const blockId = documentFocus(editor)?.blockId;
+          const blockId = documentSelectionFocus(editor.snapshot.selection)?.blockId;
           if (!blockId) return;
           run(() => dispatchIntent({ type: "selection.set", blockId, mode, offset }), "Selection changed");
         },
@@ -115,52 +119,27 @@ export function DocumentDemoRoute() {
   });
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function copySelection() {
     const next = editor.copy();
-    if (!next) return setAnnouncement("Select a block first");
+    if (!next) return observation.announce("Select a block first");
     setClipboard(next);
     void navigator.clipboard?.writeText(next.text).catch(() => undefined);
-    setAnnouncement(`Copied ${next.blocks.length} block${next.blocks.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${next.blocks.length} block${next.blocks.length === 1 ? "" : "s"}`);
   }
 
   function cutSelection() {
     const result = editor.cut();
-    if (!result) return setAnnouncement("Select a block first");
+    if (!result) return observation.announce("Select a block first");
     setClipboard(result.clipboard);
     void navigator.clipboard?.writeText(result.clipboard.text).catch(() => undefined);
-    setAnnouncement(`Cut ${result.clipboard.blocks.length} block${result.clipboard.blocks.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.clipboard.blocks.length} block${result.clipboard.blocks.length === 1 ? "" : "s"}`);
   }
 
   function pasteSelection() {
-    if (!clipboard) return setAnnouncement("Copy or cut blocks first");
+    if (!clipboard) return observation.announce("Copy or cut blocks first");
     run(() => dispatchIntent({ type: "clipboard.paste", clipboard }), `Pasted ${clipboard.blocks.length} block${clipboard.blocks.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCopy(event: ClipboardEvent<HTMLDivElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLDivElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
-    setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLDivElement>) {
-    const result = webClipboard.paste(event);
-    if (result.ok) {
-      setLastIntent({ type: "clipboard.paste", clipboard: result.payload });
-      setLastResult({ ok: true });
-    }
-    setAnnouncement(result.ok
-      ? `Pasted ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`
-      : result.code);
   }
 
   const lastSelectedId = editor.selectedBlockIds.at(-1);
@@ -173,7 +152,7 @@ export function DocumentDemoRoute() {
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
             <div data-testid="document-click-count">click count {lastClickCount}</div>
           </div>
           )}
@@ -209,15 +188,15 @@ export function DocumentDemoRoute() {
               },
               {
                 label: "intent",
-                meta: lastIntent ? lastIntent.type : "dispatch only",
-                value: lastIntent,
+                meta: observation.lastIntent ? observation.lastIntent.type : "dispatch only",
+                value: observation.lastIntent,
                 testId: "document-intent-json",
                 size: "compact",
               },
               {
                 label: "result",
-                meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet",
-                value: lastResult,
+                meta: observation.lastResult?.ok === false ? observation.lastResult.code : observation.lastResult?.ok ? "ok" : "none yet",
+                value: observation.lastResult,
                 testId: "document-result-json",
                 size: "compact",
               },
@@ -228,9 +207,7 @@ export function DocumentDemoRoute() {
             <div
               ref={surfaceRef}
               tabIndex={0}
-              onCopy={handleNativeCopy}
-              onCut={handleNativeCut}
-              onPaste={handleNativePaste}
+              {...clipboardSurface}
               onKeyDown={editing.getKeyDownHandler()}
               className={ui.state.focus}
             >
@@ -245,21 +222,13 @@ export function DocumentDemoRoute() {
                   data-block-id={block.id}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                   {...optionProps(item)}
-                  onClick={(event) => {
-                    applyAffordance(pointerSelect(event), {
-                      hand: (hand) => {
-                        if (hand.type !== "select") return;
-                        run(() => dispatchIntent({ type: "selection.set", blockId: block.id, mode: hand.operation }), "Selection changed");
-                      },
-                    });
-                  }}
                 >
                   <ActionButton
                     aria-label={`Select block ${index + 1}`}
                     className={classes(ui.surface.documentIndex, ui.text.meta)}
                   >{index + 1}</ActionButton>
                   <DocumentTextControl
-                    label={`Block ${index + 1} text`}
+                    aria-label={`Block ${index + 1} text`}
                     text={block.text}
                     offset={item.getTextOffset()}
                     onCaretRange={(from, to, mode) => {
@@ -269,7 +238,9 @@ export function DocumentDemoRoute() {
                       }
                     }}
                     onClickCount={setLastClickCount}
-                    onChange={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
+                    onTextInput={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
+                    rows={Math.max(1, Math.ceil(block.text.length / 64))}
+                    className={classes("min-h-11 resize-none", ui.field.seamless)}
                   />
                 </SelectableItem>
                 );
@@ -279,60 +250,6 @@ export function DocumentDemoRoute() {
           </section>
         </ProductApp>
     </DemoPage>
-  );
-}
-
-function documentFocus(editor: DocumentEditor): DocumentPoint | null {
-  const selection = editor.snapshot.selection;
-  if (selection.primaryIndex === null) return null;
-  return selection.ranges[selection.primaryIndex]?.focus ?? null;
-}
-
-function DocumentTextControl(props: {
-  readonly label: string;
-  readonly text: string;
-  readonly offset: number | null;
-  readonly onCaretRange: (from: number, to: number, mode: "replace" | "extend") => void;
-  readonly onClickCount: (count: number) => void;
-  readonly onChange: (next: { readonly text: string; readonly offset: number }) => void;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  useRestoreTextCursor(ref, props.offset);
-  return (
-    <textarea
-      ref={ref}
-      aria-label={props.label}
-      value={props.text}
-      rows={Math.max(1, Math.ceil(props.text.length / 64))}
-      onFocus={(event) => {
-        const offset = textInputFromControl(event).offset;
-        props.onCaretRange(offset, offset, "replace");
-      }}
-      onClick={(event) => {
-        applyAffordance(caretAffordance({ type: "pointer" }), {
-          hand: (hand) => {
-            if (hand.type !== "caret") return;
-            props.onCaretRange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd, hand.operation);
-          },
-        });
-        applyAffordance(clickCountAffordance(event.detail), {
-          hand: (hand) => {
-            if (hand.type === "click") props.onClickCount(hand.count);
-          },
-        });
-      }}
-      onSelect={(event) => {
-        applyAffordance(caretAffordance({ type: "pointer", dragging: true }), {
-          hand: (hand) => {
-            if (hand.type !== "caret") return;
-            props.onCaretRange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd, hand.operation);
-          },
-        });
-      }}
-      onChange={(event) => props.onChange(textInputFromControl(event))}
-      className={classes("min-h-11 resize-none", ui.field.seamless)}
-      style={{ cursor: caretCursor("horizontal") }}
-    />
   );
 }
 

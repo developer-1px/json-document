@@ -1,4 +1,5 @@
-import { useRef, useState, type ButtonHTMLAttributes, type HTMLAttributes, type PointerEvent, type ReactNode, type TdHTMLAttributes } from "react";
+import { useState, type ButtonHTMLAttributes, type HTMLAttributes, type PointerEvent, type ReactNode, type TdHTMLAttributes } from "react";
+import { createWebPointerSession } from "@interactive-os/json-document-web";
 
 export function FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & {
   readonly onFiles: (files: ReadonlyArray<File>) => void;
@@ -29,7 +30,7 @@ export function ResizeHandle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>
   readonly className?: string;
 }) {
   const { label, orientation, onResize, className, ...buttonProps } = props;
-  const origin = useRef<{ readonly pointerId: number; readonly position: number } | null>(null);
+  const [session] = useState(() => createWebPointerSession<{ readonly position: number }>());
   const position = (event: PointerEvent) => orientation === "horizontal" ? event.clientX : event.clientY;
-  return <button {...buttonProps} type="button" aria-label={label} data-ui-primitive="resize-handle" className={className} style={{ ...buttonProps.style, cursor: orientation === "horizontal" ? "col-resize" : "row-resize" }} onPointerDown={(event) => { event.stopPropagation(); origin.current = { pointerId: event.pointerId, position: position(event) }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { event.stopPropagation(); if (origin.current?.pointerId === event.pointerId) onResize(position(event) - origin.current.position, "preview"); }} onPointerUp={(event) => { event.stopPropagation(); if (origin.current?.pointerId !== event.pointerId) return; onResize(position(event) - origin.current.position, "commit"); origin.current = null; }} />;
+  return <button {...buttonProps} type="button" aria-label={label} data-ui-primitive="resize-handle" className={className} style={{ ...buttonProps.style, cursor: orientation === "horizontal" ? "col-resize" : "row-resize" }} onPointerDown={(event) => { event.stopPropagation(); session.begin(event.currentTarget, event.pointerId, { position: position(event) }); }} onPointerMove={(event) => { event.stopPropagation(); const active = session.getSnapshot(); if (active?.pointerId === event.pointerId) onResize(position(event) - active.state.position, "preview"); }} onPointerUp={(event) => { event.stopPropagation(); const active = session.commit(event.pointerId); if (active) onResize(position(event) - active.position, "commit"); }} onPointerCancel={(event) => { event.stopPropagation(); session.cancel(event.pointerId); }} onLostPointerCapture={(event) => { session.cancel(event.pointerId, "lost-capture"); }} />;
 }

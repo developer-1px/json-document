@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { FileDropRegion, Menu, Select } from "../src/index.js";
+import { FileDropRegion, GridCell, Menu, ResizeHandle, Select } from "../src/index.js";
 
 afterEach(cleanup);
 
@@ -45,5 +45,25 @@ describe("UI Primitives", () => {
     fireEvent.drop(region, { dataTransfer: { files: [file] } });
     expect(onFiles).toHaveBeenCalledWith([file]);
     expect(screen.queryByText("놓기")).toBeNull();
+  });
+
+  test("GridCell projects selection and ResizeHandle publishes preview and commit", () => {
+    const onResize = vi.fn();
+    render(<table><tbody><tr><GridCell selected focus>Cell</GridCell></tr></tbody></table>);
+    expect(screen.getByRole("gridcell").getAttribute("aria-selected")).toBe("true");
+
+    render(<ResizeHandle label="열 너비 조절" orientation="horizontal" onResize={onResize} />);
+    const handle = screen.getByRole("button", { name: "열 너비 조절" });
+    let captured: number | null = null;
+    Object.assign(handle, {
+      setPointerCapture: (pointerId: number) => { captured = pointerId; },
+      hasPointerCapture: (pointerId: number) => captured === pointerId,
+      releasePointerCapture: () => { captured = null; },
+    });
+    fireEvent.pointerDown(handle, { pointerId: 7, clientX: 10 });
+    fireEvent.pointerMove(handle, { pointerId: 7, clientX: 24 });
+    fireEvent.pointerUp(handle, { pointerId: 7, clientX: 30 });
+    expect(onResize).toHaveBeenNthCalledWith(1, 14, "preview");
+    expect(onResize).toHaveBeenNthCalledWith(2, 20, "commit");
   });
 });

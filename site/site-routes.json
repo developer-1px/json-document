@@ -208,6 +208,15 @@
     "navigationGroup": "Hands"
   },
   {
+    "path": "/docs/official-hands",
+    "label": "Official Hands · TBD",
+    "title": "Official Hands · TBD - json-document",
+    "heading": "Official Hands · TBD",
+    "description": "디자인과 제품 데이터는 자유롭게 유지하면서 수렴된 편집 기능을 완성된 SDK로 제공하는 방향을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/demo",
     "label": "Document",
     "title": "Document - json-document",
@@ -374,8 +383,26 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/docs/adapter-grid-cell",
+    "label": "Grid cell",
+    "title": "Grid cell Adapter - json-document",
+    "heading": "Grid cell Adapter",
+    "description": "GridPoint를 안정된 DOM cell 주소와 focus lookup에 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/docs/adapter-interaction",
+    "label": "Interaction",
+    "title": "Interaction Adapter - json-document",
+    "heading": "Interaction Adapter",
+    "description": "Pointer capture와 HTML Drag and Drop session을 preview, commit, cancel lifecycle에 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
     "path": "/docs/adapter-clipboard",
-    "label": "Clipboard",
+    "label": "Clipboard Reference",
     "title": "Clipboard Adapter - json-document",
     "heading": "Clipboard Adapter",
     "description": "ClipboardEvent를 구조화된 copy, cut, paste 계약에 연결합니다.",
@@ -446,7 +473,7 @@
   },
   {
     "path": "/docs/connector-react",
-    "label": "React",
+    "label": "React Reference",
     "title": "React Connector - json-document",
     "heading": "React Connector",
     "description": "document와 editor의 변경을 React 구독과 선택 질의로 연결합니다.",
@@ -455,7 +482,7 @@
   },
   {
     "path": "/docs/react-editing",
-    "label": "React editing",
+    "label": "Editing guide",
     "title": "React editing - json-document",
     "heading": "React에서 선택과 커서 그리기",
     "description": "useEditing으로 object 범위, focus 커서, text offset을 화면에 붙이는 방법과 API를 설명합니다.",

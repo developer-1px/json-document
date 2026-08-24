@@ -6,11 +6,15 @@ import {
   caretCursor,
   clickCountAffordance,
   commitAffordance,
+  createLineFocusSession,
+  createRenameSession,
+  createTypeaheadSession,
   contextMenuAffordance,
   deleteAffordance,
   dragAffordance,
   dragOperation,
   dropAffordance,
+  editingCommandFromWebKeyboardStroke,
   escapeAffordance,
   forbiddenCursor,
   historyAffordance,
@@ -28,11 +32,121 @@ import {
   selectAllAffordance,
   snapAffordance,
   treeAffordance,
+  createBoardDragSession,
+  createCanvasGestureSession,
   typeaheadAffordance,
   wheelAffordance,
   zoomAffordance,
 } from "../src/index.js";
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+
+describe("Affordance sessions", () => {
+  test("owns typeahead buffer and match timing", () => {
+    const matches: string[] = [];
+    const session = createTypeaheadSession<string>({ onMatch: (key) => matches.push(key) });
+    expect(session.handle({
+      key: "T", metaKey: false, ctrlKey: false, altKey: false, timeStamp: 10,
+      items: [{ key: "today", name: "Today" }], fromKey: null,
+    })).toBe(true);
+    expect(session.getSnapshot()).toEqual({ buffer: "T", at: 10 });
+    expect(matches).toEqual(["today"]);
+    session.reset();
+    expect(session.getSnapshot()).toEqual({ buffer: "", at: 0 });
+  });
+
+  test("owns rename draft, slow double click, commit, and cancel", () => {
+    const commits: string[] = [];
+    const finished: string[] = [];
+    const session = createRenameSession<string>({
+      onCommit: (key, draft) => commits.push(`${key}:${draft}`),
+      onFinish: (key) => finished.push(key),
+    });
+    expect(session.handlePointer("a", "Alpha", 1, 10)).toBe(false);
+    expect(session.handlePointer("a", "Alpha", 2, 500)).toBe(true);
+    session.update("Apex");
+    expect(session.handleKey("Enter")).toBe(true);
+    expect(commits).toEqual(["a:Apex"]);
+    session.begin("b", "Beta");
+    expect(session.handleKey("Escape")).toBe(true);
+    expect(finished).toEqual(["a", "b"]);
+  });
+
+  test("owns ordered logical focus without DOM policy", () => {
+    const focused: Array<string | null> = [];
+    const session = createLineFocusSession<string>({ initialKey: "a", onFocus: (key) => focused.push(key) });
+    expect(session.handle({ key: "ArrowDown", shiftKey: false }, ["a", "b"])).toBe(true);
+    expect(session.getFocusKey()).toBe("b");
+    expect(session.handle({ key: "Home", shiftKey: false }, ["a", "b"])).toBe(true);
+    expect(focused).toEqual(["b", "a"]);
+  });
+
+  test("wraps logical focus only when the consumer opts in", () => {
+    const focused: Array<string | null> = [];
+    const session = createLineFocusSession<string>({ initialKey: "a", wrap: true, onFocus: (key) => focused.push(key) });
+    expect(session.handle({ key: "ArrowUp", shiftKey: false }, ["a", "b"])).toBe(true);
+    expect(session.getFocusKey()).toBe("b");
+    expect(focused).toEqual(["b"]);
+  });
+});
+
+describe("createBoardDragSession", () => {
+  test("shares begin, target preview, commit, cancel, and supersede across input adapters", () => {
+    const events: string[] = [];
+    const session = createBoardDragSession<string, { readonly columnId: string; readonly beforeCardId: string | null }>({
+      onBegin: (item) => events.push(`begin:${item}`),
+      onPreview: (item, target) => events.push(`preview:${item}:${target?.columnId ?? "none"}`),
+      onCommit: ({ item, target }) => events.push(`commit:${item}:${target.columnId}`),
+      onCancel: (item, reason) => events.push(`cancel:${item}:${reason}`),
+    });
+
+    session.begin("write");
+    expect(session.commit()).toBeNull();
+    session.preview({ columnId: "doing", beforeCardId: null });
+    expect(session.commit()).toEqual({ item: "write", target: { columnId: "doing", beforeCardId: null } });
+    expect(session.getSnapshot()).toEqual({ status: "idle", item: null, target: null });
+
+    session.begin("review");
+    session.begin("draw");
+    expect(session.cancel("drop-rejected")).toBe("draw");
+    expect(events).toEqual([
+      "begin:write",
+      "preview:write:doing",
+      "commit:write:doing",
+      "begin:review",
+      "cancel:review:superseded",
+      "begin:draw",
+      "cancel:draw:drop-rejected",
+    ]);
+  });
+});
+
+describe("createCanvasGestureSession", () => {
+  test("keeps one typed gesture through preview, commit, cancel, and supersede", () => {
+    type Gesture =
+      | { readonly type: "drag"; readonly dx: number }
+      | { readonly type: "marquee"; readonly width: number };
+    const events: string[] = [];
+    const session = createCanvasGestureSession<Gesture>({
+      onPreview: (gesture) => events.push(`preview:${gesture.type}`),
+      onCommit: (gesture) => events.push(`commit:${gesture.type}`),
+      onCancel: (gesture, reason) => events.push(`cancel:${gesture.type}:${reason}`),
+    });
+
+    session.begin({ type: "drag", dx: 0 });
+    expect(session.preview((gesture) => gesture.type === "drag" ? { ...gesture, dx: 12 } : gesture))
+      .toEqual({ type: "drag", dx: 12 });
+    expect(session.commit()).toEqual({ type: "drag", dx: 12 });
+    session.begin({ type: "marquee", width: 0 });
+    session.begin({ type: "drag", dx: 0 });
+    expect(session.cancel("lost-capture")).toEqual({ type: "drag", dx: 0 });
+    expect(events).toEqual([
+      "preview:drag",
+      "commit:drag",
+      "cancel:marquee:superseded",
+      "cancel:drag:lost-capture",
+    ]);
+  });
+});
 
 describe("pointerSelect", () => {
   test("maps conventional modifiers to replace, extend, and toggle", () => {
@@ -58,6 +172,29 @@ describe("pointerSelect", () => {
       },
     });
     expect(operations).toEqual(["replace", "extend", "toggle", "toggle"]);
+  });
+});
+
+describe("editingCommandFromWebKeyboardStroke", () => {
+  test("projects supported Web strokes to editing commands", () => {
+    expect(editingCommandFromWebKeyboardStroke({
+      key: "ArrowDown",
+      shiftKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    })).toEqual({ type: "move", direction: "down", operation: "replace" });
+    expect(editingCommandFromWebKeyboardStroke({
+      key: "z",
+      shiftKey: false,
+      metaKey: true,
+      ctrlKey: false,
+    })).toEqual({ type: "undo" });
+    expect(editingCommandFromWebKeyboardStroke({
+      key: "Escape",
+      shiftKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    })).toBeNull();
   });
 });
 

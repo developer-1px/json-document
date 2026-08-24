@@ -1,22 +1,21 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
+import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   createRichTextEditor,
   type RichTextDocument,
-  type RichTextEditor,
-  type RichTextNode,
   type RichTextPoint,
-  type RichTextText,
 } from "@interactive-os/json-document-rich-text";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
+import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands } from "../../shared/widget-binding";
 import { richTextRecipe } from "./rich-text-styles";
+import { collectRichTextDemoNodeIds, findRichTextDemoTextNode } from "./richTextDemoQuery";
+import { useRichTextDemoCommands } from "./useRichTextDemoCommands";
 
 const richTextStyles = richTextRecipe();
 
@@ -107,8 +106,6 @@ const initialDocument: RichTextDocument = {
 
 export function RichTextDemoRoute() {
   const [editor] = useState(() => createRichTextEditor({ document: createJSONDocument(initialDocument) }));
-  const [lastPatch, setLastPatch] = useState<ReadonlyArray<JSONPatchOperation>>([]);
-  const [lastAction, setLastAction] = useState("selection.ready");
   const document = editor.snapshot.value as RichTextDocument;
   const primary = editor.snapshot.selection.primaryIndex === null
     ? null
@@ -121,7 +118,7 @@ export function RichTextDemoRoute() {
     focusKey: focus?.nodeId ?? null,
     textOffset: focus?.kind === "text" ? focus.offset : null,
     onSelect: (nodeId) => {
-      const text = findTextNode(document, nodeId);
+      const text = findRichTextDemoTextNode(document, nodeId);
       const point: RichTextPoint = text
         ? { kind: "text", nodeId, offset: 0, affinity: "forward" }
         : { kind: "child", nodeId, offset: 0, affinity: "forward" };
@@ -132,69 +129,19 @@ export function RichTextDemoRoute() {
     },
   });
   const snapshot = editing.snapshot;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
-  const onSurfaceAction = useCallback((action: string, result?: ReturnType<RichTextEditor["dispatch"]>) => {
-    setLastAction(action);
-    if (result?.ok && result.change) setLastPatch(result.change.applied);
-  }, []);
-
-  function remember(action: string, result: ReturnType<RichTextEditor["dispatch"]>) {
-    setLastAction(result.ok ? action : result.code);
-    if (result.ok && result.change) setLastPatch(result.change.applied);
-    return result;
-  }
-
-  function runHistory(direction: "undo" | "redo") {
-    const result = direction === "undo" ? editor.undo() : editor.redo();
-    setLastAction(result.ok ? direction : result.code);
-    if (result.ok && result.change) setLastPatch(result.change.applied);
-  }
-
-  function applySampleIntent() {
-    const text = findTextNode(snapshot.value as RichTextDocument, "text-editable");
-    if (!text) return setLastAction("rich-text.point-not-found");
-    const point: RichTextPoint = {
-      kind: "text",
-      nodeId: text.id,
-      offset: text.text.length,
-      affinity: "forward",
-    };
-    editor.dispatch({
-      type: "selection.set",
-      selection: { kind: "range", ranges: [{ anchor: point, focus: point }], primaryIndex: 0 },
-    });
-    remember("text.insert", editor.dispatch({ type: "text.insert", text: " ✓" }));
-  }
-
-  function selectText(nodeId: string, from: number, to: number) {
-    const anchor: RichTextPoint = { kind: "text", nodeId, offset: from, affinity: "forward" };
-    const focus: RichTextPoint = { kind: "text", nodeId, offset: to, affinity: "forward" };
-    editor.dispatch({ type: "selection.set", selection: { kind: "range", ranges: [{ anchor, focus }], primaryIndex: 0 } });
-  }
-
-  function toggleStrong() {
-    selectText("text-editable", 0, 3);
-    remember("mark.toggle:strong", editor.dispatch({ type: "mark.toggle", mark: { type: "strong" } }));
-  }
-
-  function setHeading() {
-    selectText("text-editable", 0, 0);
-    remember("block.set-type:heading", editor.dispatch({ type: "block.set-type", nodeType: "heading", attrs: { level: 3 } }));
-  }
-
-  function insertHardBreak() {
-    remember("node.insert:hardBreak", editor.dispatch({
-      type: "node.insert",
-      point: { kind: "child", nodeId: "paragraph-2", offset: 1, affinity: "forward" },
-      node: { id: "demo-hard-break", type: "hardBreak" },
-    }));
-  }
-
-  function updateCodeAttrs() {
-    remember("node.set-attrs", editor.dispatch({ type: "node.set-attrs", nodeId: "code-block-1", attrs: { language: "typescript" } }));
-  }
-
+  const {
+    applySampleIntent,
+    insertHardBreak,
+    lastAction,
+    lastPatch,
+    onSurfaceAction,
+    runHistory,
+    setHeading,
+    toggleStrong,
+    updateCodeAttrs,
+  } = useRichTextDemoCommands(editor);
   return (
     <DemoPage documentation={(
       <PageHeader
@@ -236,7 +183,7 @@ export function RichTextDemoRoute() {
           />
           <ol className="mt-3 m-0 grid list-none gap-1 p-0" aria-label="Rich Text blocks">
             {(snapshot.value as RichTextDocument).content.map((block) => {
-              const ids = collectNodeIds(block);
+              const ids = collectRichTextDemoNodeIds(block);
               const selected = ids.some((id) => editing.getItem(id).getIsSelected());
               const focused = ids.some((id) => editing.getItem(id).getIsFocus());
               const offset = ids
@@ -291,20 +238,4 @@ export function RichTextDemoRoute() {
       </div>
     </DemoPage>
   );
-}
-
-function findTextNode(node: RichTextDocument | RichTextNode, id: string): RichTextText | null {
-  if (node.type === "text") return node.id === id ? node as RichTextText : null;
-  if (!("content" in node) || !Array.isArray(node.content)) return null;
-  for (const child of node.content) {
-    const found = findTextNode(child as RichTextNode, id);
-    if (found) return found;
-  }
-  return null;
-}
-
-function collectNodeIds(node: RichTextDocument | RichTextNode): string[] {
-  const ids = [node.id];
-  if (!("content" in node) || !Array.isArray(node.content)) return ids;
-  return ids.concat(node.content.flatMap((child) => collectNodeIds(child as RichTextNode)));
 }

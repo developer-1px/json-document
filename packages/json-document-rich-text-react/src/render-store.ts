@@ -6,6 +6,7 @@ import {
   type RichTextEditor,
   type RichTextNode,
 } from "@interactive-os/json-document-rich-text";
+import { recordRenderStoreBlockScan } from "./render-instrument.js";
 
 export interface RichTextRenderStore {
   getBlockIds(): ReadonlyArray<string>;
@@ -16,12 +17,6 @@ export interface RichTextRenderStore {
 }
 
 const stores = new WeakMap<RichTextEditor, RichTextRenderStore>();
-
-let lastBlockScan = 0;
-
-export function lastRenderStoreBlockScan(): number {
-  return lastBlockScan;
-}
 
 export function richTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
   const cached = stores.get(editor);
@@ -46,12 +41,12 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
     const recorded = appliedOperationsFor(next);
     const applied = recorded === null ? null : relativeOperations(recorded, pointer);
     if (applied !== null && !contentStructureChanged(applied)) {
-      lastBlockScan = applied.length;
+      recordRenderStoreBlockScan(applied.length);
       for (const operation of applied) notifyAppliedPath(next, operation.path, nodeListeners);
       return;
     }
     const nextIds = next.content.map((node) => node.id);
-    lastBlockScan = next.content.length;
+    recordRenderStoreBlockScan(next.content.length);
     const structureChanged = nextIds.length !== blockIds.length
       || nextIds.some((id, index) => id !== blockIds[index]);
     const previousBlocks = previous.content;

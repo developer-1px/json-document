@@ -1,14 +1,14 @@
-import { useRef, useState, type ClipboardEvent } from "react";
+import { useState } from "react";
 import {
   createDocumentEditor,
+  documentSelectionFocus,
   type BlockDocument,
   type DocumentEditor,
 } from "@interactive-os/json-document-editing";
-import { useEditing, useRestoreTextCursor } from "@interactive-os/json-document-react";
+import { DocumentTextControl, useEditing } from "@interactive-os/json-document-react";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   documentClipboardCodec,
-  textInputFromControl,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "../../../shared/ui/interactive";
@@ -25,14 +25,17 @@ const initialDocument: BlockDocument = {
 
 export function ClipboardAdapterLab() {
   const [editor] = useState<DocumentEditor>(() => createDocumentEditor(initialDocument));
-  const [clipboard] = useState(() => createWebClipboardBinding({
+  const [announcement, setAnnouncement] = useState("Click a block, then use Mod+C and Mod+V inside this surface");
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: documentClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+    onResult: (result) => setAnnouncement(result.ok
+      ? `${result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted"} ${result.payload.blocks.length} structured block`
+      : result.code),
   }));
-  const [announcement, setAnnouncement] = useState("Click a block, then use Mod+C and Mod+V inside this surface");
-  const focus = editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus;
+  const focus = documentSelectionFocus(editor.snapshot.selection);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
@@ -46,28 +49,11 @@ export function ClipboardAdapterLab() {
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
 
-  function handleCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = clipboard.copy(event);
-    setAnnouncement(result.ok ? `Copied ${result.payload.blocks.length} structured block` : result.code);
-  }
-
-  function handlePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = clipboard.paste(event);
-    setAnnouncement(result.ok ? `Pasted ${result.payload.blocks.length} structured block` : result.code);
-  }
-
-  function handleCut(event: ClipboardEvent<HTMLElement>) {
-    const result = clipboard.cut(event);
-    setAnnouncement(result.ok ? `Cut ${result.payload.blocks.length} structured block` : result.code);
-  }
-
   return (
     <section
       aria-label="Clipboard adapter surface"
       tabIndex={0}
-      onCopy={handleCopy}
-      onCut={handleCut}
-      onPaste={handlePaste}
+      {...clipboardSurface}
       className={classes("p-4", ui.surface.raised, ui.state.focus)}
     >
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
@@ -89,14 +75,16 @@ export function ClipboardAdapterLab() {
             >
               <label className={classes("grid gap-2", ui.text.label)}>
                 {block.id}
-                <ClipboardTextControl
-                  label={`${block.id} text`}
+                <DocumentTextControl
+                  aria-label={`${block.id} text`}
                   text={block.text}
                   offset={item.getTextOffset()}
-                  onChange={(input) => {
+                  onCaretRange={() => undefined}
+                  onTextInput={(input) => {
                     const result = editor.dispatch({ type: "text.replace", blockId: block.id, ...input });
                     setAnnouncement(result.ok ? "Native text input committed" : result.code);
                   }}
+                  className={classes("min-h-20 w-full", ui.field.control)}
                 />
               </label>
             </SelectableItem>
@@ -110,26 +98,5 @@ export function ClipboardAdapterLab() {
         ]} />
       </div>
     </section>
-  );
-}
-
-function ClipboardTextControl(props: {
-  readonly label: string;
-  readonly text: string;
-  readonly offset: number | null;
-  readonly onChange: (input: { readonly text: string; readonly offset: number }) => void;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  useRestoreTextCursor(ref, props.offset);
-  return (
-    <textarea
-      ref={ref}
-      aria-label={props.label}
-      key={props.text}
-      defaultValue={props.text}
-      onClick={(event) => event.stopPropagation()}
-      onChange={(event) => props.onChange(textInputFromControl(event))}
-      className={classes("min-h-20 w-full", ui.field.control)}
-    />
   );
 }

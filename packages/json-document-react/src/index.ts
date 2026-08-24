@@ -8,6 +8,13 @@ import {
 
 export type { EditingSnapshot } from "@interactive-os/json-document-editing";
 export {
+  useEditingObservation,
+  type EditingObservation,
+  type EditingObservedResult,
+  type EditingOperationResult,
+  type EditingResultMessage,
+} from "./editing-observation.js";
+export {
   useEditingSnapshot,
   type EditingSnapshotSource,
 } from "./editing-snapshot.js";
@@ -29,6 +36,25 @@ export {
   type TextCursorControl,
   type UseEditingOptions,
 } from "./use-editing.js";
+export {
+  DocumentTextControl,
+  useDocumentTextControl,
+  type DocumentTextControlBinding,
+  type DocumentTextControlProps,
+  type UseDocumentTextControlOptions,
+} from "./use-document-text-control.js";
+export {
+  useGridEditing,
+  type GridEditing,
+  type GridEditingKeyboardOptions,
+  type UseGridEditingOptions,
+} from "./use-grid-editing.js";
+export {
+  useTreeEditing,
+  type TreeEditing,
+  type TreeEditingKeyboardOptions,
+  type UseTreeEditingOptions,
+} from "./use-tree-editing.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(

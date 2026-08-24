@@ -34,6 +34,25 @@ export function gridTopology(
   return { rowIds, columnIds };
 }
 
+/** Encodes one grid point as a reversible key for selection and rendering adapters. */
+export function gridPointKey(point: GridPoint): string {
+  return JSON.stringify([point.rowId, point.columnId]);
+}
+
+/** Decodes a key created by {@link gridPointKey}. */
+export function gridPointFromKey(key: string): GridPoint | null {
+  try {
+    const value: unknown = JSON.parse(key);
+    if (!Array.isArray(value) || value.length !== 2) return null;
+    const [rowId, columnId] = value;
+    return typeof rowId === "string" && typeof columnId === "string"
+      ? { rowId, columnId }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function lineInterval(
   topology: LineTopology,
   anchorId: string,

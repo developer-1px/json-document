@@ -36,3 +36,9 @@ function onKeyDown(event: KeyboardEvent) {
 - 짧은 시간 안에만 이어 붙임
 
 근거: [APG Listbox type-ahead](https://www.w3.org/WAI/ARIA/apg/patterns/listbox/)
+
+## Session API
+
+`createTypeaheadSession({ onMatch })`은 buffer와 마지막 입력 시각을 소유합니다.
+`handle(input)`이 문자를 소비하면 `true`를 반환하고 일치한 item key를
+`onMatch`로 보냅니다. `reset()`은 Escape나 surface 종료 시 buffer를 비웁니다.

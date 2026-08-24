@@ -19,14 +19,14 @@ import {
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
   activateAffordance,
-  historyAffordance,
-  pointerSelect,
   pressAffordance,
   type PressAffordanceState,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -53,7 +53,7 @@ export function ToolbarWidgetRoute() {
     keyboard: {
       resolve: (stroke) => {
         keyboard.resolve(stroke);
-        return editingCommandFromStroke(stroke);
+        return editingCommandFromWebKeyboardStroke(stroke);
       },
       focusKey: () => editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? undefined,
       neighbor: (key, command) => command.type === "move"
@@ -125,12 +125,7 @@ export function ToolbarWidgetRoute() {
               })}
               onClick={(event) => {
                 listboxRef.current?.focus();
-                applyAffordance(pointerSelect(event), {
-                  hand: (hand) => {
-                    if (hand.type !== "select") return;
-                    editor.dispatch({ type: "selection.set", itemId: item.id, mode: hand.operation });
-                  },
-                });
+                editing.getItem(item.id).getPressHandler()(event);
               }}
             >
               {item.label}

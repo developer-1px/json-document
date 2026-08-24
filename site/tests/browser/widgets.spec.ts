@@ -303,6 +303,15 @@ test("Board modifier click toggles cards and drag moves a card", async ({ page }
     { id: "doing", cardIds: ["draw"] },
     { id: "done", cardIds: ["write"] },
   ]);
+
+  await page.getByRole("option", { name: "Draw the board" }).dragTo(
+    page.getByRole("option", { name: "Review copy" }),
+  );
+  expect(await json(page, "widget-board-columns")).toEqual([
+    { id: "todo", cardIds: ["draw", "review"] },
+    { id: "doing", cardIds: [] },
+    { id: "done", cardIds: ["write"] },
+  ]);
 });
 
 test("Canvas escape cancels an in-progress marquee", async ({ page }) => {
