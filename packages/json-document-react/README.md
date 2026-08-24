@@ -30,6 +30,11 @@ the keys. Hosts still own markup, class names, and genre Intent
 translation. `useRestoreTextCursor` writes a text offset onto an input or
 textarea.
 
+`useEditingObservation(initialAnnouncement)` records the last Intent and
+result while leaving announcement wording in the Host. Its `dispatch`, `run`,
+`observe`, and `observeResult` doors let demos and inspectors expose the same
+editing lifecycle without reimplementing local React state.
+
 The Connector does not render product chrome or force DOM attributes. Selection
 marking and keyboard policy stay in the host; the hook only answers selection
 and turns press/key events into the host's `onSelect` and command doors.

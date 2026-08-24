@@ -6,7 +6,7 @@ import {
   type OrderDocument,
   type OrderIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   lineBoundary,
@@ -45,8 +45,7 @@ export function OrderDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<OrderIntent | null>(null);
+  const observation = useEditingObservation<OrderIntent>("Ready");
   const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const [focusId, setFocusId] = useState(initialOrder.items[0]?.id ?? null);
   const [renaming, setRenaming] = useState<{ readonly id: string; readonly draft: string } | null>(null);
@@ -54,10 +53,7 @@ export function OrderDemoRoute() {
   const orderRef = useRef<HTMLOListElement>(null);
 
   function run(intent: OrderIntent, message: string) {
-    const result = editor.dispatch(intent);
-    setLastIntent(intent);
-    setAnnouncement(result.ok ? message : result.code);
-    return result;
+    return observation.dispatch(intent, editor.dispatch, message);
   }
 
   const ids = () => (editor.snapshot.value as OrderDocument).items.map((item) => item.id);
@@ -79,11 +75,11 @@ export function OrderDemoRoute() {
       },
       onUndo: () => {
         editor.undo();
-        setAnnouncement("Undone");
+        observation.announce("Undone");
       },
       onRedo: () => {
         editor.redo();
-        setAnnouncement("Redone");
+        observation.announce("Redone");
       },
     },
   });
@@ -93,16 +89,16 @@ export function OrderDemoRoute() {
 
   function copySelection() {
     const next = editor.copy();
-    if (!next) return setAnnouncement("Select an item first");
+    if (!next) return observation.announce("Select an item first");
     setClipboard(next);
-    setAnnouncement(`Copied ${next.items.length} item${next.items.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${next.items.length} item${next.items.length === 1 ? "" : "s"}`);
   }
 
   function cutSelection() {
     const result = editor.cut();
-    if (!result) return setAnnouncement("Select an item first");
+    if (!result) return observation.announce("Select an item first");
     setClipboard(result.clipboard);
-    setAnnouncement(`Cut ${result.clipboard.items.length} item${result.clipboard.items.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.clipboard.items.length} item${result.clipboard.items.length === 1 ? "" : "s"}`);
   }
 
   const focusKey = focusId;
@@ -203,21 +199,21 @@ export function OrderDemoRoute() {
 
   function handleNativeCopy(event: ClipboardEvent<HTMLOListElement>) {
     const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCut(event: ClipboardEvent<HTMLOListElement>) {
     const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`);
   }
 
   function handleNativePaste(event: ClipboardEvent<HTMLOListElement>) {
     const result = webClipboard.paste(event);
-    setAnnouncement(result.ok
+    observation.announce(result.ok
       ? `Pasted ${result.payload.items.length} structured item${result.payload.items.length === 1 ? "" : "s"}`
       : result.code);
   }
@@ -230,7 +226,7 @@ export function OrderDemoRoute() {
         aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedItemIds.length} selected · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
           </div>
         )}
       >
@@ -255,14 +251,14 @@ export function OrderDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(
           <Inspector placement="inline" items={[
             { label: "Canonical JSON", value: snapshot.value, testId: "order-demo-document", size: "tall" },
-            { label: "intent", value: lastIntent, testId: "order-demo-intent", size: "compact" },
+            { label: "intent", value: observation.lastIntent, testId: "order-demo-intent", size: "compact" },
             { label: "selection", value: snapshot.selection, testId: "order-demo-selection", size: "compact" },
           ]} />
         )}

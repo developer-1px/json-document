@@ -76,7 +76,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual([
       "Overview",
-      "React",
+      "React Reference",
       "React Hook Form",
       "Ajv",
       "Zod",

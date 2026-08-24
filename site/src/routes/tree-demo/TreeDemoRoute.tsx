@@ -8,7 +8,7 @@ import {
   type TreeNode,
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   lineBoundary,
@@ -41,8 +41,7 @@ export function TreeDemoRoute() {
   const [editor] = useState(() => createTreeEditor(initialTree));
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set(["fruit", "veg"]));
   const [clipboard, setClipboard] = useState<TreeClipboard | null>(null);
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<TreeIntent | null>(null);
+  const observation = useEditingObservation<TreeIntent>("Ready");
   const topology = useMemo(
     () => visibleTopology((editor.snapshot.value as TreeDocument).nodes, expanded),
     [editor.snapshot.value, expanded],
@@ -61,10 +60,7 @@ export function TreeDemoRoute() {
   }));
 
   function run(intent: TreeIntent, message: string) {
-    const result = editor.dispatch(intent);
-    setLastIntent(intent);
-    setAnnouncement(result.ok ? message : result.code);
-    return result;
+    return observation.dispatch(intent, editor.dispatch, message);
   }
 
   const editing = useEditing({
@@ -115,11 +111,11 @@ export function TreeDemoRoute() {
       },
       onUndo: () => {
         editor.undo();
-        setAnnouncement("Undone");
+        observation.announce("Undone");
       },
       onRedo: () => {
         editor.redo();
-        setAnnouncement("Redone");
+        observation.announce("Redone");
       },
     },
   });
@@ -129,35 +125,35 @@ export function TreeDemoRoute() {
 
   function copySelection() {
     const next = editor.copy(topology);
-    if (!next) return setAnnouncement("Select a visible node first");
+    if (!next) return observation.announce("Select a visible node first");
     setClipboard(next);
-    setAnnouncement(`Copied ${next.nodes.length} node${next.nodes.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${next.nodes.length} node${next.nodes.length === 1 ? "" : "s"}`);
   }
 
   function cutSelection() {
     const result = editor.cut(topology);
-    if (!result) return setAnnouncement("Select a visible node first");
+    if (!result) return observation.announce("Select a visible node first");
     setClipboard(result.clipboard);
-    setAnnouncement(`Cut ${result.clipboard.nodes.length} node${result.clipboard.nodes.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.clipboard.nodes.length} node${result.clipboard.nodes.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCopy(event: ClipboardEvent<HTMLUListElement>) {
     const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCut(event: ClipboardEvent<HTMLUListElement>) {
     const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`);
   }
 
   function handleNativePaste(event: ClipboardEvent<HTMLUListElement>) {
     const result = webClipboard.paste(event);
-    setAnnouncement(result.ok
+    observation.announce(result.ok
       ? `Pasted ${result.payload.nodes.length} structured node${result.payload.nodes.length === 1 ? "" : "s"}`
       : result.code);
   }
@@ -179,7 +175,7 @@ export function TreeDemoRoute() {
         aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedNodeIdsIn(topology).length} selected · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
           </div>
         )}
       >
@@ -204,8 +200,8 @@ export function TreeDemoRoute() {
             </ActionButton>
             <ActionButton onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}>Delete</ActionButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); setAnnouncement("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); setAnnouncement("Redone"); }}>Redo</ActionButton>
+            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>Undo</ActionButton>
+            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>Redo</ActionButton>
           </>
         )}
         inspector={(

@@ -17,7 +17,7 @@ import {
   type DatabaseSort,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   activateAffordance,
   applyAffordance,
@@ -72,9 +72,7 @@ export function DatabaseTableDemo() {
   const [menu, setMenu] = useState<HeaderMenu | null>(null);
   const headerDrag = useRef<HeaderDrag | null>(null);
   const headerResize = useRef<HeaderResize | null>(null);
-  const [announcement, setAnnouncement] = useState("Database ready");
-  const [lastIntent, setLastIntent] = useState<DatabaseIntent | null>(null);
-  const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const observation = useEditingObservation<DatabaseIntent>("Database ready");
   const nextRecord = useRef(5);
   const document = editor.snapshot.value as DatabaseDocument;
   const view = document.views[0]!;
@@ -89,15 +87,11 @@ export function DatabaseTableDemo() {
 
   function dispatchIntent(intent: DatabaseIntent) {
     const result: EditingResult<DatabaseSelection> = editor.dispatch(intent);
-    setLastIntent(intent);
-    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
-    return result;
+    return observation.observe(intent, result);
   }
 
   function run(action: () => { readonly ok: boolean }, message: string) {
-    const result = action();
-    setAnnouncement(result.ok ? message : "That action is not available");
-    return result;
+    return observation.run(action, message, "That action is not available");
   }
 
   const focus = editor.snapshot.selection.focus;
@@ -317,7 +311,7 @@ export function DatabaseTableDemo() {
           <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
           <ActionButton disabled={commands.undo.disabled} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
           <ActionButton disabled={commands.redo.disabled} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>
-          <output aria-live="polite" className={classes("ml-auto", ui.text.meta)}>{announcement}</output>
+          <output aria-live="polite" className={classes("ml-auto", ui.text.meta)}>{observation.announcement}</output>
           {dragPreview ? <output data-testid="property-drag-preview" className={ui.database.lease}>Local drag preview · {dragPreview.join(" → ")}</output> : null}
           {lease ? (
             <output data-testid="native-text-lease" className={ui.database.lease}>
@@ -328,8 +322,8 @@ export function DatabaseTableDemo() {
       )}
       inspector={(
         <Inspector placement="inline" label="Inspect database state" items={[
-          { label: "intent", meta: lastIntent ? lastIntent.type : "dispatch only", value: lastIntent, testId: "database-intent-json" },
-          { label: "result", meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet", value: lastResult, testId: "database-result-json" },
+          { label: "intent", meta: observation.lastIntent ? observation.lastIntent.type : "dispatch only", value: observation.lastIntent, testId: "database-intent-json" },
+          { label: "result", meta: observation.lastResult?.ok === false ? observation.lastResult.code : observation.lastResult?.ok ? "ok" : "none yet", value: observation.lastResult, testId: "database-result-json" },
           { label: "Persistent Table view", value: view, testId: "database-view-json" },
           { label: "Structural selection", value: snapshot.selection, testId: "database-selection-json", size: "compact" },
           { label: "Canonical database", signal: `revision ${snapshot.revision}`, value: document, testId: "database-document-json" },

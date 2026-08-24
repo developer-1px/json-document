@@ -44,6 +44,7 @@ object 그림이고, textarea 캐럿은 text 그림입니다. 두 질의를 하�
 | `useJSONDocumentValue(document)` | 같은 값 구독 | 하위 진입점이 필요할 때 |
 | `useEditingSnapshot(source)` | `EditingSnapshot` | 값·선택·revision·undo 가능 여부만 그릴 때 |
 | `useEditing(options)` | snapshot + 항목 질의 + 키 입력 | 범위·커서·글자 위치를 화면에 붙일 때 |
+| `useEditingObservation(initialAnnouncement)` | 마지막 Intent·결과·announcement | 실행 결과를 inspector와 접근성 피드백에 함께 투영할 때 |
 | `useRestoreTextCursor(ref, offset)` | 없음. 캐럿만 맞춤 | 모델 offset을 input/textarea에 되돌릴 때 |
 
 `useEditing`은 안에서 `useEditingSnapshot`을 호출합니다. 값과 선택을 같이
@@ -430,10 +431,15 @@ Sheet Intent 이름을 알지 않습니다. KeyboardEvent를 command로 바꾸�
 [Adapter](adapters.md)입니다. 값 구독만 필요하면 `useReactConnector`와
 `useEditingSnapshot`으로 충분합니다.
 
-## API
+## API usage
 
 패키지 `@interactive-os/json-document-react`가 선택·커서 질의로 공개하는
 함수입니다.
+
+정확한 package export와 `useEditingObservation` 계약은
+[React Reference](connector-react.md)가 소유합니다.
+
+### 선택·커서 usage
 
 ```ts
 function useEditing<Selection extends JSONValue, Key extends string = string>(

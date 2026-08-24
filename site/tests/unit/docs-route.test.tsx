@@ -43,6 +43,11 @@ describe("documentation routes", () => {
     await waitFor(() => expect(document.title).toBe("Connector Docs - json-document"), { timeout: 10000 });
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" }, { timeout: 10000 })).toBeTruthy();
 
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "React Reference" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "React Connector" }, { timeout: 10000 })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "useEditingObservation" })).toBeTruthy();
+    expect(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Editing guide" })).toBeTruthy();
+
     await user.click(nav.getByRole("button", { name: "Editing" }));
     await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Topology" }));
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));

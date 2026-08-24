@@ -1,4 +1,5 @@
 import type { CodeLanguage } from "../ui/code-tokens";
+import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -11,7 +12,6 @@ const sourceModules = import.meta.glob<string>(
     "/src/routes/**/*.{ts,tsx}",
     "/src/shared/**/*.{ts,tsx}",
     "!/src/shared/ui/**",
-    "!/src/shared/demo-workbench/**",
     "!/src/shared/widget-binding/**",
   ],
   { import: "default", query: "?raw" },
@@ -23,6 +23,16 @@ const excludedSources = new Set([
   "routes/connectors/ConnectorDemoPage.tsx",
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
+const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
+]);
+const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useEditingObservation",
+    sourcePath: "packages/json-document-react/src/editing-observation.ts",
+  },
+] as const;
 
 export function demoEntrySource(path: string): DemoSourceFile {
   return sourceFile(path);
@@ -49,6 +59,11 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
       const resolved = resolveSource(path, specifier);
       if (resolved !== undefined) await visit(resolved);
     }
+    for (const usage of registeredPublicUsages) {
+      if (source.includes(usage.packageName) && source.includes(usage.symbol)) {
+        await visit(usage.sourcePath);
+      }
+    }
   }
 
   await visit(entry);
@@ -56,7 +71,9 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
 }
 
 function sourceFile(path: string): DemoSourceFile {
-  if (sourceModules[`/src/${path}`] === undefined) throw new Error(`Unknown demo source: ${path}`);
+  if (sourceModules[`/src/${path}`] === undefined && !registeredUsageSources.has(path)) {
+    throw new Error(`Unknown demo source: ${path}`);
+  }
   return {
     path,
     language: path.endsWith(".tsx") ? "tsx" : "typescript",
@@ -65,6 +82,7 @@ function sourceFile(path: string): DemoSourceFile {
 }
 
 function isExcluded(path: string): boolean {
+  if (registeredUsageSources.has(path)) return false;
   return path.startsWith("app/")
     || path.startsWith("shared/ui/")
     || path.startsWith("shared/demo-workbench/")
@@ -101,6 +119,8 @@ function loadSource(path: string): Promise<string> {
 }
 
 function sourceLoader(path: string): () => Promise<string> {
+  const registered = registeredUsageSources.get(path);
+  if (registered !== undefined) return async () => registered;
   const load = sourceModules[`/src/${path}`];
   if (load === undefined) throw new Error(`Unknown demo source: ${path}`);
   return load;

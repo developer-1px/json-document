@@ -50,11 +50,16 @@ describe("Demo definition and source discovery", () => {
 
   test("loads actual full demo files without following package or site chrome imports", async () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
-    expect(document.map((file) => file.path)).toEqual(["routes/document-demo/DocumentDemoRoute.tsx"]);
+    expect(document.map((file) => file.path)).toEqual([
+      "routes/document-demo/DocumentDemoRoute.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+    ]);
     const source = await document[0]!.load();
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
-    expect(document.some((file) => file.path.includes("packages/"))).toBe(false);
+    expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
+      "packages/json-document-react/src/editing-observation.ts",
+    ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
   });
 
@@ -63,6 +68,7 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseDemoRoute.tsx",
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
+      "packages/json-document-react/src/editing-observation.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",

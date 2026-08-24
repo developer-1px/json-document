@@ -60,7 +60,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
     "Overview",
-    "React",
+    "React Reference",
     "React Hook Form",
     "Ajv",
     "Zod",
@@ -215,7 +215,7 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
   await page.goto("/docs/connector-zod-validate");
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
     "Overview",
-    "React",
+    "React Reference",
     "React Hook Form",
     "Ajv",
     "Zod",
@@ -501,7 +501,7 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
 
   const currentLink = page.getByRole("navigation", { name: "Site navigation" })
     .getByRole("group", { name: "Connector" })
-    .getByRole("link", { name: "React", exact: true });
+    .getByRole("link", { name: "React Reference", exact: true });
   expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
 
   await page.goto("/docs/api");

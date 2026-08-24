@@ -9,7 +9,7 @@ import {
   type DocumentSelection,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditing, useRestoreTextCursor } from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing, useEditingObservation, useRestoreTextCursor } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   documentClipboardCodec,
@@ -48,16 +48,12 @@ export function DocumentDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const [announcement, setAnnouncement] = useState("Ready");
-  const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
-  const [lastResult, setLastResult] = useState<{ readonly ok: true } | { readonly ok: false; readonly code: string } | null>(null);
+  const observation = useEditingObservation<DocumentIntent>("Ready");
   const [lastClickCount, setLastClickCount] = useState(0);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
   function remember(intent: DocumentIntent, result: EditingResult<DocumentSelection>) {
-    setLastIntent(intent);
-    setLastResult(result.ok ? { ok: true } : { ok: false, code: result.code });
-    return result;
+    return observation.observe(intent, result);
   }
 
   function dispatchIntent(intent: DocumentIntent) {
@@ -65,9 +61,7 @@ export function DocumentDemoRoute() {
   }
 
   function run(action: () => { readonly ok: boolean }, message: string) {
-    const result = action();
-    setAnnouncement(result.ok ? message : "That action is not available here");
-    return result;
+    return observation.run(action, message, "That action is not available here");
   }
 
   const focus = documentFocus(editor);
@@ -119,46 +113,45 @@ export function DocumentDemoRoute() {
 
   function copySelection() {
     const next = editor.copy();
-    if (!next) return setAnnouncement("Select a block first");
+    if (!next) return observation.announce("Select a block first");
     setClipboard(next);
     void navigator.clipboard?.writeText(next.text).catch(() => undefined);
-    setAnnouncement(`Copied ${next.blocks.length} block${next.blocks.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${next.blocks.length} block${next.blocks.length === 1 ? "" : "s"}`);
   }
 
   function cutSelection() {
     const result = editor.cut();
-    if (!result) return setAnnouncement("Select a block first");
+    if (!result) return observation.announce("Select a block first");
     setClipboard(result.clipboard);
     void navigator.clipboard?.writeText(result.clipboard.text).catch(() => undefined);
-    setAnnouncement(`Cut ${result.clipboard.blocks.length} block${result.clipboard.blocks.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.clipboard.blocks.length} block${result.clipboard.blocks.length === 1 ? "" : "s"}`);
   }
 
   function pasteSelection() {
-    if (!clipboard) return setAnnouncement("Copy or cut blocks first");
+    if (!clipboard) return observation.announce("Copy or cut blocks first");
     run(() => dispatchIntent({ type: "clipboard.paste", clipboard }), `Pasted ${clipboard.blocks.length} block${clipboard.blocks.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCopy(event: ClipboardEvent<HTMLDivElement>) {
     const result = webClipboard.copy(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Copied ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
+    observation.announce(`Copied ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
   }
 
   function handleNativeCut(event: ClipboardEvent<HTMLDivElement>) {
     const result = webClipboard.cut(event);
-    if (!result.ok) return setAnnouncement(result.code);
+    if (!result.ok) return observation.announce(result.code);
     setClipboard(result.payload);
-    setAnnouncement(`Cut ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
+    observation.announce(`Cut ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`);
   }
 
   function handleNativePaste(event: ClipboardEvent<HTMLDivElement>) {
     const result = webClipboard.paste(event);
-    if (result.ok) {
-      setLastIntent({ type: "clipboard.paste", clipboard: result.payload });
-      setLastResult({ ok: true });
+    if (result.ok && result.operation === "paste") {
+      observation.observe({ type: "clipboard.paste", clipboard: result.payload }, result.result);
     }
-    setAnnouncement(result.ok
+    observation.announce(result.ok
       ? `Pasted ${result.payload.blocks.length} structured block${result.payload.blocks.length === 1 ? "" : "s"}`
       : result.code);
   }
@@ -173,7 +166,7 @@ export function DocumentDemoRoute() {
           aside={(
           <div className={classes("text-right", ui.text.meta)}>
             <div>{editor.selectedBlockIds.length} selected · revision {snapshot.revision}</div>
-            <div aria-live="polite">{announcement}</div>
+            <div aria-live="polite">{observation.announcement}</div>
             <div data-testid="document-click-count">click count {lastClickCount}</div>
           </div>
           )}
@@ -209,15 +202,15 @@ export function DocumentDemoRoute() {
               },
               {
                 label: "intent",
-                meta: lastIntent ? lastIntent.type : "dispatch only",
-                value: lastIntent,
+                meta: observation.lastIntent ? observation.lastIntent.type : "dispatch only",
+                value: observation.lastIntent,
                 testId: "document-intent-json",
                 size: "compact",
               },
               {
                 label: "result",
-                meta: lastResult?.ok === false ? lastResult.code : lastResult?.ok ? "ok" : "none yet",
-                value: lastResult,
+                meta: observation.lastResult?.ok === false ? observation.lastResult.code : observation.lastResult?.ok ? "ok" : "none yet",
+                value: observation.lastResult,
                 testId: "document-result-json",
                 size: "compact",
               },
