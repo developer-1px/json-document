@@ -76,13 +76,12 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/initial-database.ts",
       "routes/database-demo/DatabasePropertyEditor.tsx",
       "routes/database-demo/useDatabaseTableHeaderInteractions.ts",
-      "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-editing/src/database.ts",
+      "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
-      "packages/json-document-web/src/pointer-session.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
