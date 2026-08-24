@@ -191,12 +191,12 @@
   },
   {
     "path": "/editing/rich-text",
-    "label": "Rich Text Lab",
+    "label": "Rich Text vertical",
     "title": "Rich Text Lab - json-document",
-    "description": "Draft Official Rich Text Schema가 JSONDocument, Selection, Topology와 Editing History를 통과하는 최소 수직 슬라이스를 검증합니다.",
+    "description": "versioned Rich Text domain이 JSON Document, Selection, Editing, Web와 React integration을 통과하는 reference vertical입니다.",
     "language": "ko",
     "navigationGroup": "Editing",
-    "sidebar": false
+    "sidebar": true
   },
   {
     "path": "/editors",

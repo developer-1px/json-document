@@ -7,5 +7,9 @@
 일반 JSON Patch 검사와 합치지 않습니다. 입력 전 상태를 잡고, 계획을 세우고,
 낡지 않았을 때만 적용합니다.
 
+Text profile은 base runtime과 History를 포함합니다. Text를 선택하면
+`document + replica + history + text`를 함께 얻으며, History 없는 병렬 runtime을
+별도로 조합하는 구조가 아닙니다.
+
 브라우저 입력창에 글자 소유를 잠시 맡기는 일은
 [Contenteditable lease](collaboration-lease.md)가 이어받습니다.

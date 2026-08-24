@@ -11,7 +11,29 @@ Editing의 로컬 History와는 다릅니다. 로컬 History는 한 편집기의
 손가락을 되돌립니다. Collaboration은 다른 참여자를 덮어쓰지 않고 한
 참여자의 기여를 끄거나 켭니다.
 
+협업 document를 장르 editor에 주입하면 값, Selection과 Intent 처리는 그대로
+재사용할 수 있습니다. 다만 Undo/Redo UI는 editor의 inverse-patch History가
+아니라 `runtime.history.undo()`와 `runtime.history.redo()`에 연결해야 actor-local
+selective undo가 유지됩니다.
+
+runtime은 병렬 기능 목록이 아니라 opt-in profile의 포함 관계를 갖습니다.
+
+```text
+CollaborationRuntime
+  document + replica
+        ↓ with history
+HistoryRuntime
+  document + replica + history
+        ↓ with text
+TextRuntime
+  document + replica + history + text
+```
+
+`epochId`와 `ruleset` identity는 모든 runtime의 전제입니다. checkpoint, restore,
+compaction은 그 identity 위에서 저장·복구·세대 전환을 수행하는 운영
+capability입니다.
+
 - [Replica](collaboration-replica.md): 한 참여자가 아는 인과 상태
-- [Lifecycle](collaboration-lifecycle.md): epoch, checkpoint, restore
+- [Lifecycle](collaboration-lifecycle.md): 필수 epoch identity와 선택적 checkpoint, restore, compaction
 - [Collaborative History](collaboration-history.md): 내 기여만 선택해 되돌리기
 - [Text](collaboration-text.md): 같이 쓰는 글자

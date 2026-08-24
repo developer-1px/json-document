@@ -60,6 +60,7 @@ describe("official site shell", () => {
       "Selection",
       "Clipboard",
       "History",
+      "Rich Text vertical",
     ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([

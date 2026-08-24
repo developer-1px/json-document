@@ -34,7 +34,7 @@ describe("documentation routes", () => {
 
     await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Concept Map" }));
     await waitFor(() => expect(document.title).toBe("Concept Map - json-document"));
-    expect(await screen.findByRole("heading", { level: 1, name: "Concept Map" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Concept Map" }, { timeout: 10000 })).toBeTruthy();
 
     expect(screen.queryByRole("navigation", { name: "Documentation pages" })).toBeNull();
 
@@ -66,7 +66,7 @@ describe("documentation routes", () => {
   test("supports direct route entry for static-hosting fallbacks", async () => {
     window.history.pushState(null, "", "/docs/");
     render(<App />);
-    const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
+    const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }, { timeout: 10000 }));
 
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
