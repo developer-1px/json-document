@@ -55,6 +55,18 @@ export type {
   WebPressInteraction,
   WebPressSource,
 } from "./press.js";
+export type {
+  WebDragDropCancelReason,
+  WebDragDropSession,
+  WebDragDropSessionOptions,
+} from "./drag-drop-session.js";
+export type {
+  WebPointerCaptureTarget,
+  WebPointerSession,
+  WebPointerSessionCancelReason,
+  WebPointerSessionOptions,
+  WebPointerSessionSnapshot,
+} from "./pointer-session.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
 export type {
   WebGridCellAddressAttributes,
