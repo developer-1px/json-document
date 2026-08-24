@@ -48,6 +48,10 @@ useEditing({
 `historyAffordance(snapshot).hand` exposes the typed Undo/Redo availability map
 directly. The editing runtime still owns history state and execution.
 
+`createTypeaheadSession`, `createRenameSession`, and `createLineFocusSession`
+own the reusable state that spans several events. Product selection and rename
+Intents remain callbacks supplied by the host.
+
 `createBoardDragSession` owns the input-agnostic active item, drop-target
 preview, commit, and cancel lifecycle for Board Hands. Web pointer and HTML
 Drag and Drop sessions feed it; Hosts still resolve targets and dispatch the

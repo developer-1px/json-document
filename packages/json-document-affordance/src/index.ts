@@ -42,6 +42,19 @@ export type {
   HistoryAffordanceResult,
 } from "./history.js";
 export { applyAffordance, commitAffordance } from "./result.js";
+export {
+  createLineFocusSession,
+  createRenameSession,
+  createTypeaheadSession,
+} from "./session.js";
+export type {
+  LineFocusSession,
+  RenameSession,
+  RenameSessionSnapshot,
+  TypeaheadSession,
+  TypeaheadSessionInput,
+  TypeaheadSessionSnapshot,
+} from "./session.js";
 export type {
   AffordanceCommit,
   AffordanceCommitActions,

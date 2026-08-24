@@ -6,6 +6,9 @@ import {
   caretCursor,
   clickCountAffordance,
   commitAffordance,
+  createLineFocusSession,
+  createRenameSession,
+  createTypeaheadSession,
   contextMenuAffordance,
   deleteAffordance,
   dragAffordance,
@@ -36,6 +39,47 @@ import {
   zoomAffordance,
 } from "../src/index.js";
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+
+describe("Affordance sessions", () => {
+  test("owns typeahead buffer and match timing", () => {
+    const matches: string[] = [];
+    const session = createTypeaheadSession<string>({ onMatch: (key) => matches.push(key) });
+    expect(session.handle({
+      key: "T", metaKey: false, ctrlKey: false, altKey: false, timeStamp: 10,
+      items: [{ key: "today", name: "Today" }], fromKey: null,
+    })).toBe(true);
+    expect(session.getSnapshot()).toEqual({ buffer: "T", at: 10 });
+    expect(matches).toEqual(["today"]);
+    session.reset();
+    expect(session.getSnapshot()).toEqual({ buffer: "", at: 0 });
+  });
+
+  test("owns rename draft, slow double click, commit, and cancel", () => {
+    const commits: string[] = [];
+    const finished: string[] = [];
+    const session = createRenameSession<string>({
+      onCommit: (key, draft) => commits.push(`${key}:${draft}`),
+      onFinish: (key) => finished.push(key),
+    });
+    expect(session.handlePointer("a", "Alpha", 1, 10)).toBe(false);
+    expect(session.handlePointer("a", "Alpha", 2, 500)).toBe(true);
+    session.update("Apex");
+    expect(session.handleKey("Enter")).toBe(true);
+    expect(commits).toEqual(["a:Apex"]);
+    session.begin("b", "Beta");
+    expect(session.handleKey("Escape")).toBe(true);
+    expect(finished).toEqual(["a", "b"]);
+  });
+
+  test("owns ordered logical focus without DOM policy", () => {
+    const focused: Array<string | null> = [];
+    const session = createLineFocusSession<string>({ initialKey: "a", onFocus: (key) => focused.push(key) });
+    expect(session.handle({ key: "ArrowDown", shiftKey: false }, ["a", "b"])).toBe(true);
+    expect(session.getFocusKey()).toBe("b");
+    expect(session.handle({ key: "Home", shiftKey: false }, ["a", "b"])).toBe(true);
+    expect(focused).toEqual(["b", "a"]);
+  });
+});
 
 describe("createBoardDragSession", () => {
   test("shares begin, target preview, commit, cancel, and supersede across input adapters", () => {

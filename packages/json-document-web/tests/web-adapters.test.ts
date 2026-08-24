@@ -22,6 +22,7 @@ import {
   activeDescendantContainerProps,
   activeDescendantItemProps,
   defaultWebKeymap,
+  focusWebItem,
   gridBoundary,
   lineBoundary,
   moveGridPoint,
@@ -32,10 +33,24 @@ import {
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
+  webFocusItemProps,
   webGridCellAddressProps,
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("Web focus item", () => {
+  test("projects and realizes a focus key without selector interpolation", () => {
+    let focused = false;
+    const item = {
+      getAttribute: (name: string) => name === "data-web-focus-key" ? 'a"[1]' : null,
+      focus: () => { focused = true; },
+    };
+    expect(webFocusItemProps('a"[1]', true)).toEqual({ tabIndex: 0, "data-web-focus-key": 'a"[1]' });
+    expect(focusWebItem({ querySelectorAll: () => [item] }, 'a"[1]')).toBe(item);
+    expect(focused).toBe(true);
+  });
+});
 
 describe("Web grid cell address", () => {
   test("projects and finds a cell without encoding a CSS selector", () => {
