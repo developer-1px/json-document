@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent } from "react";
+import { useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createObjectEditor,
@@ -7,7 +7,7 @@ import {
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
-import { createWebClipboardBinding, objectClipboardCodec } from "@interactive-os/json-document-web";
+import { createWebClipboardSurface, objectClipboardCodec } from "@interactive-os/json-document-web";
 import {
   applyAffordance,
   pointerSelect,
@@ -22,7 +22,8 @@ import { editingCommandFromStroke, historyCommands, optionProps } from "../../sh
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
   const [clipboard, setClipboard] = useState<ObjectClipboard | null>(null);
-  const [webClipboard] = useState(() => createWebClipboardBinding({
+  const observation = useEditingObservation<ObjectIntent>("Ready");
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: objectClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
@@ -33,8 +34,13 @@ export function ObjectDemoRoute() {
         objects: payload.objects.map((object) => ({ ...object, x: object.x + 24, y: object.y + 24 })),
       },
     }),
+    onResult(result) {
+      if (!result.ok) return observation.announce(result.code);
+      if (result.operation !== "paste") setClipboard(result.payload);
+      const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
+      observation.announce(`${verb} ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
+    },
   }));
-  const observation = useEditingObservation<ObjectIntent>("Ready");
 
   function run(intent: ObjectIntent, message: string) {
     return observation.dispatch(intent, editor.dispatch, message);
@@ -75,27 +81,6 @@ export function ObjectDemoRoute() {
     if (!result) return observation.announce("Select an object first");
     setClipboard(result.clipboard);
     observation.announce(`Cut ${result.clipboard.objects.length} object${result.clipboard.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return observation.announce(result.code);
-    setClipboard(result.payload);
-    observation.announce(`Copied ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return observation.announce(result.code);
-    setClipboard(result.payload);
-    observation.announce(`Cut ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.paste(event);
-    observation.announce(result.ok
-      ? `Pasted ${result.payload.objects.length} structured object${result.payload.objects.length === 1 ? "" : "s"}`
-      : result.code);
   }
 
   return (
@@ -163,9 +148,7 @@ export function ObjectDemoRoute() {
         <section
           aria-label="Editable objects"
           className="contents"
-          onCopy={handleNativeCopy}
-          onCut={handleNativeCut}
-          onPaste={handleNativePaste}
+          {...clipboardSurface}
           onKeyDown={editing.getKeyDownHandler()}
         >
           {document.objects.map((object) => (

@@ -1,4 +1,4 @@
-import { useState, type ClipboardEvent } from "react";
+import { useState } from "react";
 import {
   createDocumentEditor,
   type BlockDocument,
@@ -7,7 +7,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   createWebKeyboardAdapter,
   documentClipboardCodec,
   lineBoundary,
@@ -29,16 +29,24 @@ const initialDocument: BlockDocument = {
 
 export function KeyboardAdapterLab() {
   const [editor] = useState<DocumentEditor>(() => createDocumentEditor(initialDocument));
-  const [clipboard] = useState(() => createWebClipboardBinding({
+  const [announcement, setAnnouncement] = useState("Click a block, then use arrows, Delete, or Mod+C / Mod+V");
+  const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: documentClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+    onResult: (result) => {
+      if (result.ok && result.operation === "paste") {
+        setLastIntent({ type: "clipboard.paste", clipboard: result.payload });
+      }
+      setAnnouncement(result.ok
+        ? `${result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted"} ${result.payload.blocks.length} structured block`
+        : result.code);
+    },
   }));
   const [keyboard] = useState(() => createWebKeyboardAdapter());
-  const [announcement, setAnnouncement] = useState("Click a block, then use arrows, Delete, or Mod+C / Mod+V");
   const [lastCommand, setLastCommand] = useState<WebKeyboardCommand | null>(null);
-  const [lastIntent, setLastIntent] = useState<DocumentIntent | null>(null);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
@@ -88,29 +96,11 @@ export function KeyboardAdapterLab() {
   const snapshot = editing.snapshot;
   const document = snapshot.value as BlockDocument;
 
-  function handleCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = clipboard.copy(event);
-    setAnnouncement(result.ok ? `Copied ${result.payload.blocks.length} structured block` : result.code);
-  }
-
-  function handlePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = clipboard.paste(event);
-    if (result.ok) setLastIntent({ type: "clipboard.paste", clipboard: result.payload });
-    setAnnouncement(result.ok ? `Pasted ${result.payload.blocks.length} structured block` : result.code);
-  }
-
-  function handleCut(event: ClipboardEvent<HTMLElement>) {
-    const result = clipboard.cut(event);
-    setAnnouncement(result.ok ? `Cut ${result.payload.blocks.length} structured block` : result.code);
-  }
-
   return (
     <section
       aria-label="Keyboard adapter surface"
       tabIndex={0}
-      onCopy={handleCopy}
-      onCut={handleCut}
-      onPaste={handlePaste}
+      {...clipboardSurface}
       onKeyDown={editing.getKeyDownHandler()}
       className={classes("p-4", ui.surface.raised, ui.state.focus)}
     >

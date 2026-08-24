@@ -12,7 +12,7 @@ keyboard policy.
 ```ts
 import { createDocumentEditor } from "@interactive-os/json-document-editing";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   documentClipboardCodec,
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
@@ -23,7 +23,7 @@ const editor = createDocumentEditor({
   blocks: [{ id: "welcome", text: "Hello" }],
 });
 
-const clipboard = createWebClipboardBinding({
+const clipboardSurface = createWebClipboardSurface({
   codec: documentClipboardCodec,
   read: () => editor.copy(),
   cut: () => editor.cut()?.result ?? { ok: false },
@@ -31,11 +31,15 @@ const clipboard = createWebClipboardBinding({
     type: "clipboard.paste",
     clipboard: payload,
   }),
+  onResult: (result) => {
+    // Product messages and observation remain host policy.
+  },
 });
 
-surface.addEventListener("copy", (event) => clipboard.copy(event));
-surface.addEventListener("cut", (event) => clipboard.cut(event));
-surface.addEventListener("paste", (event) => clipboard.paste(event));
+// React: <section {...clipboardSurface} />
+surface.addEventListener("copy", clipboardSurface.onCopy);
+surface.addEventListener("cut", clipboardSurface.onCut);
+surface.addEventListener("paste", clipboardSurface.onPaste);
 
 const keyboard = createWebKeyboardAdapter();
 
@@ -70,6 +74,11 @@ canonical cut, or canonical paste. Cut writes the selected payload before
 asking the Editing companion to remove it. Missing clipboard data, malformed
 payloads, unsupported cut, and rejected editing results leave native handling
 available.
+
+`createWebClipboardSurface` is the public surface-level orchestration API. It
+projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
+every result through `onResult`. `createWebClipboardBinding` remains available
+for hosts that need to invoke or install each operation independently.
 
 ## Boundary
 
