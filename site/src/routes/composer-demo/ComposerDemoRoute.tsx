@@ -211,9 +211,9 @@ export function ComposerDemoRoute() {
   }
 
   function chooseTrigger(value: "/" | "@") {
+    composerEditorRef.current?.focus();
     insertTrigger(editor, value);
     setAddOpen(false);
-    composerEditorRef.current?.focus();
   }
 
   return (
@@ -301,7 +301,7 @@ export function ComposerDemoRoute() {
           {trigger && visibleSuggestions.length > 0 ? (
             <div id="composer-command-listbox" className="composer-layer composer-command-layer" role="listbox" aria-label={trigger.kind === "skill" ? "스킬 선택" : "에이전트 선택"}>
               {visibleSuggestions.map((item) => (
-                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} type="button" {...activeDescendantItemProps(commandOptionId(item.id))} {...projectWebWidgetState({ role: "option", selected: item.id === activeSuggestion?.id })} onPointerMove={() => commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" })} onMouseDown={(event) => event.preventDefault()} onClick={() => { commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" }); insertSuggestion(editor, trigger, item); composerEditorRef.current?.focus(); }}>
+                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} type="button" {...activeDescendantItemProps(commandOptionId(item.id))} {...projectWebWidgetState({ role: "option", selected: item.id === activeSuggestion?.id })} onPointerMove={() => commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" })} onMouseDown={(event) => event.preventDefault()} onClick={() => { commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" }); insertSuggestion(editor, trigger, item); }}>
                   <span className={`composer-command-icon ${item.kind}`}>{item.kind === "skill" ? "/" : "@"}</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
                   <em>{item.kind === "skill" ? "Skill" : "Agent"}</em>

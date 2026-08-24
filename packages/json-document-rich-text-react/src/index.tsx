@@ -2,6 +2,7 @@ import {
   Children,
   createElement,
   memo,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -82,6 +83,10 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
   );
   const rootRef = useRef<HTMLElement>(null);
   const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
+  const assignRootRef = useCallback((node: HTMLElement | null) => {
+    rootRef.current = node;
+    if (elementRef) elementRef.current = node;
+  }, [elementRef]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -102,10 +107,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
   return createElement(as, {
     ...props,
     style: { ...props.style, whiteSpace: "pre-wrap" },
-    ref: (node: HTMLElement | null) => {
-      rootRef.current = node;
-      if (elementRef) elementRef.current = node;
-    },
+    ref: assignRootRef,
     contentEditable: true,
     suppressContentEditableWarning: true,
     "data-rich-text-node-id": documentId,
@@ -227,7 +229,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
     : [];
   const content = Children.toArray(children);
   if (editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
-    content.push(<span key={`${node.id}:placeholder`} data-rich-text-placeholder="" contentEditable={false} aria-hidden="true">{"\u200b"}</span>);
+    content.push(<br key={`${node.id}:placeholder`} data-rich-text-placeholder="" />);
   }
   const props = {
     "data-rich-text-node-id": node.id,
