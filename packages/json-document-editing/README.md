@@ -45,3 +45,6 @@ Visible order is a value, not a command. `LineTopology` and `GridTopology` are
 the shared shapes. Sheet aliases Grid as `SheetTopology`. Database projects a
 saved view into `{ recordIds, propertyIds }`. Tree takes host `visibleIds`.
 Selection and clipboard read that line.
+
+`gridPointKey` and `gridPointFromKey` provide the canonical reversible string
+identity when a selection or rendering adapter needs to key a `GridPoint`.

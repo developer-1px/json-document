@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { createDocumentEditor, createSheetEditor } from "@interactive-os/json-document-editing";
 import {
   useEditing,
+  useGridEditing,
   useRestoreElementFocus,
   type EditingKeyboardCommand,
   type EditingKeyboardStroke,
@@ -22,6 +23,56 @@ function resolveStroke(stroke: EditingKeyboardStroke): EditingKeyboardCommand | 
 }
 
 describe("useEditing", () => {
+  test("connects GridPoint selection and keyboard movement without exposing key encoding", () => {
+    const editor = createSheetEditor({
+      columns: [{ id: "name", label: "Name" }, { id: "status", label: "Status" }],
+      rows: [
+        { id: "row-1", cells: { name: "Alpha", status: "Draft" } },
+        { id: "row-2", cells: { name: "Beta", status: "Ready" } },
+      ],
+    });
+    const moved: string[] = [];
+
+    function View() {
+      const focus = editor.snapshot.selection.focus;
+      const editing = useGridEditing({
+        source: editor,
+        selectedPoints: editor.selectedCells,
+        focusPoint: focus,
+        onSelect: (point, mode) => editor.dispatch({
+          type: "selection.set",
+          rowId: point.rowId,
+          columnId: point.columnId,
+          mode,
+        }),
+        keyboard: {
+          resolve: resolveStroke,
+          focusPoint: () => editor.snapshot.selection.focus ?? undefined,
+          neighbor: (point, command) => command.type === "move" && command.direction === "down"
+            ? { rowId: "row-2", columnId: point.columnId }
+            : null,
+          afterMove: (point) => moved.push(`${point.rowId}/${point.columnId}`),
+        },
+      });
+      const first = editing.getCell({ rowId: "row-1", columnId: "name" });
+      const second = editing.getCell({ rowId: "row-2", columnId: "name" });
+      return (
+        <div data-testid="grid" tabIndex={0} onKeyDown={editing.getKeyDownHandler()}>
+          <button type="button" data-selected={first.getIsSelected()} onClick={first.getPressHandler()}>first</button>
+          <button type="button" data-selected={second.getIsSelected()} onClick={second.getPressHandler()}>second</button>
+        </div>
+      );
+    }
+
+    render(<View />);
+    fireEvent.click(screen.getByRole("button", { name: "second" }));
+    expect(editor.snapshot.selection.focus).toEqual({ rowId: "row-2", columnId: "name" });
+    fireEvent.click(screen.getByRole("button", { name: "first" }));
+    fireEvent.keyDown(screen.getByTestId("grid"), { key: "ArrowDown" });
+    expect(editor.snapshot.selection.focus).toEqual({ rowId: "row-2", columnId: "name" });
+    expect(moved).toEqual(["row-2/name"]);
+  });
+
   test("restores roving DOM focus after a focused item is deleted", () => {
     const editor = createDocumentEditor({
       blocks: [{ id: "alpha", text: "Alpha" }, { id: "bravo", text: "Bravo" }],

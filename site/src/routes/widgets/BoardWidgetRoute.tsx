@@ -4,6 +4,7 @@ import { useEditing, useRestoreElementFocus } from "@interactive-os/json-documen
 import {
   activeDescendantContainerProps,
   activeDescendantItemProps,
+  createWebPointerSession,
   lineBoundary,
   moveLinePoint,
   projectWebWidgetState,
@@ -44,6 +45,10 @@ type DragState = {
 export function BoardWidgetRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
   const [drag, setDrag] = useState<DragState | null>(null);
+  const [pointerSession] = useState(() => createWebPointerSession<DragState>({
+    onPreview: setDrag,
+    onCancel: () => setDrag(null),
+  }));
   const surface = useRef<HTMLDivElement>(null);
   const cardIds = () => (editor.snapshot.value as KanbanDocument).columns.flatMap((column) => column.cardIds);
   const editing = useEditing({
@@ -83,9 +88,11 @@ export function BoardWidgetRoute() {
     event.preventDefault();
     event.stopPropagation();
     (event.currentTarget.closest("[role=listbox]") as HTMLElement | null)?.focus();
-    surface.current?.setPointerCapture(event.pointerId);
+    if (surface.current === null) return;
     editing.getItem(cardId).getPressHandler()(event);
-    setDrag({ cardId, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 });
+    const state = { cardId, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 };
+    pointerSession.begin(surface.current, event.pointerId, state);
+    setDrag(state);
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
@@ -97,7 +104,9 @@ export function BoardWidgetRoute() {
           event.currentTarget.style.cursor = cursor;
         },
         hand: (hand) => {
-          if (hand.type === "translate") setDrag({ ...drag, dx: hand.dx, dy: hand.dy });
+          if (hand.type === "translate") {
+            pointerSession.preview(event.pointerId, (state) => ({ ...state, dx: hand.dx, dy: hand.dy }));
+          }
         },
       },
     );
@@ -109,9 +118,13 @@ export function BoardWidgetRoute() {
   }
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
-    if (!drag) return;
+    const committedDrag = pointerSession.commit(event.pointerId);
+    if (!committedDrag) return;
     const moved = commitAffordance(
-      dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
+      dragAffordance(
+        { x: committedDrag.originX, y: committedDrag.originY },
+        { x: event.clientX, y: event.clientY },
+      ),
     );
     const columnId = columnAt(event);
     const drop = dropAffordance({ canDrop: moved !== null && columnId !== null });
@@ -125,7 +138,7 @@ export function BoardWidgetRoute() {
       applyAffordance(dropped, {
         commit: (hand) => {
           if (hand.type !== "move-drop") return;
-          editor.dispatch({ type: "card.move", cardId: drag.cardId, columnId, beforeCardId: null });
+          editor.dispatch({ type: "card.move", cardId: committedDrag.cardId, columnId, beforeCardId: null });
         },
       });
     }
@@ -147,6 +160,14 @@ export function BoardWidgetRoute() {
           aria-label="Board columns"
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerCancel={(event) => {
+            pointerSession.cancel(event.pointerId);
+            event.currentTarget.style.cursor = "default";
+          }}
+          onLostPointerCapture={(event) => {
+            pointerSession.cancel(event.pointerId, "lost-capture");
+            event.currentTarget.style.cursor = "default";
+          }}
         >
           {board.columns.map((column) => (
             <div key={column.id} data-column-id={column.id} className="grid content-start gap-2">

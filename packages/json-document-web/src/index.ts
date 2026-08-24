@@ -11,6 +11,9 @@ export {
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";
 export { pressInteractionFromWeb } from "./press.js";
+export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
+export { createWebDragDropSession } from "./drag-drop-session.js";
+export { createWebPointerSession } from "./pointer-session.js";
 export {
   activeDescendantContainerProps,
   activeDescendantItemProps,
@@ -54,4 +57,21 @@ export type {
   WebPressInteraction,
   WebPressSource,
 } from "./press.js";
+export type {
+  WebDragDropCancelReason,
+  WebDragDropSession,
+  WebDragDropSessionOptions,
+} from "./drag-drop-session.js";
+export type {
+  WebPointerCaptureTarget,
+  WebPointerSession,
+  WebPointerSessionCancelReason,
+  WebPointerSessionOptions,
+  WebPointerSessionSnapshot,
+} from "./pointer-session.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
+export type {
+  WebGridCellAddressAttributes,
+  WebGridCellAddressElement,
+  WebGridCellAddressRoot,
+} from "./grid-cell.js";

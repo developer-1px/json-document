@@ -17,7 +17,7 @@ import {
   type DatabaseSort,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
+import { useEditingObservation, useGridEditing } from "@interactive-os/json-document-react";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
@@ -28,7 +28,11 @@ import {
   dragAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import {
+  createWebPointerSession,
+  pressInteractionFromWeb,
+  webGridCellAddressProps,
+} from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -71,8 +75,12 @@ export function DatabaseTableDemo() {
   const [dragPreview, setDragPreview] = useState<ReadonlyArray<string> | null>(null);
   const [widthPreview, setWidthPreview] = useState<Readonly<Record<string, number>> | null>(null);
   const [menu, setMenu] = useState<HeaderMenu | null>(null);
-  const headerDrag = useRef<HeaderDrag | null>(null);
-  const headerResize = useRef<HeaderResize | null>(null);
+  const [headerDragSession] = useState(() => createWebPointerSession<HeaderDrag>({
+    onCancel: () => setDragPreview(null),
+  }));
+  const [headerResizeSession] = useState(() => createWebPointerSession<HeaderResize>({
+    onCancel: () => setWidthPreview(null),
+  }));
   const observation = useEditingObservation<DatabaseIntent>("Database ready");
   const nextRecord = useRef(5);
   const document = editor.snapshot.value as DatabaseDocument;
@@ -96,19 +104,19 @@ export function DatabaseTableDemo() {
   }
 
   const focus = editor.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: editor,
-    selectedKeys: editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)),
-    focusKey: focus ? cellKey(focus.recordId, focus.propertyId) : null,
-    onSelect: (key, mode) => {
-      const { recordId, propertyId } = parseCellKey(key);
+    selectedPoints: editor.selectedCellsIn(topology).map(databaseGridPoint),
+    focusPoint: focus ? databaseGridPoint(focus) : null,
+    onSelect: (point, mode) => {
+      const { recordId, propertyId } = databasePoint(point);
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
     },
     keyboard: {
       resolve: editingCommandFromWebKeyboardStroke,
-      focusKey: () => {
+      focusPoint: () => {
         const current = editor.snapshot.selection.focus;
-        return current ? cellKey(current.recordId, current.propertyId) : undefined;
+        return current ? databaseGridPoint(current) : undefined;
       },
       neighbor: () => null,
       onUndo: () => { run(editor.undo, "Undone"); },
@@ -168,12 +176,16 @@ export function DatabaseTableDemo() {
 
   function startHeaderDrag(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
     if (event.button !== 0) return;
-    headerDrag.current = { propertyId, originX: event.clientX, originY: event.clientY, moved: false };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    headerDragSession.begin(event.currentTarget, event.pointerId, {
+      propertyId,
+      originX: event.clientX,
+      originY: event.clientY,
+      moved: false,
+    });
   }
 
   function moveHeaderDrag(event: ReactPointerEvent<HTMLElement>) {
-    const drag = headerDrag.current;
+    let drag = headerDragSession.getSnapshot()?.state;
     if (!drag) return;
     applyAffordance(dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }), {
       cursor: (cursor) => {
@@ -181,7 +193,7 @@ export function DatabaseTableDemo() {
       },
     });
     if (!drag.moved && Math.hypot(event.clientX - drag.originX, event.clientY - drag.originY) < 6) return;
-    drag.moved = true;
+    drag = headerDragSession.preview(event.pointerId, (state) => ({ ...state, moved: true })) ?? drag;
     const target = globalThis.document.elementFromPoint(event.clientX, event.clientY);
     const propertyId = target instanceof Element
       ? target.closest("[data-property-id]")?.getAttribute("data-property-id")
@@ -204,8 +216,7 @@ export function DatabaseTableDemo() {
   }
 
   function finishHeaderDrag(event: ReactPointerEvent<HTMLElement>) {
-    const drag = headerDrag.current;
-    headerDrag.current = null;
+    const drag = headerDragSession.commit(event.pointerId);
     event.currentTarget.style.cursor = "";
     const next = dragPreview;
     setDragPreview(null);
@@ -236,14 +247,18 @@ export function DatabaseTableDemo() {
 
   function startResize(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
     event.stopPropagation();
-    headerDrag.current = null;
-    headerResize.current = { propertyId, originX: event.clientX, originWidth: propertyWidth(propertyId) };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    const activeDrag = headerDragSession.getSnapshot();
+    if (activeDrag !== null) headerDragSession.cancel(activeDrag.pointerId, "superseded");
+    headerResizeSession.begin(event.currentTarget, event.pointerId, {
+      propertyId,
+      originX: event.clientX,
+      originWidth: propertyWidth(propertyId),
+    });
   }
 
   function moveResize(event: ReactPointerEvent<HTMLElement>) {
     event.stopPropagation();
-    const resize = headerResize.current;
+    const resize = headerResizeSession.getSnapshot()?.state;
     if (!resize) return;
     event.currentTarget.style.cursor = "col-resize";
     setWidthPreview({
@@ -254,8 +269,7 @@ export function DatabaseTableDemo() {
 
   function finishResize(event: ReactPointerEvent<HTMLElement>) {
     event.stopPropagation();
-    const resize = headerResize.current;
-    headerResize.current = null;
+    const resize = headerResizeSession.commit(event.pointerId);
     const preview = widthPreview;
     setWidthPreview(null);
     event.currentTarget.style.cursor = "";
@@ -350,6 +364,8 @@ export function DatabaseTableDemo() {
                     onPointerDown={(event) => startHeaderDrag(event, property.id)}
                     onPointerMove={moveHeaderDrag}
                     onPointerUp={finishHeaderDrag}
+                    onPointerCancel={(event) => headerDragSession.cancel(event.pointerId)}
+                    onLostPointerCapture={(event) => headerDragSession.cancel(event.pointerId, "lost-capture")}
                     onContextMenu={(event) => openHeaderMenu(event, property.id)}
                     onKeyDown={(event) => onHeaderKeyDown(event, property.id, false)}
                     onKeyUp={(event) => onHeaderKeyDown(event, property.id, false)}
@@ -367,6 +383,8 @@ export function DatabaseTableDemo() {
                       onPointerDown={(event) => startResize(event, property.id)}
                       onPointerMove={moveResize}
                       onPointerUp={finishResize}
+                      onPointerCancel={(event) => headerResizeSession.cancel(event.pointerId)}
+                      onLostPointerCapture={(event) => headerResizeSession.cancel(event.pointerId, "lost-capture")}
                     />
                   </th>
                 ))}
@@ -402,11 +420,13 @@ export function DatabaseTableDemo() {
               {records.map((record) => (
                 <tr key={record.id} data-record-id={record.id}>
                   {properties.map((property) => {
-                    const item = editing.getItem(cellKey(record.id, property.id));
+                    const point = databaseGridPoint({ recordId: record.id, propertyId: property.id });
+                    const item = editing.getCell(point);
                     return (
                       <SelectableItem
                         as="td"
                         key={property.id}
+                        {...webGridCellAddressProps(point)}
                         data-record-id={record.id}
                         data-property-id={property.id}
                         className={classes("p-0", ui.database.cell)}
@@ -550,11 +570,10 @@ function filterItems(property: DatabaseProperty): ReadonlyArray<{ readonly label
   return [];
 }
 
-function cellKey(recordId: string, propertyId: string): string {
-  return `${recordId}\u0000${propertyId}`;
+function databaseGridPoint(point: { readonly recordId: string; readonly propertyId: string }) {
+  return { rowId: point.recordId, columnId: point.propertyId };
 }
 
-function parseCellKey(key: string): { readonly recordId: string; readonly propertyId: string } {
-  const split = key.indexOf("\u0000");
-  return { recordId: key.slice(0, split), propertyId: key.slice(split + 1) };
+function databasePoint(point: { readonly rowId: string; readonly columnId: string }) {
+  return { recordId: point.rowId, propertyId: point.columnId };
 }

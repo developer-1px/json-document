@@ -2,6 +2,8 @@ export { createDocumentEditor, documentSelectionFocus } from "./document.js";
 export {
   gridCellsInRange,
   gridPointIndex,
+  gridPointFromKey,
+  gridPointKey,
   gridRangeBounds,
   gridTopology,
   lineInterval,

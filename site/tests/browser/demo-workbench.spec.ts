@@ -37,6 +37,10 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "DatabaseTableDemo.tsx",
     "initial-database.ts",
     "editing-observation.ts",
+    "use-grid-editing.ts",
+    "topology.ts",
+    "grid-cell.ts",
+    "pointer-session.ts",
   ]);
 });
 

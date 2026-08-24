@@ -34,6 +34,11 @@ textarea.
 caret/click affordances into reusable textarea props. `DocumentTextControl`
 renders that same lifecycle while the host keeps layout and Document Intent.
 
+`useGridEditing` is the grid-specific React entry point. It accepts canonical
+`GridPoint` values through `selectedPoints`, `focusPoint`, `onSelect`, and
+keyboard `neighbor`, and exposes `getCell(point)` without leaking the internal
+string key codec into Hosts.
+
 `useEditingObservation(initialAnnouncement)` records the last Intent and
 result while leaving announcement wording in the Host. Its `dispatch`, `run`,
 `observe`, and `observeResult` doors let demos and inspectors expose the same

@@ -43,6 +43,12 @@ export {
   type DocumentTextControlProps,
   type UseDocumentTextControlOptions,
 } from "./use-document-text-control.js";
+export {
+  useGridEditing,
+  type GridEditing,
+  type GridEditingKeyboardOptions,
+  type UseGridEditingOptions,
+} from "./use-grid-editing.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(
