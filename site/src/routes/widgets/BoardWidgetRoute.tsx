@@ -10,6 +10,7 @@ import {
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
 import {
+  createBoardDragSession,
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
   commitAffordance,
@@ -34,20 +35,32 @@ const initialBoard: KanbanDocument = {
   ],
 };
 
-type DragState = {
-  readonly cardId: string;
+type DragPreview = {
   readonly originX: number;
   readonly originY: number;
   readonly dx: number;
   readonly dy: number;
 };
 
+type BoardDropTarget = {
+  readonly columnId: string;
+  readonly beforeCardId: string | null;
+};
+
 export function BoardWidgetRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
-  const [drag, setDrag] = useState<DragState | null>(null);
-  const [pointerSession] = useState(() => createWebPointerSession<DragState>({
-    onPreview: setDrag,
-    onCancel: () => setDrag(null),
+  const [dragPreview, setDragPreview] = useState<DragPreview | null>(null);
+  const [boardDrag] = useState(() => createBoardDragSession<string, BoardDropTarget>({
+    onCommit: ({ item: cardId, target }) => editor.dispatch({
+      type: "card.move",
+      cardId,
+      columnId: target.columnId,
+      beforeCardId: target.beforeCardId,
+    }),
+  }));
+  const [pointerSession] = useState(() => createWebPointerSession<DragPreview>({
+    onPreview: setDragPreview,
+    onCancel: () => setDragPreview(null),
   }));
   const surface = useRef<HTMLDivElement>(null);
   const cardIds = () => (editor.snapshot.value as KanbanDocument).columns.flatMap((column) => column.cardIds);
@@ -90,15 +103,16 @@ export function BoardWidgetRoute() {
     (event.currentTarget.closest("[role=listbox]") as HTMLElement | null)?.focus();
     if (surface.current === null) return;
     editing.getItem(cardId).getPressHandler()(event);
-    const state = { cardId, originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 };
+    boardDrag.begin(cardId);
+    const state = { originX: event.clientX, originY: event.clientY, dx: 0, dy: 0 };
     pointerSession.begin(surface.current, event.pointerId, state);
-    setDrag(state);
+    setDragPreview(state);
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    if (!drag) return;
+    if (!dragPreview) return;
     applyAffordance(
-      dragAffordance({ x: drag.originX, y: drag.originY }, { x: event.clientX, y: event.clientY }),
+      dragAffordance({ x: dragPreview.originX, y: dragPreview.originY }, { x: event.clientX, y: event.clientY }),
       {
         cursor: (cursor) => {
           event.currentTarget.style.cursor = cursor;
@@ -110,7 +124,9 @@ export function BoardWidgetRoute() {
         },
       },
     );
-    applyAffordance(dropAffordance({ canDrop: columnAt(event) !== null }), {
+    const target = boardDropTargetAt(event);
+    boardDrag.preview(target);
+    applyAffordance(dropAffordance({ canDrop: target !== null }), {
       cursor: (cursor) => {
         event.currentTarget.style.cursor = cursor;
       },
@@ -119,30 +135,36 @@ export function BoardWidgetRoute() {
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
     const committedDrag = pointerSession.commit(event.pointerId);
-    if (!committedDrag) return;
+    if (!committedDrag) {
+      boardDrag.cancel("drop-rejected");
+      setDragPreview(null);
+      event.currentTarget.style.cursor = "default";
+      return;
+    }
     const moved = commitAffordance(
       dragAffordance(
         { x: committedDrag.originX, y: committedDrag.originY },
         { x: event.clientX, y: event.clientY },
       ),
     );
-    const columnId = columnAt(event);
-    const drop = dropAffordance({ canDrop: moved !== null && columnId !== null });
+    const target = boardDropTargetAt(event);
+    boardDrag.preview(target);
+    const drop = dropAffordance({ canDrop: moved !== null && target !== null });
     applyAffordance(drop, {
       cursor: (cursor) => {
         event.currentTarget.style.cursor = cursor;
       },
     });
     const dropped = commitAffordance(drop);
-    if (dropped && columnId !== null) {
+    if (dropped && target !== null) {
       applyAffordance(dropped, {
         commit: (hand) => {
           if (hand.type !== "move-drop") return;
-          editor.dispatch({ type: "card.move", cardId: committedDrag.cardId, columnId, beforeCardId: null });
+          boardDrag.commit();
         },
       });
-    }
-    setDrag(null);
+    } else boardDrag.cancel("drop-rejected");
+    setDragPreview(null);
     event.currentTarget.style.cursor = "default";
   }
 
@@ -162,10 +184,12 @@ export function BoardWidgetRoute() {
           onPointerUp={handlePointerUp}
           onPointerCancel={(event) => {
             pointerSession.cancel(event.pointerId);
+            boardDrag.cancel();
             event.currentTarget.style.cursor = "default";
           }}
           onLostPointerCapture={(event) => {
             pointerSession.cancel(event.pointerId, "lost-capture");
+            boardDrag.cancel();
             event.currentTarget.style.cursor = "default";
           }}
         >
@@ -181,7 +205,9 @@ export function BoardWidgetRoute() {
                   const card = cards.get(cardId);
                   if (!card) return null;
                   const option = optionProps(editing.getItem(card.id));
-                  const offset = drag?.cardId === card.id ? drag : null;
+                  const dragSnapshot = boardDrag.getSnapshot();
+                  const activeCardId = dragSnapshot.status === "dragging" ? dragSnapshot.item : null;
+                  const offset = activeCardId === card.id ? dragPreview : null;
                   return (
                     <li role="none" key={card.id}>
                       <SelectableItem
@@ -193,8 +219,9 @@ export function BoardWidgetRoute() {
                         {...projectWebWidgetState({ role: "option", selected: option.selected })}
                         style={{
                           transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
-                          pointerEvents: drag ? "none" : undefined,
+                          pointerEvents: offset ? "none" : undefined,
                         }}
+                        data-card-id={card.id}
                         onPointerDown={(event) => handleCardPointerDown(event, card.id)}
                       >
                         {card.title}
@@ -243,8 +270,11 @@ function boardCardId(cardId: string): string {
   return `widget-board-option-${cardId}`;
 }
 
-function columnAt(event: PointerEvent<HTMLElement>): string | null {
+function boardDropTargetAt(event: PointerEvent<HTMLElement>): BoardDropTarget | null {
   const node = globalThis.document.elementFromPoint(event.clientX, event.clientY);
   if (!(node instanceof Element)) return null;
-  return node.closest("[data-column-id]")?.getAttribute("data-column-id") ?? null;
+  const columnId = node.closest("[data-column-id]")?.getAttribute("data-column-id") ?? null;
+  if (columnId === null) return null;
+  const beforeCardId = node.closest("[data-card-id]")?.getAttribute("data-card-id") ?? null;
+  return { columnId, beforeCardId };
 }

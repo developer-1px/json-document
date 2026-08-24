@@ -29,11 +29,43 @@ import {
   selectAllAffordance,
   snapAffordance,
   treeAffordance,
+  createBoardDragSession,
   typeaheadAffordance,
   wheelAffordance,
   zoomAffordance,
 } from "../src/index.js";
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+
+describe("createBoardDragSession", () => {
+  test("shares begin, target preview, commit, cancel, and supersede across input adapters", () => {
+    const events: string[] = [];
+    const session = createBoardDragSession<string, { readonly columnId: string; readonly beforeCardId: string | null }>({
+      onBegin: (item) => events.push(`begin:${item}`),
+      onPreview: (item, target) => events.push(`preview:${item}:${target?.columnId ?? "none"}`),
+      onCommit: ({ item, target }) => events.push(`commit:${item}:${target.columnId}`),
+      onCancel: (item, reason) => events.push(`cancel:${item}:${reason}`),
+    });
+
+    session.begin("write");
+    expect(session.commit()).toBeNull();
+    session.preview({ columnId: "doing", beforeCardId: null });
+    expect(session.commit()).toEqual({ item: "write", target: { columnId: "doing", beforeCardId: null } });
+    expect(session.getSnapshot()).toEqual({ status: "idle", item: null, target: null });
+
+    session.begin("review");
+    session.begin("draw");
+    expect(session.cancel("drop-rejected")).toBe("draw");
+    expect(events).toEqual([
+      "begin:write",
+      "preview:write:doing",
+      "commit:write:doing",
+      "begin:review",
+      "cancel:review:superseded",
+      "begin:draw",
+      "cancel:draw:drop-rejected",
+    ]);
+  });
+});
 
 describe("pointerSelect", () => {
   test("maps conventional modifiers to replace, extend, and toggle", () => {

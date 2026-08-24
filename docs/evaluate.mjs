@@ -52,6 +52,7 @@ const publicDocs = {
   api: read("docs/public/api.md"),
   adapters: read("docs/public/adapters.md"),
   adapterGridCell: read("docs/public/adapter-grid-cell.md"),
+  adapterInteraction: read("docs/public/adapter-interaction.md"),
   affordance: read("docs/public/affordance.md"),
   affordanceSelect: read("docs/public/affordance-select.md"),
   affordanceFold: read("docs/public/affordance-fold.md"),
