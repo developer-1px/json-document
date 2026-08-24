@@ -18,6 +18,7 @@ docs
 |   |-- topology.md            # Editing: 화면 줄과 선택
 |   |-- intent.md              # Editing: Intent 시그니처
 |   |-- intent-guide.md        # Editing: Intent 따라 하기
+|   |-- official-hands.md      # Hands TBD: 완성된 기본 SDK와 확장 경계
 |   |-- collaboration.md       # JSON Document: 같은 계약의 협업 구현
 |   |-- hands.md               # Hands: 사람의 편집 도구
 |   |-- composer.md            # Hands: agent 지시와 구조화된 맥락
@@ -103,6 +104,7 @@ Affordance
 
 Hands
 |-- Overview
+|-- Official Hands (TBD)
 |-- Order
 |-- Object
 |-- Tree
@@ -152,6 +154,8 @@ identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
   connectors는 연결 방법이다. react-editing은 React에서 선택과 커서를
   그리는 사용법이다.
   concepts는 JSON Document에서 Artifact까지의 책임과 의존 지도다.
+  official-hands는 디자인과 제품 데이터는 열어 두고 수렴된 편집 기능을
+  완성된 SDK로 제공하는 TBD 관점이다.
   collaboration은 같은 JSON Document의 다른 구현이다. hands는
   Editing 위 장르의 손이다. order·object·tree는 그 손의
   나머지 slice다. database는 저장된 표 view의 손이다.
