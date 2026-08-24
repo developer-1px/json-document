@@ -57,7 +57,7 @@ export function CanvasWidgetRoute() {
       editor.dispatch({
         type: "selection.set",
         objectIds: [objectId],
-        mode: mode === "extend" ? "add" : mode,
+        mode,
       });
     },
     keyboard: {
@@ -234,7 +234,7 @@ export function CanvasWidgetRoute() {
             editor.dispatch({
               type: "selection.set",
               objectIds: hits,
-              mode: hand.operation === "extend" ? "add" : hand.operation === "toggle" ? "toggle" : "replace",
+              mode: hand.operation,
             });
           },
         });

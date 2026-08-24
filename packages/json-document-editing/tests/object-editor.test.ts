@@ -16,7 +16,7 @@ describe("object editing selection family", () => {
   test("uses set transitions for click and host-resolved marquee candidates", () => {
     const editor = createObjectEditor(initial);
     editor.dispatch({ type: "selection.set", objectIds: ["b"], mode: "toggle" });
-    editor.dispatch({ type: "selection.set", objectIds: ["b", "c"], mode: "add" });
+    editor.dispatch({ type: "selection.set", objectIds: ["b", "c"], mode: "extend" });
 
     expect(editor.snapshot.selection).toEqual({
       kind: "explicit",

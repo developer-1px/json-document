@@ -77,4 +77,13 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
+  test("registers the Object owner source next to Object demo usage", async () => {
+    expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/object-demo/ObjectDemoRoute.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/object.ts",
+    ]);
+  });
+
 });

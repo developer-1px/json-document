@@ -50,6 +50,7 @@ export type {
   ObjectEditor,
   ObjectIntent,
   ObjectSelection,
+  ObjectSelectionMode,
 } from "./object.js";
 export type {
   BlockDocument,

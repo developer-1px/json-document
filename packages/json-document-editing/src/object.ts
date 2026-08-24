@@ -36,7 +36,7 @@ export interface ObjectSelection extends Record<string, JSONValue> {
   readonly primaryKey: string | null;
 }
 
-export type ObjectSelectionMode = "replace" | "add" | "subtract" | "toggle";
+export type ObjectSelectionMode = "replace" | "extend" | "add" | "subtract" | "toggle";
 
 export interface ObjectClipboard extends Record<string, JSONValue> {
   readonly type: "application/vnd.interactive-os.objects+json";
@@ -119,7 +119,7 @@ export function createObjectEditor(
         return failure("selection.object-not-found");
       }
       const command: KeySelectionCommand<string> = {
-        type: intent.mode ?? "replace",
+        type: intent.mode === "extend" ? "add" : intent.mode ?? "replace",
         keys: intent.objectIds,
       };
       const selection = selectionFamily.transition(
