@@ -22,10 +22,13 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Why",
     "Concept Map",
     "API Reference",
+    "Public API",
   ]);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Collaboration" }).click();
   await expect(navigation.getByRole("group", { name: "Collaboration" }).getByRole("link")).toHaveText([
+    "API · Collaboration",
+    "API · Contenteditable",
     "Replica",
     "Lifecycle",
     "Collaborative History",
@@ -33,6 +36,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Editing" }).click();
   await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
+    "API · Selection",
+    "API · Editing",
+    "API · Rich Text",
     "Intent guide",
     "Intent",
     "Topology",
@@ -43,6 +49,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
+    "API · Database",
     "Overview",
     "Official Hands · TBD",
     "Order",
@@ -54,6 +61,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Adapter" }).click();
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
+    "API · Web",
+    "API · Contenteditable",
+    "API · Rich Text Web",
     "Overview",
     "Keyboard",
     "Grid cell",
@@ -63,6 +73,12 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
+    "API · React",
+    "API · React Hook Form",
+    "API · Ajv",
+    "API · Zod",
+    "API · TanStack Table",
+    "API · Rich Text React",
     "Overview",
     "React Reference",
     "React Hook Form",
@@ -72,6 +88,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Affordance" }).click();
   await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
+    "API Reference",
     "Focus",
     "Caret",
     "Select",
@@ -98,6 +115,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Snap",
     "Not-allowed",
   ]);
+  await navigation.getByRole("button", { name: "UI Primitives" }).click();
+  await expect(navigation.getByRole("group", { name: "UI Primitives" }).getByRole("link")).toHaveText(["API Reference"]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Artifact" }).click();
@@ -108,6 +127,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Adapter",
     "Connector",
     "Affordance",
+    "UI Primitives",
     "Hands",
     "Artifact",
     "Collaboration",
@@ -208,6 +228,9 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
   await page.goto("/docs/adapter-keyboard");
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
+    "API · Web",
+    "API · Contenteditable",
+    "API · Rich Text Web",
     "Overview",
     "Keyboard",
     "Grid cell",
@@ -220,6 +243,12 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
 
   await page.goto("/docs/connector-zod-validate");
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
+    "API · React",
+    "API · React Hook Form",
+    "API · Ajv",
+    "API · Zod",
+    "API · TanStack Table",
+    "API · Rich Text React",
     "Overview",
     "React Reference",
     "React Hook Form",

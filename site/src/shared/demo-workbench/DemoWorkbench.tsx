@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { classes, ui } from "../ui/styles";
+import { ActionLink } from "../ui/interactive";
 import { ShikiSourceCodeBlock } from "./ShikiSourceCodeBlock";
 import { demoEntrySource, discoverDemoSources, type DemoSourceFile } from "./demo-sources";
 
@@ -101,7 +102,12 @@ export function DemoWorkbench(props: {
           className={ui.demoWorkbench.panel}
         >
           <div className="min-w-0 p-3">
-            <p className={classes("mb-2 mt-0 font-mono", ui.text.meta)}>{activeSource.path}</p>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className={classes("m-0 font-mono", ui.text.meta)}>{activeSource.path}</p>
+              {activeSource.referencePath === undefined ? null : (
+                <ActionLink href={activeSource.referencePath} className={ui.text.meta}>API Reference</ActionLink>
+              )}
+            </div>
             {activeSourceText === undefined ? (
               <p className={classes("m-0 p-3", ui.text.meta)}>Loading source…</p>
             ) : (

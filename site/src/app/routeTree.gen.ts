@@ -108,6 +108,24 @@ import { Route as PageDocsAffordanceSnapRouteImport } from "./routes/_page/docs/
 import { Route as PageDocsAffordanceTripleClickRouteImport } from "./routes/_page/docs/affordance/triple-click";
 import { Route as PageDocsAffordanceTypeaheadRouteImport } from "./routes/_page/docs/affordance/typeahead";
 import { Route as PageDocsAffordanceZoomRouteImport } from "./routes/_page/docs/affordance/zoom";
+import { Route as PageDocsApiAffordanceRouteImport } from "./routes/_page/docs/api/affordance";
+import { Route as PageDocsApiAjvRouteImport } from "./routes/_page/docs/api/ajv";
+import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
+import { Route as PageDocsApiContenteditableRouteImport } from "./routes/_page/docs/api/contenteditable";
+import { Route as PageDocsApiContenteditableCollaborationRouteImport } from "./routes/_page/docs/api/contenteditable-collaboration";
+import { Route as PageDocsApiDatabaseRouteImport } from "./routes/_page/docs/api/database";
+import { Route as PageDocsApiEditingRouteImport } from "./routes/_page/docs/api/editing";
+import { Route as PageDocsApiJsonDocumentRouteImport } from "./routes/_page/docs/api/json-document";
+import { Route as PageDocsApiReactRouteImport } from "./routes/_page/docs/api/react";
+import { Route as PageDocsApiReactHookFormRouteImport } from "./routes/_page/docs/api/react-hook-form";
+import { Route as PageDocsApiRichTextRouteImport } from "./routes/_page/docs/api/rich-text";
+import { Route as PageDocsApiRichTextReactRouteImport } from "./routes/_page/docs/api/rich-text-react";
+import { Route as PageDocsApiRichTextWebRouteImport } from "./routes/_page/docs/api/rich-text-web";
+import { Route as PageDocsApiSelectionRouteImport } from "./routes/_page/docs/api/selection";
+import { Route as PageDocsApiTanstackTableRouteImport } from "./routes/_page/docs/api/tanstack-table";
+import { Route as PageDocsApiUiPrimitivesReactRouteImport } from "./routes/_page/docs/api/ui-primitives-react";
+import { Route as PageDocsApiWebRouteImport } from "./routes/_page/docs/api/web";
+import { Route as PageDocsApiZodRouteImport } from "./routes/_page/docs/api/zod";
 import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/docs/collaboration/index";
 import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
 import { Route as PageDocsCollaborationLifecycleRouteImport } from "./routes/_page/docs/collaboration/lifecycle";
@@ -635,6 +653,103 @@ const PageDocsAffordanceZoomRoute = PageDocsAffordanceZoomRouteImport.update({
   path: "/docs/affordance/zoom",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsApiAffordanceRoute = PageDocsApiAffordanceRouteImport.update({
+  id: "/affordance",
+  path: "/affordance",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiAjvRoute = PageDocsApiAjvRouteImport.update({
+  id: "/ajv",
+  path: "/ajv",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiCollaborationRoute =
+  PageDocsApiCollaborationRouteImport.update({
+    id: "/collaboration",
+    path: "/collaboration",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiContenteditableRoute =
+  PageDocsApiContenteditableRouteImport.update({
+    id: "/contenteditable",
+    path: "/contenteditable",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiContenteditableCollaborationRoute =
+  PageDocsApiContenteditableCollaborationRouteImport.update({
+    id: "/contenteditable-collaboration",
+    path: "/contenteditable-collaboration",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiDatabaseRoute = PageDocsApiDatabaseRouteImport.update({
+  id: "/database",
+  path: "/database",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiEditingRoute = PageDocsApiEditingRouteImport.update({
+  id: "/editing",
+  path: "/editing",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiJsonDocumentRoute = PageDocsApiJsonDocumentRouteImport.update({
+  id: "/json-document",
+  path: "/json-document",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiReactRoute = PageDocsApiReactRouteImport.update({
+  id: "/react",
+  path: "/react",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiReactHookFormRoute =
+  PageDocsApiReactHookFormRouteImport.update({
+    id: "/react-hook-form",
+    path: "/react-hook-form",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiRichTextRoute = PageDocsApiRichTextRouteImport.update({
+  id: "/rich-text",
+  path: "/rich-text",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiRichTextReactRoute =
+  PageDocsApiRichTextReactRouteImport.update({
+    id: "/rich-text-react",
+    path: "/rich-text-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiRichTextWebRoute = PageDocsApiRichTextWebRouteImport.update({
+  id: "/rich-text-web",
+  path: "/rich-text-web",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiSelectionRoute = PageDocsApiSelectionRouteImport.update({
+  id: "/selection",
+  path: "/selection",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiTanstackTableRoute =
+  PageDocsApiTanstackTableRouteImport.update({
+    id: "/tanstack-table",
+    path: "/tanstack-table",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiUiPrimitivesReactRoute =
+  PageDocsApiUiPrimitivesReactRouteImport.update({
+    id: "/ui-primitives-react",
+    path: "/ui-primitives-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiWebRoute = PageDocsApiWebRouteImport.update({
+  id: "/web",
+  path: "/web",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiZodRoute = PageDocsApiZodRouteImport.update({
+  id: "/zod",
+  path: "/zod",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
 const PageDocsCollaborationIndexRoute =
   PageDocsCollaborationIndexRouteImport.update({
     id: "/docs/collaboration/",
@@ -705,7 +820,7 @@ export interface FileRoutesByFullPath {
   "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
-  "/docs/api": typeof PageDocsApiRoute;
+  "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -769,6 +884,24 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
   "/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
+  "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
+  "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
+  "/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
+  "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
+  "/docs/api/database": typeof PageDocsApiDatabaseRoute;
+  "/docs/api/editing": typeof PageDocsApiEditingRoute;
+  "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/docs/api/react": typeof PageDocsApiReactRoute;
+  "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
+  "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
+  "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
+  "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
+  "/docs/api/selection": typeof PageDocsApiSelectionRoute;
+  "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
+  "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
+  "/docs/api/web": typeof PageDocsApiWebRoute;
+  "/docs/api/zod": typeof PageDocsApiZodRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
@@ -811,7 +944,7 @@ export interface FileRoutesByTo {
   "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
-  "/docs/api": typeof PageDocsApiRoute;
+  "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
@@ -875,6 +1008,24 @@ export interface FileRoutesByTo {
   "/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
   "/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
+  "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
+  "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
+  "/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
+  "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
+  "/docs/api/database": typeof PageDocsApiDatabaseRoute;
+  "/docs/api/editing": typeof PageDocsApiEditingRoute;
+  "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/docs/api/react": typeof PageDocsApiReactRoute;
+  "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
+  "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
+  "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
+  "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
+  "/docs/api/selection": typeof PageDocsApiSelectionRoute;
+  "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
+  "/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
+  "/docs/api/web": typeof PageDocsApiWebRoute;
+  "/docs/api/zod": typeof PageDocsApiZodRoute;
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
@@ -919,7 +1070,7 @@ export interface FileRoutesById {
   "/_page/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
-  "/_page/docs/api": typeof PageDocsApiRoute;
+  "/_page/docs/api": typeof PageDocsApiRouteWithChildren;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
@@ -983,6 +1134,24 @@ export interface FileRoutesById {
   "/_page/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
   "/_page/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
   "/_page/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
+  "/_page/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
+  "/_page/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
+  "/_page/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
+  "/_page/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
+  "/_page/docs/api/database": typeof PageDocsApiDatabaseRoute;
+  "/_page/docs/api/editing": typeof PageDocsApiEditingRoute;
+  "/_page/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/_page/docs/api/react": typeof PageDocsApiReactRoute;
+  "/_page/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
+  "/_page/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
+  "/_page/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
+  "/_page/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
+  "/_page/docs/api/selection": typeof PageDocsApiSelectionRoute;
+  "/_page/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
+  "/_page/docs/api/ui-primitives-react": typeof PageDocsApiUiPrimitivesReactRoute;
+  "/_page/docs/api/web": typeof PageDocsApiWebRoute;
+  "/_page/docs/api/zod": typeof PageDocsApiZodRoute;
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/_page/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
@@ -1091,6 +1260,24 @@ export interface FileRouteTypes {
     | "/docs/affordance/triple-click"
     | "/docs/affordance/typeahead"
     | "/docs/affordance/zoom"
+    | "/docs/api/affordance"
+    | "/docs/api/ajv"
+    | "/docs/api/collaboration"
+    | "/docs/api/contenteditable"
+    | "/docs/api/contenteditable-collaboration"
+    | "/docs/api/database"
+    | "/docs/api/editing"
+    | "/docs/api/json-document"
+    | "/docs/api/react"
+    | "/docs/api/react-hook-form"
+    | "/docs/api/rich-text"
+    | "/docs/api/rich-text-react"
+    | "/docs/api/rich-text-web"
+    | "/docs/api/selection"
+    | "/docs/api/tanstack-table"
+    | "/docs/api/ui-primitives-react"
+    | "/docs/api/web"
+    | "/docs/api/zod"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
@@ -1197,6 +1384,24 @@ export interface FileRouteTypes {
     | "/docs/affordance/triple-click"
     | "/docs/affordance/typeahead"
     | "/docs/affordance/zoom"
+    | "/docs/api/affordance"
+    | "/docs/api/ajv"
+    | "/docs/api/collaboration"
+    | "/docs/api/contenteditable"
+    | "/docs/api/contenteditable-collaboration"
+    | "/docs/api/database"
+    | "/docs/api/editing"
+    | "/docs/api/json-document"
+    | "/docs/api/react"
+    | "/docs/api/react-hook-form"
+    | "/docs/api/rich-text"
+    | "/docs/api/rich-text-react"
+    | "/docs/api/rich-text-web"
+    | "/docs/api/selection"
+    | "/docs/api/tanstack-table"
+    | "/docs/api/ui-primitives-react"
+    | "/docs/api/web"
+    | "/docs/api/zod"
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
@@ -1304,6 +1509,24 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/triple-click"
     | "/_page/docs/affordance/typeahead"
     | "/_page/docs/affordance/zoom"
+    | "/_page/docs/api/affordance"
+    | "/_page/docs/api/ajv"
+    | "/_page/docs/api/collaboration"
+    | "/_page/docs/api/contenteditable"
+    | "/_page/docs/api/contenteditable-collaboration"
+    | "/_page/docs/api/database"
+    | "/_page/docs/api/editing"
+    | "/_page/docs/api/json-document"
+    | "/_page/docs/api/react"
+    | "/_page/docs/api/react-hook-form"
+    | "/_page/docs/api/rich-text"
+    | "/_page/docs/api/rich-text-react"
+    | "/_page/docs/api/rich-text-web"
+    | "/_page/docs/api/selection"
+    | "/_page/docs/api/tanstack-table"
+    | "/_page/docs/api/ui-primitives-react"
+    | "/_page/docs/api/web"
+    | "/_page/docs/api/zod"
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
     | "/_page/docs/collaboration/replica"
@@ -2014,6 +2237,132 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAffordanceZoomRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/affordance": {
+      id: "/_page/docs/api/affordance";
+      path: "/affordance";
+      fullPath: "/docs/api/affordance";
+      preLoaderRoute: typeof PageDocsApiAffordanceRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/ajv": {
+      id: "/_page/docs/api/ajv";
+      path: "/ajv";
+      fullPath: "/docs/api/ajv";
+      preLoaderRoute: typeof PageDocsApiAjvRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/collaboration": {
+      id: "/_page/docs/api/collaboration";
+      path: "/collaboration";
+      fullPath: "/docs/api/collaboration";
+      preLoaderRoute: typeof PageDocsApiCollaborationRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/contenteditable": {
+      id: "/_page/docs/api/contenteditable";
+      path: "/contenteditable";
+      fullPath: "/docs/api/contenteditable";
+      preLoaderRoute: typeof PageDocsApiContenteditableRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/contenteditable-collaboration": {
+      id: "/_page/docs/api/contenteditable-collaboration";
+      path: "/contenteditable-collaboration";
+      fullPath: "/docs/api/contenteditable-collaboration";
+      preLoaderRoute: typeof PageDocsApiContenteditableCollaborationRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/database": {
+      id: "/_page/docs/api/database";
+      path: "/database";
+      fullPath: "/docs/api/database";
+      preLoaderRoute: typeof PageDocsApiDatabaseRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/editing": {
+      id: "/_page/docs/api/editing";
+      path: "/editing";
+      fullPath: "/docs/api/editing";
+      preLoaderRoute: typeof PageDocsApiEditingRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/json-document": {
+      id: "/_page/docs/api/json-document";
+      path: "/json-document";
+      fullPath: "/docs/api/json-document";
+      preLoaderRoute: typeof PageDocsApiJsonDocumentRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/react": {
+      id: "/_page/docs/api/react";
+      path: "/react";
+      fullPath: "/docs/api/react";
+      preLoaderRoute: typeof PageDocsApiReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/react-hook-form": {
+      id: "/_page/docs/api/react-hook-form";
+      path: "/react-hook-form";
+      fullPath: "/docs/api/react-hook-form";
+      preLoaderRoute: typeof PageDocsApiReactHookFormRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/rich-text": {
+      id: "/_page/docs/api/rich-text";
+      path: "/rich-text";
+      fullPath: "/docs/api/rich-text";
+      preLoaderRoute: typeof PageDocsApiRichTextRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/rich-text-react": {
+      id: "/_page/docs/api/rich-text-react";
+      path: "/rich-text-react";
+      fullPath: "/docs/api/rich-text-react";
+      preLoaderRoute: typeof PageDocsApiRichTextReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/rich-text-web": {
+      id: "/_page/docs/api/rich-text-web";
+      path: "/rich-text-web";
+      fullPath: "/docs/api/rich-text-web";
+      preLoaderRoute: typeof PageDocsApiRichTextWebRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/selection": {
+      id: "/_page/docs/api/selection";
+      path: "/selection";
+      fullPath: "/docs/api/selection";
+      preLoaderRoute: typeof PageDocsApiSelectionRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/tanstack-table": {
+      id: "/_page/docs/api/tanstack-table";
+      path: "/tanstack-table";
+      fullPath: "/docs/api/tanstack-table";
+      preLoaderRoute: typeof PageDocsApiTanstackTableRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/ui-primitives-react": {
+      id: "/_page/docs/api/ui-primitives-react";
+      path: "/ui-primitives-react";
+      fullPath: "/docs/api/ui-primitives-react";
+      preLoaderRoute: typeof PageDocsApiUiPrimitivesReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/web": {
+      id: "/_page/docs/api/web";
+      path: "/web";
+      fullPath: "/docs/api/web";
+      preLoaderRoute: typeof PageDocsApiWebRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/zod": {
+      id: "/_page/docs/api/zod";
+      path: "/zod";
+      fullPath: "/docs/api/zod";
+      preLoaderRoute: typeof PageDocsApiZodRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/collaboration/": {
       id: "/_page/docs/collaboration/";
       path: "/docs/collaboration";
@@ -2059,6 +2408,53 @@ declare module "@tanstack/react-router" {
   }
 }
 
+interface PageDocsApiRouteChildren {
+  PageDocsApiAffordanceRoute: typeof PageDocsApiAffordanceRoute;
+  PageDocsApiAjvRoute: typeof PageDocsApiAjvRoute;
+  PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
+  PageDocsApiContenteditableRoute: typeof PageDocsApiContenteditableRoute;
+  PageDocsApiContenteditableCollaborationRoute: typeof PageDocsApiContenteditableCollaborationRoute;
+  PageDocsApiDatabaseRoute: typeof PageDocsApiDatabaseRoute;
+  PageDocsApiEditingRoute: typeof PageDocsApiEditingRoute;
+  PageDocsApiJsonDocumentRoute: typeof PageDocsApiJsonDocumentRoute;
+  PageDocsApiReactRoute: typeof PageDocsApiReactRoute;
+  PageDocsApiReactHookFormRoute: typeof PageDocsApiReactHookFormRoute;
+  PageDocsApiRichTextRoute: typeof PageDocsApiRichTextRoute;
+  PageDocsApiRichTextReactRoute: typeof PageDocsApiRichTextReactRoute;
+  PageDocsApiRichTextWebRoute: typeof PageDocsApiRichTextWebRoute;
+  PageDocsApiSelectionRoute: typeof PageDocsApiSelectionRoute;
+  PageDocsApiTanstackTableRoute: typeof PageDocsApiTanstackTableRoute;
+  PageDocsApiUiPrimitivesReactRoute: typeof PageDocsApiUiPrimitivesReactRoute;
+  PageDocsApiWebRoute: typeof PageDocsApiWebRoute;
+  PageDocsApiZodRoute: typeof PageDocsApiZodRoute;
+}
+
+const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
+  PageDocsApiAffordanceRoute: PageDocsApiAffordanceRoute,
+  PageDocsApiAjvRoute: PageDocsApiAjvRoute,
+  PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
+  PageDocsApiContenteditableRoute: PageDocsApiContenteditableRoute,
+  PageDocsApiContenteditableCollaborationRoute:
+    PageDocsApiContenteditableCollaborationRoute,
+  PageDocsApiDatabaseRoute: PageDocsApiDatabaseRoute,
+  PageDocsApiEditingRoute: PageDocsApiEditingRoute,
+  PageDocsApiJsonDocumentRoute: PageDocsApiJsonDocumentRoute,
+  PageDocsApiReactRoute: PageDocsApiReactRoute,
+  PageDocsApiReactHookFormRoute: PageDocsApiReactHookFormRoute,
+  PageDocsApiRichTextRoute: PageDocsApiRichTextRoute,
+  PageDocsApiRichTextReactRoute: PageDocsApiRichTextReactRoute,
+  PageDocsApiRichTextWebRoute: PageDocsApiRichTextWebRoute,
+  PageDocsApiSelectionRoute: PageDocsApiSelectionRoute,
+  PageDocsApiTanstackTableRoute: PageDocsApiTanstackTableRoute,
+  PageDocsApiUiPrimitivesReactRoute: PageDocsApiUiPrimitivesReactRoute,
+  PageDocsApiWebRoute: PageDocsApiWebRoute,
+  PageDocsApiZodRoute: PageDocsApiZodRoute,
+};
+
+const PageDocsApiRouteWithChildren = PageDocsApiRoute._addFileChildren(
+  PageDocsApiRouteChildren,
+);
+
 interface PageRouteChildren {
   PageDemosRoute: typeof PageDemosRoute;
   PageEditorsRoute: typeof PageEditorsRoute;
@@ -2091,7 +2487,7 @@ interface PageRouteChildren {
   PageDocsAdapterInteractionRoute: typeof PageDocsAdapterInteractionRoute;
   PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
-  PageDocsApiRoute: typeof PageDocsApiRoute;
+  PageDocsApiRoute: typeof PageDocsApiRouteWithChildren;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
@@ -2197,7 +2593,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdapterInteractionRoute: PageDocsAdapterInteractionRoute,
   PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
-  PageDocsApiRoute: PageDocsApiRoute,
+  PageDocsApiRoute: PageDocsApiRouteWithChildren,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,

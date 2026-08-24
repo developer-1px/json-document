@@ -67,6 +67,12 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-editing/src/document.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
+    expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
+      "/docs/api/react",
+      "/docs/api/web",
+      "/docs/api/react",
+      "/docs/api/editing",
+    ]);
   });
 
   test("discovers demo-owned helpers and shared behavioral glue from one entry", async () => {

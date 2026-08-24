@@ -43,10 +43,13 @@ describe("official site shell", () => {
       "Why",
       "Concept Map",
       "API Reference",
+      "Public API",
     ]);
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Collaboration" }));
     expect(groupLinks(nav, "Collaboration")).toEqual([
+      "API · Collaboration",
+      "API · Contenteditable",
       "Replica",
       "Lifecycle",
       "Collaborative History",
@@ -54,6 +57,9 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Editing" }));
     expect(groupLinks(nav, "Editing")).toEqual([
+      "API · Selection",
+      "API · Editing",
+      "API · Rich Text",
       "Intent guide",
       "Intent",
       "Topology",
@@ -64,6 +70,7 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
+      "API · Database",
       "Overview",
       "Official Hands · TBD",
       "Order",
@@ -75,6 +82,9 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
     expect(groupLinks(nav, "Adapter")).toEqual([
+      "API · Web",
+      "API · Contenteditable",
+      "API · Rich Text Web",
       "Overview",
       "Keyboard",
       "Grid cell",
@@ -84,6 +94,12 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual([
+      "API · React",
+      "API · React Hook Form",
+      "API · Ajv",
+      "API · Zod",
+      "API · TanStack Table",
+      "API · Rich Text React",
       "Overview",
       "React Reference",
       "React Hook Form",
@@ -93,6 +109,7 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Affordance" }));
     expect(groupLinks(nav, "Affordance")).toEqual([
+      "API Reference",
       "Focus",
       "Caret",
       "Select",
@@ -119,6 +136,8 @@ describe("official site shell", () => {
       "Snap",
       "Not-allowed",
     ]);
+    await user.click(nav.getByRole("button", { name: "UI Primitives" }));
+    expect(groupLinks(nav, "UI Primitives")).toEqual(["API Reference"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Artifact" }));
@@ -129,6 +148,7 @@ describe("official site shell", () => {
       "Adapter",
       "Connector",
       "Affordance",
+      "UI Primitives",
       "Hands",
       "Artifact",
       "Collaboration",

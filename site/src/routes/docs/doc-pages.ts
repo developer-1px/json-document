@@ -1,4 +1,22 @@
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
+import jsonDocumentApiMarkdown from "../../../../docs/api-reference/json-document.md?raw";
+import selectionApiMarkdown from "../../../../docs/api-reference/selection.md?raw";
+import editingApiMarkdown from "../../../../docs/api-reference/editing.md?raw";
+import reactApiMarkdown from "../../../../docs/api-reference/react.md?raw";
+import reactHookFormApiMarkdown from "../../../../docs/api-reference/react-hook-form.md?raw";
+import ajvApiMarkdown from "../../../../docs/api-reference/ajv.md?raw";
+import zodApiMarkdown from "../../../../docs/api-reference/zod.md?raw";
+import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-table.md?raw";
+import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
+import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
+import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
+import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
+import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
+import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
+import richTextWebApiMarkdown from "../../../../docs/api-reference/rich-text-web.md?raw";
+import richTextReactApiMarkdown from "../../../../docs/api-reference/rich-text-react.md?raw";
+import collaborationApiMarkdown from "../../../../docs/api-reference/collaboration.md?raw";
+import contenteditableCollaborationApiMarkdown from "../../../../docs/api-reference/contenteditable-collaboration.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
 import affordanceMarkdown from "../../../../docs/public/affordance.md?raw";
 import uiPrimitivesMarkdown from "../../../../docs/public/ui-primitives.md?raw";
@@ -127,6 +145,24 @@ export const docPages = {
   intent: docPage("/docs/intent", intentMarkdown),
   intentGuide: docPage("/docs/intent-guide", intentGuideMarkdown),
   api: docPage("/docs/api", apiReferenceMarkdown),
+  jsonDocumentApi: docPage("/docs/api/json-document", jsonDocumentApiMarkdown),
+  selectionApi: docPage("/docs/api/selection", selectionApiMarkdown),
+  editingApi: docPage("/docs/api/editing", editingApiMarkdown),
+  reactApi: docPage("/docs/api/react", reactApiMarkdown),
+  reactHookFormApi: docPage("/docs/api/react-hook-form", reactHookFormApiMarkdown),
+  ajvApi: docPage("/docs/api/ajv", ajvApiMarkdown),
+  zodApi: docPage("/docs/api/zod", zodApiMarkdown),
+  tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
+  affordanceApi: docPage("/docs/api/affordance", affordanceApiMarkdown),
+  uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
+  databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
+  webApi: docPage("/docs/api/web", webApiMarkdown),
+  contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
+  richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),
+  richTextWebApi: docPage("/docs/api/rich-text-web", richTextWebApiMarkdown),
+  richTextReactApi: docPage("/docs/api/rich-text-react", richTextReactApiMarkdown),
+  collaborationApi: docPage("/docs/api/collaboration", collaborationApiMarkdown),
+  contenteditableCollaborationApi: docPage("/docs/api/contenteditable-collaboration", contenteditableCollaborationApiMarkdown),
   topology: docPage("/docs/topology", topologyMarkdown),
   selection: docPage("/docs/selection", selectionMarkdown),
   history: docPage("/docs/history", historyMarkdown),
