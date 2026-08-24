@@ -107,7 +107,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "react-editing.md": "/docs/react-editing",
   "adapters.md": "/docs/adapters",
   "adapter-keyboard.md": "/docs/adapter-keyboard",
-  "adapter-interaction.md": "/docs/adapter-interaction",
+  "adapter-grid-cell.md": "/docs/adapter-grid-cell",
   "adapter-clipboard.md": "/docs/adapter-clipboard",
   "adapter-contenteditable.md": "/docs/adapter-contenteditable",
   "affordance.md": "/docs/affordance",

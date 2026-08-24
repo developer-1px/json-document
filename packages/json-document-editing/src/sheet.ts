@@ -10,7 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { gridCellsInRange, gridPointIndex, gridRangeBounds, type GridTopology } from "./topology.js";
+import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
 import {
   collapsedRangeSelection,
@@ -138,14 +138,14 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     const selectedKeys = new Set<string>();
     for (const range of session.snapshot.selection.ranges) {
       for (const cell of gridCellsInRange(axes, range)) {
-        selectedKeys.add(cellKey(cell.rowId, cell.columnId));
+        selectedKeys.add(gridPointKey(cell));
       }
     }
     const selected: SheetCell[] = [];
     for (const rowId of axes.rowIds) {
       const row = sheetIndex.rowById.get(rowId) as SheetRow;
       for (const columnId of axes.columnIds) {
-        if (!selectedKeys.has(cellKey(rowId, columnId))) continue;
+        if (!selectedKeys.has(gridPointKey({ rowId, columnId }))) continue;
         selected.push({ rowId, columnId, value: row.cells[columnId]! });
       }
     }
@@ -434,9 +434,6 @@ function sameSheetPoint(left: SheetPoint, right: SheetPoint): boolean {
   return left.rowId === right.rowId && left.columnId === right.columnId;
 }
 
-function cellKey(rowId: string, columnId: string): string {
-  return `${rowId}\u0000${columnId}`;
-}
 
 function success(snapshot: EditingSnapshot<SheetSelection>): EditingResult<SheetSelection> {
   return { ok: true, snapshot };

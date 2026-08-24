@@ -83,6 +83,15 @@ input.addEventListener("input", (event) => {
 });
 ```
 
+Grid surfaces bind the Editing topology point to DOM without building selectors
+from product identifiers:
+
+```ts
+const point = { rowId: "record-1", columnId: "status" };
+const attributes = webGridCellAddressProps(point);
+const cell = findWebGridCell<HTMLElement>(table, point);
+```
+
 Document, Sheet, Order, Object, Tree, and Database codecs write both the
 structured json-document MIME payload and its `text/plain` projection. Paste
 consumes only a valid structured payload. Parsing arbitrary external plain text

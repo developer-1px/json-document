@@ -76,7 +76,7 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Adapter")).toEqual([
       "Overview",
       "Keyboard",
-      "Interaction",
+      "Grid cell",
       "Clipboard Reference",
       "Contenteditable",
     ]);
