@@ -1,7 +1,20 @@
 import { describe, expect, test } from "vitest";
-import { createDocumentEditor } from "../src/index.js";
+import { createDocumentEditor, documentSelectionFocus } from "../src/index.js";
 
 describe("document editing vertical slice", () => {
+  test("reads the primary Document focus through the public selector", () => {
+    const empty = createDocumentEditor({ blocks: [] });
+    expect(documentSelectionFocus(empty.snapshot.selection)).toBeNull();
+    expect(documentSelectionFocus({
+      kind: "range",
+      ranges: [{
+        anchor: { blockId: "a", offset: 0 },
+        focus: { blockId: "a", offset: 3 },
+      }],
+      primaryIndex: 0,
+    })).toEqual({ blockId: "a", offset: 3 });
+  });
+
   test("copies multiple blocks, edits, moves, and restores document with selection", () => {
     let id = 10;
     const editor = createDocumentEditor({

@@ -208,6 +208,15 @@
     "navigationGroup": "Hands"
   },
   {
+    "path": "/docs/official-hands",
+    "label": "Official Hands · TBD",
+    "title": "Official Hands · TBD - json-document",
+    "heading": "Official Hands · TBD",
+    "description": "디자인과 제품 데이터는 자유롭게 유지하면서 수렴된 편집 기능을 완성된 SDK로 제공하는 방향을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/demo",
     "label": "Document",
     "title": "Document - json-document",
