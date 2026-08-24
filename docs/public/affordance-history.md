@@ -5,22 +5,13 @@ redo입니다. 버튼은 `canUndo` / `canRedo`를 읽어 꺼집니다.
 
 ```ts
 import {
-  applyAffordance,
   historyAffordance,
 } from "@interactive-os/json-document-affordance";
 
-let commands = {
-  undo: { name: "undo" as const, disabled: true },
-  redo: { name: "redo" as const, disabled: true },
-};
-applyAffordance(historyAffordance({
+const commands = historyAffordance({
   canUndo: editor.snapshot.canUndo,
   canRedo: editor.snapshot.canRedo,
-}), {
-  hand: (hand) => {
-    if (hand.type === "history") commands = { undo: hand.undo, redo: hand.redo };
-  },
-});
+}).hand;
 
 <button
   disabled={commands.undo.disabled}
@@ -32,11 +23,20 @@ applyAffordance(historyAffordance({
 
 History 기록 자체는 Editing이 가지고, 어포던스는 그 손을 닫습니다.
 
+## API Reference
+
+### `historyAffordance(snapshot)`
+
+`canUndo`와 `canRedo`를 받아 항상 `history` hand를 반환합니다. 반환형
+`HistoryAffordanceResult`의 `hand.undo`와 `hand.redo`는 각각 `name`과
+`disabled`를 가지므로 버튼 상태에 직접 사용할 수 있습니다. History 기록과
+실행은 Editing/Host가 계속 소유합니다.
+
 ## TBD
 
 ```ts
 function onKeyDown(event: KeyboardEvent) {
-  const command = resolveAffordanceKey(event);
+  const command = editingCommandFromWebKeyboardStroke(event);
   if (command?.type === "redo") editor.redo();
 }
 ```

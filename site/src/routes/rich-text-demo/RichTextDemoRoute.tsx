@@ -11,11 +11,11 @@ import {
   type RichTextText,
 } from "@interactive-os/json-document-rich-text";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
+import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { historyCommands } from "../../shared/widget-binding";
 import { richTextRecipe } from "./rich-text-styles";
 
 const richTextStyles = richTextRecipe();
@@ -132,7 +132,7 @@ export function RichTextDemoRoute() {
     },
   });
   const snapshot = editing.snapshot;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   const onSurfaceAction = useCallback((action: string, result?: ReturnType<RichTextEditor["dispatch"]>) => {
     setLastAction(action);

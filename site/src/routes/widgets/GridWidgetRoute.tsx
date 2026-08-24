@@ -11,10 +11,10 @@ import {
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import {
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
-import { editingCommandFromStroke, optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialSheet: SheetDocument = {
@@ -45,7 +45,7 @@ export function GridWidgetRoute() {
     keyboard: {
       resolve: (stroke) => {
         keyboard.resolve(stroke);
-        return editingCommandFromStroke(stroke);
+        return editingCommandFromWebKeyboardStroke(stroke);
       },
       focusKey: () => {
         const next = editor.snapshot.selection.focus;
@@ -121,17 +121,7 @@ export function GridWidgetRoute() {
                     })}
                     onClick={(event) => {
                       containerRef.current?.focus();
-                      applyAffordance(pointerSelect(event), {
-                        hand: (hand) => {
-                          if (hand.type !== "select") return;
-                          editor.dispatch({
-                            type: "selection.set",
-                            rowId: row.id,
-                            columnId: column.id,
-                            mode: hand.operation,
-                          });
-                        },
-                      });
+                      editing.getItem(cellKey(row.id, column.id)).getPressHandler()(event);
                     }}
                   >
                     {String(row.cells[column.id] ?? "")}

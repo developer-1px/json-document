@@ -17,14 +17,15 @@ import {
   sheetClipboardCodec,
 } from "@interactive-os/json-document-web";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   applyAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
+import { gridCellProps } from "../../shared/widget-binding";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -74,7 +75,7 @@ export function SheetDemo() {
       );
     },
     keyboard: {
-      resolve: (stroke) => editingCommandFromStroke(stroke),
+      resolve: (stroke) => editingCommandFromWebKeyboardStroke(stroke),
       focusKey: () => {
         const focus = editor.snapshot.selection.focus;
         return focus ? cellKey(focus.rowId, focus.columnId) : undefined;
@@ -113,7 +114,7 @@ export function SheetDemo() {
   });
   const snapshot = editing.snapshot;
   const sheet = snapshot.value as SheetDocument;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function copySelection() {
     const next = editor.copy();
@@ -239,22 +240,6 @@ export function SheetDemo() {
                           data-column-id={column.id}
                           className={classes("p-0", ui.surface.gridCell)}
                           {...gridCellProps(item)}
-                          onClick={(event) => {
-                            applyAffordance(pointerSelect(event), {
-                              hand: (hand) => {
-                                if (hand.type !== "select") return;
-                                run(
-                                  () => dispatchIntent({
-                                    type: "selection.set",
-                                    rowId: row.id,
-                                    columnId: column.id,
-                                    mode: hand.operation,
-                                  }),
-                                  hand.operation === "extend" ? "Range extended" : hand.operation === "toggle" ? "Range toggled" : "Cell selected",
-                                );
-                              },
-                            });
-                          }}
                         >
                             <input
                               aria-label={`${column.label} row ${rowIndex + 1}`}

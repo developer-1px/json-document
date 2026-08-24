@@ -2,12 +2,12 @@ import { useState } from "react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
 import { useReactHookFormConnector } from "@interactive-os/json-document-react-hook-form";
+import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
-import { historyCommands } from "../../../shared/widget-binding";
 
 type ProfileForm = {
   profile: {
@@ -39,7 +39,7 @@ export function ReactHookFormConnectorLab() {
       : "root.canonical",
   });
   const snapshot = binding.snapshot;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
   const canonical = useReactConnector(document);
   const { register, formState } = binding.form;
   const [focusKey, setFocusKey] = useState<string | null>(null);

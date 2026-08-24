@@ -19,20 +19,21 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
+  historyAffordance,
+  editingCommandFromWebKeyboardStroke,
   activateAffordance,
   applyAffordance,
   commitAffordance,
   disclosureAffordance,
   dragAffordance,
   dropAffordance,
-  pointerSelect,
 } from "@interactive-os/json-document-affordance";
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { editingCommandFromStroke, gridCellProps, historyCommands } from "../../shared/widget-binding";
+import { gridCellProps } from "../../shared/widget-binding";
 import { initialDatabase } from "./initial-database";
 
 const defaultWidth = 160;
@@ -104,7 +105,7 @@ export function DatabaseTableDemo() {
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
     },
     keyboard: {
-      resolve: editingCommandFromStroke,
+      resolve: editingCommandFromWebKeyboardStroke,
       focusKey: () => {
         const current = editor.snapshot.selection.focus;
         return current ? cellKey(current.recordId, current.propertyId) : undefined;
@@ -115,7 +116,7 @@ export function DatabaseTableDemo() {
     },
   });
   const snapshot = editing.snapshot;
-  const commands = historyCommands(snapshot);
+  const commands = historyAffordance(snapshot).hand;
 
   function commit(recordId: string, propertyId: string, value: string | number | boolean) {
     run(() => dispatchIntent({ type: "cell.commit", recordId, propertyId, value }), `${propertyId} committed`);
@@ -411,22 +412,6 @@ export function DatabaseTableDemo() {
                         className={classes("p-0", ui.database.cell)}
                         style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                         {...gridCellProps(item)}
-                        onClick={(event) => {
-                          applyAffordance(pointerSelect(event), {
-                            hand: (hand) => {
-                              if (hand.type !== "select") return;
-                              run(
-                                () => dispatchIntent({
-                                  type: "selection.set",
-                                  recordId: record.id,
-                                  propertyId: property.id,
-                                  mode: hand.operation,
-                                }),
-                                "Cell selection updated",
-                              );
-                            },
-                          });
-                        }}
                       >
                         <PropertyEditor
                           property={property}
