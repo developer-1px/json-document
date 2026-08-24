@@ -21,6 +21,9 @@ test("switches between the live demo and its actual full source without resettin
   await expect(workbench.locator('[data-source-highlighter="shiki"]')).toBeVisible();
   await expect(source.locator('span[style*="color"]').first()).toBeVisible();
 
+  await workbench.getByRole("tab", { name: "clipboard.ts" }).click();
+  await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", "/docs/api/web");
+
   await tabs.nth(0).click();
   await expect(page.locator('article[data-block-id="welcome"]')).toHaveAttribute("data-selected", "true");
 });

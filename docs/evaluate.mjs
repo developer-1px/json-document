@@ -1,8 +1,15 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+
+const apiReferenceCheck = spawnSync(process.execPath, ["scripts/generate-api-reference.mjs", "--check"], { cwd: root, encoding: "utf8" });
+if (apiReferenceCheck.status !== 0) {
+  process.stderr.write(apiReferenceCheck.stderr || apiReferenceCheck.stdout);
+  process.exit(apiReferenceCheck.status ?? 1);
+}
 
 function read(path) {
   return readFileSync(join(root, path), "utf8");

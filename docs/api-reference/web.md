@@ -1,0 +1,465 @@
+# @interactive-os/json-document-web API
+
+**Owner:** Adapter
+
+Web platform adapter의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+
+> 이 문서는 `packages/json-document-web/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
+
+## `activeDescendantContainerProps`
+
+```ts
+activeDescendantContainerProps(activeId: string | null): Readonly<{ tabIndex: 0; "aria-activedescendant"?: string; }>
+```
+## `activeDescendantItemProps`
+
+```ts
+activeDescendantItemProps(id: string): Readonly<{ id: string; }>
+```
+## `chordFromStroke`
+
+```ts
+chordFromStroke(stroke: WebKeyboardStroke): string
+```
+## `createWebClipboardBinding`
+
+```ts
+createWebClipboardBinding<Payload extends WebClipboardPayload, EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string; }>(options: WebClipboardBindingOptions<Payload, EditingResult>): WebClipboardBinding<Payload, EditingResult>
+```
+## `createWebClipboardSurface`
+
+```ts
+createWebClipboardSurface<Payload extends WebClipboardPayload, EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string; }>(options: WebClipboardBindingOptions<Payload, EditingResult> & { readonly onResult: (result: WebClipboardResult<Payload, EditingResult>) => void; }): WebClipboardSurface<Payload, EditingResult>
+```
+## `createWebDragDropSession`
+
+```ts
+createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item, Target>): WebDragDropSession<Item, Target>
+```
+## `createWebKeyboardAdapter`
+
+```ts
+createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboardAdapter
+```
+## `createWebPointerSession`
+
+```ts
+createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
+```
+## `databaseClipboardCodec`
+
+```ts
+const databaseClipboardCodec: WebClipboardCodec<DatabaseClipboard>
+```
+## `defaultWebKeymap`
+
+```ts
+const defaultWebKeymap: Readonly<Record<string, WebKeyboardCommand>>
+```
+## `documentClipboardCodec`
+
+```ts
+const documentClipboardCodec: WebClipboardCodec<DocumentClipboard>
+```
+## `findWebGridCell`
+
+```ts
+findWebGridCell<Cell extends WebGridCellAddressElement>(root: WebGridCellAddressRoot<Cell> | null, point: GridPoint): Cell | null
+```
+## `focusWebItem`
+
+```ts
+focusWebItem<Item extends WebFocusableItem>(root: WebFocusItemRoot<Item> | null, key: string): Item | null
+```
+## `gridBoundary`
+
+```ts
+gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): GridPoint | null
+```
+## `lineBoundary`
+
+```ts
+lineBoundary(ids: ReadonlyArray<string>, edge: "start" | "end"): string | null
+```
+## `moveGridPoint`
+
+```ts
+moveGridPoint(topology: GridTopology, point: GridPoint, direction: Extract<NavigationCommand, { readonly type: "move"; }>["direction"]): GridPoint | null
+```
+## `moveLinePoint`
+
+```ts
+moveLinePoint(ids: ReadonlyArray<string>, currentId: string, direction: Extract<NavigationCommand, { readonly type: "move"; }>["direction"]): string | null
+```
+## `objectClipboardCodec`
+
+```ts
+const objectClipboardCodec: WebClipboardCodec<ObjectClipboard>
+```
+## `orderClipboardCodec`
+
+```ts
+const orderClipboardCodec: WebClipboardCodec<OrderClipboard>
+```
+## `pressInteractionFromWeb`
+
+```ts
+pressInteractionFromWeb(input: WebPressInput): WebPressInteraction | null
+```
+## `projectWebWidgetState`
+
+```ts
+projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
+```
+## `rovingFocusItemProps`
+
+```ts
+rovingFocusItemProps(focused: boolean): Readonly<{ tabIndex: 0 | -1; }>
+```
+## `selectionOperationFromModifiers`
+
+```ts
+selectionOperationFromModifiers(modifiers: WebModifierState): Extract<SelectionOperation, "replace" | "extend" | "toggle">
+```
+## `sheetClipboardCodec`
+
+```ts
+const sheetClipboardCodec: WebClipboardCodec<SheetClipboard>
+```
+## `textInputFromControl`
+
+```ts
+textInputFromControl(event: WebTextControlEvent): WebTextInput
+```
+## `treeClipboardCodec`
+
+```ts
+const treeClipboardCodec: WebClipboardCodec<TreeClipboard>
+```
+## `WebClipboardBinding`
+
+```ts
+interface WebClipboardBinding<Payload extends WebClipboardPayload, EditingResult> {
+  copy(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
+  cut(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
+  paste(event: WebClipboardEvent): WebClipboardResult<Payload, EditingResult>;
+}
+```
+## `WebClipboardBindingOptions`
+
+```ts
+interface WebClipboardBindingOptions<
+  Payload extends WebClipboardPayload,
+  EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string },
+> {
+  readonly codec: WebClipboardCodec<Payload>;
+  readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
+  readonly read: () => Payload | null;
+  readonly cut?: (payload: Payload) => EditingResult;
+  readonly paste: (payload: Payload) => EditingResult;
+}
+```
+## `WebClipboardCodec`
+
+```ts
+interface WebClipboardCodec<Payload extends WebClipboardPayload> {
+  readonly mimeType: Payload["type"];
+  encode(payload: Payload): string;
+  decode(serialized: string): Payload | null;
+}
+```
+## `WebClipboardData`
+
+```ts
+interface WebClipboardData {
+  readonly types: ReadonlyArray<string>;
+  getData(format: string): string;
+  setData(format: string, data: string): void;
+}
+```
+## `WebClipboardEvent`
+
+```ts
+interface WebClipboardEvent {
+  readonly clipboardData: WebClipboardData | null;
+  preventDefault(): void;
+}
+```
+## `WebClipboardPayload`
+
+```ts
+interface WebClipboardPayload {
+  readonly type: string;
+  readonly text: string;
+}
+```
+## `WebClipboardRepresentation`
+
+```ts
+interface WebClipboardRepresentation<Payload extends WebClipboardPayload> {
+  readonly mimeType: string;
+  encode(payload: Payload): string;
+  decode(serialized: string): Payload | null;
+}
+```
+## `WebClipboardResult`
+
+```ts
+type WebClipboardResult<Payload extends WebClipboardPayload, EditingResult> =
+  | { readonly ok: true; readonly operation: "copy"; readonly payload: Payload }
+  | { readonly ok: true; readonly operation: "cut" | "paste"; readonly payload: Payload; readonly result: EditingResult }
+  | { readonly ok: false; readonly code: "clipboard.unavailable" | "clipboard.empty" | "clipboard.invalid" | "clipboard.unsupported" | "editing.rejected"; readonly reason?: string };
+```
+## `WebClipboardSurface`
+
+```ts
+interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult> {
+  readonly onCopy: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+  readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
+}
+```
+## `WebDragDropCancelReason`
+
+```ts
+type WebDragDropCancelReason = "cancel" | "drop-rejected" | "superseded";
+```
+## `WebDragDropSession`
+
+```ts
+interface WebDragDropSession<Item, Target> {
+  getActiveItem(): Item | null;
+  begin(item: Item): void;
+  preview(target: Target): boolean;
+  commit(target: Target): Item | null;
+  cancel(reason?: WebDragDropCancelReason): Item | null;
+}
+```
+## `WebDragDropSessionOptions`
+
+```ts
+interface WebDragDropSessionOptions<Item, Target> {
+  readonly onPreview?: (item: Item, target: Target) => void;
+  readonly onCommit?: (item: Item, target: Target) => void;
+  readonly onCancel?: (item: Item, reason: WebDragDropCancelReason) => void;
+}
+```
+## `WebFocusableItem`
+
+```ts
+interface WebFocusableItem {
+  getAttribute(name: string): string | null;
+  focus(): void;
+}
+```
+## `WebFocusItemAttributes`
+
+```ts
+interface WebFocusItemAttributes {
+  readonly tabIndex: 0 | -1;
+  readonly "data-web-focus-key": string;
+}
+```
+## `webFocusItemProps`
+
+```ts
+webFocusItemProps(key: string, focused: boolean): WebFocusItemAttributes
+```
+## `WebFocusItemRoot`
+
+```ts
+interface WebFocusItemRoot<Item extends WebFocusableItem> {
+  querySelectorAll(selectors: string): ArrayLike<Item>;
+}
+```
+## `WebGridCellAddressAttributes`
+
+```ts
+interface WebGridCellAddressAttributes {
+  readonly "data-grid-row-id": string;
+  readonly "data-grid-column-id": string;
+}
+```
+## `WebGridCellAddressElement`
+
+```ts
+interface WebGridCellAddressElement {
+  getAttribute(name: string): string | null;
+}
+```
+## `webGridCellAddressProps`
+
+```ts
+webGridCellAddressProps(point: GridPoint): WebGridCellAddressAttributes
+```
+## `WebGridCellAddressRoot`
+
+```ts
+interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
+  querySelectorAll(selectors: string): ArrayLike<Cell>;
+}
+```
+## `WebKeyboardAdapter`
+
+```ts
+interface WebKeyboardAdapter {
+  resolve(stroke: WebKeyboardStroke): WebKeyboardCommand | null;
+}
+```
+## `WebKeyboardCommand`
+
+```ts
+type WebKeyboardCommand =
+  | Extract<NavigationCommand, { readonly type: "move" } | { readonly type: "boundary" }>
+  | { readonly type: "toggle" }
+  | { readonly type: "delete" }
+  | { readonly type: "undo" }
+  | { readonly type: "redo" };
+```
+## `WebKeyboardStroke`
+
+```ts
+interface WebKeyboardStroke {
+  readonly key: string;
+  readonly shiftKey: boolean;
+  readonly metaKey: boolean;
+  readonly ctrlKey: boolean;
+  readonly altKey?: boolean;
+}
+```
+## `WebKeymap`
+
+```ts
+type WebKeymap = Readonly<Record<string, WebKeyboardCommand>>;
+```
+## `WebModifierState`
+
+```ts
+interface WebModifierState {
+  readonly shiftKey: boolean;
+  readonly metaKey: boolean;
+  readonly ctrlKey: boolean;
+}
+```
+## `WebPointerCaptureTarget`
+
+```ts
+interface WebPointerCaptureTarget {
+  setPointerCapture(pointerId: number): void;
+  hasPointerCapture(pointerId: number): boolean;
+  releasePointerCapture(pointerId: number): void;
+}
+```
+## `WebPointerSession`
+
+```ts
+interface WebPointerSession<State> {
+  getSnapshot(): WebPointerSessionSnapshot<State> | null;
+  begin(target: WebPointerCaptureTarget, pointerId: number, state: State): void;
+  preview(pointerId: number, update: (state: State) => State): State | null;
+  commit(pointerId: number): State | null;
+  cancel(pointerId: number, reason?: WebPointerSessionCancelReason): State | null;
+}
+```
+## `WebPointerSessionCancelReason`
+
+```ts
+type WebPointerSessionCancelReason = "cancel" | "lost-capture" | "superseded";
+```
+## `WebPointerSessionOptions`
+
+```ts
+interface WebPointerSessionOptions<State> {
+  readonly onPreview?: (state: State) => void;
+  readonly onCommit?: (state: State) => void;
+  readonly onCancel?: (state: State, reason: WebPointerSessionCancelReason) => void;
+}
+```
+## `WebPointerSessionSnapshot`
+
+```ts
+type WebPointerSessionSnapshot<State> = Readonly<{
+  pointerId: number;
+  state: State;
+}>;
+```
+## `WebPressInput`
+
+```ts
+type WebPressInput = {
+  readonly type: string;
+  readonly key?: string;
+  readonly button?: number;
+  readonly detail?: number;
+  readonly repeat?: boolean;
+  readonly defaultPrevented?: boolean;
+};
+```
+## `WebPressInteraction`
+
+```ts
+type WebPressInteraction =
+  | { readonly phase: "start" | "end"; readonly source: "keyboard"; readonly key: "Enter" | "Space" }
+  | { readonly phase: "start" | "end"; readonly source: "pointer" }
+  | { readonly phase: "cancel"; readonly source: "keyboard" | "pointer" }
+  | { readonly phase: "activation"; readonly source: "pointer" | "virtual" };
+```
+## `WebPressSource`
+
+```ts
+type WebPressSource = "keyboard" | "pointer" | "virtual";
+```
+## `WebTextControl`
+
+```ts
+interface WebTextControl {
+  readonly value: string;
+  readonly selectionStart: number | null;
+}
+```
+## `WebTextControlEvent`
+
+```ts
+interface WebTextControlEvent {
+  readonly currentTarget: WebTextControl;
+}
+```
+## `WebTextInput`
+
+```ts
+interface WebTextInput {
+  readonly text: string;
+  readonly offset: number;
+}
+```
+## `WebWidgetARIA`
+
+```ts
+type WebWidgetARIA = Readonly<{
+  role: "button" | "option" | "gridcell" | "treeitem";
+  "aria-pressed"?: boolean;
+  "aria-selected"?: boolean;
+  "aria-expanded"?: boolean;
+  "aria-disabled"?: true;
+  "aria-level"?: number;
+  "aria-posinset"?: number;
+  "aria-setsize"?: number;
+}>;
+```
+## `WebWidgetState`
+
+```ts
+type WebWidgetState =
+  | { readonly role: "button"; readonly pressed?: boolean; readonly disabled?: boolean }
+  | { readonly role: "option" | "gridcell"; readonly selected: boolean; readonly disabled?: boolean }
+  | {
+    readonly role: "treeitem";
+    readonly selected: boolean;
+    readonly expanded?: boolean;
+    readonly disabled?: boolean;
+    readonly level?: number;
+    readonly posInSet?: number;
+    readonly setSize?: number;
+  }
+  | { readonly role: "disclosure"; readonly expanded: boolean; readonly disabled?: boolean };
+```

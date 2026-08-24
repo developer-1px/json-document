@@ -23,8 +23,30 @@ import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-r
 export type DemoSourceFile = {
   readonly path: string;
   readonly language: CodeLanguage;
+  readonly referencePath?: string;
   readonly load: () => Promise<string>;
 };
+
+const packageReferencePaths = new Map([
+  ["packages/json-document/", "/docs/api/json-document"],
+  ["packages/json-document-selection/", "/docs/api/selection"],
+  ["packages/json-document-editing/", "/docs/api/editing"],
+  ["packages/json-document-react/", "/docs/api/react"],
+  ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
+  ["packages/json-document-ajv/", "/docs/api/ajv"],
+  ["packages/json-document-zod/", "/docs/api/zod"],
+  ["packages/json-document-tanstack-table/", "/docs/api/tanstack-table"],
+  ["packages/json-document-affordance/", "/docs/api/affordance"],
+  ["packages/json-document-ui-primitives-react/", "/docs/api/ui-primitives-react"],
+  ["packages/json-document-database/", "/docs/api/database"],
+  ["packages/json-document-web/", "/docs/api/web"],
+  ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
+  ["packages/json-document-rich-text/", "/docs/api/rich-text"],
+  ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
+  ["packages/json-document-rich-text-react/", "/docs/api/rich-text-react"],
+  ["packages/json-document-collaboration/", "/docs/api/collaboration"],
+  ["packages/contenteditable-collaboration/", "/docs/api/contenteditable-collaboration"],
+] as const);
 
 const sourceModules = import.meta.glob<string>(
   [
@@ -250,6 +272,7 @@ function sourceFile(path: string): DemoSourceFile {
   return {
     path,
     language: path.endsWith(".tsx") ? "tsx" : "typescript",
+    referencePath: [...packageReferencePaths].find(([prefix]) => path.startsWith(prefix))?.[1],
     load: () => loadSource(path),
   };
 }

@@ -51,6 +51,8 @@
     "browser:test:headed": "playwright test --config site/playwright.config.ts --headed",
     "browser:install": "playwright install chromium",
     "docs:evaluate": "node docs/evaluate.mjs",
+    "docs:api": "node scripts/generate-api-reference.mjs",
+    "docs:api:check": "node scripts/generate-api-reference.mjs --check",
     "site:evaluate": "node site/scripts/evaluate.mjs",
     "site:build:pages": "SITE_BASE=/json-document/ SITE_URL=https://developer-1px.github.io/json-document VITE_SITE_URL=https://developer-1px.github.io/json-document npm run build -w @interactive-os/json-document-site",
     "site:evaluate:pages": "SITE_BASE=/json-document/ SITE_URL=https://developer-1px.github.io/json-document npm run site:evaluate",

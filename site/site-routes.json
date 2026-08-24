@@ -41,6 +41,150 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/api/json-document",
+    "label": "Public API",
+    "title": "JSON Document public API - json-document",
+    "description": "@interactive-os/json-document의 전체 public export와 signature입니다.",
+    "language": "ko",
+    "navigationGroup": "JSON Document"
+  },
+  {
+    "path": "/docs/api/selection",
+    "label": "API · Selection",
+    "title": "Selection API - json-document",
+    "description": "@interactive-os/json-document-selection의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/docs/api/editing",
+    "label": "API · Editing",
+    "title": "Editing API - json-document",
+    "description": "@interactive-os/json-document-editing의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/docs/api/rich-text",
+    "label": "API · Rich Text",
+    "title": "Rich Text API - json-document",
+    "description": "@interactive-os/json-document-rich-text의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Editing"
+  },
+  {
+    "path": "/docs/api/web",
+    "label": "API · Web",
+    "title": "Web API - json-document",
+    "description": "@interactive-os/json-document-web의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/docs/api/contenteditable",
+    "label": "API · Contenteditable",
+    "title": "Contenteditable API - json-document",
+    "description": "@interactive-os/json-document-contenteditable의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/docs/api/rich-text-web",
+    "label": "API · Rich Text Web",
+    "title": "Rich Text Web API - json-document",
+    "description": "@interactive-os/json-document-rich-text-web의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/docs/api/react",
+    "label": "API · React",
+    "title": "React API - json-document",
+    "description": "@interactive-os/json-document-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/api/react-hook-form",
+    "label": "API · React Hook Form",
+    "title": "React Hook Form API - json-document",
+    "description": "@interactive-os/json-document-react-hook-form의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/api/ajv",
+    "label": "API · Ajv",
+    "title": "Ajv API - json-document",
+    "description": "@interactive-os/json-document-ajv의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/api/zod",
+    "label": "API · Zod",
+    "title": "Zod API - json-document",
+    "description": "@interactive-os/json-document-zod의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/api/tanstack-table",
+    "label": "API · TanStack Table",
+    "title": "TanStack Table API - json-document",
+    "description": "@interactive-os/json-document-tanstack-table의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/api/rich-text-react",
+    "label": "API · Rich Text React",
+    "title": "Rich Text React API - json-document",
+    "description": "@interactive-os/json-document-rich-text-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/api/affordance",
+    "label": "API Reference",
+    "title": "Affordance API - json-document",
+    "description": "@interactive-os/json-document-affordance의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance"
+  },
+  {
+    "path": "/docs/api/ui-primitives-react",
+    "label": "API Reference",
+    "title": "UI Primitives API - json-document",
+    "description": "@interactive-os/json-document-ui-primitives-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives"
+  },
+  {
+    "path": "/docs/api/database",
+    "label": "API · Database",
+    "title": "Database API - json-document",
+    "description": "@interactive-os/json-document-database의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/api/collaboration",
+    "label": "API · Collaboration",
+    "title": "Collaboration API - json-document",
+    "description": "@interactive-os/json-document-collaboration의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Collaboration"
+  },
+  {
+    "path": "/docs/api/contenteditable-collaboration",
+    "label": "API · Contenteditable",
+    "title": "Contenteditable Collaboration API - json-document",
+    "description": "@interactive-os/json-document-contenteditable-collaboration의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Collaboration"
+  },
+  {
     "path": "/docs/collaboration",
     "label": "Collaboration",
     "title": "Collaboration - json-document",
