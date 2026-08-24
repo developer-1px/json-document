@@ -5,6 +5,8 @@ import objectEditingSource from "../../../../packages/json-document-editing/src/
 import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
 import webGridCellSource from "../../../../packages/json-document-web/src/grid-cell.ts?raw";
 import gridEditingSource from "../../../../packages/json-document-react/src/use-grid-editing.ts?raw";
+import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
+import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -35,6 +37,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
   ["packages/json-document-web/src/grid-cell.ts", webGridCellSource],
   ["packages/json-document-react/src/use-grid-editing.ts", gridEditingSource],
+  ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
+  ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -71,6 +75,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "findWebGridCell",
     sourcePath: "packages/json-document-web/src/grid-cell.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebDragDropSession",
+    sourcePath: "packages/json-document-web/src/drag-drop-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebPointerSession",
+    sourcePath: "packages/json-document-web/src/pointer-session.ts",
   },
 ] as const;
 

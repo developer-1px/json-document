@@ -392,6 +392,15 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/docs/adapter-interaction",
+    "label": "Interaction",
+    "title": "Interaction Adapter - json-document",
+    "heading": "Interaction Adapter",
+    "description": "Pointer capture와 HTML Drag and Drop session을 preview, commit, cancel lifecycle에 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
     "path": "/docs/adapter-clipboard",
     "label": "Clipboard Reference",
     "title": "Clipboard Adapter - json-document",
