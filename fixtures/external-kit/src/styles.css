@@ -1,0 +1,8 @@
+:root { color: #182230; background: #fff; font-family: ui-sans-serif, system-ui, sans-serif; }
+body { margin: 0; }
+main { width: min(1120px, calc(100% - 32px)); margin: 40px auto; }
+h1 { margin-bottom: 4px; font-size: 24px; }
+main > p { margin-top: 0; color: #667085; }
+.company-database { --jd-db-accent: #6750d8; }
+.failure-controls { display: contents; }
+.failure-controls output { color: #667085; font-size: 12px; }

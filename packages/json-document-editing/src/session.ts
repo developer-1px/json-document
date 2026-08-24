@@ -237,12 +237,22 @@ function invertOperations(
       if (!located.ok) return null;
       inverse.push({ op: "add", path: operation.path, value: clone(located.value) });
     } else if (operation.op === "add") {
-      inverse.push({ op: "remove", path: operation.path });
+      const path = appendedIndexPath(document, operation.path);
+      if (path === null) return null;
+      inverse.push({ op: "remove", path });
     } else {
       return null;
     }
   }
   return inverse;
+}
+
+function appendedIndexPath(document: JSONDocument, path: string): string | null {
+  if (!path.endsWith("/-")) return path;
+  const parent = path.slice(0, -2);
+  const located = document.at(parent);
+  if (!located.ok || !Array.isArray(located.value)) return null;
+  return `${parent}/${located.value.length}`;
 }
 
 function jsonEqual(left: JSONValue, right: JSONValue): boolean {

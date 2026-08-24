@@ -16,7 +16,9 @@ import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { historyCommands } from "../../shared/widget-binding";
-import { richTextStyles } from "./rich-text-styles";
+import { richTextRecipe } from "./rich-text-styles";
+
+const richTextStyles = richTextRecipe();
 
 const initialDocument: RichTextDocument = {
   profile: "urn:interactive-os:json-document:rich-text:1",
@@ -230,7 +232,7 @@ export function RichTextDemoRoute() {
             spellCheck={false}
             aria-label="Rich Text 편집기"
             data-testid="rich-text-editor"
-            className={classes(richTextStyles.editor, ui.state.focus)}
+            className={classes(richTextStyles.editor(), ui.state.focus)}
           />
           <ol className="mt-3 m-0 grid list-none gap-1 p-0" aria-label="Rich Text blocks">
             {(snapshot.value as RichTextDocument).content.map((block) => {

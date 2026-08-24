@@ -252,6 +252,15 @@
     "sidebar": false
   },
   {
+    "path": "/demo/annotation",
+    "label": "Annotation Demo",
+    "title": "Annotation Hands Demo - json-document",
+    "description": "단일 raster image 위에 target, instruction, visible mark를 만들고 structured state와 flattened image로 투영합니다.",
+    "language": "ko",
+    "parentPath": "/editors",
+    "sidebar": false
+  },
+  {
     "path": "/demo/canvas",
     "label": "Canvas",
     "title": "Canvas - json-document",
@@ -540,7 +549,7 @@
     "path": "/connectors/zod",
     "label": "Zod Live Demo",
     "title": "Zod Connector Live Demo - json-document",
-    "description": "A Zod object schema and record array become a Database admin table.",
+    "description": "A Zod object schema and record array become a Database workspace.",
     "navigationGroup": "Connector",
     "sidebar": false,
     "integration": {

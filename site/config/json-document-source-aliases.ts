@@ -44,6 +44,14 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-zod/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-database/styles.css",
+      replacement: sourceFile("packages/json-document-database/styles.css"),
+    },
+    {
+      find: "@interactive-os/json-document-database",
+      replacement: sourceFile("packages/json-document-database/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-tanstack-table",
       replacement: sourceFile("packages/json-document-tanstack-table/src/index.ts"),
     },
