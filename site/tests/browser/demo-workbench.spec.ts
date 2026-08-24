@@ -44,6 +44,7 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "use-grid-editing.ts",
     "topology.ts",
     "grid-cell.ts",
+    "pointer-session.ts",
   ]);
 });
 

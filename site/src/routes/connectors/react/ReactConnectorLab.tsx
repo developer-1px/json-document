@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
-import { type BlockDocument, type DocumentEditor } from "@interactive-os/json-document-editing";
+import { documentSelectionFocus, type BlockDocument } from "@interactive-os/json-document-editing";
 import {
+  DocumentTextControl,
   useDocumentEditor,
   useEditing,
   useEditingSnapshot,
   useReactConnector,
-  useRestoreTextCursor,
 } from "@interactive-os/json-document-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
@@ -126,7 +126,7 @@ function EditingSnapshotLab() {
 
 function UseEditingLab() {
   const editor = useDocumentEditor(initialEditorDocument);
-  const focus = documentFocus(editor);
+  const focus = documentSelectionFocus(editor.snapshot.selection);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
@@ -158,11 +158,15 @@ function UseEditingLab() {
               {...optionProps(item)}
             >
               <span className={ui.text.label}>{block.id}</span>
-              <EditingTextControl
-                label={`${block.id} cursor`}
+              <DocumentTextControl
+                aria-label={`${block.id} cursor`}
                 text={block.text}
                 offset={item.getTextOffset()}
-                onOffset={(offset) => editor.dispatch({ type: "selection.set", blockId: block.id, offset })}
+                readOnly
+                rows={2}
+                onCaretRange={(_from, offset) => editor.dispatch({ type: "selection.set", blockId: block.id, offset })}
+                onTextInput={() => undefined}
+                className={classes("resize-none", ui.field.control)}
               />
             </SelectableItem>
           );
@@ -170,37 +174,6 @@ function UseEditingLab() {
       </div>
     </section>
   );
-}
-
-function EditingTextControl(props: {
-  readonly label: string;
-  readonly text: string;
-  readonly offset: number | null;
-  readonly onOffset: (offset: number) => void;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  useRestoreTextCursor(ref, props.offset);
-  return (
-    <textarea
-      ref={ref}
-      aria-label={props.label}
-      value={props.text}
-      readOnly
-      rows={2}
-      onFocus={(event) => props.onOffset(event.currentTarget.selectionStart ?? 0)}
-      onClick={(event) => {
-        event.stopPropagation();
-        props.onOffset(event.currentTarget.selectionStart ?? 0);
-      }}
-      className={classes("resize-none", ui.field.control)}
-    />
-  );
-}
-
-function documentFocus(editor: DocumentEditor) {
-  const selection = editor.snapshot.selection;
-  if (selection.primaryIndex === null) return null;
-  return selection.ranges[selection.primaryIndex]?.focus ?? null;
 }
 
 function JSONPanel({ testId, value }: { readonly testId: string; readonly value: JSONValue }) {
