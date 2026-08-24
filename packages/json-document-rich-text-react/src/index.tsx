@@ -176,8 +176,10 @@ function RichTextBlockSlot({
     () => store.getNode(nodeId),
   );
   if (node === null) return null;
+  const renderPhase = hasRichTextContent(node) && node.content.length > 0 ? "content" : "empty";
   return (
     <RichTextMemoNode
+      key={`${node.id}:${renderPhase}`}
       node={node}
       schema={schema}
       editable={editable}
