@@ -48,6 +48,8 @@ object 그림이고, textarea 캐럿은 text 그림입니다. 두 질의를 하�
 | `useTreeEditing(options)` | snapshot + visible rows/topology + fold | 접힌 Tree의 선택·키보드·expanded state를 붙일 때 |
 | `useEditingObservation(initialAnnouncement)` | 마지막 Intent·결과·announcement | 실행 결과를 inspector와 접근성 피드백에 함께 투영할 때 |
 | `useRestoreTextCursor(ref, offset)` | 없음. 캐럿만 맞춤 | 모델 offset을 input/textarea에 되돌릴 때 |
+| `useDocumentTextControl(options)` | textarea ref와 lifecycle props | Document text control을 직접 합성할 때 |
+| `DocumentTextControl` | 표준 textarea | 같은 lifecycle을 component로 쓸 때 |
 
 `useEditing`은 안에서 `useEditingSnapshot`을 호출합니다. 값과 선택을 같이
 읽으면서 항목마다 표시를 붙일 때는 `useEditing` 하나면 됩니다.
@@ -226,6 +228,32 @@ function BlockText(props: {
 
 항목의 `getTextOffset()`을 그대로 넘기면 커서 블록만 캐럿을 맞추고,
 나머지 블록은 `null`이라 브라우저 위치를 유지합니다.
+
+## Document text control API
+
+Document textarea의 focus, click/select range, text input, click count, cursor
+복원은 `DocumentTextControl`로 한 번에 붙일 수 있습니다.
+
+```tsx
+import { DocumentTextControl } from "@interactive-os/json-document-react";
+
+<DocumentTextControl
+  aria-label="Block text"
+  text={block.text}
+  offset={item.getTextOffset()}
+  onCaretRange={(from, to, mode) => selectText(block.id, from, to, mode)}
+  onTextInput={(input) => replaceText(block.id, input)}
+/>
+```
+
+`useDocumentTextControl(options)`은 같은 계약을 `ref`와 `props`로 반환합니다.
+Host가 textarea element를 직접 구성해야 할 때 사용합니다. 두 API 모두
+Web의 `textInputFromControl`과 Affordance의 caret/click 계약을 합성합니다.
+Host는 `rows`, class, 제품 문구와 실제 Document Intent dispatch를 소유합니다.
+
+Document selection의 primary point만 필요하면 Editing의
+`documentSelectionFocus(selection)`을 사용합니다. primary range가 없으면
+`null`입니다.
 
 ## 키보드
 
