@@ -10,7 +10,12 @@ import {
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
-import { lastRenderStoreBlockScan, observeRichTextBlockRenders, observeRichTextSurfaceRenders, RichTextEditorSurface } from "../src/index.js";
+import { RichTextEditorSurface } from "../src/index.js";
+import {
+  lastRenderStoreBlockScan,
+  observeRichTextBlockRenders,
+  observeRichTextSurfaceRenders,
+} from "../src/render-instrument.js";
 import { richTextRenderStore } from "../src/render-store.js";
 
 describe("Rich Text React locality", () => {
