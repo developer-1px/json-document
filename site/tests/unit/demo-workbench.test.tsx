@@ -136,4 +136,17 @@ describe("Demo definition and source discovery", () => {
     );
   });
 
+  test("keeps each Editing concept lab API next to its owning route", async () => {
+    const labs = [
+      ["TopologyDemoRoute.tsx", "useTopologyLab.ts"],
+      ["SelectionDemoRoute.tsx", "useSelectionLab.ts"],
+      ["ClipboardDemoRoute.tsx", "useClipboardLab.ts"],
+      ["HistoryDemoRoute.tsx", "useHistoryLab.ts"],
+    ] as const;
+    for (const [route, lab] of labs) {
+      expect((await discoverDemoSources(`routes/editing-demos/${route}`)).map((file) => file.path))
+        .toContain(`routes/editing-demos/${lab}`);
+    }
+  });
+
 });
