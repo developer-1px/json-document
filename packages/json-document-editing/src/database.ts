@@ -44,6 +44,16 @@ export interface DatabaseSort extends Record<string, JSONValue> {
   readonly direction: "ascending" | "descending";
 }
 
+/** Cycles one Database property through ascending, descending, and unsorted. */
+export function nextDatabasePropertySort(
+  sort: DatabaseSort | null,
+  propertyId: string,
+): DatabaseSort | null {
+  if (sort?.propertyId !== propertyId) return { propertyId, direction: "ascending" };
+  if (sort.direction === "ascending") return { propertyId, direction: "descending" };
+  return null;
+}
+
 export interface DatabaseFilter extends Record<string, JSONValue> {
   readonly propertyId: string;
   readonly operator: "equals";

@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   createDatabaseEditor,
+  nextDatabasePropertySort,
   gridPointFromKey,
   gridPointKey,
   type DatabaseDocument,
@@ -400,7 +401,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                   style={columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned)}
                   data-pinned={props.presentation?.propertyPinned?.[property.id]}
                 >
-                  <button type="button" onClick={() => configure({ sort: nextSort(view.sort, property.id) })}>
+                  <button type="button" onClick={() => configure({ sort: nextDatabasePropertySort(view.sort, property.id) })}>
                     <span>{property.name}</span>
                     <small>{property.type}{sortMark(view.sort, property.id)}</small>
                   </button>
@@ -686,12 +687,6 @@ function neighbor(topology: { readonly recordIds: ReadonlyArray<string>; readonl
   const recordId = topology.recordIds[nextRow];
   const propertyId = topology.propertyIds[nextColumn];
   return recordId && propertyId ? { recordId, propertyId } : null;
-}
-
-function nextSort(sort: DatabaseSort | null, propertyId: string): DatabaseSort | null {
-  if (sort?.propertyId !== propertyId) return { propertyId, direction: "ascending" };
-  if (sort.direction === "ascending") return { propertyId, direction: "descending" };
-  return null;
 }
 
 function ariaSort(sort: DatabaseSort | null, propertyId: string): "none" | "ascending" | "descending" {

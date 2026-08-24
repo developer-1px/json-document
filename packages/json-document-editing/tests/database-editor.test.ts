@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   createDatabaseEditor,
+  nextDatabasePropertySort,
   type DatabaseDocument,
 } from "../src/index.js";
 
@@ -32,6 +33,16 @@ const initial: DatabaseDocument = {
 };
 
 describe("Database editor", () => {
+  test("cycles one property sort with a Database-owned transition", () => {
+    expect(nextDatabasePropertySort(null, "score")).toEqual({ propertyId: "score", direction: "ascending" });
+    expect(nextDatabasePropertySort({ propertyId: "score", direction: "ascending" }, "score"))
+      .toEqual({ propertyId: "score", direction: "descending" });
+    expect(nextDatabasePropertySort({ propertyId: "score", direction: "descending" }, "score"))
+      .toBeNull();
+    expect(nextDatabasePropertySort({ propertyId: "score", direction: "descending" }, "name"))
+      .toEqual({ propertyId: "name", direction: "ascending" });
+  });
+
   test("commits all five property value kinds and restores selection with history", () => {
     const editor = createDatabaseEditor(initial);
     expect(editor.dispatch({ type: "cell.commit", recordId: "r1", propertyId: "name", value: "Renamed" }).ok).toBe(true);

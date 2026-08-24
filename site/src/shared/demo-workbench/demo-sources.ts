@@ -13,6 +13,7 @@ import webDragDropSessionSource from "../../../../packages/json-document-web/src
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
+import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -51,6 +52,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
+  ["packages/json-document-editing/src/database.ts", databaseEditingSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -92,6 +94,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createObjectEditor",
     sourcePath: "packages/json-document-editing/src/object.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "nextDatabasePropertySort",
+    sourcePath: "packages/json-document-editing/src/database.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

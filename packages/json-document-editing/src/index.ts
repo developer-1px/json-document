@@ -10,7 +10,7 @@ export {
   lineTopology,
 } from "./topology.js";
 export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./topology.js";
-export { createDatabaseEditor } from "./database.js";
+export { createDatabaseEditor, nextDatabasePropertySort } from "./database.js";
 export { createObjectEditor } from "./object.js";
 export { createOrderEditor } from "./order.js";
 export { createEditingSession } from "./session.js";
