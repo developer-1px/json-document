@@ -1,5 +1,11 @@
 import { useRef, useState } from "react";
-import { createSheetEditor, gridTopology, type SheetDocument } from "@interactive-os/json-document-editing";
+import {
+  createSheetEditor,
+  gridPointFromKey,
+  gridPointKey,
+  gridTopology,
+  type SheetDocument,
+} from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   activeDescendantContainerProps,
@@ -7,6 +13,7 @@ import {
   gridBoundary,
   moveGridPoint,
   projectWebWidgetState,
+  webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
@@ -36,10 +43,12 @@ export function GridWidgetRoute() {
   const focus = editor.snapshot.selection.focus;
   const editing = useEditing({
     source: editor,
-    selectedKeys: editor.selectedCells.map((cell) => cellKey(cell.rowId, cell.columnId)),
-    focusKey: focus ? cellKey(focus.rowId, focus.columnId) : null,
+    selectedKeys: editor.selectedCells.map(gridPointKey),
+    focusKey: focus ? gridPointKey(focus) : null,
     onSelect: (key, mode) => {
-      const { rowId, columnId } = parseCellKey(key);
+      const point = gridPointFromKey(key);
+      if (point === null) return;
+      const { rowId, columnId } = point;
       editor.dispatch({ type: "selection.set", rowId, columnId, mode });
     },
     keyboard: {
@@ -49,7 +58,7 @@ export function GridWidgetRoute() {
       },
       focusKey: () => {
         const next = editor.snapshot.selection.focus;
-        return next ? cellKey(next.rowId, next.columnId) : undefined;
+        return next ? gridPointKey(next) : undefined;
       },
       neighbor: (key, command) => {
         const sheet = editor.snapshot.value as SheetDocument;
@@ -57,11 +66,12 @@ export function GridWidgetRoute() {
           sheet.rows.map((row) => row.id),
           sheet.columns.map((column) => column.id),
         );
-        const current = parseCellKey(key);
+        const current = gridPointFromKey(key);
+        if (current === null) return null;
         const next = command.type === "move"
           ? moveGridPoint(visible, current, command.direction)
           : gridBoundary(visible, current, command.edge);
-        return next ? cellKey(next.rowId, next.columnId) : null;
+        return next ? gridPointKey(next) : null;
       },
       onDelete: () => {
         editor.dispatch({ type: "selection.fill", value: null });
@@ -113,15 +123,16 @@ export function GridWidgetRoute() {
                     as="td"
                     key={column.id}
                     className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
-                    {...optionProps(editing.getItem(cellKey(row.id, column.id)))}
+                    {...webGridCellAddressProps({ rowId: row.id, columnId: column.id })}
+                    {...optionProps(editing.getItem(gridPointKey({ rowId: row.id, columnId: column.id })))}
                     {...activeDescendantItemProps(gridCellId(row.id, column.id))}
                     {...projectWebWidgetState({
                       role: "gridcell",
-                      selected: editing.getItem(cellKey(row.id, column.id)).getIsSelected(),
+                      selected: editing.getItem(gridPointKey({ rowId: row.id, columnId: column.id })).getIsSelected(),
                     })}
                     onClick={(event) => {
                       containerRef.current?.focus();
-                      editing.getItem(cellKey(row.id, column.id)).getPressHandler()(event);
+                      editing.getItem(gridPointKey({ rowId: row.id, columnId: column.id })).getPressHandler()(event);
                     }}
                   >
                     {String(row.cells[column.id] ?? "")}
@@ -142,15 +153,6 @@ export function GridWidgetRoute() {
   );
 }
 
-function cellKey(rowId: string, columnId: string): string {
-  return `${rowId}\u0000${columnId}`;
-}
-
 function gridCellId(rowId: string, columnId: string): string {
   return `widget-grid-cell-${rowId}-${columnId}`;
-}
-
-function parseCellKey(key: string): { readonly rowId: string; readonly columnId: string } {
-  const split = key.indexOf("\u0000");
-  return { rowId: key.slice(0, split), columnId: key.slice(split + 1) };
 }

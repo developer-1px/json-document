@@ -9,6 +9,8 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import {
+  gridPointFromKey,
+  gridPointKey,
   type SheetClipboard,
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
@@ -19,6 +21,7 @@ import { historyAffordance } from "@interactive-os/json-document-affordance";
 import {
   createWebClipboardBinding,
   sheetClipboardCodec,
+  webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
@@ -74,12 +77,12 @@ export function TanStackTableConnectorLab() {
   const focus = binding.snapshot.selection.focus;
   const editing = useEditing({
     source: binding,
-    selectedKeys: binding.selectedCells(table).map((cell) => `${cell.rowId}\u0000${cell.columnId}`),
-    focusKey: focus ? `${focus.rowId}\u0000${focus.columnId}` : null,
+    selectedKeys: binding.selectedCells(table).map(gridPointKey),
+    focusKey: focus ? gridPointKey(focus) : null,
     onSelect: (key, mode) => {
-      const split = key.indexOf("\u0000");
-      const rowId = key.slice(0, split);
-      const columnId = key.slice(split + 1);
+      const point = gridPointFromKey(key);
+      if (point === null) return;
+      const { rowId, columnId } = point;
       run(
         () => binding.selectCell(table, { rowId, columnId, mode }),
         mode === "extend" ? "Visible range extended" : mode === "toggle" ? "Visible range toggled" : "Cell selected",
@@ -183,7 +186,8 @@ export function TanStackTableConnectorLab() {
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id} data-row-id={row.id}>
                   {row.getVisibleCells().map((cell) => {
-                    const item = editing.getItem(`${row.id}\u0000${cell.column.id}`);
+                    const point = { rowId: row.id, columnId: cell.column.id };
+                    const item = editing.getItem(gridPointKey(point));
                     const value = row.original.cells[cell.column.id];
                     return (
                       <SelectableItem
@@ -191,6 +195,7 @@ export function TanStackTableConnectorLab() {
                         key={cell.id}
                         data-row-id={row.id}
                         data-column-id={cell.column.id}
+                        {...webGridCellAddressProps(point)}
                         className={classes("p-0", ui.surface.gridCell)}
                         {...gridCellProps(item)}
                       >

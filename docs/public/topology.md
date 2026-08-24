@@ -62,6 +62,33 @@ const cells = gridCellsInRange(visibleGrid, {
 이를 `SheetTopology`라고 부르고, Database는 행과 열을 `recordIds`와
 `propertyIds`로 나타냅니다.
 
+## GridPoint key API
+
+React selection key처럼 하나의 문자열 identity가 필요한 adapter에서는 직접
+구분자를 정하지 않고 topology의 공개 API를 사용합니다.
+
+```ts
+import {
+  gridPointFromKey,
+  gridPointKey,
+} from "@interactive-os/json-document-editing";
+
+const key = gridPointKey({ rowId: "record-1", columnId: "status" });
+const point = gridPointFromKey(key);
+```
+
+### `gridPointKey(point)`
+
+`GridPoint`를 식별자 문자에 제한을 두지 않는 reversible key로 만듭니다.
+
+### `gridPointFromKey(key)`
+
+`gridPointKey`가 만든 값을 `GridPoint`로 복원합니다. 형식이 유효하지 않으면
+`null`을 반환합니다.
+
+DOM에 같은 point를 연결하는 방법은 [Grid cell Adapter](adapter-grid-cell.md)에
+있습니다.
+
 ## Editor에 전달하기
 
 Sheet editor는 선택을 읽거나 복사할 때 화면 순서를 받을 수 있습니다. 다음

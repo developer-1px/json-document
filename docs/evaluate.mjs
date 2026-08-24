@@ -50,6 +50,7 @@ const publicDocs = {
   intentGuide: read("docs/public/intent-guide.md"),
   api: read("docs/public/api.md"),
   adapters: read("docs/public/adapters.md"),
+  adapterGridCell: read("docs/public/adapter-grid-cell.md"),
   affordance: read("docs/public/affordance.md"),
   affordanceSelect: read("docs/public/affordance-select.md"),
   affordanceFold: read("docs/public/affordance-fold.md"),
@@ -137,6 +138,7 @@ const activeCompanionPackages = new Set([
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "adapter-clipboard.md",
   "adapter-contenteditable.md",
+  "adapter-grid-cell.md",
   "adapter-keyboard.md",
   "adapters.md",
   "affordance-activate.md",
