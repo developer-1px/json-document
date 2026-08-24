@@ -49,7 +49,7 @@ test("lockfile과 workflow 및 미분류 변경은 전체 검사로 승격한다
   for (const path of ["package-lock.json", ".github/workflows/pages.yml", "unknown.bin"]) {
     const plan = createPlan([path]);
     assert.equal(plan.full, true, path);
-    assert.equal(plan.packageWorkspaces.length, 17, path);
+    assert.equal(plan.packageWorkspaces.length, 18, path);
     assert.deepEqual(plan.browserSpecs, ["site/tests/browser"], path);
   }
 });
@@ -90,7 +90,7 @@ test("main 계획은 현재 전체 품질 검사를 요구한다", () => {
   assert.equal(plan.site, true);
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
-  assert.equal(plan.packageWorkspaces.length, 17);
+  assert.equal(plan.packageWorkspaces.length, 18);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
 });
 
