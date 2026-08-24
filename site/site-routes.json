@@ -36,7 +36,7 @@
     "label": "API Reference",
     "title": "json-document API - json-document",
     "heading": "json-document API",
-    "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
+    "description": "JSON Document 진입점과 JSON Patch, Pointer, JSONPath, React hook 공개 API를 정리합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
   },

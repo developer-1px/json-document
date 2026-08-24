@@ -17,7 +17,7 @@ import {
   type DatabaseSort,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   activateAffordance,
   applyAffordance,
@@ -29,7 +29,6 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
-import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -73,7 +72,7 @@ export function DatabaseTableDemo() {
   const [menu, setMenu] = useState<HeaderMenu | null>(null);
   const headerDrag = useRef<HeaderDrag | null>(null);
   const headerResize = useRef<HeaderResize | null>(null);
-  const observation = useDemoObservation<DatabaseIntent>("Database ready");
+  const observation = useEditingObservation<DatabaseIntent>("Database ready");
   const nextRecord = useRef(5);
   const document = editor.snapshot.value as DatabaseDocument;
   const view = document.views[0]!;

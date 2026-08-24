@@ -8,6 +8,13 @@ import {
 
 export type { EditingSnapshot } from "@interactive-os/json-document-editing";
 export {
+  useEditingObservation,
+  type EditingObservation,
+  type EditingObservedResult,
+  type EditingOperationResult,
+  type EditingResultMessage,
+} from "./editing-observation.js";
+export {
   useEditingSnapshot,
   type EditingSnapshotSource,
 } from "./editing-snapshot.js";

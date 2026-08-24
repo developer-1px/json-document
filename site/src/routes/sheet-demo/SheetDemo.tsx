@@ -1,6 +1,5 @@
 import { useRef, useState, type ClipboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   createSheetEditor,
   type EditingResult,
@@ -10,7 +9,7 @@ import {
   type SheetIntent,
   type SheetSelection,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   gridBoundary,
@@ -51,7 +50,7 @@ export function SheetDemo() {
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
   const surfaceRef = useRef<HTMLElement>(null);
-  const observation = useDemoObservation<SheetIntent>("Ready");
+  const observation = useEditingObservation<SheetIntent>("Ready");
 
   function dispatchIntent(intent: SheetIntent) {
     const result: EditingResult<SheetSelection> = editor.dispatch(intent);

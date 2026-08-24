@@ -1,12 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useDemoObservation } from "../../src/shared/demo-workbench/use-demo-observation";
+import { useEditingObservation } from "../src/index.js";
 
 type Intent = { readonly type: "save"; readonly value: string };
 
-describe("useDemoObservation", () => {
+describe("useEditingObservation", () => {
   it("records a dispatched intent, result, and host message", () => {
-    const { result } = renderHook(() => useDemoObservation<Intent>("Ready"));
+    const { result } = renderHook(() => useEditingObservation<Intent>("Ready"));
     const intent: Intent = { type: "save", value: "Alpha" };
 
     act(() => {
@@ -19,7 +19,7 @@ describe("useDemoObservation", () => {
   });
 
   it("preserves a failure code and lets the host project its message", () => {
-    const { result } = renderHook(() => useDemoObservation<Intent>("Ready"));
+    const { result } = renderHook(() => useEditingObservation<Intent>("Ready"));
     const intent: Intent = { type: "save", value: "" };
 
     act(() => {
@@ -37,7 +37,7 @@ describe("useDemoObservation", () => {
   });
 
   it("runs non-intent actions without replacing the observed intent", () => {
-    const { result } = renderHook(() => useDemoObservation<Intent>("Ready"));
+    const { result } = renderHook(() => useEditingObservation<Intent>("Ready"));
 
     act(() => {
       result.current.run(() => ({ ok: true }), "Undone", "Undo unavailable");
@@ -49,7 +49,7 @@ describe("useDemoObservation", () => {
   });
 
   it("records a result without inventing an intent", () => {
-    const { result } = renderHook(() => useDemoObservation<Intent>("Ready"));
+    const { result } = renderHook(() => useEditingObservation<Intent>("Ready"));
 
     act(() => {
       result.current.observeResult({ ok: false, code: "selection.empty" });

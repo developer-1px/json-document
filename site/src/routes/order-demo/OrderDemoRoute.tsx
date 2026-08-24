@@ -1,13 +1,12 @@
 import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   createOrderEditor,
   type OrderClipboard,
   type OrderDocument,
   type OrderIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   lineBoundary,
@@ -46,7 +45,7 @@ export function OrderDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const observation = useDemoObservation<OrderIntent>("Ready");
+  const observation = useEditingObservation<OrderIntent>("Ready");
   const [typeahead, setTypeahead] = useState({ buffer: "", at: 0 });
   const [focusId, setFocusId] = useState(initialOrder.items[0]?.id ?? null);
   const [renaming, setRenaming] = useState<{ readonly id: string; readonly draft: string } | null>(null);

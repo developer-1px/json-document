@@ -1,13 +1,12 @@
 import { useState, type ClipboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   createObjectEditor,
   type ObjectClipboard,
   type ObjectDocument,
   type ObjectIntent,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import { createWebClipboardBinding, objectClipboardCodec } from "@interactive-os/json-document-web";
 import {
   applyAffordance,
@@ -35,7 +34,7 @@ export function ObjectDemoRoute() {
       },
     }),
   }));
-  const observation = useDemoObservation<ObjectIntent>("Ready");
+  const observation = useEditingObservation<ObjectIntent>("Ready");
 
   function run(intent: ObjectIntent, message: string) {
     return observation.dispatch(intent, editor.dispatch, message);

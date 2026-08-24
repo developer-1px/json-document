@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState, type ClipboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   createTreeEditor,
   type TreeClipboard,
@@ -9,7 +8,7 @@ import {
   type TreeNode,
   type TreeTopology,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   lineBoundary,
@@ -42,7 +41,7 @@ export function TreeDemoRoute() {
   const [editor] = useState(() => createTreeEditor(initialTree));
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set(["fruit", "veg"]));
   const [clipboard, setClipboard] = useState<TreeClipboard | null>(null);
-  const observation = useDemoObservation<TreeIntent>("Ready");
+  const observation = useEditingObservation<TreeIntent>("Ready");
   const topology = useMemo(
     () => visibleTopology((editor.snapshot.value as TreeDocument).nodes, expanded),
     [editor.snapshot.value, expanded],

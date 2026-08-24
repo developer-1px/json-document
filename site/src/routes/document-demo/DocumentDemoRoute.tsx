@@ -1,6 +1,5 @@
 import { useRef, useState, type ClipboardEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { useDemoObservation } from "../../shared/demo-workbench/use-demo-observation";
 import {
   type BlockDocument,
   type DocumentClipboard,
@@ -10,7 +9,7 @@ import {
   type DocumentSelection,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditing, useRestoreTextCursor } from "@interactive-os/json-document-react";
+import { useDocumentEditor, useEditing, useEditingObservation, useRestoreTextCursor } from "@interactive-os/json-document-react";
 import {
   createWebClipboardBinding,
   documentClipboardCodec,
@@ -49,7 +48,7 @@ export function DocumentDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
   }));
-  const observation = useDemoObservation<DocumentIntent>("Ready");
+  const observation = useEditingObservation<DocumentIntent>("Ready");
   const [lastClickCount, setLastClickCount] = useState(0);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
