@@ -1,4 +1,4 @@
-export { createDocumentEditor } from "./document.js";
+export { createDocumentEditor, documentSelectionFocus } from "./document.js";
 export {
   gridCellsInRange,
   gridPointIndex,
