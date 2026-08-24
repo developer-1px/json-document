@@ -10,6 +10,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   adapters: "peek",
   adapterKeyboard: "terminal",
   adapterGridCell: "database",
+  adapterInteraction: "cursor",
   adapterClipboard: "clipboard",
   adapterContenteditable: "cursor",
   affordance: "cursor",
@@ -83,6 +84,10 @@ export function AdapterKeyboardDocsRoute() {
 
 export function AdapterGridCellDocsRoute() {
   return <DocsRoute pageId="adapterGridCell" />;
+}
+
+export function AdapterInteractionDocsRoute() {
+  return <DocsRoute pageId="adapterInteraction" />;
 }
 
 export function AdapterClipboardDocsRoute() {
