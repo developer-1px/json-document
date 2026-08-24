@@ -1,56 +1,14 @@
-import { useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
-import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
+import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
-
-const initialDocument: BlockDocument = {
-  blocks: [
-    { id: "alpha", text: "Copy this block" },
-    { id: "bravo", text: "Paste after this block" },
-    { id: "charlie", text: "The document receives cloned blocks" },
-  ],
-};
+import { useClipboardLab } from "./useClipboardLab";
 
 export function ClipboardDemoRoute() {
-  const editor = useDocumentEditor(initialDocument);
-  const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
-  const [lastCall, setLastCall] = useState("블록을 선택한 뒤 copy 또는 cut을 실행합니다.");
-  const editing = useEditing({
-    source: editor,
-    selectedKeys: editor.selectedBlockIds,
-    focusKey: editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.blockId ?? null,
-    onSelect: (blockId) => {
-      editor.dispatch({ type: "selection.set", blockId });
-      setLastCall(`dispatch({ type: "selection.set", blockId: "${blockId}" })`);
-    },
-    operationFromEvent: () => "replace",
-  });
-  const snapshot = editing.snapshot;
-
-  function copy() {
-    const payload = editor.copy();
-    if (!payload) return;
-    setClipboard(payload);
-    setLastCall("editor.copy()");
-  }
-
-  function cut() {
-    const result = editor.cut();
-    if (!result) return;
-    setClipboard(result.clipboard);
-    setLastCall("editor.cut()");
-  }
-
-  function paste() {
-    if (!clipboard) return;
-    editor.dispatch({ type: "clipboard.paste", clipboard });
-    setLastCall("dispatch({ type: \"clipboard.paste\", clipboard })");
-  }
+  const { clipboard, copy, cut, editing, lastCall, paste, snapshot } = useClipboardLab();
 
   return (
     <DemoPage documentation={(
