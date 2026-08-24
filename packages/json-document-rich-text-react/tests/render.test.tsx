@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import * as richTextReact from "../src/index.js";
 import { RichTextEditorSurface, RichTextRenderer } from "../src/index.js";
 import {
   createRichTextSchema,
@@ -7,6 +8,14 @@ import {
   type RichTextDocument,
   type RichTextEditor,
 } from "@interactive-os/json-document-rich-text";
+
+describe("public surface", () => {
+  it("does not expose render-locality test instrumentation", () => {
+    expect(richTextReact).not.toHaveProperty("lastRenderStoreBlockScan");
+    expect(richTextReact).not.toHaveProperty("observeRichTextBlockRenders");
+    expect(richTextReact).not.toHaveProperty("observeRichTextSurfaceRenders");
+  });
+});
 
 describe("RichTextRenderer", () => {
   it("renders every official container with DOM mapping identifiers", () => {

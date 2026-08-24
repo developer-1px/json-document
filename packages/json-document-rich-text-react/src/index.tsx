@@ -24,9 +24,11 @@ import {
   createRichTextContentEditableBinding,
   type RichTextContentEditableBinding,
 } from "@interactive-os/json-document-rich-text-web";
+import {
+  recordRichTextBlockRender,
+  recordRichTextSurfaceRender,
+} from "./render-instrument.js";
 import { richTextRenderStore } from "./render-store.js";
-
-export { lastRenderStoreBlockScan } from "./render-store.js";
 
 export interface RichTextRendererProps {
   readonly document: RichTextDocument;
@@ -34,17 +36,6 @@ export interface RichTextRendererProps {
   readonly renderExtension?: (node: RichTextNode, children: ReadonlyArray<ReactNode>) => ReactNode;
   readonly renderExtensionMark?: (mark: RichTextMark, children: ReadonlyArray<ReactNode>) => ReactNode;
   readonly renderUnknown?: (value: unknown) => ReactNode;
-}
-
-let blockRenderListener: ((nodeId: string) => void) | null = null;
-let surfaceRenderListener: (() => void) | null = null;
-
-export function observeRichTextBlockRenders(listener: ((nodeId: string) => void) | null): void {
-  blockRenderListener = listener;
-}
-
-export function observeRichTextSurfaceRenders(listener: (() => void) | null): void {
-  surfaceRenderListener = listener;
 }
 
 export function RichTextRenderer({ document, schema, renderExtension, renderExtensionMark, renderUnknown }: RichTextRendererProps): ReactNode {
@@ -73,7 +64,7 @@ export interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElem
 }
 
 export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, elementRef, ...props }: RichTextEditorSurfaceProps) {
-  surfaceRenderListener?.();
+  recordRichTextSurfaceRender();
   const store = richTextRenderStore(editor);
   const blockIds = useSyncExternalStore(store.subscribeStructure, store.getBlockIds, store.getBlockIds);
   const documentId = useSyncExternalStore(
@@ -205,7 +196,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
   renderExtensionMark,
   renderUnknown,
 }: MemoNodeProps) {
-  blockRenderListener?.(node.id);
+  recordRichTextBlockRender(node.id);
   const activeSchema = schema ?? richTextSchemaV1;
   if (activeSchema.nodes[node.type] === undefined) {
     return renderUnknown?.(node) ?? <span data-rich-text-unknown>{JSON.stringify(node)}</span>;
