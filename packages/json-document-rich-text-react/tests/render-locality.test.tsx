@@ -131,6 +131,22 @@ describe("Rich Text React locality", () => {
     expect(root.textContent).toContain("x");
     await act(async () => reactRoot.unmount());
   });
+
+  it("exposes the editable element for ecosystem focus restoration", async () => {
+    const editor = createRichTextEditor({ document: createJSONDocument(createRichTextBlockFixture(1, { idPrefix: "focus" })) });
+    const elementRef: { current: HTMLElement | null } = { current: null };
+    const root = globalThis.document.createElement("div");
+    globalThis.document.body.append(root);
+    const reactRoot = createRoot(root);
+
+    await act(async () => reactRoot.render(<RichTextEditorSurface editor={editor} elementRef={elementRef} />));
+    expect(elementRef.current).toBe(root.firstElementChild);
+    elementRef.current?.focus();
+    expect(document.activeElement).toBe(elementRef.current);
+
+    await act(async () => reactRoot.unmount());
+    expect(elementRef.current).toBeNull();
+  });
 });
 
 function collapsed(nodeId: string, offset: number) {

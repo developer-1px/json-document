@@ -68,9 +68,10 @@ export interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElem
   readonly renderExtension?: RichTextRendererProps["renderExtension"];
   readonly renderExtensionMark?: RichTextRendererProps["renderExtensionMark"];
   readonly renderUnknown?: RichTextRendererProps["renderUnknown"];
+  readonly elementRef?: { current: HTMLElement | null };
 }
 
-export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, ...props }: RichTextEditorSurfaceProps) {
+export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, elementRef, ...props }: RichTextEditorSurfaceProps) {
   surfaceRenderListener?.();
   const store = richTextRenderStore(editor);
   const blockIds = useSyncExternalStore(store.subscribeStructure, store.getBlockIds, store.getBlockIds);
@@ -101,7 +102,10 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
   return createElement(as, {
     ...props,
     style: { ...props.style, whiteSpace: "pre-wrap" },
-    ref: rootRef,
+    ref: (node: HTMLElement | null) => {
+      rootRef.current = node;
+      if (elementRef) elementRef.current = node;
+    },
     contentEditable: true,
     suppressContentEditableWarning: true,
     "data-rich-text-node-id": documentId,

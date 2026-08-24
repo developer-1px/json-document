@@ -9,9 +9,14 @@ test("Composer가 브라우저 편집과 canonical draft를 함께 유지한다"
   await editor.click();
   await editor.pressSequentially("draft ");
 
-  await editor.pressSequentially("/");
+  await page.getByRole("button", { name: "추가" }).click();
+  await expect(page.getByRole("menu")).toBeFocused();
+  await page.getByRole("menuitem", { name: /스킬/ }).click();
+  await expect(editor).toBeFocused();
   await expect(page.getByRole("listbox", { name: "스킬 선택" })).toBeVisible();
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-option-skill-summary");
   await editor.press("ArrowDown");
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-option-skill-translate");
   await editor.press("Enter");
   await expect(editor).toContainText("/번역");
 
@@ -32,8 +37,14 @@ test("Composer가 브라우저 편집과 canonical draft를 함께 유지한다"
   await expect(editor).toContainText("check");
 
   await page.getByRole("button", { name: "모델 선택" }).click();
-  await page.getByRole("option", { name: /Claude Sonnet/ }).click();
+  const modelListbox = page.getByRole("listbox", { name: "모델 선택" });
+  await expect(modelListbox).toBeFocused();
+  await expect(modelListbox).toHaveAttribute("aria-activedescendant", "composer-model-option-gpt-5.6");
+  await modelListbox.press("ArrowUp");
+  await expect(modelListbox).toHaveAttribute("aria-activedescendant", "composer-model-option-claude-sonnet");
+  await modelListbox.press("Enter");
   await expect(page.getByRole("button", { name: "모델 선택" })).toContainText("Claude Sonnet");
+  await expect(page.getByRole("button", { name: "모델 선택" })).toBeFocused();
 
   await page.getByLabel("파일 첨부").setInputFiles({
     name: "brief.txt",

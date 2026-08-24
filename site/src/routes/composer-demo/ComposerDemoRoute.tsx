@@ -1,5 +1,8 @@
 import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
+import { createOrderEditor, type OrderEditor } from "@interactive-os/json-document-editing";
+import { useRestoreElementFocus } from "@interactive-os/json-document-react";
+import { activeDescendantContainerProps, activeDescendantItemProps, projectWebWidgetState } from "@interactive-os/json-document-web";
 import {
   createRichTextEditor,
   createRichTextNodeId,
@@ -71,21 +74,34 @@ function initialDraft(): ComposerDraft {
 export function ComposerDemoRoute() {
   const [draft] = useState<JSONDocument>(() => createJSONDocument(initialDraft()));
   const [editor] = useState(() => createRichTextEditor({ document: draft, pointer: "/instruction", schema: composerSchema }));
+  const [commandNavigation] = useState(() => createOrderEditor({ items: suggestions.map((item) => ({ id: item.id, label: item.label })) }));
+  const [modelNavigation] = useState(() => createOrderEditor({ items: models.map((item) => ({ id: item, label: item })) }));
   useSyncExternalStore(editor.subscribe, () => editor.snapshot.revision, () => editor.snapshot.revision);
+  useSyncExternalStore(commandNavigation.subscribe, () => commandNavigation.snapshot.revision, () => commandNavigation.snapshot.revision);
+  useSyncExternalStore(modelNavigation.subscribe, () => modelNavigation.snapshot.revision, () => modelNavigation.snapshot.revision);
   const instruction = draft.at("/instruction");
   if (!instruction.ok) throw new Error("Composer instruction is missing.");
   const instructionValue = instruction.value as unknown as RichTextDocument;
   const [addOpen, setAddOpen] = useState(false);
   const [modelOpen, setModelOpen] = useState(false);
   const [dropActive, setDropActive] = useState(false);
-  const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [submitted, setSubmitted] = useState<ComposerDraft | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const composerEditorRef = useRef<HTMLElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+  const modelButtonRef = useRef<HTMLButtonElement>(null);
+  const modelListboxRef = useRef<HTMLDivElement>(null);
+  useRestoreElementFocus(modelListboxRef, modelOpen);
+  useRestoreElementFocus(addMenuRef, addOpen);
   const trigger = activeTrigger(instructionValue, editor);
   const visibleSuggestions = suggestions.filter((item) => item.kind === trigger?.kind && item.label.toLowerCase().includes(trigger.query));
   const draftValue = draft.value as ComposerDraft;
   const attachments = draftValue.attachments;
   const model = draftValue.model;
+  const commandFocusId = orderFocus(commandNavigation);
+  const activeSuggestion = visibleSuggestions.find((item) => item.id === commandFocusId) ?? visibleSuggestions[0] ?? null;
+  const modelFocusId = orderFocus(modelNavigation) ?? model;
   const hasContent = documentText(instructionValue).trim().length > 0 || attachments.length > 0;
 
   const onAction = useCallback(() => undefined, []);
@@ -103,15 +119,13 @@ export function ComposerDemoRoute() {
     }
     if (trigger && visibleSuggestions.length > 0 && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
       event.preventDefault();
-      const direction = event.key === "ArrowDown" ? 1 : -1;
-      setSuggestionIndex((value) => (value + direction + visibleSuggestions.length) % visibleSuggestions.length);
+      moveOrderFocus(commandNavigation, visibleSuggestions.map((item) => item.id), event.key === "ArrowDown" ? 1 : -1, activeSuggestion?.id);
       return;
     }
-    if (trigger && visibleSuggestions.length > 0 && event.key === "Enter") {
+    if (trigger && activeSuggestion && event.key === "Enter") {
       event.preventDefault();
       event.stopPropagation();
-      insertSuggestion(editor, trigger, visibleSuggestions[suggestionIndex % visibleSuggestions.length]!);
-      setSuggestionIndex(0);
+      insertSuggestion(editor, trigger, activeSuggestion);
       return;
     }
     if (event.key !== "Enter" || event.shiftKey) return;
@@ -145,6 +159,7 @@ export function ComposerDemoRoute() {
     }));
     editor.apply(next.map((value, index) => ({ op: "add" as const, path: `/attachments/${attachments.length + index}`, value })), { origin: "composer.attachments.add" });
     setAddOpen(false);
+    composerEditorRef.current?.focus();
   }
 
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
@@ -163,6 +178,42 @@ export function ComposerDemoRoute() {
 
   function removeAttachment(index: number) {
     editor.apply([{ op: "remove", path: `/attachments/${index}` }], { origin: "composer.attachments.remove" });
+  }
+
+  function openModelListbox() {
+    modelNavigation.dispatch({ type: "selection.set", itemId: model, mode: "replace" });
+    setModelOpen(true);
+  }
+
+  function selectModel(candidate: (typeof models)[number]) {
+    modelNavigation.dispatch({ type: "selection.set", itemId: candidate, mode: "replace" });
+    editor.apply([{ op: "replace", path: "/model", value: candidate }], { origin: "composer.model.select" });
+    setModelOpen(false);
+    modelButtonRef.current?.focus();
+  }
+
+  function handleModelKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      moveOrderFocus(modelNavigation, [...models], event.key === "ArrowDown" ? 1 : -1);
+      return;
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectModel((models.find((candidate) => candidate === modelFocusId) ?? model) as (typeof models)[number]);
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setModelOpen(false);
+      modelButtonRef.current?.focus();
+    }
+  }
+
+  function chooseTrigger(value: "/" | "@") {
+    insertTrigger(editor, value);
+    setAddOpen(false);
+    composerEditorRef.current?.focus();
   }
 
   return (
@@ -204,7 +255,7 @@ export function ComposerDemoRoute() {
           ) : null}
 
           <div className="composer-input-row">
-            <button className={`composer-icon-button${addOpen ? " is-open" : ""}`} type="button" aria-label="추가" aria-expanded={addOpen} onClick={() => setAddOpen((value) => !value)}>＋</button>
+            <button ref={addButtonRef} className={`composer-icon-button${addOpen ? " is-open" : ""}`} type="button" aria-label="추가" aria-haspopup="menu" aria-controls="composer-add-menu" aria-expanded={addOpen} onClick={() => setAddOpen((value) => !value)}>＋</button>
             <div className="composer-editor-wrap">
               {!hasRichText(instructionValue) ? <span className="composer-placeholder-box">작업을 입력하세요</span> : null}
               <RichTextEditorSurface
@@ -213,29 +264,33 @@ export function ComposerDemoRoute() {
                 className="composer-input-box"
                 aria-label="Agent Chat Composer"
                 data-testid="composer-editor"
+                elementRef={composerEditorRef}
+                aria-controls={trigger && visibleSuggestions.length > 0 ? "composer-command-listbox" : undefined}
+                aria-expanded={trigger !== null && visibleSuggestions.length > 0}
+                {...(trigger && activeSuggestion ? activeDescendantContainerProps(commandOptionId(activeSuggestion.id)) : {})}
                 onAction={onAction}
                 onKeyDownCapture={handleKeyDown}
                 renderExtension={renderAtom}
                 spellCheck={false}
               />
             </div>
-            <button className="composer-model-pill" type="button" aria-label="모델 선택" aria-expanded={modelOpen} onClick={() => setModelOpen((value) => !value)}>{model}⌄</button>
+            <button ref={modelButtonRef} className="composer-model-pill" type="button" aria-label="모델 선택" aria-haspopup="listbox" aria-controls="composer-model-listbox" aria-expanded={modelOpen} onClick={() => { if (modelOpen) setModelOpen(false); else openModelListbox(); }}>{model}⌄</button>
             <button className="composer-icon-button" type="button" aria-label="음성 입력">♩</button>
             <button className={`composer-send-button${hasContent ? " is-active" : ""}`} type="button" aria-label="전송 (Enter)" disabled={!hasContent} onClick={submit}>↑</button>
           </div>
 
           {addOpen ? (
-            <div className="composer-layer composer-add-layer" role="menu">
+            <div ref={addMenuRef} id="composer-add-menu" className="composer-layer composer-add-layer" role="menu" tabIndex={-1} onKeyDown={(event) => { if (event.key === "Escape") { setAddOpen(false); addButtonRef.current?.focus(); } }}>
               <button type="button" role="menuitem" onClick={() => fileInput.current?.click()}><span>▤</span><span><strong>파일 업로드</strong><small>이미지와 문서를 첨부해요</small></span></button>
-              <button type="button" role="menuitem" onClick={() => insertTrigger(editor, "/")}><span>/</span><span><strong>스킬</strong><small>반복 작업을 빠르게 실행해요</small></span></button>
-              <button type="button" role="menuitem" onClick={() => insertTrigger(editor, "@")}><span>@</span><span><strong>에이전트</strong><small>전문 에이전트와 함께 작업해요</small></span></button>
+              <button type="button" role="menuitem" onClick={() => chooseTrigger("/")}><span>/</span><span><strong>스킬</strong><small>반복 작업을 빠르게 실행해요</small></span></button>
+              <button type="button" role="menuitem" onClick={() => chooseTrigger("@")}><span>@</span><span><strong>에이전트</strong><small>전문 에이전트와 함께 작업해요</small></span></button>
             </div>
           ) : null}
 
           {modelOpen ? (
-            <div className="composer-layer composer-model-layer" role="listbox" aria-label="모델 선택">
+            <div ref={modelListboxRef} id="composer-model-listbox" className="composer-layer composer-model-layer" role="listbox" aria-label="모델 선택" onKeyDown={handleModelKeyDown} {...activeDescendantContainerProps(modelOptionId(modelFocusId))}>
               {models.map((candidate) => (
-                <button key={candidate} className={candidate === model ? "selected" : ""} type="button" role="option" aria-selected={candidate === model} onClick={() => { editor.apply([{ op: "replace", path: "/model", value: candidate }], { origin: "composer.model.select" }); setModelOpen(false); }}>
+                <button key={candidate} className={candidate === modelFocusId ? "selected" : ""} type="button" {...activeDescendantItemProps(modelOptionId(candidate))} {...projectWebWidgetState({ role: "option", selected: candidate === model })} onPointerMove={() => modelNavigation.dispatch({ type: "selection.set", itemId: candidate, mode: "replace" })} onClick={() => selectModel(candidate)}>
                   <strong>{candidate}</strong>
                   <small>{candidate.startsWith("GPT") ? "OpenAI GPT 계열" : "Anthropic Claude 계열"}</small>
                 </button>
@@ -244,9 +299,9 @@ export function ComposerDemoRoute() {
           ) : null}
 
           {trigger && visibleSuggestions.length > 0 ? (
-            <div className="composer-layer composer-command-layer" role="listbox" aria-label={trigger.kind === "skill" ? "스킬 선택" : "에이전트 선택"}>
-              {visibleSuggestions.map((item, index) => (
-                <button key={item.id} className={index === suggestionIndex % visibleSuggestions.length ? "selected" : ""} type="button" role="option" aria-selected={index === suggestionIndex % visibleSuggestions.length} onMouseDown={(event) => event.preventDefault()} onClick={() => { insertSuggestion(editor, trigger, item); setSuggestionIndex(0); }}>
+            <div id="composer-command-listbox" className="composer-layer composer-command-layer" role="listbox" aria-label={trigger.kind === "skill" ? "스킬 선택" : "에이전트 선택"}>
+              {visibleSuggestions.map((item) => (
+                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} type="button" {...activeDescendantItemProps(commandOptionId(item.id))} {...projectWebWidgetState({ role: "option", selected: item.id === activeSuggestion?.id })} onPointerMove={() => commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" })} onMouseDown={(event) => event.preventDefault()} onClick={() => { commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" }); insertSuggestion(editor, trigger, item); composerEditorRef.current?.focus(); }}>
                   <span className={`composer-command-icon ${item.kind}`}>{item.kind === "skill" ? "/" : "@"}</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
                   <em>{item.kind === "skill" ? "Skill" : "Agent"}</em>
@@ -351,4 +406,23 @@ function formatBytes(size: number): string {
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
   return `${(size / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function orderFocus(editor: OrderEditor): string | null {
+  return editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
+}
+
+function moveOrderFocus(editor: OrderEditor, ids: ReadonlyArray<string>, delta: -1 | 1, from = orderFocus(editor)): void {
+  if (ids.length === 0) return;
+  const index = from === null ? -1 : ids.indexOf(from);
+  const next = index < 0 ? (delta > 0 ? 0 : ids.length - 1) : (index + delta + ids.length) % ids.length;
+  editor.dispatch({ type: "selection.set", itemId: ids[next]!, mode: "replace" });
+}
+
+function commandOptionId(id: string): string {
+  return `composer-command-option-${id}`;
+}
+
+function modelOptionId(id: string): string {
+  return `composer-model-option-${id.replaceAll(" ", "-").toLowerCase()}`;
 }
