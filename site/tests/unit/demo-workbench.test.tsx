@@ -153,4 +153,11 @@ describe("Demo definition and source discovery", () => {
     }
   });
 
+  test("keeps Rich Text Demo command and query APIs next to the owning route", async () => {
+    const paths = (await discoverDemoSources("routes/rich-text-demo/RichTextDemoRoute.tsx"))
+      .map((file) => file.path);
+    expect(paths).toContain("routes/rich-text-demo/useRichTextDemoCommands.ts");
+    expect(paths).toContain("routes/rich-text-demo/richTextDemoQuery.ts");
+  });
+
 });
