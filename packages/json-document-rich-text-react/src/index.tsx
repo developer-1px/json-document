@@ -176,10 +176,8 @@ function RichTextBlockSlot({
     () => store.getNode(nodeId),
   );
   if (node === null) return null;
-  const renderPhase = hasRichTextContent(node) && node.content.length > 0 ? "content" : "empty";
   return (
     <RichTextMemoNode
-      key={`${node.id}:${renderPhase}`}
       node={node}
       schema={schema}
       editable={editable}
@@ -231,7 +229,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
     : [];
   const content = Children.toArray(children);
   if (editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
-    content.push(<br key={`${node.id}:placeholder`} data-rich-text-placeholder="" />);
+    content.push(<span key={`${node.id}:placeholder`} data-rich-text-placeholder=""><br /></span>);
   }
   const props = {
     "data-rich-text-node-id": node.id,

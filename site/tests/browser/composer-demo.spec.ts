@@ -89,8 +89,13 @@ test("빈 Composer에 처음 입력할 때 React DOM 삭제 오류가 발생하�
   await page.goto("/demo/composer");
   const editor = page.getByLabel("Agent Chat Composer");
   await editor.click();
-  await editor.pressSequentially("a");
+  await editor.pressSequentially("ab");
+  await editor.press("Backspace");
   await expect(editor).toHaveText("a");
+  await editor.press("Backspace");
+  await expect(editor).toBeEmpty();
+  await editor.pressSequentially("c");
+  await expect(editor).toHaveText("c");
 
   expect(pageErrors).toEqual([]);
 });
@@ -116,5 +121,7 @@ test("빈 Composer의 첫 한글 IME 입력이 placeholder DOM과 충돌하지 �
   await client.detach();
 
   await expect(editor).toHaveText("한글");
+  await editor.press("Backspace");
+  await expect(editor).toHaveText("한");
   expect(pageErrors).toEqual([]);
 });

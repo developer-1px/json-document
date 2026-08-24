@@ -84,7 +84,7 @@ describe("RichTextRenderer", () => {
 
     expect(html).toContain('style="color:red;white-space:pre-wrap"');
     expect(html).toContain(">a  b</span>");
-    expect(html).toContain('<p data-rich-text-node-id="empty" data-rich-text-container-id="empty"><br data-rich-text-placeholder=""/></p>');
+    expect(html).toContain('<p data-rich-text-node-id="empty" data-rich-text-container-id="empty"><span data-rich-text-placeholder=""><br/></span></p>');
     expect(renderToStaticMarkup(<RichTextRenderer document={document} />)).not.toContain("data-rich-text-placeholder");
   });
 });
