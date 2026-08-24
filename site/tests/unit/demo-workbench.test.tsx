@@ -53,12 +53,14 @@ describe("Demo definition and source discovery", () => {
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
     ]);
     const source = await document[0]!.load();
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
   });
@@ -73,6 +75,15 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
+    ]);
+  });
+
+  test("registers the Object owner source next to Object demo usage", async () => {
+    expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/object-demo/ObjectDemoRoute.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/object.ts",
     ]);
   });
 

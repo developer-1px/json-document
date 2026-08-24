@@ -62,6 +62,7 @@ import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsMentionRouteImport } from "./routes/_page/docs/mention";
 import { Route as PageDocsObjectRouteImport } from "./routes/_page/docs/object";
+import { Route as PageDocsOfficialHandsRouteImport } from "./routes/_page/docs/official-hands";
 import { Route as PageDocsOrderRouteImport } from "./routes/_page/docs/order";
 import { Route as PageDocsReactEditingRouteImport } from "./routes/_page/docs/react-editing";
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
@@ -386,6 +387,11 @@ const PageDocsObjectRoute = PageDocsObjectRouteImport.update({
   path: "/docs/object",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsOfficialHandsRoute = PageDocsOfficialHandsRouteImport.update({
+  id: "/docs/official-hands",
+  path: "/docs/official-hands",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsOrderRoute = PageDocsOrderRouteImport.update({
   id: "/docs/order",
   path: "/docs/order",
@@ -703,6 +709,7 @@ export interface FileRoutesByFullPath {
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
   "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
@@ -806,6 +813,7 @@ export interface FileRoutesByTo {
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
   "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
@@ -911,6 +919,7 @@ export interface FileRoutesById {
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/mention": typeof PageDocsMentionRoute;
   "/_page/docs/object": typeof PageDocsObjectRoute;
+  "/_page/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/_page/docs/order": typeof PageDocsOrderRoute;
   "/_page/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
@@ -1016,6 +1025,7 @@ export interface FileRouteTypes {
     | "/docs/intent-guide"
     | "/docs/mention"
     | "/docs/object"
+    | "/docs/official-hands"
     | "/docs/order"
     | "/docs/react-editing"
     | "/docs/selection"
@@ -1119,6 +1129,7 @@ export interface FileRouteTypes {
     | "/docs/intent-guide"
     | "/docs/mention"
     | "/docs/object"
+    | "/docs/official-hands"
     | "/docs/order"
     | "/docs/react-editing"
     | "/docs/selection"
@@ -1223,6 +1234,7 @@ export interface FileRouteTypes {
     | "/_page/docs/intent-guide"
     | "/_page/docs/mention"
     | "/_page/docs/object"
+    | "/_page/docs/official-hands"
     | "/_page/docs/order"
     | "/_page/docs/react-editing"
     | "/_page/docs/selection"
@@ -1656,6 +1668,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsObjectRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/official-hands": {
+      id: "/_page/docs/official-hands";
+      path: "/docs/official-hands";
+      fullPath: "/docs/official-hands";
+      preLoaderRoute: typeof PageDocsOfficialHandsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/order": {
       id: "/_page/docs/order";
       path: "/docs/order";
@@ -2050,6 +2069,7 @@ interface PageRouteChildren {
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsMentionRoute: typeof PageDocsMentionRoute;
   PageDocsObjectRoute: typeof PageDocsObjectRoute;
+  PageDocsOfficialHandsRoute: typeof PageDocsOfficialHandsRoute;
   PageDocsOrderRoute: typeof PageDocsOrderRoute;
   PageDocsReactEditingRoute: typeof PageDocsReactEditingRoute;
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
@@ -2153,6 +2173,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsMentionRoute: PageDocsMentionRoute,
   PageDocsObjectRoute: PageDocsObjectRoute,
+  PageDocsOfficialHandsRoute: PageDocsOfficialHandsRoute,
   PageDocsOrderRoute: PageDocsOrderRoute,
   PageDocsReactEditingRoute: PageDocsReactEditingRoute,
   PageDocsSelectionRoute: PageDocsSelectionRoute,

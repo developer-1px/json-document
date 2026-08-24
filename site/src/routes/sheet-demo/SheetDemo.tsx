@@ -1,4 +1,4 @@
-import { useRef, useState, type ClipboardEvent } from "react";
+import { useRef, useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createSheetEditor,
@@ -11,7 +11,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   gridBoundary,
   moveGridPoint,
   sheetClipboardCodec,
@@ -44,14 +44,21 @@ const initialSheet: SheetDocument = {
 export function SheetDemo() {
   const [editor] = useState<SheetEditor>(() => createSheetEditor(initialSheet));
   const [clipboard, setClipboard] = useState<SheetClipboard | null>(null);
-  const [webClipboard] = useState(() => createWebClipboardBinding({
+  const observation = useEditingObservation<SheetIntent>("Ready");
+  const [clipboardSurface] = useState(() => createWebClipboardSurface({
     codec: sheetClipboardCodec,
     read: () => editor.copy(),
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({ type: "clipboard.paste", clipboard: payload }),
+    onResult(result) {
+      if (!result.ok) return observation.announce(result.code);
+      if (result.operation !== "paste") setClipboard(result.payload);
+      if (result.operation === "cut") observation.observeResult(result.result);
+      const verb = result.operation === "copy" ? "Copied" : result.operation === "cut" ? "Cut" : "Pasted";
+      observation.announce(`${verb} ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
+    },
   }));
   const surfaceRef = useRef<HTMLElement>(null);
-  const observation = useEditingObservation<SheetIntent>("Ready");
 
   function dispatchIntent(intent: SheetIntent) {
     const result: EditingResult<SheetSelection> = editor.dispatch(intent);
@@ -143,30 +150,6 @@ export function SheetDemo() {
     );
   }
 
-  function handleNativeCopy(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.copy(event);
-    if (!result.ok) return observation.announce(result.code);
-    setClipboard(result.payload);
-    observation.announce(`Copied ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
-  }
-
-  function handleNativeCut(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.cut(event);
-    if (!result.ok) return observation.announce(result.code);
-    setClipboard(result.payload);
-    if (result.operation === "cut") {
-      observation.observeResult(result.result);
-    }
-    observation.announce(`Cut ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`);
-  }
-
-  function handleNativePaste(event: ClipboardEvent<HTMLElement>) {
-    const result = webClipboard.paste(event);
-    observation.announce(result.ok
-      ? `Pasted ${result.payload.cells.length} × ${result.payload.cells[0]?.length ?? 0} structured cells`
-      : result.code);
-  }
-
   return (
     <DemoPage documentation={(
         <PageHeader
@@ -211,9 +194,7 @@ export function SheetDemo() {
             ref={surfaceRef}
             aria-label="Editable sheet"
             tabIndex={0}
-            onCopy={handleNativeCopy}
-            onCut={handleNativeCut}
-            onPaste={handleNativePaste}
+            {...clipboardSurface}
             onKeyDown={editing.getKeyDownHandler()}
             className={classes("min-w-0 overflow-auto", ui.state.focus)}
           >

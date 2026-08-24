@@ -17,6 +17,7 @@ test("switches between the live demo and its actual full source without resettin
   const source = workbench.getByRole("tabpanel").locator("pre");
   await expect(source).toContainText("export function DocumentDemoRoute()");
   await expect(source).toContainText('from "@interactive-os/json-document-react"');
+  await expect(workbench.getByRole("tab", { name: "clipboard.ts" })).toBeVisible();
   await expect(workbench.locator('[data-source-highlighter="shiki"]')).toBeVisible();
   await expect(source.locator('span[style*="color"]').first()).toBeVisible();
 
@@ -36,6 +37,7 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "DatabaseTableDemo.tsx",
     "initial-database.ts",
     "editing-observation.ts",
+    "pointer-session.ts",
   ]);
 });
 

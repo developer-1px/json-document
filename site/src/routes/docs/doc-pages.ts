@@ -58,6 +58,7 @@ import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
 import databaseMarkdown from "../../../../docs/public/database.md?raw";
+import officialHandsMarkdown from "../../../../docs/public/official-hands.md?raw";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 function docPage(path: string, source: string) {
@@ -118,6 +119,7 @@ export const docPages = {
   object: docPage("/docs/object", objectMarkdown),
   tree: docPage("/docs/tree", treeMarkdown),
   database: docPage("/docs/database", databaseMarkdown),
+  officialHands: docPage("/docs/official-hands", officialHandsMarkdown),
   intent: docPage("/docs/intent", intentMarkdown),
   intentGuide: docPage("/docs/intent-guide", intentGuideMarkdown),
   api: docPage("/docs/api", apiReferenceMarkdown),
