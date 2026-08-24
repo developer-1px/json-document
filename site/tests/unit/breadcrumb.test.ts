@@ -78,8 +78,8 @@ describe("breadcrumbTrail", () => {
     expect(trail("/docs/react-editing")).toEqual([
       "Overview:/",
       "Connector:/docs/connectors",
-      "React:/docs/connector-react",
-      "React editing:/docs/react-editing",
+      "React Reference:/docs/connector-react",
+      "Editing guide:/docs/react-editing",
     ]);
     expect(trail("/docs/adapter-keyboard")).toEqual([
       "Overview:/",

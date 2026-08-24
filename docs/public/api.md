@@ -3,63 +3,6 @@
 앞 문서에서 사용한 `@interactive-os/json-document`의 공개 API를 작업별로
 정리합니다.
 
-## Package별 API
-
-| package | 공개 API | 상세 문서 |
-| --- | --- | --- |
-| `@interactive-os/json-document` | `createJSONDocument`, JSON Patch, Pointer, JSONPath | 이 문서 |
-| `@interactive-os/json-document-react` | `useReactConnector`, `useJSONDocumentValue`, `useDocumentEditor`, `useEditingSnapshot`, `useEditing`, `useEditingObservation`, cursor 복원 hook | [React editing](react-editing.md) |
-
-### `useEditingObservation`
-
-Editing Intent를 실행한 Host가 마지막 Intent·결과·announcement를 같은 lifecycle로
-관찰할 때 사용합니다. API는 `@interactive-os/json-document-react` package root에서
-공개됩니다.
-
-```tsx
-import { useEditingObservation } from "@interactive-os/json-document-react";
-
-const observation = useEditingObservation<DocumentIntent>("Ready");
-
-const result = observation.dispatch(
-  intent,
-  editor.dispatch,
-  "Block added",
-  (failure) => failure.ok ? "" : `Rejected: ${failure.code}`,
-);
-```
-
-```ts
-function useEditingObservation<Intent>(initialAnnouncement: string): {
-  readonly announcement: string;
-  readonly lastIntent: Intent | null;
-  readonly lastResult: EditingObservedResult | null;
-  readonly announce: (message: string) => void;
-  readonly dispatch: <Result extends EditingOperationResult>(
-    intent: Intent,
-    action: (intent: Intent) => Result,
-    success: EditingResultMessage<Result>,
-    failure?: EditingResultMessage<Result>,
-  ) => Result;
-  readonly observe: <Result extends EditingOperationResult>(
-    intent: Intent,
-    result: Result,
-  ) => Result;
-  readonly observeResult: <Result extends EditingOperationResult>(result: Result) => Result;
-  readonly run: <Result extends EditingOperationResult>(
-    action: () => Result,
-    success: EditingResultMessage<Result>,
-    failure: EditingResultMessage<Result>,
-  ) => Result;
-};
-```
-
-`dispatch`는 Intent와 결과를 기록하고 성공·실패 문구를 announcement로 투영합니다.
-`run`은 undo처럼 새 Intent를 만들지 않는 작업의 문구만 갱신합니다. `observe`와
-`observeResult`는 Host가 실행 순서를 직접 조립할 때 사용합니다. 실패 결과에
-`code`가 없으면 관찰 결과에는 `editing.rejected`가 기록됩니다. 문구 자체는 제품
-의미이므로 Host가 주입합니다.
-
 ## 문서 만들기
 
 ```ts

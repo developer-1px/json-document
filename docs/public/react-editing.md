@@ -431,10 +431,15 @@ Sheet Intent 이름을 알지 않습니다. KeyboardEvent를 command로 바꾸�
 [Adapter](adapters.md)입니다. 값 구독만 필요하면 `useReactConnector`와
 `useEditingSnapshot`으로 충분합니다.
 
-## API
+## API usage
 
 패키지 `@interactive-os/json-document-react`가 선택·커서 질의로 공개하는
 함수입니다.
+
+정확한 package export와 `useEditingObservation` 계약은
+[React Reference](connector-react.md)가 소유합니다.
+
+### 선택·커서 usage
 
 ```ts
 function useEditing<Selection extends JSONValue, Key extends string = string>(

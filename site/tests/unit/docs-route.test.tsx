@@ -43,6 +43,11 @@ describe("documentation routes", () => {
     await waitFor(() => expect(document.title).toBe("Connector Docs - json-document"), { timeout: 10000 });
     expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" }, { timeout: 10000 })).toBeTruthy();
 
+    await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "React Reference" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "React Connector" }, { timeout: 10000 })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "useEditingObservation" })).toBeTruthy();
+    expect(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Editing guide" })).toBeTruthy();
+
     await user.click(nav.getByRole("button", { name: "Editing" }));
     await user.click(within(nav.getByRole("group", { name: "Editing" })).getByRole("link", { name: "Topology" }));
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));
@@ -50,9 +55,8 @@ describe("documentation routes", () => {
 
     await user.click(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }));
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
-    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("JSON Document 진입점과 JSON Patch, Pointer, JSONPath, React hook 공개 API를 정리합니다.");
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" }, { timeout: 10000 })).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 3, name: "useEditingObservation" })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
     const mobileSections = within(screen.getByRole("navigation", { name: "Documentation sections" }));

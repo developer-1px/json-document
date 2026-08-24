@@ -36,7 +36,7 @@
     "label": "API Reference",
     "title": "json-document API - json-document",
     "heading": "json-document API",
-    "description": "JSON Document 진입점과 JSON Patch, Pointer, JSONPath, React hook 공개 API를 정리합니다.",
+    "description": "여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.",
     "language": "ko",
     "navigationGroup": "JSON Document"
   },
@@ -446,7 +446,7 @@
   },
   {
     "path": "/docs/connector-react",
-    "label": "React",
+    "label": "React Reference",
     "title": "React Connector - json-document",
     "heading": "React Connector",
     "description": "document와 editor의 변경을 React 구독과 선택 질의로 연결합니다.",
@@ -455,7 +455,7 @@
   },
   {
     "path": "/docs/react-editing",
-    "label": "React editing",
+    "label": "Editing guide",
     "title": "React editing - json-document",
     "heading": "React에서 선택과 커서 그리기",
     "description": "useEditing으로 object 범위, focus 커서, text offset을 화면에 붙이는 방법과 API를 설명합니다.",
