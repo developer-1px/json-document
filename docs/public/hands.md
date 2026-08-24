@@ -21,8 +21,8 @@ Agent output + Viewer + Hands   = 이어서 작업할 수 있는 artifact
 
 | Hands | 관찰한 표면 | 사람이 하는 일 |
 | --- | --- | --- |
-| [Composer](composer.md) · TBD | ChatGPT composer | 지시와 artifact context를 한 턴으로 구성 |
-| [Mention](mention.md) · TBD | Slack mention | 이름으로 보이는 안정적인 entity reference를 삽입 |
+| [Composer](composer.md) | Cstar composer | 지시와 구조화된 context를 한 턴으로 구성 |
+| [Mention](mention.md) | Cstar mention | 이름으로 보이는 안정적인 entity reference atom을 삽입 |
 
 Transcript, 말풍선, think·stream·tool animation은 표현과 runtime lifecycle입니다.
 Hands가 아닙니다.

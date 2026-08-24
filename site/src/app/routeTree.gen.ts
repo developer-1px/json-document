@@ -29,6 +29,7 @@ import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
 import { Route as PageDemoAnnotationRouteImport } from "./routes/_page/demo/annotation";
 import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
+import { Route as PageDemoComposerRouteImport } from "./routes/_page/demo/composer";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
@@ -211,6 +212,11 @@ const PageDemoCanvasRoute = PageDemoCanvasRouteImport.update({
 const PageDemoClipboardRoute = PageDemoClipboardRouteImport.update({
   id: "/demo/clipboard",
   path: "/demo/clipboard",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoComposerRoute = PageDemoComposerRouteImport.update({
+  id: "/demo/composer",
+  path: "/demo/composer",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoDatabaseRoute = PageDemoDatabaseRouteImport.update({
@@ -658,6 +664,7 @@ export interface FileRoutesByFullPath {
   "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
+  "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
@@ -759,6 +766,7 @@ export interface FileRoutesByTo {
   "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
+  "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
@@ -862,6 +870,7 @@ export interface FileRoutesById {
   "/_page/demo/annotation": typeof PageDemoAnnotationRoute;
   "/_page/demo/canvas": typeof PageDemoCanvasRoute;
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
+  "/_page/demo/composer": typeof PageDemoComposerRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
@@ -965,6 +974,7 @@ export interface FileRouteTypes {
     | "/demo/annotation"
     | "/demo/canvas"
     | "/demo/clipboard"
+    | "/demo/composer"
     | "/demo/database"
     | "/demo/history"
     | "/demo/kanban"
@@ -1066,6 +1076,7 @@ export interface FileRouteTypes {
     | "/demo/annotation"
     | "/demo/canvas"
     | "/demo/clipboard"
+    | "/demo/composer"
     | "/demo/database"
     | "/demo/history"
     | "/demo/kanban"
@@ -1168,6 +1179,7 @@ export interface FileRouteTypes {
     | "/_page/demo/annotation"
     | "/_page/demo/canvas"
     | "/_page/demo/clipboard"
+    | "/_page/demo/composer"
     | "/_page/demo/database"
     | "/_page/demo/history"
     | "/_page/demo/kanban"
@@ -1398,6 +1410,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/clipboard";
       fullPath: "/demo/clipboard";
       preLoaderRoute: typeof PageDemoClipboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/composer": {
+      id: "/_page/demo/composer";
+      path: "/demo/composer";
+      fullPath: "/demo/composer";
+      preLoaderRoute: typeof PageDemoComposerRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/database": {
@@ -1979,6 +1998,7 @@ interface PageRouteChildren {
   PageDemoAnnotationRoute: typeof PageDemoAnnotationRoute;
   PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
+  PageDemoComposerRoute: typeof PageDemoComposerRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
@@ -2080,6 +2100,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoAnnotationRoute: PageDemoAnnotationRoute,
   PageDemoCanvasRoute: PageDemoCanvasRoute,
   PageDemoClipboardRoute: PageDemoClipboardRoute,
+  PageDemoComposerRoute: PageDemoComposerRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,

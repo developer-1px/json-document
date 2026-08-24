@@ -1,12 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Added an Agent Chat Composer Hand based on the Cstar design source, with
+  canonical Rich Text instruction, mention and skill atoms, attachment context,
+  native clipboard, IME, and local history.
+- Made the Rich Text React renderer honor editor pointers below the JSON root.
+
 All notable changes to the active v3 packages are documented here. Earlier
 source and release history remains available from Git commits and version tags.
 
 ## Next
 
 - Reframed the development SSOT around JSON Document, Hands, and Artifact. Composer and
-  Mention are the open Hands; App names and transcript animation no longer
+  Mention started as open Hands; App names and transcript animation no longer
   stand in for human editing tools.
 - Moved every standalone demo into its canonical Markdown document through a lazy Live
   Demo Bench with interactive preview, source tabs, and shared Shiki highlighting.

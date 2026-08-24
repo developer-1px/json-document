@@ -2,6 +2,7 @@ import {
   buildPointer,
   parsePointer,
   type JSONDocument,
+  type JSONPatchOperation,
   type JSONValue,
   type Pointer,
 } from "@interactive-os/json-document";
@@ -71,6 +72,7 @@ export interface RichTextEditor {
   readonly schema: RichTextSchema;
   readonly topology: RichTextTopology;
   dispatch(intent: RichTextIntent): EditingResult<RichTextSelection>;
+  apply(operations: ReadonlyArray<JSONPatchOperation>, options?: { readonly origin?: string; readonly historyGroup?: string }): EditingResult<RichTextSelection>;
   copy(): RichTextClipboard | null;
   cut(): { readonly clipboard: RichTextClipboard; readonly result: EditingResult<RichTextSelection> } | null;
   undo(): EditingResult<RichTextSelection>;
@@ -148,6 +150,14 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       if (intent.type === "node.move") return moveNode(intent.nodeId, intent.point);
       if (intent.type === "node.set-attrs") return setNodeAttrs(intent.nodeId, intent.attrs);
       return pasteClipboard(intent.clipboard);
+    },
+    apply(operations, applyOptions) {
+      return session.apply({
+        operations,
+        selectionAfter: session.snapshot.selection,
+        origin: applyOptions?.origin ?? "rich-text.document.apply",
+        ...(applyOptions?.historyGroup === undefined ? {} : { historyGroup: applyOptions.historyGroup }),
+      });
     },
     copy: copySelection,
     cut() {
