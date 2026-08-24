@@ -9,12 +9,14 @@ import {
   type SheetIntent,
   type SheetSelection,
 } from "@interactive-os/json-document-editing";
-import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
+import { useEditingObservation, useGridEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardSurface,
+  findWebGridCell,
   gridBoundary,
   moveGridPoint,
   sheetClipboardCodec,
+  webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
@@ -70,12 +72,12 @@ export function SheetDemo() {
   }
 
   const focus = editor.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: editor,
-    selectedKeys: editor.selectedCells.map((cell) => cellKey(cell.rowId, cell.columnId)),
-    focusKey: focus ? cellKey(focus.rowId, focus.columnId) : null,
-    onSelect: (key, mode) => {
-      const { rowId, columnId } = parseCellKey(key);
+    selectedPoints: editor.selectedCells,
+    focusPoint: focus,
+    onSelect: (point, mode) => {
+      const { rowId, columnId } = point;
       run(
         () => dispatchIntent({ type: "selection.set", rowId, columnId, mode }),
         mode === "extend" ? "Range extended" : mode === "toggle" ? "Range toggled" : "Cell selected",
@@ -83,21 +85,17 @@ export function SheetDemo() {
     },
     keyboard: {
       resolve: (stroke) => editingCommandFromWebKeyboardStroke(stroke),
-      focusKey: () => {
-        const focus = editor.snapshot.selection.focus;
-        return focus ? cellKey(focus.rowId, focus.columnId) : undefined;
-      },
-      neighbor: (key, command) => {
+      focusPoint: () => editor.snapshot.selection.focus ?? undefined,
+      neighbor: (point, command) => {
         const sheet = editor.snapshot.value as SheetDocument;
         const topology = {
           rowIds: sheet.rows.map((row) => row.id),
           columnIds: sheet.columns.map((column) => column.id),
         };
-        const current = parseCellKey(key);
         const next = command.type === "move"
-          ? moveGridPoint(topology, current, command.direction)
-          : gridBoundary(topology, current, command.edge);
-        return next ? cellKey(next.rowId, next.columnId) : null;
+          ? moveGridPoint(topology, point, command.direction)
+          : gridBoundary(topology, point, command.edge);
+        return next;
       },
       onDelete: () => {
         run(() => dispatchIntent({ type: "selection.fill", value: null }), "Selected cells cleared");
@@ -108,10 +106,7 @@ export function SheetDemo() {
       onRedo: () => {
         run(() => editor.redo(), "Redone");
       },
-      afterMove: (key) => {
-        const { rowId, columnId } = parseCellKey(key);
-        focusCell(surfaceRef.current, rowId, columnId);
-      },
+      afterMove: (point) => focusCell(surfaceRef.current, point),
       ignoreCommand: (command, context) => (
         context.inField
         && ((command.type === "toggle" && context.event.key === " ")
@@ -212,11 +207,13 @@ export function SheetDemo() {
                   <tr key={row.id}>
                     <th scope="row" className={classes("px-2 py-2 text-center", ui.surface.gridIndex, ui.text.meta)}>{rowIndex + 1}</th>
                     {sheet.columns.map((column) => {
-                      const item = editing.getItem(cellKey(row.id, column.id));
+                      const point = { rowId: row.id, columnId: column.id };
+                      const item = editing.getCell(point);
                       return (
                         <SelectableItem
                           as="td"
                           key={column.id}
+                          {...webGridCellAddressProps(point)}
                           data-row-id={row.id}
                           data-column-id={column.id}
                           className={classes("p-0", ui.surface.gridCell)}
@@ -245,20 +242,8 @@ export function SheetDemo() {
   );
 }
 
-function cellKey(rowId: string, columnId: string): string {
-  return `${rowId}\u0000${columnId}`;
-}
-
-function parseCellKey(key: string): { readonly rowId: string; readonly columnId: string } {
-  const split = key.indexOf("\u0000");
-  return { rowId: key.slice(0, split), columnId: key.slice(split + 1) };
-}
-
-function focusCell(surface: HTMLElement | null, rowId: string, columnId: string) {
-  const cell = surface?.querySelector(
-    `[data-row-id="${CSS.escape(rowId)}"][data-column-id="${CSS.escape(columnId)}"] input`,
-  );
-  if (cell instanceof HTMLInputElement) cell.focus();
+function focusCell(surface: HTMLElement | null, point: { readonly rowId: string; readonly columnId: string }) {
+  findWebGridCell<HTMLElement>(surface, point)?.querySelector<HTMLInputElement>("input")?.focus();
 }
 
 function displayValue(value: unknown): string {

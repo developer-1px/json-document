@@ -17,7 +17,7 @@ import {
   type DatabaseSort,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
+import { useEditingObservation, useGridEditing } from "@interactive-os/json-document-react";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
@@ -28,7 +28,7 @@ import {
   dragAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
+import { pressInteractionFromWeb, webGridCellAddressProps } from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -96,19 +96,19 @@ export function DatabaseTableDemo() {
   }
 
   const focus = editor.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: editor,
-    selectedKeys: editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)),
-    focusKey: focus ? cellKey(focus.recordId, focus.propertyId) : null,
-    onSelect: (key, mode) => {
-      const { recordId, propertyId } = parseCellKey(key);
+    selectedPoints: editor.selectedCellsIn(topology).map(databaseGridPoint),
+    focusPoint: focus ? databaseGridPoint(focus) : null,
+    onSelect: (point, mode) => {
+      const { recordId, propertyId } = databasePoint(point);
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
     },
     keyboard: {
       resolve: editingCommandFromWebKeyboardStroke,
-      focusKey: () => {
+      focusPoint: () => {
         const current = editor.snapshot.selection.focus;
-        return current ? cellKey(current.recordId, current.propertyId) : undefined;
+        return current ? databaseGridPoint(current) : undefined;
       },
       neighbor: () => null,
       onUndo: () => { run(editor.undo, "Undone"); },
@@ -402,11 +402,13 @@ export function DatabaseTableDemo() {
               {records.map((record) => (
                 <tr key={record.id} data-record-id={record.id}>
                   {properties.map((property) => {
-                    const item = editing.getItem(cellKey(record.id, property.id));
+                    const point = databaseGridPoint({ recordId: record.id, propertyId: property.id });
+                    const item = editing.getCell(point);
                     return (
                       <SelectableItem
                         as="td"
                         key={property.id}
+                        {...webGridCellAddressProps(point)}
                         data-record-id={record.id}
                         data-property-id={property.id}
                         className={classes("p-0", ui.database.cell)}
@@ -550,11 +552,10 @@ function filterItems(property: DatabaseProperty): ReadonlyArray<{ readonly label
   return [];
 }
 
-function cellKey(recordId: string, propertyId: string): string {
-  return `${recordId}\u0000${propertyId}`;
+function databaseGridPoint(point: { readonly recordId: string; readonly propertyId: string }) {
+  return { rowId: point.recordId, columnId: point.propertyId };
 }
 
-function parseCellKey(key: string): { readonly recordId: string; readonly propertyId: string } {
-  const split = key.indexOf("\u0000");
-  return { recordId: key.slice(0, split), propertyId: key.slice(split + 1) };
+function databasePoint(point: { readonly rowId: string; readonly columnId: string }) {
+  return { recordId: point.rowId, propertyId: point.columnId };
 }

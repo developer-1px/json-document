@@ -29,6 +29,7 @@ docs
 |   |-- database.md            # Hands: 저장된 표 view
 |   |-- adapters.md            # Adapters: 공식 플랫폼 변환
 |   |-- adapter-keyboard.md    # Adapter: Keyboard / Press / ARIA
+|   |-- adapter-grid-cell.md   # Adapter: GridPoint / DOM cell address
 |   |-- adapter-clipboard.md   # Adapter: ClipboardEvent
 |   |-- adapter-contenteditable.md # Adapter: native-input DOM
 |   |-- connectors.md          # Connectors: 공식 라이브러리 생태계 연결

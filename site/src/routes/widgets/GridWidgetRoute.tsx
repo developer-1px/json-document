@@ -1,12 +1,17 @@
 import { useRef, useState } from "react";
-import { createSheetEditor, gridTopology, type SheetDocument } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import {
+  createSheetEditor,
+  gridTopology,
+  type SheetDocument,
+} from "@interactive-os/json-document-editing";
+import { useGridEditing } from "@interactive-os/json-document-react";
 import {
   activeDescendantContainerProps,
   activeDescendantItemProps,
   gridBoundary,
   moveGridPoint,
   projectWebWidgetState,
+  webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { SelectableItem } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
@@ -34,12 +39,12 @@ export function GridWidgetRoute() {
   const [editor] = useState(() => createSheetEditor(initialSheet));
   const keyboard = useWidgetKeyboard();
   const focus = editor.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: editor,
-    selectedKeys: editor.selectedCells.map((cell) => cellKey(cell.rowId, cell.columnId)),
-    focusKey: focus ? cellKey(focus.rowId, focus.columnId) : null,
-    onSelect: (key, mode) => {
-      const { rowId, columnId } = parseCellKey(key);
+    selectedPoints: editor.selectedCells,
+    focusPoint: focus,
+    onSelect: (point, mode) => {
+      const { rowId, columnId } = point;
       editor.dispatch({ type: "selection.set", rowId, columnId, mode });
     },
     keyboard: {
@@ -47,21 +52,17 @@ export function GridWidgetRoute() {
         keyboard.resolve(stroke);
         return editingCommandFromWebKeyboardStroke(stroke);
       },
-      focusKey: () => {
-        const next = editor.snapshot.selection.focus;
-        return next ? cellKey(next.rowId, next.columnId) : undefined;
-      },
-      neighbor: (key, command) => {
+      focusPoint: () => editor.snapshot.selection.focus ?? undefined,
+      neighbor: (point, command) => {
         const sheet = editor.snapshot.value as SheetDocument;
         const visible = gridTopology(
           sheet.rows.map((row) => row.id),
           sheet.columns.map((column) => column.id),
         );
-        const current = parseCellKey(key);
         const next = command.type === "move"
-          ? moveGridPoint(visible, current, command.direction)
-          : gridBoundary(visible, current, command.edge);
-        return next ? cellKey(next.rowId, next.columnId) : null;
+          ? moveGridPoint(visible, point, command.direction)
+          : gridBoundary(visible, point, command.edge);
+        return next;
       },
       onDelete: () => {
         editor.dispatch({ type: "selection.fill", value: null });
@@ -108,25 +109,28 @@ export function GridWidgetRoute() {
           <tbody>
             {document.rows.map((row) => (
               <tr key={row.id}>
-                {document.columns.map((column) => (
-                  <SelectableItem
+                {document.columns.map((column) => {
+                  const point = { rowId: row.id, columnId: column.id };
+                  const cell = editing.getCell(point);
+                  return <SelectableItem
                     as="td"
                     key={column.id}
                     className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
-                    {...optionProps(editing.getItem(cellKey(row.id, column.id)))}
+                    {...webGridCellAddressProps(point)}
+                    {...optionProps(cell)}
                     {...activeDescendantItemProps(gridCellId(row.id, column.id))}
                     {...projectWebWidgetState({
                       role: "gridcell",
-                      selected: editing.getItem(cellKey(row.id, column.id)).getIsSelected(),
+                      selected: cell.getIsSelected(),
                     })}
                     onClick={(event) => {
                       containerRef.current?.focus();
-                      editing.getItem(cellKey(row.id, column.id)).getPressHandler()(event);
+                      cell.getPressHandler()(event);
                     }}
                   >
                     {String(row.cells[column.id] ?? "")}
-                  </SelectableItem>
-                ))}
+                  </SelectableItem>;
+                })}
               </tr>
             ))}
           </tbody>
@@ -142,15 +146,6 @@ export function GridWidgetRoute() {
   );
 }
 
-function cellKey(rowId: string, columnId: string): string {
-  return `${rowId}\u0000${columnId}`;
-}
-
 function gridCellId(rowId: string, columnId: string): string {
   return `widget-grid-cell-${rowId}-${columnId}`;
-}
-
-function parseCellKey(key: string): { readonly rowId: string; readonly columnId: string } {
-  const split = key.indexOf("\u0000");
-  return { rowId: key.slice(0, split), columnId: key.slice(split + 1) };
 }
