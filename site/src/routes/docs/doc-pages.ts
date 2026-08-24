@@ -29,6 +29,7 @@ import affordanceForbidMarkdown from "../../../../docs/public/affordance-forbid.
 import adaptersMarkdown from "../../../../docs/public/adapters.md?raw";
 import adapterKeyboardMarkdown from "../../../../docs/public/adapter-keyboard.md?raw";
 import adapterGridCellMarkdown from "../../../../docs/public/adapter-grid-cell.md?raw";
+import adapterInteractionMarkdown from "../../../../docs/public/adapter-interaction.md?raw";
 import adapterClipboardMarkdown from "../../../../docs/public/adapter-clipboard.md?raw";
 import adapterContenteditableMarkdown from "../../../../docs/public/adapter-contenteditable.md?raw";
 import collaborationMarkdown from "../../../../docs/public/collaboration.md?raw";
@@ -70,6 +71,7 @@ export const docPages = {
   adapters: docPage("/docs/adapters", adaptersMarkdown),
   adapterKeyboard: docPage("/docs/adapter-keyboard", adapterKeyboardMarkdown),
   adapterGridCell: docPage("/docs/adapter-grid-cell", adapterGridCellMarkdown),
+  adapterInteraction: docPage("/docs/adapter-interaction", adapterInteractionMarkdown),
   adapterClipboard: docPage("/docs/adapter-clipboard", adapterClipboardMarkdown),
   adapterContenteditable: docPage("/docs/adapter-contenteditable", adapterContenteditableMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),

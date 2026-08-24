@@ -37,6 +37,13 @@ export {
   type UseEditingOptions,
 } from "./use-editing.js";
 export {
+  DocumentTextControl,
+  useDocumentTextControl,
+  type DocumentTextControlBinding,
+  type DocumentTextControlProps,
+  type UseDocumentTextControlOptions,
+} from "./use-document-text-control.js";
+export {
   useGridEditing,
   type GridEditing,
   type GridEditingKeyboardOptions,

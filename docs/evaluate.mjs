@@ -140,6 +140,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "adapter-clipboard.md",
   "adapter-contenteditable.md",
   "adapter-grid-cell.md",
+  "adapter-interaction.md",
   "adapter-keyboard.md",
   "adapters.md",
   "affordance-activate.md",

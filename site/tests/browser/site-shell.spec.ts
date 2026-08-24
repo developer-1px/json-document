@@ -56,6 +56,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Overview",
     "Keyboard",
     "Grid cell",
+    "Interaction",
     "Clipboard Reference",
     "Contenteditable",
   ]);
@@ -209,6 +210,7 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
     "Overview",
     "Keyboard",
     "Grid cell",
+    "Interaction",
     "Clipboard Reference",
     "Contenteditable",
   ]);

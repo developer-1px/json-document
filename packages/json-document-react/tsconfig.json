@@ -7,7 +7,9 @@
   },
   "references": [
     { "path": "../json-document" },
-    { "path": "../json-document-editing" }
+    { "path": "../json-document-editing" },
+    { "path": "../json-document-affordance" },
+    { "path": "../json-document-web" }
   ],
   "include": ["src/**/*.ts"]
 }
