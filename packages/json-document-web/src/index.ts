@@ -11,6 +11,7 @@ export {
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";
 export { pressInteractionFromWeb } from "./press.js";
+export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export {
   activeDescendantContainerProps,
   activeDescendantItemProps,
@@ -55,3 +56,8 @@ export type {
   WebPressSource,
 } from "./press.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
+export type {
+  WebGridCellAddressAttributes,
+  WebGridCellAddressElement,
+  WebGridCellAddressRoot,
+} from "./grid-cell.js";

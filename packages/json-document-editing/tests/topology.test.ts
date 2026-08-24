@@ -5,6 +5,8 @@ import {
   createTreeEditor,
   gridCellsInRange,
   gridPointIndex,
+  gridPointFromKey,
+  gridPointKey,
   gridRangeBounds,
   gridTopology,
   lineInterval,
@@ -12,6 +14,14 @@ import {
 } from "../src/index.js";
 
 describe("topology", () => {
+  test("round-trips grid point keys without reserving identifier characters", () => {
+    const point = { rowId: "row\u0000/한글", columnId: "column:[1]" };
+    const key = gridPointKey(point);
+    expect(gridPointFromKey(key)).toEqual(point);
+    expect(gridPointFromKey("not-json")).toBeNull();
+    expect(gridPointFromKey('["only-one"]')).toBeNull();
+  });
+
   test("reads a 1D interval in visible order, not JSON insertion order", () => {
     const visible = lineTopology(["c", "a", "b"]);
     expect(lineInterval(visible, "c", "a")).toEqual(["c", "a"]);

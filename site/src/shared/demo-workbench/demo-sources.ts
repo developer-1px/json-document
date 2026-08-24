@@ -2,6 +2,8 @@ import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
+import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
+import webGridCellSource from "../../../../packages/json-document-web/src/grid-cell.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -29,6 +31,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
+  ["packages/json-document-editing/src/topology.ts", editingTopologySource],
+  ["packages/json-document-web/src/grid-cell.ts", webGridCellSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -45,6 +49,21 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createObjectEditor",
     sourcePath: "packages/json-document-editing/src/object.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "gridPointKey",
+    sourcePath: "packages/json-document-editing/src/topology.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "webGridCellAddressProps",
+    sourcePath: "packages/json-document-web/src/grid-cell.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "findWebGridCell",
+    sourcePath: "packages/json-document-web/src/grid-cell.ts",
   },
 ] as const;
 

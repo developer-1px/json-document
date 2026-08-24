@@ -72,7 +72,13 @@ describe("official site shell", () => {
       "Mention",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
-    expect(groupLinks(nav, "Adapter")).toEqual(["Overview", "Keyboard", "Clipboard Reference", "Contenteditable"]);
+    expect(groupLinks(nav, "Adapter")).toEqual([
+      "Overview",
+      "Keyboard",
+      "Grid cell",
+      "Clipboard Reference",
+      "Contenteditable",
+    ]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual([
       "Overview",

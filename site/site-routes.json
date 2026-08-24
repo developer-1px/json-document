@@ -374,6 +374,15 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/docs/adapter-grid-cell",
+    "label": "Grid cell",
+    "title": "Grid cell Adapter - json-document",
+    "heading": "Grid cell Adapter",
+    "description": "GridPoint를 안정된 DOM cell 주소와 focus lookup에 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
     "path": "/docs/adapter-clipboard",
     "label": "Clipboard Reference",
     "title": "Clipboard Adapter - json-document",

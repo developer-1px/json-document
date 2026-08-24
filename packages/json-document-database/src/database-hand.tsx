@@ -9,6 +9,8 @@ import {
 } from "react";
 import {
   createDatabaseEditor,
+  gridPointFromKey,
+  gridPointKey,
   type DatabaseDocument,
   type DatabaseEditor,
   type DatabaseFilter,
@@ -18,7 +20,11 @@ import {
   type DatabaseSort,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { createWebKeyboardAdapter } from "@interactive-os/json-document-web";
+import {
+  createWebKeyboardAdapter,
+  findWebGridCell,
+  webGridCellAddressProps,
+} from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
@@ -183,30 +189,34 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
   const focus = snapshot.selection.focus;
   const editing = useEditing<DatabaseSelection>({
     source: editor,
-    selectedKeys: editor.selectedCellsIn(topology).map((cell) => cellKey(cell.recordId, cell.propertyId)),
-    focusKey: focus ? cellKey(focus.recordId, focus.propertyId) : null,
+    selectedKeys: editor.selectedCellsIn(topology).map((cell) => gridPointKey(databaseGridPoint(cell))),
+    focusKey: focus ? gridPointKey(databaseGridPoint(focus)) : null,
     onSelect: (key, mode) => {
       setEditingKey(null);
-      const point = parseCellKey(key);
+      const gridPoint = gridPointFromKey(key);
+      if (gridPoint === null) return;
+      const point = databasePoint(gridPoint);
       editor.dispatch({ type: "selection.set", ...point, mode });
     },
     keyboard: {
       resolve: keyboard.resolve,
-      focusKey: () => focus ? cellKey(focus.recordId, focus.propertyId) : undefined,
+      focusKey: () => focus ? gridPointKey(databaseGridPoint(focus)) : undefined,
       neighbor: (key, command) => {
-        const point = parseCellKey(key);
+        const gridPoint = gridPointFromKey(key);
+        if (gridPoint === null) return null;
+        const point = databasePoint(gridPoint);
         if (command.type === "boundary") {
           const propertyId = command.edge === "start" ? topology.propertyIds[0] : topology.propertyIds[topology.propertyIds.length - 1];
-          return propertyId ? cellKey(point.recordId, propertyId) : null;
+          return propertyId ? gridPointKey(databaseGridPoint({ recordId: point.recordId, propertyId })) : null;
         }
         const next = neighbor(topology, point, command.direction);
-        return next ? cellKey(next.recordId, next.propertyId) : null;
+        return next ? gridPointKey(databaseGridPoint(next)) : null;
       },
       onUndo: () => history("undo"),
       onRedo: () => history("redo"),
       afterMove: (key) => {
-        const point = parseCellKey(key);
-        requestAnimationFrame(() => findCell(tableRef.current, point.recordId, point.propertyId)?.focus());
+        const point = gridPointFromKey(key);
+        if (point !== null) requestAnimationFrame(() => findWebGridCell<HTMLElement>(tableRef.current, point)?.focus());
       },
     },
   });
@@ -284,18 +294,18 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
     }
     if ((event.key === "Enter" || event.key === "F2") && snapshot.selection.focus !== null && !props.readOnly) {
       event.preventDefault();
-      const key = cellKey(snapshot.selection.focus.recordId, snapshot.selection.focus.propertyId);
+      const key = gridPointKey(databaseGridPoint(snapshot.selection.focus));
       setEditingInitialValue(undefined);
       setEditingKey(key);
-      requestAnimationFrame(() => findCell(tableRef.current, snapshot.selection.focus!.recordId, snapshot.selection.focus!.propertyId)?.querySelector<HTMLElement>("input, select")?.focus());
+      requestAnimationFrame(() => findWebGridCell<HTMLElement>(tableRef.current, databaseGridPoint(snapshot.selection.focus!))?.querySelector<HTMLElement>("input, select")?.focus());
       return;
     }
     if (!props.readOnly && snapshot.selection.focus !== null && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
       event.preventDefault();
-      const key = cellKey(snapshot.selection.focus.recordId, snapshot.selection.focus.propertyId);
+      const key = gridPointKey(databaseGridPoint(snapshot.selection.focus));
       setEditingInitialValue(event.key);
       setEditingKey(key);
-      requestAnimationFrame(() => findCell(tableRef.current, snapshot.selection.focus!.recordId, snapshot.selection.focus!.propertyId)?.querySelector<HTMLElement>("input, select")?.focus());
+      requestAnimationFrame(() => findWebGridCell<HTMLElement>(tableRef.current, databaseGridPoint(snapshot.selection.focus!))?.querySelector<HTMLElement>("input, select")?.focus());
       return;
     }
     editing.getKeyDownHandler()(event);
@@ -402,7 +412,8 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
             {records.map((record) => (
               <tr key={record.id} data-record-id={record.id}>
                 {properties.map((property) => {
-                  const key = cellKey(record.id, property.id);
+                  const point = databaseGridPoint({ recordId: record.id, propertyId: property.id });
+                  const key = gridPointKey(point);
                   const item = editing.getItem(key);
                   const selected = item.getIsSelected();
                   const hostRecord = hostRecordFor<Row>(record);
@@ -414,6 +425,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                       tabIndex={item.getIsFocus() ? 0 : -1}
                       aria-selected={selected}
                       data-selected={selected ? "true" : "false"}
+                      {...webGridCellAddressProps(point)}
                       data-record-id={record.id}
                       data-property-id={property.id}
                       onClick={item.getPressHandler()}
@@ -422,7 +434,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                         if (props.readOnly) return props.onRecordOpen?.(hostRecord);
                         setEditingInitialValue(undefined);
                         setEditingKey(key);
-                        requestAnimationFrame(() => findCell(tableRef.current, record.id, property.id)?.querySelector<HTMLElement>("input, select")?.focus());
+                        requestAnimationFrame(() => findWebGridCell<HTMLElement>(tableRef.current, point)?.querySelector<HTMLElement>("input, select")?.focus());
                       }}
                       style={columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned)}
                       data-pinned={props.presentation?.propertyPinned?.[property.id]}
@@ -446,7 +458,7 @@ function DatabaseSurface<Row extends Record<string, unknown>>(props: DatabaseHan
                             const next = neighbor(topology, { recordId: record.id, propertyId: property.id }, direction);
                             if (!next) return;
                             editor.dispatch({ type: "selection.set", ...next, mode: "replace" });
-                            requestAnimationFrame(() => findCell(tableRef.current, next.recordId, next.propertyId)?.focus());
+                            requestAnimationFrame(() => findWebGridCell<HTMLElement>(tableRef.current, databaseGridPoint(next))?.focus());
                           }}
                         />
                       )}
@@ -618,19 +630,12 @@ function recordsFingerprint(records: ReadonlyArray<unknown>): string {
   return JSON.stringify(records);
 }
 
-function cellKey(recordId: string, propertyId: string): string {
-  return `${recordId}\u0000${propertyId}`;
+function databaseGridPoint(point: { readonly recordId: string; readonly propertyId: string }) {
+  return { rowId: point.recordId, columnId: point.propertyId };
 }
 
-function parseCellKey(key: string) {
-  const split = key.indexOf("\u0000");
-  return { recordId: key.slice(0, split), propertyId: key.slice(split + 1) };
-}
-
-function findCell(table: HTMLTableElement | null, recordId: string, propertyId: string): HTMLElement | null {
-  if (table === null) return null;
-  return Array.from(table.querySelectorAll<HTMLElement>("[role=gridcell]"))
-    .find((cell) => cell.dataset.recordId === recordId && cell.dataset.propertyId === propertyId) ?? null;
+function databasePoint(point: { readonly rowId: string; readonly columnId: string }) {
+  return { recordId: point.rowId, propertyId: point.columnId };
 }
 
 function clipboardFromData(

@@ -10,7 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { gridCellsInRange, gridPointIndex, gridRangeBounds } from "./topology.js";
+import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds } from "./topology.js";
 import { acceptsDatabaseValue, assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
 import {
   collapsedRangeSelection,
@@ -473,13 +473,13 @@ function selectedCells(
       anchor: { rowId: range.anchor.recordId, columnId: range.anchor.propertyId },
       focus: { rowId: range.focus.recordId, columnId: range.focus.propertyId },
     })) {
-      selectedKeys.add(cellKey(cell.rowId, cell.columnId));
+      selectedKeys.add(gridPointKey(cell));
     }
   }
   return topology.recordIds.flatMap((recordId) => {
     const record = index.recordById.get(recordId) as DatabaseRecord;
     return topology.propertyIds
-      .filter((propertyId) => selectedKeys.has(cellKey(recordId, propertyId)))
+      .filter((propertyId) => selectedKeys.has(gridPointKey({ rowId: recordId, columnId: propertyId })))
       .map((propertyId) => ({ recordId, propertyId, value: record.values[propertyId]! }));
   });
 }
@@ -531,9 +531,6 @@ function samePoint(left: DatabasePoint, right: DatabasePoint): boolean {
   return left.recordId === right.recordId && left.propertyId === right.propertyId;
 }
 
-function cellKey(recordId: string, propertyId: string): string {
-  return `${recordId}\u0000${propertyId}`;
-}
 
 function jsonEqual(left: JSONValue | undefined, right: JSONValue | undefined): boolean {
   return JSON.stringify(left) === JSON.stringify(right);

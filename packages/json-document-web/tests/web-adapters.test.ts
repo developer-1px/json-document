@@ -16,6 +16,7 @@ import {
   documentClipboardCodec,
   orderClipboardCodec,
   createWebKeyboardAdapter,
+  findWebGridCell,
   activeDescendantContainerProps,
   activeDescendantItemProps,
   defaultWebKeymap,
@@ -29,9 +30,28 @@ import {
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
+  webGridCellAddressProps,
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("Web grid cell address", () => {
+  test("projects and finds a cell without encoding a CSS selector", () => {
+    const point = { rowId: 'row"/1', columnId: "column[한글]" };
+    const attributes = webGridCellAddressProps(point);
+    const other = addressElement(webGridCellAddressProps({ rowId: "other", columnId: "other" }));
+    const expected = addressElement(attributes);
+    const root = { querySelectorAll: () => [other, expected] };
+
+    expect(attributes).toEqual({
+      "data-grid-row-id": 'row"/1',
+      "data-grid-column-id": "column[한글]",
+    });
+    expect(findWebGridCell(root, point)).toBe(expected);
+    expect(findWebGridCell(root, { rowId: "missing", columnId: "missing" })).toBeNull();
+    expect(findWebGridCell(null, point)).toBeNull();
+  });
+});
 
 describe("Web clipboard Adapter", () => {
   test("projects copy, cut, and paste results through one surface callback", () => {
@@ -432,5 +452,18 @@ function event(clipboardData: WebClipboardData | null): WebClipboardEvent & { re
     clipboardData,
     get defaultPrevented() { return defaultPrevented; },
     preventDefault() { defaultPrevented = true; },
+  };
+}
+
+function addressElement(attributes: {
+  readonly "data-grid-row-id": string;
+  readonly "data-grid-column-id": string;
+}) {
+  return {
+    getAttribute(name: string) {
+      if (name === "data-grid-row-id") return attributes["data-grid-row-id"];
+      if (name === "data-grid-column-id") return attributes["data-grid-column-id"];
+      return null;
+    },
   };
 }

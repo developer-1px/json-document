@@ -71,6 +71,8 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-editing/src/topology.ts",
+      "packages/json-document-web/src/grid-cell.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
