@@ -43,6 +43,7 @@ import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsAdapterClipboardRouteImport } from "./routes/_page/docs/adapter-clipboard";
 import { Route as PageDocsAdapterContenteditableRouteImport } from "./routes/_page/docs/adapter-contenteditable";
 import { Route as PageDocsAdapterGridCellRouteImport } from "./routes/_page/docs/adapter-grid-cell";
+import { Route as PageDocsAdapterInteractionRouteImport } from "./routes/_page/docs/adapter-interaction";
 import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs/adapter-keyboard";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
@@ -287,6 +288,12 @@ const PageDocsAdapterGridCellRoute = PageDocsAdapterGridCellRouteImport.update({
   path: "/docs/adapter-grid-cell",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsAdapterInteractionRoute =
+  PageDocsAdapterInteractionRouteImport.update({
+    id: "/docs/adapter-interaction",
+    path: "/docs/adapter-interaction",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAdapterKeyboardRoute = PageDocsAdapterKeyboardRouteImport.update({
   id: "/docs/adapter-keyboard",
   path: "/docs/adapter-keyboard",
@@ -683,6 +690,7 @@ export interface FileRoutesByFullPath {
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
   "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
+  "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
@@ -786,6 +794,7 @@ export interface FileRoutesByTo {
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
   "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
+  "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
@@ -891,6 +900,7 @@ export interface FileRoutesById {
   "/_page/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/_page/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
   "/_page/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
+  "/_page/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
@@ -996,6 +1006,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
     | "/docs/adapter-grid-cell"
+    | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
     | "/docs/adapters"
     | "/docs/api"
@@ -1099,6 +1110,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
     | "/docs/adapter-grid-cell"
+    | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
     | "/docs/adapters"
     | "/docs/api"
@@ -1203,6 +1215,7 @@ export interface FileRouteTypes {
     | "/_page/docs/adapter-clipboard"
     | "/_page/docs/adapter-contenteditable"
     | "/_page/docs/adapter-grid-cell"
+    | "/_page/docs/adapter-interaction"
     | "/_page/docs/adapter-keyboard"
     | "/_page/docs/adapters"
     | "/_page/docs/api"
@@ -1520,6 +1533,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/adapter-grid-cell";
       fullPath: "/docs/adapter-grid-cell";
       preLoaderRoute: typeof PageDocsAdapterGridCellRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/adapter-interaction": {
+      id: "/_page/docs/adapter-interaction";
+      path: "/docs/adapter-interaction";
+      fullPath: "/docs/adapter-interaction";
+      preLoaderRoute: typeof PageDocsAdapterInteractionRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/adapter-keyboard": {
@@ -2030,6 +2050,7 @@ interface PageRouteChildren {
   PageDocsAdapterClipboardRoute: typeof PageDocsAdapterClipboardRoute;
   PageDocsAdapterContenteditableRoute: typeof PageDocsAdapterContenteditableRoute;
   PageDocsAdapterGridCellRoute: typeof PageDocsAdapterGridCellRoute;
+  PageDocsAdapterInteractionRoute: typeof PageDocsAdapterInteractionRoute;
   PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
@@ -2133,6 +2154,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdapterClipboardRoute: PageDocsAdapterClipboardRoute,
   PageDocsAdapterContenteditableRoute: PageDocsAdapterContenteditableRoute,
   PageDocsAdapterGridCellRoute: PageDocsAdapterGridCellRoute,
+  PageDocsAdapterInteractionRoute: PageDocsAdapterInteractionRoute,
   PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsApiRoute: PageDocsApiRoute,

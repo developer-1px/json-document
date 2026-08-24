@@ -76,6 +76,7 @@ describe("official site shell", () => {
       "Overview",
       "Keyboard",
       "Grid cell",
+      "Interaction",
       "Clipboard Reference",
       "Contenteditable",
     ]);

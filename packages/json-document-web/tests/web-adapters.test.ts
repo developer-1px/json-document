@@ -501,6 +501,22 @@ function event(clipboardData: WebClipboardData | null): WebClipboardEvent & { re
   };
 }
 
+function pointerCaptureTarget() {
+  const captured = new Set<number>();
+  return {
+    captured,
+    setPointerCapture(pointerId: number) {
+      captured.add(pointerId);
+    },
+    hasPointerCapture(pointerId: number) {
+      return captured.has(pointerId);
+    },
+    releasePointerCapture(pointerId: number) {
+      captured.delete(pointerId);
+    },
+  };
+}
+
 function addressElement(attributes: {
   readonly "data-grid-row-id": string;
   readonly "data-grid-column-id": string;

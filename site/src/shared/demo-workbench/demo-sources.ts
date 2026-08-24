@@ -7,6 +7,9 @@ import webGridCellSource from "../../../../packages/json-document-web/src/grid-c
 import gridEditingSource from "../../../../packages/json-document-react/src/use-grid-editing.ts?raw";
 import treeVisibilitySource from "../../../../packages/json-document-editing/src/tree-visibility.ts?raw";
 import treeEditingSource from "../../../../packages/json-document-react/src/use-tree-editing.ts?raw";
+import pointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
+import dragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
+import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -39,8 +42,26 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-grid-editing.ts", gridEditingSource],
   ["packages/json-document-editing/src/tree-visibility.ts", treeVisibilitySource],
   ["packages/json-document-react/src/use-tree-editing.ts", treeEditingSource],
+  ["packages/json-document-web/src/pointer-session.ts", pointerSessionSource],
+  ["packages/json-document-web/src/drag-drop-session.ts", dragDropSessionSource],
+  ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebPointerSession",
+    sourcePath: "packages/json-document-web/src/pointer-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebDragDropSession",
+    sourcePath: "packages/json-document-web/src/drag-drop-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createBoardDragSession",
+    sourcePath: "packages/json-document-affordance/src/board-drag-session.ts",
+  },
   {
     packageName: "@interactive-os/json-document-react",
     symbol: "useEditingObservation",

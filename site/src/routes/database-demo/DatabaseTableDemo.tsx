@@ -28,7 +28,11 @@ import {
   dragAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { pressInteractionFromWeb, webGridCellAddressProps } from "@interactive-os/json-document-web";
+import {
+  createWebPointerSession,
+  pressInteractionFromWeb,
+  webGridCellAddressProps,
+} from "@interactive-os/json-document-web";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";

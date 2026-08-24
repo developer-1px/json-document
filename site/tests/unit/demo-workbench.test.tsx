@@ -70,6 +70,7 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseDemoRoute.tsx",
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
+      "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
@@ -107,6 +108,19 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-tree-editing.ts",
       "packages/json-document-editing/src/tree-visibility.ts",
+    ]);
+  });
+
+  test("registers Board and platform drag session sources next to Kanban usage", async () => {
+    expect((await discoverDemoSources("routes/kanban-demo/KanbanDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/kanban-demo/KanbanDemoRoute.tsx",
+      "packages/json-document-web/src/drag-drop-session.ts",
+      "packages/json-document-affordance/src/board-drag-session.ts",
+    ]);
+    expect((await discoverDemoSources("routes/widgets/BoardWidgetRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/widgets/BoardWidgetRoute.tsx",
+      "packages/json-document-web/src/pointer-session.ts",
+      "packages/json-document-affordance/src/board-drag-session.ts",
     ]);
   });
 

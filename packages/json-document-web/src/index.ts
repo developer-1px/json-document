@@ -11,6 +11,8 @@ export {
 export { selectionOperationFromModifiers } from "./modifiers.js";
 export { textInputFromControl } from "./input.js";
 export { pressInteractionFromWeb } from "./press.js";
+export { createWebDragDropSession } from "./drag-drop-session.js";
+export { createWebPointerSession } from "./pointer-session.js";
 export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export {
   activeDescendantContainerProps,

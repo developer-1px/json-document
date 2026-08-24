@@ -371,6 +371,14 @@ test("Kanban moves a card to another column", async ({ page }) => {
   await expect(page.locator("[data-column-id=todo]").getByRole("button", { name: "Write the brief" })).toBeVisible();
   await page.keyboard.press("ControlOrMeta+Shift+Z");
   await expect(done.getByRole("button", { name: "Write the brief" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Draw the board" }).dragTo(
+    page.getByRole("button", { name: "Review copy" }),
+  );
+  await expect(page.locator("[data-column-id=todo] [data-card-id]")).toHaveText([
+    "Draw the board",
+    "Review copy",
+  ]);
 });
 
 async function json(page: import("@playwright/test").Page, testId: string) {

@@ -48,4 +48,9 @@ useEditing({
 `historyAffordance(snapshot).hand` exposes the typed Undo/Redo availability map
 directly. The editing runtime still owns history state and execution.
 
+`createBoardDragSession` owns the input-agnostic active item, drop-target
+preview, commit, and cancel lifecycle for Board Hands. Web pointer and HTML
+Drag and Drop sessions feed it; Hosts still resolve targets and dispatch the
+domain move Intent.
+
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
