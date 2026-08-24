@@ -49,6 +49,12 @@ export {
   type GridEditingKeyboardOptions,
   type UseGridEditingOptions,
 } from "./use-grid-editing.js";
+export {
+  useTreeEditing,
+  type TreeEditing,
+  type TreeEditingKeyboardOptions,
+  type UseTreeEditingOptions,
+} from "./use-tree-editing.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(

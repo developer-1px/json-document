@@ -46,5 +46,9 @@ the shared shapes. Sheet aliases Grid as `SheetTopology`. Database projects a
 saved view into `{ recordIds, propertyIds }`. Tree takes host `visibleIds`.
 Selection and clipboard read that line.
 
+`projectTreeVisibility(nodes, expandedIds)` is the canonical Tree projection.
+It publishes rows with hierarchy/ARIA facts and the matching `TreeTopology`.
+`treeVisibilityNeighbor` resolves movement only within that projection.
+
 `gridPointKey` and `gridPointFromKey` provide the canonical reversible string
 identity when a selection or rendering adapter needs to key a `GridPoint`.

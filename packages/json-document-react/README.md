@@ -39,6 +39,11 @@ renders that same lifecycle while the host keeps layout and Document Intent.
 keyboard `neighbor`, and exposes `getCell(point)` without leaking the internal
 string key codec into Hosts.
 
+`useTreeEditing` owns the React lifetime of expanded IDs and connects the
+canonical Tree visibility projection to selection and fold-aware keyboard
+movement. Hosts inject initial expanded IDs and keep node rendering, clipboard
+execution, and announcement wording.
+
 `useEditingObservation(initialAnnouncement)` records the last Intent and
 result while leaving announcement wording in the Host. Its `dispatch`, `run`,
 `observe`, and `observeResult` doors let demos and inspectors expose the same

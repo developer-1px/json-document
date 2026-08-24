@@ -16,6 +16,7 @@ export { createOrderEditor } from "./order.js";
 export { createEditingSession } from "./session.js";
 export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
+export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
 export type {
   DatabaseCell,
@@ -95,6 +96,11 @@ export type {
   TreeSelection,
   TreeTopology,
 } from "./tree.js";
+export type {
+  TreeVisibility,
+  TreeVisibilityNavigation,
+  TreeVisibilityRow,
+} from "./tree-visibility.js";
 export type {
   KanbanCard,
   KanbanColumn,
