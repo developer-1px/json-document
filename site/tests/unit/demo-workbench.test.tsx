@@ -82,6 +82,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
+      "packages/json-document-ui-primitives-react/src/surfaces.tsx",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
@@ -106,7 +107,20 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
+      "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+      "packages/json-document-web/src/pointer-session.ts",
     ]);
+  });
+
+  test("registers each UI Primitive owner source next to Composer usage", async () => {
+    const sources = (await discoverDemoSources("routes/composer-demo/ComposerDemoRoute.tsx")).map((file) => file.path);
+    expect(sources).toEqual(expect.arrayContaining([
+      "packages/json-document-ui-primitives-react/src/select.tsx",
+      "packages/json-document-ui-primitives-react/src/menu.tsx",
+      "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+      "packages/json-document-affordance/src/session.ts",
+      "packages/json-document-web/src/pointer-session.ts",
+    ]));
   });
 
   test("registers Tree visibility and React binding sources next to Tree usage", async () => {

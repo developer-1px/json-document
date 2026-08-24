@@ -1,6 +1,7 @@
 import apiReferenceMarkdown from "../../../../docs/public/api.md?raw";
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
 import affordanceMarkdown from "../../../../docs/public/affordance.md?raw";
+import uiPrimitivesMarkdown from "../../../../docs/public/ui-primitives.md?raw";
 import affordanceDragMarkdown from "../../../../docs/public/affordance-drag.md?raw";
 import affordanceFoldMarkdown from "../../../../docs/public/affordance-fold.md?raw";
 import affordanceHistoryMarkdown from "../../../../docs/public/affordance-history.md?raw";
@@ -75,6 +76,7 @@ export const docPages = {
   adapterClipboard: docPage("/docs/adapter-clipboard", adapterClipboardMarkdown),
   adapterContenteditable: docPage("/docs/adapter-contenteditable", adapterContenteditableMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),
+  uiPrimitives: docPage("/docs/ui-primitives", uiPrimitivesMarkdown),
   affordanceSelect: docPage("/docs/affordance/select", affordanceSelectMarkdown),
   affordanceFold: docPage("/docs/affordance/fold", affordanceFoldMarkdown),
   affordanceDrag: docPage("/docs/affordance/drag", affordanceDragMarkdown),

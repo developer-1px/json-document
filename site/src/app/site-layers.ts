@@ -14,6 +14,7 @@ export const siteLayers: ReadonlyArray<SiteLayer> = [
   { group: "Adapter", path: "/docs/adapters", label: "Adapter", blurb: "Platform contracts" },
   { group: "Connector", path: "/docs/connectors", label: "Connector", blurb: "Library ecosystems" },
   { group: "Affordance", path: "/docs/affordance", label: "Affordance", blurb: "Keyboard, mouse, and cursor" },
+  { group: "UI Primitives", path: "/docs/ui-primitives", label: "UI Primitives", blurb: "Minimal standard surfaces" },
   { group: "Hands", path: "/editors", label: "Hands", blurb: "Tools for people" },
   { group: "Artifact", path: "/viewer", label: "Artifact", blurb: "The complete experience" },
   {

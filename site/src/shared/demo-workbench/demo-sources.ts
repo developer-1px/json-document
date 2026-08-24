@@ -16,6 +16,9 @@ import webPointerSessionSource from "../../../../packages/json-document-web/src/
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
+import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
+import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
+import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -57,6 +60,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
+  ["packages/json-document-ui-primitives-react/src/menu.tsx", uiMenuSource],
+  ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
+  ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -164,6 +170,31 @@ const registeredPublicUsages = [
     symbol: "createCanvasGestureSession",
     sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
   },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "Select",
+    sourcePath: "packages/json-document-ui-primitives-react/src/select.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "Menu",
+    sourcePath: "packages/json-document-ui-primitives-react/src/menu.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "FileDropRegion",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "GridCell",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ResizeHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
 ] as const;
 
 export function demoEntrySource(path: string): DemoSourceFile {
@@ -192,7 +223,7 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
       if (resolved !== undefined) await visit(resolved);
     }
     for (const usage of registeredPublicUsages) {
-      if (source.includes(usage.packageName) && source.includes(usage.symbol)) {
+      if (hasNamedImport(source, usage.packageName, usage.symbol)) {
         await visit(usage.sourcePath);
       }
     }
@@ -200,6 +231,16 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
 
   await visit(entry);
   return paths.map(sourceFile);
+}
+
+function hasNamedImport(source: string, packageName: string, symbol: string): boolean {
+  const escapedPackage = packageName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const imports = new RegExp(`import\\s*\\{([^{}]*)\\}\\s*from\\s*["']${escapedPackage}["']`, "g");
+  for (const match of source.matchAll(imports)) {
+    const imported = match[1]?.split(",").map((entry) => entry.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0]);
+    if (imported?.includes(symbol)) return true;
+  }
+  return false;
 }
 
 function sourceFile(path: string): DemoSourceFile {

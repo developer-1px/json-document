@@ -6,6 +6,7 @@ const navigationGroups = new Set([
   "Adapter",
   "Connector",
   "Affordance",
+  "UI Primitives",
   "Hands",
   "Artifact",
 ]);

@@ -22,8 +22,9 @@ import {
   pressInteractionFromWeb,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
+import { GridCell, ResizeHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { gridCellProps } from "../../shared/widget-binding";
@@ -169,15 +170,13 @@ export function DatabaseTableDemo() {
                       <span>{property.name}</span>
                       <span className={ui.database.type}>{property.type}{databaseSortMark(view.sort, property.id)}</span>
                     </span>
-                    <span
+                    <ResizeHandle
+                      label={`${property.name} 열 너비 조절`}
+                      orientation="horizontal"
                       data-resize-edge="e"
                       data-property-id={property.id}
                       className="absolute inset-y-0 right-0 w-1.5 cursor-col-resize"
-                      onPointerDown={(event) => header.startResize(event, property.id)}
-                      onPointerMove={header.moveResize}
-                      onPointerUp={header.finishResize}
-                      onPointerCancel={(event) => header.cancelResize(event.pointerId)}
-                      onLostPointerCapture={(event) => header.cancelResize(event.pointerId, "lost-capture")}
+                      onResize={(delta, phase) => header.resizeProperty(property.id, delta, phase)}
                     />
                   </th>
                 ))}
@@ -216,13 +215,12 @@ export function DatabaseTableDemo() {
                     const point = databaseGridPoint({ recordId: record.id, propertyId: property.id });
                     const item = editing.getCell(point);
                     return (
-                      <SelectableItem
-                        as="td"
+                      <GridCell
                         key={property.id}
                         {...webGridCellAddressProps(point)}
                         data-record-id={record.id}
                         data-property-id={property.id}
-                        className={classes("p-0", ui.database.cell)}
+                        className={classes(ui.interactive.selectable, "p-0", ui.database.cell)}
                         style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                         {...gridCellProps(item)}
                       >
@@ -232,7 +230,7 @@ export function DatabaseTableDemo() {
                           onCommit={(value) => commit(record.id, property.id, value)}
                           onLease={setLease}
                         />
-                      </SelectableItem>
+                      </GridCell>
                     );
                   })}
                   {hiddenProperties.map((property) => (

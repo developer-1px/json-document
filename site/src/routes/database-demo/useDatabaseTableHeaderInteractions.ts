@@ -16,7 +16,6 @@ const minWidth = 88;
 
 type HeaderMenu = { readonly propertyId: string; readonly x: number; readonly y: number };
 type HeaderDrag = { readonly propertyId: string; readonly originX: number; readonly originY: number; readonly moved: boolean };
-type HeaderResize = { readonly propertyId: string; readonly originX: number; readonly originWidth: number };
 type ConfigureView = (intent: Extract<DatabaseIntent, { readonly type: "view.configure" }>) => void;
 
 export interface DatabaseTableHeaderInteractions {
@@ -28,10 +27,7 @@ export interface DatabaseTableHeaderInteractions {
   moveDrag(event: ReactPointerEvent<HTMLElement>): void;
   finishDrag(event: ReactPointerEvent<HTMLElement>): void;
   cancelDrag(pointerId: number, reason?: "cancel" | "lost-capture"): void;
-  startResize(event: ReactPointerEvent<HTMLElement>, propertyId: string): void;
-  moveResize(event: ReactPointerEvent<HTMLElement>): void;
-  finishResize(event: ReactPointerEvent<HTMLElement>): void;
-  cancelResize(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  resizeProperty(propertyId: string, delta: number, phase: "preview" | "commit"): void;
   openMenu(event: { preventDefault(): void; clientX: number; clientY: number }, propertyId: string): void;
   closeMenu(): void;
   onKeyDown(event: KeyboardEvent<HTMLElement>, propertyId: string, hidden: boolean): void;
@@ -49,7 +45,6 @@ export function useDatabaseTableHeaderInteractions(
   const [widthPreview, setWidthPreview] = useState<Readonly<Record<string, number>> | null>(null);
   const [menu, setMenu] = useState<HeaderMenu | null>(null);
   const [dragSession] = useState(() => createWebPointerSession<HeaderDrag>({ onCancel: () => setDragPreview(null) }));
-  const [resizeSession] = useState(() => createWebPointerSession<HeaderResize>({ onCancel: () => setWidthPreview(null) }));
   const widths = { ...view.propertyWidths, ...widthPreview };
 
   function propertyWidth(propertyId: string) {
@@ -112,29 +107,16 @@ export function useDatabaseTableHeaderInteractions(
     });
   }
 
-  function startResize(event: ReactPointerEvent<HTMLElement>, propertyId: string) {
-    event.stopPropagation();
-    const activeDrag = dragSession.getSnapshot();
-    if (activeDrag) dragSession.cancel(activeDrag.pointerId, "superseded");
-    resizeSession.begin(event.currentTarget, event.pointerId, { propertyId, originX: event.clientX, originWidth: propertyWidth(propertyId) });
-  }
-
-  function moveResize(event: ReactPointerEvent<HTMLElement>) {
-    event.stopPropagation();
-    const resize = resizeSession.getSnapshot()?.state;
-    if (!resize) return;
-    event.currentTarget.style.cursor = "col-resize";
-    setWidthPreview({ ...view.propertyWidths, [resize.propertyId]: Math.max(minWidth, resize.originWidth + event.clientX - resize.originX) });
-  }
-
-  function finishResize(event: ReactPointerEvent<HTMLElement>) {
-    event.stopPropagation();
-    const resize = resizeSession.commit(event.pointerId);
-    const preview = widthPreview;
+  function resizeProperty(propertyId: string, delta: number, phase: "preview" | "commit") {
+    const next = Math.max(minWidth, (view.propertyWidths[propertyId] ?? defaultWidth) + delta);
+    if (phase === "preview") {
+      setWidthPreview({ ...view.propertyWidths, [propertyId]: next });
+      return;
+    }
     setWidthPreview(null);
-    event.currentTarget.style.cursor = "";
-    if (!resize || !preview || preview[resize.propertyId] === view.propertyWidths[resize.propertyId]) return;
-    configure({ type: "view.configure", viewId: view.id, propertyWidths: preview });
+    if (next !== view.propertyWidths[propertyId]) {
+      configure({ type: "view.configure", viewId: view.id, propertyWidths: { ...view.propertyWidths, [propertyId]: next } });
+    }
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLElement>, propertyId: string, hidden: boolean) {
@@ -160,8 +142,7 @@ export function useDatabaseTableHeaderInteractions(
   return {
     dragPreview, menu, widths, propertyWidth, startDrag, moveDrag, finishDrag,
     cancelDrag: (pointerId, reason = "cancel") => dragSession.cancel(pointerId, reason),
-    startResize, moveResize, finishResize,
-    cancelResize: (pointerId, reason = "cancel") => resizeSession.cancel(pointerId, reason),
+    resizeProperty,
     openMenu: (event, propertyId) => { event.preventDefault(); setMenu({ propertyId, x: event.clientX, y: event.clientY }); },
     closeMenu: () => setMenu(null), onKeyDown, hideProperty, showProperty, setFilter,
   };

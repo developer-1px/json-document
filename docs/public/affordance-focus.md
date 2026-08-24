@@ -36,7 +36,8 @@ container DOM focus를 유지합니다.
 
 ## Session API
 
-`createLineFocusSession({ initialKey, onFocus })`은 한 줄의 logical focus key와
+`createLineFocusSession({ initialKey, onFocus, wrap? })`은 한 줄의 logical focus key와
 화살표·Home·End 이동을 소유합니다. `handle(event, keys)`는 focus command를
 소비했는지 반환합니다. DOM focus는 [Keyboard Adapter](adapter-keyboard.md)의
-Web item binding이 실현합니다.
+Web item binding이 실현합니다. `wrap: true`는 첫 항목과 마지막 항목 사이의
+순환 이동을 선언합니다.

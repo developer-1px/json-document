@@ -220,7 +220,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
     : [];
   const content = Children.toArray(children);
   if (editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
-    content.push(<br key={`${node.id}:placeholder`} data-rich-text-placeholder="" />);
+    content.push(<span key={`${node.id}:placeholder`} data-rich-text-placeholder=""><br /></span>);
   }
   const props = {
     "data-rich-text-node-id": node.id,

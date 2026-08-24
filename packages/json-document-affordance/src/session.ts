@@ -148,6 +148,7 @@ export interface LineFocusSession<Key extends string> {
 export function createLineFocusSession<Key extends string>(options: {
   readonly initialKey?: Key | null;
   readonly onFocus: (key: Key | null) => void;
+  readonly wrap?: boolean;
 }): LineFocusSession<Key> {
   let focusKey = options.initialKey ?? null;
   function setFocus(key: Key | null) {
@@ -165,7 +166,12 @@ export function createLineFocusSession<Key extends string>(options: {
           if (hand.type === "move") {
             consumed = true;
             const from = focusKey ?? keys[0];
-            setFocus(from === undefined ? null : moveLinePoint(keys, from, hand.direction) as Key | null);
+            let next = from === undefined ? null : moveLinePoint(keys, from, hand.direction) as Key | null;
+            if (next === null && options.wrap && keys.length > 0) {
+              const backward = hand.direction === "up" || hand.direction === "left" || hand.direction === "previous";
+              next = keys[backward ? keys.length - 1 : 0] ?? null;
+            }
+            setFocus(next);
           }
           if (hand.type === "boundary") {
             consumed = true;

@@ -54,6 +54,7 @@ const publicDocs = {
   adapterGridCell: read("docs/public/adapter-grid-cell.md"),
   adapterInteraction: read("docs/public/adapter-interaction.md"),
   affordance: read("docs/public/affordance.md"),
+  uiPrimitives: read("docs/public/ui-primitives.md"),
   affordanceSelect: read("docs/public/affordance-select.md"),
   affordanceFold: read("docs/public/affordance-fold.md"),
   affordanceDrag: read("docs/public/affordance-drag.md"),
@@ -128,6 +129,7 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-react-hook-form",
   "@interactive-os/json-document-ajv",
   "@interactive-os/json-document-affordance",
+  "@interactive-os/json-document-ui-primitives-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
   "@interactive-os/json-document-tanstack-table",
@@ -202,6 +204,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "selection.md",
   "topology.md",
   "tree.md",
+  "ui-primitives.md",
 ])) {
   fail("docs/public: only the active v3 guides and llms.txt may remain.");
 }

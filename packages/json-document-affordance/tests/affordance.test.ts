@@ -79,6 +79,14 @@ describe("Affordance sessions", () => {
     expect(session.handle({ key: "Home", shiftKey: false }, ["a", "b"])).toBe(true);
     expect(focused).toEqual(["b", "a"]);
   });
+
+  test("wraps logical focus only when the consumer opts in", () => {
+    const focused: Array<string | null> = [];
+    const session = createLineFocusSession<string>({ initialKey: "a", wrap: true, onFocus: (key) => focused.push(key) });
+    expect(session.handle({ key: "ArrowUp", shiftKey: false }, ["a", "b"])).toBe(true);
+    expect(session.getFocusKey()).toBe("b");
+    expect(focused).toEqual(["b"]);
+  });
 });
 
 describe("createBoardDragSession", () => {
