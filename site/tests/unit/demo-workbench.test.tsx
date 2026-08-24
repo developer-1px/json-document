@@ -71,6 +71,7 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
     ]);
@@ -85,6 +86,17 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/object.ts",
+    ]);
+  });
+
+  test("registers React and Web Grid owner sources next to Sheet usage", async () => {
+    expect((await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx")).map((file) => file.path)).toEqual([
+      "routes/sheet-demo/SheetDemo.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-react/src/use-grid-editing.ts",
+      "packages/json-document-editing/src/topology.ts",
+      "packages/json-document-web/src/grid-cell.ts",
     ]);
   });
 

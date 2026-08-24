@@ -1,12 +1,10 @@
 import { useRef, useState } from "react";
 import {
   createSheetEditor,
-  gridPointFromKey,
-  gridPointKey,
   gridTopology,
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useGridEditing } from "@interactive-os/json-document-react";
 import {
   activeDescendantContainerProps,
   activeDescendantItemProps,
@@ -41,13 +39,11 @@ export function GridWidgetRoute() {
   const [editor] = useState(() => createSheetEditor(initialSheet));
   const keyboard = useWidgetKeyboard();
   const focus = editor.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: editor,
-    selectedKeys: editor.selectedCells.map(gridPointKey),
-    focusKey: focus ? gridPointKey(focus) : null,
-    onSelect: (key, mode) => {
-      const point = gridPointFromKey(key);
-      if (point === null) return;
+    selectedPoints: editor.selectedCells,
+    focusPoint: focus,
+    onSelect: (point, mode) => {
       const { rowId, columnId } = point;
       editor.dispatch({ type: "selection.set", rowId, columnId, mode });
     },
@@ -56,22 +52,17 @@ export function GridWidgetRoute() {
         keyboard.resolve(stroke);
         return editingCommandFromWebKeyboardStroke(stroke);
       },
-      focusKey: () => {
-        const next = editor.snapshot.selection.focus;
-        return next ? gridPointKey(next) : undefined;
-      },
-      neighbor: (key, command) => {
+      focusPoint: () => editor.snapshot.selection.focus ?? undefined,
+      neighbor: (point, command) => {
         const sheet = editor.snapshot.value as SheetDocument;
         const visible = gridTopology(
           sheet.rows.map((row) => row.id),
           sheet.columns.map((column) => column.id),
         );
-        const current = gridPointFromKey(key);
-        if (current === null) return null;
         const next = command.type === "move"
-          ? moveGridPoint(visible, current, command.direction)
-          : gridBoundary(visible, current, command.edge);
-        return next ? gridPointKey(next) : null;
+          ? moveGridPoint(visible, point, command.direction)
+          : gridBoundary(visible, point, command.edge);
+        return next;
       },
       onDelete: () => {
         editor.dispatch({ type: "selection.fill", value: null });
@@ -118,26 +109,28 @@ export function GridWidgetRoute() {
           <tbody>
             {document.rows.map((row) => (
               <tr key={row.id}>
-                {document.columns.map((column) => (
-                  <SelectableItem
+                {document.columns.map((column) => {
+                  const point = { rowId: row.id, columnId: column.id };
+                  const cell = editing.getCell(point);
+                  return <SelectableItem
                     as="td"
                     key={column.id}
                     className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
-                    {...webGridCellAddressProps({ rowId: row.id, columnId: column.id })}
-                    {...optionProps(editing.getItem(gridPointKey({ rowId: row.id, columnId: column.id })))}
+                    {...webGridCellAddressProps(point)}
+                    {...optionProps(cell)}
                     {...activeDescendantItemProps(gridCellId(row.id, column.id))}
                     {...projectWebWidgetState({
                       role: "gridcell",
-                      selected: editing.getItem(gridPointKey({ rowId: row.id, columnId: column.id })).getIsSelected(),
+                      selected: cell.getIsSelected(),
                     })}
                     onClick={(event) => {
                       containerRef.current?.focus();
-                      editing.getItem(gridPointKey({ rowId: row.id, columnId: column.id })).getPressHandler()(event);
+                      cell.getPressHandler()(event);
                     }}
                   >
                     {String(row.cells[column.id] ?? "")}
-                  </SelectableItem>
-                ))}
+                  </SelectableItem>;
+                })}
               </tr>
             ))}
           </tbody>

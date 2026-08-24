@@ -4,6 +4,7 @@ import clipboardSource from "../../../../packages/json-document-web/src/clipboar
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
 import webGridCellSource from "../../../../packages/json-document-web/src/grid-cell.ts?raw";
+import gridEditingSource from "../../../../packages/json-document-react/src/use-grid-editing.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -33,6 +34,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
   ["packages/json-document-web/src/grid-cell.ts", webGridCellSource],
+  ["packages/json-document-react/src/use-grid-editing.ts", gridEditingSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -44,6 +46,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "createWebClipboardSurface",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useGridEditing",
+    sourcePath: "packages/json-document-react/src/use-grid-editing.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

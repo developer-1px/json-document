@@ -7,8 +7,6 @@ import {
 } from "react";
 import {
   createDatabaseEditor,
-  gridPointFromKey,
-  gridPointKey,
   type DatabaseDocument,
   type DatabaseEditor,
   type DatabaseFilter,
@@ -19,7 +17,7 @@ import {
   type DatabaseSort,
   type EditingResult,
 } from "@interactive-os/json-document-editing";
-import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
+import { useEditingObservation, useGridEditing } from "@interactive-os/json-document-react";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
@@ -98,21 +96,19 @@ export function DatabaseTableDemo() {
   }
 
   const focus = editor.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: editor,
-    selectedKeys: editor.selectedCellsIn(topology).map((cell) => gridPointKey(databaseGridPoint(cell))),
-    focusKey: focus ? gridPointKey(databaseGridPoint(focus)) : null,
-    onSelect: (key, mode) => {
-      const point = gridPointFromKey(key);
-      if (point === null) return;
+    selectedPoints: editor.selectedCellsIn(topology).map(databaseGridPoint),
+    focusPoint: focus ? databaseGridPoint(focus) : null,
+    onSelect: (point, mode) => {
       const { recordId, propertyId } = databasePoint(point);
       run(() => dispatchIntent({ type: "selection.set", recordId, propertyId, mode }), "Cell selection updated");
     },
     keyboard: {
       resolve: editingCommandFromWebKeyboardStroke,
-      focusKey: () => {
+      focusPoint: () => {
         const current = editor.snapshot.selection.focus;
-        return current ? gridPointKey(databaseGridPoint(current)) : undefined;
+        return current ? databaseGridPoint(current) : undefined;
       },
       neighbor: () => null,
       onUndo: () => { run(editor.undo, "Undone"); },
@@ -407,7 +403,7 @@ export function DatabaseTableDemo() {
                 <tr key={record.id} data-record-id={record.id}>
                   {properties.map((property) => {
                     const point = databaseGridPoint({ recordId: record.id, propertyId: property.id });
-                    const item = editing.getItem(gridPointKey(point));
+                    const item = editing.getCell(point);
                     return (
                       <SelectableItem
                         as="td"

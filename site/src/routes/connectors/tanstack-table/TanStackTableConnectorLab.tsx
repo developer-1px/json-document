@@ -9,13 +9,11 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import {
-  gridPointFromKey,
-  gridPointKey,
   type SheetClipboard,
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import { createJSONDocument } from "@interactive-os/json-document";
-import { useEditing } from "@interactive-os/json-document-react";
+import { useGridEditing } from "@interactive-os/json-document-react";
 import { createTanStackTableConnector } from "@interactive-os/json-document-tanstack-table";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import {
@@ -81,13 +79,11 @@ export function TanStackTableConnectorLab() {
   }
 
   const focus = binding.snapshot.selection.focus;
-  const editing = useEditing({
+  const editing = useGridEditing({
     source: binding,
-    selectedKeys: binding.selectedCells(table).map(gridPointKey),
-    focusKey: focus ? gridPointKey(focus) : null,
-    onSelect: (key, mode) => {
-      const point = gridPointFromKey(key);
-      if (point === null) return;
+    selectedPoints: binding.selectedCells(table),
+    focusPoint: focus,
+    onSelect: (point, mode) => {
       const { rowId, columnId } = point;
       run(
         () => binding.selectCell(table, { rowId, columnId, mode }),
@@ -172,7 +168,7 @@ export function TanStackTableConnectorLab() {
                 <tr key={row.id} data-row-id={row.id}>
                   {row.getVisibleCells().map((cell) => {
                     const point = { rowId: row.id, columnId: cell.column.id };
-                    const item = editing.getItem(gridPointKey(point));
+                    const item = editing.getCell(point);
                     const value = row.original.cells[cell.column.id];
                     return (
                       <SelectableItem

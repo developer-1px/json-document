@@ -30,6 +30,11 @@ the keys. Hosts still own markup, class names, and genre Intent
 translation. `useRestoreTextCursor` writes a text offset onto an input or
 textarea.
 
+`useGridEditing` is the grid-specific React entry point. It accepts canonical
+`GridPoint` values through `selectedPoints`, `focusPoint`, `onSelect`, and
+keyboard `neighbor`, and exposes `getCell(point)` without leaking the internal
+string key codec into Hosts.
+
 `useEditingObservation(initialAnnouncement)` records the last Intent and
 result while leaving announcement wording in the Host. Its `dispatch`, `run`,
 `observe`, and `observeResult` doors let demos and inspectors expose the same

@@ -36,6 +36,12 @@ export {
   type TextCursorControl,
   type UseEditingOptions,
 } from "./use-editing.js";
+export {
+  useGridEditing,
+  type GridEditing,
+  type GridEditingKeyboardOptions,
+  type UseGridEditingOptions,
+} from "./use-grid-editing.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(
