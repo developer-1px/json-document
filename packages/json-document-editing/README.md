@@ -41,6 +41,11 @@ editor projects each saved view into a visible record/property topology for
 range selection, keeps native title/text caret state in the host, and restores
 structural selection with record and view mutations through history.
 
+
+`nextDatabasePropertySort(sort, propertyId)` is the canonical saved-view sort
+transition: a property cycles through ascending, descending, and unsorted. UI
+packages and Hosts share this rule instead of repeating local sort helpers.
+
 Visible order is a value, not a command. `LineTopology` and `GridTopology` are
 the shared shapes. Sheet aliases Grid as `SheetTopology`. Database projects a
 saved view into `{ recordIds, propertyIds }`. Tree takes host `visibleIds`.
