@@ -243,7 +243,7 @@ export function SheetDemo() {
                           key={column.id}
                           data-row-id={row.id}
                           data-column-id={column.id}
-                          className={classes("p-0", ui.surface.gridCell)}
+                          className={classes(ui.interactive.selectable, "p-0", ui.surface.gridCell)}
                           {...gridCellProps(item)}
                           onClick={(event) => {
                             applyAffordance(pointerSelect(event), {

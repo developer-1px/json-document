@@ -387,7 +387,7 @@ export function DatabaseTableDemo() {
                         key={property.id}
                         data-record-id={record.id}
                         data-property-id={property.id}
-                        className={classes("p-0", ui.database.cell)}
+                        className={classes(ui.interactive.selectable, "p-0", ui.database.cell)}
                         style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
                         {...gridCellProps(item)}
                         onClick={(event) => {
