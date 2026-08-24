@@ -9,10 +9,34 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
+Pointer Events and HTML Drag and Drop keep separate public sessions:
+
+```ts
+import {
+  createWebDragDropSession,
+  createWebPointerSession,
+} from "@interactive-os/json-document-web";
+
+const pointer = createWebPointerSession({
+  onPreview: renderPreview,
+  onCommit: commitProductIntent,
+  onCancel: clearPreview,
+});
+
+const dragDrop = createWebDragDropSession({
+  onPreview: showDropTarget,
+  onCommit: moveItem,
+  onCancel: clearDropTarget,
+});
+```
+
+The sessions own platform lifecycle state. Hit testing, valid targets, geometry,
+and document Intent remain in the host.
+
 ```ts
 import { createDocumentEditor } from "@interactive-os/json-document-editing";
 import {
-  createWebClipboardBinding,
+  createWebClipboardSurface,
   documentClipboardCodec,
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
@@ -23,7 +47,7 @@ const editor = createDocumentEditor({
   blocks: [{ id: "welcome", text: "Hello" }],
 });
 
-const clipboard = createWebClipboardBinding({
+const clipboardSurface = createWebClipboardSurface({
   codec: documentClipboardCodec,
   read: () => editor.copy(),
   cut: () => editor.cut()?.result ?? { ok: false },
@@ -31,11 +55,15 @@ const clipboard = createWebClipboardBinding({
     type: "clipboard.paste",
     clipboard: payload,
   }),
+  onResult: (result) => {
+    // Product messages and observation remain host policy.
+  },
 });
 
-surface.addEventListener("copy", (event) => clipboard.copy(event));
-surface.addEventListener("cut", (event) => clipboard.cut(event));
-surface.addEventListener("paste", (event) => clipboard.paste(event));
+// React: <section {...clipboardSurface} />
+surface.addEventListener("copy", clipboardSurface.onCopy);
+surface.addEventListener("cut", clipboardSurface.onCut);
+surface.addEventListener("paste", clipboardSurface.onPaste);
 
 const keyboard = createWebKeyboardAdapter();
 
@@ -55,6 +83,15 @@ input.addEventListener("input", (event) => {
 });
 ```
 
+Grid surfaces bind the Editing topology point to DOM without building selectors
+from product identifiers:
+
+```ts
+const point = { rowId: "record-1", columnId: "status" };
+const attributes = webGridCellAddressProps(point);
+const cell = findWebGridCell<HTMLElement>(table, point);
+```
+
 Document, Sheet, Order, Object, Tree, and Database codecs write both the
 structured json-document MIME payload and its `text/plain` projection. Paste
 consumes only a valid structured payload. Parsing arbitrary external plain text
@@ -70,6 +107,11 @@ canonical cut, or canonical paste. Cut writes the selected payload before
 asking the Editing companion to remove it. Missing clipboard data, malformed
 payloads, unsupported cut, and rejected editing results leave native handling
 available.
+
+`createWebClipboardSurface` is the public surface-level orchestration API. It
+projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
+every result through `onResult`. `createWebClipboardBinding` remains available
+for hosts that need to invoke or install each operation independently.
 
 ## Boundary
 

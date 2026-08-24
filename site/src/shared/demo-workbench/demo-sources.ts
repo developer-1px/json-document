@@ -2,6 +2,20 @@ import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
+import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
+import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
+import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
+import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
+import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
+import webGridCellSource from "../../../../packages/json-document-web/src/grid-cell.ts?raw";
+import gridEditingSource from "../../../../packages/json-document-react/src/use-grid-editing.ts?raw";
+import treeVisibilitySource from "../../../../packages/json-document-editing/src/tree-visibility.ts?raw";
+import treeEditingSource from "../../../../packages/json-document-react/src/use-tree-editing.ts?raw";
+import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
+import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
+import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
+import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
+import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -29,6 +43,20 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
+  ["packages/json-document-web/src/clipboard.ts", clipboardSource],
+  ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
+  ["packages/json-document-editing/src/document.ts", documentEditingSource],
+  ["packages/json-document-editing/src/object.ts", objectEditingSource],
+  ["packages/json-document-editing/src/topology.ts", editingTopologySource],
+  ["packages/json-document-web/src/grid-cell.ts", webGridCellSource],
+  ["packages/json-document-react/src/use-grid-editing.ts", gridEditingSource],
+  ["packages/json-document-editing/src/tree-visibility.ts", treeVisibilitySource],
+  ["packages/json-document-react/src/use-tree-editing.ts", treeEditingSource],
+  ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
+  ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
+  ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
+  ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
+  ["packages/json-document-editing/src/database.ts", databaseEditingSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -55,6 +83,86 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "webFocusItemProps",
     sourcePath: "packages/json-document-web/src/focus-item.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "focusWebItem",
+    sourcePath: "packages/json-document-web/src/focus-item.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebClipboardSurface",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "DocumentTextControl",
+    sourcePath: "packages/json-document-react/src/use-document-text-control.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "documentSelectionFocus",
+    sourcePath: "packages/json-document-editing/src/document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useGridEditing",
+    sourcePath: "packages/json-document-react/src/use-grid-editing.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useTreeEditing",
+    sourcePath: "packages/json-document-react/src/use-tree-editing.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "projectTreeVisibility",
+    sourcePath: "packages/json-document-editing/src/tree-visibility.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createObjectEditor",
+    sourcePath: "packages/json-document-editing/src/object.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "nextDatabasePropertySort",
+    sourcePath: "packages/json-document-editing/src/database.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "gridPointKey",
+    sourcePath: "packages/json-document-editing/src/topology.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "webGridCellAddressProps",
+    sourcePath: "packages/json-document-web/src/grid-cell.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "findWebGridCell",
+    sourcePath: "packages/json-document-web/src/grid-cell.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebDragDropSession",
+    sourcePath: "packages/json-document-web/src/drag-drop-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebPointerSession",
+    sourcePath: "packages/json-document-web/src/pointer-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createBoardDragSession",
+    sourcePath: "packages/json-document-affordance/src/board-drag-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createCanvasGestureSession",
+    sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
   },
 ] as const;
 

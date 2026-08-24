@@ -82,6 +82,28 @@ preset으로 유지됩니다. 실제 API-backed database의 중심 계약은
 Hands는 backend, 인증, 권한 정책, database migration, formula runtime 또는
 제품 업무 규칙을 대신 구현하지 않습니다.
 
+## Editing Database API
+
+Canonical JSON 기반 editor와 saved-view domain transition은
+`@interactive-os/json-document-editing`에 있습니다.
+
+```ts
+import {
+  createDatabaseEditor,
+  nextDatabasePropertySort,
+} from "@interactive-os/json-document-editing";
+
+const editor = createDatabaseEditor(document);
+const sort = nextDatabasePropertySort(view.sort, propertyId);
+editor.dispatch({ type: "view.configure", viewId: view.id, sort });
+```
+
+- `createDatabaseEditor(source)`: selection, cell/record/view Intent, clipboard, history
+- `nextDatabasePropertySort(sort, propertyId)`: ascending → descending → unsorted 전이
+
+DOM event, pointer capture, header menu 좌표, renderer와 업무 property policy는 이 API의
+책임이 아닙니다.
+
 ## Live Demo
 
 ```live-demo

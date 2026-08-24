@@ -64,6 +64,7 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
       "Overview",
+      "Official Hands · TBD",
       "Order",
       "Object",
       "Tree",
@@ -72,7 +73,14 @@ describe("official site shell", () => {
       "Mention",
     ]);
     await user.click(nav.getByRole("button", { name: "Adapter" }));
-    expect(groupLinks(nav, "Adapter")).toEqual(["Overview", "Keyboard", "Clipboard", "Contenteditable"]);
+    expect(groupLinks(nav, "Adapter")).toEqual([
+      "Overview",
+      "Keyboard",
+      "Grid cell",
+      "Interaction",
+      "Clipboard Reference",
+      "Contenteditable",
+    ]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual([
       "Overview",
@@ -148,7 +156,11 @@ describe("official site shell", () => {
     expect(databaseCrumb.getByText("Database")).toBeTruthy();
 
     await user.click(within(nav.getByRole("group", { name: "Connector" })).getByRole("link", { name: "Overview", exact: true }));
-    expect(await screen.findByRole("heading", { level: 1, name: "json-document Connectors" })).toBeTruthy();
+    expect(await screen.findByRole(
+      "heading",
+      { level: 1, name: "json-document Connectors" },
+      { timeout: 5000 },
+    )).toBeTruthy();
   }, 10000);
 
   test("keeps the site chrome mounted across interior routes", async () => {

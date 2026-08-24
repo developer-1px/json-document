@@ -67,7 +67,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Expand/Collapse](affordance-fold.md) | `treeAffordance` | 나무 왼쪽 접힘, 오른쪽 펼침 |
 | [Undo](affordance-history.md) | `historyAffordance` | Mod+Z, Mod+Shift+Z |
 | [Nudge](affordance-nudge.md) | `nudgeAffordance` | 화살표 한 단위, Shift 큰 단위 |
-| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance` | 고른 대상을 포인터로 옮김 |
+| [Drag](affordance-drag.md) | `dragAffordance`, `commitAffordance`, `createCanvasGestureSession` | 대상 이동, Canvas gesture preview/commit/cancel |
 | [Marquee](affordance-marquee.md) | `marqueeAffordance`, `commitAffordance` | 빈 곳에서 사각형으로 여러 대상 |
 | [Pan](affordance-pan.md) | `panAffordance` | Space+드래그, grab |
 | [Snap](affordance-snap.md) | `snapAffordance` | 그리드·가이드, 수정 키로 해제 |
@@ -75,7 +75,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace |
 | [Hover](affordance-hover.md) | `hoverAffordance` | 평면 윤곽, 툴팁 지연 |
 | [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, 선택은 유지 |
-| [Drop](affordance-drop.md) | `dropAffordance` | drop 대상, 선택 유지, no-drop |
+| [Drop](affordance-drop.md) | `dropAffordance`, `createBoardDragSession` | drop 대상, Board preview/commit/cancel, 선택 유지, no-drop |
 | [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |
 | [Resize](affordance-resize.md) | `resizeAffordance` | 모서리 핸들, CSS UI 4 커서 |
 | [Scroll](affordance-scroll.md) | `wheelAffordance` | wheel 팬 |

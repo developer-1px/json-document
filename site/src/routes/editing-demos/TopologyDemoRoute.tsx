@@ -1,47 +1,13 @@
-import { useMemo, useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { lineInterval, lineTopology } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import {
-  applyAffordance,
-} from "@interactive-os/json-document-affordance";
 import { optionProps } from "../../shared/widget-binding";
-
-const records = {
-  alpha: "Alpha",
-  bravo: "Bravo",
-  charlie: "Charlie",
-  delta: "Delta",
-} as const;
-
-const orders = {
-  source: ["alpha", "bravo", "charlie", "delta"],
-  sorted: ["alpha", "delta", "charlie", "bravo"],
-  filtered: ["alpha", "charlie", "delta"],
-} as const;
+import { topologyLabOrders, topologyLabRecords, useTopologyLab } from "./useTopologyLab";
 
 export function TopologyDemoRoute() {
-  const [order, setOrder] = useState<keyof typeof orders>("source");
-  const [anchor, setAnchor] = useState("alpha");
-  const [focus, setFocus] = useState("charlie");
-  const topology = useMemo(() => lineTopology(orders[order]), [order]);
-  const interval = lineInterval(topology, anchor, focus);
-  const editing = useEditing({
-    selectedKeys: interval,
-    focusKey: focus,
-    onSelect: (key, mode) => {
-      if (mode === "extend") {
-        setFocus(key);
-        return;
-      }
-      setAnchor(key);
-      setFocus(key);
-    },
-  });
+  const { anchor, editing, focus, interval, order, setOrder, topology } = useTopologyLab();
 
   return (
     <DemoPage documentation={(
@@ -55,7 +21,7 @@ export function TopologyDemoRoute() {
           <p className={ui.text.label}>1 · 입력</p>
           <h2 id="topology-input" className={classes("mb-2 mt-1", ui.text.heading)}>화면 순서 선택하기</h2>
           <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Visible order">
-            {(Object.keys(orders) as ReadonlyArray<keyof typeof orders>).map((item) => (
+            {(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => (
               <ToggleButton
                 key={item}
                 pressed={order === item}
@@ -76,7 +42,7 @@ export function TopologyDemoRoute() {
                     className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
                     {...optionProps(item)}
                   >
-                    {records[id as keyof typeof records]}
+                    {topologyLabRecords[id as keyof typeof topologyLabRecords]}
                   </SelectableItem>
                 </li>
               );

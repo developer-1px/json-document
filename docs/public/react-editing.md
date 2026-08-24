@@ -44,8 +44,12 @@ object 그림이고, textarea 캐럿은 text 그림입니다. 두 질의를 하�
 | `useJSONDocumentValue(document)` | 같은 값 구독 | 하위 진입점이 필요할 때 |
 | `useEditingSnapshot(source)` | `EditingSnapshot` | 값·선택·revision·undo 가능 여부만 그릴 때 |
 | `useEditing(options)` | snapshot + 항목 질의 + 키 입력 | 범위·커서·글자 위치를 화면에 붙일 때 |
+| `useGridEditing(options)` | snapshot + `GridPoint` 셀 질의 + 키 입력 | 격자 좌표를 문자열 키로 번역하지 않고 붙일 때 |
+| `useTreeEditing(options)` | snapshot + visible rows/topology + fold | 접힌 Tree의 선택·키보드·expanded state를 붙일 때 |
 | `useEditingObservation(initialAnnouncement)` | 마지막 Intent·결과·announcement | 실행 결과를 inspector와 접근성 피드백에 함께 투영할 때 |
 | `useRestoreTextCursor(ref, offset)` | 없음. 캐럿만 맞춤 | 모델 offset을 input/textarea에 되돌릴 때 |
+| `useDocumentTextControl(options)` | textarea ref와 lifecycle props | Document text control을 직접 합성할 때 |
+| `DocumentTextControl` | 표준 textarea | 같은 lifecycle을 component로 쓸 때 |
 
 `useEditing`은 안에서 `useEditingSnapshot`을 호출합니다. 값과 선택을 같이
 읽으면서 항목마다 표시를 붙일 때는 `useEditing` 하나면 됩니다.
@@ -117,9 +121,9 @@ const item = editing.getItem(block.id);
 `getTextOffset()`은 커서 항목에서만 숫자를 돌려줍니다. 같은 범위에 들어
 있어도 커서가 아닌 항목은 `null`입니다.
 
-키는 문자열이라면 됩니다. 셀은 `"rowId\\u0000columnId"`처럼 host가 만든
-합성 키를 씁니다. hook은 그 문자열을 다시 쪼개지 않습니다. `onSelect`와
-`neighbor`에서 같은 규칙을 써서 다시 풀어 Intent로 보냅니다.
+`useEditing`의 키는 문자열이라면 됩니다. 격자에서는 Host가 합성 키를 만들지
+않고 `useGridEditing`에 `GridPoint`를 직접 넘깁니다. 좌표 codec은 hook 내부에서
+Editing의 `gridPointKey`·`gridPointFromKey` 정본을 사용합니다.
 
 `editing.snapshot`은 구독한 `EditingSnapshot`입니다.
 
@@ -168,18 +172,8 @@ ignorePress: (event) => (
 ),
 ```
 
-`mode`는 hook의 공통 단어입니다. Object editor처럼 장르 Intent가
-`extend` 대신 `add`를 받으면 `onSelect`에서 번역합니다.
-
-```tsx
-onSelect: (objectId, mode) => {
-  editor.dispatch({
-    type: "selection.set",
-    objectIds: [objectId],
-    mode: mode === "extend" ? "add" : mode,
-  });
-},
-```
+`mode`는 hook의 공통 단어입니다. Object editor를 포함한 ecosystem
+`selection.set` 계약은 `replace`, `extend`, `toggle`을 직접 받습니다.
 
 ## 옵션
 
@@ -234,6 +228,32 @@ function BlockText(props: {
 
 항목의 `getTextOffset()`을 그대로 넘기면 커서 블록만 캐럿을 맞추고,
 나머지 블록은 `null`이라 브라우저 위치를 유지합니다.
+
+## Document text control API
+
+Document textarea의 focus, click/select range, text input, click count, cursor
+복원은 `DocumentTextControl`로 한 번에 붙일 수 있습니다.
+
+```tsx
+import { DocumentTextControl } from "@interactive-os/json-document-react";
+
+<DocumentTextControl
+  aria-label="Block text"
+  text={block.text}
+  offset={item.getTextOffset()}
+  onCaretRange={(from, to, mode) => selectText(block.id, from, to, mode)}
+  onTextInput={(input) => replaceText(block.id, input)}
+/>
+```
+
+`useDocumentTextControl(options)`은 같은 계약을 `ref`와 `props`로 반환합니다.
+Host가 textarea element를 직접 구성해야 할 때 사용합니다. 두 API 모두
+Web의 `textInputFromControl`과 Affordance의 caret/click 계약을 합성합니다.
+Host는 `rows`, class, 제품 문구와 실제 Document Intent dispatch를 소유합니다.
+
+Document selection의 primary point만 필요하면 Editing의
+`documentSelectionFocus(selection)`을 사용합니다. primary range가 없으면
+`null`입니다.
 
 ## 키보드
 
@@ -361,7 +381,7 @@ const editing = useEditing({
     editor.dispatch({
       type: "selection.set",
       objectIds: [objectId],
-      mode: mode === "extend" ? "add" : mode,
+      mode,
     });
   },
 });
@@ -372,19 +392,11 @@ const editing = useEditing({
 
 ## 표의 셀
 
-표는 보이는 격자를 Topology로 읽고, 셀 키를 만듭니다.
+표는 보이는 격자를 Topology로 읽고 `GridPoint`를 그대로 연결합니다.
 
 ```tsx
+import { useGridEditing } from "@interactive-os/json-document-react";
 import { createWebKeyboardAdapter, moveGridPoint, gridBoundary } from "@interactive-os/json-document-web";
-
-function cellKey(rowId: string, columnId: string) {
-  return `${rowId}\u0000${columnId}`;
-}
-
-function parseCellKey(key: string) {
-  const split = key.indexOf("\u0000");
-  return { rowId: key.slice(0, split), columnId: key.slice(split + 1) };
-}
 
 const keyboard = createWebKeyboardAdapter();
 const focus = editor.snapshot.selection.focus;
@@ -393,34 +405,28 @@ const topology = {
   columnIds: editor.snapshot.value.columns.map((column) => column.id),
 };
 
-const editing = useEditing({
+const editing = useGridEditing({
   source: editor,
-  selectedKeys: editor.selectedCells.map((cell) => cellKey(cell.rowId, cell.columnId)),
-  focusKey: focus ? cellKey(focus.rowId, focus.columnId) : null,
-  onSelect: (key, mode) => {
-    const { rowId, columnId } = parseCellKey(key);
+  selectedPoints: editor.selectedCells,
+  focusPoint: focus,
+  onSelect: ({ rowId, columnId }, mode) => {
     editor.dispatch({ type: "selection.set", rowId, columnId, mode });
   },
   keyboard: {
     resolve: (stroke) => keyboard.resolve(stroke),
-    focusKey: () => {
-      const next = editor.snapshot.selection.focus;
-      return next ? cellKey(next.rowId, next.columnId) : undefined;
-    },
-    neighbor: (key, command) => {
-      const current = parseCellKey(key);
-      const next = command.type === "move"
-        ? moveGridPoint(topology, current, command.direction)
-        : gridBoundary(topology, current, command.edge);
-      return next ? cellKey(next.rowId, next.columnId) : null;
-    },
-    afterMove: (key) => focusCell(parseCellKey(key)),
+    focusPoint: () => editor.snapshot.selection.focus ?? undefined,
+    neighbor: (point, command) => command.type === "move"
+      ? moveGridPoint(topology, point, command.direction)
+      : gridBoundary(topology, point, command.edge),
+    afterMove: (point) => focusCell(point),
   },
 });
+
+const cell = editing.getCell({ rowId: row.id, columnId: column.id });
 ```
 
 `focusCell`은 옮겨진 셀 DOM에 포커스를 두는 host 함수입니다. 정렬·필터
-뒤의 범위는 editor가 Topology로 계산합니다. hook에는 그 결과 키만
+뒤의 범위는 editor가 Topology로 계산합니다. hook에는 canonical point만
 넘깁니다. 보이는 행·열을 Sheet Topology로 바꾸는 일은
 [TanStack Table Connector](connectors.md)가 맡습니다.
 
@@ -445,6 +451,10 @@ Sheet Intent 이름을 알지 않습니다. KeyboardEvent를 command로 바꾸�
 function useEditing<Selection extends JSONValue, Key extends string = string>(
   options: UseEditingOptions<Selection, Key>,
 ): Editing<Selection, Key>
+
+function useGridEditing<Selection extends JSONValue>(
+  options: UseGridEditingOptions<Selection>,
+): GridEditing<Selection>
 
 function useRestoreTextCursor(
   control: { readonly current: TextCursorControl | null },
@@ -503,6 +513,64 @@ type EditingSelectionMode = "replace" | "extend" | "toggle";
 
 `getKeyDownHandler()`는 항상 함수를 돌려줍니다. `keyboard`가 없으면 그
 함수는 event를 무시합니다. 표면 노드에 `tabIndex={0}`과 함께 붙입니다.
+
+### `useGridEditing` 계약
+
+```ts
+interface UseGridEditingOptions<Selection extends JSONValue> {
+  readonly source?: EditingSnapshotSource<Selection>;
+  readonly selectedPoints: Iterable<GridPoint>;
+  readonly focusPoint?: GridPoint | null;
+  readonly onSelect: (point: GridPoint, mode: EditingSelectionMode) => void;
+  readonly operationFromEvent?: (event: EditingPressEvent) => EditingSelectionMode;
+  readonly ignorePress?: (event: EditingPressEvent) => boolean;
+  readonly keyboard?: GridEditingKeyboardOptions;
+}
+
+interface GridEditing<Selection extends JSONValue> {
+  readonly snapshot: EditingSnapshot<Selection>;
+  getCell(point: GridPoint): EditingItem;
+  getKeyDownHandler(): (event: EditingKeyDownEvent) => void;
+}
+```
+
+`selectedPoints`, `focusPoint`, `onSelect`, `keyboard.focusPoint`,
+`keyboard.neighbor`, `keyboard.afterMove`는 모두 `{ rowId, columnId }`를
+주고받습니다. 내부 key encoding은 공개 계약이 아니며 Host가 조립하거나
+해석하지 않습니다. 나머지 click mode와 keyboard command door는
+`useEditing`과 같습니다.
+
+### `useTreeEditing` 계약
+
+```ts
+interface UseTreeEditingOptions<Selection extends JSONValue> {
+  readonly source?: EditingSnapshotSource<Selection>;
+  readonly nodes: ReadonlyArray<TreeNode>;
+  readonly initialExpandedIds?: Iterable<string>;
+  readonly selectedNodeIds: (topology: TreeTopology) => Iterable<string>;
+  readonly focusNodeId?: string | null;
+  readonly onSelect: (nodeId: string, mode: EditingSelectionMode, topology: TreeTopology) => void;
+  readonly keyboard?: TreeEditingKeyboardOptions;
+}
+
+interface TreeEditing<Selection extends JSONValue> {
+  readonly snapshot: EditingSnapshot<Selection>;
+  readonly visibility: TreeVisibility;
+  readonly expandedIds: ReadonlySet<string>;
+  getItem(nodeId: string): EditingItem;
+  getKeyDownHandler(): (event: EditingKeyDownEvent) => void;
+  isExpanded(nodeId: string): boolean;
+  expand(nodeId: string): void;
+  collapse(nodeId: string): void;
+  toggle(nodeId: string): void;
+}
+```
+
+`initialExpandedIds`는 초기 제품 정책만 주입합니다. 이후 fold state와
+projection은 hook이 같은 수명주기로 유지합니다. `selectedNodeIds`,
+`onSelect`, keyboard `onDelete`가 받는 `TreeTopology`는 현재 visible rows와
+항상 같은 snapshot입니다. node markup과 clipboard·announcement 실행은
+Host 책임입니다.
 
 ### 키보드 옵션과 command
 

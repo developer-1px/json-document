@@ -42,6 +42,8 @@ import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsAdapterClipboardRouteImport } from "./routes/_page/docs/adapter-clipboard";
 import { Route as PageDocsAdapterContenteditableRouteImport } from "./routes/_page/docs/adapter-contenteditable";
+import { Route as PageDocsAdapterGridCellRouteImport } from "./routes/_page/docs/adapter-grid-cell";
+import { Route as PageDocsAdapterInteractionRouteImport } from "./routes/_page/docs/adapter-interaction";
 import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs/adapter-keyboard";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
@@ -61,6 +63,7 @@ import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsMentionRouteImport } from "./routes/_page/docs/mention";
 import { Route as PageDocsObjectRouteImport } from "./routes/_page/docs/object";
+import { Route as PageDocsOfficialHandsRouteImport } from "./routes/_page/docs/official-hands";
 import { Route as PageDocsOrderRouteImport } from "./routes/_page/docs/order";
 import { Route as PageDocsReactEditingRouteImport } from "./routes/_page/docs/react-editing";
 import { Route as PageDocsSelectionRouteImport } from "./routes/_page/docs/selection";
@@ -281,6 +284,17 @@ const PageDocsAdapterContenteditableRoute =
     path: "/docs/adapter-contenteditable",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAdapterGridCellRoute = PageDocsAdapterGridCellRouteImport.update({
+  id: "/docs/adapter-grid-cell",
+  path: "/docs/adapter-grid-cell",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAdapterInteractionRoute =
+  PageDocsAdapterInteractionRouteImport.update({
+    id: "/docs/adapter-interaction",
+    path: "/docs/adapter-interaction",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAdapterKeyboardRoute = PageDocsAdapterKeyboardRouteImport.update({
   id: "/docs/adapter-keyboard",
   path: "/docs/adapter-keyboard",
@@ -377,6 +391,11 @@ const PageDocsMentionRoute = PageDocsMentionRouteImport.update({
 const PageDocsObjectRoute = PageDocsObjectRouteImport.update({
   id: "/docs/object",
   path: "/docs/object",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsOfficialHandsRoute = PageDocsOfficialHandsRouteImport.update({
+  id: "/docs/official-hands",
+  path: "/docs/official-hands",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsOrderRoute = PageDocsOrderRouteImport.update({
@@ -676,6 +695,8 @@ export interface FileRoutesByFullPath {
   "/demo/tree": typeof PageDemoTreeRoute;
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
+  "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
+  "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
@@ -695,6 +716,7 @@ export interface FileRoutesByFullPath {
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
   "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
@@ -778,6 +800,8 @@ export interface FileRoutesByTo {
   "/demo/tree": typeof PageDemoTreeRoute;
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
+  "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
+  "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRoute;
@@ -797,6 +821,7 @@ export interface FileRoutesByTo {
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
   "/docs/object": typeof PageDocsObjectRoute;
+  "/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/docs/order": typeof PageDocsOrderRoute;
   "/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/docs/selection": typeof PageDocsSelectionRoute;
@@ -882,6 +907,8 @@ export interface FileRoutesById {
   "/_page/demo/tree": typeof PageDemoTreeRoute;
   "/_page/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/_page/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
+  "/_page/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
+  "/_page/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/api": typeof PageDocsApiRoute;
@@ -901,6 +928,7 @@ export interface FileRoutesById {
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/mention": typeof PageDocsMentionRoute;
   "/_page/docs/object": typeof PageDocsObjectRoute;
+  "/_page/docs/official-hands": typeof PageDocsOfficialHandsRoute;
   "/_page/docs/order": typeof PageDocsOrderRoute;
   "/_page/docs/react-editing": typeof PageDocsReactEditingRoute;
   "/_page/docs/selection": typeof PageDocsSelectionRoute;
@@ -986,6 +1014,8 @@ export interface FileRouteTypes {
     | "/demo/tree"
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
+    | "/docs/adapter-grid-cell"
+    | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
     | "/docs/adapters"
     | "/docs/api"
@@ -1005,6 +1035,7 @@ export interface FileRouteTypes {
     | "/docs/intent-guide"
     | "/docs/mention"
     | "/docs/object"
+    | "/docs/official-hands"
     | "/docs/order"
     | "/docs/react-editing"
     | "/docs/selection"
@@ -1088,6 +1119,8 @@ export interface FileRouteTypes {
     | "/demo/tree"
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
+    | "/docs/adapter-grid-cell"
+    | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
     | "/docs/adapters"
     | "/docs/api"
@@ -1107,6 +1140,7 @@ export interface FileRouteTypes {
     | "/docs/intent-guide"
     | "/docs/mention"
     | "/docs/object"
+    | "/docs/official-hands"
     | "/docs/order"
     | "/docs/react-editing"
     | "/docs/selection"
@@ -1191,6 +1225,8 @@ export interface FileRouteTypes {
     | "/_page/demo/tree"
     | "/_page/docs/adapter-clipboard"
     | "/_page/docs/adapter-contenteditable"
+    | "/_page/docs/adapter-grid-cell"
+    | "/_page/docs/adapter-interaction"
     | "/_page/docs/adapter-keyboard"
     | "/_page/docs/adapters"
     | "/_page/docs/api"
@@ -1210,6 +1246,7 @@ export interface FileRouteTypes {
     | "/_page/docs/intent-guide"
     | "/_page/docs/mention"
     | "/_page/docs/object"
+    | "/_page/docs/official-hands"
     | "/_page/docs/order"
     | "/_page/docs/react-editing"
     | "/_page/docs/selection"
@@ -1503,6 +1540,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAdapterContenteditableRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/adapter-grid-cell": {
+      id: "/_page/docs/adapter-grid-cell";
+      path: "/docs/adapter-grid-cell";
+      fullPath: "/docs/adapter-grid-cell";
+      preLoaderRoute: typeof PageDocsAdapterGridCellRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/adapter-interaction": {
+      id: "/_page/docs/adapter-interaction";
+      path: "/docs/adapter-interaction";
+      fullPath: "/docs/adapter-interaction";
+      preLoaderRoute: typeof PageDocsAdapterInteractionRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/adapter-keyboard": {
       id: "/_page/docs/adapter-keyboard";
       path: "/docs/adapter-keyboard";
@@ -1634,6 +1685,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/object";
       fullPath: "/docs/object";
       preLoaderRoute: typeof PageDocsObjectRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/official-hands": {
+      id: "/_page/docs/official-hands";
+      path: "/docs/official-hands";
+      fullPath: "/docs/official-hands";
+      preLoaderRoute: typeof PageDocsOfficialHandsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/order": {
@@ -2010,6 +2068,8 @@ interface PageRouteChildren {
   PageDemoTreeRoute: typeof PageDemoTreeRoute;
   PageDocsAdapterClipboardRoute: typeof PageDocsAdapterClipboardRoute;
   PageDocsAdapterContenteditableRoute: typeof PageDocsAdapterContenteditableRoute;
+  PageDocsAdapterGridCellRoute: typeof PageDocsAdapterGridCellRoute;
+  PageDocsAdapterInteractionRoute: typeof PageDocsAdapterInteractionRoute;
   PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsApiRoute: typeof PageDocsApiRoute;
@@ -2029,6 +2089,7 @@ interface PageRouteChildren {
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsMentionRoute: typeof PageDocsMentionRoute;
   PageDocsObjectRoute: typeof PageDocsObjectRoute;
+  PageDocsOfficialHandsRoute: typeof PageDocsOfficialHandsRoute;
   PageDocsOrderRoute: typeof PageDocsOrderRoute;
   PageDocsReactEditingRoute: typeof PageDocsReactEditingRoute;
   PageDocsSelectionRoute: typeof PageDocsSelectionRoute;
@@ -2112,6 +2173,8 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoTreeRoute: PageDemoTreeRoute,
   PageDocsAdapterClipboardRoute: PageDocsAdapterClipboardRoute,
   PageDocsAdapterContenteditableRoute: PageDocsAdapterContenteditableRoute,
+  PageDocsAdapterGridCellRoute: PageDocsAdapterGridCellRoute,
+  PageDocsAdapterInteractionRoute: PageDocsAdapterInteractionRoute,
   PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsApiRoute: PageDocsApiRoute,
@@ -2131,6 +2194,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsMentionRoute: PageDocsMentionRoute,
   PageDocsObjectRoute: PageDocsObjectRoute,
+  PageDocsOfficialHandsRoute: PageDocsOfficialHandsRoute,
   PageDocsOrderRoute: PageDocsOrderRoute,
   PageDocsReactEditingRoute: PageDocsReactEditingRoute,
   PageDocsSelectionRoute: PageDocsSelectionRoute,

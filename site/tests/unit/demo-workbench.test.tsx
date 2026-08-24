@@ -53,12 +53,18 @@ describe("Demo definition and source discovery", () => {
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-react/src/use-document-text-control.ts",
+      "packages/json-document-editing/src/document.ts",
     ]);
     const source = await document[0]!.load();
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-react/src/use-document-text-control.ts",
+      "packages/json-document-editing/src/document.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
   });
@@ -68,12 +74,91 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseDemoRoute.tsx",
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
+      "routes/database-demo/DatabasePropertyEditor.tsx",
+      "routes/database-demo/useDatabaseTableHeaderInteractions.ts",
+      "packages/json-document-editing/src/database.ts",
+      "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-react/src/use-grid-editing.ts",
+      "packages/json-document-editing/src/topology.ts",
+      "packages/json-document-web/src/grid-cell.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
       "packages/json-document-affordance/src/session.ts",
     ]);
+  });
+
+  test("registers the Object owner source next to Object demo usage", async () => {
+    expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/object-demo/ObjectDemoRoute.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/object.ts",
+    ]);
+  });
+
+  test("registers React and Web Grid owner sources next to Sheet usage", async () => {
+    expect((await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx")).map((file) => file.path)).toEqual([
+      "routes/sheet-demo/SheetDemo.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-react/src/use-grid-editing.ts",
+      "packages/json-document-editing/src/topology.ts",
+      "packages/json-document-web/src/grid-cell.ts",
+    ]);
+  });
+
+  test("registers Tree visibility and React binding sources next to Tree usage", async () => {
+    expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-react/src/use-tree-editing.ts",
+      "packages/json-document-editing/src/tree-visibility.ts",
+    ]);
+  });
+
+  test("registers Board and platform drag session sources next to Kanban usage", async () => {
+    expect((await discoverDemoSources("routes/kanban-demo/KanbanDemoRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/kanban-demo/KanbanDemoRoute.tsx",
+      "packages/json-document-web/src/drag-drop-session.ts",
+      "packages/json-document-affordance/src/board-drag-session.ts",
+    ]);
+    expect((await discoverDemoSources("routes/widgets/BoardWidgetRoute.tsx")).map((file) => file.path)).toEqual([
+      "routes/widgets/BoardWidgetRoute.tsx",
+      "packages/json-document-web/src/pointer-session.ts",
+      "packages/json-document-affordance/src/board-drag-session.ts",
+    ]);
+  });
+
+  test("registers the Canvas gesture owner source next to Canvas usages", async () => {
+    expect((await discoverDemoSources("routes/canvas-demo/CanvasDemoRoute.tsx")).map((file) => file.path)).toContain(
+      "packages/json-document-affordance/src/canvas-gesture-session.ts",
+    );
+    expect((await discoverDemoSources("routes/widgets/CanvasWidgetRoute.tsx")).map((file) => file.path)).toContain(
+      "packages/json-document-affordance/src/canvas-gesture-session.ts",
+    );
+  });
+
+  test("keeps each Editing concept lab API next to its owning route", async () => {
+    const labs = [
+      ["TopologyDemoRoute.tsx", "useTopologyLab.ts"],
+      ["SelectionDemoRoute.tsx", "useSelectionLab.ts"],
+      ["ClipboardDemoRoute.tsx", "useClipboardLab.ts"],
+      ["HistoryDemoRoute.tsx", "useHistoryLab.ts"],
+    ] as const;
+    for (const [route, lab] of labs) {
+      expect((await discoverDemoSources(`routes/editing-demos/${route}`)).map((file) => file.path))
+        .toContain(`routes/editing-demos/${lab}`);
+    }
+  });
+
+  test("keeps Rich Text Demo command and query APIs next to the owning route", async () => {
+    const paths = (await discoverDemoSources("routes/rich-text-demo/RichTextDemoRoute.tsx"))
+      .map((file) => file.path);
+    expect(paths).toContain("routes/rich-text-demo/useRichTextDemoCommands.ts");
+    expect(paths).toContain("routes/rich-text-demo/richTextDemoQuery.ts");
   });
 
 });

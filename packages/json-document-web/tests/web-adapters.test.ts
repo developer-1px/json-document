@@ -10,11 +10,15 @@ import {
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
 import {
+  createWebDragDropSession,
+  createWebPointerSession,
   createWebClipboardBinding,
+  createWebClipboardSurface,
   databaseClipboardCodec,
   documentClipboardCodec,
   orderClipboardCodec,
   createWebKeyboardAdapter,
+  findWebGridCell,
   activeDescendantContainerProps,
   activeDescendantItemProps,
   defaultWebKeymap,
@@ -30,6 +34,7 @@ import {
   sheetClipboardCodec,
   textInputFromControl,
   webFocusItemProps,
+  webGridCellAddressProps,
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
@@ -47,7 +52,47 @@ describe("Web focus item", () => {
   });
 });
 
+describe("Web grid cell address", () => {
+  test("projects and finds a cell without encoding a CSS selector", () => {
+    const point = { rowId: 'row"/1', columnId: "column[한글]" };
+    const attributes = webGridCellAddressProps(point);
+    const other = addressElement(webGridCellAddressProps({ rowId: "other", columnId: "other" }));
+    const expected = addressElement(attributes);
+    const root = { querySelectorAll: () => [other, expected] };
+
+    expect(attributes).toEqual({
+      "data-grid-row-id": 'row"/1',
+      "data-grid-column-id": "column[한글]",
+    });
+    expect(findWebGridCell(root, point)).toBe(expected);
+    expect(findWebGridCell(root, { rowId: "missing", columnId: "missing" })).toBeNull();
+    expect(findWebGridCell(null, point)).toBeNull();
+  });
+});
+
 describe("Web clipboard Adapter", () => {
+  test("projects copy, cut, and paste results through one surface callback", () => {
+    const editor = createDocumentEditor({
+      blocks: [{ id: "a", text: "Alpha" }, { id: "b", text: "Beta" }],
+    });
+    const results: string[] = [];
+    const surface = createWebClipboardSurface({
+      codec: documentClipboardCodec,
+      read: () => editor.copy(),
+      cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
+      paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard }),
+      onResult: (result) => results.push(result.ok ? result.operation : result.code),
+    });
+    const data = new MemoryClipboardData();
+
+    expect(surface.onCopy(event(data))).toMatchObject({ ok: true, operation: "copy" });
+    expect(editor.dispatch({ type: "selection.set", blockId: "b" }).ok).toBe(true);
+    expect(surface.onPaste(event(data))).toMatchObject({ ok: true, operation: "paste" });
+    expect(surface.onCut(event(data))).toMatchObject({ ok: true, operation: "cut" });
+    expect(surface.onCopy(event(null))).toMatchObject({ ok: false, code: "clipboard.unavailable" });
+    expect(results).toEqual(["copy", "paste", "cut", "clipboard.unavailable"]);
+  });
+
   test("copies and pastes a structured Document payload through ClipboardEvent contracts", () => {
     const editor = createDocumentEditor({
       blocks: [
@@ -270,6 +315,50 @@ describe("Web clipboard Adapter", () => {
   });
 });
 
+describe("Web interaction sessions", () => {
+  test("owns pointer capture, preview, commit, and lost-capture cancellation", () => {
+    const events: string[] = [];
+    const target = pointerCaptureTarget();
+    const session = createWebPointerSession<{ readonly x: number }>({
+      onPreview: (state) => events.push(`preview:${state.x}`),
+      onCommit: (state) => events.push(`commit:${state.x}`),
+      onCancel: (state, reason) => events.push(`${reason}:${state.x}`),
+    });
+
+    session.begin(target, 7, { x: 1 });
+    expect(session.preview(8, (state) => ({ x: state.x + 1 }))).toBeNull();
+    expect(session.preview(7, (state) => ({ x: state.x + 2 }))).toEqual({ x: 3 });
+    expect(session.commit(7)).toEqual({ x: 3 });
+    expect(target.captured.size).toBe(0);
+
+    session.begin(target, 9, { x: 4 });
+    expect(session.cancel(9, "lost-capture")).toEqual({ x: 4 });
+    expect(events).toEqual(["preview:3", "commit:3", "lost-capture:4"]);
+  });
+
+  test("owns HTML drag and drop preview, commit, rejection, and supersession", () => {
+    const events: string[] = [];
+    const session = createWebDragDropSession<string, string>({
+      onPreview: (item, target) => events.push(`preview:${item}:${target}`),
+      onCommit: (item, target) => events.push(`commit:${item}:${target}`),
+      onCancel: (item, reason) => events.push(`${reason}:${item}`),
+    });
+
+    session.begin("a");
+    expect(session.preview("column-1")).toBe(true);
+    session.begin("b");
+    expect(session.commit("column-2")).toBe("b");
+    session.begin("c");
+    expect(session.cancel("drop-rejected")).toBe("c");
+    expect(events).toEqual([
+      "preview:a:column-1",
+      "superseded:a",
+      "commit:b:column-2",
+      "drop-rejected:c",
+    ]);
+  });
+});
+
 describe("Web Press and ARIA Adapters", () => {
   test("normalizes keyboard, pointer, cancellation, and native activation facts", () => {
     expect(pressInteractionFromWeb({ type: "keydown", key: "Enter" })).toEqual({
@@ -424,5 +513,34 @@ function event(clipboardData: WebClipboardData | null): WebClipboardEvent & { re
     clipboardData,
     get defaultPrevented() { return defaultPrevented; },
     preventDefault() { defaultPrevented = true; },
+  };
+}
+
+function addressElement(attributes: {
+  readonly "data-grid-row-id": string;
+  readonly "data-grid-column-id": string;
+}) {
+  return {
+    getAttribute(name: string) {
+      if (name === "data-grid-row-id") return attributes["data-grid-row-id"];
+      if (name === "data-grid-column-id") return attributes["data-grid-column-id"];
+      return null;
+    },
+  };
+}
+
+function pointerCaptureTarget() {
+  const captured = new Set<number>();
+  return {
+    captured,
+    setPointerCapture(pointerId: number) {
+      captured.add(pointerId);
+    },
+    hasPointerCapture(pointerId: number) {
+      return captured.has(pointerId);
+    },
+    releasePointerCapture(pointerId: number) {
+      captured.delete(pointerId);
+    },
   };
 }

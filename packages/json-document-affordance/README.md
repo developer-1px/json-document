@@ -52,4 +52,13 @@ directly. The editing runtime still owns history state and execution.
 own the reusable state that spans several events. Product selection and rename
 Intents remain callbacks supplied by the host.
 
+`createBoardDragSession` owns the input-agnostic active item, drop-target
+preview, commit, and cancel lifecycle for Board Hands. Web pointer and HTML
+Drag and Drop sessions feed it; Hosts still resolve targets and dispatch the
+domain move Intent.
+
+`createCanvasGestureSession` owns one active semantic Canvas gesture and its
+preview, commit, cancel, and supersede lifecycle. Web pointer capture and Host
+coordinate, hit-test, renderer, lock, and viewport policies stay outside it.
+
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
