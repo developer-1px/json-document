@@ -70,6 +70,7 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
+      "API · Composer",
       "API · Database",
       "Overview",
       "Official Hands · TBD",

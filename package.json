@@ -17,6 +17,7 @@
     "packages/json-document-web",
     "packages/json-document-contenteditable",
     "packages/json-document-rich-text",
+    "packages/json-document-composer",
     "packages/json-document-rich-text-web",
     "packages/json-document-rich-text-react",
     "packages/json-document-collaboration",

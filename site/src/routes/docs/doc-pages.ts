@@ -13,6 +13,7 @@ import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw"
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
+import composerApiMarkdown from "../../../../docs/api-reference/composer.md?raw";
 import richTextWebApiMarkdown from "../../../../docs/api-reference/rich-text-web.md?raw";
 import richTextReactApiMarkdown from "../../../../docs/api-reference/rich-text-react.md?raw";
 import collaborationApiMarkdown from "../../../../docs/api-reference/collaboration.md?raw";
@@ -159,6 +160,7 @@ export const docPages = {
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),
+  composerApi: docPage("/docs/api/composer", composerApiMarkdown),
   richTextWebApi: docPage("/docs/api/rich-text-web", richTextWebApiMarkdown),
   richTextReactApi: docPage("/docs/api/rich-text-react", richTextReactApiMarkdown),
   collaborationApi: docPage("/docs/api/collaboration", collaborationApiMarkdown),

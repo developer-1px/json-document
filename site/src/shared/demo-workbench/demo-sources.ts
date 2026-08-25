@@ -30,6 +30,10 @@ import uiSelectSource from "../../../../packages/json-document-ui-primitives-rea
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
 import uiListboxSource from "../../../../packages/json-document-ui-primitives-react/src/listbox.ts?raw";
+import composerModelSource from "../../../../packages/json-document-composer/src/model.ts?raw";
+import composerSchemaSource from "../../../../packages/json-document-composer/src/schema.ts?raw";
+import composerTriggerSource from "../../../../packages/json-document-composer/src/trigger.ts?raw";
+import composerCommandsSource from "../../../../packages/json-document-composer/src/commands.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -53,6 +57,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-web/", "/docs/api/web"],
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
+  ["packages/json-document-composer/", "/docs/api/composer"],
   ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
   ["packages/json-document-rich-text-react/", "/docs/api/rich-text-react"],
   ["packages/json-document-collaboration/", "/docs/api/collaboration"],
@@ -107,8 +112,32 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
   ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
+  ["packages/json-document-composer/src/model.ts", composerModelSource],
+  ["packages/json-document-composer/src/schema.ts", composerSchemaSource],
+  ["packages/json-document-composer/src/trigger.ts", composerTriggerSource],
+  ["packages/json-document-composer/src/commands.ts", composerCommandsSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "createComposerDraft",
+    sourcePath: "packages/json-document-composer/src/model.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "composerSchema",
+    sourcePath: "packages/json-document-composer/src/schema.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "findComposerTrigger",
+    sourcePath: "packages/json-document-composer/src/trigger.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "insertComposerReference",
+    sourcePath: "packages/json-document-composer/src/commands.ts",
+  },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "useListbox",

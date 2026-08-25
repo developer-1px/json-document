@@ -131,6 +131,7 @@ const implementationShape = read("standards/repository-implementation-shape.md")
 const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
 const activeCompanionPackages = new Set([
   "@interactive-os/json-document-editing",
+  "@interactive-os/json-document-composer",
   "@interactive-os/json-document-selection",
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-react-hook-form",

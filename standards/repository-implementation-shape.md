@@ -212,6 +212,7 @@ foundation으로 유지한다.
 | `packages/json-document` | Layered Kernel | `application/domain/foundation`과 root facade 유지 |
 | `packages/json-document-selection` | Responsibility family | `core/interaction/ports`와 selection family folder 유지 |
 | `packages/json-document-editing` | Domain family | Domain 응집은 유지하고 내부 책임 단면 정렬은 후속 #414 |
+| `packages/json-document-composer` | Composite Domain | Composer profile/model/schema/trigger/commands 책임 file과 root facade 유지 |
 | `packages/json-document-react` | Single-native Connector | 하나의 React subscription/lifecycle entry로 flat 유지 |
 | `packages/json-document-react-hook-form` | Single-native Connector | RHF lifecycle이 하나인 동안 flat 유지; 독립 binding이 생기면 분리 |
 | `packages/json-document-ajv` | Single-native Connector | 하나의 validator translation으로 flat 유지 |
