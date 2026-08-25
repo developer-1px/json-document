@@ -1,6 +1,6 @@
 import { useRef, useState, type KeyboardEvent } from "react";
 import { createOrderEditor, type OrderDocument } from "@interactive-os/json-document-editing";
-import { useEditing } from "@interactive-os/json-document-react";
+import { editingItemProps, useEditing } from "@interactive-os/json-document-react";
 import {
   lineBoundary,
   moveLinePoint,
@@ -13,7 +13,7 @@ import {
   applyAffordance,
   escapeAffordance,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { useWidgetKeyboard } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialOrder: OrderDocument = {
@@ -101,7 +101,7 @@ export function ListboxWidgetRoute() {
             <SelectableItem
               key={item.id}
               className={classes("w-full text-left", ui.surface.selectableBlock)}
-              {...optionProps(editing.getItem(item.id))}
+              {...editingItemProps(editing.getItem(item.id))}
               {...listbox.optionProps({ id: item.id, textValue: item.label })}
               {...projectWebWidgetState({
                 role: "option",
