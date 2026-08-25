@@ -16,9 +16,13 @@ import webDragDropSessionSource from "../../../../packages/json-document-web/src
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
+import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
+import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
+import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
+import webAnnotationRasterSource from "../../../../packages/json-document-web/src/annotation-raster.ts?raw";
 import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
@@ -86,9 +90,13 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
+  ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
+  ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
+  ["packages/json-document-web/src/raster-source.ts", webRasterSource],
+  ["packages/json-document-web/src/annotation-raster.ts", webAnnotationRasterSource],
   ["packages/json-document-ui-primitives-react/src/menu.tsx", uiMenuSource],
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
@@ -100,6 +108,26 @@ const registeredPublicUsages = [
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
   })),
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createGestureSession",
+    sourcePath: "packages/json-document-affordance/src/gesture-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "projectWebClientPointToSVG",
+    sourcePath: "packages/json-document-web/src/svg-coordinate.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "readWebRasterFile",
+    sourcePath: "packages/json-document-web/src/raster-source.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "renderWebAnnotationRaster",
+    sourcePath: "packages/json-document-web/src/annotation-raster.ts",
+  },
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "createAnnotationEditor",
