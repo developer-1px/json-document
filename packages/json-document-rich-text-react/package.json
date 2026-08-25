@@ -22,6 +22,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -b tsconfig.json",
+    "perf": "npm run build && node benchmarks/render-store.mjs",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "test": "vitest run --config vitest.config.ts",
