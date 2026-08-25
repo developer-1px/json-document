@@ -3,6 +3,8 @@
   "compilerOptions": { "rootDir": "src", "outDir": "dist", "tsBuildInfoFile": "dist/.tsbuildinfo" },
   "references": [
     { "path": "../json-document" },
+    { "path": "../json-document-file-intake" },
+    { "path": "../json-document-rich-text-mention" },
     { "path": "../json-document-rich-text" }
   ],
   "include": ["src/**/*.ts"]

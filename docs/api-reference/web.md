@@ -24,17 +24,17 @@ chordFromStroke(stroke: WebKeyboardStroke): string
 ## `composerAttachmentCandidateFromWebFile`
 
 ```ts
-composerAttachmentCandidateFromWebFile(file: WebComposerFile): ComposerAttachmentCandidate
+composerAttachmentCandidateFromWebFile(file: WebFileCandidate): FileCandidate
 ```
 ## `composerAttachmentCandidatesFromWebClipboard`
 
 ```ts
-composerAttachmentCandidatesFromWebClipboard(event: WebComposerClipboardEvent): ReadonlyArray<ComposerAttachmentCandidate>
+composerAttachmentCandidatesFromWebClipboard(event: WebFileClipboardEvent): ReadonlyArray<FileCandidate>
 ```
 ## `composerAttachmentCandidatesFromWebFiles`
 
 ```ts
-composerAttachmentCandidatesFromWebFiles(files: WebComposerFileList | ReadonlyArray<WebComposerFile>): ReadonlyArray<ComposerAttachmentCandidate>
+composerAttachmentCandidatesFromWebFiles(files: WebFileCandidateList | ReadonlyArray<WebFileCandidate>): ReadonlyArray<FileCandidate>
 ```
 ## `createWebClipboardBinding`
 
@@ -80,6 +80,21 @@ const defaultWebKeymap: Readonly<Record<string, WebKeyboardCommand>>
 
 ```ts
 const documentClipboardCodec: WebClipboardCodec<DocumentClipboard>
+```
+## `fileCandidateFromWebFile`
+
+```ts
+fileCandidateFromWebFile(file: WebFileCandidate): FileCandidate
+```
+## `fileCandidatesFromWebClipboard`
+
+```ts
+fileCandidatesFromWebClipboard(event: WebFileClipboardEvent): ReadonlyArray<FileCandidate>
+```
+## `fileCandidatesFromWebFiles`
+
+```ts
+fileCandidatesFromWebFiles(files: WebFileCandidateList | ReadonlyArray<WebFileCandidate>): ReadonlyArray<FileCandidate>
 ```
 ## `findWebGridCell`
 
@@ -317,26 +332,17 @@ type WebClipboardWriteResult =
 ## `WebComposerClipboardEvent`
 
 ```ts
-interface WebComposerClipboardEvent {
-  readonly clipboardData: { readonly files: WebComposerFileList } | null;
-}
+type WebComposerClipboardEvent = WebFileClipboardEvent;
 ```
 ## `WebComposerFile`
 
 ```ts
-interface WebComposerFile {
-  readonly name: string;
-  readonly size: number;
-  readonly type: string;
-}
+type WebComposerFile = WebFileCandidate;
 ```
 ## `WebComposerFileList`
 
 ```ts
-interface WebComposerFileList {
-  readonly length: number;
-  readonly [index: number]: WebComposerFile;
-}
+type WebComposerFileList = WebFileCandidateList;
 ```
 ## `WebDragDropCancelReason`
 
@@ -361,6 +367,30 @@ interface WebDragDropSessionOptions<Item, Target> {
   readonly onPreview?: (item: Item, target: Target) => void;
   readonly onCommit?: (item: Item, target: Target) => void;
   readonly onCancel?: (item: Item, reason: WebDragDropCancelReason) => void;
+}
+```
+## `WebFileCandidate`
+
+```ts
+interface WebFileCandidate {
+  readonly name: string;
+  readonly size: number;
+  readonly type: string;
+}
+```
+## `WebFileCandidateList`
+
+```ts
+interface WebFileCandidateList {
+  readonly length: number;
+  readonly [index: number]: WebFileCandidate;
+}
+```
+## `WebFileClipboardEvent`
+
+```ts
+interface WebFileClipboardEvent {
+  readonly clipboardData: { readonly files: WebFileCandidateList } | null;
 }
 ```
 ## `WebFocusableItem`

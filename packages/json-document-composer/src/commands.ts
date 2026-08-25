@@ -5,6 +5,8 @@ import {
   type RichTextNode,
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
+import { validateFileCandidates } from "@interactive-os/json-document-file-intake";
+import { insertRichTextMention } from "@interactive-os/json-document-rich-text-mention";
 import { COMPOSER_MENTION_NODE, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE, type ComposerAttachment, type ComposerAttachmentCandidate, type ComposerDraft, type ComposerReference, type ComposerTrigger } from "./model.js";
 import type { ComposerAttachmentPolicy } from "./host-config.js";
 
@@ -19,18 +21,9 @@ export function createComposerAttachments(
   candidates: ReadonlyArray<ComposerAttachmentCandidate>,
   options: { readonly createId: () => string; readonly policy: ComposerAttachmentPolicy; readonly currentCount?: number },
 ): ComposerAttachmentResult {
-  if (candidates.length === 0) return { ok: true, attachments: [] };
-  const currentCount = options.currentCount ?? 0;
-  if (options.policy.maxFiles !== null && currentCount + candidates.length > options.policy.maxFiles) {
-    return { ok: false, code: "composer.attachments.limit", candidate: candidates[0]! };
-  }
-  const attachments: ComposerAttachment[] = [];
-  for (const candidate of candidates) {
-    if (candidate.name.length === 0 || !Number.isFinite(candidate.size) || candidate.size < 0) return { ok: false, code: "composer.attachments.invalid", candidate };
-    if (options.policy.maxBytesPerFile !== null && candidate.size > options.policy.maxBytesPerFile) return { ok: false, code: "composer.attachments.size", candidate };
-    if (!acceptsMediaType(candidate.mediaType, options.policy.acceptedMediaTypes)) return { ok: false, code: "composer.attachments.media-type", candidate };
-    attachments.push({ id: options.createId(), kind: candidate.mediaType?.startsWith("image/") ? "image" : "document", ...candidate });
-  }
+  const validated = validateFileCandidates(candidates, options.policy, options.currentCount === undefined ? {} : { currentCount: options.currentCount });
+  if (!validated.ok) return { ok: false, code: composerAttachmentError(validated.code), candidate: validated.candidate };
+  const attachments: ComposerAttachment[] = validated.candidates.map((candidate) => ({ id: options.createId(), kind: candidate.mediaType?.startsWith("image/") ? "image" : "document", ...candidate }));
   return { ok: true, attachments };
 }
 
@@ -48,14 +41,13 @@ export function selectComposerModel<Model extends string>(editor: RichTextEditor
 }
 
 export function insertComposerReference(editor: RichTextEditor, trigger: ComposerTrigger, reference: ComposerReference, options: { readonly createId: () => string }): ComposerCommandResult {
+  if (reference.kind === "mention") return insertRichTextMention(editor, trigger.range, reference, options);
   const anchor: RichTextPoint = { kind: "text", nodeId: trigger.range.nodeId, offset: trigger.range.from, affinity: "forward" };
   const focus: RichTextPoint = { kind: "text", nodeId: trigger.range.nodeId, offset: trigger.range.to, affinity: "forward" };
   const selected = editor.dispatch({ type: "selection.set", selection: { kind: "range", ranges: [{ anchor, focus }], primaryIndex: 0 } });
   if (!selected.ok) return selected;
-  const atom: RichTextNode = reference.kind === "skill"
-    ? { id: options.createId(), type: COMPOSER_SKILL_NODE, attrs: { skillId: reference.id, label: reference.label } }
-    : { id: options.createId(), type: COMPOSER_MENTION_NODE, attrs: { entityId: reference.id, label: reference.label } };
-  const prefix = reference.kind === "skill" ? "/" : "@";
+  const atom: RichTextNode = { id: options.createId(), type: COMPOSER_SKILL_NODE, attrs: { skillId: reference.id, label: reference.label } };
+  const prefix = "/";
   return editor.dispatch({
     type: "clipboard.paste",
     clipboard: {
@@ -90,8 +82,6 @@ export function hasComposerContent(draft: ComposerDraft): boolean {
   return draft.attachments.length > 0 || draft.instruction.content.some((node) => "content" in node && Array.isArray(node.content) && node.content.length > 0);
 }
 
-function acceptsMediaType(mediaType: string | null, accepted: ReadonlyArray<string>): boolean {
-  if (accepted.length === 0 || accepted.includes("*/*")) return true;
-  const value = mediaType ?? "";
-  return accepted.some((pattern) => pattern === value || (pattern.endsWith("/*") && value.startsWith(pattern.slice(0, -1))));
+function composerAttachmentError(code: "file-intake.invalid" | "file-intake.limit" | "file-intake.media-type" | "file-intake.size"): "composer.attachments.invalid" | "composer.attachments.limit" | "composer.attachments.media-type" | "composer.attachments.size" {
+  return `composer.attachments.${code.slice("file-intake.".length)}` as "composer.attachments.invalid" | "composer.attachments.limit" | "composer.attachments.media-type" | "composer.attachments.size";
 }

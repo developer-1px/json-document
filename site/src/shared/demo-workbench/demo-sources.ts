@@ -39,7 +39,10 @@ import composerInteractionSource from "../../../../packages/json-document-compos
 import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
 import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
-import webComposerAttachmentSource from "../../../../packages/json-document-web/src/composer-attachment.ts?raw";
+import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
+import mentionSource from "../../../../packages/json-document-rich-text-mention/src/index.ts?raw";
+import mentionReactSource from "../../../../packages/json-document-rich-text-mention-react/src/index.tsx?raw";
+import webFileIntakeSource from "../../../../packages/json-document-web/src/file-intake.ts?raw";
 import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
 import uiFileSizeSource from "../../../../packages/json-document-ui-primitives-react/src/file-size.ts?raw";
 
@@ -65,6 +68,9 @@ const packageReferencePaths = new Map([
   ["packages/json-document-web/", "/docs/api/web"],
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
+  ["packages/json-document-file-intake/", "/docs/api/file-intake"],
+  ["packages/json-document-rich-text-mention/", "/docs/api/rich-text-mention"],
+  ["packages/json-document-rich-text-mention-react/", "/docs/api/rich-text-mention-react"],
   ["packages/json-document-composer/", "/docs/api/composer"],
   ["packages/json-document-composer-react/", "/docs/api/composer-react"],
   ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
@@ -130,11 +136,29 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/suggestions.ts", composerSuggestionsSource],
   ["packages/json-document-composer-react/src/command-menu.ts", composerCommandMenuSource],
   ["packages/json-document-composer-react/src/reference-atom.tsx", composerReferenceAtomSource],
-  ["packages/json-document-web/src/composer-attachment.ts", webComposerAttachmentSource],
+  ["packages/json-document-file-intake/src/index.ts", fileIntakeSource],
+  ["packages/json-document-rich-text-mention/src/index.ts", mentionSource],
+  ["packages/json-document-rich-text-mention-react/src/index.tsx", mentionReactSource],
+  ["packages/json-document-web/src/file-intake.ts", webFileIntakeSource],
   ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
   ["packages/json-document-ui-primitives-react/src/file-size.ts", uiFileSizeSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-file-intake",
+    symbol: "validateFileCandidates",
+    sourcePath: "packages/json-document-file-intake/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-mention",
+    symbol: "insertRichTextMention",
+    sourcePath: "packages/json-document-rich-text-mention/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-mention-react",
+    symbol: "RichTextMentionAtom",
+    sourcePath: "packages/json-document-rich-text-mention-react/src/index.tsx",
+  },
   {
     packageName: "@interactive-os/json-document-composer",
     symbol: "createComposerDraft",
@@ -192,8 +216,8 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-web",
-    symbol: "composerAttachmentCandidatesFromWebFiles",
-    sourcePath: "packages/json-document-web/src/composer-attachment.ts",
+    symbol: "fileCandidatesFromWebFiles",
+    sourcePath: "packages/json-document-web/src/file-intake.ts",
   },
   {
     packageName: "@interactive-os/json-document-rich-text-react",

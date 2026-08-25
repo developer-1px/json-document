@@ -45,20 +45,12 @@ interface ComposerAttachment extends Record<string, JSONValue> {
 ## `ComposerAttachmentCandidate`
 
 ```ts
-interface ComposerAttachmentCandidate extends Record<string, JSONValue> {
-  readonly name: string;
-  readonly size: number;
-  readonly mediaType: string | null;
-}
+type ComposerAttachmentCandidate = FileCandidate;
 ```
 ## `ComposerAttachmentPolicy`
 
 ```ts
-interface ComposerAttachmentPolicy extends Record<string, JSONValue> {
-  readonly acceptedMediaTypes: ReadonlyArray<string>;
-  readonly maxFiles: number | null;
-  readonly maxBytesPerFile: number | null;
-}
+type ComposerAttachmentPolicy = FileAcceptancePolicy;
 ```
 ## `ComposerAttachmentResult`
 
@@ -157,7 +149,7 @@ interface ComposerKeyStroke {
 
 ```ts
 type ComposerReference =
-  | { readonly kind: "mention"; readonly id: string; readonly label: string }
+  | ({ readonly kind: "mention" } & RichTextMention)
   | { readonly kind: "skill"; readonly id: string; readonly label: string };
 ```
 ## `composerSchema`

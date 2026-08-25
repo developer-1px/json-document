@@ -117,10 +117,13 @@ import { Route as PageDocsApiContenteditableRouteImport } from "./routes/_page/d
 import { Route as PageDocsApiContenteditableCollaborationRouteImport } from "./routes/_page/docs/api/contenteditable-collaboration";
 import { Route as PageDocsApiDatabaseRouteImport } from "./routes/_page/docs/api/database";
 import { Route as PageDocsApiEditingRouteImport } from "./routes/_page/docs/api/editing";
+import { Route as PageDocsApiFileIntakeRouteImport } from "./routes/_page/docs/api/file-intake";
 import { Route as PageDocsApiJsonDocumentRouteImport } from "./routes/_page/docs/api/json-document";
 import { Route as PageDocsApiReactRouteImport } from "./routes/_page/docs/api/react";
 import { Route as PageDocsApiReactHookFormRouteImport } from "./routes/_page/docs/api/react-hook-form";
 import { Route as PageDocsApiRichTextRouteImport } from "./routes/_page/docs/api/rich-text";
+import { Route as PageDocsApiRichTextMentionRouteImport } from "./routes/_page/docs/api/rich-text-mention";
+import { Route as PageDocsApiRichTextMentionReactRouteImport } from "./routes/_page/docs/api/rich-text-mention-react";
 import { Route as PageDocsApiRichTextReactRouteImport } from "./routes/_page/docs/api/rich-text-react";
 import { Route as PageDocsApiRichTextWebRouteImport } from "./routes/_page/docs/api/rich-text-web";
 import { Route as PageDocsApiSelectionRouteImport } from "./routes/_page/docs/api/selection";
@@ -704,6 +707,11 @@ const PageDocsApiEditingRoute = PageDocsApiEditingRouteImport.update({
   path: "/editing",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiFileIntakeRoute = PageDocsApiFileIntakeRouteImport.update({
+  id: "/file-intake",
+  path: "/file-intake",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
 const PageDocsApiJsonDocumentRoute = PageDocsApiJsonDocumentRouteImport.update({
   id: "/json-document",
   path: "/json-document",
@@ -725,6 +733,18 @@ const PageDocsApiRichTextRoute = PageDocsApiRichTextRouteImport.update({
   path: "/rich-text",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiRichTextMentionRoute =
+  PageDocsApiRichTextMentionRouteImport.update({
+    id: "/rich-text-mention",
+    path: "/rich-text-mention",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiRichTextMentionReactRoute =
+  PageDocsApiRichTextMentionReactRouteImport.update({
+    id: "/rich-text-mention-react",
+    path: "/rich-text-mention-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
 const PageDocsApiRichTextReactRoute =
   PageDocsApiRichTextReactRouteImport.update({
     id: "/rich-text-react",
@@ -906,10 +926,13 @@ export interface FileRoutesByFullPath {
   "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/docs/api/database": typeof PageDocsApiDatabaseRoute;
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
+  "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
+  "/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
+  "/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
   "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/docs/api/selection": typeof PageDocsApiSelectionRoute;
@@ -1032,10 +1055,13 @@ export interface FileRoutesByTo {
   "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/docs/api/database": typeof PageDocsApiDatabaseRoute;
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
+  "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
+  "/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
+  "/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
   "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/docs/api/selection": typeof PageDocsApiSelectionRoute;
@@ -1160,10 +1186,13 @@ export interface FileRoutesById {
   "/_page/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/_page/docs/api/database": typeof PageDocsApiDatabaseRoute;
   "/_page/docs/api/editing": typeof PageDocsApiEditingRoute;
+  "/_page/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/_page/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
   "/_page/docs/api/react": typeof PageDocsApiReactRoute;
   "/_page/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/_page/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
+  "/_page/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
+  "/_page/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/_page/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
   "/_page/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/_page/docs/api/selection": typeof PageDocsApiSelectionRoute;
@@ -1288,10 +1317,13 @@ export interface FileRouteTypes {
     | "/docs/api/contenteditable-collaboration"
     | "/docs/api/database"
     | "/docs/api/editing"
+    | "/docs/api/file-intake"
     | "/docs/api/json-document"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
+    | "/docs/api/rich-text-mention"
+    | "/docs/api/rich-text-mention-react"
     | "/docs/api/rich-text-react"
     | "/docs/api/rich-text-web"
     | "/docs/api/selection"
@@ -1414,10 +1446,13 @@ export interface FileRouteTypes {
     | "/docs/api/contenteditable-collaboration"
     | "/docs/api/database"
     | "/docs/api/editing"
+    | "/docs/api/file-intake"
     | "/docs/api/json-document"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
+    | "/docs/api/rich-text-mention"
+    | "/docs/api/rich-text-mention-react"
     | "/docs/api/rich-text-react"
     | "/docs/api/rich-text-web"
     | "/docs/api/selection"
@@ -1541,10 +1576,13 @@ export interface FileRouteTypes {
     | "/_page/docs/api/contenteditable-collaboration"
     | "/_page/docs/api/database"
     | "/_page/docs/api/editing"
+    | "/_page/docs/api/file-intake"
     | "/_page/docs/api/json-document"
     | "/_page/docs/api/react"
     | "/_page/docs/api/react-hook-form"
     | "/_page/docs/api/rich-text"
+    | "/_page/docs/api/rich-text-mention"
+    | "/_page/docs/api/rich-text-mention-react"
     | "/_page/docs/api/rich-text-react"
     | "/_page/docs/api/rich-text-web"
     | "/_page/docs/api/selection"
@@ -2325,6 +2363,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiEditingRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/file-intake": {
+      id: "/_page/docs/api/file-intake";
+      path: "/file-intake";
+      fullPath: "/docs/api/file-intake";
+      preLoaderRoute: typeof PageDocsApiFileIntakeRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/json-document": {
       id: "/_page/docs/api/json-document";
       path: "/json-document";
@@ -2351,6 +2396,20 @@ declare module "@tanstack/react-router" {
       path: "/rich-text";
       fullPath: "/docs/api/rich-text";
       preLoaderRoute: typeof PageDocsApiRichTextRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/rich-text-mention": {
+      id: "/_page/docs/api/rich-text-mention";
+      path: "/rich-text-mention";
+      fullPath: "/docs/api/rich-text-mention";
+      preLoaderRoute: typeof PageDocsApiRichTextMentionRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/rich-text-mention-react": {
+      id: "/_page/docs/api/rich-text-mention-react";
+      path: "/rich-text-mention-react";
+      fullPath: "/docs/api/rich-text-mention-react";
+      preLoaderRoute: typeof PageDocsApiRichTextMentionReactRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
     "/_page/docs/api/rich-text-react": {
@@ -2457,10 +2516,13 @@ interface PageDocsApiRouteChildren {
   PageDocsApiContenteditableCollaborationRoute: typeof PageDocsApiContenteditableCollaborationRoute;
   PageDocsApiDatabaseRoute: typeof PageDocsApiDatabaseRoute;
   PageDocsApiEditingRoute: typeof PageDocsApiEditingRoute;
+  PageDocsApiFileIntakeRoute: typeof PageDocsApiFileIntakeRoute;
   PageDocsApiJsonDocumentRoute: typeof PageDocsApiJsonDocumentRoute;
   PageDocsApiReactRoute: typeof PageDocsApiReactRoute;
   PageDocsApiReactHookFormRoute: typeof PageDocsApiReactHookFormRoute;
   PageDocsApiRichTextRoute: typeof PageDocsApiRichTextRoute;
+  PageDocsApiRichTextMentionRoute: typeof PageDocsApiRichTextMentionRoute;
+  PageDocsApiRichTextMentionReactRoute: typeof PageDocsApiRichTextMentionReactRoute;
   PageDocsApiRichTextReactRoute: typeof PageDocsApiRichTextReactRoute;
   PageDocsApiRichTextWebRoute: typeof PageDocsApiRichTextWebRoute;
   PageDocsApiSelectionRoute: typeof PageDocsApiSelectionRoute;
@@ -2481,10 +2543,13 @@ const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
     PageDocsApiContenteditableCollaborationRoute,
   PageDocsApiDatabaseRoute: PageDocsApiDatabaseRoute,
   PageDocsApiEditingRoute: PageDocsApiEditingRoute,
+  PageDocsApiFileIntakeRoute: PageDocsApiFileIntakeRoute,
   PageDocsApiJsonDocumentRoute: PageDocsApiJsonDocumentRoute,
   PageDocsApiReactRoute: PageDocsApiReactRoute,
   PageDocsApiReactHookFormRoute: PageDocsApiReactHookFormRoute,
   PageDocsApiRichTextRoute: PageDocsApiRichTextRoute,
+  PageDocsApiRichTextMentionRoute: PageDocsApiRichTextMentionRoute,
+  PageDocsApiRichTextMentionReactRoute: PageDocsApiRichTextMentionReactRoute,
   PageDocsApiRichTextReactRoute: PageDocsApiRichTextReactRoute,
   PageDocsApiRichTextWebRoute: PageDocsApiRichTextWebRoute,
   PageDocsApiSelectionRoute: PageDocsApiSelectionRoute,

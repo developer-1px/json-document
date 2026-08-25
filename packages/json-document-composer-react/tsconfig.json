@@ -8,6 +8,8 @@
   "references": [
     { "path": "../json-document-composer" },
     { "path": "../json-document-rich-text" },
+    { "path": "../json-document-rich-text-mention" },
+    { "path": "../json-document-rich-text-mention-react" },
     { "path": "../json-document-ui-primitives-react" }
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx"]

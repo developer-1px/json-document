@@ -26,7 +26,7 @@ import {
   type ComposerReference,
 } from "@interactive-os/json-document-composer";
 import { ComposerReferenceAtom, useComposerCommandMenu } from "@interactive-os/json-document-composer-react";
-import { composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles } from "@interactive-os/json-document-web";
+import { fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "@interactive-os/json-document-web";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { JsonInspector } from "../../shared/ui/json-inspector";
@@ -132,11 +132,11 @@ export function ComposerDemoRoute() {
   }
 
   function attachFiles(event: ChangeEvent<HTMLInputElement>) {
-    addFiles(composerAttachmentCandidatesFromWebFiles(event.currentTarget.files ?? []));
+    addFiles(fileCandidatesFromWebFiles(event.currentTarget.files ?? []));
     event.currentTarget.value = "";
   }
 
-  function addFiles(candidates: ReturnType<typeof composerAttachmentCandidatesFromWebFiles>) {
+  function addFiles(candidates: ReturnType<typeof fileCandidatesFromWebFiles>) {
     if (candidates.length === 0) return;
     const created = createComposerAttachments(candidates, { createId: hostPorts.createId, policy: hostConfig.attachments, currentCount: attachments.length });
     if (!created.ok) return;
@@ -145,7 +145,7 @@ export function ComposerDemoRoute() {
   }
 
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
-    const candidates = composerAttachmentCandidatesFromWebClipboard(event);
+    const candidates = fileCandidatesFromWebClipboard(event);
     if (candidates.length === 0) return;
     event.preventDefault();
     event.stopPropagation();
@@ -180,7 +180,7 @@ export function ComposerDemoRoute() {
         <FileDropRegion
           className={`home-composer-single${hasContent ? " home-composer-single-filled" : ""}`}
           data-testid="agent-chat-composer"
-          onFiles={(files) => addFiles(composerAttachmentCandidatesFromWebFiles(files))}
+          onFiles={(files) => addFiles(fileCandidatesFromWebFiles(files))}
           overlay={<div className="composer-dropzone-overlay"><div className="composer-dropzone-card"><strong>여기에 파일을 놓아주세요</strong><span>이미지와 문서를 Composer context에 첨부합니다.</span></div></div>}
           onPasteCapture={handlePaste}
           onKeyDownCapture={handleHistoryKeyDown}

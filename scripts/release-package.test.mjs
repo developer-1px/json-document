@@ -10,6 +10,9 @@ const firstKit = [
   ["json-document-editing-v0.1.0-rc.0", "@interactive-os/json-document-editing", "next", "packages/json-document-editing/package.json"],
   ["json-document-composer-v0.1.0-rc.0", "@interactive-os/json-document-composer", "next", "packages/json-document-composer/package.json"],
   ["json-document-composer-react-v0.1.0-rc.0", "@interactive-os/json-document-composer-react", "next", "packages/json-document-composer-react/package.json"],
+  ["json-document-file-intake-v0.1.0-rc.0", "@interactive-os/json-document-file-intake", "next", "packages/json-document-file-intake/package.json"],
+  ["json-document-rich-text-mention-v0.1.0-rc.0", "@interactive-os/json-document-rich-text-mention", "next", "packages/json-document-rich-text-mention/package.json"],
+  ["json-document-rich-text-mention-react-v0.1.0-rc.0", "@interactive-os/json-document-rich-text-mention-react", "next", "packages/json-document-rich-text-mention-react/package.json"],
   ["json-document-web-v0.1.0-rc.0", "@interactive-os/json-document-web", "next", "packages/json-document-web/package.json"],
   ["json-document-react-v0.1.0-rc.0", "@interactive-os/json-document-react", "next", "packages/json-document-react/package.json"],
 ];

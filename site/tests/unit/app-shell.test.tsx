@@ -70,6 +70,8 @@ describe("official site shell", () => {
     ]);
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
+      "API · Rich Text Mention",
+      "API · Mention React",
       "API · Composer",
       "API · Composer React",
       "API · Database",
@@ -143,7 +145,7 @@ describe("official site shell", () => {
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Artifact" }));
-    expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet"]);
+    expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet", "API · File Intake"]);
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
       "Editing",

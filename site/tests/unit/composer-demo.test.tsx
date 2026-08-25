@@ -2,6 +2,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { ComposerDemoRoute } from "../../src/routes/composer-demo/ComposerDemoRoute";
 import composerDemoSource from "../../src/routes/composer-demo/ComposerDemoRoute.tsx?raw";
+import composerCommandsSource from "../../../packages/json-document-composer/src/commands.ts?raw";
+import composerSchemaSource from "../../../packages/json-document-composer/src/schema.ts?raw";
+import composerReferenceAtomSource from "../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 
 afterEach(cleanup);
 
@@ -10,7 +13,8 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).not.toContain("editor.apply(");
     expect(composerDemoSource).not.toContain("function composerAttachments");
     expect(composerDemoSource).toContain("addComposerAttachments(");
-    expect(composerDemoSource).toContain("composerAttachmentCandidatesFromWebFiles(");
+    expect(composerDemoSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerDemoSource).not.toContain("composerAttachmentCandidatesFromWebFiles(");
     expect(composerDemoSource).not.toContain("composer-placeholder-box");
     expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
     expect(composerDemoSource).toContain("useComposerCommandMenu(");
@@ -22,6 +26,15 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).not.toContain("commandActiveId");
     expect(composerDemoSource).not.toContain("function renderAtom");
     expect(composerDemoSource).not.toContain("function formatBytes");
+  });
+
+  test("delegates file intake and mention responsibilities to their canonical owners", () => {
+    expect(composerCommandsSource).toContain("validateFileCandidates(");
+    expect(composerCommandsSource).not.toContain("function acceptsMediaType");
+    expect(composerCommandsSource).toContain("insertRichTextMention(");
+    expect(composerSchemaSource).toContain("richTextMentionNodeSpec");
+    expect(composerSchemaSource).not.toContain("entityId: { required:");
+    expect(composerReferenceAtomSource).toContain("<RichTextMentionAtom");
   });
 
   test("delegates empty-state placeholder lifecycle to the canonical Rich Text surface", () => {
