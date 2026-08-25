@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { ActionLink, DisclosureButton } from "../../shared/ui/interactive";
+import { DisclosureButton } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionLink } from "../../shared/ui/interactive";
 import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -80,7 +81,6 @@ function AppShell() {
                   className={classes(ui.nav.groupToggle, activeGroup === group ? ui.nav.groupActive : ui.nav.groupIdle)}
                   expanded={open}
                   controls={`${groupLabelId}-list`}
-                  chevronClassName={ui.nav.chevron}
                   onClick={() => {
                     setOpenGroups((current) => {
                       const next = new Set(current);
@@ -90,7 +90,8 @@ function AppShell() {
                     });
                   }}
                 >
-                  {group}
+                  <span>{group}</span>
+                  <span aria-hidden="true" className={classes(ui.interactive.chevron, ui.nav.chevron)}>⌄</span>
                 </DisclosureButton>
                 <ul
                   id={`${groupLabelId}-list`}

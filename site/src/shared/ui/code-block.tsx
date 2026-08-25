@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { createWebClipboardTextWriter } from "@interactive-os/json-document-web";
 import { codeLanguageLabel, tokenizeCodeLine, type CodeLanguage } from "./code-tokens";
-import { IconButton } from "./interactive";
+import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "./styles";
 
 type CodeBlockSize = "compact" | "content" | "standard" | "tall";

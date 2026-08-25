@@ -3,7 +3,7 @@ import { createJSONDocument, type JSONDocument, type JSONValue } from "@interact
 import { useEditing, useReactConnector, type Editing } from "@interactive-os/json-document-react";
 import { ContentEditable } from "@interactive-os/json-document-contenteditable";
 import { Inspector } from "../../../shared/ui/inspector";
-import { SelectableItem } from "../../../shared/ui/interactive";
+import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 
 export function ContentEditableAdapterLab() {

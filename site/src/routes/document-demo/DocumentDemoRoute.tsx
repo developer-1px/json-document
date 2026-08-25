@@ -26,7 +26,7 @@ import {
   editingCommandFromWebKeyboardStroke,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -220,7 +220,7 @@ export function DocumentDemoRoute() {
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (
-                <ActionButton kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
+                <ActionButton data-kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
               ) : document.blocks.map((block, index) => {
                 const item = editing.getItem(block.id);
                 return (

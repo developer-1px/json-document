@@ -15,8 +15,8 @@ Hands
 Host
 ```
 
-`@interactive-os/json-document-ui-primitives-react`는 현재 `Select`, `Menu`,
-`FileDropRegion`, `GridCell`, `ResizeHandle`을 제공합니다. Host는 같은 상태와
+`@interactive-os/json-document-ui-primitives-react`는 현재 control, selection,
+disclosure, menu, select와 surface primitive를 제공합니다. Host는 같은 상태와
 event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 
 제품의 option 목록, permission, workflow, persistence와 브랜드 디자인은 이
@@ -25,6 +25,30 @@ event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 ```sh
 npm i @interactive-os/json-document-ui-primitives-react
 ```
+
+## Control primitives
+
+```tsx
+<ActionButton onClick={save}>Save</ActionButton>
+<ToggleButton pressed={filtered} onClick={toggleFilter}>Filter</ToggleButton>
+<IconButton label="Copy" onClick={copy}>□</IconButton>
+<SelectableItem as="li" selected={selected} focus={focused}>Item</SelectableItem>
+<DisclosureButton expanded={open} controls="details" onClick={toggle}>
+  <span>Details</span>
+  <span aria-hidden="true">⌄</span>
+</DisclosureButton>
+```
+
+모든 button primitive는 기본 `type="button"`을 제공하고 명시적 override를
+보존합니다. `ToggleButton`은 `pressed`를 `aria-pressed`에, `IconButton`은
+`label`을 accessible name과 기본 tooltip에 투영합니다. `DisclosureButton`은
+`expanded`와 `controls`를 disclosure ARIA에 연결하며 표현 markup은 Host가
+children으로 구성합니다.
+
+`SelectableItem`은 polymorphic element에 `selected/focus` data state와
+`data-ui-control` styling slot을 제공합니다. role, ARIA selection과 roving focus는
+해당 widget의 semantic primitive 또는 Web Adapter가 소유합니다. 제품별 kind,
+copy와 CSS recipe도 Host 책임입니다.
 
 ## `Select`
 

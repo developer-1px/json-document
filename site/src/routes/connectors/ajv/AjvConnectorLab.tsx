@@ -4,7 +4,7 @@ import { createAjvValidator } from "@interactive-os/json-document-ajv";
 import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
 import { Ajv } from "ajv";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const ajv = new Ajv({ useDefaults: true });
@@ -81,7 +81,7 @@ export function AjvConnectorLab() {
           className={ui.field.control}
         />
       </SelectableItem>
-      <ActionButton kind="primary" onClick={commitDraft} className="mt-3">
+      <ActionButton data-kind="primary" onClick={commitDraft} className="mt-3">
         Commit draft
       </ActionButton>
 
