@@ -15,9 +15,9 @@ export function DatabaseTableDemo() {
         viewId="table"
         labels={{ ariaLabel: "Notion-style database" }}
         style={{
-          "--jd-db-accent": "#de6d55",
-          "--jd-db-border": "#d8d1c5",
-          "--jd-db-selection-bg": "#fbf8f2",
+          "--jd-db-accent": "rgb(var(--color-border-accent))",
+          "--jd-db-border": "rgb(var(--color-border-subtle))",
+          "--jd-db-selection-bg": "rgb(var(--color-background-subtle))",
         } as CSSProperties}
         createRecord={() => ({ id: nextRecordId(editor) })}
         renderToolbar={(context) => context.nativeTextLease ? (
