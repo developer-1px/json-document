@@ -1,5 +1,6 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import {
+  ANNOTATION_PROFILE_V1,
   createDatabaseEditor,
   createDocumentEditor,
   createOrderEditor,
@@ -8,6 +9,7 @@ import {
   type DatabaseDocument,
   type OrderDocument,
   type SheetDocument,
+  type AnnotationDocument,
 } from "@interactive-os/json-document-editing";
 import {
   createWebDragDropSession,
@@ -29,6 +31,9 @@ import {
   moveLinePoint,
   pressInteractionFromWeb,
   projectWebWidgetState,
+  projectWebClientPointToSVG,
+  readWebRasterFile,
+  renderWebAnnotationRaster,
   rovingFocusItemProps,
   selectionOperationFromModifiers,
   sheetClipboardCodec,
@@ -38,6 +43,78 @@ import {
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("Web Annotation platform adapters", () => {
+  test("projects client coordinates through an offset and scaled SVG viewport", () => {
+    expect(projectWebClientPointToSVG(
+      { x: 110, y: 70 },
+      { clientRect: { left: 10, top: 20, width: 200, height: 100 }, viewBox: { x: 5, y: 10, width: 1000, height: 500 } },
+    )).toEqual({ x: 505, y: 260 });
+    expect(projectWebClientPointToSVG(
+      { x: 0, y: 0 },
+      { clientRect: { left: 0, top: 0, width: 0, height: 100 }, viewBox: { x: 0, y: 0, width: 1, height: 1 } },
+    )).toBeNull();
+  });
+
+  test("reads a raster data URL and reports decoded natural dimensions", async () => {
+    class Reader {
+      result: string | null = null;
+      error: Error | null = null;
+      onload: null | (() => void) = null;
+      onerror: null | (() => void) = null;
+      readAsDataURL() { this.result = "data:image/png;base64,fixture"; this.onload?.(); }
+    }
+    class RasterImage {
+      naturalWidth = 640; naturalHeight = 480; onload: null | (() => void) = null; onerror: null | (() => void) = null;
+      set src(_value: string) { this.onload?.(); }
+    }
+    vi.stubGlobal("FileReader", Reader);
+    vi.stubGlobal("Image", RasterImage);
+    await expect(readWebRasterFile({ name: "fixture.png", type: "image/png" })).resolves.toEqual({ ok: true, dataURL: "data:image/png;base64,fixture", width: 640, height: 480 });
+  });
+
+  test("returns stable read and decode failure codes", async () => {
+    class FailedReader {
+      result: string | null = null; error = new Error("read failed"); onload: null | (() => void) = null; onerror: null | (() => void) = null;
+      readAsDataURL() { this.onerror?.(); }
+    }
+    vi.stubGlobal("FileReader", FailedReader);
+    await expect(readWebRasterFile({ name: "broken.png", type: "image/png" })).resolves.toMatchObject({ ok: false, code: "raster.read-failed" });
+
+    class Reader {
+      result = "data:image/png;base64,broken"; error: Error | null = null; onload: null | (() => void) = null; onerror: null | (() => void) = null;
+      readAsDataURL() { this.onload?.(); }
+    }
+    class FailedImage { onload: null | (() => void) = null; onerror: null | (() => void) = null; set src(_value: string) { this.onerror?.(); } }
+    vi.stubGlobal("FileReader", Reader);
+    vi.stubGlobal("Image", FailedImage);
+    await expect(readWebRasterFile({ name: "broken.png", type: "image/png" })).resolves.toEqual({ ok: false, code: "raster.decode-failed" });
+  });
+
+  test("translates point, rectangle, path, and arrow selectors into deterministic Canvas commands", async () => {
+    const commands: string[] = [];
+    const context = new Proxy({}, { set: () => true, get: (_target, property) => (...args: unknown[]) => commands.push(`${String(property)}:${args.join(",")}`) }) as CanvasRenderingContext2D;
+    class RasterImage { onload: null | (() => void) = null; onerror: null | (() => void) = null; set src(_value: string) { this.onload?.(); } }
+    vi.stubGlobal("Image", RasterImage);
+    vi.stubGlobal("document", { createElement: () => ({ width: 0, height: 0, getContext: () => context, toDataURL: () => "data:image/png;base64,rendered" }) });
+    const annotationDocument: AnnotationDocument = {
+      profile: ANNOTATION_PROFILE_V1, id: "annotations", sources: [{ id: "source", src: "fixture.png", width: 100, height: 80 }],
+      annotations: [
+        { id: "point", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "point", x: 1, y: 2 } }, presentation: { type: "marker" } },
+        { id: "rectangle", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "rectangle", x: 3, y: 4, width: 5, height: 6 } }, presentation: { type: "outline" } },
+        { id: "path", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "path", points: [{ x: 7, y: 8 }, { x: 9, y: 10 }] } }, presentation: { type: "stroke" } },
+        { id: "arrow", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "arrow", from: { x: 11, y: 12 }, to: { x: 13, y: 14 } } }, presentation: { type: "arrow" } },
+      ],
+    };
+    await expect(renderWebAnnotationRaster({ document: annotationDocument, sourceId: "source", sourceURL: "fixture.png", style: { stroke: "red", fill: "red", lineWidth: 2, labelFont: "12px sans" } }))
+      .resolves.toEqual({ ok: true, dataURL: "data:image/png;base64,rendered" });
+    expect(commands.some((command) => command.startsWith("arc:"))).toBe(true);
+    expect(commands.some((command) => command.startsWith("strokeRect:"))).toBe(true);
+    expect(commands.filter((command) => command.startsWith("lineTo:")).length).toBeGreaterThanOrEqual(4);
+  });
+});
 
 describe("Web focus item", () => {
   test("projects and realizes a focus key without selector interpolation", () => {
