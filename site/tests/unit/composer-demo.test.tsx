@@ -15,6 +15,8 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
     expect(composerDemoSource).toContain("useComposerCommandMenu(");
     expect(composerDemoSource).toContain("<ComposerReferenceAtom");
+    expect(composerDemoSource).toContain("renderExtension={renderComposerReference}");
+    expect(composerDemoSource).not.toContain("renderExtension={(node)");
     expect(composerDemoSource).toContain("formatFileSize(file.size)");
     expect(composerDemoSource).not.toContain("hostConfig.suggestions.filter(");
     expect(composerDemoSource).not.toContain("commandActiveId");

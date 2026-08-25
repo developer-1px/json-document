@@ -5,6 +5,7 @@ import {
   createRichTextNodeId,
   createRichTextEditor,
   type RichTextDocument,
+  type RichTextNode,
 } from "@interactive-os/json-document-rich-text";
 import {
   COMPOSER_HOST_PROFILE_V1,
@@ -59,6 +60,10 @@ const hostConfig = {
   attachments: { acceptedMediaTypes: ["*/*"], maxFiles: null, maxBytesPerFile: null },
   interaction: { submit: "enter", newline: "shift-enter" },
 } satisfies ComposerHostConfig<ComposerModel>;
+
+function renderComposerReference(node: RichTextNode) {
+  return <ComposerReferenceAtom node={node} className="composer-atom" />;
+}
 
 if (hostConfig.profile !== composerHostConfigSchema.$id) throw new TypeError("Composer Host config profile does not match its schema.");
 
@@ -220,7 +225,7 @@ export function ComposerDemoRoute() {
                 onAction={onAction}
                 onKeyDownCapture={handleKeyDown}
                 placeholder="작업을 입력하세요"
-                renderExtension={(node) => <ComposerReferenceAtom node={node} className="composer-atom" />}
+                renderExtension={renderComposerReference}
                 spellCheck={false}
               />
             </div>

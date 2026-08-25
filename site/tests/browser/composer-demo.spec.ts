@@ -107,6 +107,25 @@ test("빈 Composer에 처음 입력할 때 React DOM 삭제 오류가 발생하�
   expect(pageErrors).toEqual([]);
 });
 
+test("Composer에서 연속 soft break를 Backspace로 합쳐도 React DOM 배치가 충돌하지 않는다", async ({ page }) => {
+  const pageErrors: Error[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error));
+
+  await page.goto("/demo/composer");
+  const editor = page.getByLabel("Agent Chat Composer");
+  await editor.click();
+  await editor.pressSequentially("/");
+  await editor.press("Enter");
+  await expect(editor).toContainText("/요약");
+  await editor.press("Shift+Enter");
+  await editor.press("Shift+Enter");
+  await editor.press("Backspace");
+  await editor.press("Backspace");
+
+  await expect(editor).toContainText("/요약");
+  expect(pageErrors).toEqual([]);
+});
+
 test("빈 Composer의 첫 한글 IME 입력이 placeholder DOM과 충돌하지 않는다", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium");
   const pageErrors: Error[] = [];
