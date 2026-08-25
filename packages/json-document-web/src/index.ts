@@ -1,6 +1,7 @@
 export {
   createWebClipboardBinding,
   createWebClipboardSurface,
+  createWebClipboardTextWriter,
   databaseClipboardCodec,
   documentClipboardCodec,
   objectClipboardCodec,
@@ -46,6 +47,9 @@ export type {
   WebClipboardRepresentation,
   WebClipboardResult,
   WebClipboardSurface,
+  WebClipboardTextWriter,
+  WebClipboardTextPort,
+  WebClipboardWriteResult,
 } from "./clipboard.js";
 export type { WebModifierState } from "./modifiers.js";
 export type {

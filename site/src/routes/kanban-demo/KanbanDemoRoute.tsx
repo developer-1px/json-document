@@ -23,7 +23,7 @@ import {
 import { ActionButton } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialBoard: KanbanDocument = {
   columns: [
@@ -139,7 +139,7 @@ export function KanbanDemoRoute() {
             {column.cardIds.map((cardId) => {
               const card = cards.get(cardId);
               if (!card) return null;
-              const option = optionProps(editing.getItem(card.id));
+              const option = editingItemProps(editing.getItem(card.id));
               return (
                 <button
                   key={card.id}
@@ -148,7 +148,7 @@ export function KanbanDemoRoute() {
                   {...webKanbanCardProps(card.id)}
                   data-selected={option.selected ? "true" : "false"}
                   data-focus={option.focus ? "true" : "false"}
-                  aria-selected={option["aria-selected"]}
+                  aria-selected={option.selected}
                   onClick={option.onClick}
                   onDragStart={(event) => {
                     editing.getItem(card.id).getPressHandler()(event);

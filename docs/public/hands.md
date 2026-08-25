@@ -1,5 +1,26 @@
 # Hands
 
+## Annotation editor
+
+Raster Annotation의 persistent model과 editing session은
+`@interactive-os/json-document-editing`의 `createAnnotationEditor`가 소유합니다.
+
+```ts
+const editor = createAnnotationEditor(annotationDocument);
+editor.dispatch({ type: "annotation.move", annotationId, dx, dy });
+editor.undo();
+```
+
+`AnnotationDocument`는 source와 selector geometry, presentation을 직렬화하고,
+selection과 undo/redo는 editor snapshot에 둡니다. Point, rectangle, path와 arrow
+selector는 geometry의 유일한 정본이며 presentation은 geometry를 반복하지
+않습니다. SVG 좌표 변환, pointer gesture, Canvas rasterization과 comment UI는
+Editing owner 밖에서 조합합니다.
+
+```live-demo
+/demo/annotation
+```
+
 Hands는 사람이 artifact와 agent를 다루게 하는 장르별 완료 기준입니다.
 App도, 단일 화면 component도, 하나의 공통 package도 아닙니다. 실제 제품을
 끝까지 만져 보며 발견한 전형적인 인간의 손과 그 조합 증거를 가리킵니다.

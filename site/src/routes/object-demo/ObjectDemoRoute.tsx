@@ -18,7 +18,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 export function ObjectDemoRoute() {
   const [editor] = useState(() => createObjectEditor(initialObjectDemoDocument));
@@ -153,7 +153,7 @@ export function ObjectDemoRoute() {
               key={object.id}
               data-object-id={object.id}
               className={ui.interactive.planeItem}
-              {...optionProps(editing.getItem(object.id))}
+              {...editingItemProps(editing.getItem(object.id))}
               style={{
                 left: object.x,
                 top: object.y,

@@ -14,6 +14,7 @@ import {
   createWebPointerSession,
   createWebClipboardBinding,
   createWebClipboardSurface,
+  createWebClipboardTextWriter,
   databaseClipboardCodec,
   documentClipboardCodec,
   orderClipboardCodec,
@@ -88,6 +89,24 @@ describe("Web grid cell address", () => {
 });
 
 describe("Web clipboard Adapter", () => {
+  test("normalizes imperative text write success, unsupported, and rejection", async () => {
+    const writes: string[] = [];
+    const writer = createWebClipboardTextWriter({
+      clipboard: { writeText: async (text) => { writes.push(text); } },
+    });
+    expect(await writer.writeText("")).toEqual({ ok: true });
+    expect(writes).toEqual([""]);
+    expect(await createWebClipboardTextWriter({ clipboard: null }).writeText("text"))
+      .toEqual({ ok: false, code: "clipboard.unsupported" });
+    expect(await createWebClipboardTextWriter({
+      clipboard: { writeText: async () => { throw new DOMException("Permission denied", "NotAllowedError"); } },
+    }).writeText("text")).toEqual({
+      ok: false,
+      code: "clipboard.write-failed",
+      reason: "Permission denied",
+    });
+  });
+
   test("projects copy, cut, and paste results through one surface callback", () => {
     const editor = createDocumentEditor({
       blocks: [{ id: "a", text: "Alpha" }, { id: "b", text: "Beta" }],

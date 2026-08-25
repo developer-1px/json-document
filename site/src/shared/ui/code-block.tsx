@@ -1,9 +1,12 @@
 import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { createWebClipboardTextWriter } from "@interactive-os/json-document-web";
 import { codeLanguageLabel, tokenizeCodeLine, type CodeLanguage } from "./code-tokens";
 import { IconButton } from "./interactive";
 import { classes, ui } from "./styles";
 
 type CodeBlockSize = "compact" | "content" | "standard" | "tall";
+
+const clipboardTextWriter = createWebClipboardTextWriter();
 
 export type HighlightedCodeToken = {
   readonly content: string;
@@ -29,13 +32,8 @@ export function CodeBlock(props: {
   useEffect(() => setCopied(false), [source]);
 
   async function copySource() {
-    if (!navigator.clipboard) return;
-    try {
-      await navigator.clipboard.writeText(source);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
+    const result = await clipboardTextWriter.writeText(source);
+    setCopied(result.ok);
   }
 
   return (

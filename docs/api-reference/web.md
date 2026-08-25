@@ -31,6 +31,11 @@ createWebClipboardBinding<Payload extends WebClipboardPayload, EditingResult ext
 ```ts
 createWebClipboardSurface<Payload extends WebClipboardPayload, EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string; }>(options: WebClipboardBindingOptions<Payload, EditingResult> & { readonly onResult: (result: WebClipboardResult<Payload, EditingResult>) => void; }): WebClipboardSurface<Payload, EditingResult>
 ```
+## `createWebClipboardTextWriter`
+
+```ts
+createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPort | null; }): WebClipboardTextWriter
+```
 ## `createWebDragDropSession`
 
 ```ts
@@ -228,6 +233,31 @@ interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult
   readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
   readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
 }
+```
+## `WebClipboardTextPort`
+
+```ts
+interface WebClipboardTextPort {
+  writeText(text: string): Promise<void>;
+}
+```
+## `WebClipboardTextWriter`
+
+```ts
+interface WebClipboardTextWriter {
+  writeText(text: string): Promise<WebClipboardWriteResult>;
+}
+```
+## `WebClipboardWriteResult`
+
+```ts
+type WebClipboardWriteResult =
+  | { readonly ok: true }
+  | {
+    readonly ok: false;
+    readonly code: "clipboard.unsupported" | "clipboard.write-failed";
+    readonly reason?: string;
+  };
 ```
 ## `WebDragDropCancelReason`
 

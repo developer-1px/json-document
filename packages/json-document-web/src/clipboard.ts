@@ -67,6 +67,43 @@ export interface WebClipboardSurface<Payload extends WebClipboardPayload, Editin
   readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
 }
 
+export type WebClipboardWriteResult =
+  | { readonly ok: true }
+  | {
+    readonly ok: false;
+    readonly code: "clipboard.unsupported" | "clipboard.write-failed";
+    readonly reason?: string;
+  };
+
+export interface WebClipboardTextWriter {
+  writeText(text: string): Promise<WebClipboardWriteResult>;
+}
+
+export interface WebClipboardTextPort {
+  writeText(text: string): Promise<void>;
+}
+
+export function createWebClipboardTextWriter(options?: {
+  readonly clipboard?: WebClipboardTextPort | null;
+}): WebClipboardTextWriter {
+  return {
+    async writeText(text) {
+      const clipboard = options?.clipboard === undefined
+        ? (typeof navigator === "undefined" ? null : navigator.clipboard)
+        : options.clipboard;
+      if (clipboard === null || clipboard === undefined) {
+        return { ok: false, code: "clipboard.unsupported" };
+      }
+      try {
+        await clipboard.writeText(text);
+        return { ok: true };
+      } catch (error) {
+        return { ok: false, code: "clipboard.write-failed", reason: errorMessage(error) };
+      }
+    },
+  };
+}
+
 export const documentClipboardCodec: WebClipboardCodec<DocumentClipboard> = jsonCodec(
   "application/vnd.interactive-os.blocks+json",
   isDocumentClipboard,
