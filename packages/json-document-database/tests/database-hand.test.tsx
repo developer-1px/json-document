@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod/v4";
+import { createDatabaseEditor } from "@interactive-os/json-document-editing";
+import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import { DatabaseHand } from "../src/index.js";
 
 const schema = z.object({
@@ -20,6 +22,28 @@ const records = [
 afterEach(cleanup);
 
 describe("DatabaseHand", () => {
+  it("uses the supplied editor and the canonical private table surface", () => {
+    const translated = databaseDocumentFromZod(schema, records);
+    if (!translated.ok) throw new Error(translated.code);
+    const editor = createDatabaseEditor(translated.value);
+    const { container } = render(<DatabaseHand editor={editor} viewId={translated.value.views[0]!.id} />);
+    expect(container.querySelectorAll("[data-database-table-surface]")).toHaveLength(1);
+    fireEvent.change(screen.getByRole("combobox", { name: "Status a" }), { target: { value: "done" } });
+    expect((editor.snapshot.value as typeof translated.value).records[0]?.values.status).toBe("done");
+  });
+
+  it("emits a controlled document from the document profile", () => {
+    const translated = databaseDocumentFromZod(schema, records);
+    if (!translated.ok) throw new Error(translated.code);
+    const onDocumentChange = vi.fn();
+    render(<DatabaseHand document={translated.value} viewId={translated.value.views[0]!.id} onDocumentChange={onDocumentChange} />);
+    fireEvent.change(screen.getByRole("combobox", { name: "Status a" }), { target: { value: "done" } });
+    expect(onDocumentChange).toHaveBeenCalledWith(
+      expect.objectContaining({ records: expect.arrayContaining([expect.objectContaining({ id: "a", values: expect.objectContaining({ status: "done" }) })]) }),
+      expect.objectContaining({ origin: "cell.commit" }),
+    );
+  });
+
   it("renders typed admin cells and emits host records", () => {
     const onRecordsChange = vi.fn();
     render(<DatabaseHand schema={schema} records={records} onRecordsChange={onRecordsChange} />);

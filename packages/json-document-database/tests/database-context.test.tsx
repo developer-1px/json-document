@@ -19,6 +19,11 @@ const rows: ReadonlyArray<Row> = [{ id: "a", title: "Alpha", status: "open" }];
 afterEach(cleanup);
 
 describe("Database.Provider", () => {
+  it("delegates the compound Table profile to the canonical private surface", async () => {
+    const { container } = render(<Database.Provider resource={resource} operations={createOperations()} defaultView={view}><Database.Table /></Database.Provider>);
+    await waitFor(() => expect(container.querySelectorAll("[data-database-table-surface]")).toHaveLength(1));
+  });
+
   it("loads through the operation contract and exposes serializable view state", async () => {
     const operations = createOperations();
     render(<Database.Provider resource={resource} operations={operations} defaultView={view}><Probe /></Database.Provider>);

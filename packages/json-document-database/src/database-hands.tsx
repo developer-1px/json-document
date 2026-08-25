@@ -20,7 +20,8 @@ export interface DatabaseTableProps<Row extends DatabaseRow> {
 
 export function DatabaseTable<Row extends DatabaseRow>(props: DatabaseTableProps<Row>) {
   const database = useDatabase<Row>();
-  const columns = database.view.projection.columns;
+  const editablePropertyIds = new Set(resourceProperties(database.resource.schema).map((property) => property.id).filter((id) => id !== "id"));
+  const columns = database.view.projection.columns.filter((column) => editablePropertyIds.has(column.propertyId));
   const presentation = {
     propertyOrder: columns.map((column) => column.propertyId),
     propertyVisibility: Object.fromEntries(columns.map((column) => [column.propertyId, column.visible])),

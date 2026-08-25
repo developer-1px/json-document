@@ -47,8 +47,13 @@ The operations contract supports cursor queries, create/update/delete, bulk
 partial results, optimistic mutation, rollback, validation errors, conflicts,
 retry, request cancellation, and stale response rejection.
 
-The original `DatabaseHand` remains as a compatibility preset for controlled
-in-memory records. It is not the primary contract for API-backed products.
+`DatabaseHand` exposes one canonical table surface through three source profiles:
+an existing `DatabaseEditor`, a controlled `DatabaseDocument`, or the legacy
+Zod `schema/records` adapter. `renderToolbar(context)` and
+`renderInspector(context)` let Hosts compose product UI from the read-only
+snapshot without reimplementing table behavior. API-backed products can use the
+compound `Database.Provider`/`Database.Table` profile; it delegates to the same
+private surface.
 
 This package does not implement a backend, authentication, authorization
 policy, database migration, formula runtime, or product business rules.

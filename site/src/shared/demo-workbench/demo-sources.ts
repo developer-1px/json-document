@@ -20,6 +20,7 @@ import boardDragSessionSource from "../../../../packages/json-document-affordanc
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
+import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
@@ -96,6 +97,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
+  ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
   ["packages/json-document-web/src/raster-source.ts", webRasterSource],
@@ -236,6 +238,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "nextDatabasePropertySort",
     sourcePath: "packages/json-document-editing/src/database.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-database",
+    symbol: "DatabaseHand",
+    sourcePath: "packages/json-document-database/src/database-hand.tsx",
   },
   {
     packageName: "@interactive-os/json-document-editing",
