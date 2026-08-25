@@ -19,7 +19,8 @@ import {
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialSheet: SheetDocument = {
@@ -117,7 +118,7 @@ export function GridWidgetRoute() {
                     key={column.id}
                     className={classes("px-3 py-2", ui.surface.gridCell, ui.text.body)}
                     {...webGridCellAddressProps(point)}
-                    {...optionProps(cell)}
+                    {...editingItemProps(cell)}
                     {...activeDescendantItemProps(gridCellId(row.id, column.id))}
                     {...projectWebWidgetState({
                       role: "gridcell",

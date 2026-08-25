@@ -3,7 +3,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { selectionLabDocument, useSelectionLab } from "./useSelectionLab";
 
 export function SelectionDemoRoute() {
@@ -38,7 +38,7 @@ export function SelectionDemoRoute() {
                 key={block.id}
                 type="button"
                 className={classes("px-3 py-2", ui.surface.selectableBlock)}
-                {...optionProps(editing.getItem(block.id))}
+                {...editingItemProps(editing.getItem(block.id))}
               >
                 {block.id} · {block.text}
               </SelectableItem>

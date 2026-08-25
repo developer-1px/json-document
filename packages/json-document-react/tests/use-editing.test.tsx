@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest";
 import { createDocumentEditor, createSheetEditor, createTreeEditor } from "@interactive-os/json-document-editing";
 import {
+  editingItemProps,
   useEditing,
   useGridEditing,
   useTreeEditing,
@@ -25,6 +26,21 @@ function resolveStroke(stroke: EditingKeyboardStroke): EditingKeyboardCommand | 
 }
 
 describe("useEditing", () => {
+  test("projects selected, focus, and the canonical press handler", () => {
+    let pressed: unknown;
+    const onPress = (event: unknown) => { pressed = event; };
+    const props = editingItemProps({
+      getIsSelected: () => true,
+      getIsFocus: () => false,
+      getTextOffset: () => null,
+      getPressHandler: () => onPress,
+    });
+
+    expect(props.selected).toBe(true);
+    expect(props.focus).toBe(false);
+    props.onClick({ shiftKey: true });
+    expect(pressed).toEqual({ shiftKey: true });
+  });
   test("owns visible-tree fold state while keeping the initial policy injectable", () => {
     const editor = createTreeEditor({
       nodes: [

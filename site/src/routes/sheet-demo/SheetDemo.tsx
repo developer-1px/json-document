@@ -15,6 +15,7 @@ import {
   findWebGridCell,
   gridBoundary,
   moveGridPoint,
+  rovingFocusItemProps,
   sheetClipboardCodec,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
@@ -28,7 +29,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { gridCellProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -214,10 +215,11 @@ export function SheetDemo() {
                         <GridCell
                           key={column.id}
                           {...webGridCellAddressProps(point)}
+                          {...rovingFocusItemProps(item.getIsFocus())}
                           data-row-id={row.id}
                           data-column-id={column.id}
                           className={classes(ui.interactive.selectable, "p-0", ui.surface.gridCell)}
-                          {...gridCellProps(item)}
+                          {...editingItemProps(item)}
                         >
                             <input
                               aria-label={`${column.label} row ${rowIndex + 1}`}

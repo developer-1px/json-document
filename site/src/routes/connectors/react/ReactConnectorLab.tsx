@@ -12,7 +12,7 @@ import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
-import { optionProps } from "../../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialEditorDocument: BlockDocument = {
   blocks: [
@@ -155,7 +155,7 @@ function UseEditingLab() {
             <SelectableItem
               key={block.id}
               className={classes("grid gap-2 p-3 text-left", ui.surface.workspace)}
-              {...optionProps(item)}
+              {...editingItemProps(item)}
             >
               <span className={ui.text.label}>{block.id}</span>
               <DocumentTextControl

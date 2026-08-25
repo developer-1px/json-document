@@ -28,7 +28,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -221,7 +221,7 @@ export function DocumentDemoRoute() {
                   key={block.id}
                   data-block-id={block.id}
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
-                  {...optionProps(item)}
+                  {...editingItemProps(item)}
                 >
                   <ActionButton
                     aria-label={`Select block ${index + 1}`}

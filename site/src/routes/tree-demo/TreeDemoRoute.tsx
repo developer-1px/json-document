@@ -19,7 +19,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialTree: TreeDocument = {
   nodes: [
@@ -167,7 +167,7 @@ export function TreeDemoRoute() {
                     <SelectableItem
                       data-node-id={row.id}
                       className={classes("text-left", ui.surface.documentBlock)}
-                      {...optionProps(editing.getItem(row.id))}
+                      {...editingItemProps(editing.getItem(row.id))}
                     >
                       {row.label}
                     </SelectableItem>
