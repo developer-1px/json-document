@@ -1,6 +1,6 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
-import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
+import { SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";

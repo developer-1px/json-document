@@ -87,3 +87,46 @@
     color: theme("colors.foreground-default");
   }
 }
+
+@layer components {
+  [data-ui-control="action"],
+  [data-ui-control="toggle"] {
+    @apply cursor-pointer rounded-none border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,box-shadow,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-line-subtle/60 disabled:bg-transparent disabled:text-foreground-muted disabled:shadow-none;
+  }
+
+  [data-ui-control="action"] {
+    @apply border-line-subtle bg-background-canvas text-foreground-default shadow-control hover:border-line-default hover:bg-background-subtle;
+  }
+
+  [data-ui-control="action"][data-kind="primary"] {
+    @apply border-line-action-primary bg-background-action-primary text-foreground-inverse shadow-control-primary hover:border-foreground-strong hover:bg-background-action-primary-hovered;
+  }
+
+  [data-ui-control="action"][data-kind="danger"] {
+    @apply border-line-accent/60 bg-background-canvas text-foreground-accent hover:border-line-accent hover:bg-background-accent-subtle;
+  }
+
+  [data-ui-control="toggle"] {
+    @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-accent aria-pressed:bg-background-subtle aria-pressed:text-foreground-accent aria-pressed:ring-1 aria-pressed:ring-line-accent disabled:aria-pressed:border-line-subtle/60 disabled:aria-pressed:bg-transparent disabled:aria-pressed:text-foreground-muted disabled:aria-pressed:ring-0;
+  }
+
+  :where([data-ui-control="selectable"]) {
+    @apply cursor-pointer outline-none transition-[background-color,border-color,box-shadow] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 focus-within:ring-2 focus-within:ring-line-accent/25 data-[selected=true]:border-line-accent data-[selected=true]:bg-background-subtle data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-line-accent data-[focus=true]:outline data-[focus=true]:outline-2 data-[focus=true]:-outline-offset-1 data-[focus=true]:outline-foreground-default;
+  }
+
+  :where([data-ui-control="selectable"])[data-selected="true"][data-focus="true"] {
+    outline-color: theme("colors.line-accent");
+  }
+
+  [data-ui-control="disclosure"] {
+    @apply flex w-full cursor-pointer items-center justify-between gap-3 rounded-none border border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-foreground-strong outline-none transition-colors hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:text-foreground-muted;
+  }
+
+  [data-ui-control="disclosure"][aria-expanded="true"] > [aria-hidden="true"] {
+    transform: rotate(180deg);
+  }
+
+  [data-ui-control="icon"] {
+    @apply flex h-7 w-7 cursor-pointer items-center justify-center rounded-none border border-transparent bg-transparent text-foreground-muted outline-none transition-colors hover:border-line-subtle hover:bg-background-canvas hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-foreground-disabled;
+  }
+}

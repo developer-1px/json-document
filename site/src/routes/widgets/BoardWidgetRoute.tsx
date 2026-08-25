@@ -20,7 +20,7 @@ import {
   dragAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { SelectableItem } from "../../shared/ui/interactive";
+import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";

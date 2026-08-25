@@ -16,7 +16,7 @@ import {
   pressInteractionFromWeb,
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   historyAffordance,

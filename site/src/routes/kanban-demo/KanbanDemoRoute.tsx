@@ -20,7 +20,7 @@ import {
   commitAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { ActionButton } from "../../shared/ui/interactive";
+import { ActionButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
