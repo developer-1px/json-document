@@ -49,6 +49,8 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   ]);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
+    "API · Rich Text Mention",
+    "API · Mention React",
     "API · Composer",
     "API · Composer React",
     "API · Database",
@@ -122,7 +124,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Artifact" }).click();
-  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet"]);
+  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet", "API · File Intake"]);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
     "Editing",

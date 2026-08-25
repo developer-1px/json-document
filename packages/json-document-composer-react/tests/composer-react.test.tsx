@@ -9,7 +9,7 @@ afterEach(cleanup);
 describe("Composer React integration", () => {
   test("owns suggestion resolution, active-item fallback, keyboard action, and insertion", async () => {
     const dispatch = vi.fn((_intent: unknown) => ({ ok: true }));
-    const editor = { dispatch: dispatch as unknown as RichTextEditor["dispatch"] } as RichTextEditor;
+    const editor = { dispatch: dispatch as unknown as RichTextEditor["dispatch"], schema: { profile: "urn:test:composer:1" } } as RichTextEditor;
     const trigger = { kind: "mention" as const, query: "al", range: { nodeId: "text", from: 0, to: 3 } };
     const suggestions = [
       { id: "alpha", kind: "mention" as const, label: "Alpha", description: "First" },

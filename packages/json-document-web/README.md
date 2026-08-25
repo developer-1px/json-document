@@ -9,6 +9,10 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
+`fileCandidateFromWebFile`, `fileCandidatesFromWebFiles`, and
+`fileCandidatesFromWebClipboard` translate browser file metadata into the platform-independent
+`@interactive-os/json-document-file-intake` contract without choosing IDs, storage, or product policy.
+
 Pointer Events and HTML Drag and Drop keep separate public sessions:
 
 ```ts

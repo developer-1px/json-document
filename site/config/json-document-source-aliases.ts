@@ -68,6 +68,18 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-rich-text/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-file-intake",
+      replacement: sourceFile("packages/json-document-file-intake/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-rich-text-mention",
+      replacement: sourceFile("packages/json-document-rich-text-mention/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-rich-text-mention-react",
+      replacement: sourceFile("packages/json-document-rich-text-mention-react/src/index.tsx"),
+    },
+    {
       find: "@interactive-os/json-document-composer",
       replacement: sourceFile("packages/json-document-composer/src/index.ts"),
     },

@@ -13,6 +13,9 @@ import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw"
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
+import fileIntakeApiMarkdown from "../../../../docs/api-reference/file-intake.md?raw";
+import richTextMentionApiMarkdown from "../../../../docs/api-reference/rich-text-mention.md?raw";
+import richTextMentionReactApiMarkdown from "../../../../docs/api-reference/rich-text-mention-react.md?raw";
 import composerApiMarkdown from "../../../../docs/api-reference/composer.md?raw";
 import composerReactApiMarkdown from "../../../../docs/api-reference/composer-react.md?raw";
 import richTextWebApiMarkdown from "../../../../docs/api-reference/rich-text-web.md?raw";
@@ -161,6 +164,9 @@ export const docPages = {
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),
+  fileIntakeApi: docPage("/docs/api/file-intake", fileIntakeApiMarkdown),
+  richTextMentionApi: docPage("/docs/api/rich-text-mention", richTextMentionApiMarkdown),
+  richTextMentionReactApi: docPage("/docs/api/rich-text-mention-react", richTextMentionReactApiMarkdown),
   composerApi: docPage("/docs/api/composer", composerApiMarkdown),
   composerReactApi: docPage("/docs/api/composer-react", composerReactApiMarkdown),
   richTextWebApi: docPage("/docs/api/rich-text-web", richTextWebApiMarkdown),

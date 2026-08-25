@@ -1,4 +1,5 @@
 import { createRichTextSchema } from "@interactive-os/json-document-rich-text";
+import { richTextMentionNodeSpec } from "@interactive-os/json-document-rich-text-mention";
 import { COMPOSER_MENTION_NODE, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE } from "./model.js";
 
 const referenceAttrs = {
@@ -8,7 +9,7 @@ const referenceAttrs = {
 export const composerSchema = createRichTextSchema({
   profile: COMPOSER_PROFILE_V1,
   nodes: {
-    [COMPOSER_MENTION_NODE]: { group: "inline", atom: true, content: null, allowedMarks: "none", attrs: { entityId: { required: true, validate: referenceAttrs.label.validate }, ...referenceAttrs } },
+    [COMPOSER_MENTION_NODE]: richTextMentionNodeSpec,
     [COMPOSER_SKILL_NODE]: { group: "inline", atom: true, content: null, allowedMarks: "none", attrs: { skillId: { required: true, validate: referenceAttrs.label.validate }, ...referenceAttrs } },
   },
 });

@@ -1,4 +1,5 @@
 import type { JSONValue } from "@interactive-os/json-document";
+import type { FileAcceptancePolicy } from "@interactive-os/json-document-file-intake";
 import type { ComposerReference } from "./model.js";
 
 export const COMPOSER_HOST_PROFILE_V1 = "urn:interactive-os:json-document:composer-host:1" as const;
@@ -11,11 +12,7 @@ export interface ComposerHostModel<Model extends string = string> extends Record
 
 export type ComposerHostSuggestion = ComposerReference & Readonly<Record<string, JSONValue>>;
 
-export interface ComposerAttachmentPolicy extends Record<string, JSONValue> {
-  readonly acceptedMediaTypes: ReadonlyArray<string>;
-  readonly maxFiles: number | null;
-  readonly maxBytesPerFile: number | null;
-}
+export type ComposerAttachmentPolicy = FileAcceptancePolicy;
 
 export interface ComposerInteractionPolicy extends Record<string, JSONValue> {
   readonly submit: "enter" | "mod-enter";

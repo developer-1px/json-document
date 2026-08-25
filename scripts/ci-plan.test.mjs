@@ -39,7 +39,7 @@ test("기반 패키지 변경은 모든 역방향 소비자를 선택한다", ()
   const plan = createPlan(["packages/json-document/src/index.ts"]);
 
   assert.equal(plan.full, false);
-  assert.equal(plan.packageWorkspaces.length, 19);
+  assert.equal(plan.packageWorkspaces.length, 22);
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
@@ -49,7 +49,7 @@ test("lockfile과 workflow 및 미분류 변경은 전체 검사로 승격한다
   for (const path of ["package-lock.json", ".github/workflows/pages.yml", "unknown.bin"]) {
     const plan = createPlan([path]);
     assert.equal(plan.full, true, path);
-    assert.equal(plan.packageWorkspaces.length, 20, path);
+    assert.equal(plan.packageWorkspaces.length, 23, path);
     assert.deepEqual(plan.browserSpecs, ["site/tests/browser"], path);
   }
 });
@@ -90,7 +90,7 @@ test("main 계획은 현재 전체 품질 검사를 요구한다", () => {
   assert.equal(plan.site, true);
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
-  assert.equal(plan.packageWorkspaces.length, 20);
+  assert.equal(plan.packageWorkspaces.length, 23);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
 });
 
@@ -105,11 +105,14 @@ test("선택기가 반환하는 모든 browser 경로가 존재한다", () => {
       "json-document-ajv",
       "json-document-contenteditable",
       "json-document-composer-react",
+      "json-document-file-intake",
       "json-document-database",
       "json-document-editing",
       "json-document-react",
       "json-document-react-hook-form",
       "json-document-rich-text",
+      "json-document-rich-text-mention",
+      "json-document-rich-text-mention-react",
       "json-document-rich-text-react",
       "json-document-rich-text-web",
       "json-document-selection",

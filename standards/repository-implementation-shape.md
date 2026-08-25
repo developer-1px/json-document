@@ -204,7 +204,7 @@ foundation으로 유지한다.
 
 ## 현재 package 분류
 
-아래 표는 현재 20개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
+아래 표는 현재 23개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
 `후속`은 이 RFC가 source를 이동하지 않고 별도 이슈가 책임짐을 뜻한다.
 
 | Package path | 정본 모형 | 현재 판단 |
@@ -225,6 +225,9 @@ foundation으로 유지한다.
 | `packages/json-document-web` | Adapter family | keyboard/clipboard/input/modifier 책임 file과 root facade 유지 |
 | `packages/json-document-contenteditable` | Composite Adapter | React entry, binding, DOM adapter 책임 분리 유지 |
 | `packages/json-document-rich-text` | Composite Domain | schema/model/validation/topology 경계 유지; editor 책임 분리는 후속 #415 |
+| `packages/json-document-file-intake` | Single-native Domain | 플랫폼 독립 file candidate, acceptance policy, validation 계약을 flat owner로 유지 |
+| `packages/json-document-rich-text-mention` | Rich Text Extension | entity mention node schema와 insertion command를 소유 |
+| `packages/json-document-rich-text-mention-react` | Single-native Connector | canonical mention node의 React projection을 소유 |
 | `packages/json-document-rich-text-web` | Adapter family | clipboard와 contenteditable 책임 file, root facade 유지 |
 | `packages/json-document-rich-text-react` | Composite Connector | React render surface와 render store 책임 분리 유지 |
 | `packages/json-document-collaboration` | Profiled runtime | root/history/text public entry와 책임 module 유지; profile 의미를 합치지 않음 |

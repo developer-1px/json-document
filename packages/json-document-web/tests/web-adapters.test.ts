@@ -12,9 +12,9 @@ import {
   type AnnotationDocument,
 } from "@interactive-os/json-document-editing";
 import {
-  composerAttachmentCandidateFromWebFile,
-  composerAttachmentCandidatesFromWebClipboard,
-  composerAttachmentCandidatesFromWebFiles,
+  fileCandidateFromWebFile,
+  fileCandidatesFromWebClipboard,
+  fileCandidatesFromWebFiles,
   createWebDragDropSession,
   createWebPointerSession,
   createWebClipboardBinding,
@@ -52,23 +52,23 @@ import {
   type WebClipboardEvent,
 } from "../src/index.js";
 
-describe("Web Composer attachment translation", () => {
+describe("Web file intake translation", () => {
   const files = [
     { name: "brief.png", size: 24, type: "image/png" },
     { name: "notes.txt", size: 12, type: "" },
   ];
 
   test("projects browser File metadata without choosing Composer IDs or policy", () => {
-    expect(composerAttachmentCandidateFromWebFile(files[0]!)).toEqual({ name: "brief.png", size: 24, mediaType: "image/png" });
-    expect(composerAttachmentCandidatesFromWebFiles(files)).toEqual([
+    expect(fileCandidateFromWebFile(files[0]!)).toEqual({ name: "brief.png", size: 24, mediaType: "image/png" });
+    expect(fileCandidatesFromWebFiles(files)).toEqual([
       { name: "brief.png", size: 24, mediaType: "image/png" },
       { name: "notes.txt", size: 12, mediaType: null },
     ]);
   });
 
   test("reads paste files through a narrow ClipboardEvent port", () => {
-    expect(composerAttachmentCandidatesFromWebClipboard({ clipboardData: { files } })).toHaveLength(2);
-    expect(composerAttachmentCandidatesFromWebClipboard({ clipboardData: null })).toEqual([]);
+    expect(fileCandidatesFromWebClipboard({ clipboardData: { files } })).toHaveLength(2);
+    expect(fileCandidatesFromWebClipboard({ clipboardData: null })).toEqual([]);
   });
 });
 

@@ -18,7 +18,7 @@ export { createWebDragDropSession } from "./drag-drop-session.js";
 export { createWebPointerSession } from "./pointer-session.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
-export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles } from "./composer-attachment.js";
+export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
 export { renderWebAnnotationRaster } from "./annotation-raster.js";
 export {
   findWebKanbanCardDropTarget,
@@ -87,7 +87,7 @@ export type {
 export type { WebKanbanTargetElement } from "./kanban-drop-target.js";
 export type { WebClientPoint, WebSVGElement, WebSVGViewport } from "./svg-coordinate.js";
 export type { WebRasterFile, WebRasterSourceResult } from "./raster-source.js";
-export type { WebComposerClipboardEvent, WebComposerFile, WebComposerFileList } from "./composer-attachment.js";
+export type { WebComposerClipboardEvent, WebComposerFile, WebComposerFileList, WebFileCandidate, WebFileCandidateList, WebFileClipboardEvent } from "./file-intake.js";
 export type { WebAnnotationRasterResult, WebAnnotationRasterStyle } from "./annotation-raster.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
 export type {
