@@ -25,6 +25,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/demo/kanban": demo(() => import("../routes/kanban-demo/KanbanDemoRoute"), "KanbanDemoRoute", "routes/kanban-demo/KanbanDemoRoute.tsx"),
   "/demo/database": demo(() => import("../routes/database-demo/DatabaseDemoRoute"), "DatabaseDemoRoute", "routes/database-demo/DatabaseDemoRoute.tsx"),
   "/demo/composer": demo(() => import("../routes/composer-demo/ComposerDemoRoute"), "ComposerDemoRoute", "routes/composer-demo/ComposerDemoRoute.tsx"),
+  "/demo/annotation": demo(() => import("../routes/annotation-demo/AnnotationDemoRoute"), "AnnotationDemoRoute", "routes/annotation-demo/AnnotationDemoRoute.tsx"),
   "/editing/rich-text": demo(() => import("../routes/rich-text-demo/RichTextDemoRoute"), "RichTextDemoRoute", "routes/rich-text-demo/RichTextDemoRoute.tsx"),
   "/adapters/keyboard": demo(() => import("../routes/adapters/keyboard/KeyboardAdapterDemoRoute"), "KeyboardAdapterDemoRoute", "routes/adapters/keyboard/KeyboardAdapterDemoRoute.tsx"),
   "/adapters/clipboard": demo(() => import("../routes/adapters/clipboard/ClipboardAdapterDemoRoute"), "ClipboardAdapterDemoRoute", "routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx"),

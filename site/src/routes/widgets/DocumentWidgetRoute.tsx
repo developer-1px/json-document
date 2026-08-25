@@ -14,7 +14,8 @@ import {
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialDocument: BlockDocument = {
@@ -85,7 +86,7 @@ export function DocumentWidgetRoute() {
               as="li"
               key={block.id}
               className={classes("w-full text-left", ui.surface.selectableBlock)}
-              {...optionProps(editing.getItem(block.id))}
+              {...editingItemProps(editing.getItem(block.id))}
               {...activeDescendantItemProps(documentItemId(block.id))}
               {...projectWebWidgetState({
                 role: "option",

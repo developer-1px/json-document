@@ -35,7 +35,7 @@ import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-o
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const lockedIds = new Set(["lock"]);
 const resizeEdges: ReadonlyArray<ResizeEdge> = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
@@ -736,7 +736,7 @@ export function CanvasDemoRoute() {
             {document.objects.map((object) => {
               const resizing = resize?.id === object.id ? resize : null;
               const offset = drag && !drag.copying && drag.ids.includes(object.id) ? drag : null;
-              const option = optionProps(editing.getItem(object.id));
+              const option = editingItemProps(editing.getItem(object.id));
               return (
                 <SelectableItem
                   key={object.id}
@@ -813,7 +813,7 @@ export function CanvasDemoRoute() {
               })
               : null}
             {document.objects.map((object) => {
-              const option = optionProps(editing.getItem(object.id));
+              const option = editingItemProps(editing.getItem(object.id));
               if (!option.selected || lockedIds.has(object.id)) return null;
               const resizing = resize?.id === object.id ? resize : null;
               const offset = drag && !drag.copying && drag.ids.includes(object.id) ? drag : null;

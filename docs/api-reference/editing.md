@@ -6,12 +6,86 @@ intent, editor, history 편집 계약의 public entrypoint입니다. 아래 항�
 
 > 이 문서는 `packages/json-document-editing/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `Annotation`
+
+```ts
+interface Annotation extends Record<string, JSONValue> { readonly id: string; readonly body: { readonly instruction: string }; readonly target: { readonly sourceId: string; readonly selector: AnnotationSelector }; readonly presentation: AnnotationPresentation }
+```
+## `ANNOTATION_PROFILE_V1`
+
+```ts
+const ANNOTATION_PROFILE_V1: "urn:interactive-os:json-document:annotation:1"
+```
+## `AnnotationDocument`
+
+```ts
+interface AnnotationDocument extends Record<string, JSONValue> { readonly profile: typeof ANNOTATION_PROFILE_V1; readonly id: string; readonly sources: ReadonlyArray<AnnotationSource>; readonly annotations: ReadonlyArray<Annotation> }
+```
+## `AnnotationEditor`
+
+```ts
+interface AnnotationEditor { readonly snapshot: EditingSnapshot<AnnotationSelection>; dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection>; undo(): EditingResult<AnnotationSelection>; redo(): EditingResult<AnnotationSelection>; subscribe(listener: () => void): () => void }
+```
+## `AnnotationIntent`
+
+```ts
+type AnnotationIntent =
+  | { readonly type: "selection.set"; readonly annotationId: string | null; readonly mode: "replace" | "toggle" }
+  | { readonly type: "annotation.create"; readonly annotation: Annotation }
+  | { readonly type: "annotation.body.set"; readonly annotationId: string; readonly instruction: string }
+  | { readonly type: "annotation.move"; readonly annotationId: string; readonly dx: number; readonly dy: number }
+  | { readonly type: "annotation.resize"; readonly annotationId: string; readonly handle: "end" | "south-east"; readonly dx: number; readonly dy: number }
+  | { readonly type: "annotation.delete"; readonly annotationId: string };
+```
+## `AnnotationPoint`
+
+```ts
+interface AnnotationPoint extends Record<string, JSONValue> { readonly x: number; readonly y: number }
+```
+## `AnnotationPresentation`
+
+```ts
+type AnnotationPresentation =
+  | { readonly type: "marker" }
+  | { readonly type: "outline" }
+  | { readonly type: "stroke" }
+  | { readonly type: "arrow" };
+```
+## `AnnotationSelection`
+
+```ts
+interface AnnotationSelection extends Record<string, JSONValue> { readonly kind: "annotation"; readonly ids: ReadonlyArray<string>; readonly primaryId: string | null }
+```
+## `AnnotationSelector`
+
+```ts
+type AnnotationSelector =
+  | ({ readonly type: "point" } & AnnotationPoint)
+  | ({ readonly type: "rectangle"; readonly width: number; readonly height: number } & AnnotationPoint)
+  | { readonly type: "path"; readonly points: ReadonlyArray<AnnotationPoint> }
+  | { readonly type: "arrow"; readonly from: AnnotationPoint; readonly to: AnnotationPoint };
+```
+## `AnnotationSource`
+
+```ts
+interface AnnotationSource extends Record<string, JSONValue> { readonly id: string; readonly src: string; readonly width: number; readonly height: number }
+```
+## `assertAnnotationDocument`
+
+```ts
+assertAnnotationDocument(document: AnnotationDocument): void
+```
 ## `BlockDocument`
 
 ```ts
 interface BlockDocument extends Record<string, JSONValue> {
   readonly blocks: ReadonlyArray<DocumentBlock>;
 }
+```
+## `createAnnotationEditor`
+
+```ts
+createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): AnnotationEditor
 ```
 ## `createDatabaseEditor`
 
