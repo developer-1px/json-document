@@ -7,4 +7,5 @@ export type { ComposerInteraction, ComposerKeyStroke } from "./interaction.js";
 export { createComposerDraft, COMPOSER_MENTION_NODE, COMPOSER_PROFILE_V1, COMPOSER_SKILL_NODE } from "./model.js";
 export { composerSchema } from "./schema.js";
 export { findComposerTrigger } from "./trigger.js";
+export { resolveComposerSuggestions } from "./suggestions.js";
 export type { ComposerAttachment, ComposerAttachmentCandidate, ComposerDraft, ComposerReference, ComposerTrigger } from "./model.js";

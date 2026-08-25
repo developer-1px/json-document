@@ -13,6 +13,13 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).toContain("composerAttachmentCandidatesFromWebFiles(");
     expect(composerDemoSource).not.toContain("composer-placeholder-box");
     expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
+    expect(composerDemoSource).toContain("useComposerCommandMenu(");
+    expect(composerDemoSource).toContain("<ComposerReferenceAtom");
+    expect(composerDemoSource).toContain("formatFileSize(file.size)");
+    expect(composerDemoSource).not.toContain("hostConfig.suggestions.filter(");
+    expect(composerDemoSource).not.toContain("commandActiveId");
+    expect(composerDemoSource).not.toContain("function renderAtom");
+    expect(composerDemoSource).not.toContain("function formatBytes");
   });
 
   test("delegates empty-state placeholder lifecycle to the canonical Rich Text surface", () => {

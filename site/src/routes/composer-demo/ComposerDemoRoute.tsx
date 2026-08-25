@@ -1,15 +1,13 @@
-import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type KeyboardEvent } from "react";
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
-import { FileDropRegion, Menu, Select, useListbox } from "@interactive-os/json-document-ui-primitives-react";
+import { FileDropRegion, Menu, Select, formatFileSize } from "@interactive-os/json-document-ui-primitives-react";
 import {
   createRichTextNodeId,
   createRichTextEditor,
   type RichTextDocument,
-  type RichTextNode,
 } from "@interactive-os/json-document-rich-text";
 import {
   COMPOSER_HOST_PROFILE_V1,
-  COMPOSER_SKILL_NODE,
   addComposerAttachments,
   composerInteractionFromKeyStroke,
   composerHostConfigSchema,
@@ -18,7 +16,6 @@ import {
   createComposerDraft,
   findComposerTrigger,
   hasComposerContent,
-  insertComposerReference,
   insertComposerText,
   removeComposerAttachment,
   selectComposerModel,
@@ -27,6 +24,7 @@ import {
   type ComposerHostPorts,
   type ComposerReference,
 } from "@interactive-os/json-document-composer";
+import { ComposerReferenceAtom, useComposerCommandMenu } from "@interactive-os/json-document-composer-react";
 import { composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles } from "@interactive-os/json-document-web";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -72,28 +70,23 @@ export function ComposerDemoRoute() {
   if (!instruction.ok) throw new Error("Composer instruction is missing.");
   const instructionValue = instruction.value as unknown as RichTextDocument;
   const [submitted, setSubmitted] = useState<ComposerDraft | null>(null);
-  const [commandActiveId, setCommandActiveId] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const composerEditorRef = useRef<HTMLElement>(null);
   const trigger = findComposerTrigger(instructionValue, editor.snapshot.selection);
-  const visibleSuggestions = hostConfig.suggestions.filter((item) => item.kind === trigger?.kind && item.label.toLowerCase().includes(trigger.query));
+  const commandMenu = useComposerCommandMenu({
+    id: "composer-command-listbox",
+    label: trigger?.kind === "skill" ? "스킬 선택" : "에이전트 선택",
+    editor,
+    trigger,
+    suggestions: hostConfig.suggestions,
+    createId: createRichTextNodeId,
+  });
+  const visibleSuggestions = commandMenu.items;
   const draftValue = draft.value as ComposerDraft<(typeof models)[number]>;
   const attachments = draftValue.attachments;
   const model = draftValue.model;
-  const activeSuggestion = visibleSuggestions.find((item) => item.id === commandActiveId) ?? visibleSuggestions[0] ?? null;
-  const commandListbox = useListbox({
-    id: "composer-command-listbox",
-    label: trigger?.kind === "skill" ? "스킬 선택" : "에이전트 선택",
-    items: visibleSuggestions.map((item) => ({ ...item, textValue: item.label })),
-    activeId: activeSuggestion?.id ?? null,
-    wrap: true,
-    onActiveChange: setCommandActiveId,
-    onAction: (id) => {
-      const suggestion = visibleSuggestions.find((item) => item.id === id);
-      if (trigger && suggestion) insertComposerReference(editor, trigger, suggestion, { createId: createRichTextNodeId });
-    },
-  });
-  const { onKeyDown: handleCommandKeyDown, ...commandReferenceProps } = commandListbox.referenceProps;
+  const activeSuggestion = commandMenu.activeItem;
+  const { onKeyDown: handleCommandKeyDown, ...commandReferenceProps } = commandMenu.referenceProps;
   const hasContent = hasComposerContent(draftValue);
   const hostPorts: ComposerHostPorts<ComposerModel> = {
     createId: createRichTextNodeId,
@@ -194,7 +187,7 @@ export function ComposerDemoRoute() {
                   <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? "▧" : "▤"}</span>
                   <span className="composer-file-info">
                     <span className="composer-file-name">{file.name}</span>
-                    <span className="composer-file-size">{formatBytes(file.size)}</span>
+                    <span className="composer-file-size">{formatFileSize(file.size)}</span>
                   </span>
                   <button className="composer-file-remove" type="button" aria-label={`${file.name} 제거`} onClick={() => removeAttachment(file.id)}>×</button>
                 </div>
@@ -227,7 +220,7 @@ export function ComposerDemoRoute() {
                 onAction={onAction}
                 onKeyDownCapture={handleKeyDown}
                 placeholder="작업을 입력하세요"
-                renderExtension={renderAtom}
+                renderExtension={(node) => <ComposerReferenceAtom node={node} className="composer-atom" />}
                 spellCheck={false}
               />
             </div>
@@ -249,9 +242,9 @@ export function ComposerDemoRoute() {
           </div>
 
           {trigger && visibleSuggestions.length > 0 ? (
-            <div {...commandListbox.listboxProps} className="composer-layer composer-command-layer">
+            <div {...commandMenu.listboxProps} className="composer-layer composer-command-layer">
               {visibleSuggestions.map((item) => (
-                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} {...commandListbox.optionProps({ ...item, textValue: item.label })} onMouseDown={(event) => event.preventDefault()}>
+                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} {...commandMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
                   <span className={`composer-command-icon ${item.kind}`}>{item.kind === "skill" ? "/" : "@"}</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
                   <em>{item.kind === "skill" ? "Skill" : "Agent"}</em>
@@ -276,17 +269,4 @@ export function ComposerDemoRoute() {
       </section>
     </DemoPage>
   );
-}
-
-function renderAtom(node: RichTextNode): ReactNode {
-  const attrs = "attrs" in node ? node.attrs as { readonly label?: unknown } : {};
-  const label = typeof attrs.label === "string" ? attrs.label : node.type;
-  const kind = node.type === COMPOSER_SKILL_NODE ? "skill" : "mention";
-  return <span className={`composer-atom ${kind}`} contentEditable={false} data-rich-text-node-id={node.id}>{kind === "skill" ? "/" : "@"}{label}</span>;
-}
-
-function formatBytes(size: number): string {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / 1024 / 1024).toFixed(1)} MB`;
 }

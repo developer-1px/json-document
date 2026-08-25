@@ -77,8 +77,8 @@
 .composer-command-icon.mention { color: var(--color-foreground-accent); }
 
 .composer-atom { display: inline-flex; align-items: center; margin: 0 2px; padding: 1px 7px; border-radius: 8px; font-size: 14px; font-weight: 650; line-height: 22px; user-select: all; }
-.composer-atom.skill { background: var(--color-background-accent-subtle); color: var(--color-foreground-success); }
-.composer-atom.mention { background: var(--color-background-accent-subtle); color: var(--color-foreground-accent); }
+.composer-atom[data-composer-reference-kind="skill"] { background: var(--color-background-accent-subtle); color: var(--color-foreground-success); }
+.composer-atom[data-composer-reference-kind="mention"] { background: var(--color-background-accent-subtle); color: var(--color-foreground-accent); }
 
 .composer-action-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
 .composer-action-chips button { padding: 9px 14px; border: 1px solid var(--color-border-subtle); border-radius: 20px; background: var(--color-background-canvas); color: var(--color-foreground-muted); font-size: 12px; cursor: pointer; }

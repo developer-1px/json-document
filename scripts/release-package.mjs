@@ -11,6 +11,7 @@ export const releases = [
   release("json-document-selection", "packages/json-document-selection/package.json", "@interactive-os/json-document-selection"),
   release("json-document-editing", "packages/json-document-editing/package.json", "@interactive-os/json-document-editing"),
   release("json-document-composer", "packages/json-document-composer/package.json", "@interactive-os/json-document-composer"),
+  release("json-document-composer-react", "packages/json-document-composer-react/package.json", "@interactive-os/json-document-composer-react"),
   release("json-document-web", "packages/json-document-web/package.json", "@interactive-os/json-document-web"),
   release("json-document-contenteditable", "packages/json-document-contenteditable/package.json", "@interactive-os/json-document-contenteditable"),
   release("json-document-tanstack-table", "packages/json-document-tanstack-table/package.json", "@interactive-os/json-document-tanstack-table"),

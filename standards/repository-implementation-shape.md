@@ -204,7 +204,7 @@ foundation으로 유지한다.
 
 ## 현재 package 분류
 
-아래 표는 현재 17개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
+아래 표는 현재 20개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
 `후속`은 이 RFC가 source를 이동하지 않고 별도 이슈가 책임짐을 뜻한다.
 
 | Package path | 정본 모형 | 현재 판단 |
@@ -213,6 +213,7 @@ foundation으로 유지한다.
 | `packages/json-document-selection` | Responsibility family | `core/interaction/ports`와 selection family folder 유지 |
 | `packages/json-document-editing` | Domain family | Domain 응집은 유지하고 내부 책임 단면 정렬은 후속 #414 |
 | `packages/json-document-composer` | Composite Domain | Composer profile/model/schema/trigger/commands 책임 file과 root facade 유지 |
+| `packages/json-document-composer-react` | Composite Connector | command-menu lifecycle과 reference projection 책임 module 및 root facade 유지 |
 | `packages/json-document-react` | Single-native Connector | 하나의 React subscription/lifecycle entry로 flat 유지 |
 | `packages/json-document-react-hook-form` | Single-native Connector | RHF lifecycle이 하나인 동안 flat 유지; 독립 binding이 생기면 분리 |
 | `packages/json-document-ajv` | Single-native Connector | 하나의 validator translation으로 flat 유지 |
