@@ -182,28 +182,17 @@ interface BoardDrop<Item, Target> {
 ## `CanvasGestureCancelReason`
 
 ```ts
-type CanvasGestureCancelReason = "cancel" | "pointer-cancel" | "lost-capture" | "superseded";
+type CanvasGestureCancelReason = GestureCancelReason;
 ```
 ## `CanvasGestureSession`
 
 ```ts
-interface CanvasGestureSession<Gesture extends CanvasGestureState> {
-  getActive(): Gesture | null;
-  begin(gesture: Gesture): Gesture;
-  preview(update: Gesture | ((gesture: Gesture) => Gesture)): Gesture | null;
-  commit(): Gesture | null;
-  cancel(reason?: CanvasGestureCancelReason): Gesture | null;
-}
+type CanvasGestureSession<Gesture extends CanvasGestureState> = GestureSession<Gesture>;
 ```
 ## `CanvasGestureSessionOptions`
 
 ```ts
-interface CanvasGestureSessionOptions<Gesture extends CanvasGestureState> {
-  readonly onBegin?: (gesture: Gesture) => void;
-  readonly onPreview?: (gesture: Gesture) => void;
-  readonly onCommit?: (gesture: Gesture) => void;
-  readonly onCancel?: (gesture: Gesture, reason: CanvasGestureCancelReason) => void;
-}
+type CanvasGestureSessionOptions<Gesture extends CanvasGestureState> = GestureSessionOptions<Gesture>;
 ```
 ## `CanvasGestureState`
 
@@ -251,6 +240,11 @@ createBoardDragSession<Item, Target>(options?: BoardDragSessionOptions<Item, Tar
 
 ```ts
 createCanvasGestureSession<Gesture extends CanvasGestureState>(options?: CanvasGestureSessionOptions<Gesture>): CanvasGestureSession<Gesture>
+```
+## `createGestureSession`
+
+```ts
+createGestureSession<Gesture extends GestureState>(options?: GestureSessionOptions<Gesture>): GestureSession<Gesture>
 ```
 ## `createLineFocusSession`
 
@@ -311,6 +305,39 @@ focusAffordance(stroke: Pick<WebKeyboardStroke, "key" | "shiftKey">): Affordance
 
 ```ts
 forbiddenCursor(input: { readonly allowed: boolean; readonly dropping?: boolean; }): AffordancePreview
+```
+## `GestureCancelReason`
+
+```ts
+type GestureCancelReason = "cancel" | "pointer-cancel" | "lost-capture" | "superseded";
+```
+## `GestureSession`
+
+```ts
+interface GestureSession<Gesture extends GestureState> {
+  getActive(): Gesture | null;
+  begin(gesture: Gesture): Gesture;
+  preview(update: Gesture | ((gesture: Gesture) => Gesture)): Gesture | null;
+  commit(): Gesture | null;
+  cancel(reason?: GestureCancelReason): Gesture | null;
+}
+```
+## `GestureSessionOptions`
+
+```ts
+interface GestureSessionOptions<Gesture extends GestureState> {
+  readonly onBegin?: (gesture: Gesture) => void;
+  readonly onPreview?: (gesture: Gesture) => void;
+  readonly onCommit?: (gesture: Gesture) => void;
+  readonly onCancel?: (gesture: Gesture, reason: GestureCancelReason) => void;
+}
+```
+## `GestureState`
+
+```ts
+interface GestureState {
+  readonly type: string;
+}
 ```
 ## `historyAffordance`
 

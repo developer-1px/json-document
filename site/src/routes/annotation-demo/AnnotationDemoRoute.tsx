@@ -18,6 +18,14 @@ import {
   type AnnotationPoint,
   type AnnotationSource,
 } from "@interactive-os/json-document-editing";
+import { createGestureSession } from "@interactive-os/json-document-affordance";
+import {
+  createWebPointerSession,
+  projectWebClientPointToSVG,
+  readWebRasterFile,
+  renderWebAnnotationRaster,
+  webSVGViewportFromElement,
+} from "@interactive-os/json-document-web";
 import {
   ArrowUpRight,
   Download,
@@ -38,7 +46,6 @@ import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   initialAnnotationDocument,
-  renderAnnotationImage,
 } from "./annotation-state";
 import { annotationDemoRecipe } from "./annotation-demo-styles";
 
@@ -59,7 +66,14 @@ export function AnnotationDemoRoute() {
   useSyncExternalStore(editor.subscribe, () => editor.snapshot.revision, () => editor.snapshot.revision);
   const [tool, setTool] = useState<Tool>("comment");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [gesture, setGesture] = useState<Gesture | null>(null);
+  const [, setGestureRevision] = useState(0);
+  const [gestureSession] = useState(() => createGestureSession<Gesture>({
+    onBegin: () => setGestureRevision((revision) => revision + 1),
+    onPreview: () => setGestureRevision((revision) => revision + 1),
+    onCommit: () => setGestureRevision((revision) => revision + 1),
+    onCancel: () => setGestureRevision((revision) => revision + 1),
+  }));
+  const [pointerSession] = useState(() => createWebPointerSession<{ readonly active: true }>());
   const [savedState, setSavedState] = useState<string | null>(null);
   const [output, setOutput] = useState<Output>("structured");
   const [renderedImage, setRenderedImage] = useState<string | null>(null);
@@ -75,13 +89,14 @@ export function AnnotationDemoRoute() {
   const selected = documentValue.annotations.find((annotation) => annotation.id === selectedId) ?? null;
   const source = documentValue.sources[0]!;
   const sourceUrl = rasterUrlsRef.current.get(source.id) ?? sourcePath(source.src);
+  const gesture = gestureSession.getActive();
 
   useEffect(() => {
     if (output !== "image") return;
     let active = true;
     setRenderedImage(null);
-    void renderAnnotationImage(documentValue, sourceUrl).then((url) => {
-      if (active) setRenderedImage(url);
+    void renderWebAnnotationRaster({ document: documentValue, sourceId: source.id, sourceURL: sourceUrl, style: rasterStyle() }).then((result) => {
+      if (active) setRenderedImage(result.ok ? result.dataURL : null);
     });
     return () => { active = false; };
   }, [output, documentValue, sourceUrl]);
@@ -139,13 +154,14 @@ export function AnnotationDemoRoute() {
   function handleCanvasPointerDown(event: PointerEvent<SVGSVGElement>) {
     if (event.target !== event.currentTarget && (event.target as Element).closest("[data-annotation-id]")) return;
     const point = eventPoint(event);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (point === null) return;
     if (tool === "select") return setSelected(null);
+    pointerSession.begin(event.currentTarget, event.pointerId, { active: true });
     if (tool === "draw") {
-      setGesture({ type: "draw", points: [point] });
+      gestureSession.begin({ type: "draw", points: [point] });
       return;
     }
-    setGesture({ type: "create", tool, start: point, current: point });
+    gestureSession.begin({ type: "create", tool, start: point, current: point });
   }
 
   function handleAnnotationPointerDown(event: PointerEvent<SVGGElement>, annotation: Annotation) {
@@ -157,41 +173,45 @@ export function AnnotationDemoRoute() {
     }
     const svg = svgRef.current;
     if (svg === null) return;
-    svg.setPointerCapture(event.pointerId);
     setSelected(annotation.id);
     const start = eventPoint(event);
-    setGesture({ type: "move", id: annotation.id, start, current: start });
+    if (start === null) return;
+    pointerSession.begin(svg, event.pointerId, { active: true });
+    gestureSession.begin({ type: "move", id: annotation.id, start, current: start });
   }
 
   function handleResizePointerDown(event: PointerEvent<SVGCircleElement>, annotation: Annotation) {
     event.stopPropagation();
     const svg = svgRef.current;
     if (svg === null) return;
-    svg.setPointerCapture(event.pointerId);
     const start = eventPoint(event);
-    setGesture({ type: "resize", id: annotation.id, start, current: start });
+    if (start === null) return;
+    pointerSession.begin(svg, event.pointerId, { active: true });
+    gestureSession.begin({ type: "resize", id: annotation.id, start, current: start });
   }
 
   function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
-    if (gesture === null) return;
+    if (gesture === null || pointerSession.getSnapshot()?.pointerId !== event.pointerId) return;
     const point = eventPoint(event);
+    if (point === null) return;
     if (gesture.type === "draw") {
       const previous = gesture.points.at(-1);
       if (previous !== undefined && distance(previous, point) >= 4) {
-        setGesture({ type: "draw", points: [...gesture.points, point] });
+        gestureSession.preview({ type: "draw", points: [...gesture.points, point] });
       }
       return;
     }
     if (gesture.type === "create") {
-      setGesture({ ...gesture, current: point });
+      gestureSession.preview({ ...gesture, current: point });
       return;
     }
-    setGesture({ ...gesture, current: point });
+    gestureSession.preview({ ...gesture, current: point });
   }
 
   function handlePointerUp(event: PointerEvent<SVGSVGElement>) {
+    if (pointerSession.commit(event.pointerId) === null) return;
+    const gesture = gestureSession.commit();
     if (gesture === null) return;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (gesture.type === "draw") {
       const annotation = createDrawAnnotation(source.id, gesture.points);
       if (annotation !== null) {
@@ -216,12 +236,12 @@ export function AnnotationDemoRoute() {
         : { type: "annotation.resize", annotationId: gesture.id, handle: resizeHandle(documentValue, gesture.id), dx, dy });
       setAnnouncement(gesture.type === "move" ? "Annotation을 이동했습니다." : "Target을 resize했습니다.");
     }
-    setGesture(null);
   }
 
-  function handlePointerCancel(event: PointerEvent<SVGSVGElement>) {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    setGesture(null);
+  function cancelPointerGesture(event: PointerEvent<SVGSVGElement>, reason: "pointer-cancel" | "lost-capture") {
+    const cancelled = pointerSession.cancel(event.pointerId, reason === "lost-capture" ? "lost-capture" : "cancel");
+    if (cancelled === null) return;
+    gestureSession.cancel(reason);
     setAnnouncement("진행 중인 조작을 취소했습니다.");
   }
 
@@ -243,6 +263,9 @@ export function AnnotationDemoRoute() {
     }
     if (event.key === "Escape") {
       event.preventDefault();
+      const pointer = pointerSession.getSnapshot();
+      if (pointer !== null) pointerSession.cancel(pointer.pointerId);
+      gestureSession.cancel("cancel");
       chooseTool("select");
       return;
     }
@@ -271,7 +294,10 @@ export function AnnotationDemoRoute() {
     event.target.value = "";
     if (file === undefined) return;
     try {
-      const { source: nextSource, url } = await readRasterSource(file);
+      const raster = await readWebRasterFile(file);
+      if (!raster.ok) throw new Error(raster.reason ?? raster.code);
+      const nextSource: AnnotationSource = { id: `upload-${file.name}-${file.lastModified}`, src: file.name, width: raster.width, height: raster.height };
+      const url = raster.dataURL;
       rasterUrlsRef.current.set(nextSource.id, url);
       documentSource.commit([{ op: "replace", path: "", value: {
         profile: ANNOTATION_PROFILE_V1,
@@ -287,9 +313,10 @@ export function AnnotationDemoRoute() {
   }
 
   async function downloadImage() {
-    const url = await renderAnnotationImage(documentValue, sourceUrl);
+    const result = await renderWebAnnotationRaster({ document: documentValue, sourceId: source.id, sourceURL: sourceUrl, style: rasterStyle() });
+    if (!result.ok) { setAnnouncement("Annotation 이미지를 만들지 못했습니다."); return; }
     const link = document.createElement("a");
-    link.href = url;
+    link.href = result.dataURL;
     link.download = "annotation-request.png";
     link.click();
     setAnnouncement("Annotation이 적용된 이미지를 다운로드했습니다.");
@@ -311,7 +338,8 @@ export function AnnotationDemoRoute() {
               data-tool={tool}
               onKeyDown={handleKeyDown}
               onPointerDown={handleCanvasPointerDown}
-              onPointerCancel={handlePointerCancel}
+              onLostPointerCapture={(event) => cancelPointerGesture(event, "lost-capture")}
+              onPointerCancel={(event) => cancelPointerGesture(event, "pointer-cancel")}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               role="application"
@@ -320,7 +348,7 @@ export function AnnotationDemoRoute() {
             >
               <image href={sourceUrl} width={source.width} height={source.height} pointerEvents="none" />
               {documentValue.annotations.map((annotation, index) => (
-                <AnnotationShape key={annotation.id} annotation={annotation} index={index + 1} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onResizePointerDown={handleResizePointerDown} />
+                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onResizePointerDown={handleResizePointerDown} />
               ))}
               {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
               {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
@@ -673,14 +701,13 @@ function annotationBounds(annotation: Annotation) {
   return { x: selector.x, y: selector.y, width: 0, height: 0 };
 }
 
-function eventPoint(event: PointerEvent<SVGElement>): AnnotationPoint {
+function eventPoint(event: PointerEvent<SVGElement>): AnnotationPoint | null {
   const svg = event.currentTarget.ownerSVGElement ?? event.currentTarget as SVGSVGElement;
-  const bounds = svg.getBoundingClientRect();
-  const viewBox = svg.viewBox.baseVal;
-  return {
-    x: ((event.clientX - bounds.left) / bounds.width) * viewBox.width,
-    y: ((event.clientY - bounds.top) / bounds.height) * viewBox.height,
-  };
+  const projected = projectWebClientPointToSVG(
+    { x: event.clientX, y: event.clientY },
+    webSVGViewportFromElement(svg),
+  );
+  return projected === null ? null : { x: projected.x, y: projected.y };
 }
 
 function rectangleFromPoints(start: AnnotationPoint, end: AnnotationPoint) {
@@ -751,34 +778,36 @@ function resizeHandle(document: AnnotationDocument, annotationId: string): "end"
   return document.annotations.find((item) => item.id === annotationId)?.target.selector.type === "arrow" ? "end" : "south-east";
 }
 
-async function readRasterSource(file: File): Promise<{ source: AnnotationSource; url: string }> {
-  const url = await readFileAsDataUrl(file);
-  const image = await loadRaster(url);
-  return {
-    source: {
-      id: `upload-${file.name}-${file.lastModified}`,
-      src: file.name,
-      width: image.naturalWidth,
-      height: image.naturalHeight,
-    },
-    url,
-  };
+function projectGestureAnnotation(annotation: Annotation, gesture: Gesture | null): Annotation {
+  if (gesture === null || (gesture.type !== "move" && gesture.type !== "resize") || gesture.id !== annotation.id) return annotation;
+  const dx = gesture.current.x - gesture.start.x;
+  const dy = gesture.current.y - gesture.start.y;
+  const selector = annotation.target.selector;
+  if (gesture.type === "move") {
+    const point = (value: AnnotationPoint) => ({ x: value.x + dx, y: value.y + dy });
+    const moved = selector.type === "point" || selector.type === "rectangle" ? { ...selector, ...point(selector) }
+      : selector.type === "path" ? { ...selector, points: selector.points.map(point) }
+        : { ...selector, from: point(selector.from), to: point(selector.to) };
+    return { ...annotation, target: { ...annotation.target, selector: moved } };
+  }
+  if (selector.type === "rectangle") {
+    return { ...annotation, target: { ...annotation.target, selector: { ...selector, width: Math.max(1, selector.width + dx), height: Math.max(1, selector.height + dy) } } };
+  }
+  if (selector.type === "path") {
+    const bounds = annotationBounds(annotation);
+    const width = Math.max(1, bounds.width); const height = Math.max(1, bounds.height);
+    const scaleX = Math.max(1, width + dx) / width; const scaleY = Math.max(1, height + dy) / height;
+    return { ...annotation, target: { ...annotation.target, selector: { ...selector, points: selector.points.map((point) => ({ x: bounds.x + (point.x - bounds.x) * scaleX, y: bounds.y + (point.y - bounds.y) * scaleY })) } } };
+  }
+  if (selector.type === "arrow") {
+    const to = { x: selector.to.x + dx, y: selector.to.y + dy };
+    return { ...annotation, target: { ...annotation.target, selector: { ...selector, to } } };
+  }
+  return annotation;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Unable to read image"));
-    reader.onerror = () => reject(reader.error ?? new Error("Unable to read image"));
-    reader.readAsDataURL(file);
-  });
-}
-
-function loadRaster(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Unable to decode image"));
-    image.src = src;
-  });
+function rasterStyle() {
+  const color = getComputedStyle(document.documentElement).getPropertyValue("--color-border-accent").trim();
+  const accentColor = ["rgb", "(", color, ")"].join("");
+  return { stroke: accentColor, fill: accentColor, lineWidth: 8, labelFont: "700 30px system-ui, sans-serif" };
 }
