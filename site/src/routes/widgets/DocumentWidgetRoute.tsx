@@ -8,7 +8,7 @@ import {
   moveLinePoint,
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
-import { SelectableItem } from "../../shared/ui/interactive";
+import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   editingCommandFromWebKeyboardStroke,

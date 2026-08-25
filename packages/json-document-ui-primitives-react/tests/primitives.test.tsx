@@ -1,11 +1,43 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { FileDropRegion, GridCell, Menu, ResizeHandle, Select } from "../src/index.js";
+import {
+  ActionButton,
+  DisclosureButton,
+  FileDropRegion,
+  GridCell,
+  IconButton,
+  Menu,
+  ResizeHandle,
+  Select,
+  SelectableItem,
+  ToggleButton,
+} from "../src/index.js";
 
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("control primitives project their reusable button and state contracts", () => {
+    render(
+      <>
+        <ActionButton>Action</ActionButton>
+        <ActionButton type="submit">Submit</ActionButton>
+        <ToggleButton pressed>Toggle</ToggleButton>
+        <IconButton label="Copy">□</IconButton>
+        <SelectableItem selected focus>Item</SelectableItem>
+        <DisclosureButton expanded controls="panel">Details</DisclosureButton>
+      </>,
+    );
+
+    expect(screen.getByRole("button", { name: "Action" }).getAttribute("type")).toBe("button");
+    expect(screen.getByRole("button", { name: "Submit" }).getAttribute("type")).toBe("submit");
+    expect(screen.getByRole("button", { name: "Toggle" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Copy" }).getAttribute("title")).toBe("Copy");
+    expect(screen.getByRole("button", { name: "Item" }).dataset).toMatchObject({ selected: "true", focus: "true" });
+    expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-controls")).toBe("panel");
+    expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-expanded")).toBe("true");
+  });
+
   test("Select completes keyboard selection, cancellation, disabled options, and focus restoration", async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();

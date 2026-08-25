@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionButton, SelectableItem, ToggleButton } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { artifactViewerRecipe } from "./artifact-viewer-styles";
@@ -71,7 +71,7 @@ function Composer({ artifactName }: { readonly artifactName: string }) {
       </div>
       <label className="sr-only" htmlFor="artifact-composer">Agent에게 이어서 요청</label>
       <input id="artifact-composer" className={ui.field.control} placeholder="이 artifact에서 무엇을 바꿀까요?" />
-      <ActionButton kind="primary">Send</ActionButton>
+      <ActionButton data-kind="primary">Send</ActionButton>
       <p className={classes("col-span-full m-0", ui.text.meta)}>
         Composer와 Mention은 agent에게 지시와 artifact context를 건네는 Hands입니다.
       </p>

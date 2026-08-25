@@ -1,6 +1,6 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
@@ -39,7 +39,7 @@ export function HistoryDemoRoute() {
               );
             })}
           </div>
-          <ActionButton kind="primary" onClick={edit}>편집 적용</ActionButton>
+          <ActionButton data-kind="primary" onClick={edit}>편집 적용</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-call">

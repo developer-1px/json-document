@@ -22,7 +22,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { ActionButton, IconButton, ToggleButton } from "../../shared/ui/interactive";
+import { ActionButton, IconButton, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -415,7 +415,7 @@ function CommentComposer(props: {
         aria-label="Send comment"
         className={annotationDemoStyles.sendButton()}
         disabled={draft.trim() === ""}
-        kind="primary"
+        data-kind="primary"
         onClick={() => props.onSubmit(draft)}
         onMouseDown={(event) => event.preventDefault()}
         title="Send comment"

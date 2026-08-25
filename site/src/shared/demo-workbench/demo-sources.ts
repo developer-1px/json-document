@@ -19,6 +19,7 @@ import databaseEditingSource from "../../../../packages/json-document-editing/sr
 import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
+import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -85,8 +86,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/menu.tsx", uiMenuSource],
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
+  ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
 ]);
 const registeredPublicUsages = [
+  ...(["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "DisclosureButton"] as const).map((symbol) => ({
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol,
+    sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
+  })),
   {
     packageName: "@interactive-os/json-document-react",
     symbol: "useEditingObservation",

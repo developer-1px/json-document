@@ -24,7 +24,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { GridCell, ResizeHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton } from "../../shared/ui/interactive";
+import { ActionButton } from "@interactive-os/json-document-ui-primitives-react";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { gridCellProps } from "../../shared/widget-binding";
@@ -115,8 +115,8 @@ export function DatabaseTableDemo() {
       canvasClassName="relative overflow-auto p-0"
       toolbar={(
         <>
-          <ActionButton kind="primary" onClick={addRecord}>New record</ActionButton>
-          <ActionButton kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>
+          <ActionButton data-kind="primary" onClick={addRecord}>New record</ActionButton>
+          <ActionButton data-kind="danger" onClick={deleteSelectedRecord}>Delete selected</ActionButton>
           <span className={classes("mx-1 h-6 w-px", ui.surface.separator)} aria-hidden="true" />
           <ActionButton disabled={commands.undo.disabled} onClick={() => run(editor.undo, "Undone")}>Undo</ActionButton>
           <ActionButton disabled={commands.redo.disabled} onClick={() => run(editor.redo, "Redone")}>Redo</ActionButton>

@@ -32,7 +32,7 @@ import {
   type ResizeEdge,
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";

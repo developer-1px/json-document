@@ -1,7 +1,7 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
@@ -45,7 +45,7 @@ export function ClipboardDemoRoute() {
           <Inspector label="Inspect clipboard payload" items={[
             { label: "clipboard", value: clipboard, testId: "clipboard-demo-payload", size: "compact" },
           ]} />
-          <ActionButton className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>payload 붙여넣기</ActionButton>
+          <ActionButton className="mt-3" data-kind="primary" onClick={paste} disabled={!clipboard}>payload 붙여넣기</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-result">

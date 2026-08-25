@@ -15,7 +15,7 @@ import {
   type WebKeyboardCommand,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
-import { SelectableItem } from "../../../shared/ui/interactive";
+import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { optionProps } from "../../../shared/widget-binding";
 

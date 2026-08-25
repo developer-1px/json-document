@@ -23,7 +23,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
+import { ActionButton, SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { gridCellProps } from "../../../shared/widget-binding";
 

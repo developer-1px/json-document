@@ -22,7 +22,7 @@ import {
   snapAffordance,
 } from "@interactive-os/json-document-affordance";
 import { initialObjectDemoDocument } from "../../shared/demo-workbench/object-demo-document";
-import { SelectableItem } from "../../shared/ui/interactive";
+import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { optionProps } from "../../shared/widget-binding";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
