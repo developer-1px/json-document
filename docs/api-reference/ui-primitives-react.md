@@ -31,6 +31,30 @@ GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: bo
 ```ts
 IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & { readonly label: string; }): ReactNode
 ```
+## `ListboxBinding`
+
+```ts
+interface ListboxBinding<Item extends ListboxItem> {
+  readonly activeId: string | null;
+  readonly referenceProps: {
+    readonly "aria-controls": string;
+    readonly "aria-expanded": boolean;
+    readonly "aria-activedescendant"?: string;
+    readonly onKeyDown: KeyboardEventHandler;
+  };
+  readonly listboxProps: HTMLAttributes<HTMLElement>;
+  optionProps(item: Item): ButtonHTMLAttributes<HTMLButtonElement>;
+}
+```
+## `ListboxItem`
+
+```ts
+interface ListboxItem {
+  readonly id: string;
+  readonly textValue: string;
+  readonly disabled?: boolean;
+}
+```
 ## `Menu`
 
 ```ts
@@ -95,4 +119,23 @@ type SelectOption = {
 
 ```ts
 ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly pressed: boolean; }): ReactNode
+```
+## `useListbox`
+
+```ts
+useListbox<Item extends ListboxItem>(options: UseListboxOptions<Item>): ListboxBinding<Item>
+```
+## `UseListboxOptions`
+
+```ts
+interface UseListboxOptions<Item extends ListboxItem> {
+  readonly id: string;
+  readonly label: string;
+  readonly items: ReadonlyArray<Item>;
+  readonly activeId: string | null;
+  readonly selectedId?: string | null;
+  readonly wrap?: boolean;
+  readonly onActiveChange: (id: string | null) => void;
+  readonly onAction: (id: string) => void;
+}
 ```

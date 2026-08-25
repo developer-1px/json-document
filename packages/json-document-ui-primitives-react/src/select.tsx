@@ -4,10 +4,9 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { createLineFocusSession, createTypeaheadSession } from "@interactive-os/json-document-affordance";
+import { useListbox } from "./listbox.js";
 
 export type SelectOption = {
   readonly id: string;
@@ -41,16 +40,23 @@ export function Select(props: {
   const listboxRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [focusId, setFocusId] = useState(props.value);
-  const [focusSession] = useState(() => createLineFocusSession<string>({
-    initialKey: props.value,
-    wrap: true,
-    onFocus: (key) => { if (key !== null) setFocusId(key); },
-  }));
-  const [typeaheadSession] = useState(() => createTypeaheadSession<string>({
-    onMatch: (key) => focusSession.setFocus(key),
-  }));
   const selected = props.options.find((option) => option.id === props.value) ?? props.options[0];
   const enabled = props.options.filter((option) => !option.disabled);
+  const listbox = useListbox({
+    id: listboxId,
+    label: props.label,
+    items: props.options.map((option) => ({ ...option, textValue: option.label })),
+    activeId: focusId,
+    selectedId: props.value,
+    wrap: true,
+    onActiveChange: (id) => { if (id !== null) setFocusId(id); },
+    onAction: (id) => {
+      const option = enabled.find((candidate) => candidate.id === id);
+      if (!option) return;
+      props.onValueChange(option.id);
+      close();
+    },
+  });
 
   useEffect(() => {
     if (open) listboxRef.current?.focus();
@@ -63,55 +69,8 @@ export function Select(props: {
 
   function openListbox() {
     if (props.disabled || enabled.length === 0) return;
-    focusSession.setFocus(enabled.some((option) => option.id === props.value) ? props.value : enabled[0]!.id);
+    setFocusId(enabled.some((option) => option.id === props.value) ? props.value : enabled[0]!.id);
     setOpen(true);
-  }
-
-  function move(delta: -1 | 1) {
-    focusSession.handle({ key: delta === 1 ? "ArrowDown" : "ArrowUp", shiftKey: false }, enabled.map((option) => option.id));
-  }
-
-  function commit(id = focusId) {
-    const option = enabled.find((candidate) => candidate.id === id);
-    if (!option) return;
-    props.onValueChange(option.id);
-    close();
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      move(event.key === "ArrowDown" ? 1 : -1);
-      return;
-    }
-    if (event.key === "Home" || event.key === "End") {
-      event.preventDefault();
-      focusSession.handle(event, enabled.map((option) => option.id));
-      return;
-    }
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      commit();
-      return;
-    }
-    if (event.key === "Escape") {
-      event.preventDefault();
-      close();
-      return;
-    }
-    if (event.key === "Tab") {
-      close(false);
-      return;
-    }
-    if (typeaheadSession.handle({
-      key: event.key,
-      metaKey: event.metaKey,
-      ctrlKey: event.ctrlKey,
-      altKey: event.altKey,
-      timeStamp: event.timeStamp,
-      items: enabled.map((option) => ({ key: option.id, name: option.label })),
-      fromKey: focusSession.getFocusKey(),
-    })) event.preventDefault();
   }
 
   return (
@@ -139,13 +98,21 @@ export function Select(props: {
       {open ? (
         <div
           ref={listboxRef}
-          id={listboxId}
-          role="listbox"
-          aria-label={props.label}
-          aria-activedescendant={optionId(listboxId, focusId)}
+          {...listbox.listboxProps}
           tabIndex={-1}
           className={props.classNames?.listbox}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              close();
+              return;
+            }
+            if (event.key === "Tab") {
+              close(false);
+              return;
+            }
+            listbox.listboxProps.onKeyDown?.(event);
+          }}
         >
           {props.options.map((option) => {
             const focused = option.id === focusId;
@@ -153,22 +120,13 @@ export function Select(props: {
             return (
               <button
                 key={option.id}
-                id={optionId(listboxId, option.id)}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                aria-disabled={option.disabled || undefined}
-                disabled={option.disabled}
-                data-focus={focused || undefined}
-                data-selected={isSelected || undefined}
+                {...listbox.optionProps({ ...option, textValue: option.label })}
                 className={classes(
                   props.classNames?.option,
                   focused && props.classNames?.focusedOption,
                   isSelected && props.classNames?.selectedOption,
                 )}
                 style={unstyledButton}
-                onPointerMove={() => { if (!option.disabled) focusSession.setFocus(option.id); }}
-                onClick={() => commit(option.id)}
               >
                 {props.renderOption?.(option) ?? option.label}
               </button>
@@ -181,10 +139,6 @@ export function Select(props: {
 }
 
 const unstyledButton: CSSProperties = { cursor: "pointer" };
-
-function optionId(listboxId: string, value: string): string {
-  return `${listboxId}-option-${encodeURIComponent(value)}`;
-}
 
 function classes(...values: ReadonlyArray<string | false | undefined>): string | undefined {
   const value = values.filter(Boolean).join(" ");

@@ -26,6 +26,7 @@ import uiMenuSource from "../../../../packages/json-document-ui-primitives-react
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
+import uiListboxSource from "../../../../packages/json-document-ui-primitives-react/src/listbox.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -99,8 +100,14 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
+  ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "useListbox",
+    sourcePath: "packages/json-document-ui-primitives-react/src/listbox.ts",
+  },
   ...(["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "DisclosureButton"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,

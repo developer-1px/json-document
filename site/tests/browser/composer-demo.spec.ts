@@ -14,9 +14,9 @@ test("Composer가 브라우저 편집과 canonical draft를 함께 유지한다"
   await page.getByRole("menuitem", { name: /스킬/ }).click();
   await expect(editor).toBeFocused();
   await expect(page.getByRole("listbox", { name: "스킬 선택" })).toBeVisible();
-  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-option-skill-summary");
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-listbox-option-skill-summary");
   await editor.press("ArrowDown");
-  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-option-skill-translate");
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-listbox-option-skill-translate");
   await editor.press("Enter");
   await expect(editor).toContainText("/번역");
 

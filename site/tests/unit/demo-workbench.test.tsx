@@ -100,9 +100,10 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/listbox.ts",
+      "packages/json-document-affordance/src/session.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
-      "packages/json-document-affordance/src/session.ts",
     ]);
   });
 

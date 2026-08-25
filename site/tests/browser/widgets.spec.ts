@@ -95,7 +95,8 @@ test("Listbox typeahead jumps to the matching label", async ({ page }) => {
   await page.goto("/widgets/listbox");
   await page.getByRole("listbox", { name: "Order items" }).focus();
   await page.keyboard.type("T");
-  expect(await json(page, "widget-listbox-selected")).toEqual(["today"]);
+  expect(await json(page, "widget-listbox-selected")).toEqual(["inbox"]);
+  expect(await json(page, "widget-listbox-focus")).toBe("today");
 });
 
 test("Listbox leaves modified printable keys for history commands", async ({ page }) => {
@@ -110,7 +111,7 @@ test("Listbox leaves modified printable keys for history commands", async ({ pag
   await expect(listbox).toBeFocused();
 });
 
-test("Listbox reads selected keys and focus from Order", async ({ page }) => {
+test("Listbox keeps selection and active state separate", async ({ page }) => {
   await page.goto("/widgets/listbox");
   const listbox = page.getByRole("listbox", { name: "Order items" });
   await page.getByRole("option", { name: "Today" }).click();
@@ -126,19 +127,16 @@ test("Listbox reads selected keys and focus from Order", async ({ page }) => {
 
   await page.getByRole("option", { name: "Today" }).click();
   await page.keyboard.press("ArrowDown");
-  expect(await json(page, "widget-listbox-selected")).toEqual(["later"]);
+  expect(await json(page, "widget-listbox-selected")).toEqual(["today"]);
   expect(await json(page, "widget-listbox-focus")).toBe("later");
-  expect(await json(page, "widget-listbox-keyboard")).toEqual({
-    type: "move",
-    direction: "down",
-    operation: "replace",
-  });
   await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-listbox-option-later");
 
+  await page.keyboard.press("Enter");
+  expect(await json(page, "widget-listbox-selected")).toEqual(["later"]);
   await page.keyboard.press("Delete");
   await expect(page.getByRole("option", { name: "Later" })).toHaveCount(0);
   await expect(listbox).toBeFocused();
-  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-listbox-option-done");
+  await expect(listbox).toHaveAttribute("aria-activedescendant", "widget-listbox-option-inbox");
   await expect(page.locator("#widget-listbox-option-done")).toHaveCount(1);
 });
 
