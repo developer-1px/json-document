@@ -29,7 +29,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialOrder: OrderDocument = {
   items: [
@@ -240,7 +240,7 @@ export function OrderDemoRoute() {
                 data-item-id={item.id}
                 {...webFocusItemProps(item.id, focusId === item.id)}
                 className={classes("grid grid-cols-[2rem_1fr] text-left", ui.surface.documentBlock)}
-                {...optionProps(editing.getItem(item.id))}
+                {...editingItemProps(editing.getItem(item.id))}
                 focus={focusId === item.id}
                 onFocus={() => focusSession.setFocus(item.id)}
                 onClick={(event) => {

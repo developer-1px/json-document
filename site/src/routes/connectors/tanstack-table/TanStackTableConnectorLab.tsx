@@ -18,14 +18,16 @@ import { createTanStackTableConnector } from "@interactive-os/json-document-tans
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import {
   createWebClipboardSurface,
+  projectWebWidgetState,
   sheetClipboardCodec,
+  rovingFocusItemProps,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
 import { ActionButton, SelectableItem, ToggleButton } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
-import { gridCellProps } from "../../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialSheet: SheetDocument = {
   columns: [
@@ -177,8 +179,13 @@ export function TanStackTableConnectorLab() {
                         data-row-id={row.id}
                         data-column-id={cell.column.id}
                         {...webGridCellAddressProps(point)}
+                        {...rovingFocusItemProps(item.getIsFocus())}
+                        {...projectWebWidgetState({
+                          role: "gridcell",
+                          selected: item.getIsSelected(),
+                        })}
                         className={classes("p-0", ui.surface.gridCell)}
-                        {...gridCellProps(item)}
+                        {...editingItemProps(item)}
                       >
                           <input
                             aria-label={`${cell.column.id} ${row.id}`}
