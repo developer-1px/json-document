@@ -52,6 +52,7 @@ export type {
   ObjectDocument,
   ObjectEditor,
   ObjectIntent,
+  ObjectPastePlacement,
   ObjectSelection,
   ObjectSelectionMode,
 } from "./object.js";
@@ -103,6 +104,7 @@ export type {
 } from "./tree-visibility.js";
 export type {
   KanbanCard,
+  KanbanCardDropTarget,
   KanbanColumn,
   KanbanDocument,
   KanbanEditor,

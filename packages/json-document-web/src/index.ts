@@ -16,6 +16,12 @@ export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export { createWebDragDropSession } from "./drag-drop-session.js";
 export { createWebPointerSession } from "./pointer-session.js";
 export {
+  findWebKanbanCardDropTarget,
+  kanbanCardDropTargetFromWebElement,
+  webKanbanCardProps,
+  webKanbanColumnProps,
+} from "./kanban-drop-target.js";
+export {
   activeDescendantContainerProps,
   activeDescendantItemProps,
   projectWebWidgetState,
@@ -70,6 +76,7 @@ export type {
   WebPointerSessionOptions,
   WebPointerSessionSnapshot,
 } from "./pointer-session.js";
+export type { WebKanbanTargetElement } from "./kanban-drop-target.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
 export type {
   WebFocusableItem,

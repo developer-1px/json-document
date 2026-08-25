@@ -38,7 +38,7 @@ test("Object routes platform history shortcuts from its editing surface", async 
   await expect(note).toHaveCSS("background-color", "rgb(77, 106, 138)");
 });
 
-test("Object composes native clipboard events with its paste offset", async ({ page }) => {
+test("Object composes native and toolbar paste with the same placement Intent", async ({ page }) => {
   await page.goto("/demo/object");
   const note = page.getByRole("button", { name: "Note" });
   await note.click();
@@ -46,10 +46,12 @@ test("Object composes native clipboard events with its paste offset", async ({ p
   await page.getByRole("button", { name: "Card" }).click();
   await page.keyboard.press("ControlOrMeta+V");
   await expect(page.getByRole("button", { name: "Note" })).toHaveCount(2);
+  await page.getByRole("button", { name: "Paste", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Note" })).toHaveCount(3);
   const notes = (await json(page, "object-demo-document")).objects
     .filter((object: { readonly label: string }) => object.label === "Note");
   expect(notes.map((object: { readonly x: number; readonly y: number }) => [object.x, object.y]))
-    .toEqual([[24, 24], [48, 48]]);
+    .toEqual([[24, 24], [48, 48], [48, 48]]);
 });
 
 test("Order typeahead jumps to the matching label and Escape clears the buffer", async ({ page }) => {
@@ -363,19 +365,19 @@ test("Kanban moves a card to another column", async ({ page }) => {
   await page.goto("/demo/kanban");
   await expect(page.getByRole("heading", { level: 1, name: "Kanban", exact: true })).toBeVisible();
   const card = page.getByRole("button", { name: "Write the brief" });
-  const done = page.locator("[data-column-id=done]");
+  const done = page.locator("[data-kanban-column-id=done]");
   await card.dragTo(done);
   await expect(done.getByRole("button", { name: "Write the brief" })).toBeVisible();
   await page.getByLabel("Kanban board").focus();
   await page.keyboard.press("ControlOrMeta+Z");
-  await expect(page.locator("[data-column-id=todo]").getByRole("button", { name: "Write the brief" })).toBeVisible();
+  await expect(page.locator("[data-kanban-column-id=todo]").getByRole("button", { name: "Write the brief" })).toBeVisible();
   await page.keyboard.press("ControlOrMeta+Shift+Z");
   await expect(done.getByRole("button", { name: "Write the brief" })).toBeVisible();
 
   await page.getByRole("button", { name: "Draw the board" }).dragTo(
     page.getByRole("button", { name: "Review copy" }),
   );
-  await expect(page.locator("[data-column-id=todo] [data-card-id]")).toHaveText([
+  await expect(page.locator("[data-kanban-column-id=todo] [data-kanban-card-id]")).toHaveText([
     "Draw the board",
     "Review copy",
   ]);

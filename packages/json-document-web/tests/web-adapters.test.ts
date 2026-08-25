@@ -19,6 +19,7 @@ import {
   orderClipboardCodec,
   createWebKeyboardAdapter,
   findWebGridCell,
+  findWebKanbanCardDropTarget,
   activeDescendantContainerProps,
   activeDescendantItemProps,
   defaultWebKeymap,
@@ -27,6 +28,7 @@ import {
   lineBoundary,
   moveGridPoint,
   moveLinePoint,
+  kanbanCardDropTargetFromWebElement,
   pressInteractionFromWeb,
   projectWebWidgetState,
   rovingFocusItemProps,
@@ -35,9 +37,24 @@ import {
   textInputFromControl,
   webFocusItemProps,
   webGridCellAddressProps,
+  webKanbanCardProps,
+  webKanbanColumnProps,
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("Web Kanban drop target", () => {
+  test("projects canonical column/card markup and empty columns", () => {
+    expect(webKanbanColumnProps("doing")).toEqual({ "data-kanban-column-id": "doing" });
+    expect(webKanbanCardProps("review")).toEqual({ "data-kanban-card-id": "review" });
+    const column = kanbanElement({ "data-kanban-column-id": "doing" });
+    const card = kanbanElement({ "data-kanban-card-id": "review" }, column);
+    expect(kanbanCardDropTargetFromWebElement(card)).toEqual({ columnId: "doing", beforeCardId: "review" });
+    expect(kanbanCardDropTargetFromWebElement(column)).toEqual({ columnId: "doing", beforeCardId: null });
+    expect(kanbanCardDropTargetFromWebElement(kanbanElement({}))).toBeNull();
+    expect(findWebKanbanCardDropTarget({ x: 10, y: 20 }, { elementFromPoint: () => card })).toEqual({ columnId: "doing", beforeCardId: "review" });
+  });
+});
 
 describe("Web focus item", () => {
   test("projects and realizes a focus key without selector interpolation", () => {
@@ -542,5 +559,20 @@ function pointerCaptureTarget() {
     releasePointerCapture(pointerId: number) {
       captured.delete(pointerId);
     },
+  };
+}
+
+type TestKanbanElement = {
+  closest(selector: string): TestKanbanElement | null;
+  getAttribute(name: string): string | null;
+};
+
+function kanbanElement(attributes: Readonly<Record<string, string>>, parent: TestKanbanElement | null = null): TestKanbanElement {
+  return {
+    closest(selector: string) {
+      const name = selector.slice(1, -1);
+      return name in attributes ? this : parent?.closest(selector) ?? null;
+    },
+    getAttribute(name: string) { return attributes[name] ?? null; },
   };
 }

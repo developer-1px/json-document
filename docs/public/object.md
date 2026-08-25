@@ -38,7 +38,9 @@ event를 Intent에 넣지 않습니다.
 직렬화·`preventDefault()`·paste 판정은 Web Adapter의
 [`createWebClipboardSurface`](adapter-clipboard.md#createwebclipboardsurface)가
 소유하며, paste offset처럼 제품에 따라 달라지는 배치 정책은 Host가
-`clipboard.paste` 전에 적용합니다.
+`clipboard.paste.placement`의 `{ type: "offset", dx, dy }`로 전달합니다. Editor가
+unique ID clone 뒤 placement를 정확히 한 번 적용하므로 clipboard payload에는
+배치 결과를 미리 저장하지 않습니다. placement 생략은 zero offset입니다.
 
 ## 상태의 주인
 
