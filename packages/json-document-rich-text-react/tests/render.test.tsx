@@ -93,7 +93,28 @@ describe("RichTextRenderer", () => {
 
     expect(html).toContain('style="color:red;white-space:pre-wrap"');
     expect(html).toContain(">a  b</span>");
-    expect(html).toContain('<p data-rich-text-node-id="empty" data-rich-text-container-id="empty"><span data-rich-text-placeholder=""><br/></span></p>');
+    expect(html).toContain('<p data-rich-text-node-id="empty" data-rich-text-container-id="empty"><span data-rich-text-placeholder="" aria-hidden="true"><br/></span></p>');
     expect(renderToStaticMarkup(<RichTextRenderer document={document} />)).not.toContain("data-rich-text-placeholder");
+  });
+
+  it("projects product placeholder copy without inserting it into the editable DOM text", () => {
+    const document: RichTextDocument = {
+      profile: richTextSchemaV1.profile,
+      id: "doc",
+      type: "doc",
+      content: [{ id: "empty", type: "paragraph", content: [] }],
+    };
+    const editor = {
+      pointer: "",
+      schema: richTextSchemaV1,
+      snapshot: { value: document, selection: { kind: "range", ranges: [], primaryIndex: null }, revision: 0, canUndo: false, canRedo: false },
+      subscribe: () => () => {},
+    } as unknown as RichTextEditor;
+
+    const html = renderToStaticMarkup(<RichTextEditorSurface editor={editor} placeholder="Write a message" />);
+    expect(html).toContain('aria-placeholder="Write a message"');
+    expect(html).toContain('data-rich-text-empty="true"');
+    expect(html).toContain('data-rich-text-placeholder="Write a message"');
+    expect(html).not.toContain('>Write a message<');
   });
 });

@@ -14,7 +14,6 @@ import {
   composerInteractionFromKeyStroke,
   composerHostConfigSchema,
   composerSchema,
-  composerText,
   createComposerAttachments,
   createComposerDraft,
   findComposerTrigger,
@@ -217,7 +216,6 @@ export function ComposerDemoRoute() {
               classNames={{ root: "composer-menu-root", trigger: "composer-icon-button", popup: "composer-layer composer-add-layer" }}
             />
             <div className="composer-editor-wrap">
-              {composerText(instructionValue).trim() === "" ? <span className="composer-placeholder-box">작업을 입력하세요</span> : null}
               <RichTextEditorSurface
                 as="div"
                 editor={editor}
@@ -228,6 +226,7 @@ export function ComposerDemoRoute() {
                 {...(trigger && visibleSuggestions.length > 0 ? commandReferenceProps : { "aria-expanded": false })}
                 onAction={onAction}
                 onKeyDownCapture={handleKeyDown}
+                placeholder="작업을 입력하세요"
                 renderExtension={renderAtom}
                 spellCheck={false}
               />

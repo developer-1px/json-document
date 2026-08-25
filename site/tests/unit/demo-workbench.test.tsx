@@ -136,6 +136,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-composer/src/host-config.ts",
       "packages/json-document-composer/src/interaction.ts",
       "packages/json-document-web/src/composer-attachment.ts",
+      "packages/json-document-rich-text-react/src/index.tsx",
       "packages/json-document-ui-primitives-react/src/select.tsx",
       "packages/json-document-ui-primitives-react/src/menu.tsx",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",

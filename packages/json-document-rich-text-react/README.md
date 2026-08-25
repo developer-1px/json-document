@@ -10,6 +10,7 @@ import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-r
 <RichTextEditorSurface
   editor={editor}
   aria-label="Rich Text editor"
+  placeholder="Write a message"
   onAction={(action, result) => console.log(action, result)}
 />
 ```
@@ -32,3 +33,8 @@ Canonical empty text blocks remain empty in JSON. On the editable surface only,
 they receive a non-canonical `<span data-rich-text-placeholder><br></span>` so
 browsers can retain the DOM caret across consecutive Enter operations without
 making the browser-mutated `<br>` a direct React reconciliation boundary.
+When `placeholder` is supplied, the first empty block exposes that copy through
+the same generated-content attribute plus `aria-placeholder` and
+`data-rich-text-empty`. Hosts style the generated content with
+`[data-rich-text-placeholder]::before`; no placeholder text node enters the
+editable DOM or canonical document.

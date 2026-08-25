@@ -12,7 +12,9 @@ export interface RichTextRenderStore {
   getBlockIds(): ReadonlyArray<string>;
   getDocumentId(): string;
   getNode(nodeId: string): RichTextNode | null;
+  getPlaceholderBlockId(): string | null;
   subscribeNode(nodeId: string, notify: () => void): () => void;
+  subscribePlaceholder(notify: () => void): () => void;
   subscribeStructure(notify: () => void): () => void;
 }
 
@@ -30,7 +32,9 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
   const pointer = editor.pointer ?? "";
   let document = documentAtPointer(editor.snapshot.value, pointer);
   let blockIds: ReadonlyArray<string> = document.content.map((node) => node.id);
+  let placeholderBlockId = placeholderBlockFor(document);
   const nodeListeners = new Map<string, Set<() => void>>();
+  const placeholderListeners = new Set<() => void>();
   const structureListeners = new Set<() => void>();
 
   editor.subscribe((snapshot) => {
@@ -38,6 +42,13 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
     if (next === document) return;
     const previous = document;
     document = next;
+    if (placeholderListeners.size > 0) {
+      const nextPlaceholderBlockId = placeholderBlockFor(next);
+      if (nextPlaceholderBlockId !== placeholderBlockId) {
+        placeholderBlockId = nextPlaceholderBlockId;
+        for (const notify of placeholderListeners) notify();
+      }
+    }
     const recorded = appliedOperationsFor(next);
     const applied = recorded === null ? null : relativeOperations(recorded, pointer);
     if (applied !== null && !contentStructureChanged(applied)) {
@@ -69,6 +80,7 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
       const located = richTextTopology(document).locate(nodeId);
       return located && located.node.type !== "doc" ? located.node as RichTextNode : null;
     },
+    getPlaceholderBlockId() { return placeholderBlockId; },
     subscribeNode(nodeId, notify) {
       const listeners = nodeListeners.get(nodeId) ?? new Set<() => void>();
       listeners.add(notify);
@@ -78,11 +90,32 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
         if (listeners.size === 0) nodeListeners.delete(nodeId);
       };
     },
+    subscribePlaceholder(notify) {
+      placeholderBlockId = placeholderBlockFor(document);
+      placeholderListeners.add(notify);
+      return () => { placeholderListeners.delete(notify); };
+    },
     subscribeStructure(notify) {
       structureListeners.add(notify);
       return () => { structureListeners.delete(notify); };
     },
   };
+}
+
+function placeholderBlockFor(document: RichTextDocument): string | null {
+  const first = document.content[0];
+  if (first === undefined || !isPlaceholderBlock(first)) return null;
+  return document.content.every((node) => !hasVisibleContent(node)) ? first.id : null;
+}
+
+function hasVisibleContent(node: RichTextNode): boolean {
+  if (node.type === "text" && "text" in node) return node.text.length > 0;
+  if (node.type === "hardBreak" || !hasRichTextContent(node)) return true;
+  return node.content.some(hasVisibleContent);
+}
+
+function isPlaceholderBlock(node: RichTextNode): boolean {
+  return node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock";
 }
 
 function relativeOperations(

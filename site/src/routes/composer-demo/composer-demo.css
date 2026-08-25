@@ -35,7 +35,7 @@
 .composer-editor-wrap { position: relative; display: flex; min-width: 0; flex: 1; align-self: stretch; align-items: center; }
 .composer-input-box { width: 100%; min-height: 26px; max-height: 132px; padding: 11px 2px 8px; overflow: auto; border: 0; outline: 0; color: var(--color-foreground-strong); font-size: 16px; line-height: 1.55; }
 .composer-input-box p { margin: 0; }
-.composer-placeholder-box { position: absolute; left: 2px; top: 11px; color: var(--color-foreground-muted); font-size: 16px; pointer-events: none; }
+.composer-input-box [data-rich-text-placeholder]:not([data-rich-text-placeholder=""])::before { color: var(--color-foreground-muted); content: attr(data-rich-text-placeholder); }
 
 .composer-icon-button,
 .composer-send-button { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--color-foreground-muted); font-size: 20px; cursor: pointer; }

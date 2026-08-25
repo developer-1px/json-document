@@ -37,6 +37,7 @@ import composerCommandsSource from "../../../../packages/json-document-composer/
 import composerHostConfigSource from "../../../../packages/json-document-composer/src/host-config.ts?raw";
 import composerInteractionSource from "../../../../packages/json-document-composer/src/interaction.ts?raw";
 import webComposerAttachmentSource from "../../../../packages/json-document-web/src/composer-attachment.ts?raw";
+import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -122,6 +123,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/host-config.ts", composerHostConfigSource],
   ["packages/json-document-composer/src/interaction.ts", composerInteractionSource],
   ["packages/json-document-web/src/composer-attachment.ts", webComposerAttachmentSource],
+  ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -163,6 +165,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "composerAttachmentCandidatesFromWebFiles",
     sourcePath: "packages/json-document-web/src/composer-attachment.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-react",
+    symbol: "RichTextEditorSurface",
+    sourcePath: "packages/json-document-rich-text-react/src/index.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",

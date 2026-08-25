@@ -11,6 +11,17 @@ describe("Agent Chat Composer Hands", () => {
     expect(composerDemoSource).not.toContain("function composerAttachments");
     expect(composerDemoSource).toContain("addComposerAttachments(");
     expect(composerDemoSource).toContain("composerAttachmentCandidatesFromWebFiles(");
+    expect(composerDemoSource).not.toContain("composer-placeholder-box");
+    expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
+  });
+
+  test("delegates empty-state placeholder lifecycle to the canonical Rich Text surface", () => {
+    render(<ComposerDemoRoute />);
+    const editor = screen.getByLabelText("Agent Chat Composer");
+    expect(editor.getAttribute("aria-placeholder")).toBe("작업을 입력하세요");
+    expect(editor.getAttribute("data-rich-text-empty")).toBe("true");
+    expect(editor.querySelector('[data-rich-text-placeholder="작업을 입력하세요"]')).toBeTruthy();
+    expect(editor.textContent).toBe("");
   });
 
   test("keeps attachments in the canonical Composer draft and removes them from the same context", () => {
