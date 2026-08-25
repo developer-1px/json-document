@@ -33,10 +33,12 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
+    "@interactive-os/json-document-composer": "^0.1.0-rc.0",
     "@interactive-os/json-document-editing": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-selection": ">=0.1.0-rc.0 <1"
   },
   "devDependencies": {
+    "@interactive-os/json-document-composer": "*",
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-selection": "*",
     "@types/node": "^25.9.0",

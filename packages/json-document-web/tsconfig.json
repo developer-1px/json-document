@@ -6,6 +6,7 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "references": [
+    { "path": "../json-document-composer" },
     { "path": "../json-document-editing" },
     { "path": "../json-document-selection" }
   ],

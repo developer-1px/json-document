@@ -34,6 +34,9 @@ import composerModelSource from "../../../../packages/json-document-composer/src
 import composerSchemaSource from "../../../../packages/json-document-composer/src/schema.ts?raw";
 import composerTriggerSource from "../../../../packages/json-document-composer/src/trigger.ts?raw";
 import composerCommandsSource from "../../../../packages/json-document-composer/src/commands.ts?raw";
+import composerHostConfigSource from "../../../../packages/json-document-composer/src/host-config.ts?raw";
+import composerInteractionSource from "../../../../packages/json-document-composer/src/interaction.ts?raw";
+import webComposerAttachmentSource from "../../../../packages/json-document-web/src/composer-attachment.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -116,6 +119,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/schema.ts", composerSchemaSource],
   ["packages/json-document-composer/src/trigger.ts", composerTriggerSource],
   ["packages/json-document-composer/src/commands.ts", composerCommandsSource],
+  ["packages/json-document-composer/src/host-config.ts", composerHostConfigSource],
+  ["packages/json-document-composer/src/interaction.ts", composerInteractionSource],
+  ["packages/json-document-web/src/composer-attachment.ts", webComposerAttachmentSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -137,6 +143,26 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-composer",
     symbol: "insertComposerReference",
     sourcePath: "packages/json-document-composer/src/commands.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "composerHostConfigSchema",
+    sourcePath: "packages/json-document-composer/src/host-config.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "addComposerAttachments",
+    sourcePath: "packages/json-document-composer/src/commands.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "composerInteractionFromKeyStroke",
+    sourcePath: "packages/json-document-composer/src/interaction.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "composerAttachmentCandidatesFromWebFiles",
+    sourcePath: "packages/json-document-web/src/composer-attachment.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
