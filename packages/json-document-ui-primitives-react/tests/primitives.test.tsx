@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { useState } from "react";
 import {
   ActionButton,
   DisclosureButton,
@@ -12,11 +13,50 @@ import {
   Select,
   SelectableItem,
   ToggleButton,
+  useListbox,
 } from "../src/index.js";
 
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("Listbox keeps active and selected separate across keyboard, typeahead, pointer, and action", async () => {
+    const user = userEvent.setup();
+    const actions = vi.fn();
+    const items = [
+      { id: "a", textValue: "Alpha" },
+      { id: "blocked", textValue: "Blocked", disabled: true },
+      { id: "b/c", textValue: "Beta" },
+    ] as const;
+    function Harness() {
+      const [activeId, setActiveId] = useState<string | null>("a");
+      const listbox = useListbox({
+        id: "commands",
+        label: "Commands",
+        items,
+        activeId,
+        selectedId: "a",
+        onActiveChange: setActiveId,
+        onAction: actions,
+      });
+      return <><input aria-label="Reference" {...listbox.referenceProps} /><div tabIndex={-1} {...listbox.listboxProps}>
+        {items.map((item) => <button key={item.id} {...listbox.optionProps(item)}>{item.textValue}</button>)}
+      </div></>;
+    }
+    render(<Harness />);
+    const reference = screen.getByRole("textbox", { name: "Reference" });
+    reference.focus();
+    await user.keyboard("{ArrowDown}");
+    expect(reference.getAttribute("aria-activedescendant")).toBe("commands-option-b%2Fc");
+    expect(screen.getByRole("option", { name: "Alpha" }).getAttribute("aria-selected")).toBe("true");
+    await user.keyboard("a");
+    expect(reference.getAttribute("aria-activedescendant")).toBe("commands-option-a");
+    await user.hover(screen.getByRole("option", { name: "Beta" }));
+    expect(reference.getAttribute("aria-activedescendant")).toBe("commands-option-b%2Fc");
+    await user.keyboard("{Enter}");
+    expect(actions).toHaveBeenCalledWith("b/c");
+    expect((screen.getByRole("option", { name: "Blocked" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
   test("control primitives project their reusable button and state contracts", () => {
     render(
       <>

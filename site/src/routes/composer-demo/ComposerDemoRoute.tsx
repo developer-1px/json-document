@@ -1,8 +1,6 @@
 import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
-import { createOrderEditor, type OrderEditor } from "@interactive-os/json-document-editing";
-import { activeDescendantContainerProps, activeDescendantItemProps, projectWebWidgetState } from "@interactive-os/json-document-web";
-import { FileDropRegion, Menu, Select } from "@interactive-os/json-document-ui-primitives-react";
+import { FileDropRegion, Menu, Select, useListbox } from "@interactive-os/json-document-ui-primitives-react";
 import {
   createRichTextEditor,
   type RichTextDocument,
@@ -46,13 +44,12 @@ const modelOptions = models.map((label) => ({
 export function ComposerDemoRoute() {
   const [draft] = useState<JSONDocument>(() => createJSONDocument(createComposerDraft(models[0])));
   const [editor] = useState(() => createRichTextEditor({ document: draft, pointer: "/instruction", schema: composerSchema }));
-  const [commandNavigation] = useState(() => createOrderEditor({ items: suggestions.map((item) => ({ id: item.id, label: item.label })) }));
   useSyncExternalStore(editor.subscribe, () => editor.snapshot.revision, () => editor.snapshot.revision);
-  useSyncExternalStore(commandNavigation.subscribe, () => commandNavigation.snapshot.revision, () => commandNavigation.snapshot.revision);
   const instruction = draft.at("/instruction");
   if (!instruction.ok) throw new Error("Composer instruction is missing.");
   const instructionValue = instruction.value as unknown as RichTextDocument;
   const [submitted, setSubmitted] = useState<ComposerDraft | null>(null);
+  const [commandActiveId, setCommandActiveId] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const composerEditorRef = useRef<HTMLElement>(null);
   const trigger = activeComposerTrigger(instructionValue, editor);
@@ -60,8 +57,20 @@ export function ComposerDemoRoute() {
   const draftValue = draft.value as ComposerDraft<(typeof models)[number]>;
   const attachments = draftValue.attachments;
   const model = draftValue.model;
-  const commandFocusId = orderFocus(commandNavigation);
-  const activeSuggestion = visibleSuggestions.find((item) => item.id === commandFocusId) ?? visibleSuggestions[0] ?? null;
+  const activeSuggestion = visibleSuggestions.find((item) => item.id === commandActiveId) ?? visibleSuggestions[0] ?? null;
+  const commandListbox = useListbox({
+    id: "composer-command-listbox",
+    label: trigger?.kind === "skill" ? "스킬 선택" : "에이전트 선택",
+    items: visibleSuggestions.map((item) => ({ ...item, textValue: item.label })),
+    activeId: activeSuggestion?.id ?? null,
+    wrap: true,
+    onActiveChange: setCommandActiveId,
+    onAction: (id) => {
+      const suggestion = visibleSuggestions.find((item) => item.id === id);
+      if (trigger && suggestion) insertComposerSuggestion(editor, trigger, suggestion);
+    },
+  });
+  const { onKeyDown: handleCommandKeyDown, ...commandReferenceProps } = commandListbox.referenceProps;
   const hasContent = composerDocumentText(instructionValue).trim().length > 0 || attachments.length > 0;
 
   const onAction = useCallback(() => undefined, []);
@@ -75,16 +84,12 @@ export function ComposerDemoRoute() {
     if (event.key === "Escape") {
       return;
     }
-    if (trigger && visibleSuggestions.length > 0 && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
-      event.preventDefault();
-      moveOrderFocus(commandNavigation, visibleSuggestions.map((item) => item.id), event.key === "ArrowDown" ? 1 : -1, activeSuggestion?.id);
-      return;
-    }
-    if (trigger && activeSuggestion && event.key === "Enter") {
-      event.preventDefault();
-      event.stopPropagation();
-      insertComposerSuggestion(editor, trigger, activeSuggestion);
-      return;
+    if (trigger && visibleSuggestions.length > 0) {
+      handleCommandKeyDown(event);
+      if (event.defaultPrevented) {
+        event.stopPropagation();
+        return;
+      }
     }
     if (event.key !== "Enter" || event.shiftKey) return;
     event.preventDefault();
@@ -192,9 +197,7 @@ export function ComposerDemoRoute() {
                 aria-label="Agent Chat Composer"
                 data-testid="composer-editor"
                 elementRef={composerEditorRef}
-                aria-controls={trigger && visibleSuggestions.length > 0 ? "composer-command-listbox" : undefined}
-                aria-expanded={trigger !== null && visibleSuggestions.length > 0}
-                {...(trigger && activeSuggestion ? activeDescendantContainerProps(commandOptionId(activeSuggestion.id)) : {})}
+                {...(trigger && visibleSuggestions.length > 0 ? commandReferenceProps : { "aria-expanded": false })}
                 onAction={onAction}
                 onKeyDownCapture={handleKeyDown}
                 renderExtension={renderAtom}
@@ -219,9 +222,9 @@ export function ComposerDemoRoute() {
           </div>
 
           {trigger && visibleSuggestions.length > 0 ? (
-            <div id="composer-command-listbox" className="composer-layer composer-command-layer" role="listbox" aria-label={trigger.kind === "skill" ? "스킬 선택" : "에이전트 선택"}>
+            <div {...commandListbox.listboxProps} className="composer-layer composer-command-layer">
               {visibleSuggestions.map((item) => (
-                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} type="button" {...activeDescendantItemProps(commandOptionId(item.id))} {...projectWebWidgetState({ role: "option", selected: item.id === activeSuggestion?.id })} onPointerMove={() => commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" })} onMouseDown={(event) => event.preventDefault()} onClick={() => { commandNavigation.dispatch({ type: "selection.set", itemId: item.id, mode: "replace" }); insertComposerSuggestion(editor, trigger, item); }}>
+                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} {...commandListbox.optionProps({ ...item, textValue: item.label })} onMouseDown={(event) => event.preventDefault()}>
                   <span className={`composer-command-icon ${item.kind}`}>{item.kind === "skill" ? "/" : "@"}</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
                   <em>{item.kind === "skill" ? "Skill" : "Agent"}</em>
@@ -259,19 +262,4 @@ function formatBytes(size: number): string {
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
   return `${(size / 1024 / 1024).toFixed(1)} MB`;
-}
-
-function orderFocus(editor: OrderEditor): string | null {
-  return editor.snapshot.selection.ranges[editor.snapshot.selection.primaryIndex ?? 0]?.focus.itemId ?? null;
-}
-
-function moveOrderFocus(editor: OrderEditor, ids: ReadonlyArray<string>, delta: -1 | 1, from = orderFocus(editor)): void {
-  if (ids.length === 0) return;
-  const index = from === null ? -1 : ids.indexOf(from);
-  const next = index < 0 ? (delta > 0 ? 0 : ids.length - 1) : (index + delta + ids.length) % ids.length;
-  editor.dispatch({ type: "selection.set", itemId: ids[next]!, mode: "replace" });
-}
-
-function commandOptionId(id: string): string {
-  return `composer-command-option-${id}`;
 }

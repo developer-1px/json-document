@@ -26,6 +26,33 @@ event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 npm i @interactive-os/json-document-ui-primitives-react
 ```
 
+## `useListbox`
+
+```tsx
+const listbox = useListbox({
+  id: "command-listbox",
+  label: "Commands",
+  items,
+  activeId,
+  selectedId,
+  onActiveChange: setActiveId,
+  onAction: runCommand,
+});
+
+<Editor {...listbox.referenceProps} />
+<div {...listbox.listboxProps}>
+  {items.map((item) => <button {...listbox.optionProps(item)}>{render(item)}</button>)}
+</div>
+```
+
+`useListbox`는 enabled item의 Arrow/Home/End 이동, `textValue` typeahead,
+active-descendant ARIA, pointer active와 Enter/Space activation을 소유합니다.
+`activeId`와 `selectedId`는 서로 독립이며 이동만으로 selection을 commit하지
+않습니다. `referenceProps`는 Composer처럼 DOM focus를 외부 editor에 유지하는
+경로에, `listboxProps`는 Select처럼 listbox 자체가 focus를 받는 경로에 씁니다.
+Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host가
+합성합니다.
+
 ## Control primitives
 
 ```tsx
