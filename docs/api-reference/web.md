@@ -31,6 +31,11 @@ createWebClipboardBinding<Payload extends WebClipboardPayload, EditingResult ext
 ```ts
 createWebClipboardSurface<Payload extends WebClipboardPayload, EditingResult extends { readonly ok: boolean; readonly code?: string; readonly reason?: string; }>(options: WebClipboardBindingOptions<Payload, EditingResult> & { readonly onResult: (result: WebClipboardResult<Payload, EditingResult>) => void; }): WebClipboardSurface<Payload, EditingResult>
 ```
+## `createWebClipboardTextWriter`
+
+```ts
+createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPort | null; }): WebClipboardTextWriter
+```
 ## `createWebDragDropSession`
 
 ```ts
@@ -106,10 +111,25 @@ const orderClipboardCodec: WebClipboardCodec<OrderClipboard>
 ```ts
 pressInteractionFromWeb(input: WebPressInput): WebPressInteraction | null
 ```
+## `projectWebClientPointToSVG`
+
+```ts
+projectWebClientPointToSVG(point: WebClientPoint, viewport: WebSVGViewport): WebClientPoint | null
+```
 ## `projectWebWidgetState`
 
 ```ts
 projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
+```
+## `readWebRasterFile`
+
+```ts
+readWebRasterFile(file: WebRasterFile): Promise<WebRasterSourceResult>
+```
+## `renderWebAnnotationRaster`
+
+```ts
+renderWebAnnotationRaster(options: { readonly document: AnnotationDocument; readonly sourceId: string; readonly sourceURL: string; readonly style: WebAnnotationRasterStyle; }): Promise<WebAnnotationRasterResult>
 ```
 ## `rovingFocusItemProps`
 
@@ -135,6 +155,31 @@ textInputFromControl(event: WebTextControlEvent): WebTextInput
 
 ```ts
 const treeClipboardCodec: WebClipboardCodec<TreeClipboard>
+```
+## `WebAnnotationRasterResult`
+
+```ts
+type WebAnnotationRasterResult =
+  | { readonly ok: true; readonly dataURL: string }
+  | { readonly ok: false; readonly code: "raster.decode-failed" | "raster.context-unavailable" | "raster.encode-failed"; readonly reason?: string };
+```
+## `WebAnnotationRasterStyle`
+
+```ts
+interface WebAnnotationRasterStyle {
+  readonly stroke: string;
+  readonly fill: string;
+  readonly lineWidth: number;
+  readonly labelFont: string;
+}
+```
+## `WebClientPoint`
+
+```ts
+interface WebClientPoint {
+  readonly x: number;
+  readonly y: number;
+}
 ```
 ## `WebClipboardBinding`
 
@@ -218,6 +263,31 @@ interface WebClipboardSurface<Payload extends WebClipboardPayload, EditingResult
   readonly onCut: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
   readonly onPaste: (event: WebClipboardEvent) => WebClipboardResult<Payload, EditingResult>;
 }
+```
+## `WebClipboardTextPort`
+
+```ts
+interface WebClipboardTextPort {
+  writeText(text: string): Promise<void>;
+}
+```
+## `WebClipboardTextWriter`
+
+```ts
+interface WebClipboardTextWriter {
+  writeText(text: string): Promise<WebClipboardWriteResult>;
+}
+```
+## `WebClipboardWriteResult`
+
+```ts
+type WebClipboardWriteResult =
+  | { readonly ok: true }
+  | {
+    readonly ok: false;
+    readonly code: "clipboard.unsupported" | "clipboard.write-failed";
+    readonly reason?: string;
+  };
 ```
 ## `WebDragDropCancelReason`
 
@@ -408,6 +478,42 @@ type WebPressInteraction =
 
 ```ts
 type WebPressSource = "keyboard" | "pointer" | "virtual";
+```
+## `WebRasterFile`
+
+```ts
+interface WebRasterFile {
+  readonly name: string;
+  readonly type: string;
+}
+```
+## `WebRasterSourceResult`
+
+```ts
+type WebRasterSourceResult =
+  | { readonly ok: true; readonly dataURL: string; readonly width: number; readonly height: number }
+  | { readonly ok: false; readonly code: "raster.read-failed" | "raster.decode-failed"; readonly reason?: string };
+```
+## `WebSVGElement`
+
+```ts
+interface WebSVGElement {
+  getBoundingClientRect(): { readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+  readonly viewBox: { readonly baseVal: { readonly x: number; readonly y: number; readonly width: number; readonly height: number } };
+}
+```
+## `WebSVGViewport`
+
+```ts
+interface WebSVGViewport {
+  readonly clientRect: { readonly left: number; readonly top: number; readonly width: number; readonly height: number };
+  readonly viewBox: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
+}
+```
+## `webSVGViewportFromElement`
+
+```ts
+webSVGViewportFromElement(svg: WebSVGElement): WebSVGViewport
 ```
 ## `WebTextControl`
 

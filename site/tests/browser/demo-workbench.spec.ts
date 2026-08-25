@@ -44,6 +44,7 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "database.ts",
     "pointer-session.ts",
     "controls.tsx",
+    "use-editing.ts",
     "editing-observation.ts",
     "use-grid-editing.ts",
     "topology.ts",

@@ -37,7 +37,7 @@ test("Comment creates point and region marks with one editable comment", async (
   await drag(page, box.x + box.width * 0.45, box.y + box.height * 0.25, box.x + box.width * 0.7, box.y + box.height * 0.55);
   await expect(page.getByLabel("Annotation instruction")).toBeFocused();
   await expect(page.getByRole("button", { name: "Select", exact: true })).toHaveAttribute("aria-pressed", "true");
-  expect((await structured(page)).annotations.map((item: any) => item.mark.type)).toEqual(["marker", "rectangle"]);
+  expect((await structured(page)).annotations.map((item: any) => item.presentation.type)).toEqual(["marker", "outline"]);
 });
 
 test("Draw and Arrow reuse the same selection and comment flow", async ({ page }) => {
@@ -54,7 +54,7 @@ test("Draw and Arrow reuse the same selection and comment flow", async ({ page }
 
   await page.getByRole("button", { name: "Arrow" }).click();
   await drag(page, box.x + 500, box.y + 400, box.x + 700, box.y + 260);
-  expect((await structured(page)).annotations.map((item: any) => item.mark.type)).toEqual(["draw", "arrow"]);
+  expect((await structured(page)).annotations.map((item: any) => item.presentation.type)).toEqual(["stroke", "arrow"]);
 });
 
 test("Select moves and resizes a region", async ({ page }) => {
@@ -62,18 +62,46 @@ test("Select moves and resizes a region", async ({ page }) => {
   const canvas = page.getByLabel("Raster annotation canvas");
   const box = await requiredBox(canvas);
   await drag(page, box.x + 350, box.y + 220, box.x + 620, box.y + 440);
-  const before = (await structured(page)).annotations[0].target;
+  const before = (await structured(page)).annotations[0].target.selector;
   await page.getByRole("button", { name: "Select" }).click();
   const annotation = page.locator("[data-annotation-id]").first();
   const annotationBox = await requiredBox(annotation);
   await drag(page, annotationBox.x + 20, annotationBox.y + 20, annotationBox.x + 70, annotationBox.y + 45);
-  const moved = (await structured(page)).annotations[0].target;
+  const moved = (await structured(page)).annotations[0].target.selector;
   expect(moved.x).toBeGreaterThan(before.x);
   const handle = page.getByLabel("Resize rectangle");
   const handleBox = await requiredBox(handle);
   await drag(page, handleBox.x + 5, handleBox.y + 5, handleBox.x + 55, handleBox.y + 45);
-  const resized = (await structured(page)).annotations[0].target;
+  const resized = (await structured(page)).annotations[0].target.selector;
   expect(resized.width).toBeGreaterThan(moved.width);
+});
+
+test("pointer cancel and lost capture discard transient movement", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  const box = await requiredBox(canvas);
+  await drag(page, box.x + 350, box.y + 220, box.x + 620, box.y + 440);
+  await page.getByRole("button", { name: "Select" }).click();
+  const annotation = page.locator("[data-annotation-id]").first();
+  const before = (await structured(page)).annotations[0].target.selector;
+
+  for (const reason of ["pointercancel", "lostpointercapture"] as const) {
+    const annotationBox = await requiredBox(annotation);
+    await page.mouse.move(annotationBox.x + 20, annotationBox.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(annotationBox.x + 90, annotationBox.y + 60, { steps: 4 });
+    expect((await structured(page)).annotations[0].target.selector).toEqual(before);
+    if (reason === "pointercancel") {
+      await canvas.dispatchEvent("pointercancel", { pointerId: 1, bubbles: true });
+    } else {
+      await canvas.evaluate((element) => {
+        const svg = element as SVGSVGElement;
+        if (svg.hasPointerCapture(1)) svg.releasePointerCapture(1);
+      });
+    }
+    await page.mouse.up();
+    expect((await structured(page)).annotations[0].target.selector).toEqual(before);
+  }
 });
 
 test("Download rasterizes the current annotations into a PNG", async ({ page }) => {

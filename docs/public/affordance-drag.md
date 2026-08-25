@@ -75,6 +75,10 @@ gestures.commit();
 - `CanvasGestureSession<Gesture>`: `getActive`, `begin`, `preview`, `commit`, `cancel`
 - `CanvasGestureState`, `CanvasGestureType`, `CanvasGestureCancelReason`
 
+Canvas에 한정되지 않은 create/draw/move/resize lifecycle은
+`createGestureSession<Gesture>()`을 사용합니다. `GestureState`는 string `type`만
+요구하며 begin/preview/commit/cancel과 supersede 의미를 소유합니다.
+
 좌표 변환, hit test, 잠금 정책, renderer, tool/viewport 정책은 Host 책임입니다.
 
 ## TBD

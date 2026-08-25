@@ -19,7 +19,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialBoard: KanbanDocument = {
@@ -204,7 +204,7 @@ export function BoardWidgetRoute() {
                 {column.cardIds.map((cardId) => {
                   const card = cards.get(cardId);
                   if (!card) return null;
-                  const option = optionProps(editing.getItem(card.id));
+                  const option = editingItemProps(editing.getItem(card.id));
                   const dragSnapshot = boardDrag.getSnapshot();
                   const activeCardId = dragSnapshot.status === "dragging" ? dragSnapshot.item : null;
                   const offset = activeCardId === card.id ? dragPreview : null;

@@ -24,7 +24,7 @@ import {
 import { initialObjectDemoDocument } from "../../shared/demo-workbench/object-demo-document";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 type DragState = {
@@ -341,7 +341,7 @@ export function CanvasWidgetRoute() {
           <div style={{ transform: `translate(${pan.x}px, ${pan.y}px)` }}>
             {document.objects.map((object) => {
               const offset = drag?.ids.includes(object.id) ? drag : null;
-              const option = optionProps(editing.getItem(object.id));
+              const option = editingItemProps(editing.getItem(object.id));
               return (
                 <SelectableItem
                   as="div"

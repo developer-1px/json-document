@@ -48,6 +48,21 @@ export interface EditingItem<Key extends string = string> {
   getPressHandler(): (event: EditingPressEvent) => void;
 }
 
+export interface EditingItemProps {
+  readonly selected: boolean;
+  readonly focus: boolean;
+  readonly onClick: (event: EditingPressEvent) => void;
+}
+
+/** Projects one canonical Editing item to framework-native state and press props. */
+export function editingItemProps(item: EditingItem): EditingItemProps {
+  return {
+    selected: item.getIsSelected(),
+    focus: item.getIsFocus(),
+    onClick: item.getPressHandler(),
+  };
+}
+
 export interface EditingKeyboardOptions<Key extends string = string> {
   readonly resolve: (stroke: EditingKeyboardStroke) => EditingKeyboardCommand | null;
   readonly focusKey: () => Key | undefined;

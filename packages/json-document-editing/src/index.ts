@@ -18,6 +18,19 @@ export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
+export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
+export { assertAnnotationDocument } from "./annotation-validation.js";
+export type {
+  Annotation,
+  AnnotationDocument,
+  AnnotationEditor,
+  AnnotationIntent,
+  AnnotationPoint,
+  AnnotationPresentation,
+  AnnotationSelection,
+  AnnotationSelector,
+  AnnotationSource,
+} from "./annotation.js";
 export type {
   DatabaseCell,
   DatabaseClipboard,

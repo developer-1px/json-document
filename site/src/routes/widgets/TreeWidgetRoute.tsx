@@ -14,7 +14,8 @@ import { classes, ui } from "../../shared/ui/styles";
 import {
   editingCommandFromWebKeyboardStroke,
 } from "@interactive-os/json-document-affordance";
-import { optionProps, useWidgetKeyboard } from "../../shared/widget-binding";
+import { useWidgetKeyboard } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
 
 const initialTree: TreeDocument = {
@@ -83,7 +84,7 @@ export function TreeWidgetRoute() {
                   <SelectableItem
                     as="div"
                     className={classes("grid grid-cols-[2rem_minmax(0,1fr)] text-left", ui.surface.selectableBlock)}
-                    {...optionProps(editing.getItem(row.id))}
+                    {...editingItemProps(editing.getItem(row.id))}
                     {...activeDescendantItemProps(treeItemId(row.id))}
                     {...projectWebWidgetState({
                       role: "treeitem",
