@@ -12,6 +12,7 @@ import {
 import { useEditingObservation, useGridEditing } from "@interactive-os/json-document-react";
 import {
   createWebClipboardSurface,
+  createWebClipboardTextWriter,
   findWebGridCell,
   gridBoundary,
   moveGridPoint,
@@ -43,6 +44,8 @@ const initialSheet: SheetDocument = {
     { id: "row-4", cells: { name: "Delta", status: "Done", owner: "Sol" } },
   ],
 };
+
+const clipboardTextWriter = createWebClipboardTextWriter();
 
 export function SheetDemo() {
   const [editor] = useState<SheetEditor>(() => createSheetEditor(initialSheet));
@@ -123,7 +126,7 @@ export function SheetDemo() {
     const next = editor.copy();
     if (next === null) return observation.announce("Select a cell first");
     setClipboard(next);
-    void navigator.clipboard?.writeText(next.text).catch(() => undefined);
+    void writeClipboardText(next.text);
     observation.announce(`Copied ${next.cells.length} × ${next.cells[0]?.length ?? 0} cells`);
   }
 
@@ -132,7 +135,7 @@ export function SheetDemo() {
     if (next === null) return observation.announce("Select a cell first");
     setClipboard(next.clipboard);
     observation.observeResult(next.result);
-    void navigator.clipboard?.writeText(next.clipboard.text).catch(() => undefined);
+    void writeClipboardText(next.clipboard.text);
     observation.announce(next.result.ok
       ? `Cut ${next.clipboard.cells.length} × ${next.clipboard.cells[0]?.length ?? 0} cells`
       : next.result.code);
@@ -144,6 +147,11 @@ export function SheetDemo() {
       () => dispatchIntent({ type: "clipboard.paste", clipboard }),
       `Pasted ${clipboard.cells.length} × ${clipboard.cells[0]?.length ?? 0} cells`,
     );
+  }
+
+  async function writeClipboardText(text: string) {
+    const result = await clipboardTextWriter.writeText(text);
+    if (!result.ok) observation.announce(result.reason ?? result.code);
   }
 
   return (

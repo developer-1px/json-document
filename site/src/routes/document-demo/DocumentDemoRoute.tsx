@@ -16,6 +16,7 @@ import {
 } from "@interactive-os/json-document-react";
 import {
   createWebClipboardSurface,
+  createWebClipboardTextWriter,
   documentClipboardCodec,
   lineBoundary,
   moveLinePoint,
@@ -38,6 +39,8 @@ const initialDocument: BlockDocument = {
     { id: "json", text: "Every interaction commits to the canonical JSON shown beside the document." },
   ],
 };
+
+const clipboardTextWriter = createWebClipboardTextWriter();
 
 export function DocumentDemoRoute() {
   const editor = useDocumentEditor(initialDocument);
@@ -125,7 +128,7 @@ export function DocumentDemoRoute() {
     const next = editor.copy();
     if (!next) return observation.announce("Select a block first");
     setClipboard(next);
-    void navigator.clipboard?.writeText(next.text).catch(() => undefined);
+    void writeClipboardText(next.text);
     observation.announce(`Copied ${next.blocks.length} block${next.blocks.length === 1 ? "" : "s"}`);
   }
 
@@ -133,13 +136,18 @@ export function DocumentDemoRoute() {
     const result = editor.cut();
     if (!result) return observation.announce("Select a block first");
     setClipboard(result.clipboard);
-    void navigator.clipboard?.writeText(result.clipboard.text).catch(() => undefined);
+    void writeClipboardText(result.clipboard.text);
     observation.announce(`Cut ${result.clipboard.blocks.length} block${result.clipboard.blocks.length === 1 ? "" : "s"}`);
   }
 
   function pasteSelection() {
     if (!clipboard) return observation.announce("Copy or cut blocks first");
     run(() => dispatchIntent({ type: "clipboard.paste", clipboard }), `Pasted ${clipboard.blocks.length} block${clipboard.blocks.length === 1 ? "" : "s"}`);
+  }
+
+  async function writeClipboardText(text: string) {
+    const result = await clipboardTextWriter.writeText(text);
+    if (!result.ok) observation.announce(result.reason ?? result.code);
   }
 
   const lastSelectedId = editor.selectedBlockIds.at(-1);
