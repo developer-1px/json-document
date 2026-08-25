@@ -27,6 +27,7 @@ export function createRichTextContentEditableBinding(options: {
   let composition: CompositionLease | null = null;
   let compositionEndTimer: ReturnType<typeof setTimeout> | null = null;
   let renderPending = false;
+  let keyboardDeletion: "backward" | "forward" | null = null;
   const clipboard = createWebClipboardBinding({
     codec: createRichTextClipboardCodec(editor.schema),
     representations: createRichTextClipboardRepresentations(
@@ -43,6 +44,14 @@ export function createRichTextContentEditableBinding(options: {
       || event.isComposing
       || (composition.phase === "ending" && event.inputType === "insertText")
     )) return;
+    const inputDirection = event.inputType === "deleteContentBackward" ? "backward"
+      : event.inputType === "deleteContentForward" ? "forward"
+      : null;
+    if (inputDirection !== null && keyboardDeletion === inputDirection) {
+      event.preventDefault();
+      keyboardDeletion = null;
+      return;
+    }
     const platformSelection = readSelectionFromInput(event);
     const normallyUsesPlatformRange = ![
       "insertText",
@@ -140,9 +149,18 @@ export function createRichTextContentEditableBinding(options: {
   };
   const selectionChanged = () => { if (!renderPending) syncSelection(); };
   const keyDown = (event: KeyboardEvent) => {
-    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "z") return;
-    event.preventDefault();
-    report(event.shiftKey ? "redo" : "undo", event.shiftKey ? editor.redo() : editor.undo());
+    if ((event.key === "Backspace" || event.key === "Delete") && !event.metaKey && !event.ctrlKey && !event.altKey && !event.isComposing && composition === null) {
+      const direction = event.key === "Backspace" ? "backward" : "forward";
+      event.preventDefault();
+      keyboardDeletion = direction;
+      queueMicrotask(() => { if (keyboardDeletion === direction) keyboardDeletion = null; });
+      report("text.delete", editor.dispatch({ type: "text.delete", direction, unit: "character" }));
+      return;
+    }
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      report(event.shiftKey ? "redo" : "undo", event.shiftKey ? editor.redo() : editor.undo());
+    }
   };
 
   root.addEventListener("beforeinput", beforeInput);

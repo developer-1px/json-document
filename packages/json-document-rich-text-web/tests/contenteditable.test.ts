@@ -7,6 +7,25 @@ import { describe, expect, it } from "vitest";
 import { createRichTextContentEditableBinding } from "../src/index.js";
 
 describe("Official Rich Text contenteditable composition", () => {
+  it("routes repeated keyboard deletion through the canonical selection without double beforeinput", () => {
+    const document = createJSONDocument(initialDocument());
+    const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });
+    const root = fixture();
+    const binding = createRichTextContentEditableBinding({ root, editor });
+    const text = root.querySelector("[data-rich-text-text-id='text']")!.firstChild as Text;
+    window.getSelection()!.setBaseAndExtent(text, 3, text, 3);
+
+    const key = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Backspace" });
+    root.dispatchEvent(key);
+    const duplicate = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "deleteContentBackward" });
+    root.dispatchEvent(duplicate);
+
+    expect(key.defaultPrevented).toBe(true);
+    expect(duplicate.defaultPrevented).toBe(true);
+    expect((document.value as RichTextDocument).content[0]).toMatchObject({ content: [{ id: "text", text: "ab" }] });
+    binding.destroy();
+  });
+
   it("reconciles native Korean DOM composition once and keeps one undo step", async () => {
     const document = createJSONDocument(initialDocument());
     const editor = createRichTextEditor({

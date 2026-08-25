@@ -374,6 +374,8 @@ describe("Official Rich Text editor", () => {
     expect((document.value as RichTextDocument).content[0]).toMatchObject({ id: "paragraph-1" });
     expect(editor.dispatch({ type: "node.remove", nodeId: "break-1" }).ok).toBe(true);
     expect(textById(document.value as RichTextDocument, "text-2")).not.toBeNull();
+    expect(editor.topology.locate("paragraph-1")?.node).toMatchObject({ content: [{ id: "text-2" }] });
+    expect(editor.topology.locate("break-1")).toBeNull();
     expect(editor.dispatch({ type: "node.set-attrs", nodeId: "heading-1", attrs: { level: 4 } }).ok).toBe(true);
     expect((document.value as RichTextDocument).content[1]).toMatchObject({ id: "heading-1", attrs: { level: 4 } });
   });
