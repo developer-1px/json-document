@@ -6,6 +6,7 @@ import {
   ActionButton,
   DisclosureButton,
   FileDropRegion,
+  formatFileSize,
   GridCell,
   IconButton,
   Menu,
@@ -19,6 +20,13 @@ import {
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("formats file metadata with one canonical compact unit policy", () => {
+    expect(formatFileSize(512)).toBe("512 B");
+    expect(formatFileSize(1536)).toBe("2 KB");
+    expect(formatFileSize(1024 * 1024 * 1.25)).toBe("1.3 MB");
+    expect(() => formatFileSize(-1)).toThrow(RangeError);
+  });
+
   test("Listbox keeps active and selected separate across keyboard, typeahead, pointer, and action", async () => {
     const user = userEvent.setup();
     const actions = vi.fn();

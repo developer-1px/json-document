@@ -72,6 +72,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-composer/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-composer-react",
+      replacement: sourceFile("packages/json-document-composer-react/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-rich-text-web",
       replacement: sourceFile("packages/json-document-rich-text-web/src/index.ts"),
     },

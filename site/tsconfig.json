@@ -19,6 +19,7 @@
       "@interactive-os/json-document-contenteditable": ["../packages/json-document-contenteditable/src/index.ts"],
       "@interactive-os/json-document-rich-text": ["../packages/json-document-rich-text/src/index.ts"],
       "@interactive-os/json-document-composer": ["../packages/json-document-composer/src/index.ts"],
+      "@interactive-os/json-document-composer-react": ["../packages/json-document-composer-react/src/index.ts"],
       "@interactive-os/json-document-rich-text-web": ["../packages/json-document-rich-text-web/src/index.ts"],
       "@interactive-os/json-document-rich-text-react": ["../packages/json-document-rich-text-react/src/index.tsx"],
       "@interactive-os/json-document-zod": ["../packages/json-document-zod/src/index.ts"],

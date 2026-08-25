@@ -36,8 +36,12 @@ import composerTriggerSource from "../../../../packages/json-document-composer/s
 import composerCommandsSource from "../../../../packages/json-document-composer/src/commands.ts?raw";
 import composerHostConfigSource from "../../../../packages/json-document-composer/src/host-config.ts?raw";
 import composerInteractionSource from "../../../../packages/json-document-composer/src/interaction.ts?raw";
+import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
+import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
+import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 import webComposerAttachmentSource from "../../../../packages/json-document-web/src/composer-attachment.ts?raw";
 import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
+import uiFileSizeSource from "../../../../packages/json-document-ui-primitives-react/src/file-size.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -62,6 +66,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
   ["packages/json-document-composer/", "/docs/api/composer"],
+  ["packages/json-document-composer-react/", "/docs/api/composer-react"],
   ["packages/json-document-rich-text-web/", "/docs/api/rich-text-web"],
   ["packages/json-document-rich-text-react/", "/docs/api/rich-text-react"],
   ["packages/json-document-collaboration/", "/docs/api/collaboration"],
@@ -122,8 +127,12 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/commands.ts", composerCommandsSource],
   ["packages/json-document-composer/src/host-config.ts", composerHostConfigSource],
   ["packages/json-document-composer/src/interaction.ts", composerInteractionSource],
+  ["packages/json-document-composer/src/suggestions.ts", composerSuggestionsSource],
+  ["packages/json-document-composer-react/src/command-menu.ts", composerCommandMenuSource],
+  ["packages/json-document-composer-react/src/reference-atom.tsx", composerReferenceAtomSource],
   ["packages/json-document-web/src/composer-attachment.ts", webComposerAttachmentSource],
   ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
+  ["packages/json-document-ui-primitives-react/src/file-size.ts", uiFileSizeSource],
 ]);
 const registeredPublicUsages = [
   {
@@ -160,6 +169,26 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-composer",
     symbol: "composerInteractionFromKeyStroke",
     sourcePath: "packages/json-document-composer/src/interaction.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer",
+    symbol: "resolveComposerSuggestions",
+    sourcePath: "packages/json-document-composer/src/suggestions.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposerCommandMenu",
+    sourcePath: "packages/json-document-composer-react/src/command-menu.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "ComposerReferenceAtom",
+    sourcePath: "packages/json-document-composer-react/src/reference-atom.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "formatFileSize",
+    sourcePath: "packages/json-document-ui-primitives-react/src/file-size.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",

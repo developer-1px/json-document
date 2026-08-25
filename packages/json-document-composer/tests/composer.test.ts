@@ -16,6 +16,7 @@ import {
   hasComposerContent,
   insertComposerReference,
   removeComposerAttachment,
+  resolveComposerSuggestions,
   selectComposerModel,
 } from "../src/index.js";
 
@@ -50,6 +51,17 @@ describe("Composer domain", () => {
   test("finds trigger boundaries from document and selection only", () => {
     expect(findComposerTrigger(textDocument, selection)).toEqual({ kind: "mention", query: "al", range: { nodeId: "text", from: 4, to: 7 } });
     expect(findComposerTrigger(textDocument, { ...selection, ranges: [{ ...selection.ranges[0]!, focus: { kind: "text", nodeId: "text", offset: 3, affinity: "forward" } }] })).toBeNull();
+  });
+
+  test("resolves product suggestions from the active trigger", () => {
+    const suggestions = [
+      { id: "alpha", kind: "mention" as const, label: "Alpha" },
+      { id: "alpine", kind: "mention" as const, label: "Alpine" },
+      { id: "skill", kind: "skill" as const, label: "Alpha skill" },
+    ];
+    const trigger = { kind: "mention" as const, query: "AL", range: { nodeId: "text", from: 4, to: 7 } };
+    expect(resolveComposerSuggestions(trigger, suggestions)).toEqual(suggestions.slice(0, 2));
+    expect(resolveComposerSuggestions(null, suggestions)).toEqual([]);
   });
 
   test("inserts a reference with injected IDs and projects text", () => {

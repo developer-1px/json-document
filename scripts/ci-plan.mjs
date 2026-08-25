@@ -19,6 +19,7 @@ const alwaysFull = new Set([
 
 const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-composer", ["site/tests/browser/composer-demo.spec.ts"]],
+  ["@interactive-os/json-document-composer-react", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document", ["site/tests/browser"]],
   ["@interactive-os/json-document-affordance", ["site/tests/browser/widgets.spec.ts"]],
   ["@interactive-os/json-document-ajv", ["site/tests/browser/connectors/ajv.spec.ts"]],

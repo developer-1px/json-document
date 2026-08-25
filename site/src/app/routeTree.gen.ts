@@ -112,6 +112,7 @@ import { Route as PageDocsApiAffordanceRouteImport } from "./routes/_page/docs/a
 import { Route as PageDocsApiAjvRouteImport } from "./routes/_page/docs/api/ajv";
 import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
 import { Route as PageDocsApiComposerRouteImport } from "./routes/_page/docs/api/composer";
+import { Route as PageDocsApiComposerReactRouteImport } from "./routes/_page/docs/api/composer-react";
 import { Route as PageDocsApiContenteditableRouteImport } from "./routes/_page/docs/api/contenteditable";
 import { Route as PageDocsApiContenteditableCollaborationRouteImport } from "./routes/_page/docs/api/contenteditable-collaboration";
 import { Route as PageDocsApiDatabaseRouteImport } from "./routes/_page/docs/api/database";
@@ -675,6 +676,12 @@ const PageDocsApiComposerRoute = PageDocsApiComposerRouteImport.update({
   path: "/composer",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiComposerReactRoute =
+  PageDocsApiComposerReactRouteImport.update({
+    id: "/composer-react",
+    path: "/composer-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
 const PageDocsApiContenteditableRoute =
   PageDocsApiContenteditableRouteImport.update({
     id: "/contenteditable",
@@ -894,6 +901,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
+  "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
   "/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
   "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/docs/api/database": typeof PageDocsApiDatabaseRoute;
@@ -1019,6 +1027,7 @@ export interface FileRoutesByTo {
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
+  "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
   "/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
   "/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/docs/api/database": typeof PageDocsApiDatabaseRoute;
@@ -1146,6 +1155,7 @@ export interface FileRoutesById {
   "/_page/docs/api/ajv": typeof PageDocsApiAjvRoute;
   "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/_page/docs/api/composer": typeof PageDocsApiComposerRoute;
+  "/_page/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
   "/_page/docs/api/contenteditable": typeof PageDocsApiContenteditableRoute;
   "/_page/docs/api/contenteditable-collaboration": typeof PageDocsApiContenteditableCollaborationRoute;
   "/_page/docs/api/database": typeof PageDocsApiDatabaseRoute;
@@ -1273,6 +1283,7 @@ export interface FileRouteTypes {
     | "/docs/api/ajv"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
+    | "/docs/api/composer-react"
     | "/docs/api/contenteditable"
     | "/docs/api/contenteditable-collaboration"
     | "/docs/api/database"
@@ -1398,6 +1409,7 @@ export interface FileRouteTypes {
     | "/docs/api/ajv"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
+    | "/docs/api/composer-react"
     | "/docs/api/contenteditable"
     | "/docs/api/contenteditable-collaboration"
     | "/docs/api/database"
@@ -1524,6 +1536,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/ajv"
     | "/_page/docs/api/collaboration"
     | "/_page/docs/api/composer"
+    | "/_page/docs/api/composer-react"
     | "/_page/docs/api/contenteditable"
     | "/_page/docs/api/contenteditable-collaboration"
     | "/_page/docs/api/database"
@@ -2277,6 +2290,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiComposerRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/composer-react": {
+      id: "/_page/docs/api/composer-react";
+      path: "/composer-react";
+      fullPath: "/docs/api/composer-react";
+      preLoaderRoute: typeof PageDocsApiComposerReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/contenteditable": {
       id: "/_page/docs/api/contenteditable";
       path: "/contenteditable";
@@ -2432,6 +2452,7 @@ interface PageDocsApiRouteChildren {
   PageDocsApiAjvRoute: typeof PageDocsApiAjvRoute;
   PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
   PageDocsApiComposerRoute: typeof PageDocsApiComposerRoute;
+  PageDocsApiComposerReactRoute: typeof PageDocsApiComposerReactRoute;
   PageDocsApiContenteditableRoute: typeof PageDocsApiContenteditableRoute;
   PageDocsApiContenteditableCollaborationRoute: typeof PageDocsApiContenteditableCollaborationRoute;
   PageDocsApiDatabaseRoute: typeof PageDocsApiDatabaseRoute;
@@ -2454,6 +2475,7 @@ const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiAjvRoute: PageDocsApiAjvRoute,
   PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
   PageDocsApiComposerRoute: PageDocsApiComposerRoute,
+  PageDocsApiComposerReactRoute: PageDocsApiComposerReactRoute,
   PageDocsApiContenteditableRoute: PageDocsApiContenteditableRoute,
   PageDocsApiContenteditableCollaborationRoute:
     PageDocsApiContenteditableCollaborationRoute,

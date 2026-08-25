@@ -36,6 +36,14 @@ Selection, IME, structured Clipboard와 history를 기존 Rich Text editor에 �
 `addComposerAttachments`, `removeComposerAttachment`, `selectComposerModel` command를
 사용합니다. `createComposerAttachments`는 Host가 주입한 ID와 attachment policy를
 적용하며 실패를 명시적인 결과로 반환합니다.
+`resolveComposerSuggestions`는 active trigger와 제품 catalog로 표시할 후보를
+결정하며 Host가 query matching을 다시 구현하지 않게 합니다.
+
+`@interactive-os/json-document-composer-react`는 React Host를 위한
+`useComposerCommandMenu`와 `ComposerReferenceAtom`을 제공합니다. 전자는 suggestion
+resolution, active-item fallback, listbox lifecycle과 reference 삽입을 조립하고,
+후자는 canonical mention·skill node를 접근 가능한 DOM projection으로 렌더링합니다.
+제품 className과 CSS는 Host가 주입합니다.
 
 `composerHostConfigSchema`는 제품이 반드시 결정해야 하는 model·suggestion catalog,
 attachment 제한과 Enter 정책만 JSON으로 검증합니다. `ComposerHostPorts`의 ID factory와
@@ -47,7 +55,8 @@ Web `File`과 `ClipboardEvent`에서 이름·크기·media type을 읽는 일은
 Web object를 알지 않으며, Web adapter는 ID·허용 정책·attachment kind를 결정하지 않습니다.
 
 Host는 config 값과 runtime port를 주입하고 composer의 배치, copy, CSS와 첨부 preview를
-그립니다. 검색 source, 파일 저장소, Agent runtime, transcript, think·stream·tool 상태는
+그립니다. 파일 metadata 표시는 UI primitives의 `formatFileSize`를 사용합니다.
+검색 source, 파일 저장소, Agent runtime, transcript, think·stream·tool 상태는
 Composer가 소유하지 않습니다.
 
 ```live-demo

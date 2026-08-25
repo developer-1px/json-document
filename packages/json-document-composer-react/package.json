@@ -1,33 +1,41 @@
 {
-  "name": "@interactive-os/json-document-composer",
+  "name": "@interactive-os/json-document-composer-react",
   "version": "0.1.0-rc.0",
-  "description": "Official Composer draft, reference, and trigger domain for json-document.",
+  "description": "Official React interaction and projection integration for json-document Composer.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-composer" },
+  "repository": { "type": "git", "url": "git+https://github.com/developer-1px/json-document.git", "directory": "packages/json-document-composer-react" },
   "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
   "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -b tsconfig.json",
-    "perf": "npm run build && node benchmarks/suggestions.mjs",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
-    "@interactive-os/json-document": "^3.0.0",
-    "@interactive-os/json-document-rich-text": "^0.1.0-rc.0"
+    "@interactive-os/json-document-composer": "^0.1.0-rc.0",
+    "@interactive-os/json-document-rich-text": "^0.1.0-rc.0",
+    "@interactive-os/json-document-ui-primitives-react": "^0.1.0-rc.0",
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
-    "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-composer": "*",
     "@interactive-os/json-document-rich-text": "*",
-    "@types/node": "^25.9.0",
+    "@interactive-os/json-document-ui-primitives-react": "*",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.1.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "typescript": "^5.0.0",
     "vitest": "^4.1.7"
   }

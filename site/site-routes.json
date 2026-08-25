@@ -81,6 +81,14 @@
     "navigationGroup": "Hands"
   },
   {
+    "path": "/docs/api/composer-react",
+    "label": "API · Composer React",
+    "title": "Composer React API - json-document",
+    "description": "@interactive-os/json-document-composer-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/api/web",
     "label": "API · Web",
     "title": "Web API - json-document",

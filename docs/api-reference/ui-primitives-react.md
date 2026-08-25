@@ -21,6 +21,11 @@ DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expa
 ```ts
 FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & { readonly onFiles: (files: ReadonlyArray<File>) => void; readonly overlay?: ReactNode; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
+## `formatFileSize`
+
+```ts
+formatFileSize(bytes: number): string
+```
 ## `GridCell`
 
 ```ts

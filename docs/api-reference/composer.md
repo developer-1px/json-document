@@ -214,6 +214,11 @@ insertComposerText(editor: RichTextEditor, text: string): ComposerCommandResult
 ```ts
 removeComposerAttachment(editor: RichTextEditor, draft: ComposerDraft, attachmentId: string): ComposerDraftCommandResult | null
 ```
+## `resolveComposerSuggestions`
+
+```ts
+resolveComposerSuggestions<Suggestion extends ComposerHostSuggestion>(trigger: ComposerTrigger | null, suggestions: ReadonlyArray<Suggestion>): ReadonlyArray<Suggestion>
+```
 ## `selectComposerModel`
 
 ```ts
