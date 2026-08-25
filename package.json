@@ -18,6 +18,8 @@
     "packages/json-document-contenteditable",
     "packages/json-document-rich-text",
     "packages/json-document-file-intake",
+    "packages/json-document-rich-text-suggestion",
+    "packages/json-document-rich-text-suggestion-react",
     "packages/json-document-rich-text-mention",
     "packages/json-document-rich-text-mention-react",
     "packages/json-document-composer",

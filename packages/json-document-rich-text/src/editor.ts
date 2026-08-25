@@ -427,23 +427,18 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     const parent = nodeAtPath(current, parentPath);
     if (parent === null || !hasRichTextContent(parent)) return failure("rich-text.point-not-found");
     const contentPath = absolutePath(pointer, containerContentSegments(parentPath));
-    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [
-      { op: "remove", path: `${contentPath}/${index}` },
-    ];
     const before = parent.content[index - 1];
     const after = parent.content[index + 1];
+    const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [];
     if (
       before !== undefined && after !== undefined
       && isRichTextText(before) && isRichTextText(after)
       && JSON.stringify(before.marks) === JSON.stringify(after.marks)
     ) {
-      operations.push({
-        op: "replace",
-        path: `${contentPath}/${index - 1}/text`,
-        value: before.text + after.text,
-      });
-      operations.push({ op: "remove", path: `${contentPath}/${index}` });
+      operations.push({ op: "replace", path: `${contentPath}/${index - 1}/text`, value: before.text + after.text });
+      operations.push({ op: "remove", path: `${contentPath}/${index + 1}` });
     }
+    operations.push({ op: "remove", path: `${contentPath}/${index}` });
     const caret: RichTextPoint = before && isRichTextText(before)
       ? { kind: "text", nodeId: before.id, offset: before.text.length, affinity: "forward" }
       : after && isRichTextText(after)
@@ -1132,7 +1127,21 @@ function resolveDeletionPoint(
   point: RichTextPoint,
   direction: "backward" | "forward",
 ): Extract<RichTextPoint, { readonly kind: "text" }> | { readonly kind: "node"; readonly nodeId: string } | null {
-  if (point.kind === "text") return point;
+  if (point.kind === "text") {
+    const located = findNode(document, point.nodeId);
+    if (!located || !isRichTextText(located.node)) return null;
+    const atBoundary = direction === "backward"
+      ? point.offset === 0
+      : point.offset === located.node.text.length;
+    if (!atBoundary) return point;
+    if (!located.parent) return null;
+    return resolveDeletionPoint(document, {
+      kind: "child",
+      nodeId: located.parent.id,
+      offset: direction === "backward" ? located.index : located.index + 1,
+      affinity: point.affinity,
+    }, direction) ?? point;
+  }
   const container = point.nodeId === document.id ? document : findNode(document, point.nodeId)?.node;
   if (!container || !hasRichTextContent(container)) return null;
   const index = direction === "backward" ? point.offset - 1 : point.offset;

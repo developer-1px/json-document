@@ -19,6 +19,6 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
-  "peerDependencies": { "@interactive-os/json-document": "^3.0.0", "@interactive-os/json-document-rich-text": "^0.1.0-rc.0" },
-  "devDependencies": { "@interactive-os/json-document": "*", "@interactive-os/json-document-rich-text": "*", "typescript": "^5.0.0", "vitest": "^4.1.7" }
+  "peerDependencies": { "@interactive-os/json-document": "^3.0.0", "@interactive-os/json-document-rich-text": "^0.1.0-rc.0", "@interactive-os/json-document-rich-text-suggestion": "^0.1.0-rc.0" },
+  "devDependencies": { "@interactive-os/json-document": "*", "@interactive-os/json-document-rich-text": "*", "@interactive-os/json-document-rich-text-suggestion": "*", "typescript": "^5.0.0", "vitest": "^4.1.7" }
 }

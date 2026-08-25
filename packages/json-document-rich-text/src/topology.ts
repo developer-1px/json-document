@@ -258,6 +258,10 @@ function adoptRichTextTopology(
       if (!refreshTopologyPath(next, path, previous.nodes, overlay)) return null;
       continue;
     }
+    if (classified.kind === "sibling" && operation.op === "remove") {
+      if (!refreshTopologyPath(next, parentPointer(classified.parentPath), previous.nodes, overlay)) return null;
+      continue;
+    }
     if (classified.kind !== "sibling" || (operation.op !== "add" && operation.op !== "replace")) continue;
     if (operation.op === "replace") {
       const previousId = nodeIdOf(operation.value);

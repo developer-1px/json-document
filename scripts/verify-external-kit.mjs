@@ -15,6 +15,8 @@ const kitWorkspaces = [
   "@interactive-os/json-document-editing",
   "@interactive-os/json-document-rich-text",
   "@interactive-os/json-document-file-intake",
+  "@interactive-os/json-document-rich-text-suggestion",
+  "@interactive-os/json-document-rich-text-suggestion-react",
   "@interactive-os/json-document-rich-text-mention",
   "@interactive-os/json-document-rich-text-mention-react",
   "@interactive-os/json-document-composer",

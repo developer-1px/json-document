@@ -125,6 +125,8 @@ import { Route as PageDocsApiRichTextRouteImport } from "./routes/_page/docs/api
 import { Route as PageDocsApiRichTextMentionRouteImport } from "./routes/_page/docs/api/rich-text-mention";
 import { Route as PageDocsApiRichTextMentionReactRouteImport } from "./routes/_page/docs/api/rich-text-mention-react";
 import { Route as PageDocsApiRichTextReactRouteImport } from "./routes/_page/docs/api/rich-text-react";
+import { Route as PageDocsApiRichTextSuggestionRouteImport } from "./routes/_page/docs/api/rich-text-suggestion";
+import { Route as PageDocsApiRichTextSuggestionReactRouteImport } from "./routes/_page/docs/api/rich-text-suggestion-react";
 import { Route as PageDocsApiRichTextWebRouteImport } from "./routes/_page/docs/api/rich-text-web";
 import { Route as PageDocsApiSelectionRouteImport } from "./routes/_page/docs/api/selection";
 import { Route as PageDocsApiTanstackTableRouteImport } from "./routes/_page/docs/api/tanstack-table";
@@ -751,6 +753,18 @@ const PageDocsApiRichTextReactRoute =
     path: "/rich-text-react",
     getParentRoute: () => PageDocsApiRoute,
   } as any);
+const PageDocsApiRichTextSuggestionRoute =
+  PageDocsApiRichTextSuggestionRouteImport.update({
+    id: "/rich-text-suggestion",
+    path: "/rich-text-suggestion",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
+const PageDocsApiRichTextSuggestionReactRoute =
+  PageDocsApiRichTextSuggestionReactRouteImport.update({
+    id: "/rich-text-suggestion-react",
+    path: "/rich-text-suggestion-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
 const PageDocsApiRichTextWebRoute = PageDocsApiRichTextWebRouteImport.update({
   id: "/rich-text-web",
   path: "/rich-text-web",
@@ -934,6 +948,8 @@ export interface FileRoutesByFullPath {
   "/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
   "/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
+  "/docs/api/rich-text-suggestion": typeof PageDocsApiRichTextSuggestionRoute;
+  "/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
   "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/docs/api/selection": typeof PageDocsApiSelectionRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
@@ -1063,6 +1079,8 @@ export interface FileRoutesByTo {
   "/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
   "/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
+  "/docs/api/rich-text-suggestion": typeof PageDocsApiRichTextSuggestionRoute;
+  "/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
   "/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/docs/api/selection": typeof PageDocsApiSelectionRoute;
   "/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
@@ -1194,6 +1212,8 @@ export interface FileRoutesById {
   "/_page/docs/api/rich-text-mention": typeof PageDocsApiRichTextMentionRoute;
   "/_page/docs/api/rich-text-mention-react": typeof PageDocsApiRichTextMentionReactRoute;
   "/_page/docs/api/rich-text-react": typeof PageDocsApiRichTextReactRoute;
+  "/_page/docs/api/rich-text-suggestion": typeof PageDocsApiRichTextSuggestionRoute;
+  "/_page/docs/api/rich-text-suggestion-react": typeof PageDocsApiRichTextSuggestionReactRoute;
   "/_page/docs/api/rich-text-web": typeof PageDocsApiRichTextWebRoute;
   "/_page/docs/api/selection": typeof PageDocsApiSelectionRoute;
   "/_page/docs/api/tanstack-table": typeof PageDocsApiTanstackTableRoute;
@@ -1325,6 +1345,8 @@ export interface FileRouteTypes {
     | "/docs/api/rich-text-mention"
     | "/docs/api/rich-text-mention-react"
     | "/docs/api/rich-text-react"
+    | "/docs/api/rich-text-suggestion"
+    | "/docs/api/rich-text-suggestion-react"
     | "/docs/api/rich-text-web"
     | "/docs/api/selection"
     | "/docs/api/tanstack-table"
@@ -1454,6 +1476,8 @@ export interface FileRouteTypes {
     | "/docs/api/rich-text-mention"
     | "/docs/api/rich-text-mention-react"
     | "/docs/api/rich-text-react"
+    | "/docs/api/rich-text-suggestion"
+    | "/docs/api/rich-text-suggestion-react"
     | "/docs/api/rich-text-web"
     | "/docs/api/selection"
     | "/docs/api/tanstack-table"
@@ -1584,6 +1608,8 @@ export interface FileRouteTypes {
     | "/_page/docs/api/rich-text-mention"
     | "/_page/docs/api/rich-text-mention-react"
     | "/_page/docs/api/rich-text-react"
+    | "/_page/docs/api/rich-text-suggestion"
+    | "/_page/docs/api/rich-text-suggestion-react"
     | "/_page/docs/api/rich-text-web"
     | "/_page/docs/api/selection"
     | "/_page/docs/api/tanstack-table"
@@ -2419,6 +2445,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiRichTextReactRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/rich-text-suggestion": {
+      id: "/_page/docs/api/rich-text-suggestion";
+      path: "/rich-text-suggestion";
+      fullPath: "/docs/api/rich-text-suggestion";
+      preLoaderRoute: typeof PageDocsApiRichTextSuggestionRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/rich-text-suggestion-react": {
+      id: "/_page/docs/api/rich-text-suggestion-react";
+      path: "/rich-text-suggestion-react";
+      fullPath: "/docs/api/rich-text-suggestion-react";
+      preLoaderRoute: typeof PageDocsApiRichTextSuggestionReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/rich-text-web": {
       id: "/_page/docs/api/rich-text-web";
       path: "/rich-text-web";
@@ -2524,6 +2564,8 @@ interface PageDocsApiRouteChildren {
   PageDocsApiRichTextMentionRoute: typeof PageDocsApiRichTextMentionRoute;
   PageDocsApiRichTextMentionReactRoute: typeof PageDocsApiRichTextMentionReactRoute;
   PageDocsApiRichTextReactRoute: typeof PageDocsApiRichTextReactRoute;
+  PageDocsApiRichTextSuggestionRoute: typeof PageDocsApiRichTextSuggestionRoute;
+  PageDocsApiRichTextSuggestionReactRoute: typeof PageDocsApiRichTextSuggestionReactRoute;
   PageDocsApiRichTextWebRoute: typeof PageDocsApiRichTextWebRoute;
   PageDocsApiSelectionRoute: typeof PageDocsApiSelectionRoute;
   PageDocsApiTanstackTableRoute: typeof PageDocsApiTanstackTableRoute;
@@ -2551,6 +2593,9 @@ const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiRichTextMentionRoute: PageDocsApiRichTextMentionRoute,
   PageDocsApiRichTextMentionReactRoute: PageDocsApiRichTextMentionReactRoute,
   PageDocsApiRichTextReactRoute: PageDocsApiRichTextReactRoute,
+  PageDocsApiRichTextSuggestionRoute: PageDocsApiRichTextSuggestionRoute,
+  PageDocsApiRichTextSuggestionReactRoute:
+    PageDocsApiRichTextSuggestionReactRoute,
   PageDocsApiRichTextWebRoute: PageDocsApiRichTextWebRoute,
   PageDocsApiSelectionRoute: PageDocsApiSelectionRoute,
   PageDocsApiTanstackTableRoute: PageDocsApiTanstackTableRoute,

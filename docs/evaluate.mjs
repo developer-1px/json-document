@@ -134,6 +134,8 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-composer",
   "@interactive-os/json-document-composer-react",
   "@interactive-os/json-document-file-intake",
+  "@interactive-os/json-document-rich-text-suggestion",
+  "@interactive-os/json-document-rich-text-suggestion-react",
   "@interactive-os/json-document-rich-text-mention",
   "@interactive-os/json-document-rich-text-mention-react",
   "@interactive-os/json-document-selection",

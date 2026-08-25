@@ -25,9 +25,12 @@ entity ID가 reference 정체성입니다. Selection과 Clipboard는 atom 전체
 `RICH_TEXT_MENTION_NODE`, `richTextMentionNodeSpec`, `insertRichTextMention`을
 소유합니다. React surface는
 `@interactive-os/json-document-rich-text-mention-react`의
-`RichTextMentionAtom`으로 같은 node를 투영합니다. Composer는 이 계약을 조립하며
-mention schema나 insertion, projection을 다시 구현하지 않습니다.
+`RichTextMentionAtom`, `useRichTextMentionSuggestions`,
+`RichTextMentionSuggestions`로 같은 node와 후보 UI를 투영합니다. trigger/query/range와
+open/dismiss/active 상태, 키보드·pointer·ARIA focus는 공용 Rich Text Suggestion
+패키지에 위임합니다. Composer는 이 계약을 조립하며 mention schema, insertion,
+projection이나 suggestion lifecycle을 다시 구현하지 않습니다.
 
-Host는 suggestion popup과 token을 그립니다. 검색 source, 권한, 알림 전송은
-Mention이 소유하지 않습니다. Composer demo가 @ typeahead, atom 삽입, 삭제,
-copy와 undo를 같은 Rich Text 경로로 증명합니다.
+Host는 후보 자료, 제품 copy와 배치를 정합니다. 검색 source, 권한, 알림 전송은
+Mention이 소유하지 않습니다. Composer demo가 @ typeahead, 가상 focus, atom 삽입과
+경계 삭제, copy와 undo를 같은 Rich Text 경로로 증명합니다.

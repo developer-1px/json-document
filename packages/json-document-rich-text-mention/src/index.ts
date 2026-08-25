@@ -4,14 +4,26 @@ import {
   type RichTextNode,
   type RichTextNodeSpec,
   type RichTextPoint,
+  type RichTextSelection,
 } from "@interactive-os/json-document-rich-text";
-import type { JSONValue } from "@interactive-os/json-document";
+import {
+  findRichTextSuggestionTrigger,
+  resolveRichTextSuggestions,
+  type RichTextSuggestionCandidate,
+  type RichTextSuggestionTrigger,
+} from "@interactive-os/json-document-rich-text-suggestion";
 
 export const RICH_TEXT_MENTION_NODE = "os.interactive/mention" as const;
 
-export interface RichTextMention extends Record<string, JSONValue> {
+export interface RichTextMention {
   readonly id: string;
   readonly label: string;
+}
+
+export interface RichTextMentionSuggestion extends RichTextMention, RichTextSuggestionCandidate {
+  readonly description?: string;
+  readonly iconUrl?: string;
+  readonly iconText?: string;
 }
 
 export interface RichTextMentionRange {
@@ -32,6 +44,29 @@ export const richTextMentionNodeSpec: RichTextNodeSpec = {
 
 export function createRichTextMentionNode(mention: RichTextMention, nodeId: string): RichTextNode {
   return { id: nodeId, type: RICH_TEXT_MENTION_NODE, attrs: { entityId: mention.id, label: mention.label } };
+}
+
+export function findRichTextMentionTrigger(
+  document: import("@interactive-os/json-document-rich-text").RichTextDocument,
+  selection: RichTextSelection,
+): RichTextSuggestionTrigger | null {
+  return findRichTextSuggestionTrigger(document, selection, ["@"]);
+}
+
+export function resolveRichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>(
+  trigger: RichTextSuggestionTrigger | null,
+  suggestions: ReadonlyArray<Suggestion>,
+): ReadonlyArray<Suggestion> {
+  return trigger?.trigger === "@" ? resolveRichTextSuggestions(trigger, suggestions) : [];
+}
+
+export function insertRichTextMentionSuggestion(
+  editor: RichTextEditor,
+  trigger: RichTextSuggestionTrigger,
+  suggestion: RichTextMentionSuggestion,
+  options: { readonly createId: () => string },
+): ReturnType<RichTextEditor["dispatch"]> {
+  return insertRichTextMention(editor, trigger.range, suggestion, options);
 }
 
 /** Replaces a text range with one canonical mention atom and a trailing space. */

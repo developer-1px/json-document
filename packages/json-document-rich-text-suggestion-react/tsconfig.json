@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig/library-react.json",
+  "compilerOptions": { "outDir": "dist", "rootDir": "src", "jsx": "react-jsx", "tsBuildInfoFile": "dist/.tsbuildinfo" },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    { "path": "../json-document-rich-text-suggestion" },
+    { "path": "../json-document-ui-primitives-react" }
+  ]
+}
