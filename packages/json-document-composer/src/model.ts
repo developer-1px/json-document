@@ -17,6 +17,12 @@ export interface ComposerAttachment extends Record<string, JSONValue> {
   readonly mediaType: string | null;
 }
 
+export interface ComposerAttachmentCandidate extends Record<string, JSONValue> {
+  readonly name: string;
+  readonly size: number;
+  readonly mediaType: string | null;
+}
+
 export interface ComposerDraft<Model extends string = string> extends Record<string, JSONValue> {
   readonly id: string;
   readonly profile: typeof COMPOSER_PROFILE_V1;

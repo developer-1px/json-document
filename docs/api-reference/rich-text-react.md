@@ -35,7 +35,7 @@ interface RichTextEditor {
 ## `RichTextEditorSurface`
 
 ```ts
-RichTextEditorSurface({ editor, as, createId, onAction, renderExtension, renderExtensionMark, renderUnknown, elementRef, ...props }: RichTextEditorSurfaceProps): React.DetailedReactHTMLElement<{ style: { whiteSpace: "pre-wrap"; accentColor?: CSS.Property.AccentColor | undefined; ... 854 more ...; glyphOrientationVertical?: CSS.Property.GlyphOrientationVertical | undefined; }; ... 277 more ...; onTransitionStartCapture?: React.TransitionEventHandler<...>; }, HTMLElement>
+RichTextEditorSurface({ editor, as, createId, onAction, renderExtension, renderExtensionMark, renderUnknown, elementRef, placeholder, ...props }: RichTextEditorSurfaceProps): React.DetailedReactHTMLElement<{ "aria-placeholder"?: string | undefined; style: { whiteSpace: "pre-wrap"; accentColor?: CSS.Property.AccentColor | undefined; ... 854 more ...; glyphOrientationVertical?: CSS.Property.GlyphOrientationVertical | undefined; }; ... 277 more ...; onTransitionStartCapture?: React.TransitionEventHandler<...>; }, HTMLElement>
 ```
 ## `RichTextEditorSurfaceProps`
 
@@ -49,6 +49,8 @@ interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElement>, "
   readonly renderExtensionMark?: RichTextRendererProps["renderExtensionMark"];
   readonly renderUnknown?: RichTextRendererProps["renderUnknown"];
   readonly elementRef?: { current: HTMLElement | null };
+  /** Product copy projected without inserting text into the canonical document or editable DOM. */
+  readonly placeholder?: string;
 }
 ```
 ## `RichTextNode`

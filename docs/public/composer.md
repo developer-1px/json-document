@@ -32,15 +32,23 @@ Selection, IME, structured Clipboard와 history를 기존 Rich Text editor에 �
 소유합니다. `findComposerTrigger(document, selection)`은 `/`·`@` query를 pure하게
 찾고 `insertComposerReference`는 Host가 주입한 ID factory로 atom을 삽입합니다.
 `createComposerDraft`, `insertComposerText`, `composerText`, `hasComposerContent`도
-같은 owner의 public API입니다.
+같은 owner의 public API입니다. Draft 변경은 raw JSON Pointer가 아니라
+`addComposerAttachments`, `removeComposerAttachment`, `selectComposerModel` command를
+사용합니다. `createComposerAttachments`는 Host가 주입한 ID와 attachment policy를
+적용하며 실패를 명시적인 결과로 반환합니다.
 
-File에서 attachment metadata를 읽고 ID/media type policy를 고르는 일과 suggestion의
-description/icon/category는 Host에 남습니다. Composer package는 React, DOM, UI
-Primitive나 제품 model 목록을 import하지 않습니다.
+`composerHostConfigSchema`는 제품이 반드시 결정해야 하는 model·suggestion catalog,
+attachment 제한과 Enter 정책만 JSON으로 검증합니다. `ComposerHostPorts`의 ID factory와
+submit callback은 함수이므로 document나 JSON Schema에 넣지 않습니다.
 
-Host는 composer의 배치, 후보 목록과 첨부 preview를 그립니다. 검색 source, 파일
-저장소, Agent runtime, transcript, think·stream·tool 상태는 Composer가 소유하지
-않습니다.
+Web `File`과 `ClipboardEvent`에서 이름·크기·media type을 읽는 일은
+`@interactive-os/json-document-web`의 `composerAttachmentCandidatesFromWebFiles`와
+`composerAttachmentCandidatesFromWebClipboard`가 담당합니다. Composer domain은 DOM과
+Web object를 알지 않으며, Web adapter는 ID·허용 정책·attachment kind를 결정하지 않습니다.
+
+Host는 config 값과 runtime port를 주입하고 composer의 배치, copy, CSS와 첨부 preview를
+그립니다. 검색 source, 파일 저장소, Agent runtime, transcript, think·stream·tool 상태는
+Composer가 소유하지 않습니다.
 
 ```live-demo
 /demo/composer

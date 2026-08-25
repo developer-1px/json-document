@@ -45,6 +45,7 @@ export function RichTextRenderer({ document, schema, renderExtension, renderExte
       node={node}
       schema={schema}
       editable={false}
+      placeholder={undefined}
       renderExtension={renderExtension}
       renderExtensionMark={renderExtensionMark}
       renderUnknown={renderUnknown}
@@ -61,9 +62,11 @@ export interface RichTextEditorSurfaceProps extends Omit<HTMLAttributes<HTMLElem
   readonly renderExtensionMark?: RichTextRendererProps["renderExtensionMark"];
   readonly renderUnknown?: RichTextRendererProps["renderUnknown"];
   readonly elementRef?: { current: HTMLElement | null };
+  /** Product copy projected without inserting text into the canonical document or editable DOM. */
+  readonly placeholder?: string;
 }
 
-export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, elementRef, ...props }: RichTextEditorSurfaceProps) {
+export function RichTextEditorSurface({ editor, as = "article", createId, onAction, renderExtension, renderExtensionMark, renderUnknown, elementRef, placeholder, ...props }: RichTextEditorSurfaceProps) {
   recordRichTextSurfaceRender();
   const store = richTextRenderStore(editor);
   const blockIds = useSyncExternalStore(store.subscribeStructure, store.getBlockIds, store.getBlockIds);
@@ -71,6 +74,11 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
     store.subscribeStructure,
     store.getDocumentId,
     store.getDocumentId,
+  );
+  const placeholderBlockId = useSyncExternalStore(
+    placeholder === undefined ? emptySubscribe : store.subscribePlaceholder,
+    placeholder === undefined ? noPlaceholder : store.getPlaceholderBlockId,
+    placeholder === undefined ? noPlaceholder : store.getPlaceholderBlockId,
   );
   const rootRef = useRef<HTMLElement>(null);
   const bindingRef = useRef<RichTextContentEditableBinding | null>(null);
@@ -103,6 +111,8 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
     suppressContentEditableWarning: true,
     "data-rich-text-node-id": documentId,
     "data-rich-text-container-id": documentId,
+    "data-rich-text-empty": placeholderBlockId === null ? "false" : "true",
+    ...(placeholder === undefined ? {} : { "aria-placeholder": placeholder }),
   }, [
     <SelectionRestorer key=":selection" editor={editor} rootRef={rootRef} bindingRef={bindingRef} />,
     ...blockIds.map((nodeId) => (
@@ -112,6 +122,7 @@ export function RichTextEditorSurface({ editor, as = "article", createId, onActi
         nodeId={nodeId}
         schema={editor.schema}
         editable
+        placeholder={nodeId === placeholderBlockId ? placeholder : undefined}
         renderExtension={renderExtension}
         renderExtensionMark={renderExtensionMark}
         renderUnknown={renderUnknown}
@@ -148,6 +159,7 @@ function RichTextBlockSlot({
   nodeId,
   schema,
   editable,
+  placeholder,
   renderExtension,
   renderExtensionMark,
   renderUnknown,
@@ -156,6 +168,7 @@ function RichTextBlockSlot({
   readonly nodeId: string;
   readonly schema: RichTextSchema;
   readonly editable: boolean;
+  readonly placeholder: string | undefined;
   readonly renderExtension: RichTextRendererProps["renderExtension"];
   readonly renderExtensionMark: RichTextRendererProps["renderExtensionMark"];
   readonly renderUnknown: RichTextRendererProps["renderUnknown"];
@@ -172,6 +185,7 @@ function RichTextBlockSlot({
       node={node}
       schema={schema}
       editable={editable}
+      placeholder={placeholder}
       renderExtension={renderExtension}
       renderExtensionMark={renderExtensionMark}
       renderUnknown={renderUnknown}
@@ -183,6 +197,7 @@ interface MemoNodeProps {
   readonly node: RichTextNode;
   readonly schema: RichTextSchema | undefined;
   readonly editable: boolean;
+  readonly placeholder: string | undefined;
   readonly renderExtension: RichTextRendererProps["renderExtension"];
   readonly renderExtensionMark: RichTextRendererProps["renderExtensionMark"];
   readonly renderUnknown: RichTextRendererProps["renderUnknown"];
@@ -192,6 +207,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
   node,
   schema,
   editable,
+  placeholder,
   renderExtension,
   renderExtensionMark,
   renderUnknown,
@@ -212,6 +228,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
         node={child}
         schema={schema}
         editable={editable}
+        placeholder={undefined}
         renderExtension={renderExtension}
         renderExtensionMark={renderExtensionMark}
         renderUnknown={renderUnknown}
@@ -220,7 +237,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
     : [];
   const content = Children.toArray(children);
   if (editable && children.length === 0 && (node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock")) {
-    content.push(<span key={`${node.id}:placeholder`} data-rich-text-placeholder=""><br /></span>);
+    content.push(<span key={`${node.id}:placeholder`} data-rich-text-placeholder={placeholder ?? ""} aria-hidden="true"><br /></span>);
   }
   const props = {
     "data-rich-text-node-id": node.id,
@@ -243,6 +260,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
   previous.node === next.node
   && previous.schema === next.schema
   && previous.editable === next.editable
+  && previous.placeholder === next.placeholder
   && previous.renderExtension === next.renderExtension
   && previous.renderExtensionMark === next.renderExtensionMark
   && previous.renderUnknown === next.renderUnknown
@@ -270,3 +288,6 @@ function markElement(mark: RichTextMark): { readonly type: string; readonly prop
 }
 
 export type { RichTextDocument, RichTextEditor, RichTextNode };
+
+function emptySubscribe(): () => void { return () => {}; }
+function noPlaceholder(): null { return null; }

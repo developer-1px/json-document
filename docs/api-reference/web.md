@@ -21,6 +21,21 @@ activeDescendantItemProps(id: string): Readonly<{ id: string; }>
 ```ts
 chordFromStroke(stroke: WebKeyboardStroke): string
 ```
+## `composerAttachmentCandidateFromWebFile`
+
+```ts
+composerAttachmentCandidateFromWebFile(file: WebComposerFile): ComposerAttachmentCandidate
+```
+## `composerAttachmentCandidatesFromWebClipboard`
+
+```ts
+composerAttachmentCandidatesFromWebClipboard(event: WebComposerClipboardEvent): ReadonlyArray<ComposerAttachmentCandidate>
+```
+## `composerAttachmentCandidatesFromWebFiles`
+
+```ts
+composerAttachmentCandidatesFromWebFiles(files: WebComposerFileList | ReadonlyArray<WebComposerFile>): ReadonlyArray<ComposerAttachmentCandidate>
+```
 ## `createWebClipboardBinding`
 
 ```ts
@@ -298,6 +313,30 @@ type WebClipboardWriteResult =
     readonly code: "clipboard.unsupported" | "clipboard.write-failed";
     readonly reason?: string;
   };
+```
+## `WebComposerClipboardEvent`
+
+```ts
+interface WebComposerClipboardEvent {
+  readonly clipboardData: { readonly files: WebComposerFileList } | null;
+}
+```
+## `WebComposerFile`
+
+```ts
+interface WebComposerFile {
+  readonly name: string;
+  readonly size: number;
+  readonly type: string;
+}
+```
+## `WebComposerFileList`
+
+```ts
+interface WebComposerFileList {
+  readonly length: number;
+  readonly [index: number]: WebComposerFile;
+}
 ```
 ## `WebDragDropCancelReason`
 

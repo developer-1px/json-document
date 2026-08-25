@@ -13,6 +13,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { RichTextEditorSurface } from "../src/index.js";
 import {
   lastRenderStoreBlockScan,
+  lastPlaceholderScan,
   observeRichTextBlockRenders,
   observeRichTextSurfaceRenders,
 } from "../src/render-instrument.js";
@@ -98,6 +99,33 @@ describe("Rich Text React locality", () => {
     expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
     expect(lastRenderStoreBlockScan()).toBeLessThan(16);
     expect(notified).toEqual(["scan-5000"]);
+  });
+
+  it("keeps placeholder updates local in a 10,000-block document", () => {
+    const jsonDocument = createJSONDocument(createRichTextBlockFixture(10_000, { idPrefix: "placeholder" }));
+    const editor = createRichTextEditor({
+      document: jsonDocument,
+      selection: collapsed("placeholder-text-5000", 1),
+    });
+    const store = richTextRenderStore(editor);
+    let notifies = 0;
+    store.subscribePlaceholder(() => { notifies += 1; });
+
+    expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
+    expect(lastPlaceholderScan()).toBeLessThan(16);
+    expect(notifies).toBe(0);
+  });
+
+  it("does no placeholder work when the surface has no placeholder", () => {
+    const jsonDocument = createJSONDocument(createRichTextBlockFixture(10_000, { idPrefix: "plain" }));
+    const editor = createRichTextEditor({
+      document: jsonDocument,
+      selection: collapsed("plain-text-5000", 1),
+    });
+    richTextRenderStore(editor);
+
+    expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
+    expect(lastPlaceholderScan()).toBe(0);
   });
 
   it("notifies structure subscribers after a block split", () => {

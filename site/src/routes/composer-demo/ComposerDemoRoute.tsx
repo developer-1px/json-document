@@ -8,18 +8,26 @@ import {
   type RichTextNode,
 } from "@interactive-os/json-document-rich-text";
 import {
+  COMPOSER_HOST_PROFILE_V1,
   COMPOSER_SKILL_NODE,
+  addComposerAttachments,
+  composerInteractionFromKeyStroke,
+  composerHostConfigSchema,
   composerSchema,
-  composerText,
+  createComposerAttachments,
   createComposerDraft,
   findComposerTrigger,
   hasComposerContent,
   insertComposerReference,
   insertComposerText,
-  type ComposerAttachment,
+  removeComposerAttachment,
+  selectComposerModel,
   type ComposerDraft,
+  type ComposerHostConfig,
+  type ComposerHostPorts,
   type ComposerReference,
 } from "@interactive-os/json-document-composer";
+import { composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles } from "@interactive-os/json-document-web";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { JsonInspector } from "../../shared/ui/json-inspector";
@@ -38,10 +46,23 @@ const suggestions: ReadonlyArray<ComposerSuggestion> = [
 ];
 
 const models = ["GPT-5.6", "GPT-5.5", "Claude Opus", "Claude Sonnet"] as const;
+type ComposerModel = (typeof models)[number];
+
 const modelOptions = models.map((label) => ({
   id: label.toLocaleLowerCase().replaceAll(" ", "-"),
   label,
+  value: label,
 }));
+
+const hostConfig = {
+  profile: COMPOSER_HOST_PROFILE_V1,
+  models: modelOptions,
+  suggestions,
+  attachments: { acceptedMediaTypes: ["*/*"], maxFiles: null, maxBytesPerFile: null },
+  interaction: { submit: "enter", newline: "shift-enter" },
+} satisfies ComposerHostConfig<ComposerModel>;
+
+if (hostConfig.profile !== composerHostConfigSchema.$id) throw new TypeError("Composer Host config profile does not match its schema.");
 
 export function ComposerDemoRoute() {
   const [draft] = useState<JSONDocument>(() => createJSONDocument(createComposerDraft({ id: "composer-draft", instructionId: "composer-instruction", paragraphId: "composer-paragraph", model: models[0] })));
@@ -55,7 +76,7 @@ export function ComposerDemoRoute() {
   const fileInput = useRef<HTMLInputElement>(null);
   const composerEditorRef = useRef<HTMLElement>(null);
   const trigger = findComposerTrigger(instructionValue, editor.snapshot.selection);
-  const visibleSuggestions = suggestions.filter((item) => item.kind === trigger?.kind && item.label.toLowerCase().includes(trigger.query));
+  const visibleSuggestions = hostConfig.suggestions.filter((item) => item.kind === trigger?.kind && item.label.toLowerCase().includes(trigger.query));
   const draftValue = draft.value as ComposerDraft<(typeof models)[number]>;
   const attachments = draftValue.attachments;
   const model = draftValue.model;
@@ -74,18 +95,21 @@ export function ComposerDemoRoute() {
   });
   const { onKeyDown: handleCommandKeyDown, ...commandReferenceProps } = commandListbox.referenceProps;
   const hasContent = hasComposerContent(draftValue);
+  const hostPorts: ComposerHostPorts<ComposerModel> = {
+    createId: createRichTextNodeId,
+    submit: async (value) => { setSubmitted(value); },
+  };
 
   const onAction = useCallback(() => undefined, []);
 
   function submit() {
     if (!hasContent) return;
-    setSubmitted(draft.value as ComposerDraft<(typeof models)[number]>);
+    void hostPorts.submit(draft.value as ComposerDraft<ComposerModel>);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (event.key === "Escape") {
-      return;
-    }
+    const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey }, hostConfig.interaction);
+    if (interaction === "dismiss") return;
     if (trigger && visibleSuggestions.length > 0) {
       handleCommandKeyDown(event);
       if (event.defaultPrevented) {
@@ -93,48 +117,49 @@ export function ComposerDemoRoute() {
         return;
       }
     }
-    if (event.key !== "Enter" || event.shiftKey) return;
+    if (interaction !== "submit") return;
     event.preventDefault();
     event.stopPropagation();
     submit();
   }
 
   function handleHistoryKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "z") return;
+    const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey }, hostConfig.interaction);
+    if (interaction !== "history.undo" && interaction !== "history.redo") return;
     event.preventDefault();
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
-    if (event.shiftKey) editor.redo();
+    if (interaction === "history.redo") editor.redo();
     else editor.undo();
   }
 
   function attachFiles(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.currentTarget.files ?? []);
-    addFiles(files);
+    addFiles(composerAttachmentCandidatesFromWebFiles(event.currentTarget.files ?? []));
     event.currentTarget.value = "";
   }
 
-  function addFiles(files: ReadonlyArray<File>) {
-    if (files.length === 0) return;
-    const next = composerAttachments(files);
-    editor.apply(next.map((value, index) => ({ op: "add" as const, path: `/attachments/${attachments.length + index}`, value })), { origin: "composer.attachments.add" });
+  function addFiles(candidates: ReturnType<typeof composerAttachmentCandidatesFromWebFiles>) {
+    if (candidates.length === 0) return;
+    const created = createComposerAttachments(candidates, { createId: hostPorts.createId, policy: hostConfig.attachments, currentCount: attachments.length });
+    if (!created.ok) return;
+    addComposerAttachments(editor, draftValue, created.attachments);
     composerEditorRef.current?.focus();
   }
 
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
-    const files = Array.from(event.clipboardData.files);
-    if (files.length === 0) return;
+    const candidates = composerAttachmentCandidatesFromWebClipboard(event);
+    if (candidates.length === 0) return;
     event.preventDefault();
     event.stopPropagation();
-    addFiles(files);
+    addFiles(candidates);
   }
 
-  function removeAttachment(index: number) {
-    editor.apply([{ op: "remove", path: `/attachments/${index}` }], { origin: "composer.attachments.remove" });
+  function removeAttachment(attachmentId: string) {
+    removeComposerAttachment(editor, draftValue, attachmentId);
   }
 
-  function selectModel(candidate: (typeof models)[number]) {
-    editor.apply([{ op: "replace", path: "/model", value: candidate }], { origin: "composer.model.select" });
+  function selectModel(candidate: ComposerModel) {
+    selectComposerModel(editor, candidate);
   }
 
   function chooseTrigger(value: "/" | "@") {
@@ -157,21 +182,21 @@ export function ComposerDemoRoute() {
         <FileDropRegion
           className={`home-composer-single${hasContent ? " home-composer-single-filled" : ""}`}
           data-testid="agent-chat-composer"
-          onFiles={addFiles}
+          onFiles={(files) => addFiles(composerAttachmentCandidatesFromWebFiles(files))}
           overlay={<div className="composer-dropzone-overlay"><div className="composer-dropzone-card"><strong>여기에 파일을 놓아주세요</strong><span>이미지와 문서를 Composer context에 첨부합니다.</span></div></div>}
           onPasteCapture={handlePaste}
           onKeyDownCapture={handleHistoryKeyDown}
         >
           {attachments.length > 0 ? (
             <div className="composer-attachments" aria-label="첨부 파일">
-              {attachments.map((file, index) => (
+              {attachments.map((file) => (
                 <div className="composer-file" key={file.id}>
                   <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? "▧" : "▤"}</span>
                   <span className="composer-file-info">
                     <span className="composer-file-name">{file.name}</span>
                     <span className="composer-file-size">{formatBytes(file.size)}</span>
                   </span>
-                  <button className="composer-file-remove" type="button" aria-label={`${file.name} 제거`} onClick={() => removeAttachment(index)}>×</button>
+                  <button className="composer-file-remove" type="button" aria-label={`${file.name} 제거`} onClick={() => removeAttachment(file.id)}>×</button>
                 </div>
               ))}
             </div>
@@ -191,7 +216,6 @@ export function ComposerDemoRoute() {
               classNames={{ root: "composer-menu-root", trigger: "composer-icon-button", popup: "composer-layer composer-add-layer" }}
             />
             <div className="composer-editor-wrap">
-              {composerText(instructionValue).trim() === "" ? <span className="composer-placeholder-box">작업을 입력하세요</span> : null}
               <RichTextEditorSurface
                 as="div"
                 editor={editor}
@@ -202,6 +226,7 @@ export function ComposerDemoRoute() {
                 {...(trigger && visibleSuggestions.length > 0 ? commandReferenceProps : { "aria-expanded": false })}
                 onAction={onAction}
                 onKeyDownCapture={handleKeyDown}
+                placeholder="작업을 입력하세요"
                 renderExtension={renderAtom}
                 spellCheck={false}
               />
@@ -210,9 +235,9 @@ export function ComposerDemoRoute() {
               id="composer-model"
               label="모델 선택"
               value={model.toLocaleLowerCase().replaceAll(" ", "-")}
-              options={modelOptions}
+              options={hostConfig.models}
               onValueChange={(id) => {
-                const candidate = modelOptions.find((option) => option.id === id)?.label;
+                const candidate = hostConfig.models.find((option) => option.id === id)?.value;
                 if (candidate) selectModel(candidate);
               }}
               renderValue={(option) => <>{option.label}⌄</>}
@@ -264,14 +289,4 @@ function formatBytes(size: number): string {
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
   return `${(size / 1024 / 1024).toFixed(1)} MB`;
-}
-
-function composerAttachments(files: ReadonlyArray<File>): ReadonlyArray<ComposerAttachment> {
-  return files.map((file) => ({
-    id: createRichTextNodeId(),
-    kind: file.type.startsWith("image/") ? "image" : "document",
-    name: file.name,
-    size: file.size,
-    mediaType: file.type || null,
-  }));
 }

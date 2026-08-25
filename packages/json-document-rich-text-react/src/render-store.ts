@@ -6,13 +6,15 @@ import {
   type RichTextEditor,
   type RichTextNode,
 } from "@interactive-os/json-document-rich-text";
-import { recordRenderStoreBlockScan } from "./render-instrument.js";
+import { recordPlaceholderScan, recordRenderStoreBlockScan } from "./render-instrument.js";
 
 export interface RichTextRenderStore {
   getBlockIds(): ReadonlyArray<string>;
   getDocumentId(): string;
   getNode(nodeId: string): RichTextNode | null;
+  getPlaceholderBlockId(): string | null;
   subscribeNode(nodeId: string, notify: () => void): () => void;
+  subscribePlaceholder(notify: () => void): () => void;
   subscribeStructure(notify: () => void): () => void;
 }
 
@@ -30,7 +32,11 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
   const pointer = editor.pointer ?? "";
   let document = documentAtPointer(editor.snapshot.value, pointer);
   let blockIds: ReadonlyArray<string> = document.content.map((node) => node.id);
+  let placeholderBlockId: string | null = null;
+  let placeholderInitialized = false;
+  let visibleBlocks = new Set<string>();
   const nodeListeners = new Map<string, Set<() => void>>();
+  const placeholderListeners = new Set<() => void>();
   const structureListeners = new Set<() => void>();
 
   editor.subscribe((snapshot) => {
@@ -40,6 +46,21 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
     document = next;
     const recorded = appliedOperationsFor(next);
     const applied = recorded === null ? null : relativeOperations(recorded, pointer);
+    if (placeholderListeners.size > 0) {
+      const nextPlaceholderBlockId = applied !== null && !contentStructureChanged(applied)
+        ? updatePlaceholderFromApplied(previous, next, applied, visibleBlocks)
+        : rebuildPlaceholderState(next, visibleBlocks);
+      if (nextPlaceholderBlockId !== placeholderBlockId) {
+        placeholderBlockId = nextPlaceholderBlockId;
+        for (const notify of placeholderListeners) notify();
+      }
+    } else {
+      recordPlaceholderScan(0);
+      if (placeholderInitialized) {
+        placeholderInitialized = false;
+        visibleBlocks = new Set();
+      }
+    }
     if (applied !== null && !contentStructureChanged(applied)) {
       recordRenderStoreBlockScan(applied.length);
       for (const operation of applied) notifyAppliedPath(next, operation.path, nodeListeners);
@@ -69,6 +90,13 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
       const located = richTextTopology(document).locate(nodeId);
       return located && located.node.type !== "doc" ? located.node as RichTextNode : null;
     },
+    getPlaceholderBlockId() {
+      if (!placeholderInitialized) {
+        placeholderBlockId = rebuildPlaceholderState(document, visibleBlocks);
+        placeholderInitialized = true;
+      }
+      return placeholderBlockId;
+    },
     subscribeNode(nodeId, notify) {
       const listeners = nodeListeners.get(nodeId) ?? new Set<() => void>();
       listeners.add(notify);
@@ -78,11 +106,69 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
         if (listeners.size === 0) nodeListeners.delete(nodeId);
       };
     },
+    subscribePlaceholder(notify) {
+      if (placeholderListeners.size === 0) {
+        placeholderBlockId = rebuildPlaceholderState(document, visibleBlocks);
+        placeholderInitialized = true;
+      }
+      placeholderListeners.add(notify);
+      return () => {
+        placeholderListeners.delete(notify);
+        if (placeholderListeners.size === 0) {
+          visibleBlocks = new Set();
+          placeholderInitialized = false;
+        }
+      };
+    },
     subscribeStructure(notify) {
       structureListeners.add(notify);
       return () => { structureListeners.delete(notify); };
     },
   };
+}
+
+function rebuildPlaceholderState(document: RichTextDocument, visibleBlocks: Set<string>): string | null {
+  visibleBlocks.clear();
+  for (const block of document.content) if (hasVisibleContent(block)) visibleBlocks.add(block.id);
+  recordPlaceholderScan(document.content.length);
+  return placeholderBlockFor(document, visibleBlocks);
+}
+
+function updatePlaceholderFromApplied(
+  previous: RichTextDocument,
+  next: RichTextDocument,
+  applied: ReadonlyArray<{ readonly path: string }>,
+  visibleBlocks: Set<string>,
+): string | null {
+  const changedIndexes = new Set<number>();
+  for (const operation of applied) {
+    const match = /^\/content\/(\d+)/.exec(operation.path);
+    if (match !== null) changedIndexes.add(Number(match[1]));
+  }
+  for (const index of changedIndexes) {
+    const before = previous.content[index];
+    const after = next.content[index];
+    if (before !== undefined) visibleBlocks.delete(before.id);
+    if (after !== undefined && hasVisibleContent(after)) visibleBlocks.add(after.id);
+  }
+  recordPlaceholderScan(changedIndexes.size);
+  return placeholderBlockFor(next, visibleBlocks);
+}
+
+function placeholderBlockFor(document: RichTextDocument, visibleBlocks: ReadonlySet<string>): string | null {
+  const first = document.content[0];
+  if (first === undefined || !isPlaceholderBlock(first)) return null;
+  return visibleBlocks.size === 0 ? first.id : null;
+}
+
+function hasVisibleContent(node: RichTextNode): boolean {
+  if (node.type === "text" && "text" in node) return node.text.length > 0;
+  if (node.type === "hardBreak" || !hasRichTextContent(node)) return true;
+  return node.content.some(hasVisibleContent);
+}
+
+function isPlaceholderBlock(node: RichTextNode): boolean {
+  return node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock";
 }
 
 function relativeOperations(

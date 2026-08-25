@@ -88,12 +88,19 @@ test("빈 Composer에 처음 입력할 때 React DOM 삭제 오류가 발생하�
 
   await page.goto("/demo/composer");
   const editor = page.getByLabel("Agent Chat Composer");
+  await expect(editor).toHaveAttribute("aria-placeholder", "작업을 입력하세요");
+  await expect(editor).toHaveAttribute("data-rich-text-empty", "true");
+  await expect(editor.locator('[data-rich-text-placeholder="작업을 입력하세요"]')).toHaveCount(1);
   await editor.click();
   await editor.pressSequentially("ab");
+  await expect(editor).toHaveAttribute("data-rich-text-empty", "false");
+  await expect(editor.locator('[data-rich-text-placeholder="작업을 입력하세요"]')).toHaveCount(0);
   await editor.press("Backspace");
   await expect(editor).toHaveText("a");
   await editor.press("Backspace");
   await expect(editor).toBeEmpty();
+  await expect(editor).toHaveAttribute("data-rich-text-empty", "true");
+  await expect(editor.locator('[data-rich-text-placeholder="작업을 입력하세요"]')).toHaveCount(1);
   await editor.pressSequentially("c");
   await expect(editor).toHaveText("c");
 
