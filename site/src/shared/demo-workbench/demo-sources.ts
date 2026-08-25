@@ -130,6 +130,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-web/src/clipboard.ts",
   },
   {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebClipboardTextWriter",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-react",
     symbol: "DocumentTextControl",
     sourcePath: "packages/json-document-react/src/use-document-text-control.ts",
