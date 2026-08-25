@@ -87,3 +87,11 @@ Host callback에 전달합니다. 유효한 target과 drop policy는 Host가 결
 
 Canvas·Board·Kanban·Database는 이 API를 실제 interaction surface에서
 사용합니다.
+
+### Kanban drop target projection
+
+`webKanbanColumnProps`와 `webKanbanCardProps`가 안정된 markup attribute를 만들고,
+`kanbanCardDropTargetFromWebElement`가 HTML drag target을 Editing의
+`KanbanCardDropTarget`으로 투영합니다. Pointer 좌표 경로는
+`findWebKanbanCardDropTarget`이 같은 projection core를 사용합니다. Web은 target을
+해석할 뿐 move validity와 permission은 결정하지 않습니다.

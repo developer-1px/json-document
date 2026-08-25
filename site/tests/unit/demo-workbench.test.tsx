@@ -160,6 +160,8 @@ describe("Demo definition and source discovery", () => {
     expect((await discoverDemoSources("routes/kanban-demo/KanbanDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/kanban-demo/KanbanDemoRoute.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-editing/src/kanban.ts",
+      "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/drag-drop-session.ts",
       "packages/json-document-affordance/src/board-drag-session.ts",
@@ -167,6 +169,8 @@ describe("Demo definition and source discovery", () => {
     expect((await discoverDemoSources("routes/widgets/BoardWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/BoardWidgetRoute.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-editing/src/kanban.ts",
+      "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/board-drag-session.ts",

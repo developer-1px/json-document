@@ -20,6 +20,12 @@ export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coo
 export { readWebRasterFile } from "./raster-source.js";
 export { renderWebAnnotationRaster } from "./annotation-raster.js";
 export {
+  findWebKanbanCardDropTarget,
+  kanbanCardDropTargetFromWebElement,
+  webKanbanCardProps,
+  webKanbanColumnProps,
+} from "./kanban-drop-target.js";
+export {
   activeDescendantContainerProps,
   activeDescendantItemProps,
   projectWebWidgetState,
@@ -77,6 +83,7 @@ export type {
   WebPointerSessionOptions,
   WebPointerSessionSnapshot,
 } from "./pointer-session.js";
+export type { WebKanbanTargetElement } from "./kanban-drop-target.js";
 export type { WebClientPoint, WebSVGElement, WebSVGViewport } from "./svg-coordinate.js";
 export type { WebRasterFile, WebRasterSourceResult } from "./raster-source.js";
 export type { WebAnnotationRasterResult, WebAnnotationRasterStyle } from "./annotation-raster.js";

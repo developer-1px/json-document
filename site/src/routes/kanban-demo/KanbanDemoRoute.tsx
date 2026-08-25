@@ -2,10 +2,16 @@ import { useState, type DragEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createKanbanEditor,
+  type KanbanCardDropTarget,
   type KanbanDocument,
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
-import { createWebDragDropSession } from "@interactive-os/json-document-web";
+import {
+  createWebDragDropSession,
+  kanbanCardDropTargetFromWebElement,
+  webKanbanCardProps,
+  webKanbanColumnProps,
+} from "@interactive-os/json-document-web";
 import {
   createBoardDragSession,
   historyAffordance,
@@ -32,14 +38,9 @@ const initialBoard: KanbanDocument = {
   ],
 };
 
-type BoardDropTarget = {
-  readonly columnId: string;
-  readonly beforeCardId: string | null;
-};
-
 export function KanbanDemoRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
-  const [boardDrag] = useState(() => createBoardDragSession<string, BoardDropTarget>({
+  const [boardDrag] = useState(() => createBoardDragSession<string, KanbanCardDropTarget>({
     onCommit: ({ item: cardId, target }) => {
       editor.dispatch({
         type: "card.move",
@@ -49,7 +50,7 @@ export function KanbanDemoRoute() {
       });
     },
   }));
-  const [dragSession] = useState(() => createWebDragDropSession<string, BoardDropTarget>({
+  const [dragSession] = useState(() => createWebDragDropSession<string, KanbanCardDropTarget>({
     onPreview: (_cardId, target) => { boardDrag.preview(target); },
     onCommit: (_cardId, target) => {
       boardDrag.preview(target);
@@ -103,10 +104,11 @@ export function KanbanDemoRoute() {
         {board.columns.map((column) => (
           <div
             key={column.id}
-            data-column-id={column.id}
+            {...webKanbanColumnProps(column.id)}
             onDragOver={(event) => {
               event.preventDefault();
-              dragSession.preview(dropTargetFromEvent(event, column.id));
+              const target = dropTargetFromEvent(event);
+              if (target !== null) dragSession.preview(target);
               applyAffordance(dropAffordance({ canDrop: true }), {
                 cursor: (cursor) => {
                   event.currentTarget.style.cursor = cursor;
@@ -126,7 +128,8 @@ export function KanbanDemoRoute() {
               applyAffordance(committed, {
                 commit: (hand) => {
                   if (hand.type !== "move-drop") return;
-                  dragSession.commit(dropTargetFromEvent(event, column.id));
+                  const target = dropTargetFromEvent(event);
+                  if (target !== null) dragSession.commit(target);
                 },
               });
             }}
@@ -142,7 +145,7 @@ export function KanbanDemoRoute() {
                   key={card.id}
                   type="button"
                   draggable
-                  data-card-id={card.id}
+                  {...webKanbanCardProps(card.id)}
                   data-selected={option.selected ? "true" : "false"}
                   data-focus={option.focus ? "true" : "false"}
                   aria-selected={option.selected}
@@ -167,7 +170,6 @@ export function KanbanDemoRoute() {
   );
 }
 
-function dropTargetFromEvent(event: DragEvent<HTMLElement>, columnId: string): BoardDropTarget {
-  const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-card-id]") : null;
-  return { columnId, beforeCardId: target?.dataset.cardId ?? null };
+function dropTargetFromEvent(event: DragEvent<HTMLElement>): KanbanCardDropTarget | null {
+  return kanbanCardDropTargetFromWebElement(event.target instanceof Element ? event.target : null);
 }

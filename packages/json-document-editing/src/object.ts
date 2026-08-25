@@ -44,6 +44,12 @@ export interface ObjectClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 
+export interface ObjectPastePlacement {
+  readonly type: "offset";
+  readonly dx: number;
+  readonly dy: number;
+}
+
 export type ObjectIntent =
   | {
       readonly type: "selection.set";
@@ -66,7 +72,7 @@ export type ObjectIntent =
       readonly dw: number;
       readonly dh: number;
     }
-  | { readonly type: "clipboard.paste"; readonly clipboard: ObjectClipboard };
+  | { readonly type: "clipboard.paste"; readonly clipboard: ObjectClipboard; readonly placement?: ObjectPastePlacement };
 
 export interface ObjectEditor {
   readonly snapshot: EditingSnapshot<ObjectSelection>;
@@ -177,7 +183,11 @@ export function createObjectEditor(
 
     if (intent.type === "clipboard.paste") {
       const objects = value().objects;
-      const pasted = cloneObjectsWithUniqueIds(intent.clipboard.objects, objects, createId);
+      const pasted = cloneObjectsWithUniqueIds(intent.clipboard.objects, objects, createId).map((object) => ({
+        ...object,
+        x: object.x + (intent.placement?.dx ?? 0),
+        y: object.y + (intent.placement?.dy ?? 0),
+      }));
       if (pasted.length === 0) return failure("clipboard.empty");
       return session.apply({
         operations: pasted.map((object, offset) => ({

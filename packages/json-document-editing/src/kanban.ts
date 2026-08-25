@@ -38,18 +38,21 @@ export interface KanbanSelection extends Record<string, JSONValue> {
   readonly primaryKey: string | null;
 }
 
+export interface KanbanCardDropTarget {
+  readonly columnId: string;
+  readonly beforeCardId: string | null;
+}
+
 export type KanbanIntent =
   | {
       readonly type: "selection.set";
       readonly cardId: string;
       readonly mode?: "replace" | "toggle";
     }
-  | {
+  | ({
       readonly type: "card.move";
       readonly cardId: string;
-      readonly columnId: string;
-      readonly beforeCardId?: string | null;
-    }
+    } & KanbanCardDropTarget)
   | { readonly type: "selection.remove" };
 
 export interface KanbanEditor {

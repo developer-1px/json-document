@@ -7,6 +7,7 @@ import clipboardSource from "../../../../packages/json-document-web/src/clipboar
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
+import kanbanEditingSource from "../../../../packages/json-document-editing/src/kanban.ts?raw";
 import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
 import webGridCellSource from "../../../../packages/json-document-web/src/grid-cell.ts?raw";
 import gridEditingSource from "../../../../packages/json-document-react/src/use-grid-editing.ts?raw";
@@ -14,6 +15,7 @@ import treeVisibilitySource from "../../../../packages/json-document-editing/src
 import treeEditingSource from "../../../../packages/json-document-react/src/use-tree-editing.ts?raw";
 import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
+import webKanbanDropTargetSource from "../../../../packages/json-document-web/src/kanban-drop-target.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
@@ -81,6 +83,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
+  ["packages/json-document-editing/src/kanban.ts", kanbanEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
   ["packages/json-document-web/src/grid-cell.ts", webGridCellSource],
   ["packages/json-document-react/src/use-grid-editing.ts", gridEditingSource],
@@ -88,6 +91,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-tree-editing.ts", treeEditingSource],
   ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
+  ["packages/json-document-web/src/kanban-drop-target.ts", webKanbanDropTargetSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
@@ -132,6 +136,21 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "renderWebAnnotationRaster",
     sourcePath: "packages/json-document-web/src/annotation-raster.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createKanbanEditor",
+    sourcePath: "packages/json-document-editing/src/kanban.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "kanbanCardDropTargetFromWebElement",
+    sourcePath: "packages/json-document-web/src/kanban-drop-target.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "findWebKanbanCardDropTarget",
+    sourcePath: "packages/json-document-web/src/kanban-drop-target.ts",
   },
   {
     packageName: "@interactive-os/json-document-editing",

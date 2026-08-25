@@ -103,4 +103,18 @@ describe("object editing selection family", () => {
     expect(editor.undo().ok).toBe(true);
     expect(editor.selectedObjects.map((object) => object.id)).toEqual(["n1", "n2"]);
   });
+
+  test("applies zero, positive, and negative paste offsets exactly once with history", () => {
+    const clipboard = { type: "application/vnd.interactive-os.objects+json", objects: [initial.objects[0]!], text: "Alpha" } as const;
+    for (const [dx, dy, x, y] of [[0, 0, 10, 10], [24, 24, 34, 34], [-5, -7, 5, 3]] as const) {
+      const editor = createObjectEditor(initial, { createId: () => `copy-${dx}-${dy}` });
+      expect(editor.dispatch({ type: "clipboard.paste", clipboard, placement: { type: "offset", dx, dy } }).ok).toBe(true);
+      expect((editor.snapshot.value as ObjectDocument).objects.at(-1)).toMatchObject({ x, y });
+      expect(editor.snapshot.selection.keys).toEqual([`copy-${dx}-${dy}`]);
+      expect(editor.undo().ok).toBe(true);
+      expect(editor.snapshot.value).toEqual(initial);
+      expect(editor.redo().ok).toBe(true);
+      expect((editor.snapshot.value as ObjectDocument).objects.at(-1)).toMatchObject({ x, y });
+    }
+  });
 });

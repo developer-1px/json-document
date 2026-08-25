@@ -71,6 +71,11 @@ const documentClipboardCodec: WebClipboardCodec<DocumentClipboard>
 ```ts
 findWebGridCell<Cell extends WebGridCellAddressElement>(root: WebGridCellAddressRoot<Cell> | null, point: GridPoint): Cell | null
 ```
+## `findWebKanbanCardDropTarget`
+
+```ts
+findWebKanbanCardDropTarget(point: { readonly x: number; readonly y: number; }, webDocument?: { elementFromPoint(x: number, y: number): WebKanbanTargetElement | null; }): KanbanCardDropTarget | null
+```
 ## `focusWebItem`
 
 ```ts
@@ -80,6 +85,11 @@ focusWebItem<Item extends WebFocusableItem>(root: WebFocusItemRoot<Item> | null,
 
 ```ts
 gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): GridPoint | null
+```
+## `kanbanCardDropTargetFromWebElement`
+
+```ts
+kanbanCardDropTargetFromWebElement(element: WebKanbanTargetElement | null): KanbanCardDropTarget | null
 ```
 ## `lineBoundary`
 
@@ -367,6 +377,24 @@ webGridCellAddressProps(point: GridPoint): WebGridCellAddressAttributes
 ```ts
 interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
   querySelectorAll(selectors: string): ArrayLike<Cell>;
+}
+```
+## `webKanbanCardProps`
+
+```ts
+webKanbanCardProps(cardId: string): Readonly<{ "data-kanban-card-id": string; }>
+```
+## `webKanbanColumnProps`
+
+```ts
+webKanbanColumnProps(columnId: string): Readonly<{ "data-kanban-column-id": string; }>
+```
+## `WebKanbanTargetElement`
+
+```ts
+interface WebKanbanTargetElement {
+  closest(selector: string): WebKanbanTargetElement | null;
+  getAttribute(name: string): string | null;
 }
 ```
 ## `WebKeyboardAdapter`

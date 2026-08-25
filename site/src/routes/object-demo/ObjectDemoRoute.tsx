@@ -30,10 +30,8 @@ export function ObjectDemoRoute() {
     cut: () => editor.cut()?.result ?? { ok: false, code: "selection.empty" },
     paste: (payload) => editor.dispatch({
       type: "clipboard.paste",
-      clipboard: {
-        ...payload,
-        objects: payload.objects.map((object) => ({ ...object, x: object.x + 24, y: object.y + 24 })),
-      },
+      clipboard: payload,
+      placement: { type: "offset", dx: 24, dy: 24 },
     }),
     onResult(result) {
       if (!result.ok) return observation.announce(result.code);
@@ -123,10 +121,8 @@ export function ObjectDemoRoute() {
                 if (!clipboard) return;
                 run({
                   type: "clipboard.paste",
-                  clipboard: {
-                    ...clipboard,
-                    objects: clipboard.objects.map((object) => ({ ...object, x: object.x + 24, y: object.y + 24 })),
-                  },
+                  clipboard,
+                  placement: { type: "offset", dx: 24, dy: 24 },
                 }, `Pasted ${clipboard.objects.length} object${clipboard.objects.length === 1 ? "" : "s"}`);
               }}
             >

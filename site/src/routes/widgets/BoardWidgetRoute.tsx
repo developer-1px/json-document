@@ -1,13 +1,16 @@
 import { useRef, useState, type KeyboardEventHandler, type PointerEvent, type ReactNode } from "react";
-import { createKanbanEditor, type KanbanDocument } from "@interactive-os/json-document-editing";
+import { createKanbanEditor, type KanbanCardDropTarget, type KanbanDocument } from "@interactive-os/json-document-editing";
 import { useEditing, useRestoreElementFocus } from "@interactive-os/json-document-react";
 import {
   activeDescendantContainerProps,
   activeDescendantItemProps,
   createWebPointerSession,
+  findWebKanbanCardDropTarget,
   lineBoundary,
   moveLinePoint,
   projectWebWidgetState,
+  webKanbanCardProps,
+  webKanbanColumnProps,
 } from "@interactive-os/json-document-web";
 import {
   createBoardDragSession,
@@ -42,15 +45,10 @@ type DragPreview = {
   readonly dy: number;
 };
 
-type BoardDropTarget = {
-  readonly columnId: string;
-  readonly beforeCardId: string | null;
-};
-
 export function BoardWidgetRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null);
-  const [boardDrag] = useState(() => createBoardDragSession<string, BoardDropTarget>({
+  const [boardDrag] = useState(() => createBoardDragSession<string, KanbanCardDropTarget>({
     onCommit: ({ item: cardId, target }) => editor.dispatch({
       type: "card.move",
       cardId,
@@ -124,7 +122,7 @@ export function BoardWidgetRoute() {
         },
       },
     );
-    const target = boardDropTargetAt(event);
+    const target = findWebKanbanCardDropTarget({ x: event.clientX, y: event.clientY });
     boardDrag.preview(target);
     applyAffordance(dropAffordance({ canDrop: target !== null }), {
       cursor: (cursor) => {
@@ -147,7 +145,7 @@ export function BoardWidgetRoute() {
         { x: event.clientX, y: event.clientY },
       ),
     );
-    const target = boardDropTargetAt(event);
+    const target = findWebKanbanCardDropTarget({ x: event.clientX, y: event.clientY });
     boardDrag.preview(target);
     const drop = dropAffordance({ canDrop: moved !== null && target !== null });
     applyAffordance(drop, {
@@ -194,7 +192,7 @@ export function BoardWidgetRoute() {
           }}
         >
           {board.columns.map((column) => (
-            <div key={column.id} data-column-id={column.id} className="grid content-start gap-2">
+            <div key={column.id} {...webKanbanColumnProps(column.id)} className="grid content-start gap-2">
               <p className={classes("mb-0 mt-0", ui.text.label)}>{column.title}</p>
               <BoardListbox
                 label={column.title}
@@ -221,7 +219,7 @@ export function BoardWidgetRoute() {
                           transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
                           pointerEvents: offset ? "none" : undefined,
                         }}
-                        data-card-id={card.id}
+                        {...webKanbanCardProps(card.id)}
                         onPointerDown={(event) => handleCardPointerDown(event, card.id)}
                       >
                         {card.title}
@@ -268,13 +266,4 @@ function BoardListbox(props: {
 
 function boardCardId(cardId: string): string {
   return `widget-board-option-${cardId}`;
-}
-
-function boardDropTargetAt(event: PointerEvent<HTMLElement>): BoardDropTarget | null {
-  const node = globalThis.document.elementFromPoint(event.clientX, event.clientY);
-  if (!(node instanceof Element)) return null;
-  const columnId = node.closest("[data-column-id]")?.getAttribute("data-column-id") ?? null;
-  if (columnId === null) return null;
-  const beforeCardId = node.closest("[data-card-id]")?.getAttribute("data-card-id") ?? null;
-  return { columnId, beforeCardId };
 }

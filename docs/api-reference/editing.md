@@ -511,6 +511,14 @@ interface KanbanCard extends Record<string, JSONValue> {
   readonly title: string;
 }
 ```
+## `KanbanCardDropTarget`
+
+```ts
+interface KanbanCardDropTarget {
+  readonly columnId: string;
+  readonly beforeCardId: string | null;
+}
+```
 ## `KanbanColumn`
 
 ```ts
@@ -549,12 +557,10 @@ type KanbanIntent =
       readonly cardId: string;
       readonly mode?: "replace" | "toggle";
     }
-  | {
+  | ({
       readonly type: "card.move";
       readonly cardId: string;
-      readonly columnId: string;
-      readonly beforeCardId?: string | null;
-    }
+    } & KanbanCardDropTarget)
   | { readonly type: "selection.remove" };
 ```
 ## `KanbanSelection`
@@ -643,7 +649,16 @@ type ObjectIntent =
       readonly dw: number;
       readonly dh: number;
     }
-  | { readonly type: "clipboard.paste"; readonly clipboard: ObjectClipboard };
+  | { readonly type: "clipboard.paste"; readonly clipboard: ObjectClipboard; readonly placement?: ObjectPastePlacement };
+```
+## `ObjectPastePlacement`
+
+```ts
+interface ObjectPastePlacement {
+  readonly type: "offset";
+  readonly dx: number;
+  readonly dy: number;
+}
 ```
 ## `ObjectSelection`
 
