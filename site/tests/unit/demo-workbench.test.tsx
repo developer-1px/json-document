@@ -129,6 +129,10 @@ describe("Demo definition and source discovery", () => {
   test("registers each UI Primitive owner source next to Composer usage", async () => {
     const sources = (await discoverDemoSources("routes/composer-demo/ComposerDemoRoute.tsx")).map((file) => file.path);
     expect(sources).toEqual(expect.arrayContaining([
+      "packages/json-document-composer/src/model.ts",
+      "packages/json-document-composer/src/schema.ts",
+      "packages/json-document-composer/src/trigger.ts",
+      "packages/json-document-composer/src/commands.ts",
       "packages/json-document-ui-primitives-react/src/select.tsx",
       "packages/json-document-ui-primitives-react/src/menu.tsx",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",

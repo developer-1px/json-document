@@ -13,6 +13,7 @@ export const apiReferencePackages = [
   ["web", "@interactive-os/json-document-web", "packages/json-document-web/src/index.ts", "Adapter", "Web platform adapter"],
   ["contenteditable", "@interactive-os/json-document-contenteditable", "packages/json-document-contenteditable/src/index.ts", "Adapter", "contenteditable platform adapter"],
   ["rich-text", "@interactive-os/json-document-rich-text", "packages/json-document-rich-text/src/index.ts", "Editing", "Rich Text domain과 editing 계약"],
+  ["composer", "@interactive-os/json-document-composer", "packages/json-document-composer/src/index.ts", "Hands", "Composer draft와 reference/trigger command 계약"],
   ["rich-text-web", "@interactive-os/json-document-rich-text-web", "packages/json-document-rich-text-web/src/index.ts", "Adapter", "Rich Text DOM adapter"],
   ["rich-text-react", "@interactive-os/json-document-rich-text-react", "packages/json-document-rich-text-react/src/index.tsx", "Connector", "Rich Text React connector"],
   ["collaboration", "@interactive-os/json-document-collaboration", "packages/json-document-collaboration/src/index.ts", "Collaboration", "replica, history, text collaboration runtime"],

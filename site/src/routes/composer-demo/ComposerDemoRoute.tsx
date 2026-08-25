@@ -2,29 +2,31 @@ import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, 
 import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
 import { FileDropRegion, Menu, Select, useListbox } from "@interactive-os/json-document-ui-primitives-react";
 import {
+  createRichTextNodeId,
   createRichTextEditor,
   type RichTextDocument,
   type RichTextNode,
 } from "@interactive-os/json-document-rich-text";
+import {
+  COMPOSER_SKILL_NODE,
+  composerSchema,
+  composerText,
+  createComposerDraft,
+  findComposerTrigger,
+  hasComposerContent,
+  insertComposerReference,
+  insertComposerText,
+  type ComposerAttachment,
+  type ComposerDraft,
+  type ComposerReference,
+} from "@interactive-os/json-document-composer";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { JsonInspector } from "../../shared/ui/json-inspector";
 import { PageHeader } from "../../shared/ui/primitives";
-import {
-  activeComposerTrigger,
-  composerAttachments,
-  composerDocumentText,
-  composerSchema,
-  createComposerDraft,
-  hasComposerRichText,
-  insertComposerSuggestion,
-  insertComposerText,
-  MENTION_TYPE,
-  SKILL_TYPE,
-  type ComposerDraft,
-  type ComposerSuggestion,
-} from "./composer-hands";
 import "./composer-demo.css";
+
+type ComposerSuggestion = ComposerReference & { readonly description: string };
 
 const suggestions: ReadonlyArray<ComposerSuggestion> = [
   { id: "skill-summary", kind: "skill", label: "요약", description: "대화와 문서를 핵심만 정리" },
@@ -42,7 +44,7 @@ const modelOptions = models.map((label) => ({
 }));
 
 export function ComposerDemoRoute() {
-  const [draft] = useState<JSONDocument>(() => createJSONDocument(createComposerDraft(models[0])));
+  const [draft] = useState<JSONDocument>(() => createJSONDocument(createComposerDraft({ id: "composer-draft", instructionId: "composer-instruction", paragraphId: "composer-paragraph", model: models[0] })));
   const [editor] = useState(() => createRichTextEditor({ document: draft, pointer: "/instruction", schema: composerSchema }));
   useSyncExternalStore(editor.subscribe, () => editor.snapshot.revision, () => editor.snapshot.revision);
   const instruction = draft.at("/instruction");
@@ -52,7 +54,7 @@ export function ComposerDemoRoute() {
   const [commandActiveId, setCommandActiveId] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const composerEditorRef = useRef<HTMLElement>(null);
-  const trigger = activeComposerTrigger(instructionValue, editor);
+  const trigger = findComposerTrigger(instructionValue, editor.snapshot.selection);
   const visibleSuggestions = suggestions.filter((item) => item.kind === trigger?.kind && item.label.toLowerCase().includes(trigger.query));
   const draftValue = draft.value as ComposerDraft<(typeof models)[number]>;
   const attachments = draftValue.attachments;
@@ -67,11 +69,11 @@ export function ComposerDemoRoute() {
     onActiveChange: setCommandActiveId,
     onAction: (id) => {
       const suggestion = visibleSuggestions.find((item) => item.id === id);
-      if (trigger && suggestion) insertComposerSuggestion(editor, trigger, suggestion);
+      if (trigger && suggestion) insertComposerReference(editor, trigger, suggestion, { createId: createRichTextNodeId });
     },
   });
   const { onKeyDown: handleCommandKeyDown, ...commandReferenceProps } = commandListbox.referenceProps;
-  const hasContent = composerDocumentText(instructionValue).trim().length > 0 || attachments.length > 0;
+  const hasContent = hasComposerContent(draftValue);
 
   const onAction = useCallback(() => undefined, []);
 
@@ -189,7 +191,7 @@ export function ComposerDemoRoute() {
               classNames={{ root: "composer-menu-root", trigger: "composer-icon-button", popup: "composer-layer composer-add-layer" }}
             />
             <div className="composer-editor-wrap">
-              {!hasComposerRichText(instructionValue) ? <span className="composer-placeholder-box">작업을 입력하세요</span> : null}
+              {composerText(instructionValue).trim() === "" ? <span className="composer-placeholder-box">작업을 입력하세요</span> : null}
               <RichTextEditorSurface
                 as="div"
                 editor={editor}
@@ -254,7 +256,7 @@ export function ComposerDemoRoute() {
 function renderAtom(node: RichTextNode): ReactNode {
   const attrs = "attrs" in node ? node.attrs as { readonly label?: unknown } : {};
   const label = typeof attrs.label === "string" ? attrs.label : node.type;
-  const kind = node.type === SKILL_TYPE ? "skill" : "mention";
+  const kind = node.type === COMPOSER_SKILL_NODE ? "skill" : "mention";
   return <span className={`composer-atom ${kind}`} contentEditable={false} data-rich-text-node-id={node.id}>{kind === "skill" ? "/" : "@"}{label}</span>;
 }
 
@@ -262,4 +264,14 @@ function formatBytes(size: number): string {
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
   return `${(size / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function composerAttachments(files: ReadonlyArray<File>): ReadonlyArray<ComposerAttachment> {
+  return files.map((file) => ({
+    id: createRichTextNodeId(),
+    kind: file.type.startsWith("image/") ? "image" : "document",
+    name: file.name,
+    size: file.size,
+    ...(file.type === "" ? {} : { mediaType: file.type }),
+  }));
 }

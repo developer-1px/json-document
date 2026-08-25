@@ -20,6 +20,7 @@
     "@interactive-os/json-document-react": "*",
     "@interactive-os/json-document-react-hook-form": "*",
     "@interactive-os/json-document-rich-text": "*",
+    "@interactive-os/json-document-composer": "*",
     "@interactive-os/json-document-rich-text-react": "*",
     "@interactive-os/json-document-rich-text-web": "*",
     "@interactive-os/json-document-selection": "*",

@@ -8,6 +8,7 @@ const firstKit = [
   ["json-document-v3.0.0", "@interactive-os/json-document", "latest", "packages/json-document/package.json"],
   ["json-document-selection-v0.1.0-rc.0", "@interactive-os/json-document-selection", "next", "packages/json-document-selection/package.json"],
   ["json-document-editing-v0.1.0-rc.0", "@interactive-os/json-document-editing", "next", "packages/json-document-editing/package.json"],
+  ["json-document-composer-v0.1.0-rc.0", "@interactive-os/json-document-composer", "next", "packages/json-document-composer/package.json"],
   ["json-document-web-v0.1.0-rc.0", "@interactive-os/json-document-web", "next", "packages/json-document-web/package.json"],
   ["json-document-react-v0.1.0-rc.0", "@interactive-os/json-document-react", "next", "packages/json-document-react/package.json"],
 ];
