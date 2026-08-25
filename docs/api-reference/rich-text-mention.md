@@ -11,15 +11,30 @@ Rich Text entity mention schema와 삽입 계약의 public entrypoint입니다. 
 ```ts
 createRichTextMentionNode(mention: RichTextMention, nodeId: string): RichTextNode
 ```
+## `findRichTextMentionTrigger`
+
+```ts
+findRichTextMentionTrigger(document: import("@interactive-os/json-document-rich-text").RichTextDocument, selection: RichTextSelection): RichTextSuggestionTrigger | null
+```
 ## `insertRichTextMention`
 
 ```ts
 insertRichTextMention(editor: RichTextEditor, range: RichTextMentionRange, mention: RichTextMention, options: { readonly createId: () => string; }): ReturnType<RichTextEditor["dispatch"]>
 ```
+## `insertRichTextMentionSuggestion`
+
+```ts
+insertRichTextMentionSuggestion(editor: RichTextEditor, trigger: RichTextSuggestionTrigger, suggestion: RichTextMentionSuggestion, options: { readonly createId: () => string; }): ReturnType<RichTextEditor["dispatch"]>
+```
 ## `isRichTextMentionNode`
 
 ```ts
 isRichTextMentionNode(node: RichTextNode): boolean
+```
+## `resolveRichTextMentionSuggestions`
+
+```ts
+resolveRichTextMentionSuggestions<Suggestion extends RichTextMentionSuggestion>(trigger: RichTextSuggestionTrigger | null, suggestions: ReadonlyArray<Suggestion>): ReadonlyArray<Suggestion>
 ```
 ## `RICH_TEXT_MENTION_NODE`
 
@@ -29,7 +44,7 @@ const RICH_TEXT_MENTION_NODE: "os.interactive/mention"
 ## `RichTextMention`
 
 ```ts
-interface RichTextMention extends Record<string, JSONValue> {
+interface RichTextMention {
   readonly id: string;
   readonly label: string;
 }
@@ -46,5 +61,14 @@ interface RichTextMentionRange {
   readonly nodeId: string;
   readonly from: number;
   readonly to: number;
+}
+```
+## `RichTextMentionSuggestion`
+
+```ts
+interface RichTextMentionSuggestion extends RichTextMention, RichTextSuggestionCandidate {
+  readonly description?: string;
+  readonly iconUrl?: string;
+  readonly iconText?: string;
 }
 ```

@@ -24,12 +24,14 @@
     "@interactive-os/json-document": "^3.0.0",
     "@interactive-os/json-document-file-intake": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text-mention": "^0.1.0-rc.0",
+    "@interactive-os/json-document-rich-text-suggestion": "^0.1.0-rc.0",
     "@interactive-os/json-document-rich-text": "^0.1.0-rc.0"
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",
     "@interactive-os/json-document-file-intake": "*",
     "@interactive-os/json-document-rich-text-mention": "*",
+    "@interactive-os/json-document-rich-text-suggestion": "*",
     "@interactive-os/json-document-rich-text": "*",
     "@types/node": "^25.9.0",
     "typescript": "^5.0.0",

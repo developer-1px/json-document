@@ -17,6 +17,8 @@
     { "path": "./packages/json-document-contenteditable" },
     { "path": "./packages/json-document-rich-text" },
     { "path": "./packages/json-document-file-intake" },
+    { "path": "./packages/json-document-rich-text-suggestion" },
+    { "path": "./packages/json-document-rich-text-suggestion-react" },
     { "path": "./packages/json-document-rich-text-mention" },
     { "path": "./packages/json-document-rich-text-mention-react" },
     { "path": "./packages/json-document-composer" },

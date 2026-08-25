@@ -37,9 +37,10 @@ import composerCommandsSource from "../../../../packages/json-document-composer/
 import composerHostConfigSource from "../../../../packages/json-document-composer/src/host-config.ts?raw";
 import composerInteractionSource from "../../../../packages/json-document-composer/src/interaction.ts?raw";
 import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
-import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
 import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
+import suggestionSource from "../../../../packages/json-document-rich-text-suggestion/src/index.ts?raw";
+import suggestionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/index.ts?raw";
 import mentionSource from "../../../../packages/json-document-rich-text-mention/src/index.ts?raw";
 import mentionReactSource from "../../../../packages/json-document-rich-text-mention-react/src/index.tsx?raw";
 import webFileIntakeSource from "../../../../packages/json-document-web/src/file-intake.ts?raw";
@@ -69,6 +70,8 @@ const packageReferencePaths = new Map([
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
   ["packages/json-document-file-intake/", "/docs/api/file-intake"],
+  ["packages/json-document-rich-text-suggestion/", "/docs/api/rich-text-suggestion"],
+  ["packages/json-document-rich-text-suggestion-react/", "/docs/api/rich-text-suggestion-react"],
   ["packages/json-document-rich-text-mention/", "/docs/api/rich-text-mention"],
   ["packages/json-document-rich-text-mention-react/", "/docs/api/rich-text-mention-react"],
   ["packages/json-document-composer/", "/docs/api/composer"],
@@ -134,9 +137,10 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/host-config.ts", composerHostConfigSource],
   ["packages/json-document-composer/src/interaction.ts", composerInteractionSource],
   ["packages/json-document-composer/src/suggestions.ts", composerSuggestionsSource],
-  ["packages/json-document-composer-react/src/command-menu.ts", composerCommandMenuSource],
   ["packages/json-document-composer-react/src/reference-atom.tsx", composerReferenceAtomSource],
   ["packages/json-document-file-intake/src/index.ts", fileIntakeSource],
+  ["packages/json-document-rich-text-suggestion/src/index.ts", suggestionSource],
+  ["packages/json-document-rich-text-suggestion-react/src/index.ts", suggestionReactSource],
   ["packages/json-document-rich-text-mention/src/index.ts", mentionSource],
   ["packages/json-document-rich-text-mention-react/src/index.tsx", mentionReactSource],
   ["packages/json-document-web/src/file-intake.ts", webFileIntakeSource],
@@ -144,6 +148,16 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/file-size.ts", uiFileSizeSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-rich-text-suggestion",
+    symbol: "findRichTextSuggestionTrigger",
+    sourcePath: "packages/json-document-rich-text-suggestion/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-suggestion-react",
+    symbol: "useRichTextSuggestion",
+    sourcePath: "packages/json-document-rich-text-suggestion-react/src/index.ts",
+  },
   {
     packageName: "@interactive-os/json-document-file-intake",
     symbol: "validateFileCandidates",
@@ -198,11 +212,6 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-composer",
     symbol: "resolveComposerSuggestions",
     sourcePath: "packages/json-document-composer/src/suggestions.ts",
-  },
-  {
-    packageName: "@interactive-os/json-document-composer-react",
-    symbol: "useComposerCommandMenu",
-    sourcePath: "packages/json-document-composer-react/src/command-menu.ts",
   },
   {
     packageName: "@interactive-os/json-document-composer-react",

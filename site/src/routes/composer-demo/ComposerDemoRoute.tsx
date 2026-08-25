@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type KeyboardEvent } from "react";
-import { createJSONDocument, type JSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument, type JSONDocument, type JSONValue } from "@interactive-os/json-document";
 import { FileDropRegion, Menu, Select, formatFileSize } from "@interactive-os/json-document-ui-primitives-react";
 import {
   createRichTextNodeId,
@@ -18,6 +18,7 @@ import {
   findComposerTrigger,
   hasComposerContent,
   insertComposerText,
+  insertComposerReference,
   removeComposerAttachment,
   selectComposerModel,
   type ComposerDraft,
@@ -25,7 +26,10 @@ import {
   type ComposerHostPorts,
   type ComposerReference,
 } from "@interactive-os/json-document-composer";
-import { ComposerReferenceAtom, useComposerCommandMenu } from "@interactive-os/json-document-composer-react";
+import { ComposerReferenceAtom } from "@interactive-os/json-document-composer-react";
+import { findRichTextSuggestionTrigger } from "@interactive-os/json-document-rich-text-suggestion";
+import { useRichTextSuggestion } from "@interactive-os/json-document-rich-text-suggestion-react";
+import { RichTextMentionSuggestions, useRichTextMentionSuggestions } from "@interactive-os/json-document-rich-text-mention-react";
 import { fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "@interactive-os/json-document-web";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
@@ -33,15 +37,15 @@ import { JsonInspector } from "../../shared/ui/json-inspector";
 import { PageHeader } from "../../shared/ui/primitives";
 import "./composer-demo.css";
 
-type ComposerSuggestion = ComposerReference & { readonly description: string };
+type ComposerSuggestion = ComposerReference & Readonly<Record<string, JSONValue>> & { readonly description: string; readonly iconText: string };
 
 const suggestions: ReadonlyArray<ComposerSuggestion> = [
-  { id: "skill-summary", kind: "skill", label: "요약", description: "대화와 문서를 핵심만 정리" },
-  { id: "skill-translate", kind: "skill", label: "번역", description: "선택한 언어로 자연스럽게 번역" },
-  { id: "skill-task", kind: "skill", label: "작업 만들기", description: "다음 액션을 일정과 태스크로 변환" },
-  { id: "agent-research", kind: "mention", label: "리서치 에이전트", description: "자료 조사와 출처 기반 정리" },
-  { id: "agent-meeting", kind: "mention", label: "회의록 에이전트", description: "회의 내용과 후속 액션 정리" },
-  { id: "agent-review", kind: "mention", label: "코드 리뷰 에이전트", description: "변경점과 위험 검토" },
+  { id: "skill-summary", kind: "skill", label: "요약", description: "대화와 문서를 핵심만 정리", iconText: "/" },
+  { id: "skill-translate", kind: "skill", label: "번역", description: "선택한 언어로 자연스럽게 번역", iconText: "/" },
+  { id: "skill-task", kind: "skill", label: "작업 만들기", description: "다음 액션을 일정과 태스크로 변환", iconText: "/" },
+  { id: "agent-research", kind: "mention", label: "리서치 에이전트", description: "자료 조사와 출처 기반 정리", iconText: "R" },
+  { id: "agent-meeting", kind: "mention", label: "회의록 에이전트", description: "회의 내용과 후속 액션 정리", iconText: "M" },
+  { id: "agent-review", kind: "mention", label: "코드 리뷰 에이전트", description: "변경점과 위험 검토", iconText: "C" },
 ];
 
 const models = ["GPT-5.6", "GPT-5.5", "Claude Opus", "Claude Sonnet"] as const;
@@ -61,10 +65,6 @@ const hostConfig = {
   interaction: { submit: "enter", newline: "shift-enter" },
 } satisfies ComposerHostConfig<ComposerModel>;
 
-function renderComposerReference(node: RichTextNode) {
-  return <ComposerReferenceAtom node={node} className="composer-atom" />;
-}
-
 if (hostConfig.profile !== composerHostConfigSchema.$id) throw new TypeError("Composer Host config profile does not match its schema.");
 
 export function ComposerDemoRoute() {
@@ -78,19 +78,27 @@ export function ComposerDemoRoute() {
   const fileInput = useRef<HTMLInputElement>(null);
   const composerEditorRef = useRef<HTMLElement>(null);
   const trigger = findComposerTrigger(instructionValue, editor.snapshot.selection);
-  const commandMenu = useComposerCommandMenu({
-    id: "composer-command-listbox",
-    label: trigger?.kind === "skill" ? "스킬 선택" : "에이전트 선택",
+  const suggestionTrigger = findRichTextSuggestionTrigger(instructionValue, editor.snapshot.selection, ["/", "@"]) ;
+  const mentionMenu = useRichTextMentionSuggestions({
+    id: "composer-mention-listbox",
+    label: "에이전트 선택",
     editor,
-    trigger,
-    suggestions: hostConfig.suggestions,
+    trigger: suggestionTrigger,
+    suggestions: hostConfig.suggestions.filter((item) => item.kind === "mention"),
     createId: createRichTextNodeId,
   });
+  const skillMenu = useRichTextSuggestion({
+    id: "composer-skill-listbox",
+    label: "스킬 선택",
+    trigger: suggestionTrigger?.trigger === "/" ? suggestionTrigger : null,
+    candidates: hostConfig.suggestions.filter((item) => item.kind === "skill"),
+    onAction: (suggestion, activeTrigger) => insertComposerReference(editor, { kind: "skill", query: activeTrigger.query, range: activeTrigger.range }, suggestion, { createId: createRichTextNodeId }),
+  });
+  const commandMenu = trigger?.kind === "mention" ? mentionMenu : skillMenu;
   const visibleSuggestions = commandMenu.items;
   const draftValue = draft.value as ComposerDraft<(typeof models)[number]>;
   const attachments = draftValue.attachments;
   const model = draftValue.model;
-  const activeSuggestion = commandMenu.activeItem;
   const { onKeyDown: handleCommandKeyDown, ...commandReferenceProps } = commandMenu.referenceProps;
   const hasContent = hasComposerContent(draftValue);
   const hostPorts: ComposerHostPorts<ComposerModel> = {
@@ -99,6 +107,7 @@ export function ComposerDemoRoute() {
   };
 
   const onAction = useCallback(() => undefined, []);
+  const renderComposerReference = useCallback((node: RichTextNode) => <ComposerReferenceAtom node={node} editor={editor} className="composer-atom" />, [editor]);
 
   function submit() {
     if (!hasContent) return;
@@ -107,7 +116,6 @@ export function ComposerDemoRoute() {
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     const interaction = composerInteractionFromKeyStroke({ key: event.key, shiftKey: event.shiftKey, commandKey: event.metaKey || event.ctrlKey }, hostConfig.interaction);
-    if (interaction === "dismiss") return;
     if (trigger && visibleSuggestions.length > 0) {
       handleCommandKeyDown(event);
       if (event.defaultPrevented) {
@@ -115,6 +123,7 @@ export function ComposerDemoRoute() {
         return;
       }
     }
+    if (interaction === "dismiss") return;
     if (interaction !== "submit") return;
     event.preventDefault();
     event.stopPropagation();
@@ -246,13 +255,15 @@ export function ComposerDemoRoute() {
             <button className={`composer-send-button${hasContent ? " is-active" : ""}`} type="button" aria-label="전송 (Enter)" disabled={!hasContent} onClick={submit}>↑</button>
           </div>
 
-          {trigger && visibleSuggestions.length > 0 ? (
-            <div {...commandMenu.listboxProps} className="composer-layer composer-command-layer">
-              {visibleSuggestions.map((item) => (
-                <button key={item.id} className={item.id === activeSuggestion?.id ? "selected" : ""} {...commandMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
-                  <span className={`composer-command-icon ${item.kind}`}>{item.kind === "skill" ? "/" : "@"}</span>
+          {trigger?.kind === "mention" ? (
+            <RichTextMentionSuggestions binding={mentionMenu} groupLabel="에이전트" className="composer-layer composer-command-layer" />
+          ) : trigger?.kind === "skill" && visibleSuggestions.length > 0 ? (
+            <div {...skillMenu.listboxProps} className="composer-layer composer-command-layer">
+              {skillMenu.items.map((item) => (
+                <button key={item.id} className={item.id === skillMenu.activeItem?.id ? "selected" : ""} {...skillMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
+                  <span className="composer-command-icon skill">/</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
-                  <em>{item.kind === "skill" ? "Skill" : "Agent"}</em>
+                  <em>Skill</em>
                 </button>
               ))}
             </div>

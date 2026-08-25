@@ -19,6 +19,8 @@ const alwaysFull = new Set([
 
 const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-file-intake", ["site/tests/browser/composer-demo.spec.ts"]],
+  ["@interactive-os/json-document-rich-text-suggestion", ["site/tests/browser/composer-demo.spec.ts"]],
+  ["@interactive-os/json-document-rich-text-suggestion-react", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-mention", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-mention-react", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-composer", ["site/tests/browser/composer-demo.spec.ts"]],
@@ -79,6 +81,8 @@ const firstKitWorkspaces = new Set([
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
   "@interactive-os/json-document-file-intake",
+  "@interactive-os/json-document-rich-text-suggestion",
+  "@interactive-os/json-document-rich-text-suggestion-react",
   "@interactive-os/json-document-rich-text-mention",
   "@interactive-os/json-document-rich-text-mention-react",
 ]);

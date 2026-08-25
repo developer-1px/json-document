@@ -14,6 +14,8 @@ export const apiReferencePackages = [
   ["contenteditable", "@interactive-os/json-document-contenteditable", "packages/json-document-contenteditable/src/index.ts", "Adapter", "contenteditable platform adapter"],
   ["rich-text", "@interactive-os/json-document-rich-text", "packages/json-document-rich-text/src/index.ts", "Editing", "Rich Text domain과 editing 계약"],
   ["file-intake", "@interactive-os/json-document-file-intake", "packages/json-document-file-intake/src/index.ts", "Artifact", "플랫폼 독립 파일 후보와 수용 정책"],
+  ["rich-text-suggestion", "@interactive-os/json-document-rich-text-suggestion", "packages/json-document-rich-text-suggestion/src/index.ts", "Hands", "Rich Text suggestion trigger와 상태 계약"],
+  ["rich-text-suggestion-react", "@interactive-os/json-document-rich-text-suggestion-react", "packages/json-document-rich-text-suggestion-react/src/index.ts", "Hands", "Rich Text suggestion React interaction binding"],
   ["rich-text-mention", "@interactive-os/json-document-rich-text-mention", "packages/json-document-rich-text-mention/src/index.ts", "Hands", "Rich Text entity mention schema와 삽입 계약"],
   ["rich-text-mention-react", "@interactive-os/json-document-rich-text-mention-react", "packages/json-document-rich-text-mention-react/src/index.tsx", "Hands", "Rich Text mention React projection"],
   ["composer", "@interactive-os/json-document-composer", "packages/json-document-composer/src/index.ts", "Hands", "Composer draft와 reference/trigger command 계약"],

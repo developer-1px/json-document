@@ -80,6 +80,8 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   contenteditableApi: "cursor",
   richTextApi: "terminal",
   fileIntakeApi: "clipboard",
+  richTextSuggestionApi: "cursor",
+  richTextSuggestionReactApi: "connector",
   richTextMentionApi: "cursor",
   richTextMentionReactApi: "connector",
   composerApi: "terminal",

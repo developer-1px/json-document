@@ -14,9 +14,9 @@ test("Composer가 브라우저 편집과 canonical draft를 함께 유지한다"
   await page.getByRole("menuitem", { name: /스킬/ }).click();
   await expect(editor).toBeFocused();
   await expect(page.getByRole("listbox", { name: "스킬 선택" })).toBeVisible();
-  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-listbox-option-skill-summary");
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-skill-listbox-option-skill-summary");
   await editor.press("ArrowDown");
-  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-command-listbox-option-skill-translate");
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-skill-listbox-option-skill-translate");
   await editor.press("Enter");
   await expect(editor).toContainText("/번역");
 
@@ -63,6 +63,33 @@ test("Composer가 브라우저 편집과 canonical draft를 함께 유지한다"
 
   await editor.press("Enter");
   await expect(page.getByRole("status")).toHaveText("canonical Composer turn을 제출했습니다.");
+  expect(pageErrors).toEqual([]);
+});
+
+test("Mention Hands가 가상 포커스와 atom 경계 삭제를 완성한다", async ({ page }) => {
+  const pageErrors: Error[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error));
+
+  await page.goto("/demo/composer");
+  const editor = page.getByLabel("Agent Chat Composer");
+  await editor.click();
+  await editor.pressSequentially("@");
+  const listbox = page.getByRole("listbox", { name: "에이전트 선택" });
+  await expect(listbox).toBeVisible();
+  await expect(editor).toBeFocused();
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-mention-listbox-option-agent-research");
+  await editor.press("End");
+  await expect(editor).toHaveAttribute("aria-activedescendant", "composer-mention-listbox-option-agent-review");
+  await expect(page.getByRole("option", { name: /코드 리뷰 에이전트/ })).toHaveAttribute("data-focus", "true");
+  await editor.press("Enter");
+
+  const atom = editor.locator("[data-rich-text-mention]");
+  await expect(atom).toContainText("코드 리뷰 에이전트");
+  await editor.press("Backspace");
+  await expect(atom).toHaveAttribute("data-focus", "true");
+  await editor.press("Backspace");
+  await expect(atom).toHaveCount(0);
+  await expect(page.getByTestId("composer-draft-json")).not.toContainText('"os.interactive/mention"');
   expect(pageErrors).toEqual([]);
 });
 

@@ -18,6 +18,8 @@
       "@interactive-os/json-document-web": ["../packages/json-document-web/src/index.ts"],
       "@interactive-os/json-document-contenteditable": ["../packages/json-document-contenteditable/src/index.ts"],
       "@interactive-os/json-document-rich-text": ["../packages/json-document-rich-text/src/index.ts"],
+      "@interactive-os/json-document-rich-text-suggestion": ["../packages/json-document-rich-text-suggestion/src/index.ts"],
+      "@interactive-os/json-document-rich-text-suggestion-react": ["../packages/json-document-rich-text-suggestion-react/src/index.ts"],
       "@interactive-os/json-document-file-intake": ["../packages/json-document-file-intake/src/index.ts"],
       "@interactive-os/json-document-rich-text-mention": ["../packages/json-document-rich-text-mention/src/index.ts"],
       "@interactive-os/json-document-rich-text-mention-react": ["../packages/json-document-rich-text-mention-react/src/index.tsx"],

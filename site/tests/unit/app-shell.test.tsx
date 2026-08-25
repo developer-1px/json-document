@@ -71,6 +71,8 @@ describe("official site shell", () => {
     await user.click(nav.getByRole("button", { name: "Hands" }));
     expect(groupLinks(nav, "Hands")).toEqual([
       "API · Rich Text Mention",
+      "API · Rich Text Suggestion",
+      "API · Suggestion React",
       "API · Mention React",
       "API · Composer",
       "API · Composer React",

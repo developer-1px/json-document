@@ -14,6 +14,8 @@ import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
 import fileIntakeApiMarkdown from "../../../../docs/api-reference/file-intake.md?raw";
+import richTextSuggestionApiMarkdown from "../../../../docs/api-reference/rich-text-suggestion.md?raw";
+import richTextSuggestionReactApiMarkdown from "../../../../docs/api-reference/rich-text-suggestion-react.md?raw";
 import richTextMentionApiMarkdown from "../../../../docs/api-reference/rich-text-mention.md?raw";
 import richTextMentionReactApiMarkdown from "../../../../docs/api-reference/rich-text-mention-react.md?raw";
 import composerApiMarkdown from "../../../../docs/api-reference/composer.md?raw";
@@ -165,6 +167,8 @@ export const docPages = {
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),
   fileIntakeApi: docPage("/docs/api/file-intake", fileIntakeApiMarkdown),
+  richTextSuggestionApi: docPage("/docs/api/rich-text-suggestion", richTextSuggestionApiMarkdown),
+  richTextSuggestionReactApi: docPage("/docs/api/rich-text-suggestion-react", richTextSuggestionReactApiMarkdown),
   richTextMentionApi: docPage("/docs/api/rich-text-mention", richTextMentionApiMarkdown),
   richTextMentionReactApi: docPage("/docs/api/rich-text-mention-react", richTextMentionReactApiMarkdown),
   composerApi: docPage("/docs/api/composer", composerApiMarkdown),

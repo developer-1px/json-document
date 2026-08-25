@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig/library.json",
   "compilerOptions": { "rootDir": "src", "outDir": "dist", "tsBuildInfoFile": "dist/.tsbuildinfo" },
-  "references": [{ "path": "../json-document" }, { "path": "../json-document-rich-text" }],
+  "references": [{ "path": "../json-document" }, { "path": "../json-document-rich-text" }, { "path": "../json-document-rich-text-suggestion" }],
   "include": ["src/**/*.ts"]
 }

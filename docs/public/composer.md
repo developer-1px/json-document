@@ -38,13 +38,13 @@ Selection, IME, structured Clipboard와 history를 기존 Rich Text editor에 �
 `@interactive-os/json-document-file-intake`의 `validateFileCandidates`로 공통 파일
 후보와 수용 정책을 검증한 뒤 Host가 주입한 ID로 Composer attachment를 만들며,
 검증 실패를 명시적인 Composer command 결과로 번역합니다.
-`resolveComposerSuggestions`는 active trigger와 제품 catalog로 표시할 후보를
-결정하며 Host가 query matching을 다시 구현하지 않게 합니다.
+호환용 `findComposerTrigger`와 `resolveComposerSuggestions`도 공용 Rich Text Suggestion
+계약에 위임합니다. 신규 조립은 `@interactive-os/json-document-rich-text-suggestion`의
+trigger·candidate 상태와 `@interactive-os/json-document-rich-text-suggestion-react`의
+combobox·listbox interaction binding을 직접 사용합니다.
 
 `@interactive-os/json-document-composer-react`는 React Host를 위한
-`useComposerCommandMenu`와 `ComposerReferenceAtom`을 제공합니다. 전자는 suggestion
-resolution, active-item fallback, listbox lifecycle과 reference 삽입을 조립하고,
-후자는 skill projection을 소유하고 mention은
+`ComposerReferenceAtom`을 제공합니다. skill projection을 소유하고 mention은
 `@interactive-os/json-document-rich-text-mention-react`의
 `RichTextMentionAtom`을 조립해 접근 가능한 DOM projection으로 렌더링합니다.
 제품 className과 CSS는 Host가 주입합니다.
@@ -61,6 +61,8 @@ DOM과 Web object를 알지 않으며, Web adapter는 ID·허용 정책·attachm
 
 Host는 config 값과 runtime port를 주입하고 composer의 배치, copy, CSS와 첨부 preview를
 그립니다. 파일 metadata 표시는 UI primitives의 `formatFileSize`를 사용합니다.
+후보 자료·제품 copy·권한은 Host가 정하지만 suggestion open/dismiss, keyboard focus,
+pointer active state와 mention 삽입 lifecycle은 정본 Hands가 소유합니다.
 검색 source, 파일 저장소, Agent runtime, transcript, think·stream·tool 상태는
 Composer가 소유하지 않습니다.
 

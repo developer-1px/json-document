@@ -118,6 +118,60 @@ describe("Official Rich Text editor", () => {
     expect(editor.snapshot.selection).toEqual(selection);
   });
 
+  it("deletes an adjacent inline atom from a text boundary in both directions", () => {
+    const backwardDocument = createJSONDocument({
+      profile: "urn:interactive-os:json-document:rich-text:1",
+      id: "backward-atom-doc",
+      type: "doc",
+      content: [{
+        id: "backward-paragraph",
+        type: "paragraph",
+        content: [
+          { id: "backward-text-a", type: "text", text: "A", marks: [] },
+          { id: "backward-atom", type: "hardBreak" },
+          { id: "backward-text-b", type: "text", text: "B", marks: [] },
+        ],
+      }],
+    } satisfies RichTextDocument);
+    const backwardEditor = createRichTextEditor({ document: backwardDocument, selection: collapsed("backward-text-b", 0) });
+
+    expect(backwardEditor.dispatch({ type: "text.delete", direction: "backward", unit: "character" }).ok).toBe(true);
+    expect((backwardDocument.value as RichTextDocument).content[0]).toMatchObject({
+      content: [{ id: "backward-text-a", text: "AB" }],
+    });
+    expect(backwardEditor.snapshot.selection.ranges[0]?.focus).toMatchObject({ offset: 1 });
+    expect(backwardEditor.undo().ok).toBe(true);
+    expect((backwardDocument.value as RichTextDocument).content[0]).toMatchObject({
+      content: [{ id: "backward-text-a" }, { id: "backward-atom" }, { id: "backward-text-b" }],
+    });
+
+    const forwardDocument = createJSONDocument({
+      profile: "urn:interactive-os:json-document:rich-text:1",
+      id: "forward-atom-doc",
+      type: "doc",
+      content: [{
+        id: "forward-paragraph",
+        type: "paragraph",
+        content: [
+          { id: "forward-text-a", type: "text", text: "A", marks: [] },
+          { id: "forward-atom", type: "hardBreak" },
+          { id: "forward-text-b", type: "text", text: "B", marks: [] },
+        ],
+      }],
+    } satisfies RichTextDocument);
+    const forwardEditor = createRichTextEditor({ document: forwardDocument, selection: collapsed("forward-text-a", 1) });
+
+    expect(forwardEditor.dispatch({ type: "text.delete", direction: "forward", unit: "character" }).ok).toBe(true);
+    expect((forwardDocument.value as RichTextDocument).content[0]).toMatchObject({
+      content: [{ id: "forward-text-a", text: "AB" }],
+    });
+    expect(forwardEditor.snapshot.selection.ranges[0]?.focus).toMatchObject({ offset: 1 });
+    expect(forwardEditor.undo().ok).toBe(true);
+    expect((forwardDocument.value as RichTextDocument).content[0]).toMatchObject({
+      content: [{ id: "forward-text-a" }, { id: "forward-atom" }, { id: "forward-text-b" }],
+    });
+  });
+
   it("renders the canonical tree through a target-neutral adapter", () => {
     const adapter: RichTextRenderAdapter<string> = {
       document: (_node, children) => `<article>${children.join("")}</article>`,

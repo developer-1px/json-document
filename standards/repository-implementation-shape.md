@@ -226,6 +226,8 @@ foundation으로 유지한다.
 | `packages/json-document-contenteditable` | Composite Adapter | React entry, binding, DOM adapter 책임 분리 유지 |
 | `packages/json-document-rich-text` | Composite Domain | schema/model/validation/topology 경계 유지; editor 책임 분리는 후속 #415 |
 | `packages/json-document-file-intake` | Single-native Domain | 플랫폼 독립 file candidate, acceptance policy, validation 계약을 flat owner로 유지 |
+| `packages/json-document-rich-text-suggestion` | Single-native Hands | Rich Text suggestion trigger, query, candidate와 open/dismiss/active 상태를 소유 |
+| `packages/json-document-rich-text-suggestion-react` | Single-native Connector | editable reference, listbox, keyboard·pointer와 ARIA focus projection을 소유 |
 | `packages/json-document-rich-text-mention` | Rich Text Extension | entity mention node schema와 insertion command를 소유 |
 | `packages/json-document-rich-text-mention-react` | Single-native Connector | canonical mention node의 React projection을 소유 |
 | `packages/json-document-rich-text-web` | Adapter family | clipboard와 contenteditable 책임 file, root facade 유지 |
