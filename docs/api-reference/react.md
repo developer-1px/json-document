@@ -49,6 +49,20 @@ interface EditingItem<Key extends string = string> {
   getPressHandler(): (event: EditingPressEvent) => void;
 }
 ```
+## `editingItemProps`
+
+```ts
+editingItemProps(item: EditingItem): EditingItemProps
+```
+## `EditingItemProps`
+
+```ts
+interface EditingItemProps {
+  readonly selected: boolean;
+  readonly focus: boolean;
+  readonly onClick: (event: EditingPressEvent) => void;
+}
+```
 ## `EditingKeyboardCommand`
 
 ```ts
