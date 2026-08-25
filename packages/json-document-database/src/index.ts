@@ -39,8 +39,13 @@ export type { DatabaseTableProps } from "./database-hands.js";
 export type {
   DatabaseHandCellRenderProps,
   DatabaseHandChange,
+  DatabaseHandContext,
+  DatabaseHandDocumentChange,
+  DatabaseHandDocumentSource,
+  DatabaseHandEditorSource,
   DatabaseHandFeatures,
   DatabaseHandLabels,
   DatabaseHandPresentation,
   DatabaseHandProps,
+  DatabaseHandLegacySource,
 } from "./database-hand.js";

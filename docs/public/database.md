@@ -75,9 +75,13 @@ column visibility/order/width/pinning과 `personal | shared | locked` ownership�
 가집니다. `view/onViewChange` controlled 방식으로 URL이나 host store가 정본이
 될 수 있고, `defaultView`만 주면 Hand가 내부 상태를 소유합니다.
 
-기존 `DatabaseHand`의 `records/onRecordsChange` API는 in-memory compatibility
-preset으로 유지됩니다. 실제 API-backed database의 중심 계약은
-`Database.Provider`와 `Database.Workspace`입니다.
+`DatabaseHand`는 하나의 table surface에 세 가지 source profile을 제공합니다.
+이미 생성한 `DatabaseEditor`, controlled `DatabaseDocument`, 기존 Zod
+`schema/records` adapter 중 하나를 선택합니다. `renderToolbar(context)`와
+`renderInspector(context)`는 snapshot, view, selection, history, announcement를
+읽기 전용으로 제공하므로 Host가 table 동작을 다시 구현하지 않고 제품 UI만
+조합할 수 있습니다. API-backed `Database.Table`도 같은 private surface로
+위임합니다.
 
 Hands는 backend, 인증, 권한 정책, database migration, formula runtime 또는
 제품 업무 규칙을 대신 구현하지 않습니다.

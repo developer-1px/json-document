@@ -151,6 +151,52 @@ interface DatabaseHandChange<Row> {
   readonly revision: number;
 }
 ```
+## `DatabaseHandContext`
+
+```ts
+interface DatabaseHandContext {
+  readonly snapshot: EditingSnapshot<DatabaseSelection>;
+  readonly document: DatabaseDocument;
+  readonly view: DatabaseTableView;
+  readonly selectedCells: ReadonlyArray<{ readonly recordId: string; readonly propertyId: string }>;
+  readonly canUndo: boolean;
+  readonly canRedo: boolean;
+  readonly announcement: string;
+  readonly result: EditingResult<DatabaseSelection> | null;
+  readonly nativeTextLease: { readonly recordId: string; readonly propertyId: string; readonly composing: boolean } | null;
+}
+```
+## `DatabaseHandDocumentChange`
+
+```ts
+interface DatabaseHandDocumentChange {
+  readonly origin: DatabaseHandOrigin;
+  readonly revision: number;
+}
+```
+## `DatabaseHandDocumentSource`
+
+```ts
+interface DatabaseHandDocumentSource {
+  readonly editor?: never;
+  readonly document: DatabaseDocument;
+  readonly viewId: string;
+  readonly onDocumentChange: (document: DatabaseDocument, change: DatabaseHandDocumentChange) => void;
+  readonly schema?: never;
+  readonly records?: never;
+}
+```
+## `DatabaseHandEditorSource`
+
+```ts
+interface DatabaseHandEditorSource {
+  readonly editor: DatabaseEditor;
+  readonly viewId: string;
+  readonly document?: never;
+  readonly schema?: never;
+  readonly records?: never;
+}
+```
 ## `DatabaseHandFeatures`
 
 ```ts
@@ -178,6 +224,18 @@ interface DatabaseHandLabels {
   readonly loading?: string;
 }
 ```
+## `DatabaseHandLegacySource`
+
+```ts
+interface DatabaseHandLegacySource<Row extends Record<string, unknown>> {
+  readonly editor?: never;
+  readonly document?: never;
+  readonly viewId?: never;
+  readonly schema: ZodType<Row>;
+  readonly records: ReadonlyArray<Row>;
+  readonly onRecordsChange?: (records: ReadonlyArray<Row>, change: DatabaseHandChange<Row>) => void;
+}
+```
 ## `DatabaseHandPresentation`
 
 ```ts
@@ -191,27 +249,11 @@ interface DatabaseHandPresentation {
 ## `DatabaseHandProps`
 
 ```ts
-interface DatabaseHandProps<Row extends Record<string, unknown>> {
-  readonly schema: ZodType<Row>;
-  readonly records: ReadonlyArray<Row>;
-  readonly onRecordsChange?: (records: ReadonlyArray<Row>, change: DatabaseHandChange<Row>) => void;
-  readonly onSelectionChange?: (recordIds: ReadonlyArray<string>) => void;
-  readonly onRecordOpen?: (record: Row) => void;
-  readonly createRecord?: () => Row;
-  readonly renderCell?: Readonly<Record<string, (props: DatabaseHandCellRenderProps<Row>) => ReactNode>>;
-  readonly features?: DatabaseHandFeatures;
-  readonly labels?: DatabaseHandLabels;
-  readonly toolbar?: ReactNode;
-  readonly emptyState?: ReactNode;
-  readonly loadingState?: ReactNode;
-  readonly errorState?: (message: string) => ReactNode;
-  readonly loading?: boolean;
-  readonly readOnly?: boolean;
-  readonly className?: string;
-  readonly style?: CSSProperties;
-  readonly density?: "comfortable" | "compact";
-  readonly presentation?: DatabaseHandPresentation;
-}
+type DatabaseHandProps<Row extends Record<string, unknown>> = DatabaseHandCommonProps<Row> & (
+  | DatabaseHandEditorSource
+  | DatabaseHandDocumentSource
+  | DatabaseHandLegacySource<Row>
+);
 ```
 ## `DatabaseMutationContext`
 

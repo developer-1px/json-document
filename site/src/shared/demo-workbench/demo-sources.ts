@@ -16,6 +16,7 @@ import webPointerSessionSource from "../../../../packages/json-document-web/src/
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
+import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
 import uiMenuSource from "../../../../packages/json-document-ui-primitives-react/src/menu.tsx?raw";
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
@@ -82,6 +83,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
+  ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
   ["packages/json-document-ui-primitives-react/src/menu.tsx", uiMenuSource],
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
@@ -156,6 +158,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "nextDatabasePropertySort",
     sourcePath: "packages/json-document-editing/src/database.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-database",
+    symbol: "DatabaseHand",
+    sourcePath: "packages/json-document-database/src/database-hand.tsx",
   },
   {
     packageName: "@interactive-os/json-document-editing",
