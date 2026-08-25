@@ -272,6 +272,6 @@ function composerAttachments(files: ReadonlyArray<File>): ReadonlyArray<Composer
     kind: file.type.startsWith("image/") ? "image" : "document",
     name: file.name,
     size: file.size,
-    ...(file.type === "" ? {} : { mediaType: file.type }),
+    mediaType: file.type || null,
   }));
 }

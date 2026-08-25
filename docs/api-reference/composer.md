@@ -29,7 +29,7 @@ interface ComposerAttachment extends Record<string, JSONValue> {
   readonly kind: "document" | "image";
   readonly name: string;
   readonly size: number;
-  readonly mediaType?: string;
+  readonly mediaType: string | null;
 }
 ```
 ## `ComposerCommandResult`
