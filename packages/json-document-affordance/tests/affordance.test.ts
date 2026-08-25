@@ -34,6 +34,7 @@ import {
   treeAffordance,
   createBoardDragSession,
   createCanvasGestureSession,
+  createGestureSession,
   typeaheadAffordance,
   wheelAffordance,
   zoomAffordance,
@@ -145,6 +146,17 @@ describe("createCanvasGestureSession", () => {
       "cancel:marquee:superseded",
       "cancel:drag:lost-capture",
     ]);
+  });
+});
+
+describe("createGestureSession", () => {
+  test("accepts annotation semantic states without a Canvas gesture type", () => {
+    type AnnotationGesture = { readonly type: "create"; readonly current: { readonly x: number; readonly y: number } };
+    const session = createGestureSession<AnnotationGesture>();
+    session.begin({ type: "create", current: { x: 1, y: 2 } });
+    session.preview((gesture) => ({ ...gesture, current: { x: 4, y: 8 } }));
+    expect(session.commit()).toEqual({ type: "create", current: { x: 4, y: 8 } });
+    expect(session.getActive()).toBeNull();
   });
 });
 

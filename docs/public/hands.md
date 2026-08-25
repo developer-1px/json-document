@@ -17,6 +17,18 @@ selector는 geometry의 유일한 정본이며 presentation은 geometry를 반�
 않습니다. SVG 좌표 변환, pointer gesture, Canvas rasterization과 comment UI는
 Editing owner 밖에서 조합합니다.
 
+```ts
+const gesture = createGestureSession<AnnotationGesture>();
+const point = projectWebClientPointToSVG(clientPoint, viewport);
+const raster = await readWebRasterFile(file);
+const output = await renderWebAnnotationRaster({ document, sourceId, sourceURL, style });
+```
+
+Gesture는 Affordance가 input-independent lifecycle로 소유하고 Pointer capture는
+Web pointer session이 소유합니다. SVG projection과 raster file decode는 Annotation
+model을 모르며, Canvas 합성만 domain-qualified Web adapter가 selector와
+presentation을 번역합니다.
+
 ```live-demo
 /demo/annotation
 ```
