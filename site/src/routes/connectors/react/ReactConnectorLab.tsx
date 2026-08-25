@@ -10,7 +10,7 @@ import {
 } from "@interactive-os/json-document-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "../../../shared/ui/interactive";
+import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 

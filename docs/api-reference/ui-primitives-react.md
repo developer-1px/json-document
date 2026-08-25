@@ -6,6 +6,16 @@
 
 > 이 문서는 `packages/json-document-ui-primitives-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `ActionButton`
+
+```ts
+ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement>): ReactNode
+```
+## `DisclosureButton`
+
+```ts
+DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & { readonly expanded: boolean; readonly controls: string; }): ReactNode
+```
 ## `FileDropRegion`
 
 ```ts
@@ -15,6 +25,11 @@ FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & { readonl
 
 ```ts
 GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly focus?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `IconButton`
+
+```ts
+IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & { readonly label: string; }): ReactNode
 ```
 ## `Menu`
 
@@ -41,6 +56,20 @@ ResizeHandle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" |
 ```ts
 Select(props: { readonly id?: string; readonly label: string; readonly value: string; readonly options: ReadonlyArray<SelectOption>; readonly onValueChange: (value: string) => void; readonly renderValue?: (option: SelectOption) => ReactNode; readonly renderOption?: (option: SelectOption) => ReactNode; readonly classNames?: SelectClassNames; readonly disabled?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
+## `SelectableItem`
+
+```ts
+SelectableItem<T extends ElementType = "button">(props: SelectableItemProps<T>): ReactNode
+```
+## `SelectableItemProps`
+
+```ts
+type SelectableItemProps<T extends ElementType = "button"> = {
+  readonly as?: T;
+  readonly selected: boolean;
+  readonly focus?: boolean;
+} & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
+```
 ## `SelectClassNames`
 
 ```ts
@@ -61,4 +90,9 @@ type SelectOption = {
   readonly label: string;
   readonly disabled?: boolean;
 };
+```
+## `ToggleButton`
+
+```ts
+ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly pressed: boolean; }): ReactNode
 ```

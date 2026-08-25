@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from "react";
-import { DisclosureButton, IconButton, ToggleButton } from "./interactive";
+import { DisclosureButton, IconButton, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { JsonInspector, type JsonInspectorProps } from "./json-inspector";
 import { classes, ui } from "./styles";
 
@@ -42,7 +42,8 @@ export function Inspector(props: {
         controls={panelId}
         onClick={() => setOpen((current) => !current)}
       >
-        {label}
+        <span>{label}</span>
+        <span aria-hidden="true" className={ui.interactive.chevron}>⌄</span>
       </DisclosureButton>
 
       <aside

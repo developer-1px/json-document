@@ -19,6 +19,7 @@
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -b tsconfig.json",
     "test": "vitest run --config vitest.config.ts",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "verify": "npm run typecheck && npm test && npm run build"
   },
@@ -28,6 +29,8 @@
     "@interactive-os/json-document-web": "0.1.0-rc.0"
   },
   "devDependencies": {
+    "@interactive-os/json-document-affordance": "*",
+    "@interactive-os/json-document-web": "*",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.14",

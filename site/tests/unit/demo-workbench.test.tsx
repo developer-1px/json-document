@@ -52,6 +52,7 @@ describe("Demo definition and source discovery", () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -62,6 +63,7 @@ describe("Demo definition and source discovery", () => {
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -70,6 +72,7 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
+      "/docs/api/ui-primitives-react",
       "/docs/api/react",
       "/docs/api/react",
       "/docs/api/web",
@@ -90,6 +93,7 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-affordance/src/session.ts",
     ]);
@@ -98,6 +102,7 @@ describe("Demo definition and source discovery", () => {
   test("registers the Object owner source next to Object demo usage", async () => {
     expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/object-demo/ObjectDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -108,6 +113,7 @@ describe("Demo definition and source discovery", () => {
   test("registers React and Web Grid owner sources next to Sheet usage", async () => {
     expect((await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx")).map((file) => file.path)).toEqual([
       "routes/sheet-demo/SheetDemo.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -133,6 +139,7 @@ describe("Demo definition and source discovery", () => {
   test("registers Tree visibility and React binding sources next to Tree usage", async () => {
     expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -144,12 +151,14 @@ describe("Demo definition and source discovery", () => {
   test("registers Board and platform drag session sources next to Kanban usage", async () => {
     expect((await discoverDemoSources("routes/kanban-demo/KanbanDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/kanban-demo/KanbanDemoRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/drag-drop-session.ts",
       "packages/json-document-affordance/src/board-drag-session.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/BoardWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/BoardWidgetRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/board-drag-session.ts",
