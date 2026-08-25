@@ -72,6 +72,14 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-file-intake/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-rich-text-suggestion-react",
+      replacement: sourceFile("packages/json-document-rich-text-suggestion-react/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-rich-text-suggestion",
+      replacement: sourceFile("packages/json-document-rich-text-suggestion/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-rich-text-mention",
       replacement: sourceFile("packages/json-document-rich-text-mention/src/index.ts"),
     },
