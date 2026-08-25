@@ -1,5 +1,6 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
@@ -66,6 +67,7 @@ const excludedSources = new Set([
 ]);
 const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
+  ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
@@ -87,6 +89,11 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "editingItemProps",
+    sourcePath: "packages/json-document-react/src/use-editing.ts",
+  },
   {
     packageName: "@interactive-os/json-document-react",
     symbol: "useEditingObservation",

@@ -3,7 +3,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { useHistoryLab } from "./useHistoryLab";
 
 export function HistoryDemoRoute() {
@@ -31,7 +31,7 @@ export function HistoryDemoRoute() {
                   key={block.id}
                   type="button"
                   className={classes("px-3 py-2", ui.surface.selectableBlock)}
-                  {...optionProps(item)}
+                  {...editingItemProps(item)}
                 >
                   {block.id} · {block.text}
                   {item.getTextOffset() === null ? "" : ` · offset ${item.getTextOffset()}`}

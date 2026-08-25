@@ -17,7 +17,7 @@ import {
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "../../../shared/ui/interactive";
 import { classes, ui } from "../../../shared/ui/styles";
-import { optionProps } from "../../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 
 const initialDocument: BlockDocument = {
   blocks: [
@@ -121,7 +121,7 @@ export function KeyboardAdapterLab() {
               key={block.id}
               data-block-id={block.id}
               className={classes("p-3", ui.surface.workspace)}
-              {...optionProps(editing.getItem(block.id))}
+              {...editingItemProps(editing.getItem(block.id))}
             >
               <span className={ui.text.label}>{block.id}</span>
             </SelectableItem>

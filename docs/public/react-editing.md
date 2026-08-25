@@ -508,8 +508,21 @@ interface EditingItem<Key extends string = string> {
   getPressHandler(): (event: EditingPressEvent) => void;
 }
 
+interface EditingItemProps {
+  readonly selected: boolean;
+  readonly focus: boolean;
+  readonly onClick: (event: EditingPressEvent) => void;
+}
+
+function editingItemProps(item: EditingItem): EditingItemProps;
+
 type EditingSelectionMode = "replace" | "extend" | "toggle";
 ```
+
+`editingItemProps(item)`은 항목의 canonical selected/focus 상태와 press
+handler를 React surface에 연결합니다. Role, ARIA와 roving `tabIndex`는 이
+함수가 결정하지 않습니다. UI Primitive의 semantic props와 Web Adapter의
+`projectWebWidgetState`·`rovingFocusItemProps`를 함께 조합합니다.
 
 `getKeyDownHandler()`는 항상 함수를 돌려줍니다. `keyboard`가 없으면 그
 함수는 event를 무시합니다. 표면 노드에 `tabIndex={0}`과 함께 붙입니다.

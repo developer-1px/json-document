@@ -20,6 +20,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import {
   pressInteractionFromWeb,
+  rovingFocusItemProps,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { GridCell, ResizeHandle } from "@interactive-os/json-document-ui-primitives-react";
@@ -27,7 +28,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton } from "../../shared/ui/interactive";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { gridCellProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { initialDatabase } from "./initial-database";
 import { DatabasePropertyEditor, type DatabaseNativeTextLease } from "./DatabasePropertyEditor";
 import {
@@ -218,11 +219,12 @@ export function DatabaseTableDemo() {
                       <GridCell
                         key={property.id}
                         {...webGridCellAddressProps(point)}
+                        {...rovingFocusItemProps(item.getIsFocus())}
                         data-record-id={record.id}
                         data-property-id={property.id}
                         className={classes(ui.interactive.selectable, "p-0", ui.database.cell)}
                         style={{ width: propertyWidth(property.id), minWidth: propertyWidth(property.id) }}
-                        {...gridCellProps(item)}
+                        {...editingItemProps(item)}
                       >
                         <DatabasePropertyEditor
                           property={property}

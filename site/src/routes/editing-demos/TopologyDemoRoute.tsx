@@ -3,7 +3,7 @@ import { Inspector } from "../../shared/ui/inspector";
 import { SelectableItem, ToggleButton } from "../../shared/ui/interactive";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import { optionProps } from "../../shared/widget-binding";
+import { editingItemProps } from "@interactive-os/json-document-react";
 import { topologyLabOrders, topologyLabRecords, useTopologyLab } from "./useTopologyLab";
 
 export function TopologyDemoRoute() {
@@ -40,7 +40,7 @@ export function TopologyDemoRoute() {
                   <SelectableItem
                     type="button"
                     className={classes("w-full px-3 py-2", ui.surface.selectableBlock)}
-                    {...optionProps(item)}
+                    {...editingItemProps(item)}
                   >
                     {topologyLabRecords[id as keyof typeof topologyLabRecords]}
                   </SelectableItem>

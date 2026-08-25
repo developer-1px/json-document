@@ -20,12 +20,14 @@ export {
 } from "./editing-snapshot.js";
 export {
   restoreTextCursor,
+  editingItemProps,
   selectionModeFromModifiers,
   useEditing,
   useRestoreTextCursor,
   useRestoreElementFocus,
   type Editing,
   type EditingItem,
+  type EditingItemProps,
   type EditingKeyDownEvent,
   type EditingKeyboardCommand,
   type EditingKeyboardOptions,
