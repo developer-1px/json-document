@@ -39,15 +39,10 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "DatabaseDemoRoute.tsx",
     "DatabaseTableDemo.tsx",
     "initial-database.ts",
-    "DatabasePropertyEditor.tsx",
-    "useDatabaseTableHeaderInteractions.ts",
+    "database-hand.tsx",
     "database.ts",
-    "pointer-session.ts",
-    "editing-observation.ts",
-    "use-grid-editing.ts",
     "topology.ts",
     "grid-cell.ts",
-    "surfaces.tsx",
   ]);
 });
 

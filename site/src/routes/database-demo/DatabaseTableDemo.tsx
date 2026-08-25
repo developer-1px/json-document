@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { DatabaseHand } from "@interactive-os/json-document-database";
+import "@interactive-os/json-document-database/styles.css";
 import { createDatabaseEditor, type DatabaseDocument, type DatabaseEditor } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -13,6 +14,11 @@ export function DatabaseTableDemo() {
         editor={editor}
         viewId="table"
         labels={{ ariaLabel: "Notion-style database" }}
+        style={{
+          "--jd-db-accent": "#de6d55",
+          "--jd-db-border": "#d8d1c5",
+          "--jd-db-selection-bg": "#fbf8f2",
+        } as CSSProperties}
         createRecord={() => ({ id: nextRecordId(editor) })}
         renderToolbar={(context) => context.nativeTextLease ? (
           <output data-testid="native-text-lease">
