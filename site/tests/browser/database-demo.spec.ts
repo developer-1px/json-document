@@ -7,7 +7,25 @@ test("Database Table edits five property types while native text lease stays out
   await expect(grid.getByRole("columnheader")).toContainText(["Name", "Note", "Score", "Status", "Complete", "Row"]);
 
   const title = page.getByRole("textbox", { name: "Name page-1" });
+  const titleCell = title.locator("xpath=ancestor::*[@role='gridcell']");
+  const cellBox = await titleCell.boundingBox();
   await title.focus();
+  await expect.poll(async () => titleCell.evaluate((cell) => {
+    const cellStyle = getComputedStyle(cell);
+    const controlStyle = getComputedStyle(cell.querySelector("input")!);
+    return {
+      borderLeft: cellStyle.borderLeftWidth,
+      borderRight: cellStyle.borderRightWidth,
+      cellRing: cellStyle.boxShadow,
+      controlRing: controlStyle.boxShadow,
+    };
+  })).toEqual({
+    borderLeft: "0px",
+    borderRight: "0px",
+    cellRing: expect.not.stringMatching(/^none$/),
+    controlRing: "none",
+  });
+  expect(await titleCell.boundingBox()).toEqual(cellBox);
   await expect(page.getByTestId("native-text-lease")).toContainText("page-1/name");
   await title.dispatchEvent("compositionstart");
   await expect(page.getByTestId("native-text-lease")).toContainText("composing");
