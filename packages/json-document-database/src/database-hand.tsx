@@ -253,7 +253,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   readonly onEmit: (origin: DatabaseHandOrigin) => void;
 }) {
   const { editor } = props;
-  const [announcement, setAnnouncement] = useState("Database ready");
+  const [announcement, setAnnouncement] = useState("");
   const [lastResult, setLastResult] = useState<EditingResult<DatabaseSelection> | null>(null);
   const [nativeTextLease, setNativeTextLease] = useState<DatabaseHandContext["nativeTextLease"]>(null);
   const [filterPropertyId, setFilterPropertyId] = useState("");
@@ -475,7 +475,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         ) : null}
         {props.toolbar}
         {props.renderToolbar?.(context)}
-        <output className="jd-database__announcement" aria-live="polite">{announcement}</output>
+        {announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
       </div>
 
       <div
@@ -742,7 +742,7 @@ function FilterControl(props: {
         </select>
       </label>
       {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} disabled={props.filter === null} onClick={() => props.onFilter(null)}><span aria-hidden="true">×</span></button>
+      {props.filter ? <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} onClick={() => props.onFilter(null)}><span aria-hidden="true">×</span></button> : null}
     </div>
   );
 }
