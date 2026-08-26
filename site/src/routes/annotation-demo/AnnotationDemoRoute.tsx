@@ -410,7 +410,7 @@ function CommentComposer(props: {
   }, [props.annotation.id]);
   const dock = composerDock(props.annotation, props.source);
   const opensLeft = dock.horizontal === "left";
-  const opensAbove = dock.vertical === "above";
+  const verticalTransform = dock.vertical === "above" ? "-100%" : dock.vertical === "below" ? "0" : "-50%";
   return (
     <section
       aria-label={`Request ${props.index} comment`}
@@ -419,7 +419,7 @@ function CommentComposer(props: {
       style={{
         left: `${(dock.anchor.x / props.source.width) * 100}%`,
         top: `${(dock.anchor.y / props.source.height) * 100}%`,
-        transform: `translate(${opensLeft ? "-100%" : "0"}, ${opensAbove ? "-100%" : "0"})`,
+        transform: `translate(${opensLeft ? "-100%" : "0"}, ${verticalTransform})`,
       }}
     >
       <textarea
@@ -747,14 +747,14 @@ function annotationDock(annotation: Annotation, source: AnnotationSource) {
 function composerDock(annotation: Annotation, source: AnnotationSource) {
   const bounds = annotationBounds(annotation);
   const horizontal = bounds.x + bounds.width / 2 > source.width * 0.75 ? "left" : "right";
-  const vertical = bounds.y + bounds.height / 2 < source.height * 0.25 ? "below" : "above";
+  const vertical = bounds.y < 48 ? "below" : bounds.y > source.height - 48 ? "above" : "center";
   return {
     horizontal,
     vertical,
     anchor: {
       type: "point" as const,
       x: horizontal === "left" ? bounds.x - 36 : bounds.x + 36,
-      y: vertical === "above" ? bounds.y - 36 : bounds.y + 36,
+      y: bounds.y,
     },
   };
 }
