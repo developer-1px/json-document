@@ -33,10 +33,15 @@ test("hovering or focusing an annotation number previews its comment", async ({ 
   await page.getByRole("button", { name: "Send comment" }).click();
   const marker = page.locator("[data-annotation-id]").first();
   await marker.hover();
-  await expect(page.getByRole("tooltip", { name: "Comment 1 preview" })).toContainText("대비를 높여");
+  const preview = page.getByRole("tooltip", { name: "Comment 1 preview" });
+  await expect(preview).toContainText("대비를 높여");
+  const markerBox = await requiredBox(marker);
+  const previewBox = await requiredBox(preview);
+  expect(Math.abs(previewBox.x - markerBox.x)).toBeLessThan(16);
+  expect(Math.abs(previewBox.y + previewBox.height - markerBox.y - markerBox.height)).toBeLessThan(16);
   await page.mouse.move(0, 0);
   await marker.focus();
-  await expect(page.getByRole("tooltip", { name: "Comment 1 preview" })).toContainText("대비를 높여");
+  await expect(preview).toContainText("대비를 높여");
 });
 
 test("click opens comment editing while drag keeps the composer hidden", async ({ page }) => {
