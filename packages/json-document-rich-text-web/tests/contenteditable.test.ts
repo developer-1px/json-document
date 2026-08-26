@@ -7,6 +7,46 @@ import { describe, expect, it } from "vitest";
 import { createRichTextContentEditableBinding } from "../src/index.js";
 
 describe("Official Rich Text contenteditable composition", () => {
+  it("publishes owner-document selectionchange without a root-local release event", () => {
+    const document = createJSONDocument(initialDocument());
+    const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });
+    const root = fixture();
+    const binding = createRichTextContentEditableBinding({ root, editor });
+    const text = root.querySelector("[data-rich-text-text-id='text']")!.firstChild as Text;
+
+    window.getSelection()!.setBaseAndExtent(text, 0, text, 2);
+    root.ownerDocument.dispatchEvent(new Event("selectionchange"));
+
+    expect(editor.snapshot.selection.ranges[0]).toMatchObject({
+      anchor: { nodeId: "text", offset: 0 },
+      focus: { nodeId: "text", offset: 2 },
+    });
+    binding.destroy();
+
+    window.getSelection()!.setBaseAndExtent(text, 1, text, 3);
+    root.ownerDocument.dispatchEvent(new Event("selectionchange"));
+    expect(editor.snapshot.selection.ranges[0]).toMatchObject({
+      anchor: { nodeId: "text", offset: 0 },
+      focus: { nodeId: "text", offset: 2 },
+    });
+  });
+
+  it("does not publish transient selectionchange during a composition lease", () => {
+    const document = createJSONDocument(initialDocument());
+    const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });
+    const root = fixture();
+    const binding = createRichTextContentEditableBinding({ root, editor });
+    const text = root.querySelector("[data-rich-text-text-id='text']")!.firstChild as Text;
+
+    window.getSelection()!.setBaseAndExtent(text, 3, text, 3);
+    root.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    window.getSelection()!.setBaseAndExtent(text, 0, text, 1);
+    root.ownerDocument.dispatchEvent(new Event("selectionchange"));
+
+    expect(editor.snapshot.selection).toEqual(collapsed("text", 3));
+    binding.destroy();
+  });
+
   it("ignores keyboard and beforeinput events from a nested editing host", () => {
     const document = createJSONDocument(initialDocument());
     const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });

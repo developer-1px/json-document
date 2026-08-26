@@ -154,6 +154,7 @@ bind
 | `compositionstart` | Composing lease 시작 | Capture를 가진 composing lease 시작 | Selection과 scoped DOM text를 capture |
 | `compositionupdate` | 별도 listener 없음; browser DOM mutation으로 관찰 | 별도 listener 없음; browser DOM mutation으로 관찰 | 별도 listener 없음; scoped DOM mutation으로 관찰 |
 | `compositionend` | DOM string을 한 번 commit하고 trailing input guard 진입 | DOM observation을 plan/commit하고 tail reconciliation 진입 | Ending phase로 전환하고 microtask/timer에서 scoped diff commit |
+| `selectionchange` | DOM adapter가 지원하는 selection observation으로 반영 | DOM adapter가 지원하는 selection observation으로 반영 | Owner document에서 관찰하고 현재 editing root의 point만 publish; composition lease와 pending model render 중에는 무시 |
 | `copy` | Browser 기본 plain-text 처리 | Browser 기본 plain-text 처리 | Structured/HTML/plain representation을 Web clipboard binding으로 작성 |
 | `cut` | Native mutation이 `beforeinput/input` lifecycle로 commit됨 | Native mutation이 capture/plan/commit됨 | Clipboard payload 작성 후 Rich Text selection cut dispatch |
 | `paste` | Native mutation이 `beforeinput/input` lifecycle로 commit됨 | Native mutation이 capture/plan/commit됨 | Structured > HTML > plain priority로 semantic paste dispatch |

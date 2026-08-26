@@ -152,6 +152,24 @@ test("Rich Text Lab preserves the mouse selection and editor focus while applyin
   await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: "text-editable", anchorOffset: 0, focusOffset: 3 });
 });
 
+test("Rich Text Lab publishes selectionchange before toolbar activation without a root mouseup", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+  await editor.evaluate((root) => {
+    const text = root.querySelector<HTMLElement>('[data-rich-text-text-id="text-editable"]')!.firstChild!;
+    window.getSelection()!.setBaseAndExtent(text, 0, text, 3);
+    (root as HTMLElement).focus();
+    document.dispatchEvent(new Event("selectionchange"));
+  });
+
+  await page.getByRole("button", { name: "Toggle strong" }).click();
+
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를",
+    marks: [{ type: "strong" }],
+  });
+});
+
 test("Rich Text Lab replaces unexpected descendant DOM mutation from the canonical model on publish", async ({ page }) => {
   await page.goto("/editing/rich-text");
   const editor = page.getByTestId("rich-text-editor");

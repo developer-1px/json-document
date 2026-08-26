@@ -15,9 +15,9 @@
     {
       "id": "selection",
       "status": "verified",
-      "observation": "rerender와 block join 뒤 DOM Selection의 node와 offset이 무효화될 수 있다.",
-      "invariant": "model selection을 node ID 기준으로 복원하며 DOM Selection을 canonical state로 보관하지 않는다.",
-      "evidence": "dom-selection-roundtrip",
+      "observation": "rerender와 block join 뒤 DOM Selection의 node와 offset이 무효화될 수 있고, drag가 root 밖에서 끝나면 root-local release event 없이 document selectionchange만 발생할 수 있다.",
+      "invariant": "현재 editing root의 selectionchange를 model point로 publish하고 model selection을 node ID 기준으로 복원하며, composition과 pending render의 transient DOM Selection은 canonical state로 채택하지 않는다.",
+      "evidence": "dom-selection-roundtrip, selectionchange-without-root-release",
       "revisitWhen": "selection mapping 또는 renderer topology가 바뀔 때"
     },
     {
@@ -105,6 +105,12 @@
     {
       "id": "dom-selection-roundtrip",
       "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/selection", "meaning": "DOM Selection과 RichTextSelection 왕복 및 rerender 뒤 복원" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "selectionchange-without-root-release",
+      "source": { "url": "https://github.com/ianstormtaylor/slate/blob/main/packages/slate-react/src/components/editable.tsx", "meaning": "root-local mouseup 또는 React onSelect 없이 발생한 owner-document selectionchange를 publish하고 composition 중 transient selection은 억제한다" },
       "requiresNativeInput": false,
       "browsers": ["chromium", "firefox", "webkit"]
     },

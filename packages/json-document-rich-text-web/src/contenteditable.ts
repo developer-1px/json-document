@@ -154,7 +154,10 @@ export function createRichTextContentEditableBinding(options: {
     reportClipboard("clipboard.paste", clipboard.paste(asWebEvent(event)));
   };
   const selectionChanged = (event: Event) => {
-    if (eventBelongsToEditingRoot(root, event) && !renderPending) syncSelection();
+    if (eventBelongsToEditingRoot(root, event) && composition === null && !renderPending) syncSelection();
+  };
+  const documentSelectionChanged = () => {
+    if (composition === null && !renderPending) syncSelection();
   };
   const keyDown = (event: KeyboardEvent) => {
     if (!eventBelongsToEditingRoot(root, event)) return;
@@ -183,6 +186,7 @@ export function createRichTextContentEditableBinding(options: {
   root.addEventListener("mouseup", selectionChanged);
   root.addEventListener("keyup", selectionChanged);
   root.addEventListener("keydown", keyDown);
+  root.ownerDocument.addEventListener("selectionchange", documentSelectionChanged);
 
   return {
     isComposing: () => composition !== null,
@@ -205,6 +209,7 @@ export function createRichTextContentEditableBinding(options: {
       root.removeEventListener("mouseup", selectionChanged);
       root.removeEventListener("keyup", selectionChanged);
       root.removeEventListener("keydown", keyDown);
+      root.ownerDocument.removeEventListener("selectionchange", documentSelectionChanged);
       composition = null;
       options.onCompositionChange?.(false);
     },
