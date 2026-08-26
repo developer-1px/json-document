@@ -1,5 +1,5 @@
-import type { JSONValue } from "@interactive-os/json-document";
 import type { DatabaseDocument, DatabaseProperty, DatabaseTableView } from "./database.js";
+import { acceptsDatabaseValue } from "./database-property-value.js";
 
 export function assertDatabaseDocument(document: DatabaseDocument): void {
   assertUnique(document.schema.properties.map((property) => property.id), "property");
@@ -26,13 +26,6 @@ export function assertDatabaseView(view: DatabaseTableView, properties: Readonly
   }
   if (view.sort && !available.has(view.sort.propertyId)) throw new Error("Database sort property was not found.");
   if (view.filter && !available.has(view.filter.propertyId)) throw new Error("Database filter property was not found.");
-}
-
-export function acceptsDatabaseValue(property: DatabaseProperty, value: JSONValue): boolean {
-  if (property.type === "title" || property.type === "text") return typeof value === "string";
-  if (property.type === "number") return typeof value === "number";
-  if (property.type === "checkbox") return typeof value === "boolean";
-  return typeof value === "string" && property.options.some((option) => option.id === value);
 }
 
 function assertUnique(ids: ReadonlyArray<string>, label: string): void {

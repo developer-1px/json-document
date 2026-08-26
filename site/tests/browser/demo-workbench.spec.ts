@@ -41,6 +41,7 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "initial-database.ts",
     "database-hand.tsx",
     "database.ts",
+    "database-property-value.ts",
     "topology.ts",
     "grid-cell.ts",
   ]);

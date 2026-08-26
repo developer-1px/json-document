@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { DatabaseHand } from "@interactive-os/json-document-database";
 import "@interactive-os/json-document-database/styles.css";
-import { createDatabaseEditor, type DatabaseDocument, type DatabaseEditor } from "@interactive-os/json-document-editing";
+import { createDatabaseEditor, type DatabaseEditor } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
 import { ProductApp } from "../../shared/ui/primitives";
 import { initialDatabase } from "./initial-database";
@@ -19,7 +19,6 @@ export function DatabaseTableDemo() {
           "--jd-db-border": "rgb(var(--color-border-subtle))",
           "--jd-db-selection-bg": "rgb(var(--color-background-subtle))",
         } as CSSProperties}
-        createRecord={() => ({ id: nextRecordId(editor) })}
         renderToolbar={(context) => context.nativeTextLease ? (
           <output data-testid="native-text-lease">
             Native text lease · {context.nativeTextLease.recordId}/{context.nativeTextLease.propertyId}{context.nativeTextLease.composing ? " · composing" : ""}
@@ -36,11 +35,4 @@ export function DatabaseTableDemo() {
       />
     </ProductApp>
   );
-}
-
-function nextRecordId(editor: DatabaseEditor): string {
-  const ids = new Set((editor.snapshot.value as DatabaseDocument).records.map((record) => record.id));
-  let index = 1;
-  while (ids.has(`page-${index}`)) index += 1;
-  return `page-${index}`;
 }

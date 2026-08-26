@@ -5,6 +5,11 @@ const repositoryRoot = new URL("../..", import.meta.url).pathname;
 const siteSourceRoot = join(repositoryRoot, "site/src");
 const registrySource = readFileSync(join(siteSourceRoot, "app/live-demo-registry.tsx"), "utf8");
 const sourceRegistry = readFileSync(join(siteSourceRoot, "shared/demo-workbench/demo-sources.ts"), "utf8");
+const databasePropertyConsumers = [
+  "packages/json-document-database/src/database-hand.tsx",
+  "packages/json-document-database/src/database-hands.tsx",
+  "packages/json-document-zod/src/database-document.ts",
+];
 const entries = [...registrySource.matchAll(/^\s*"\/[^"]+"[^\n]+"(routes\/[^"]+)"\),?$/gm)].map((match) => match[1]);
 const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*\n\s*symbol:\s*["']([^"']+)["'],\s*\n\s*sourcePath:\s*["']([^"']+)["']/g)].map((match) => ({
   packageName: match[1],
@@ -22,6 +27,12 @@ const packageDirectories = readdirSync(join(repositoryRoot, "packages"), { withF
 for (const directory of packageDirectories) {
   const manifest = JSON.parse(readFileSync(join(repositoryRoot, directory, "package.json"), "utf8"));
   if (Object.keys(manifest.exports ?? {}).length === 0) throw new Error(`${directory} has no public export`);
+}
+for (const path of databasePropertyConsumers) {
+  const source = readSource(path);
+  if (/property\.type === "number"\s*\?\s*Number\(/.test(source) || /(?:currentTarget\.)?value === "true"/.test(source)) {
+    throw new Error(`${path} bypasses canonical Database property value conversion`);
+  }
 }
 
 const visited = new Set();

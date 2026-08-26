@@ -1,46 +1,20 @@
 import type { JSONValue } from "@interactive-os/json-document";
+import {
+  acceptsDatabaseValue,
+  defaultDatabaseValue,
+  type DatabaseDocument,
+  type DatabaseProperty,
+  type DatabasePropertyType,
+  type DatabaseRecord,
+  type DatabaseSelectOption,
+} from "@interactive-os/json-document-editing";
 import type { ZodType } from "zod/v4";
 
-export type DatabasePropertyTypeFromZod =
-  | "title"
-  | "text"
-  | "number"
-  | "select"
-  | "checkbox";
-
-export interface DatabaseSelectOptionFromZod extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly name: string;
-}
-
-export interface DatabasePropertyFromZod extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly name: string;
-  readonly type: DatabasePropertyTypeFromZod;
-  readonly options: ReadonlyArray<DatabaseSelectOptionFromZod>;
-}
-
-export interface DatabaseRecordFromZod extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly values: Readonly<Record<string, JSONValue>>;
-}
-
-export interface DatabaseDocumentFromZod extends Record<string, JSONValue> {
-  readonly schema: {
-    readonly properties: ReadonlyArray<DatabasePropertyFromZod>;
-  };
-  readonly records: ReadonlyArray<DatabaseRecordFromZod>;
-  readonly views: ReadonlyArray<{
-    readonly id: string;
-    readonly name: string;
-    readonly type: "table";
-    readonly propertyOrder: ReadonlyArray<string>;
-    readonly propertyVisibility: Readonly<Record<string, boolean>>;
-    readonly propertyWidths: Readonly<Record<string, number>>;
-    readonly sort: null;
-    readonly filter: null;
-  }>;
-}
+export type DatabasePropertyTypeFromZod = DatabasePropertyType;
+export type DatabaseSelectOptionFromZod = DatabaseSelectOption;
+export type DatabasePropertyFromZod = DatabaseProperty;
+export type DatabaseRecordFromZod = DatabaseRecord;
+export type DatabaseDocumentFromZod = DatabaseDocument;
 
 export type DatabaseDocumentFromZodResult =
   | { readonly ok: true; readonly value: DatabaseDocumentFromZod }
@@ -118,8 +92,8 @@ export function databaseDocumentFromZod(
     const values: Record<string, JSONValue> = {};
     for (const property of properties) {
       const raw = record[property.id];
-      const value = raw === undefined ? defaultValue(property) : asJSONValue(raw);
-      if (value === undefined || !acceptsValue(property, value)) {
+      const value = raw === undefined ? defaultDatabaseValue(property) : asJSONValue(raw);
+      if (value === undefined || !acceptsDatabaseValue(property, value)) {
         return failure(
           "invalid_value",
           `Record ${JSON.stringify(recordId.value)} has an invalid ${property.type} value.`,
@@ -237,20 +211,6 @@ function readIdentity(
     return failure("missing_id", "Record id must be a non-empty string.", `/${index}/id`);
   }
   return { ok: true, value };
-}
-
-function acceptsValue(property: DatabasePropertyFromZod, value: JSONValue): boolean {
-  if (property.type === "title" || property.type === "text") return typeof value === "string";
-  if (property.type === "number") return typeof value === "number";
-  if (property.type === "checkbox") return typeof value === "boolean";
-  return typeof value === "string" && property.options.some((option) => option.id === value);
-}
-
-function defaultValue(property: DatabasePropertyFromZod): JSONValue {
-  if (property.type === "number") return 0;
-  if (property.type === "checkbox") return false;
-  if (property.type === "select") return property.options[0]?.id ?? "";
-  return "";
 }
 
 function asJSONValue(value: unknown): JSONValue | undefined {

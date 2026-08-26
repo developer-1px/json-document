@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 import {
+  acceptsDatabaseValue,
   createDatabaseEditor,
+  databaseValueFromText,
+  defaultDatabaseValue,
   nextDatabasePropertySort,
   type DatabaseDocument,
 } from "../src/index.js";
@@ -33,6 +36,17 @@ const initial: DatabaseDocument = {
 };
 
 describe("Database editor", () => {
+  test("owns the canonical property value semantics", () => {
+    const [, , score, status, done] = initial.schema.properties;
+    expect(defaultDatabaseValue(score!)).toBe(0);
+    expect(defaultDatabaseValue(status!)).toBe("todo");
+    expect(defaultDatabaseValue(done!)).toBe(false);
+    expect(databaseValueFromText(score!, "8")).toBe(8);
+    expect(databaseValueFromText(done!, "true")).toBe(true);
+    expect(acceptsDatabaseValue(status!, "done")).toBe(true);
+    expect(acceptsDatabaseValue(status!, "missing")).toBe(false);
+  });
+
   test("cycles one property sort with a Database-owned transition", () => {
     expect(nextDatabasePropertySort(null, "score")).toEqual({ propertyId: "score", direction: "ascending" });
     expect(nextDatabasePropertySort({ propertyId: "score", direction: "ascending" }, "score"))
