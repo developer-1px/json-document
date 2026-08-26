@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CornerDownLeft, Redo2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditing } from "@interactive-os/json-document-react";
@@ -156,8 +157,8 @@ export function RichTextDemoRoute() {
     )}>
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
         <ActionButton preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
-        <IconButton preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}>↶</IconButton>
-        <IconButton preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}>↷</IconButton>
+        <IconButton preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></IconButton>
+        <IconButton preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></IconButton>
         <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
       </div>
 
@@ -165,7 +166,7 @@ export function RichTextDemoRoute() {
         <span className={ui.text.meta}>Schema-aware intent proofs</span>
         <IconButton preserveFocus label="Toggle strong" onClick={toggleStrong}><strong>B</strong></IconButton>
         <IconButton preserveFocus label="Set heading" onClick={setHeading}>H</IconButton>
-        <IconButton preserveFocus label="Insert hard break" onClick={insertHardBreak}>↵</IconButton>
+        <IconButton preserveFocus label="Insert hard break" onClick={insertHardBreak}><CornerDownLeft aria-hidden="true" size={16} /></IconButton>
         <IconButton preserveFocus label="Set code attrs" onClick={updateCodeAttrs}>{`{}`}</IconButton>
       </div>
 

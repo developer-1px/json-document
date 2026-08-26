@@ -50,6 +50,7 @@
 .jd-database__columns summary::-webkit-details-marker { display: none; }
 .jd-database__column-menu {
   position: absolute;
+  z-index: 2;
   top: calc(100% + 8px);
   right: 0;
   display: grid;

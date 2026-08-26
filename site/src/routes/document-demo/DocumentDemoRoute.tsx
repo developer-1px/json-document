@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { ArrowDown, ArrowUp, ClipboardPaste, Copy, CopyPlus, Plus, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   type BlockDocument,
@@ -171,18 +172,18 @@ export function DocumentDemoRoute() {
           toolbarLabel="Document actions"
           toolbar={(
             <>
-              <Action label="Add" icon="＋" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
-              <Action label="Duplicate" icon="⧉" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
-              <Action label="Move up" icon="↑" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
-              <Action label="Move down" icon="↓" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
+              <Action label="Add" icon={<Plus aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
+              <Action label="Duplicate" icon={<CopyPlus aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
+              <Action label="Move up" icon={<ArrowUp aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
+              <Action label="Move down" icon={<ArrowDown aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Copy" icon="⧉" onClick={copySelection} />
-              <Action label="Cut" icon="✂" onClick={cutSelection} />
-              <Action label="Paste" icon="▣" onClick={pasteSelection} disabled={!clipboard} />
-              <Action label="Delete" icon="⌫" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
+              <Action label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
+              <Action label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
+              <Action label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} onClick={pasteSelection} disabled={!clipboard} />
+              <Action label="Delete" icon={<Trash2 aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" icon="↶" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" icon="↷" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Action label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
+              <Action label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
             </>
           )}
           inspector={(
@@ -262,6 +263,6 @@ export function DocumentDemoRoute() {
   );
 }
 
-function Action(props: { readonly label: string; readonly icon: string; readonly onClick: () => void; readonly disabled?: boolean }) {
+function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
   return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }

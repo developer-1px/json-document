@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Plus, Redo2, Undo2 } from "lucide-react";
 import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
 import { documentSelectionFocus, type BlockDocument } from "@interactive-os/json-document-editing";
 import {
@@ -61,7 +62,7 @@ function JSONDocumentSubscriptionLab() {
         onClick={() => replace("/count", value.count + 1)}
         className="mt-3"
       >
-        ＋
+        <Plus aria-hidden="true" size={16} />
       </IconButton>
 
       <JSONPanel testId="react-document-json" value={value} />
@@ -109,13 +110,13 @@ function EditingSnapshotLab() {
           disabled={commands.undo.disabled}
           onClick={() => editor.undo()}
         >
-          ↶
+          <Undo2 aria-hidden="true" size={16} />
         </IconButton>
         <IconButton label="Redo"
           disabled={commands.redo.disabled}
           onClick={() => editor.redo()}
         >
-          ↷
+          <Redo2 aria-hidden="true" size={16} />
         </IconButton>
       </div>
 

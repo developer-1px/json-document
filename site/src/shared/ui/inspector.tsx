@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { X } from "lucide-react";
 import { DisclosureButton, IconButton, Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { JsonInspector, type JsonInspectorProps } from "./json-inspector";
 import { classes, ui } from "./styles";
@@ -62,7 +63,7 @@ export function Inspector(props: {
         {inline ? null : (
           <div className="mb-2 flex items-center justify-between gap-3">
             <span className={ui.text.label}>Inspector</span>
-            <IconButton label="Close inspector" onClick={() => setOpen(false)}>×</IconButton>
+            <IconButton label="Close inspector" onClick={() => setOpen(false)}><X aria-hidden="true" size={16} /></IconButton>
           </div>
         )}
 

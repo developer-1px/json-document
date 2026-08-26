@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Undo2 } from "lucide-react";
 import { ActionButton, IconButton, SegmentedControl, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -30,7 +31,7 @@ export function ArtifactViewerRoute() {
             <SegmentedControl label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={(value) => setActive(value as ArtifactKind)} />
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
             <span className={ui.text.meta}>{artifact.name} · mock artifact</span>
-            <IconButton label="Undo" className="ml-auto">↶</IconButton>
+            <IconButton label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></IconButton>
           </>
         )}
         inspector={<Composer artifactName={artifact.name} />}

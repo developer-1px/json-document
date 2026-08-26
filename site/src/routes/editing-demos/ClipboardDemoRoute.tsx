@@ -1,4 +1,5 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
+import { Copy, Scissors } from "lucide-react";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -34,8 +35,8 @@ export function ClipboardDemoRoute() {
             ))}
           </div>
           <div className="mt-3 flex gap-2">
-            <IconButton label="Copy" onClick={copy}>⧉</IconButton>
-            <IconButton label="Cut" onClick={cut}>✂</IconButton>
+            <IconButton label="Copy" onClick={copy}><Copy aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Cut" onClick={cut}><Scissors aria-hidden="true" size={16} /></IconButton>
           </div>
         </section>
 

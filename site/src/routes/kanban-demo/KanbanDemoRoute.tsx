@@ -1,4 +1,5 @@
 import { useState, type DragEvent } from "react";
+import { Redo2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createKanbanEditor,
@@ -90,8 +91,8 @@ export function KanbanDemoRoute() {
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}>↶</IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}>↷</IconButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}><Redo2 aria-hidden="true" size={16} /></IconButton>
           </>
         )}
       >

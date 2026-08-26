@@ -33,6 +33,7 @@ import {
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
+import { ArrowDown, ArrowUp, Columns3, Minus, Plus, Redo2, Undo2, X } from "lucide-react";
 
 export interface DatabaseHandChange<Row> {
   readonly records: ReadonlyArray<Row>;
@@ -437,12 +438,12 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       data-database-table-surface=""
     >
       <div className="jd-database__toolbar" role="toolbar" aria-label="Database actions">
-        {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" aria-label={props.labels.newRecord} title={props.labels.newRecord} onClick={addRecord}><span aria-hidden="true">＋</span></button> : null}
-        {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" aria-label={props.labels.deleteRecord} title={props.labels.deleteRecord} onClick={deleteSelected}><span aria-hidden="true">−</span></button> : null}
+        {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" aria-label={props.labels.newRecord} title={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></button> : null}
+        {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" aria-label={props.labels.deleteRecord} title={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></button> : null}
         {props.features.history && !props.readOnly ? (
           <>
-            <button type="button" aria-label={props.labels.undo} title={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><span aria-hidden="true">↶</span></button>
-            <button type="button" aria-label={props.labels.redo} title={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><span aria-hidden="true">↷</span></button>
+            <button type="button" aria-label={props.labels.undo} title={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><Undo2 aria-hidden="true" size={16} /></button>
+            <button type="button" aria-label={props.labels.redo} title={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><Redo2 aria-hidden="true" size={16} /></button>
           </>
         ) : null}
         {props.features.filter ? (
@@ -457,7 +458,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         ) : null}
         {props.features.columns ? (
           <details className="jd-database__columns">
-            <summary aria-label={props.labels.columns} title={props.labels.columns}><span aria-hidden="true">▥</span>{hiddenProperties.length > 0 ? <small>{hiddenProperties.length}</small> : null}</summary>
+            <summary aria-label={props.labels.columns} title={props.labels.columns}><Columns3 aria-hidden="true" size={16} />{hiddenProperties.length > 0 ? <small>{hiddenProperties.length}</small> : null}</summary>
             <div className="jd-database__column-menu">
               {document.schema.properties.map((property) => (
                 <label key={property.id}>
@@ -743,7 +744,7 @@ function FilterControl(props: {
         </select>
       </label>
       {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      {props.filter ? <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} onClick={() => props.onFilter(null)}><span aria-hidden="true">×</span></button> : null}
+      {props.filter ? <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></button> : null}
     </div>
   );
 }
@@ -887,9 +888,9 @@ function ariaSort(sort: DatabaseSort | null, propertyId: string): "none" | "asce
   return sort?.propertyId === propertyId ? sort.direction : "none";
 }
 
-function sortMark(sort: DatabaseSort | null, propertyId: string): string {
-  if (sort?.propertyId !== propertyId) return "";
-  return sort.direction === "ascending" ? " ↑" : " ↓";
+function sortMark(sort: DatabaseSort | null, propertyId: string): ReactNode {
+  if (sort?.propertyId !== propertyId) return null;
+  return sort.direction === "ascending" ? <ArrowUp aria-hidden="true" size={10} /> : <ArrowDown aria-hidden="true" size={10} />;
 }
 
 function join(...values: ReadonlyArray<string | undefined>): string {

@@ -10,6 +10,7 @@ describe("interactive design system", () => {
 
     const link = screen.getByRole("link", { name: "Open demo" });
     expect(link.getAttribute("href")).toBe("#target");
-    expect(link.textContent).toBe("Open demo→");
+    expect(link.textContent).toBe("Open demo");
+    expect(link.querySelector("svg[aria-hidden=true]")).not.toBeNull();
   });
 });

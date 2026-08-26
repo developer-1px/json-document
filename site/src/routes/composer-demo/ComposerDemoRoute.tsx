@@ -1,4 +1,5 @@
 import { useCallback, useState, type ReactNode } from "react";
+import { AudioLines, Clock3, FileText, Image, Plus, Search, X } from "lucide-react";
 import type { JSONValue } from "@interactive-os/json-document";
 import { ActionButton, FileDropRegion, IconButton, Menu, Select, SelectableItem, formatFileSize } from "@interactive-os/json-document-ui-primitives-react";
 import { createRichTextNodeId, type RichTextNode } from "@interactive-os/json-document-rich-text";
@@ -59,7 +60,7 @@ export function ComposerDemoRoute() {
   const onAction = useCallback(() => undefined, []);
   const renderComposerReference = useCallback((node: RichTextNode) => composer.renderReference(node, { className: "composer-atom" }), [composer.renderReference]);
   const addActions: ReadonlyArray<{ readonly id: string; readonly label: string; readonly content: ReactNode; readonly run: () => void }> = [
-    { id: "file", label: "파일 업로드", content: <><span>▤</span><span><strong>파일 업로드</strong><small>이미지와 문서를 첨부해요</small></span></>, run: composer.openFilePicker },
+    { id: "file", label: "파일 업로드", content: <><FileText aria-hidden="true" size={16} /><span><strong>파일 업로드</strong><small>이미지와 문서를 첨부해요</small></span></>, run: composer.openFilePicker },
     { id: "skill", label: "스킬", content: <><span>/</span><span><strong>스킬</strong><small>반복 작업을 빠르게 실행해요</small></span></>, run: () => composer.chooseTrigger("/") },
     { id: "agent", label: "에이전트", content: <><span>@</span><span><strong>에이전트</strong><small>전문 에이전트와 함께 작업해요</small></span></>, run: () => composer.chooseTrigger("@") },
   ];
@@ -88,12 +89,12 @@ export function ComposerDemoRoute() {
             <div className="composer-attachments" aria-label="첨부 파일">
               {composer.attachments.map((file) => (
                 <div className="composer-file" key={file.id}>
-                  <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? "▧" : "▤"}</span>
+                  <span className="composer-file-ic" aria-hidden="true">{file.kind === "image" ? <Image size={16} /> : <FileText size={16} />}</span>
                   <span className="composer-file-info">
                     <span className="composer-file-name">{file.name}</span>
                     <span className="composer-file-size">{formatFileSize(file.size)}</span>
                   </span>
-                  <IconButton className="composer-file-remove" label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}>×</IconButton>
+                  <IconButton className="composer-file-remove" label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}><X aria-hidden="true" size={16} /></IconButton>
                 </div>
               ))}
             </div>
@@ -102,7 +103,7 @@ export function ComposerDemoRoute() {
           <div className="composer-input-row">
             <Menu
               label="추가"
-              trigger="＋"
+              trigger={<Plus aria-hidden="true" size={16} />}
               items={addActions}
               restoreFocusOnAction={false}
               onAction={(id) => addActions.find((action) => action.id === id)?.run()}
@@ -137,7 +138,7 @@ export function ComposerDemoRoute() {
               renderOption={(option) => <><strong>{option.label}</strong><small>{hostConfig.models.find((model) => model.id === option.id)?.description}</small></>}
               classNames={{ root: "composer-select-root", trigger: "composer-model-pill", listbox: "composer-layer composer-model-layer", focusedOption: "selected" }}
             />
-            <IconButton className="composer-icon-button" label="음성 입력">♩</IconButton>
+            <IconButton className="composer-icon-button" label="음성 입력"><AudioLines aria-hidden="true" size={16} /></IconButton>
             <ActionButton kind="primary" aria-label="전송 (Enter)" className={`composer-send-button${composer.hasContent ? " is-active" : ""}`} disabled={!composer.hasContent} onClick={composer.submit}>전송</ActionButton>
           </div>
 
@@ -158,9 +159,9 @@ export function ComposerDemoRoute() {
         </FileDropRegion>
 
         <div className="composer-action-chips" aria-label="추천 작업">
-          <ActionButton onClick={() => composer.insertText("경쟁사 최신 동향을 조사해줘")}>⌕ 경쟁사 최신 동향 조사</ActionButton>
-          <ActionButton onClick={() => composer.insertText("전략 기획서 초안을 작성해줘")}>⌁ 전략 기획서 초안 작성</ActionButton>
-          <ActionButton onClick={() => composer.insertText("뉴스 브리핑을 매일 예약해줘")}>◷ 뉴스 브리핑 예약 설정</ActionButton>
+          <ActionButton onClick={() => composer.insertText("경쟁사 최신 동향을 조사해줘")}><Search aria-hidden="true" size={16} /> 경쟁사 최신 동향 조사</ActionButton>
+          <ActionButton onClick={() => composer.insertText("전략 기획서 초안을 작성해줘")}><FileText aria-hidden="true" size={16} /> 전략 기획서 초안 작성</ActionButton>
+          <ActionButton onClick={() => composer.insertText("뉴스 브리핑을 매일 예약해줘")}><Clock3 aria-hidden="true" size={16} /> 뉴스 브리핑 예약 설정</ActionButton>
         </div>
         {submitted ? <p className="composer-submit-status" role="status">canonical Composer turn을 제출했습니다.</p> : null}
       </div>

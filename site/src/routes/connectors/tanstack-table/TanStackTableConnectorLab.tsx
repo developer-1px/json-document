@@ -1,4 +1,5 @@
-import { useState, type FocusEvent } from "react";
+import { useState, type FocusEvent, type ReactNode } from "react";
+import { ArrowDownWideNarrow, ClipboardPaste, Columns3, Copy, EyeOff, ListFilter, PaintBucket, Redo2, Scissors, Undo2 } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -131,20 +132,20 @@ export function TanStackTableConnectorLab() {
       className={classes("p-4", ui.surface.raised)}
     >
       <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">
-        <Control label="Ready rows" icon="◉" active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
-        <Control label="Score descending" icon="↓" active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
-        <Control label="Score first" icon="⇤" active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
-        <Control label="Hide status" icon="◌" active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
+        <Control label="Ready rows" icon={<ListFilter aria-hidden="true" size={16} />} active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
+        <Control label="Score descending" icon={<ArrowDownWideNarrow aria-hidden="true" size={16} />} active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
+        <Control label="Score first" icon={<Columns3 aria-hidden="true" size={16} />} active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
+        <Control label="Hide status" icon={<EyeOff aria-hidden="true" size={16} />} active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
         <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-        <Control label="Copy" icon="⧉" onClick={copySelection} />
-        <Control label="Cut" icon="✂" onClick={cutSelection} />
-        <Control label="Paste" icon="▣" disabled={clipboard === null} onClick={pasteSelection} />
-        <Control label="Fill selected" icon="▦" onClick={() => run(
+        <Control label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
+        <Control label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
+        <Control label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} disabled={clipboard === null} onClick={pasteSelection} />
+        <Control label="Fill selected" icon={<PaintBucket aria-hidden="true" size={16} />} onClick={() => run(
           () => binding.fillSelected(table, "Selected"),
           "Visible selected cells filled",
         )} />
-        <Control label="Undo" icon="↶" disabled={commands.undo.disabled} onClick={() => run(binding.undo, "Undone")} />
-        <Control label="Redo" icon="↷" disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
+        <Control label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} disabled={commands.undo.disabled} onClick={() => run(binding.undo, "Undone")} />
+        <Control label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
       </div>
 
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
@@ -214,7 +215,7 @@ export function TanStackTableConnectorLab() {
   );
 }
 
-function Control(props: { readonly label: string; readonly icon: string; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
+function Control(props: { readonly label: string; readonly icon: ReactNode; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
   if (props.active !== undefined) {
     return <ToggleButton label={props.label} pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.icon}</ToggleButton>;
   }
