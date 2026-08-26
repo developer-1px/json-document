@@ -1,8 +1,11 @@
 import { describe, expect, test } from "vitest";
 import {
   ANNOTATION_PROFILE_V1,
+  annotationResizeHandle,
+  annotationSelectorBounds,
   assertAnnotationDocument,
   createAnnotationEditor,
+  transformAnnotationSelector,
   type Annotation,
   type AnnotationDocument,
 } from "../src/index.js";
@@ -76,5 +79,16 @@ describe("Annotation editor", () => {
     expect((editor.snapshot.value as AnnotationDocument).annotations[0]!.target.selector).toMatchObject({ points: [{ x: 3, y: 5 }, { x: 5, y: 7 }] });
     expect(editor.dispatch({ type: "annotation.resize", annotationId: "path", handle: "south-east", dx: 2, dy: 3 }).ok).toBe(true);
     expect(editor.dispatch({ type: "annotation.resize", annotationId: "arrow", handle: "end", dx: 5, dy: -2 }).ok).toBe(true);
+  });
+
+  test("projects preview geometry through the same selector contract used by commits", () => {
+    const transform = { type: "resize", handle: "south-east", dx: 10, dy: -20 } as const;
+    const projected = transformAnnotationSelector(rectangle.target.selector, transform);
+    const editor = createAnnotationEditor(document([rectangle]));
+    editor.dispatch({ type: "annotation.resize", annotationId: rectangle.id, handle: transform.handle, dx: transform.dx, dy: transform.dy });
+    expect((editor.snapshot.value as AnnotationDocument).annotations[0]!.target.selector).toEqual(projected);
+    expect(annotationSelectorBounds(rectangle.target.selector)).toEqual({ x: 20, y: 30, width: 40, height: 50 });
+    expect(annotationResizeHandle(rectangle.target.selector)).toBe("south-east");
+    expect(annotationResizeHandle(point.target.selector)).toBeNull();
   });
 });

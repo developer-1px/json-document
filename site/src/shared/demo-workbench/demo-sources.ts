@@ -22,6 +22,7 @@ import gestureSessionSource from "../../../../packages/json-document-affordance/
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
+import annotationHandSource from "../../../../packages/json-document-annotation/src/annotation-hand.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
@@ -80,6 +81,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-affordance/", "/docs/api/affordance"],
   ["packages/json-document-ui-primitives-react/", "/docs/api/ui-primitives-react"],
   ["packages/json-document-database/", "/docs/api/database"],
+  ["packages/json-document-annotation/", "/docs/api/annotation"],
   ["packages/json-document-web/", "/docs/api/web"],
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
@@ -136,6 +138,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
+  ["packages/json-document-annotation/src/annotation-hand.tsx", annotationHandSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
   ["packages/json-document-web/src/raster-source.ts", webRasterSource],
@@ -380,6 +383,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createAnnotationEditor",
     sourcePath: "packages/json-document-editing/src/annotation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-annotation",
+    symbol: "AnnotationHand",
+    sourcePath: "packages/json-document-annotation/src/annotation-hand.tsx",
   },
   {
     packageName: "@interactive-os/json-document-react",

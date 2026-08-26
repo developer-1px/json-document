@@ -12,6 +12,7 @@ test("첫 kit package 변경은 외부 소비자 검증을 선택한다", () => 
     "json-document-react",
     "json-document-zod",
     "json-document-database",
+    "json-document-annotation",
   ]) {
     assert.equal(createPlan([`packages/${directory}/src/index.ts`]).externalKit, true, directory);
   }

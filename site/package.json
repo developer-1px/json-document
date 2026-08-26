@@ -15,6 +15,7 @@
     "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:canonical-modules && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@interactive-os/json-document-annotation": "*",
     "@interactive-os/json-document-affordance": "*",
     "@interactive-os/json-document-ui-primitives-react": "*",
     "@interactive-os/json-document-ajv": "*",

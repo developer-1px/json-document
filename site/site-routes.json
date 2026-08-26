@@ -225,6 +225,14 @@
     "navigationGroup": "Hands"
   },
   {
+    "path": "/docs/api/annotation",
+    "label": "API · Annotation",
+    "title": "Annotation API - json-document",
+    "description": "@interactive-os/json-document-annotation의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/api/collaboration",
     "label": "API · Collaboration",
     "title": "Collaboration API - json-document",

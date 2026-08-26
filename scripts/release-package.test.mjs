@@ -25,6 +25,12 @@ const databaseHand = [
   "next",
   "packages/json-document-database/package.json",
 ];
+const annotationHand = [
+  "json-document-annotation-v0.1.0-rc.0",
+  "@interactive-os/json-document-annotation",
+  "next",
+  "packages/json-document-annotation/package.json",
+];
 
 test("첫 npm kit의 stable과 RC release stream을 구분한다", () => {
   for (const [tag, workspace, distTag, packageFile] of firstKit) {
@@ -43,6 +49,11 @@ test("manifest version과 다른 tag를 거부한다", () => {
 
 test("Database Hand를 next release stream으로 해석한다", () => {
   const [tag, workspace, distTag, packageFile] = databaseHand;
+  assert.deepEqual(resolveRelease(tag), { workspace, distTag, version: "0.1.0-rc.0", packageFile });
+});
+
+test("Annotation Hand를 next release stream으로 해석한다", () => {
+  const [tag, workspace, distTag, packageFile] = annotationHand;
   assert.deepEqual(resolveRelease(tag), { workspace, distTag, version: "0.1.0-rc.0", packageFile });
 });
 

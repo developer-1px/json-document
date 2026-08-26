@@ -76,6 +76,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   affordanceApi: "patch",
   uiPrimitivesApi: "patch",
   databaseApi: "database",
+  annotationApi: "cursor",
   webApi: "terminal",
   contenteditableApi: "cursor",
   richTextApi: "terminal",

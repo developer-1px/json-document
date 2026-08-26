@@ -60,7 +60,9 @@ export function createAnnotationEditor(source: EditingDocumentSource<AnnotationD
     if (intent.type === "annotation.body.set") {
       return replace(index, { ...annotation, body: { instruction: intent.instruction } }, intent.type);
     }
-    const selector = intent.type === "annotation.move" ? move(annotation.target.selector, intent.dx, intent.dy) : resize(annotation.target.selector, intent.handle, intent.dx, intent.dy);
+    const selector = transformAnnotationSelector(annotation.target.selector, intent.type === "annotation.move"
+      ? { type: "move", dx: intent.dx, dy: intent.dy }
+      : { type: "resize", handle: intent.handle, dx: intent.dx, dy: intent.dy });
     if (!selector) return failure("annotation.resize-unsupported");
     return replace(index, { ...annotation, target: { ...annotation.target, selector } }, intent.type);
   }
@@ -72,12 +74,38 @@ export function createAnnotationEditor(source: EditingDocumentSource<AnnotationD
   return { get snapshot() { return session.snapshot; }, dispatch, undo: () => session.undo(), redo: () => session.redo(), subscribe: (listener) => session.subscribe(listener) };
 }
 
-function move(selector: AnnotationSelector, dx: number, dy: number): AnnotationSelector {
+export type AnnotationSelectorTransform =
+  | { readonly type: "move"; readonly dx: number; readonly dy: number }
+  | { readonly type: "resize"; readonly handle: "end" | "south-east"; readonly dx: number; readonly dy: number };
+
+export interface AnnotationBounds extends AnnotationPoint { readonly width: number; readonly height: number }
+
+export function transformAnnotationSelector(selector: AnnotationSelector, transform: AnnotationSelectorTransform): AnnotationSelector | null {
+  if (transform.type === "resize") return resize(selector, transform.handle, transform.dx, transform.dy);
+  const { dx, dy } = transform;
   const point = (p: AnnotationPoint) => ({ x: p.x + dx, y: p.y + dy });
   if (selector.type === "point" || selector.type === "rectangle") return { ...selector, ...point(selector) };
   if (selector.type === "path") return { ...selector, points: selector.points.map(point) };
   return { ...selector, from: point(selector.from), to: point(selector.to) };
 }
+
+export function annotationSelectorBounds(selector: AnnotationSelector): AnnotationBounds {
+  if (selector.type === "arrow") return rectangleFromPoints(selector.from, selector.to);
+  if (selector.type === "rectangle") return { x: selector.x, y: selector.y, width: selector.width, height: selector.height };
+  if (selector.type === "path") {
+    const xs = selector.points.map(({ x }) => x); const ys = selector.points.map(({ y }) => y);
+    const x = Math.min(...xs); const y = Math.min(...ys);
+    return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+  }
+  return { x: selector.x, y: selector.y, width: 0, height: 0 };
+}
+
+export function annotationResizeHandle(selector: AnnotationSelector): "end" | "south-east" | null {
+  if (selector.type === "arrow") return "end";
+  if (selector.type === "rectangle" || selector.type === "path") return "south-east";
+  return null;
+}
+
 function resize(selector: AnnotationSelector, handle: "end" | "south-east", dx: number, dy: number): AnnotationSelector | null {
   if (handle === "south-east" && selector.type === "rectangle") return { ...selector, width: Math.max(1, selector.width + dx), height: Math.max(1, selector.height + dy) };
   if (handle === "south-east" && selector.type === "path") {
@@ -89,6 +117,7 @@ function resize(selector: AnnotationSelector, handle: "end" | "south-east", dx: 
   if (handle === "end" && selector.type === "arrow") { const to = { x: selector.to.x + dx, y: selector.to.y + dy }; return to.x === selector.from.x && to.y === selector.from.y ? null : { ...selector, to }; }
   return null;
 }
+function rectangleFromPoints(start: AnnotationPoint, end: AnnotationPoint): AnnotationBounds { return { x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width: Math.abs(end.x - start.x), height: Math.abs(end.y - start.y) }; }
 function selectionFor(ids: ReadonlyArray<string>, primaryId: string | null = ids.at(-1) ?? null): AnnotationSelection { return { kind: "annotation", ids, primaryId }; }
 function success(snapshot: EditingSnapshot<AnnotationSelection>): EditingResult<AnnotationSelection> { return { ok: true, snapshot }; }
 function failure(code: string, reason?: string): EditingResult<AnnotationSelection> { return { ok: false, code, ...(reason === undefined ? {} : { reason }) }; }
