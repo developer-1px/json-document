@@ -16,25 +16,18 @@ export {
 } from "./contracts.js";
 export type {
   DatabaseCapabilities,
-  DatabaseColumnProjection,
   DatabaseDeleteResult,
   DatabaseFailureKind,
-  DatabaseFilterGroup,
-  DatabaseFilterOperator,
-  DatabaseFilterRule,
-  DatabaseGroupRule,
   DatabaseMutationContext,
   DatabaseMutationResult,
   DatabaseOperations,
-  DatabaseProjection,
   DatabaseQueryRequest,
   DatabaseQueryResult,
   DatabaseResource,
   DatabaseRow,
   DatabaseRowId,
-  DatabaseSortRule,
-  DatabaseViewDocument,
 } from "./contracts.js";
+export type { DatabaseColumnProjection, DatabaseFilter, DatabaseFilterGroup, DatabaseFilterOperator, DatabaseGroup, DatabaseProjection, DatabaseSort, DatabaseTableView } from "@interactive-os/json-document-editing";
 export type { DatabaseTableProps } from "./database-hands.js";
 export type {
   DatabaseHandCellRenderProps,

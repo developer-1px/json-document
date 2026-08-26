@@ -52,7 +52,7 @@ for (const size of config.sizes) {
   const database = {
     schema: { properties: columns.map((column) => ({ id: column.id, name: column.label, type: column.id === "score" ? "number" : column.id === "name" ? "title" : "text", options: [] })) },
     records: rows.map((row) => ({ id: row.id, values: row.cells })),
-    views: [{ id: "table", name: "Table", type: "table", propertyOrder: columns.map((column) => column.id), propertyVisibility: {}, propertyWidths: {}, sort: { propertyId: "score", direction: "descending" }, filter: null }],
+    views: [{ id: "table", name: "Table", ownership: "personal", layout: "table", projection: { search: "", filter: { id: "table:root", conjunction: "and", items: [] }, sorts: [{ propertyId: "score", direction: "descending" }], groups: [], columns: columns.map((column) => ({ propertyId: column.id, visible: true, width: null, pinned: null })) } }],
   };
   record("database sorted topology", size, measure(config, "database sorted topology", () => {
     const editor = createDatabaseEditor(database);

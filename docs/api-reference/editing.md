@@ -149,6 +149,11 @@ interface DatabaseClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `DatabaseColumnProjection`
+
+```ts
+interface DatabaseColumnProjection extends Record<string, JSONValue> { readonly propertyId: string; readonly visible: boolean; readonly width: number | null; readonly pinned: "start" | "end" | null; }
+```
 ## `DatabaseDocument`
 
 ```ts
@@ -177,11 +182,22 @@ interface DatabaseEditor {
 ## `DatabaseFilter`
 
 ```ts
-interface DatabaseFilter extends Record<string, JSONValue> {
-  readonly propertyId: string;
-  readonly operator: "equals";
-  readonly value: JSONValue;
-}
+interface DatabaseFilter extends Record<string, JSONValue> { readonly id: string; readonly propertyId: string; readonly operator: DatabaseFilterOperator; readonly value: JSONValue; }
+```
+## `DatabaseFilterGroup`
+
+```ts
+interface DatabaseFilterGroup extends Record<string, JSONValue> { readonly id: string; readonly conjunction: "and" | "or"; readonly items: ReadonlyArray<DatabaseFilter | DatabaseFilterGroup>; }
+```
+## `DatabaseFilterOperator`
+
+```ts
+type DatabaseFilterOperator = "equals" | "not-equals" | "contains" | "greater-than" | "greater-than-or-equal" | "less-than" | "less-than-or-equal" | "is-empty";
+```
+## `DatabaseGroup`
+
+```ts
+interface DatabaseGroup extends Record<string, JSONValue> { readonly propertyId: string; readonly direction: "ascending" | "descending"; }
 ```
 ## `DatabaseIntent`
 
@@ -211,11 +227,7 @@ type DatabaseIntent =
   | {
       readonly type: "view.configure";
       readonly viewId: string;
-      readonly propertyOrder?: ReadonlyArray<string>;
-      readonly propertyVisibility?: Readonly<Record<string, boolean>>;
-      readonly propertyWidths?: Readonly<Record<string, number>>;
-      readonly sort?: DatabaseSort | null;
-      readonly filter?: DatabaseFilter | null;
+      readonly projection: DatabaseProjection;
     }
   | {
       readonly type: "clipboard.paste";
@@ -230,6 +242,11 @@ interface DatabasePoint extends Record<string, JSONValue> {
   readonly recordId: string;
   readonly propertyId: string;
 }
+```
+## `DatabaseProjection`
+
+```ts
+interface DatabaseProjection extends Record<string, JSONValue> { readonly search: string; readonly filter: DatabaseFilterGroup; readonly sorts: ReadonlyArray<DatabaseSort>; readonly groups: ReadonlyArray<DatabaseGroup>; readonly columns: ReadonlyArray<DatabaseColumnProjection>; }
 ```
 ## `DatabaseProperty`
 
@@ -292,16 +309,7 @@ interface DatabaseSort extends Record<string, JSONValue> {
 ## `DatabaseTableView`
 
 ```ts
-interface DatabaseTableView extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly name: string;
-  readonly type: "table";
-  readonly propertyOrder: ReadonlyArray<string>;
-  readonly propertyVisibility: Readonly<Record<string, boolean>>;
-  readonly propertyWidths: Readonly<Record<string, number>>;
-  readonly sort: DatabaseSort | null;
-  readonly filter: DatabaseFilter | null;
-}
+interface DatabaseTableView extends Record<string, JSONValue> { readonly id: string; readonly name: string; readonly ownership: "personal" | "shared" | "locked"; readonly layout: "table"; readonly projection: DatabaseProjection; }
 ```
 ## `DatabaseTopology`
 

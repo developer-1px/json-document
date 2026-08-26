@@ -99,8 +99,10 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
       "packages/json-document-database/src/database-hand.tsx",
-      "packages/json-document-editing/src/database.ts",
+      "packages/json-document-database/src/database-property-control.tsx",
       "packages/json-document-editing/src/database-property-value.ts",
+      "packages/json-document-database/src/database-view-controls.tsx",
+      "packages/json-document-editing/src/database.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
     ]);

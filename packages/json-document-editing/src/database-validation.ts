@@ -1,4 +1,4 @@
-import type { DatabaseDocument, DatabaseProperty, DatabaseTableView } from "./database.js";
+import type { DatabaseDocument, DatabaseFilter, DatabaseProperty, DatabaseTableView } from "./database.js";
 import { acceptsDatabaseValue } from "./database-property-value.js";
 
 export function assertDatabaseDocument(document: DatabaseDocument): void {
@@ -15,17 +15,29 @@ export function assertDatabaseDocument(document: DatabaseDocument): void {
 
 export function assertDatabaseView(view: DatabaseTableView, properties: ReadonlyArray<DatabaseProperty>): void {
   const available = new Set(properties.map((property) => property.id));
-  assertUnique(view.propertyOrder, "view property");
-  if (view.propertyOrder.length !== properties.length || view.propertyOrder.some((id) => !available.has(id))) throw new Error(`Database view ${JSON.stringify(view.id)} must order every property exactly once.`);
-  for (const propertyId of Object.keys(view.propertyVisibility)) if (!available.has(propertyId)) throw new Error(`Database view references unknown property ${JSON.stringify(propertyId)}.`);
-  for (const [propertyId, width] of Object.entries(view.propertyWidths)) {
+  const propertyIds = view.projection.columns.map((column) => column.propertyId);
+  assertUnique(propertyIds, "view property");
+  if (propertyIds.length !== properties.length || propertyIds.some((id) => !available.has(id))) throw new Error(`Database view ${JSON.stringify(view.id)} must project every property exactly once.`);
+  for (const { propertyId, width } of view.projection.columns) {
     if (!available.has(propertyId)) throw new Error(`Database view references unknown property ${JSON.stringify(propertyId)}.`);
-    if (typeof width !== "number" || !Number.isFinite(width) || width <= 0) {
+    if (width !== null && (!Number.isFinite(width) || width <= 0)) {
       throw new Error(`Database view ${JSON.stringify(view.id)} has an invalid width for ${JSON.stringify(propertyId)}.`);
     }
   }
-  if (view.sort && !available.has(view.sort.propertyId)) throw new Error("Database sort property was not found.");
-  if (view.filter && !available.has(view.filter.propertyId)) throw new Error("Database filter property was not found.");
+  for (const sort of [...view.projection.sorts, ...view.projection.groups]) if (!available.has(sort.propertyId)) throw new Error("Database sort property was not found.");
+  assertFilterProperties(view.projection.filter, available);
+}
+
+function assertFilterProperties(group: DatabaseTableView["projection"]["filter"], available: ReadonlySet<string>): void {
+  for (const item of group.items) {
+    if (isFilter(item)) {
+      if (!available.has(item.propertyId)) throw new Error("Database filter property was not found.");
+    } else assertFilterProperties(item, available);
+  }
+}
+
+function isFilter(item: DatabaseTableView["projection"]["filter"]["items"][number]): item is DatabaseFilter {
+  return typeof item.propertyId === "string";
 }
 
 function assertUnique(ids: ReadonlyArray<string>, label: string): void {

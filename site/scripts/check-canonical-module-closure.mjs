@@ -34,6 +34,15 @@ for (const path of databasePropertyConsumers) {
     throw new Error(`${path} bypasses canonical Database property value conversion`);
   }
 }
+const databaseContracts = readSource("packages/json-document-database/src/contracts.ts");
+if (/DatabaseViewDocument/.test(databaseContracts)) throw new Error("Database Hand declares a parallel saved-view model");
+const databaseHands = readSource("packages/json-document-database/src/database-hands.tsx");
+if (/JSON\.stringify\(before\)|JSON\.stringify\(row\)/.test(databaseHands)) throw new Error("Database remote updates infer patches from full records");
+for (const path of ["packages/json-document-database/src/database-hand.tsx", "packages/json-document-database/src/database-hands.tsx"]) if (!readSource(path).includes('from "./database-view-controls.js"')) throw new Error(`${path} bypasses canonical Database view controls`);
+const defaultCell = readSource("packages/json-document-database/src/database-hand.tsx").match(/function DefaultCell[\s\S]*?function FilterControl/)?.[0] ?? "";
+for (const source of [defaultCell, databaseHands.match(/export function DatabaseRecordPanel[\s\S]*?export function DatabaseWorkspace/)?.[0] ?? ""]) {
+  if (/property\.type === ["'](?:checkbox|select|number)["']/.test(source)) throw new Error("Database property controls bypass the canonical React owner");
+}
 
 const visited = new Set();
 const queue = [...entries];

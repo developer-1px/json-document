@@ -22,6 +22,8 @@ import gestureSessionSource from "../../../../packages/json-document-affordance/
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
+import databasePropertyControlSource from "../../../../packages/json-document-database/src/database-property-control.tsx?raw";
+import databaseViewControlsSource from "../../../../packages/json-document-database/src/database-view-controls.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
@@ -136,6 +138,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
+  ["packages/json-document-database/src/database-property-control.tsx", databasePropertyControlSource],
+  ["packages/json-document-database/src/database-view-controls.tsx", databaseViewControlsSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
   ["packages/json-document-web/src/raster-source.ts", webRasterSource],
@@ -174,6 +178,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
   ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
   ["packages/json-document-zod/src/index.ts", zodSource],
+]);
+const registeredImplementationSources = new Map<string, ReadonlyArray<string>>([
+  ["packages/json-document-database/src/database-hand.tsx", ["packages/json-document-database/src/database-property-control.tsx", "packages/json-document-database/src/database-view-controls.tsx"]],
 ]);
 const registeredPublicUsages = [
   {
@@ -554,6 +561,7 @@ async function discoverSourceClosure(entry: string): Promise<ReadonlyArray<DemoS
     visited.add(path);
     paths.push(path);
     const source = await loadSource(path);
+    for (const implementation of registeredImplementationSources.get(path) ?? []) await visit(implementation);
     for (const specifier of relativeSpecifiers(source)) {
       const resolved = resolveSource(path, specifier);
       if (resolved !== undefined) await visit(resolved);

@@ -314,12 +314,9 @@ describe("Web clipboard Adapter", () => {
       views: [{
         id: "all",
         name: "All",
-        type: "table",
-        propertyOrder: ["title"],
-        propertyVisibility: { title: true },
-        propertyWidths: {},
-        sort: null,
-        filter: null,
+        ownership: "personal",
+        layout: "table",
+        projection: { search: "", filter: { id: "all:root", conjunction: "and", items: [] }, sorts: [], groups: [], columns: [{ propertyId: "title", visible: true, width: null, pinned: null }] },
       }],
     });
     const databaseBinding = createWebClipboardBinding({

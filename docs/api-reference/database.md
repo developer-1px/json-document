@@ -14,7 +14,7 @@ createDatabaseResource<Row extends DatabaseRow, Create = Partial<Row>>(resource:
 ## `createDatabaseView`
 
 ```ts
-createDatabaseView(id: string, name: string, propertyIds: ReadonlyArray<string>, ownership?: DatabaseViewDocument["ownership"]): DatabaseViewDocument
+createDatabaseView(id: string, name: string, propertyIds: ReadonlyArray<string>, ownership?: DatabaseTableView["ownership"]): DatabaseTableView
 ```
 ## `Database`
 
@@ -37,12 +37,7 @@ interface DatabaseCapabilities {
 ## `DatabaseColumnProjection`
 
 ```ts
-interface DatabaseColumnProjection {
-  readonly propertyId: string;
-  readonly visible: boolean;
-  readonly width?: number;
-  readonly pinned?: "start" | "end";
-}
+interface DatabaseColumnProjection extends Record<string, JSONValue> { readonly propertyId: string; readonly visible: boolean; readonly width: number | null; readonly pinned: "start" | "end" | null; }
 ```
 ## `DatabaseContextValue`
 
@@ -52,15 +47,15 @@ interface DatabaseContextValue<Row extends DatabaseRow = DatabaseRow> {
   readonly rows: ReadonlyArray<Row>;
   readonly total: number;
   readonly nextCursor?: string;
-  readonly view: DatabaseViewDocument;
-  readonly views: ReadonlyArray<DatabaseViewDocument>;
+  readonly view: DatabaseTableView;
+  readonly views: ReadonlyArray<DatabaseTableView>;
   readonly status: DatabaseStatus;
   readonly capabilities: Required<DatabaseCapabilities>;
   readonly selectedRowIds: ReadonlyArray<DatabaseRowId>;
   readonly activeRow: Row | null;
   readonly isCreating: boolean;
-  setView(view: DatabaseViewDocument): void;
-  saveView(view: DatabaseViewDocument): Promise<void>;
+  setView(view: DatabaseTableView): void;
+  saveView(view: DatabaseTableView): Promise<void>;
   selectRows(ids: ReadonlyArray<DatabaseRowId>): void;
   openRow(row: Row | null): void;
   startCreate(): void;
@@ -86,45 +81,25 @@ interface DatabaseDeleteResult {
 ```ts
 type DatabaseFailureKind = "network" | "validation" | "conflict" | "partial" | "unknown";
 ```
+## `DatabaseFilter`
+
+```ts
+interface DatabaseFilter extends Record<string, JSONValue> { readonly id: string; readonly propertyId: string; readonly operator: DatabaseFilterOperator; readonly value: JSONValue; }
+```
 ## `DatabaseFilterGroup`
 
 ```ts
-interface DatabaseFilterGroup {
-  readonly id: string;
-  readonly conjunction: "and" | "or";
-  readonly items: ReadonlyArray<DatabaseFilterRule | DatabaseFilterGroup>;
-}
+interface DatabaseFilterGroup extends Record<string, JSONValue> { readonly id: string; readonly conjunction: "and" | "or"; readonly items: ReadonlyArray<DatabaseFilter | DatabaseFilterGroup>; }
 ```
 ## `DatabaseFilterOperator`
 
 ```ts
-type DatabaseFilterOperator =
-  | "equals"
-  | "not-equals"
-  | "contains"
-  | "greater-than"
-  | "greater-than-or-equal"
-  | "less-than"
-  | "less-than-or-equal"
-  | "is-empty";
+type DatabaseFilterOperator = "equals" | "not-equals" | "contains" | "greater-than" | "greater-than-or-equal" | "less-than" | "less-than-or-equal" | "is-empty";
 ```
-## `DatabaseFilterRule`
+## `DatabaseGroup`
 
 ```ts
-interface DatabaseFilterRule {
-  readonly id: string;
-  readonly propertyId: string;
-  readonly operator: DatabaseFilterOperator;
-  readonly value?: unknown;
-}
-```
-## `DatabaseGroupRule`
-
-```ts
-interface DatabaseGroupRule {
-  readonly propertyId: string;
-  readonly direction: "ascending" | "descending";
-}
+interface DatabaseGroup extends Record<string, JSONValue> { readonly propertyId: string; readonly direction: "ascending" | "descending"; }
 ```
 ## `DatabaseHand`
 
@@ -149,6 +124,7 @@ interface DatabaseHandChange<Row> {
   readonly records: ReadonlyArray<Row>;
   readonly origin: "cell.commit" | "record.add" | "record.delete" | "undo" | "redo";
   readonly revision: number;
+  readonly updates?: ReadonlyArray<{ readonly recordId: string; readonly patch: Partial<Row> }>;
 }
 ```
 ## `DatabaseHandContext`
@@ -303,13 +279,7 @@ interface DatabaseOperations<Row extends DatabaseRow, Create = Partial<Row>, Upd
 ## `DatabaseProjection`
 
 ```ts
-interface DatabaseProjection {
-  readonly search: string;
-  readonly filter: DatabaseFilterGroup;
-  readonly sorts: ReadonlyArray<DatabaseSortRule>;
-  readonly groups: ReadonlyArray<DatabaseGroupRule>;
-  readonly columns: ReadonlyArray<DatabaseColumnProjection>;
-}
+interface DatabaseProjection extends Record<string, JSONValue> { readonly search: string; readonly filter: DatabaseFilterGroup; readonly sorts: ReadonlyArray<DatabaseSort>; readonly groups: ReadonlyArray<DatabaseGroup>; readonly columns: ReadonlyArray<DatabaseColumnProjection>; }
 ```
 ## `DatabaseProvider`
 
@@ -322,11 +292,11 @@ DatabaseProvider<Row extends DatabaseRow, Create = Partial<Row>, Update = Partia
 interface DatabaseProviderProps<Row extends DatabaseRow, Create = Partial<Row>, Update = Partial<Row>> {
   readonly resource: DatabaseResource<Row, Create>;
   readonly operations: DatabaseOperations<Row, Create, Update>;
-  readonly defaultView: DatabaseViewDocument;
-  readonly view?: DatabaseViewDocument;
-  readonly onViewChange?: (view: DatabaseViewDocument) => void;
-  readonly views?: ReadonlyArray<DatabaseViewDocument>;
-  readonly onSaveView?: (view: DatabaseViewDocument) => Promise<void> | void;
+  readonly defaultView: DatabaseTableView;
+  readonly view?: DatabaseTableView;
+  readonly onViewChange?: (view: DatabaseTableView) => void;
+  readonly views?: ReadonlyArray<DatabaseTableView>;
+  readonly onSaveView?: (view: DatabaseTableView) => Promise<void> | void;
   readonly capabilities?: DatabaseCapabilities;
   readonly pageSize?: number;
   readonly children: ReactNode;
@@ -336,7 +306,7 @@ interface DatabaseProviderProps<Row extends DatabaseRow, Create = Partial<Row>, 
 
 ```ts
 interface DatabaseQueryRequest {
-  readonly view: DatabaseViewDocument;
+  readonly view: DatabaseTableView;
   readonly cursor?: string;
   readonly pageSize: number;
   readonly signal: AbortSignal;
@@ -371,10 +341,10 @@ type DatabaseRow = Record<string, unknown>;
 ```ts
 type DatabaseRowId = string;
 ```
-## `DatabaseSortRule`
+## `DatabaseSort`
 
 ```ts
-interface DatabaseSortRule {
+interface DatabaseSort extends Record<string, JSONValue> {
   readonly propertyId: string;
   readonly direction: "ascending" | "descending";
 }
@@ -399,16 +369,10 @@ interface DatabaseTableProps<Row extends DatabaseRow> {
   readonly density?: "comfortable" | "compact";
 }
 ```
-## `DatabaseViewDocument`
+## `DatabaseTableView`
 
 ```ts
-interface DatabaseViewDocument {
-  readonly id: string;
-  readonly name: string;
-  readonly ownership: "personal" | "shared" | "locked";
-  readonly layout: "table";
-  readonly projection: DatabaseProjection;
-}
+interface DatabaseTableView extends Record<string, JSONValue> { readonly id: string; readonly name: string; readonly ownership: "personal" | "shared" | "locked"; readonly layout: "table"; readonly projection: DatabaseProjection; }
 ```
 ## `useDatabase`
 

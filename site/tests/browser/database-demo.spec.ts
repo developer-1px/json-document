@@ -53,7 +53,7 @@ test("Database Table header hands persist view projection and restore records wi
   await noteHeader.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Hide" }).click();
   await expect(page.getByRole("columnheader", { name: /Note text/ })).toHaveCount(0);
-  await expect(page.getByTestId("database-view-json")).toContainText('"note": false');
+  await expect(page.getByTestId("database-view-json")).toContainText('"visible": false');
 
   await page.getByRole("columnheader", { name: "Show Note" }).click();
   await expect(page.getByRole("columnheader", { name: /Note text/ })).toBeVisible();
@@ -68,7 +68,7 @@ test("Database Table header hands persist view projection and restore records wi
 
   const nameHeader = page.getByRole("columnheader", { name: /Name title/ });
   await nameHeader.dragTo(scoreHeader);
-  await expect(page.getByTestId("database-view-json")).toContainText('"propertyOrder"');
+  await expect(page.getByTestId("database-view-json")).toContainText('"columns"');
 
   const handle = page.locator("[data-resize-edge=e][data-property-id=score]");
   const box = await handle.boundingBox();
@@ -77,7 +77,7 @@ test("Database Table header hands persist view projection and restore records wi
   await page.mouse.down();
   await page.mouse.move(box.x + 80, box.y + box.height / 2);
   await page.mouse.up();
-  await expect(page.getByTestId("database-view-json")).toContainText('"score":');
+  await expect.poll(async () => JSON.parse(await page.getByTestId("database-view-json").textContent() ?? "{}").projection.columns.find((column: { propertyId: string }) => column.propertyId === "score")?.width).toBeGreaterThan(160);
 
   await page.getByRole("button", { name: "New record" }).click();
   await expect(page.getByTestId("database-document-json")).toContainText('"id": "record-1"');

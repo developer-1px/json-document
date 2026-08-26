@@ -26,12 +26,14 @@ const initial: DatabaseDocument = {
   views: [{
     id: "table",
     name: "Table",
-    type: "table",
-    propertyOrder: ["name", "note", "score", "status", "done"],
-    propertyVisibility: {},
-    propertyWidths: {},
-    sort: null,
-    filter: null,
+    ownership: "personal",
+    layout: "table",
+    projection: {
+      search: "",
+      filter: { id: "table:root", conjunction: "and", items: [] },
+      sorts: [], groups: [],
+      columns: ["name", "note", "score", "status", "done"].map((propertyId) => ({ propertyId, visible: true, width: null, pinned: null })),
+    },
   }],
 };
 
@@ -78,10 +80,12 @@ describe("Database editor", () => {
     expect(editor.dispatch({
       type: "view.configure",
       viewId: "table",
-      propertyOrder: ["score", "name", "note", "status", "done"],
-      propertyVisibility: { note: false },
-      sort: { propertyId: "score", direction: "descending" },
-      filter: { propertyId: "status", operator: "equals", value: "todo" },
+      projection: {
+        ...initial.views[0]!.projection,
+        columns: ["score", "name", "note", "status", "done"].map((propertyId) => ({ propertyId, visible: propertyId !== "note", width: null, pinned: null })),
+        sorts: [{ propertyId: "score", direction: "descending" }],
+        filter: { id: "table:root", conjunction: "and", items: [{ id: "status", propertyId: "status", operator: "equals", value: "todo" }] },
+      },
     }).ok).toBe(true);
 
     expect(editor.tableTopology("table")).toEqual({
@@ -90,13 +94,16 @@ describe("Database editor", () => {
     });
     const document = editor.snapshot.value as DatabaseDocument;
     expect(document.records).toEqual(initial.records);
-    expect(document.views[0]?.sort).toEqual({ propertyId: "score", direction: "descending" });
+    expect(document.views[0]?.projection.sorts).toEqual([{ propertyId: "score", direction: "descending" }]);
     expect(editor.dispatch({
       type: "view.configure",
       viewId: "table",
-      propertyWidths: { score: 160, name: 220 },
+      projection: {
+        ...document.views[0]!.projection,
+        columns: document.views[0]!.projection.columns.map((column) => column.propertyId === "score" ? { ...column, width: 160 } : column.propertyId === "name" ? { ...column, width: 220 } : column),
+      },
     }).ok).toBe(true);
-    expect((editor.snapshot.value as DatabaseDocument).views[0]?.propertyWidths).toEqual({ score: 160, name: 220 });
+    expect((editor.snapshot.value as DatabaseDocument).views[0]?.projection.columns.filter((column) => column.width)).toMatchObject([{ propertyId: "score", width: 160 }, { propertyId: "name", width: 220 }]);
     expect(editor.undo().ok).toBe(true);
     expect(editor.undo().ok).toBe(true);
     expect(editor.tableTopology("table").recordIds).toEqual(["r1", "r2", "r3"]);
@@ -144,10 +151,12 @@ describe("Database editor", () => {
     editor.dispatch({
       type: "view.configure",
       viewId: "table",
-      sort: { propertyId: "score", direction: "descending" },
-      filter: { propertyId: "status", operator: "equals", value: "todo" },
-      propertyOrder: ["score", "name", "note", "status", "done"],
-      propertyVisibility: { note: false, status: false, done: false },
+      projection: {
+        ...initial.views[0]!.projection,
+        sorts: [{ propertyId: "score", direction: "descending" }],
+        filter: { id: "table:root", conjunction: "and", items: [{ id: "status", propertyId: "status", operator: "equals", value: "todo" }] },
+        columns: ["score", "name", "note", "status", "done"].map((propertyId) => ({ propertyId, visible: propertyId === "score" || propertyId === "name", width: null, pinned: null })),
+      },
     });
     const topology = editor.tableTopology("table");
     expect(topology).toEqual({ recordIds: ["r3", "r1"], propertyIds: ["score", "name"] });

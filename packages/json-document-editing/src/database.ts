@@ -57,22 +57,14 @@ export function nextDatabasePropertySort(
   return null;
 }
 
-export interface DatabaseFilter extends Record<string, JSONValue> {
-  readonly propertyId: string;
-  readonly operator: "equals";
-  readonly value: JSONValue;
-}
+export type DatabaseFilterOperator = "equals" | "not-equals" | "contains" | "greater-than" | "greater-than-or-equal" | "less-than" | "less-than-or-equal" | "is-empty";
 
-export interface DatabaseTableView extends Record<string, JSONValue> {
-  readonly id: string;
-  readonly name: string;
-  readonly type: "table";
-  readonly propertyOrder: ReadonlyArray<string>;
-  readonly propertyVisibility: Readonly<Record<string, boolean>>;
-  readonly propertyWidths: Readonly<Record<string, number>>;
-  readonly sort: DatabaseSort | null;
-  readonly filter: DatabaseFilter | null;
-}
+export interface DatabaseFilter extends Record<string, JSONValue> { readonly id: string; readonly propertyId: string; readonly operator: DatabaseFilterOperator; readonly value: JSONValue; }
+export interface DatabaseFilterGroup extends Record<string, JSONValue> { readonly id: string; readonly conjunction: "and" | "or"; readonly items: ReadonlyArray<DatabaseFilter | DatabaseFilterGroup>; }
+export interface DatabaseGroup extends Record<string, JSONValue> { readonly propertyId: string; readonly direction: "ascending" | "descending"; }
+export interface DatabaseColumnProjection extends Record<string, JSONValue> { readonly propertyId: string; readonly visible: boolean; readonly width: number | null; readonly pinned: "start" | "end" | null; }
+export interface DatabaseProjection extends Record<string, JSONValue> { readonly search: string; readonly filter: DatabaseFilterGroup; readonly sorts: ReadonlyArray<DatabaseSort>; readonly groups: ReadonlyArray<DatabaseGroup>; readonly columns: ReadonlyArray<DatabaseColumnProjection>; }
+export interface DatabaseTableView extends Record<string, JSONValue> { readonly id: string; readonly name: string; readonly ownership: "personal" | "shared" | "locked"; readonly layout: "table"; readonly projection: DatabaseProjection; }
 
 export interface DatabaseDocument extends Record<string, JSONValue> {
   readonly schema: {
@@ -140,11 +132,7 @@ export type DatabaseIntent =
   | {
       readonly type: "view.configure";
       readonly viewId: string;
-      readonly propertyOrder?: ReadonlyArray<string>;
-      readonly propertyVisibility?: Readonly<Record<string, boolean>>;
-      readonly propertyWidths?: Readonly<Record<string, number>>;
-      readonly sort?: DatabaseSort | null;
-      readonly filter?: DatabaseFilter | null;
+      readonly projection: DatabaseProjection;
     }
   | {
       readonly type: "clipboard.paste";
@@ -423,11 +411,7 @@ function configureView(
   const current = document.views[viewIndex]!;
   const next: DatabaseTableView = {
     ...current,
-    ...(intent.propertyOrder === undefined ? {} : { propertyOrder: [...intent.propertyOrder] }),
-    ...(intent.propertyVisibility === undefined ? {} : { propertyVisibility: { ...intent.propertyVisibility } }),
-    ...(intent.propertyWidths === undefined ? {} : { propertyWidths: { ...intent.propertyWidths } }),
-    ...(intent.sort === undefined ? {} : { sort: intent.sort }),
-    ...(intent.filter === undefined ? {} : { filter: intent.filter }),
+    projection: intent.projection,
   };
   assertDatabaseView(next, document.schema.properties);
   return session.apply({
@@ -440,21 +424,43 @@ function configureView(
 function projectTable(document: DatabaseDocument, viewId: string): DatabaseTopology {
   const view = document.views.find((candidate) => candidate.id === viewId);
   if (!view) throw new Error(`Database view was not found: ${JSON.stringify(viewId)}.`);
-  const propertyIds = view.propertyOrder.filter((propertyId) => view.propertyVisibility[propertyId] !== false);
+  const propertyIds = view.projection.columns.filter((column) => column.visible).map((column) => column.propertyId);
   const records = document.records
-    .filter((record) => view.filter === null || jsonEqual(record.values[view.filter.propertyId], view.filter.value))
+    .filter((record) => matchesFilter(record, view.projection.filter))
+    .filter((record) => !view.projection.search || Object.values(record.values).some((value) => String(value).toLocaleLowerCase().includes(view.projection.search.toLocaleLowerCase())))
     .map((record, index) => ({ record, index }));
-  if (view.sort !== null) {
+  const sorts = [...view.projection.groups, ...view.projection.sorts];
+  if (sorts.length > 0) {
     records.sort((left, right) => {
-      const compared = compareValues(left.record.values[view.sort!.propertyId], right.record.values[view.sort!.propertyId]);
-      const stable = compared === 0 ? left.index - right.index : compared;
-      return view.sort!.direction === "ascending" ? stable : -stable;
+      for (const sort of sorts) {
+        const compared = compareValues(left.record.values[sort.propertyId], right.record.values[sort.propertyId]);
+        if (compared !== 0) return sort.direction === "ascending" ? compared : -compared;
+      }
+      return left.index - right.index;
     });
   }
   return {
     recordIds: records.map(({ record }) => record.id),
     propertyIds,
   };
+}
+
+function matchesFilter(record: DatabaseRecord, group: DatabaseFilterGroup): boolean {
+  const matches = group.items.map((item) => isDatabaseFilter(item) ? matchesRule(record.values[item.propertyId], item) : matchesFilter(record, item));
+  return group.conjunction === "and" ? matches.every(Boolean) : matches.some(Boolean);
+}
+function isDatabaseFilter(value: DatabaseFilter | DatabaseFilterGroup): value is DatabaseFilter { return typeof value.propertyId === "string"; }
+
+function matchesRule(value: JSONValue | undefined, rule: DatabaseFilter): boolean {
+  if (rule.operator === "is-empty") return value === undefined || value === null || value === "";
+  if (rule.operator === "equals") return jsonEqual(value, rule.value);
+  if (rule.operator === "not-equals") return !jsonEqual(value, rule.value);
+  if (rule.operator === "contains") return String(value ?? "").includes(String(rule.value ?? ""));
+  const compared = compareValues(value, rule.value);
+  if (rule.operator === "greater-than") return compared > 0;
+  if (rule.operator === "greater-than-or-equal") return compared >= 0;
+  if (rule.operator === "less-than") return compared < 0;
+  return compared <= 0;
 }
 
 function tableTopology(index: DatabaseIndex, viewId: string): DatabaseTopology {
