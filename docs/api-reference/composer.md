@@ -103,6 +103,7 @@ interface ComposerHostModel<Model extends string = string> extends Record<string
   readonly id: string;
   readonly label: string;
   readonly value: Model;
+  readonly description: string;
 }
 ```
 ## `ComposerHostPorts`
