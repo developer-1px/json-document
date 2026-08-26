@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { createLineFocusSession } from "@interactive-os/json-document-affordance";
 
 export type MenuItem = {
@@ -7,6 +7,11 @@ export type MenuItem = {
   readonly disabled?: boolean;
   readonly content?: ReactNode;
 };
+
+export function MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+  const { type = "button", ...buttonProps } = props;
+  return <button {...buttonProps} type={type} role="menuitem" data-ui-control="menu-item" />;
+}
 
 export function Menu(props: {
   readonly label: string;
@@ -47,7 +52,7 @@ export function Menu(props: {
           else if ((event.key === "Enter" || event.key === " ") && focusedItem) { event.preventDefault(); props.onAction(focusedItem.id); if (props.restoreFocusOnAction === false) setOpen(false); else close(); }
         }}>
           {props.items.map((item) => {
-            return <button key={item.id} type="button" role="menuitem" disabled={item.disabled} data-focus={item.id === focusedItem?.id || undefined} className={props.classNames?.item} style={{ cursor: item.disabled ? "not-allowed" : "pointer" }} onPointerMove={() => { if (!item.disabled) focusSession.setFocus(item.id); }} onClick={() => { props.onAction(item.id); if (props.restoreFocusOnAction === false) setOpen(false); else close(); }}>{item.content ?? item.label}</button>;
+            return <MenuItemButton key={item.id} disabled={item.disabled} data-focus={item.id === focusedItem?.id || undefined} className={props.classNames?.item} style={{ cursor: item.disabled ? "not-allowed" : "pointer" }} onPointerMove={() => { if (!item.disabled) focusSession.setFocus(item.id); }} onClick={() => { props.onAction(item.id); if (props.restoreFocusOnAction === false) setOpen(false); else close(); }}>{item.content ?? item.label}</MenuItemButton>;
           })}
         </div>
       ) : null}

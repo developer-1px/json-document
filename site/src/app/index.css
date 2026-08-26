@@ -90,7 +90,10 @@
 
 @layer components {
   [data-ui-control="action"],
-  [data-ui-control="toggle"] {
+  [data-ui-control="toggle"],
+  [data-ui-control="choice-chip"],
+  [data-ui-segment="true"],
+  [data-ui-tab="true"] {
     @apply cursor-pointer rounded-none border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,box-shadow,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-line-subtle/60 disabled:bg-transparent disabled:text-foreground-muted disabled:shadow-none;
   }
 
@@ -98,16 +101,32 @@
     @apply border-line-subtle bg-background-canvas text-foreground-default shadow-control hover:border-line-default hover:bg-background-subtle;
   }
 
-  [data-ui-control="action"][data-kind="primary"] {
+  [data-ui-control="action"]:is([data-kind="primary"], [data-ui-kind="primary"]) {
     @apply border-line-action-primary bg-background-action-primary text-foreground-inverse shadow-control-primary hover:border-foreground-strong hover:bg-background-action-primary-hovered;
   }
 
-  [data-ui-control="action"][data-kind="danger"] {
+  [data-ui-control="action"]:is([data-kind="danger"], [data-ui-kind="danger"]) {
     @apply border-line-accent/60 bg-background-canvas text-foreground-accent hover:border-line-accent hover:bg-background-accent-subtle;
   }
 
   [data-ui-control="toggle"] {
     @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-accent aria-pressed:bg-background-subtle aria-pressed:text-foreground-accent aria-pressed:ring-1 aria-pressed:ring-line-accent disabled:aria-pressed:border-line-subtle/60 disabled:aria-pressed:bg-transparent disabled:aria-pressed:text-foreground-muted disabled:aria-pressed:ring-0;
+  }
+
+  [data-ui-control="choice-chip"],
+  [data-ui-segment="true"],
+  [data-ui-tab="true"] {
+    @apply border-transparent bg-transparent text-foreground-muted hover:bg-background-subtle hover:text-foreground-strong;
+  }
+
+  [data-ui-control="choice-chip"][data-selected="true"],
+  [data-ui-segment="true"][aria-checked="true"],
+  [data-ui-tab="true"][aria-selected="true"] {
+    @apply border-line-subtle bg-background-canvas text-foreground-strong shadow-control;
+  }
+
+  [data-ui-control="segmented"] {
+    @apply inline-flex items-center rounded-control bg-background-subtle p-0.5;
   }
 
   :where([data-ui-control="selectable"]) {
@@ -127,6 +146,19 @@
   }
 
   [data-ui-control="icon"] {
-    @apply flex h-7 w-7 cursor-pointer items-center justify-center rounded-none border border-transparent bg-transparent text-foreground-muted outline-none transition-colors hover:border-line-subtle hover:bg-background-canvas hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-foreground-disabled;
+    @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-control border border-transparent bg-transparent text-foreground-muted outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-foreground-disabled;
+  }
+
+  [data-ui-component="icon-action"] {
+    @apply relative inline-flex;
+  }
+
+  [data-ui-tooltip="true"] {
+    @apply pointer-events-none absolute left-1/2 top-full z-50 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-control bg-foreground-strong px-2 py-1 text-overline font-medium text-background-canvas shadow-overlay;
+  }
+
+  [data-ui-component="icon-action"]:hover [data-ui-tooltip="true"],
+  [data-ui-component="icon-action"]:focus-within [data-ui-tooltip="true"] {
+    @apply block;
   }
 }

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { useState } from "react";
 import {
   ActionButton,
+  ChoiceChip,
   DisclosureButton,
   FileDropRegion,
   formatFileSize,
@@ -13,6 +14,8 @@ import {
   ResizeHandle,
   Select,
   SelectableItem,
+  SegmentedControl,
+  Tabs,
   ToggleButton,
   useListbox,
 } from "../src/index.js";
@@ -72,6 +75,7 @@ describe("UI Primitives", () => {
         <ActionButton type="submit">Submit</ActionButton>
         <ToggleButton pressed>Toggle</ToggleButton>
         <IconButton label="Copy">□</IconButton>
+        <ChoiceChip selected>Compact</ChoiceChip>
         <SelectableItem selected focus>Item</SelectableItem>
         <DisclosureButton expanded controls="panel">Details</DisclosureButton>
       </>,
@@ -80,10 +84,43 @@ describe("UI Primitives", () => {
     expect(screen.getByRole("button", { name: "Action" }).getAttribute("type")).toBe("button");
     expect(screen.getByRole("button", { name: "Submit" }).getAttribute("type")).toBe("submit");
     expect(screen.getByRole("button", { name: "Toggle" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByRole("button", { name: "Copy" }).getAttribute("title")).toBe("Copy");
+    expect(screen.getByRole("button", { name: "Copy" }).getAttribute("aria-describedby")).toBe(
+      screen.getByRole("tooltip", { name: "Copy" }).id,
+    );
+    expect(screen.getByRole("button", { name: "Compact" }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: "Item" }).dataset).toMatchObject({ selected: "true", focus: "true" });
     expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-controls")).toBe("panel");
     expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-expanded")).toBe("true");
+  });
+
+  test("SegmentedControl keeps one choice and supports arrow navigation", async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+    render(<SegmentedControl label="View" value="canvas" options={[{ id: "canvas", label: "Canvas" }, { id: "json", label: "JSON" }]} onValueChange={onValueChange} />);
+    const canvas = screen.getByRole("radio", { name: "Canvas" });
+    canvas.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(onValueChange).toHaveBeenCalledWith("json");
+    expect(document.activeElement).toBe(screen.getByRole("radio", { name: "JSON" }));
+  });
+
+  test("editing controls can preserve the active surface focus on pointer activation", () => {
+    render(<IconButton preserveFocus label="Strong">B</IconButton>);
+    expect(fireEvent.mouseDown(screen.getByRole("button", { name: "Strong" }))).toBe(false);
+  });
+
+  test("Tabs owns selection semantics and roving keyboard focus", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState<"demo" | "source">("demo");
+      return <Tabs label="Demo views" value={value} options={[{ id: "demo", label: "Demo" }, { id: "source", label: "Source" }]} onValueChange={setValue} tabId={(id) => `tab-${id}`} panelId={(id) => `panel-${id}`} />;
+    }
+    render(<Harness />);
+    const demo = screen.getByRole("tab", { name: "Demo" });
+    demo.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Source" }).getAttribute("aria-selected")).toBe("true");
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Source" }));
   });
 
   test("Select completes keyboard selection, cancellation, disabled options, and focus restoration", async () => {

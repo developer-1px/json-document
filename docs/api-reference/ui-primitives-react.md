@@ -9,7 +9,17 @@
 ## `ActionButton`
 
 ```ts
-ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement>): ReactNode
+ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement> & FocusPreservingControl & { readonly kind?: ActionButtonKind; }): ReactNode
+```
+## `ActionButtonKind`
+
+```ts
+type ActionButtonKind = "primary" | "secondary" | "danger";
+```
+## `ChoiceChip`
+
+```ts
+ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
 ```
 ## `DisclosureButton`
 
@@ -34,7 +44,7 @@ GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: bo
 ## `IconButton`
 
 ```ts
-IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & { readonly label: string; }): ReactNode
+IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & FocusPreservingControl & { readonly label: string; readonly rootClassName?: string; }): ReactNode
 ```
 ## `ListboxBinding`
 
@@ -75,10 +85,29 @@ type MenuItem = {
   readonly content?: ReactNode;
 };
 ```
+## `MenuItemButton`
+
+```ts
+MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
 ## `ResizeHandle`
 
 ```ts
 ResizeHandle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & { readonly label: string; readonly orientation: "horizontal" | "vertical"; readonly onResize: (delta: number, phase: "preview" | "commit") => void; readonly className?: string; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `SegmentedControl`
+
+```ts
+SegmentedControl(props: { readonly label: string; readonly value: string; readonly options: ReadonlyArray<SegmentedControlOption>; readonly onValueChange: (value: string) => void; readonly className?: string; }): ReactNode
+```
+## `SegmentedControlOption`
+
+```ts
+type SegmentedControlOption = {
+  readonly id: string;
+  readonly label: ReactNode;
+  readonly disabled?: boolean;
+};
 ```
 ## `Select`
 
@@ -120,10 +149,24 @@ type SelectOption = {
   readonly disabled?: boolean;
 };
 ```
+## `TabOption`
+
+```ts
+type TabOption<T extends string | number> = {
+  readonly id: T;
+  readonly label: ReactNode;
+  readonly disabled?: boolean;
+};
+```
+## `Tabs`
+
+```ts
+Tabs<T extends string | number>(props: { readonly label: string; readonly value: T; readonly options: ReadonlyArray<TabOption<T>>; readonly onValueChange: (value: T) => void; readonly tabId: (value: T, index: number) => string; readonly panelId: (value: T, index: number) => string; readonly className?: string; readonly tabClassName?: string; }): ReactNode
+```
 ## `ToggleButton`
 
 ```ts
-ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly pressed: boolean; }): ReactNode
+ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly label?: string; readonly tooltip?: string; }): ReactNode
 ```
 ## `useListbox`
 

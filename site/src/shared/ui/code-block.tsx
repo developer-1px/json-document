@@ -44,6 +44,7 @@ export function CodeBlock(props: {
         {props.signal ? <> · {props.signal}</> : null}
       </figcaption>
       <IconButton
+        rootClassName={ui.code.block.copyRoot}
         label={copied ? "Copied" : "Copy"}
         className={ui.code.block.copy}
         data-copied={copied}
