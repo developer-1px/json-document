@@ -269,7 +269,8 @@ const misplacedMarkdown = filesUnder("").filter((path) => {
   return path.endsWith(".md")
     && !path.startsWith("docs/")
     && !path.startsWith("standards/")
-    && name !== "README.md";
+    && name !== "README.md"
+    && name !== "AGENTS.md";
 });
 if (misplacedMarkdown.length > 0) {
   fail(`docs layout: non-README markdown must live under docs/: ${misplacedMarkdown.join(", ")}.`);
