@@ -409,8 +409,6 @@ function CommentComposer(props: {
     return () => cancelAnimationFrame(frame);
   }, [props.annotation.id]);
   const dock = composerDock(props.annotation, props.source);
-  const opensLeft = dock.horizontal === "left";
-  const verticalTransform = dock.vertical === "above" ? "-100%" : dock.vertical === "below" ? "0" : "-50%";
   return (
     <section
       aria-label={`Request ${props.index} comment`}
@@ -419,7 +417,7 @@ function CommentComposer(props: {
       style={{
         left: `${(dock.anchor.x / props.source.width) * 100}%`,
         top: `${(dock.anchor.y / props.source.height) * 100}%`,
-        transform: `translate(${opensLeft ? "-100%" : "0"}, ${verticalTransform})`,
+        transform: dockTransform(dock),
       }}
     >
       <textarea
@@ -465,16 +463,16 @@ function ToolIcon(props: { readonly tool: Tool }) {
 }
 
 function CommentPreview(props: { readonly annotation: Annotation; readonly index: number; readonly source: AnnotationSource }) {
-  const anchor = annotationBounds(props.annotation);
+  const dock = composerDock(props.annotation, props.source);
   return (
     <div
       aria-label={`Comment ${props.index} preview`}
       className={annotationDemoStyles.commentPreview()}
       role="tooltip"
       style={{
-        left: `${(anchor.x / props.source.width) * 100}%`,
-        top: `${(anchor.y / props.source.height) * 100}%`,
-        transform: "translate(-50%, -50%)",
+        left: `${(dock.anchor.x / props.source.width) * 100}%`,
+        top: `${(dock.anchor.y / props.source.height) * 100}%`,
+        transform: dockTransform(dock),
       }}
     >
       {props.annotation.body.instruction}
@@ -743,6 +741,12 @@ function composerDock(annotation: Annotation, source: AnnotationSource) {
       y: bounds.y,
     },
   };
+}
+
+function dockTransform(dock: ReturnType<typeof composerDock>): string {
+  const horizontal = dock.horizontal === "left" ? "-100%" : "0";
+  const vertical = dock.vertical === "above" ? "-100%" : dock.vertical === "below" ? "0" : "-50%";
+  return `translate(${horizontal}, ${vertical})`;
 }
 
 function annotationBounds(annotation: Annotation) {

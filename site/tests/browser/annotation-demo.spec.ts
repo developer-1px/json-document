@@ -35,14 +35,6 @@ test("hovering or focusing an annotation number previews its comment", async ({ 
   await marker.hover();
   const preview = page.getByRole("tooltip", { name: "Comment 1 preview" });
   await expect(preview).toContainText("대비를 높여");
-  const markerBox = await requiredBox(marker);
-  const previewBox = await requiredBox(preview);
-  const markerCenterX = markerBox.x + markerBox.width / 2;
-  const markerCenterY = markerBox.y + markerBox.height / 2;
-  const previewCenterX = previewBox.x + previewBox.width / 2;
-  const previewCenterY = previewBox.y + previewBox.height / 2;
-  expect(Math.abs(previewCenterX - markerCenterX)).toBeLessThan(4);
-  expect(Math.abs(previewCenterY - markerCenterY)).toBeLessThan(4);
   await expect(marker).toHaveAttribute("data-previewing", "true");
   await page.mouse.move(0, 0);
   await marker.focus();
@@ -58,11 +50,15 @@ test("click opens comment editing while drag keeps the composer hidden", async (
   await page.getByRole("button", { name: "Send comment" }).click();
   const marker = page.locator("[data-annotation-id]").first();
 
+  await marker.hover();
+  const previewBox = await requiredBox(page.getByRole("tooltip", { name: "Comment 1 preview" }));
   await marker.click();
   await expect(instruction).toBeFocused();
   const composer = page.getByRole("region", { name: "Request 1 comment" });
   const clickedMarkerBox = await requiredBox(marker);
   const composerBox = await requiredBox(composer);
+  expect(Math.abs(composerBox.x - previewBox.x)).toBeLessThan(4);
+  expect(Math.abs(composerBox.y - previewBox.y)).toBeLessThan(4);
   expect(composerBox.x).toBeGreaterThan(clickedMarkerBox.x + clickedMarkerBox.width / 2);
   const markerCenterY = clickedMarkerBox.y + clickedMarkerBox.height / 2;
   const composerCenterY = composerBox.y + composerBox.height / 2;
