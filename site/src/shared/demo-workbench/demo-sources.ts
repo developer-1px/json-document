@@ -46,6 +46,17 @@ import mentionReactSource from "../../../../packages/json-document-rich-text-men
 import webFileIntakeSource from "../../../../packages/json-document-web/src/file-intake.ts?raw";
 import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
 import uiFileSizeSource from "../../../../packages/json-document-ui-primitives-react/src/file-size.ts?raw";
+import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
+import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
+import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
+import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
+import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
+import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
+import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
+import richTextSource from "../../../../packages/json-document-rich-text/src/editor.ts?raw";
+import richTextWebSource from "../../../../packages/json-document-rich-text-web/src/contenteditable.ts?raw";
+import tanStackTableSource from "../../../../packages/json-document-tanstack-table/src/index.ts?raw";
+import zodSource from "../../../../packages/json-document-zod/src/index.ts?raw";
 
 export type DemoSourceFile = {
   readonly path: string;
@@ -146,8 +157,74 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/file-intake.ts", webFileIntakeSource],
   ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
   ["packages/json-document-ui-primitives-react/src/file-size.ts", uiFileSizeSource],
+  ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
+  ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
+  ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
+  ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
+  ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
+  ["packages/json-document-ajv/src/index.ts", ajvSource],
+  ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
+  ["packages/json-document-rich-text/src/editor.ts", richTextSource],
+  ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
+  ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
+  ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document",
+    symbol: "createJSONDocument",
+    sourcePath: "packages/json-document/src/application/document/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "collapsedRangeSelection",
+    sourcePath: "packages/json-document-selection/src/range/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable",
+    symbol: "ContentEditable",
+    sourcePath: "packages/json-document-contenteditable/src/content-editable.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-collaboration/text",
+    symbol: "createTextRuntime",
+    sourcePath: "packages/json-document-collaboration/src/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-contenteditable-collaboration",
+    symbol: "createContentEditableAdapter",
+    sourcePath: "packages/contenteditable-collaboration/src/lease.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ajv",
+    symbol: "createAjvValidator",
+    sourcePath: "packages/json-document-ajv/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react-hook-form",
+    symbol: "useReactHookFormConnector",
+    sourcePath: "packages/json-document-react-hook-form/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text",
+    symbol: "createRichTextEditor",
+    sourcePath: "packages/json-document-rich-text/src/editor.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-web",
+    symbol: "createRichTextContentEditableBinding",
+    sourcePath: "packages/json-document-rich-text-web/src/contenteditable.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-tanstack-table",
+    symbol: "createTanStackTableConnector",
+    sourcePath: "packages/json-document-tanstack-table/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-zod",
+    symbol: "createZodValidator",
+    sourcePath: "packages/json-document-zod/src/index.ts",
+  },
   {
     packageName: "@interactive-os/json-document-rich-text-suggestion",
     symbol: "findRichTextSuggestionTrigger",

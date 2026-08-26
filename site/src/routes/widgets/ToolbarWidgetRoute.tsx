@@ -1,10 +1,6 @@
 import {
   useRef,
   useState,
-  type FocusEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  type PointerEvent,
 } from "react";
 import { createOrderEditor, type OrderDocument } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
@@ -13,18 +9,14 @@ import {
   activeDescendantItemProps,
   lineBoundary,
   moveLinePoint,
-  pressInteractionFromWeb,
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
-  activateAffordance,
-  pressAffordance,
-  type PressAffordanceState,
 } from "@interactive-os/json-document-affordance";
 import { useWidgetKeyboard } from "../../shared/widget-binding";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -94,12 +86,12 @@ export function ToolbarWidgetRoute() {
         <div className={classes("flex flex-wrap gap-1", ui.product.toolbar)} role="toolbar" aria-label="History">
           <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}>↶</IconButton>
           <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}>↷</IconButton>
-          <CustomPressButton onActivate={() => {
+          <ActionButton onClick={() => {
             editor.dispatch({ type: "selection.set", itemId: "today", mode: "replace" });
             setCustomActivations((count) => count + 1);
           }}>
             Select Today
-          </CustomPressButton>
+          </ActionButton>
         </div>
       )}
       surfaceLabel="Listbox"
@@ -142,59 +134,6 @@ export function ToolbarWidgetRoute() {
         { label: "custom activations", value: customActivations, testId: "widget-toolbar-press-count", size: "compact" },
       ]}
     />
-  );
-}
-
-function CustomPressButton(props: { readonly children: string; readonly onActivate: () => void }) {
-  const [press, setPress] = useState<PressAffordanceState>({ status: "idle" });
-
-  function handlePress(
-    event: KeyboardEvent<HTMLDivElement> | PointerEvent<HTMLDivElement> | MouseEvent<HTMLDivElement> | FocusEvent<HTMLDivElement>,
-  ) {
-    const interaction = pressInteractionFromWeb(event);
-    if (interaction?.phase === "activation" && interaction.source === "pointer") return;
-    if (interaction?.source === "keyboard" && "key" in interaction && interaction.key === "Space" && interaction.phase === "start") {
-      event.preventDefault();
-    }
-    if (interaction?.source === "pointer" && interaction.phase === "start") {
-      event.currentTarget.focus();
-      event.preventDefault();
-    }
-    const result = pressAffordance(interaction, press);
-    setPress(result.state);
-    applyAffordance(result, {
-      hand: (hand) => {
-        if (hand.type === "activate") {
-          props.onActivate();
-          return;
-        }
-        if (hand.type !== "press") return;
-        applyAffordance(activateAffordance(hand), {
-          hand: (activation) => {
-            if (activation.type === "activate") props.onActivate();
-          },
-        });
-      },
-    });
-  }
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      data-pressed={press.status === "active" ? "true" : undefined}
-      className={classes(ui.interactive.control, ui.interactive.action.secondary)}
-      onBlur={handlePress}
-      onClick={handlePress}
-      onKeyDown={handlePress}
-      onKeyUp={handlePress}
-      onPointerCancel={handlePress}
-      onPointerDown={handlePress}
-      onPointerLeave={handlePress}
-      onPointerUp={handlePress}
-    >
-      {props.children}
-    </div>
   );
 }
 
