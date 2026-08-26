@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../ui/styles";
 import { ActionLink } from "../ui/interactive";
+import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
 import { ShikiSourceCodeBlock } from "./ShikiSourceCodeBlock";
 import { demoEntrySource, discoverDemoSources, type DemoSourceFile } from "./demo-sources";
 
@@ -12,6 +13,7 @@ export function DemoWorkbench(props: {
   readonly source: string;
 }) {
   const [activeTab, setActiveTab] = useState<WorkbenchTab>("demo");
+  const [expanded, setExpanded] = useState(false);
   const [sources, setSources] = useState<ReadonlyArray<DemoSourceFile>>(() => [demoEntrySource(props.source)]);
   const id = useId();
   const tabs: ReadonlyArray<{ readonly key: WorkbenchTab; readonly label: string }> = [
@@ -28,6 +30,15 @@ export function DemoWorkbench(props: {
     setSources([demoEntrySource(props.source)]);
     setSourceText({});
   }, [props.source]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const close = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setExpanded(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [expanded]);
 
   useEffect(() => {
     if (activeSourceIndex === undefined) return;
@@ -48,8 +59,8 @@ export function DemoWorkbench(props: {
   }, [activeSource?.path, activeSourceText]);
 
   return (
-    <section className={classes("min-w-0", ui.product.frame)} aria-label="Demo workbench">
-      <div className={ui.demoWorkbench.header}>
+    <section className={classes("min-w-0", ui.product.frame, expanded && "fixed inset-3 z-50 overflow-auto bg-background-canvas shadow-overlay")} aria-label="Demo workbench" data-expanded={expanded || undefined}>
+      <div className={classes(ui.demoWorkbench.header, "flex items-start justify-between gap-2")}>
         <Tabs
           className={ui.demoWorkbench.tabList}
           tabClassName={ui.demoWorkbench.tab}
@@ -60,6 +71,9 @@ export function DemoWorkbench(props: {
           tabId={(_tab, index) => `${id}-tab-${index}`}
           panelId={(_tab, index) => `${id}-panel-${index}`}
         />
+        <IconButton label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
+          {expanded ? "↙" : "↗"}
+        </IconButton>
       </div>
 
       <div

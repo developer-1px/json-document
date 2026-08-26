@@ -9,7 +9,7 @@ import {
 } from "@interactive-os/json-document-rich-text";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
-import { JsonInspector } from "../../shared/ui/json-inspector";
+import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -210,30 +210,12 @@ export function RichTextDemoRoute() {
           </p>
         </section>
 
-        <section className="grid min-w-0 gap-3" aria-label="Rich Text state inspectors">
-          <JsonInspector
-            label="Canonical JSON"
-            meta="JSONDocument.value"
-            value={snapshot.value}
-            testId="rich-text-document-json"
-            size="tall"
-          />
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-            <JsonInspector
-              label="Selection + Topology"
-              meta="RangeSelection / logical interval"
-              value={{ selection: snapshot.selection, interval }}
-              testId="rich-text-selection-json"
-              size="standard"
-            />
-            <JsonInspector
-              label="Applied JSON Patch"
-              meta={lastAction}
-              value={lastPatch}
-              testId="rich-text-patch-json"
-              size="standard"
-            />
-          </div>
+        <section className="min-w-0" aria-label="Rich Text state inspectors">
+          <Inspector defaultOpen placement="inline" label="Inspect Rich Text state" items={[
+            { label: "Canonical JSON", meta: "JSONDocument.value", value: snapshot.value, testId: "rich-text-document-json", size: "tall" },
+            { label: "Selection + Topology", meta: "RangeSelection / logical interval", value: { selection: snapshot.selection, interval }, testId: "rich-text-selection-json", size: "standard" },
+            { label: "Applied JSON Patch", meta: lastAction, value: lastPatch, testId: "rich-text-patch-json", size: "standard" },
+          ]} />
         </section>
       </div>
     </DemoPage>
