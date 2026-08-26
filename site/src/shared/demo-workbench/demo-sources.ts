@@ -39,6 +39,8 @@ import composerHostConfigSource from "../../../../packages/json-document-compose
 import composerInteractionSource from "../../../../packages/json-document-composer/src/interaction.ts?raw";
 import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
 import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
+import composerReactLifecycleSource from "../../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
 import suggestionSource from "../../../../packages/json-document-rich-text-suggestion/src/index.ts?raw";
 import suggestionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/index.ts?raw";
@@ -151,6 +153,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/interaction.ts", composerInteractionSource],
   ["packages/json-document-composer/src/suggestions.ts", composerSuggestionsSource],
   ["packages/json-document-composer-react/src/reference-atom.tsx", composerReferenceAtomSource],
+  ["packages/json-document-composer-react/src/use-composer.tsx", composerReactLifecycleSource],
+  ["packages/json-document-composer-react/src/command-menu.ts", composerCommandMenuSource],
   ["packages/json-document-file-intake/src/index.ts", fileIntakeSource],
   ["packages/json-document-rich-text-suggestion/src/index.ts", suggestionSource],
   ["packages/json-document-rich-text-suggestion-react/src/index.ts", suggestionReactSource],
@@ -295,6 +299,21 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-composer-react",
     symbol: "ComposerReferenceAtom",
+    sourcePath: "packages/json-document-composer-react/src/reference-atom.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposer",
+    sourcePath: "packages/json-document-composer-react/src/use-composer.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposer",
+    sourcePath: "packages/json-document-composer-react/src/command-menu.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposer",
     sourcePath: "packages/json-document-composer-react/src/reference-atom.tsx",
   },
   {

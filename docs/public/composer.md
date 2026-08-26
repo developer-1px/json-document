@@ -39,12 +39,14 @@ Selection, IME, structured Clipboard와 history를 기존 Rich Text editor에 �
 후보와 수용 정책을 검증한 뒤 Host가 주입한 ID로 Composer attachment를 만들며,
 검증 실패를 명시적인 Composer command 결과로 번역합니다.
 호환용 `findComposerTrigger`와 `resolveComposerSuggestions`도 공용 Rich Text Suggestion
-계약에 위임합니다. 신규 조립은 `@interactive-os/json-document-rich-text-suggestion`의
-trigger·candidate 상태와 `@interactive-os/json-document-rich-text-suggestion-react`의
-combobox·listbox interaction binding을 직접 사용합니다.
+계약에 위임합니다.
 
 `@interactive-os/json-document-composer-react`는 React Host를 위한
-`ComposerReferenceAtom`을 제공합니다. skill projection을 소유하고 mention은
+`useComposer({ id, config, ports, labels })`와 `ComposerReferenceAtom`을 제공합니다.
+`useComposer`는 draft/editor 구독, mention·skill suggestion 통합, keyboard·history,
+Web file·clipboard intake, focus 복구와 submit 실행 순서를 소유합니다. Host를 바꿀 때는
+동일한 binding에 선언적인 config·ports·표현만 주입합니다. `ComposerReferenceAtom`은
+skill projection을 소유하고 mention은
 `@interactive-os/json-document-rich-text-mention-react`의
 `RichTextMentionAtom`을 조립해 접근 가능한 DOM projection으로 렌더링합니다.
 제품 className과 CSS는 Host가 주입합니다.

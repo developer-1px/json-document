@@ -8,6 +8,7 @@ export interface ComposerHostModel<Model extends string = string> extends Record
   readonly id: string;
   readonly label: string;
   readonly value: Model;
+  readonly description: string;
 }
 
 export type ComposerHostSuggestion = ComposerReference & Readonly<Record<string, JSONValue>>;
@@ -47,8 +48,8 @@ export const composerHostConfigSchema = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["id", "label", "value"],
-        properties: { id: { type: "string", minLength: 1 }, label: { type: "string", minLength: 1 }, value: { type: "string", minLength: 1 } },
+        required: ["id", "label", "value", "description"],
+        properties: { id: { type: "string", minLength: 1 }, label: { type: "string", minLength: 1 }, value: { type: "string", minLength: 1 }, description: { type: "string", minLength: 1 } },
       },
     },
     suggestions: {

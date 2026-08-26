@@ -5,6 +5,8 @@ import composerDemoSource from "../../src/routes/composer-demo/ComposerDemoRoute
 import composerCommandsSource from "../../../packages/json-document-composer/src/commands.ts?raw";
 import composerSchemaSource from "../../../packages/json-document-composer/src/schema.ts?raw";
 import composerReferenceAtomSource from "../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
+import composerLifecycleSource from "../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerCommandMenuSource from "../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 
 afterEach(cleanup);
 
@@ -12,21 +14,32 @@ describe("Agent Chat Composer Hands", () => {
   test("keeps draft patches and Web file projection out of the Host route", () => {
     expect(composerDemoSource).not.toContain("editor.apply(");
     expect(composerDemoSource).not.toContain("function composerAttachments");
-    expect(composerDemoSource).toContain("addComposerAttachments(");
-    expect(composerDemoSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerDemoSource).toContain("useComposer(");
+    expect(composerDemoSource).not.toContain("addComposerAttachments(");
+    expect(composerDemoSource).not.toContain("fileCandidatesFromWebFiles(");
     expect(composerDemoSource).not.toContain("composerAttachmentCandidatesFromWebFiles(");
     expect(composerDemoSource).not.toContain("composer-placeholder-box");
     expect(composerDemoSource).toContain('placeholder="작업을 입력하세요"');
-    expect(composerDemoSource).toContain("useRichTextSuggestion(");
-    expect(composerDemoSource).toContain("useRichTextMentionSuggestions(");
+    expect(composerDemoSource).not.toContain("useRichTextSuggestion(");
+    expect(composerDemoSource).not.toContain("useRichTextMentionSuggestions(");
     expect(composerDemoSource).not.toContain("useComposerCommandMenu(");
-    expect(composerDemoSource).toContain("<ComposerReferenceAtom");
+    expect(composerDemoSource).not.toContain("<ComposerReferenceAtom");
     expect(composerDemoSource).toContain("renderExtension={renderComposerReference}");
     expect(composerDemoSource).not.toContain("renderExtension={(node)");
     expect(composerDemoSource).toContain("formatFileSize(file.size)");
     expect(composerDemoSource).not.toContain("commandActiveId");
     expect(composerDemoSource).not.toContain("function renderAtom");
     expect(composerDemoSource).not.toContain("function formatBytes");
+    expect(composerDemoSource).not.toContain('startsWith("gpt")');
+    expect(composerDemoSource).not.toContain('id === "file"');
+    expect(composerDemoSource).not.toContain('id === "skill"');
+    expect(composerDemoSource).not.toContain('id === "agent"');
+    expect(composerDemoSource).toContain("addActions.find((action) => action.id === id)?.run()");
+    expect(composerLifecycleSource).toContain("addComposerAttachments(");
+    expect(composerLifecycleSource).toContain("fileCandidatesFromWebFiles(");
+    expect(composerCommandMenuSource).toContain("useRichTextSuggestion(");
+    expect(composerCommandMenuSource).toContain("useRichTextMentionSuggestions(");
+    expect(composerLifecycleSource).toContain("<ComposerReferenceAtom");
   });
 
   test("delegates file intake and mention responsibilities to their canonical owners", () => {
