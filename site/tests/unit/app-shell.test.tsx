@@ -81,6 +81,7 @@ describe("official site shell", () => {
       "Official Hands · TBD",
       "Order",
       "Object",
+      "Annotation",
       "Tree",
       "Database",
       "Composer",
