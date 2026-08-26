@@ -6,6 +6,11 @@ intent, editor, history 편집 계약의 public entrypoint입니다. 아래 항�
 
 > 이 문서는 `packages/json-document-editing/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `acceptsDatabaseValue`
+
+```ts
+acceptsDatabaseValue(property: DatabaseProperty, value: JSONValue): boolean
+```
 ## `Annotation`
 
 ```ts
@@ -305,6 +310,16 @@ interface DatabaseTopology {
   readonly recordIds: ReadonlyArray<string>;
   readonly propertyIds: ReadonlyArray<string>;
 }
+```
+## `databaseValueFromText`
+
+```ts
+databaseValueFromText(property: DatabaseProperty, value: string): string | number | boolean
+```
+## `defaultDatabaseValue`
+
+```ts
+defaultDatabaseValue(property: DatabaseProperty): JSONValue
 ```
 ## `DocumentBlock`
 

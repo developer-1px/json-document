@@ -46,6 +46,10 @@ structural selection with record and view mutations through history.
 transition: a property cycles through ascending, descending, and unsorted. UI
 packages and Hosts share this rule instead of repeating local sort helpers.
 
+`defaultDatabaseValue(property)`, `databaseValueFromText(property, value)`, and
+`acceptsDatabaseValue(property, value)` are the canonical value semantics used
+by Database editors, Hands, and schema connectors.
+
 Visible order is a value, not a command. `LineTopology` and `GridTopology` are
 the shared shapes. Sheet aliases Grid as `SheetTopology`. Database projects a
 saved view into `{ recordIds, propertyIds }`. Tree takes host `visibleIds`.

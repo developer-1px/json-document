@@ -100,6 +100,7 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/initial-database.ts",
       "packages/json-document-database/src/database-hand.tsx",
       "packages/json-document-editing/src/database.ts",
+      "packages/json-document-editing/src/database-property-value.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
     ]);
@@ -138,21 +139,21 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
-  test("registers each Composer ecosystem owner source next to its Usage", async () => {
+  test("registers the Composer lifecycle owner and its canonical domain closure next to Usage", async () => {
     const sources = (await discoverDemoSources("routes/composer-demo/ComposerDemoRoute.tsx")).map((file) => file.path);
     expect(sources).toEqual(expect.arrayContaining([
       "packages/json-document-composer/src/model.ts",
       "packages/json-document-composer/src/schema.ts",
-      "packages/json-document-composer/src/trigger.ts",
       "packages/json-document-composer/src/commands.ts",
       "packages/json-document-composer/src/host-config.ts",
       "packages/json-document-composer/src/interaction.ts",
       "packages/json-document-rich-text-suggestion/src/index.ts",
       "packages/json-document-rich-text-suggestion-react/src/index.ts",
+      "packages/json-document-composer-react/src/use-composer.tsx",
+      "packages/json-document-composer-react/src/command-menu.ts",
       "packages/json-document-composer-react/src/reference-atom.tsx",
       "packages/json-document-file-intake/src/index.ts",
       "packages/json-document-rich-text-mention/src/index.ts",
-      "packages/json-document-rich-text-mention-react/src/index.tsx",
       "packages/json-document-web/src/file-intake.ts",
       "packages/json-document-rich-text-react/src/index.tsx",
       "packages/json-document-ui-primitives-react/src/file-size.ts",

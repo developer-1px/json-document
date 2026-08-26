@@ -77,6 +77,7 @@ describe("Composer domain", () => {
   test("publishes a serializable Host policy schema without runtime ports", () => {
     expect(composerHostConfigSchema.$id).toBe(COMPOSER_HOST_PROFILE_V1);
     expect(composerHostConfigSchema.required).toEqual(["profile", "models", "suggestions", "attachments", "interaction"]);
+    expect(composerHostConfigSchema.properties.models.items.required).toEqual(["id", "label", "value", "description"]);
     expect("submit" in composerHostConfigSchema.properties).toBe(false);
     expect("createId" in composerHostConfigSchema.properties).toBe(false);
   });

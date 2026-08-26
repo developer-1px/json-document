@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import { ArrowLeft, ArrowRight, ArrowUpDown, Check, Columns3, ListFilter, Minus, Plus, RefreshCw, X } from "lucide-react";
+import { databaseValueFromText } from "@interactive-os/json-document-editing";
 import { DatabaseHand, type DatabaseHandCellRenderProps } from "./database-hand.js";
 import { DatabaseProvider, useDatabase, type DatabaseProviderProps } from "./database-context.js";
 import type {
@@ -202,8 +203,7 @@ export function DatabaseRecordPanel() {
                 </select>
               ) : (
                 <input type={property.type === "number" ? "number" : "text"} value={String(draft[property.id] ?? row?.[property.id] ?? "")} onChange={(event) => {
-                  const next = property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value;
-                  setDraft((value) => ({ ...value, [property.id]: next }));
+                  setDraft((value) => ({ ...value, [property.id]: databaseValueFromText(property, event.currentTarget.value) }));
                 }} />
               )}
               {database.status.fieldErrors?.[property.id] ? <small role="alert">{database.status.fieldErrors[property.id]}</small> : null}

@@ -20,6 +20,7 @@ import boardDragSessionSource from "../../../../packages/json-document-affordanc
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
+import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
@@ -38,6 +39,8 @@ import composerHostConfigSource from "../../../../packages/json-document-compose
 import composerInteractionSource from "../../../../packages/json-document-composer/src/interaction.ts?raw";
 import composerSuggestionsSource from "../../../../packages/json-document-composer/src/suggestions.ts?raw";
 import composerReferenceAtomSource from "../../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";
+import composerReactLifecycleSource from "../../../../packages/json-document-composer-react/src/use-composer.tsx?raw";
+import composerCommandMenuSource from "../../../../packages/json-document-composer-react/src/command-menu.ts?raw";
 import fileIntakeSource from "../../../../packages/json-document-file-intake/src/index.ts?raw";
 import suggestionSource from "../../../../packages/json-document-rich-text-suggestion/src/index.ts?raw";
 import suggestionReactSource from "../../../../packages/json-document-rich-text-suggestion-react/src/index.ts?raw";
@@ -131,6 +134,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
+  ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
@@ -149,6 +153,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-composer/src/interaction.ts", composerInteractionSource],
   ["packages/json-document-composer/src/suggestions.ts", composerSuggestionsSource],
   ["packages/json-document-composer-react/src/reference-atom.tsx", composerReferenceAtomSource],
+  ["packages/json-document-composer-react/src/use-composer.tsx", composerReactLifecycleSource],
+  ["packages/json-document-composer-react/src/command-menu.ts", composerCommandMenuSource],
   ["packages/json-document-file-intake/src/index.ts", fileIntakeSource],
   ["packages/json-document-rich-text-suggestion/src/index.ts", suggestionSource],
   ["packages/json-document-rich-text-suggestion-react/src/index.ts", suggestionReactSource],
@@ -296,6 +302,21 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-composer-react/src/reference-atom.tsx",
   },
   {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposer",
+    sourcePath: "packages/json-document-composer-react/src/use-composer.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposer",
+    sourcePath: "packages/json-document-composer-react/src/command-menu.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-composer-react",
+    symbol: "useComposer",
+    sourcePath: "packages/json-document-composer-react/src/reference-atom.tsx",
+  },
+  {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "formatFileSize",
     sourcePath: "packages/json-document-ui-primitives-react/src/file-size.ts",
@@ -439,6 +460,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "nextDatabasePropertySort",
     sourcePath: "packages/json-document-editing/src/database.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "databaseValueFromText",
+    sourcePath: "packages/json-document-editing/src/database-property-value.ts",
   },
   {
     packageName: "@interactive-os/json-document-database",

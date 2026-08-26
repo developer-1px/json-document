@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   createDatabaseEditor,
+  databaseValueFromText,
   nextDatabasePropertySort,
   gridPointFromKey,
   gridPointKey,
@@ -254,7 +255,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   readonly onEmit: (origin: DatabaseHandOrigin) => void;
 }) {
   const { editor } = props;
-  const [announcement, setAnnouncement] = useState("Database ready");
+  const [announcement, setAnnouncement] = useState("");
   const [lastResult, setLastResult] = useState<EditingResult<DatabaseSelection> | null>(null);
   const [nativeTextLease, setNativeTextLease] = useState<DatabaseHandContext["nativeTextLease"]>(null);
   const [filterPropertyId, setFilterPropertyId] = useState("");
@@ -476,7 +477,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         ) : null}
         {props.toolbar}
         {props.renderToolbar?.(context)}
-        <output className="jd-database__announcement" aria-live="polite">{announcement}</output>
+        {announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
       </div>
 
       <div
@@ -707,7 +708,7 @@ function DefaultCell(props: {
       onCompositionStart={() => props.onLease(true)}
       onCompositionEnd={() => props.onLease(false)}
       onBlur={(event) => {
-        if (props.directEditing) props.commit(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value);
+        if (props.directEditing) props.commit(databaseValueFromText(props.property, event.currentTarget.value));
         props.onLease(null);
         props.finish();
       }}
@@ -715,7 +716,7 @@ function DefaultCell(props: {
         cancel(event);
         if (event.key === "Enter" || event.key === "Tab") {
           event.preventDefault();
-          finish(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value, event.currentTarget);
+          finish(databaseValueFromText(props.property, event.currentTarget.value), event.currentTarget);
           props.moveAfterCommit(event.key === "Tab" ? (event.shiftKey ? "left" : "right") : (event.shiftKey ? "up" : "down"));
         }
       }}
@@ -743,7 +744,7 @@ function FilterControl(props: {
         </select>
       </label>
       {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} disabled={props.filter === null} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></button>
+      {props.filter ? <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></button> : null}
     </div>
   );
 }
@@ -751,7 +752,7 @@ function FilterControl(props: {
 function FilterValue(props: { readonly property: DatabaseProperty; readonly value: unknown; readonly onChange: (value: string | number | boolean) => void }) {
   if (props.property.type === "checkbox") {
     return (
-      <select aria-label="Filter value" value={String(props.value)} onChange={(event) => props.onChange(event.currentTarget.value === "true")}>
+      <select aria-label="Filter value" value={String(props.value)} onChange={(event) => props.onChange(databaseValueFromText(props.property, event.currentTarget.value))}>
         <option value="">Any value</option><option value="true">Checked</option><option value="false">Unchecked</option>
       </select>
     );
@@ -770,7 +771,7 @@ function FilterValue(props: { readonly property: DatabaseProperty; readonly valu
       type={props.property.type === "number" ? "number" : "text"}
       value={String(props.value ?? "")}
       placeholder="Equals…"
-      onChange={(event) => props.onChange(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value)}
+      onChange={(event) => props.onChange(databaseValueFromText(props.property, event.currentTarget.value))}
     />
   );
 }
@@ -857,9 +858,7 @@ function clipboardFromData(
     const propertyId = topology.propertyIds[start + offset];
     const property = document.schema.properties.find((candidate) => candidate.id === propertyId);
     if (!property) return value;
-    if (property.type === "number") return Number(value);
-    if (property.type === "checkbox") return value === "true";
-    return value;
+    return databaseValueFromText(property, value);
   }));
   return { type: "application/vnd.interactive-os.database+json" as const, cells, text };
 }
