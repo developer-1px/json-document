@@ -29,6 +29,7 @@
       "@interactive-os/json-document-rich-text-react": ["../packages/json-document-rich-text-react/src/index.tsx"],
       "@interactive-os/json-document-zod": ["../packages/json-document-zod/src/index.ts"],
       "@interactive-os/json-document-database": ["../packages/json-document-database/src/index.ts"],
+      "@interactive-os/json-document-annotation": ["../packages/json-document-annotation/src/index.ts"],
       "@interactive-os/json-document-collaboration": ["../packages/json-document-collaboration/src/index.ts"],
       "@interactive-os/json-document-collaboration/text": ["../packages/json-document-collaboration/src/text-index.ts"],
       "@interactive-os/json-document-contenteditable-collaboration": ["../packages/contenteditable-collaboration/src/index.ts"]
