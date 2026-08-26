@@ -1,5 +1,6 @@
 import {
   buildPointer,
+  jsonEqual,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
@@ -19,6 +20,7 @@ import {
   selectRangePoint,
   type RangeSelectionState,
 } from "./range-selection.js";
+import { jsonCellText } from "./cell-text.js";
 
 export type DatabasePropertyType = "title" | "text" | "number" | "select" | "checkbox";
 
@@ -291,7 +293,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
     return {
       type: "application/vnd.interactive-os.database+json",
       cells,
-      text: cells.map((row) => row.map(cellText).join("\t")).join("\n"),
+      text: cells.map((row) => row.map(jsonCellText).join("\t")).join("\n"),
     };
   }
 
@@ -404,13 +406,6 @@ function resolveTopology(document: DatabaseDocument, topology?: DatabaseTopology
   }
   index.validatedTopologies.add(resolved);
   return resolved;
-}
-
-function cellText(value: JSONValue): string {
-  if (value === null) return "";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return JSON.stringify(value);
 }
 
 function clone<Value extends JSONValue>(value: Value): Value {
@@ -541,10 +536,6 @@ function samePoint(left: DatabasePoint, right: DatabasePoint): boolean {
   return left.recordId === right.recordId && left.propertyId === right.propertyId;
 }
 
-
-function jsonEqual(left: JSONValue | undefined, right: JSONValue | undefined): boolean {
-  return JSON.stringify(left) === JSON.stringify(right);
-}
 
 function success(snapshot: EditingSnapshot<DatabaseSelection>): EditingResult<DatabaseSelection> {
   return { ok: true, snapshot };

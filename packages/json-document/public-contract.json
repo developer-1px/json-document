@@ -5,7 +5,9 @@
       "applyPatch",
       "buildPointer",
       "createJSONDocument",
+      "jsonEqual",
       "parentPointer",
+      "parseArrayIndex",
       "parsePointer",
       "trackPointer",
       "tryParsePointer"

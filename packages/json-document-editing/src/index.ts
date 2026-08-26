@@ -1,4 +1,5 @@
 export { createDocumentEditor, documentSelectionFocus } from "./document.js";
+export { jsonCellText } from "./cell-text.js";
 export {
   gridCellsInRange,
   gridPointIndex,

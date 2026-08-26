@@ -77,6 +77,11 @@ interface JSONDocumentOptions {
   readonly validate?: (candidate: JSONValue) => JSONPatchValidationResult;
 }
 ```
+## `jsonEqual`
+
+```ts
+jsonEqual(left: unknown, right: unknown): boolean
+```
 ## `JSONPatchOperation`
 
 ```ts
@@ -131,6 +136,11 @@ type JSONValue =
 
 ```ts
 parentPointer(pointer: Pointer): Pointer | null
+```
+## `parseArrayIndex`
+
+```ts
+parseArrayIndex(segment: string): number | null
 ```
 ## `parsePointer`
 

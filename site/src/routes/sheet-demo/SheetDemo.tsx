@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createSheetEditor,
+  jsonCellText,
   type EditingResult,
   type SheetClipboard,
   type SheetDocument,
@@ -231,7 +232,7 @@ export function SheetDemo() {
                         >
                             <input
                               aria-label={`${column.label} row ${rowIndex + 1}`}
-                              value={displayValue(row.cells[column.id])}
+                              value={jsonCellText(row.cells[column.id])}
                               onChange={(event) => run(
                                 () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value: event.currentTarget.value }),
                                 `${column.label} committed`,
@@ -254,11 +255,6 @@ export function SheetDemo() {
 
 function focusCell(surface: HTMLElement | null, point: { readonly rowId: string; readonly columnId: string }) {
   findWebGridCell<HTMLElement>(surface, point)?.querySelector<HTMLInputElement>("input")?.focus();
-}
-
-function displayValue(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 function Action(props: { readonly label: string; readonly icon: string; readonly onClick: () => void; readonly disabled?: boolean }) {

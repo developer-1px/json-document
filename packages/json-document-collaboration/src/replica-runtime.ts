@@ -14,7 +14,7 @@ import {
   unauthorizedChange,
 } from "./change.js";
 import { patchBetweenValues } from "./document-patch.js";
-import { jsonEqual } from "./json-equal.js";
+import { jsonEqual } from "@interactive-os/json-document";
 import { materializeChanges } from "./materialize.js";
 import { assignCausalState, type RuntimeState } from "./runtime-state.js";
 import type {

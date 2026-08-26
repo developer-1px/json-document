@@ -121,6 +121,29 @@ function asPointer(path: string): Pointer | null {
 위치를 계산합니다. 값이 제거됐거나 더 이상 한 위치로 추적되지 않으면
 `null`입니다.
 
+JSON Pointer의 array segment를 index로 해석해야 하는 adapter는 정본
+`parseArrayIndex`를 사용합니다. 선행 0, 음수, 안전하지 않은 정수는
+`null`로 거절합니다.
+
+```ts
+import { parseArrayIndex } from "@interactive-os/json-document";
+
+parseArrayIndex("12"); // 12
+parseArrayIndex("01"); // null
+```
+
+## JSON 값 비교하기
+
+`jsonEqual`은 object key 순서와 객체 identity에 의존하지 않고 JSON 값을
+구조적으로 비교합니다. Connector와 Collaboration runtime이 별도의 equality
+알고리즘을 만들지 않고 이 계약을 함께 사용합니다.
+
+```ts
+import { jsonEqual } from "@interactive-os/json-document";
+
+jsonEqual({ title: "Draft", tags: [] }, { tags: [], title: "Draft" }); // true
+```
+
 ## 문서 없이 patch 적용하기
 
 `applyPatch(value, operations)`는 document 상태를 만들지 않고 RFC 6902

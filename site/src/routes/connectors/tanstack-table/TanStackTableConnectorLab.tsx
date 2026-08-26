@@ -9,6 +9,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import {
+  jsonCellText,
   type SheetClipboard,
   type SheetDocument,
 } from "@interactive-os/json-document-editing";
@@ -189,8 +190,8 @@ export function TanStackTableConnectorLab() {
                       >
                           <input
                             aria-label={`${cell.column.id} ${row.id}`}
-                            defaultValue={displayValue(value)}
-                            key={displayValue(value)}
+                            defaultValue={jsonCellText(value)}
+                            key={jsonCellText(value)}
                             onBlur={(event) => commitCell(event, row.id, cell.column.id, value)}
                             className={classes("w-full min-w-0", ui.field.seamless)}
                           />
@@ -218,9 +219,4 @@ function Control(props: { readonly label: string; readonly icon: string; readonl
     return <ToggleButton label={props.label} pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.icon}</ToggleButton>;
   }
   return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
-}
-
-function displayValue(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  return typeof value === "string" ? value : JSON.stringify(value);
 }

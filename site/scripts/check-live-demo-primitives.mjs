@@ -7,8 +7,8 @@ const registryPath = join(sourceRoot, "app/live-demo-registry.tsx");
 const registry = readFileSync(registryPath, "utf8");
 const liveDemoPaths = [...registry.matchAll(/^\s*"([^"]+)": demo\(/gm)].map((match) => match[1]);
 
-if (liveDemoPaths.length !== 31) {
-  throw new Error(`Live Demo 감사 집합이 31개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
+if (liveDemoPaths.length !== 32) {
+  throw new Error(`Live Demo 감사 집합이 32개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
 }
 
 const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];
@@ -19,6 +19,7 @@ const counts = { action: 0, icon: 0, toggle: 0, choice: 0, segmented: 0, tabs: 0
 for (const file of files) {
   const source = readFileSync(file, "utf8");
   for (const match of source.matchAll(/<button\b/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} raw <button>`);
+  for (const match of source.matchAll(/<(?!button\b)[A-Za-z][^>]*\brole=["']button["']/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} non-button role=button`);
   for (const match of source.matchAll(/<ToggleButton\b[^>]*\brole=["']tab["']/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} tab을 ToggleButton으로 우회`);
   counts.action += matches(source, /<ActionButton\b/g);
   counts.icon += matches(source, /<IconButton\b/g);

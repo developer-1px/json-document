@@ -16,6 +16,7 @@ import {
   escapeAffordance,
   forbiddenCursor,
   marqueeAffordance,
+  marqueeHitsAffordance,
   nudgeAffordance,
   panAffordance,
   planeHitAffordance,
@@ -256,14 +257,15 @@ export function CanvasWidgetRoute() {
               return;
             }
             if (hand.type !== "select" || !hand.rect) return;
-            const hits = document.objects
-              .filter((object) => intersects(hand.rect!, object))
-              .map((object) => object.id);
-            if (hits.length === 0) return;
-            editor.dispatch({
-              type: "selection.set",
-              objectIds: hits,
-              mode: hand.operation,
+            applyAffordance(marqueeHitsAffordance({ rect: hand.rect, items: document.objects }), {
+              hand: (hits) => {
+                if (hits.type !== "select" || !hits.objectIds || hits.objectIds.length === 0) return;
+                editor.dispatch({
+                  type: "selection.set",
+                  objectIds: hits.objectIds,
+                  mode: hand.operation,
+                });
+              },
             });
           },
         });
@@ -388,14 +390,4 @@ export function CanvasWidgetRoute() {
 
 function canvasObjectId(objectId: string): string {
   return `widget-canvas-option-${objectId}`;
-}
-
-function intersects(
-  rect: { readonly x: number; readonly y: number; readonly width: number; readonly height: number },
-  object: { readonly x: number; readonly y: number; readonly width: number; readonly height: number },
-): boolean {
-  return rect.x < object.x + object.width
-    && rect.x + rect.width > object.x
-    && rect.y < object.y + object.height
-    && rect.y + rect.height > object.y;
 }
