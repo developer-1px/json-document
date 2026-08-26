@@ -20,10 +20,11 @@ export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
-export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
+export { ANNOTATION_PROFILE_V1, annotationResizeHandle, annotationSelectorBounds, createAnnotationEditor, transformAnnotationSelector } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
 export type {
   Annotation,
+  AnnotationBounds,
   AnnotationDocument,
   AnnotationEditor,
   AnnotationIntent,
@@ -31,6 +32,7 @@ export type {
   AnnotationPresentation,
   AnnotationSelection,
   AnnotationSelector,
+  AnnotationSelectorTransform,
   AnnotationSource,
 } from "./annotation.js";
 export type {

@@ -21,6 +21,11 @@ interface Annotation extends Record<string, JSONValue> { readonly id: string; re
 ```ts
 const ANNOTATION_PROFILE_V1: "urn:interactive-os:json-document:annotation:1"
 ```
+## `AnnotationBounds`
+
+```ts
+interface AnnotationBounds extends AnnotationPoint { readonly width: number; readonly height: number }
+```
 ## `AnnotationDocument`
 
 ```ts
@@ -57,6 +62,11 @@ type AnnotationPresentation =
   | { readonly type: "stroke" }
   | { readonly type: "arrow" };
 ```
+## `annotationResizeHandle`
+
+```ts
+annotationResizeHandle(selector: AnnotationSelector): "end" | "south-east" | null
+```
 ## `AnnotationSelection`
 
 ```ts
@@ -70,6 +80,18 @@ type AnnotationSelector =
   | ({ readonly type: "rectangle"; readonly width: number; readonly height: number } & AnnotationPoint)
   | { readonly type: "path"; readonly points: ReadonlyArray<AnnotationPoint> }
   | { readonly type: "arrow"; readonly from: AnnotationPoint; readonly to: AnnotationPoint };
+```
+## `annotationSelectorBounds`
+
+```ts
+annotationSelectorBounds(selector: AnnotationSelector): AnnotationBounds
+```
+## `AnnotationSelectorTransform`
+
+```ts
+type AnnotationSelectorTransform =
+  | { readonly type: "move"; readonly dx: number; readonly dy: number }
+  | { readonly type: "resize"; readonly handle: "end" | "south-east"; readonly dx: number; readonly dy: number };
 ```
 ## `AnnotationSource`
 
@@ -889,6 +911,11 @@ interface SheetSelection extends Record<string, JSONValue> {
 
 ```ts
 type SheetTopology = GridTopology;
+```
+## `transformAnnotationSelector`
+
+```ts
+transformAnnotationSelector(selector: AnnotationSelector, transform: AnnotationSelectorTransform): AnnotationSelector | null
 ```
 ## `TreeClipboard`
 
