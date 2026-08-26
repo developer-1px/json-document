@@ -15,7 +15,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -104,18 +104,18 @@ export function ObjectDemoRoute() {
         toolbar={(
           <>
             {objectDemoColors.map((color) => (
-              <ActionButton
+              <IconButton
                 key={color}
-                aria-label={`Fill ${color}`}
+                label={`Fill ${color}`}
                 onClick={() => run({ type: "selection.fill", color }, "Fill applied")}
               >
                 <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
-              </ActionButton>
+              </IconButton>
             ))}
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton onClick={copySelection}>Copy</ActionButton>
-            <ActionButton onClick={cutSelection}>Cut</ActionButton>
-            <ActionButton
+            <IconButton label="Copy" onClick={copySelection}>⧉</IconButton>
+            <IconButton label="Cut" onClick={cutSelection}>✂</IconButton>
+            <IconButton label="Paste"
               disabled={!clipboard}
               onClick={() => {
                 if (!clipboard) return;
@@ -126,12 +126,12 @@ export function ObjectDemoRoute() {
                 }, `Pasted ${clipboard.objects.length} object${clipboard.objects.length === 1 ? "" : "s"}`);
               }}
             >
-              Paste
-            </ActionButton>
-            <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
+              ▣
+            </IconButton>
+            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>⌫</IconButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>Redo</ActionButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>↶</IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>↷</IconButton>
           </>
         )}
         inspector={(

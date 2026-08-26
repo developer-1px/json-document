@@ -1,9 +1,10 @@
 # UI Primitives
 
 UI Primitives는 수렴한 Hands 행동과 표준 디자인 시스템을 함께 제공하는
-minimalist React UI입니다. Host는 제품 데이터, 업무 정책, 배치와 시각적
-확장을 소유하고 Primitive는 키보드, 포인터, focus, cursor와 semantic markup을
-완결합니다.
+minimalist React UI입니다. 여기서 minimalist는 장식을 줄이는 취향이 아니라,
+역할·상태·키보드·focus·feedback을 잃지 않는 최소 표현 계약입니다. Host는 제품
+데이터, 업무 정책, copy와 배치를 소유하고 Primitive는 키보드, 포인터, focus,
+cursor, semantic markup과 안정된 styling hook을 완결합니다.
 
 ```text
 Affordance
@@ -20,7 +21,11 @@ disclosure, menu, select와 surface primitive를 제공합니다. Host는 같은
 event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 
 제품의 option 목록, permission, workflow, persistence와 브랜드 디자인은 이
-레이어가 소유하지 않습니다.
+레이어가 소유하지 않습니다. 제품은 `data-ui-*` hook을 token에 연결할 수 있지만
+control의 의미·상태·focus·keyboard 계약을 다시 구현하지 않습니다.
+
+정본 구현: `packages/json-document-ui-primitives-react/src/controls.tsx`,
+`packages/json-document-ui-primitives-react/src/menu.tsx`
 
 ```sh
 npm i @interactive-os/json-document-ui-primitives-react
@@ -56,9 +61,24 @@ Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host�
 ## Control primitives
 
 ```tsx
-<ActionButton onClick={save}>Save</ActionButton>
-<ToggleButton pressed={filtered} onClick={toggleFilter}>Filter</ToggleButton>
-<IconButton label="Copy" onClick={copy}>□</IconButton>
+<ActionButton kind="primary" onClick={save}>Save</ActionButton>
+<ToggleButton label="Filter ready rows" pressed={filtered} onClick={toggleFilter}>◉</ToggleButton>
+<IconButton label="Copy" onClick={copy}>⧉</IconButton>
+<ChoiceChip selected={density === "compact"} onClick={compact}>Compact</ChoiceChip>
+<SegmentedControl
+  label="View"
+  value={view}
+  options={[{ id: "canvas", label: "Canvas" }, { id: "json", label: "JSON" }]}
+  onValueChange={setView}
+/>
+<Tabs
+  label="Inspector values"
+  value={tab}
+  options={[{ id: "document", label: "Document" }, { id: "selection", label: "Selection" }]}
+  onValueChange={setTab}
+  tabId={(id) => `tab-${id}`}
+  panelId={(id) => `panel-${id}`}
+/>
 <SelectableItem as="li" selected={selected} focus={focused}>Item</SelectableItem>
 <DisclosureButton expanded={open} controls="details" onClick={toggle}>
   <span>Details</span>
@@ -67,15 +87,20 @@ Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host�
 ```
 
 모든 button primitive는 기본 `type="button"`을 제공하고 명시적 override를
-보존합니다. `ToggleButton`은 `pressed`를 `aria-pressed`에, `IconButton`은
-`label`을 accessible name과 기본 tooltip에 투영합니다. `DisclosureButton`은
+보존합니다. `ActionButton`은 흐름을 진행하거나 완료하는 text CTA입니다.
+`ToggleButton`은 `pressed`를 `aria-pressed`에 투영하며 icon-only인 경우
+`label`을 visible tooltip과 accessible name으로 사용합니다. `IconButton`도
+`label`을 visible tooltip과 accessible name에 투영합니다. `ChoiceChip`은 선택을
+radio chrome 없이 표시하고 `SegmentedControl`과 `Tabs`는 단일 선택 및 roving
+keyboard focus를 소유합니다. `DisclosureButton`은
 `expanded`와 `controls`를 disclosure ARIA에 연결하며 표현 markup은 Host가
 children으로 구성합니다.
 
 `SelectableItem`은 polymorphic element에 `selected/focus` data state와
 `data-ui-control` styling slot을 제공합니다. role, ARIA selection과 roving focus는
-해당 widget의 semantic primitive 또는 Web Adapter가 소유합니다. 제품별 kind,
-copy와 CSS recipe도 Host 책임입니다.
+해당 widget의 semantic primitive 또는 Web Adapter가 소유합니다. 제품별 copy와
+brand token은 Host 책임이지만 최소 hit target, focus-visible, disabled/pressed와
+tooltip 가시성은 UI Primitive styling hook의 불변식입니다.
 
 ## `Select`
 

@@ -34,14 +34,13 @@ import {
   MousePointer2,
   Pencil,
   Redo2,
-  Send,
   Trash2,
   Undo2,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { ActionButton, IconButton, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -359,13 +358,13 @@ export function AnnotationDemoRoute() {
           </div>
           <nav aria-label="Annotation tools" className={annotationDemoStyles.toolDock()}>
             {(["select", "comment", "draw", "arrow"] as const).map((value) => (
-              <button aria-label={toolLabel(value)} aria-pressed={tool === value} className={annotationDemoStyles.dockButton()} key={value} onClick={() => chooseTool(value)} title={`${toolLabel(value)} (${toolShortcut(value)})`} type="button">
+              <ToggleButton label={toolLabel(value)} tooltip={`${toolLabel(value)} (${toolShortcut(value)})`} pressed={tool === value} className={annotationDemoStyles.dockButton()} key={value} onClick={() => chooseTool(value)}>
                 <ToolIcon tool={value} />
-              </button>
+              </ToggleButton>
             ))}
             <span className={annotationDemoStyles.dockDivider()} aria-hidden="true" />
-            <button aria-label="Delete annotation" className={annotationDemoStyles.dockButton()} disabled={selected === null} onClick={deleteSelected} type="button"><Trash2 aria-hidden="true" size={16} /></button>
-            <button aria-label="Download annotated image" className={annotationDemoStyles.dockButton()} onClick={() => void downloadImage()} type="button"><Download aria-hidden="true" size={16} /></button>
+            <IconButton label="Delete annotation" className={annotationDemoStyles.dockButton()} disabled={selected === null} onClick={deleteSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Download annotated image" className={annotationDemoStyles.dockButton()} onClick={() => void downloadImage()}><Download aria-hidden="true" size={16} /></IconButton>
           </nav>
           <output className="sr-only" data-testid="annotation-structured-output">
             {JSON.stringify(presentStructuredSnapshot(documentValue, selectedId))}
@@ -437,12 +436,11 @@ function CommentComposer(props: {
         aria-label="Send comment"
         className={annotationDemoStyles.sendButton()}
         disabled={draft.trim() === ""}
-        data-kind="primary"
+        kind="primary"
         onClick={() => props.onSubmit(draft)}
         onMouseDown={(event) => event.preventDefault()}
-        title="Send comment"
       >
-        <Send aria-hidden="true" size={15} />
+        Send
       </ActionButton>
     </section>
   );
@@ -622,15 +620,20 @@ function OutputPanel(props: {
 }) {
   return (
     <section aria-label="Annotation output" className="grid gap-3">
-      <div className="flex flex-wrap gap-1" role="tablist" aria-label="Output format">
-        <ToggleButton role="tab" pressed={props.output === "structured"} aria-selected={props.output === "structured"} onClick={() => props.setOutput("structured")}>Structured</ToggleButton>
-        <ToggleButton role="tab" pressed={props.output === "image"} aria-selected={props.output === "image"} onClick={() => props.setOutput("image")}>Image</ToggleButton>
-      </div>
+      <Tabs
+        className="flex flex-wrap gap-1"
+        label="Output format"
+        value={props.output}
+        options={[{ id: "structured", label: "Structured" }, { id: "image", label: "Image" }]}
+        onValueChange={props.setOutput}
+        tabId={(value) => `annotation-output-tab-${value}`}
+        panelId={(value) => `annotation-output-panel-${value}`}
+      />
       {props.output === "structured" ? (
-        <div className="grid gap-2">
+        <div id="annotation-output-panel-structured" role="tabpanel" aria-labelledby="annotation-output-tab-structured" className="grid gap-2">
           <div className="flex flex-wrap gap-1">
-            <ActionButton onClick={props.onSave}>Save state</ActionButton>
-            <ActionButton disabled={!props.canRestore} onClick={props.onRestore}>Restore state</ActionButton>
+            <IconButton label="Save state" onClick={props.onSave}>↓</IconButton>
+            <IconButton label="Restore state" disabled={!props.canRestore} onClick={props.onRestore}>↥</IconButton>
             <a className={ui.interactive.link.prominent} download="annotation-request.json" href={props.structuredDownloadUrl}>Download JSON</a>
           </div>
           <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput(), ui.surface.inset)}>
@@ -638,9 +641,9 @@ function OutputPanel(props: {
           </pre>
         </div>
       ) : props.renderedImage === null ? (
-        <p className={classes("m-0", ui.text.meta)}>Rasterizing…</p>
+        <p id="annotation-output-panel-image" role="tabpanel" aria-labelledby="annotation-output-tab-image" className={classes("m-0", ui.text.meta)}>Rasterizing…</p>
       ) : (
-        <div className="grid gap-2">
+        <div id="annotation-output-panel-image" role="tabpanel" aria-labelledby="annotation-output-tab-image" className="grid gap-2">
           <img data-testid="annotation-image-output" src={props.renderedImage} alt="원본과 annotation이 합성된 결과" className="block h-auto max-h-64 max-w-full" />
           <a className={ui.interactive.link.prominent} href={props.renderedImage} download="annotation-request.png">Download PNG</a>
         </div>

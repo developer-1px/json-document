@@ -69,7 +69,7 @@ export function ZodConnectorLab() {
         />
       </SelectableItem>
       <ActionButton
-        data-kind="primary"
+        kind="primary"
         onClick={commitDraft}
         className="mt-3"
       >

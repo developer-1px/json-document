@@ -27,7 +27,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { GridCell } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -173,16 +173,16 @@ export function SheetDemo() {
           toolbarLabel="Sheet actions"
           toolbar={(
             <>
-              <Action label="Copy" onClick={copySelection} />
-              <Action label="Cut" onClick={cutSelection} />
-              <Action label="Paste" onClick={pasteSelection} disabled={clipboard === null} />
-              <Action label="Fill selected" onClick={() => run(
+              <Action label="Copy" icon="⧉" onClick={copySelection} />
+              <Action label="Cut" icon="✂" onClick={cutSelection} />
+              <Action label="Paste" icon="▣" onClick={pasteSelection} disabled={clipboard === null} />
+              <Action label="Fill selected" icon="▦" onClick={() => run(
                 () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
                 "Selected cells filled",
               )} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Action label="Undo" icon="↶" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
+              <Action label="Redo" icon="↷" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
               <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
             </>
           )}
@@ -261,6 +261,6 @@ function displayValue(value: unknown): string {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
-function Action(props: { readonly label: string; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <ActionButton disabled={props.disabled} onClick={props.onClick}>{props.label}</ActionButton>;
+function Action(props: { readonly label: string; readonly icon: string; readonly onClick: () => void; readonly disabled?: boolean }) {
+  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }

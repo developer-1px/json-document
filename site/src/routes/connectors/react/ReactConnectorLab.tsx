@@ -10,7 +10,7 @@ import {
 } from "@interactive-os/json-document-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -57,12 +57,12 @@ function JSONDocumentSubscriptionLab() {
           className={ui.field.control}
         />
       </label>
-      <ActionButton
+      <IconButton label={`Count ${value.count}`}
         onClick={() => replace("/count", value.count + 1)}
         className="mt-3"
       >
-        Count {value.count}
-      </ActionButton>
+        ＋
+      </IconButton>
 
       <JSONPanel testId="react-document-json" value={value} />
     </section>
@@ -105,18 +105,18 @@ function EditingSnapshotLab() {
         ))}
       </div>
       <div className="mt-3 flex gap-2">
-        <ActionButton
+        <IconButton label="Undo"
           disabled={commands.undo.disabled}
           onClick={() => editor.undo()}
         >
-          Undo
-        </ActionButton>
-        <ActionButton
+          ↶
+        </IconButton>
+        <IconButton label="Redo"
           disabled={commands.redo.disabled}
           onClick={() => editor.redo()}
         >
-          Redo
-        </ActionButton>
+          ↷
+        </IconButton>
       </div>
 
       <JSONPanel testId="react-editor-json" value={snapshot.value} />

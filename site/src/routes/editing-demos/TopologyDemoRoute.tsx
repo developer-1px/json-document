@@ -1,6 +1,6 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
-import { SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { SegmentedControl, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -20,18 +20,7 @@ export function TopologyDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-input">
           <p className={ui.text.label}>1 · 입력</p>
           <h2 id="topology-input" className={classes("mb-2 mt-1", ui.text.heading)}>화면 순서 선택하기</h2>
-          <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Visible order">
-            {(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => (
-              <ToggleButton
-                key={item}
-                pressed={order === item}
-                className="px-3 py-1.5"
-                onClick={() => setOrder(item)}
-              >
-                {item}
-              </ToggleButton>
-            ))}
-          </div>
+          <SegmentedControl className="mb-3" label="Visible order" value={order} options={(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => ({ id: item, label: item }))} onValueChange={(value) => setOrder(value as typeof order)} />
           <ol className="m-0 grid list-none gap-1 p-0">
             {topology.ids.map((id) => {
               const item = editing.getItem(id);

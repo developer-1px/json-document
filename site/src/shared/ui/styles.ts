@@ -116,7 +116,8 @@ export const ui = {
     prompt: "text-foreground-accent",
     block: {
       frame: "relative min-w-0 overflow-hidden rounded-code bg-background-subtle shadow-none",
-      copy: "absolute right-1.5 top-1.5 z-10 h-6 w-6 bg-background-subtle/90 data-[copied=true]:text-foreground-success [&_path]:stroke-current [&_path]:stroke-2 [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round] [&_rect]:stroke-current [&_rect]:stroke-2",
+      copyRoot: "absolute right-1.5 top-1.5 z-10",
+      copy: "h-6 w-6 bg-background-subtle/90 data-[copied=true]:text-foreground-success [&_path]:stroke-current [&_path]:stroke-2 [&_path]:[stroke-linecap:round] [&_path]:[stroke-linejoin:round] [&_rect]:stroke-current [&_rect]:stroke-2",
       viewport: {
         compact: "max-h-32",
         content: "max-h-none",
