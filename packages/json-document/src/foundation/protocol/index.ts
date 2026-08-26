@@ -35,6 +35,7 @@ export {
   readAt,
   tryParsePointer,
 } from "../pointer/core.js";
+export { parseArrayIndex } from "../pointer/array-index.js";
 
 export function trackPointer(
   pointer: Pointer,

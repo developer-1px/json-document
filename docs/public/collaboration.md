@@ -37,3 +37,9 @@ capability입니다.
 - [Lifecycle](collaboration-lifecycle.md): 필수 epoch identity와 선택적 checkpoint, restore, compaction
 - [Collaborative History](collaboration-history.md): 내 기여만 선택해 되돌리기
 - [Text](collaboration-text.md): 같이 쓰는 글자
+
+## Live Demo
+
+```live-demo
+/collaboration
+```

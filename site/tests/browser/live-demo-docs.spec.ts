@@ -20,6 +20,7 @@ const pages = [
   ["/docs/connector-zod-validate", 1],
   ["/docs/connector-tanstack-table", 1],
   ["/docs/react-editing", 1],
+  ["/docs/collaboration", 1],
   ["/docs/affordance/select", 3],
   ["/docs/affordance/drag", 2],
   ["/docs/affordance/fold", 1],

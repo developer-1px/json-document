@@ -9,7 +9,7 @@ import {
   type PreparedGraph,
 } from "./change.js";
 import { patchBetweenValues } from "./document-patch.js";
-import { jsonEqual } from "./json-equal.js";
+import { jsonEqual } from "@interactive-os/json-document";
 import {
   historyOperationFor,
   isUndoableChange,

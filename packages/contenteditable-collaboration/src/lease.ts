@@ -2,7 +2,7 @@ import type {
   TextCapture,
   TextSelection,
 } from "@interactive-os/json-document-collaboration/text";
-import { plainTextDOMAdapter } from "./dom/plain-text.js";
+import { plainTextDOMAdapter } from "@interactive-os/json-document-contenteditable";
 import type {
   ContentEditableAdapter,
   ContentEditableOptions,

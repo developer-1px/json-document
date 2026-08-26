@@ -4,10 +4,12 @@ import { SegmentedControl, SelectableItem } from "@interactive-os/json-document-
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
+import { collapsedRangeSelection } from "@interactive-os/json-document-selection";
 import { selectionLabDocument, useSelectionLab } from "./useSelectionLab";
 
 export function SelectionDemoRoute() {
   const { editing, lastIntent, lastResult, mode, setMode, snapshot } = useSelectionLab();
+  const canonicalInitialSelection = collapsedRangeSelection({ blockId: selectionLabDocument.blocks[0]!.id, offset: 0 });
 
   return (
     <DemoPage documentation={(
@@ -49,6 +51,7 @@ export function SelectionDemoRoute() {
           <h2 id="selection-result" className={classes("mb-2 mt-1", ui.text.heading)}>Selection만 바뀝니다</h2>
           <Inspector label="Inspect result state" items={[
             { label: "selection", value: snapshot.selection, testId: "selection-demo-selection", size: "compact" },
+            { label: "selection family seed", value: canonicalInitialSelection, testId: "selection-demo-family", size: "compact" },
             { label: "document.value", value: snapshot.value, testId: "selection-demo-document", size: "compact" },
             {
               label: "history",

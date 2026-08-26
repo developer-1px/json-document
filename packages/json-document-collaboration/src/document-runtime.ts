@@ -15,7 +15,7 @@ import {
   prepareGraph,
   type PreparedGraph,
 } from "./change.js";
-import { jsonEqual } from "./json-equal.js";
+import { jsonEqual } from "@interactive-os/json-document";
 import { materializeChanges, type MaterializedDocument } from "./materialize.js";
 import {
   ACCEPTANCE_REENTRANCY_FAILURE,

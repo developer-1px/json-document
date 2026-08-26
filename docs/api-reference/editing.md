@@ -503,6 +503,11 @@ interface GridTopology {
   readonly columnIds: ReadonlyArray<string>;
 }
 ```
+## `jsonCellText`
+
+```ts
+jsonCellText(value: JSONValue | undefined): string
+```
 ## `KanbanCard`
 
 ```ts
