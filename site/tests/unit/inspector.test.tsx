@@ -33,4 +33,11 @@ describe("Inspector", () => {
     expect(screen.getByTestId("document-json").closest('[role="tabpanel"]')?.hasAttribute("hidden")).toBe(true);
     expect(screen.getByTestId("selection-json").closest('[role="tabpanel"]')?.hasAttribute("hidden")).toBe(false);
   });
+
+  test("can start open when the product treats inspector as part of the primary workbench", () => {
+    render(<Inspector defaultOpen placement="inline" items={items} />);
+
+    expect(screen.getByRole("button", { name: "Inspect editing state" }).getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByLabelText("Inspect editing state").hasAttribute("hidden")).toBe(false);
+  });
 });

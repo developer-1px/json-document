@@ -10,9 +10,10 @@ export function Inspector(props: {
   readonly label?: string;
   readonly className?: string;
   readonly placement?: "overlay" | "inline";
+  readonly defaultOpen?: boolean;
 }) {
   const panelId = `inspector-${useId().replace(/:/g, "")}`;
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(props.defaultOpen ?? false);
   const [activeTestId, setActiveTestId] = useState(props.items[0]?.testId ?? "");
   const activeIndex = Math.max(0, props.items.findIndex((item) => item.testId === activeTestId));
   const label = props.label ?? "Inspect editing state";

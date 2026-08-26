@@ -137,6 +137,21 @@ test("Rich Text Lab preserves repeated forward character deletion", async ({ pag
   await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: "text-editable", anchorOffset: 0, focusOffset: 0 });
 });
 
+test("Rich Text Lab preserves the mouse selection and editor focus while applying toolbar formatting", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+  await setSelection(page, "text-editable", 0, 3);
+
+  await page.getByRole("button", { name: "Toggle strong" }).click();
+
+  await expect(editor).toBeFocused();
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를",
+    marks: [{ type: "strong" }],
+  });
+  await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: "text-editable", anchorOffset: 0, focusOffset: 3 });
+});
+
 test("Rich Text Lab replaces unexpected descendant DOM mutation from the canonical model on publish", async ({ page }) => {
   await page.goto("/editing/rich-text");
   const editor = page.getByTestId("rich-text-editor");
@@ -316,6 +331,7 @@ test("Rich Text Lab renders the complete v1 vocabulary and exposes schema-aware 
   await expect(editor.locator("ul")).toContainText("schema-aware transforms");
   await expect(editor.locator("br")).toHaveCount(1);
 
+  await setSelection(page, "text-editable", 0, 3);
   await page.getByRole("button", { name: "Toggle strong" }).click();
   expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
     text: "여기를",

@@ -6,9 +6,20 @@ import {
   type ReactNode,
 } from "react";
 
-export function ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement>): ReactNode {
-  const { type = "button", ...buttonProps } = props;
-  return <button {...buttonProps} type={type} data-ui-control="action" />;
+export function ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Keeps focus in an editing surface during pointer activation so its DOM selection remains available. */
+  readonly preserveFocus?: boolean;
+}): ReactNode {
+  const { onMouseDown, preserveFocus = false, type = "button", ...buttonProps } = props;
+  return <button
+    {...buttonProps}
+    type={type}
+    data-ui-control="action"
+    onMouseDown={preserveFocus ? (event) => {
+      onMouseDown?.(event);
+      event.preventDefault();
+    } : onMouseDown}
+  />;
 }
 
 export function ToggleButton(

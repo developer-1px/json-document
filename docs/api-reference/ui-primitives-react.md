@@ -9,7 +9,7 @@
 ## `ActionButton`
 
 ```ts
-ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement>): ReactNode
+ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement> & { readonly preserveFocus?: boolean; }): ReactNode
 ```
 ## `DisclosureButton`
 

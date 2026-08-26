@@ -9,7 +9,7 @@ import {
 } from "@interactive-os/json-document-rich-text";
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
-import { JsonInspector } from "../../shared/ui/json-inspector";
+import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -155,18 +155,18 @@ export function RichTextDemoRoute() {
 
     )}>
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
-        <ActionButton data-kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
-        <ActionButton onClick={() => runHistory("undo")} disabled={commands.undo.disabled}>Undo</ActionButton>
-        <ActionButton onClick={() => runHistory("redo")} disabled={commands.redo.disabled}>Redo</ActionButton>
+        <ActionButton preserveFocus data-kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
+        <ActionButton preserveFocus onClick={() => runHistory("undo")} disabled={commands.undo.disabled}>Undo</ActionButton>
+        <ActionButton preserveFocus onClick={() => runHistory("redo")} disabled={commands.redo.disabled}>Redo</ActionButton>
         <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
       </div>
 
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="group" aria-label="Official Rich Text intent proofs">
         <span className={ui.text.meta}>Schema-aware intent proofs</span>
-        <ActionButton onClick={toggleStrong}>Toggle strong</ActionButton>
-        <ActionButton onClick={setHeading}>Set heading</ActionButton>
-        <ActionButton onClick={insertHardBreak}>Insert hard break</ActionButton>
-        <ActionButton onClick={updateCodeAttrs}>Set code attrs</ActionButton>
+        <ActionButton preserveFocus onClick={toggleStrong}>Toggle strong</ActionButton>
+        <ActionButton preserveFocus onClick={setHeading}>Set heading</ActionButton>
+        <ActionButton preserveFocus onClick={insertHardBreak}>Insert hard break</ActionButton>
+        <ActionButton preserveFocus onClick={updateCodeAttrs}>Set code attrs</ActionButton>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
@@ -210,30 +210,12 @@ export function RichTextDemoRoute() {
           </p>
         </section>
 
-        <section className="grid min-w-0 gap-3" aria-label="Rich Text state inspectors">
-          <JsonInspector
-            label="Canonical JSON"
-            meta="JSONDocument.value"
-            value={snapshot.value}
-            testId="rich-text-document-json"
-            size="tall"
-          />
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-            <JsonInspector
-              label="Selection + Topology"
-              meta="RangeSelection / logical interval"
-              value={{ selection: snapshot.selection, interval }}
-              testId="rich-text-selection-json"
-              size="standard"
-            />
-            <JsonInspector
-              label="Applied JSON Patch"
-              meta={lastAction}
-              value={lastPatch}
-              testId="rich-text-patch-json"
-              size="standard"
-            />
-          </div>
+        <section className="min-w-0" aria-label="Rich Text state inspectors">
+          <Inspector defaultOpen placement="inline" label="Inspect Rich Text state" items={[
+            { label: "Canonical JSON", meta: "JSONDocument.value", value: snapshot.value, testId: "rich-text-document-json", size: "tall" },
+            { label: "Selection + Topology", meta: "RangeSelection / logical interval", value: { selection: snapshot.selection, interval }, testId: "rich-text-selection-json", size: "standard" },
+            { label: "Applied JSON Patch", meta: lastAction, value: lastPatch, testId: "rich-text-patch-json", size: "standard" },
+          ]} />
         </section>
       </div>
     </DemoPage>

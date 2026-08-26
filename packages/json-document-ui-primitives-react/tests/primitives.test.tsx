@@ -86,6 +86,15 @@ describe("UI Primitives", () => {
     expect(screen.getByRole("button", { name: "Details" }).getAttribute("aria-expanded")).toBe("true");
   });
 
+  test("ActionButton can preserve an editing surface focus during pointer activation", () => {
+    render(<><div contentEditable role="textbox" /><ActionButton preserveFocus>Format</ActionButton></>);
+    const editor = screen.getByRole("textbox");
+    editor.focus();
+
+    expect(fireEvent.mouseDown(screen.getByRole("button", { name: "Format" }))).toBe(false);
+    expect(document.activeElement).toBe(editor);
+  });
+
   test("Select completes keyboard selection, cancellation, disabled options, and focus restoration", async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();

@@ -39,6 +39,18 @@ describe("DemoWorkbench", () => {
     expect(tabs[0]!.getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(tabs[0]);
   });
+
+  test("expands the live demo for focused inspection and restores it with Escape", () => {
+    render(<DemoWorkbench source={source}><div>Demo</div></DemoWorkbench>);
+    const workbench = screen.getByRole("region", { name: "Demo workbench" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand demo" }));
+    expect(workbench.getAttribute("data-expanded")).toBe("true");
+    expect(screen.getByRole("button", { name: "Restore demo size" })).toBeTruthy();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(workbench.hasAttribute("data-expanded")).toBe(false);
+  });
 });
 
 describe("Demo definition and source discovery", () => {

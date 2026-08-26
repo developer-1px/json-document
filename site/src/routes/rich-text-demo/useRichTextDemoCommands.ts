@@ -25,12 +25,6 @@ export function useRichTextDemoCommands(editor: RichTextEditor) {
     if (result.ok && result.change) setLastPatch(result.change.applied);
   }
 
-  function selectText(nodeId: string, from: number, to: number) {
-    const anchor: RichTextPoint = { kind: "text", nodeId, offset: from, affinity: "forward" };
-    const focus: RichTextPoint = { kind: "text", nodeId, offset: to, affinity: "forward" };
-    editor.dispatch({ type: "selection.set", selection: { kind: "range", ranges: [{ anchor, focus }], primaryIndex: 0 } });
-  }
-
   function applySampleIntent() {
     const text = findRichTextDemoTextNode(editor.snapshot.value as RichTextDocument, "text-editable");
     if (!text) return setLastAction("rich-text.point-not-found");
@@ -40,12 +34,10 @@ export function useRichTextDemoCommands(editor: RichTextEditor) {
   }
 
   function toggleStrong() {
-    selectText("text-editable", 0, 3);
     remember("mark.toggle:strong", editor.dispatch({ type: "mark.toggle", mark: { type: "strong" } }));
   }
 
   function setHeading() {
-    selectText("text-editable", 0, 0);
     remember("block.set-type:heading", editor.dispatch({ type: "block.set-type", nodeType: "heading", attrs: { level: 3 } }));
   }
 
