@@ -34,6 +34,7 @@ import {
   MousePointer2,
   Pencil,
   Redo2,
+  SendHorizontal,
   ThumbsDown,
   ThumbsUp,
   Trash2,
@@ -42,7 +43,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { ActionButton, IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -444,16 +445,16 @@ function CommentComposer(props: {
         rows={1}
         value={draft}
       />
-      <ActionButton
-        aria-label="Send comment"
+      <IconButton
+        label="Send comment"
+        rootClassName="shrink-0"
         className={annotationDemoStyles.sendButton()}
         disabled={draft.trim() === ""}
-        kind="primary"
         onClick={() => props.onSubmit(draft)}
         onMouseDown={(event) => event.preventDefault()}
       >
-        Send
-      </ActionButton>
+        <SendHorizontal aria-hidden="true" size={15} />
+      </IconButton>
     </section>
   );
 }
@@ -517,20 +518,7 @@ function AnnotationShape(props: {
       style={{ cursor: "move" }}
     >
       {annotation.presentation.type === "marker" && selector.type === "point" ? (
-        <>
-          <rect
-            x={selector.x + 10}
-            y={selector.y + 10}
-            width="16"
-            height="16"
-            fill={accent}
-            transform={`rotate(45 ${selector.x + 18} ${selector.y + 18})`}
-          />
-          <circle cx={selector.x} cy={selector.y} r="24" fill={accent} />
-          <text x={selector.x} y={selector.y + 1} fill="white" fontSize="24" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
-            {props.index}
-          </text>
-        </>
+        <CommentNumberBadge index={props.index} point={selector} selected={props.selected} />
       ) : null}
       {annotation.presentation.type === "reaction" && selector.type === "point" ? (
         <ReactionSticker point={selector} reaction={annotation.presentation.reaction} selected={props.selected} />
@@ -576,13 +564,24 @@ function AnnotationShape(props: {
         </>
       ) : null}
       {annotation.presentation.type !== "marker" && annotation.presentation.type !== "reaction" ? (
-        <>
-          <rect x={bounds.x - 19} y={bounds.y - 19} width="38" height="38" rx="8" fill={accent} stroke="white" strokeWidth={props.selected ? 6 : 0} vectorEffect="non-scaling-stroke" />
-          <text x={bounds.x} y={bounds.y + 1} fill="white" fontSize="22" fontWeight="700" textAnchor="middle" dominantBaseline="middle">{props.index}</text>
-        </>
+        <CommentNumberBadge index={props.index} point={bounds} selected={props.selected} />
       ) : null}
     </g>
   );
+}
+
+function CommentNumberBadge(props: { readonly index: number; readonly point: AnnotationPoint; readonly selected: boolean }) {
+  return (
+    <>
+      <path d={commentBubblePath(props.point)} fill={accent} stroke="white" strokeWidth={props.selected ? 6 : 0} vectorEffect="non-scaling-stroke" />
+      <text x={props.point.x} y={props.point.y + 1} fill="white" fontSize="22" fontWeight="700" textAnchor="middle" dominantBaseline="middle">{props.index}</text>
+    </>
+  );
+}
+
+function commentBubblePath(point: AnnotationPoint): string {
+  const { x, y } = point;
+  return `M ${x} ${y - 24} C ${x + 13.25} ${y - 24} ${x + 24} ${y - 13.25} ${x + 24} ${y} L ${x + 24} ${y + 24} L ${x} ${y + 24} C ${x - 13.25} ${y + 24} ${x - 24} ${y + 13.25} ${x - 24} ${y} C ${x - 24} ${y - 13.25} ${x - 13.25} ${y - 24} ${x} ${y - 24} Z`;
 }
 
 function StrokeLine(props: {
