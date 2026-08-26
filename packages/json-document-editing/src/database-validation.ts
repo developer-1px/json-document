@@ -35,6 +35,19 @@ export function acceptsDatabaseValue(property: DatabaseProperty, value: JSONValu
   return typeof value === "string" && property.options.some((option) => option.id === value);
 }
 
+export function defaultDatabaseValue(property: DatabaseProperty): JSONValue {
+  if (property.type === "number") return 0;
+  if (property.type === "checkbox") return false;
+  if (property.type === "select") return property.options[0]?.id ?? "";
+  return "";
+}
+
+export function databaseValueFromText(property: DatabaseProperty, value: string): string | number | boolean {
+  if (property.type === "number") return Number(value);
+  if (property.type === "checkbox") return value === "true";
+  return value;
+}
+
 function assertUnique(ids: ReadonlyArray<string>, label: string): void {
   const unique = new Set<string>();
   for (const id of ids) {

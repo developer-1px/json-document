@@ -19,22 +19,7 @@ databaseDocumentFromZod(schema: ZodType, records: ReadonlyArray<unknown>): Datab
 ## `DatabaseDocumentFromZod`
 
 ```ts
-interface DatabaseDocumentFromZod extends Record<string, JSONValue> {
-  readonly schema: {
-    readonly properties: ReadonlyArray<DatabasePropertyFromZod>;
-  };
-  readonly records: ReadonlyArray<DatabaseRecordFromZod>;
-  readonly views: ReadonlyArray<{
-    readonly id: string;
-    readonly name: string;
-    readonly type: "table";
-    readonly propertyOrder: ReadonlyArray<string>;
-    readonly propertyVisibility: Readonly<Record<string, boolean>>;
-    readonly propertyWidths: Readonly<Record<string, number>>;
-    readonly sort: null;
-    readonly filter: null;
-  }>;
-}
+type DatabaseDocumentFromZod = DatabaseDocument;
 ```
 ## `DatabaseDocumentFromZodResult`
 

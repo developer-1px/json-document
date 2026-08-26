@@ -12,7 +12,7 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds } from "./topology.js";
-import { acceptsDatabaseValue, assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
+import { acceptsDatabaseValue, assertDatabaseDocument, assertDatabaseView, defaultDatabaseValue } from "./database-validation.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -230,7 +230,7 @@ export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocum
       }
       const values: Record<string, JSONValue> = {};
       for (const property of document.schema.properties) {
-        const value = intent.values?.[property.id] ?? defaultValue(property);
+        const value = intent.values?.[property.id] ?? defaultDatabaseValue(property);
         if (!acceptsDatabaseValue(property, value)) return failure("record.invalid-value");
         values[property.id] = value;
       }
@@ -498,13 +498,6 @@ function resolveCell(document: DatabaseDocument, recordId: string, propertyId: s
   const property = index.propertyById.get(propertyId);
   if (recordIndex === undefined || property === undefined) return null;
   return { recordIndex, record: document.records[recordIndex]!, property };
-}
-
-function defaultValue(property: DatabaseProperty): JSONValue {
-  if (property.type === "number") return 0;
-  if (property.type === "checkbox") return false;
-  if (property.type === "select") return property.options[0]?.id ?? "";
-  return "";
 }
 
 function compareValues(left: JSONValue | undefined, right: JSONValue | undefined): number {

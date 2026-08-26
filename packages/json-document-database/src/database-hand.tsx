@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   createDatabaseEditor,
+  databaseValueFromText,
   nextDatabasePropertySort,
   gridPointFromKey,
   gridPointKey,
@@ -706,7 +707,7 @@ function DefaultCell(props: {
       onCompositionStart={() => props.onLease(true)}
       onCompositionEnd={() => props.onLease(false)}
       onBlur={(event) => {
-        if (props.directEditing) props.commit(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value);
+        if (props.directEditing) props.commit(databaseValueFromText(props.property, event.currentTarget.value));
         props.onLease(null);
         props.finish();
       }}
@@ -714,7 +715,7 @@ function DefaultCell(props: {
         cancel(event);
         if (event.key === "Enter" || event.key === "Tab") {
           event.preventDefault();
-          finish(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value, event.currentTarget);
+          finish(databaseValueFromText(props.property, event.currentTarget.value), event.currentTarget);
           props.moveAfterCommit(event.key === "Tab" ? (event.shiftKey ? "left" : "right") : (event.shiftKey ? "up" : "down"));
         }
       }}
@@ -769,7 +770,7 @@ function FilterValue(props: { readonly property: DatabaseProperty; readonly valu
       type={props.property.type === "number" ? "number" : "text"}
       value={String(props.value ?? "")}
       placeholder="Equals…"
-      onChange={(event) => props.onChange(props.property.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value)}
+      onChange={(event) => props.onChange(databaseValueFromText(props.property, event.currentTarget.value))}
     />
   );
 }
@@ -856,9 +857,7 @@ function clipboardFromData(
     const propertyId = topology.propertyIds[start + offset];
     const property = document.schema.properties.find((candidate) => candidate.id === propertyId);
     if (!property) return value;
-    if (property.type === "number") return Number(value);
-    if (property.type === "checkbox") return value === "true";
-    return value;
+    return databaseValueFromText(property, value);
   }));
   return { type: "application/vnd.interactive-os.database+json" as const, cells, text };
 }

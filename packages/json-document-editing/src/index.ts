@@ -12,6 +12,7 @@ export {
 } from "./topology.js";
 export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./topology.js";
 export { createDatabaseEditor, nextDatabasePropertySort } from "./database.js";
+export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } from "./database-validation.js";
 export { createObjectEditor } from "./object.js";
 export { createOrderEditor } from "./order.js";
 export { createEditingSession } from "./session.js";
