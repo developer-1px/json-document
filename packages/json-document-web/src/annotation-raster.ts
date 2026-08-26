@@ -62,6 +62,15 @@ function drawAnnotation(context: CanvasRenderingContext2D, annotation: Annotatio
     context.fillStyle = "white"; context.textAlign = "center"; context.textBaseline = "middle"; context.fillText(String(number), selector.x, selector.y + 1); context.fillStyle = style.fill;
     return;
   }
+  if (annotation.presentation.type === "reaction" && selector.type === "point") {
+    context.save();
+    context.font = "40px sans-serif";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(annotation.presentation.reaction === "like" ? "👍" : "👎", selector.x, selector.y);
+    context.restore();
+    return;
+  }
   if (annotation.presentation.type === "outline" && selector.type === "rectangle") { context.strokeRect(selector.x, selector.y, selector.width, selector.height); return; }
   if (annotation.presentation.type === "stroke" && selector.type === "path") { drawStroke(context, selector.points); return; }
   if (annotation.presentation.type === "arrow" && selector.type === "arrow") drawArrow(context, selector.from, selector.to);

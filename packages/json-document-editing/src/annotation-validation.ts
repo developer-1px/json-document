@@ -21,10 +21,12 @@ export function assertAnnotation(annotation: Annotation, sourceIds?: ReadonlySet
   if (!nonEmpty(annotation.target.sourceId) || (sourceIds && !sourceIds.has(annotation.target.sourceId))) fail("target.sourceId");
   assertSelector(annotation.target.selector);
   const compatible = annotation.presentation.type === "marker" ? annotation.target.selector.type === "point"
+    : annotation.presentation.type === "reaction" ? annotation.target.selector.type === "point"
     : annotation.presentation.type === "outline" ? annotation.target.selector.type === "rectangle"
       : annotation.presentation.type === "stroke" ? annotation.target.selector.type === "path"
         : annotation.presentation.type === "arrow" && annotation.target.selector.type === "arrow";
   if (!compatible) fail("selector/presentation");
+  if (annotation.presentation.type === "reaction" && annotation.presentation.reaction !== "like" && annotation.presentation.reaction !== "dislike") fail("presentation.reaction");
 }
 
 function assertSelector(selector: AnnotationSelector): void {

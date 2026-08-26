@@ -4,9 +4,39 @@ test("Image Annotation Hands exposes the compact bottom tool dock", async ({ pag
   await page.goto("/demo/annotation");
   const dock = page.getByRole("navigation", { name: "Annotation tools" });
   await expect(dock).toBeVisible();
-  for (const name of ["Select", "Comment", "Draw", "Arrow", "Download annotated image"]) {
-    await expect(dock.getByRole("button", { name })).toBeVisible();
+  for (const name of ["Select", "Comment", "Draw", "Arrow", "Like", "Dislike", "Download annotated image"]) {
+    await expect(dock.getByRole("button", { name, exact: true })).toBeVisible();
   }
+});
+
+test("Like and Dislike place reaction stickers without opening a comment composer", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await page.getByRole("button", { name: "Like", exact: true }).click();
+  await canvas.click({ position: { x: 240, y: 220 } });
+  await expect(page.getByLabel("Like sticker")).toBeVisible();
+  await expect(page.getByLabel("Annotation instruction")).toBeHidden();
+  await page.getByRole("button", { name: "Dislike", exact: true }).click();
+  await canvas.click({ position: { x: 420, y: 280 } });
+  await expect(page.getByLabel("Dislike sticker")).toBeVisible();
+  expect((await structured(page)).annotations.map((item: any) => item.presentation)).toEqual([
+    { type: "reaction", reaction: "like" },
+    { type: "reaction", reaction: "dislike" },
+  ]);
+});
+
+test("hovering or focusing an annotation number previews its comment", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.click({ position: { x: 300, y: 260 } });
+  await page.getByLabel("Annotation instruction").fill("이 부분의 대비를 높여 주세요.");
+  await page.getByRole("button", { name: "Send comment" }).click();
+  const marker = page.locator("[data-annotation-id]").first();
+  await marker.hover();
+  await expect(page.getByRole("tooltip", { name: "Comment 1 preview" })).toContainText("대비를 높여");
+  await page.mouse.move(0, 0);
+  await marker.focus();
+  await expect(page.getByRole("tooltip", { name: "Comment 1 preview" })).toContainText("대비를 높여");
 });
 
 test("Comment creates point and region marks with one editable comment", async ({ page }) => {

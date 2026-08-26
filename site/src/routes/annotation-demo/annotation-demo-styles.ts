@@ -20,6 +20,7 @@ export const annotationDemoRecipe = tv({
     threadRule: "h-px bg-line-subtle/70",
     replyInput: "rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm text-foreground-strong outline-none placeholder:text-foreground-muted focus:border-line-accent focus:ring-2 focus:ring-line-accent/20",
     commentCard: "absolute z-10 flex w-[320px] items-end gap-2 rounded-surface border border-line-subtle bg-background-canvas p-3 shadow-overlay",
+    commentPreview: "pointer-events-none absolute z-20 max-w-[280px] rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-5 text-foreground-strong shadow-overlay",
     commentTailAboveLeft: "absolute -bottom-2 -right-2 size-4 rotate-45 border-b border-r border-line-subtle bg-background-canvas",
     commentTailAboveRight: "absolute -bottom-2 -left-2 size-4 rotate-45 border-b border-l border-line-subtle bg-background-canvas",
     commentTailBelowLeft: "absolute -right-2 -top-2 size-4 rotate-45 border-r border-t border-line-subtle bg-background-canvas",
