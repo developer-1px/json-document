@@ -105,7 +105,14 @@ const sort = nextDatabasePropertySort(view.sort, propertyId);
 editor.dispatch({ type: "view.configure", viewId: view.id, sort });
 const initialValue = defaultDatabaseValue(property);
 const value = databaseValueFromText(property, input.value);
-if (acceptsDatabaseValue(property, value)) editor.dispatch({ type: "cell.commit", recordId, propertyId: property.id, value });
+if (acceptsDatabaseValue(property, value)) {
+  editor.dispatch({
+    type: "cell.commit",
+    recordId,
+    propertyId: property.id,
+    value,
+  });
+}
 ```
 
 - `createDatabaseEditor(source)`: selection, cell/record/view Intent, clipboard, history
