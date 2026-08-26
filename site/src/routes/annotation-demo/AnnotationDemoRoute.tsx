@@ -357,7 +357,7 @@ export function AnnotationDemoRoute() {
             >
               <image href={sourceUrl} width={source.width} height={source.height} pointerEvents="none" />
               {documentValue.annotations.map((annotation, index) => (
-                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} previewing={gesture === null && previewId === annotation.id && annotation.body.instruction.trim() !== "" && editingId !== annotation.id} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onPreviewChange={(visible) => setPreviewId(visible ? annotation.id : null)} onResizePointerDown={handleResizePointerDown} />
+                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onPreviewChange={(visible) => setPreviewId(visible ? annotation.id : null)} onResizePointerDown={handleResizePointerDown} />
               ))}
               {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
               {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
@@ -483,7 +483,6 @@ function CommentPreview(props: { readonly annotation: Annotation; readonly index
 function AnnotationShape(props: {
   readonly annotation: Annotation;
   readonly index: number;
-  readonly previewing: boolean;
   readonly selected: boolean;
   readonly onPointerDown: (event: PointerEvent<SVGGElement>, annotation: Annotation) => void;
   readonly onPreviewChange: (visible: boolean) => void;
@@ -502,7 +501,6 @@ function AnnotationShape(props: {
     <g
       aria-label={`Annotation ${props.index}: ${annotation.body.instruction}`}
       data-annotation-id={annotation.id}
-      data-previewing={props.previewing ? "true" : "false"}
       data-selected={props.selected ? "true" : "false"}
       onBlur={() => props.onPreviewChange(false)}
       onFocus={() => props.onPreviewChange(true)}
@@ -514,7 +512,7 @@ function AnnotationShape(props: {
       style={{ cursor: "move" }}
     >
       {annotation.presentation.type === "marker" && selector.type === "point" ? (
-        <CommentNumberBadge index={props.index} point={selector} previewing={props.previewing} selected={props.selected} />
+        <CommentNumberBadge index={props.index} point={selector} selected={props.selected} />
       ) : null}
       {annotation.presentation.type === "reaction" && selector.type === "point" ? (
         <ReactionSticker point={selector} reaction={annotation.presentation.reaction} selected={props.selected} />
@@ -560,15 +558,15 @@ function AnnotationShape(props: {
         </>
       ) : null}
       {annotation.presentation.type !== "marker" && annotation.presentation.type !== "reaction" ? (
-        <CommentNumberBadge index={props.index} point={bounds} previewing={props.previewing} selected={props.selected} />
+        <CommentNumberBadge index={props.index} point={bounds} selected={props.selected} />
       ) : null}
     </g>
   );
 }
 
-function CommentNumberBadge(props: { readonly index: number; readonly point: AnnotationPoint; readonly previewing: boolean; readonly selected: boolean }) {
+function CommentNumberBadge(props: { readonly index: number; readonly point: AnnotationPoint; readonly selected: boolean }) {
   return (
-    <g opacity={props.previewing ? 0 : 1}>
+    <g>
       <path d={commentBubblePath(props.point)} fill={accent} stroke="white" strokeWidth={props.selected ? 6 : 0} vectorEffect="non-scaling-stroke" />
       <text x={props.point.x} y={props.point.y + 1} fill="white" fontSize="22" fontWeight="700" textAnchor="middle" dominantBaseline="middle">{props.index}</text>
     </g>

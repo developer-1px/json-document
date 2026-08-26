@@ -35,7 +35,7 @@ test("hovering or focusing an annotation number previews its comment", async ({ 
   await marker.hover();
   const preview = page.getByRole("tooltip", { name: "Comment 1 preview" });
   await expect(preview).toContainText("대비를 높여");
-  await expect(marker).toHaveAttribute("data-previewing", "true");
+  await expect(marker).toBeVisible();
   await page.mouse.move(0, 0);
   await marker.focus();
   await expect(preview).toContainText("대비를 높여");
