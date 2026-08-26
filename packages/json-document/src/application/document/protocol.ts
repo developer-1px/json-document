@@ -3,9 +3,11 @@ import {
   applyProtocolPatch,
   buildPointer as buildPointerInternal,
   parentPointer as parentPointerInternal,
+  parseArrayIndex as parseArrayIndexInternal,
   parsePointer as parsePointerInternal,
   trackPointer as trackPointerInternal,
   tryParsePointer as tryParsePointerInternal,
+  jsonEqual as jsonEqualInternal,
 } from "../../domain/json-document/index.js";
 import type {
   JSONPatchOperation,
@@ -22,6 +24,14 @@ export function applyPatch(
 
 export function parsePointer(pointer: Pointer): string[] {
   return parsePointerInternal(pointer);
+}
+
+export function parseArrayIndex(segment: string): number | null {
+  return parseArrayIndexInternal(segment);
+}
+
+export function jsonEqual(left: unknown, right: unknown): boolean {
+  return jsonEqualInternal(left, right);
 }
 
 export function tryParsePointer(pointer: Pointer): string[] | null {

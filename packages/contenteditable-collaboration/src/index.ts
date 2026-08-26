@@ -1,5 +1,5 @@
 export { createContentEditableAdapter } from "./lease.js";
-export { plainTextDOMAdapter } from "./dom/plain-text.js";
+export { plainTextDOMAdapter } from "@interactive-os/json-document-contenteditable";
 export type {
   ContentEditableAdapter,
   ContentEditableOptions,

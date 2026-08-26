@@ -1,8 +1,9 @@
-import type {
-  JSONAppliedChange,
-  JSONDocument,
-  JSONPatchOperation,
-  JSONValue,
+import {
+  jsonEqual,
+  type JSONAppliedChange,
+  type JSONDocument,
+  type JSONPatchOperation,
+  type JSONValue,
 } from "@interactive-os/json-document";
 import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
 
@@ -253,10 +254,6 @@ function appendedIndexPath(document: JSONDocument, path: string): string | null 
   const located = document.at(parent);
   if (!located.ok || !Array.isArray(located.value)) return null;
   return `${parent}/${located.value.length}`;
-}
-
-function jsonEqual(left: JSONValue, right: JSONValue): boolean {
-  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function clonePatchOperations(

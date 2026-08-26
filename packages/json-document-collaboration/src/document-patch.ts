@@ -1,5 +1,5 @@
 import { buildPointer, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
-import { jsonEqual } from "./json-equal.js";
+import { jsonEqual } from "@interactive-os/json-document";
 
 export function patchBetweenValues(
   before: JSONValue,

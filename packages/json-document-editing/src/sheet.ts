@@ -20,6 +20,7 @@ import {
   type RangeSelectionState,
   type SelectionRange,
 } from "./range-selection.js";
+import { jsonCellText } from "./cell-text.js";
 
 export interface SheetColumn extends Record<string, JSONValue> {
   readonly id: string;
@@ -224,7 +225,7 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     return {
       type: "application/vnd.interactive-os.sheet+json",
       cells,
-      text: cells.map((row) => row.map(cellText).join("\t")).join("\n"),
+      text: cells.map((row) => row.map(jsonCellText).join("\t")).join("\n"),
     };
   }
 
@@ -396,13 +397,6 @@ function resolvePointWithIndices(
   const rowIndex = index.rowIndexById.get(rowId);
   const columnIndex = index.columnIndexById.get(columnId);
   return rowIndex === undefined || columnIndex === undefined ? null : { rowIndex, columnIndex };
-}
-
-function cellText(value: JSONValue): string {
-  if (value === null) return "";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return JSON.stringify(value);
 }
 
 function collapsed(rowId: string, columnId: string): SheetSelection {

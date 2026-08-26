@@ -8,6 +8,9 @@
       ],
       "@interactive-os/json-document-collaboration/text": [
         "../json-document-collaboration/dist/text-index.d.ts"
+      ],
+      "@interactive-os/json-document-contenteditable": [
+        "../json-document-contenteditable/dist/index.d.ts"
       ]
     },
     "rootDir": "src",
@@ -16,7 +19,8 @@
   },
   "references": [
     { "path": "../json-document" },
-    { "path": "../json-document-collaboration" }
+    { "path": "../json-document-collaboration" },
+    { "path": "../json-document-contenteditable" }
   ],
   "include": [
     "src/**/*.ts"

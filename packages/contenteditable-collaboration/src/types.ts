@@ -4,26 +4,9 @@ import type {
   TextRuntime,
   TextSelection,
 } from "@interactive-os/json-document-collaboration/text";
+import type { TextDOMAdapter } from "@interactive-os/json-document-contenteditable";
 
-export interface DOMObservation {
-  readonly value: string;
-  readonly selection: TextSelection | null;
-}
-
-/**
- * The DOM adapter for one collaborative string field.
- *
- * Implementations may render wrappers, but observed and restored offsets must
- * use JavaScript/DOM UTF-16 offsets.
- */
-export interface TextDOMAdapter {
-  observe(root: HTMLElement): DOMObservation;
-  render(root: HTMLElement, value: string): void;
-  restoreSelection(
-    root: HTMLElement,
-    selection: TextSelection,
-  ): boolean;
-}
+export type { DOMObservation, TextDOMAdapter } from "@interactive-os/json-document-contenteditable";
 
 export interface ContentEditableOptions {
   readonly runtime: TextRuntime;
