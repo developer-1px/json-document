@@ -60,6 +60,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Official Hands · TBD",
     "Order",
     "Object",
+    "Annotation",
     "Tree",
     "Database",
     "Composer",
