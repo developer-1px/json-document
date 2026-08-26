@@ -581,7 +581,7 @@ function CommentNumberBadge(props: { readonly index: number; readonly point: Ann
 
 function commentBubblePath(point: AnnotationPoint): string {
   const { x, y } = point;
-  return `M ${x} ${y - 24} C ${x + 13.25} ${y - 24} ${x + 24} ${y - 13.25} ${x + 24} ${y} L ${x + 24} ${y + 24} L ${x} ${y + 24} C ${x - 13.25} ${y + 24} ${x - 24} ${y + 13.25} ${x - 24} ${y} C ${x - 24} ${y - 13.25} ${x - 13.25} ${y - 24} ${x} ${y - 24} Z`;
+  return `M ${x} ${y - 24} C ${x + 13.25} ${y - 24} ${x + 24} ${y - 13.25} ${x + 24} ${y} C ${x + 24} ${y + 13.25} ${x + 13.25} ${y + 24} ${x} ${y + 24} L ${x - 24} ${y + 24} L ${x - 24} ${y} C ${x - 24} ${y - 13.25} ${x - 13.25} ${y - 24} ${x} ${y - 24} Z`;
 }
 
 function StrokeLine(props: {

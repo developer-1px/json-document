@@ -74,8 +74,8 @@ function drawCommentBubble(context: CanvasRenderingContext2D, point: AnnotationP
   const { x, y } = point;
   context.beginPath(); context.moveTo(x, y - 28);
   context.bezierCurveTo(x + 15.5, y - 28, x + 28, y - 15.5, x + 28, y);
-  context.lineTo(x + 28, y + 28); context.lineTo(x, y + 28);
-  context.bezierCurveTo(x - 15.5, y + 28, x - 28, y + 15.5, x - 28, y);
+  context.bezierCurveTo(x + 28, y + 15.5, x + 15.5, y + 28, x, y + 28);
+  context.lineTo(x - 28, y + 28); context.lineTo(x - 28, y);
   context.bezierCurveTo(x - 28, y - 15.5, x - 15.5, y - 28, x, y - 28);
   context.closePath(); context.fill();
 }
