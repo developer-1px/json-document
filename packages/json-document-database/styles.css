@@ -28,11 +28,8 @@
   gap: 4px;
   padding: 6px 8px;
   border-bottom: 1px solid var(--jd-db-border);
-  background: color-mix(in srgb, var(--jd-db-bg) 94%, var(--jd-db-canvas));
 }
 
-.jd-database__toolbar button,
-.jd-database__toolbar summary,
 .jd-database__toolbar select,
 .jd-database__toolbar input {
   min-height: 28px;
@@ -42,8 +39,8 @@
   padding: 6px 10px;
 }
 
-.jd-database__toolbar button, .jd-database__toolbar summary { display: inline-grid; width: 30px; padding: 4px; place-items: center; cursor: pointer; font-weight: 600; }
-.jd-database__toolbar button:hover:not(:disabled) { border-color: var(--jd-db-accent); }
+.jd-database__toolbar button, .jd-database__toolbar summary { display: inline-grid; width: 30px; min-height: 28px; border: 0; border-radius: 4px; background: transparent; padding: 4px; place-items: center; cursor: pointer; font-weight: 600; }
+.jd-database__toolbar button:hover:not(:disabled), .jd-database__toolbar summary:hover { background: var(--jd-db-accent-soft); }
 .jd-database__toolbar button:disabled { cursor: not-allowed; opacity: .45; }
 .jd-database__toolbar button[data-kind="danger"] { color: var(--jd-db-danger); }
 
