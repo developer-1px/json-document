@@ -751,7 +751,7 @@ function FilterControl(props: {
 function FilterValue(props: { readonly property: DatabaseProperty; readonly value: unknown; readonly onChange: (value: string | number | boolean) => void }) {
   if (props.property.type === "checkbox") {
     return (
-      <select aria-label="Filter value" value={String(props.value)} onChange={(event) => props.onChange(event.currentTarget.value === "true")}>
+      <select aria-label="Filter value" value={String(props.value)} onChange={(event) => props.onChange(databaseValueFromText(props.property, event.currentTarget.value))}>
         <option value="">Any value</option><option value="true">Checked</option><option value="false">Unchecked</option>
       </select>
     );

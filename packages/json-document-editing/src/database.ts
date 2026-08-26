@@ -12,7 +12,8 @@ import {
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds } from "./topology.js";
-import { acceptsDatabaseValue, assertDatabaseDocument, assertDatabaseView, defaultDatabaseValue } from "./database-validation.js";
+import { acceptsDatabaseValue, defaultDatabaseValue } from "./database-property-value.js";
+import { assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
