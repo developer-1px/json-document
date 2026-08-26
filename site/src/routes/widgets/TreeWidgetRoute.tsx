@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   createTreeEditor,
   type TreeDocument,
@@ -99,7 +100,7 @@ export function TreeWidgetRoute() {
                       editing.getItem(row.id).getPressHandler()(event);
                     }}
                   >
-                    <span aria-hidden="true">{row.hasChildren ? row.expanded ? "−" : "+" : ""}</span>
+                    <span aria-hidden="true">{row.hasChildren ? row.expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} /> : null}</span>
                     <span>{row.label}</span>
                   </SelectableItem>
               </li>

@@ -1,4 +1,5 @@
 import { useRef, useState, type KeyboardEvent } from "react";
+import { ClipboardPaste, Copy, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createOrderEditor,
@@ -187,8 +188,8 @@ export function OrderDemoRoute() {
         toolbarLabel="Order actions"
         toolbar={(
           <>
-            <IconButton label="Copy" onClick={copySelection}>⧉</IconButton>
-            <IconButton label="Cut" onClick={cutSelection}>✂</IconButton>
+            <IconButton label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></IconButton>
             <IconButton label="Paste"
               disabled={!clipboard}
               onClick={() => {
@@ -196,12 +197,12 @@ export function OrderDemoRoute() {
                 run({ type: "clipboard.paste", clipboard }, `Pasted ${clipboard.items.length} item${clipboard.items.length === 1 ? "" : "s"}`);
               }}
             >
-              ▣
+              <ClipboardPaste aria-hidden="true" size={16} />
             </IconButton>
-            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>⌫</IconButton>
+            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></IconButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>↶</IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>↷</IconButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
           </>
         )}
         inspector={(

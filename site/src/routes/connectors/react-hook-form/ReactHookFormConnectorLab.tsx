@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Redo2, Undo2 } from "lucide-react";
 import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
 import { useReactHookFormConnector } from "@interactive-os/json-document-react-hook-form";
@@ -114,8 +115,8 @@ export function ReactHookFormConnectorLab() {
 
           <div className="flex flex-wrap gap-2">
             <ActionButton kind="primary" type="submit">Save record</ActionButton>
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={binding.undo}>↶</IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={binding.redo}>↷</IconButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={binding.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={binding.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
           </div>
 
           <dl className={classes("grid grid-cols-2 gap-2 p-3", ui.surface.inset)}>

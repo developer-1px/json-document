@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { ChevronDown, ChevronRight, ClipboardPaste, Copy, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createTreeEditor,
@@ -120,8 +121,8 @@ export function TreeDemoRoute() {
         toolbarLabel="Tree actions"
         toolbar={(
           <>
-            <IconButton label="Copy" onClick={copySelection}>⧉</IconButton>
-            <IconButton label="Cut" onClick={cutSelection}>✂</IconButton>
+            <IconButton label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></IconButton>
             <IconButton label="Paste"
               disabled={!clipboard}
               onClick={() => {
@@ -129,12 +130,12 @@ export function TreeDemoRoute() {
                 run({ type: "clipboard.paste", clipboard, topology }, `Pasted ${clipboard.nodes.length} node${clipboard.nodes.length === 1 ? "" : "s"}`);
               }}
             >
-              ▣
+              <ClipboardPaste aria-hidden="true" size={16} />
             </IconButton>
-            <IconButton label="Delete" onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}>⌫</IconButton>
+            <IconButton label="Delete" onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></IconButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>↶</IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>↷</IconButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
           </>
         )}
         inspector={(
@@ -161,7 +162,7 @@ export function TreeDemoRoute() {
                         label={row.expanded ? `Collapse ${row.label}` : `Expand ${row.label}`}
                         onClick={() => editing.toggle(row.id)}
                       >
-                        {row.expanded ? "−" : "+"}
+                        {row.expanded ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronRight aria-hidden="true" size={16} />}
                       </IconButton>
                     ) : <span />}
                     <SelectableItem

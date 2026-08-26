@@ -2,6 +2,7 @@ import {
   type AnchorHTMLAttributes,
   type ReactNode,
 } from "react";
+import { ArrowRight } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { classes, ui } from "./styles";
 
@@ -31,7 +32,7 @@ export function ActionLink(props: ActionLinkProps) {
   const content = (
     <>
       {children}
-      {kind === "prominent" ? <span aria-hidden="true">→</span> : null}
+      {kind === "prominent" ? <ArrowRight aria-hidden="true" size={16} /> : null}
     </>
   );
   const linkClassName = classes(ui.interactive.link[kind], className);

@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { ClipboardPaste, Copy, PaintBucket, Redo2, Scissors, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
   createSheetEditor,
@@ -174,16 +175,16 @@ export function SheetDemo() {
           toolbarLabel="Sheet actions"
           toolbar={(
             <>
-              <Action label="Copy" icon="⧉" onClick={copySelection} />
-              <Action label="Cut" icon="✂" onClick={cutSelection} />
-              <Action label="Paste" icon="▣" onClick={pasteSelection} disabled={clipboard === null} />
-              <Action label="Fill selected" icon="▦" onClick={() => run(
+              <Action label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
+              <Action label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
+              <Action label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} onClick={pasteSelection} disabled={clipboard === null} />
+              <Action label="Fill selected" icon={<PaintBucket aria-hidden="true" size={16} />} onClick={() => run(
                 () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
                 "Selected cells filled",
               )} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" icon="↶" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" icon="↷" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Action label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
+              <Action label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
               <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
             </>
           )}
@@ -257,6 +258,6 @@ function focusCell(surface: HTMLElement | null, point: { readonly rowId: string;
   findWebGridCell<HTMLElement>(surface, point)?.querySelector<HTMLInputElement>("input")?.focus();
 }
 
-function Action(props: { readonly label: string; readonly icon: string; readonly onClick: () => void; readonly disabled?: boolean }) {
+function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
   return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }

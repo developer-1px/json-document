@@ -1,4 +1,5 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../ui/styles";
 import { ActionLink } from "../ui/interactive";
@@ -72,7 +73,7 @@ export function DemoWorkbench(props: {
           panelId={(_tab, index) => `${id}-panel-${index}`}
         />
         <IconButton label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
-          {expanded ? "↙" : "↗"}
+          {expanded ? <Minimize2 aria-hidden="true" size={16} /> : <Maximize2 aria-hidden="true" size={16} />}
         </IconButton>
       </div>
 

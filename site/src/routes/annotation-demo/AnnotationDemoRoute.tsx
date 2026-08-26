@@ -34,6 +34,8 @@ import {
   MousePointer2,
   Pencil,
   Redo2,
+  RotateCcw,
+  Save,
   SendHorizontal,
   ThumbsDown,
   ThumbsUp,
@@ -678,8 +680,8 @@ function OutputPanel(props: {
       {props.output === "structured" ? (
         <div id="annotation-output-panel-structured" role="tabpanel" aria-labelledby="annotation-output-tab-structured" className="grid gap-2">
           <div className="flex flex-wrap gap-1">
-            <IconButton label="Save state" onClick={props.onSave}>↓</IconButton>
-            <IconButton label="Restore state" disabled={!props.canRestore} onClick={props.onRestore}>↥</IconButton>
+            <IconButton label="Save state" onClick={props.onSave}><Save aria-hidden="true" size={16} /></IconButton>
+            <IconButton label="Restore state" disabled={!props.canRestore} onClick={props.onRestore}><RotateCcw aria-hidden="true" size={16} /></IconButton>
             <a className={ui.interactive.link.prominent} download="annotation-request.json" href={props.structuredDownloadUrl}>Download JSON</a>
           </div>
           <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput(), ui.surface.inset)}>

@@ -1,4 +1,5 @@
 import { type SiteNavigationGroup, type SiteRoute } from "./router";
+import { ChevronRight } from "lucide-react";
 import { siteLayers } from "./site-layers";
 import { ActionLink } from "../shared/ui/interactive";
 import { ui } from "../shared/ui/styles";
@@ -60,7 +61,7 @@ export function SiteBreadcrumb(props: {
           const current = index === trail.length - 1;
           return (
             <li key={`${crumb.path}:${crumb.label}`} className={ui.breadcrumb.item}>
-              {index > 0 ? <span className={ui.breadcrumb.sep} aria-hidden="true">›</span> : null}
+              {index > 0 ? <ChevronRight className={ui.breadcrumb.sep} aria-hidden="true" size={12} /> : null}
               {current ? (
                 <span className={ui.breadcrumb.current} aria-current="page">{crumb.label}</span>
               ) : (
