@@ -1,6 +1,6 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
-import { SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { SegmentedControl, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -20,18 +20,7 @@ export function SelectionDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-input">
           <p className={ui.text.label}>1 · 입력</p>
           <h2 id="selection-input" className={classes("mb-2 mt-1", ui.text.heading)}>모드와 블록 선택하기</h2>
-          <div className="mb-3 flex flex-wrap gap-1" role="group" aria-label="Selection mode">
-            {(["replace", "extend", "toggle"] as const).map((item) => (
-              <ToggleButton
-                key={item}
-                pressed={mode === item}
-                className="px-3 py-1.5"
-                onClick={() => setMode(item)}
-              >
-                {item}
-              </ToggleButton>
-            ))}
-          </div>
+          <SegmentedControl className="mb-3" label="Selection mode" value={mode} options={(["replace", "extend", "toggle"] as const).map((item) => ({ id: item, label: item }))} onValueChange={(value) => setMode(value as typeof mode)} />
           <div className="grid gap-1">
             {selectionLabDocument.blocks.map((block) => (
               <SelectableItem

@@ -1,4 +1,5 @@
-import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../ui/styles";
 import { ActionLink } from "../ui/interactive";
 import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
@@ -57,43 +58,19 @@ export function DemoWorkbench(props: {
     return () => { current = false; };
   }, [activeSource?.path, activeSourceText]);
 
-  function selectNeighbor(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (direction === 0) return;
-    event.preventDefault();
-    const nextIndex = (index + direction + tabs.length) % tabs.length;
-    setActiveTab(tabs[nextIndex]!.key);
-    event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]")[nextIndex]?.focus();
-  }
-
   return (
     <section className={classes("min-w-0", ui.product.frame, expanded && "fixed inset-3 z-50 overflow-auto bg-background-canvas shadow-overlay")} aria-label="Demo workbench" data-expanded={expanded || undefined}>
       <div className={classes(ui.demoWorkbench.header, "flex items-start justify-between gap-2")}>
-        <div
+        <Tabs
           className={ui.demoWorkbench.tabList}
-          role="tablist"
-          aria-label="Demo and source files"
-        >
-          {tabs.map((tab, index) => {
-            const selected = tab.key === activeTab;
-            return (
-              <button
-                key={String(tab.key)}
-                id={`${id}-tab-${index}`}
-                type="button"
-                role="tab"
-                aria-controls={`${id}-panel-${index}`}
-                aria-selected={selected}
-                tabIndex={selected ? 0 : -1}
-                className={ui.demoWorkbench.tab}
-                onClick={() => setActiveTab(tab.key)}
-                onKeyDown={(event) => selectNeighbor(event, index)}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+          tabClassName={ui.demoWorkbench.tab}
+          label="Demo and source files"
+          value={activeTab}
+          options={tabs.map((tab) => ({ id: tab.key, label: tab.label }))}
+          onValueChange={setActiveTab}
+          tabId={(_tab, index) => `${id}-tab-${index}`}
+          panelId={(_tab, index) => `${id}-panel-${index}`}
+        />
         <IconButton label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
           {expanded ? "↙" : "↗"}
         </IconButton>

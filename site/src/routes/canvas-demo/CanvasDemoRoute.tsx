@@ -32,7 +32,7 @@ import {
   type ResizeEdge,
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, MenuItemButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -691,13 +691,12 @@ export function CanvasDemoRoute() {
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
         toolbar={objectDemoColors.map((color) => (
-          <ActionButton
+          <IconButton label={`Fill ${color}`}
             key={color}
-            aria-label={`Fill ${color}`}
             onClick={() => editor.dispatch({ type: "selection.fill", color })}
           >
             <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
-          </ActionButton>
+          </IconButton>
         ))}
       >
         <div
@@ -849,9 +848,7 @@ export function CanvasDemoRoute() {
               className={ui.interactive.contextMenu}
               style={{ left: menu.x, top: menu.y }}
             >
-              <button
-                type="button"
-                role="menuitem"
+              <MenuItemButton
                 className={ui.interactive.contextMenuItem}
                 onClick={() => {
                   editor.dispatch({ type: "selection.remove" });
@@ -859,7 +856,7 @@ export function CanvasDemoRoute() {
                 }}
               >
                 Delete
-              </button>
+              </MenuItemButton>
             </div>
           ) : null}
         </div>
