@@ -462,12 +462,12 @@
   },
   {
     "path": "/demo/annotation",
-    "label": "Annotation Demo",
+    "label": "Annotation",
     "title": "Annotation Hands Demo - json-document",
     "description": "단일 raster image 위에 target, instruction, visible mark를 만들고 structured state와 flattened image로 투영합니다.",
     "language": "ko",
     "parentPath": "/editors",
-    "sidebar": false
+    "navigationGroup": "Hands"
   },
   {
     "path": "/demo/canvas",
