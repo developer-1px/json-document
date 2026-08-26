@@ -11,6 +11,7 @@ const source = { id: "source", src: "/cat.png", width: 1200, height: 800 } as co
 const point: Annotation = { id: "point", body: { instruction: "Inspect" }, target: { sourceId: "source", selector: { type: "point", x: 10, y: 20 } }, presentation: { type: "marker" } };
 const rectangle: Annotation = { id: "rect", body: { instruction: "Crop" }, target: { sourceId: "source", selector: { type: "rectangle", x: 20, y: 30, width: 40, height: 50 } }, presentation: { type: "outline" } };
 const arrow: Annotation = { id: "arrow", body: { instruction: "Follow" }, target: { sourceId: "source", selector: { type: "arrow", from: { x: 0, y: 0 }, to: { x: 10, y: 10 } } }, presentation: { type: "arrow" } };
+const reaction: Annotation = { id: "reaction", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "point", x: 30, y: 40 } }, presentation: { type: "reaction", reaction: "like" } };
 
 const legacyRectangleFixture = {
   id: "legacy-rect",
@@ -25,8 +26,9 @@ function document(annotations: ReadonlyArray<Annotation> = []): AnnotationDocume
 
 describe("Annotation editor", () => {
   test("validates the profile, source, selector, and presentation relationship", () => {
-    expect(() => assertAnnotationDocument(document([point, rectangle, arrow]))).not.toThrow();
+    expect(() => assertAnnotationDocument(document([point, rectangle, arrow, reaction]))).not.toThrow();
     expect(() => assertAnnotationDocument(document([{ ...point, presentation: { type: "outline" } }]))).toThrow(/selector\/presentation/);
+    expect(() => assertAnnotationDocument(document([{ ...reaction, presentation: { type: "reaction", reaction: "love" as "like" } }]))).toThrow(/presentation\.reaction/);
   });
 
   test("represents a legacy target/mark fixture with the canonical selector/presentation contract", () => {

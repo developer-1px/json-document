@@ -57,14 +57,44 @@ function applyStyle(context: CanvasRenderingContext2D, style: WebAnnotationRaste
 function drawAnnotation(context: CanvasRenderingContext2D, annotation: Annotation, number: number, style: WebAnnotationRasterStyle) {
   const selector = annotation.target.selector;
   if (annotation.presentation.type === "marker" && selector.type === "point") {
-    context.save(); context.translate(selector.x + 20, selector.y + 20); context.rotate(Math.PI / 4); context.fillRect(-11, -11, 22, 22); context.restore();
-    context.beginPath(); context.arc(selector.x, selector.y, 28, 0, Math.PI * 2); context.fill();
+    drawCommentBubble(context, selector);
     context.fillStyle = "white"; context.textAlign = "center"; context.textBaseline = "middle"; context.fillText(String(number), selector.x, selector.y + 1); context.fillStyle = style.fill;
+    return;
+  }
+  if (annotation.presentation.type === "reaction" && selector.type === "point") {
+    drawReaction(context, selector, annotation.presentation.reaction, style);
     return;
   }
   if (annotation.presentation.type === "outline" && selector.type === "rectangle") { context.strokeRect(selector.x, selector.y, selector.width, selector.height); return; }
   if (annotation.presentation.type === "stroke" && selector.type === "path") { drawStroke(context, selector.points); return; }
   if (annotation.presentation.type === "arrow" && selector.type === "arrow") drawArrow(context, selector.from, selector.to);
+}
+
+function drawCommentBubble(context: CanvasRenderingContext2D, point: AnnotationPoint) {
+  const { x, y } = point;
+  context.beginPath(); context.moveTo(x, y - 28);
+  context.bezierCurveTo(x + 15.5, y - 28, x + 28, y - 15.5, x + 28, y);
+  context.bezierCurveTo(x + 28, y + 15.5, x + 15.5, y + 28, x, y + 28);
+  context.lineTo(x - 28, y + 28); context.lineTo(x - 28, y);
+  context.bezierCurveTo(x - 28, y - 15.5, x - 15.5, y - 28, x, y - 28);
+  context.closePath(); context.fill();
+}
+
+function drawReaction(context: CanvasRenderingContext2D, point: AnnotationPoint, reaction: "like" | "dislike", style: WebAnnotationRasterStyle) {
+  const direction = reaction === "like" ? -1 : 1;
+  context.save();
+  context.shadowColor = "rgba(0, 0, 0, 0.24)"; context.shadowBlur = 6; context.shadowOffsetY = 4;
+  context.beginPath(); context.arc(point.x, point.y, 29, 0, Math.PI * 2); context.fillStyle = "white"; context.fill(); context.strokeStyle = "white"; context.lineWidth = 9; context.stroke();
+  context.shadowColor = "transparent";
+  context.beginPath(); context.arc(point.x, point.y, 28, 0, Math.PI * 2); context.strokeStyle = style.stroke; context.lineWidth = 3; context.stroke();
+  context.translate(point.x, point.y); context.scale(1, direction);
+  context.beginPath();
+  context.moveTo(-13, -2); context.lineTo(-7, -2); context.lineTo(-3, -13); context.quadraticCurveTo(-1, -17, 3, -14);
+  context.lineTo(3, -7); context.lineTo(12, -7); context.quadraticCurveTo(16, -7, 15, -2);
+  context.lineTo(12, 10); context.quadraticCurveTo(11, 14, 7, 14); context.lineTo(-7, 14); context.lineTo(-7, -2);
+  context.moveTo(-13, -2); context.lineTo(-13, 14); context.lineTo(-7, 14);
+  context.stroke();
+  context.restore();
 }
 
 function drawStroke(context: CanvasRenderingContext2D, points: ReadonlyArray<AnnotationPoint>) {

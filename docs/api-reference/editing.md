@@ -47,6 +47,7 @@ interface AnnotationPoint extends Record<string, JSONValue> { readonly x: number
 ```ts
 type AnnotationPresentation =
   | { readonly type: "marker" }
+  | { readonly type: "reaction"; readonly reaction: "like" | "dislike" }
   | { readonly type: "outline" }
   | { readonly type: "stroke" }
   | { readonly type: "arrow" };

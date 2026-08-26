@@ -13,6 +13,7 @@ export type AnnotationSelector =
   | { readonly type: "arrow"; readonly from: AnnotationPoint; readonly to: AnnotationPoint };
 export type AnnotationPresentation =
   | { readonly type: "marker" }
+  | { readonly type: "reaction"; readonly reaction: "like" | "dislike" }
   | { readonly type: "outline" }
   | { readonly type: "stroke" }
   | { readonly type: "arrow" };

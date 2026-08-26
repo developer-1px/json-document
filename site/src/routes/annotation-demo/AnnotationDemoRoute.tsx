@@ -34,13 +34,16 @@ import {
   MousePointer2,
   Pencil,
   Redo2,
+  SendHorizontal,
+  ThumbsDown,
+  ThumbsUp,
   Trash2,
   Undo2,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { ActionButton, IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import {
@@ -48,10 +51,10 @@ import {
 } from "./annotation-state";
 import { annotationDemoRecipe } from "./annotation-demo-styles";
 
-type Tool = "select" | "comment" | "draw" | "arrow";
+type Tool = "select" | "comment" | "draw" | "arrow" | "like" | "dislike";
 type Output = "structured" | "image";
 type Gesture =
-  | { readonly type: "create"; readonly tool: "comment" | "arrow"; readonly start: AnnotationPoint; readonly current: AnnotationPoint }
+  | { readonly type: "create"; readonly tool: Exclude<Tool, "select" | "draw">; readonly start: AnnotationPoint; readonly current: AnnotationPoint }
   | { readonly type: "draw"; readonly points: ReadonlyArray<AnnotationPoint> }
   | { readonly type: "move"; readonly id: string; readonly start: AnnotationPoint; readonly current: AnnotationPoint }
   | { readonly type: "resize"; readonly id: string; readonly start: AnnotationPoint; readonly current: AnnotationPoint };
@@ -65,6 +68,7 @@ export function AnnotationDemoRoute() {
   useSyncExternalStore(editor.subscribe, () => editor.snapshot.revision, () => editor.snapshot.revision);
   const [tool, setTool] = useState<Tool>("comment");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [, setGestureRevision] = useState(0);
   const [gestureSession] = useState(() => createGestureSession<Gesture>({
     onBegin: () => setGestureRevision((revision) => revision + 1),
@@ -165,7 +169,8 @@ export function AnnotationDemoRoute() {
 
   function handleAnnotationPointerDown(event: PointerEvent<SVGGElement>, annotation: Annotation) {
     event.stopPropagation();
-    setEditingId(annotation.id);
+    setEditingId(null);
+    setPreviewId(null);
     if (tool !== "select") {
       setSelected(annotation.id);
       return;
@@ -216,7 +221,7 @@ export function AnnotationDemoRoute() {
       if (annotation !== null) {
         editor.dispatch({ type: "annotation.create", annotation });
         setTool("select");
-        setEditingId(annotation.id);
+        setEditingId(annotation.presentation.type === "reaction" ? null : annotation.id);
         setAnnouncement("자유선 코멘트를 만들었습니다.");
       }
     } else if (gesture.type === "create") {
@@ -224,12 +229,17 @@ export function AnnotationDemoRoute() {
       if (annotation !== null) {
         editor.dispatch({ type: "annotation.create", annotation });
         setTool("select");
-        setEditingId(annotation.id);
+        setEditingId(annotation.presentation.type === "reaction" ? null : annotation.id);
         setAnnouncement(annotationAnnouncement(annotation));
       }
     } else {
       const dx = gesture.current.x - gesture.start.x;
       const dy = gesture.current.y - gesture.start.y;
+      if (gesture.type === "move" && Math.hypot(dx, dy) < 4) {
+        const annotation = documentValue.annotations.find((item) => item.id === gesture.id);
+        if (annotation !== undefined && annotation.presentation.type !== "reaction") setEditingId(gesture.id);
+        return;
+      }
       editor.dispatch(gesture.type === "move"
         ? { type: "annotation.move", annotationId: gesture.id, dx, dy }
         : { type: "annotation.resize", annotationId: gesture.id, handle: resizeHandle(documentValue, gesture.id), dx, dy });
@@ -347,17 +357,20 @@ export function AnnotationDemoRoute() {
             >
               <image href={sourceUrl} width={source.width} height={source.height} pointerEvents="none" />
               {documentValue.annotations.map((annotation, index) => (
-                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onResizePointerDown={handleResizePointerDown} />
+                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onPreviewChange={(visible) => setPreviewId(visible ? annotation.id : null)} onResizePointerDown={handleResizePointerDown} />
               ))}
               {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
               {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
             </svg>
+            {documentValue.annotations.map((annotation, index) => gesture === null && previewId === annotation.id && annotation.body.instruction.trim() !== "" && editingId !== annotation.id ? (
+              <CommentPreview key={annotation.id} annotation={annotation} index={index + 1} source={source} />
+            ) : null)}
             {selected && editingId === selected.id ? (
               <CommentComposer annotation={selected} index={documentValue.annotations.indexOf(selected) + 1} source={source} onCancel={() => cancelComment(selected)} onSave={(instruction) => sendComment(selected, instruction)} onSubmit={(instruction) => submitComment(selected, instruction)} />
             ) : null}
           </div>
           <nav aria-label="Annotation tools" className={annotationDemoStyles.toolDock()}>
-            {(["select", "comment", "draw", "arrow"] as const).map((value) => (
+            {(["select", "comment", "draw", "arrow", "like", "dislike"] as const).map((value) => (
               <ToggleButton label={toolLabel(value)} tooltip={`${toolLabel(value)} (${toolShortcut(value)})`} pressed={tool === value} className={annotationDemoStyles.dockButton()} key={value} onClick={() => chooseTool(value)}>
                 <ToolIcon tool={value} />
               </ToggleButton>
@@ -395,12 +408,7 @@ function CommentComposer(props: {
     });
     return () => cancelAnimationFrame(frame);
   }, [props.annotation.id]);
-  const dock = annotationDock(props.annotation, props.source);
-  const opensLeft = dock.horizontal === "left";
-  const opensAbove = dock.vertical === "above";
-  const tailStyle = opensAbove
-    ? opensLeft ? annotationDemoStyles.commentTailAboveLeft() : annotationDemoStyles.commentTailAboveRight()
-    : opensLeft ? annotationDemoStyles.commentTailBelowLeft() : annotationDemoStyles.commentTailBelowRight();
+  const dock = composerDock(props.annotation, props.source);
   return (
     <section
       aria-label={`Request ${props.index} comment`}
@@ -409,10 +417,9 @@ function CommentComposer(props: {
       style={{
         left: `${(dock.anchor.x / props.source.width) * 100}%`,
         top: `${(dock.anchor.y / props.source.height) * 100}%`,
-        transform: `translate(${opensLeft ? "-100%" : "0"}, ${opensAbove ? "-100%" : "0"})`,
+        transform: dockTransform(dock),
       }}
     >
-      <span className={tailStyle} aria-hidden="true" />
       <textarea
         ref={inputRef}
         aria-label="Annotation instruction"
@@ -432,16 +439,16 @@ function CommentComposer(props: {
         rows={1}
         value={draft}
       />
-      <ActionButton
-        aria-label="Send comment"
+      <IconButton
+        label="Send comment"
+        rootClassName="shrink-0"
         className={annotationDemoStyles.sendButton()}
         disabled={draft.trim() === ""}
-        kind="primary"
         onClick={() => props.onSubmit(draft)}
         onMouseDown={(event) => event.preventDefault()}
       >
-        Send
-      </ActionButton>
+        <SendHorizontal aria-hidden="true" size={15} />
+      </IconButton>
     </section>
   );
 }
@@ -450,7 +457,27 @@ function ToolIcon(props: { readonly tool: Tool }) {
   if (props.tool === "select") return <MousePointer2 aria-hidden="true" size={16} />;
   if (props.tool === "comment") return <MessageSquare aria-hidden="true" size={16} />;
   if (props.tool === "draw") return <Pencil aria-hidden="true" size={16} />;
+  if (props.tool === "like") return <ThumbsUp aria-hidden="true" size={16} />;
+  if (props.tool === "dislike") return <ThumbsDown aria-hidden="true" size={16} />;
   return <ArrowUpRight aria-hidden="true" size={16} />;
+}
+
+function CommentPreview(props: { readonly annotation: Annotation; readonly index: number; readonly source: AnnotationSource }) {
+  const dock = composerDock(props.annotation, props.source);
+  return (
+    <div
+      aria-label={`Comment ${props.index} preview`}
+      className={annotationDemoStyles.commentPreview()}
+      role="tooltip"
+      style={{
+        left: `${(dock.anchor.x / props.source.width) * 100}%`,
+        top: `${(dock.anchor.y / props.source.height) * 100}%`,
+        transform: dockTransform(dock),
+      }}
+    >
+      {props.annotation.body.instruction}
+    </div>
+  );
 }
 
 function AnnotationShape(props: {
@@ -458,6 +485,7 @@ function AnnotationShape(props: {
   readonly index: number;
   readonly selected: boolean;
   readonly onPointerDown: (event: PointerEvent<SVGGElement>, annotation: Annotation) => void;
+  readonly onPreviewChange: (visible: boolean) => void;
   readonly onResizePointerDown: (event: PointerEvent<SVGCircleElement>, annotation: Annotation) => void;
 }) {
   const { annotation } = props;
@@ -474,25 +502,20 @@ function AnnotationShape(props: {
       aria-label={`Annotation ${props.index}: ${annotation.body.instruction}`}
       data-annotation-id={annotation.id}
       data-selected={props.selected ? "true" : "false"}
+      onBlur={() => props.onPreviewChange(false)}
+      onFocus={() => props.onPreviewChange(true)}
+      onPointerEnter={() => props.onPreviewChange(true)}
+      onPointerLeave={() => props.onPreviewChange(false)}
       onPointerDown={(event) => props.onPointerDown(event, annotation)}
       role="button"
+      tabIndex={0}
       style={{ cursor: "move" }}
     >
       {annotation.presentation.type === "marker" && selector.type === "point" ? (
-        <>
-          <rect
-            x={selector.x + 10}
-            y={selector.y + 10}
-            width="16"
-            height="16"
-            fill={accent}
-            transform={`rotate(45 ${selector.x + 18} ${selector.y + 18})`}
-          />
-          <circle cx={selector.x} cy={selector.y} r="24" fill={accent} />
-          <text x={selector.x} y={selector.y + 1} fill="white" fontSize="24" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
-            {props.index}
-          </text>
-        </>
+        <CommentNumberBadge index={props.index} point={selector} selected={props.selected} />
+      ) : null}
+      {annotation.presentation.type === "reaction" && selector.type === "point" ? (
+        <ReactionSticker point={selector} reaction={annotation.presentation.reaction} selected={props.selected} />
       ) : null}
       {annotation.presentation.type === "outline" && selector.type === "rectangle" ? (
         <>
@@ -534,14 +557,25 @@ function AnnotationShape(props: {
           ) : null}
         </>
       ) : null}
-      {annotation.presentation.type !== "marker" ? (
-        <>
-          <rect x={bounds.x - 19} y={bounds.y - 19} width="38" height="38" rx="8" fill={accent} stroke="white" strokeWidth={props.selected ? 6 : 0} vectorEffect="non-scaling-stroke" />
-          <text x={bounds.x} y={bounds.y + 1} fill="white" fontSize="22" fontWeight="700" textAnchor="middle" dominantBaseline="middle">{props.index}</text>
-        </>
+      {annotation.presentation.type !== "marker" && annotation.presentation.type !== "reaction" ? (
+        <CommentNumberBadge index={props.index} point={bounds} selected={props.selected} />
       ) : null}
     </g>
   );
+}
+
+function CommentNumberBadge(props: { readonly index: number; readonly point: AnnotationPoint; readonly selected: boolean }) {
+  return (
+    <g>
+      <path d={commentBubblePath(props.point)} fill={accent} stroke="white" strokeWidth={props.selected ? 6 : 0} vectorEffect="non-scaling-stroke" />
+      <text x={props.point.x} y={props.point.y + 1} fill="white" fontSize="22" fontWeight="700" textAnchor="middle" dominantBaseline="middle">{props.index}</text>
+    </g>
+  );
+}
+
+function commentBubblePath(point: AnnotationPoint): string {
+  const { x, y } = point;
+  return `M ${x} ${y - 24} C ${x + 13.25} ${y - 24} ${x + 24} ${y - 13.25} ${x + 24} ${y} C ${x + 24} ${y + 13.25} ${x + 13.25} ${y + 24} ${x} ${y + 24} L ${x - 24} ${y + 24} L ${x - 24} ${y} C ${x - 24} ${y - 13.25} ${x - 13.25} ${y - 24} ${x} ${y - 24} Z`;
 }
 
 function StrokeLine(props: {
@@ -600,12 +634,24 @@ function ArrowLine(props: { readonly from: AnnotationPoint; readonly to: Annotat
 }
 
 function DraftShape({ gesture }: { readonly gesture: Extract<Gesture, { type: "create" }> }) {
+  if (gesture.tool === "like" || gesture.tool === "dislike") return <ReactionSticker point={gesture.start} reaction={gesture.tool} selected={false} draft />;
   if (gesture.tool === "arrow") return <ArrowLine from={gesture.start} to={gesture.current} selected />;
   if (distance(gesture.start, gesture.current) < 16) {
     return <circle cx={gesture.start.x} cy={gesture.start.y} r="32" fill={accent} opacity="0.7" />;
   }
   const rectangle = rectangleFromPoints(gesture.start, gesture.current);
   return <rect {...rectangle} fill="transparent" stroke={accent} strokeDasharray="18 12" strokeWidth="8" />;
+}
+
+function ReactionSticker(props: { readonly point: AnnotationPoint; readonly reaction: "like" | "dislike"; readonly selected: boolean; readonly draft?: boolean }) {
+  const Icon = props.reaction === "like" ? ThumbsUp : ThumbsDown;
+  return (
+    <g aria-label={props.reaction === "like" ? "Like sticker" : "Dislike sticker"} opacity={props.draft ? 0.7 : 1} style={{ filter: "drop-shadow(0 4px 3px rgb(var(--color-foreground-strong) / 0.24))" }}>
+      <circle cx={props.point.x} cy={props.point.y} r="29" fill="white" stroke="white" strokeWidth={props.selected ? 12 : 9} vectorEffect="non-scaling-stroke" />
+      <circle cx={props.point.x} cy={props.point.y} r="28" fill="white" stroke={accent} strokeWidth={props.selected ? 5 : 3} vectorEffect="non-scaling-stroke" />
+      <Icon x={props.point.x - 15} y={props.point.y - 15} width="30" height="30" color={accent} fill="none" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+    </g>
+  );
 }
 
 function OutputPanel(props: {
@@ -654,11 +700,14 @@ function OutputPanel(props: {
 
 function createAnnotation(
   sourceId: string,
-  kind: "comment" | "arrow",
+  kind: Exclude<Tool, "select" | "draw">,
   start: AnnotationPoint,
   end: AnnotationPoint,
 ): Annotation | null {
   const id = `annotation-${crypto.randomUUID()}`;
+  if (kind === "like" || kind === "dislike") {
+    return { id, target: { sourceId, selector: { type: "point", ...start } }, body: { instruction: "" }, presentation: { type: "reaction", reaction: kind } };
+  }
   if (kind === "comment") {
     if (distance(start, end) < 16) return { id, target: { sourceId, selector: { type: "point", ...start } }, body: { instruction: "" }, presentation: { type: "marker" } };
     return { id, target: { sourceId, selector: { type: "rectangle", ...rectangleFromPoints(start, end) } }, body: { instruction: "" }, presentation: { type: "outline" } };
@@ -677,20 +726,25 @@ function createDrawAnnotation(sourceId: string, points: ReadonlyArray<Annotation
   };
 }
 
-function annotationDock(annotation: Annotation, source: AnnotationSource) {
+function composerDock(annotation: Annotation, source: AnnotationSource) {
   const bounds = annotationBounds(annotation);
-  const horizontal = bounds.x + bounds.width / 2 >= source.width / 2 ? "left" : "right";
-  const vertical = bounds.y + bounds.height / 2 >= source.height / 2 ? "above" : "below";
-  const pointOffset = annotation.target.selector.type === "point" ? 24 : 0;
+  const horizontal = bounds.x + bounds.width / 2 > source.width * 0.75 ? "left" : "right";
+  const vertical = bounds.y < 48 ? "below" : bounds.y > source.height - 48 ? "above" : "center";
   return {
     horizontal,
     vertical,
     anchor: {
       type: "point" as const,
-      x: horizontal === "left" ? bounds.x - pointOffset : bounds.x + bounds.width + pointOffset,
-      y: vertical === "above" ? bounds.y - pointOffset : bounds.y + bounds.height + pointOffset,
+      x: horizontal === "left" ? bounds.x - 36 : bounds.x + 36,
+      y: bounds.y,
     },
   };
+}
+
+function dockTransform(dock: ReturnType<typeof composerDock>): string {
+  const horizontal = dock.horizontal === "left" ? "-100%" : "0";
+  const vertical = dock.vertical === "above" ? "-100%" : dock.vertical === "below" ? "0" : "-50%";
+  return `translate(${horizontal}, ${vertical})`;
 }
 
 function annotationBounds(annotation: Annotation) {
@@ -731,11 +785,11 @@ function pathLength(points: ReadonlyArray<AnnotationPoint>): number {
 }
 
 function toolLabel(tool: Tool): string {
-  return ({ select: "Select", comment: "Comment", draw: "Draw", arrow: "Arrow" })[tool];
+  return ({ select: "Select", comment: "Comment", draw: "Draw", arrow: "Arrow", like: "Like", dislike: "Dislike" })[tool];
 }
 
 function toolShortcut(tool: Tool): string {
-  return ({ select: "V", comment: "C", draw: "D", arrow: "A" })[tool];
+  return ({ select: "V", comment: "C", draw: "D", arrow: "A", like: "L", dislike: "K" })[tool];
 }
 
 function toolFromShortcut(key: string): Tool | null {
@@ -744,10 +798,13 @@ function toolFromShortcut(key: string): Tool | null {
   if (normalized === "c") return "comment";
   if (normalized === "d") return "draw";
   if (normalized === "a") return "arrow";
+  if (normalized === "l") return "like";
+  if (normalized === "k") return "dislike";
   return null;
 }
 
 function annotationAnnouncement(annotation: Annotation): string {
+  if (annotation.presentation.type === "reaction") return annotation.presentation.reaction === "like" ? "좋아요 스티커를 붙였습니다." : "싫어요 스티커를 붙였습니다.";
   if (annotation.presentation.type === "marker") return "위치 코멘트를 만들었습니다.";
   if (annotation.presentation.type === "outline") return "영역 코멘트를 만들었습니다.";
   if (annotation.presentation.type === "stroke") return "자유선 코멘트를 만들었습니다.";
@@ -755,6 +812,7 @@ function annotationAnnouncement(annotation: Annotation): string {
 }
 
 function markLabel(annotation: Annotation): string {
+  if (annotation.presentation.type === "reaction") return annotation.presentation.reaction === "like" ? "Like" : "Dislike";
   if (annotation.presentation.type === "marker") return "Point";
   if (annotation.presentation.type === "outline") return "Area";
   if (annotation.presentation.type === "stroke") return "Draw";

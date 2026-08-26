@@ -57,3 +57,9 @@ It publishes rows with hierarchy/ARIA facts and the matching `TreeTopology`.
 
 `gridPointKey` and `gridPointFromKey` provide the canonical reversible string
 identity when a selection or rendering adapter needs to key a `GridPoint`.
+
+`Annotation` keeps a target selector separate from its presentation. Point
+targets may use numbered `marker` presentations for instructions or a
+serializable `{ type: "reaction", reaction: "like" | "dislike" }` presentation
+for comment-free feedback. Both use the same create, move, delete, and history
+contracts exposed by `createAnnotationEditor`.

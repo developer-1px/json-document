@@ -144,6 +144,7 @@ describe("Web Annotation platform adapters", () => {
       profile: ANNOTATION_PROFILE_V1, id: "annotations", sources: [{ id: "source", src: "fixture.png", width: 100, height: 80 }],
       annotations: [
         { id: "point", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "point", x: 1, y: 2 } }, presentation: { type: "marker" } },
+        { id: "reaction", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "point", x: 2, y: 3 } }, presentation: { type: "reaction", reaction: "like" } },
         { id: "rectangle", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "rectangle", x: 3, y: 4, width: 5, height: 6 } }, presentation: { type: "outline" } },
         { id: "path", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "path", points: [{ x: 7, y: 8 }, { x: 9, y: 10 }] } }, presentation: { type: "stroke" } },
         { id: "arrow", body: { instruction: "" }, target: { sourceId: "source", selector: { type: "arrow", from: { x: 11, y: 12 }, to: { x: 13, y: 14 } } }, presentation: { type: "arrow" } },
@@ -152,6 +153,8 @@ describe("Web Annotation platform adapters", () => {
     await expect(renderWebAnnotationRaster({ document: annotationDocument, sourceId: "source", sourceURL: "fixture.png", style: { stroke: "red", fill: "red", lineWidth: 2, labelFont: "12px sans" } }))
       .resolves.toEqual({ ok: true, dataURL: "data:image/png;base64,rendered" });
     expect(commands.some((command) => command.startsWith("arc:"))).toBe(true);
+    expect(commands.some((command) => command === "translate:2,3")).toBe(true);
+    expect(commands.some((command) => command === "scale:1,-1")).toBe(true);
     expect(commands.some((command) => command.startsWith("strokeRect:"))).toBe(true);
     expect(commands.filter((command) => command.startsWith("lineTo:")).length).toBeGreaterThanOrEqual(4);
   });
