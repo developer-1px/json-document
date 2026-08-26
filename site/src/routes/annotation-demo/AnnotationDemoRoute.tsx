@@ -408,7 +408,7 @@ function CommentComposer(props: {
     });
     return () => cancelAnimationFrame(frame);
   }, [props.annotation.id]);
-  const dock = annotationDock(props.annotation, props.source);
+  const dock = composerDock(props.annotation, props.source);
   const opensLeft = dock.horizontal === "left";
   const opensAbove = dock.vertical === "above";
   return (
@@ -422,7 +422,6 @@ function CommentComposer(props: {
         transform: `translate(${opensLeft ? "-100%" : "0"}, ${opensAbove ? "-100%" : "0"})`,
       }}
     >
-      <span className={commentTailStyle(dock)} aria-hidden="true" />
       <textarea
         ref={inputRef}
         aria-label="Annotation instruction"
@@ -478,7 +477,7 @@ function CommentPreview(props: { readonly annotation: Annotation; readonly index
         transform: `translate(${dock.horizontal === "left" ? "-100%" : "0"}, ${dock.vertical === "above" ? "-100%" : "0"})`,
       }}
     >
-      <span className={commentTailStyle(dock)} aria-hidden="true" />
+      <span className={commentTailStyle(dock)} data-comment-tail="preview" aria-hidden="true" />
       {props.annotation.body.instruction}
     </div>
   );
@@ -741,6 +740,21 @@ function annotationDock(annotation: Annotation, source: AnnotationSource) {
       type: "point" as const,
       x: horizontal === "left" ? bounds.x + 24 : bounds.x - 24,
       y: vertical === "above" ? bounds.y + 24 : bounds.y - 24,
+    },
+  };
+}
+
+function composerDock(annotation: Annotation, source: AnnotationSource) {
+  const bounds = annotationBounds(annotation);
+  const horizontal = bounds.x + bounds.width / 2 > source.width * 0.75 ? "left" : "right";
+  const vertical = bounds.y + bounds.height / 2 < source.height * 0.25 ? "below" : "above";
+  return {
+    horizontal,
+    vertical,
+    anchor: {
+      type: "point" as const,
+      x: horizontal === "left" ? bounds.x - 36 : bounds.x + 36,
+      y: vertical === "above" ? bounds.y - 36 : bounds.y + 36,
     },
   };
 }
