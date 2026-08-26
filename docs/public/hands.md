@@ -14,14 +14,17 @@ editor.undo();
 `AnnotationDocument`는 source와 selector geometry, presentation을 직렬화하고,
 selection과 undo/redo는 editor snapshot에 둡니다. Point, rectangle, path와 arrow
 selector는 geometry의 유일한 정본이며 presentation은 geometry를 반복하지
-않습니다. SVG 좌표 변환, pointer gesture, Canvas rasterization과 comment UI는
-Editing owner 밖에서 조합합니다.
+않습니다. `@interactive-os/json-document-annotation`의 `AnnotationHand`가
+도구, gesture-to-Intent, SVG projection, transient preview와 comment UI를
+하나의 공개 surface로 제공합니다.
 
 ```ts
-const gesture = createGestureSession<AnnotationGesture>();
-const point = projectWebClientPointToSVG(clientPoint, viewport);
-const raster = await readWebRasterFile(file);
-const output = await renderWebAnnotationRaster({ document, sourceId, sourceURL, style });
+<AnnotationHand
+  editor={editor}
+  sourceUrl={sourceURL}
+  createId={() => crypto.randomUUID()}
+  rasterStyle={style}
+/>
 ```
 
 Gesture는 Affordance가 input-independent lifecycle로 소유하고 Pointer capture는

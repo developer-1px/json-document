@@ -110,6 +110,7 @@ import { Route as PageDocsAffordanceTypeaheadRouteImport } from "./routes/_page/
 import { Route as PageDocsAffordanceZoomRouteImport } from "./routes/_page/docs/affordance/zoom";
 import { Route as PageDocsApiAffordanceRouteImport } from "./routes/_page/docs/api/affordance";
 import { Route as PageDocsApiAjvRouteImport } from "./routes/_page/docs/api/ajv";
+import { Route as PageDocsApiAnnotationRouteImport } from "./routes/_page/docs/api/annotation";
 import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
 import { Route as PageDocsApiComposerRouteImport } from "./routes/_page/docs/api/composer";
 import { Route as PageDocsApiComposerReactRouteImport } from "./routes/_page/docs/api/composer-react";
@@ -670,6 +671,11 @@ const PageDocsApiAjvRoute = PageDocsApiAjvRouteImport.update({
   path: "/ajv",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiAnnotationRoute = PageDocsApiAnnotationRouteImport.update({
+  id: "/annotation",
+  path: "/annotation",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
 const PageDocsApiCollaborationRoute =
   PageDocsApiCollaborationRouteImport.update({
     id: "/collaboration",
@@ -933,6 +939,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1064,6 +1071,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1197,6 +1205,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/_page/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/_page/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/_page/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/_page/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/_page/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1330,6 +1339,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/zoom"
     | "/docs/api/affordance"
     | "/docs/api/ajv"
+    | "/docs/api/annotation"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
     | "/docs/api/composer-react"
@@ -1461,6 +1471,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/zoom"
     | "/docs/api/affordance"
     | "/docs/api/ajv"
+    | "/docs/api/annotation"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
     | "/docs/api/composer-react"
@@ -1593,6 +1604,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/zoom"
     | "/_page/docs/api/affordance"
     | "/_page/docs/api/ajv"
+    | "/_page/docs/api/annotation"
     | "/_page/docs/api/collaboration"
     | "/_page/docs/api/composer"
     | "/_page/docs/api/composer-react"
@@ -2340,6 +2352,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiAjvRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/annotation": {
+      id: "/_page/docs/api/annotation";
+      path: "/annotation";
+      fullPath: "/docs/api/annotation";
+      preLoaderRoute: typeof PageDocsApiAnnotationRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/collaboration": {
       id: "/_page/docs/api/collaboration";
       path: "/collaboration";
@@ -2549,6 +2568,7 @@ declare module "@tanstack/react-router" {
 interface PageDocsApiRouteChildren {
   PageDocsApiAffordanceRoute: typeof PageDocsApiAffordanceRoute;
   PageDocsApiAjvRoute: typeof PageDocsApiAjvRoute;
+  PageDocsApiAnnotationRoute: typeof PageDocsApiAnnotationRoute;
   PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
   PageDocsApiComposerRoute: typeof PageDocsApiComposerRoute;
   PageDocsApiComposerReactRoute: typeof PageDocsApiComposerReactRoute;
@@ -2577,6 +2597,7 @@ interface PageDocsApiRouteChildren {
 const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiAffordanceRoute: PageDocsApiAffordanceRoute,
   PageDocsApiAjvRoute: PageDocsApiAjvRoute,
+  PageDocsApiAnnotationRoute: PageDocsApiAnnotationRoute,
   PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
   PageDocsApiComposerRoute: PageDocsApiComposerRoute,
   PageDocsApiComposerReactRoute: PageDocsApiComposerReactRoute,

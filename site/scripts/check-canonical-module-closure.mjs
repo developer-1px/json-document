@@ -10,6 +10,13 @@ const databasePropertyConsumers = [
   "packages/json-document-database/src/database-hands.tsx",
   "packages/json-document-zod/src/database-document.ts",
 ];
+const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
+if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", "AnnotationHand")) {
+  throw new Error("Annotation Demo must consume the canonical AnnotationHand");
+}
+for (const localResponsibility of ["createGestureSession", "projectWebClientPointToSVG", "function AnnotationShape", "function CommentComposer", "presentStructuredSnapshot"]) {
+  if (annotationDemo.includes(localResponsibility)) throw new Error(`Annotation Demo owns displaced behavior: ${localResponsibility}`);
+}
 const entries = [...registrySource.matchAll(/^\s*"\/[^"]+"[^\n]+"(routes\/[^"]+)"\),?$/gm)].map((match) => match[1]);
 const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*\n\s*symbol:\s*["']([^"']+)["'],\s*\n\s*sourcePath:\s*["']([^"']+)["']/g)].map((match) => ({
   packageName: match[1],

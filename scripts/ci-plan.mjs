@@ -30,6 +30,7 @@ const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-ajv", ["site/tests/browser/connectors/ajv.spec.ts"]],
   ["@interactive-os/json-document-contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
   ["@interactive-os/json-document-database", ["site/tests/browser/database-demo.spec.ts"]],
+  ["@interactive-os/json-document-annotation", ["site/tests/browser/annotation-demo.spec.ts"]],
   ["@interactive-os/json-document-editing", [
     "site/tests/browser/editing-demos.spec.ts",
     "site/tests/browser/editor-slice-demos.spec.ts",
@@ -65,6 +66,7 @@ const routeBrowserSpecs = new Map([
   ["connectors/tanstack-table", ["site/tests/browser/connectors/tanstack-table.spec.ts"]],
   ["connectors/zod", ["site/tests/browser/connectors/zod.spec.ts"]],
   ["database-demo", ["site/tests/browser/database-demo.spec.ts"]],
+  ["annotation-demo", ["site/tests/browser/annotation-demo.spec.ts"]],
   ["document-demo", ["site/tests/browser/document-demo.spec.ts"]],
   ["editing-demos", ["site/tests/browser/editing-demos.spec.ts"]],
   ["rich-text-demo", ["site/tests/browser/rich-text-demo.spec.ts"]],
@@ -80,6 +82,7 @@ const firstKitWorkspaces = new Set([
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
+  "@interactive-os/json-document-annotation",
   "@interactive-os/json-document-file-intake",
   "@interactive-os/json-document-rich-text-suggestion",
   "@interactive-os/json-document-rich-text-suggestion-react",

@@ -13,6 +13,7 @@
     "packages/json-document-ui-primitives-react",
     "packages/json-document-zod",
     "packages/json-document-database",
+    "packages/json-document-annotation",
     "packages/json-document-tanstack-table",
     "packages/json-document-web",
     "packages/json-document-contenteditable",

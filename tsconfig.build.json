@@ -12,6 +12,7 @@
     { "path": "./packages/json-document-ui-primitives-react" },
     { "path": "./packages/json-document-zod" },
     { "path": "./packages/json-document-database" },
+    { "path": "./packages/json-document-annotation" },
     { "path": "./packages/json-document-tanstack-table" },
     { "path": "./packages/json-document-web" },
     { "path": "./packages/json-document-contenteditable" },
