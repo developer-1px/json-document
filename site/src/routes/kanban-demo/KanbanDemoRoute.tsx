@@ -20,7 +20,7 @@ import {
   commitAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { ActionButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -90,8 +90,8 @@ export function KanbanDemoRoute() {
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
-            <ActionButton disabled={commands.undo.disabled} onClick={() => editor.undo()}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => editor.redo()}>Redo</ActionButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}>↶</IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}>↷</IconButton>
           </>
         )}
       >
@@ -141,9 +141,12 @@ export function KanbanDemoRoute() {
               if (!card) return null;
               const option = editingItemProps(editing.getItem(card.id));
               return (
-                <button
+                <SelectableItem
+                  as="button"
                   key={card.id}
                   type="button"
+                  selected={option.selected}
+                  focus={option.focus}
                   draggable
                   {...webKanbanCardProps(card.id)}
                   data-selected={option.selected ? "true" : "false"}
@@ -159,7 +162,7 @@ export function KanbanDemoRoute() {
                   className={classes("w-full p-3 text-left", ui.surface.documentBlock, ui.interactive.selectable)}
                 >
                   {card.title}
-                </button>
+                </SelectableItem>
               );
             })}
           </div>

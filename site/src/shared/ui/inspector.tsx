@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from "react";
-import { DisclosureButton, IconButton, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { DisclosureButton, IconButton, Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { JsonInspector, type JsonInspectorProps } from "./json-inspector";
 import { classes, ui } from "./styles";
 
@@ -65,20 +65,15 @@ export function Inspector(props: {
           </div>
         )}
 
-        <div className="mb-3 flex min-w-0 flex-wrap gap-1" role="tablist" aria-label="Inspector values">
-          {props.items.map((item, index) => (
-            <ToggleButton
-              key={item.testId}
-              role="tab"
-              pressed={index === activeIndex}
-              aria-selected={index === activeIndex}
-              aria-controls={`${panelId}-item-${index}`}
-              onClick={() => setActiveTestId(item.testId)}
-            >
-              {item.label}
-            </ToggleButton>
-          ))}
-        </div>
+        <Tabs
+          className="mb-3 flex min-w-0 flex-wrap gap-1"
+          label="Inspector values"
+          value={props.items[activeIndex]!.testId}
+          options={props.items.map((item) => ({ id: item.testId, label: item.label }))}
+          onValueChange={setActiveTestId}
+          tabId={(testId) => `${panelId}-tab-${testId}`}
+          panelId={(_testId, index) => `${panelId}-item-${index}`}
+        />
 
         <div className="min-h-0 min-w-0 overflow-auto">
           {props.items.map((item, index) => (
@@ -86,6 +81,7 @@ export function Inspector(props: {
               id={`${panelId}-item-${index}`}
               key={item.testId}
               role="tabpanel"
+              aria-labelledby={`${panelId}-tab-${item.testId}`}
               hidden={index !== activeIndex}
             >
               <JsonInspector {...item} className={classes("min-h-0", item.className)} />

@@ -26,7 +26,7 @@ import {
   editingCommandFromWebKeyboardStroke,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, ChoiceChip, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -171,18 +171,18 @@ export function DocumentDemoRoute() {
           toolbarLabel="Document actions"
           toolbar={(
             <>
-              <Action label="Add" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
-              <Action label="Duplicate" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
-              <Action label="Move up" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
-              <Action label="Move down" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
+              <Action label="Add" icon="＋" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
+              <Action label="Duplicate" icon="⧉" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
+              <Action label="Move up" icon="↑" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
+              <Action label="Move down" icon="↓" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Copy" onClick={copySelection} />
-              <Action label="Cut" onClick={cutSelection} />
-              <Action label="Paste" onClick={pasteSelection} disabled={!clipboard} />
-              <Action label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
+              <Action label="Copy" icon="⧉" onClick={copySelection} />
+              <Action label="Cut" icon="✂" onClick={cutSelection} />
+              <Action label="Paste" icon="▣" onClick={pasteSelection} disabled={!clipboard} />
+              <Action label="Delete" icon="⌫" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Action label="Undo" icon="↶" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
+              <Action label="Redo" icon="↷" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
             </>
           )}
           inspector={(
@@ -220,7 +220,7 @@ export function DocumentDemoRoute() {
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (
-                <ActionButton data-kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
+                <ActionButton kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
               ) : document.blocks.map((block, index) => {
                 const item = editing.getItem(block.id);
                 return (
@@ -231,10 +231,11 @@ export function DocumentDemoRoute() {
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                   {...editingItemProps(item)}
                 >
-                  <ActionButton
+                  <ChoiceChip
+                    selected={item.getIsSelected()}
                     aria-label={`Select block ${index + 1}`}
                     className={classes(ui.surface.documentIndex, ui.text.meta)}
-                  >{index + 1}</ActionButton>
+                  >{index + 1}</ChoiceChip>
                   <DocumentTextControl
                     aria-label={`Block ${index + 1} text`}
                     text={block.text}
@@ -261,6 +262,6 @@ export function DocumentDemoRoute() {
   );
 }
 
-function Action(props: { readonly label: string; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <ActionButton disabled={props.disabled} onClick={props.onClick}>{props.label}</ActionButton>;
+function Action(props: { readonly label: string; readonly icon: string; readonly onClick: () => void; readonly disabled?: boolean }) {
+  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }

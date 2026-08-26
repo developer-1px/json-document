@@ -81,7 +81,7 @@ export function AjvConnectorLab() {
           className={ui.field.control}
         />
       </SelectableItem>
-      <ActionButton data-kind="primary" onClick={commitDraft} className="mt-3">
+      <ActionButton kind="primary" onClick={commitDraft} className="mt-3">
         Commit draft
       </ActionButton>
 

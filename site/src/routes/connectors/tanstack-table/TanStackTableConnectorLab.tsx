@@ -25,7 +25,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -130,20 +130,20 @@ export function TanStackTableConnectorLab() {
       className={classes("p-4", ui.surface.raised)}
     >
       <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">
-        <Control label="Ready rows" active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
-        <Control label="Score descending" active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
-        <Control label="Score first" active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
-        <Control label="Hide status" active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
+        <Control label="Ready rows" icon="◉" active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
+        <Control label="Score descending" icon="↓" active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
+        <Control label="Score first" icon="⇤" active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
+        <Control label="Hide status" icon="◌" active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
         <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-        <Control label="Copy" onClick={copySelection} />
-        <Control label="Cut" onClick={cutSelection} />
-        <Control label="Paste" disabled={clipboard === null} onClick={pasteSelection} />
-        <Control label="Fill selected" onClick={() => run(
+        <Control label="Copy" icon="⧉" onClick={copySelection} />
+        <Control label="Cut" icon="✂" onClick={cutSelection} />
+        <Control label="Paste" icon="▣" disabled={clipboard === null} onClick={pasteSelection} />
+        <Control label="Fill selected" icon="▦" onClick={() => run(
           () => binding.fillSelected(table, "Selected"),
           "Visible selected cells filled",
         )} />
-        <Control label="Undo" disabled={commands.undo.disabled} onClick={() => run(binding.undo, "Undone")} />
-        <Control label="Redo" disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
+        <Control label="Undo" icon="↶" disabled={commands.undo.disabled} onClick={() => run(binding.undo, "Undone")} />
+        <Control label="Redo" icon="↷" disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
       </div>
 
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
@@ -213,11 +213,11 @@ export function TanStackTableConnectorLab() {
   );
 }
 
-function Control(props: { readonly label: string; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
+function Control(props: { readonly label: string; readonly icon: string; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
   if (props.active !== undefined) {
-    return <ToggleButton pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.label}</ToggleButton>;
+    return <ToggleButton label={props.label} pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.icon}</ToggleButton>;
   }
-  return <ActionButton disabled={props.disabled} onClick={props.onClick}>{props.label}</ActionButton>;
+  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }
 
 function displayValue(value: unknown): string {

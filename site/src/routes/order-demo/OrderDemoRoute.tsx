@@ -26,7 +26,7 @@ import {
   renameAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -187,21 +187,21 @@ export function OrderDemoRoute() {
         toolbarLabel="Order actions"
         toolbar={(
           <>
-            <ActionButton onClick={copySelection}>Copy</ActionButton>
-            <ActionButton onClick={cutSelection}>Cut</ActionButton>
-            <ActionButton
+            <IconButton label="Copy" onClick={copySelection}>⧉</IconButton>
+            <IconButton label="Cut" onClick={cutSelection}>✂</IconButton>
+            <IconButton label="Paste"
               disabled={!clipboard}
               onClick={() => {
                 if (!clipboard) return;
                 run({ type: "clipboard.paste", clipboard }, `Pasted ${clipboard.items.length} item${clipboard.items.length === 1 ? "" : "s"}`);
               }}
             >
-              Paste
-            </ActionButton>
-            <ActionButton onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>Delete</ActionButton>
+              ▣
+            </IconButton>
+            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}>⌫</IconButton>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <ActionButton disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>Undo</ActionButton>
-            <ActionButton disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>Redo</ActionButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}>↶</IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}>↷</IconButton>
           </>
         )}
         inspector={(

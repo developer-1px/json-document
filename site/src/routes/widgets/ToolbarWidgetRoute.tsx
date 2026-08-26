@@ -16,7 +16,7 @@ import {
   pressInteractionFromWeb,
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   historyAffordance,
@@ -92,8 +92,8 @@ export function ToolbarWidgetRoute() {
       widgetLabel="Toolbar"
       widget={(
         <div className={classes("flex flex-wrap gap-1", ui.product.toolbar)} role="toolbar" aria-label="History">
-          <ActionButton disabled={commands.undo.disabled} onClick={() => editor.undo()}>Undo</ActionButton>
-          <ActionButton disabled={commands.redo.disabled} onClick={() => editor.redo()}>Redo</ActionButton>
+          <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}>↶</IconButton>
+          <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}>↷</IconButton>
           <CustomPressButton onActivate={() => {
             editor.dispatch({ type: "selection.set", itemId: "today", mode: "replace" });
             setCustomActivations((count) => count + 1);

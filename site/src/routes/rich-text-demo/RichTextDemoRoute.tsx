@@ -10,7 +10,7 @@ import {
 import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { JsonInspector } from "../../shared/ui/json-inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { richTextRecipe } from "./rich-text-styles";
@@ -155,18 +155,18 @@ export function RichTextDemoRoute() {
 
     )}>
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
-        <ActionButton data-kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
-        <ActionButton onClick={() => runHistory("undo")} disabled={commands.undo.disabled}>Undo</ActionButton>
-        <ActionButton onClick={() => runHistory("redo")} disabled={commands.redo.disabled}>Redo</ActionButton>
+        <ActionButton preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
+        <IconButton preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}>↶</IconButton>
+        <IconButton preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}>↷</IconButton>
         <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
       </div>
 
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="group" aria-label="Official Rich Text intent proofs">
         <span className={ui.text.meta}>Schema-aware intent proofs</span>
-        <ActionButton onClick={toggleStrong}>Toggle strong</ActionButton>
-        <ActionButton onClick={setHeading}>Set heading</ActionButton>
-        <ActionButton onClick={insertHardBreak}>Insert hard break</ActionButton>
-        <ActionButton onClick={updateCodeAttrs}>Set code attrs</ActionButton>
+        <IconButton preserveFocus label="Toggle strong" onClick={toggleStrong}><strong>B</strong></IconButton>
+        <IconButton preserveFocus label="Set heading" onClick={setHeading}>H</IconButton>
+        <IconButton preserveFocus label="Insert hard break" onClick={insertHardBreak}>↵</IconButton>
+        <IconButton preserveFocus label="Set code attrs" onClick={updateCodeAttrs}>{`{}`}</IconButton>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">

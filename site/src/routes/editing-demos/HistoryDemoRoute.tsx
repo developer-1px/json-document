@@ -1,6 +1,6 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -39,15 +39,15 @@ export function HistoryDemoRoute() {
               );
             })}
           </div>
-          <ActionButton data-kind="primary" onClick={edit}>편집 적용</ActionButton>
+          <ActionButton kind="primary" onClick={edit}>편집 적용</ActionButton>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-call">
           <p className={ui.text.label}>2 · History API</p>
           <h2 id="history-call" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
           <div className="mb-3 flex gap-2">
-            <ActionButton onClick={undo} disabled={commands.undo.disabled}>Undo</ActionButton>
-            <ActionButton onClick={redo} disabled={commands.redo.disabled}>Redo</ActionButton>
+            <IconButton label="Undo" onClick={undo} disabled={commands.undo.disabled}>↶</IconButton>
+            <IconButton label="Redo" onClick={redo} disabled={commands.redo.disabled}>↷</IconButton>
           </div>
           <Inspector label="Inspect history state" items={[
             {

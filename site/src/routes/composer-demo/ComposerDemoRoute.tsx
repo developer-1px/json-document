@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, useSyncExternalStore, type ChangeEvent, type ClipboardEvent, type KeyboardEvent } from "react";
 import { createJSONDocument, type JSONDocument, type JSONValue } from "@interactive-os/json-document";
-import { FileDropRegion, Menu, Select, formatFileSize } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, FileDropRegion, IconButton, Menu, Select, SelectableItem, formatFileSize } from "@interactive-os/json-document-ui-primitives-react";
 import {
   createRichTextNodeId,
   createRichTextEditor,
@@ -203,7 +203,7 @@ export function ComposerDemoRoute() {
                     <span className="composer-file-name">{file.name}</span>
                     <span className="composer-file-size">{formatFileSize(file.size)}</span>
                   </span>
-                  <button className="composer-file-remove" type="button" aria-label={`${file.name} 제거`} onClick={() => removeAttachment(file.id)}>×</button>
+                  <IconButton className="composer-file-remove" label={`${file.name} 제거`} onClick={() => removeAttachment(file.id)}>×</IconButton>
                 </div>
               ))}
             </div>
@@ -251,8 +251,8 @@ export function ComposerDemoRoute() {
               renderOption={(option) => <><strong>{option.label}</strong><small>{option.id.startsWith("gpt") ? "OpenAI GPT 계열" : "Anthropic Claude 계열"}</small></>}
               classNames={{ root: "composer-select-root", trigger: "composer-model-pill", listbox: "composer-layer composer-model-layer", focusedOption: "selected" }}
             />
-            <button className="composer-icon-button" type="button" aria-label="음성 입력">♩</button>
-            <button className={`composer-send-button${hasContent ? " is-active" : ""}`} type="button" aria-label="전송 (Enter)" disabled={!hasContent} onClick={submit}>↑</button>
+            <IconButton className="composer-icon-button" label="음성 입력">♩</IconButton>
+            <ActionButton kind="primary" aria-label="전송 (Enter)" className={`composer-send-button${hasContent ? " is-active" : ""}`} disabled={!hasContent} onClick={submit}>전송</ActionButton>
           </div>
 
           {trigger?.kind === "mention" ? (
@@ -260,11 +260,11 @@ export function ComposerDemoRoute() {
           ) : trigger?.kind === "skill" && visibleSuggestions.length > 0 ? (
             <div {...skillMenu.listboxProps} className="composer-layer composer-command-layer">
               {skillMenu.items.map((item) => (
-                <button key={item.id} className={item.id === skillMenu.activeItem?.id ? "selected" : ""} {...skillMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
+                <SelectableItem as="button" selected={false} focus={item.id === skillMenu.activeItem?.id} key={item.id} className={item.id === skillMenu.activeItem?.id ? "selected" : ""} {...skillMenu.optionProps(item)} onMouseDown={(event) => event.preventDefault()}>
                   <span className="composer-command-icon skill">/</span>
                   <span><strong>{item.label}</strong><small>{item.description}</small></span>
                   <em>Skill</em>
-                </button>
+                </SelectableItem>
               ))}
             </div>
           ) : null}
@@ -272,9 +272,9 @@ export function ComposerDemoRoute() {
         </FileDropRegion>
 
         <div className="composer-action-chips" aria-label="추천 작업">
-          <button type="button" onClick={() => insertComposerText(editor, "경쟁사 최신 동향을 조사해줘")}>⌕ 경쟁사 최신 동향 조사</button>
-          <button type="button" onClick={() => insertComposerText(editor, "전략 기획서 초안을 작성해줘")}>⌁ 전략 기획서 초안 작성</button>
-          <button type="button" onClick={() => insertComposerText(editor, "뉴스 브리핑을 매일 예약해줘")}>◷ 뉴스 브리핑 예약 설정</button>
+          <ActionButton onClick={() => insertComposerText(editor, "경쟁사 최신 동향을 조사해줘")}>⌕ 경쟁사 최신 동향 조사</ActionButton>
+          <ActionButton onClick={() => insertComposerText(editor, "전략 기획서 초안을 작성해줘")}>⌁ 전략 기획서 초안 작성</ActionButton>
+          <ActionButton onClick={() => insertComposerText(editor, "뉴스 브리핑을 매일 예약해줘")}>◷ 뉴스 브리핑 예약 설정</ActionButton>
         </div>
         {submitted ? <p className="composer-submit-status" role="status">canonical Composer turn을 제출했습니다.</p> : null}
       </div>

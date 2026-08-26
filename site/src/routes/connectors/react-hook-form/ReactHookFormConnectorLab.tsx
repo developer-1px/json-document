@@ -6,7 +6,7 @@ import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 
 type ProfileForm = {
@@ -113,9 +113,9 @@ export function ReactHookFormConnectorLab() {
           </SelectableItem>
 
           <div className="flex flex-wrap gap-2">
-            <ActionButton data-kind="primary" type="submit">Save record</ActionButton>
-            <ActionButton type="button" disabled={commands.undo.disabled} onClick={binding.undo}>Undo</ActionButton>
-            <ActionButton type="button" disabled={commands.redo.disabled} onClick={binding.redo}>Redo</ActionButton>
+            <ActionButton kind="primary" type="submit">Save record</ActionButton>
+            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={binding.undo}>↶</IconButton>
+            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={binding.redo}>↷</IconButton>
           </div>
 
           <dl className={classes("grid grid-cols-2 gap-2 p-3", ui.surface.inset)}>

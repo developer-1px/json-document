@@ -4,7 +4,7 @@ test("Selection Demo changes Selection without changing document or History", as
   await page.goto("/demo/selection");
   const before = await json(page, "selection-demo-document");
 
-  await page.getByRole("button", { name: "extend" }).click();
+  await page.getByRole("radio", { name: "extend" }).click();
   await page.getByRole("button", { name: /charlie/ }).click();
 
   expect((await json(page, "selection-demo-selection")).ranges[0]).toMatchObject({
@@ -19,7 +19,7 @@ test("Topology Demo recomputes the interval from visible order", async ({ page }
   await page.goto("/demo/topology");
   expect(await json(page, "topology-demo-interval")).toEqual(["alpha", "bravo", "charlie"]);
 
-  await page.getByRole("button", { name: "sorted" }).click();
+  await page.getByRole("radio", { name: "sorted" }).click();
   expect(await json(page, "topology-demo-interval")).toEqual(["alpha", "delta", "charlie"]);
   expect(await json(page, "topology-demo-endpoints")).toEqual({ anchor: "alpha", focus: "charlie" });
 });

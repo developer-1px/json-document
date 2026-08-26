@@ -8,8 +8,9 @@
     "preview": "vite preview",
     "check:tokens": "node scripts/check-design-tokens.mjs",
     "check:ui": "node scripts/check-ui-language.mjs",
+    "check:primitives": "node scripts/check-live-demo-primitives.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && npm run check:tokens && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:primitives && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",
