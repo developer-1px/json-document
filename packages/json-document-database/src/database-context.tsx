@@ -15,8 +15,8 @@ import type {
   DatabaseResource,
   DatabaseRow,
   DatabaseRowId,
-  DatabaseViewDocument,
 } from "./contracts.js";
+import type { DatabaseTableView } from "@interactive-os/json-document-editing";
 import { DatabaseOperationError } from "./contracts.js";
 
 export interface DatabaseStatus {
@@ -31,15 +31,15 @@ export interface DatabaseContextValue<Row extends DatabaseRow = DatabaseRow> {
   readonly rows: ReadonlyArray<Row>;
   readonly total: number;
   readonly nextCursor?: string;
-  readonly view: DatabaseViewDocument;
-  readonly views: ReadonlyArray<DatabaseViewDocument>;
+  readonly view: DatabaseTableView;
+  readonly views: ReadonlyArray<DatabaseTableView>;
   readonly status: DatabaseStatus;
   readonly capabilities: Required<DatabaseCapabilities>;
   readonly selectedRowIds: ReadonlyArray<DatabaseRowId>;
   readonly activeRow: Row | null;
   readonly isCreating: boolean;
-  setView(view: DatabaseViewDocument): void;
-  saveView(view: DatabaseViewDocument): Promise<void>;
+  setView(view: DatabaseTableView): void;
+  saveView(view: DatabaseTableView): Promise<void>;
   selectRows(ids: ReadonlyArray<DatabaseRowId>): void;
   openRow(row: Row | null): void;
   startCreate(): void;
@@ -66,11 +66,11 @@ const defaultCapabilities: Required<DatabaseCapabilities> = {
 export interface DatabaseProviderProps<Row extends DatabaseRow, Create = Partial<Row>, Update = Partial<Row>> {
   readonly resource: DatabaseResource<Row, Create>;
   readonly operations: DatabaseOperations<Row, Create, Update>;
-  readonly defaultView: DatabaseViewDocument;
-  readonly view?: DatabaseViewDocument;
-  readonly onViewChange?: (view: DatabaseViewDocument) => void;
-  readonly views?: ReadonlyArray<DatabaseViewDocument>;
-  readonly onSaveView?: (view: DatabaseViewDocument) => Promise<void> | void;
+  readonly defaultView: DatabaseTableView;
+  readonly view?: DatabaseTableView;
+  readonly onViewChange?: (view: DatabaseTableView) => void;
+  readonly views?: ReadonlyArray<DatabaseTableView>;
+  readonly onSaveView?: (view: DatabaseTableView) => Promise<void> | void;
   readonly capabilities?: DatabaseCapabilities;
   readonly pageSize?: number;
   readonly children: ReactNode;
@@ -124,13 +124,13 @@ export function DatabaseProvider<Row extends DatabaseRow, Create = Partial<Row>,
     return () => queryController.current?.abort();
   }, [activeView]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function setView(next: DatabaseViewDocument) {
+  function setView(next: DatabaseTableView) {
     if (!capabilities.configureView || activeView.ownership === "locked") return;
     if (props.view === undefined) setInternalView(next);
     props.onViewChange?.(next);
   }
 
-  async function saveView(next: DatabaseViewDocument) {
+  async function saveView(next: DatabaseTableView) {
     if (!capabilities.saveView || next.ownership === "locked") return;
     await props.onSaveView?.(next);
     setStatus({ phase: "ready", message: `View ${next.name} saved` });

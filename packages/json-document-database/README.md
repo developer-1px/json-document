@@ -1,8 +1,9 @@
 # @interactive-os/json-document-database
 
 Enterprise React Database Hands for existing schemas and CRUD APIs. The host
-owns data, authorization, and business rules; the package owns the interaction
-quality of querying, projecting, editing, and recovering from failures.
+owns data, authorization, and business rules; `@interactive-os/json-document-editing`
+owns the saved-view projection contract, and this package owns the React interaction
+quality of querying, editing, and recovering from failures.
 
 ```tsx
 import { Database, createDatabaseResource, createDatabaseView } from "@interactive-os/json-document-database";

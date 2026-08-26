@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod/v4";
 import {
@@ -20,8 +20,15 @@ afterEach(cleanup);
 
 describe("Database.Provider", () => {
   it("delegates the compound Table profile to the canonical private surface", async () => {
-    const { container } = render(<Database.Provider resource={resource} operations={createOperations()} defaultView={view}><Database.Table /></Database.Provider>);
+    const operations = createOperations();
+    const { container } = render(<Database.Provider resource={resource} operations={operations} defaultView={view}><Database.Table /></Database.Provider>);
     await waitFor(() => expect(container.querySelectorAll("[data-database-table-surface]")).toHaveLength(1));
+    await waitFor(() => expect(screen.getByRole("gridcell", { name: "Alpha" })).toBeTruthy());
+    fireEvent.doubleClick(screen.getByRole("gridcell", { name: "Alpha" }));
+    const title = screen.getByRole("textbox", { name: "Title a" });
+    fireEvent.change(title, { target: { value: "Renamed" } });
+    fireEvent.keyDown(title, { key: "Enter" });
+    await waitFor(() => expect(operations.update).toHaveBeenCalledWith("a", { title: "Renamed" }, expect.anything()));
   });
 
   it("loads through the operation contract and exposes serializable view state", async () => {

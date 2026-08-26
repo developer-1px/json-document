@@ -1,8 +1,8 @@
 # Database
 
 Database Hands는 이미 존재하는 resource schema와 CRUD API 위에 완성된 database
-UX를 놓습니다. 데이터·권한 정책·업무 규칙은 host가 소유하고, Hands는 query,
-projection, editing, async failure와 접근성 품질을 소유합니다.
+UX를 놓습니다. 데이터·권한 정책·업무 규칙은 host가 소유하고, Editing은
+saved-view projection을, Hands는 query wiring, React editing, async failure와 접근성 품질을 소유합니다.
 
 ```text
 Host
@@ -101,8 +101,12 @@ import {
 } from "@interactive-os/json-document-editing";
 
 const editor = createDatabaseEditor(document);
-const sort = nextDatabasePropertySort(view.sort, propertyId);
-editor.dispatch({ type: "view.configure", viewId: view.id, sort });
+const sort = nextDatabasePropertySort(view.projection.sorts[0] ?? null, propertyId);
+editor.dispatch({
+  type: "view.configure",
+  viewId: view.id,
+  projection: { ...view.projection, sorts: sort === null ? [] : [sort] },
+});
 const initialValue = defaultDatabaseValue(property);
 const value = databaseValueFromText(property, input.value);
 if (acceptsDatabaseValue(property, value)) {
