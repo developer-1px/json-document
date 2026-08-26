@@ -465,16 +465,16 @@ function ToolIcon(props: { readonly tool: Tool }) {
 }
 
 function CommentPreview(props: { readonly annotation: Annotation; readonly index: number; readonly source: AnnotationSource }) {
-  const dock = annotationDock(props.annotation, props.source);
+  const anchor = annotationBounds(props.annotation);
   return (
     <div
       aria-label={`Comment ${props.index} preview`}
       className={annotationDemoStyles.commentPreview()}
       role="tooltip"
       style={{
-        left: `${(dock.anchor.x / props.source.width) * 100}%`,
-        top: `${(dock.anchor.y / props.source.height) * 100}%`,
-        transform: `translate(${dock.horizontal === "left" ? "-100%" : "0"}, ${dock.vertical === "above" ? "-100%" : "0"})`,
+        left: `${(anchor.x / props.source.width) * 100}%`,
+        top: `${(anchor.y / props.source.height) * 100}%`,
+        transform: "translate(-50%, -50%)",
       }}
     >
       {props.annotation.body.instruction}
@@ -727,21 +727,6 @@ function createDrawAnnotation(sourceId: string, points: ReadonlyArray<Annotation
     target: { sourceId, selector: { type: "path", points } },
     body: { instruction: "" },
     presentation: { type: "stroke" },
-  };
-}
-
-function annotationDock(annotation: Annotation, source: AnnotationSource) {
-  const bounds = annotationBounds(annotation);
-  const horizontal = bounds.x + bounds.width / 2 > source.width * 0.75 ? "left" : "right";
-  const vertical = bounds.y + bounds.height / 2 < source.height * 0.25 ? "below" : "above";
-  return {
-    horizontal,
-    vertical,
-    anchor: {
-      type: "point" as const,
-      x: horizontal === "left" ? bounds.x + 24 : bounds.x - 24,
-      y: vertical === "above" ? bounds.y + 24 : bounds.y - 24,
-    },
   };
 }
 

@@ -37,8 +37,12 @@ test("hovering or focusing an annotation number previews its comment", async ({ 
   await expect(preview).toContainText("대비를 높여");
   const markerBox = await requiredBox(marker);
   const previewBox = await requiredBox(preview);
-  expect(Math.abs(previewBox.x - markerBox.x)).toBeLessThan(16);
-  expect(Math.abs(previewBox.y + previewBox.height - markerBox.y - markerBox.height)).toBeLessThan(16);
+  const markerCenterX = markerBox.x + markerBox.width / 2;
+  const markerCenterY = markerBox.y + markerBox.height / 2;
+  const previewCenterX = previewBox.x + previewBox.width / 2;
+  const previewCenterY = previewBox.y + previewBox.height / 2;
+  expect(Math.abs(previewCenterX - markerCenterX)).toBeLessThan(4);
+  expect(Math.abs(previewCenterY - markerCenterY)).toBeLessThan(4);
   await expect(marker).toHaveAttribute("data-previewing", "true");
   await page.mouse.move(0, 0);
   await marker.focus();
