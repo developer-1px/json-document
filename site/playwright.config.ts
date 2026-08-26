@@ -6,6 +6,7 @@ const browserChannel = process.env.PLAYWRIGHT_CHANNEL === "bundled"
   ? undefined
   : process.env.PLAYWRIGHT_CHANNEL ?? "chrome";
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
+const richTextBrowserSpecs = /rich-text-(?:corpus|demo)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./tests/browser",
@@ -15,7 +16,6 @@ export default defineConfig({
   reporter: "list",
   use: {
     baseURL,
-    permissions: ["clipboard-read", "clipboard-write"],
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
     video: "off",
@@ -40,7 +40,20 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         ...(browserChannel ? { channel: browserChannel } : {}),
+        permissions: ["clipboard-read", "clipboard-write"],
       },
+    },
+    {
+      name: "firefox",
+      dependencies: ["setup"],
+      testMatch: richTextBrowserSpecs,
+      use: devices["Desktop Firefox"],
+    },
+    {
+      name: "webkit",
+      dependencies: ["setup"],
+      testMatch: richTextBrowserSpecs,
+      use: devices["Desktop Safari"],
     },
   ],
 });

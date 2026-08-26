@@ -25,6 +25,14 @@ describe("Rich Text DOM Selection mapping", () => {
       focus: { kind: "child", nodeId: "p", offset: 2, affinity: "forward" },
     }], primaryIndex: 0 });
   });
+
+  it("rejects selection owned by a nested editing host", () => {
+    const root = fixture('<p data-rich-text-node-id="p" data-rich-text-container-id="p"><span data-rich-text-node-id="t" data-rich-text-text-id="t">outer</span><span contenteditable><span data-rich-text-node-id="nested" data-rich-text-text-id="nested">inner</span></span></p>');
+    const nested = root.querySelector('[data-rich-text-text-id="nested"]')!.firstChild!;
+    window.getSelection()!.setBaseAndExtent(nested, 2, nested, 2);
+
+    expect(readRichTextDOMSelection(root)).toBeNull();
+  });
 });
 
 function fixture(html: string): HTMLElement {

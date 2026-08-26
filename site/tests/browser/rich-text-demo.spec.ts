@@ -137,6 +137,23 @@ test("Rich Text Lab preserves repeated forward character deletion", async ({ pag
   await expect.poll(() => domSelection(page)).toMatchObject({ nodeId: "text-editable", anchorOffset: 0, focusOffset: 0 });
 });
 
+test("Rich Text Lab replaces unexpected descendant DOM mutation from the canonical model on publish", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+  const editableText = editor.locator('[data-rich-text-text-id="text-editable"]');
+
+  await editableText.evaluate((element) => { element.textContent = "external DOM corruption"; });
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를 선택하고 직접 입력해 보세요.",
+  });
+
+  await page.getByRole("button", { name: "Apply sample intent" }).click();
+  await expect(editableText).toHaveText("여기를 선택하고 직접 입력해 보세요. ✓");
+  expect(textNode(await json(page, "rich-text-document-json"), "text-editable")).toMatchObject({
+    text: "여기를 선택하고 직접 입력해 보세요. ✓",
+  });
+});
+
 test("Rich Text Lab exposes a deterministic sample intent for inspection", async ({ page }) => {
   await page.goto("/editing/rich-text");
   await page.getByRole("button", { name: "Apply sample intent" }).click();
@@ -186,7 +203,9 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
   await setSelection(page, "text-heading", 0, 9);
   const copied = await editor.evaluate((root) => {
     const data = new DataTransfer();
-    root.dispatchEvent(new ClipboardEvent("copy", { bubbles: true, cancelable: true, clipboardData: data }));
+    const event = new Event("copy", { bubbles: true, cancelable: true });
+    Object.defineProperty(event, "clipboardData", { value: data });
+    root.dispatchEvent(event);
     return {
       types: Array.from(data.types),
       structured: data.getData("application/vnd.interactive-os.rich-text+json"),
@@ -223,7 +242,9 @@ test("Rich Text Lab connects Enter, IME, selection restore, and Clipboard repres
   await setSelection(page, plainId, 0, 1);
   const cutTypes = await editor.evaluate((root) => {
     const data = new DataTransfer();
-    root.dispatchEvent(new ClipboardEvent("cut", { bubbles: true, cancelable: true, clipboardData: data }));
+    const event = new Event("cut", { bubbles: true, cancelable: true });
+    Object.defineProperty(event, "clipboardData", { value: data });
+    root.dispatchEvent(event);
     return Array.from(data.types);
   });
   expect(cutTypes).toEqual([
@@ -467,6 +488,8 @@ async function dispatchPaste(
     if (representations.structured !== undefined) data.setData("application/vnd.interactive-os.rich-text+json", representations.structured);
     if (representations.html !== undefined) data.setData("text/html", representations.html);
     if (representations.plain !== undefined) data.setData("text/plain", representations.plain);
-    root.dispatchEvent(new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: data }));
+    const event = new Event("paste", { bubbles: true, cancelable: true });
+    Object.defineProperty(event, "clipboardData", { value: data });
+    root.dispatchEvent(event);
   }, values);
 }

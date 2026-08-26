@@ -7,6 +7,24 @@ import { describe, expect, it } from "vitest";
 import { createRichTextContentEditableBinding } from "../src/index.js";
 
 describe("Official Rich Text contenteditable composition", () => {
+  it("ignores keyboard and beforeinput events from a nested editing host", () => {
+    const document = createJSONDocument(initialDocument());
+    const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });
+    const root = fixture();
+    const nested = root.ownerDocument.createElement("span");
+    nested.setAttribute("contenteditable", "true");
+    nested.textContent = "nested";
+    root.append(nested);
+    const binding = createRichTextContentEditableBinding({ root, editor });
+
+    nested.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Backspace" }));
+    nested.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "deleteContentBackward" }));
+
+    expect(document.value).toEqual(initialDocument());
+    expect(editor.snapshot.canUndo).toBe(false);
+    binding.destroy();
+  });
+
   it("routes repeated keyboard deletion through the canonical selection without double beforeinput", () => {
     const document = createJSONDocument(initialDocument());
     const editor = createRichTextEditor({ document, selection: collapsed("text", 3) });

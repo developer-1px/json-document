@@ -3,6 +3,80 @@
   "suite": "browser",
   "profile": "standards/json-document-rich-text-v1/profile.md",
   "matrix": ["chromium", "firefox", "webkit"],
+  "defectFamilies": [
+    {
+      "id": "composition",
+      "status": "verified",
+      "observation": "composition 중 DOM mutation과 compositionend 뒤 trailing input의 순서는 엔진마다 다를 수 있다.",
+      "invariant": "한 composition session은 canonical document와 history를 정확히 한 번만 변경한다.",
+      "evidence": "korean-ime-composition",
+      "revisitWhen": "지원 엔진의 native IME 자동화 API 또는 Input Events 규약이 바뀔 때"
+    },
+    {
+      "id": "selection",
+      "status": "verified",
+      "observation": "rerender와 block join 뒤 DOM Selection의 node와 offset이 무효화될 수 있다.",
+      "invariant": "model selection을 node ID 기준으로 복원하며 DOM Selection을 canonical state로 보관하지 않는다.",
+      "evidence": "dom-selection-roundtrip",
+      "revisitWhen": "selection mapping 또는 renderer topology가 바뀔 때"
+    },
+    {
+      "id": "deletion",
+      "status": "verified",
+      "observation": "keydown과 beforeinput이 같은 Backspace/Delete 동작을 중복 보고할 수 있다.",
+      "invariant": "한 물리 입력은 character delete 또는 block join을 한 번만 dispatch한다.",
+      "evidence": "repeated-backspace-delete",
+      "revisitWhen": "keyboard/beforeinput ownership 또는 deletion intent가 바뀔 때"
+    },
+    {
+      "id": "atom-void",
+      "status": "verified",
+      "observation": "text가 아닌 leaf 전후 caret은 browser DOM point와 model child point가 다르다.",
+      "invariant": "atom 경계 삭제와 selection은 Rich Text point/intent가 소유한다.",
+      "evidence": "atom-boundary-selection-delete",
+      "revisitWhen": "새 atom/void node 또는 DOM wrapper가 추가될 때"
+    },
+    {
+      "id": "placeholder-managed-break",
+      "status": "verified",
+      "observation": "빈 block의 placeholder와 br은 caret surface이지만 canonical content가 아니다.",
+      "invariant": "연속 split/join 뒤 placeholder는 canonical empty block 수와 일치한다.",
+      "evidence": "consecutive-enter",
+      "revisitWhen": "empty-block renderer 또는 placeholder CSS가 바뀔 때"
+    },
+    {
+      "id": "clipboard",
+      "status": "synthetic",
+      "observation": "ClipboardEvent 생성자와 권한 지원은 엔진 및 자동화 harness마다 다르다.",
+      "invariant": "binding은 structured, HTML, plain representation 우선순위를 동일하게 적용한다.",
+      "evidence": "clipboard-representations",
+      "revisitWhen": "Clipboard API 권한 또는 representation codec이 바뀔 때"
+    },
+    {
+      "id": "unexpected-dom-mutation",
+      "status": "synthetic",
+      "observation": "spellchecker, extension, accessibility 도구가 React가 관리하는 descendant를 바꿀 수 있다.",
+      "invariant": "composition lease 밖의 DOM 변경은 canonical model을 덮어쓰지 못하고 다음 publish에서 복구된다.",
+      "evidence": "unexpected-dom-mutation-recovery",
+      "revisitWhen": "renderer에 mutation observer 또는 외부 mutation recovery가 도입될 때"
+    },
+    {
+      "id": "focus-shadow-root",
+      "status": "synthetic",
+      "observation": "document selection과 activeElement만으로 nested host나 ShadowRoot focus를 일반화할 수 없다.",
+      "invariant": "현재 root에 포함된 DOM point만 model selection으로 받아들인다.",
+      "evidence": "nested-host-selection-scope",
+      "revisitWhen": "ShadowRoot를 공식 mounting surface로 지원할 때"
+    },
+    {
+      "id": "android-soft-keyboard",
+      "status": "unavailable",
+      "observation": "Android/Gboard는 desktop keydown과 다른 beforeinput/composition sequence를 낼 수 있다.",
+      "invariant": "keyboard event 부재를 text intent 부재로 해석하지 않는다.",
+      "evidence": "android-soft-keyboard-unavailable",
+      "revisitWhen": "실기기 또는 신뢰 가능한 Android WebView 자동화가 CI에 연결될 때"
+    }
+  ],
   "cases": [
     {
       "id": "beforeinput-insert-text",
@@ -55,6 +129,35 @@
       "source": { "url": "https://github.com/ianstormtaylor/slate/tree/main/packages/slate-history/test", "meaning": "Undo/Redo는 document와 selection을 함께 복원한다" },
       "requiresNativeInput": false,
       "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "atom-boundary-selection-delete",
+      "source": { "url": "https://github.com/ianstormtaylor/slate/tree/main/packages/slate-react/test", "meaning": "text가 아닌 leaf 경계의 caret과 삭제는 model point로 왕복한다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "unexpected-dom-mutation-recovery",
+      "source": { "url": "https://github.com/ProseMirror/prosemirror-view/blob/master/src/domobserver.ts", "meaning": "composition 밖의 외부 DOM mutation은 canonical model을 변경하지 않는다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "nested-host-selection-scope",
+      "source": { "url": "https://github.com/ianstormtaylor/slate/blob/main/packages/slate-react/src/components/editable.tsx", "meaning": "현재 editing root 밖과 nested editing host의 selection을 격리한다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "android-soft-keyboard-unavailable",
+      "source": { "url": "https://github.com/ckeditor/ckeditor5/issues/3131", "meaning": "Android soft keyboard event sequence는 별도 실기기 증거가 필요하다" },
+      "requiresNativeInput": true,
+      "browsers": [],
+      "skip": {
+        "chromium": "Desktop Chromium 자동화는 Android/Gboard native event sequence를 제공하지 않는다.",
+        "firefox": "Desktop Firefox 자동화는 Android soft keyboard native event sequence를 제공하지 않는다.",
+        "webkit": "Desktop WebKit 자동화는 Android soft keyboard native event sequence를 제공하지 않는다."
+      }
     }
   ]
 }

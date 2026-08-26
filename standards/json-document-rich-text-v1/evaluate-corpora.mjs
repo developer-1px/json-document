@@ -48,12 +48,23 @@ for (const id of requiredModel) {
 }
 
 assert.deepEqual(browser.matrix, ["chromium", "firefox", "webkit"]);
+const requiredDefectFamilies = [
+  "composition", "selection", "deletion", "atom-void", "placeholder-managed-break",
+  "clipboard", "unexpected-dom-mutation", "focus-shadow-root", "android-soft-keyboard",
+];
+assert.deepEqual(browser.defectFamilies.map((entry) => entry.id), requiredDefectFamilies);
+for (const family of browser.defectFamilies) {
+  assert(["verified", "synthetic", "unavailable", "unverified"].includes(family.status), `${family.id}: valid status is required`);
+  assert(typeof family.observation === "string" && family.observation.length > 0, `${family.id}: observation is required`);
+  assert(typeof family.invariant === "string" && family.invariant.length > 0, `${family.id}: invariant is required`);
+  assert(typeof family.revisitWhen === "string" && family.revisitWhen.length > 0, `${family.id}: revisitWhen is required`);
+}
 assert(Array.isArray(browser.cases) && browser.cases.length > 0, "browser corpus requires cases");
 const browserIds = browser.cases.map((entry) => entry.id);
 assert.equal(new Set(browserIds).size, browserIds.length, "browser case IDs must be unique");
 for (const entry of browser.cases) {
   assert(typeof entry.source?.url === "string" && entry.source.url.startsWith("http"), `${entry.id}: source.url is required`);
-  assert(Array.isArray(entry.browsers) && entry.browsers.length > 0, `${entry.id}: browsers are required`);
+  assert(Array.isArray(entry.browsers), `${entry.id}: browsers are required`);
   if (entry.requiresNativeInput) {
     assert(entry.skip && typeof entry.skip === "object", `${entry.id}: native input cases must record skip reasons`);
   }

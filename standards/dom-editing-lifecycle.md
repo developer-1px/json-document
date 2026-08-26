@@ -158,7 +158,7 @@ bind
 | `cut` | Native mutation이 `beforeinput/input` lifecycle로 commit됨 | Native mutation이 capture/plan/commit됨 | Clipboard payload 작성 후 Rich Text selection cut dispatch |
 | `paste` | Native mutation이 `beforeinput/input` lifecycle로 commit됨 | Native mutation이 capture/plan/commit됨 | Structured > HTML > plain priority로 semantic paste dispatch |
 | `blur` | Active lease cancel과 latest render | Active lease/tail cancel과 latest render | Binding-level blur handler 없음; host/renderer가 focus policy 소유 |
-| `keydown` | Binding이 command policy를 소유하지 않음 | Adapter가 command policy를 소유하지 않음 | Native history 대신 editor undo/redo shortcut만 intercept |
+| `keydown` | Binding이 command policy를 소유하지 않음 | Adapter가 command policy를 소유하지 않음 | Backspace/Delete와 native history를 semantic intent로 intercept하고 뒤따르는 동일 deletion `beforeinput`을 중복 처리하지 않음 |
 
 Clipboard event와 뒤따르는 `beforeinput`이 모두 오는 browser에서도 한 사용자
 작업을 두 번 commit하지 않아야 한다. Rich Text clipboard binding은 clipboard
@@ -254,14 +254,38 @@ Selection type을 통합하지 않는다. 공유할 것은 `observe -> model map
 | Local string native IME | 미검증 | 미검증 | 미검증 | Package composition unit test만 존재 |
 | Collaborative text typed input | 미검증 | 미검증 | 미검증 | Package jsdom test만 존재; public browser path 없음 |
 | Collaborative text native IME와 remote merge | 미검증 | 미검증 | 미검증 | Event-order·rebase unit test만 존재 |
-| Rich Text semantic `beforeinput` | 검증 | 미실행 | 미실행 | Playwright project가 현재 Chrome 하나만 실행 |
+| Rich Text semantic `beforeinput` | 검증 | 검증 | 검증 | Official Rich Text browser suite를 세 engine에서 실행 |
 | Rich Text native Korean IME | 검증 | 미검증 | 미검증 | Chromium CDP `Input.imeSetComposition`; corpus에 Firefox/WebKit skip reason 기록 |
-| Rich Text selection·clipboard | 검증 | 미실행 | 미실행 | Browser corpus는 3종을 선언하지만 현재 Playwright config는 Chrome만 구성 |
+| Rich Text selection·synthetic clipboard | 검증 | 검증 | 검증 | Engine-neutral `DataTransfer` fixture로 binding과 representation priority를 검증; system clipboard 지원 증거는 아님 |
+| Rich Text unexpected descendant mutation 뒤 publish 복구 | 검증 | 검증 | 검증 | 외부 DOM 변경이 model을 바꾸지 않고 다음 canonical publish에서 교체됨 |
 
-따라서 현재 repository-wide browser support를 “Chromium·Firefox·WebKit 지원”으로
-표현하지 않는다. Firefox와 WebKit은 corpus 기대 대상이며 실행 증거가 생기기
-전까지 미검증이다. Native IME는 automation API 부재와 product support 부재를
+이 표는 Official Rich Text vertical의 세 desktop engine 증거만 나타낸다. 따라서
+local string·collaboration이나 native IME까지 repository-wide로
+“Chromium·Firefox·WebKit 지원”한다고 표현하지 않는다. Native IME와 system
+clipboard는 synthetic algorithm 증거, automation API 부재, product support를
 구분해서 기록한다.
+
+## 지속 compatibility audit
+
+`standards/json-document-rich-text-v1/corpora/browser.json`의
+`defectFamilies`가 editable compatibility 지식의 기계 검증 가능한 정본이다.
+현재 필수 결함군은 composition, selection, deletion, atom/void,
+placeholder/managed break, clipboard, unexpected DOM mutation,
+focus/ShadowRoot, Android/soft keyboard다.
+
+각 결함군은 다음 네 항목을 빠짐없이 유지한다.
+
+- 실제 browser 또는 harness에서 관찰한 현상(`observation`)
+- canonical model이 지켜야 하는 불변식(`invariant`)
+- 실행 가능한 case 또는 명시적인 unavailable 기록(`evidence`)
+- workaround를 재검토하거나 제거할 조건(`revisitWhen`)
+
+증거 상태는 `verified`, `synthetic`, `unavailable`, `unverified`로만 기록한다.
+product-real stable automation은 CI를 막는다. Synthetic event, platform API가 없는
+native IME와 Android soft keyboard는 알고리즘 회귀를 보완하거나 공백을 드러내는
+증거이지 browser 지원을 주장하는 근거가 아니다. 새 drift 또는 leak을 발견하면
+먼저 해당 결함군의 observation과 invariant를 갱신하고, 최소 재현을 corpus에 넣은
+뒤 canonical owner에서 수정한다. Host와 Demo에는 복구 코드를 두지 않는다.
 
 ## Verification contract
 
