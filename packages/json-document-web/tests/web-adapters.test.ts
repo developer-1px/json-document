@@ -153,7 +153,8 @@ describe("Web Annotation platform adapters", () => {
     await expect(renderWebAnnotationRaster({ document: annotationDocument, sourceId: "source", sourceURL: "fixture.png", style: { stroke: "red", fill: "red", lineWidth: 2, labelFont: "12px sans" } }))
       .resolves.toEqual({ ok: true, dataURL: "data:image/png;base64,rendered" });
     expect(commands.some((command) => command.startsWith("arc:"))).toBe(true);
-    expect(commands.some((command) => command === "fillText:👍,2,3")).toBe(true);
+    expect(commands.some((command) => command === "translate:2,3")).toBe(true);
+    expect(commands.some((command) => command === "scale:1,-1")).toBe(true);
     expect(commands.some((command) => command.startsWith("strokeRect:"))).toBe(true);
     expect(commands.filter((command) => command.startsWith("lineTo:")).length).toBeGreaterThanOrEqual(4);
   });

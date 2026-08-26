@@ -39,6 +39,28 @@ test("hovering or focusing an annotation number previews its comment", async ({ 
   await expect(page.getByRole("tooltip", { name: "Comment 1 preview" })).toContainText("대비를 높여");
 });
 
+test("click opens comment editing while drag keeps the composer hidden", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.click({ position: { x: 300, y: 260 } });
+  const instruction = page.getByLabel("Annotation instruction");
+  await instruction.fill("위치를 확인해 주세요.");
+  await page.getByRole("button", { name: "Send comment" }).click();
+  const marker = page.locator("[data-annotation-id]").first();
+
+  await marker.click();
+  await expect(instruction).toBeFocused();
+  await page.getByRole("button", { name: "Select", exact: true }).click();
+  const markerBox = await requiredBox(marker);
+  await page.mouse.move(markerBox.x + markerBox.width / 2, markerBox.y + markerBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(markerBox.x + markerBox.width / 2 + 80, markerBox.y + markerBox.height / 2 + 40, { steps: 4 });
+  await expect(instruction).toBeHidden();
+  await expect(page.getByRole("tooltip", { name: "Comment 1 preview" })).toBeHidden();
+  await page.mouse.up();
+  await expect(instruction).toBeHidden();
+});
+
 test("Comment creates point and region marks with one editable comment", async ({ page }) => {
   await page.goto("/demo/annotation");
   const canvas = page.getByLabel("Raster annotation canvas");

@@ -168,7 +168,8 @@ export function AnnotationDemoRoute() {
 
   function handleAnnotationPointerDown(event: PointerEvent<SVGGElement>, annotation: Annotation) {
     event.stopPropagation();
-    setEditingId(annotation.presentation.type === "reaction" ? null : annotation.id);
+    setEditingId(null);
+    setPreviewId(null);
     if (tool !== "select") {
       setSelected(annotation.id);
       return;
@@ -233,6 +234,11 @@ export function AnnotationDemoRoute() {
     } else {
       const dx = gesture.current.x - gesture.start.x;
       const dy = gesture.current.y - gesture.start.y;
+      if (gesture.type === "move" && Math.hypot(dx, dy) < 4) {
+        const annotation = documentValue.annotations.find((item) => item.id === gesture.id);
+        if (annotation !== undefined && annotation.presentation.type !== "reaction") setEditingId(gesture.id);
+        return;
+      }
       editor.dispatch(gesture.type === "move"
         ? { type: "annotation.move", annotationId: gesture.id, dx, dy }
         : { type: "annotation.resize", annotationId: gesture.id, handle: resizeHandle(documentValue, gesture.id), dx, dy });
@@ -355,7 +361,7 @@ export function AnnotationDemoRoute() {
               {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
               {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
             </svg>
-            {documentValue.annotations.map((annotation, index) => previewId === annotation.id && annotation.body.instruction.trim() !== "" && editingId !== annotation.id ? (
+            {documentValue.annotations.map((annotation, index) => gesture === null && previewId === annotation.id && annotation.body.instruction.trim() !== "" && editingId !== annotation.id ? (
               <CommentPreview key={annotation.id} annotation={annotation} index={index + 1} source={source} />
             ) : null)}
             {selected && editingId === selected.id ? (
@@ -527,9 +533,7 @@ function AnnotationShape(props: {
         </>
       ) : null}
       {annotation.presentation.type === "reaction" && selector.type === "point" ? (
-        <text aria-label={annotation.presentation.reaction === "like" ? "Like sticker" : "Dislike sticker"} x={selector.x} y={selector.y + 2} fontSize="48" textAnchor="middle" dominantBaseline="middle">
-          {annotation.presentation.reaction === "like" ? "👍" : "👎"}
-        </text>
+        <ReactionSticker point={selector} reaction={annotation.presentation.reaction} selected={props.selected} />
       ) : null}
       {annotation.presentation.type === "outline" && selector.type === "rectangle" ? (
         <>
@@ -637,13 +641,24 @@ function ArrowLine(props: { readonly from: AnnotationPoint; readonly to: Annotat
 }
 
 function DraftShape({ gesture }: { readonly gesture: Extract<Gesture, { type: "create" }> }) {
-  if (gesture.tool === "like" || gesture.tool === "dislike") return <text x={gesture.start.x} y={gesture.start.y + 2} fontSize="48" opacity="0.7" textAnchor="middle" dominantBaseline="middle">{gesture.tool === "like" ? "👍" : "👎"}</text>;
+  if (gesture.tool === "like" || gesture.tool === "dislike") return <ReactionSticker point={gesture.start} reaction={gesture.tool} selected={false} draft />;
   if (gesture.tool === "arrow") return <ArrowLine from={gesture.start} to={gesture.current} selected />;
   if (distance(gesture.start, gesture.current) < 16) {
     return <circle cx={gesture.start.x} cy={gesture.start.y} r="32" fill={accent} opacity="0.7" />;
   }
   const rectangle = rectangleFromPoints(gesture.start, gesture.current);
   return <rect {...rectangle} fill="transparent" stroke={accent} strokeDasharray="18 12" strokeWidth="8" />;
+}
+
+function ReactionSticker(props: { readonly point: AnnotationPoint; readonly reaction: "like" | "dislike"; readonly selected: boolean; readonly draft?: boolean }) {
+  const Icon = props.reaction === "like" ? ThumbsUp : ThumbsDown;
+  return (
+    <g aria-label={props.reaction === "like" ? "Like sticker" : "Dislike sticker"} opacity={props.draft ? 0.7 : 1} style={{ filter: "drop-shadow(0 4px 3px rgb(var(--color-foreground-strong) / 0.24))" }}>
+      <circle cx={props.point.x} cy={props.point.y} r="29" fill="white" stroke="white" strokeWidth={props.selected ? 12 : 9} vectorEffect="non-scaling-stroke" />
+      <circle cx={props.point.x} cy={props.point.y} r="28" fill="white" stroke={accent} strokeWidth={props.selected ? 5 : 3} vectorEffect="non-scaling-stroke" />
+      <Icon x={props.point.x - 15} y={props.point.y - 15} width="30" height="30" color={accent} fill="none" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+    </g>
+  );
 }
 
 function OutputPanel(props: {

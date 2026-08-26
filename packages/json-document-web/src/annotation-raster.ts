@@ -63,17 +63,29 @@ function drawAnnotation(context: CanvasRenderingContext2D, annotation: Annotatio
     return;
   }
   if (annotation.presentation.type === "reaction" && selector.type === "point") {
-    context.save();
-    context.font = "40px sans-serif";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillText(annotation.presentation.reaction === "like" ? "👍" : "👎", selector.x, selector.y);
-    context.restore();
+    drawReaction(context, selector, annotation.presentation.reaction, style);
     return;
   }
   if (annotation.presentation.type === "outline" && selector.type === "rectangle") { context.strokeRect(selector.x, selector.y, selector.width, selector.height); return; }
   if (annotation.presentation.type === "stroke" && selector.type === "path") { drawStroke(context, selector.points); return; }
   if (annotation.presentation.type === "arrow" && selector.type === "arrow") drawArrow(context, selector.from, selector.to);
+}
+
+function drawReaction(context: CanvasRenderingContext2D, point: AnnotationPoint, reaction: "like" | "dislike", style: WebAnnotationRasterStyle) {
+  const direction = reaction === "like" ? -1 : 1;
+  context.save();
+  context.shadowColor = "rgba(0, 0, 0, 0.24)"; context.shadowBlur = 6; context.shadowOffsetY = 4;
+  context.beginPath(); context.arc(point.x, point.y, 29, 0, Math.PI * 2); context.fillStyle = "white"; context.fill(); context.strokeStyle = "white"; context.lineWidth = 9; context.stroke();
+  context.shadowColor = "transparent";
+  context.beginPath(); context.arc(point.x, point.y, 28, 0, Math.PI * 2); context.strokeStyle = style.stroke; context.lineWidth = 3; context.stroke();
+  context.translate(point.x, point.y); context.scale(1, direction);
+  context.beginPath();
+  context.moveTo(-13, -2); context.lineTo(-7, -2); context.lineTo(-3, -13); context.quadraticCurveTo(-1, -17, 3, -14);
+  context.lineTo(3, -7); context.lineTo(12, -7); context.quadraticCurveTo(16, -7, 15, -2);
+  context.lineTo(12, 10); context.quadraticCurveTo(11, 14, 7, 14); context.lineTo(-7, 14); context.lineTo(-7, -2);
+  context.moveTo(-13, -2); context.lineTo(-13, 14); context.lineTo(-7, 14);
+  context.stroke();
+  context.restore();
 }
 
 function drawStroke(context: CanvasRenderingContext2D, points: ReadonlyArray<AnnotationPoint>) {
