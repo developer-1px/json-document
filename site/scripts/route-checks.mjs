@@ -50,6 +50,9 @@ export function validateSiteRoutes(routes, fail) {
     if (route.heading !== undefined && (typeof route.heading !== "string" || route.heading.trim() === "")) {
       fail(`site route ${route.path} has an invalid heading.`);
     }
+    if (route.chrome !== undefined && route.chrome !== "app") {
+      fail(`site route ${route.path} has an invalid chrome.`);
+    }
     if (route.relatedDemoLabel !== undefined && (typeof route.relatedDemoLabel !== "string" || route.relatedDemoLabel.trim() === "")) {
       fail(`site route ${route.path} has an invalid related demo label.`);
     }

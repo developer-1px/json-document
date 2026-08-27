@@ -18,3 +18,23 @@ export {
   type TabOption,
   type SelectableItemProps,
 } from "./controls.js";
+export {
+  CalendarGrid,
+  DatePicker,
+  DateRangePicker,
+  HtmlDateField,
+  RangeCalendar,
+  shiftVisibleDate,
+} from "./date-controls.js";
+export {
+  addCalendarDays,
+  addCalendarMonths,
+  addCalendarYears,
+  calendarCells,
+  parseHtmlDateValue,
+  startOfIsoWeek,
+  visiblePeriodLabel,
+  type CalendarGrain,
+  type DateRangeValue,
+  type HtmlDateType,
+} from "./date-values.js";

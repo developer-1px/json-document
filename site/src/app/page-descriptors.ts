@@ -23,6 +23,7 @@ export type SiteRoute = {
   readonly navigationGroup?: SiteNavigationGroup;
   readonly parentPath?: string;
   readonly sidebar?: false;
+  readonly chrome?: "app";
   readonly relatedDemoPath?: string;
   readonly relatedDemoLabel?: string;
   readonly integration?: {
@@ -41,4 +42,8 @@ export function pageDescriptor(path: string): SiteRoute {
 
 export function integrationPageDescriptors(kind: IntegrationKind): ReadonlyArray<SiteRoute> {
   return pageDescriptors.filter((route) => route.integration?.kind === kind);
+}
+
+export function isAppChrome(route: SiteRoute | undefined): boolean {
+  return route?.chrome === "app";
 }

@@ -16,10 +16,55 @@ ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement> & FocusPreservingCon
 ```ts
 type ActionButtonKind = "primary" | "secondary" | "danger";
 ```
+## `addCalendarDays`
+
+```ts
+addCalendarDays(date: string, days: number): string
+```
+## `addCalendarMonths`
+
+```ts
+addCalendarMonths(date: string, months: number): string
+```
+## `addCalendarYears`
+
+```ts
+addCalendarYears(date: string, years: number): string
+```
+## `calendarCells`
+
+```ts
+calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell>
+```
+## `CalendarGrain`
+
+```ts
+type CalendarGrain = "week" | "month" | "year";
+```
+## `CalendarGrid`
+
+```ts
+CalendarGrid(props: { readonly label: string; readonly value: string | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: string) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
+```
 ## `ChoiceChip`
 
 ```ts
 ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
+```
+## `DatePicker`
+
+```ts
+DatePicker(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+```
+## `DateRangePicker`
+
+```ts
+DateRangePicker(props: { readonly label: string; readonly value: DateRangeValue; readonly onValueChange: (value: DateRangeValue) => void; }): ReactNode
+```
+## `DateRangeValue`
+
+```ts
+type DateRangeValue = { readonly start: string; readonly end: string };
 ```
 ## `DisclosureButton`
 
@@ -40,6 +85,16 @@ formatFileSize(bytes: number): string
 
 ```ts
 GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly focus?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `HtmlDateField`
+
+```ts
+HtmlDateField(props: { readonly type: HtmlDateType; readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+```
+## `HtmlDateType`
+
+```ts
+type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
 ```
 ## `IconButton`
 
@@ -89,6 +144,16 @@ type MenuItem = {
 
 ```ts
 MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `parseHtmlDateValue`
+
+```ts
+parseHtmlDateValue(type: HtmlDateType, value: string): string | null
+```
+## `RangeCalendar`
+
+```ts
+RangeCalendar(props: { readonly label: string; readonly value: DateRangeValue | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: DateRangeValue) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
 ```
 ## `ResizeHandle`
 
@@ -149,6 +214,16 @@ type SelectOption = {
   readonly disabled?: boolean;
 };
 ```
+## `shiftVisibleDate`
+
+```ts
+shiftVisibleDate(visibleDate: string, grain: CalendarGrain, direction: 1 | -1): string
+```
+## `startOfIsoWeek`
+
+```ts
+startOfIsoWeek(date: string): string
+```
 ## `TabOption`
 
 ```ts
@@ -186,4 +261,9 @@ interface UseListboxOptions<Item extends ListboxItem> {
   readonly onActiveChange: (id: string | null) => void;
   readonly onAction: (id: string) => void;
 }
+```
+## `visiblePeriodLabel`
+
+```ts
+visiblePeriodLabel(grain: CalendarGrain, visibleDate: string): string
 ```

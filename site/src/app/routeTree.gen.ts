@@ -28,10 +28,12 @@ import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/
 import { Route as PageConnectorsWebRouteImport } from "./routes/_page/connectors/web";
 import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
 import { Route as PageDemoAnnotationRouteImport } from "./routes/_page/demo/annotation";
+import { Route as PageDemoCalendarRouteImport } from "./routes/_page/demo/calendar";
 import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
 import { Route as PageDemoComposerRouteImport } from "./routes/_page/demo/composer";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
+import { Route as PageDemoDateControlsRouteImport } from "./routes/_page/demo/date-controls";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
 import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
@@ -242,6 +244,11 @@ const PageDemoAnnotationRoute = PageDemoAnnotationRouteImport.update({
   path: "/demo/annotation",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoCalendarRoute = PageDemoCalendarRouteImport.update({
+  id: "/demo/calendar",
+  path: "/demo/calendar",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoCanvasRoute = PageDemoCanvasRouteImport.update({
   id: "/demo/canvas",
   path: "/demo/canvas",
@@ -260,6 +267,11 @@ const PageDemoComposerRoute = PageDemoComposerRouteImport.update({
 const PageDemoDatabaseRoute = PageDemoDatabaseRouteImport.update({
   id: "/demo/database",
   path: "/demo/database",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoDateControlsRoute = PageDemoDateControlsRouteImport.update({
+  id: "/demo/date-controls",
+  path: "/demo/date-controls",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
@@ -870,10 +882,12 @@ export interface FileRoutesByFullPath {
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
   "/demo/annotation": typeof PageDemoAnnotationRoute;
+  "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
+  "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/object": typeof PageDemoObjectRoute;
@@ -1004,10 +1018,12 @@ export interface FileRoutesByTo {
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
   "/demo/annotation": typeof PageDemoAnnotationRoute;
+  "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
+  "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
   "/demo/object": typeof PageDemoObjectRoute;
@@ -1140,10 +1156,12 @@ export interface FileRoutesById {
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/_page/connectors/web": typeof PageConnectorsWebRoute;
   "/_page/demo/annotation": typeof PageDemoAnnotationRoute;
+  "/_page/demo/calendar": typeof PageDemoCalendarRoute;
   "/_page/demo/canvas": typeof PageDemoCanvasRoute;
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
   "/_page/demo/composer": typeof PageDemoComposerRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
+  "/_page/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
   "/_page/demo/object": typeof PageDemoObjectRoute;
@@ -1276,10 +1294,12 @@ export interface FileRouteTypes {
     | "/connectors/tanstack-table"
     | "/connectors/web"
     | "/demo/annotation"
+    | "/demo/calendar"
     | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/composer"
     | "/demo/database"
+    | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
     | "/demo/object"
@@ -1410,10 +1430,12 @@ export interface FileRouteTypes {
     | "/connectors/tanstack-table"
     | "/connectors/web"
     | "/demo/annotation"
+    | "/demo/calendar"
     | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/composer"
     | "/demo/database"
+    | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
     | "/demo/object"
@@ -1545,10 +1567,12 @@ export interface FileRouteTypes {
     | "/_page/connectors/tanstack-table"
     | "/_page/connectors/web"
     | "/_page/demo/annotation"
+    | "/_page/demo/calendar"
     | "/_page/demo/canvas"
     | "/_page/demo/clipboard"
     | "/_page/demo/composer"
     | "/_page/demo/database"
+    | "/_page/demo/date-controls"
     | "/_page/demo/history"
     | "/_page/demo/kanban"
     | "/_page/demo/object"
@@ -1804,6 +1828,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoAnnotationRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/calendar": {
+      id: "/_page/demo/calendar";
+      path: "/demo/calendar";
+      fullPath: "/demo/calendar";
+      preLoaderRoute: typeof PageDemoCalendarRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/demo/canvas": {
       id: "/_page/demo/canvas";
       path: "/demo/canvas";
@@ -1830,6 +1861,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/database";
       fullPath: "/demo/database";
       preLoaderRoute: typeof PageDemoDatabaseRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/date-controls": {
+      id: "/_page/demo/date-controls";
+      path: "/demo/date-controls";
+      fullPath: "/demo/date-controls";
+      preLoaderRoute: typeof PageDemoDateControlsRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/history": {
@@ -2682,10 +2720,12 @@ interface PageRouteChildren {
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
   PageConnectorsWebRoute: typeof PageConnectorsWebRoute;
   PageDemoAnnotationRoute: typeof PageDemoAnnotationRoute;
+  PageDemoCalendarRoute: typeof PageDemoCalendarRoute;
   PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
   PageDemoComposerRoute: typeof PageDemoComposerRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
+  PageDemoDateControlsRoute: typeof PageDemoDateControlsRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
   PageDemoObjectRoute: typeof PageDemoObjectRoute;
@@ -2791,10 +2831,12 @@ const PageRouteChildren: PageRouteChildren = {
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,
   PageConnectorsWebRoute: PageConnectorsWebRoute,
   PageDemoAnnotationRoute: PageDemoAnnotationRoute,
+  PageDemoCalendarRoute: PageDemoCalendarRoute,
   PageDemoCanvasRoute: PageDemoCanvasRoute,
   PageDemoClipboardRoute: PageDemoClipboardRoute,
   PageDemoComposerRoute: PageDemoComposerRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
+  PageDemoDateControlsRoute: PageDemoDateControlsRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,
   PageDemoObjectRoute: PageDemoObjectRoute,

@@ -26,6 +26,7 @@ import {
   createWebKeyboardAdapter,
   findWebGridCell,
   findWebKanbanCardDropTarget,
+  findWebPointTarget,
   activeDescendantContainerProps,
   activeDescendantItemProps,
   defaultWebKeymap,
@@ -82,6 +83,17 @@ describe("Web Kanban drop target", () => {
     expect(kanbanCardDropTargetFromWebElement(column)).toEqual({ columnId: "doing", beforeCardId: null });
     expect(kanbanCardDropTargetFromWebElement(kanbanElement({}))).toBeNull();
     expect(findWebKanbanCardDropTarget({ x: 10, y: 20 }, { elementFromPoint: () => card })).toEqual({ columnId: "doing", beforeCardId: "review" });
+  });
+});
+
+describe("Web point target", () => {
+  test("finds a visual drop target while pointer capture keeps the event target elsewhere", () => {
+    const outside = { getBoundingClientRect: () => ({ left: 0, right: 40, top: 0, bottom: 40 }) };
+    const target = { getBoundingClientRect: () => ({ left: 40, right: 80, top: 0, bottom: 40 }) };
+    const root = { querySelectorAll: () => [outside, target] };
+
+    expect(findWebPointTarget("[data-drop-target]", { x: 60, y: 20 }, root)).toBe(target);
+    expect(findWebPointTarget("[data-drop-target]", { x: 90, y: 20 }, root)).toBeNull();
   });
 });
 

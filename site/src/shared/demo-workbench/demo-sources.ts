@@ -1,5 +1,11 @@
 import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
+import calendarEditingSource from "../../../../packages/json-document-editing/src/calendar.ts?raw";
+import calendarAllDayPointerSource from "../../../../packages/json-document-editing/src/calendar-allday-pointer.ts?raw";
+import calendarMonthPointerSource from "../../../../packages/json-document-editing/src/calendar-month-pointer.ts?raw";
+import calendarTimeGridPointerSource from "../../../../packages/json-document-editing/src/calendar-time-grid-pointer.ts?raw";
+import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
+import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
@@ -19,6 +25,7 @@ import treeVisibilitySource from "../../../../packages/json-document-editing/src
 import treeEditingSource from "../../../../packages/json-document-react/src/use-tree-editing.ts?raw";
 import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
+import webPointTargetSource from "../../../../packages/json-document-web/src/point-target.ts?raw";
 import webKanbanDropTargetSource from "../../../../packages/json-document-web/src/kanban-drop-target.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
@@ -118,6 +125,12 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document-editing/src/calendar.ts", calendarEditingSource],
+  ["packages/json-document-editing/src/calendar-allday-pointer.ts", calendarAllDayPointerSource],
+  ["packages/json-document-editing/src/calendar-month-pointer.ts", calendarMonthPointerSource],
+  ["packages/json-document-editing/src/calendar-time-grid-pointer.ts", calendarTimeGridPointerSource],
+  ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
+  ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
@@ -138,6 +151,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-tree-editing.ts", treeEditingSource],
   ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
+  ["packages/json-document-web/src/point-target.ts", webPointTargetSource],
   ["packages/json-document-web/src/kanban-drop-target.ts", webKanbanDropTargetSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
@@ -186,6 +200,41 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "findWebPointTarget",
+    sourcePath: "packages/json-document-web/src/point-target.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createCalendarEditor",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "interpretCalendarAllDayPointer",
+    sourcePath: "packages/json-document-editing/src/calendar-allday-pointer.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "interpretCalendarMonthPointer",
+    sourcePath: "packages/json-document-editing/src/calendar-month-pointer.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "interpretCalendarTimeGridPointer",
+    sourcePath: "packages/json-document-editing/src/calendar-time-grid-pointer.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "CalendarGrid",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarCells",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
   {
     packageName: "@interactive-os/json-document",
     symbol: "createJSONDocument",

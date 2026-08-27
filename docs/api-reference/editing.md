@@ -11,6 +11,11 @@ intent, editor, history 편집 계약의 public entrypoint입니다. 아래 항�
 ```ts
 acceptsDatabaseValue(property: DatabaseProperty, value: JSONValue): boolean
 ```
+## `addCalendarDate`
+
+```ts
+addCalendarDate(day: string, days: number): string | null
+```
 ## `Annotation`
 
 ```ts
@@ -88,10 +93,176 @@ interface BlockDocument extends Record<string, JSONValue> {
   readonly blocks: ReadonlyArray<DocumentBlock>;
 }
 ```
+## `CalendarAllDayHandle`
+
+```ts
+type CalendarAllDayHandle = "body" | "start" | "end";
+```
+## `calendarAllDayLayout`
+
+```ts
+calendarAllDayLayout(events: ReadonlyArray<CalendarEvent>, days: ReadonlyArray<string>): ReadonlyArray<{ readonly event: CalendarEvent; readonly startIndex: number; readonly span: number; }>
+```
+## `CalendarAllDayPointerIntent`
+
+```ts
+type CalendarAllDayPointerIntent = Extract<
+  CalendarIntent,
+  { type: "event.create" } | { type: "selection.set" } | { type: "event.move-day" } | { type: "event.resize" }
+>;
+```
+## `CalendarAllDayPointerRelease`
+
+```ts
+type CalendarAllDayPointerRelease = {
+  readonly originDay: string;
+  readonly originEventId: string | null;
+  readonly originEventStart: string | null;
+  readonly originHandle: CalendarAllDayHandle | null;
+  readonly targetDay: string;
+};
+```
+## `CalendarDocument`
+
+```ts
+interface CalendarDocument extends Record<string, JSONValue> {
+  readonly events: ReadonlyArray<CalendarEvent>;
+}
+```
+## `CalendarEditor`
+
+```ts
+interface CalendarEditor {
+  readonly snapshot: EditingSnapshot<CalendarSelection>;
+  readonly selectedEvents: ReadonlyArray<CalendarEvent>;
+  dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
+  undo(): EditingResult<CalendarSelection>;
+  redo(): EditingResult<CalendarSelection>;
+  subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;
+}
+```
+## `CalendarEvent`
+
+```ts
+interface CalendarEvent extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly title: string;
+  readonly start: string;
+  readonly end: string;
+  readonly allDay: boolean;
+}
+```
+## `calendarEventsInMonth`
+
+```ts
+calendarEventsInMonth(events: ReadonlyArray<CalendarEvent>, month: string): ReadonlyArray<CalendarEvent>
+```
+## `calendarEventsOnDay`
+
+```ts
+calendarEventsOnDay(events: ReadonlyArray<CalendarEvent>, day: string): ReadonlyArray<CalendarEvent>
+```
+## `calendarInstantAt`
+
+```ts
+calendarInstantAt(day: string, minutesFromMidnight: number): string | null
+```
+## `CalendarIntent`
+
+```ts
+type CalendarIntent =
+  | {
+      readonly type: "selection.set";
+      readonly eventIds: ReadonlyArray<string>;
+      readonly mode?: "replace" | "extend" | "toggle";
+    }
+  | { readonly type: "selection.remove" }
+  | {
+      readonly type: "event.create";
+      readonly start: string;
+      readonly end: string;
+      readonly title?: string;
+      readonly allDay?: boolean;
+    }
+  | { readonly type: "event.move"; readonly eventId: string; readonly start: string }
+  | { readonly type: "event.resize"; readonly eventId: string; readonly edge: "start" | "end"; readonly instant: string }
+  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string };
+```
+## `CalendarMonthPointerIntent`
+
+```ts
+type CalendarMonthPointerIntent = Extract<
+  CalendarIntent,
+  { type: "event.create" } | { type: "selection.set" } | { type: "event.move-day" }
+>;
+```
+## `CalendarMonthPointerRelease`
+
+```ts
+type CalendarMonthPointerRelease = {
+  readonly originDay: string;
+  readonly originEventId: string | null;
+  readonly targetDay: string;
+  readonly eventsOnTargetDay: ReadonlyArray<{ readonly id: string }>;
+};
+```
+## `CalendarSelection`
+
+```ts
+interface CalendarSelection extends Record<string, JSONValue> {
+  readonly kind: "explicit";
+  readonly keys: ReadonlyArray<string>;
+  readonly primaryKey: string | null;
+}
+```
+## `calendarShiftInstant`
+
+```ts
+calendarShiftInstant(instant: string, minutes: number): string | null
+```
+## `calendarTimedLayout`
+
+```ts
+calendarTimedLayout(events: ReadonlyArray<CalendarEvent>, day: string): ReadonlyArray<{ readonly event: CalendarEvent; readonly startMinutes: number; readonly endMinutes: number; readonly lane: number; readonly laneCount: number; }>
+```
+## `CalendarTimeGridHandle`
+
+```ts
+type CalendarTimeGridHandle = "body" | "start" | "end";
+```
+## `CalendarTimeGridPointerIntent`
+
+```ts
+type CalendarTimeGridPointerIntent = Extract<
+  CalendarIntent,
+  { type: "event.create" } | { type: "selection.set" } | { type: "event.move" } | { type: "event.resize" }
+>;
+```
+## `CalendarTimeGridPointerRelease`
+
+```ts
+type CalendarTimeGridPointerRelease = {
+  readonly originInstant: string;
+  readonly originEventId: string | null;
+  readonly originEventStart: string | null;
+  readonly originHandle: CalendarTimeGridHandle | null;
+  readonly targetInstant: string;
+};
+```
+## `CalendarView`
+
+```ts
+type CalendarView = "day" | "week" | "month" | "year";
+```
 ## `createAnnotationEditor`
 
 ```ts
 createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): AnnotationEditor
+```
+## `createCalendarEditor`
+
+```ts
+createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: { readonly createId?: () => string; }): CalendarEditor
 ```
 ## `createDatabaseEditor`
 
@@ -518,6 +689,26 @@ interface GridTopology {
   readonly rowIds: ReadonlyArray<string>;
   readonly columnIds: ReadonlyArray<string>;
 }
+```
+## `interpretCalendarAllDayPointer`
+
+```ts
+interpretCalendarAllDayPointer(release: CalendarAllDayPointerRelease): CalendarAllDayPointerIntent | null
+```
+## `interpretCalendarMonthPointer`
+
+```ts
+interpretCalendarMonthPointer(release: CalendarMonthPointerRelease): CalendarMonthPointerIntent | null
+```
+## `interpretCalendarTimeGridPointer`
+
+```ts
+interpretCalendarTimeGridPointer(release: CalendarTimeGridPointerRelease): CalendarTimeGridPointerIntent | null
+```
+## `isCalendarAllDay`
+
+```ts
+isCalendarAllDay(event: Pick<CalendarEvent, "allDay">): boolean
 ```
 ## `jsonCellText`
 

@@ -154,6 +154,7 @@ Core는 어떤 Hands도 강제하지 않습니다. 사용자가 Official Hands�
 | Tree | visible topology, fold, range Selection과 subtree Clipboard |
 | Kanban | column·card identity와 card move |
 | Database | typed property, record edit와 saved view projection |
+| Calendar | interval events, day/week timed span, all-day band, month day-move, year overview |
 | Rich Text | versioned schema, native input과 schema-aware transform |
 
 이 후보들은 별도 Official Domain이 아닙니다. 최소 schema, Editing semantics,

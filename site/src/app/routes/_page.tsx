@@ -3,7 +3,7 @@ import { DemoProvider } from "../../shared/demo-workbench/DemoSurface";
 import type { DemoDefinition } from "../../shared/demo-workbench/define-demo";
 import { PageFrame, PageLeadProvider } from "../../shared/ui/primitives";
 import { SiteBreadcrumb } from "../breadcrumb";
-import { findSiteRoute, siteRoutes, usePathname } from "../router";
+import { findSiteRoute, isAppChrome, siteRoutes, usePathname } from "../router";
 
 export const Route = createFileRoute("/_page")({
   component: InteriorPage,
@@ -18,6 +18,9 @@ function InteriorPage() {
     ),
   });
   const content = <Outlet />;
+  if (isAppChrome(route)) {
+    return <main className="flex min-h-0 flex-1 flex-col">{content}</main>;
+  }
   if (demo !== undefined) {
     return (
       <PageFrame>

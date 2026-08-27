@@ -84,6 +84,7 @@ describe("official site shell", () => {
       "Object",
       "Annotation",
       "Tree",
+      "Calendar",
       "Database",
       "Composer",
       "Mention",

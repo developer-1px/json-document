@@ -158,3 +158,29 @@ native drag event를 파일 배열로 투영하며 drag-active overlay를 관리
 Pointer capture lifecycle과 cursor를 소유하고 시작점 기준 `delta`를
 `preview | commit` phase로 전달합니다. 최소·최대 크기와 canonical commit은 Host
 정책입니다.
+
+## Date and time controls
+
+HTML이 이름 붙인 날짜·시간 값과 APG 캘린더 격자를 Primitive가 닫습니다.
+필드는 유효한 문자열만 commit하고, 잘못된 draft는 이전 값으로 돌아갑니다.
+
+```ts
+<HtmlDateField type="date" label="Date" value={date} onValueChange={setDate} />
+<HtmlDateField type="time" label="Time" value={time} onValueChange={setTime} />
+<HtmlDateField type="datetime-local" label="DateTime" value={dateTime} onValueChange={setDateTime} />
+<HtmlDateField type="month" label="Month" value={month} onValueChange={setMonth} />
+<HtmlDateField type="week" label="Week" value={week} onValueChange={setWeek} />
+<CalendarGrid label="Calendar" value={date} grain={grain} visibleDate={date} onValueChange={setDate} onGrainChange={setGrain} onVisibleDateChange={setDate} />
+<RangeCalendar label="Range" value={range} grain={grain} visibleDate={range.start} onValueChange={setRange} onGrainChange={setGrain} onVisibleDateChange={setVisible} />
+<DatePicker label="Event date" value={date} onValueChange={setDate} />
+<DateRangePicker label="Trip" value={range} onValueChange={setRange} />
+```
+
+`date`는 `YYYY-MM-DD`, `time`은 `HH:mm`, `datetime-local`은 `YYYY-MM-DDTHH:mm`,
+`month`는 `YYYY-MM`, `week`는 `YYYY-Www`입니다. Calendar와 RangeCalendar는
+주·월·연 입자를 바꾸고 화살표로 날을 옮깁니다. DatePicker와 DateRangePicker는
+필드와 격자가 같은 commit 값을 쓰며 Escape는 확정하지 않은 선택을 버립니다.
+
+```live-demo
+/demo/date-controls
+```

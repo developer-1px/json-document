@@ -19,6 +19,10 @@ export function DemoPage(props: {
 
 const DemoEmbedContext = createContext(false);
 
+export function useDemoEmbed(): boolean {
+  return useContext(DemoEmbedContext);
+}
+
 export function DemoEmbedProvider(props: { readonly children: ReactNode }) {
   return <DemoEmbedContext value>{props.children}</DemoEmbedContext>;
 }

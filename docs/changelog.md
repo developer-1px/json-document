@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Gave Calendar app chrome: a collapsible site rail, no docs header or demo
+  workbench, and a full-height product surface.
+- Added HTML date, time, datetime-local, month, and week controls plus APG
+  calendar, range calendar, date picker, and date-range picker primitives.
+- Added Calendar Hands for interval events across day, week, month, and year
+  views. Timed span create/move/resize, an all-day band, and month press-release
+  map through `interpretCalendarTimeGridPointer`,
+  `interpretCalendarAllDayPointer`, and `interpretCalendarMonthPointer`.
 - Added an Agent Chat Composer Hand based on the Cstar design source, with
   canonical Rich Text instruction, mention and skill atoms, attachment context,
   native clipboard, IME, and local history.

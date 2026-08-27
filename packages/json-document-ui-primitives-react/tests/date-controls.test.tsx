@@ -1,0 +1,229 @@
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import { afterEach, describe, expect, test } from "vitest";
+import { useState } from "react";
+import {
+  CalendarGrid,
+  DatePicker,
+  DateRangePicker,
+  HtmlDateField,
+  RangeCalendar,
+  shiftVisibleDate,
+  parseHtmlDateValue,
+  type CalendarGrain,
+  type DateRangeValue,
+  type HtmlDateType,
+} from "../src/index.js";
+
+afterEach(cleanup);
+
+describe("HTML date values", () => {
+  test("accepts canonical HTML strings and rejects invalid civil values", () => {
+    expect(parseHtmlDateValue("date", "2024-02-29")).toBe("2024-02-29");
+    expect(parseHtmlDateValue("date", "2025-02-29")).toBeNull();
+    expect(parseHtmlDateValue("time", "08:30")).toBe("08:30");
+    expect(parseHtmlDateValue("time", "24:00")).toBeNull();
+    expect(parseHtmlDateValue("datetime-local", "2026-08-03T09:15")).toBe("2026-08-03T09:15");
+    expect(parseHtmlDateValue("datetime-local", "2026-08-03 09:15")).toBeNull();
+    expect(parseHtmlDateValue("month", "2026-08")).toBe("2026-08");
+    expect(parseHtmlDateValue("month", "2026-13")).toBeNull();
+    expect(parseHtmlDateValue("week", "2026-W01")).toBe("2026-W01");
+    expect(parseHtmlDateValue("week", "2026-W99")).toBeNull();
+  });
+});
+
+describe("HtmlDateField", () => {
+  test("commits each HTML type through the shipped field and ignores invalid drafts", () => {
+    function Harness(props: { readonly type: HtmlDateType; readonly initial: string; readonly next: string; readonly invalid: string }) {
+      const [value, setValue] = useState(props.initial);
+      return (
+        <>
+          <HtmlDateField type={props.type} label={props.type} value={value} onValueChange={setValue} />
+          <output aria-label="committed">{value}</output>
+        </>
+      );
+    }
+
+    const cases: ReadonlyArray<{ type: HtmlDateType; initial: string; next: string; invalid: string }> = [
+      { type: "date", initial: "2026-08-03", next: "2026-08-10", invalid: "2026-02-31" },
+      { type: "time", initial: "08:30", next: "17:05", invalid: "99:99" },
+      { type: "datetime-local", initial: "2026-08-03T08:30", next: "2026-08-03T17:05", invalid: "2026-13-01T00:00" },
+      { type: "month", initial: "2026-08", next: "2026-09", invalid: "2026-00" },
+      { type: "week", initial: "2026-W32", next: "2026-W33", invalid: "2026-W00" },
+    ];
+
+    for (const sample of cases) {
+      const view = render(<Harness {...sample} />);
+      const field = screen.getByLabelText(sample.type);
+      expect(field.getAttribute("type")).toBe(sample.type);
+      fireEvent.change(field, { target: { value: sample.invalid } });
+      fireEvent.blur(field);
+      expect(screen.getByLabelText("committed").textContent).toBe(sample.initial);
+      fireEvent.change(field, { target: { value: sample.next } });
+      fireEvent.blur(field);
+      expect(screen.getByLabelText("committed").textContent).toBe(sample.next);
+      view.unmount();
+    }
+  });
+});
+
+describe("CalendarGrid and RangeCalendar", () => {
+  test("moves month and year periods without skipping clamped civil dates", () => {
+    expect(shiftVisibleDate("2026-01-31", "month", 1)).toBe("2026-02-28");
+    expect(shiftVisibleDate("2024-02-29", "year", 1)).toBe("2025-02-28");
+    expect(shiftVisibleDate("2026-01-01", "week", -1)).toBe("2025-12-25");
+  });
+
+  test("selects a day, switches grain, and moves selection with arrow keys", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState<string | null>("2026-08-03");
+      const [grain, setGrain] = useState<CalendarGrain>("month");
+      const [visibleDate, setVisibleDate] = useState("2026-08-03");
+      return (
+        <>
+          <CalendarGrid
+            label="Choose date"
+            value={value}
+            grain={grain}
+            visibleDate={visibleDate}
+            onValueChange={setValue}
+            onGrainChange={setGrain}
+            onVisibleDateChange={setVisibleDate}
+          />
+          <output aria-label="committed">{value}</output>
+        </>
+      );
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-12" }));
+    expect(screen.getByRole("gridcell", { name: "2026-08-12" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-12");
+    await user.click(screen.getByRole("radio", { name: "Week" }));
+    screen.getByRole("grid", { name: "Choose date" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-13");
+    await user.click(screen.getByRole("radio", { name: "Year" }));
+    screen.getByRole("grid", { name: "Choose date" }).focus();
+    await user.keyboard("{ArrowLeft}");
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-12");
+  });
+
+  test("selects a contiguous range and keeps arrow movement on the range surface", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState<DateRangeValue | null>(null);
+      const [grain, setGrain] = useState<CalendarGrain>("month");
+      return (
+        <>
+          <RangeCalendar
+            label="Trip"
+            value={value}
+            grain={grain}
+            visibleDate="2026-08-03"
+            onValueChange={setValue}
+            onGrainChange={setGrain}
+            onVisibleDateChange={() => undefined}
+          />
+          <output aria-label="committed">{value ? `${value.start}/${value.end}` : ""}</output>
+        </>
+      );
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-03" }));
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-07" }));
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-03/2026-08-07");
+    expect(screen.getByRole("gridcell", { name: "2026-08-05" }).getAttribute("aria-selected")).toBe("true");
+    screen.getByRole("grid", { name: "Trip" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-03/2026-08-08");
+  });
+});
+
+describe("DatePicker and DateRangePicker", () => {
+  test("field and calendar commit the same date and Escape keeps the previous value", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState("2026-08-03");
+      return (
+        <>
+          <DatePicker label="Event date" value={value} onValueChange={setValue} />
+          <output aria-label="committed">{value}</output>
+        </>
+      );
+    }
+    render(<Harness />);
+    const field = screen.getByLabelText("Event date");
+    await user.clear(field);
+    await user.type(field, "2026-08-20");
+    await user.tab();
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-20");
+    await user.click(screen.getByRole("button", { name: "Choose Event date" }));
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-11" }));
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-11");
+    await user.click(screen.getByRole("button", { name: "Choose Event date" }));
+    screen.getByRole("grid", { name: "Event date calendar" }).focus();
+    await user.keyboard("{ArrowDown}");
+    await user.keyboard("{Escape}");
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-11");
+  });
+
+  test("moves across a month boundary before committing a picker value", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState("2026-08-31");
+      return <DatePicker label="Boundary date" value={value} onValueChange={setValue} />;
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Choose Boundary date" }));
+    const grid = screen.getByRole("grid", { name: "Boundary date calendar" });
+    grid.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByText("2026-09")).toBeTruthy();
+    await user.keyboard("{Enter}");
+    expect((screen.getByLabelText("Boundary date") as HTMLInputElement).value).toBe("2026-09-01");
+  });
+
+  test("range fields and range calendar write the same committed range", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState<DateRangeValue>({ start: "2026-08-01", end: "2026-08-02" });
+      return (
+        <>
+          <DateRangePicker label="Trip" value={value} onValueChange={setValue} />
+          <output aria-label="committed">{`${value.start}/${value.end}`}</output>
+        </>
+      );
+    }
+    render(<Harness />);
+    const start = screen.getByLabelText("Trip start");
+    await user.clear(start);
+    await user.type(start, "2026-08-10");
+    await user.tab();
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-02/2026-08-10");
+    await user.click(screen.getByRole("button", { name: "Choose Trip" }));
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-04" }));
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-06" }));
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-04/2026-08-06");
+    screen.getByRole("grid", { name: "Trip calendar" }).focus();
+    await user.keyboard("{ArrowRight}");
+    await user.keyboard("{Escape}");
+    expect(screen.getByLabelText("committed").textContent).toBe("2026-08-04/2026-08-06");
+  });
+
+  test("extends a range across a month boundary before committing", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState<DateRangeValue>({ start: "2026-08-31", end: "2026-08-31" });
+      return <DateRangePicker label="Boundary trip" value={value} onValueChange={setValue} />;
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Choose Boundary trip" }));
+    const grid = screen.getByRole("grid", { name: "Boundary trip calendar" });
+    grid.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByText("2026-09")).toBeTruthy();
+    await user.keyboard("{Enter}");
+    expect((screen.getByLabelText("Boundary trip end") as HTMLInputElement).value).toBe("2026-09-01");
+  });
+});

@@ -43,16 +43,17 @@ export function ProductApp(props: {
   readonly toolbarLabel?: string;
   readonly inspector?: ReactNode;
   readonly canvasClassName?: string;
+  readonly fill?: boolean;
   readonly children: ReactNode;
 }) {
   return (
-    <div className={ui.product.frame} data-product-app>
+    <div className={classes(ui.product.frame, props.fill && ui.product.fill)} data-product-app>
       {props.toolbar != null ? (
         <div className={ui.product.toolbar} role="toolbar" aria-label={props.toolbarLabel}>
           {props.toolbar}
         </div>
       ) : null}
-      <div className={classes(ui.product.canvas, props.canvasClassName)}>{props.children}</div>
+      <div className={classes(ui.product.canvas, props.fill && ui.product.fillCanvas, props.canvasClassName)}>{props.children}</div>
       {props.inspector != null ? <div className={ui.product.panel}>{props.inspector}</div> : null}
     </div>
   );

@@ -6,6 +6,7 @@ export const ui = {
     page: "min-h-full bg-background-canvas px-layout-page pb-8 pt-4 lg:px-layout-page-wide",
     content: "mx-auto max-w-6xl",
     navigation: "bg-background-subtle text-sm",
+    navigationRail: "flex h-screen w-12 shrink-0 flex-col items-center gap-2 border-r border-line-subtle/40 py-2",
     brand: "font-mono text-foreground-strong no-underline hover:text-foreground-default",
   },
   nav: {
@@ -42,8 +43,10 @@ export const ui = {
   },
   product: {
     frame: "rounded-surface bg-background-canvas shadow-surface",
+    fill: "flex h-full min-h-0 flex-col rounded-none shadow-none",
     toolbar: "flex flex-wrap items-center gap-1 border-b border-line-subtle/40 px-3 py-2",
     canvas: "p-3",
+    fillCanvas: "min-h-0 flex-1 overflow-auto",
     panel: "border-t border-line-subtle/40 px-3 py-2",
   },
   demoWorkbench: {
