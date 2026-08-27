@@ -91,9 +91,14 @@ describe("DatabaseHand", () => {
     const title = screen.getByRole("gridcell", { name: "Alpha" });
     fireEvent.click(title);
     expect(onSelectionChange).toHaveBeenLastCalledWith(["a"]);
-    const clipboard = { getData: (type: string) => type === "text/plain" ? "Pasted" : "", setData: vi.fn() };
+    const clipboard = { types: ["text/plain"], getData: (type: string) => type === "text/plain" ? "Pasted" : "", setData: vi.fn() };
     fireEvent.paste(title.closest(".jd-database__viewport")!, { clipboardData: clipboard });
     expect(onRecordsChange).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ id: "a", title: "Pasted" })]), expect.objectContaining({ origin: "cell.commit" }));
+
+    const copied = { types: [] as string[], getData: vi.fn(), setData: vi.fn() };
+    fireEvent.copy(title.closest(".jd-database__viewport")!, { clipboardData: copied });
+    expect(copied.setData).toHaveBeenCalledWith("application/vnd.interactive-os.database+json", expect.stringContaining('"type":"application/vnd.interactive-os.database+json"'));
+    expect(copied.setData).toHaveBeenCalledWith("text/plain", "Pasted");
   });
 
   it("uses structural focus for navigation and Escape cancels cell editing", async () => {

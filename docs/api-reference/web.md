@@ -171,6 +171,11 @@ projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
 ```ts
 readWebRasterFile(file: WebRasterFile): Promise<WebRasterSourceResult>
 ```
+## `registerWebVirtualSelectionScope`
+
+```ts
+registerWebVirtualSelectionScope(document: object, options: WebVirtualSelectionScopeOptions): WebVirtualSelectionScopeRegistration
+```
 ## `renderWebAnnotationRaster`
 
 ```ts
@@ -687,6 +692,35 @@ interface WebViewportInteractionPorts<Key> {
 interface WebViewportObserver {
   observe(target: object, options?: object): void;
   disconnect(): void;
+}
+```
+## `WebVirtualSelectionScopeActivation`
+
+```ts
+type WebVirtualSelectionScopeActivation = "contained" | "fallback";
+```
+## `WebVirtualSelectionScopeElementRef`
+
+```ts
+interface WebVirtualSelectionScopeElementRef {
+  readonly current: object | null;
+}
+```
+## `WebVirtualSelectionScopeOptions`
+
+```ts
+interface WebVirtualSelectionScopeOptions {
+  readonly activation: WebVirtualSelectionScopeActivation;
+  readonly boundaryRef?: WebVirtualSelectionScopeElementRef;
+  readonly readAllText: () => string;
+  readonly selectionRef: WebVirtualSelectionScopeElementRef;
+}
+```
+## `WebVirtualSelectionScopeRegistration`
+
+```ts
+interface WebVirtualSelectionScopeRegistration {
+  unregister(): void;
 }
 ```
 ## `WebWidgetARIA`

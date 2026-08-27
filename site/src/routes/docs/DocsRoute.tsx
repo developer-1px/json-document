@@ -12,6 +12,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   adapterGridCell: "database",
   adapterInteraction: "cursor",
   adapterClipboard: "clipboard",
+  adapterVirtualSelection: "cursor",
   adapterContenteditable: "cursor",
   affordance: "cursor",
   uiPrimitives: "braces",
@@ -118,6 +119,10 @@ export function AdapterInteractionDocsRoute() {
 
 export function AdapterClipboardDocsRoute() {
   return <DocsRoute pageId="adapterClipboard" />;
+}
+
+export function AdapterVirtualSelectionDocsRoute() {
+  return <DocsRoute pageId="adapterVirtualSelection" />;
 }
 
 export function AdapterContenteditableDocsRoute() {

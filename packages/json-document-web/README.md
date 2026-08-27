@@ -9,6 +9,12 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
+`registerWebVirtualSelectionScope` coordinates native Select All and copy when a
+surface mounts only part of its model. It selects the mounted root with a real
+DOM Range, then writes the registered complete model text during the native
+`copy` event. Nested contained scopes override a single document fallback;
+editable controls keep browser-native selection.
+
 `fileCandidateFromWebFile`, `fileCandidatesFromWebFiles`, and
 `fileCandidatesFromWebClipboard` translate browser file metadata into the platform-independent
 `@interactive-os/json-document-file-intake` contract without choosing IDs, storage, or product policy.

@@ -628,6 +628,15 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/docs/adapter-virtual-selection",
+    "label": "Virtual Selection",
+    "title": "Virtual Selection Adapter - json-document",
+    "heading": "Virtual Selection Adapter",
+    "description": "부분 마운트된 DOM의 Native Selection과 전체 model-backed plain-text 복사를 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
     "path": "/adapters/keyboard",
     "label": "Keyboard Live Demo",
     "title": "Keyboard Adapter Live Demo - json-document",
@@ -661,6 +670,18 @@
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-contenteditable"
+    }
+  },
+  {
+    "path": "/adapters/virtual-selection",
+    "label": "Virtual Selection adapter",
+    "title": "Virtual Selection Adapter Live Demo - json-document",
+    "description": "Official virtual selection adapter: a native Range represents mounted content while copy writes complete model text.",
+    "navigationGroup": "Adapter",
+    "sidebar": false,
+    "integration": {
+      "kind": "adapter",
+      "packageName": "@interactive-os/json-document-web"
     }
   },
   {

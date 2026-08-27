@@ -78,6 +78,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Interaction",
     "Clipboard Reference",
     "Contenteditable",
+    "Virtual Selection",
   ]);
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
@@ -215,6 +216,7 @@ test("Connector pages declare the connection before the live demo", async ({ pag
     "/connectors/tanstack-table",
     "/adapters/keyboard",
     "/adapters/clipboard",
+    "/adapters/virtual-selection",
     "/adapters/contenteditable",
   ];
 
@@ -245,6 +247,7 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
     "Interaction",
     "Clipboard Reference",
     "Contenteditable",
+    "Virtual Selection",
   ]);
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
@@ -319,6 +322,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/adapters",
     "/adapters/keyboard",
     "/adapters/clipboard",
+    "/adapters/virtual-selection",
     "/adapters/contenteditable",
   ];
 

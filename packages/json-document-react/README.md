@@ -1,5 +1,10 @@
 # @interactive-os/json-document-react
 
+`useVirtualSelectionScope` composes the Web virtual-selection coordinator with a
+React callback ref. The hook keeps the latest complete-text reader across
+rerenders and unregisters the owner-document scope when the element changes or
+unmounts.
+
 React Connector for `@interactive-os/json-document` and
 `@interactive-os/json-document-editing`.
 

@@ -21,6 +21,7 @@ export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coo
 export { readWebRasterFile } from "./raster-source.js";
 export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
 export { renderWebAnnotationRaster } from "./annotation-raster.js";
+export { registerWebVirtualSelectionScope } from "./virtual-selection-scope.js";
 export {
   findWebKanbanCardDropTarget,
   kanbanCardDropTargetFromWebElement,
@@ -96,6 +97,12 @@ export type { WebClientPoint, WebSVGElement, WebSVGViewport } from "./svg-coordi
 export type { WebRasterFile, WebRasterSourceResult } from "./raster-source.js";
 export type { WebComposerClipboardEvent, WebComposerFile, WebComposerFileList, WebFileCandidate, WebFileCandidateList, WebFileClipboardEvent } from "./file-intake.js";
 export type { WebAnnotationRasterResult, WebAnnotationRasterStyle } from "./annotation-raster.js";
+export type {
+  WebVirtualSelectionScopeActivation,
+  WebVirtualSelectionScopeElementRef,
+  WebVirtualSelectionScopeOptions,
+  WebVirtualSelectionScopeRegistration,
+} from "./virtual-selection-scope.js";
 export type { WebWidgetARIA, WebWidgetState } from "./widget.js";
 export type {
   WebFocusableItem,

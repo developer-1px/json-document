@@ -48,6 +48,7 @@ import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
+import { CodeBlock } from "../../shared/ui/code-block";
 import {
   initialAnnotationDocument,
 } from "./annotation-state";
@@ -381,11 +382,23 @@ export function AnnotationDemoRoute() {
             <IconButton label="Delete annotation" className={annotationDemoStyles.dockButton()} disabled={selected === null} onClick={deleteSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
             <IconButton label="Download annotated image" className={annotationDemoStyles.dockButton()} onClick={() => void downloadImage()}><Download aria-hidden="true" size={16} /></IconButton>
           </nav>
-          <output className="sr-only" data-testid="annotation-structured-output">
-            {JSON.stringify(presentStructuredSnapshot(documentValue, selectedId))}
-          </output>
         </div>
       </ProductApp>
+      <details className={classes("fixed bottom-4 right-4 z-50 max-h-[calc(100vh-2rem)] w-[min(34rem,calc(100vw-2rem))] overflow-auto p-3", ui.surface.overlay)}>
+        <summary className={ui.interactive.link.prominent}>Annotation output</summary>
+        <div className="mt-3">
+          <OutputPanel
+            canRestore={savedState !== null}
+            onRestore={restoreState}
+            onSave={saveState}
+            output={output}
+            setOutput={setOutput}
+            structured={structuredOutput}
+            structuredDownloadUrl={structuredDownloadUrl}
+            renderedImage={renderedImage}
+          />
+        </div>
+      </details>
     </DemoPage>
   );
 }
@@ -684,9 +697,14 @@ function OutputPanel(props: {
             <IconButton label="Restore state" disabled={!props.canRestore} onClick={props.onRestore}><RotateCcw aria-hidden="true" size={16} /></IconButton>
             <a className={ui.interactive.link.prominent} download="annotation-request.json" href={props.structuredDownloadUrl}>Download JSON</a>
           </div>
-          <pre data-testid="annotation-structured-output" className={classes(annotationDemoStyles.structuredOutput(), ui.surface.inset)}>
-            {JSON.stringify(props.structured, null, 2)}
-          </pre>
+          <CodeBlock
+            className={annotationDemoStyles.structuredOutput()}
+            label="Annotation structured JSON"
+            language="json"
+            size="compact"
+            source={JSON.stringify(props.structured, null, 2)}
+            testId="annotation-structured-output"
+          />
         </div>
       ) : props.renderedImage === null ? (
         <p id="annotation-output-panel-image" role="tabpanel" aria-labelledby="annotation-output-tab-image" className={classes("m-0", ui.text.meta)}>Rasterizing…</p>

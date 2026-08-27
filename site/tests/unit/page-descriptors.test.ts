@@ -8,7 +8,7 @@ import {
 
 describe("public page descriptors", () => {
   test("owns integration pages and related demos in canonical descriptors", () => {
-    expect(integrationPageDescriptors("adapter")).toHaveLength(3);
+    expect(integrationPageDescriptors("adapter")).toHaveLength(4);
     expect(integrationPageDescriptors("connector")).toHaveLength(5);
     expect(pageDescriptors.filter(({ parentPath }) => parentPath === "/connectors/zod").map(({ path, label, relatedDemoLabel }) => ({
       path,

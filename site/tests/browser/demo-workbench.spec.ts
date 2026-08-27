@@ -40,6 +40,7 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "DatabaseTableDemo.tsx",
     "initial-database.ts",
     "database-hand.tsx",
+    "clipboard.ts",
     "database.ts",
     "database-property-value.ts",
     "topology.ts",
