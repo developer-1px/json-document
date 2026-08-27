@@ -261,6 +261,11 @@ createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string)
 ```ts
 createTypeaheadSession<Key>(options: { readonly onMatch: (key: Key) => void; readonly onSnapshot?: (snapshot: TypeaheadSessionSnapshot) => void; }): TypeaheadSession<Key>
 ```
+## `createViewportInteractionSession`
+
+```ts
+createViewportInteractionSession<Key>(options: ViewportInteractionOptions<Key>): ViewportInteractionSession<Key>
+```
 ## `deleteAffordance`
 
 ```ts
@@ -564,6 +569,60 @@ interface TypeaheadSessionInput<Key> {
 interface TypeaheadSessionSnapshot {
   readonly buffer: string;
   readonly at: number;
+}
+```
+## `ViewportInteractionCancelReason`
+
+```ts
+type ViewportInteractionCancelReason = "cancel" | "superseded" | "user-interruption" | "watchdog";
+```
+## `ViewportInteractionOptions`
+
+```ts
+interface ViewportInteractionOptions<Key> extends ViewportInteractionPorts<Key> {
+  readonly settleFrames?: number;
+  readonly watchdogMs?: number;
+  readonly onCancel?: (reason: ViewportInteractionCancelReason) => void;
+  readonly onSettle?: () => void;
+}
+```
+## `ViewportInteractionPorts`
+
+```ts
+interface ViewportInteractionPorts<Key> {
+  readonly measureAnchor: (key: Key) => number | null;
+  readonly scrollBy: (delta: number) => void;
+  readonly scrollToFollowTarget: () => void;
+  readonly scheduleFrame: (callback: () => void) => () => void;
+  readonly scheduleWatchdog: (callback: () => void, delay: number) => () => void;
+}
+```
+## `ViewportInteractionSession`
+
+```ts
+interface ViewportInteractionSession<Key> {
+  getSnapshot(): ViewportInteractionSnapshot;
+  setFollowing(following: boolean): void;
+  begin(transaction?: ViewportLayoutTransaction<Key>): void;
+  layoutChanged(): void;
+  interrupt(): void;
+  cancel(reason?: ViewportInteractionCancelReason): void;
+}
+```
+## `ViewportInteractionSnapshot`
+
+```ts
+interface ViewportInteractionSnapshot {
+  readonly active: boolean;
+  readonly following: boolean;
+  readonly applyingScroll: boolean;
+}
+```
+## `ViewportLayoutTransaction`
+
+```ts
+interface ViewportLayoutTransaction<Key> {
+  readonly anchorKey?: Key;
 }
 ```
 ## `wheelAffordance`

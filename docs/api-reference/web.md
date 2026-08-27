@@ -66,6 +66,11 @@ createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboar
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
 ```
+## `createWebViewportInteractionPorts`
+
+```ts
+createWebViewportInteractionPorts<Key>(options: WebViewportInteractionOptions<Key>): WebViewportInteractionPorts<Key>
+```
 ## `databaseClipboardCodec`
 
 ```ts
@@ -633,6 +638,55 @@ interface WebTextControlEvent {
 interface WebTextInput {
   readonly text: string;
   readonly offset: number;
+}
+```
+## `WebViewportElement`
+
+```ts
+interface WebViewportElement {
+  readonly clientHeight: number;
+  readonly scrollHeight: number;
+  getBoundingClientRect(): { readonly top: number };
+  scrollBy(options: { readonly top: number; readonly behavior: "instant" }): void;
+  scrollTo(options: { readonly top: number; readonly behavior: "instant" }): void;
+  addEventListener(type: string, listener: () => void, options?: { readonly passive?: boolean }): void;
+  removeEventListener(type: string, listener: () => void): void;
+}
+```
+## `WebViewportInteractionOptions`
+
+```ts
+interface WebViewportInteractionOptions<Key> {
+  readonly viewport: WebViewportElement;
+  readonly content?: object;
+  readonly findAnchor: (key: Key) => { getBoundingClientRect(): { readonly top: number } } | null;
+  readonly createResizeObserver?: (callback: () => void) => WebViewportObserver;
+  readonly createMutationObserver?: (callback: () => void) => WebViewportObserver;
+  readonly requestFrame?: (callback: () => void) => number;
+  readonly cancelFrame?: (handle: number) => void;
+  readonly setTimer?: (callback: () => void, delay: number) => number;
+  readonly clearTimer?: (handle: number) => void;
+}
+```
+## `WebViewportInteractionPorts`
+
+```ts
+interface WebViewportInteractionPorts<Key> {
+  measureAnchor(key: Key): number | null;
+  scrollBy(delta: number): void;
+  scrollToFollowTarget(): void;
+  scheduleFrame(callback: () => void): () => void;
+  scheduleWatchdog(callback: () => void, delay: number): () => void;
+  observeLayout(callback: () => void): () => void;
+  observeUserScrollIntent(callback: () => void): () => void;
+}
+```
+## `WebViewportObserver`
+
+```ts
+interface WebViewportObserver {
+  observe(target: object, options?: object): void;
+  disconnect(): void;
 }
 ```
 ## `WebWidgetARIA`

@@ -75,6 +75,22 @@ Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
 Transcript, 말풍선, think·stream·tool animation은 표현과 runtime lifecycle입니다.
 Hands가 아닙니다.
 
+## Hands가 공유하는 Viewport interaction
+
+Cstar의 긴 대화 표면에서 발견한 prepend 위치 보존, streaming follow와 사용자
+scroll 중단은 chat 업무 규칙이 아닙니다. 동적으로 늘어나거나 일부만 렌더링되는
+여러 Hands가 공유하는 browser interaction입니다. 정본 lifecycle은 논리 anchor의
+viewport offset을 보존하고, 안정된 layout의 target을 따라가며, 사용자가 개입하면
+자동 follow를 넘겨줍니다. programmatic scroll, settle, supersede, cancel과
+watchdog도 같은 session이 구분합니다.
+
+Host는 anchor identity와 follow 정책을 정하고, Affordance와 Web adapter는 제품
+의미를 모른 채 lifecycle과 DOM 연결을 소유합니다.
+
+```live-demo
+/demo/viewport
+```
+
 ## Artifact를 다루는 닫힌 Hands
 
 | Hands | 관찰한 표면 | 사람이 하는 일 |

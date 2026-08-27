@@ -18,6 +18,21 @@ function onWheel(event: WheelEvent) {
 
 이 손은 호스트 overflow입니다. 문서 값은 바꾸지 않습니다.
 
+콘텐츠 prepend·streaming·비동기 layout 중 논리 위치와 사용자 의도를 보존하는
+수명은 `createViewportInteractionSession`이 소유합니다. Web Host는
+`createWebViewportInteractionPorts`로 DOM 측정, scroll, observer와 frame을
+연결합니다. anchor identity와 언제 follow할지는 Host 정책입니다.
+
+```ts
+const ports = createWebViewportInteractionPorts({ viewport, content, findAnchor });
+const session = createViewportInteractionSession(ports);
+const stopLayout = ports.observeLayout(() => session.layoutChanged());
+const stopIntent = ports.observeUserScrollIntent(() => session.interrupt());
+
+session.begin({ anchorKey: firstVisibleId });
+prependRows();
+```
+
 닫는 손:
 - wheel (수정 키 없음). 평면에서는 스크롤/팬. 객체 좌표 불변
 - 초점 대상이 보이도록 scroll-into-view는 호스트

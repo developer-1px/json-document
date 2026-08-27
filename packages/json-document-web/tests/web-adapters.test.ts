@@ -17,6 +17,7 @@ import {
   fileCandidatesFromWebFiles,
   createWebDragDropSession,
   createWebPointerSession,
+  createWebViewportInteractionPorts,
   createWebClipboardBinding,
   createWebClipboardSurface,
   createWebClipboardTextWriter,
@@ -51,6 +52,55 @@ import {
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("Web viewport interaction ports", () => {
+  test("projects anchor geometry and scroll operations", () => {
+    const scrolls: Array<{ kind: string; top: number }> = [];
+    const viewport = webViewportElement({
+      top: 20,
+      clientHeight: 300,
+      scrollHeight: 900,
+      onScrollBy: (top) => scrolls.push({ kind: "by", top }),
+      onScrollTo: (top) => scrolls.push({ kind: "to", top }),
+    });
+    const ports = createWebViewportInteractionPorts({
+      viewport,
+      findAnchor: (key: string) => key === "row" ? { getBoundingClientRect: () => ({ top: 92 }) } : null,
+      requestFrame: () => 1,
+      cancelFrame: () => undefined,
+    });
+    expect(ports.measureAnchor("row")).toBe(72);
+    expect(ports.measureAnchor("missing")).toBeNull();
+    ports.scrollBy(48);
+    ports.scrollToFollowTarget();
+    expect(scrolls).toEqual([{ kind: "by", top: 48 }, { kind: "to", top: 600 }]);
+  });
+
+  test("binds layout observers and user intent with cleanup", () => {
+    const observed: string[] = [];
+    const disconnected: string[] = [];
+    const listeners = new Map<string, () => void>();
+    const viewport = webViewportElement({ listeners });
+    const content = {};
+    const ports = createWebViewportInteractionPorts<string>({
+      viewport,
+      content,
+      findAnchor: () => null,
+      createResizeObserver: () => observer("resize", observed, disconnected),
+      createMutationObserver: () => observer("mutation", observed, disconnected),
+      requestFrame: () => 1,
+      cancelFrame: () => undefined,
+    });
+    const stopLayout = ports.observeLayout(() => undefined);
+    const stopIntent = ports.observeUserScrollIntent(() => undefined);
+    expect(observed).toEqual(["resize", "resize", "mutation"]);
+    expect([...listeners.keys()]).toEqual(["wheel", "touchstart", "pointerdown"]);
+    stopLayout();
+    stopIntent();
+    expect(disconnected).toEqual(["resize", "mutation"]);
+    expect(listeners.size).toBe(0);
+  });
+});
 
 describe("Web file intake translation", () => {
   const files = [
@@ -696,5 +746,32 @@ function kanbanElement(attributes: Readonly<Record<string, string>>, parent: Tes
       return name in attributes ? this : parent?.closest(selector) ?? null;
     },
     getAttribute(name: string) { return attributes[name] ?? null; },
+  };
+}
+
+function webViewportElement(options: {
+  readonly top?: number;
+  readonly clientHeight?: number;
+  readonly scrollHeight?: number;
+  readonly onScrollBy?: (top: number) => void;
+  readonly onScrollTo?: (top: number) => void;
+  readonly listeners?: Map<string, () => void>;
+} = {}) {
+  const listeners = options.listeners ?? new Map<string, () => void>();
+  return {
+    clientHeight: options.clientHeight ?? 0,
+    scrollHeight: options.scrollHeight ?? 0,
+    getBoundingClientRect: () => ({ top: options.top ?? 0 }),
+    scrollBy: ({ top }: { readonly top: number }) => options.onScrollBy?.(top),
+    scrollTo: ({ top }: { readonly top: number }) => options.onScrollTo?.(top),
+    addEventListener: (type: string, listener: () => void) => { listeners.set(type, listener); },
+    removeEventListener: (type: string) => { listeners.delete(type); },
+  };
+}
+
+function observer(name: string, observed: string[], disconnected: string[]) {
+  return {
+    observe: () => { observed.push(name); },
+    disconnect: () => { disconnected.push(name); },
   };
 }
