@@ -428,7 +428,7 @@
     "path": "/demo/viewport",
     "label": "Viewport Interaction",
     "title": "Viewport Interaction - json-document",
-    "description": "Preserve an anchor, follow streaming growth, and yield scrolling to the user.",
+    "description": "Replay a security-filtered Cstar runtime capture to preserve history position, follow 87 real stream chunks, and yield scrolling to the reader.",
     "language": "ko",
     "parentPath": "/editors",
     "navigationGroup": "Hands"

@@ -58,6 +58,8 @@ Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
 - Clipboard/History 등 필요한 editing capability가 연결됨
 - 대표 keyboard·pointer Affordance와 browser lifecycle이 실제 Host에서 동작함
 - package contract와 Live Demo browser test가 같은 행동을 증명함
+- Live Demo fixture가 관찰된 실제 제품 사건에서 유래하고 shape·순서·크기·timing과
+  provenance를 보존함. synthetic happy path만으로는 Hands를 닫지 않음
 - 반복 책임은 owner package API, 제품 고유 정책은 이름 붙은 Host module에 있음
 
 따라서 “닫힘”은 모든 제품 기능이나 모든 접근성 변형이 끝났다는 뜻이 아닙니다.
@@ -78,7 +80,9 @@ Hands가 아닙니다.
 ## Hands가 공유하는 Viewport interaction
 
 Cstar의 긴 대화 표면에서 발견한 prepend 위치 보존, streaming follow와 사용자
-scroll 중단은 chat 업무 규칙이 아닙니다. 동적으로 늘어나거나 일부만 렌더링되는
+scroll 중단은 chat 업무 규칙이 아닙니다. Live Demo는 security-filter가 적용된
+실제 Codex runtime browser-memory capture의 1,052개 text delta를 87개 원래 chunk
+경계와 scaled delay로 재생합니다. 동적으로 늘어나거나 일부만 렌더링되는
 여러 Hands가 공유하는 browser interaction입니다. 정본 lifecycle은 논리 anchor의
 viewport offset을 보존하고, 안정된 layout의 target을 따라가며, 사용자가 개입하면
 자동 follow를 넘겨줍니다. programmatic scroll, settle, supersede, cancel과
