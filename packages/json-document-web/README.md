@@ -43,10 +43,9 @@ const dragDrop = createWebDragDropSession({
 The sessions own platform lifecycle state. Hit testing, valid targets, geometry,
 and document Intent remain in the host.
 
-`createWebViewportInteractionPorts` supplies DOM anchor measurement, instant
-scroll operations, Resize/Mutation observation, animation frames, watchdogs,
-and user scroll-intent events to the input-independent Affordance session. It
-does not choose an anchor, enable follow mode, or load/render content.
+`createWebViewportPositionPorts` measures an exact target and its paired tail
+reserve, writes temporary scroll range, performs smooth or instant positioning,
+and observes layout and target visibility without choosing product policy.
 
 ```ts
 import { createDocumentEditor } from "@interactive-os/json-document-editing";

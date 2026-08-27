@@ -261,10 +261,10 @@ createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string)
 ```ts
 createTypeaheadSession<Key>(options: { readonly onMatch: (key: Key) => void; readonly onSnapshot?: (snapshot: TypeaheadSessionSnapshot) => void; }): TypeaheadSession<Key>
 ```
-## `createViewportInteractionSession`
+## `createViewportPositionSession`
 
 ```ts
-createViewportInteractionSession<Key>(options: ViewportInteractionOptions<Key>): ViewportInteractionSession<Key>
+createViewportPositionSession<Key>(options: ViewportPositionOptions<Key>): ViewportPositionSession<Key>
 ```
 ## `deleteAffordance`
 
@@ -571,58 +571,60 @@ interface TypeaheadSessionSnapshot {
   readonly at: number;
 }
 ```
-## `ViewportInteractionCancelReason`
+## `ViewportPositionCancelReason`
 
 ```ts
-type ViewportInteractionCancelReason = "cancel" | "superseded" | "user-interruption" | "watchdog";
+type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport";
 ```
-## `ViewportInteractionOptions`
+## `ViewportPositionGeometry`
 
 ```ts
-interface ViewportInteractionOptions<Key> extends ViewportInteractionPorts<Key> {
-  readonly settleFrames?: number;
-  readonly watchdogMs?: number;
-  readonly onCancel?: (reason: ViewportInteractionCancelReason) => void;
-  readonly onSettle?: () => void;
+interface ViewportPositionGeometry {
+  readonly targetOffset: number;
+  readonly tailReserveOffset: number;
+  readonly viewportHeight: number;
 }
 ```
-## `ViewportInteractionPorts`
+## `ViewportPositionOptions`
 
 ```ts
-interface ViewportInteractionPorts<Key> {
-  readonly measureAnchor: (key: Key) => number | null;
-  readonly scrollBy: (delta: number) => void;
-  readonly scrollToFollowTarget: () => void;
+interface ViewportPositionOptions<Key> extends ViewportPositionPorts<Key> {
+  readonly onCancel?: (reason: ViewportPositionCancelReason) => void;
+  readonly onChange?: (snapshot: ViewportPositionSnapshot<Key>) => void;
+}
+```
+## `ViewportPositionPorts`
+
+```ts
+interface ViewportPositionPorts<Key> {
+  readonly measure: (key: Key) => ViewportPositionGeometry | null;
+  readonly setTailReserve: (key: Key, height: number) => boolean;
+  readonly scrollTo: (top: number, behavior: "smooth" | "instant") => void;
   readonly scheduleFrame: (callback: () => void) => () => void;
-  readonly scheduleWatchdog: (callback: () => void, delay: number) => () => void;
 }
 ```
-## `ViewportInteractionSession`
+## `ViewportPositionSession`
 
 ```ts
-interface ViewportInteractionSession<Key> {
-  getSnapshot(): ViewportInteractionSnapshot;
-  setFollowing(following: boolean): void;
-  begin(transaction?: ViewportLayoutTransaction<Key>): void;
+interface ViewportPositionSession<Key> {
+  getSnapshot(): ViewportPositionSnapshot<Key>;
+  position(targetKey: Key, viewportOffset: number): void;
   layoutChanged(): void;
-  interrupt(): void;
-  cancel(reason?: ViewportInteractionCancelReason): void;
+  targetVisibilityChanged(visible: boolean): void;
+  complete(): void;
+  cancel(reason?: ViewportPositionCancelReason): void;
 }
 ```
-## `ViewportInteractionSnapshot`
+## `ViewportPositionSnapshot`
 
 ```ts
-interface ViewportInteractionSnapshot {
+interface ViewportPositionSnapshot<Key> {
   readonly active: boolean;
-  readonly following: boolean;
   readonly applyingScroll: boolean;
-}
-```
-## `ViewportLayoutTransaction`
-
-```ts
-interface ViewportLayoutTransaction<Key> {
-  readonly anchorKey?: Key;
+  readonly owned: boolean;
+  readonly tailReserve: number;
+  readonly targetKey: Key | null;
+  readonly viewportOffset: number | null;
 }
 ```
 ## `wheelAffordance`

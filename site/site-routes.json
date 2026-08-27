@@ -426,9 +426,9 @@
   },
   {
     "path": "/demo/viewport",
-    "label": "Viewport Interaction",
-    "title": "Viewport Interaction - json-document",
-    "description": "Replay a security-filtered Cstar runtime capture to preserve history position, follow 87 real stream chunks, and yield scrolling to the reader.",
+    "label": "Viewport Position",
+    "title": "Viewport Position - json-document",
+    "description": "Position an exact object at a requested viewport offset while 87 production-captured stream chunks consume temporary trailing scroll range.",
     "language": "ko",
     "parentPath": "/editors",
     "navigationGroup": "Hands"

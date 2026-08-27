@@ -35,7 +35,6 @@ import {
   createBoardDragSession,
   createCanvasGestureSession,
   createGestureSession,
-  createViewportInteractionSession,
   typeaheadAffordance,
   wheelAffordance,
   zoomAffordance,
@@ -43,104 +42,6 @@ import {
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 
 describe("Affordance sessions", () => {
-  test("preserves an anchor after layout settles", () => {
-    const frames: Array<() => void> = [];
-    const scrolls: number[] = [];
-    let offset = 40;
-    const session = createViewportInteractionSession<string>({
-      measureAnchor: () => offset,
-      scrollBy: (delta) => scrolls.push(delta),
-      scrollToFollowTarget: () => scrolls.push(Infinity),
-      scheduleFrame: (callback) => { frames.push(callback); return () => undefined; },
-      scheduleWatchdog: () => () => undefined,
-    });
-    session.begin({ anchorKey: "visible-row" });
-    offset = 112;
-    session.layoutChanged();
-    frames.at(-1)?.();
-    frames.at(-1)?.();
-    expect(scrolls).toEqual([72]);
-    expect(session.getSnapshot().active).toBe(false);
-  });
-
-  test("follows growth until user intent interrupts it", () => {
-    const frames: Array<() => void> = [];
-    const events: string[] = [];
-    const session = createViewportInteractionSession<string>({
-      measureAnchor: () => null,
-      scrollBy: () => undefined,
-      scrollToFollowTarget: () => events.push("follow"),
-      scheduleFrame: (callback) => { frames.push(callback); return () => undefined; },
-      scheduleWatchdog: () => () => undefined,
-      onCancel: (reason) => events.push(reason),
-    });
-    session.setFollowing(true);
-    session.begin();
-    frames.at(-1)?.();
-    frames.at(-1)?.();
-    expect(events).toEqual(["follow"]);
-    session.begin();
-    session.interrupt();
-    expect(session.getSnapshot().following).toBe(false);
-    expect(events).toEqual(["follow", "user-interruption"]);
-  });
-
-  test("yields an idle follow mode when user intent arrives between mutations", () => {
-    const cancellations: string[] = [];
-    const session = createViewportInteractionSession<string>({
-      measureAnchor: () => null,
-      scrollBy: () => undefined,
-      scrollToFollowTarget: () => undefined,
-      scheduleFrame: () => () => undefined,
-      scheduleWatchdog: () => () => undefined,
-      onCancel: (reason) => cancellations.push(reason),
-    });
-    session.setFollowing(true);
-    session.interrupt();
-    expect(session.getSnapshot().following).toBe(false);
-    expect(cancellations).toEqual(["user-interruption"]);
-  });
-
-  test("supersedes stale work and ends an unsettled transaction with a watchdog", () => {
-    const frames: Array<() => void> = [];
-    const watchdogs: Array<() => void> = [];
-    const cancellations: string[] = [];
-    const session = createViewportInteractionSession<string>({
-      measureAnchor: () => 0,
-      scrollBy: () => undefined,
-      scrollToFollowTarget: () => undefined,
-      scheduleFrame: (callback) => { frames.push(callback); return () => undefined; },
-      scheduleWatchdog: (callback) => { watchdogs.push(callback); return () => undefined; },
-      onCancel: (reason) => cancellations.push(reason),
-    });
-    session.begin({ anchorKey: "a" });
-    const staleFrame = frames.at(-1)!;
-    session.begin({ anchorKey: "b" });
-    staleFrame();
-    expect(session.getSnapshot().active).toBe(true);
-    watchdogs.at(-1)?.();
-    expect(cancellations).toEqual(["superseded", "watchdog"]);
-    expect(session.getSnapshot().active).toBe(false);
-  });
-
-  test("marks session-owned scroll while applying it", () => {
-    let owned = false;
-    const frames: Array<() => void> = [];
-    let session: ReturnType<typeof createViewportInteractionSession<string>>;
-    session = createViewportInteractionSession<string>({
-      measureAnchor: () => null,
-      scrollBy: () => undefined,
-      scrollToFollowTarget: () => { owned = session.getSnapshot().applyingScroll; },
-      scheduleFrame: (callback) => { frames.push(callback); return () => undefined; },
-      scheduleWatchdog: () => () => undefined,
-    });
-    session.setFollowing(true);
-    session.begin();
-    frames.at(-1)?.();
-    frames.at(-1)?.();
-    expect(owned).toBe(true);
-  });
-
   test("owns typeahead buffer and match timing", () => {
     const matches: string[] = [];
     const session = createTypeaheadSession<string>({ onMatch: (key) => matches.push(key) });

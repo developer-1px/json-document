@@ -16,7 +16,7 @@ export { focusWebItem, webFocusItemProps } from "./focus-item.js";
 export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export { createWebDragDropSession } from "./drag-drop-session.js";
 export { createWebPointerSession } from "./pointer-session.js";
-export { createWebViewportInteractionPorts } from "./viewport-interaction.js";
+export { createWebViewportPositionPorts } from "./viewport-position.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
 export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
@@ -87,11 +87,13 @@ export type {
   WebPointerSessionSnapshot,
 } from "./pointer-session.js";
 export type {
-  WebViewportElement,
-  WebViewportInteractionOptions,
-  WebViewportInteractionPorts,
-  WebViewportObserver,
-} from "./viewport-interaction.js";
+  WebViewportPositionElement,
+  WebViewportPositionObserver,
+  WebViewportPositionOptions,
+  WebViewportPositionPorts,
+  WebViewportPositionViewport,
+  WebViewportPositionVisibilityObserver,
+} from "./viewport-position.js";
 export type { WebKanbanTargetElement } from "./kanban-drop-target.js";
 export type { WebClientPoint, WebSVGElement, WebSVGViewport } from "./svg-coordinate.js";
 export type { WebRasterFile, WebRasterSourceResult } from "./raster-source.js";

@@ -16,7 +16,7 @@ export {
 export { createBoardDragSession } from "./board-drag-session.js";
 export { createCanvasGestureSession } from "./canvas-gesture-session.js";
 export { createGestureSession } from "./gesture-session.js";
-export { createViewportInteractionSession } from "./viewport-interaction.js";
+export { createViewportPositionSession } from "./viewport-position.js";
 export type {
   BoardDragCancelReason,
   BoardDragSession,
@@ -38,13 +38,13 @@ export type {
   GestureState,
 } from "./gesture-session.js";
 export type {
-  ViewportInteractionCancelReason,
-  ViewportInteractionOptions,
-  ViewportInteractionPorts,
-  ViewportInteractionSession,
-  ViewportInteractionSnapshot,
-  ViewportLayoutTransaction,
-} from "./viewport-interaction.js";
+  ViewportPositionCancelReason,
+  ViewportPositionGeometry,
+  ViewportPositionOptions,
+  ViewportPositionPorts,
+  ViewportPositionSession,
+  ViewportPositionSnapshot,
+} from "./viewport-position.js";
 export type { Point, Rect, ResizeEdge } from "./drag.js";
 export { disclosureAffordance, treeAffordance } from "./fold.js";
 export type { TreeAffordance, TreeFoldNode, TreeMoveDirection } from "./fold.js";

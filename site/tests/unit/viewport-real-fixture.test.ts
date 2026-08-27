@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto";
 import { describe, expect, test } from "vitest";
-import { cstarViewportStreamCapture } from "../../src/routes/viewport-demo/cstar-viewport-stream.fixture";
+import { runtimeMarkdownStreamFixture } from "../../src/routes/viewport-position-demo/runtime-markdown-stream.fixture";
 
-describe("Cstar viewport real-world fixture", () => {
+describe("Viewport real-world stream fixture", () => {
   test("preserves the security-filtered production capture and its complete chunk sequence", () => {
-    const capture = cstarViewportStreamCapture;
+    const capture = runtimeMarkdownStreamFixture;
     const digest = createHash("sha256").update(capture.stream.document).digest("hex");
 
-    expect(capture.schemaVersion).toBe("cstar.chat-transcript-animation-stream-capture/v1");
+    expect(capture.schemaVersion).toBe("json-document.runtime-markdown-stream-fixture/v1");
     expect(capture.capture.securityFilter).toBe("applied");
     expect(capture.capture.droppedEntries).toBe(0);
     expect(capture.capture.truncatedEntries).toBe(0);

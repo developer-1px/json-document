@@ -61,9 +61,9 @@ domain move Intent.
 preview, commit, cancel, and supersede lifecycle. Web pointer capture and Host
 coordinate, hit-test, renderer, lock, and viewport policies stay outside it.
 
-`createViewportInteractionSession` preserves a logical anchor or follows an
-explicit target while asynchronous layout settles. It owns supersede, cancel,
-user interruption, programmatic scroll ownership, and watchdog lifecycle;
-anchor identity, follow policy, rendering, and data loading remain in the Host.
+`createViewportPositionSession` places an exact logical target at a requested
+viewport offset. It creates the missing trailing scroll range near the document
+end, reconciles that range as layout grows, and removes it when the target
+leaves the viewport; target meaning remains in the Host.
 
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)

@@ -18,19 +18,28 @@ function onWheel(event: WheelEvent) {
 
 이 손은 호스트 overflow입니다. 문서 값은 바꾸지 않습니다.
 
-콘텐츠 prepend·streaming·비동기 layout 중 논리 위치와 사용자 의도를 보존하는
-수명은 `createViewportInteractionSession`이 소유합니다. Web Host는
-`createWebViewportInteractionPorts`로 DOM 측정, scroll, observer와 frame을
-연결합니다. anchor identity와 언제 follow할지는 Host 정책입니다.
+특정 오브젝트를 원하는 viewport 위치로 보내는 수명은
+`createViewportPositionSession`이 소유합니다. 문서 끝에서 해당 위치까지 스크롤할
+수 없다면 부족한 trailing scroll range를 임시로 만들고, 뒤의 content가 자라면
+같은 layout 주기에 줄입니다. 대상이 viewport를 벗어나면 control과 임시 range를
+함께 해제합니다. Web Host는 `createWebViewportPositionPorts`로 exact target과
+짝지은 tail reserve를 연결합니다.
 
 ```ts
-const ports = createWebViewportInteractionPorts({ viewport, content, findAnchor });
-const session = createViewportInteractionSession(ports);
+const ports = createWebViewportPositionPorts({
+  viewport,
+  content,
+  findTarget,
+  findTailReserve,
+  createVisibilityObserver,
+});
+const session = createViewportPositionSession({ ...ports });
 const stopLayout = ports.observeLayout(() => session.layoutChanged());
-const stopIntent = ports.observeUserScrollIntent(() => session.interrupt());
+const stopVisibility = ports.observeTargetVisibility(targetId, (visible) => {
+  session.targetVisibilityChanged(visible);
+});
 
-session.begin({ anchorKey: firstVisibleId });
-prependRows();
+session.position(targetId, 96);
 ```
 
 닫는 손:

@@ -66,10 +66,10 @@ createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboar
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
 ```
-## `createWebViewportInteractionPorts`
+## `createWebViewportPositionPorts`
 
 ```ts
-createWebViewportInteractionPorts<Key>(options: WebViewportInteractionOptions<Key>): WebViewportInteractionPorts<Key>
+createWebViewportPositionPorts<Key>(options: WebViewportPositionOptions<Key>): WebViewportPositionPorts<Key>
 ```
 ## `databaseClipboardCodec`
 
@@ -645,52 +645,67 @@ interface WebTextInput {
   readonly offset: number;
 }
 ```
-## `WebViewportElement`
+## `WebViewportPositionElement`
 
 ```ts
-interface WebViewportElement {
-  readonly clientHeight: number;
-  readonly scrollHeight: number;
+interface WebViewportPositionElement {
+  readonly style: { height: string };
   getBoundingClientRect(): { readonly top: number };
-  scrollBy(options: { readonly top: number; readonly behavior: "instant" }): void;
-  scrollTo(options: { readonly top: number; readonly behavior: "instant" }): void;
-  addEventListener(type: string, listener: () => void, options?: { readonly passive?: boolean }): void;
-  removeEventListener(type: string, listener: () => void): void;
 }
 ```
-## `WebViewportInteractionOptions`
+## `WebViewportPositionObserver`
 
 ```ts
-interface WebViewportInteractionOptions<Key> {
-  readonly viewport: WebViewportElement;
+interface WebViewportPositionObserver {
+  observe(target: object, options?: object): void;
+  disconnect(): void;
+}
+```
+## `WebViewportPositionOptions`
+
+```ts
+interface WebViewportPositionOptions<Key> {
+  readonly viewport: WebViewportPositionViewport;
   readonly content?: object;
-  readonly findAnchor: (key: Key) => { getBoundingClientRect(): { readonly top: number } } | null;
-  readonly createResizeObserver?: (callback: () => void) => WebViewportObserver;
-  readonly createMutationObserver?: (callback: () => void) => WebViewportObserver;
+  readonly findTarget: (key: Key) => WebViewportPositionElement | null;
+  readonly findTailReserve: (key: Key) => WebViewportPositionElement | null;
+  readonly createResizeObserver?: (callback: () => void) => WebViewportPositionObserver;
+  readonly createMutationObserver?: (callback: () => void) => WebViewportPositionObserver;
+  readonly createVisibilityObserver?: (
+    callback: (visible: boolean) => void,
+    root: object,
+  ) => WebViewportPositionVisibilityObserver;
   readonly requestFrame?: (callback: () => void) => number;
   readonly cancelFrame?: (handle: number) => void;
-  readonly setTimer?: (callback: () => void, delay: number) => number;
-  readonly clearTimer?: (handle: number) => void;
 }
 ```
-## `WebViewportInteractionPorts`
+## `WebViewportPositionPorts`
 
 ```ts
-interface WebViewportInteractionPorts<Key> {
-  measureAnchor(key: Key): number | null;
-  scrollBy(delta: number): void;
-  scrollToFollowTarget(): void;
+interface WebViewportPositionPorts<Key> {
+  measure(key: Key): { targetOffset: number; tailReserveOffset: number; viewportHeight: number } | null;
+  setTailReserve(key: Key, height: number): boolean;
+  scrollTo(top: number, behavior: "smooth" | "instant"): void;
   scheduleFrame(callback: () => void): () => void;
-  scheduleWatchdog(callback: () => void, delay: number): () => void;
   observeLayout(callback: () => void): () => void;
-  observeUserScrollIntent(callback: () => void): () => void;
+  observeTargetVisibility(key: Key, callback: (visible: boolean) => void): () => void;
 }
 ```
-## `WebViewportObserver`
+## `WebViewportPositionViewport`
 
 ```ts
-interface WebViewportObserver {
-  observe(target: object, options?: object): void;
+interface WebViewportPositionViewport {
+  readonly clientHeight: number;
+  readonly scrollTop: number;
+  getBoundingClientRect(): { readonly top: number };
+  scrollTo(options: { readonly top: number; readonly behavior: "smooth" | "instant" }): void;
+}
+```
+## `WebViewportPositionVisibilityObserver`
+
+```ts
+interface WebViewportPositionVisibilityObserver {
+  observe(target: object): void;
   disconnect(): void;
 }
 ```

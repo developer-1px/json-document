@@ -58,7 +58,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "API · Database",
     "Overview",
     "Official Hands · TBD",
-    "Viewport Interaction",
+    "Viewport Position",
     "Order",
     "Object",
     "Annotation",

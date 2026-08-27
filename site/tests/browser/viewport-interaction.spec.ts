@@ -1,31 +1,45 @@
 import { expect, test } from "@playwright/test";
 
-test("Cstar real fixture preserves history position and yields a live stream to the reader", async ({ page }) => {
+test("real stream uses temporary trailing range to position an exact object", async ({ page }) => {
   test.setTimeout(45_000);
   await page.goto("/demo/viewport");
   const viewport = page.getByTestId("viewport");
-  const capturedResponse = viewport.locator('[data-entry-id="captured-response"]');
-  const before = await capturedResponse.evaluate((element) => element.getBoundingClientRect().top);
 
-  await page.getByRole("button", { name: "Load earlier Cstar history" }).click();
-  await expect(page.getByTestId("viewport-status")).toHaveText("Earlier Cstar history loaded · anchor preserved");
-  const after = await capturedResponse.evaluate((element) => element.getBoundingClientRect().top);
-  expect(Math.abs(after - before)).toBeLessThan(2);
+  await page.getByRole("button", { name: "Submit captured prompt" }).click();
+  const target = viewport.locator('[data-viewport-position-target-key="submitted-request"]');
+  await expect.poll(async () => target.evaluate((element) => {
+    const viewportElement = element.closest('[data-testid="viewport"]')!;
+    return Math.abs(element.getBoundingClientRect().top - viewportElement.getBoundingClientRect().top - 96);
+  })).toBeLessThan(2);
 
-  await page.getByRole("button", { name: "Replay actual capture" }).click();
-  await expect(page.getByTestId("viewport-status")).toContainText("Replaying captured stream");
-  await capturedResponse.click();
-  await expect(page.getByTestId("viewport-status")).toContainText("Reading history");
-  await expect(page.getByText(/captured chunks arrived/)).toBeVisible();
+  const initialTailRange = Number.parseInt(await page.getByTestId("tail-range").innerText(), 10);
+  expect(initialTailRange).toBeGreaterThan(0);
+  await expect.poll(async () => Number.parseInt(
+    await page.getByTestId("tail-range").innerText(),
+    10,
+  )).toBeLessThan(initialTailRange);
 
-  await page.getByRole("button", { name: "Return to latest" }).click();
-  await expect(page.getByText(/following: true/)).toBeVisible();
-  await expect(page.getByTestId("viewport-status")).toHaveText("Captured run complete", { timeout: 20_000 });
-  await expect.poll(() => viewport.evaluate((element) =>
-    Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop),
-  )).toBeLessThan(2);
+  await expect(page.getByTestId("viewport-status")).toHaveText(
+    "Captured response complete · requested position retained",
+    { timeout: 20_000 },
+  );
+  await viewport.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+  await expect(page.getByText("position control: released")).toBeVisible();
+  await expect(page.getByTestId("tail-range")).toHaveText("0px");
+  await expect(page.getByTestId("viewport-status")).toContainText("Target left viewport");
 
-  await expect(page.getByText("1,052 deltas · 87 captured chunks")).toBeVisible();
+  await page.getByRole("button", { name: "Replay captured response" }).click();
+  await expect(page.getByTestId("viewport-status")).toHaveText(
+    "Captured response complete · requested position retained",
+    { timeout: 20_000 },
+  );
+  await expect(page.getByText("position control: active")).toBeVisible();
+  await expect.poll(async () => target.evaluate((element) => {
+    const viewportElement = element.closest('[data-testid="viewport"]')!;
+    return Math.abs(element.getBoundingClientRect().top - viewportElement.getBoundingClientRect().top - 96);
+  })).toBeLessThan(2);
+
+  await expect(page.getByText("1,052 deltas · 87 chunks")).toBeVisible();
   await expect(page.getByText("bounded-browser-memory")).toBeVisible();
   await expect(page.getByText("applied")).toBeVisible();
 });
