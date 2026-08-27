@@ -13,6 +13,7 @@ import {
 import {
   hasRichTextContent,
   isRichTextText,
+  richTextPlainText,
   richTextSchemaV1,
   type RichTextDocument,
   type RichTextEditor,
@@ -20,6 +21,7 @@ import {
   type RichTextNode,
   type RichTextSchema,
 } from "@interactive-os/json-document-rich-text";
+import { useVirtualSelectionScope } from "@interactive-os/json-document-react";
 import {
   createRichTextContentEditableBinding,
   type RichTextContentEditableBinding,
@@ -246,6 +248,7 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
   if (node.type === "heading") return createElement(`h${node.attrs.level}`, { key: node.id, ...props }, content);
   if (node.type === "hardBreak") return <br key={node.id} {...props} />;
   if (node.type === "codeBlock") {
+    if (!editable) return <ReadOnlyCodeBlock key={node.id} node={node} attributes={props}>{content}</ReadOnlyCodeBlock>;
     return <pre key={node.id} {...props}><code {...(node.attrs.language === null ? {} : { className: `language-${node.attrs.language}` })}>{content}</code></pre>;
   }
   if (node.type === "orderedList") return <ol key={node.id} {...props} start={node.attrs.start}>{content}</ol>;
@@ -265,6 +268,24 @@ const RichTextMemoNode = memo(function RichTextMemoNode({
   && previous.renderExtensionMark === next.renderExtensionMark
   && previous.renderUnknown === next.renderUnknown
 ));
+
+function ReadOnlyCodeBlock(props: {
+  readonly node: Extract<RichTextNode, { readonly type: "codeBlock" }>;
+  readonly attributes: Readonly<Record<string, string>>;
+  readonly children: ReadonlyArray<ReactNode>;
+}) {
+  const selectionRef = useVirtualSelectionScope<HTMLPreElement>({
+    activation: "contained",
+    readAllText: () => richTextPlainText(props.node.content),
+  });
+  return (
+    <pre ref={selectionRef} {...props.attributes}>
+      <code {...(props.node.attrs.language === null ? {} : { className: `language-${props.node.attrs.language}` })}>
+        {props.children}
+      </code>
+    </pre>
+  );
+}
 
 function wrapMark(
   mark: RichTextMark,

@@ -33,6 +33,7 @@ import {
 } from "./model.js";
 import { createRichTextNodeId } from "./identity.js";
 import { normalizeRichText } from "./normalize.js";
+import { richTextPlainText } from "./plain-text.js";
 import { diffRichText } from "./diff.js";
 import {
   containerContentSegments,
@@ -256,7 +257,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     const content = allInline
       ? slices[0]!.content
       : slices.flatMap((slice) => slice.openStart === 0 ? slice.content : [{ id: createId(), type: "paragraph", content: slice.content } as RichTextNode]);
-    const text = plainTextForNodes(content);
+    const text = richTextPlainText(content);
     return {
       type: RICH_TEXT_CLIPBOARD_MIME,
       slice: {
@@ -1222,14 +1223,6 @@ function findContainingTextBlock(document: RichTextDocument, nodeId: string, sch
     return spec?.group === "block" && hasRichTextContent(node)
       && node.content.every((child) => schema.nodes[child.type]?.group === "inline");
   }) as RichTextNode | undefined ?? null;
-}
-
-function plainTextForNodes(nodes: ReadonlyArray<RichTextNode>): string {
-  return nodes.map((node) => {
-    if (isRichTextText(node)) return node.text;
-    if (node.type === "hardBreak") return "\n";
-    return hasRichTextContent(node) ? plainTextForNodes(node.content) : "";
-  }).join(nodes.some((node) => node.type === "paragraph" || node.type === "heading" || node.type === "codeBlock") ? "\n" : "");
 }
 
 function detachedNode(node: RichTextNode): RichTextNode {
