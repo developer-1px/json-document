@@ -521,6 +521,26 @@
     "sidebar": false
   },
   {
+    "path": "/demo/calendar",
+    "label": "Calendar",
+    "title": "Calendar Hands Demo - json-document",
+    "description": "Interval events on one document across day, week, month, and year views.",
+    "language": "ko",
+    "parentPath": "/editors",
+    "navigationGroup": "Hands",
+    "chrome": "app"
+  },
+  {
+    "path": "/demo/date-controls",
+    "label": "Date controls",
+    "title": "Date controls - json-document",
+    "description": "HTML date, time, month, week, datetime-local fields with calendar and range pickers.",
+    "language": "ko",
+    "parentPath": "/docs/ui-primitives",
+    "navigationGroup": "UI Primitives",
+    "sidebar": false
+  },
+  {
     "path": "/docs/database",
     "label": "Database",
     "title": "Database - json-document",

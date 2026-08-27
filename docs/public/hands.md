@@ -33,6 +33,33 @@ presentation을 번역합니다.
 /demo/annotation
 ```
 
+## Calendar editor
+
+시간 구간 이벤트의 persistent model과 editing session은
+`@interactive-os/json-document-editing`의 `createCalendarEditor`가 소유합니다.
+
+```ts
+const editor = createCalendarEditor(calendarDocument);
+editor.dispatch({ type: "event.move", eventId, start: "2026-08-03T10:00" });
+editor.dispatch({ type: "event.move-day", eventId, day: "2026-08-05" });
+editor.dispatch({ type: "event.create", start: "2026-08-03", end: "2026-08-04", allDay: true });
+editor.undo();
+```
+
+`CalendarDocument`는 `{ id, title, start, end, allDay }` 이벤트를 직렬화합니다.
+시간 이벤트는 datetime-local, 종일 이벤트는 exclusive-end 날짜입니다. 일·주
+보기의 빈 구간 drag는 그 start/end로 만들고, 블록 이동은 duration을 유지하며
+가장자리는 `event.resize`입니다. 종일 밴드는 날짜 단위로 만들고 옮기고 늘립니다.
+월 보기 같은 날 빈 칸은 종일 생성, 점유 칸은 origin 이벤트 선택, 다른 날로
+끌 때만 `event.move-day`입니다. 이 매핑은 `interpretCalendarTimeGridPointer`,
+`interpretCalendarAllDayPointer`, `interpretCalendarMonthPointer`가 소유하며
+현재 선택은 입력이 아닙니다. 연 보기는 12개월이고 Space로 월에 들어갑니다.
+픽셀 격자와 보기 전환은 Host가 조합합니다.
+
+```live-demo
+/demo/calendar
+```
+
 Hands는 사람이 artifact와 agent를 다루게 하는 장르별 완료 기준입니다.
 App도, 단일 화면 component도, 하나의 공통 package도 아닙니다. 실제 제품을
 끝까지 만져 보며 발견한 전형적인 인간의 손과 그 조합 증거를 가리킵니다.
@@ -109,8 +136,9 @@ adapter는 제품 의미를 모른 채 position/range lifecycle과 DOM 연결을
 | [Tree](tree.md) | Finder | 보이는 가지를 접고 범위를 고름 |
 | Kanban | Trello | card를 열 사이로 옮김 |
 | [Database](database.md) | Airtable | 같은 record를 저장된 view로 봄 |
+| Calendar | Google Calendar | 구간 이벤트를 주·월·연에서 만들고 옮김 |
 
-Slides, Form, Calendar 같은 App 이름은 먼저 기존 Hands로 분해합니다. 예를 들어
+Slides, Form 같은 App 이름은 먼저 기존 Hands로 분해합니다. 예를 들어
 Slides는 Order와 Object의 조합일 수 있습니다. 끝까지 환원되지 않는 인간의
 편집 문법이 남을 때만 새 Hands 후보가 됩니다.
 

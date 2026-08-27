@@ -63,6 +63,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Object",
     "Annotation",
     "Tree",
+    "Calendar",
     "Database",
     "Composer",
     "Mention",

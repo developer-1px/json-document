@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { DisclosureButton } from "@interactive-os/json-document-ui-primitives-react";
+import { PanelLeft, PanelLeftClose } from "lucide-react";
+import { DisclosureButton, IconButton } from "@interactive-os/json-document-ui-primitives-react";
 import { ActionLink } from "../../shared/ui/interactive";
 import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   findSiteRoute,
+  isAppChrome,
   siteRoutes,
   usePathname,
   useRouteMetadata,
@@ -23,6 +25,9 @@ export const Route = createRootRoute({
 function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
+  const appChrome = isAppChrome(route);
+  const [navCollapsed, setNavCollapsed] = useState(true);
+  const collapsed = appChrome && navCollapsed;
 
   useRouteMetadata(route);
   const activeGroup = routeGroup(route, siteRoutes);
@@ -35,22 +40,44 @@ function AppShell() {
     setOpenGroups((current) => current.has(activeGroup) ? current : new Set([...current, activeGroup]));
   }, [activeGroup]);
 
+  useEffect(() => {
+    if (appChrome) setNavCollapsed(true);
+  }, [appChrome]);
+
   return (
-    <div className={classes("flex min-h-screen flex-col md:flex-row", ui.frame.app)}>
+    <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
       <a
         href="#main-content"
         className={classes("sr-only z-50", ui.state.skipLink)}
       >
         Skip to content
       </a>
+      {collapsed ? (
+        <nav aria-label="Site navigation" className={classes(ui.frame.navigationRail, ui.frame.navigation)}>
+          <IconButton label="Open navigation" onClick={() => setNavCollapsed(false)}>
+            <PanelLeft aria-hidden="true" size={16} />
+          </IconButton>
+          <ActionLink to="/" className={classes("grid size-7 place-items-center", ui.frame.brand)}>
+            <span className="sr-only">json-document</span>
+            <CatMenuMark />
+          </ActionLink>
+        </nav>
+      ) : (
       <nav
         aria-label="Site navigation"
         className={classes("shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", ui.frame.navigation)}
       >
-        <ActionLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
-          <span className="sr-only">json-document</span>
-          <JsonDocumentWordmark className="h-auto w-full max-w-40" />
-        </ActionLink>
+        <div className="flex items-start justify-between gap-1">
+          <ActionLink to="/" className={classes("flex min-w-0 flex-1 px-4 py-3", ui.frame.brand)}>
+            <span className="sr-only">json-document</span>
+            <JsonDocumentWordmark className="h-auto w-full max-w-40" />
+          </ActionLink>
+          {appChrome ? (
+            <IconButton label="Collapse navigation" className="mt-2 mr-1" onClick={() => setNavCollapsed(true)}>
+              <PanelLeftClose aria-hidden="true" size={16} />
+            </IconButton>
+          ) : null}
+        </div>
         <div className={ui.nav.menu}>
           {rootNavRoutes(siteRoutes).map((item) => (
             <ActionLink
@@ -116,7 +143,8 @@ function AppShell() {
           })}
         </div>
       </nav>
-      <div id="main-content" className="min-w-0 flex-1">
+      )}
+      <div id="main-content" className={classes("min-w-0 flex-1", appChrome && "flex min-h-0 flex-col overflow-hidden")}>
         <Outlet />
       </div>
     </div>
