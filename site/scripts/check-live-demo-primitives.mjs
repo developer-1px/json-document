@@ -7,8 +7,8 @@ const registryPath = join(sourceRoot, "app/live-demo-registry.tsx");
 const registry = readFileSync(registryPath, "utf8");
 const liveDemoPaths = [...registry.matchAll(/^\s*"([^"]+)": demo\(/gm)].map((match) => match[1]);
 
-if (liveDemoPaths.length !== 32) {
-  throw new Error(`Live Demo 감사 집합이 32개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
+if (liveDemoPaths.length !== 33) {
+  throw new Error(`Live Demo 감사 집합이 33개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
 }
 
 const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];
