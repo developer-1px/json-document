@@ -4,6 +4,8 @@ import editingItemSource from "../../../../packages/json-document-react/src/use-
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
+import virtualSelectionSource from "../../../../packages/json-document-web/src/virtual-selection-scope.ts?raw";
+import virtualSelectionReactSource from "../../../../packages/json-document-react/src/use-virtual-selection-scope.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
@@ -57,6 +59,7 @@ import collaborationContentEditableSource from "../../../../packages/contentedit
 import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
 import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
 import richTextSource from "../../../../packages/json-document-rich-text/src/editor.ts?raw";
+import richTextPlainTextSource from "../../../../packages/json-document-rich-text/src/plain-text.ts?raw";
 import richTextWebSource from "../../../../packages/json-document-rich-text-web/src/contenteditable.ts?raw";
 import tanStackTableSource from "../../../../packages/json-document-tanstack-table/src/index.ts?raw";
 import zodSource from "../../../../packages/json-document-zod/src/index.ts?raw";
@@ -118,6 +121,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
+  ["packages/json-document-web/src/virtual-selection-scope.ts", virtualSelectionSource],
+  ["packages/json-document-react/src/use-virtual-selection-scope.ts", virtualSelectionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
@@ -171,6 +176,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ajv/src/index.ts", ajvSource],
   ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
   ["packages/json-document-rich-text/src/editor.ts", richTextSource],
+  ["packages/json-document-rich-text/src/plain-text.ts", richTextPlainTextSource],
   ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
   ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
   ["packages/json-document-zod/src/index.ts", zodSource],
@@ -215,6 +221,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-rich-text",
     symbol: "createRichTextEditor",
     sourcePath: "packages/json-document-rich-text/src/editor.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text",
+    symbol: "richTextPlainText",
+    sourcePath: "packages/json-document-rich-text/src/plain-text.ts",
   },
   {
     packageName: "@interactive-os/json-document-rich-text-web",
@@ -332,6 +343,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-rich-text-react/src/index.tsx",
   },
   {
+    packageName: "@interactive-os/json-document-rich-text-react",
+    symbol: "RichTextRenderer",
+    sourcePath: "packages/json-document-rich-text-react/src/index.tsx",
+  },
+  {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "useListbox",
     sourcePath: "packages/json-document-ui-primitives-react/src/listbox.ts",
@@ -425,6 +441,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "createWebClipboardTextWriter",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "registerWebVirtualSelectionScope",
+    sourcePath: "packages/json-document-web/src/virtual-selection-scope.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useVirtualSelectionScope",
+    sourcePath: "packages/json-document-react/src/use-virtual-selection-scope.ts",
   },
   {
     packageName: "@interactive-os/json-document-react",

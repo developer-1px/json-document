@@ -18,6 +18,7 @@ import { Route as PageAdaptersIndexRouteImport } from "./routes/_page/adapters/i
 import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapters/clipboard";
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
 import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
+import { Route as PageAdaptersVirtualSelectionRouteImport } from "./routes/_page/adapters/virtual-selection";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
@@ -45,6 +46,7 @@ import { Route as PageDocsAdapterContenteditableRouteImport } from "./routes/_pa
 import { Route as PageDocsAdapterGridCellRouteImport } from "./routes/_page/docs/adapter-grid-cell";
 import { Route as PageDocsAdapterInteractionRouteImport } from "./routes/_page/docs/adapter-interaction";
 import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs/adapter-keyboard";
+import { Route as PageDocsAdapterVirtualSelectionRouteImport } from "./routes/_page/docs/adapter-virtual-selection";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
@@ -185,6 +187,12 @@ const PageAdaptersKeyboardRoute = PageAdaptersKeyboardRouteImport.update({
   path: "/adapters/keyboard",
   getParentRoute: () => PageRoute,
 } as any);
+const PageAdaptersVirtualSelectionRoute =
+  PageAdaptersVirtualSelectionRouteImport.update({
+    id: "/adapters/virtual-selection",
+    path: "/adapters/virtual-selection",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
   id: "/connectors/",
   path: "/connectors/",
@@ -326,6 +334,12 @@ const PageDocsAdapterKeyboardRoute = PageDocsAdapterKeyboardRouteImport.update({
   path: "/docs/adapter-keyboard",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsAdapterVirtualSelectionRoute =
+  PageDocsAdapterVirtualSelectionRouteImport.update({
+    id: "/docs/adapter-virtual-selection",
+    path: "/docs/adapter-virtual-selection",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAdaptersRoute = PageDocsAdaptersRouteImport.update({
   id: "/docs/adapters",
   path: "/docs/adapters",
@@ -842,6 +856,7 @@ export interface FileRoutesByFullPath {
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
+  "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -866,6 +881,7 @@ export interface FileRoutesByFullPath {
   "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
   "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
+  "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
@@ -973,6 +989,7 @@ export interface FileRoutesByTo {
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
+  "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -997,6 +1014,7 @@ export interface FileRoutesByTo {
   "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
   "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
+  "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
   "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
@@ -1106,6 +1124,7 @@ export interface FileRoutesById {
   "/_page/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
+  "/_page/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
@@ -1130,6 +1149,7 @@ export interface FileRoutesById {
   "/_page/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
   "/_page/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
+  "/_page/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
   "/_page/docs/api": typeof PageDocsApiRouteWithChildren;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
@@ -1239,6 +1259,7 @@ export interface FileRouteTypes {
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
+    | "/adapters/virtual-selection"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1263,6 +1284,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-grid-cell"
     | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
+    | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
     | "/docs/api"
     | "/docs/clipboard"
@@ -1370,6 +1392,7 @@ export interface FileRouteTypes {
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
+    | "/adapters/virtual-selection"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1394,6 +1417,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-grid-cell"
     | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
+    | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
     | "/docs/api"
     | "/docs/clipboard"
@@ -1502,6 +1526,7 @@ export interface FileRouteTypes {
     | "/_page/adapters/clipboard"
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
+    | "/_page/adapters/virtual-selection"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
@@ -1526,6 +1551,7 @@ export interface FileRouteTypes {
     | "/_page/docs/adapter-grid-cell"
     | "/_page/docs/adapter-interaction"
     | "/_page/docs/adapter-keyboard"
+    | "/_page/docs/adapter-virtual-selection"
     | "/_page/docs/adapters"
     | "/_page/docs/api"
     | "/_page/docs/clipboard"
@@ -1694,6 +1720,13 @@ declare module "@tanstack/react-router" {
       path: "/adapters/keyboard";
       fullPath: "/adapters/keyboard";
       preLoaderRoute: typeof PageAdaptersKeyboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/adapters/virtual-selection": {
+      id: "/_page/adapters/virtual-selection";
+      path: "/adapters/virtual-selection";
+      fullPath: "/adapters/virtual-selection";
+      preLoaderRoute: typeof PageAdaptersVirtualSelectionRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/": {
@@ -1883,6 +1916,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/adapter-keyboard";
       fullPath: "/docs/adapter-keyboard";
       preLoaderRoute: typeof PageDocsAdapterKeyboardRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/adapter-virtual-selection": {
+      id: "/_page/docs/adapter-virtual-selection";
+      path: "/docs/adapter-virtual-selection";
+      fullPath: "/docs/adapter-virtual-selection";
+      preLoaderRoute: typeof PageDocsAdapterVirtualSelectionRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/adapters": {
@@ -2615,6 +2655,7 @@ interface PageRouteChildren {
   PageAdaptersClipboardRoute: typeof PageAdaptersClipboardRoute;
   PageAdaptersContenteditableRoute: typeof PageAdaptersContenteditableRoute;
   PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
+  PageAdaptersVirtualSelectionRoute: typeof PageAdaptersVirtualSelectionRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
@@ -2639,6 +2680,7 @@ interface PageRouteChildren {
   PageDocsAdapterGridCellRoute: typeof PageDocsAdapterGridCellRoute;
   PageDocsAdapterInteractionRoute: typeof PageDocsAdapterInteractionRoute;
   PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
+  PageDocsAdapterVirtualSelectionRoute: typeof PageDocsAdapterVirtualSelectionRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
   PageDocsApiRoute: typeof PageDocsApiRouteWithChildren;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
@@ -2721,6 +2763,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageAdaptersClipboardRoute: PageAdaptersClipboardRoute,
   PageAdaptersContenteditableRoute: PageAdaptersContenteditableRoute,
   PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
+  PageAdaptersVirtualSelectionRoute: PageAdaptersVirtualSelectionRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
@@ -2745,6 +2788,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdapterGridCellRoute: PageDocsAdapterGridCellRoute,
   PageDocsAdapterInteractionRoute: PageDocsAdapterInteractionRoute,
   PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
+  PageDocsAdapterVirtualSelectionRoute: PageDocsAdapterVirtualSelectionRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
   PageDocsApiRoute: PageDocsApiRouteWithChildren,
   PageDocsClipboardRoute: PageDocsClipboardRoute,

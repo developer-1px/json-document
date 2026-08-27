@@ -57,6 +57,10 @@ export {
   type TreeEditingKeyboardOptions,
   type UseTreeEditingOptions,
 } from "./use-tree-editing.js";
+export {
+  useVirtualSelectionScope,
+  type UseVirtualSelectionScopeOptions,
+} from "./use-virtual-selection-scope.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(

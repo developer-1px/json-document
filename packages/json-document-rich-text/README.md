@@ -11,6 +11,10 @@ multi-range selection mapping, all Official v1 intents, structured slices,
 history integration, and schema-driven rendering. It does not own toolbar,
 slash-menu, or product command policy.
 
+`richTextPlainText(nodes)` is the canonical model-backed plain-text projection
+used by clipboard and read-only platform surfaces. It preserves hard breaks
+without reading rendered DOM.
+
 ```ts
 import { createJSONDocument } from "@interactive-os/json-document";
 import {

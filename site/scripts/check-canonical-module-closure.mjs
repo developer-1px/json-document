@@ -34,6 +34,21 @@ for (const path of databasePropertyConsumers) {
     throw new Error(`${path} bypasses canonical Database property value conversion`);
   }
 }
+const databaseHandSource = readSource("packages/json-document-database/src/database-hand.tsx");
+if (/clipboardData\.setData|onCopy=\{\s*\(event\)/.test(databaseHandSource)) {
+  throw new Error("DatabaseHand bypasses the canonical Web Clipboard surface");
+}
+
+const allowedRawPreSources = new Set([
+  "routes/adapters/virtual-selection/VirtualSelectionAdapterLab.tsx",
+  "shared/ui/code-block.tsx",
+]);
+for (const path of sourceFiles(siteSourceRoot)) {
+  const relative = path.slice(siteSourceRoot.length + 1);
+  if (!allowedRawPreSources.has(relative) && /<pre\b/.test(readFileSync(path, "utf8"))) {
+    throw new Error(`${relative} renders a copyable raw <pre> outside the canonical CodeBlock surface`);
+  }
+}
 
 const visited = new Set();
 const queue = [...entries];
@@ -93,4 +108,12 @@ function hasNamedImport(source, packageName, symbol) {
     if (imported.includes(symbol)) return true;
   }
   return false;
+}
+
+function sourceFiles(root) {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.tsx?$/.test(entry.name) ? [path] : [];
+  });
 }

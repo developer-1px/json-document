@@ -13,9 +13,10 @@ JSON Document와 Editing은 브라우저 event를 직접 해석하지 않습니�
 | Pointer / Drag and Drop session | `@interactive-os/json-document-web` | [Interaction](adapter-interaction.md) |
 | SVG coordinate / Raster source / Annotation raster | `@interactive-os/json-document-web` | [Hands](hands.md) |
 | Clipboard | `@interactive-os/json-document-web` | [Clipboard](adapter-clipboard.md) |
+| Virtual Selection | `@interactive-os/json-document-web`, `@interactive-os/json-document-react` | [Virtual Selection](adapter-virtual-selection.md) |
 | Contenteditable | `@interactive-os/json-document-contenteditable` | [Contenteditable](adapter-contenteditable.md) |
 
-Keyboard, Interaction, Clipboard는 같은 package에 있지만 서로 다른 플랫폼 계약을
+Keyboard, Interaction, Clipboard, Virtual Selection은 같은 package family에 있지만 서로 다른 플랫폼 계약을
 번역합니다. 제품은 필요한 Adapter만 붙입니다.
 
 ## SVG와 Raster

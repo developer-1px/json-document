@@ -384,3 +384,17 @@ interface UseTreeEditingOptions<Selection extends JSONValue> {
   readonly keyboard?: TreeEditingKeyboardOptions;
 }
 ```
+## `useVirtualSelectionScope`
+
+```ts
+useVirtualSelectionScope<Element extends HTMLElement = HTMLElement>(options: UseVirtualSelectionScopeOptions): RefCallback<Element>
+```
+## `UseVirtualSelectionScopeOptions`
+
+```ts
+interface UseVirtualSelectionScopeOptions {
+  readonly activation: WebVirtualSelectionScopeActivation;
+  readonly boundaryRef?: { readonly current: HTMLElement | null };
+  readonly readAllText: () => string;
+}
+```

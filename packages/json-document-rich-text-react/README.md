@@ -1,5 +1,9 @@
 # @interactive-os/json-document-rich-text-react
 
+Read-only `RichTextRenderer` code blocks register a contained Virtual Selection
+scope whose copy text comes from the canonical Rich Text model projection.
+`RichTextEditorSurface` keeps native and structured Editing selection instead.
+
 Official React renderer and `contenteditable` surface for the json-document Rich Text v1 profile.
 
 `RichTextRenderer` renders canonical semantic HTML. `RichTextEditorSurface` connects that rendering to the official editor, DOM Selection, `beforeinput`, IME, Clipboard, and history integration.
