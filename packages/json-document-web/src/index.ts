@@ -16,6 +16,7 @@ export { focusWebItem, webFocusItemProps } from "./focus-item.js";
 export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export { createWebDragDropSession } from "./drag-drop-session.js";
 export { createWebPointerSession } from "./pointer-session.js";
+export { findWebPointTarget } from "./point-target.js";
 export { createWebViewportPositionPorts } from "./viewport-position.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
@@ -86,6 +87,7 @@ export type {
   WebPointerSessionOptions,
   WebPointerSessionSnapshot,
 } from "./pointer-session.js";
+export type { WebPointTargetElement, WebPointTargetRoot } from "./point-target.js";
 export type {
   WebViewportPositionElement,
   WebViewportPositionObserver,

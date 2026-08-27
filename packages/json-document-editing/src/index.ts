@@ -20,6 +20,22 @@ export { createSheetEditor } from "./sheet.js";
 export { createTreeEditor } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
+export {
+  calendarAllDayLayout,
+  calendarEventsInMonth,
+  calendarEventsOnDay,
+  calendarTimedLayout,
+  createCalendarEditor,
+} from "./calendar.js";
+export { interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
+export { interpretCalendarMonthPointer } from "./calendar-month-pointer.js";
+export { interpretCalendarTimeGridPointer } from "./calendar-time-grid-pointer.js";
+export {
+  addCalendarDate,
+  calendarInstantAt,
+  calendarShiftInstant,
+  isCalendarAllDay,
+} from "./calendar-validation.js";
 export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
 export type {
@@ -126,3 +142,25 @@ export type {
   KanbanIntent,
   KanbanSelection,
 } from "./kanban.js";
+export type {
+  CalendarDocument,
+  CalendarEditor,
+  CalendarEvent,
+  CalendarIntent,
+  CalendarSelection,
+  CalendarView,
+} from "./calendar.js";
+export type {
+  CalendarAllDayHandle,
+  CalendarAllDayPointerIntent,
+  CalendarAllDayPointerRelease,
+} from "./calendar-allday-pointer.js";
+export type {
+  CalendarMonthPointerIntent,
+  CalendarMonthPointerRelease,
+} from "./calendar-month-pointer.js";
+export type {
+  CalendarTimeGridHandle,
+  CalendarTimeGridPointerIntent,
+  CalendarTimeGridPointerRelease,
+} from "./calendar-time-grid-pointer.js";

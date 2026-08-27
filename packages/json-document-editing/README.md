@@ -62,6 +62,16 @@ It publishes rows with hierarchy/ARIA facts and the matching `TreeTopology`.
 `gridPointKey` and `gridPointFromKey` provide the canonical reversible string
 identity when a selection or rendering adapter needs to key a `GridPoint`.
 
+`Calendar` keeps interval events `{ id, title, start, end, allDay }`. Timed
+events use datetime-local strings; all-day events use exclusive-end dates.
+`createCalendarEditor` creates, moves while keeping duration, resizes start or
+end, moves by day, deletes, and undoes on one document across day, week, month,
+and year views. `interpretCalendarTimeGridPointer`,
+`interpretCalendarAllDayPointer`, and `interpretCalendarMonthPointer` map a
+press-release to those intents from the origin event, not the current
+selection. `calendarTimedLayout` places a timed event on its `start`/`end`
+span. Pixel grids and view chrome stay in the Host.
+
 `Annotation` keeps a target selector separate from its presentation. Point
 targets may use numbered `marker` presentations for instructions or a
 serializable `{ type: "reaction", reaction: "like" | "dislike" }` presentation

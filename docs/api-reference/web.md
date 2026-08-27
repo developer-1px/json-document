@@ -111,6 +111,11 @@ findWebGridCell<Cell extends WebGridCellAddressElement>(root: WebGridCellAddress
 ```ts
 findWebKanbanCardDropTarget(point: { readonly x: number; readonly y: number; }, webDocument?: { elementFromPoint(x: number, y: number): WebKanbanTargetElement | null; }): KanbanCardDropTarget | null
 ```
+## `findWebPointTarget`
+
+```ts
+findWebPointTarget<Element extends WebPointTargetElement = WebPointTargetElement>(selector: string, point: { readonly x: number; readonly y: number; }, root?: WebPointTargetRoot<Element>): Element | null
+```
 ## `focusWebItem`
 
 ```ts
@@ -559,6 +564,25 @@ type WebPointerSessionSnapshot<State> = Readonly<{
   pointerId: number;
   state: State;
 }>;
+```
+## `WebPointTargetElement`
+
+```ts
+interface WebPointTargetElement {
+  getBoundingClientRect(): {
+    readonly left: number;
+    readonly right: number;
+    readonly top: number;
+    readonly bottom: number;
+  };
+}
+```
+## `WebPointTargetRoot`
+
+```ts
+interface WebPointTargetRoot<Element extends WebPointTargetElement = WebPointTargetElement> {
+  querySelectorAll(selector: string): ArrayLike<Element>;
+}
 ```
 ## `WebPressInput`
 
