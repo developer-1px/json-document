@@ -57,6 +57,7 @@ import adapterKeyboardMarkdown from "../../../../docs/public/adapter-keyboard.md
 import adapterGridCellMarkdown from "../../../../docs/public/adapter-grid-cell.md?raw";
 import adapterInteractionMarkdown from "../../../../docs/public/adapter-interaction.md?raw";
 import adapterClipboardMarkdown from "../../../../docs/public/adapter-clipboard.md?raw";
+import adapterVirtualSelectionMarkdown from "../../../../docs/public/adapter-virtual-selection.md?raw";
 import adapterContenteditableMarkdown from "../../../../docs/public/adapter-contenteditable.md?raw";
 import collaborationMarkdown from "../../../../docs/public/collaboration.md?raw";
 import collaborationHistoryMarkdown from "../../../../docs/public/collaboration-history.md?raw";
@@ -99,6 +100,7 @@ export const docPages = {
   adapterGridCell: docPage("/docs/adapter-grid-cell", adapterGridCellMarkdown),
   adapterInteraction: docPage("/docs/adapter-interaction", adapterInteractionMarkdown),
   adapterClipboard: docPage("/docs/adapter-clipboard", adapterClipboardMarkdown),
+  adapterVirtualSelection: docPage("/docs/adapter-virtual-selection", adapterVirtualSelectionMarkdown),
   adapterContenteditable: docPage("/docs/adapter-contenteditable", adapterContenteditableMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),
   uiPrimitives: docPage("/docs/ui-primitives", uiPrimitivesMarkdown),

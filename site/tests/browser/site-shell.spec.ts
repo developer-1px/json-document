@@ -214,6 +214,7 @@ test("Connector pages declare the connection before the live demo", async ({ pag
     "/connectors/tanstack-table",
     "/adapters/keyboard",
     "/adapters/clipboard",
+    "/adapters/virtual-selection",
     "/adapters/contenteditable",
   ];
 
@@ -318,6 +319,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/adapters",
     "/adapters/keyboard",
     "/adapters/clipboard",
+    "/adapters/virtual-selection",
     "/adapters/contenteditable",
   ];
 

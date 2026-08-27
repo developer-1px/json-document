@@ -98,6 +98,7 @@ describe("official site shell", () => {
       "Interaction",
       "Clipboard Reference",
       "Contenteditable",
+      "Virtual Selection",
     ]);
     await user.click(nav.getByRole("button", { name: "Connector" }));
     expect(groupLinks(nav, "Connector")).toEqual([

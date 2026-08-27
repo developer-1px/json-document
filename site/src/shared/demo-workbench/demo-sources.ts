@@ -4,6 +4,8 @@ import editingItemSource from "../../../../packages/json-document-react/src/use-
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
+import virtualSelectionSource from "../../../../packages/json-document-web/src/virtual-selection-scope.ts?raw";
+import virtualSelectionReactSource from "../../../../packages/json-document-react/src/use-virtual-selection-scope.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
@@ -118,6 +120,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
+  ["packages/json-document-web/src/virtual-selection-scope.ts", virtualSelectionSource],
+  ["packages/json-document-react/src/use-virtual-selection-scope.ts", virtualSelectionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
@@ -425,6 +429,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "createWebClipboardTextWriter",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "registerWebVirtualSelectionScope",
+    sourcePath: "packages/json-document-web/src/virtual-selection-scope.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useVirtualSelectionScope",
+    sourcePath: "packages/json-document-react/src/use-virtual-selection-scope.ts",
   },
   {
     packageName: "@interactive-os/json-document-react",

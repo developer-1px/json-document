@@ -30,6 +30,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/collaboration": demo(() => import("../routes/collaboration-demo/CollaborationDemoRoute"), "CollaborationDemoRoute", "routes/collaboration-demo/CollaborationDemoRoute.tsx"),
   "/adapters/keyboard": demo(() => import("../routes/adapters/keyboard/KeyboardAdapterDemoRoute"), "KeyboardAdapterDemoRoute", "routes/adapters/keyboard/KeyboardAdapterDemoRoute.tsx"),
   "/adapters/clipboard": demo(() => import("../routes/adapters/clipboard/ClipboardAdapterDemoRoute"), "ClipboardAdapterDemoRoute", "routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx"),
+  "/adapters/virtual-selection": demo(() => import("../routes/adapters/virtual-selection/VirtualSelectionAdapterDemoRoute"), "VirtualSelectionAdapterDemoRoute", "routes/adapters/virtual-selection/VirtualSelectionAdapterDemoRoute.tsx"),
   "/adapters/contenteditable": demo(() => import("../routes/adapters/contenteditable/ContentEditableAdapterDemoRoute"), "ContentEditableAdapterDemoRoute", "routes/adapters/contenteditable/ContentEditableAdapterDemoRoute.tsx"),
   "/connectors/react": demo(() => import("../routes/connectors/react/ReactConnectorDemoRoute"), "ReactConnectorDemoRoute", "routes/connectors/react/ReactConnectorDemoRoute.tsx"),
   "/connectors/react-hook-form": demo(() => import("../routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute"), "ReactHookFormConnectorDemoRoute", "routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute.tsx"),
