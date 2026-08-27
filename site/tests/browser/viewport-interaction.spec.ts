@@ -18,8 +18,7 @@ test("Viewport interaction preserves an anchor and yields follow to the user", a
   await page.getByRole("button", { name: "Resume follow" }).click();
   await page.getByRole("button", { name: "Append stream chunk" }).click();
   await expect(page.getByTestId("viewport-status")).toHaveText("Follow end");
-  const atEnd = await viewport.evaluate((element) =>
-    Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) < 2,
-  );
-  expect(atEnd).toBe(true);
+  await expect.poll(() => viewport.evaluate((element) =>
+    Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop),
+  )).toBeLessThan(2);
 });
