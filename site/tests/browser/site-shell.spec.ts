@@ -77,6 +77,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Interaction",
     "Clipboard Reference",
     "Contenteditable",
+    "Virtual Selection",
   ]);
   await navigation.getByRole("button", { name: "Connector" }).click();
   await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
@@ -245,6 +246,7 @@ test("Adapter and Connector menus expose contract docs while demos stay embedded
     "Interaction",
     "Clipboard Reference",
     "Contenteditable",
+    "Virtual Selection",
   ]);
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
