@@ -396,6 +396,11 @@ interface RichTextParagraph extends RichTextNodeValue {
   readonly content: ReadonlyArray<RichTextInlineNode>;
 }
 ```
+## `richTextPlainText`
+
+```ts
+richTextPlainText(nodes: ReadonlyArray<RichTextNode>): string
+```
 ## `RichTextPlainText`
 
 ```ts

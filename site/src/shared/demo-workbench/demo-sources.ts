@@ -59,6 +59,7 @@ import collaborationContentEditableSource from "../../../../packages/contentedit
 import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
 import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
 import richTextSource from "../../../../packages/json-document-rich-text/src/editor.ts?raw";
+import richTextPlainTextSource from "../../../../packages/json-document-rich-text/src/plain-text.ts?raw";
 import richTextWebSource from "../../../../packages/json-document-rich-text-web/src/contenteditable.ts?raw";
 import tanStackTableSource from "../../../../packages/json-document-tanstack-table/src/index.ts?raw";
 import zodSource from "../../../../packages/json-document-zod/src/index.ts?raw";
@@ -175,6 +176,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ajv/src/index.ts", ajvSource],
   ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
   ["packages/json-document-rich-text/src/editor.ts", richTextSource],
+  ["packages/json-document-rich-text/src/plain-text.ts", richTextPlainTextSource],
   ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
   ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
   ["packages/json-document-zod/src/index.ts", zodSource],
@@ -219,6 +221,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-rich-text",
     symbol: "createRichTextEditor",
     sourcePath: "packages/json-document-rich-text/src/editor.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text",
+    symbol: "richTextPlainText",
+    sourcePath: "packages/json-document-rich-text/src/plain-text.ts",
   },
   {
     packageName: "@interactive-os/json-document-rich-text-web",
@@ -333,6 +340,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-rich-text-react",
     symbol: "RichTextEditorSurface",
+    sourcePath: "packages/json-document-rich-text-react/src/index.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-react",
+    symbol: "RichTextRenderer",
     sourcePath: "packages/json-document-rich-text-react/src/index.tsx",
   },
   {

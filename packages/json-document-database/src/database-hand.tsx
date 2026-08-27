@@ -14,6 +14,7 @@ import {
   gridPointFromKey,
   gridPointKey,
   type DatabaseDocument,
+  type DatabaseClipboard,
   type DatabaseEditor,
   type DatabaseFilter,
   type DatabaseProperty,
@@ -26,8 +27,11 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
+  createWebClipboardSurface,
   createWebKeyboardAdapter,
+  databaseClipboardCodec,
   findWebGridCell,
+  type WebClipboardRepresentation,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
@@ -428,6 +432,28 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
     result: lastResult,
     nativeTextLease,
   };
+  const clipboardRepresentations: ReadonlyArray<WebClipboardRepresentation<DatabaseClipboard>> = [
+    databaseClipboardCodec,
+    {
+      mimeType: "text/plain",
+      encode: (clipboard) => clipboard.text,
+      decode: (text) => databaseClipboardFromText(text, document, topology, snapshot.selection.focus),
+    },
+  ];
+  const clipboardSurface = createWebClipboardSurface({
+    codec: databaseClipboardCodec,
+    representations: clipboardRepresentations,
+    read: () => editor.copy(topology),
+    paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard, topology }),
+    onResult(result) {
+      if (!result.ok) {
+        if (result.code === "editing.rejected") announce(result.reason ?? result.code);
+        return;
+      }
+      if (result.operation === "copy") announce("Selection copied");
+      if (result.operation === "paste") emit("cell.commit", "Selection pasted");
+    },
+  });
 
   return (
     <div
@@ -485,23 +511,8 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         aria-label="Database editor"
         tabIndex={0}
         onKeyDown={keyDown}
-        onCopy={(event) => {
-          const clipboard = editor.copy(topology);
-          if (clipboard === null) return;
-          event.preventDefault();
-          event.clipboardData.setData(clipboard.type, JSON.stringify(clipboard));
-          event.clipboardData.setData("text/plain", clipboard.text);
-          announce("Selection copied");
-        }}
-        onPaste={(event) => {
-          if (props.readOnly) return;
-          const clipboard = clipboardFromData(event.clipboardData, document, topology, snapshot.selection.focus);
-          if (clipboard === null) return;
-          event.preventDefault();
-          const result = editor.dispatch({ type: "clipboard.paste", clipboard, topology });
-          if (result.ok) emit("cell.commit", "Selection pasted");
-          else announce(result.code);
-        }}
+        onCopy={clipboardSurface.onCopy}
+        onPaste={props.readOnly ? undefined : clipboardSurface.onPaste}
       >
         <table ref={tableRef} role="grid" aria-label={props.labels.ariaLabel} aria-multiselectable="true">
           <thead>
@@ -836,20 +847,12 @@ function databasePoint(point: { readonly rowId: string; readonly columnId: strin
   return { recordId: point.rowId, propertyId: point.columnId };
 }
 
-function clipboardFromData(
-  data: DataTransfer,
+function databaseClipboardFromText(
+  text: string,
   document: DatabaseDocument,
   topology: { readonly propertyIds: ReadonlyArray<string> },
   focus: { readonly propertyId: string } | null,
 ) {
-  const structured = data.getData("application/vnd.interactive-os.database+json");
-  if (structured) {
-    try {
-      const value = JSON.parse(structured);
-      if (value?.type === "application/vnd.interactive-os.database+json" && Array.isArray(value.cells)) return value;
-    } catch {}
-  }
-  const text = data.getData("text/plain");
   if (!text || focus === null) return null;
   const start = topology.propertyIds.indexOf(focus.propertyId);
   if (start < 0) return null;

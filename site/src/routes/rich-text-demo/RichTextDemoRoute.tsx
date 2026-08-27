@@ -5,10 +5,11 @@ import { createJSONDocument } from "@interactive-os/json-document";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   createRichTextEditor,
+  richTextPlainText,
   type RichTextDocument,
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
-import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
+import { RichTextEditorSurface, RichTextRenderer } from "@interactive-os/json-document-rich-text-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -130,6 +131,7 @@ export function RichTextDemoRoute() {
     },
   });
   const snapshot = editing.snapshot;
+  const readOnlyCodeBlocks = document.content.filter((node) => node.type === "codeBlock");
   const commands = historyAffordance(snapshot).hand;
 
   const {
@@ -209,6 +211,13 @@ export function RichTextDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.
           </p>
+          <section className={classes("mt-3 p-3", ui.surface.inset)} aria-label="Read-only Rich Text code projection">
+            <p className={classes("mb-2 mt-0", ui.text.label)}>Read-only code projection</p>
+            <RichTextRenderer document={{ ...document, content: readOnlyCodeBlocks }} />
+            <output className="sr-only" data-testid="rich-text-code-plain-text">
+              {richTextPlainText(readOnlyCodeBlocks)}
+            </output>
+          </section>
         </section>
 
         <section className="min-w-0" aria-label="Rich Text state inspectors">
