@@ -425,6 +425,15 @@
     "sidebar": false
   },
   {
+    "path": "/demo/viewport",
+    "label": "Viewport Position",
+    "title": "Viewport Position - json-document",
+    "description": "Position an exact object at a requested viewport offset while 87 production-captured stream chunks consume temporary trailing scroll range.",
+    "language": "ko",
+    "parentPath": "/editors",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/order",
     "label": "Order",
     "title": "Order - json-document",

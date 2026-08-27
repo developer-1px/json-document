@@ -2,7 +2,9 @@ import type { CodeLanguage } from "../ui/code-tokens";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
+import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
+import webViewportPositionSource from "../../../../packages/json-document-web/src/viewport-position.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
 import virtualSelectionSource from "../../../../packages/json-document-web/src/virtual-selection-scope.ts?raw";
 import virtualSelectionReactSource from "../../../../packages/json-document-react/src/use-virtual-selection-scope.ts?raw";
@@ -119,7 +121,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
+  ["packages/json-document-affordance/src/viewport-position.ts", viewportPositionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
+  ["packages/json-document-web/src/viewport-position.ts", webViewportPositionSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
   ["packages/json-document-web/src/virtual-selection-scope.ts", virtualSelectionSource],
   ["packages/json-document-react/src/use-virtual-selection-scope.ts", virtualSelectionReactSource],
@@ -361,6 +365,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "createGestureSession",
     sourcePath: "packages/json-document-affordance/src/gesture-session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createViewportPositionSession",
+    sourcePath: "packages/json-document-affordance/src/viewport-position.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebViewportPositionPorts",
+    sourcePath: "packages/json-document-web/src/viewport-position.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",

@@ -66,6 +66,11 @@ createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboar
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
 ```
+## `createWebViewportPositionPorts`
+
+```ts
+createWebViewportPositionPorts<Key>(options: WebViewportPositionOptions<Key>): WebViewportPositionPorts<Key>
+```
 ## `databaseClipboardCodec`
 
 ```ts
@@ -638,6 +643,70 @@ interface WebTextControlEvent {
 interface WebTextInput {
   readonly text: string;
   readonly offset: number;
+}
+```
+## `WebViewportPositionElement`
+
+```ts
+interface WebViewportPositionElement {
+  readonly style: { height: string };
+  getBoundingClientRect(): { readonly top: number };
+}
+```
+## `WebViewportPositionObserver`
+
+```ts
+interface WebViewportPositionObserver {
+  observe(target: object, options?: object): void;
+  disconnect(): void;
+}
+```
+## `WebViewportPositionOptions`
+
+```ts
+interface WebViewportPositionOptions<Key> {
+  readonly viewport: WebViewportPositionViewport;
+  readonly content?: object;
+  readonly findTarget: (key: Key) => WebViewportPositionElement | null;
+  readonly findTailReserve: (key: Key) => WebViewportPositionElement | null;
+  readonly createResizeObserver?: (callback: () => void) => WebViewportPositionObserver;
+  readonly createMutationObserver?: (callback: () => void) => WebViewportPositionObserver;
+  readonly createVisibilityObserver?: (
+    callback: (visible: boolean) => void,
+    root: object,
+  ) => WebViewportPositionVisibilityObserver;
+  readonly requestFrame?: (callback: () => void) => number;
+  readonly cancelFrame?: (handle: number) => void;
+}
+```
+## `WebViewportPositionPorts`
+
+```ts
+interface WebViewportPositionPorts<Key> {
+  measure(key: Key): { targetOffset: number; tailReserveOffset: number; viewportHeight: number } | null;
+  setTailReserve(key: Key, height: number): boolean;
+  scrollTo(top: number, behavior: "smooth" | "instant"): void;
+  scheduleFrame(callback: () => void): () => void;
+  observeLayout(callback: () => void): () => void;
+  observeTargetVisibility(key: Key, callback: (visible: boolean) => void): () => void;
+}
+```
+## `WebViewportPositionViewport`
+
+```ts
+interface WebViewportPositionViewport {
+  readonly clientHeight: number;
+  readonly scrollTop: number;
+  getBoundingClientRect(): { readonly top: number };
+  scrollTo(options: { readonly top: number; readonly behavior: "smooth" | "instant" }): void;
+}
+```
+## `WebViewportPositionVisibilityObserver`
+
+```ts
+interface WebViewportPositionVisibilityObserver {
+  observe(target: object): void;
+  disconnect(): void;
 }
 ```
 ## `WebVirtualSelectionScopeActivation`

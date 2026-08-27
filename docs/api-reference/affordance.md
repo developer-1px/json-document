@@ -261,6 +261,11 @@ createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string)
 ```ts
 createTypeaheadSession<Key>(options: { readonly onMatch: (key: Key) => void; readonly onSnapshot?: (snapshot: TypeaheadSessionSnapshot) => void; }): TypeaheadSession<Key>
 ```
+## `createViewportPositionSession`
+
+```ts
+createViewportPositionSession<Key>(options: ViewportPositionOptions<Key>): ViewportPositionSession<Key>
+```
 ## `deleteAffordance`
 
 ```ts
@@ -564,6 +569,62 @@ interface TypeaheadSessionInput<Key> {
 interface TypeaheadSessionSnapshot {
   readonly buffer: string;
   readonly at: number;
+}
+```
+## `ViewportPositionCancelReason`
+
+```ts
+type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport";
+```
+## `ViewportPositionGeometry`
+
+```ts
+interface ViewportPositionGeometry {
+  readonly targetOffset: number;
+  readonly tailReserveOffset: number;
+  readonly viewportHeight: number;
+}
+```
+## `ViewportPositionOptions`
+
+```ts
+interface ViewportPositionOptions<Key> extends ViewportPositionPorts<Key> {
+  readonly onCancel?: (reason: ViewportPositionCancelReason) => void;
+  readonly onChange?: (snapshot: ViewportPositionSnapshot<Key>) => void;
+}
+```
+## `ViewportPositionPorts`
+
+```ts
+interface ViewportPositionPorts<Key> {
+  readonly measure: (key: Key) => ViewportPositionGeometry | null;
+  readonly setTailReserve: (key: Key, height: number) => boolean;
+  readonly scrollTo: (top: number, behavior: "smooth" | "instant") => void;
+  readonly scheduleFrame: (callback: () => void) => () => void;
+}
+```
+## `ViewportPositionSession`
+
+```ts
+interface ViewportPositionSession<Key> {
+  getSnapshot(): ViewportPositionSnapshot<Key>;
+  position(targetKey: Key, viewportOffset: number): void;
+  layoutChanged(): void;
+  targetVisibilityChanged(visible: boolean): void;
+  complete(): void;
+  cancel(reason?: ViewportPositionCancelReason): void;
+}
+```
+## `ViewportPositionSnapshot`
+
+```ts
+interface ViewportPositionSnapshot<Key> {
+  readonly active: boolean;
+  readonly applyingScroll: boolean;
+  readonly owned: boolean;
+  readonly tailReserve: number;
+  readonly targetKey: Key | null;
+  readonly viewportOffset: number | null;
 }
 ```
 ## `wheelAffordance`

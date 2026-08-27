@@ -79,6 +79,7 @@ describe("official site shell", () => {
       "API · Database",
       "Overview",
       "Official Hands · TBD",
+      "Viewport Position",
       "Order",
       "Object",
       "Annotation",

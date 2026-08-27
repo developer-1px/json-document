@@ -58,6 +58,8 @@ Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
 - Clipboard/History 등 필요한 editing capability가 연결됨
 - 대표 keyboard·pointer Affordance와 browser lifecycle이 실제 Host에서 동작함
 - package contract와 Live Demo browser test가 같은 행동을 증명함
+- Live Demo fixture가 관찰된 실제 제품 사건에서 유래하고 shape·순서·크기·timing과
+  provenance를 보존함. synthetic happy path만으로는 Hands를 닫지 않음
 - 반복 책임은 owner package API, 제품 고유 정책은 이름 붙은 Host module에 있음
 
 따라서 “닫힘”은 모든 제품 기능이나 모든 접근성 변형이 끝났다는 뜻이 아닙니다.
@@ -74,6 +76,27 @@ Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
 
 Transcript, 말풍선, think·stream·tool animation은 표현과 runtime lifecycle입니다.
 Hands가 아닙니다.
+
+## Hands가 공유하는 Viewport Position
+
+특정 오브젝트를 지정한 화면 위치로 보내고, 문서 끝에서도 그 위치에 도달하도록
+부족한 하단 scroll range를 임시로 제공하며, 오브젝트가 화면 밖으로 나가면 이를
+함께 제거하는 동작은 업무 규칙이 아닙니다. Live Demo는 security-filter가 적용된 실제
+runtime browser-memory capture의 1,052개 text delta를 87개 원래 chunk 경계와
+scaled delay로 재생합니다.
+
+정본 lifecycle의 입력은 exact target과 원하는 viewport offset입니다. Demo에서는
+제출한 항목과 96px을 넘기지만 맨 위는 하나의 사용 예일 뿐입니다. target 뒤의
+content가 자라는 만큼 temporary trailing range를 같은 rendering opportunity에서
+줄이고, target이 viewport를 벗어나면 position control과 range를 해제합니다. 완료 시
+DOM 교체나 browser scroll clamp가 생겨도 요청한 target 위치를 복원합니다.
+
+Host는 target identity, 원하는 offset, 활성화·완료 정책을 정하고, Affordance와 Web
+adapter는 제품 의미를 모른 채 position/range lifecycle과 DOM 연결을 소유합니다.
+
+```live-demo
+/demo/viewport
+```
 
 ## Artifact를 다루는 닫힌 Hands
 

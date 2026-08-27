@@ -18,6 +18,30 @@ function onWheel(event: WheelEvent) {
 
 이 손은 호스트 overflow입니다. 문서 값은 바꾸지 않습니다.
 
+특정 오브젝트를 원하는 viewport 위치로 보내는 수명은
+`createViewportPositionSession`이 소유합니다. 문서 끝에서 해당 위치까지 스크롤할
+수 없다면 부족한 trailing scroll range를 임시로 만들고, 뒤의 content가 자라면
+같은 layout 주기에 줄입니다. 대상이 viewport를 벗어나면 control과 임시 range를
+함께 해제합니다. Web Host는 `createWebViewportPositionPorts`로 exact target과
+짝지은 tail reserve를 연결합니다.
+
+```ts
+const ports = createWebViewportPositionPorts({
+  viewport,
+  content,
+  findTarget,
+  findTailReserve,
+  createVisibilityObserver,
+});
+const session = createViewportPositionSession({ ...ports });
+const stopLayout = ports.observeLayout(() => session.layoutChanged());
+const stopVisibility = ports.observeTargetVisibility(targetId, (visible) => {
+  session.targetVisibilityChanged(visible);
+});
+
+session.position(targetId, 96);
+```
+
 닫는 손:
 - wheel (수정 키 없음). 평면에서는 스크롤/팬. 객체 좌표 불변
 - 초점 대상이 보이도록 scroll-into-view는 호스트
