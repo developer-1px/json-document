@@ -65,6 +65,9 @@ Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와
 Host는 `Temporal.Now`로 concrete clock을 읽고 Editing `formatCalendarInstant`로
 Calendar datetime-local minute 문자열을 만듭니다. clock source와 저장 형식의
 책임을 섞는 route-local formatter는 두지 않습니다.
+Calendar collection과 id lookup은 Editing `calendarDocumentCalendars`,
+`calendarDocumentCalendar`가 소유합니다. Host는 sidebar와 inspector를 조합하고
+calendar color를 UI variant로 바꾸는 시각 정책만 유지합니다.
 Inspector의 repeat frequency·interval·until 변경은 Editing
 `calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`,
 `calendarRecurrenceWithUntil`이 `CalendarRecurrence` model을 만들고 보존합니다.
