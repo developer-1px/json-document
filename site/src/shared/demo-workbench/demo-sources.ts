@@ -298,6 +298,21 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithFrequency",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithInterval",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithUntil",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "previewCalendarAllDay",
     sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
   },

@@ -13,6 +13,9 @@ import {
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
+  calendarRecurrenceWithFrequency,
+  calendarRecurrenceWithInterval,
+  calendarRecurrenceWithUntil,
   calendarShiftInstant,
   calendarTimedLayout,
   calendarVisibleEvents,
@@ -814,11 +817,7 @@ export function CalendarDemoRoute(props: {
                   onValueChange={(value) => applySelectedPatch({
                     recurrence: value === "none"
                       ? null
-                      : {
-                        freq: value as CalendarRecurrence["freq"],
-                        interval: selectedEvent.recurrence?.interval ?? 1,
-                        until: selectedEvent.recurrence?.until ?? "",
-                      },
+                      : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
                   })}
                 />
                 {selectedEvent.recurrence === null ? null : (
@@ -832,9 +831,8 @@ export function CalendarDemoRoute(props: {
                         className={ui.field.control}
                         value={selectedEvent.recurrence.interval}
                         onChange={(event) => {
-                          const interval = Math.max(1, Math.floor(Number(event.target.value) || 1));
                           applySelectedPatch({
-                            recurrence: { ...selectedEvent.recurrence!, interval },
+                            recurrence: calendarRecurrenceWithInterval(selectedEvent.recurrence, event.target.value),
                           });
                         }}
                       />
@@ -844,7 +842,7 @@ export function CalendarDemoRoute(props: {
                       label="Repeat until"
                       value={selectedEvent.recurrence.until}
                       onValueChange={(value) => applySelectedPatch({
-                        recurrence: { ...selectedEvent.recurrence!, until: value },
+                        recurrence: calendarRecurrenceWithUntil(selectedEvent.recurrence, value),
                       })}
                     />
                   </>

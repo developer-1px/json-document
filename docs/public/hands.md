@@ -65,6 +65,10 @@ Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와
 Host는 `Temporal.Now`로 concrete clock을 읽고 Editing `formatCalendarInstant`로
 Calendar datetime-local minute 문자열을 만듭니다. clock source와 저장 형식의
 책임을 섞는 route-local formatter는 두지 않습니다.
+Inspector의 repeat frequency·interval·until 변경은 Editing
+`calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`,
+`calendarRecurrenceWithUntil`이 `CalendarRecurrence` model을 만들고 보존합니다.
+Host는 option copy와 recurrence 비활성화 선택만 조합합니다.
 월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
 정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
 조합합니다.
