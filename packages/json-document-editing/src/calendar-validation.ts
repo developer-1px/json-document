@@ -1,8 +1,13 @@
 import { Temporal } from "@js-temporal/polyfill";
-import type { CalendarCalendar, CalendarDocument, CalendarEvent } from "./calendar.js";
+import type { CalendarCalendar, CalendarDocument, CalendarEvent, CalendarView } from "./calendar.js";
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+const CALENDAR_VIEWS: ReadonlySet<string> = new Set(["day", "week", "month", "year"]);
+
+export function parseCalendarView(value: unknown): CalendarView | null {
+  return typeof value === "string" && CALENDAR_VIEWS.has(value) ? value as CalendarView : null;
+}
 
 export function calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar> {
   return Array.isArray(document.calendars) ? document.calendars : [];

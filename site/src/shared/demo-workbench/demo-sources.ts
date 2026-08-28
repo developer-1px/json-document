@@ -337,6 +337,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
   },
   {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "parseCalendarView",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-web",
     symbol: "calendarCommandFromWebKeyboardEvent",
     sourcePath: "packages/json-document-web/src/calendar-input.ts",

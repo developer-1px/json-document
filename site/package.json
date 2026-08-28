@@ -28,8 +28,9 @@
     "check:calendar-date-part": "node scripts/check-calendar-date-part.mjs",
     "check:calendar-period-cells": "node scripts/check-calendar-period-cells.mjs",
     "check:calendar-allday-span": "node scripts/check-calendar-allday-span.mjs",
+    "check:calendar-view-parser": "node scripts/check-calendar-view-parser.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:segmented-control-id && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:calendar-temporal && npm run check:calendar-keyboard && npm run check:calendar-rename && npm run check:calendar-viewport && npm run check:calendar-pointer-coordinate && npm run check:calendar-year-months && npm run check:calendar-month-weeks && npm run check:calendar-period-label && npm run check:calendar-visible-date-shift && npm run check:calendar-time-label && npm run check:calendar-event-label && npm run check:calendar-interval-last-date && npm run check:calendar-date-part && npm run check:calendar-period-cells && npm run check:calendar-allday-span && npm run check:tokens && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:segmented-control-id && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:calendar-temporal && npm run check:calendar-keyboard && npm run check:calendar-rename && npm run check:calendar-viewport && npm run check:calendar-pointer-coordinate && npm run check:calendar-year-months && npm run check:calendar-month-weeks && npm run check:calendar-period-label && npm run check:calendar-visible-date-shift && npm run check:calendar-time-label && npm run check:calendar-event-label && npm run check:calendar-interval-last-date && npm run check:calendar-date-part && npm run check:calendar-period-cells && npm run check:calendar-allday-span && npm run check:calendar-view-parser && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",

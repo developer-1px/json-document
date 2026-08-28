@@ -1122,6 +1122,11 @@ interface OrderSelection extends Record<string, JSONValue> {
   readonly primaryIndex: number | null;
 }
 ```
+## `parseCalendarView`
+
+```ts
+parseCalendarView(value: unknown): CalendarView | null
+```
 ## `previewCalendarAllDay`
 
 ```ts

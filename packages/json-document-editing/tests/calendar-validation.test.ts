@@ -1,5 +1,14 @@
 import { describe, expect, test } from "vitest";
-import { calendarAllDaySpan, calendarDatePart, calendarIntervalLastDate } from "../src/index.js";
+import { calendarAllDaySpan, calendarDatePart, calendarIntervalLastDate, parseCalendarView } from "../src/index.js";
+
+describe("parseCalendarView", () => {
+  test("accepts canonical calendar views and rejects other runtime values", () => {
+    expect(["day", "week", "month", "year"].map(parseCalendarView)).toEqual(["day", "week", "month", "year"]);
+    expect(parseCalendarView("agenda")).toBeNull();
+    expect(parseCalendarView(1)).toBeNull();
+    expect(parseCalendarView(null)).toBeNull();
+  });
+});
 
 describe("calendarAllDaySpan", () => {
   test("projects inclusive UI dates to an ordered exclusive all-day interval", () => {

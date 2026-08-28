@@ -53,6 +53,7 @@ export {
   calendarIntervalLastDate,
   calendarShiftInstant,
   isCalendarAllDay,
+  parseCalendarView,
 } from "./calendar-validation.js";
 export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
