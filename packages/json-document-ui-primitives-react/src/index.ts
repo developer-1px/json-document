@@ -38,6 +38,7 @@ export {
   addCalendarMonths,
   addCalendarYears,
   calendarCells,
+  calendarMonthWeeks,
   calendarYearMonths,
   parseHtmlDateValue,
   startOfIsoWeek,

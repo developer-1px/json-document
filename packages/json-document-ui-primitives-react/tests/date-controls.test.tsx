@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { useState } from "react";
 import {
   CalendarGrid,
+  calendarMonthWeeks,
   calendarYearMonths,
   DatePicker,
   DateRangePicker,
@@ -44,6 +45,17 @@ describe("HTML date values", () => {
       "2028-05-01", "2028-06-01", "2028-07-01", "2028-08-01",
       "2028-09-01", "2028-10-01", "2028-11-01", "2028-12-01",
     ]);
+  });
+
+  test("projects a month grid as six ISO week rows of seven cells", () => {
+    const weeks = calendarMonthWeeks("2026-05-25");
+    expect(weeks).toHaveLength(6);
+    expect(weeks.every((week) => week.length === 7)).toBe(true);
+    expect(weeks[0]?.map((cell) => cell.date)).toEqual([
+      "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30",
+      "2026-05-01", "2026-05-02", "2026-05-03",
+    ]);
+    expect(weeks[5]?.at(-1)?.date).toBe("2026-06-07");
   });
 });
 

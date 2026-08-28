@@ -43,6 +43,7 @@ import {
   addCalendarDays,
   addCalendarYears,
   calendarCells,
+  calendarMonthWeeks,
   calendarYearMonths,
   shiftVisibleDate,
   startOfIsoWeek,
@@ -556,7 +557,7 @@ export function CalendarDemoRoute(props: {
                     </div>
                   ))}
                 </div>
-                {monthWeeks(calendarCells("month", visibleDate)).map((week) => {
+                {calendarMonthWeeks(visibleDate).map((week) => {
                   const dates = week.map((cell) => cell.date);
                   const layout = calendarMonthWeekLayout(paintedEvents, dates, monthDayRows);
                   return (
@@ -855,14 +856,6 @@ export function CalendarDemoRoute(props: {
       </ProductApp>
     </DemoSurface>
   );
-}
-
-function monthWeeks<T>(cells: ReadonlyArray<T>): ReadonlyArray<ReadonlyArray<T>> {
-  const weeks: Array<ReadonlyArray<T>> = [];
-  for (let index = 0; index < cells.length; index += 7) {
-    weeks.push(cells.slice(index, index + 7));
-  }
-  return weeks;
 }
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {

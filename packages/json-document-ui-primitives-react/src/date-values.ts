@@ -169,6 +169,11 @@ export function calendarCells(grain: CalendarGrain, visibleDate: string): Readon
   return Array.from({ length: days }, (_, index) => cell(addCalendarDays(yearStart, index), true));
 }
 
+export function calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>> {
+  const cells = calendarCells("month", visibleDate);
+  return Array.from({ length: 6 }, (_, index) => cells.slice(index * 7, index * 7 + 7));
+}
+
 export function visiblePeriodLabel(grain: CalendarGrain, visibleDate: string): string {
   const parts = civil(visibleDate);
   if (grain === "week") return `${startOfIsoWeek(visibleDate)} · week`;

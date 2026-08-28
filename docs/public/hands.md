@@ -56,6 +56,9 @@ start/end로 만들고, 빈 칸 클릭은 선택을 지웁니다. 빈 칸 더블
 늘립니다. 월 보기 같은 날 빈 칸 클릭은 선택 해제, 더블클릭은 그날 종일 생성,
 빈 칸을 다른 날로 끌면 그 날들을 덮는 종일 구간을 만들고 제목을 묻습니다.
 여러 날을 덮는 종일 이벤트는 주 행을 가로지르는 막대이고, 주 경계에서 잘립니다.
+월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
+정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
+조합합니다.
 막대 가장자리는 종일 밴드와 같이 `event.resize`입니다.
 점유 칸은 origin 이벤트 선택, 다른 날로 끌 때만 `event.move-day`입니다.
 월간 span에서 누른 Web `clientX`는 `calendarKeyFromWebRow`가 주 행 bounds와

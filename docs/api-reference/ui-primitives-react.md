@@ -46,6 +46,11 @@ type CalendarGrain = "week" | "month" | "year";
 ```ts
 CalendarGrid(props: { readonly label: string; readonly value: string | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: string) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
 ```
+## `calendarMonthWeeks`
+
+```ts
+calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>>
+```
 ## `calendarYearMonths`
 
 ```ts
