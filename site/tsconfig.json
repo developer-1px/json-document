@@ -15,6 +15,7 @@
       "@interactive-os/json-document-ajv": ["../packages/json-document-ajv/src/index.ts"],
       "@interactive-os/json-document-affordance": ["../packages/json-document-affordance/src/index.ts"],
       "@interactive-os/json-document-ui-primitives-react": ["../packages/json-document-ui-primitives-react/src/index.ts"],
+      "@interactive-os/json-document-animation-react": ["../packages/json-document-animation-react/src/index.ts"],
       "@interactive-os/json-document-tanstack-table": ["../packages/json-document-tanstack-table/src/index.ts"],
       "@interactive-os/json-document-web": ["../packages/json-document-web/src/index.ts"],
       "@interactive-os/json-document-contenteditable": ["../packages/json-document-contenteditable/src/index.ts"],
