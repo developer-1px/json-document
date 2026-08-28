@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { addCalendarDate, calendarBusyDates, type CalendarEvent } from "@interactive-os/json-document-editing";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton } from "@interactive-os/json-document-ui-primitives-react";
 import { addCalendarMonths, calendarCells } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
@@ -45,9 +45,8 @@ export function CalendarDemoNavigator(props: {
           </div>
         ))}
         {cells.map((cell) => (
-          <button
+          <ActionButton
             key={cell.date}
-            type="button"
             aria-label={cell.date}
             aria-current={cell.date === props.today ? "date" : undefined}
             className={classes(
@@ -59,7 +58,7 @@ export function CalendarDemoNavigator(props: {
             onClick={() => props.onDateChange(cell.date)}
           >
             {Number(cell.date.slice(8))}
-          </button>
+          </ActionButton>
         ))}
       </div>
     </section>

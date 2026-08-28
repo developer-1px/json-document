@@ -1009,13 +1009,12 @@ export function CalendarDemoRoute(props: {
                                 onPointerDown={(event) => event.stopPropagation()}
                                 onDoubleClick={(event) => event.stopPropagation()}
                               >
-                                <button
-                                  type="button"
-                                  className={classes("px-1 text-left", ui.text.body)}
+                                <ActionButton
+                                  className={classes("px-1 text-left", styles.quietAction(), ui.text.body)}
                                   onClick={() => setLocation("day", cell.date)}
                                 >
                                   {cell.date}
-                                </button>
+                                </ActionButton>
                                 {calendarMonthDayLayout(paintedEvents, cell.date, Math.max(onDay.length, 1)).events.map((item) => (
                                   <SelectableItem
                                     key={`${item.id}:${item.start}`}
@@ -1039,14 +1038,13 @@ export function CalendarDemoRoute(props: {
                                 </span>
                                 <div className="shrink-0" style={{ height: `${layout.laneCount * 1.25}rem` }} />
                                 {(layout.hiddenCounts[index] ?? 0) > 0 ? (
-                                  <button
-                                    type="button"
-                                    className={classes("relative z-10", styles.monthMore(), ui.text.meta)}
+                                  <ActionButton
+                                    className={classes(styles.monthMore(), ui.text.meta)}
                                     onPointerDown={(event) => event.stopPropagation()}
                                     onClick={() => setOverflowDay(cell.date)}
                                   >
                                     {`+${layout.hiddenCounts[index]} more`}
-                                  </button>
+                                  </ActionButton>
                                 ) : null}
                               </>
                             )}
@@ -1124,13 +1122,12 @@ export function CalendarDemoRoute(props: {
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                 {yearMonths(visibleDate).map((monthStart, index) => (
                   <section key={monthStart} aria-label={monthStart.slice(0, 7)} className={styles.yearMonth()}>
-                    <button
-                      type="button"
-                      className={classes("text-left", ui.text.body)}
+                    <ActionButton
+                      className={classes("text-left", styles.quietAction(), ui.text.body)}
                       onClick={() => setLocation("month", monthStart)}
                     >
                       {months[index]}
-                    </button>
+                    </ActionButton>
                     <div role="grid" aria-label={monthStart.slice(0, 7)} className="grid grid-cols-7">
                       {weekdays.map((name) => (
                         <div key={name} role="columnheader" className={classes("text-center", ui.text.meta)}>
@@ -1138,9 +1135,8 @@ export function CalendarDemoRoute(props: {
                         </div>
                       ))}
                       {calendarCells("month", monthStart).map((cell) => (
-                        <button
+                        <ActionButton
                           key={cell.date}
-                          type="button"
                           aria-label={cell.date}
                           aria-current={cell.date === today ? "date" : undefined}
                           className={classes(
@@ -1152,7 +1148,7 @@ export function CalendarDemoRoute(props: {
                           onClick={() => setLocation("day", cell.date)}
                         >
                           {Number(cell.date.slice(8))}
-                        </button>
+                        </ActionButton>
                       ))}
                     </div>
                   </section>
