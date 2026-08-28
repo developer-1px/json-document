@@ -154,16 +154,19 @@ export function moveCalendarDate(date: string, grain: CalendarGrain, key: string
 
 export type CalendarCell = {
   readonly date: string;
+  readonly day: number;
   readonly inVisiblePeriod: boolean;
   readonly weekday: number;
 };
+export type CalendarCellInterval = { readonly start: string; readonly end: string };
 
-export function calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell> {
-  if (grain === "week") {
+export function calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell> {
+  if (period === "day") return [cell(visibleDate, true)];
+  if (period === "week") {
     const start = startOfIsoWeek(visibleDate);
     return Array.from({ length: 7 }, (_, index) => cell(addCalendarDays(start, index), true));
   }
-  if (grain === "month") {
+  if (period === "month") {
     const monthStart = startOfMonth(visibleDate);
     const gridStart = startOfIsoWeek(monthStart);
     const month = civil(visibleDate).month;
@@ -178,6 +181,14 @@ export function calendarCells(grain: CalendarGrain, visibleDate: string): Readon
   const year = civil(visibleDate).year;
   const days = civil(visibleDate).year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 366 : 365;
   return Array.from({ length: days }, (_, index) => cell(addCalendarDays(yearStart, index), true));
+}
+
+export function calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null {
+  const first = cells[0]?.date;
+  const last = cells.at(-1)?.date;
+  return first === undefined || last === undefined
+    ? null
+    : { start: first, end: addCalendarDays(last, 1) };
 }
 
 export function calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>> {
@@ -206,7 +217,8 @@ export function visiblePeriodLabel(
 }
 
 function cell(date: string, inVisiblePeriod: boolean): CalendarCell {
-  return { date, inVisiblePeriod, weekday: isoWeekday(date) };
+  const parsed = Temporal.PlainDate.from(date);
+  return { date, day: parsed.day, inVisiblePeriod, weekday: parsed.dayOfWeek };
 }
 
 function civil(date: string): { year: number; month: number; day: number } {
