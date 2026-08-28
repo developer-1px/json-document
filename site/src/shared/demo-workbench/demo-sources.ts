@@ -30,6 +30,7 @@ import webDragDropSessionSource from "../../../../packages/json-document-web/src
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 import webPointTargetSource from "../../../../packages/json-document-web/src/point-target.ts?raw";
 import webCalendarSource from "../../../../packages/json-document-web/src/calendar-input.ts?raw";
+import webKeyboardSource from "../../../../packages/json-document-web/src/keyboard.ts?raw";
 import calendarHandSource from "../../../../packages/json-document-calendar/src/use-calendar-hand.ts?raw";
 import calendarPointerInteractionsSource from "../../../../packages/json-document-calendar/src/use-calendar-pointer-interactions.ts?raw";
 import webKanbanDropTargetSource from "../../../../packages/json-document-web/src/kanban-drop-target.ts?raw";
@@ -162,6 +163,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
   ["packages/json-document-web/src/point-target.ts", webPointTargetSource],
   ["packages/json-document-web/src/calendar-input.ts", webCalendarSource],
+  ["packages/json-document-web/src/keyboard.ts", webKeyboardSource],
   ["packages/json-document-calendar/src/use-calendar-hand.ts", calendarHandSource],
   ["packages/json-document-calendar/src/use-calendar-pointer-interactions.ts", calendarPointerInteractionsSource],
   ["packages/json-document-web/src/kanban-drop-target.ts", webKanbanDropTargetSource],
@@ -296,6 +298,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "calendarCommandFromWebKeyboardEvent",
     sourcePath: "packages/json-document-web/src/calendar-input.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebKeyboardAdapter",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",

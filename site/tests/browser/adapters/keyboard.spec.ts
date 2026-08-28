@@ -6,6 +6,11 @@ test("Keyboard adapter composes Intent, Clipboard, and History", async ({ page }
   await page.locator('[data-block-id="alpha"]').click({ position: { x: 8, y: 8 } });
   await surface.focus();
 
+  await page.keyboard.press("g");
+  expect(JSON.parse(await page.getByTestId("product-keyboard-command-json").innerText())).toEqual({
+    type: "open-command-palette",
+  });
+
   await page.keyboard.press("ArrowDown");
   expect(JSON.parse(await page.getByTestId("keyboard-command-json").innerText())).toEqual({
     type: "move",

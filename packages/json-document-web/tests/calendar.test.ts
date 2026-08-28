@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import {
   calendarCommandFromWebKeyboardEvent,
@@ -7,11 +8,33 @@ import {
 
 describe("Calendar Web adapters", () => {
   test("maps the default calendar keys without stealing text-entry input", () => {
-    expect(calendarCommandFromWebKeyboardEvent(stroke("d"))).toEqual({ type: "view", view: "day" });
-    expect(calendarCommandFromWebKeyboardEvent(stroke("ArrowRight"))).toEqual({ type: "shift", direction: 1 });
-    expect(calendarCommandFromWebKeyboardEvent(stroke("Delete"))).toEqual({ type: "remove" });
+    const cases = [
+      ["d", { type: "view", view: "day" }],
+      ["w", { type: "view", view: "week" }],
+      ["m", { type: "view", view: "month" }],
+      ["y", { type: "view", view: "year" }],
+      ["t", { type: "today" }],
+      ["c", { type: "create" }],
+      ["Delete", { type: "remove" }],
+      ["Backspace", { type: "remove" }],
+      ["n", { type: "shift", direction: 1 }],
+      ["p", { type: "shift", direction: -1 }],
+      ["ArrowRight", { type: "shift", direction: 1 }],
+      ["ArrowLeft", { type: "shift", direction: -1 }],
+    ] as const;
+    for (const [key, command] of cases) {
+      expect(calendarCommandFromWebKeyboardEvent(stroke(key))).toEqual(command);
+    }
     expect(calendarCommandFromWebKeyboardEvent(stroke("d", { tagName: "INPUT" }))).toBeNull();
     expect(calendarCommandFromWebKeyboardEvent(stroke("ArrowRight", { tagName: "INPUT", type: "radio" }))).toBeNull();
+    expect(calendarCommandFromWebKeyboardEvent({ ...stroke("d"), metaKey: true })).toBeNull();
+    expect(calendarCommandFromWebKeyboardEvent({ ...stroke("d"), shiftKey: true })).toBeNull();
+  });
+
+  test("delegates Calendar chords to the canonical keyboard adapter", () => {
+    const source = readFileSync(new URL("../src/calendar-input.ts", import.meta.url), "utf8");
+    expect(source).toContain("createWebKeyboardAdapter<WebCalendarCommand>");
+    expect(source).not.toMatch(/if\s*\(\s*event\.key\s*===\s*["'][dwmtycnp]["']/);
   });
 
   test("translates Web geometry using injected Calendar policy", () => {

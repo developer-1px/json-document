@@ -27,6 +27,19 @@ test("Calendar c hotkey creates a timed event on the visible date", async ({ pag
   await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-25T10:30");
 });
 
+test("Calendar view and period hotkeys use the canonical Web keymap", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.getByRole("toolbar", { name: "Calendar" }).click();
+  await page.keyboard.press("m");
+  await expect(page).toHaveURL(/view=month/);
+  await page.keyboard.press("n");
+  await expect(page).toHaveURL(/date=2026-06-25/);
+  await page.keyboard.press("p");
+  await expect(page).toHaveURL(/date=2026-05-25/);
+  await page.keyboard.press("w");
+  await expect(page).toHaveURL(/view=week/);
+});
+
 test("Calendar week empty drag creates a timed interval and inspector shows that span", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const thursday = page.locator('[data-calendar-grid="time"][data-calendar-day="2026-05-28"]');

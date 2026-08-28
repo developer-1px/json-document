@@ -74,7 +74,9 @@ createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item,
 ## `createWebKeyboardAdapter`
 
 ```ts
-createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboardAdapter
+createWebKeyboardAdapter(): WebKeyboardAdapter
+createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; }): WebKeyboardAdapter
+createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; }): WebKeyboardAdapter<Command>
 ```
 ## `createWebPointerSession`
 
@@ -259,6 +261,7 @@ type WebCalendarCommand =
 interface WebCalendarKeyboardEvent {
   readonly key: string;
   readonly target: unknown;
+  readonly shiftKey?: boolean;
   readonly metaKey?: boolean;
   readonly ctrlKey?: boolean;
   readonly altKey?: boolean;
@@ -520,8 +523,8 @@ interface WebKanbanTargetElement {
 ## `WebKeyboardAdapter`
 
 ```ts
-interface WebKeyboardAdapter {
-  resolve(stroke: WebKeyboardStroke): WebKeyboardCommand | null;
+interface WebKeyboardAdapter<Command = WebKeyboardCommand> {
+  resolve(stroke: WebKeyboardStroke): Command | null;
 }
 ```
 ## `WebKeyboardCommand`
@@ -548,7 +551,7 @@ interface WebKeyboardStroke {
 ## `WebKeymap`
 
 ```ts
-type WebKeymap = Readonly<Record<string, WebKeyboardCommand>>;
+type WebKeymap<Command = WebKeyboardCommand> = Readonly<Record<string, Command>>;
 ```
 ## `WebModifierState`
 
