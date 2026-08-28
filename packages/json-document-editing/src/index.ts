@@ -22,14 +22,21 @@ export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility
 export { createKanbanEditor } from "./kanban.js";
 export {
   calendarAllDayLayout,
+  calendarBusyDates,
   calendarEventsInMonth,
   calendarEventsOnDay,
+  calendarMonthDayLayout,
+  calendarMonthWeekLayout,
+  calendarNowMarker,
   calendarTimedLayout,
+  calendarVisibleEvents,
   createCalendarEditor,
 } from "./calendar.js";
-export { interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
-export { interpretCalendarMonthPointer } from "./calendar-month-pointer.js";
-export { interpretCalendarTimeGridPointer } from "./calendar-time-grid-pointer.js";
+export { projectCalendarOccurrences } from "./calendar-occurrence.js";
+export { previewCalendarAllDay, previewCalendarMonth, previewCalendarTimeGrid } from "./calendar-preview.js";
+export { bindCalendarAllDayIntent, interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
+export { bindCalendarMonthIntent, interpretCalendarMonthPointer } from "./calendar-month-pointer.js";
+export { bindCalendarTimeGridIntent, interpretCalendarTimeGridPointer } from "./calendar-time-grid-pointer.js";
 export {
   addCalendarDate,
   calendarInstantAt,
@@ -143,13 +150,16 @@ export type {
   KanbanSelection,
 } from "./kanban.js";
 export type {
+  CalendarCalendar,
   CalendarDocument,
   CalendarEditor,
   CalendarEvent,
   CalendarIntent,
+  CalendarRecurrence,
   CalendarSelection,
   CalendarView,
 } from "./calendar.js";
+export type { CalendarOccurrence } from "./calendar-occurrence.js";
 export type {
   CalendarAllDayHandle,
   CalendarAllDayPointerIntent,

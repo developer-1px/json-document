@@ -110,7 +110,15 @@
   }
 
   [data-ui-control="toggle"] {
-    @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-accent aria-pressed:bg-background-subtle aria-pressed:text-foreground-accent aria-pressed:ring-1 aria-pressed:ring-line-accent disabled:aria-pressed:border-line-subtle/60 disabled:aria-pressed:bg-transparent disabled:aria-pressed:text-foreground-muted disabled:aria-pressed:ring-0;
+    @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-subtle aria-pressed:bg-background-subtle aria-pressed:text-foreground-strong disabled:aria-pressed:border-line-subtle/60 disabled:aria-pressed:bg-transparent disabled:aria-pressed:text-foreground-muted;
+  }
+
+  [data-ui-control="date-field"] {
+    @apply grid w-full min-w-0 gap-1 text-xs font-medium text-foreground-default;
+  }
+
+  [data-ui-control="date-field"] input {
+    @apply w-full min-w-0 rounded-none border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
   [data-ui-control="choice-chip"],
@@ -126,7 +134,7 @@
   }
 
   [data-ui-control="segmented"] {
-    @apply inline-flex items-center rounded-control bg-background-subtle p-0.5;
+    @apply inline-flex max-w-full min-w-0 flex-wrap items-center rounded-control bg-background-subtle p-0.5;
   }
 
   :where([data-ui-control="selectable"]) {
