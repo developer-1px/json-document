@@ -2,7 +2,12 @@ import { Temporal } from "@js-temporal/polyfill";
 
 export type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
 export type CalendarGrain = "week" | "month" | "year";
+export type CalendarPeriod = "day" | CalendarGrain;
 export type DateRangeValue = { readonly start: string; readonly end: string };
+export type VisiblePeriodLabelOptions = {
+  readonly monthNames?: ReadonlyArray<string>;
+  readonly weekSeparator?: string;
+};
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME = /^(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
@@ -44,6 +49,12 @@ export function parseDateTimeLocal(value: string): string | null {
   } catch {
     return null;
   }
+}
+
+export function calendarTimeLabel(value: string): string {
+  const parsed = parseDateTimeLocal(value);
+  if (parsed === null) return "";
+  return Temporal.PlainDateTime.from(parsed).toPlainTime().toString({ smallestUnit: "minute" });
 }
 
 export function parseMonth(value: string): string | null {
@@ -143,16 +154,19 @@ export function moveCalendarDate(date: string, grain: CalendarGrain, key: string
 
 export type CalendarCell = {
   readonly date: string;
+  readonly day: number;
   readonly inVisiblePeriod: boolean;
   readonly weekday: number;
 };
+export type CalendarCellInterval = { readonly start: string; readonly end: string };
 
-export function calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell> {
-  if (grain === "week") {
+export function calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell> {
+  if (period === "day") return [cell(visibleDate, true)];
+  if (period === "week") {
     const start = startOfIsoWeek(visibleDate);
     return Array.from({ length: 7 }, (_, index) => cell(addCalendarDays(start, index), true));
   }
-  if (grain === "month") {
+  if (period === "month") {
     const monthStart = startOfMonth(visibleDate);
     const gridStart = startOfIsoWeek(monthStart);
     const month = civil(visibleDate).month;
@@ -169,15 +183,42 @@ export function calendarCells(grain: CalendarGrain, visibleDate: string): Readon
   return Array.from({ length: days }, (_, index) => cell(addCalendarDays(yearStart, index), true));
 }
 
-export function visiblePeriodLabel(grain: CalendarGrain, visibleDate: string): string {
+export function calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null {
+  const first = cells[0]?.date;
+  const last = cells.at(-1)?.date;
+  return first === undefined || last === undefined
+    ? null
+    : { start: first, end: addCalendarDays(last, 1) };
+}
+
+export function calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>> {
+  const cells = calendarCells("month", visibleDate);
+  return Array.from({ length: 6 }, (_, index) => cells.slice(index * 7, index * 7 + 7));
+}
+
+export function visiblePeriodLabel(
+  period: CalendarPeriod,
+  visibleDate: string,
+  options: VisiblePeriodLabelOptions = {},
+): string {
+  if (period === "day") return visibleDate;
   const parts = civil(visibleDate);
-  if (grain === "week") return `${startOfIsoWeek(visibleDate)} · week`;
-  if (grain === "month") return `${padYear(parts.year)}-${pad(parts.month)}`;
+  if (period === "week") {
+    const start = startOfIsoWeek(visibleDate);
+    if (options.weekSeparator === undefined) return `${start} · week`;
+    return `${start}${options.weekSeparator}${addCalendarDays(start, 6)}`;
+  }
+  if (period === "month") {
+    const fallback = `${padYear(parts.year)}-${pad(parts.month)}`;
+    const monthName = options.monthNames?.[parts.month - 1];
+    return monthName === undefined ? fallback : `${monthName} ${padYear(parts.year)}`;
+  }
   return padYear(parts.year);
 }
 
 function cell(date: string, inVisiblePeriod: boolean): CalendarCell {
-  return { date, inVisiblePeriod, weekday: isoWeekday(date) };
+  const parsed = Temporal.PlainDate.from(date);
+  return { date, day: parsed.day, inVisiblePeriod, weekday: parsed.dayOfWeek };
 }
 
 function civil(date: string): { year: number; month: number; day: number } {

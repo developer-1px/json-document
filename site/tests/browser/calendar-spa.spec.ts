@@ -77,7 +77,18 @@ test("Calendar month empty drag paints an all-day span without leaving month vie
   const inspector = page.getByRole("region", { name: "Event" });
   await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
   await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-22");
-  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-23");
+  const inspectorEnd = inspector.getByLabel("End", { exact: true });
+  await expect(inspectorEnd).toHaveValue("2026-05-23");
+  await inspectorEnd.fill("2026-05-25");
+  await inspectorEnd.press("Enter");
+  await expect(inspectorEnd).toHaveValue("2026-05-25");
+  const eventBars = month.locator("[data-calendar-span]").filter({
+    has: page.getByRole("button", { name: "Event", exact: true }),
+  });
+  await expect(eventBars).toHaveCount(2);
+  await expect.poll(() => eventBars.evaluateAll((bars) => (
+    bars.map((bar) => bar.getAttribute("data-calendar-span")).sort()
+  ))).toEqual(["1", "3"]);
 });
 
 test("Calendar month all-day bar resizes by its end handle", async ({ page }) => {
