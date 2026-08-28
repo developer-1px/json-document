@@ -128,7 +128,11 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Not-allowed",
   ]);
   await navigation.getByRole("button", { name: "UI Primitives" }).click();
-  await expect(navigation.getByRole("group", { name: "UI Primitives" }).getByRole("link")).toHaveText(["API Reference"]);
+  await expect(navigation.getByRole("group", { name: "UI Primitives" }).getByRole("link")).toHaveText([
+    "API Reference",
+    "API · Animation",
+    "Animation",
+  ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Artifact" }).click();
