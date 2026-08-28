@@ -585,7 +585,7 @@ export function CalendarDemoRoute(props: {
                               overflowDay === cell.date && "z-20",
                             )}
                             style={{ gridColumn: index + 1, gridRow: "1 / -1" }}
-                            onPointerDown={(event) => monthPointerDown(event, cell.date, null, null, null)}
+                            onPointerDown={(event) => monthPointerDown(event, cell.date, dates, null, null, null)}
                             onPointerUp={monthPointerUp}
                             onDoubleClick={() => createAllDayOn(cell.date)}
                             onPointerCancel={(event) => cancelMonthPointer(event.pointerId)}
@@ -664,11 +664,7 @@ export function CalendarDemoRoute(props: {
                             className={isCalendarAllDay(item.event) ? styles.monthAllDay() : styles.monthTimed()}
                             onPointerDown={(event) => {
                               event.stopPropagation();
-                              const weekRoot = event.currentTarget.closest("[data-calendar-week]");
-                              const day = weekRoot === null
-                                ? dates[item.startIndex]
-                                : monthWeekDayAt(weekRoot, event.clientX, dates);
-                              monthPointerDown(event, day ?? dates[item.startIndex] ?? visibleDate, item.event.id, item.event.start, item.event.end);
+                              monthPointerDown(event, dates[item.startIndex] ?? visibleDate, dates, item.event.id, item.event.start, item.event.end);
                             }}
                             onPointerUp={monthPointerUp}
                             onDoubleClick={(event) => event.stopPropagation()}
@@ -867,13 +863,6 @@ function monthWeeks<T>(cells: ReadonlyArray<T>): ReadonlyArray<ReadonlyArray<T>>
     weeks.push(cells.slice(index, index + 7));
   }
   return weeks;
-}
-
-function monthWeekDayAt(week: Element, clientX: number, days: ReadonlyArray<string>): string | null {
-  const rect = week.getBoundingClientRect();
-  if (rect.width <= 0 || days.length === 0) return days[0] ?? null;
-  const index = Math.max(0, Math.min(days.length - 1, Math.floor(((clientX - rect.left) / rect.width) * days.length)));
-  return days[index] ?? null;
 }
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {

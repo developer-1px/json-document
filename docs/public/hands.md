@@ -58,6 +58,10 @@ start/end로 만들고, 빈 칸 클릭은 선택을 지웁니다. 빈 칸 더블
 여러 날을 덮는 종일 이벤트는 주 행을 가로지르는 막대이고, 주 경계에서 잘립니다.
 막대 가장자리는 종일 밴드와 같이 `event.resize`입니다.
 점유 칸은 origin 이벤트 선택, 다른 날로 끌 때만 `event.move-day`입니다.
+월간 span에서 누른 Web `clientX`는 `calendarKeyFromWebRow`가 주 행 bounds와
+정렬된 날짜를 사용해 origin 날짜로 투영합니다. Calendar React의
+`useCalendarPointerInteractions`가 DOM 측정과 pointer session 시작을 소유하므로
+Host는 이벤트와 날짜 목록만 연결합니다.
 `+N more`는 그 날의 이벤트 목록을 열고 월 보기에 남습니다. 이 매핑은
 `interpretCalendarTimeGridPointer`, `interpretCalendarAllDayPointer`,
 `interpretCalendarMonthPointer`가 소유하며 현재 선택은 입력이 아닙니다.

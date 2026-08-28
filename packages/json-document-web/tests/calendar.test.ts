@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   calendarCommandFromWebKeyboardEvent,
   calendarDayDeltaFromWebWidth,
+  calendarKeyFromWebRow,
   calendarMinutesFromWebGrid,
 } from "../src/index.js";
 
@@ -46,6 +47,16 @@ describe("Calendar Web adapters", () => {
     })).toBe(7 * 60 + 45);
     expect(calendarDayDeltaFromWebWidth(160, 100)).toBe(2);
     expect(calendarDayDeltaFromWebWidth(80, 0)).toBe(0);
+  });
+
+  test("projects a horizontal Calendar row point to its ordered key", () => {
+    const days = ["2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05"];
+    expect(calendarKeyFromWebRow(125, { left: 100, width: 200 }, days)).toBe("2026-08-02");
+    expect(calendarKeyFromWebRow(225, { left: 100, width: 200 }, days)).toBe("2026-08-04");
+    expect(calendarKeyFromWebRow(50, { left: 100, width: 200 }, days)).toBe("2026-08-02");
+    expect(calendarKeyFromWebRow(350, { left: 100, width: 200 }, days)).toBe("2026-08-05");
+    expect(calendarKeyFromWebRow(225, { left: 100, width: 0 }, days)).toBe("2026-08-02");
+    expect(calendarKeyFromWebRow(225, { left: 100, width: 200 }, [])).toBeNull();
   });
 });
 

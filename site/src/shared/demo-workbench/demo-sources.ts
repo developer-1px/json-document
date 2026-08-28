@@ -333,6 +333,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-web/src/calendar-input.ts",
   },
   {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "calendarKeyFromWebRow",
+    sourcePath: "packages/json-document-web/src/calendar-input.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "CalendarGrid",
     sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
