@@ -231,6 +231,15 @@ commitAffordance<H extends AffordanceHand>(result: AffordancePreview<H>): Afford
 ```ts
 contextMenuAffordance(input: { readonly type?: string; readonly button?: number; readonly key?: string; readonly shiftKey?: boolean; }): AffordancePreview
 ```
+## `ControlHandleDescriptor`
+
+```ts
+type ControlHandleDescriptor = {
+  readonly kind: "control";
+  readonly axis?: InteractionHandleAxis;
+  readonly cursor?: InteractionHandleCursorPolicy;
+};
+```
 ## `createBoardDragSession`
 
 ```ts
@@ -245,6 +254,11 @@ createCanvasGestureSession<Gesture extends CanvasGestureState>(options?: CanvasG
 
 ```ts
 createGestureSession<Gesture extends GestureState>(options?: GestureSessionOptions<Gesture>): GestureSession<Gesture>
+```
+## `createInteractionHandleSession`
+
+```ts
+createInteractionHandleSession(): InteractionHandleSession
 ```
 ## `createLineFocusSession`
 
@@ -280,6 +294,15 @@ disclosureAffordance(input: { readonly key: string; readonly expanded: boolean; 
 
 ```ts
 dragAffordance(origin: Point, point: Point, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }): AffordancePreview
+```
+## `DragHandleDescriptor`
+
+```ts
+type DragHandleDescriptor = {
+  readonly kind: "drag";
+  readonly axis?: InteractionHandleAxis;
+  readonly cursor?: InteractionHandleCursorPolicy;
+};
 ```
 ## `dragOperation`
 
@@ -381,6 +404,102 @@ type HistoryAffordanceResult = AffordancePreview<HistoryAffordanceHand> & {
 
 ```ts
 hoverAffordance(input: { readonly elapsedMs: number; readonly inside: boolean; readonly delayMs?: number; readonly highlight?: boolean; }): AffordancePreview
+```
+## `InteractionHandleAxis`
+
+```ts
+type InteractionHandleAxis = "x" | "y" | "both";
+```
+## `InteractionHandleCancelReason`
+
+```ts
+type InteractionHandleCancelReason = "cancel" | "lost-capture" | "superseded";
+```
+## `interactionHandleCursor`
+
+```ts
+interactionHandleCursor(descriptor: InteractionHandleDescriptor, state?: "idle" | "active"): InteractionHandleCursor
+```
+## `InteractionHandleCursor`
+
+```ts
+type InteractionHandleCursor =
+  | "grab"
+  | "grabbing"
+  | "move"
+  | "crosshair"
+  | "col-resize"
+  | "row-resize"
+  | "nwse-resize"
+  | "nesw-resize"
+  | `${ResizeEdge}-resize`;
+```
+## `InteractionHandleCursorPolicy`
+
+```ts
+type InteractionHandleCursorPolicy = {
+  readonly idle: InteractionHandleCursor;
+  readonly active?: InteractionHandleCursor;
+};
+```
+## `interactionHandleDelta`
+
+```ts
+interactionHandleDelta(descriptor: InteractionHandleDescriptor, origin: Point, point: Point): InteractionHandleDelta
+```
+## `InteractionHandleDelta`
+
+```ts
+type InteractionHandleDelta = {
+  readonly dx: number;
+  readonly dy: number;
+};
+```
+## `InteractionHandleDescriptor`
+
+```ts
+type InteractionHandleDescriptor =
+  | DragHandleDescriptor
+  | ResizeHandleDescriptor
+  | ControlHandleDescriptor;
+```
+## `InteractionHandleEvent`
+
+```ts
+type InteractionHandleEvent = {
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly phase: InteractionHandlePhase;
+  readonly origin: Point;
+  readonly point: Point;
+  readonly delta: InteractionHandleDelta;
+  readonly cursor: InteractionHandleCursor;
+  readonly reason?: InteractionHandleCancelReason;
+};
+```
+## `InteractionHandlePhase`
+
+```ts
+type InteractionHandlePhase = "start" | "preview" | "commit" | "cancel";
+```
+## `InteractionHandleSession`
+
+```ts
+interface InteractionHandleSession {
+  getSnapshot(): InteractionHandleSnapshot | null;
+  start(descriptor: InteractionHandleDescriptor, origin: Point): InteractionHandleEvent;
+  preview(point: Point): InteractionHandleEvent | null;
+  commit(point: Point): InteractionHandleEvent | null;
+  cancel(reason?: InteractionHandleCancelReason): InteractionHandleEvent | null;
+}
+```
+## `InteractionHandleSnapshot`
+
+```ts
+type InteractionHandleSnapshot = {
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly origin: Point;
+  readonly point: Point;
+};
 ```
 ## `LineFocusSession`
 
@@ -489,6 +608,15 @@ resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { re
 
 ```ts
 type ResizeEdge = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
+```
+## `ResizeHandleDescriptor`
+
+```ts
+type ResizeHandleDescriptor = {
+  readonly kind: "resize";
+  readonly edge: ResizeEdge;
+  readonly cursor?: InteractionHandleCursorPolicy;
+};
 ```
 ## `resolveAffordanceKey`
 

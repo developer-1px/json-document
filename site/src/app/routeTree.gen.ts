@@ -19,6 +19,7 @@ import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapte
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
 import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
 import { Route as PageAdaptersVirtualSelectionRouteImport } from "./routes/_page/adapters/virtual-selection";
+import { Route as PageAffordancesHandlesRouteImport } from "./routes/_page/affordances/handles";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
@@ -197,6 +198,11 @@ const PageAdaptersVirtualSelectionRoute =
     path: "/adapters/virtual-selection",
     getParentRoute: () => PageRoute,
   } as any);
+const PageAffordancesHandlesRoute = PageAffordancesHandlesRouteImport.update({
+  id: "/affordances/handles",
+  path: "/affordances/handles",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
   id: "/connectors/",
   path: "/connectors/",
@@ -881,6 +887,7 @@ export interface FileRoutesByFullPath {
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/affordances/handles": typeof PageAffordancesHandlesRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -1018,6 +1025,7 @@ export interface FileRoutesByTo {
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/affordances/handles": typeof PageAffordancesHandlesRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -1157,6 +1165,7 @@ export interface FileRoutesById {
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/_page/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/_page/affordances/handles": typeof PageAffordancesHandlesRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
@@ -1296,6 +1305,7 @@ export interface FileRouteTypes {
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
+    | "/affordances/handles"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1433,6 +1443,7 @@ export interface FileRouteTypes {
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
+    | "/affordances/handles"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1571,6 +1582,7 @@ export interface FileRouteTypes {
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
     | "/_page/adapters/virtual-selection"
+    | "/_page/affordances/handles"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
@@ -1775,6 +1787,13 @@ declare module "@tanstack/react-router" {
       path: "/adapters/virtual-selection";
       fullPath: "/adapters/virtual-selection";
       preLoaderRoute: typeof PageAdaptersVirtualSelectionRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/affordances/handles": {
+      id: "/_page/affordances/handles";
+      path: "/affordances/handles";
+      fullPath: "/affordances/handles";
+      preLoaderRoute: typeof PageAffordancesHandlesRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/": {
@@ -2734,6 +2753,7 @@ interface PageRouteChildren {
   PageAdaptersContenteditableRoute: typeof PageAdaptersContenteditableRoute;
   PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
   PageAdaptersVirtualSelectionRoute: typeof PageAdaptersVirtualSelectionRoute;
+  PageAffordancesHandlesRoute: typeof PageAffordancesHandlesRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
@@ -2845,6 +2865,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageAdaptersContenteditableRoute: PageAdaptersContenteditableRoute,
   PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
   PageAdaptersVirtualSelectionRoute: PageAdaptersVirtualSelectionRoute,
+  PageAffordancesHandlesRoute: PageAffordancesHandlesRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,

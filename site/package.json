@@ -11,9 +11,10 @@
     "check:icons": "node scripts/check-canonical-icons.mjs",
     "check:primitives": "node scripts/check-live-demo-primitives.mjs",
     "check:canonical-modules": "node scripts/check-canonical-module-closure.mjs",
+    "check:interaction-handles": "node scripts/check-interaction-handles.mjs",
     "check:calendar-temporal": "node scripts/check-calendar-temporal.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:canonical-modules && npm run check:calendar-temporal && npm run check:tokens && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:calendar-temporal && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",

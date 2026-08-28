@@ -51,6 +51,18 @@ CalendarGrid(props: { readonly label: string; readonly value: string | null; rea
 ```ts
 ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
 ```
+## `ControlHandle`
+
+```ts
+ControlHandle(props: ControlHandleProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `ControlHandleProps`
+
+```ts
+type ControlHandleProps = Omit<InteractionHandleButtonProps<ControlHandleDescriptor>, "descriptor"> & {
+  readonly descriptor?: ControlHandleDescriptor;
+};
+```
 ## `DatePicker`
 
 ```ts
@@ -70,6 +82,18 @@ type DateRangeValue = { readonly start: string; readonly end: string };
 
 ```ts
 DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & { readonly expanded: boolean; readonly controls: string; }): ReactNode
+```
+## `DragHandle`
+
+```ts
+DragHandle(props: DragHandleProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `DragHandleProps`
+
+```ts
+type DragHandleProps = Omit<InteractionHandleButtonProps<DragHandleDescriptor>, "descriptor"> & {
+  readonly descriptor?: DragHandleDescriptor;
+};
 ```
 ## `FileDropRegion`
 
@@ -100,6 +124,24 @@ type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
 
 ```ts
 IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & FocusPreservingControl & { readonly label: string; readonly rootClassName?: string; }): ReactNode
+```
+## `InteractionHandleBindingOptions`
+
+```ts
+type InteractionHandleBindingOptions<ElementType extends Element = HTMLElement> = {
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly onHandle: (event: InteractionHandleEvent, input: PointerEvent<ElementType>) => void;
+};
+```
+## `InteractionHandleButtonProps`
+
+```ts
+type InteractionHandleButtonProps<Descriptor extends InteractionHandleDescriptor> =
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label"> & {
+    readonly label: string;
+    readonly descriptor: Descriptor;
+    readonly onHandle: (event: InteractionHandleEvent) => void;
+  };
 ```
 ## `ListboxBinding`
 
@@ -158,7 +200,19 @@ RangeCalendar(props: { readonly label: string; readonly value: DateRangeValue | 
 ## `ResizeHandle`
 
 ```ts
-ResizeHandle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & { readonly label: string; readonly orientation: "horizontal" | "vertical"; readonly onResize: (delta: number, phase: "preview" | "commit") => void; readonly className?: string; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+ResizeHandle(props: ResizeHandleProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `ResizeHandleProps`
+
+```ts
+type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & {
+  readonly label: string;
+  readonly orientation: "horizontal" | "vertical";
+  readonly onResize: (delta: number, phase: "preview" | "commit") => void;
+  readonly onHandle?: (event: InteractionHandleEvent) => void;
+  readonly descriptor?: ResizeHandleDescriptor;
+  readonly className?: string;
+};
 ```
 ## `SegmentedControl`
 
@@ -247,6 +301,11 @@ Tabs<T extends string | number>(props: { readonly label: string; readonly value:
 
 ```ts
 ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly label?: string; readonly tooltip?: string; }): ReactNode
+```
+## `useInteractionHandle`
+
+```ts
+useInteractionHandle<ElementType extends Element = HTMLElement>(options: InteractionHandleBindingOptions<ElementType>): { ...; }
 ```
 ## `useListbox`
 

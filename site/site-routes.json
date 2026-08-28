@@ -665,6 +665,14 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/affordances/handles",
+    "label": "Interaction Handles Live Demo",
+    "title": "Interaction Handles Live Demo - json-document",
+    "description": "DragHandle, ResizeHandle, ControlHandle의 정본 descriptor, cursor, lifecycle Usage입니다.",
+    "navigationGroup": "Affordance",
+    "sidebar": false
+  },
+  {
     "path": "/adapters/keyboard",
     "label": "Keyboard Live Demo",
     "title": "Keyboard Adapter Live Demo - json-document",

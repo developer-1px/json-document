@@ -105,6 +105,9 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-editing/src/database-property-value.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
+      "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+      "packages/json-document-web/src/pointer-session.ts",
+      "packages/json-document-affordance/src/interaction-handle.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
@@ -138,6 +141,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/grid-cell.ts",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
       "packages/json-document-web/src/pointer-session.ts",
+      "packages/json-document-affordance/src/interaction-handle.ts",
     ]);
   });
 

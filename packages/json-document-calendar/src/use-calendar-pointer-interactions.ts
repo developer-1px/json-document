@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useState, type PointerEvent } from "react";
 import {
   addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
   calendarEventsOnDay, calendarInstantAt, calendarShiftInstant, calendarVisibleEvents,
@@ -54,8 +54,6 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   const [timePointer] = useState(() => createWebPointerSession<TimeRelease>());
   const [allDayPointer] = useState(() => createWebPointerSession<AllDayRelease>());
   const [monthPointer] = useState(() => createWebPointerSession<MonthRelease>());
-  const allDayPreviewRef = useRef<CalendarAllDayPointerRelease | null>(null);
-  allDayPreviewRef.current = hand.allDayPreview;
   const document = hand.document;
   const visibleEvents = calendarVisibleEvents(document);
 
@@ -82,15 +80,6 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const intent = bindCalendarAllDayIntent(interpretCalendarAllDayPointer(release), event, release.originEventStart, hand.scope);
     remember(intent, release.originEventStart, event?.end ?? null);
   }
-
-  useEffect(() => {
-    function onPointerUp(): void {
-      const release = allDayPreviewRef.current;
-      if (release !== null && (release.originHandle === "start" || release.originHandle === "end")) commitAllDay(release);
-    }
-    window.addEventListener("pointerup", onPointerUp, true);
-    return () => window.removeEventListener("pointerup", onPointerUp, true);
-  });
 
   function timePointerDown(event: PointerEvent<HTMLElement>, day: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: CalendarTimeGridHandle | null): void {
     if (event.button !== 0) return;

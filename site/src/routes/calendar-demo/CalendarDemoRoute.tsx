@@ -695,7 +695,9 @@ export function CalendarDemoRoute(props: {
                         const clipEnd = isCalendarAllDay(item.event) && weekLast !== undefined && lastDay !== null && lastDay > weekLast;
                         return (
                         <div
-                          key={`${item.event.id}:${item.event.start}:${item.startIndex}`}
+                          key={`${item.event.id}:${allDayPreview?.originEventId === item.event.id
+                            ? allDayPreview.originEventStart ?? item.event.start
+                            : item.event.start}`}
                           data-calendar-span={String(item.span)}
                           className="relative z-10 min-w-0 w-full"
                           style={{

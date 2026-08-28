@@ -3,6 +3,32 @@
 Resize는 가장자리·모서리·칸 경계·창 분할선을 움직이는 손입니다.
 CSS predefined 리사이즈 커서가 이 손을 닫습니다.
 
+`InteractionHandleDescriptor`가 Drag·Resize·Control 손잡이의 축, cursor와
+`start → preview → commit / cancel` lifecycle을 하나의 정본 계약으로 묶습니다.
+DOM pointer capture는 React/Web binding이 맡고, 제품은 delta를 자기 Intent로
+변환합니다.
+
+```ts
+import { createInteractionHandleSession } from "@interactive-os/json-document-affordance";
+
+const handle = createInteractionHandleSession();
+handle.start({ kind: "resize", edge: "se" }, origin);
+handle.preview(point); // axis-aware delta + nw/se cursor meaning
+handle.commit(point);
+```
+
+```tsx
+import {
+  ControlHandle,
+  DragHandle,
+  ResizeHandle,
+} from "@interactive-os/json-document-ui-primitives-react";
+
+<DragHandle label="Move card" onHandle={applyDrag} />;
+<ResizeHandle label="Resize panel" orientation="horizontal" onResize={applyResize} />;
+<ControlHandle label="Move control point" onHandle={applyControlPoint} />;
+```
+
 ```ts
 import { applyAffordance, commitAffordance, resizeAffordance } from "@interactive-os/json-document-affordance";
 
@@ -52,3 +78,7 @@ function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
 - 스냅은 [Snap](affordance-snap.md)
 
 근거: [CSS UI cursor resize](https://www.w3.org/TR/css-ui-4/#cursor), [CSS UI resize](https://www.w3.org/TR/css-ui-4/#resize), [APG Window Splitter](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/), Figma/Keynote/Illustrator 바운딩 박스
+
+```live-demo
+/affordances/handles
+```

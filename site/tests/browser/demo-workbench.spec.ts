@@ -46,6 +46,9 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "database-property-value.ts",
     "topology.ts",
     "grid-cell.ts",
+    "surfaces.tsx",
+    "pointer-session.ts",
+    "interaction-handle.ts",
   ]);
 });
 
