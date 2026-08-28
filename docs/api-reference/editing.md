@@ -137,6 +137,11 @@ type CalendarAllDayPointerRelease = {
   readonly targetDay: string;
 };
 ```
+## `calendarAllDaySpan`
+
+```ts
+calendarAllDaySpan(originDay: string, targetDay: string): { readonly start: string; readonly end: string; } | null
+```
 ## `calendarBusyDates`
 
 ```ts

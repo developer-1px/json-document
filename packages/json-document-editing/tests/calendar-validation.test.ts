@@ -1,5 +1,23 @@
 import { describe, expect, test } from "vitest";
-import { calendarDatePart, calendarIntervalLastDate } from "../src/index.js";
+import { calendarAllDaySpan, calendarDatePart, calendarIntervalLastDate } from "../src/index.js";
+
+describe("calendarAllDaySpan", () => {
+  test("projects inclusive UI dates to an ordered exclusive all-day interval", () => {
+    expect(calendarAllDaySpan("2026-05-25", "2026-05-27")).toEqual({
+      start: "2026-05-25",
+      end: "2026-05-28",
+    });
+    expect(calendarAllDaySpan("2026-05-27", "2026-05-25")).toEqual({
+      start: "2026-05-25",
+      end: "2026-05-28",
+    });
+    expect(calendarAllDaySpan("2026-05-25", "2026-05-25")).toEqual({
+      start: "2026-05-25",
+      end: "2026-05-26",
+    });
+    expect(calendarAllDaySpan("not-a-date", "2026-05-25")).toBeNull();
+  });
+});
 
 describe("calendarDatePart", () => {
   test("projects the calendar date from date and date-time values", () => {
