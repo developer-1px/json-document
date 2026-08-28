@@ -66,7 +66,9 @@ Host는 이벤트와 날짜 목록만 연결합니다.
 `interpretCalendarTimeGridPointer`, `interpretCalendarAllDayPointer`,
 `interpretCalendarMonthPointer`가 소유하며 현재 선택은 입력이 아닙니다.
 연 보기는 12개 미니 월입니다. 월 이름은 월 보기로, 날짜는 일 보기로
-들어갑니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
+들어갑니다. 연간 12개 월 시작일은 UI Primitives 날짜 값 정본의
+`calendarYearMonths`가 만들고, Host는 월 이름과 grid layout 및 navigation만
+조합합니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
 보기 전환은 Host가 조합합니다.
 
 ```live-demo

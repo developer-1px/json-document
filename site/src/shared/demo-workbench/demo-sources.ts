@@ -349,6 +349,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarYearMonths",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "startOfYear",
     sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
   },

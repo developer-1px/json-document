@@ -41,9 +41,9 @@ import {
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
-  addCalendarMonths,
   addCalendarYears,
   calendarCells,
+  calendarYearMonths,
   shiftVisibleDate,
   startOfIsoWeek,
   startOfYear,
@@ -705,7 +705,7 @@ export function CalendarDemoRoute(props: {
             ) : null}
             {view === "year" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {yearMonths(visibleDate).map((monthStart, index) => (
+                {calendarYearMonths(visibleDate).map((monthStart, index) => (
                   <section key={monthStart} aria-label={monthStart.slice(0, 7)} className={styles.yearMonth()}>
                     <ActionButton
                       className={classes("text-left", styles.quietAction(), ui.text.body)}
@@ -877,11 +877,6 @@ function monthEventLabel(item: CalendarEvent): string {
 
 function clockNow(now = Temporal.Now.plainDateTimeISO()): string {
   return now.toString({ smallestUnit: "minute" });
-}
-
-function yearMonths(visibleDate: string): ReadonlyArray<string> {
-  const yearStart = startOfYear(visibleDate);
-  return Array.from({ length: 12 }, (_, index) => addCalendarMonths(yearStart, index));
 }
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {

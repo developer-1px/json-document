@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { useState } from "react";
 import {
   CalendarGrid,
+  calendarYearMonths,
   DatePicker,
   DateRangePicker,
   HtmlDateField,
@@ -35,6 +36,14 @@ describe("HTML date values", () => {
   test("projects the canonical year boundary across leap years", () => {
     expect(startOfYear("2028-02-29")).toBe("2028-01-01");
     expect(startOfYear("2027-12-31")).toBe("2027-01-01");
+  });
+
+  test("projects the twelve ordered month starts for the visible year", () => {
+    expect(calendarYearMonths("2028-02-29")).toEqual([
+      "2028-01-01", "2028-02-01", "2028-03-01", "2028-04-01",
+      "2028-05-01", "2028-06-01", "2028-07-01", "2028-08-01",
+      "2028-09-01", "2028-10-01", "2028-11-01", "2028-12-01",
+    ]);
   });
 });
 

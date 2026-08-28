@@ -95,6 +95,11 @@ export function startOfYear(date: string): string {
   return Temporal.PlainDate.from(date).with({ month: 1, day: 1 }).toString();
 }
 
+export function calendarYearMonths(visibleDate: string): ReadonlyArray<string> {
+  const yearStart = startOfYear(visibleDate);
+  return Array.from({ length: 12 }, (_, index) => addCalendarMonths(yearStart, index));
+}
+
 export function isoWeekday(date: string): number {
   return Temporal.PlainDate.from(date).dayOfWeek;
 }
