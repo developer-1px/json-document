@@ -13,6 +13,10 @@ export function calendarDocumentCalendars(document: CalendarDocument): ReadonlyA
   return Array.isArray(document.calendars) ? document.calendars : [];
 }
 
+export function calendarDocumentCalendar(document: CalendarDocument, calendarId: string): CalendarCalendar | null {
+  return calendarDocumentCalendars(document).find((calendar) => calendar.id === calendarId) ?? null;
+}
+
 export function calendarDocumentEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent> {
   return Array.isArray(document.events) ? document.events : [];
 }

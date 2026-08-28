@@ -3,17 +3,21 @@ import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
-  addCalendarDate,
   calendarAllDayLayout,
   calendarAllDaySpan,
   calendarBusyDates,
   calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
   calendarEventsOnDay,
   calendarInstantAt,
   calendarIntervalLastDate,
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
+  calendarRecurrenceWithFrequency,
+  calendarRecurrenceWithInterval,
+  calendarRecurrenceWithUntil,
   calendarShiftInstant,
   calendarTimedLayout,
   calendarVisibleEvents,
@@ -44,14 +48,13 @@ import {
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
-  addCalendarYears,
+  calendarCellInterval,
   calendarCells,
   calendarEventLabel,
   calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
   shiftVisibleDate,
-  startOfYear,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
@@ -196,6 +199,7 @@ export function CalendarDemoRoute(props: {
   }
 
   const document = hand.document;
+  const calendars = calendarDocumentCalendars(document);
   const selected = new Set(hand.snapshot.selection.keys);
   const selectedEvent = hand.selectedEvent;
   const inspected = hand.inspectedInterval;
@@ -205,15 +209,13 @@ export function CalendarDemoRoute(props: {
   const days = timeGridCells.map((cell) => cell.date);
   const nowInstant = formatCalendarInstant(Temporal.Now.plainDateTimeISO());
   const today = calendarDatePart(nowInstant);
-  const yearStart = startOfYear(visibleDate);
-  const yearEnd = addCalendarYears(yearStart, 1);
-  const yearBusyDates = view === "year"
-    ? calendarBusyDates(
-      paintedEvents,
-      addCalendarDate(yearStart, -7) ?? yearStart,
-      addCalendarDate(yearEnd, 14) ?? yearEnd,
-    )
+  const yearMonths = calendarYearMonths(visibleDate);
+  const yearCellInterval = view === "year"
+    ? calendarCellInterval(yearMonths.flatMap((monthStart) => calendarCells("month", monthStart)))
     : null;
+  const yearBusyDates = yearCellInterval === null
+    ? null
+    : calendarBusyDates(paintedEvents, yearCellInterval.start, yearCellInterval.end);
 
   useEffect(() => {
     setOverflowDay(null);
@@ -526,7 +528,7 @@ export function CalendarDemoRoute(props: {
         <div className="flex h-full min-h-0 min-w-0 gap-4">
           <nav aria-label="Calendars" className={styles.sidebar()}>
             <p className={ui.text.label}>Calendars</p>
-            {(document.calendars ?? []).map((calendar) => (
+            {calendars.map((calendar) => (
               <ToggleButton
                 key={calendar.id}
                 pressed={!calendar.hidden}
@@ -710,7 +712,7 @@ export function CalendarDemoRoute(props: {
             ) : null}
             {view === "year" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {calendarYearMonths(visibleDate).map((monthStart, index) => (
+                {yearMonths.map((monthStart, index) => (
                   <section
                     key={monthStart}
                     aria-label={visiblePeriodLabel("month", monthStart)}
@@ -802,7 +804,7 @@ export function CalendarDemoRoute(props: {
                 <Select
                   label="Calendar"
                   value={selectedEvent.calendarId}
-                  options={(document.calendars ?? []).map((calendar) => ({ id: calendar.id, label: calendar.title }))}
+                  options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
                   onValueChange={(value) => applySelectedPatch({ calendarId: value })}
                 />
                 <Select
@@ -818,11 +820,7 @@ export function CalendarDemoRoute(props: {
                   onValueChange={(value) => applySelectedPatch({
                     recurrence: value === "none"
                       ? null
-                      : {
-                        freq: value as CalendarRecurrence["freq"],
-                        interval: selectedEvent.recurrence?.interval ?? 1,
-                        until: selectedEvent.recurrence?.until ?? "",
-                      },
+                      : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
                   })}
                 />
                 {selectedEvent.recurrence === null ? null : (
@@ -836,9 +834,8 @@ export function CalendarDemoRoute(props: {
                         className={ui.field.control}
                         value={selectedEvent.recurrence.interval}
                         onChange={(event) => {
-                          const interval = Math.max(1, Math.floor(Number(event.target.value) || 1));
                           applySelectedPatch({
-                            recurrence: { ...selectedEvent.recurrence!, interval },
+                            recurrence: calendarRecurrenceWithInterval(selectedEvent.recurrence, event.target.value),
                           });
                         }}
                       />
@@ -848,7 +845,7 @@ export function CalendarDemoRoute(props: {
                       label="Repeat until"
                       value={selectedEvent.recurrence.until}
                       onValueChange={(value) => applySelectedPatch({
-                        recurrence: { ...selectedEvent.recurrence!, until: value },
+                        recurrence: calendarRecurrenceWithUntil(selectedEvent.recurrence, value),
                       })}
                     />
                   </>
@@ -875,7 +872,7 @@ export function CalendarDemoRoute(props: {
 }
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
-  return (document.calendars ?? []).find((item) => item.id === calendarId)?.color === "accent" ? "accent" : "subtle";
+  return calendarDocumentCalendar(document, calendarId)?.color === "accent" ? "accent" : "subtle";
 }
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {

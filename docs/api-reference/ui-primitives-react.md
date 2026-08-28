@@ -41,6 +41,16 @@ type CalendarCell = {
   readonly weekday: number;
 };
 ```
+## `calendarCellInterval`
+
+```ts
+calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null
+```
+## `CalendarCellInterval`
+
+```ts
+type CalendarCellInterval = { readonly start: string; readonly end: string };
+```
 ## `calendarCells`
 
 ```ts

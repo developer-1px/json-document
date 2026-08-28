@@ -28,5 +28,8 @@ switch week, month, and year grains with arrow-key movement. `DatePicker` and
 `DateRangePicker` compose those fields with a calendar; Escape discards an
 uncommitted pick.
 
+`calendarCellInterval(cells)` projects rendered calendar cells to their
+exclusive-end date interval so occurrence queries use the exact visible grid.
+
 `formatFileSize(bytes)` provides the canonical compact `B`/`KB`/`MB` display
 policy for file metadata rendered by Hands.
