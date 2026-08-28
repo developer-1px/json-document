@@ -191,10 +191,9 @@ export function CalendarDemoRoute(props: {
   const inspected = hand.inspectedInterval;
   const visibleEvents = calendarVisibleEvents(document);
   const paintedEvents = hand.paintedEvents;
-  const weekStart = startOfIsoWeek(visibleDate);
   const days = view === "day"
     ? [visibleDate]
-    : Array.from({ length: 7 }, (_, index) => addCalendarDays(weekStart, index));
+    : calendarCells("week", visibleDate).map((cell) => cell.date);
   const nowInstant = clockNow();
   const today = nowInstant.slice(0, 10);
   const yearStart = startOfYear(visibleDate);
