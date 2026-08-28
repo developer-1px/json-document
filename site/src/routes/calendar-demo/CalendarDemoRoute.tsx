@@ -121,8 +121,6 @@ const monthDayRows = 3;
 const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-type OccurrenceScope = "this" | "this-and-following" | "all";
-
 export function CalendarDemoRoute(props: {
   readonly view?: CalendarView;
   readonly visibleDate?: string;
@@ -493,7 +491,7 @@ export function CalendarDemoRoute(props: {
                   { id: "month", label: "Month" },
                   { id: "year", label: "Year" },
                 ]}
-                onValueChange={(value) => setView(value as CalendarView)}
+                onValueChange={setView}
               />
             </div>
             <div className={styles.toolbarCluster()}>
@@ -863,7 +861,7 @@ export function CalendarDemoRoute(props: {
                       { id: "this-and-following", label: "Following" },
                       { id: "all", label: "All" },
                     ]}
-                    onValueChange={(value) => setScope(value as OccurrenceScope)}
+                    onValueChange={setScope}
                   />
                 )}
               </>

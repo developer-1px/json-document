@@ -343,7 +343,7 @@ function GrainSwitch(props: {
         { id: "month", label: "Month" },
         { id: "year", label: "Year" },
       ]}
-      onValueChange={(value) => props.onGrainChange(value as CalendarGrain)}
+      onValueChange={props.onGrainChange}
     />
   );
 }

@@ -261,13 +261,13 @@ type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-lab
 ## `SegmentedControl`
 
 ```ts
-SegmentedControl(props: { readonly label: string; readonly value: string; readonly options: ReadonlyArray<SegmentedControlOption>; readonly onValueChange: (value: string) => void; readonly className?: string; }): ReactNode
+SegmentedControl<Id extends string>(props: { readonly label: string; readonly value: Id; readonly options: ReadonlyArray<SegmentedControlOption<Id>>; readonly onValueChange: (value: Id) => void; readonly className?: string; }): ReactNode
 ```
 ## `SegmentedControlOption`
 
 ```ts
-type SegmentedControlOption = {
-  readonly id: string;
+type SegmentedControlOption<Id extends string = string> = {
+  readonly id: Id;
   readonly label: ReactNode;
   readonly disabled?: boolean;
 };
