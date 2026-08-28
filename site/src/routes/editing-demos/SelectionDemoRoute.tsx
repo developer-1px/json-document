@@ -22,7 +22,7 @@ export function SelectionDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="selection-input">
           <p className={ui.text.label}>1 · 입력</p>
           <h2 id="selection-input" className={classes("mb-2 mt-1", ui.text.heading)}>모드와 블록 선택하기</h2>
-          <SegmentedControl className="mb-3" label="Selection mode" value={mode} options={(["replace", "extend", "toggle"] as const).map((item) => ({ id: item, label: item }))} onValueChange={(value) => setMode(value as typeof mode)} />
+          <SegmentedControl className="mb-3" label="Selection mode" value={mode} options={(["replace", "extend", "toggle"] as const).map((item) => ({ id: item, label: item }))} onValueChange={setMode} />
           <div className="grid gap-1">
             {selectionLabDocument.blocks.map((block) => (
               <SelectableItem

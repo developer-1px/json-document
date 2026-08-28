@@ -92,8 +92,8 @@ export function ChoiceChip(
   );
 }
 
-export type SegmentedControlOption = {
-  readonly id: string;
+export type SegmentedControlOption<Id extends string = string> = {
+  readonly id: Id;
   readonly label: ReactNode;
   readonly disabled?: boolean;
 };
@@ -148,15 +148,15 @@ export function Tabs<T extends string | number>(props: {
   );
 }
 
-export function SegmentedControl(props: {
+export function SegmentedControl<Id extends string>(props: {
   readonly label: string;
-  readonly value: string;
-  readonly options: ReadonlyArray<SegmentedControlOption>;
-  readonly onValueChange: (value: string) => void;
+  readonly value: Id;
+  readonly options: ReadonlyArray<SegmentedControlOption<Id>>;
+  readonly onValueChange: (value: Id) => void;
   readonly className?: string;
 }): ReactNode {
   const enabled = props.options.filter((option) => !option.disabled);
-  const move = (from: string, direction: 1 | -1) => {
+  const move = (from: Id, direction: 1 | -1) => {
     const index = enabled.findIndex((option) => option.id === from);
     const next = enabled[(index + direction + enabled.length) % enabled.length];
     if (next) props.onValueChange(next.id);

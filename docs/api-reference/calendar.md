@@ -86,7 +86,7 @@ interface CalendarPointerInteractions {
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
-  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, rowDays: ReadonlyArray<string>, id: string | null, start: string | null, end: string | null): void;
   monthPointerMove(event: PointerEvent<HTMLElement>): void;
   monthPointerUp(event: PointerEvent<HTMLElement>): void;
   cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;

@@ -67,6 +67,20 @@ export function calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: num
   return Math.round(deltaPx / columnWidthPx);
 }
 
+export function calendarKeyFromWebRow<Key>(
+  clientX: number,
+  bounds: { readonly left: number; readonly width: number },
+  keys: ReadonlyArray<Key>,
+): Key | null {
+  if (keys.length === 0) return null;
+  if (bounds.width <= 0) return keys[0] ?? null;
+  const index = Math.max(0, Math.min(
+    keys.length - 1,
+    Math.floor(((clientX - bounds.left) / bounds.width) * keys.length),
+  ));
+  return keys[index] ?? null;
+}
+
 function isTextEntryTarget(target: unknown): boolean {
   if (target == null) return false;
   const node = target as { readonly tagName?: string; readonly isContentEditable?: boolean; readonly type?: string };

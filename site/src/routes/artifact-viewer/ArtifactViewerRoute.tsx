@@ -28,7 +28,7 @@ export function ArtifactViewerRoute() {
         toolbarLabel="Artifact 선택"
         toolbar={(
           <>
-            <SegmentedControl label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={(value) => setActive(value as ArtifactKind)} />
+            <SegmentedControl label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={setActive} />
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
             <span className={ui.text.meta}>{artifact.name} · mock artifact</span>
             <IconButton label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></IconButton>
