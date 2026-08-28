@@ -29,6 +29,32 @@ export function calendarEventRecurrence(event: CalendarEvent): CalendarRecurrenc
   return { freq, interval, until };
 }
 
+export function calendarRecurrenceWithFrequency(
+  current: CalendarRecurrence | null,
+  value: unknown,
+): CalendarRecurrence | null {
+  if (value !== "daily" && value !== "weekly" && value !== "monthly" && value !== "yearly") return current;
+  return { freq: value, interval: current?.interval ?? 1, until: current?.until ?? "" };
+}
+
+export function calendarRecurrenceWithInterval(
+  current: CalendarRecurrence | null,
+  value: unknown,
+): CalendarRecurrence | null {
+  if (current === null) return null;
+  const numeric = typeof value === "number" || typeof value === "string" ? Number(value) : Number.NaN;
+  const interval = Number.isFinite(numeric) ? Math.max(1, Math.floor(numeric)) : 1;
+  return { ...current, interval };
+}
+
+export function calendarRecurrenceWithUntil(
+  current: CalendarRecurrence | null,
+  until: string,
+): CalendarRecurrence | null {
+  if (current === null) return null;
+  return { ...current, until };
+}
+
 export function calendarEventExcludeDates(event: CalendarEvent): ReadonlyArray<string> {
   const value = event.excludeDates;
   if (!Array.isArray(value)) return [];

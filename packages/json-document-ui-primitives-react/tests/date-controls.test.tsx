@@ -4,7 +4,10 @@ import { afterEach, describe, expect, test } from "vitest";
 import { useState } from "react";
 import {
   CalendarGrid,
+  calendarCellInterval,
+  calendarCells,
   calendarMonthWeeks,
+  calendarTimeLabel,
   calendarYearMonths,
   DatePicker,
   DateRangePicker,
@@ -35,6 +38,13 @@ describe("HTML date values", () => {
     expect(parseHtmlDateValue("week", "2026-W99")).toBeNull();
   });
 
+  test("projects datetime-local values to minute clock labels", () => {
+    expect(calendarTimeLabel("2026-08-03T09:15")).toBe("09:15");
+    expect(calendarTimeLabel("2026-08-03T09:15:42")).toBe("09:15");
+    expect(calendarTimeLabel("2026-08-03")).toBe("");
+    expect(calendarTimeLabel("not-a-date-time")).toBe("");
+  });
+
   test("projects the canonical year boundary across leap years", () => {
     expect(startOfYear("2028-02-29")).toBe("2028-01-01");
     expect(startOfYear("2027-12-31")).toBe("2027-01-01");
@@ -48,6 +58,18 @@ describe("HTML date values", () => {
     ]);
   });
 
+  test("projects day and ISO week periods as canonical calendar cells", () => {
+    expect(calendarCells("day", "2026-05-28")).toEqual([
+      { date: "2026-05-28", day: 28, inVisiblePeriod: true, weekday: 4 },
+    ]);
+    const week = calendarCells("week", "2026-05-28");
+    expect(week.map((cell) => cell.date)).toEqual([
+      "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28",
+      "2026-05-29", "2026-05-30", "2026-05-31",
+    ]);
+    expect(week.map((cell) => cell.day)).toEqual([25, 26, 27, 28, 29, 30, 31]);
+  });
+
   test("projects a month grid as six ISO week rows of seven cells", () => {
     const weeks = calendarMonthWeeks("2026-05-25");
     expect(weeks).toHaveLength(6);
@@ -56,7 +78,16 @@ describe("HTML date values", () => {
       "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30",
       "2026-05-01", "2026-05-02", "2026-05-03",
     ]);
+    expect(weeks[0]?.map((cell) => cell.day)).toEqual([27, 28, 29, 30, 1, 2, 3]);
     expect(weeks[5]?.at(-1)?.date).toBe("2026-06-07");
+  });
+
+  test("projects ordered calendar cells to a half-open query interval", () => {
+    expect(calendarCellInterval([])).toBeNull();
+    expect(calendarCellInterval(calendarCells("month", "2026-05-25"))).toEqual({
+      start: "2026-04-27",
+      end: "2026-06-08",
+    });
   });
 
   test("preserves default labels and accepts Calendar toolbar copy policy", () => {
@@ -140,6 +171,7 @@ describe("CalendarGrid and RangeCalendar", () => {
       );
     }
     render(<Harness />);
+    expect(screen.getByRole("gridcell", { name: "2026-08-03" }).textContent).toBe("3");
     await user.click(screen.getByRole("gridcell", { name: "2026-08-12" }));
     expect(screen.getByRole("gridcell", { name: "2026-08-12" }).getAttribute("aria-selected")).toBe("true");
     expect(screen.getByLabelText("committed").textContent).toBe("2026-08-12");

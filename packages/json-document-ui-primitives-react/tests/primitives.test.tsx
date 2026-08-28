@@ -106,7 +106,7 @@ describe("UI Primitives", () => {
 
   test("SegmentedControl keeps one choice and supports arrow navigation", async () => {
     const user = userEvent.setup();
-    const onValueChange = vi.fn();
+    const onValueChange = vi.fn<(value: "canvas" | "json") => void>();
     render(<SegmentedControl label="View" value="canvas" options={[{ id: "canvas", label: "Canvas" }, { id: "json", label: "JSON" }]} onValueChange={onValueChange} />);
     const canvas = screen.getByRole("radio", { name: "Canvas" });
     canvas.focus();
