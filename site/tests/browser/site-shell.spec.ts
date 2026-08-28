@@ -56,6 +56,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "API · Composer",
     "API · Composer React",
     "API · Database",
+    "API · Calendar",
     "Overview",
     "Official Hands · TBD",
     "Viewport Position",
