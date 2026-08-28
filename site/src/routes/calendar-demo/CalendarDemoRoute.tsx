@@ -286,7 +286,7 @@ export function CalendarDemoRoute(props: {
           >
             <span className={ui.text.meta}>{weekdays[cell.weekday - 1]}</span>
             <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
-              {Number(cell.date.slice(8))}
+              {cell.day}
             </span>
           </div>
         ))}
@@ -627,7 +627,7 @@ export function CalendarDemoRoute(props: {
                             ) : (
                               <>
                                 <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
-                                  {Number(cell.date.slice(8))}
+                                  {cell.day}
                                 </span>
                                 <div className="shrink-0" style={{ height: `${layout.laneCount * 1.25}rem` }} />
                                 {(layout.hiddenCounts[index] ?? 0) > 0 ? (
@@ -746,7 +746,7 @@ export function CalendarDemoRoute(props: {
                           )}
                           onClick={() => setLocation("day", cell.date)}
                         >
-                          {Number(cell.date.slice(8))}
+                          {cell.day}
                         </ActionButton>
                       ))}
                     </div>

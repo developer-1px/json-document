@@ -62,7 +62,7 @@ export function CalendarDemoNavigator(props: {
             )}
             onClick={() => props.onDateChange(cell.date)}
           >
-            {Number(cell.date.slice(8))}
+            {cell.day}
           </ActionButton>
         ))}
       </div>

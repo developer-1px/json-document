@@ -67,7 +67,9 @@ Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와
 조합합니다.
 Day와 week time grid의 ordered 날짜 cell도 UI Primitives `calendarCells`가
 소유합니다. Day는 정확한 ISO weekday를 포함한 단일 cell, week는 ISO 주의
-7개 cell을 반환하며 Host는 이 정본 metadata로 header와 event grid를 조합합니다.
+7개 cell을 반환합니다. 각 `CalendarCell`은 canonical date에서 투영한 `day`와
+ISO weekday를 제공하며 Host는 문자열을 해석하지 않고 이 metadata로 날짜 숫자,
+header와 event grid를 조합합니다.
 Inclusive UI 날짜 endpoint를 all-day event의 exclusive storage interval로 바꾸는
 projection은 Editing `calendarAllDaySpan`이 소유합니다. 빈 drag, end resize,
 timed→all-day 전환, 단일 생성과 Inspector 수정이 모두 같은 정본 규칙을 사용합니다.

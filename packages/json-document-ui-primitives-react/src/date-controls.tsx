@@ -11,6 +11,7 @@ import {
   orderedRange,
   parseHtmlDateValue,
   visiblePeriodLabel,
+  type CalendarCell,
   type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,
@@ -348,14 +349,14 @@ function GrainSwitch(props: {
 }
 
 function renderDayCells(
-  cells: ReadonlyArray<{ readonly date: string; readonly inVisiblePeriod: boolean }>,
+  cells: ReadonlyArray<CalendarCell>,
   options: {
     readonly selected: (date: string) => boolean;
     readonly focused: (date: string) => boolean;
     readonly onSelect: (date: string) => void;
   },
 ): ReactNode {
-  const weeks: Array<Array<{ readonly date: string; readonly inVisiblePeriod: boolean }>> = [];
+  const weeks: Array<Array<CalendarCell>> = [];
   for (const cell of cells) {
     const last = weeks.at(-1);
     if (last === undefined || last.length === 7) weeks.push([cell]);
@@ -375,7 +376,7 @@ function renderDayCells(
           tabIndex={options.focused(cell.date) ? 0 : -1}
           onClick={() => options.onSelect(cell.date)}
         >
-          {cell.date.slice(8)}
+          {cell.day}
         </button>
       ))}
     </div>

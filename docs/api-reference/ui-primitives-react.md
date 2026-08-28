@@ -36,6 +36,7 @@ addCalendarYears(date: string, years: number): string
 ```ts
 type CalendarCell = {
   readonly date: string;
+  readonly day: number;
   readonly inVisiblePeriod: boolean;
   readonly weekday: number;
 };

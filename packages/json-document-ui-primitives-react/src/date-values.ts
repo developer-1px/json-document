@@ -154,6 +154,7 @@ export function moveCalendarDate(date: string, grain: CalendarGrain, key: string
 
 export type CalendarCell = {
   readonly date: string;
+  readonly day: number;
   readonly inVisiblePeriod: boolean;
   readonly weekday: number;
 };
@@ -207,7 +208,8 @@ export function visiblePeriodLabel(
 }
 
 function cell(date: string, inVisiblePeriod: boolean): CalendarCell {
-  return { date, inVisiblePeriod, weekday: isoWeekday(date) };
+  const parsed = Temporal.PlainDate.from(date);
+  return { date, day: parsed.day, inVisiblePeriod, weekday: parsed.dayOfWeek };
 }
 
 function civil(date: string): { year: number; month: number; day: number } {
