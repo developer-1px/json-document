@@ -33,6 +33,7 @@ export {
   calendarCells,
   parseHtmlDateValue,
   startOfIsoWeek,
+  startOfYear,
   visiblePeriodLabel,
   type CalendarGrain,
   type DateRangeValue,

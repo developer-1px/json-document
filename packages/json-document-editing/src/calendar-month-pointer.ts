@@ -1,6 +1,6 @@
 import type { CalendarEvent, CalendarIntent } from "./calendar.js";
 import { calendarEventRecurrence } from "./calendar-occurrence.js";
-import { addCalendarDate, calendarAllDaySpan, calendarDatePart, isCalendarAllDay, parseCalendarDate } from "./calendar-validation.js";
+import { addCalendarDate, calendarAllDaySpan, calendarDatePart, calendarDaysBetween, isCalendarAllDay, parseCalendarDate } from "./calendar-validation.js";
 
 export type CalendarMonthPointerRelease = {
   readonly originDay: string;
@@ -33,7 +33,7 @@ export function interpretCalendarMonthPointer(
   const origin = parseCalendarDate(release.originDay);
   const target = parseCalendarDate(release.targetDay);
   if (origin === null || target === null) return null;
-  const day = addCalendarDate(originStart, (target - origin) / 86_400_000);
+  const day = addCalendarDate(originStart, calendarDaysBetween(origin, target));
   if (day === null) return null;
   return { type: "event.move-day", eventId: release.originEventId, day };
 }
@@ -53,7 +53,7 @@ export function bindCalendarMonthIntent(
   const next = parseCalendarDate(intent.day);
   if (origin === null || next === null) return intent;
   if (scope === "all") {
-    const day = addCalendarDate(calendarDatePart(event.start), (next - origin) / 86_400_000);
+    const day = addCalendarDate(calendarDatePart(event.start), calendarDaysBetween(origin, next));
     if (day === null) return intent;
     return { type: "event.move-day", eventId: intent.eventId, day };
   }

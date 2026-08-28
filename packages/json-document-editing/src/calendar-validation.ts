@@ -3,10 +3,6 @@ import type { CalendarCalendar, CalendarDocument, CalendarEvent } from "./calend
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
-const DAY_MS = 86_400_000;
-const MINUTE_MS = 60_000;
-const EPOCH_DATE = Temporal.PlainDate.from("1970-01-01");
-const EPOCH_DATE_TIME = Temporal.PlainDateTime.from("1970-01-01T00:00");
 
 export function calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar> {
   return Array.isArray(document.calendars) ? document.calendars : [];
@@ -50,36 +46,36 @@ export function isCalendarAllDay(event: Pick<CalendarEvent, "allDay">): boolean 
   return event.allDay === true;
 }
 
-export function parseCalendarInstant(value: string): number | null {
+export function parseCalendarInstant(value: string): Temporal.PlainDateTime | null {
   if (!DATETIME.test(value)) return null;
   try {
-    return EPOCH_DATE_TIME.until(Temporal.PlainDateTime.from(value), { largestUnit: "minutes" }).total("minutes") * MINUTE_MS;
+    return Temporal.PlainDateTime.from(value);
   } catch {
     return null;
   }
 }
 
-export function formatCalendarInstant(utc: number): string {
-  return EPOCH_DATE_TIME.add({ minutes: utc / MINUTE_MS }).toString({ smallestUnit: "minute" });
+export function formatCalendarInstant(value: Temporal.PlainDateTime): string {
+  return value.toString({ smallestUnit: "minute" });
 }
 
-export function parseCalendarDate(value: string): number | null {
+export function parseCalendarDate(value: string): Temporal.PlainDate | null {
   if (!DATE.test(value)) return null;
   try {
-    return EPOCH_DATE.until(Temporal.PlainDate.from(value), { largestUnit: "days" }).days * DAY_MS;
+    return Temporal.PlainDate.from(value);
   } catch {
     return null;
   }
 }
 
-export function formatCalendarDate(utc: number): string {
-  return EPOCH_DATE.add({ days: utc / DAY_MS }).toString();
+export function formatCalendarDate(value: Temporal.PlainDate): string {
+  return value.toString();
 }
 
 export function addCalendarDate(day: string, days: number): string | null {
-  const utc = parseCalendarDate(day);
-  if (utc === null) return null;
-  return formatCalendarDate(utc + days * DAY_MS);
+  const date = parseCalendarDate(day);
+  if (date === null) return null;
+  return formatCalendarDate(date.add({ days }));
 }
 
 export function calendarAllDaySpan(originDay: string, targetDay: string): { readonly start: string; readonly end: string } | null {
@@ -92,16 +88,16 @@ export function calendarAllDaySpan(originDay: string, targetDay: string): { read
 }
 
 export function calendarShiftInstant(instant: string, minutes: number): string | null {
-  const utc = parseCalendarInstant(instant);
-  if (utc === null) return null;
-  return formatCalendarInstant(utc + minutes * MINUTE_MS);
+  const dateTime = parseCalendarInstant(instant);
+  if (dateTime === null) return null;
+  return formatCalendarInstant(dateTime.add({ minutes }));
 }
 
 export function calendarInstantAt(day: string, minutesFromMidnight: number): string | null {
-  const utc = parseCalendarInstant(`${day}T00:00`);
-  if (utc === null) return null;
+  const dateTime = parseCalendarInstant(`${day}T00:00`);
+  if (dateTime === null) return null;
   const minutes = Math.max(0, Math.min(24 * 60, minutesFromMidnight));
-  return formatCalendarInstant(utc + minutes * MINUTE_MS);
+  return formatCalendarInstant(dateTime.add({ minutes }));
 }
 
 export function calendarDatePart(value: string): string {
@@ -110,15 +106,23 @@ export function calendarDatePart(value: string): string {
 
 export function calendarEventBounds(
   event: Pick<CalendarEvent, "start" | "end" | "allDay">,
-): { readonly from: number; readonly to: number } | null {
+): { readonly from: Temporal.PlainDateTime; readonly to: Temporal.PlainDateTime } | null {
   if (isCalendarAllDay(event)) {
     const from = parseCalendarDate(event.start);
     const to = parseCalendarDate(event.end);
     if (from === null || to === null) return null;
-    return { from, to };
+    return { from: from.toPlainDateTime(), to: to.toPlainDateTime() };
   }
   const from = parseCalendarInstant(event.start);
   const to = parseCalendarInstant(event.end);
   if (from === null || to === null) return null;
   return { from, to };
+}
+
+export function calendarDaysBetween(from: Temporal.PlainDate, to: Temporal.PlainDate): number {
+  return from.until(to, { largestUnit: "days" }).days;
+}
+
+export function calendarMinutesBetween(from: Temporal.PlainDateTime, to: Temporal.PlainDateTime): number {
+  return from.until(to, { largestUnit: "minutes" }).total("minutes");
 }

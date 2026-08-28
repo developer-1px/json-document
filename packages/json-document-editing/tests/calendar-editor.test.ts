@@ -275,6 +275,41 @@ describe("calendar editor", () => {
     ]);
   });
 
+  test("daily recurrence crosses leap day and keeps local clock time", () => {
+    const series = event({
+      id: "leap-daily",
+      title: "Leap daily",
+      start: "2028-02-28T23:30",
+      end: "2028-02-29T00:15",
+      recurrence: { freq: "daily", interval: 1, until: "2028-03-01" },
+    });
+    expect(projectCalendarOccurrences([series], "2028-02-28", "2028-03-02").map((item) => ({
+      start: item.start,
+      end: item.end,
+    }))).toEqual([
+      { start: "2028-02-28T23:30", end: "2028-02-29T00:15" },
+      { start: "2028-02-29T23:30", end: "2028-03-01T00:15" },
+      { start: "2028-03-01T23:30", end: "2028-03-02T00:15" },
+    ]);
+  });
+
+  test("moves all-day and timed events across leap day with their spans intact", () => {
+    const document: CalendarDocument = {
+      calendars: initial.calendars,
+      events: [
+        event({ id: "trip", title: "Trip", start: "2028-02-28", end: "2028-03-01", allDay: true }),
+        event({ id: "night", title: "Night", start: "2028-02-28T23:30", end: "2028-02-29T00:30" }),
+      ],
+    };
+    const editor = createCalendarEditor(document);
+    expect(editor.dispatch({ type: "event.move-day", eventId: "trip", day: "2028-03-01" }).ok).toBe(true);
+    expect(editor.dispatch({ type: "event.move-day", eventId: "night", day: "2028-03-01" }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events).toMatchObject([
+      { start: "2028-03-01", end: "2028-03-03" },
+      { start: "2028-03-01T23:30", end: "2028-03-02T00:30" },
+    ]);
+  });
+
   test("places overlapping all-day events on separate lanes", () => {
     const days = ["2026-08-03", "2026-08-04", "2026-08-05"];
     const layout = calendarAllDayLayout([
