@@ -20,7 +20,7 @@ export function TopologyDemoRoute() {
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="topology-input">
           <p className={ui.text.label}>1 · 입력</p>
           <h2 id="topology-input" className={classes("mb-2 mt-1", ui.text.heading)}>화면 순서 선택하기</h2>
-          <SegmentedControl className="mb-3" label="Visible order" value={order} options={(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => ({ id: item, label: item }))} onValueChange={(value) => setOrder(value as typeof order)} />
+          <SegmentedControl className="mb-3" label="Visible order" value={order} options={(Object.keys(topologyLabOrders) as ReadonlyArray<keyof typeof topologyLabOrders>).map((item) => ({ id: item, label: item }))} onValueChange={setOrder} />
           <ol className="m-0 grid list-none gap-1 p-0">
             {topology.ids.map((id) => {
               const item = editing.getItem(id);

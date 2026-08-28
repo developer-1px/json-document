@@ -39,20 +39,55 @@ test("Calendar day view uses the visible date's canonical weekday cell", async (
   await page.goto("/demo/calendar?view=day&date=2026-05-28");
   const day = page.getByRole("grid", { name: "Day" });
   await expect(day).toBeVisible();
-  await expect(day.getByRole("columnheader", { name: "Thu 28" })).toBeVisible();
+  await expect(day.getByRole("columnheader", { name: "Thu 28" })).toContainText("28");
   await expect(day.getByRole("columnheader", { name: "Mon 28" })).toHaveCount(0);
 });
 
 test("Calendar month and year views show date grids", async ({ page }) => {
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
-  await expect(page.getByRole("gridcell", { name: "2026-05-25", exact: true })).toBeVisible();
+  await expect(page.getByRole("gridcell", { name: "2026-05-25", exact: true })).toContainText("25");
   await expect(page.getByRole("radio", { name: "Month", exact: true })).toBeChecked();
+  await expect(page.getByRole("grid", { name: "Jump 2026-05", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "2026-04-27", exact: true }).first()).toHaveText("27");
 
-  await page.getByRole("radio", { name: "Year", exact: true }).click();
+  await page.getByRole("button", { name: "Next month", exact: true }).click();
+  await expect(page.getByRole("grid", { name: "Jump 2026-06", exact: true })).toBeVisible();
+
+  await page.getByRole("radio", { name: "Month", exact: true }).press("ArrowRight");
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01" })).toHaveText("1");
+  await expect(page.getByRole("region", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
+  await expect(page.getByRole("grid", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
   await expect(page).toHaveURL(/view=year/);
   await expect(page).toHaveURL(/date=2026-05-25/);
+
+  const following = page.getByRole("radio", { name: "Following", exact: true });
+  await following.click();
+  await expect(following).toBeChecked();
+  await following.press("ArrowRight");
+  await expect(page.getByRole("radio", { name: "All", exact: true })).toBeChecked();
+});
+
+test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const repeat = page.getByRole("button", { name: "Repeat", exact: true });
+
+  await repeat.click();
+  await page.getByRole("option", { name: "None", exact: true }).click();
+  await expect(page.getByRole("spinbutton", { name: "Repeat every", exact: true })).toHaveCount(0);
+
+  await repeat.click();
+  await page.getByRole("option", { name: "Weekly", exact: true }).click();
+  await expect(repeat).toHaveText("Weekly");
+
+  const interval = page.getByRole("spinbutton", { name: "Repeat every", exact: true });
+  await interval.fill("0");
+  await expect(interval).toHaveValue("1");
+
+  const until = page.getByRole("textbox", { name: "Repeat until", exact: true });
+  await until.fill("2026-06-30");
+  await expect(until).toHaveValue("2026-06-30");
 });
 
 test("Calendar location writes one search snapshot and restores on back", async ({ page }) => {

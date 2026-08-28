@@ -32,7 +32,12 @@ export {
   calendarVisibleEvents,
   createCalendarEditor,
 } from "./calendar.js";
-export { projectCalendarOccurrences } from "./calendar-occurrence.js";
+export {
+  calendarRecurrenceWithFrequency,
+  calendarRecurrenceWithInterval,
+  calendarRecurrenceWithUntil,
+  projectCalendarOccurrences,
+} from "./calendar-occurrence.js";
 export {
   calendarOccurrenceAfterIntent,
   calendarOccurrenceForInspector,
@@ -49,10 +54,14 @@ export {
   addCalendarDate,
   calendarAllDaySpan,
   calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
   calendarInstantAt,
   calendarIntervalLastDate,
   calendarShiftInstant,
+  formatCalendarInstant,
   isCalendarAllDay,
+  parseCalendarView,
 } from "./calendar-validation.js";
 export { ANNOTATION_PROFILE_V1, createAnnotationEditor } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
