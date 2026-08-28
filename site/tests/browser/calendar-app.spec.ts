@@ -51,7 +51,7 @@ test("Calendar invalid search falls back to the fixture week", async ({ page }) 
   await page.goto("/demo/calendar?view=agenda&date=nope");
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
   await expect(page.getByRole("radio", { name: "Week", exact: true })).toBeChecked();
-  await expect(page.getByText("2026-05-25 · week", { exact: true })).toBeVisible();
+  await expect(page.getByText("2026-05-25 – 2026-05-31", { exact: true })).toBeVisible();
 });
 
 test("Calendar Usage embed does not write view search params", async ({ page }) => {
