@@ -3,22 +3,27 @@ import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
-  addCalendarDate,
   calendarAllDayLayout,
   calendarAllDaySpan,
   calendarBusyDates,
   calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
   calendarEventsOnDay,
   calendarInstantAt,
   calendarIntervalLastDate,
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
+  calendarRecurrenceWithFrequency,
+  calendarRecurrenceWithInterval,
+  calendarRecurrenceWithUntil,
   calendarShiftInstant,
   calendarTimedLayout,
   calendarVisibleEvents,
   calendarVisibleHourBand,
   createCalendarEditor,
+  formatCalendarInstant,
   isCalendarAllDay,
   type CalendarDocument,
   type CalendarEvent,
@@ -43,14 +48,13 @@ import {
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
-  addCalendarYears,
+  calendarCellInterval,
   calendarCells,
   calendarEventLabel,
   calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
   shiftVisibleDate,
-  startOfYear,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
@@ -120,8 +124,6 @@ const pxPerHour = 72;
 const monthDayRows = 3;
 const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-type OccurrenceScope = "this" | "this-and-following" | "all";
 
 export function CalendarDemoRoute(props: {
   readonly view?: CalendarView;
@@ -197,6 +199,7 @@ export function CalendarDemoRoute(props: {
   }
 
   const document = hand.document;
+  const calendars = calendarDocumentCalendars(document);
   const selected = new Set(hand.snapshot.selection.keys);
   const selectedEvent = hand.selectedEvent;
   const inspected = hand.inspectedInterval;
@@ -204,17 +207,15 @@ export function CalendarDemoRoute(props: {
   const paintedEvents = hand.paintedEvents;
   const timeGridCells = calendarCells(view === "day" ? "day" : "week", visibleDate);
   const days = timeGridCells.map((cell) => cell.date);
-  const nowInstant = clockNow();
+  const nowInstant = formatCalendarInstant(Temporal.Now.plainDateTimeISO());
   const today = calendarDatePart(nowInstant);
-  const yearStart = startOfYear(visibleDate);
-  const yearEnd = addCalendarYears(yearStart, 1);
-  const yearBusyDates = view === "year"
-    ? calendarBusyDates(
-      paintedEvents,
-      addCalendarDate(yearStart, -7) ?? yearStart,
-      addCalendarDate(yearEnd, 14) ?? yearEnd,
-    )
+  const yearMonths = calendarYearMonths(visibleDate);
+  const yearCellInterval = view === "year"
+    ? calendarCellInterval(yearMonths.flatMap((monthStart) => calendarCells("month", monthStart)))
     : null;
+  const yearBusyDates = yearCellInterval === null
+    ? null
+    : calendarBusyDates(paintedEvents, yearCellInterval.start, yearCellInterval.end);
 
   useEffect(() => {
     setOverflowDay(null);
@@ -286,7 +287,7 @@ export function CalendarDemoRoute(props: {
           >
             <span className={ui.text.meta}>{weekdays[cell.weekday - 1]}</span>
             <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
-              {Number(cell.date.slice(8))}
+              {cell.day}
             </span>
           </div>
         ))}
@@ -493,7 +494,7 @@ export function CalendarDemoRoute(props: {
                   { id: "month", label: "Month" },
                   { id: "year", label: "Year" },
                 ]}
-                onValueChange={(value) => setView(value as CalendarView)}
+                onValueChange={setView}
               />
             </div>
             <div className={styles.toolbarCluster()}>
@@ -527,7 +528,7 @@ export function CalendarDemoRoute(props: {
         <div className="flex h-full min-h-0 min-w-0 gap-4">
           <nav aria-label="Calendars" className={styles.sidebar()}>
             <p className={ui.text.label}>Calendars</p>
-            {(document.calendars ?? []).map((calendar) => (
+            {calendars.map((calendar) => (
               <ToggleButton
                 key={calendar.id}
                 pressed={!calendar.hidden}
@@ -627,7 +628,7 @@ export function CalendarDemoRoute(props: {
                             ) : (
                               <>
                                 <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
-                                  {Number(cell.date.slice(8))}
+                                  {cell.day}
                                 </span>
                                 <div className="shrink-0" style={{ height: `${layout.laneCount * 1.25}rem` }} />
                                 {(layout.hiddenCounts[index] ?? 0) > 0 ? (
@@ -711,7 +712,7 @@ export function CalendarDemoRoute(props: {
             ) : null}
             {view === "year" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {calendarYearMonths(visibleDate).map((monthStart, index) => (
+                {yearMonths.map((monthStart, index) => (
                   <section
                     key={monthStart}
                     aria-label={visiblePeriodLabel("month", monthStart)}
@@ -746,7 +747,7 @@ export function CalendarDemoRoute(props: {
                           )}
                           onClick={() => setLocation("day", cell.date)}
                         >
-                          {Number(cell.date.slice(8))}
+                          {cell.day}
                         </ActionButton>
                       ))}
                     </div>
@@ -803,7 +804,7 @@ export function CalendarDemoRoute(props: {
                 <Select
                   label="Calendar"
                   value={selectedEvent.calendarId}
-                  options={(document.calendars ?? []).map((calendar) => ({ id: calendar.id, label: calendar.title }))}
+                  options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
                   onValueChange={(value) => applySelectedPatch({ calendarId: value })}
                 />
                 <Select
@@ -819,11 +820,7 @@ export function CalendarDemoRoute(props: {
                   onValueChange={(value) => applySelectedPatch({
                     recurrence: value === "none"
                       ? null
-                      : {
-                        freq: value as CalendarRecurrence["freq"],
-                        interval: selectedEvent.recurrence?.interval ?? 1,
-                        until: selectedEvent.recurrence?.until ?? "",
-                      },
+                      : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
                   })}
                 />
                 {selectedEvent.recurrence === null ? null : (
@@ -837,9 +834,8 @@ export function CalendarDemoRoute(props: {
                         className={ui.field.control}
                         value={selectedEvent.recurrence.interval}
                         onChange={(event) => {
-                          const interval = Math.max(1, Math.floor(Number(event.target.value) || 1));
                           applySelectedPatch({
-                            recurrence: { ...selectedEvent.recurrence!, interval },
+                            recurrence: calendarRecurrenceWithInterval(selectedEvent.recurrence, event.target.value),
                           });
                         }}
                       />
@@ -849,7 +845,7 @@ export function CalendarDemoRoute(props: {
                       label="Repeat until"
                       value={selectedEvent.recurrence.until}
                       onValueChange={(value) => applySelectedPatch({
-                        recurrence: { ...selectedEvent.recurrence!, until: value },
+                        recurrence: calendarRecurrenceWithUntil(selectedEvent.recurrence, value),
                       })}
                     />
                   </>
@@ -863,7 +859,7 @@ export function CalendarDemoRoute(props: {
                       { id: "this-and-following", label: "Following" },
                       { id: "all", label: "All" },
                     ]}
-                    onValueChange={(value) => setScope(value as OccurrenceScope)}
+                    onValueChange={setScope}
                   />
                 )}
               </>
@@ -876,11 +872,7 @@ export function CalendarDemoRoute(props: {
 }
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
-  return (document.calendars ?? []).find((item) => item.id === calendarId)?.color === "accent" ? "accent" : "subtle";
-}
-
-function clockNow(now = Temporal.Now.plainDateTimeISO()): string {
-  return now.toString({ smallestUnit: "minute" });
+  return calendarDocumentCalendar(document, calendarId)?.color === "accent" ? "accent" : "subtle";
 }
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
