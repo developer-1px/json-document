@@ -47,6 +47,7 @@ export { bindCalendarMonthIntent, interpretCalendarMonthPointer } from "./calend
 export { bindCalendarTimeGridIntent, interpretCalendarTimeGridPointer } from "./calendar-time-grid-pointer.js";
 export {
   addCalendarDate,
+  calendarDatePart,
   calendarInstantAt,
   calendarIntervalLastDate,
   calendarShiftInstant,

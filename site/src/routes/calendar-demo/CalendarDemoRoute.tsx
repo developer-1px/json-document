@@ -6,6 +6,7 @@ import {
   addCalendarDate,
   calendarAllDayLayout,
   calendarBusyDates,
+  calendarDatePart,
   calendarEventsOnDay,
   calendarInstantAt,
   calendarIntervalLastDate,
@@ -207,7 +208,7 @@ export function CalendarDemoRoute(props: {
     ? [visibleDate]
     : Array.from({ length: 7 }, (_, index) => addCalendarDays(weekStart, index));
   const nowInstant = clockNow();
-  const today = nowInstant.slice(0, 10);
+  const today = calendarDatePart(nowInstant);
   const yearStart = startOfYear(visibleDate);
   const yearEnd = addCalendarYears(yearStart, 1);
   const yearBusyDates = view === "year"
@@ -237,7 +238,7 @@ export function CalendarDemoRoute(props: {
   });
 
   function createOnVisibleDate(): void {
-    const start = calendarInstantAt(visibleDate.slice(0, 10), 10 * 60);
+    const start = calendarInstantAt(calendarDatePart(visibleDate), 10 * 60);
     const end = start === null ? null : calendarShiftInstant(start, 30);
     if (start === null || end === null) return;
     hand.createInterval(start, end);

@@ -152,6 +152,11 @@ interface CalendarCalendar extends Record<string, JSONValue> {
   readonly color: string;
 }
 ```
+## `calendarDatePart`
+
+```ts
+calendarDatePart(value: string): string
+```
 ## `CalendarDocument`
 
 ```ts

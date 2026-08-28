@@ -323,6 +323,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarDatePart",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "calendarIntervalLastDate",
     sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
   },
