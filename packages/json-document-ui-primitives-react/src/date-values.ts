@@ -158,6 +158,7 @@ export type CalendarCell = {
   readonly inVisiblePeriod: boolean;
   readonly weekday: number;
 };
+export type CalendarCellInterval = { readonly start: string; readonly end: string };
 
 export function calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell> {
   if (period === "day") return [cell(visibleDate, true)];
@@ -180,6 +181,14 @@ export function calendarCells(period: CalendarPeriod, visibleDate: string): Read
   const year = civil(visibleDate).year;
   const days = civil(visibleDate).year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 366 : 365;
   return Array.from({ length: days }, (_, index) => cell(addCalendarDays(yearStart, index), true));
+}
+
+export function calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null {
+  const first = cells[0]?.date;
+  const last = cells.at(-1)?.date;
+  return first === undefined || last === undefined
+    ? null
+    : { start: first, end: addCalendarDays(last, 1) };
 }
 
 export function calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>> {

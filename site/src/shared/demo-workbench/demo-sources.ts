@@ -298,6 +298,21 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithFrequency",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithInterval",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithUntil",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "previewCalendarAllDay",
     sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
   },
@@ -328,6 +343,16 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarDocumentCalendars",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarDocumentCalendar",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "calendarDatePart",
     sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
   },
@@ -339,6 +364,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "parseCalendarView",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "formatCalendarInstant",
     sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
   },
   {
@@ -374,6 +404,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarCells",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarCellInterval",
     sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
   },
   {

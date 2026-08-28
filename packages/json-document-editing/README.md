@@ -66,6 +66,13 @@ identity when a selection or rendering adapter needs to key a `GridPoint`.
 events use datetime-local strings; all-day events use exclusive-end dates.
 `parseCalendarView` validates untrusted runtime values against the canonical
 day, week, month, and year view contract while Hosts retain their own fallback policy.
+`formatCalendarInstant` serializes a Temporal date-time to the canonical
+datetime-local minute string while Hosts retain ownership of their clock source.
+`calendarDocumentCalendars` projects the document's safe calendar collection,
+and `calendarDocumentCalendar` owns id lookup while Hosts retain visual policy.
+`calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`, and
+`calendarRecurrenceWithUntil` own recurrence creation and inspector transitions;
+Hosts only pass UI values and choose whether recurrence is disabled.
 `createCalendarEditor` creates, moves while keeping duration, resizes start or
 end, moves by day, deletes, and undoes on one document across day, week, month,
 and year views. `interpretCalendarTimeGridPointer`,
