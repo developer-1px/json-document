@@ -86,6 +86,11 @@ interface AnnotationSource extends Record<string, JSONValue> { readonly id: stri
 ```ts
 assertAnnotationDocument(document: AnnotationDocument): void
 ```
+## `bindCalendarAllDayIntent`
+
+```ts
+bindCalendarAllDayIntent(intent: CalendarAllDayPointerIntent | null, event: CalendarEvent | undefined, occurrenceStart: string | null, scope?: "this" | "this-and-following" | "all"): CalendarIntent | null
+```
 ## `bindCalendarMonthIntent`
 
 ```ts
@@ -144,6 +149,7 @@ interface CalendarCalendar extends Record<string, JSONValue> {
   readonly id: string;
   readonly title: string;
   readonly hidden: boolean;
+  readonly color: string;
 }
 ```
 ## `CalendarDocument`
@@ -244,10 +250,37 @@ type CalendarIntent =
     }
   | { readonly type: "calendar.set-hidden"; readonly calendarId: string; readonly hidden: boolean };
 ```
+## `previewCalendarMonth`
+
+```ts
+previewCalendarMonth(
+  events: ReadonlyArray<CalendarEvent>,
+  release: CalendarMonthPointerRelease,
+  scope?: "this" | "this-and-following" | "all",
+): ReadonlyArray<CalendarEvent>
+```
 ## `calendarMonthDayLayout`
 
 ```ts
 calendarMonthDayLayout(events: ReadonlyArray<CalendarEvent>, day: string, rowLimit: number): { readonly events: ReadonlyArray<CalendarEvent>; readonly hiddenCount: number; }
+```
+## `calendarMonthWeekLayout`
+
+```ts
+calendarMonthWeekLayout(
+  events: ReadonlyArray<CalendarEvent>,
+  days: ReadonlyArray<string>,
+  rowLimit: number,
+): {
+  readonly items: ReadonlyArray<{
+    readonly event: CalendarEvent;
+    readonly startIndex: number;
+    readonly span: number;
+    readonly lane: number;
+  }>;
+  readonly hiddenCounts: ReadonlyArray<number>;
+  readonly laneCount: number;
+}
 ```
 ## `CalendarMonthPointerIntent`
 
@@ -1054,7 +1087,7 @@ interface OrderSelection extends Record<string, JSONValue> {
 ## `previewCalendarAllDay`
 
 ```ts
-previewCalendarAllDay(events: ReadonlyArray<CalendarEvent>, release: CalendarAllDayPointerRelease): ReadonlyArray<CalendarEvent>
+previewCalendarAllDay(events: ReadonlyArray<CalendarEvent>, release: CalendarAllDayPointerRelease, scope?: "this" | "this-and-following" | "all"): ReadonlyArray<CalendarEvent>
 ```
 ## `previewCalendarTimeGrid`
 

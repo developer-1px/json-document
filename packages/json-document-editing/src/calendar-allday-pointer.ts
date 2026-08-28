@@ -1,5 +1,7 @@
-import type { CalendarIntent } from "./calendar.js";
-import { addCalendarDate, parseCalendarDate } from "./calendar-validation.js";
+import type { CalendarEvent, CalendarIntent } from "./calendar.js";
+import { calendarEventRecurrence } from "./calendar-occurrence.js";
+import { bindCalendarMonthIntent } from "./calendar-month-pointer.js";
+import { addCalendarDate, calendarAllDaySpan, parseCalendarDate } from "./calendar-validation.js";
 
 export type CalendarAllDayHandle = "body" | "start" | "end";
 
@@ -20,11 +22,10 @@ export function interpretCalendarAllDayPointer(
   release: CalendarAllDayPointerRelease,
 ): CalendarAllDayPointerIntent | null {
   if (release.originEventId === null) {
-    const start = release.originDay <= release.targetDay ? release.originDay : release.targetDay;
-    const last = release.originDay <= release.targetDay ? release.targetDay : release.originDay;
-    const end = addCalendarDate(last, 1);
-    if (end === null) return null;
-    return { type: "event.create", start, end, allDay: true };
+    if (release.originDay === release.targetDay) return { type: "selection.set", eventIds: [] };
+    const span = calendarAllDaySpan(release.originDay, release.targetDay);
+    if (span === null) return null;
+    return { type: "event.create", start: span.start, end: span.end, allDay: true };
   }
 
   const handle = release.originHandle ?? "body";
@@ -59,4 +60,27 @@ export function interpretCalendarAllDayPointer(
   const day = addCalendarDate(release.originEventStart ?? "", (target - origin) / 86_400_000);
   if (day === null) return null;
   return { type: "event.move-day", eventId: release.originEventId, day };
+}
+
+export function bindCalendarAllDayIntent(
+  intent: CalendarAllDayPointerIntent | null,
+  event: CalendarEvent | undefined,
+  occurrenceStart: string | null,
+  scope: "this" | "this-and-following" | "all" = "this",
+): CalendarIntent | null {
+  if (intent === null) return null;
+  if (intent.type === "event.move-day") {
+    return bindCalendarMonthIntent(intent, event, occurrenceStart, scope);
+  }
+  if (intent.type !== "event.resize") return intent;
+  if (event === undefined || calendarEventRecurrence(event) === null) return intent;
+  const start = occurrenceStart ?? event.start;
+  if (scope === "all") return intent;
+  return {
+    type: "occurrence.edit",
+    eventId: intent.eventId,
+    occurrenceStart: start,
+    scope,
+    ...(intent.edge === "start" ? { start: intent.instant } : { end: intent.instant }),
+  };
 }

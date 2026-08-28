@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   calendarAllDayResizeDays,
+  calendarInspectorOccurrence,
   calendarPointerOccurrence,
   calendarSelectionOccurrence,
   calendarVisibleHourBand,
@@ -47,6 +48,19 @@ describe("calendarPointerOccurrence", () => {
     )).toEqual({ start: "2026-05-25T09:00", end: "2026-05-25T10:00" });
   });
 
+  test("uses the resized instant even if committed still has the origin interval", () => {
+    expect(calendarPointerOccurrence(
+      { type: "event.resize", eventId: "holiday", edge: "end", instant: "2026-05-25" },
+      { start: "2026-05-22", end: "2026-05-24" },
+      { start: "2026-05-22", end: "2026-05-24" },
+    )).toEqual({ start: "2026-05-22", end: "2026-05-25" });
+    expect(calendarPointerOccurrence(
+      { type: "event.resize", eventId: "holiday", edge: "start", instant: "2026-05-21" },
+      { start: "2026-05-22", end: "2026-05-24" },
+      { start: "2026-05-22", end: "2026-05-24" },
+    )).toEqual({ start: "2026-05-21", end: "2026-05-24" });
+  });
+
   test("uses the committed event after a day move", () => {
     expect(calendarPointerOccurrence(
       { type: "event.move-day", eventId: "standup", day: "2026-05-26" },
@@ -74,6 +88,26 @@ describe("calendarSelectionOccurrence", () => {
       start: "2026-05-25T09:00",
       end: "2026-05-25T09:30",
     });
+  });
+});
+
+describe("calendarInspectorOccurrence", () => {
+  test("uses the committed event for a non-recurring resize even if occurrence state is stale", () => {
+    expect(calendarInspectorOccurrence(
+      { start: "2026-05-22", end: "2026-05-25", recurrence: null },
+      { start: "2026-05-22", end: "2026-05-24" },
+    )).toEqual({ start: "2026-05-22", end: "2026-05-25" });
+  });
+
+  test("uses the occurrence interval for a recurring series", () => {
+    expect(calendarInspectorOccurrence(
+      {
+        start: "2026-05-25T09:00",
+        end: "2026-05-25T09:30",
+        recurrence: { freq: "daily", interval: 1, until: "2026-05-29" },
+      },
+      { start: "2026-05-26T09:00", end: "2026-05-26T09:30" },
+    )).toEqual({ start: "2026-05-26T09:00", end: "2026-05-26T09:30" });
   });
 });
 

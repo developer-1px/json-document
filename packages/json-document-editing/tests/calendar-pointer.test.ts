@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  bindCalendarAllDayIntent,
   bindCalendarTimeGridIntent,
   createCalendarEditor,
   interpretCalendarAllDayPointer,
@@ -33,7 +34,7 @@ function event(fields: {
 }
 
 const initial: CalendarDocument = {
-  calendars: [{ id: "home", title: "Home", hidden: false }],
+  calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
   events: [
     event({ id: "standup", title: "Standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30", allDay: false }),
     event({ id: "review", title: "Review", start: "2026-08-03T14:00", end: "2026-08-03T15:00", allDay: false }),
@@ -77,7 +78,7 @@ describe("interpretCalendarTimeGridPointer", () => {
     });
   });
 
-  test("empty click creates a one-hour event even when another event is selected", () => {
+  test("empty click clears selection instead of creating", () => {
     const editor = createCalendarEditor(initial);
     expect(editor.snapshot.selection.primaryKey).toBe("standup");
     const intent = interpretCalendarTimeGridPointer({
@@ -87,15 +88,10 @@ describe("interpretCalendarTimeGridPointer", () => {
       originHandle: null,
       targetInstant: "2026-08-04T10:00",
     });
-    expect(intent).toEqual({
-      type: "event.create",
-      start: "2026-08-04T10:00",
-      end: "2026-08-04T11:00",
-    });
+    expect(intent).toEqual({ type: "selection.set", eventIds: [] });
     expect(editor.dispatch(intent!).ok).toBe(true);
-    expect((editor.snapshot.value as CalendarDocument).events.find((event) => event.id === "standup")).toMatchObject({
-      start: "2026-08-03T09:00",
-    });
+    expect(editor.snapshot.selection.primaryKey).toBeNull();
+    expect((editor.snapshot.value as CalendarDocument).events).toHaveLength(initial.events.length);
   });
 
   test("occupied press on the same instant selects the origin event", () => {
@@ -208,6 +204,16 @@ describe("previewCalendarTimeGrid", () => {
       start: "2026-08-03T09:00",
       end: "2026-08-03T10:00",
     });
+  });
+
+  test("empty click preview does not paint a ghost", () => {
+    expect(previewCalendarTimeGrid(initial.events, {
+      originInstant: "2026-08-04T10:00",
+      originEventId: null,
+      originEventStart: null,
+      originHandle: null,
+      targetInstant: "2026-08-04T10:00",
+    })).toEqual(initial.events);
   });
 
   test("empty span preview yields that start and end", () => {
@@ -395,7 +401,7 @@ describe("bindCalendarTimeGridIntent", () => {
       start: "2026-08-04T11:00",
     });
     const editor = createCalendarEditor({
-      calendars: [{ id: "home", title: "Home", hidden: false }],
+      calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
       events: [series],
     }, { createId: () => "split" });
     expect(editor.dispatch(intent!).ok).toBe(true);
@@ -435,7 +441,7 @@ describe("bindCalendarTimeGridIntent", () => {
       end: "2026-08-04T09:30",
     });
     const editor = createCalendarEditor({
-      calendars: [{ id: "home", title: "Home", hidden: false }],
+      calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
       events: [series],
     }, { createId: () => "split" });
     expect(editor.dispatch(intent!).ok).toBe(true);
@@ -472,7 +478,7 @@ describe("bindCalendarTimeGridIntent", () => {
       start: "2026-08-03T11:00",
     });
     const editor = createCalendarEditor({
-      calendars: [{ id: "home", title: "Home", hidden: false }],
+      calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
       events: [series],
     });
     expect(editor.dispatch(intent!).ok).toBe(true);
@@ -485,20 +491,14 @@ describe("bindCalendarTimeGridIntent", () => {
 });
 
 describe("interpretCalendarAllDayPointer", () => {
-  test("empty same-day press creates a one-day all-day event", () => {
-    const intent = interpretCalendarAllDayPointer({
+  test("empty same-day press clears selection instead of creating", () => {
+    expect(interpretCalendarAllDayPointer({
       originDay: "2026-08-10",
       originEventId: null,
       originEventStart: null,
       originHandle: null,
       targetDay: "2026-08-10",
-    });
-    expect(intent).toEqual({
-      type: "event.create",
-      start: "2026-08-10",
-      end: "2026-08-11",
-      allDay: true,
-    });
+    })).toEqual({ type: "selection.set", eventIds: [] });
   });
 
   test("empty span drag creates an all-day range", () => {
@@ -564,6 +564,56 @@ describe("interpretCalendarAllDayPointer", () => {
       start: "2026-08-03",
       end: "2026-08-06",
       allDay: true,
+    });
+  });
+
+  test("start-edge drag resizes the inclusive start without moving the exclusive end", () => {
+    const intent = interpretCalendarAllDayPointer({
+      originDay: "2026-08-03",
+      originEventId: "holiday",
+      originEventStart: "2026-08-03",
+      originHandle: "start",
+      targetDay: "2026-08-02",
+    });
+    expect(intent).toEqual({
+      type: "event.resize",
+      eventId: "holiday",
+      edge: "start",
+      instant: "2026-08-02",
+    });
+    const editor = createCalendarEditor(initial);
+    expect(editor.dispatch(intent!).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events[2]).toMatchObject({
+      start: "2026-08-02",
+      end: "2026-08-04",
+      allDay: true,
+    });
+  });
+
+  test("turns a recurring all-day move into this-occurrence edit", () => {
+    const series = event({
+      id: "holiday",
+      title: "Holiday",
+      start: "2026-08-03",
+      end: "2026-08-04",
+      allDay: true,
+      recurrence: { freq: "daily", interval: 1, until: "2026-08-05" },
+    });
+    const move = interpretCalendarAllDayPointer({
+      originDay: "2026-08-04",
+      originEventId: "holiday",
+      originEventStart: "2026-08-04",
+      originHandle: "body",
+      targetDay: "2026-08-06",
+    });
+    expect(move).toEqual({ type: "event.move-day", eventId: "holiday", day: "2026-08-06" });
+    const intent = bindCalendarAllDayIntent(move, series, "2026-08-04", "this");
+    expect(intent).toEqual({
+      type: "occurrence.edit",
+      eventId: "holiday",
+      occurrenceStart: "2026-08-04",
+      scope: "this",
+      start: "2026-08-06",
     });
   });
 });

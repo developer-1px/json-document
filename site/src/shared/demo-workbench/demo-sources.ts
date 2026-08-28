@@ -221,6 +221,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarMonthWeekLayout",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "calendarBusyDates",
     sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
@@ -252,6 +257,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "previewCalendarTimeGrid",
+    sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "previewCalendarMonth",
     sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
   },
   {

@@ -18,6 +18,9 @@ export function assertCalendarDocument(document: CalendarDocument): void {
   for (const calendar of calendarDocumentCalendars(document)) {
     if (calendar.id.length === 0) throw new Error("Calendar ids must not be empty.");
     if (calendarIds.has(calendar.id)) throw new Error(`Calendar id must be unique: ${JSON.stringify(calendar.id)}.`);
+    if (typeof calendar.color !== "string" || calendar.color.length === 0) {
+      throw new Error(`Calendar color must not be empty: ${JSON.stringify(calendar.id)}.`);
+    }
     calendarIds.add(calendar.id);
   }
   const ids = new Set<string>();
@@ -92,6 +95,15 @@ export function addCalendarDate(day: string, days: number): string | null {
   const utc = parseCalendarDate(day);
   if (utc === null) return null;
   return formatCalendarDate(utc + days * DAY_MS);
+}
+
+export function calendarAllDaySpan(originDay: string, targetDay: string): { readonly start: string; readonly end: string } | null {
+  if (parseCalendarDate(originDay) === null || parseCalendarDate(targetDay) === null) return null;
+  const start = originDay <= targetDay ? originDay : targetDay;
+  const last = originDay <= targetDay ? targetDay : originDay;
+  const end = addCalendarDate(last, 1);
+  if (end === null) return null;
+  return { start, end };
 }
 
 export function calendarShiftInstant(instant: string, minutes: number): string | null {

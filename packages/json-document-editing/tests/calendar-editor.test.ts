@@ -3,6 +3,7 @@ import {
   calendarAllDayLayout,
   calendarBusyDates,
   calendarMonthDayLayout,
+  calendarMonthWeekLayout,
   calendarNowMarker,
   calendarTimedLayout,
   calendarVisibleEvents,
@@ -36,8 +37,8 @@ function event(fields: {
 
 const initial: CalendarDocument = {
   calendars: [
-    { id: "home", title: "Home", hidden: false },
-    { id: "work", title: "Work", hidden: false },
+    { id: "home", title: "Home", hidden: false, color: "subtle" },
+    { id: "work", title: "Work", hidden: false, color: "accent" },
   ],
   events: [
     event({ id: "standup", title: "Standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30", allDay: false }),
@@ -470,7 +471,7 @@ describe("calendar editor", () => {
 
   test("this-scope remove excludes that occurrence without deleting the series", () => {
     const editor = createCalendarEditor({
-      calendars: [{ id: "home", title: "Home", hidden: false }],
+      calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
       events: [
         event({
           id: "standup",
@@ -498,7 +499,7 @@ describe("calendar editor", () => {
 
   test("all-scope start edit from a later occurrence shifts the series by the same delta", () => {
     const editor = createCalendarEditor({
-      calendars: [{ id: "home", title: "Home", hidden: false }],
+      calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
       events: [
         event({
           id: "standup",
@@ -555,6 +556,19 @@ describe("calendar editor", () => {
     ]);
   });
 
+  test("keeps each calendar's color token when hiding it", () => {
+    const editor = createCalendarEditor(initial);
+    expect((editor.snapshot.value as CalendarDocument).calendars.map((item) => [item.id, item.color])).toEqual([
+      ["home", "subtle"],
+      ["work", "accent"],
+    ]);
+    expect(editor.dispatch({ type: "calendar.set-hidden", calendarId: "work", hidden: true }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).calendars.find((item) => item.id === "work")).toMatchObject({
+      hidden: true,
+      color: "accent",
+    });
+  });
+
   test("month day layout puts all-day events first and keeps overflow off the last row", () => {
     const events = [
       event({ id: "late", title: "Late", start: "2026-08-03T16:00", end: "2026-08-03T17:00" }),
@@ -580,6 +594,106 @@ describe("calendar editor", () => {
       "noon",
       "late",
     ]);
+  });
+
+  test("month week layout keeps a later all-day event from blocking earlier days' lanes", () => {
+    const days = ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09"];
+    const layout = calendarMonthWeekLayout([
+      event({ id: "monday", title: "Monday", start: "2026-08-03T09:00", end: "2026-08-03T09:30" }),
+      event({ id: "sunday", title: "Sunday", start: "2026-08-09", end: "2026-08-10", allDay: true }),
+    ], days, 3);
+    expect(layout.items.map((item) => ({
+      id: item.event.id,
+      startIndex: item.startIndex,
+      lane: item.lane,
+    }))).toEqual([
+      { id: "monday", startIndex: 0, lane: 0 },
+      { id: "sunday", startIndex: 6, lane: 0 },
+    ]);
+    expect(layout.hiddenCounts).toEqual([0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  test("month week layout spans an all-day event across days and stacks timed events below", () => {
+    const days = ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09"];
+    const layout = calendarMonthWeekLayout([
+      event({ id: "travel", title: "Travel", start: "2026-08-04", end: "2026-08-07", allDay: true }),
+      event({ id: "standup", title: "Standup", start: "2026-08-04T09:00", end: "2026-08-04T09:30" }),
+    ], days, 3);
+    expect(layout.items.map((item) => ({
+      id: item.event.id,
+      startIndex: item.startIndex,
+      span: item.span,
+      lane: item.lane,
+    }))).toEqual([
+      { id: "travel", startIndex: 1, span: 3, lane: 0 },
+      { id: "standup", startIndex: 1, span: 1, lane: 1 },
+    ]);
+    expect(layout.laneCount).toBe(2);
+    expect(layout.hiddenCounts).toEqual([0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  test("resizing an all-day event across a week boundary yields two clipped pieces", () => {
+    const editor = createCalendarEditor({
+      calendars: [{ id: "home", title: "Home", hidden: false, color: "subtle" }],
+      events: [
+        event({ id: "travel", title: "Travel", start: "2026-08-07", end: "2026-08-09", allDay: true }),
+      ],
+    });
+    expect(editor.dispatch({
+      type: "event.resize",
+      eventId: "travel",
+      edge: "end",
+      instant: "2026-08-11",
+    }).ok).toBe(true);
+    const events = (editor.snapshot.value as CalendarDocument).events;
+    expect(events[0]).toMatchObject({ start: "2026-08-07", end: "2026-08-11", allDay: true });
+    const first = calendarMonthWeekLayout(
+      events,
+      ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09"],
+      3,
+    );
+    const second = calendarMonthWeekLayout(
+      events,
+      ["2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16"],
+      3,
+    );
+    expect(first.items).toEqual([expect.objectContaining({ startIndex: 4, span: 3, lane: 0 })]);
+    expect(second.items).toEqual([expect.objectContaining({ startIndex: 0, span: 1, lane: 0 })]);
+  });
+
+  test("month week layout clips a multi-day bar at the week boundary", () => {
+    const eventSpan = event({
+      id: "travel",
+      title: "Travel",
+      start: "2026-08-07",
+      end: "2026-08-11",
+      allDay: true,
+    });
+    const first = calendarMonthWeekLayout(
+      [eventSpan],
+      ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09"],
+      3,
+    );
+    const second = calendarMonthWeekLayout(
+      [eventSpan],
+      ["2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16"],
+      3,
+    );
+    expect(first.items).toEqual([expect.objectContaining({ startIndex: 4, span: 3, lane: 0 })]);
+    expect(second.items).toEqual([expect.objectContaining({ startIndex: 0, span: 1, lane: 0 })]);
+  });
+
+  test("month week layout keeps overflow off the last row", () => {
+    const days = ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09"];
+    const layout = calendarMonthWeekLayout([
+      event({ id: "holiday", title: "Holiday", start: "2026-08-03", end: "2026-08-04", allDay: true }),
+      event({ id: "early", title: "Early", start: "2026-08-03T09:00", end: "2026-08-03T09:30" }),
+      event({ id: "noon", title: "Noon", start: "2026-08-03T12:00", end: "2026-08-03T13:00" }),
+      event({ id: "late", title: "Late", start: "2026-08-03T16:00", end: "2026-08-03T17:00" }),
+    ], days, 3);
+    expect(layout.items.map((item) => item.event.id)).toEqual(["holiday", "early"]);
+    expect(layout.laneCount).toBe(2);
+    expect(layout.hiddenCounts[0]).toBe(2);
   });
 
   test("busy dates mark every civil day an occurrence occupies", () => {

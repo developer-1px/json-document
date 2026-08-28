@@ -27,10 +27,8 @@ export function interpretCalendarTimeGridPointer(
     if (originTime === null || targetTime === null) return null;
     const startTime = originTime <= targetTime ? originTime : targetTime;
     const endTime = originTime <= targetTime ? targetTime : originTime;
-    const start = `${day}T${startTime}`;
-    const end = startTime === endTime ? calendarShiftInstant(start, 60) : `${day}T${endTime}`;
-    if (end === null) return null;
-    return { type: "event.create", start, end };
+    if (startTime === endTime) return { type: "selection.set", eventIds: [] };
+    return { type: "event.create", start: `${day}T${startTime}`, end: `${day}T${endTime}` };
   }
 
   const handle = release.originHandle ?? "body";

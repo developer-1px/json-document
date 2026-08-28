@@ -20,7 +20,24 @@ describe("calendar product design", () => {
     assertNoAccentChrome(styles.timedEvent(), "timedEvent");
     assertNoAccentChrome(styles.allDayEvent(), "allDayEvent");
     assertNoAccentChrome(styles.monthEvent(), "monthEvent");
+    assertNoAccentChrome(styles.monthTimed(), "monthTimed");
+    assertNoAccentChrome(styles.monthAllDay(), "monthAllDay");
+    assertNoAccentChrome(styles.todayMark(), "todayMark");
+    expect(styles.timedEvent()).toContain("data-[selected=true]:font-semibold");
+    expect(styles.timedEvent()).toContain("data-[selected=true]:text-foreground-strong");
+    expect(styles.timedEvent()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
+    expect(styles.timedEvent()).toContain("rounded-control");
+    expect(styles.resizeEdge()).toContain("bg-transparent");
+    expect(styles.resizeEdge()).not.toContain("bg-line-accent");
+    expect(styles.timedEvent()).not.toContain("data-[selected=true]:bg-background-subtle");
+    expect(styles.monthTimed()).not.toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
+    expect(styles.todayMark()).toContain("font-semibold");
+    expect(styles.todayMark()).toContain("text-foreground-strong");
+    expect(styles.todayMark()).not.toContain("bg-background-accent");
+    expect(styles.calendarToggle()).toContain("aria-pressed:text-foreground-strong");
+    expect(styles.calendarSwatch()).toContain("data-[calendar-color=accent]:bg-background-accent");
     assertNoAccentChrome(styles.calendarToggle(), "calendarToggle");
+    assertNoAccentChrome(styles.calendarSwatch(), "calendarSwatch");
     assertNoAccentChrome(styles.yearDayBusy(), "yearDayBusy");
   });
 
@@ -61,8 +78,21 @@ describe("calendar product design", () => {
       "utf8",
     );
     expect(source).toContain("calendarMonthDayLayout");
+    expect(source).toContain("calendarMonthWeekLayout");
+    expect(source).toContain("Resize ${item.event.title} end");
+    expect(source).toContain("calendarInspectorOccurrence");
+    expect(source).toContain("clipStart");
+    expect(source).toContain("clipEnd");
     expect(source).toContain("calendarBusyDates");
     expect(source).toContain('calendarCells("month"');
+    expect(source).toContain("Repeat every");
+    expect(source).toContain("const hourStart = 0");
+    expect(source).toContain("const hourEnd = 24");
+    expect(source).toContain("overflowDay");
+    expect(source).toContain("Events on");
+    expect(source).toContain("setOverflowDay(cell.date)");
+    expect(source).toContain("previewCalendarMonth");
+    expect(source).toContain('color: "accent"');
     expect(source).not.toContain("uniqueTitles");
   });
 });

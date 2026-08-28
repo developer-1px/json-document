@@ -5,7 +5,10 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Create", exact: true }).click();
-  await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  const inspector = page.getByRole("region", { name: "Event" });
+  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-25T10:00");
+  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-25T10:30");
   await expect(page.getByRole("grid", { name: "Week", exact: true }).getByRole("button", { name: "Event", exact: true })).toBeVisible();
 
   await page.getByRole("region", { name: "Jump to date" }).getByRole("button", { name: "2026-05-26", exact: true }).click();
@@ -18,5 +21,136 @@ test("Calendar c hotkey creates a timed event on the visible date", async ({ pag
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   await page.getByRole("toolbar", { name: "Calendar" }).click();
   await page.keyboard.press("c");
-  await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  const inspector = page.getByRole("region", { name: "Event" });
+  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-25T10:00");
+  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-25T10:30");
+});
+
+test("Calendar week empty drag creates a timed interval and inspector shows that span", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const thursday = page.locator('[data-calendar-grid="time"][data-calendar-day="2026-05-28"]');
+  const box = await thursday.boundingBox();
+  if (box === null) throw new Error("Week time-grid Thursday is not visible.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height * (4 / 12));
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height * (5.5 / 12), { steps: 5 });
+  await page.mouse.up();
+  await expect(thursday.getByRole("button", { name: "Event", exact: true })).toBeVisible();
+  const inspector = page.getByRole("region", { name: "Event" });
+  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  const start = await inspector.getByLabel("Start", { exact: true }).inputValue();
+  const end = await inspector.getByLabel("End", { exact: true }).inputValue();
+  expect(start.startsWith("2026-05-28T")).toBe(true);
+  expect(end.startsWith("2026-05-28T")).toBe(true);
+  expect(start < end).toBe(true);
+  await expect(inspector.getByRole("button", { name: "All-day", exact: true })).toHaveAttribute("aria-pressed", "false");
+});
+
+test("Calendar month empty drag paints an all-day span without leaving month view", async ({ page }) => {
+  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  const from = page.getByRole("gridcell", { name: "2026-05-22", exact: true });
+  const to = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
+  const start = await from.boundingBox();
+  const end = await to.boundingBox();
+  if (start === null || end === null) throw new Error("Month days are not visible.");
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 8 });
+  await page.mouse.up();
+  const month = page.getByRole("grid", { name: "Month", exact: true });
+  await expect(month).toBeVisible();
+  await expect(month.locator("[data-calendar-span=\"2\"]")).toBeVisible();
+  const inspector = page.getByRole("region", { name: "Event" });
+  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-22");
+  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-23");
+});
+
+test("Calendar month all-day bar resizes by its end handle", async ({ page }) => {
+  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  const from = page.getByRole("gridcell", { name: "2026-05-22", exact: true });
+  const to = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
+  const start = await from.boundingBox();
+  const end = await to.boundingBox();
+  if (start === null || end === null) throw new Error("Month days are not visible.");
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 8 });
+  await page.mouse.up();
+  const month = page.getByRole("grid", { name: "Month", exact: true });
+  await expect(month.locator("[data-calendar-span=\"2\"]")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Resize Event start", exact: true })).toBeVisible();
+  const handle = page.getByRole("button", { name: "Resize Event end", exact: true });
+  const box = await handle.boundingBox();
+  if (box === null) throw new Error("Month resize handle is not visible.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + end.width, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(month.locator("[data-calendar-span=\"3\"]")).toBeVisible();
+  const inspector = page.getByRole("region", { name: "Event" });
+  await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
+  await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-22");
+  const endValue = await inspector.getByLabel("End", { exact: true }).inputValue();
+  expect(endValue >= "2026-05-24").toBe(true);
+  await expect(month).toBeVisible();
+});
+
+test("Calendar month all-day bar resizes by its start handle", async ({ page }) => {
+  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  const from = page.getByRole("gridcell", { name: "2026-05-22", exact: true });
+  const to = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
+  const start = await from.boundingBox();
+  const end = await to.boundingBox();
+  if (start === null || end === null) throw new Error("Month days are not visible.");
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 8 });
+  await page.mouse.up();
+  const month = page.getByRole("grid", { name: "Month", exact: true });
+  await expect(month.locator("[data-calendar-span=\"2\"]")).toBeVisible();
+  const handle = page.getByRole("button", { name: "Resize Event start", exact: true });
+  const box = await handle.boundingBox();
+  if (box === null) throw new Error("Month start resize handle is not visible.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 - start.width, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(month.locator("[data-calendar-span=\"3\"]")).toBeVisible();
+  const inspector = page.getByRole("region", { name: "Event" });
+  const startValue = await inspector.getByLabel("Start", { exact: true }).inputValue();
+  expect(startValue <= "2026-05-21").toBe(true);
+  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-23");
+  await expect(month).toBeVisible();
+});
+
+test("Calendar empty month cell click clears selection and does not create", async ({ page }) => {
+  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  const month = page.getByRole("grid", { name: "Month", exact: true });
+  await month.getByRole("button", { name: "09:00 매일 뉴스 브리핑", exact: true }).first().click();
+  await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("매일 뉴스 브리핑");
+  await page.getByRole("gridcell", { name: "2026-05-21", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Event" }).getByText("Select or create an event.")).toBeVisible();
+  await expect(month.getByRole("button", { name: "Event", exact: true })).toHaveCount(0);
+});
+
+test("Calendar Home and Work chips use distinct fill tokens", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const home = page.getByRole("button", { name: "휴일", exact: true });
+  const work = page.getByRole("button", { name: "점심", exact: true });
+  await expect(home).toHaveAttribute("data-calendar-color", "accent");
+  await expect(work).toHaveAttribute("data-calendar-color", "subtle");
+});
+
+test("Calendar month +N more opens that day's events without leaving month view", async ({ page }) => {
+  await page.goto("/demo/calendar?view=month&date=2026-05-25");
+  const day = page.getByRole("gridcell", { name: "2026-05-25", exact: true });
+  await day.getByRole("button", { name: /\+\d+ more/ }).click();
+  const overflow = page.getByRole("dialog", { name: "Events on 2026-05-25", exact: true });
+  await expect(overflow).toBeVisible();
+  await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
+  await overflow.getByRole("button", { name: "12:00 점심", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("점심");
+  await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
 });

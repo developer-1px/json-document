@@ -53,7 +53,7 @@ export function ProductApp(props: {
           {props.toolbar}
         </div>
       ) : null}
-      <div className={classes(ui.product.canvas, props.fill && ui.product.fillCanvas, props.canvasClassName)}>{props.children}</div>
+      <div className={classes(ui.product.canvas, props.fill && ui.product.fillCanvas, props.canvasClassName ?? (props.fill ? "overflow-auto" : undefined))}>{props.children}</div>
       {props.inspector != null ? <div className={ui.product.panel}>{props.inspector}</div> : null}
     </div>
   );

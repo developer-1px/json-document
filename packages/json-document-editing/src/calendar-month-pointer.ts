@@ -1,6 +1,6 @@
 import type { CalendarEvent, CalendarIntent } from "./calendar.js";
 import { calendarEventRecurrence } from "./calendar-occurrence.js";
-import { addCalendarDate, calendarDatePart, isCalendarAllDay, parseCalendarDate } from "./calendar-validation.js";
+import { addCalendarDate, calendarAllDaySpan, calendarDatePart, isCalendarAllDay, parseCalendarDate } from "./calendar-validation.js";
 
 export type CalendarMonthPointerRelease = {
   readonly originDay: string;
@@ -22,11 +22,13 @@ export function interpretCalendarMonthPointer(
     if (release.originEventId !== null) {
       return { type: "selection.set", eventIds: [release.originEventId] };
     }
-    const end = addCalendarDate(release.targetDay, 1);
-    if (end === null) return null;
-    return { type: "event.create", start: release.targetDay, end, allDay: true };
+    return { type: "selection.set", eventIds: [] };
   }
-  if (release.originEventId === null) return null;
+  if (release.originEventId === null) {
+    const span = calendarAllDaySpan(release.originDay, release.targetDay);
+    if (span === null) return null;
+    return { type: "event.create", start: span.start, end: span.end, allDay: true };
+  }
   const originStart = calendarDatePart(release.originEventStart ?? release.originDay);
   const origin = parseCalendarDate(release.originDay);
   const target = parseCalendarDate(release.targetDay);

@@ -1,9 +1,15 @@
 import type { CalendarEvent } from "./calendar.js";
 import { calendarEventExcludeDates, calendarEventRecurrence } from "./calendar-occurrence.js";
 import {
+  bindCalendarAllDayIntent,
   interpretCalendarAllDayPointer,
   type CalendarAllDayPointerRelease,
 } from "./calendar-allday-pointer.js";
+import {
+  bindCalendarMonthIntent,
+  interpretCalendarMonthPointer,
+  type CalendarMonthPointerRelease,
+} from "./calendar-month-pointer.js";
 import {
   bindCalendarTimeGridIntent,
   interpretCalendarTimeGridPointer,
@@ -23,6 +29,7 @@ import {
 export function previewCalendarAllDay(
   events: ReadonlyArray<CalendarEvent>,
   release: CalendarAllDayPointerRelease,
+  scope: "this" | "this-and-following" | "all" = "this",
 ): ReadonlyArray<CalendarEvent> {
   const intent = interpretCalendarAllDayPointer(release);
   if (intent === null || intent.type === "selection.set") return events;
@@ -37,6 +44,26 @@ export function previewCalendarAllDay(
       recurrence: null,
       excludeDates: [],
     }];
+  }
+  const event = events.find((item) => item.id === intent.eventId);
+  const bound = bindCalendarAllDayIntent(intent, event, release.originEventStart, scope) ?? intent;
+  if (bound.type === "occurrence.edit" && event !== undefined && release.originEventStart !== null) {
+    const excluded = calendarDatePart(release.originEventStart);
+    const start = bound.start ?? release.originEventStart;
+    const end = bound.end ?? event.end;
+    return [
+      ...events.map((item) => item.id === event.id
+        ? { ...item, excludeDates: [...calendarEventExcludeDates(item), excluded] }
+        : item),
+      {
+        ...event,
+        id: "preview",
+        start,
+        end,
+        recurrence: bound.scope === "this" ? null : event.recurrence,
+        excludeDates: [],
+      },
+    ];
   }
   if (intent.type === "event.move-day") {
     return events.map((item) => {
@@ -110,6 +137,75 @@ export function previewCalendarTimeGrid(
     const end = bound.edge === "end" ? bound.instant : item.end;
     if (start >= end) return item;
     return { ...item, start, end };
+  });
+}
+
+export function previewCalendarMonth(
+  events: ReadonlyArray<CalendarEvent>,
+  release: CalendarMonthPointerRelease,
+  scope: "this" | "this-and-following" | "all" = "this",
+): ReadonlyArray<CalendarEvent> {
+  const intent = interpretCalendarMonthPointer(release);
+  if (intent === null || intent.type === "selection.set") return events;
+  if (intent.type === "event.create") {
+    return [...events, {
+      id: "preview",
+      title: "Event",
+      start: intent.start,
+      end: intent.end,
+      allDay: true,
+      calendarId: "",
+      recurrence: null,
+      excludeDates: [],
+    }];
+  }
+  const event = events.find((item) => item.id === intent.eventId);
+  const bound = bindCalendarMonthIntent(intent, event, release.originEventStart ?? null, scope) ?? intent;
+  if (bound.type === "occurrence.edit" && event !== undefined && (release.originEventStart ?? null) !== null) {
+    const occurrenceStart = release.originEventStart ?? event.start;
+    const excluded = calendarDatePart(occurrenceStart);
+    const start = bound.start ?? occurrenceStart;
+    const end = bound.end ?? event.end;
+    return [
+      ...events.map((item) => item.id === event.id
+        ? { ...item, excludeDates: [...calendarEventExcludeDates(item), excluded] }
+        : item),
+      {
+        ...event,
+        id: "preview",
+        start,
+        end,
+        recurrence: bound.scope === "this" ? null : event.recurrence,
+        excludeDates: [],
+      },
+    ];
+  }
+  if (intent.type !== "event.move-day") return events;
+  return events.map((item) => {
+    if (item.id !== intent.eventId) return item;
+    if (isCalendarAllDay(item)) {
+      const from = parseCalendarDate(item.start);
+      const to = parseCalendarDate(item.end);
+      const nextDay = parseCalendarDate(intent.day);
+      if (from === null || to === null || nextDay === null) return item;
+      const delta = nextDay - from;
+      return {
+        ...item,
+        start: formatCalendarDate(from + delta),
+        end: formatCalendarDate(to + delta),
+      };
+    }
+    const from = parseCalendarInstant(item.start);
+    const to = parseCalendarInstant(item.end);
+    const currentDay = parseCalendarInstant(`${calendarDatePart(item.start)}T00:00`);
+    const nextDay = parseCalendarInstant(`${intent.day}T00:00`);
+    if (from === null || to === null || currentDay === null || nextDay === null) return item;
+    const delta = nextDay - currentDay;
+    return {
+      ...item,
+      start: formatCalendarInstant(from + delta),
+      end: formatCalendarInstant(to + delta),
+    };
   });
 }
 

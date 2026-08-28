@@ -33,8 +33,14 @@ export function calendarPointerOccurrence(
   committed: CalendarOccurrenceRange | null,
 ): CalendarOccurrenceRange {
   if (intent?.type === "event.create") return { start: intent.start, end: intent.end };
+  if (intent?.type === "event.resize") {
+    return {
+      start: intent.edge === "start" ? intent.instant : (committed?.start ?? origin.start),
+      end: intent.edge === "end" ? intent.instant : (committed?.end ?? origin.end),
+    };
+  }
   if (
-    (intent?.type === "event.move" || intent?.type === "event.resize" || intent?.type === "event.move-day" || intent?.type === "occurrence.edit")
+    (intent?.type === "event.move" || intent?.type === "event.move-day" || intent?.type === "occurrence.edit")
     && committed !== null
   ) {
     return committed;
@@ -46,5 +52,15 @@ export function calendarSelectionOccurrence(
   selected: { readonly start: string; readonly end: string } | null,
 ): CalendarOccurrenceRange {
   if (selected === null) return { start: null, end: null };
+  return { start: selected.start, end: selected.end };
+}
+
+export function calendarInspectorOccurrence(
+  selected: { readonly start: string; readonly end: string; readonly recurrence: unknown },
+  occurrence: CalendarOccurrenceRange,
+): { readonly start: string; readonly end: string } {
+  if (selected.recurrence !== null && occurrence.start !== null && occurrence.end !== null) {
+    return { start: occurrence.start, end: occurrence.end };
+  }
   return { start: selected.start, end: selected.end };
 }

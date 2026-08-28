@@ -26,14 +26,15 @@ export {
   calendarEventsInMonth,
   calendarEventsOnDay,
   calendarMonthDayLayout,
+  calendarMonthWeekLayout,
   calendarNowMarker,
   calendarTimedLayout,
   calendarVisibleEvents,
   createCalendarEditor,
 } from "./calendar.js";
 export { projectCalendarOccurrences } from "./calendar-occurrence.js";
-export { previewCalendarAllDay, previewCalendarTimeGrid } from "./calendar-preview.js";
-export { interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
+export { previewCalendarAllDay, previewCalendarMonth, previewCalendarTimeGrid } from "./calendar-preview.js";
+export { bindCalendarAllDayIntent, interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
 export { bindCalendarMonthIntent, interpretCalendarMonthPointer } from "./calendar-month-pointer.js";
 export { bindCalendarTimeGridIntent, interpretCalendarTimeGridPointer } from "./calendar-time-grid-pointer.js";
 export {

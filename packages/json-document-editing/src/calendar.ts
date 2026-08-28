@@ -33,6 +33,7 @@ export interface CalendarCalendar extends Record<string, JSONValue> {
   readonly id: string;
   readonly title: string;
   readonly hidden: boolean;
+  readonly color: string;
 }
 
 export interface CalendarRecurrence extends Record<string, JSONValue> {
@@ -657,15 +658,91 @@ export function calendarAllDayLayout(
     });
   }
   const sorted = layout.sort((left, right) => left.startIndex - right.startIndex || right.span - left.span);
+  const positioned = assignCalendarSpanLanes(sorted);
+  const laneCount = Math.max(1, positioned[0]?.laneCount ?? 0);
+  return positioned.map((item) => ({ ...item, laneCount }));
+}
+
+export function calendarMonthWeekLayout(
+  events: ReadonlyArray<CalendarEvent>,
+  days: ReadonlyArray<string>,
+  rowLimit: number,
+): {
+  readonly items: ReadonlyArray<{
+    readonly event: CalendarEvent;
+    readonly startIndex: number;
+    readonly span: number;
+    readonly lane: number;
+  }>;
+  readonly hiddenCounts: ReadonlyArray<number>;
+  readonly laneCount: number;
+} {
+  const empty = { items: [], hiddenCounts: days.map(() => 0), laneCount: 0 };
+  const rangeStart = days[0];
+  const rangeLast = days.at(-1);
+  if (rangeStart === undefined || rangeLast === undefined) return empty;
+  const rangeEnd = addCalendarDate(rangeLast, 1);
+  if (rangeEnd === null) return empty;
+  const layout: Array<{ event: CalendarEvent; startIndex: number; span: number }> = [];
+  for (const item of projectCalendarOccurrences(events, rangeStart, rangeEnd)) {
+    const occurrence = { ...item.event, start: item.start, end: item.end };
+    const clipped = isCalendarAllDay(occurrence)
+      ? clipAllDayToDays(item.start, item.end, days)
+      : clipTimedToDays(item.start, item.end, days);
+    if (clipped === null) continue;
+    layout.push({ event: occurrence, startIndex: clipped.startIndex, span: clipped.span });
+  }
+  layout.sort((left, right) => {
+    if (left.startIndex !== right.startIndex) return left.startIndex - right.startIndex;
+    const leftAllDay = isCalendarAllDay(left.event) ? 0 : 1;
+    const rightAllDay = isCalendarAllDay(right.event) ? 0 : 1;
+    if (leftAllDay !== rightAllDay) return leftAllDay - rightAllDay;
+    return right.span - left.span || left.event.start.localeCompare(right.event.start);
+  });
+  const positioned = assignCalendarSpanLanes(layout);
+  const covering = (index: number) => positioned.filter((item) => (
+    index >= item.startIndex && index < item.startIndex + item.span
+  ));
+  const overflow = days.some((_, index) => covering(index).length > rowLimit);
+  const visibleLaneCount = overflow
+    ? Math.max(0, rowLimit - 1)
+    : positioned.reduce((max, item) => Math.max(max, item.lane + 1), 0);
+  return {
+    items: positioned.filter((item) => item.lane < visibleLaneCount),
+    hiddenCounts: days.map((_, index) => covering(index).filter((item) => item.lane >= visibleLaneCount).length),
+    laneCount: visibleLaneCount,
+  };
+}
+
+function assignCalendarSpanLanes<T extends { readonly startIndex: number; readonly span: number }>(
+  layout: ReadonlyArray<T>,
+): ReadonlyArray<T & { readonly lane: number; readonly laneCount: number }> {
   const laneEnds: number[] = [];
-  const positioned = sorted.map((item) => {
+  const positioned = layout.map((item) => {
     const available = laneEnds.findIndex((end) => end <= item.startIndex);
     const lane = available === -1 ? laneEnds.length : available;
     laneEnds[lane] = item.startIndex + item.span;
     return { ...item, lane };
   });
-  const laneCount = Math.max(1, laneEnds.length);
+  const laneCount = laneEnds.length;
   return positioned.map((item) => ({ ...item, laneCount }));
+}
+
+function clipTimedToDays(
+  start: string,
+  end: string,
+  days: ReadonlyArray<string>,
+): { readonly startIndex: number; readonly span: number } | null {
+  let startIndex = -1;
+  let lastIndex = -1;
+  for (const day of calendarOccurrenceDays(start, end, false)) {
+    const index = days.indexOf(day);
+    if (index < 0) continue;
+    if (startIndex < 0) startIndex = index;
+    lastIndex = index;
+  }
+  if (startIndex < 0 || lastIndex < startIndex) return null;
+  return { startIndex, span: lastIndex - startIndex + 1 };
 }
 
 function clipAllDayToDays(

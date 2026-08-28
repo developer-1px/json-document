@@ -191,5 +191,20 @@ describe("UI Primitives", () => {
     fireEvent.pointerUp(handle, { pointerId: 7, clientX: 30 });
     expect(onResize).toHaveBeenNthCalledWith(1, 14, "preview");
     expect(onResize).toHaveBeenNthCalledWith(2, 20, "commit");
+
+    const onLost = vi.fn();
+    render(<ResizeHandle label="행 높이 조절" orientation="vertical" onResize={onLost} />);
+    const lost = screen.getByRole("button", { name: "행 높이 조절" });
+    let capturedLost: number | null = null;
+    Object.assign(lost, {
+      setPointerCapture: (pointerId: number) => { capturedLost = pointerId; },
+      hasPointerCapture: (pointerId: number) => capturedLost === pointerId,
+      releasePointerCapture: () => { capturedLost = null; },
+    });
+    fireEvent.pointerDown(lost, { pointerId: 8, clientY: 10 });
+    fireEvent.pointerMove(lost, { pointerId: 8, clientY: 40 });
+    fireEvent.lostPointerCapture(lost, { pointerId: 8, clientY: 40 });
+    expect(onLost).toHaveBeenNthCalledWith(1, 30, "preview");
+    expect(onLost).toHaveBeenNthCalledWith(2, 30, "commit");
   });
 });

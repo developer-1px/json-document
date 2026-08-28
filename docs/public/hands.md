@@ -46,16 +46,24 @@ editor.dispatch({ type: "event.create", start: "2026-08-03", end: "2026-08-04", 
 editor.undo();
 ```
 
-`CalendarDocument`는 `{ id, title, start, end, allDay }` 이벤트를 직렬화합니다.
-시간 이벤트는 datetime-local, 종일 이벤트는 exclusive-end 날짜입니다. 일·주
-보기의 빈 구간 drag는 그 start/end로 만들고, 블록 이동은 duration을 유지하며
-가장자리는 `event.resize`입니다. 종일 밴드는 날짜 단위로 만들고 옮기고 늘립니다.
-월 보기 같은 날 빈 칸은 종일 생성, 점유 칸은 origin 이벤트 선택, 다른 날로
-끌 때만 `event.move-day`입니다. 이 매핑은 `interpretCalendarTimeGridPointer`,
-`interpretCalendarAllDayPointer`, `interpretCalendarMonthPointer`가 소유하며
-현재 선택은 입력이 아닙니다. 연 보기는 12개 미니 월입니다. 월 이름은 월
-보기로, 날짜는 일 보기로 들어갑니다. 보기와 날짜는 Host URL
-(`?view=&date=`)입니다. 픽셀 격자와 보기 전환은 Host가 조합합니다.
+`CalendarDocument`는 캘린더 `{ id, title, hidden, color }`와 이벤트
+`{ id, title, start, end, allDay, calendarId }`를 직렬화합니다. `color`는
+Host가 fill로 옮기는 짧은 토큰입니다. 시간 이벤트는 datetime-local, 종일
+이벤트는 exclusive-end 날짜입니다. 일·주 보기의 빈 구간 drag는 그
+start/end로 만들고, 빈 칸 클릭은 선택을 지웁니다. 빈 칸 더블클릭은 기본
+길이로 만들고 제목을 묻습니다. 블록 이동은 duration을 유지하며 가장자리는
+`event.resize`입니다. 종일 밴드는 날짜 단위로 드래그해 만들고 옮기고
+늘립니다. 월 보기 같은 날 빈 칸 클릭은 선택 해제, 더블클릭은 그날 종일 생성,
+빈 칸을 다른 날로 끌면 그 날들을 덮는 종일 구간을 만들고 제목을 묻습니다.
+여러 날을 덮는 종일 이벤트는 주 행을 가로지르는 막대이고, 주 경계에서 잘립니다.
+막대 가장자리는 종일 밴드와 같이 `event.resize`입니다.
+점유 칸은 origin 이벤트 선택, 다른 날로 끌 때만 `event.move-day`입니다.
+`+N more`는 그 날의 이벤트 목록을 열고 월 보기에 남습니다. 이 매핑은
+`interpretCalendarTimeGridPointer`, `interpretCalendarAllDayPointer`,
+`interpretCalendarMonthPointer`가 소유하며 현재 선택은 입력이 아닙니다.
+연 보기는 12개 미니 월입니다. 월 이름은 월 보기로, 날짜는 일 보기로
+들어갑니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
+보기 전환은 Host가 조합합니다.
 
 ```live-demo
 /demo/calendar

@@ -53,9 +53,9 @@ export function CalendarDemoNavigator(props: {
             className={classes(
               styles.yearDay(),
               cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
-              cell.date === props.today && styles.today(),
-              cell.date === props.visibleDate && styles.yearDayBusy(),
-              busy?.has(cell.date) && styles.yearDayBusy(),
+              cell.date === props.visibleDate && cell.date !== props.today && "font-semibold text-foreground-strong",
+              cell.date === props.today ? styles.todayMark() : null,
+              busy?.has(cell.date) && cell.date !== props.today && styles.yearDayBusy(),
             )}
             onClick={() => props.onDateChange(cell.date)}
           >
