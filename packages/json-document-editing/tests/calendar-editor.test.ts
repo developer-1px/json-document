@@ -9,9 +9,29 @@ import {
   calendarVisibleEvents,
   createCalendarEditor,
   projectCalendarOccurrences,
+  calendarRecurrenceWithFrequency,
+  calendarRecurrenceWithInterval,
+  calendarRecurrenceWithUntil,
   type CalendarDocument,
   type CalendarEvent,
 } from "../src/index.js";
+
+describe("Calendar recurrence transitions", () => {
+  test("creates frequencies, normalizes intervals, and preserves unrelated fields", () => {
+    const daily = calendarRecurrenceWithFrequency(null, "daily");
+    expect(daily).toEqual({ freq: "daily", interval: 1, until: "" });
+    expect(calendarRecurrenceWithFrequency(daily, "agenda")).toBe(daily);
+    expect(calendarRecurrenceWithInterval(daily, "2.9")).toEqual({ freq: "daily", interval: 2, until: "" });
+    expect(calendarRecurrenceWithInterval(daily, "0")?.interval).toBe(1);
+    expect(calendarRecurrenceWithUntil(daily, "2026-06-30")).toEqual({
+      freq: "daily",
+      interval: 1,
+      until: "2026-06-30",
+    });
+    expect(calendarRecurrenceWithInterval(null, 2)).toBeNull();
+    expect(calendarRecurrenceWithUntil(null, "2026-06-30")).toBeNull();
+  });
+});
 
 function event(fields: {
   readonly id: string;

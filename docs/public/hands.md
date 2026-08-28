@@ -56,6 +56,36 @@ start/end로 만들고, 빈 칸 클릭은 선택을 지웁니다. 빈 칸 더블
 늘립니다. 월 보기 같은 날 빈 칸 클릭은 선택 해제, 더블클릭은 그날 종일 생성,
 빈 칸을 다른 날로 끌면 그 날들을 덮는 종일 구간을 만들고 제목을 묻습니다.
 여러 날을 덮는 종일 이벤트는 주 행을 가로지르는 막대이고, 주 경계에서 잘립니다.
+Exclusive end를 마지막 점유 날짜로 바꾸는 interval projection은 Editing
+`calendarIntervalLastDate`가 소유합니다. occurrence day 열거, all-day resize end,
+month week clipping이 모두 같은 정본 규칙을 사용합니다.
+날짜 또는 날짜·시간 문자열에서 `YYYY-MM-DD` 날짜 부분을 얻는 projection은
+Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와 새 이벤트의
+생성 날짜도 Host의 문자열 자르기 없이 이 공개 API를 사용합니다.
+Host는 `Temporal.Now`로 concrete clock을 읽고 Editing `formatCalendarInstant`로
+Calendar datetime-local minute 문자열을 만듭니다. clock source와 저장 형식의
+책임을 섞는 route-local formatter는 두지 않습니다.
+Calendar collection과 id lookup은 Editing `calendarDocumentCalendars`,
+`calendarDocumentCalendar`가 소유합니다. Host는 sidebar와 inspector를 조합하고
+calendar color를 UI variant로 바꾸는 시각 정책만 유지합니다.
+Inspector의 repeat frequency·interval·until 변경은 Editing
+`calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`,
+`calendarRecurrenceWithUntil`이 `CalendarRecurrence` model을 만들고 보존합니다.
+Host는 option copy와 recurrence 비활성화 선택만 조합합니다.
+월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
+정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
+조합합니다.
+표시 cell collection의 첫 날짜부터 마지막 날짜 다음 날까지의 half-open query
+범위는 UI Primitives `calendarCellInterval`이 소유합니다. 연간 12개 month grid와
+sidebar navigator가 같은 interval을 Editing occurrence query에 전달합니다.
+Day와 week time grid의 ordered 날짜 cell도 UI Primitives `calendarCells`가
+소유합니다. Day는 정확한 ISO weekday를 포함한 단일 cell, week는 ISO 주의
+7개 cell을 반환합니다. 각 `CalendarCell`은 canonical date에서 투영한 `day`와
+ISO weekday를 제공하며 Host는 문자열을 해석하지 않고 이 metadata로 날짜 숫자,
+header와 event grid를 조합합니다.
+Inclusive UI 날짜 endpoint를 all-day event의 exclusive storage interval로 바꾸는
+projection은 Editing `calendarAllDaySpan`이 소유합니다. 빈 drag, end resize,
+timed→all-day 전환, 단일 생성과 Inspector 수정이 모두 같은 정본 규칙을 사용합니다.
 막대 가장자리는 종일 밴드와 같이 `event.resize`입니다.
 점유 칸은 origin 이벤트 선택, 다른 날로 끌 때만 `event.move-day`입니다.
 월간 span에서 누른 Web `clientX`는 `calendarKeyFromWebRow`가 주 행 bounds와
@@ -66,8 +96,25 @@ Host는 이벤트와 날짜 목록만 연결합니다.
 `interpretCalendarTimeGridPointer`, `interpretCalendarAllDayPointer`,
 `interpretCalendarMonthPointer`가 소유하며 현재 선택은 입력이 아닙니다.
 연 보기는 12개 미니 월입니다. 월 이름은 월 보기로, 날짜는 일 보기로
-들어갑니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
-보기 전환은 Host가 조합합니다.
+들어갑니다. 연간 12개 월 시작일은 UI Primitives 날짜 값 정본의
+`calendarYearMonths`가 만들고, Host는 월 이름과 grid layout 및 navigation만
+조합합니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
+보기 전환은 Host가 조합합니다. 정본 view membership은 Editing
+`parseCalendarView`가 판별하고 URL의 invalid
+값을 어떤 view로 대체할지는 Host 정책으로 남습니다.
+toolbar의 현재 기간 문구는 UI Primitives
+`visiblePeriodLabel`이 view 분기와 날짜 경계를 투영하고, Host가 월 이름 copy와
+week separator policy를 주입합니다.
+Previous/Next 및 keyboard period 이동은 UI Primitives `shiftVisibleDate`가
+day/week/month/year의 단위와 calendar arithmetic을 소유하며, Host는 현재 view와
+direction을 전달하고 결과를 URL state에 반영합니다.
+Timed event의 datetime-local에서 `HH:mm` 문구를 투영하는 일은 UI Primitives
+`calendarTimeLabel`이 소유합니다. Host는 그 결과를 visual copy에 조합하고,
+UI Primitives의 event-label projection도 같은 정본 값을 accessible name에
+사용합니다. Date-only와 유효하지 않은 값은 빈 문구입니다.
+Month event의 accessible name은 UI Primitives `calendarEventLabel`이 all-day에는
+title, timed event에는 가능한 `HH:mm title`을 투영합니다. 이 모듈은 구조적
+event 값만 받아 UI Primitives가 Editing package에 의존하지 않도록 합니다.
 
 ```live-demo
 /demo/calendar

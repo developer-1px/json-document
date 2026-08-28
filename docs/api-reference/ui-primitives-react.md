@@ -31,10 +31,44 @@ addCalendarMonths(date: string, months: number): string
 ```ts
 addCalendarYears(date: string, years: number): string
 ```
+## `CalendarCell`
+
+```ts
+type CalendarCell = {
+  readonly date: string;
+  readonly day: number;
+  readonly inVisiblePeriod: boolean;
+  readonly weekday: number;
+};
+```
+## `calendarCellInterval`
+
+```ts
+calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null
+```
+## `CalendarCellInterval`
+
+```ts
+type CalendarCellInterval = { readonly start: string; readonly end: string };
+```
 ## `calendarCells`
 
 ```ts
-calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell>
+calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell>
+```
+## `calendarEventLabel`
+
+```ts
+calendarEventLabel(event: CalendarEventLabelValue): string
+```
+## `CalendarEventLabelValue`
+
+```ts
+type CalendarEventLabelValue = {
+  readonly title: string;
+  readonly start: string;
+  readonly allDay: boolean;
+};
 ```
 ## `CalendarGrain`
 
@@ -45,6 +79,26 @@ type CalendarGrain = "week" | "month" | "year";
 
 ```ts
 CalendarGrid(props: { readonly label: string; readonly value: string | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: string) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
+```
+## `calendarMonthWeeks`
+
+```ts
+calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>>
+```
+## `CalendarPeriod`
+
+```ts
+type CalendarPeriod = "day" | CalendarGrain;
+```
+## `calendarTimeLabel`
+
+```ts
+calendarTimeLabel(value: string): string
+```
+## `calendarYearMonths`
+
+```ts
+calendarYearMonths(visibleDate: string): ReadonlyArray<string>
 ```
 ## `ChoiceChip`
 
@@ -217,13 +271,13 @@ type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-lab
 ## `SegmentedControl`
 
 ```ts
-SegmentedControl(props: { readonly label: string; readonly value: string; readonly options: ReadonlyArray<SegmentedControlOption>; readonly onValueChange: (value: string) => void; readonly className?: string; }): ReactNode
+SegmentedControl<Id extends string>(props: { readonly label: string; readonly value: Id; readonly options: ReadonlyArray<SegmentedControlOption<Id>>; readonly onValueChange: (value: Id) => void; readonly className?: string; }): ReactNode
 ```
 ## `SegmentedControlOption`
 
 ```ts
-type SegmentedControlOption = {
-  readonly id: string;
+type SegmentedControlOption<Id extends string = string> = {
+  readonly id: Id;
   readonly label: ReactNode;
   readonly disabled?: boolean;
 };
@@ -271,7 +325,7 @@ type SelectOption = {
 ## `shiftVisibleDate`
 
 ```ts
-shiftVisibleDate(visibleDate: string, grain: CalendarGrain, direction: 1 | -1): string
+shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string
 ```
 ## `startOfIsoWeek`
 
@@ -329,5 +383,13 @@ interface UseListboxOptions<Item extends ListboxItem> {
 ## `visiblePeriodLabel`
 
 ```ts
-visiblePeriodLabel(grain: CalendarGrain, visibleDate: string): string
+visiblePeriodLabel(period: CalendarPeriod, visibleDate: string, options?: VisiblePeriodLabelOptions): string
+```
+## `VisiblePeriodLabelOptions`
+
+```ts
+type VisiblePeriodLabelOptions = {
+  readonly monthNames?: ReadonlyArray<string>;
+  readonly weekSeparator?: string;
+};
 ```
