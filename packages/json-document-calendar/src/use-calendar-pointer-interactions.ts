@@ -7,7 +7,8 @@ import {
   type CalendarTimeGridPointerRelease,
 } from "@interactive-os/json-document-editing";
 import {
-  calendarDayDeltaFromWebWidth, calendarMinutesFromWebGrid, createWebPointerSession, findWebPointTarget,
+  calendarDayDeltaFromWebWidth, calendarKeyFromWebRow, calendarMinutesFromWebGrid,
+  createWebPointerSession, findWebPointTarget,
 } from "@interactive-os/json-document-web";
 import type { CalendarHand } from "./use-calendar-hand.js";
 
@@ -39,7 +40,7 @@ export interface CalendarPointerInteractions {
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
-  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, rowDays: ReadonlyArray<string>, id: string | null, start: string | null, end: string | null): void;
   monthPointerMove(event: PointerEvent<HTMLElement>): void;
   monthPointerUp(event: PointerEvent<HTMLElement>): void;
   cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
@@ -137,8 +138,12 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     remember(intent, release.originEventStart, release.originEventEnd);
   }
 
-  function monthPointerDown(event: PointerEvent<HTMLElement>, originDay: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null): void {
+  function monthPointerDown(event: PointerEvent<HTMLElement>, fallbackDay: string, rowDays: ReadonlyArray<string>, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null): void {
     if (event.button !== 0) return;
+    const row = event.currentTarget.closest("[data-calendar-week]");
+    const originDay = row === null
+      ? fallbackDay
+      : calendarKeyFromWebRow(event.clientX, row.getBoundingClientRect(), rowDays) ?? fallbackDay;
     policy.onMonthPointerBegin?.();
     const release = { originDay, originEventId, originEventStart, originEventEnd, targetDay: originDay, eventsOnTargetDay: [] };
     monthPointer.begin(event.currentTarget, event.pointerId, release);

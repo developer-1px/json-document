@@ -26,6 +26,11 @@ calendarCommandFromWebKeyboardEvent(event: WebCalendarKeyboardEvent): WebCalenda
 ```ts
 calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number
 ```
+## `calendarKeyFromWebRow`
+
+```ts
+calendarKeyFromWebRow<Key>(clientX: number, bounds: { readonly left: number; readonly width: number; }, keys: ReadonlyArray<Key>): Key | null
+```
 ## `calendarMinutesFromWebGrid`
 
 ```ts
@@ -253,7 +258,8 @@ type WebCalendarCommand =
   | { readonly type: "shift"; readonly direction: 1 | -1 }
   | { readonly type: "today" }
   | { readonly type: "create" }
-  | { readonly type: "remove" };
+  | { readonly type: "remove" }
+  | { readonly type: "dismiss" };
 ```
 ## `WebCalendarKeyboardEvent`
 

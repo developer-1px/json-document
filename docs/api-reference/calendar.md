@@ -53,6 +53,28 @@ type CalendarHandOptions = {
   readonly defaultTitle?: string;
 };
 ```
+## `CalendarKeyboardOptions`
+
+```ts
+interface CalendarKeyboardOptions {
+  readonly active: boolean;
+  readonly target?: CalendarKeyboardTarget;
+  readonly onView: (view: CalendarView) => void;
+  readonly onShift: (direction: 1 | -1) => void;
+  readonly onToday: () => void;
+  readonly onCreate: () => void;
+  readonly onRemove: () => void;
+  readonly onDismiss?: () => boolean;
+}
+```
+## `CalendarKeyboardTarget`
+
+```ts
+interface CalendarKeyboardTarget {
+  addEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+  removeEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+}
+```
 ## `CalendarPointerInteractions`
 
 ```ts
@@ -64,7 +86,7 @@ interface CalendarPointerInteractions {
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
-  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, rowDays: ReadonlyArray<string>, id: string | null, start: string | null, end: string | null): void;
   monthPointerMove(event: PointerEvent<HTMLElement>): void;
   monthPointerUp(event: PointerEvent<HTMLElement>): void;
   cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
@@ -112,6 +134,11 @@ interface CalendarViewportPositionOptions {
 
 ```ts
 useCalendarHand(editor: CalendarEditor, options?: CalendarHandOptions): CalendarHand
+```
+## `useCalendarKeyboard`
+
+```ts
+useCalendarKeyboard(options: CalendarKeyboardOptions): void
 ```
 ## `useCalendarPointerInteractions`
 

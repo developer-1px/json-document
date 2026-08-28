@@ -6,7 +6,8 @@ export type WebCalendarCommand =
   | { readonly type: "shift"; readonly direction: 1 | -1 }
   | { readonly type: "today" }
   | { readonly type: "create" }
-  | { readonly type: "remove" };
+  | { readonly type: "remove" }
+  | { readonly type: "dismiss" };
 
 export interface WebCalendarKeyboardEvent {
   readonly key: string;
@@ -26,6 +27,7 @@ const calendarKeymap = Object.freeze({
   c: { type: "create" },
   Delete: { type: "remove" },
   Backspace: { type: "remove" },
+  Escape: { type: "dismiss" },
   n: { type: "shift", direction: 1 },
   p: { type: "shift", direction: -1 },
   ArrowRight: { type: "shift", direction: 1 },
@@ -63,6 +65,20 @@ export function calendarMinutesFromWebGrid(
 export function calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number {
   if (columnWidthPx <= 0) return 0;
   return Math.round(deltaPx / columnWidthPx);
+}
+
+export function calendarKeyFromWebRow<Key>(
+  clientX: number,
+  bounds: { readonly left: number; readonly width: number },
+  keys: ReadonlyArray<Key>,
+): Key | null {
+  if (keys.length === 0) return null;
+  if (bounds.width <= 0) return keys[0] ?? null;
+  const index = Math.max(0, Math.min(
+    keys.length - 1,
+    Math.floor(((clientX - bounds.left) / bounds.width) * keys.length),
+  ));
+  return keys[index] ?? null;
 }
 
 function isTextEntryTarget(target: unknown): boolean {
