@@ -43,6 +43,7 @@ import {
   addCalendarDays,
   addCalendarYears,
   calendarCells,
+  calendarEventLabel,
   calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
@@ -615,7 +616,7 @@ export function CalendarDemoRoute(props: {
                                   <SelectableItem
                                     key={`${item.id}:${item.start}`}
                                     selected={selected.has(item.id) && (occurrenceStart === null || occurrenceStart === item.start)}
-                                    aria-label={monthEventLabel(item)}
+                                    aria-label={calendarEventLabel(item)}
                                     data-calendar-color={calendarColor(document, item.calendarId)}
                                     className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
                                     onClick={() => hand.selectOccurrence(item.id, item.start, item.end)}
@@ -664,7 +665,7 @@ export function CalendarDemoRoute(props: {
                         >
                           <SelectableItem
                             selected={selected.has(item.event.id) && (occurrenceStart === null || occurrenceStart === item.event.start)}
-                            aria-label={monthEventLabel(item.event)}
+                            aria-label={calendarEventLabel(item.event)}
                             data-calendar-color={calendarColor(document, item.event.calendarId)}
                             data-preview={item.event.id === "preview" ? "true" : undefined}
                             className={isCalendarAllDay(item.event) ? styles.monthAllDay() : styles.monthTimed()}
@@ -865,12 +866,6 @@ export function CalendarDemoRoute(props: {
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
   return (document.calendars ?? []).find((item) => item.id === calendarId)?.color === "accent" ? "accent" : "subtle";
-}
-
-function monthEventLabel(item: CalendarEvent): string {
-  if (isCalendarAllDay(item)) return item.title;
-  const time = calendarTimeLabel(item.start);
-  return time.length > 0 ? `${time} ${item.title}` : item.title;
 }
 
 function clockNow(now = Temporal.Now.plainDateTimeISO()): string {

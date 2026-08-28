@@ -36,6 +36,20 @@ addCalendarYears(date: string, years: number): string
 ```ts
 calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell>
 ```
+## `calendarEventLabel`
+
+```ts
+calendarEventLabel(event: CalendarEventLabelValue): string
+```
+## `CalendarEventLabelValue`
+
+```ts
+type CalendarEventLabelValue = {
+  readonly title: string;
+  readonly start: string;
+  readonly allDay: boolean;
+};
+```
 ## `CalendarGrain`
 
 ```ts

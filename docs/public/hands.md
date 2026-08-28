@@ -79,8 +79,12 @@ Previous/Next 및 keyboard period 이동은 UI Primitives `shiftVisibleDate`가
 day/week/month/year의 단위와 calendar arithmetic을 소유하며, Host는 현재 view와
 direction을 전달하고 결과를 URL state에 반영합니다.
 Timed event의 datetime-local에서 `HH:mm` 문구를 투영하는 일은 UI Primitives
-`calendarTimeLabel`이 소유하며, Host는 그 결과를 event title과 visual copy 및
-accessible label로 조합합니다. Date-only와 유효하지 않은 값은 빈 문구입니다.
+`calendarTimeLabel`이 소유합니다. Host는 그 결과를 visual copy에 조합하고,
+UI Primitives의 event-label projection도 같은 정본 값을 accessible name에
+사용합니다. Date-only와 유효하지 않은 값은 빈 문구입니다.
+Month event의 accessible name은 UI Primitives `calendarEventLabel`이 all-day에는
+title, timed event에는 가능한 `HH:mm title`을 투영합니다. 이 모듈은 구조적
+event 값만 받아 UI Primitives가 Editing package에 의존하지 않도록 합니다.
 
 ```live-demo
 /demo/calendar

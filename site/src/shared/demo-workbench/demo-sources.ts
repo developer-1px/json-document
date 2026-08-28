@@ -7,6 +7,7 @@ import calendarTimeGridPointerSource from "../../../../packages/json-document-ed
 import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
+import calendarEventLabelSource from "../../../../packages/json-document-ui-primitives-react/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
@@ -143,6 +144,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
+  ["packages/json-document-ui-primitives-react/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
@@ -341,6 +343,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "CalendarGrid",
     sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarEventLabel",
+    sourcePath: "packages/json-document-ui-primitives-react/src/calendar-event-label.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
