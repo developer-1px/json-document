@@ -149,7 +149,7 @@ describe("official site shell", () => {
       "Not-allowed",
     ]);
     await user.click(nav.getByRole("button", { name: "UI Primitives" }));
-    expect(groupLinks(nav, "UI Primitives")).toEqual(["API Reference"]);
+    expect(groupLinks(nav, "UI Primitives")).toEqual(["API Reference", "API · Animation", "Animation"]);
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Artifact" }));
