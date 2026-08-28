@@ -19,6 +19,8 @@ import {
 import {
   addCalendarDate,
   calendarDatePart,
+  calendarDaysBetween,
+  calendarMinutesBetween,
   formatCalendarDate,
   formatCalendarInstant,
   isCalendarAllDay,
@@ -72,11 +74,11 @@ export function previewCalendarAllDay(
       const to = parseCalendarDate(item.end);
       const nextDay = parseCalendarDate(intent.day);
       if (from === null || to === null || nextDay === null) return item;
-      const delta = nextDay - from;
+      const delta = calendarDaysBetween(from, nextDay);
       return {
         ...item,
-        start: formatCalendarDate(from + delta),
-        end: formatCalendarDate(to + delta),
+        start: formatCalendarDate(from.add({ days: delta })),
+        end: formatCalendarDate(to.add({ days: delta })),
       };
     });
   }
@@ -127,7 +129,7 @@ export function previewCalendarTimeGrid(
       const to = parseCalendarInstant(item.end);
       const nextStart = parseCalendarInstant(bound.start);
       if (from === null || to === null || nextStart === null) return item;
-      return { ...item, start: bound.start, end: formatCalendarInstant(nextStart + (to - from)) };
+      return { ...item, start: bound.start, end: formatCalendarInstant(nextStart.add({ minutes: calendarMinutesBetween(from, to) })) };
     });
   }
   if (bound.type !== "event.resize") return events;
@@ -188,11 +190,11 @@ export function previewCalendarMonth(
       const to = parseCalendarDate(item.end);
       const nextDay = parseCalendarDate(intent.day);
       if (from === null || to === null || nextDay === null) return item;
-      const delta = nextDay - from;
+      const delta = calendarDaysBetween(from, nextDay);
       return {
         ...item,
-        start: formatCalendarDate(from + delta),
-        end: formatCalendarDate(to + delta),
+        start: formatCalendarDate(from.add({ days: delta })),
+        end: formatCalendarDate(to.add({ days: delta })),
       };
     }
     const from = parseCalendarInstant(item.start);
@@ -200,11 +202,11 @@ export function previewCalendarMonth(
     const currentDay = parseCalendarInstant(`${calendarDatePart(item.start)}T00:00`);
     const nextDay = parseCalendarInstant(`${intent.day}T00:00`);
     if (from === null || to === null || currentDay === null || nextDay === null) return item;
-    const delta = nextDay - currentDay;
+    const delta = calendarMinutesBetween(currentDay, nextDay);
     return {
       ...item,
-      start: formatCalendarInstant(from + delta),
-      end: formatCalendarInstant(to + delta),
+      start: formatCalendarInstant(from.add({ minutes: delta })),
+      end: formatCalendarInstant(to.add({ minutes: delta })),
     };
   });
 }
@@ -220,14 +222,14 @@ function previewFollowingOccurrences(
   const to = parseCalendarInstant(event.end);
   const occStart = parseCalendarInstant(occurrenceStart);
   if (recurrence === null || from === null || to === null || occStart === null) return events;
-  const duration = to - from;
+  const duration = calendarMinutesBetween(from, to);
   let start = occurrenceStart;
-  let end = formatCalendarInstant(occStart + duration);
+  let end = formatCalendarInstant(occStart.add({ minutes: duration }));
   if (intent.type === "event.move") {
     const nextStart = parseCalendarInstant(intent.start);
     if (nextStart === null) return events;
     start = intent.start;
-    end = formatCalendarInstant(nextStart + duration);
+    end = formatCalendarInstant(nextStart.add({ minutes: duration }));
   } else if (intent.edge === "start") {
     start = intent.instant;
   } else {
@@ -261,14 +263,14 @@ function previewRecurringOccurrence(
   const to = parseCalendarInstant(event.end);
   const occStart = parseCalendarInstant(occurrenceStart);
   if (from === null || to === null || occStart === null) return events;
-  const duration = to - from;
+  const duration = calendarMinutesBetween(from, to);
   let start = occurrenceStart;
-  let end = formatCalendarInstant(occStart + duration);
+  let end = formatCalendarInstant(occStart.add({ minutes: duration }));
   if (intent.type === "event.move") {
     const nextStart = parseCalendarInstant(intent.start);
     if (nextStart === null) return events;
     start = intent.start;
-    end = formatCalendarInstant(nextStart + duration);
+    end = formatCalendarInstant(nextStart.add({ minutes: duration }));
   } else if (intent.edge === "start") {
     start = intent.instant;
   } else {

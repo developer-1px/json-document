@@ -224,6 +224,11 @@ shiftVisibleDate(visibleDate: string, grain: CalendarGrain, direction: 1 | -1): 
 ```ts
 startOfIsoWeek(date: string): string
 ```
+## `startOfYear`
+
+```ts
+startOfYear(date: string): string
+```
 ## `TabOption`
 
 ```ts

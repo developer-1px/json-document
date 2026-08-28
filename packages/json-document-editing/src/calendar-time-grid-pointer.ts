@@ -1,6 +1,6 @@
 import type { CalendarEvent, CalendarIntent } from "./calendar.js";
 import { calendarEventRecurrence } from "./calendar-occurrence.js";
-import { calendarDatePart, calendarShiftInstant, parseCalendarInstant } from "./calendar-validation.js";
+import { calendarDatePart, calendarMinutesBetween, calendarShiftInstant, parseCalendarInstant } from "./calendar-validation.js";
 
 export type CalendarTimeGridHandle = "body" | "start" | "end";
 
@@ -49,7 +49,7 @@ export function interpretCalendarTimeGridPointer(
   const target = parseCalendarInstant(release.targetInstant);
   const eventStart = parseCalendarInstant(release.originEventStart ?? "");
   if (origin === null || target === null || eventStart === null) return null;
-  const start = calendarShiftInstant(release.originEventStart ?? "", (target - origin) / 60_000);
+  const start = calendarShiftInstant(release.originEventStart ?? "", calendarMinutesBetween(origin, target));
   if (start === null) return null;
   return { type: "event.move", eventId: release.originEventId, start };
 }
@@ -79,7 +79,7 @@ export function bindCalendarTimeGridIntent(
     const to = parseCalendarInstant(event.end);
     const occurrenceEnd = from === null || to === null
       ? null
-      : calendarShiftInstant(start, (to - from) / 60_000);
+      : calendarShiftInstant(start, calendarMinutesBetween(from, to));
     return {
       type: "occurrence.edit",
       eventId: intent.eventId,
@@ -107,7 +107,7 @@ function bindRecurringSeriesTimeGridIntent(
     const origin = parseCalendarInstant(occurrenceStart);
     const next = parseCalendarInstant(intent.start);
     if (origin === null || next === null) return intent;
-    const start = calendarShiftInstant(event.start, (next - origin) / 60_000);
+    const start = calendarShiftInstant(event.start, calendarMinutesBetween(origin, next));
     if (start === null) return intent;
     return { type: "event.move", eventId: intent.eventId, start };
   }
@@ -117,11 +117,12 @@ function bindRecurringSeriesTimeGridIntent(
   const instant = parseCalendarInstant(intent.instant);
   if (from === null || to === null || occStart === null || instant === null) return intent;
   if (intent.edge === "start") {
-    const start = calendarShiftInstant(event.start, (instant - occStart) / 60_000);
+    const start = calendarShiftInstant(event.start, calendarMinutesBetween(occStart, instant));
     if (start === null) return intent;
     return { type: "event.resize", eventId: intent.eventId, edge: "start", instant: start };
   }
-  const end = calendarShiftInstant(event.end, (instant - (occStart + (to - from))) / 60_000);
+  const occurrenceEnd = occStart.add({ minutes: calendarMinutesBetween(from, to) });
+  const end = calendarShiftInstant(event.end, calendarMinutesBetween(occurrenceEnd, instant));
   if (end === null) return intent;
   return { type: "event.resize", eventId: intent.eventId, edge: "end", instant: end };
 }

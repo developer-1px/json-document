@@ -4,7 +4,6 @@ import {
   addCalendarDate,
   calendarDatePart,
   calendarEventBounds,
-  formatCalendarInstant,
   isCalendarAllDay,
   parseCalendarDate,
   parseCalendarInstant,
@@ -43,13 +42,15 @@ export function projectCalendarOccurrences(
 ): ReadonlyArray<CalendarOccurrence> {
   const from = parseCalendarDate(rangeStart);
   const to = parseCalendarDate(rangeEnd);
-  if (from === null || to === null || from >= to) return [];
+  if (from === null || to === null || Temporal.PlainDate.compare(from, to) >= 0) return [];
+  const rangeFrom = from.toPlainDateTime();
+  const rangeTo = to.toPlainDateTime();
   const occurrences: CalendarOccurrence[] = [];
   for (const event of events) {
     const recurrence = calendarEventRecurrence(event);
     if (recurrence === null) {
       const bounds = calendarEventBounds(event);
-      if (bounds === null || bounds.to <= from || bounds.from >= to) continue;
+      if (bounds === null || Temporal.PlainDateTime.compare(bounds.to, rangeFrom) <= 0 || Temporal.PlainDateTime.compare(bounds.from, rangeTo) >= 0) continue;
       occurrences.push({ event, start: event.start, end: event.end });
       continue;
     }
@@ -60,9 +61,9 @@ export function projectCalendarOccurrences(
       if (shifted === null) break;
       const bounds = calendarEventBounds({ ...event, start: shifted.start, end: shifted.end });
       if (bounds === null) break;
-      if (until !== null && bounds.from > until + 86_400_000 - 1) break;
-      if (bounds.from >= to) break;
-      if (bounds.to > from && !excluded.has(calendarDatePart(shifted.start))) {
+      if (until !== null && Temporal.PlainDate.compare(bounds.from.toPlainDate(), until) > 0) break;
+      if (Temporal.PlainDateTime.compare(bounds.from, rangeTo) >= 0) break;
+      if (Temporal.PlainDateTime.compare(bounds.to, rangeFrom) > 0 && !excluded.has(calendarDatePart(shifted.start))) {
         occurrences.push({ event, start: shifted.start, end: shifted.end });
       }
     }
@@ -97,10 +98,10 @@ function shiftDate(value: string, freq: CalendarRecurrence["freq"], steps: numbe
 }
 
 function shiftInstant(value: string, freq: CalendarRecurrence["freq"], steps: number): string | null {
-  const utc = parseCalendarInstant(value);
-  if (utc === null) return null;
-  if (freq === "daily") return formatCalendarInstant(utc + steps * 86_400_000);
-  if (freq === "weekly") return formatCalendarInstant(utc + steps * 7 * 86_400_000);
+  const dateTime = parseCalendarInstant(value);
+  if (dateTime === null) return null;
+  if (freq === "daily") return dateTime.add({ days: steps }).toString({ smallestUnit: "minute" });
+  if (freq === "weekly") return dateTime.add({ weeks: steps }).toString({ smallestUnit: "minute" });
   const duration = freq === "monthly" ? { months: steps } : { years: steps };
   return Temporal.PlainDateTime.from(value).add(duration, { overflow: "constrain" }).toString({ smallestUnit: "minute" });
 }

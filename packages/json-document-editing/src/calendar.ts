@@ -19,9 +19,11 @@ import {
   addCalendarDate,
   assertCalendarDocument,
   calendarDatePart,
+  calendarDaysBetween,
   calendarDocumentCalendars,
   calendarDocumentEvents,
   calendarEventBounds,
+  calendarMinutesBetween,
   formatCalendarDate,
   formatCalendarInstant,
   isCalendarAllDay,
@@ -241,7 +243,7 @@ export function createCalendarEditor(
     const to = parseCalendarInstant(event.end);
     const nextStart = parseCalendarInstant(start);
     if (from === null || to === null || nextStart === null) return failure("event.invalid-instant");
-    const nextEnd = formatCalendarInstant(nextStart + (to - from));
+    const nextEnd = formatCalendarInstant(nextStart.add({ minutes: calendarMinutesBetween(from, to) }));
     return session.apply({
       operations: [
         { op: "replace", path: buildPointer(["events", index, "start"]), value: start },
@@ -284,11 +286,11 @@ export function createCalendarEditor(
       const to = parseCalendarDate(event.end);
       const nextDay = parseCalendarDate(day);
       if (from === null || to === null || nextDay === null) return failure("event.invalid-instant");
-      const delta = nextDay - from;
+      const delta = calendarDaysBetween(from, nextDay);
       return session.apply({
         operations: [
-          { op: "replace", path: buildPointer(["events", index, "start"]), value: formatCalendarDate(from + delta) },
-          { op: "replace", path: buildPointer(["events", index, "end"]), value: formatCalendarDate(to + delta) },
+          { op: "replace", path: buildPointer(["events", index, "start"]), value: formatCalendarDate(from.add({ days: delta })) },
+          { op: "replace", path: buildPointer(["events", index, "end"]), value: formatCalendarDate(to.add({ days: delta })) },
         ],
         selectionAfter: selectionFor([eventId]),
         origin: "event.move-day",
@@ -299,11 +301,11 @@ export function createCalendarEditor(
     const currentDay = parseCalendarInstant(`${calendarDatePart(event.start)}T00:00`);
     const nextDay = parseCalendarInstant(`${day}T00:00`);
     if (from === null || to === null || currentDay === null || nextDay === null) return failure("event.invalid-instant");
-    const delta = nextDay - currentDay;
+    const delta = calendarMinutesBetween(currentDay, nextDay);
     return session.apply({
       operations: [
-        { op: "replace", path: buildPointer(["events", index, "start"]), value: formatCalendarInstant(from + delta) },
-        { op: "replace", path: buildPointer(["events", index, "end"]), value: formatCalendarInstant(to + delta) },
+        { op: "replace", path: buildPointer(["events", index, "start"]), value: formatCalendarInstant(from.add({ minutes: delta })) },
+        { op: "replace", path: buildPointer(["events", index, "end"]), value: formatCalendarInstant(to.add({ minutes: delta })) },
       ],
       selectionAfter: selectionFor([eventId]),
       origin: "event.move-day",
@@ -516,7 +518,7 @@ export function calendarNowMarker(nowInstant: string, day: string): { readonly m
   const start = parseCalendarInstant(`${day}T00:00`);
   const now = parseCalendarInstant(nowInstant);
   if (start === null || now === null) return null;
-  return { minutes: (now - start) / 60_000 };
+  return { minutes: calendarMinutesBetween(start, now) };
 }
 
 export function calendarEventsOnDay(
@@ -595,18 +597,20 @@ export function calendarTimedLayout(
 }> {
   const dayStart = parseCalendarInstant(`${day}T00:00`);
   if (dayStart === null) return [];
-  const dayEnd = dayStart + 86_400_000;
+  const dayEnd = dayStart.add({ days: 1 });
   const next = addCalendarDate(day, 1);
   if (next === null) return [];
   const layout: Array<{ event: CalendarEvent; startMinutes: number; endMinutes: number }> = [];
   for (const item of projectCalendarOccurrences(events, day, next)) {
     if (isCalendarAllDay(item.event)) continue;
     const bounds = calendarEventBounds({ ...item.event, start: item.start, end: item.end });
-    if (bounds === null || bounds.to <= dayStart || bounds.from >= dayEnd) continue;
+    if (bounds === null || Temporal.PlainDateTime.compare(bounds.to, dayStart) <= 0 || Temporal.PlainDateTime.compare(bounds.from, dayEnd) >= 0) continue;
+    const clippedStart = Temporal.PlainDateTime.compare(bounds.from, dayStart) < 0 ? dayStart : bounds.from;
+    const clippedEnd = Temporal.PlainDateTime.compare(bounds.to, dayEnd) > 0 ? dayEnd : bounds.to;
     layout.push({
       event: { ...item.event, start: item.start, end: item.end },
-      startMinutes: (Math.max(bounds.from, dayStart) - dayStart) / 60_000,
-      endMinutes: (Math.min(bounds.to, dayEnd) - dayStart) / 60_000,
+      startMinutes: calendarMinutesBetween(dayStart, clippedStart),
+      endMinutes: calendarMinutesBetween(dayStart, clippedEnd),
     });
   }
   const sorted = layout.sort((left, right) => left.startMinutes - right.startMinutes || left.endMinutes - right.endMinutes);
@@ -788,11 +792,11 @@ function occurrenceEndOf(event: CalendarEvent, occurrenceStart: string): string 
   if (isCalendarAllDay(event)) {
     const from = parseCalendarDate(calendarDatePart(occurrenceStart));
     if (from === null) return occurrenceStart;
-    return formatCalendarDate(from + (bounds.to - bounds.from));
+    return formatCalendarDate(from.add({ days: calendarDaysBetween(bounds.from.toPlainDate(), bounds.to.toPlainDate()) }));
   }
   const from = parseCalendarInstant(occurrenceStart);
   if (from === null) return occurrenceStart;
-  return formatCalendarInstant(from + (bounds.to - bounds.from));
+  return formatCalendarInstant(from.add({ minutes: calendarMinutesBetween(bounds.from, bounds.to) }));
 }
 
 function shiftSeriesValue(seriesValue: string, origin: string, next: string): string | undefined {
@@ -800,13 +804,13 @@ function shiftSeriesValue(seriesValue: string, origin: string, next: string): st
   const nextInstant = parseCalendarInstant(next);
   const seriesInstant = parseCalendarInstant(seriesValue);
   if (originInstant !== null && nextInstant !== null && seriesInstant !== null) {
-    return formatCalendarInstant(seriesInstant + (nextInstant - originInstant));
+    return formatCalendarInstant(seriesInstant.add({ minutes: calendarMinutesBetween(originInstant, nextInstant) }));
   }
   const originDate = parseCalendarDate(calendarDatePart(origin));
   const nextDate = parseCalendarDate(calendarDatePart(next));
   const seriesDate = parseCalendarDate(calendarDatePart(seriesValue));
   if (originDate === null || nextDate === null || seriesDate === null) return undefined;
-  return formatCalendarDate(seriesDate + (nextDate - originDate));
+  return formatCalendarDate(seriesDate.add({ days: calendarDaysBetween(originDate, nextDate) }));
 }
 
 function shiftedOccurrenceTimes(
@@ -819,17 +823,18 @@ function shiftedOccurrenceTimes(
   if (end !== undefined) return nextStart < end ? { start: nextStart, end } : null;
   const bounds = calendarEventBounds(event);
   if (bounds === null) return null;
-  const duration = bounds.to - bounds.from;
   if (isCalendarAllDay(event)) {
     const from = parseCalendarDate(calendarDatePart(nextStart));
     if (from === null) return null;
-    const nextEnd = formatCalendarDate(from + duration);
+    const duration = calendarDaysBetween(bounds.from.toPlainDate(), bounds.to.toPlainDate());
+    const nextEnd = formatCalendarDate(from.add({ days: duration }));
     const dateStart = calendarDatePart(nextStart);
     return dateStart < nextEnd ? { start: dateStart, end: nextEnd } : null;
   }
   const from = parseCalendarInstant(nextStart);
   if (from === null) return null;
-  const nextEnd = formatCalendarInstant(from + duration);
+  const duration = calendarMinutesBetween(bounds.from, bounds.to);
+  const nextEnd = formatCalendarInstant(from.add({ minutes: duration }));
   return nextStart < nextEnd ? { start: nextStart, end: nextEnd } : null;
 }
 

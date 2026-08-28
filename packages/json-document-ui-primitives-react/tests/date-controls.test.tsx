@@ -9,6 +9,7 @@ import {
   HtmlDateField,
   RangeCalendar,
   shiftVisibleDate,
+  startOfYear,
   parseHtmlDateValue,
   type CalendarGrain,
   type DateRangeValue,
@@ -29,6 +30,11 @@ describe("HTML date values", () => {
     expect(parseHtmlDateValue("month", "2026-13")).toBeNull();
     expect(parseHtmlDateValue("week", "2026-W01")).toBe("2026-W01");
     expect(parseHtmlDateValue("week", "2026-W99")).toBeNull();
+  });
+
+  test("projects the canonical year boundary across leap years", () => {
+    expect(startOfYear("2028-02-29")).toBe("2028-01-01");
+    expect(startOfYear("2027-12-31")).toBe("2027-01-01");
   });
 });
 

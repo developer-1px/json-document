@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
+import { Temporal } from "@js-temporal/polyfill";
 
 import {
   addCalendarDate,
@@ -34,9 +35,12 @@ import {
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
+  addCalendarMonths,
+  addCalendarYears,
   calendarCells,
   shiftVisibleDate,
   startOfIsoWeek,
+  startOfYear,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
   calendarCommandFromWebKeyboardEvent,
@@ -193,8 +197,8 @@ export function CalendarDemoRoute(props: {
     : Array.from({ length: 7 }, (_, index) => addCalendarDays(weekStart, index));
   const nowInstant = clockNow();
   const today = nowInstant.slice(0, 10);
-  const yearStart = `${visibleDate.slice(0, 4)}-01-01`;
-  const yearEnd = `${String(Number(visibleDate.slice(0, 4)) + 1).padStart(4, "0")}-01-01`;
+  const yearStart = startOfYear(visibleDate);
+  const yearEnd = addCalendarYears(yearStart, 1);
   const yearBusyDates = view === "year"
     ? calendarBusyDates(
       paintedEvents,
@@ -933,18 +937,13 @@ function monthEventLabel(item: CalendarEvent): string {
   return time.length > 0 ? `${time} ${item.title}` : item.title;
 }
 
-function clockNow(now = new Date()): string {
-  const year = String(now.getFullYear()).padStart(4, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hour = String(now.getHours()).padStart(2, "0");
-  const minute = String(now.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hour}:${minute}`;
+function clockNow(now = Temporal.Now.plainDateTimeISO()): string {
+  return now.toString({ smallestUnit: "minute" });
 }
 
 function yearMonths(visibleDate: string): ReadonlyArray<string> {
-  const year = visibleDate.slice(0, 4);
-  return Array.from({ length: 12 }, (_, index) => `${year}-${String(index + 1).padStart(2, "0")}-01`);
+  const yearStart = startOfYear(visibleDate);
+  return Array.from({ length: 12 }, (_, index) => addCalendarMonths(yearStart, index));
 }
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
