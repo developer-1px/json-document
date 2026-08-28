@@ -19,6 +19,7 @@ import {
   calendarVisibleEvents,
   calendarVisibleHourBand,
   createCalendarEditor,
+  formatCalendarInstant,
   isCalendarAllDay,
   type CalendarDocument,
   type CalendarEvent,
@@ -202,7 +203,7 @@ export function CalendarDemoRoute(props: {
   const paintedEvents = hand.paintedEvents;
   const timeGridCells = calendarCells(view === "day" ? "day" : "week", visibleDate);
   const days = timeGridCells.map((cell) => cell.date);
-  const nowInstant = clockNow();
+  const nowInstant = formatCalendarInstant(Temporal.Now.plainDateTimeISO());
   const today = calendarDatePart(nowInstant);
   const yearStart = startOfYear(visibleDate);
   const yearEnd = addCalendarYears(yearStart, 1);
@@ -875,10 +876,6 @@ export function CalendarDemoRoute(props: {
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
   return (document.calendars ?? []).find((item) => item.id === calendarId)?.color === "accent" ? "accent" : "subtle";
-}
-
-function clockNow(now = Temporal.Now.plainDateTimeISO()): string {
-  return now.toString({ smallestUnit: "minute" });
 }
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {

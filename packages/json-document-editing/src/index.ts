@@ -52,6 +52,7 @@ export {
   calendarInstantAt,
   calendarIntervalLastDate,
   calendarShiftInstant,
+  formatCalendarInstant,
   isCalendarAllDay,
   parseCalendarView,
 } from "./calendar-validation.js";

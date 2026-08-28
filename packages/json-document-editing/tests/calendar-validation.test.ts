@@ -1,5 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { calendarAllDaySpan, calendarDatePart, calendarIntervalLastDate, parseCalendarView } from "../src/index.js";
+import { Temporal } from "@js-temporal/polyfill";
+import { calendarAllDaySpan, calendarDatePart, calendarIntervalLastDate, formatCalendarInstant, parseCalendarView } from "../src/index.js";
+
+describe("formatCalendarInstant", () => {
+  test("serializes Calendar date-time values at minute precision", () => {
+    expect(formatCalendarInstant(Temporal.PlainDateTime.from("2026-05-25T09:30:45.123"))).toBe("2026-05-25T09:30");
+  });
+});
 
 describe("parseCalendarView", () => {
   test("accepts canonical calendar views and rejects other runtime values", () => {

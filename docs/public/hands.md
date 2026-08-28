@@ -62,6 +62,9 @@ month week clipping이 모두 같은 정본 규칙을 사용합니다.
 날짜 또는 날짜·시간 문자열에서 `YYYY-MM-DD` 날짜 부분을 얻는 projection은
 Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와 새 이벤트의
 생성 날짜도 Host의 문자열 자르기 없이 이 공개 API를 사용합니다.
+Host는 `Temporal.Now`로 concrete clock을 읽고 Editing `formatCalendarInstant`로
+Calendar datetime-local minute 문자열을 만듭니다. clock source와 저장 형식의
+책임을 섞는 route-local formatter는 두지 않습니다.
 월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
 정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
 조합합니다.

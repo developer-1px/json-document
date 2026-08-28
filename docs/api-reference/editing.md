@@ -795,6 +795,11 @@ interface EditingSnapshot<Selection extends JSONValue> {
   readonly canRedo: boolean;
 }
 ```
+## `formatCalendarInstant`
+
+```ts
+formatCalendarInstant(value: Temporal.PlainDateTime): string
+```
 ## `gridCellsInRange`
 
 ```ts
