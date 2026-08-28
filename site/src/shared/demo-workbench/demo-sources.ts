@@ -33,6 +33,7 @@ import webCalendarSource from "../../../../packages/json-document-web/src/calend
 import webKeyboardSource from "../../../../packages/json-document-web/src/keyboard.ts?raw";
 import calendarHandSource from "../../../../packages/json-document-calendar/src/use-calendar-hand.ts?raw";
 import calendarPointerInteractionsSource from "../../../../packages/json-document-calendar/src/use-calendar-pointer-interactions.ts?raw";
+import calendarViewportPositionSource from "../../../../packages/json-document-calendar/src/use-calendar-viewport-position.ts?raw";
 import webKanbanDropTargetSource from "../../../../packages/json-document-web/src/kanban-drop-target.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
@@ -167,6 +168,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/keyboard.ts", webKeyboardSource],
   ["packages/json-document-calendar/src/use-calendar-hand.ts", calendarHandSource],
   ["packages/json-document-calendar/src/use-calendar-pointer-interactions.ts", calendarPointerInteractionsSource],
+  ["packages/json-document-calendar/src/use-calendar-viewport-position.ts", calendarViewportPositionSource],
   ["packages/json-document-web/src/kanban-drop-target.ts", webKanbanDropTargetSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
@@ -225,6 +227,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-calendar",
     symbol: "useCalendarPointerInteractions",
     sourcePath: "packages/json-document-calendar/src/use-calendar-pointer-interactions.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarViewportPosition",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-viewport-position.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",

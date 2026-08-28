@@ -106,4 +106,24 @@ describe("Viewport position session", () => {
       { top: 804, behavior: "instant" },
     ]);
   });
+
+  test("supports an instant initial position and releases ownership for user interaction", () => {
+    const scrolls: Array<{ top: number; behavior: string }> = [];
+    const cancellations: string[] = [];
+    const session = createViewportPositionSession<string>({
+      measure: () => ({ targetOffset: 336, tailReserveOffset: Number.POSITIVE_INFINITY, viewportHeight: 600 }),
+      setTailReserve: () => false,
+      scrollTo: (top, behavior) => scrolls.push({ top, behavior }),
+      scheduleFrame: () => () => undefined,
+      onCancel: (reason) => cancellations.push(reason),
+    });
+
+    session.position("07", 0, "instant");
+    session.complete();
+    session.cancel("user-interaction");
+
+    expect(scrolls).toEqual([{ top: 336, behavior: "instant" }]);
+    expect(session.getSnapshot().owned).toBe(false);
+    expect(cancellations).toEqual(["user-interaction"]);
+  });
 });

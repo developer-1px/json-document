@@ -52,6 +52,30 @@ describe("Web viewport position ports", () => {
     stopVisibility();
     expect(disconnected).toEqual(["resize", "mutation", "visibility"]);
   });
+
+  test("positions without trailing range and translates user viewport interaction", () => {
+    const interactions: string[] = [];
+    const viewport = viewportElement([]);
+    const ports = createWebViewportPositionPorts<string>({
+      viewport,
+      findTarget: () => element(420),
+      requestFrame: () => 1,
+      cancelFrame: () => undefined,
+    });
+
+    expect(ports.measure("07")).toEqual({
+      targetOffset: 700,
+      tailReserveOffset: Number.POSITIVE_INFINITY,
+      viewportHeight: 600,
+    });
+    expect(ports.setTailReserve("07", 100)).toBe(false);
+    const stop = ports.observeUserInteraction(() => interactions.push("claimed"));
+    viewport.emit("wheel");
+    viewport.emit("pointerdown");
+    stop();
+    viewport.emit("wheel");
+    expect(interactions).toEqual(["claimed", "claimed"]);
+  });
 });
 
 function element(top: number) {
@@ -59,11 +83,19 @@ function element(top: number) {
 }
 
 function viewportElement(scrolls: Array<{ top: number; behavior: string }>) {
+  const listeners = new Map<string, Set<() => void>>();
   return {
     clientHeight: 600,
     scrollTop: 300,
     getBoundingClientRect: () => ({ top: 20 }),
     scrollTo: (options: { top: number; behavior: "smooth" | "instant" }) => scrolls.push(options),
+    addEventListener: (type: "wheel" | "pointerdown", listener: () => void) => {
+      const current = listeners.get(type) ?? new Set();
+      current.add(listener);
+      listeners.set(type, current);
+    },
+    removeEventListener: (type: "wheel" | "pointerdown", listener: () => void) => listeners.get(type)?.delete(listener),
+    emit: (type: "wheel" | "pointerdown") => listeners.get(type)?.forEach((listener) => listener()),
   };
 }
 

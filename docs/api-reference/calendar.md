@@ -83,6 +83,17 @@ type CalendarPointerPolicy = {
   readonly onMonthPointerBegin?: () => void;
 };
 ```
+## `CalendarViewportPositionOptions`
+
+```ts
+interface CalendarViewportPositionOptions {
+  readonly viewportRef: RefObject<HTMLElement | null>;
+  readonly active: boolean;
+  readonly resetKey: string;
+  readonly targetHour: number;
+  readonly viewportOffset?: number;
+}
+```
 ## `useCalendarHand`
 
 ```ts
@@ -92,4 +103,9 @@ useCalendarHand(editor: CalendarEditor, options?: CalendarHandOptions): Calendar
 
 ```ts
 useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy): CalendarPointerInteractions
+```
+## `useCalendarViewportPosition`
+
+```ts
+useCalendarViewportPosition(options: CalendarViewportPositionOptions): void
 ```

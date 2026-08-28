@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
 
@@ -22,7 +22,7 @@ import {
   type CalendarRecurrence,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
-import { useCalendarHand, useCalendarPointerInteractions } from "@interactive-os/json-document-calendar";
+import { useCalendarHand, useCalendarPointerInteractions, useCalendarViewportPosition } from "@interactive-os/json-document-calendar";
 import {
   ActionButton,
   HtmlDateField,
@@ -170,6 +170,12 @@ export function CalendarDemoRoute(props: {
   });
   const view = props.view ?? viewState;
   const visibleDate = props.visibleDate ?? visibleDateState;
+  useCalendarViewportPosition({
+    viewportRef: hoursRef,
+    active: !embedded && (view === "day" || view === "week"),
+    resetKey: `${view}:${visibleDate}`,
+    targetHour: workHourStart,
+  });
 
   function setLocation(nextView: CalendarView, nextDate: string): void {
     props.onLocationChange?.({ view: nextView, date: nextDate });
@@ -212,30 +218,6 @@ export function CalendarDemoRoute(props: {
     titleRef.current?.focus();
     titleRef.current?.select();
   }, [naming, selectedEvent?.id]);
-
-  useLayoutEffect(() => {
-    if (view !== "day" && view !== "week") return;
-    const node = hoursRef.current;
-    if (node === null) return;
-    const top = workHourStart * pxPerHour;
-    let userMoved = false;
-    const snap = () => {
-      if (!userMoved) node.scrollTop = top;
-    };
-    const mark = () => {
-      userMoved = true;
-    };
-    snap();
-    node.addEventListener("wheel", mark, { passive: true });
-    node.addEventListener("pointerdown", mark);
-    const observer = new ResizeObserver(snap);
-    observer.observe(node);
-    return () => {
-      observer.disconnect();
-      node.removeEventListener("wheel", mark);
-      node.removeEventListener("pointerdown", mark);
-    };
-  }, [view, visibleDate]);
 
   useEffect(() => {
     setOverflowDay(null);
@@ -407,6 +389,7 @@ export function CalendarDemoRoute(props: {
       </div>
       <div
         ref={hoursRef}
+        data-calendar-time-viewport=""
         className={classes("grid", !embedded && styles.weekHours())}
         style={{
           gridTemplateColumns: `3.25rem repeat(${days.length}, minmax(4.5rem, 1fr))`,
@@ -414,6 +397,12 @@ export function CalendarDemoRoute(props: {
         }}
       >
         <div className="relative overflow-hidden" style={{ height: (hourEnd - hourStart) * pxPerHour }}>
+          <div
+            aria-hidden="true"
+            data-calendar-viewport-hour={String(workHourStart).padStart(2, "0")}
+            className="pointer-events-none absolute left-0 top-0"
+            style={{ transform: `translateY(${(workHourStart - hourStart) * pxPerHour}px)` }}
+          />
           {Array.from({ length: hourEnd - hourStart }, (_, index) => hourStart + index).map((hour) => (
             <div
               key={hour}

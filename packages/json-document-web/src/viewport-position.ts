@@ -8,6 +8,8 @@ export interface WebViewportPositionViewport {
   readonly scrollTop: number;
   getBoundingClientRect(): { readonly top: number };
   scrollTo(options: { readonly top: number; readonly behavior: "smooth" | "instant" }): void;
+  addEventListener?(type: "wheel" | "pointerdown", listener: () => void, options?: { readonly passive?: boolean }): void;
+  removeEventListener?(type: "wheel" | "pointerdown", listener: () => void): void;
 }
 
 export interface WebViewportPositionObserver {
@@ -24,7 +26,7 @@ export interface WebViewportPositionOptions<Key> {
   readonly viewport: WebViewportPositionViewport;
   readonly content?: object;
   readonly findTarget: (key: Key) => WebViewportPositionElement | null;
-  readonly findTailReserve: (key: Key) => WebViewportPositionElement | null;
+  readonly findTailReserve?: (key: Key) => WebViewportPositionElement | null;
   readonly createResizeObserver?: (callback: () => void) => WebViewportPositionObserver;
   readonly createMutationObserver?: (callback: () => void) => WebViewportPositionObserver;
   readonly createVisibilityObserver?: (
@@ -42,6 +44,7 @@ export interface WebViewportPositionPorts<Key> {
   scheduleFrame(callback: () => void): () => void;
   observeLayout(callback: () => void): () => void;
   observeTargetVisibility(key: Key, callback: (visible: boolean) => void): () => void;
+  observeUserInteraction(callback: () => void): () => void;
 }
 
 /** Adapts target positioning and temporary trailing scroll range to browser DOM lifecycles. */
@@ -54,17 +57,19 @@ export function createWebViewportPositionPorts<Key>(
   return {
     measure(key) {
       const target = options.findTarget(key);
-      const tailReserve = options.findTailReserve(key);
-      if (target === null || tailReserve === null) return null;
+      const tailReserve = options.findTailReserve?.(key) ?? null;
+      if (target === null) return null;
       const viewportTop = options.viewport.getBoundingClientRect().top;
       return {
         targetOffset: target.getBoundingClientRect().top - viewportTop + options.viewport.scrollTop,
-        tailReserveOffset: tailReserve.getBoundingClientRect().top - viewportTop + options.viewport.scrollTop,
+        tailReserveOffset: tailReserve === null
+          ? Number.POSITIVE_INFINITY
+          : tailReserve.getBoundingClientRect().top - viewportTop + options.viewport.scrollTop,
         viewportHeight: options.viewport.clientHeight,
       };
     },
     setTailReserve(key, height) {
-      const tailReserve = options.findTailReserve(key);
+      const tailReserve = options.findTailReserve?.(key) ?? null;
       if (tailReserve === null) return false;
       const next = `${Math.max(0, Math.ceil(height))}px`;
       if (tailReserve.style.height === next) return false;
@@ -99,6 +104,19 @@ export function createWebViewportPositionPorts<Key>(
       const observer = options.createVisibilityObserver(callback, options.viewport);
       observer.observe(target);
       return () => observer.disconnect();
+    },
+    observeUserInteraction(callback) {
+      const addEventListener = options.viewport.addEventListener?.bind(options.viewport);
+      const removeEventListener = options.viewport.removeEventListener?.bind(options.viewport);
+      if (addEventListener === undefined || removeEventListener === undefined) {
+        return () => undefined;
+      }
+      addEventListener("wheel", callback, { passive: true });
+      addEventListener("pointerdown", callback);
+      return () => {
+        removeEventListener("wheel", callback);
+        removeEventListener("pointerdown", callback);
+      };
     },
   };
 }

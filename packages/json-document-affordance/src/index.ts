@@ -59,6 +59,7 @@ export type {
 } from "./interaction-handle.js";
 export type {
   ViewportPositionCancelReason,
+  ViewportPositionBehavior,
   ViewportPositionGeometry,
   ViewportPositionOptions,
   ViewportPositionPorts,

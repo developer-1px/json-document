@@ -699,10 +699,15 @@ interface TypeaheadSessionSnapshot {
   readonly at: number;
 }
 ```
+## `ViewportPositionBehavior`
+
+```ts
+type ViewportPositionBehavior = "smooth" | "instant";
+```
 ## `ViewportPositionCancelReason`
 
 ```ts
-type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport";
+type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport" | "user-interaction";
 ```
 ## `ViewportPositionGeometry`
 
@@ -736,7 +741,7 @@ interface ViewportPositionPorts<Key> {
 ```ts
 interface ViewportPositionSession<Key> {
   getSnapshot(): ViewportPositionSnapshot<Key>;
-  position(targetKey: Key, viewportOffset: number): void;
+  position(targetKey: Key, viewportOffset: number, behavior?: ViewportPositionBehavior): void;
   layoutChanged(): void;
   targetVisibilityChanged(visible: boolean): void;
   complete(): void;
