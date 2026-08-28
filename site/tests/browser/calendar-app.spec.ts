@@ -54,13 +54,19 @@ test("Calendar month and year views show date grids", async ({ page }) => {
   await page.getByRole("button", { name: "Next month", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Jump 2026-06", exact: true })).toBeVisible();
 
-  await page.getByRole("radio", { name: "Year", exact: true }).click();
+  await page.getByRole("radio", { name: "Month", exact: true }).press("ArrowRight");
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01" })).toHaveText("1");
   await expect(page.getByRole("region", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
   await expect(page.getByRole("grid", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
   await expect(page).toHaveURL(/view=year/);
   await expect(page).toHaveURL(/date=2026-05-25/);
+
+  const following = page.getByRole("radio", { name: "Following", exact: true });
+  await following.click();
+  await expect(following).toBeChecked();
+  await following.press("ArrowRight");
+  await expect(page.getByRole("radio", { name: "All", exact: true })).toBeChecked();
 });
 
 test("Calendar location writes one search snapshot and restores on back", async ({ page }) => {
