@@ -81,6 +81,7 @@ export interface RenameSession<Key> {
 
 export function createRenameSession<Key>(options: {
   readonly onCommit: (key: Key, draft: string) => void;
+  readonly onCancel?: (key: Key, draft: string) => void;
   readonly onFinish?: (key: Key) => void;
   readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void;
 }): RenameSession<Key> {
@@ -94,6 +95,7 @@ export function createRenameSession<Key>(options: {
     if (snapshot === null) return;
     const finished = snapshot;
     if (commit) options.onCommit(finished.key, finished.draft);
+    else options.onCancel?.(finished.key, finished.draft);
     publish(null);
     options.onFinish?.(finished.key);
   }

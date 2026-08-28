@@ -22,7 +22,12 @@ import {
   type CalendarRecurrence,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
-import { useCalendarHand, useCalendarPointerInteractions, useCalendarViewportPosition } from "@interactive-os/json-document-calendar";
+import {
+  useCalendarHand,
+  useCalendarPointerInteractions,
+  useCalendarRenameInput,
+  useCalendarViewportPosition,
+} from "@interactive-os/json-document-calendar";
 import {
   ActionButton,
   HtmlDateField,
@@ -122,7 +127,6 @@ export function CalendarDemoRoute(props: {
 } = {}) {
   const styles = calendarDemoRecipe();
   const embedded = useDemoEmbed();
-  const titleRef = useRef<HTMLInputElement>(null);
   const hoursRef = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => {
     let sequence = 0;
@@ -141,9 +145,7 @@ export function CalendarDemoRoute(props: {
   const occurrenceEnd = hand.occurrence.end;
   const scope = hand.scope;
   const setScope = hand.setScope;
-  const naming = hand.naming;
-  const titleDraft = hand.titleDraft;
-  const setTitleDraft = hand.setTitleDraft;
+  const titleInput = useCalendarRenameInput(hand);
   const [overflowDay, setOverflowDay] = useState<string | null>(null);
   const {
     instantAt,
@@ -214,12 +216,6 @@ export function CalendarDemoRoute(props: {
     : null;
 
   useEffect(() => {
-    if (!naming) return;
-    titleRef.current?.focus();
-    titleRef.current?.select();
-  }, [naming, selectedEvent?.id]);
-
-  useEffect(() => {
     setOverflowDay(null);
   }, [view, visibleDate]);
 
@@ -237,11 +233,6 @@ export function CalendarDemoRoute(props: {
     }
     function onEscape(event: KeyboardEvent): void {
       if (event.key !== "Escape") return;
-      if (naming) {
-        event.preventDefault();
-        cancelCreated();
-        return;
-      }
       if (overflowDay !== null) {
         event.preventDefault();
         setOverflowDay(null);
@@ -253,7 +244,7 @@ export function CalendarDemoRoute(props: {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keydown", onEscape);
     };
-  }, [embedded, today, view, visibleDate, naming, titleDraft, selectedEvent?.id, overflowDay]);
+  }, [embedded, today, view, visibleDate, selectedEvent?.id, overflowDay]);
 
   function createOnVisibleDate(): void {
     const start = calendarInstantAt(visibleDate.slice(0, 10), 10 * 60);
@@ -275,22 +266,8 @@ export function CalendarDemoRoute(props: {
     hand.createInterval(day, end, { allDay: true });
   }
 
-  function cancelCreated(): void {
-    hand.cancelNaming();
-  }
-
   function removeSelected(): void {
     hand.removeSelected();
-  }
-
-  function commitTitle(): void {
-    const next = titleDraft.trim();
-    if (selectedEvent === null || next === selectedEvent.title) {
-      hand.finishNaming();
-      return;
-    }
-    hand.applySelectedPatch({ title: next === "" ? "Event" : next });
-    hand.finishNaming();
   }
 
   const applySelectedPatch = hand.applySelectedPatch;
@@ -789,18 +766,14 @@ export function CalendarDemoRoute(props: {
             ) : (
               <>
                 <input
-                  ref={titleRef}
+                  ref={titleInput.ref}
                   aria-label="Title"
                   className={classes(ui.field.seamless, styles.inspectorTitle())}
-                  value={titleDraft}
-                  onChange={(event) => setTitleDraft(event.target.value)}
-                  onBlur={commitTitle}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      commitTitle();
-                    }
-                  }}
+                  value={titleInput.value}
+                  onFocus={titleInput.onFocus}
+                  onChange={titleInput.onChange}
+                  onBlur={titleInput.onBlur}
+                  onKeyDown={titleInput.onKeyDown}
                 />
                 <ToggleButton
                   pressed={selectedEvent.allDay}

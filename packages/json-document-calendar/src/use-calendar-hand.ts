@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { createRenameSession, type RenameSessionSnapshot } from "@interactive-os/json-document-affordance";
 import {
   calendarOccurrenceAfterIntent,
   calendarOccurrenceForInspector,
@@ -34,7 +35,7 @@ export interface CalendarHand {
   readonly inspectedInterval: { readonly start: string; readonly end: string } | null;
   readonly occurrence: CalendarOccurrenceRange;
   readonly scope: OccurrenceScope;
-  readonly naming: boolean;
+  readonly renaming: boolean;
   readonly titleDraft: string;
   readonly paintedEvents: ReadonlyArray<CalendarEvent>;
   readonly timePreview: CalendarTimeGridPointerRelease | null;
@@ -43,6 +44,10 @@ export interface CalendarHand {
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
+  beginTitleRename(): void;
+  commitTitleRename(): void;
+  cancelTitleRename(): void;
+  handleTitleRenameKey(key: string): boolean;
   setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
   setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
   setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
@@ -55,8 +60,6 @@ export interface CalendarHand {
   removeSelected(): boolean;
   setCalendarHidden(calendarId: string, hidden: boolean): boolean;
   rememberSelection(): void;
-  finishNaming(): void;
-  cancelNaming(): void;
   undo(): void;
   redo(): void;
 }
@@ -68,8 +71,34 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     options.initialOccurrence ?? calendarOccurrenceFromSelection(selectedEvent),
   );
   const [scope, setScope] = useState<OccurrenceScope>("this");
-  const [naming, setNaming] = useState(false);
-  const [titleDraft, setTitleDraft] = useState(selectedEvent?.title ?? "");
+  const [renameSnapshot, setRenameSnapshot] = useState<RenameSessionSnapshot<string> | null>(null);
+  const occurrenceRef = useRef(occurrence);
+  const scopeRef = useRef(scope);
+  const createdRenameKeyRef = useRef<string | null>(null);
+  occurrenceRef.current = occurrence;
+  scopeRef.current = scope;
+  const [renameSession] = useState(() => createRenameSession<string>({
+    onCommit(key, draft) {
+      const current = editor.selectedEvents.find((event) => event.id === key);
+      if (current === undefined) return;
+      const next = draft.trim() || (options.defaultTitle ?? "Event");
+      if (next !== current.title) {
+        editor.dispatch(calendarUpdateIntent(current, occurrenceRef.current.start, scopeRef.current, { title: next }));
+        setOccurrence(calendarOccurrenceFromSelection(editor.selectedEvents[0] ?? null));
+      }
+    },
+    onCancel(key, draft) {
+      const fallback = options.defaultTitle ?? "Event";
+      if (createdRenameKeyRef.current === key && (draft.trim() === "" || draft.trim() === fallback)) {
+        editor.dispatch({ type: "selection.remove" });
+        setOccurrence(calendarOccurrenceFromSelection(editor.selectedEvents[0] ?? null));
+      }
+    },
+    onFinish(key) {
+      if (createdRenameKeyRef.current === key) createdRenameKeyRef.current = null;
+    },
+    onSnapshot: setRenameSnapshot,
+  }));
   const [timePreview, setTimePreview] = useState<CalendarTimeGridPointerRelease | null>(null);
   const [allDayPreview, setAllDayPreview] = useState<CalendarAllDayPointerRelease | null>(null);
   const [monthPreview, setMonthPreview] = useState<CalendarMonthPointerRelease | null>(null);
@@ -83,9 +112,9 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
         ? previewCalendarMonth(visibleEvents, monthPreview, scope)
         : visibleEvents;
 
-  useEffect(() => {
-    setTitleDraft(selectedEvent?.title ?? "");
-  }, [selectedEvent?.id, selectedEvent?.title, occurrence.start]);
+  const titleDraft = renameSnapshot !== null && renameSnapshot.key === selectedEvent?.id
+    ? renameSnapshot.draft
+    : selectedEvent?.title ?? "";
 
   function dispatch(intent: CalendarIntent | null): boolean {
     return intent !== null && editor.dispatch(intent).ok;
@@ -106,9 +135,13 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     setOccurrence(calendarOccurrenceAfterIntent(intent, origin, committed));
     if (intent?.type === "event.create") {
       setScope("this");
-      setNaming(true);
+      const created = editor.selectedEvents[0] ?? null;
+      if (created !== null) {
+        createdRenameKeyRef.current = created.id;
+        renameSession.begin(created.id, created.title);
+      }
     } else {
-      setNaming(false);
+      renameSession.commit();
     }
   }
 
@@ -153,13 +186,15 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     return dispatch({ type: "calendar.set-hidden", calendarId, hidden });
   }
 
-  function cancelNaming(): void {
-    const fallback = options.defaultTitle ?? "Event";
-    if (naming && (titleDraft.trim() === "" || titleDraft.trim() === fallback)) {
-      dispatch({ type: "selection.remove" });
+  function beginTitleRename(): void {
+    if (selectedEvent !== null && renameSession.getSnapshot()?.key !== selectedEvent.id) {
+      renameSession.begin(selectedEvent.id, selectedEvent.title);
     }
-    setNaming(false);
-    rememberSelection();
+  }
+
+  function setTitleDraft(title: string): void {
+    beginTitleRename();
+    renameSession.update(title);
   }
 
   function undo(): void {
@@ -179,7 +214,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     inspectedInterval: selectedEvent === null ? null : calendarOccurrenceForInspector(selectedEvent, occurrence),
     occurrence,
     scope,
-    naming,
+    renaming: renameSnapshot !== null,
     titleDraft,
     paintedEvents,
     timePreview,
@@ -188,6 +223,10 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     setScope,
     setOccurrence,
     setTitleDraft,
+    beginTitleRename,
+    commitTitleRename: renameSession.commit,
+    cancelTitleRename: renameSession.cancel,
+    handleTitleRenameKey: renameSession.handleKey,
     setTimePreview,
     setAllDayPreview,
     setMonthPreview,
@@ -200,8 +239,6 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     removeSelected,
     setCalendarHidden,
     rememberSelection,
-    finishNaming: () => setNaming(false),
-    cancelNaming,
     undo,
     redo,
   };

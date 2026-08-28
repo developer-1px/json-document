@@ -96,9 +96,11 @@ describe("Affordance sessions", () => {
 
   test("owns rename draft, slow double click, commit, and cancel", () => {
     const commits: string[] = [];
+    const cancels: string[] = [];
     const finished: string[] = [];
     const session = createRenameSession<string>({
       onCommit: (key, draft) => commits.push(`${key}:${draft}`),
+      onCancel: (key, draft) => cancels.push(`${key}:${draft}`),
       onFinish: (key) => finished.push(key),
     });
     expect(session.handlePointer("a", "Alpha", 1, 10)).toBe(false);
@@ -108,6 +110,7 @@ describe("Affordance sessions", () => {
     expect(commits).toEqual(["a:Apex"]);
     session.begin("b", "Beta");
     expect(session.handleKey("Escape")).toBe(true);
+    expect(cancels).toEqual(["b:Beta"]);
     expect(finished).toEqual(["a", "b"]);
   });
 

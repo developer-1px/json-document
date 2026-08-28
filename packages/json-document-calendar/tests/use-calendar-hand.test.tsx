@@ -40,7 +40,7 @@ describe("useCalendarHand", () => {
     });
   });
 
-  test("owns preview and create-naming lifecycle state", () => {
+  test("composes the canonical Rename session for created-event cancellation", () => {
     const editor = createCalendarEditor(initial, { createId: () => "draft" });
     const { result } = renderHook(() => useCalendarHand(editor, { defaultTitle: "Event" }));
 
@@ -58,15 +58,36 @@ describe("useCalendarHand", () => {
     act(() => {
       result.current.createInterval("2026-08-03T10:00", "2026-08-03T11:00", { title: "Event" });
     });
-    expect(result.current.naming).toBe(true);
+    expect(result.current.renaming).toBe(true);
     expect(result.current.occurrence).toEqual({
       start: "2026-08-03T10:00",
       end: "2026-08-03T11:00",
     });
 
-    act(() => result.current.cancelNaming());
-    expect(result.current.naming).toBe(false);
+    act(() => result.current.cancelTitleRename());
+    expect(result.current.renaming).toBe(false);
     expect(result.current.document.events).toHaveLength(1);
+  });
+
+  test("commits and cancels title drafts through the canonical Rename session", () => {
+    const editor = createCalendarEditor(initial);
+    const { result } = renderHook(() => useCalendarHand(editor));
+
+    act(() => result.current.selectOccurrence("standup", "2026-08-03T09:00", "2026-08-03T09:30"));
+    act(() => {
+      result.current.beginTitleRename();
+      result.current.setTitleDraft("Daily standup");
+      result.current.commitTitleRename();
+    });
+    expect(result.current.selectedEvent?.title).toBe("Daily standup");
+
+    act(() => {
+      result.current.beginTitleRename();
+      result.current.setTitleDraft("Discard me");
+      result.current.cancelTitleRename();
+    });
+    expect(result.current.selectedEvent?.title).toBe("Daily standup");
+    expect(result.current.titleDraft).toBe("Daily standup");
   });
 
   test("owns normalized resize preview and commit across React, Web, and Editing", () => {
