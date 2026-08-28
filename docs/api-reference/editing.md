@@ -352,6 +352,21 @@ interface CalendarRecurrence extends Record<string, JSONValue> {
   readonly until: string;
 }
 ```
+## `calendarRecurrenceWithFrequency`
+
+```ts
+calendarRecurrenceWithFrequency(current: CalendarRecurrence | null, value: unknown): CalendarRecurrence | null
+```
+## `calendarRecurrenceWithInterval`
+
+```ts
+calendarRecurrenceWithInterval(current: CalendarRecurrence | null, value: unknown): CalendarRecurrence | null
+```
+## `calendarRecurrenceWithUntil`
+
+```ts
+calendarRecurrenceWithUntil(current: CalendarRecurrence | null, until: string): CalendarRecurrence | null
+```
 ## `CalendarSelection`
 
 ```ts

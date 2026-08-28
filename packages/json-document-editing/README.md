@@ -68,6 +68,9 @@ events use datetime-local strings; all-day events use exclusive-end dates.
 day, week, month, and year view contract while Hosts retain their own fallback policy.
 `formatCalendarInstant` serializes a Temporal date-time to the canonical
 datetime-local minute string while Hosts retain ownership of their clock source.
+`calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`, and
+`calendarRecurrenceWithUntil` own recurrence creation and inspector transitions;
+Hosts only pass UI values and choose whether recurrence is disabled.
 `createCalendarEditor` creates, moves while keeping duration, resizes start or
 end, moves by day, deletes, and undoes on one document across day, week, month,
 and year views. `interpretCalendarTimeGridPointer`,
