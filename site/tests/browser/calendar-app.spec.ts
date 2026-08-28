@@ -35,6 +35,14 @@ test("Calendar positions the work hour until the user claims the viewport", asyn
   await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(640);
 });
 
+test("Calendar day view uses the visible date's canonical weekday cell", async ({ page }) => {
+  await page.goto("/demo/calendar?view=day&date=2026-05-28");
+  const day = page.getByRole("grid", { name: "Day" });
+  await expect(day).toBeVisible();
+  await expect(day.getByRole("columnheader", { name: "Thu 28" })).toBeVisible();
+  await expect(day.getByRole("columnheader", { name: "Mon 28" })).toHaveCount(0);
+});
+
 test("Calendar month and year views show date grids", async ({ page }) => {
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();

@@ -42,7 +42,6 @@ import {
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
-  addCalendarDays,
   addCalendarYears,
   calendarCells,
   calendarEventLabel,
@@ -50,7 +49,6 @@ import {
   calendarTimeLabel,
   calendarYearMonths,
   shiftVisibleDate,
-  startOfIsoWeek,
   startOfYear,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-ui-primitives-react";
@@ -203,10 +201,8 @@ export function CalendarDemoRoute(props: {
   const inspected = hand.inspectedInterval;
   const visibleEvents = calendarVisibleEvents(document);
   const paintedEvents = hand.paintedEvents;
-  const weekStart = startOfIsoWeek(visibleDate);
-  const days = view === "day"
-    ? [visibleDate]
-    : Array.from({ length: 7 }, (_, index) => addCalendarDays(weekStart, index));
+  const timeGridCells = calendarCells(view === "day" ? "day" : "week", visibleDate);
+  const days = timeGridCells.map((cell) => cell.date);
   const nowInstant = clockNow();
   const today = calendarDatePart(nowInstant);
   const yearStart = startOfYear(visibleDate);
@@ -281,15 +277,15 @@ export function CalendarDemoRoute(props: {
         style={{ gridTemplateColumns: `3.25rem repeat(${days.length}, minmax(4.5rem, 1fr))` }}
       >
         <div className={styles.weekHead()} />
-        {days.map((day, index) => (
+        {timeGridCells.map((cell) => (
           <div
-            key={day}
+            key={cell.date}
             role="columnheader"
             className={styles.weekHead()}
           >
-            <span className={ui.text.meta}>{weekdays[index]}</span>
-            <span className={classes(styles.dayNumber(), day === today && styles.todayMark())}>
-              {Number(day.slice(8))}
+            <span className={ui.text.meta}>{weekdays[cell.weekday - 1]}</span>
+            <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
+              {Number(cell.date.slice(8))}
             </span>
           </div>
         ))}

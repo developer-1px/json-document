@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { useState } from "react";
 import {
   CalendarGrid,
+  calendarCells,
   calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
@@ -53,6 +54,17 @@ describe("HTML date values", () => {
       "2028-01-01", "2028-02-01", "2028-03-01", "2028-04-01",
       "2028-05-01", "2028-06-01", "2028-07-01", "2028-08-01",
       "2028-09-01", "2028-10-01", "2028-11-01", "2028-12-01",
+    ]);
+  });
+
+  test("projects day and ISO week periods as canonical calendar cells", () => {
+    expect(calendarCells("day", "2026-05-28")).toEqual([
+      { date: "2026-05-28", inVisiblePeriod: true, weekday: 4 },
+    ]);
+    const week = calendarCells("week", "2026-05-28");
+    expect(week.map((cell) => cell.date)).toEqual([
+      "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28",
+      "2026-05-29", "2026-05-30", "2026-05-31",
     ]);
   });
 

@@ -65,6 +65,9 @@ Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와
 월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
 정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
 조합합니다.
+Day와 week time grid의 ordered 날짜 cell도 UI Primitives `calendarCells`가
+소유합니다. Day는 정확한 ISO weekday를 포함한 단일 cell, week는 ISO 주의
+7개 cell을 반환하며 Host는 이 정본 metadata로 header와 event grid를 조합합니다.
 막대 가장자리는 종일 밴드와 같이 `event.resize`입니다.
 점유 칸은 origin 이벤트 선택, 다른 날로 끌 때만 `event.move-day`입니다.
 월간 span에서 누른 Web `clientX`는 `calendarKeyFromWebRow`가 주 행 bounds와

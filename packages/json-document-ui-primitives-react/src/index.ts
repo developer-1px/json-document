@@ -46,6 +46,7 @@ export {
   startOfIsoWeek,
   startOfYear,
   visiblePeriodLabel,
+  type CalendarCell,
   type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,

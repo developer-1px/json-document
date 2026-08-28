@@ -31,10 +31,19 @@ addCalendarMonths(date: string, months: number): string
 ```ts
 addCalendarYears(date: string, years: number): string
 ```
+## `CalendarCell`
+
+```ts
+type CalendarCell = {
+  readonly date: string;
+  readonly inVisiblePeriod: boolean;
+  readonly weekday: number;
+};
+```
 ## `calendarCells`
 
 ```ts
-calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell>
+calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell>
 ```
 ## `calendarEventLabel`
 

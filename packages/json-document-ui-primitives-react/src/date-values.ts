@@ -158,12 +158,13 @@ export type CalendarCell = {
   readonly weekday: number;
 };
 
-export function calendarCells(grain: CalendarGrain, visibleDate: string): ReadonlyArray<CalendarCell> {
-  if (grain === "week") {
+export function calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell> {
+  if (period === "day") return [cell(visibleDate, true)];
+  if (period === "week") {
     const start = startOfIsoWeek(visibleDate);
     return Array.from({ length: 7 }, (_, index) => cell(addCalendarDays(start, index), true));
   }
-  if (grain === "month") {
+  if (period === "month") {
     const monthStart = startOfMonth(visibleDate);
     const gridStart = startOfIsoWeek(monthStart);
     const month = civil(visibleDate).month;
