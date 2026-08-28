@@ -13,6 +13,7 @@ import {
   shiftVisibleDate,
   startOfYear,
   parseHtmlDateValue,
+  visiblePeriodLabel,
   type CalendarGrain,
   type DateRangeValue,
   type HtmlDateType,
@@ -56,6 +57,21 @@ describe("HTML date values", () => {
       "2026-05-01", "2026-05-02", "2026-05-03",
     ]);
     expect(weeks[5]?.at(-1)?.date).toBe("2026-06-07");
+  });
+
+  test("preserves default labels and accepts Calendar toolbar copy policy", () => {
+    expect(visiblePeriodLabel("week", "2026-05-28")).toBe("2026-05-25 · week");
+    expect(visiblePeriodLabel("month", "2026-05-28")).toBe("2026-05");
+    expect(visiblePeriodLabel("year", "2026-05-28")).toBe("2026");
+
+    const options = {
+      monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      weekSeparator: " – ",
+    };
+    expect(visiblePeriodLabel("day", "2026-05-28", options)).toBe("2026-05-28");
+    expect(visiblePeriodLabel("week", "2026-05-28", options)).toBe("2026-05-25 – 2026-05-31");
+    expect(visiblePeriodLabel("month", "2026-05-28", options)).toBe("May 2026");
+    expect(visiblePeriodLabel("year", "2026-05-28", options)).toBe("2026");
   });
 });
 

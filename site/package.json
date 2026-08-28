@@ -19,8 +19,9 @@
     "check:calendar-pointer-coordinate": "node scripts/check-calendar-pointer-coordinate.mjs",
     "check:calendar-year-months": "node scripts/check-calendar-year-months.mjs",
     "check:calendar-month-weeks": "node scripts/check-calendar-month-weeks.mjs",
+    "check:calendar-period-label": "node scripts/check-calendar-period-label.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:calendar-temporal && npm run check:calendar-keyboard && npm run check:calendar-rename && npm run check:calendar-viewport && npm run check:calendar-pointer-coordinate && npm run check:calendar-year-months && npm run check:calendar-month-weeks && npm run check:tokens && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:calendar-temporal && npm run check:calendar-keyboard && npm run check:calendar-rename && npm run check:calendar-viewport && npm run check:calendar-pointer-coordinate && npm run check:calendar-year-months && npm run check:calendar-month-weeks && npm run check:calendar-period-label && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",

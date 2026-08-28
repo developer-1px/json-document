@@ -72,7 +72,9 @@ Host는 이벤트와 날짜 목록만 연결합니다.
 들어갑니다. 연간 12개 월 시작일은 UI Primitives 날짜 값 정본의
 `calendarYearMonths`가 만들고, Host는 월 이름과 grid layout 및 navigation만
 조합합니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
-보기 전환은 Host가 조합합니다.
+보기 전환은 Host가 조합합니다. toolbar의 현재 기간 문구는 UI Primitives
+`visiblePeriodLabel`이 view 분기와 날짜 경계를 투영하고, Host가 월 이름 copy와
+week separator policy를 주입합니다.
 
 ```live-demo
 /demo/calendar
