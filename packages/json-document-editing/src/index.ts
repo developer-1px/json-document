@@ -48,6 +48,7 @@ export { bindCalendarTimeGridIntent, interpretCalendarTimeGridPointer } from "./
 export {
   addCalendarDate,
   calendarInstantAt,
+  calendarIntervalLastDate,
   calendarShiftInstant,
   isCalendarAllDay,
 } from "./calendar-validation.js";

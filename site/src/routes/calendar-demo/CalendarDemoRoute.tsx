@@ -8,6 +8,7 @@ import {
   calendarBusyDates,
   calendarEventsOnDay,
   calendarInstantAt,
+  calendarIntervalLastDate,
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
@@ -344,7 +345,7 @@ export function CalendarDemoRoute(props: {
                   orientation="horizontal"
                   className={classes("right-0 top-0 h-full w-2", styles.resizeEdge())}
                   onResize={(delta, phase) => {
-                    const last = addCalendarDate(item.event.end, -1) ?? item.event.start;
+                    const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
                     resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
                   }}
                 />
@@ -648,9 +649,9 @@ export function CalendarDemoRoute(props: {
                       {overflowDay === null ? layout.items.map((item) => {
                         const weekFirst = dates[0];
                         const weekLast = dates.at(-1);
-                        const lastDay = addCalendarDate(item.event.end, -1);
+                        const lastDay = calendarIntervalLastDate(item.event.start, item.event.end, true);
                         const clipStart = isCalendarAllDay(item.event) && weekFirst !== undefined && item.event.start < weekFirst;
-                        const clipEnd = isCalendarAllDay(item.event) && weekLast !== undefined && lastDay !== null && lastDay > weekLast;
+                        const clipEnd = isCalendarAllDay(item.event) && weekLast !== undefined && lastDay > weekLast;
                         return (
                         <div
                           key={`${item.event.id}:${allDayPreview?.originEventId === item.event.id
@@ -694,7 +695,7 @@ export function CalendarDemoRoute(props: {
                                   orientation="horizontal"
                                   className={classes("right-0 top-0 z-20 h-full w-2", styles.resizeEdge())}
                                   onResize={(delta, phase) => {
-                                    const last = addCalendarDate(item.event.end, -1) ?? item.event.start;
+                                    const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
                                     resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
                                   }}
                                 />
@@ -783,7 +784,11 @@ export function CalendarDemoRoute(props: {
                   type={selectedEvent.allDay ? "date" : "datetime-local"}
                   label="End"
                   value={selectedEvent.allDay
-                    ? (addCalendarDate((inspected?.end ?? selectedEvent.end), -1) ?? selectedEvent.end)
+                    ? calendarIntervalLastDate(
+                      inspected?.start ?? selectedEvent.start,
+                      inspected?.end ?? selectedEvent.end,
+                      true,
+                    )
                     : (inspected?.end ?? selectedEvent.end)}
                   onValueChange={(value) => applySelectedPatch({
                     end: selectedEvent.allDay ? (addCalendarDate(value, 1) ?? value) : value,

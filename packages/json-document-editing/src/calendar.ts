@@ -23,6 +23,7 @@ import {
   calendarDocumentCalendars,
   calendarDocumentEvents,
   calendarEventBounds,
+  calendarIntervalLastDate,
   calendarMinutesBetween,
   formatCalendarDate,
   formatCalendarInstant,
@@ -570,11 +571,7 @@ export function calendarBusyDates(
 
 function calendarOccurrenceDays(start: string, end: string, allDay: boolean): ReadonlyArray<string> {
   const first = calendarDatePart(start);
-  let last = calendarDatePart(end);
-  if (allDay || !end.includes("T") || end.slice(11, 16) === "00:00") {
-    last = addCalendarDate(last, -1) ?? first;
-  }
-  if (last < first) last = first;
+  const last = calendarIntervalLastDate(start, end, allDay);
   const days: string[] = [];
   for (let day = first; day <= last; ) {
     days.push(day);

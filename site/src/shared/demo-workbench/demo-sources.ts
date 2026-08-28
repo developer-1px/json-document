@@ -7,6 +7,7 @@ import calendarTimeGridPointerSource from "../../../../packages/json-document-ed
 import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
+import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
 import calendarEventLabelSource from "../../../../packages/json-document-ui-primitives-react/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
@@ -144,6 +145,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
+  ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
   ["packages/json-document-ui-primitives-react/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
@@ -318,6 +320,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "calendarUpdateIntent",
     sourcePath: "packages/json-document-editing/src/calendar-selection.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarIntervalLastDate",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",

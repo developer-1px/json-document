@@ -104,6 +104,16 @@ export function calendarDatePart(value: string): string {
   return value.slice(0, 10);
 }
 
+export function calendarIntervalLastDate(start: string, end: string, allDay: boolean): string {
+  const first = calendarDatePart(start);
+  let last = calendarDatePart(end);
+  const endInstant = parseCalendarInstant(end);
+  const endsAtDateBoundary = !end.includes("T")
+    || (endInstant !== null && endInstant.hour === 0 && endInstant.minute === 0);
+  if (allDay || endsAtDateBoundary) last = addCalendarDate(last, -1) ?? first;
+  return last < first ? first : last;
+}
+
 export function calendarEventBounds(
   event: Pick<CalendarEvent, "start" | "end" | "allDay">,
 ): { readonly from: Temporal.PlainDateTime; readonly to: Temporal.PlainDateTime } | null {

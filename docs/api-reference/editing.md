@@ -262,6 +262,11 @@ type CalendarIntent =
     }
   | { readonly type: "calendar.set-hidden"; readonly calendarId: string; readonly hidden: boolean };
 ```
+## `calendarIntervalLastDate`
+
+```ts
+calendarIntervalLastDate(start: string, end: string, allDay: boolean): string
+```
 ## `calendarMonthDayLayout`
 
 ```ts
