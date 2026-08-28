@@ -16,6 +16,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-editing/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-calendar",
+      replacement: sourceFile("packages/json-document-calendar/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-selection",
       replacement: sourceFile("packages/json-document-selection/src/index.ts"),
     },
