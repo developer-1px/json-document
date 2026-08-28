@@ -62,9 +62,22 @@ month week clipping이 모두 같은 정본 규칙을 사용합니다.
 날짜 또는 날짜·시간 문자열에서 `YYYY-MM-DD` 날짜 부분을 얻는 projection은
 Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와 새 이벤트의
 생성 날짜도 Host의 문자열 자르기 없이 이 공개 API를 사용합니다.
+Host는 `Temporal.Now`로 concrete clock을 읽고 Editing `formatCalendarInstant`로
+Calendar datetime-local minute 문자열을 만듭니다. clock source와 저장 형식의
+책임을 섞는 route-local formatter는 두지 않습니다.
+Calendar collection과 id lookup은 Editing `calendarDocumentCalendars`,
+`calendarDocumentCalendar`가 소유합니다. Host는 sidebar와 inspector를 조합하고
+calendar color를 UI variant로 바꾸는 시각 정책만 유지합니다.
+Inspector의 repeat frequency·interval·until 변경은 Editing
+`calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`,
+`calendarRecurrenceWithUntil`이 `CalendarRecurrence` model을 만들고 보존합니다.
+Host는 option copy와 recurrence 비활성화 선택만 조합합니다.
 월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
 정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
 조합합니다.
+표시 cell collection의 첫 날짜부터 마지막 날짜 다음 날까지의 half-open query
+범위는 UI Primitives `calendarCellInterval`이 소유합니다. 연간 12개 month grid와
+sidebar navigator가 같은 interval을 Editing occurrence query에 전달합니다.
 Day와 week time grid의 ordered 날짜 cell도 UI Primitives `calendarCells`가
 소유합니다. Day는 정확한 ISO weekday를 포함한 단일 cell, week는 ISO 주의
 7개 cell을 반환합니다. 각 `CalendarCell`은 canonical date에서 투영한 `day`와
@@ -86,7 +99,10 @@ Host는 이벤트와 날짜 목록만 연결합니다.
 들어갑니다. 연간 12개 월 시작일은 UI Primitives 날짜 값 정본의
 `calendarYearMonths`가 만들고, Host는 월 이름과 grid layout 및 navigation만
 조합합니다. 보기와 날짜는 Host URL (`?view=&date=`)입니다. 픽셀 격자와
-보기 전환은 Host가 조합합니다. toolbar의 현재 기간 문구는 UI Primitives
+보기 전환은 Host가 조합합니다. 정본 view membership은 Editing
+`parseCalendarView`가 판별하고 URL의 invalid
+값을 어떤 view로 대체할지는 Host 정책으로 남습니다.
+toolbar의 현재 기간 문구는 UI Primitives
 `visiblePeriodLabel`이 view 분기와 날짜 경계를 투영하고, Host가 월 이름 copy와
 week separator policy를 주입합니다.
 Previous/Next 및 keyboard period 이동은 UI Primitives `shiftVisibleDate`가

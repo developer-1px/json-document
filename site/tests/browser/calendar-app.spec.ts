@@ -69,6 +69,27 @@ test("Calendar month and year views show date grids", async ({ page }) => {
   await expect(page.getByRole("radio", { name: "All", exact: true })).toBeChecked();
 });
 
+test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const repeat = page.getByRole("button", { name: "Repeat", exact: true });
+
+  await repeat.click();
+  await page.getByRole("option", { name: "None", exact: true }).click();
+  await expect(page.getByRole("spinbutton", { name: "Repeat every", exact: true })).toHaveCount(0);
+
+  await repeat.click();
+  await page.getByRole("option", { name: "Weekly", exact: true }).click();
+  await expect(repeat).toHaveText("Weekly");
+
+  const interval = page.getByRole("spinbutton", { name: "Repeat every", exact: true });
+  await interval.fill("0");
+  await expect(interval).toHaveValue("1");
+
+  const until = page.getByRole("textbox", { name: "Repeat until", exact: true });
+  await until.fill("2026-06-30");
+  await expect(until).toHaveValue("2026-06-30");
+});
+
 test("Calendar location writes one search snapshot and restores on back", async ({ page }) => {
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
