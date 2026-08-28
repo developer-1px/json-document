@@ -8,6 +8,7 @@
     "paths": {
       "@interactive-os/json-document": ["../packages/json-document/src/application/document/index.ts"],
       "@interactive-os/json-document-editing": ["../packages/json-document-editing/src/index.ts"],
+      "@interactive-os/json-document-calendar": ["../packages/json-document-calendar/src/index.ts"],
       "@interactive-os/json-document-selection": ["../packages/json-document-selection/src/index.ts"],
       "@interactive-os/json-document-react": ["../packages/json-document-react/src/index.ts"],
       "@interactive-os/json-document-react-hook-form": ["../packages/json-document-react-hook-form/src/index.ts"],
