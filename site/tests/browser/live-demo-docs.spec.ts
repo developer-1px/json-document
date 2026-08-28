@@ -11,6 +11,7 @@ const pages = [
   ["/docs/tree", 1],
   ["/docs/database", 1],
   ["/docs/ui-primitives", 1],
+  ["/docs/animation", 1],
   ["/docs/adapter-keyboard", 1],
   ["/docs/adapter-clipboard", 1],
   ["/docs/adapter-virtual-selection", 1],
