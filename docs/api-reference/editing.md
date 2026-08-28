@@ -137,6 +137,11 @@ type CalendarAllDayPointerRelease = {
   readonly targetDay: string;
 };
 ```
+## `calendarAllDaySpan`
+
+```ts
+calendarAllDaySpan(originDay: string, targetDay: string): { readonly start: string; readonly end: string; } | null
+```
 ## `calendarBusyDates`
 
 ```ts
@@ -152,6 +157,11 @@ interface CalendarCalendar extends Record<string, JSONValue> {
   readonly color: string;
 }
 ```
+## `calendarDatePart`
+
+```ts
+calendarDatePart(value: string): string
+```
 ## `CalendarDocument`
 
 ```ts
@@ -159,6 +169,16 @@ interface CalendarDocument extends Record<string, JSONValue> {
   readonly calendars: ReadonlyArray<CalendarCalendar>;
   readonly events: ReadonlyArray<CalendarEvent>;
 }
+```
+## `calendarDocumentCalendar`
+
+```ts
+calendarDocumentCalendar(document: CalendarDocument, calendarId: string): CalendarCalendar | null
+```
+## `calendarDocumentCalendars`
+
+```ts
+calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar>
 ```
 ## `CalendarEditor`
 
@@ -341,6 +361,21 @@ interface CalendarRecurrence extends Record<string, JSONValue> {
   readonly interval: number;
   readonly until: string;
 }
+```
+## `calendarRecurrenceWithFrequency`
+
+```ts
+calendarRecurrenceWithFrequency(current: CalendarRecurrence | null, value: unknown): CalendarRecurrence | null
+```
+## `calendarRecurrenceWithInterval`
+
+```ts
+calendarRecurrenceWithInterval(current: CalendarRecurrence | null, value: unknown): CalendarRecurrence | null
+```
+## `calendarRecurrenceWithUntil`
+
+```ts
+calendarRecurrenceWithUntil(current: CalendarRecurrence | null, until: string): CalendarRecurrence | null
 ```
 ## `CalendarSelection`
 
@@ -785,6 +820,11 @@ interface EditingSnapshot<Selection extends JSONValue> {
   readonly canRedo: boolean;
 }
 ```
+## `formatCalendarInstant`
+
+```ts
+formatCalendarInstant(value: Temporal.PlainDateTime): string
+```
 ## `gridCellsInRange`
 
 ```ts
@@ -1111,6 +1151,11 @@ interface OrderSelection extends Record<string, JSONValue> {
   readonly ranges: ReadonlyArray<OrderRange>;
   readonly primaryIndex: number | null;
 }
+```
+## `parseCalendarView`
+
+```ts
+parseCalendarView(value: unknown): CalendarView | null
 ```
 ## `previewCalendarAllDay`
 
