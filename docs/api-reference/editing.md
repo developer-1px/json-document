@@ -170,6 +170,16 @@ interface CalendarDocument extends Record<string, JSONValue> {
   readonly events: ReadonlyArray<CalendarEvent>;
 }
 ```
+## `calendarDocumentCalendar`
+
+```ts
+calendarDocumentCalendar(document: CalendarDocument, calendarId: string): CalendarCalendar | null
+```
+## `calendarDocumentCalendars`
+
+```ts
+calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar>
+```
 ## `CalendarEditor`
 
 ```ts

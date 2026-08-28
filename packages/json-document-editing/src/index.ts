@@ -54,6 +54,8 @@ export {
   addCalendarDate,
   calendarAllDaySpan,
   calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
   calendarInstantAt,
   calendarIntervalLastDate,
   calendarShiftInstant,

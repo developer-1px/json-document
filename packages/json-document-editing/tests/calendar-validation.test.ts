@@ -1,6 +1,32 @@
 import { describe, expect, test } from "vitest";
 import { Temporal } from "@js-temporal/polyfill";
-import { calendarAllDaySpan, calendarDatePart, calendarIntervalLastDate, formatCalendarInstant, parseCalendarView } from "../src/index.js";
+import {
+  calendarAllDaySpan,
+  calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
+  calendarIntervalLastDate,
+  formatCalendarInstant,
+  parseCalendarView,
+  type CalendarDocument,
+} from "../src/index.js";
+
+const calendarDocument: CalendarDocument = {
+  calendars: [
+    { id: "work", title: "Work", hidden: false, color: "accent" },
+    { id: "home", title: "Home", hidden: true, color: "subtle" },
+  ],
+  events: [],
+};
+
+describe("Calendar document calendar projection", () => {
+  test("projects a safe collection and resolves calendars by id", () => {
+    expect(calendarDocumentCalendars(calendarDocument)).toBe(calendarDocument.calendars);
+    expect(calendarDocumentCalendars({ calendars: null } as unknown as CalendarDocument)).toEqual([]);
+    expect(calendarDocumentCalendar(calendarDocument, "home")).toBe(calendarDocument.calendars[1]);
+    expect(calendarDocumentCalendar(calendarDocument, "missing")).toBeNull();
+  });
+});
 
 describe("formatCalendarInstant", () => {
   test("serializes Calendar date-time values at minute precision", () => {

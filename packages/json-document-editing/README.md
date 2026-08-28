@@ -68,6 +68,8 @@ events use datetime-local strings; all-day events use exclusive-end dates.
 day, week, month, and year view contract while Hosts retain their own fallback policy.
 `formatCalendarInstant` serializes a Temporal date-time to the canonical
 datetime-local minute string while Hosts retain ownership of their clock source.
+`calendarDocumentCalendars` projects the document's safe calendar collection,
+and `calendarDocumentCalendar` owns id lookup while Hosts retain visual policy.
 `calendarRecurrenceWithFrequency`, `calendarRecurrenceWithInterval`, and
 `calendarRecurrenceWithUntil` own recurrence creation and inspector transitions;
 Hosts only pass UI values and choose whether recurrence is disabled.

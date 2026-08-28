@@ -7,6 +7,8 @@ import {
   calendarAllDaySpan,
   calendarBusyDates,
   calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
   calendarEventsOnDay,
   calendarInstantAt,
   calendarIntervalLastDate,
@@ -197,6 +199,7 @@ export function CalendarDemoRoute(props: {
   }
 
   const document = hand.document;
+  const calendars = calendarDocumentCalendars(document);
   const selected = new Set(hand.snapshot.selection.keys);
   const selectedEvent = hand.selectedEvent;
   const inspected = hand.inspectedInterval;
@@ -525,7 +528,7 @@ export function CalendarDemoRoute(props: {
         <div className="flex h-full min-h-0 min-w-0 gap-4">
           <nav aria-label="Calendars" className={styles.sidebar()}>
             <p className={ui.text.label}>Calendars</p>
-            {(document.calendars ?? []).map((calendar) => (
+            {calendars.map((calendar) => (
               <ToggleButton
                 key={calendar.id}
                 pressed={!calendar.hidden}
@@ -801,7 +804,7 @@ export function CalendarDemoRoute(props: {
                 <Select
                   label="Calendar"
                   value={selectedEvent.calendarId}
-                  options={(document.calendars ?? []).map((calendar) => ({ id: calendar.id, label: calendar.title }))}
+                  options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
                   onValueChange={(value) => applySelectedPatch({ calendarId: value })}
                 />
                 <Select
@@ -869,7 +872,7 @@ export function CalendarDemoRoute(props: {
 }
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
-  return (document.calendars ?? []).find((item) => item.id === calendarId)?.color === "accent" ? "accent" : "subtle";
+  return calendarDocumentCalendar(document, calendarId)?.color === "accent" ? "accent" : "subtle";
 }
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
