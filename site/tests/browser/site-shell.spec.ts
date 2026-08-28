@@ -119,6 +119,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Marquee",
     "Drop",
     "Duplicate",
+    "Interaction Handles",
     "Resize",
     "Pan",
     "Scroll",

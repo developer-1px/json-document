@@ -160,9 +160,9 @@ test("pointer cancel and lost capture discard transient movement", async ({ page
     if (reason === "pointercancel") {
       await canvas.dispatchEvent("pointercancel", { pointerId: 1, bubbles: true });
     } else {
-      await canvas.evaluate((element) => {
-        const svg = element as SVGSVGElement;
-        if (svg.hasPointerCapture(1)) svg.releasePointerCapture(1);
+      await annotation.evaluate((element) => {
+        const owner = [element, ...element.querySelectorAll("*")].find((candidate) => candidate.hasPointerCapture(1));
+        owner?.releasePointerCapture(1);
       });
     }
     await page.mouse.up();

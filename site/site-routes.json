@@ -665,6 +665,14 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/affordances/handles",
+    "label": "Interaction Handles Live Demo",
+    "title": "Interaction Handles Live Demo - json-document",
+    "description": "DragHandle, ResizeHandle, ControlHandle의 정본 descriptor, cursor, lifecycle Usage입니다.",
+    "navigationGroup": "Affordance",
+    "sidebar": false
+  },
+  {
     "path": "/adapters/keyboard",
     "label": "Keyboard Live Demo",
     "title": "Keyboard Adapter Live Demo - json-document",
@@ -1098,6 +1106,18 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/handles",
+    "label": "Interaction Handles",
+    "title": "Interaction Handles - json-document",
+    "heading": "Interaction Handles",
+    "description": "Drag·Resize·Control 손잡이가 하나의 descriptor, cursor, pointer lifecycle을 공유하는 생태계 경계를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "relatedDemoPath": "/affordances/handles",
+    "relatedDemoLabel": "Usage 열기",
     "parentPath": "/docs/affordance"
   },
   {

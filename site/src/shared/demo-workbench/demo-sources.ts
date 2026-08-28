@@ -37,6 +37,7 @@ import webKanbanDropTargetSource from "../../../../packages/json-document-web/sr
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
+import interactionHandleSource from "../../../../packages/json-document-affordance/src/interaction-handle.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
@@ -170,6 +171,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
+  ["packages/json-document-affordance/src/interaction-handle.ts", interactionHandleSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
@@ -685,6 +687,16 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
   },
   {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createInteractionHandleSession",
+    sourcePath: "packages/json-document-affordance/src/interaction-handle.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "interactionHandleCursor",
+    sourcePath: "packages/json-document-affordance/src/interaction-handle.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "Select",
     sourcePath: "packages/json-document-ui-primitives-react/src/select.tsx",
@@ -707,6 +719,21 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "ResizeHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "DragHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ControlHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "useInteractionHandle",
     sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
   },
 ] as const;
