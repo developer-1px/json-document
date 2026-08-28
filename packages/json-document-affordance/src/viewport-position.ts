@@ -1,4 +1,5 @@
-export type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport";
+export type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport" | "user-interaction";
+export type ViewportPositionBehavior = "smooth" | "instant";
 
 export interface ViewportPositionGeometry {
   readonly targetOffset: number;
@@ -29,7 +30,7 @@ export interface ViewportPositionSnapshot<Key> {
 
 export interface ViewportPositionSession<Key> {
   getSnapshot(): ViewportPositionSnapshot<Key>;
-  position(targetKey: Key, viewportOffset: number): void;
+  position(targetKey: Key, viewportOffset: number, behavior?: ViewportPositionBehavior): void;
   layoutChanged(): void;
   targetVisibilityChanged(visible: boolean): void;
   complete(): void;
@@ -47,6 +48,7 @@ export function createViewportPositionSession<Key>(
   let targetKey: Key | null = null;
   let viewportOffset: number | null = null;
   let initialScrollApplied = false;
+  let initialBehavior: ViewportPositionBehavior = "smooth";
   let cancelFrame: (() => void) | null = null;
 
   function snapshot(): ViewportPositionSnapshot<Key> {
@@ -93,7 +95,7 @@ export function createViewportPositionSession<Key>(
       applyingScroll = true;
       publish();
       try {
-        options.scrollTo(targetScrollTop, initialScrollApplied ? "instant" : "smooth");
+        options.scrollTo(targetScrollTop, initialScrollApplied ? "instant" : initialBehavior);
       } finally {
         applyingScroll = false;
       }
@@ -116,13 +118,14 @@ export function createViewportPositionSession<Key>(
     targetKey = null;
     viewportOffset = null;
     initialScrollApplied = false;
+    initialBehavior = "smooth";
     publish();
     options.onCancel?.(reason);
   }
 
   return {
     getSnapshot: snapshot,
-    position(key, offset) {
+    position(key, offset, behavior = "smooth") {
       clearFrame();
       if (targetKey !== null && targetKey !== key) releaseTailReserve();
       targetKey = key;
@@ -130,6 +133,7 @@ export function createViewportPositionSession<Key>(
       active = true;
       owned = true;
       initialScrollApplied = false;
+      initialBehavior = behavior;
       reconcile();
     },
     layoutChanged() {

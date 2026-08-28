@@ -731,7 +731,7 @@ interface WebViewportPositionOptions<Key> {
   readonly viewport: WebViewportPositionViewport;
   readonly content?: object;
   readonly findTarget: (key: Key) => WebViewportPositionElement | null;
-  readonly findTailReserve: (key: Key) => WebViewportPositionElement | null;
+  readonly findTailReserve?: (key: Key) => WebViewportPositionElement | null;
   readonly createResizeObserver?: (callback: () => void) => WebViewportPositionObserver;
   readonly createMutationObserver?: (callback: () => void) => WebViewportPositionObserver;
   readonly createVisibilityObserver?: (
@@ -752,6 +752,7 @@ interface WebViewportPositionPorts<Key> {
   scheduleFrame(callback: () => void): () => void;
   observeLayout(callback: () => void): () => void;
   observeTargetVisibility(key: Key, callback: (visible: boolean) => void): () => void;
+  observeUserInteraction(callback: () => void): () => void;
 }
 ```
 ## `WebViewportPositionViewport`
@@ -762,6 +763,8 @@ interface WebViewportPositionViewport {
   readonly scrollTop: number;
   getBoundingClientRect(): { readonly top: number };
   scrollTo(options: { readonly top: number; readonly behavior: "smooth" | "instant" }): void;
+  addEventListener?(type: "wheel" | "pointerdown", listener: () => void, options?: { readonly passive?: boolean }): void;
+  removeEventListener?(type: "wheel" | "pointerdown", listener: () => void): void;
 }
 ```
 ## `WebViewportPositionVisibilityObserver`

@@ -21,6 +21,20 @@ test("Calendar app chrome fills the page without docs or workbench", async ({ pa
   await expect(page.getByRole("toolbar", { name: "Calendar" })).toBeVisible();
 });
 
+test("Calendar positions the work hour until the user claims the viewport", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const viewport = page.locator("[data-calendar-time-viewport]");
+  await expect(viewport).toBeVisible();
+  await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(7 * 72);
+
+  await viewport.evaluate((element) => {
+    element.scrollTop = 640;
+    element.dispatchEvent(new WheelEvent("wheel", { bubbles: true }));
+    element.style.height = "480px";
+  });
+  await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(640);
+});
+
 test("Calendar month and year views show date grids", async ({ page }) => {
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
