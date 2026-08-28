@@ -16,10 +16,10 @@ export type WebKeyboardCommand =
   | { readonly type: "undo" }
   | { readonly type: "redo" };
 
-export type WebKeymap = Readonly<Record<string, WebKeyboardCommand>>;
+export type WebKeymap<Command = WebKeyboardCommand> = Readonly<Record<string, Command>>;
 
-export interface WebKeyboardAdapter {
-  resolve(stroke: WebKeyboardStroke): WebKeyboardCommand | null;
+export interface WebKeyboardAdapter<Command = WebKeyboardCommand> {
+  resolve(stroke: WebKeyboardStroke): Command | null;
 }
 
 const move = (
@@ -54,10 +54,22 @@ export const defaultWebKeymap: WebKeymap = Object.freeze({
   "Mod-Shift-z": { type: "redo" },
 });
 
+export function createWebKeyboardAdapter(): WebKeyboardAdapter;
 export function createWebKeyboardAdapter(
-  options: { readonly keymap?: WebKeymap } = {},
-): WebKeyboardAdapter {
-  const keymap = { ...defaultWebKeymap, ...options.keymap };
+  options: { readonly keymap?: WebKeymap; readonly defaults?: true },
+): WebKeyboardAdapter;
+export function createWebKeyboardAdapter<Command>(
+  options: { readonly keymap: WebKeymap<Command>; readonly defaults: false },
+): WebKeyboardAdapter<Command>;
+export function createWebKeyboardAdapter<Command>(
+  options: {
+    readonly keymap?: WebKeymap<Command>;
+    readonly defaults?: boolean;
+  } = {},
+): WebKeyboardAdapter<Command | WebKeyboardCommand> {
+  const keymap: WebKeymap<Command | WebKeyboardCommand> = options.defaults === false
+    ? { ...options.keymap }
+    : { ...defaultWebKeymap, ...options.keymap };
   return {
     resolve(stroke) {
       return keymap[chordFromStroke(stroke)] ?? null;

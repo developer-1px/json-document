@@ -71,6 +71,7 @@ test("Database Table header hands persist view projection and restore records wi
   await expect(page.getByTestId("database-view-json")).toContainText('"propertyOrder"');
 
   const handle = page.locator("[data-resize-edge=e][data-property-id=score]");
+  await handle.scrollIntoViewIfNeeded();
   const box = await handle.boundingBox();
   if (!box) throw new Error("resize handle");
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

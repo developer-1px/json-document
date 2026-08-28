@@ -41,6 +41,12 @@ commit만 json-document로 갑니다. 글 편집 자체는 Hands와 [Caret](affo
 
 ## Session API
 
-`createRenameSession({ onCommit, onFinish, onSnapshot })`은 active key, draft,
+`createRenameSession({ onCommit, onCancel, onFinish, onSnapshot })`은 active key, draft,
 slow double-click 간격과 commit/cancel을 소유합니다. Host는 snapshot으로 input을
 그리고 `onCommit(key, draft)`에서 domain rename Intent를 보냅니다.
+`onCancel(key, draft)`는 저장되지 않은 값을 복구하거나, Calendar처럼 생성과
+동시에 시작된 rename을 취소할 때 새 항목을 제거하는 제품 정책을 연결합니다.
+
+Calendar는 `useCalendarRenameInput(hand)`으로 focus/select, input change,
+Enter·Escape, blur를 같은 session에 연결합니다. Host는 반환된 `ref`, `value`,
+event handler만 제목 input에 전달합니다.

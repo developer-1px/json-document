@@ -1,8 +1,16 @@
 export { Menu, MenuItemButton, type MenuItem } from "./menu.js";
 export { Select, type SelectClassNames, type SelectOption } from "./select.js";
-export { FileDropRegion, GridCell, ResizeHandle } from "./surfaces.js";
+export { ControlHandle, DragHandle, FileDropRegion, GridCell, ResizeHandle, useInteractionHandle } from "./surfaces.js";
+export type {
+  ControlHandleProps,
+  DragHandleProps,
+  InteractionHandleBindingOptions,
+  InteractionHandleButtonProps,
+  ResizeHandleProps,
+} from "./surfaces.js";
 export { useListbox } from "./listbox.js";
 export { formatFileSize } from "./file-size.js";
+export { calendarEventLabel, type CalendarEventLabelValue } from "./calendar-event-label.js";
 export type { ListboxBinding, ListboxItem, UseListboxOptions } from "./listbox.js";
 export {
   ActionButton,
@@ -30,12 +38,20 @@ export {
   addCalendarDays,
   addCalendarMonths,
   addCalendarYears,
+  calendarCellInterval,
   calendarCells,
+  calendarMonthWeeks,
+  calendarTimeLabel,
+  calendarYearMonths,
   parseHtmlDateValue,
   startOfIsoWeek,
   startOfYear,
   visiblePeriodLabel,
+  type CalendarCell,
+  type CalendarCellInterval,
+  type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,
   type HtmlDateType,
+  type VisiblePeriodLabelOptions,
 } from "./date-values.js";

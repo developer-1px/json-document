@@ -26,6 +26,11 @@ calendarCommandFromWebKeyboardEvent(event: WebCalendarKeyboardEvent): WebCalenda
 ```ts
 calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number
 ```
+## `calendarKeyFromWebRow`
+
+```ts
+calendarKeyFromWebRow<Key>(clientX: number, bounds: { readonly left: number; readonly width: number; }, keys: ReadonlyArray<Key>): Key | null
+```
 ## `calendarMinutesFromWebGrid`
 
 ```ts
@@ -74,7 +79,9 @@ createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item,
 ## `createWebKeyboardAdapter`
 
 ```ts
-createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboardAdapter
+createWebKeyboardAdapter(): WebKeyboardAdapter
+createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; }): WebKeyboardAdapter
+createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; }): WebKeyboardAdapter<Command>
 ```
 ## `createWebPointerSession`
 
@@ -251,7 +258,8 @@ type WebCalendarCommand =
   | { readonly type: "shift"; readonly direction: 1 | -1 }
   | { readonly type: "today" }
   | { readonly type: "create" }
-  | { readonly type: "remove" };
+  | { readonly type: "remove" }
+  | { readonly type: "dismiss" };
 ```
 ## `WebCalendarKeyboardEvent`
 
@@ -259,6 +267,7 @@ type WebCalendarCommand =
 interface WebCalendarKeyboardEvent {
   readonly key: string;
   readonly target: unknown;
+  readonly shiftKey?: boolean;
   readonly metaKey?: boolean;
   readonly ctrlKey?: boolean;
   readonly altKey?: boolean;
@@ -520,8 +529,8 @@ interface WebKanbanTargetElement {
 ## `WebKeyboardAdapter`
 
 ```ts
-interface WebKeyboardAdapter {
-  resolve(stroke: WebKeyboardStroke): WebKeyboardCommand | null;
+interface WebKeyboardAdapter<Command = WebKeyboardCommand> {
+  resolve(stroke: WebKeyboardStroke): Command | null;
 }
 ```
 ## `WebKeyboardCommand`
@@ -548,7 +557,7 @@ interface WebKeyboardStroke {
 ## `WebKeymap`
 
 ```ts
-type WebKeymap = Readonly<Record<string, WebKeyboardCommand>>;
+type WebKeymap<Command = WebKeyboardCommand> = Readonly<Record<string, Command>>;
 ```
 ## `WebModifierState`
 
@@ -728,7 +737,7 @@ interface WebViewportPositionOptions<Key> {
   readonly viewport: WebViewportPositionViewport;
   readonly content?: object;
   readonly findTarget: (key: Key) => WebViewportPositionElement | null;
-  readonly findTailReserve: (key: Key) => WebViewportPositionElement | null;
+  readonly findTailReserve?: (key: Key) => WebViewportPositionElement | null;
   readonly createResizeObserver?: (callback: () => void) => WebViewportPositionObserver;
   readonly createMutationObserver?: (callback: () => void) => WebViewportPositionObserver;
   readonly createVisibilityObserver?: (
@@ -749,6 +758,7 @@ interface WebViewportPositionPorts<Key> {
   scheduleFrame(callback: () => void): () => void;
   observeLayout(callback: () => void): () => void;
   observeTargetVisibility(key: Key, callback: (visible: boolean) => void): () => void;
+  observeUserInteraction(callback: () => void): () => void;
 }
 ```
 ## `WebViewportPositionViewport`
@@ -759,6 +769,8 @@ interface WebViewportPositionViewport {
   readonly scrollTop: number;
   getBoundingClientRect(): { readonly top: number };
   scrollTo(options: { readonly top: number; readonly behavior: "smooth" | "instant" }): void;
+  addEventListener?(type: "wheel" | "pointerdown", listener: () => void, options?: { readonly passive?: boolean }): void;
+  removeEventListener?(type: "wheel" | "pointerdown", listener: () => void): void;
 }
 ```
 ## `WebViewportPositionVisibilityObserver`

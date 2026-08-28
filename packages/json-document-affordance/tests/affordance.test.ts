@@ -35,6 +35,9 @@ import {
   createBoardDragSession,
   createCanvasGestureSession,
   createGestureSession,
+  createInteractionHandleSession,
+  interactionHandleCursor,
+  interactionHandleDelta,
   typeaheadAffordance,
   wheelAffordance,
   zoomAffordance,
@@ -42,6 +45,42 @@ import {
 import { pressInteractionFromWeb } from "@interactive-os/json-document-web";
 
 describe("Affordance sessions", () => {
+  test("owns drag, resize, and control handle descriptor, cursor, delta, and lifecycle semantics", () => {
+    expect(interactionHandleCursor({ kind: "drag" })).toBe("grab");
+    expect(interactionHandleCursor({ kind: "drag" }, "active")).toBe("grabbing");
+    expect(interactionHandleCursor({ kind: "resize", edge: "ne" })).toBe("ne-resize");
+    expect(interactionHandleCursor({ kind: "control" })).toBe("crosshair");
+    expect(interactionHandleDelta(
+      { kind: "resize", edge: "e" },
+      { x: 10, y: 20 },
+      { x: 25, y: 45 },
+    )).toEqual({ dx: 15, dy: 0 });
+
+    const session = createInteractionHandleSession();
+    expect(session.start({ kind: "drag", axis: "x" }, { x: 10, y: 20 })).toMatchObject({
+      phase: "start",
+      delta: { dx: 0, dy: 0 },
+      cursor: "grabbing",
+    });
+    expect(session.preview({ x: 18, y: 50 })).toMatchObject({
+      phase: "preview",
+      delta: { dx: 8, dy: 0 },
+      cursor: "grabbing",
+    });
+    expect(session.commit({ x: 24, y: 60 })).toMatchObject({
+      phase: "commit",
+      delta: { dx: 14, dy: 0 },
+      cursor: "grab",
+    });
+    expect(session.getSnapshot()).toBeNull();
+    session.start({ kind: "control" }, { x: 0, y: 0 });
+    expect(session.cancel("lost-capture")).toMatchObject({
+      phase: "cancel",
+      reason: "lost-capture",
+      cursor: "crosshair",
+    });
+  });
+
   test("owns typeahead buffer and match timing", () => {
     const matches: string[] = [];
     const session = createTypeaheadSession<string>({ onMatch: (key) => matches.push(key) });
@@ -57,9 +96,11 @@ describe("Affordance sessions", () => {
 
   test("owns rename draft, slow double click, commit, and cancel", () => {
     const commits: string[] = [];
+    const cancels: string[] = [];
     const finished: string[] = [];
     const session = createRenameSession<string>({
       onCommit: (key, draft) => commits.push(`${key}:${draft}`),
+      onCancel: (key, draft) => cancels.push(`${key}:${draft}`),
       onFinish: (key) => finished.push(key),
     });
     expect(session.handlePointer("a", "Alpha", 1, 10)).toBe(false);
@@ -69,6 +110,7 @@ describe("Affordance sessions", () => {
     expect(commits).toEqual(["a:Apex"]);
     session.begin("b", "Beta");
     expect(session.handleKey("Escape")).toBe(true);
+    expect(cancels).toEqual(["b:Beta"]);
     expect(finished).toEqual(["a", "b"]);
   });
 

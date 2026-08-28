@@ -18,7 +18,7 @@ import {
   type AnnotationPoint,
   type AnnotationSource,
 } from "@interactive-os/json-document-editing";
-import { createGestureSession } from "@interactive-os/json-document-affordance";
+import { createGestureSession, type InteractionHandleDescriptor, type InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import {
   createWebPointerSession,
   projectWebClientPointToSVG,
@@ -45,7 +45,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { IconButton, Tabs, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, Tabs, ToggleButton, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader, ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { CodeBlock } from "../../shared/ui/code-block";
@@ -170,31 +170,34 @@ export function AnnotationDemoRoute() {
     gestureSession.begin({ type: "create", tool, start: point, current: point });
   }
 
-  function handleAnnotationPointerDown(event: PointerEvent<SVGGElement>, annotation: Annotation) {
-    event.stopPropagation();
-    setEditingId(null);
-    setPreviewId(null);
-    if (tool !== "select") {
-      setSelected(annotation.id);
+  function handleAnnotationInteraction(
+    interaction: InteractionHandleEvent,
+    event: PointerEvent<SVGElement>,
+    annotation: Annotation,
+    type: "move" | "resize",
+  ) {
+    if (interaction.phase === "start") {
+      if (type === "move") {
+        setEditingId(null);
+        setPreviewId(null);
+        setSelected(annotation.id);
+        if (tool !== "select") return;
+      }
+      const start = eventPoint(event);
+      if (start !== null) gestureSession.begin({ type, id: annotation.id, start, current: start });
       return;
     }
-    const svg = svgRef.current;
-    if (svg === null) return;
-    setSelected(annotation.id);
-    const start = eventPoint(event);
-    if (start === null) return;
-    pointerSession.begin(svg, event.pointerId, { active: true });
-    gestureSession.begin({ type: "move", id: annotation.id, start, current: start });
-  }
-
-  function handleResizePointerDown(event: PointerEvent<SVGCircleElement>, annotation: Annotation) {
-    event.stopPropagation();
-    const svg = svgRef.current;
-    if (svg === null) return;
-    const start = eventPoint(event);
-    if (start === null) return;
-    pointerSession.begin(svg, event.pointerId, { active: true });
-    gestureSession.begin({ type: "resize", id: annotation.id, start, current: start });
+    if (interaction.phase === "cancel") {
+      gestureSession.cancel("pointer-cancel");
+      setAnnouncement("진행 중인 조작을 취소했습니다.");
+      return;
+    }
+    const active = gestureSession.getActive();
+    if (active?.type !== type || active.id !== annotation.id) return;
+    const current = eventPoint(event);
+    if (current === null) return;
+    gestureSession.preview({ ...active, current });
+    if (interaction.phase === "commit") commitActiveGesture();
   }
 
   function handlePointerMove(event: PointerEvent<SVGSVGElement>) {
@@ -217,6 +220,10 @@ export function AnnotationDemoRoute() {
 
   function handlePointerUp(event: PointerEvent<SVGSVGElement>) {
     if (pointerSession.commit(event.pointerId) === null) return;
+    commitActiveGesture();
+  }
+
+  function commitActiveGesture() {
     const gesture = gestureSession.commit();
     if (gesture === null) return;
     if (gesture.type === "draw") {
@@ -360,7 +367,7 @@ export function AnnotationDemoRoute() {
             >
               <image href={sourceUrl} width={source.width} height={source.height} pointerEvents="none" />
               {documentValue.annotations.map((annotation, index) => (
-                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onPointerDown={handleAnnotationPointerDown} onPreviewChange={(visible) => setPreviewId(visible ? annotation.id : null)} onResizePointerDown={handleResizePointerDown} />
+                <AnnotationShape key={annotation.id} annotation={projectGestureAnnotation(annotation, gesture)} index={index + 1} selected={annotation.id === selectedId} onHandle={handleAnnotationInteraction} onPreviewChange={(visible) => setPreviewId(visible ? annotation.id : null)} />
               ))}
               {gesture?.type === "create" ? <DraftShape gesture={gesture} /> : null}
               {gesture?.type === "draw" ? <StrokeLine points={gesture.points} draft /> : null}
@@ -499,11 +506,14 @@ function AnnotationShape(props: {
   readonly annotation: Annotation;
   readonly index: number;
   readonly selected: boolean;
-  readonly onPointerDown: (event: PointerEvent<SVGGElement>, annotation: Annotation) => void;
+  readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<SVGElement>, annotation: Annotation, type: "move" | "resize") => void;
   readonly onPreviewChange: (visible: boolean) => void;
-  readonly onResizePointerDown: (event: PointerEvent<SVGCircleElement>, annotation: Annotation) => void;
 }) {
   const { annotation } = props;
+  const drag = useInteractionHandle<SVGGElement>({
+    descriptor: { kind: "drag", cursor: { idle: "move", active: "grabbing" } },
+    onHandle: (interaction, event) => props.onHandle(interaction, event, annotation, "move"),
+  });
   const selector = annotation.target.selector;
   const bounds = annotationBounds(annotation);
   const common = {
@@ -521,10 +531,10 @@ function AnnotationShape(props: {
       onFocus={() => props.onPreviewChange(true)}
       onPointerEnter={() => props.onPreviewChange(true)}
       onPointerLeave={() => props.onPreviewChange(false)}
-      onPointerDown={(event) => props.onPointerDown(event, annotation)}
+      {...drag.handleProps}
       role="button"
       tabIndex={0}
-      style={{ cursor: "move" }}
+      style={{ cursor: drag.cursor }}
     >
       {annotation.presentation.type === "marker" && selector.type === "point" ? (
         <CommentNumberBadge index={props.index} point={selector} selected={props.selected} />
@@ -536,14 +546,12 @@ function AnnotationShape(props: {
         <>
           <rect {...common} {...selector} fill="transparent" />
           {props.selected ? (
-            <circle
+            <AnnotationPointHandle
               aria-label="Resize rectangle"
               cx={selector.x + selector.width}
               cy={selector.y + selector.height}
-              r="15"
-              fill={accent}
-              onPointerDown={(event) => props.onResizePointerDown(event, annotation)}
-              style={{ cursor: "nwse-resize" }}
+              descriptor={{ kind: "resize", edge: "se", cursor: { idle: "nwse-resize" } }}
+              onHandle={(interaction, event) => props.onHandle(interaction, event, annotation, "resize")}
             />
           ) : null}
         </>
@@ -552,7 +560,7 @@ function AnnotationShape(props: {
         <>
           <StrokeLine points={selector.points} selected={props.selected} />
           {props.selected ? (
-            <circle aria-label="Resize drawing" cx={bounds.x + bounds.width} cy={bounds.y + bounds.height} r="15" fill={accent} onPointerDown={(event) => props.onResizePointerDown(event, annotation)} style={{ cursor: "nwse-resize" }} />
+            <AnnotationPointHandle aria-label="Resize drawing" cx={bounds.x + bounds.width} cy={bounds.y + bounds.height} descriptor={{ kind: "resize", edge: "se", cursor: { idle: "nwse-resize" } }} onHandle={(interaction, event) => props.onHandle(interaction, event, annotation, "resize")} />
           ) : null}
         </>
       ) : null}
@@ -560,14 +568,12 @@ function AnnotationShape(props: {
         <>
           <ArrowLine from={selector.from} to={selector.to} selected={props.selected} />
           {props.selected ? (
-            <circle
+            <AnnotationPointHandle
               aria-label="Resize arrow"
               cx={selector.to.x}
               cy={selector.to.y}
-              r="15"
-              fill={accent}
-              onPointerDown={(event) => props.onResizePointerDown(event, annotation)}
-              style={{ cursor: "crosshair" }}
+              descriptor={{ kind: "control" }}
+              onHandle={(interaction, event) => props.onHandle(interaction, event, annotation, "resize")}
             />
           ) : null}
         </>
@@ -577,6 +583,17 @@ function AnnotationShape(props: {
       ) : null}
     </g>
   );
+}
+
+function AnnotationPointHandle(props: {
+  readonly "aria-label": string;
+  readonly cx: number;
+  readonly cy: number;
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<SVGCircleElement>) => void;
+}) {
+  const binding = useInteractionHandle<SVGCircleElement>({ descriptor: props.descriptor, onHandle: props.onHandle });
+  return <circle {...binding.handleProps} aria-label={props["aria-label"]} cx={props.cx} cy={props.cy} r="15" fill={accent} style={{ cursor: binding.cursor }} />;
 }
 
 function CommentNumberBadge(props: { readonly index: number; readonly point: AnnotationPoint; readonly selected: boolean }) {

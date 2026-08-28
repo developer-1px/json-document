@@ -7,6 +7,8 @@ import calendarTimeGridPointerSource from "../../../../packages/json-document-ed
 import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
+import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
+import calendarEventLabelSource from "../../../../packages/json-document-ui-primitives-react/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
@@ -31,12 +33,17 @@ import webDragDropSessionSource from "../../../../packages/json-document-web/src
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 import webPointTargetSource from "../../../../packages/json-document-web/src/point-target.ts?raw";
 import webCalendarSource from "../../../../packages/json-document-web/src/calendar-input.ts?raw";
+import webKeyboardSource from "../../../../packages/json-document-web/src/keyboard.ts?raw";
 import calendarHandSource from "../../../../packages/json-document-calendar/src/use-calendar-hand.ts?raw";
+import calendarKeyboardSource from "../../../../packages/json-document-calendar/src/use-calendar-keyboard.ts?raw";
 import calendarPointerInteractionsSource from "../../../../packages/json-document-calendar/src/use-calendar-pointer-interactions.ts?raw";
+import calendarRenameInputSource from "../../../../packages/json-document-calendar/src/use-calendar-rename-input.ts?raw";
+import calendarViewportPositionSource from "../../../../packages/json-document-calendar/src/use-calendar-viewport-position.ts?raw";
 import webKanbanDropTargetSource from "../../../../packages/json-document-web/src/kanban-drop-target.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
+import interactionHandleSource from "../../../../packages/json-document-affordance/src/interaction-handle.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
@@ -140,6 +147,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
+  ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
+  ["packages/json-document-ui-primitives-react/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
@@ -165,12 +174,17 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
   ["packages/json-document-web/src/point-target.ts", webPointTargetSource],
   ["packages/json-document-web/src/calendar-input.ts", webCalendarSource],
+  ["packages/json-document-web/src/keyboard.ts", webKeyboardSource],
   ["packages/json-document-calendar/src/use-calendar-hand.ts", calendarHandSource],
+  ["packages/json-document-calendar/src/use-calendar-keyboard.ts", calendarKeyboardSource],
   ["packages/json-document-calendar/src/use-calendar-pointer-interactions.ts", calendarPointerInteractionsSource],
+  ["packages/json-document-calendar/src/use-calendar-rename-input.ts", calendarRenameInputSource],
+  ["packages/json-document-calendar/src/use-calendar-viewport-position.ts", calendarViewportPositionSource],
   ["packages/json-document-web/src/kanban-drop-target.ts", webKanbanDropTargetSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
+  ["packages/json-document-affordance/src/interaction-handle.ts", interactionHandleSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
@@ -222,8 +236,23 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarKeyboard",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-keyboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
     symbol: "useCalendarPointerInteractions",
     sourcePath: "packages/json-document-calendar/src/use-calendar-pointer-interactions.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarViewportPosition",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-viewport-position.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarRenameInput",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-rename-input.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",
@@ -272,6 +301,21 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithFrequency",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithInterval",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarRecurrenceWithUntil",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "previewCalendarAllDay",
     sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
   },
@@ -296,13 +340,58 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/calendar-selection.ts",
   },
   {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarAllDaySpan",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarDocumentCalendars",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarDocumentCalendar",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarDatePart",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarIntervalLastDate",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "parseCalendarView",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "formatCalendarInstant",
+    sourcePath: "packages/json-document-editing/src/calendar-validation.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-web",
     symbol: "calendarCommandFromWebKeyboardEvent",
     sourcePath: "packages/json-document-web/src/calendar-input.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",
+    symbol: "createWebKeyboardAdapter",
+    sourcePath: "packages/json-document-web/src/keyboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
     symbol: "calendarMinutesFromWebGrid",
+    sourcePath: "packages/json-document-web/src/calendar-input.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "calendarKeyFromWebRow",
     sourcePath: "packages/json-document-web/src/calendar-input.ts",
   },
   {
@@ -317,8 +406,43 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarEventLabel",
+    sourcePath: "packages/json-document-ui-primitives-react/src/calendar-event-label.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarCells",
     sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarCellInterval",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarMonthWeeks",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarTimeLabel",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "calendarYearMonths",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "visiblePeriodLabel",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "shiftVisibleDate",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
@@ -495,7 +619,7 @@ const registeredPublicUsages = [
     symbol: "useListbox",
     sourcePath: "packages/json-document-ui-primitives-react/src/listbox.ts",
   },
-  ...(["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "DisclosureButton"] as const).map((symbol) => ({
+  ...(["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "SegmentedControl", "DisclosureButton"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
@@ -686,6 +810,16 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-affordance/src/canvas-gesture-session.ts",
   },
   {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "createInteractionHandleSession",
+    sourcePath: "packages/json-document-affordance/src/interaction-handle.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "interactionHandleCursor",
+    sourcePath: "packages/json-document-affordance/src/interaction-handle.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "Select",
     sourcePath: "packages/json-document-ui-primitives-react/src/select.tsx",
@@ -708,6 +842,21 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "ResizeHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "DragHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ControlHandle",
+    sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "useInteractionHandle",
     sourcePath: "packages/json-document-ui-primitives-react/src/surfaces.tsx",
   },
 ] as const;

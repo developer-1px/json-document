@@ -623,6 +623,26 @@ describe("Web keyboard Adapter", () => {
       .toEqual({ type: "toggle" });
   });
 
+  test("resolves an isolated product semantic keymap without structural defaults", () => {
+    type ProductCommand =
+      | { readonly type: "open" }
+      | { readonly type: "shift"; readonly direction: 1 | -1 };
+    const product = createWebKeyboardAdapter<ProductCommand>({
+      keymap: {
+        Enter: { type: "open" },
+        ArrowRight: { type: "shift", direction: 1 },
+      },
+      defaults: false,
+    });
+
+    expect(product.resolve({ key: "Enter", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "open" });
+    expect(product.resolve({ key: "ArrowRight", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "shift", direction: 1 });
+    expect(product.resolve({ key: "Delete", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toBeNull();
+  });
+
   test("moves and bounds a grid point in visible order", () => {
     const start = { rowId: "r2", columnId: "status" };
     expect(moveGridPoint(grid, start, "up")).toEqual({ rowId: "r1", columnId: "status" });

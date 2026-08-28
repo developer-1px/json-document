@@ -49,6 +49,7 @@ import affordanceContextMenuMarkdown from "../../../../docs/public/affordance-co
 import affordanceMarqueeMarkdown from "../../../../docs/public/affordance-marquee.md?raw";
 import affordanceDropMarkdown from "../../../../docs/public/affordance-drop.md?raw";
 import affordanceCopyDragMarkdown from "../../../../docs/public/affordance-copy-drag.md?raw";
+import affordanceHandlesMarkdown from "../../../../docs/public/affordance-handles.md?raw";
 import affordanceResizeMarkdown from "../../../../docs/public/affordance-resize.md?raw";
 import affordancePanMarkdown from "../../../../docs/public/affordance-pan.md?raw";
 import affordanceScrollMarkdown from "../../../../docs/public/affordance-scroll.md?raw";
@@ -127,6 +128,7 @@ export const docPages = {
   affordanceMarquee: docPage("/docs/affordance/marquee", affordanceMarqueeMarkdown),
   affordanceDrop: docPage("/docs/affordance/drop", affordanceDropMarkdown),
   affordanceCopyDrag: docPage("/docs/affordance/copy-drag", affordanceCopyDragMarkdown),
+  affordanceHandles: docPage("/docs/affordance/handles", affordanceHandlesMarkdown),
   affordanceResize: docPage("/docs/affordance/resize", affordanceResizeMarkdown),
   affordancePan: docPage("/docs/affordance/pan", affordancePanMarkdown),
   affordanceScroll: docPage("/docs/affordance/scroll", affordanceScrollMarkdown),

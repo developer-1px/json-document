@@ -16,6 +16,11 @@ export {
 export { createBoardDragSession } from "./board-drag-session.js";
 export { createCanvasGestureSession } from "./canvas-gesture-session.js";
 export { createGestureSession } from "./gesture-session.js";
+export {
+  createInteractionHandleSession,
+  interactionHandleCursor,
+  interactionHandleDelta,
+} from "./interaction-handle.js";
 export { createViewportPositionSession } from "./viewport-position.js";
 export type {
   BoardDragCancelReason,
@@ -38,7 +43,23 @@ export type {
   GestureState,
 } from "./gesture-session.js";
 export type {
+  ControlHandleDescriptor,
+  DragHandleDescriptor,
+  InteractionHandleAxis,
+  InteractionHandleCancelReason,
+  InteractionHandleCursor,
+  InteractionHandleCursorPolicy,
+  InteractionHandleDelta,
+  InteractionHandleDescriptor,
+  InteractionHandleEvent,
+  InteractionHandlePhase,
+  InteractionHandleSession,
+  InteractionHandleSnapshot,
+  ResizeHandleDescriptor,
+} from "./interaction-handle.js";
+export type {
   ViewportPositionCancelReason,
+  ViewportPositionBehavior,
   ViewportPositionGeometry,
   ViewportPositionOptions,
   ViewportPositionPorts,

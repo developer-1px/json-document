@@ -5,6 +5,7 @@ import type {
   AffordancePreview,
   AffordanceRect,
 } from "./result.js";
+import { interactionHandleCursor } from "./interaction-handle.js";
 
 export type Point = {
   readonly x: number;
@@ -141,17 +142,6 @@ export function panAffordance(input: {
 
 export type ResizeEdge = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 
-const resizeCursors: Record<ResizeEdge, string> = {
-  n: "n-resize",
-  ne: "ne-resize",
-  e: "e-resize",
-  se: "se-resize",
-  s: "s-resize",
-  sw: "sw-resize",
-  w: "w-resize",
-  nw: "nw-resize",
-};
-
 export function resizeAffordance(
   origin: Point,
   point: Point,
@@ -189,7 +179,7 @@ export function resizeAffordance(
       dh: bottom - top,
       edge,
     },
-    cursor: resizeCursors[edge],
+    cursor: interactionHandleCursor({ kind: "resize", edge }),
   };
 }
 

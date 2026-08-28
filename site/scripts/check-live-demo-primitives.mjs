@@ -7,14 +7,14 @@ const registryPath = join(sourceRoot, "app/live-demo-registry.tsx");
 const registry = readFileSync(registryPath, "utf8");
 const liveDemoPaths = [...registry.matchAll(/^\s*"([^"]+)": demo\(/gm)].map((match) => match[1]);
 
-if (liveDemoPaths.length !== 37) {
-  throw new Error(`Live Demo 감사 집합이 37개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
+if (liveDemoPaths.length !== 38) {
+  throw new Error(`Live Demo 감사 집합이 38개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
 }
 
 const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];
 const files = roots.flatMap(walk).filter((file) => extname(file) === ".tsx" && !file.includes("/routes/docs/"));
 const findings = [];
-const counts = { action: 0, icon: 0, toggle: 0, choice: 0, segmented: 0, tabs: 0, disclosure: 0, menu: 0 };
+const counts = { action: 0, icon: 0, toggle: 0, choice: 0, segmented: 0, tabs: 0, disclosure: 0, menu: 0, dragHandle: 0, resizeHandle: 0, controlHandle: 0 };
 
 for (const file of files) {
   const source = readFileSync(file, "utf8");
@@ -29,6 +29,9 @@ for (const file of files) {
   counts.tabs += matches(source, /<Tabs\b/g);
   counts.disclosure += matches(source, /<DisclosureButton\b/g);
   counts.menu += matches(source, /<(?:Menu|MenuItemButton)\b/g);
+  counts.dragHandle += matches(source, /<DragHandle\b/g);
+  counts.resizeHandle += matches(source, /<ResizeHandle\b/g);
+  counts.controlHandle += matches(source, /<ControlHandle\b/g);
 }
 
 if (findings.length > 0) throw new Error(`Live Demo가 canonical UI Primitive를 우회합니다:\n${findings.join("\n")}`);

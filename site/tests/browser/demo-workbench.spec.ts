@@ -40,11 +40,15 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "DatabaseTableDemo.tsx",
     "initial-database.ts",
     "database-hand.tsx",
+    "keyboard.ts",
     "clipboard.ts",
     "database.ts",
     "database-property-value.ts",
     "topology.ts",
     "grid-cell.ts",
+    "surfaces.tsx",
+    "pointer-session.ts",
+    "interaction-handle.ts",
   ]);
 });
 

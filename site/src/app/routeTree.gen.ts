@@ -19,6 +19,7 @@ import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapte
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
 import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
 import { Route as PageAdaptersVirtualSelectionRouteImport } from "./routes/_page/adapters/virtual-selection";
+import { Route as PageAffordancesHandlesRouteImport } from "./routes/_page/affordances/handles";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
@@ -102,6 +103,7 @@ import { Route as PageDocsAffordanceDropRouteImport } from "./routes/_page/docs/
 import { Route as PageDocsAffordanceFocusRouteImport } from "./routes/_page/docs/affordance/focus";
 import { Route as PageDocsAffordanceFoldRouteImport } from "./routes/_page/docs/affordance/fold";
 import { Route as PageDocsAffordanceForbidRouteImport } from "./routes/_page/docs/affordance/forbid";
+import { Route as PageDocsAffordanceHandlesRouteImport } from "./routes/_page/docs/affordance/handles";
 import { Route as PageDocsAffordanceHistoryRouteImport } from "./routes/_page/docs/affordance/history";
 import { Route as PageDocsAffordanceHoverRouteImport } from "./routes/_page/docs/affordance/hover";
 import { Route as PageDocsAffordanceMarqueeRouteImport } from "./routes/_page/docs/affordance/marquee";
@@ -200,6 +202,11 @@ const PageAdaptersVirtualSelectionRoute =
     path: "/adapters/virtual-selection",
     getParentRoute: () => PageRoute,
   } as any);
+const PageAffordancesHandlesRoute = PageAffordancesHandlesRouteImport.update({
+  id: "/affordances/handles",
+  path: "/affordances/handles",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
   id: "/connectors/",
   path: "/connectors/",
@@ -633,6 +640,12 @@ const PageDocsAffordanceForbidRoute =
     path: "/docs/affordance/forbid",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAffordanceHandlesRoute =
+  PageDocsAffordanceHandlesRouteImport.update({
+    id: "/docs/affordance/handles",
+    path: "/docs/affordance/handles",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAffordanceHistoryRoute =
   PageDocsAffordanceHistoryRouteImport.update({
     id: "/docs/affordance/history",
@@ -900,6 +913,7 @@ export interface FileRoutesByFullPath {
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/affordances/handles": typeof PageAffordancesHandlesRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -982,6 +996,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1040,6 +1055,7 @@ export interface FileRoutesByTo {
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/affordances/handles": typeof PageAffordancesHandlesRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -1122,6 +1138,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1182,6 +1199,7 @@ export interface FileRoutesById {
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/_page/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/_page/affordances/handles": typeof PageAffordancesHandlesRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
@@ -1264,6 +1282,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/_page/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/_page/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/_page/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/_page/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/_page/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/_page/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1324,6 +1343,7 @@ export interface FileRouteTypes {
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
+    | "/affordances/handles"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1406,6 +1426,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/focus"
     | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
+    | "/docs/affordance/handles"
     | "/docs/affordance/history"
     | "/docs/affordance/hover"
     | "/docs/affordance/marquee"
@@ -1464,6 +1485,7 @@ export interface FileRouteTypes {
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
+    | "/affordances/handles"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1546,6 +1568,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/focus"
     | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
+    | "/docs/affordance/handles"
     | "/docs/affordance/history"
     | "/docs/affordance/hover"
     | "/docs/affordance/marquee"
@@ -1605,6 +1628,7 @@ export interface FileRouteTypes {
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
     | "/_page/adapters/virtual-selection"
+    | "/_page/affordances/handles"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
@@ -1687,6 +1711,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/focus"
     | "/_page/docs/affordance/fold"
     | "/_page/docs/affordance/forbid"
+    | "/_page/docs/affordance/handles"
     | "/_page/docs/affordance/history"
     | "/_page/docs/affordance/hover"
     | "/_page/docs/affordance/marquee"
@@ -1812,6 +1837,13 @@ declare module "@tanstack/react-router" {
       path: "/adapters/virtual-selection";
       fullPath: "/adapters/virtual-selection";
       preLoaderRoute: typeof PageAdaptersVirtualSelectionRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/affordances/handles": {
+      id: "/_page/affordances/handles";
+      path: "/affordances/handles";
+      fullPath: "/affordances/handles";
+      preLoaderRoute: typeof PageAffordancesHandlesRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/": {
@@ -2395,6 +2427,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAffordanceForbidRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/affordance/handles": {
+      id: "/_page/docs/affordance/handles";
+      path: "/docs/affordance/handles";
+      fullPath: "/docs/affordance/handles";
+      preLoaderRoute: typeof PageDocsAffordanceHandlesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/affordance/history": {
       id: "/_page/docs/affordance/history";
       path: "/docs/affordance/history";
@@ -2794,6 +2833,7 @@ interface PageRouteChildren {
   PageAdaptersContenteditableRoute: typeof PageAdaptersContenteditableRoute;
   PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
   PageAdaptersVirtualSelectionRoute: typeof PageAdaptersVirtualSelectionRoute;
+  PageAffordancesHandlesRoute: typeof PageAffordancesHandlesRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
@@ -2876,6 +2916,7 @@ interface PageRouteChildren {
   PageDocsAffordanceFocusRoute: typeof PageDocsAffordanceFocusRoute;
   PageDocsAffordanceFoldRoute: typeof PageDocsAffordanceFoldRoute;
   PageDocsAffordanceForbidRoute: typeof PageDocsAffordanceForbidRoute;
+  PageDocsAffordanceHandlesRoute: typeof PageDocsAffordanceHandlesRoute;
   PageDocsAffordanceHistoryRoute: typeof PageDocsAffordanceHistoryRoute;
   PageDocsAffordanceHoverRoute: typeof PageDocsAffordanceHoverRoute;
   PageDocsAffordanceMarqueeRoute: typeof PageDocsAffordanceMarqueeRoute;
@@ -2907,6 +2948,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageAdaptersContenteditableRoute: PageAdaptersContenteditableRoute,
   PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
   PageAdaptersVirtualSelectionRoute: PageAdaptersVirtualSelectionRoute,
+  PageAffordancesHandlesRoute: PageAffordancesHandlesRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
@@ -2989,6 +3031,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAffordanceFocusRoute: PageDocsAffordanceFocusRoute,
   PageDocsAffordanceFoldRoute: PageDocsAffordanceFoldRoute,
   PageDocsAffordanceForbidRoute: PageDocsAffordanceForbidRoute,
+  PageDocsAffordanceHandlesRoute: PageDocsAffordanceHandlesRoute,
   PageDocsAffordanceHistoryRoute: PageDocsAffordanceHistoryRoute,
   PageDocsAffordanceHoverRoute: PageDocsAffordanceHoverRoute,
   PageDocsAffordanceMarqueeRoute: PageDocsAffordanceMarqueeRoute,

@@ -20,6 +20,7 @@ export { findWebPointTarget } from "./point-target.js";
 export {
   calendarCommandFromWebKeyboardEvent,
   calendarDayDeltaFromWebWidth,
+  calendarKeyFromWebRow,
   calendarMinutesFromWebGrid,
   type WebCalendarCommand,
   type WebCalendarKeyboardEvent,

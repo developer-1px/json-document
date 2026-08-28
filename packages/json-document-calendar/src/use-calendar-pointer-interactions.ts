@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useState, type PointerEvent } from "react";
 import {
   addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
   calendarEventsOnDay, calendarInstantAt, calendarShiftInstant, calendarVisibleEvents,
@@ -7,7 +7,8 @@ import {
   type CalendarTimeGridPointerRelease,
 } from "@interactive-os/json-document-editing";
 import {
-  calendarDayDeltaFromWebWidth, calendarMinutesFromWebGrid, createWebPointerSession, findWebPointTarget,
+  calendarDayDeltaFromWebWidth, calendarKeyFromWebRow, calendarMinutesFromWebGrid,
+  createWebPointerSession, findWebPointTarget,
 } from "@interactive-os/json-document-web";
 import type { CalendarHand } from "./use-calendar-hand.js";
 
@@ -39,7 +40,7 @@ export interface CalendarPointerInteractions {
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
-  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, rowDays: ReadonlyArray<string>, id: string | null, start: string | null, end: string | null): void;
   monthPointerMove(event: PointerEvent<HTMLElement>): void;
   monthPointerUp(event: PointerEvent<HTMLElement>): void;
   cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
@@ -54,8 +55,6 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   const [timePointer] = useState(() => createWebPointerSession<TimeRelease>());
   const [allDayPointer] = useState(() => createWebPointerSession<AllDayRelease>());
   const [monthPointer] = useState(() => createWebPointerSession<MonthRelease>());
-  const allDayPreviewRef = useRef<CalendarAllDayPointerRelease | null>(null);
-  allDayPreviewRef.current = hand.allDayPreview;
   const document = hand.document;
   const visibleEvents = calendarVisibleEvents(document);
 
@@ -82,15 +81,6 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const intent = bindCalendarAllDayIntent(interpretCalendarAllDayPointer(release), event, release.originEventStart, hand.scope);
     remember(intent, release.originEventStart, event?.end ?? null);
   }
-
-  useEffect(() => {
-    function onPointerUp(): void {
-      const release = allDayPreviewRef.current;
-      if (release !== null && (release.originHandle === "start" || release.originHandle === "end")) commitAllDay(release);
-    }
-    window.addEventListener("pointerup", onPointerUp, true);
-    return () => window.removeEventListener("pointerup", onPointerUp, true);
-  });
 
   function timePointerDown(event: PointerEvent<HTMLElement>, day: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: CalendarTimeGridHandle | null): void {
     if (event.button !== 0) return;
@@ -148,8 +138,12 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     remember(intent, release.originEventStart, release.originEventEnd);
   }
 
-  function monthPointerDown(event: PointerEvent<HTMLElement>, originDay: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null): void {
+  function monthPointerDown(event: PointerEvent<HTMLElement>, fallbackDay: string, rowDays: ReadonlyArray<string>, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null): void {
     if (event.button !== 0) return;
+    const row = event.currentTarget.closest("[data-calendar-week]");
+    const originDay = row === null
+      ? fallbackDay
+      : calendarKeyFromWebRow(event.clientX, row.getBoundingClientRect(), rowDays) ?? fallbackDay;
     policy.onMonthPointerBegin?.();
     const release = { originDay, originEventId, originEventStart, originEventEnd, targetDay: originDay, eventsOnTargetDay: [] };
     monthPointer.begin(event.currentTarget, event.pointerId, release);

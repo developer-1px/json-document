@@ -131,6 +131,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "affordance-marquee.md": "/docs/affordance/marquee",
   "affordance-drop.md": "/docs/affordance/drop",
   "affordance-copy-drag.md": "/docs/affordance/copy-drag",
+  "affordance-handles.md": "/docs/affordance/handles",
   "affordance-resize.md": "/docs/affordance/resize",
   "affordance-pan.md": "/docs/affordance/pan",
   "affordance-scroll.md": "/docs/affordance/scroll",

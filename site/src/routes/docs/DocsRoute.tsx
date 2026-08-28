@@ -36,6 +36,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   affordanceMarquee: "cursor",
   affordanceDrop: "connector",
   affordanceCopyDrag: "peek",
+  affordanceHandles: "cursor",
   affordanceResize: "branch",
   affordancePan: "sleep",
   affordanceScroll: "sleep",

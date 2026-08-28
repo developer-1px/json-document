@@ -5,6 +5,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
+  type PointerEvent,
   type ReactNode,
 } from "react";
 import {
@@ -35,6 +36,8 @@ import {
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
+import { useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
 import { ArrowDown, ArrowUp, Columns3, Minus, Plus, Redo2, Undo2, X } from "lucide-react";
@@ -267,7 +270,6 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   const [editingInitialValue, setEditingInitialValue] = useState<string>();
   const [headerMenu, setHeaderMenu] = useState<{ readonly propertyId: string; readonly x: number; readonly y: number } | null>(null);
   const [draggedPropertyId, setDraggedPropertyId] = useState<string | null>(null);
-  const resize = useRef<{ readonly propertyId: string; readonly startX: number; readonly startWidth: number } | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const nextRecord = useRef(1);
   const snapshot = useEditingSnapshot(editor);
@@ -548,37 +550,11 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                     <span>{property.name}</span>
                     <small>{property.type}{sortMark(view.sort, property.id)}</small>
                   </button>
-                  <span
-                    role="separator"
-                    aria-label={`${property.name} column width`}
-                    data-resize-edge="e"
-                    data-property-id={property.id}
-                    style={{ position: "absolute", insetBlock: 0, insetInlineEnd: 0, width: 6, cursor: "col-resize" }}
-                    onMouseDown={(event) => {
-                      event.preventDefault();
-                      const startX = event.clientX;
-                      const startWidth = view.propertyWidths[property.id] ?? 160;
-                      const finish = (up: MouseEvent) => {
-                        window.removeEventListener("mouseup", finish);
-                        configure({ propertyWidths: { ...view.propertyWidths, [property.id]: Math.max(88, startWidth + up.clientX - startX) } });
-                      };
-                      window.addEventListener("mouseup", finish);
-                    }}
-                    onPointerDown={(event) => {
-                      event.currentTarget.setPointerCapture(event.pointerId);
-                      resize.current = { propertyId: property.id, startX: event.clientX, startWidth: view.propertyWidths[property.id] ?? 160 };
-                    }}
-                    onPointerMove={(event) => {
-                      if (resize.current?.propertyId !== property.id) return;
-                      event.currentTarget.style.left = `${event.clientX - resize.current.startX}px`;
-                    }}
-                    onPointerUp={(event) => {
-                      const active = resize.current;
-                      resize.current = null;
-                      event.currentTarget.style.left = "";
-                      if (!active) return;
-                      configure({ propertyWidths: { ...view.propertyWidths, [property.id]: Math.max(88, active.startWidth + event.clientX - active.startX) } });
-                    }}
+                  <DatabaseColumnResizeHandle
+                    label={`${property.name} column width`}
+                    propertyId={property.id}
+                    width={view.propertyWidths[property.id] ?? 160}
+                    onCommit={(width) => configure({ propertyWidths: { ...view.propertyWidths, [property.id]: width } })}
                   />
                 </th>
               ))}
@@ -666,6 +642,37 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       </div>
       {props.renderInspector?.(context)}
     </div>
+  );
+}
+
+function DatabaseColumnResizeHandle(props: {
+  readonly label: string;
+  readonly propertyId: string;
+  readonly width: number;
+  readonly onCommit: (width: number) => void;
+}) {
+  const binding = useInteractionHandle<HTMLSpanElement>({
+    descriptor: { kind: "resize", edge: "e", cursor: { idle: "col-resize" } },
+    onHandle(interaction: InteractionHandleEvent, event: PointerEvent<HTMLSpanElement>) {
+      if (interaction.phase === "preview") {
+        event.currentTarget.style.transform = `translateX(${interaction.delta.dx}px)`;
+      } else if (interaction.phase === "commit") {
+        event.currentTarget.style.transform = "";
+        props.onCommit(Math.max(88, props.width + interaction.delta.dx));
+      } else if (interaction.phase === "cancel") {
+        event.currentTarget.style.transform = "";
+      }
+    },
+  });
+  return (
+    <span
+      {...binding.handleProps}
+      role="separator"
+      aria-label={props.label}
+      data-resize-edge="e"
+      data-property-id={props.propertyId}
+      style={{ position: "absolute", insetBlock: 0, insetInlineEnd: 0, width: 6, cursor: binding.cursor }}
+    />
   );
 }
 

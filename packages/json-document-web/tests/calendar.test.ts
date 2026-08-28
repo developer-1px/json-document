@@ -1,17 +1,42 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import {
   calendarCommandFromWebKeyboardEvent,
   calendarDayDeltaFromWebWidth,
+  calendarKeyFromWebRow,
   calendarMinutesFromWebGrid,
 } from "../src/index.js";
 
 describe("Calendar Web adapters", () => {
   test("maps the default calendar keys without stealing text-entry input", () => {
-    expect(calendarCommandFromWebKeyboardEvent(stroke("d"))).toEqual({ type: "view", view: "day" });
-    expect(calendarCommandFromWebKeyboardEvent(stroke("ArrowRight"))).toEqual({ type: "shift", direction: 1 });
-    expect(calendarCommandFromWebKeyboardEvent(stroke("Delete"))).toEqual({ type: "remove" });
+    const cases = [
+      ["d", { type: "view", view: "day" }],
+      ["w", { type: "view", view: "week" }],
+      ["m", { type: "view", view: "month" }],
+      ["y", { type: "view", view: "year" }],
+      ["t", { type: "today" }],
+      ["c", { type: "create" }],
+      ["Delete", { type: "remove" }],
+      ["Backspace", { type: "remove" }],
+      ["Escape", { type: "dismiss" }],
+      ["n", { type: "shift", direction: 1 }],
+      ["p", { type: "shift", direction: -1 }],
+      ["ArrowRight", { type: "shift", direction: 1 }],
+      ["ArrowLeft", { type: "shift", direction: -1 }],
+    ] as const;
+    for (const [key, command] of cases) {
+      expect(calendarCommandFromWebKeyboardEvent(stroke(key))).toEqual(command);
+    }
     expect(calendarCommandFromWebKeyboardEvent(stroke("d", { tagName: "INPUT" }))).toBeNull();
     expect(calendarCommandFromWebKeyboardEvent(stroke("ArrowRight", { tagName: "INPUT", type: "radio" }))).toBeNull();
+    expect(calendarCommandFromWebKeyboardEvent({ ...stroke("d"), metaKey: true })).toBeNull();
+    expect(calendarCommandFromWebKeyboardEvent({ ...stroke("d"), shiftKey: true })).toBeNull();
+  });
+
+  test("delegates Calendar chords to the canonical keyboard adapter", () => {
+    const source = readFileSync(new URL("../src/calendar-input.ts", import.meta.url), "utf8");
+    expect(source).toContain("createWebKeyboardAdapter<WebCalendarCommand>");
+    expect(source).not.toMatch(/if\s*\(\s*event\.key\s*===\s*["'][dwmtycnp]["']/);
   });
 
   test("translates Web geometry using injected Calendar policy", () => {
@@ -22,6 +47,16 @@ describe("Calendar Web adapters", () => {
     })).toBe(7 * 60 + 45);
     expect(calendarDayDeltaFromWebWidth(160, 100)).toBe(2);
     expect(calendarDayDeltaFromWebWidth(80, 0)).toBe(0);
+  });
+
+  test("projects a horizontal Calendar row point to its ordered key", () => {
+    const days = ["2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05"];
+    expect(calendarKeyFromWebRow(125, { left: 100, width: 200 }, days)).toBe("2026-08-02");
+    expect(calendarKeyFromWebRow(225, { left: 100, width: 200 }, days)).toBe("2026-08-04");
+    expect(calendarKeyFromWebRow(50, { left: 100, width: 200 }, days)).toBe("2026-08-02");
+    expect(calendarKeyFromWebRow(350, { left: 100, width: 200 }, days)).toBe("2026-08-05");
+    expect(calendarKeyFromWebRow(225, { left: 100, width: 0 }, days)).toBe("2026-08-02");
+    expect(calendarKeyFromWebRow(225, { left: 100, width: 200 }, [])).toBeNull();
   });
 });
 

@@ -1,37 +1,54 @@
 import type { CalendarView } from "@interactive-os/json-document-editing";
+import { createWebKeyboardAdapter, type WebKeymap } from "./keyboard.js";
 
 export type WebCalendarCommand =
   | { readonly type: "view"; readonly view: CalendarView }
   | { readonly type: "shift"; readonly direction: 1 | -1 }
   | { readonly type: "today" }
   | { readonly type: "create" }
-  | { readonly type: "remove" };
+  | { readonly type: "remove" }
+  | { readonly type: "dismiss" };
 
 export interface WebCalendarKeyboardEvent {
   readonly key: string;
   readonly target: unknown;
+  readonly shiftKey?: boolean;
   readonly metaKey?: boolean;
   readonly ctrlKey?: boolean;
   readonly altKey?: boolean;
 }
 
+const calendarKeymap = Object.freeze({
+  d: { type: "view", view: "day" },
+  w: { type: "view", view: "week" },
+  m: { type: "view", view: "month" },
+  y: { type: "view", view: "year" },
+  t: { type: "today" },
+  c: { type: "create" },
+  Delete: { type: "remove" },
+  Backspace: { type: "remove" },
+  Escape: { type: "dismiss" },
+  n: { type: "shift", direction: 1 },
+  p: { type: "shift", direction: -1 },
+  ArrowRight: { type: "shift", direction: 1 },
+  ArrowLeft: { type: "shift", direction: -1 },
+} satisfies WebKeymap<WebCalendarCommand>);
+
+const calendarKeyboard = createWebKeyboardAdapter<WebCalendarCommand>({
+  keymap: calendarKeymap,
+  defaults: false,
+});
+
 export function calendarCommandFromWebKeyboardEvent(event: WebCalendarKeyboardEvent): WebCalendarCommand | null {
-  if (event.metaKey === true || event.ctrlKey === true || event.altKey === true) return null;
   if (isTextEntryTarget(event.target)) return null;
-  if (event.key === "d") return { type: "view", view: "day" };
-  if (event.key === "w") return { type: "view", view: "week" };
-  if (event.key === "m") return { type: "view", view: "month" };
-  if (event.key === "y") return { type: "view", view: "year" };
-  if (event.key === "t") return { type: "today" };
-  if (event.key === "c") return { type: "create" };
-  if (event.key === "Delete" || event.key === "Backspace") return { type: "remove" };
-  if (event.key === "n") return { type: "shift", direction: 1 };
-  if (event.key === "p") return { type: "shift", direction: -1 };
-  if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-    if (isRadioOrTab(event.target)) return null;
-    return { type: "shift", direction: event.key === "ArrowRight" ? 1 : -1 };
-  }
-  return null;
+  if ((event.key === "ArrowRight" || event.key === "ArrowLeft") && isRadioOrTab(event.target)) return null;
+  return calendarKeyboard.resolve({
+    key: event.key,
+    shiftKey: event.shiftKey === true,
+    metaKey: event.metaKey === true,
+    ctrlKey: event.ctrlKey === true,
+    altKey: event.altKey === true,
+  });
 }
 
 export function calendarMinutesFromWebGrid(
@@ -48,6 +65,20 @@ export function calendarMinutesFromWebGrid(
 export function calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number {
   if (columnWidthPx <= 0) return 0;
   return Math.round(deltaPx / columnWidthPx);
+}
+
+export function calendarKeyFromWebRow<Key>(
+  clientX: number,
+  bounds: { readonly left: number; readonly width: number },
+  keys: ReadonlyArray<Key>,
+): Key | null {
+  if (keys.length === 0) return null;
+  if (bounds.width <= 0) return keys[0] ?? null;
+  const index = Math.max(0, Math.min(
+    keys.length - 1,
+    Math.floor(((clientX - bounds.left) / bounds.width) * keys.length),
+  ));
+  return keys[index] ?? null;
 }
 
 function isTextEntryTarget(target: unknown): boolean {

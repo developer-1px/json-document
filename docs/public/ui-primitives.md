@@ -92,7 +92,8 @@ Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host�
 `label`을 visible tooltip과 accessible name으로 사용합니다. `IconButton`도
 `label`을 visible tooltip과 accessible name에 투영합니다. `ChoiceChip`은 선택을
 radio chrome 없이 표시하고 `SegmentedControl`과 `Tabs`는 단일 선택 및 roving
-keyboard focus를 소유합니다. `DisclosureButton`은
+keyboard focus를 소유합니다. 두 control은 option ID generic을 callback까지
+보존하므로 Host는 선택 값을 다시 cast하지 않습니다. `DisclosureButton`은
 `expanded`와 `controls`를 disclosure ARIA에 연결하며 표현 markup은 Host가
 children으로 구성합니다.
 

@@ -69,8 +69,13 @@ export function ViewportPositionDemoRoute() {
       });
     };
     const stopLayout = ports.observeLayout(() => session.layoutChanged());
+    const stopUserInteraction = ports.observeUserInteraction(() => {
+      session.cancel("user-interaction");
+      setStatus("User claimed the viewport · position control released");
+    });
     return () => {
       stopLayout();
+      stopUserInteraction();
       stopVisibilityRef.current?.();
       session.cancel();
       sessionRef.current = null;

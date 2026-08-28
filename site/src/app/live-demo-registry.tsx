@@ -36,6 +36,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/adapters/clipboard": demo(() => import("../routes/adapters/clipboard/ClipboardAdapterDemoRoute"), "ClipboardAdapterDemoRoute", "routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx"),
   "/adapters/virtual-selection": demo(() => import("../routes/adapters/virtual-selection/VirtualSelectionAdapterDemoRoute"), "VirtualSelectionAdapterDemoRoute", "routes/adapters/virtual-selection/VirtualSelectionAdapterDemoRoute.tsx"),
   "/adapters/contenteditable": demo(() => import("../routes/adapters/contenteditable/ContentEditableAdapterDemoRoute"), "ContentEditableAdapterDemoRoute", "routes/adapters/contenteditable/ContentEditableAdapterDemoRoute.tsx"),
+  "/affordances/handles": demo(() => import("../routes/affordances/handles/InteractionHandleDemoRoute"), "InteractionHandleDemoRoute", "routes/affordances/handles/InteractionHandleDemoRoute.tsx"),
   "/connectors/react": demo(() => import("../routes/connectors/react/ReactConnectorDemoRoute"), "ReactConnectorDemoRoute", "routes/connectors/react/ReactConnectorDemoRoute.tsx"),
   "/connectors/react-hook-form": demo(() => import("../routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute"), "ReactHookFormConnectorDemoRoute", "routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute.tsx"),
   "/connectors/ajv": demo(() => import("../routes/connectors/ajv/AjvConnectorDemoRoute"), "AjvConnectorDemoRoute", "routes/connectors/ajv/AjvConnectorDemoRoute.tsx"),

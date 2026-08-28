@@ -5,6 +5,8 @@ import { useState } from "react";
 import {
   ActionButton,
   ChoiceChip,
+  ControlHandle,
+  DragHandle,
   DisclosureButton,
   FileDropRegion,
   formatFileSize,
@@ -104,7 +106,7 @@ describe("UI Primitives", () => {
 
   test("SegmentedControl keeps one choice and supports arrow navigation", async () => {
     const user = userEvent.setup();
-    const onValueChange = vi.fn();
+    const onValueChange = vi.fn<(value: "canvas" | "json") => void>();
     render(<SegmentedControl label="View" value="canvas" options={[{ id: "canvas", label: "Canvas" }, { id: "json", label: "JSON" }]} onValueChange={onValueChange} />);
     const canvas = screen.getByRole("radio", { name: "Canvas" });
     canvas.focus();
@@ -192,8 +194,9 @@ describe("UI Primitives", () => {
     expect(onResize).toHaveBeenNthCalledWith(1, 14, "preview");
     expect(onResize).toHaveBeenNthCalledWith(2, 20, "commit");
 
-    const onLost = vi.fn();
-    render(<ResizeHandle label="행 높이 조절" orientation="vertical" onResize={onLost} />);
+    const onLostResize = vi.fn();
+    const onLostHandle = vi.fn();
+    render(<ResizeHandle label="행 높이 조절" orientation="vertical" onResize={onLostResize} onHandle={onLostHandle} />);
     const lost = screen.getByRole("button", { name: "행 높이 조절" });
     let capturedLost: number | null = null;
     Object.assign(lost, {
@@ -204,7 +207,44 @@ describe("UI Primitives", () => {
     fireEvent.pointerDown(lost, { pointerId: 8, clientY: 10 });
     fireEvent.pointerMove(lost, { pointerId: 8, clientY: 40 });
     fireEvent.lostPointerCapture(lost, { pointerId: 8, clientY: 40 });
-    expect(onLost).toHaveBeenNthCalledWith(1, 30, "preview");
-    expect(onLost).toHaveBeenNthCalledWith(2, 30, "commit");
+    expect(onLostResize).toHaveBeenCalledOnce();
+    expect(onLostResize).toHaveBeenCalledWith(30, "preview");
+    expect(onLostHandle).toHaveBeenLastCalledWith(expect.objectContaining({
+      phase: "cancel",
+      reason: "lost-capture",
+    }));
+  });
+
+  test("DragHandle and ControlHandle share typed lifecycle, delta, and cursor binding", () => {
+    const onDrag = vi.fn();
+    const onControl = vi.fn();
+    render(<>
+      <DragHandle label="카드 이동" descriptor={{ kind: "drag", axis: "x" }} onHandle={onDrag} />
+      <ControlHandle label="제어점 이동" onHandle={onControl} />
+    </>);
+    const drag = screen.getByRole("button", { name: "카드 이동" });
+    const control = screen.getByRole("button", { name: "제어점 이동" });
+    for (const handle of [drag, control]) {
+      let captured: number | null = null;
+      Object.assign(handle, {
+        setPointerCapture: (pointerId: number) => { captured = pointerId; },
+        hasPointerCapture: (pointerId: number) => captured === pointerId,
+        releasePointerCapture: () => { captured = null; },
+      });
+    }
+    expect(drag.style.cursor).toBe("grab");
+    expect(control.style.cursor).toBe("crosshair");
+    fireEvent.pointerDown(drag, { pointerId: 9, clientX: 4, clientY: 5 });
+    expect(drag.style.cursor).toBe("grabbing");
+    fireEvent.pointerMove(drag, { pointerId: 9, clientX: 14, clientY: 25 });
+    fireEvent.pointerUp(drag, { pointerId: 9, clientX: 20, clientY: 30 });
+    expect(onDrag.mock.calls.map(([event]) => [event.phase, event.delta])).toEqual([
+      ["start", { dx: 0, dy: 0 }],
+      ["preview", { dx: 10, dy: 0 }],
+      ["commit", { dx: 16, dy: 0 }],
+    ]);
+    fireEvent.pointerDown(control, { pointerId: 10, clientX: 0, clientY: 0 });
+    fireEvent.pointerCancel(control, { pointerId: 10, clientX: 0, clientY: 0 });
+    expect(onControl.mock.calls.map(([event]) => event.phase)).toEqual(["start", "cancel"]);
   });
 });

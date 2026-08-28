@@ -16,7 +16,7 @@ interface CalendarHand {
   readonly inspectedInterval: { readonly start: string; readonly end: string } | null;
   readonly occurrence: CalendarOccurrenceRange;
   readonly scope: OccurrenceScope;
-  readonly naming: boolean;
+  readonly renaming: boolean;
   readonly titleDraft: string;
   readonly paintedEvents: ReadonlyArray<CalendarEvent>;
   readonly timePreview: CalendarTimeGridPointerRelease | null;
@@ -25,6 +25,10 @@ interface CalendarHand {
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
+  beginTitleRename(): void;
+  commitTitleRename(): void;
+  cancelTitleRename(): void;
+  handleTitleRenameKey(key: string): boolean;
   setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
   setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
   setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
@@ -37,8 +41,6 @@ interface CalendarHand {
   removeSelected(): boolean;
   setCalendarHidden(calendarId: string, hidden: boolean): boolean;
   rememberSelection(): void;
-  finishNaming(): void;
-  cancelNaming(): void;
   undo(): void;
   redo(): void;
 }
@@ -51,6 +53,28 @@ type CalendarHandOptions = {
   readonly defaultTitle?: string;
 };
 ```
+## `CalendarKeyboardOptions`
+
+```ts
+interface CalendarKeyboardOptions {
+  readonly active: boolean;
+  readonly target?: CalendarKeyboardTarget;
+  readonly onView: (view: CalendarView) => void;
+  readonly onShift: (direction: 1 | -1) => void;
+  readonly onToday: () => void;
+  readonly onCreate: () => void;
+  readonly onRemove: () => void;
+  readonly onDismiss?: () => boolean;
+}
+```
+## `CalendarKeyboardTarget`
+
+```ts
+interface CalendarKeyboardTarget {
+  addEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+  removeEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+}
+```
 ## `CalendarPointerInteractions`
 
 ```ts
@@ -62,7 +86,7 @@ interface CalendarPointerInteractions {
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
-  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, rowDays: ReadonlyArray<string>, id: string | null, start: string | null, end: string | null): void;
   monthPointerMove(event: PointerEvent<HTMLElement>): void;
   monthPointerUp(event: PointerEvent<HTMLElement>): void;
   cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
@@ -83,13 +107,51 @@ type CalendarPointerPolicy = {
   readonly onMonthPointerBegin?: () => void;
 };
 ```
+## `CalendarRenameInputBinding`
+
+```ts
+interface CalendarRenameInputBinding {
+  readonly ref: RefObject<HTMLInputElement | null>;
+  readonly value: string;
+  onFocus(): void;
+  onChange(event: ChangeEvent<HTMLInputElement>): void;
+  onBlur(event: FocusEvent<HTMLInputElement>): void;
+  onKeyDown(event: KeyboardEvent<HTMLInputElement>): void;
+}
+```
+## `CalendarViewportPositionOptions`
+
+```ts
+interface CalendarViewportPositionOptions {
+  readonly viewportRef: RefObject<HTMLElement | null>;
+  readonly active: boolean;
+  readonly resetKey: string;
+  readonly targetHour: number;
+  readonly viewportOffset?: number;
+}
+```
 ## `useCalendarHand`
 
 ```ts
 useCalendarHand(editor: CalendarEditor, options?: CalendarHandOptions): CalendarHand
 ```
+## `useCalendarKeyboard`
+
+```ts
+useCalendarKeyboard(options: CalendarKeyboardOptions): void
+```
 ## `useCalendarPointerInteractions`
 
 ```ts
 useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy): CalendarPointerInteractions
+```
+## `useCalendarRenameInput`
+
+```ts
+useCalendarRenameInput(hand: CalendarHand): CalendarRenameInputBinding
+```
+## `useCalendarViewportPosition`
+
+```ts
+useCalendarViewportPosition(options: CalendarViewportPositionOptions): void
 ```
