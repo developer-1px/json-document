@@ -225,6 +225,14 @@
     "navigationGroup": "Hands"
   },
   {
+    "path": "/docs/api/calendar",
+    "label": "API · Calendar",
+    "title": "Calendar API - json-document",
+    "description": "@interactive-os/json-document-calendar의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/api/collaboration",
     "label": "API · Collaboration",
     "title": "Collaboration API - json-document",

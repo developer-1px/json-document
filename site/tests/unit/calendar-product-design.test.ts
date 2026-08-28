@@ -80,7 +80,7 @@ describe("calendar product design", () => {
     expect(source).toContain("calendarMonthDayLayout");
     expect(source).toContain("calendarMonthWeekLayout");
     expect(source).toContain("Resize ${item.event.title} end");
-    expect(source).toContain("calendarInspectorOccurrence");
+    expect(source).toContain("useCalendarHand");
     expect(source).toContain("clipStart");
     expect(source).toContain("clipEnd");
     expect(source).toContain("calendarBusyDates");
@@ -91,7 +91,7 @@ describe("calendar product design", () => {
     expect(source).toContain("overflowDay");
     expect(source).toContain("Events on");
     expect(source).toContain("setOverflowDay(cell.date)");
-    expect(source).toContain("previewCalendarMonth");
+    expect(source).toContain("paintedEvents = hand.paintedEvents");
     expect(source).toContain('color: "accent"');
     expect(source).not.toContain("uniqueTitles");
   });

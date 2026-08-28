@@ -17,6 +17,13 @@ export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
 export { createWebDragDropSession } from "./drag-drop-session.js";
 export { createWebPointerSession } from "./pointer-session.js";
 export { findWebPointTarget } from "./point-target.js";
+export {
+  calendarCommandFromWebKeyboardEvent,
+  calendarDayDeltaFromWebWidth,
+  calendarMinutesFromWebGrid,
+  type WebCalendarCommand,
+  type WebCalendarKeyboardEvent,
+} from "./calendar-input.js";
 export { createWebViewportPositionPorts } from "./viewport-position.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";

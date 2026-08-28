@@ -30,6 +30,12 @@ const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-ajv", ["site/tests/browser/connectors/ajv.spec.ts"]],
   ["@interactive-os/json-document-contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
   ["@interactive-os/json-document-database", ["site/tests/browser/database-demo.spec.ts"]],
+  ["@interactive-os/json-document-calendar", [
+    "site/tests/browser/calendar-app.spec.ts",
+    "site/tests/browser/calendar-launch.spec.ts",
+    "site/tests/browser/calendar-spa.spec.ts",
+    "site/tests/browser/calendar.spec.ts",
+  ]],
   ["@interactive-os/json-document-editing", [
     "site/tests/browser/editing-demos.spec.ts",
     "site/tests/browser/editor-slice-demos.spec.ts",
@@ -80,6 +86,7 @@ const firstKitWorkspaces = new Set([
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
+  "@interactive-os/json-document-calendar",
   "@interactive-os/json-document-file-intake",
   "@interactive-os/json-document-rich-text-suggestion",
   "@interactive-os/json-document-rich-text-suggestion-react",

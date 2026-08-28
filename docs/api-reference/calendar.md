@@ -1,0 +1,95 @@
+# @interactive-os/json-document-calendar API
+
+**Owner:** Hands
+
+Calendar React lifecycle와 occurrence interaction 계약의 public entrypoint입니다. 아래 항목은 package root에서 import할 수 있는 안정된 public API이며 internal 경로는 계약이 아닙니다.
+
+> 이 문서는 `packages/json-document-calendar/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
+
+## `CalendarHand`
+
+```ts
+interface CalendarHand {
+  readonly snapshot: CalendarEditor["snapshot"];
+  readonly document: CalendarDocument;
+  readonly selectedEvent: CalendarEvent | null;
+  readonly inspectedInterval: { readonly start: string; readonly end: string } | null;
+  readonly occurrence: CalendarOccurrenceRange;
+  readonly scope: OccurrenceScope;
+  readonly naming: boolean;
+  readonly titleDraft: string;
+  readonly paintedEvents: ReadonlyArray<CalendarEvent>;
+  readonly timePreview: CalendarTimeGridPointerRelease | null;
+  readonly allDayPreview: CalendarAllDayPointerRelease | null;
+  readonly monthPreview: CalendarMonthPointerRelease | null;
+  setScope(scope: OccurrenceScope): void;
+  setOccurrence(occurrence: CalendarOccurrenceRange): void;
+  setTitleDraft(title: string): void;
+  setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
+  setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
+  setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
+  dispatch(intent: CalendarIntent | null): boolean;
+  commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean;
+  rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
+  applySelectedPatch(patch: CalendarEventPatch): boolean;
+  createInterval(start: string, end: string, options?: { readonly allDay?: boolean; readonly title?: string }): boolean;
+  selectOccurrence(eventId: string, start: string, end: string): boolean;
+  removeSelected(): boolean;
+  setCalendarHidden(calendarId: string, hidden: boolean): boolean;
+  rememberSelection(): void;
+  finishNaming(): void;
+  cancelNaming(): void;
+  undo(): void;
+  redo(): void;
+}
+```
+## `CalendarHandOptions`
+
+```ts
+type CalendarHandOptions = {
+  readonly initialOccurrence?: CalendarOccurrenceRange;
+  readonly defaultTitle?: string;
+};
+```
+## `CalendarPointerInteractions`
+
+```ts
+interface CalendarPointerInteractions {
+  instantAt(day: string, clientY: number, grid: Element): string | null;
+  timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
+  timePointerMove(event: PointerEvent<HTMLElement>): void;
+  timePointerUp(event: PointerEvent<HTMLElement>): void;
+  allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
+  allDayPointerMove(event: PointerEvent<HTMLElement>): void;
+  allDayPointerUp(event: PointerEvent<HTMLElement>): void;
+  monthPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null): void;
+  monthPointerMove(event: PointerEvent<HTMLElement>): void;
+  monthPointerUp(event: PointerEvent<HTMLElement>): void;
+  cancelTimePointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  cancelAllDayPointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  cancelMonthPointer(pointerId: number, reason?: "cancel" | "lost-capture"): void;
+  resizeTimed(id: string, edge: "start" | "end", occurrenceStart: string, origin: string, delta: number, phase: Phase): void;
+  resizeAllDay(id: string, edge: "start" | "end", originDay: string, occurrenceStart: string, delta: number, phase: Phase): void;
+}
+```
+## `CalendarPointerPolicy`
+
+```ts
+type CalendarPointerPolicy = {
+  readonly hourStart: number;
+  readonly hourEnd: number;
+  readonly stepMinutes: number;
+  readonly pixelsPerHour: number;
+  readonly onMonthPointerBegin?: () => void;
+};
+```
+## `useCalendarHand`
+
+```ts
+useCalendarHand(editor: CalendarEditor, options?: CalendarHandOptions): CalendarHand
+```
+## `useCalendarPointerInteractions`
+
+```ts
+useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy): CalendarPointerInteractions
+```

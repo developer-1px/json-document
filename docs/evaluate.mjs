@@ -147,6 +147,7 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-ui-primitives-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
+  "@interactive-os/json-document-calendar",
   "@interactive-os/json-document-tanstack-table",
   "@interactive-os/json-document-web",
   "@interactive-os/json-document-contenteditable",

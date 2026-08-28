@@ -186,6 +186,18 @@ interface CalendarEvent extends Record<string, JSONValue> {
   readonly excludeDates: ReadonlyArray<string>;
 }
 ```
+## `CalendarEventPatch`
+
+```ts
+type CalendarEventPatch = {
+  readonly title?: string;
+  readonly start?: string;
+  readonly end?: string;
+  readonly allDay?: boolean;
+  readonly calendarId?: string;
+  readonly recurrence?: CalendarEvent["recurrence"];
+};
+```
 ## `calendarEventsInMonth`
 
 ```ts
@@ -293,6 +305,29 @@ type CalendarOccurrence = {
   readonly end: string;
 };
 ```
+## `calendarOccurrenceAfterIntent`
+
+```ts
+calendarOccurrenceAfterIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange, committed: CalendarOccurrenceRange | null): CalendarOccurrenceRange
+```
+## `calendarOccurrenceForInspector`
+
+```ts
+calendarOccurrenceForInspector(selected: Pick<CalendarEvent, "start" | "end" | "recurrence">, occurrence: CalendarOccurrenceRange): { readonly start: string; readonly end: string; }
+```
+## `calendarOccurrenceFromSelection`
+
+```ts
+calendarOccurrenceFromSelection(selected: Pick<CalendarEvent, "start" | "end"> | null): CalendarOccurrenceRange
+```
+## `CalendarOccurrenceRange`
+
+```ts
+type CalendarOccurrenceRange = {
+  readonly start: string | null;
+  readonly end: string | null;
+};
+```
 ## `CalendarRecurrence`
 
 ```ts
@@ -345,6 +380,11 @@ type CalendarTimeGridPointerRelease = {
   readonly targetInstant: string;
 };
 ```
+## `calendarUpdateIntent`
+
+```ts
+calendarUpdateIntent(event: CalendarEvent, occurrenceStart: string | null, scope: Extract<CalendarIntent, { type: "occurrence.edit"; }>["scope"], patch: CalendarEventPatch): CalendarIntent
+```
 ## `CalendarView`
 
 ```ts
@@ -354,6 +394,11 @@ type CalendarView = "day" | "week" | "month" | "year";
 
 ```ts
 calendarVisibleEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent>
+```
+## `calendarVisibleHourBand`
+
+```ts
+calendarVisibleHourBand(startMinutes: number, endMinutes: number, hourStart: number, hourEnd: number): { readonly startMinutes: number; readonly endMinutes: number; } | null
 ```
 ## `createAnnotationEditor`
 

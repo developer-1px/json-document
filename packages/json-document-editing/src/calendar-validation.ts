@@ -1,9 +1,12 @@
+import { Temporal } from "@js-temporal/polyfill";
 import type { CalendarCalendar, CalendarDocument, CalendarEvent } from "./calendar.js";
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
 const DAY_MS = 86_400_000;
 const MINUTE_MS = 60_000;
+const EPOCH_DATE = Temporal.PlainDate.from("1970-01-01");
+const EPOCH_DATE_TIME = Temporal.PlainDateTime.from("1970-01-01T00:00");
 
 export function calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar> {
   return Array.isArray(document.calendars) ? document.calendars : [];
@@ -48,47 +51,29 @@ export function isCalendarAllDay(event: Pick<CalendarEvent, "allDay">): boolean 
 }
 
 export function parseCalendarInstant(value: string): number | null {
-  const match = DATETIME.exec(value);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const hour = Number(match[4]);
-  const minute = Number(match[5]);
-  if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59) return null;
-  const utc = Date.UTC(year, month - 1, day, hour, minute);
-  const date = new Date(utc);
-  if (
-    date.getUTCFullYear() !== year
-    || date.getUTCMonth() + 1 !== month
-    || date.getUTCDate() !== day
-    || date.getUTCHours() !== hour
-    || date.getUTCMinutes() !== minute
-  ) return null;
-  return utc;
+  if (!DATETIME.test(value)) return null;
+  try {
+    return EPOCH_DATE_TIME.until(Temporal.PlainDateTime.from(value), { largestUnit: "minutes" }).total("minutes") * MINUTE_MS;
+  } catch {
+    return null;
+  }
 }
 
 export function formatCalendarInstant(utc: number): string {
-  const date = new Date(utc);
-  return `${pad(date.getUTCFullYear(), 4)}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+  return EPOCH_DATE_TIME.add({ minutes: utc / MINUTE_MS }).toString({ smallestUnit: "minute" });
 }
 
 export function parseCalendarDate(value: string): number | null {
-  const match = DATE.exec(value);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-  const utc = Date.UTC(year, month - 1, day);
-  const date = new Date(utc);
-  if (date.getUTCFullYear() !== year || date.getUTCMonth() + 1 !== month || date.getUTCDate() !== day) return null;
-  return utc;
+  if (!DATE.test(value)) return null;
+  try {
+    return EPOCH_DATE.until(Temporal.PlainDate.from(value), { largestUnit: "days" }).days * DAY_MS;
+  } catch {
+    return null;
+  }
 }
 
 export function formatCalendarDate(utc: number): string {
-  const date = new Date(utc);
-  return `${pad(date.getUTCFullYear(), 4)}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+  return EPOCH_DATE.add({ days: utc / DAY_MS }).toString();
 }
 
 export function addCalendarDate(day: string, days: number): string | null {
@@ -136,8 +121,4 @@ export function calendarEventBounds(
   const to = parseCalendarInstant(event.end);
   if (from === null || to === null) return null;
   return { from, to };
-}
-
-function pad(value: number, size = 2): string {
-  return String(value).padStart(size, "0");
 }
