@@ -18,11 +18,13 @@ import { resolveDocumentSource, type EditingDocumentSource } from "./document-so
 import {
   addCalendarDate,
   assertCalendarDocument,
+  calendarAllDaySpan,
   calendarDatePart,
   calendarDaysBetween,
   calendarDocumentCalendars,
   calendarDocumentEvents,
   calendarEventBounds,
+  calendarIntervalLastDate,
   calendarMinutesBetween,
   formatCalendarDate,
   formatCalendarInstant,
@@ -322,7 +324,7 @@ export function createCalendarEditor(
     const allDay = intent.allDay ?? event.allDay;
     if (intent.allDay === true && !event.allDay) {
       start = calendarDatePart(event.start);
-      end = addCalendarDate(start, 1) ?? start;
+      end = calendarAllDaySpan(start, start)?.end ?? start;
     } else if (intent.allDay === false && event.allDay) {
       start = `${calendarDatePart(event.start)}T09:00`;
       end = `${calendarDatePart(event.start)}T10:00`;
@@ -570,11 +572,7 @@ export function calendarBusyDates(
 
 function calendarOccurrenceDays(start: string, end: string, allDay: boolean): ReadonlyArray<string> {
   const first = calendarDatePart(start);
-  let last = calendarDatePart(end);
-  if (allDay || !end.includes("T") || end.slice(11, 16) === "00:00") {
-    last = addCalendarDate(last, -1) ?? first;
-  }
-  if (last < first) last = first;
+  const last = calendarIntervalLastDate(start, end, allDay);
   const days: string[] = [];
   for (let day = first; day <= last; ) {
     days.push(day);
