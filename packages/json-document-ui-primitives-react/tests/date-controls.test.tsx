@@ -111,7 +111,8 @@ describe("HtmlDateField", () => {
 });
 
 describe("CalendarGrid and RangeCalendar", () => {
-  test("moves month and year periods without skipping clamped civil dates", () => {
+  test("moves visible periods without skipping clamped civil dates", () => {
+    expect(shiftVisibleDate("2026-01-01", "day", -1)).toBe("2025-12-31");
     expect(shiftVisibleDate("2026-01-31", "month", 1)).toBe("2026-02-28");
     expect(shiftVisibleDate("2024-02-29", "year", 1)).toBe("2025-02-28");
     expect(shiftVisibleDate("2026-01-01", "week", -1)).toBe("2025-12-25");

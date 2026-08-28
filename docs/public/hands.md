@@ -75,6 +75,9 @@ Host는 이벤트와 날짜 목록만 연결합니다.
 보기 전환은 Host가 조합합니다. toolbar의 현재 기간 문구는 UI Primitives
 `visiblePeriodLabel`이 view 분기와 날짜 경계를 투영하고, Host가 월 이름 copy와
 week separator policy를 주입합니다.
+Previous/Next 및 keyboard period 이동은 UI Primitives `shiftVisibleDate`가
+day/week/month/year의 단위와 calendar arithmetic을 소유하며, Host는 현재 view와
+direction을 전달하고 결과를 URL state에 반영합니다.
 
 ```live-demo
 /demo/calendar

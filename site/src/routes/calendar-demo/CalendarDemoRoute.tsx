@@ -222,7 +222,7 @@ export function CalendarDemoRoute(props: {
   useCalendarKeyboard({
     active: !embedded,
     onView: setView,
-    onShift: (direction) => setVisibleDate(shiftView(visibleDate, view, direction)),
+    onShift: (direction) => setVisibleDate(shiftVisibleDate(visibleDate, view, direction)),
     onToday: () => setLocation(view === "year" ? "month" : view, today),
     onCreate: createOnVisibleDate,
     onRemove: removeSelected,
@@ -496,14 +496,14 @@ export function CalendarDemoRoute(props: {
               />
             </div>
             <div className={styles.toolbarCluster()}>
-              <IconButton label="Previous" onClick={() => setVisibleDate(shiftView(visibleDate, view, -1))}>
+              <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
                 <ChevronLeft aria-hidden="true" size={16} />
               </IconButton>
               <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
                 monthNames: months,
                 weekSeparator: " – ",
               })}</span>
-              <IconButton label="Next" onClick={() => setVisibleDate(shiftView(visibleDate, view, 1))}>
+              <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
                 <ChevronRight aria-hidden="true" size={16} />
               </IconButton>
               <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>
@@ -890,9 +890,4 @@ function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
 
 function clockLabel(instant: string): string {
   return instant.includes("T") ? instant.slice(11, 16) : "";
-}
-
-function shiftView(date: string, view: CalendarView, direction: 1 | -1): string {
-  if (view === "day") return addCalendarDays(date, direction);
-  return shiftVisibleDate(date, view, direction);
 }

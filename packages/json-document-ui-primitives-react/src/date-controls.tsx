@@ -11,6 +11,7 @@ import {
   orderedRange,
   parseHtmlDateValue,
   visiblePeriodLabel,
+  type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,
   type HtmlDateType,
@@ -395,8 +396,9 @@ function onGridKey(event: KeyboardEvent<HTMLDivElement>, handle: (key: string) =
   }
 }
 
-export function shiftVisibleDate(visibleDate: string, grain: CalendarGrain, direction: 1 | -1): string {
-  if (grain === "week") return addCalendarDays(visibleDate, direction * 7);
-  if (grain === "month") return addCalendarMonths(visibleDate, direction);
+export function shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string {
+  if (period === "day") return addCalendarDays(visibleDate, direction);
+  if (period === "week") return addCalendarDays(visibleDate, direction * 7);
+  if (period === "month") return addCalendarMonths(visibleDate, direction);
   return addCalendarYears(visibleDate, direction);
 }

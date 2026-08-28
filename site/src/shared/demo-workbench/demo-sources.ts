@@ -364,6 +364,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "shiftVisibleDate",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "startOfYear",
     sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
   },

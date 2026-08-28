@@ -286,7 +286,7 @@ type SelectOption = {
 ## `shiftVisibleDate`
 
 ```ts
-shiftVisibleDate(visibleDate: string, grain: CalendarGrain, direction: 1 | -1): string
+shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string
 ```
 ## `startOfIsoWeek`
 
