@@ -17,6 +17,7 @@ describe("Calendar Web adapters", () => {
       ["c", { type: "create" }],
       ["Delete", { type: "remove" }],
       ["Backspace", { type: "remove" }],
+      ["Escape", { type: "dismiss" }],
       ["n", { type: "shift", direction: 1 }],
       ["p", { type: "shift", direction: -1 }],
       ["ArrowRight", { type: "shift", direction: 1 }],

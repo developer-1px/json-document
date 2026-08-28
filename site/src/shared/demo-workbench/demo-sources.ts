@@ -32,6 +32,7 @@ import webPointTargetSource from "../../../../packages/json-document-web/src/poi
 import webCalendarSource from "../../../../packages/json-document-web/src/calendar-input.ts?raw";
 import webKeyboardSource from "../../../../packages/json-document-web/src/keyboard.ts?raw";
 import calendarHandSource from "../../../../packages/json-document-calendar/src/use-calendar-hand.ts?raw";
+import calendarKeyboardSource from "../../../../packages/json-document-calendar/src/use-calendar-keyboard.ts?raw";
 import calendarPointerInteractionsSource from "../../../../packages/json-document-calendar/src/use-calendar-pointer-interactions.ts?raw";
 import calendarRenameInputSource from "../../../../packages/json-document-calendar/src/use-calendar-rename-input.ts?raw";
 import calendarViewportPositionSource from "../../../../packages/json-document-calendar/src/use-calendar-viewport-position.ts?raw";
@@ -168,6 +169,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/calendar-input.ts", webCalendarSource],
   ["packages/json-document-web/src/keyboard.ts", webKeyboardSource],
   ["packages/json-document-calendar/src/use-calendar-hand.ts", calendarHandSource],
+  ["packages/json-document-calendar/src/use-calendar-keyboard.ts", calendarKeyboardSource],
   ["packages/json-document-calendar/src/use-calendar-pointer-interactions.ts", calendarPointerInteractionsSource],
   ["packages/json-document-calendar/src/use-calendar-rename-input.ts", calendarRenameInputSource],
   ["packages/json-document-calendar/src/use-calendar-viewport-position.ts", calendarViewportPositionSource],
@@ -224,6 +226,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-calendar",
     symbol: "useCalendarHand",
     sourcePath: "packages/json-document-calendar/src/use-calendar-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarKeyboard",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-keyboard.ts",
   },
   {
     packageName: "@interactive-os/json-document-calendar",

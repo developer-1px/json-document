@@ -53,6 +53,28 @@ type CalendarHandOptions = {
   readonly defaultTitle?: string;
 };
 ```
+## `CalendarKeyboardOptions`
+
+```ts
+interface CalendarKeyboardOptions {
+  readonly active: boolean;
+  readonly target?: CalendarKeyboardTarget;
+  readonly onView: (view: CalendarView) => void;
+  readonly onShift: (direction: 1 | -1) => void;
+  readonly onToday: () => void;
+  readonly onCreate: () => void;
+  readonly onRemove: () => void;
+  readonly onDismiss?: () => boolean;
+}
+```
+## `CalendarKeyboardTarget`
+
+```ts
+interface CalendarKeyboardTarget {
+  addEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+  removeEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
+}
+```
 ## `CalendarPointerInteractions`
 
 ```ts
@@ -112,6 +134,11 @@ interface CalendarViewportPositionOptions {
 
 ```ts
 useCalendarHand(editor: CalendarEditor, options?: CalendarHandOptions): CalendarHand
+```
+## `useCalendarKeyboard`
+
+```ts
+useCalendarKeyboard(options: CalendarKeyboardOptions): void
 ```
 ## `useCalendarPointerInteractions`
 

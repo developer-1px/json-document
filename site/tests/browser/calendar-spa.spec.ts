@@ -163,6 +163,10 @@ test("Calendar month +N more opens that day's events without leaving month view"
   const overflow = page.getByRole("dialog", { name: "Events on 2026-05-25", exact: true });
   await expect(overflow).toBeVisible();
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(overflow).toHaveCount(0);
+  await day.getByRole("button", { name: /\+\d+ more/ }).click();
+  await expect(overflow).toBeVisible();
   await overflow.getByRole("button", { name: "12:00 점심", exact: true }).click();
   await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("점심");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();

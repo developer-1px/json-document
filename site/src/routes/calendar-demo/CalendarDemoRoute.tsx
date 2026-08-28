@@ -24,6 +24,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import {
   useCalendarHand,
+  useCalendarKeyboard,
   useCalendarPointerInteractions,
   useCalendarRenameInput,
   useCalendarViewportPosition,
@@ -47,9 +48,6 @@ import {
   startOfIsoWeek,
   startOfYear,
 } from "@interactive-os/json-document-ui-primitives-react";
-import {
-  calendarCommandFromWebKeyboardEvent,
-} from "@interactive-os/json-document-web";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { ProductApp } from "../../shared/ui/primitives";
@@ -219,32 +217,19 @@ export function CalendarDemoRoute(props: {
     setOverflowDay(null);
   }, [view, visibleDate]);
 
-  useEffect(() => {
-    if (embedded) return;
-    function onKeyDown(event: KeyboardEvent): void {
-      const command = calendarCommandFromWebKeyboardEvent(event);
-      if (command === null) return;
-      event.preventDefault();
-      if (command.type === "view") setView(command.view);
-      if (command.type === "shift") setVisibleDate(shiftView(visibleDate, view, command.direction));
-      if (command.type === "today") setLocation(view === "year" ? "month" : view, today);
-      if (command.type === "create") createOnVisibleDate();
-      if (command.type === "remove") removeSelected();
-    }
-    function onEscape(event: KeyboardEvent): void {
-      if (event.key !== "Escape") return;
-      if (overflowDay !== null) {
-        event.preventDefault();
-        setOverflowDay(null);
-      }
-    }
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keydown", onEscape);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keydown", onEscape);
-    };
-  }, [embedded, today, view, visibleDate, selectedEvent?.id, overflowDay]);
+  useCalendarKeyboard({
+    active: !embedded,
+    onView: setView,
+    onShift: (direction) => setVisibleDate(shiftView(visibleDate, view, direction)),
+    onToday: () => setLocation(view === "year" ? "month" : view, today),
+    onCreate: createOnVisibleDate,
+    onRemove: removeSelected,
+    onDismiss: () => {
+      if (overflowDay === null) return false;
+      setOverflowDay(null);
+      return true;
+    },
+  });
 
   function createOnVisibleDate(): void {
     const start = calendarInstantAt(visibleDate.slice(0, 10), 10 * 60);
