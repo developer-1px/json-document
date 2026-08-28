@@ -56,6 +56,11 @@ calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCel
 ```ts
 type CalendarPeriod = "day" | CalendarGrain;
 ```
+## `calendarTimeLabel`
+
+```ts
+calendarTimeLabel(value: string): string
+```
 ## `calendarYearMonths`
 
 ```ts

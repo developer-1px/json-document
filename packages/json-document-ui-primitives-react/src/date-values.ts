@@ -51,6 +51,12 @@ export function parseDateTimeLocal(value: string): string | null {
   }
 }
 
+export function calendarTimeLabel(value: string): string {
+  const parsed = parseDateTimeLocal(value);
+  if (parsed === null) return "";
+  return Temporal.PlainDateTime.from(parsed).toPlainTime().toString({ smallestUnit: "minute" });
+}
+
 export function parseMonth(value: string): string | null {
   const match = MONTH.exec(value);
   if (!match) return null;

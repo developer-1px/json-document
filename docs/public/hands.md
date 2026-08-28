@@ -78,6 +78,9 @@ week separator policy를 주입합니다.
 Previous/Next 및 keyboard period 이동은 UI Primitives `shiftVisibleDate`가
 day/week/month/year의 단위와 calendar arithmetic을 소유하며, Host는 현재 view와
 direction을 전달하고 결과를 URL state에 반영합니다.
+Timed event의 datetime-local에서 `HH:mm` 문구를 투영하는 일은 UI Primitives
+`calendarTimeLabel`이 소유하며, Host는 그 결과를 event title과 visual copy 및
+accessible label로 조합합니다. Date-only와 유효하지 않은 값은 빈 문구입니다.
 
 ```live-demo
 /demo/calendar

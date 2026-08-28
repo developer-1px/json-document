@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   CalendarGrid,
   calendarMonthWeeks,
+  calendarTimeLabel,
   calendarYearMonths,
   DatePicker,
   DateRangePicker,
@@ -33,6 +34,13 @@ describe("HTML date values", () => {
     expect(parseHtmlDateValue("month", "2026-13")).toBeNull();
     expect(parseHtmlDateValue("week", "2026-W01")).toBe("2026-W01");
     expect(parseHtmlDateValue("week", "2026-W99")).toBeNull();
+  });
+
+  test("projects datetime-local values to minute clock labels", () => {
+    expect(calendarTimeLabel("2026-08-03T09:15")).toBe("09:15");
+    expect(calendarTimeLabel("2026-08-03T09:15:42")).toBe("09:15");
+    expect(calendarTimeLabel("2026-08-03")).toBe("");
+    expect(calendarTimeLabel("not-a-date-time")).toBe("");
   });
 
   test("projects the canonical year boundary across leap years", () => {

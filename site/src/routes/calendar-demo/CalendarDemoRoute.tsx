@@ -44,6 +44,7 @@ import {
   addCalendarYears,
   calendarCells,
   calendarMonthWeeks,
+  calendarTimeLabel,
   calendarYearMonths,
   shiftVisibleDate,
   startOfIsoWeek,
@@ -445,7 +446,7 @@ export function CalendarDemoRoute(props: {
                   >
                     <span className="min-w-0 truncate">{item.event.title}</span>
                     {endMinutes - startMinutes >= 40 ? (
-                      <span className={styles.eventTime()}>{clockLabel(item.event.start)}</span>
+                      <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
                     ) : null}
                   </SelectableItem>
                   {item.event.id === "preview" ? null : (
@@ -868,7 +869,7 @@ function calendarColor(document: CalendarDocument, calendarId: string): "accent"
 
 function monthEventLabel(item: CalendarEvent): string {
   if (isCalendarAllDay(item)) return item.title;
-  const time = item.start.includes("T") ? item.start.slice(11, 16) : "";
+  const time = calendarTimeLabel(item.start);
   return time.length > 0 ? `${time} ${item.title}` : item.title;
 }
 
@@ -878,7 +879,7 @@ function clockNow(now = Temporal.Now.plainDateTimeISO()): string {
 
 function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
   const styles = calendarDemoRecipe();
-  const time = clockLabel(props.event.start);
+  const time = calendarTimeLabel(props.event.start);
   if (isCalendarAllDay(props.event)) return props.event.title;
   return (
     <>
@@ -886,8 +887,4 @@ function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
       {time.length > 0 ? <span className={styles.eventTime()}>{time}</span> : null}
     </>
   );
-}
-
-function clockLabel(instant: string): string {
-  return instant.includes("T") ? instant.slice(11, 16) : "";
 }
