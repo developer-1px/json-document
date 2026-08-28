@@ -84,4 +84,16 @@ describe("documentation routes", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "JSON Document" })).getByRole("link", { name: "API Reference" }).getAttribute("aria-current")).toBe("page");
   });
+
+  test("exposes the Interaction Handles ecosystem document", async () => {
+    window.history.pushState(null, "", "/docs/affordance/handles");
+    render(<App />);
+
+    await waitFor(() => expect(document.title).toBe("Interaction Handles - json-document"));
+    expect(await screen.findByRole("heading", { level: 1, name: "Interaction Handles" }, { timeout: 10000 })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "책임 경계" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Affordance API Reference" }).getAttribute("href")).toBe("/docs/api/affordance");
+    expect(screen.getByRole("link", { name: "UI Primitives React API Reference" }).getAttribute("href")).toBe("/docs/api/ui-primitives-react");
+    expect(screen.getByRole("region", { name: "Live demo: /affordances/handles" }).getAttribute("data-live-demo")).toBe("/affordances/handles");
+  });
 });

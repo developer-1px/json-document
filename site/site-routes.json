@@ -1109,6 +1109,18 @@
     "parentPath": "/docs/affordance"
   },
   {
+    "path": "/docs/affordance/handles",
+    "label": "Interaction Handles",
+    "title": "Interaction Handles - json-document",
+    "heading": "Interaction Handles",
+    "description": "Drag·Resize·Control 손잡이가 하나의 descriptor, cursor, pointer lifecycle을 공유하는 생태계 경계를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "relatedDemoPath": "/affordances/handles",
+    "relatedDemoLabel": "Usage 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
     "path": "/docs/affordance/resize",
     "label": "Resize",
     "title": "Resize - json-document",

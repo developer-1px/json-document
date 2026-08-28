@@ -77,6 +77,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, 선택은 유지 |
 | [Drop](affordance-drop.md) | `dropAffordance`, `createBoardDragSession` | drop 대상, Board preview/commit/cancel, 선택 유지, no-drop |
 | [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |
+| [Interaction Handles](affordance-handles.md) | `createInteractionHandleSession`, `DragHandle`, `ResizeHandle`, `ControlHandle` | drag·resize·control 손잡이의 공통 lifecycle |
 | [Resize](affordance-resize.md) | `resizeAffordance` | 모서리 핸들, CSS UI 4 커서 |
 | [Scroll](affordance-scroll.md) | `wheelAffordance` | wheel 팬 |
 | [Zoom](affordance-zoom.md) | `wheelAffordance`, `zoomAffordance` | Mod+휠, +/− |

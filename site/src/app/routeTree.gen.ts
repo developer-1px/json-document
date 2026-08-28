@@ -101,6 +101,7 @@ import { Route as PageDocsAffordanceDropRouteImport } from "./routes/_page/docs/
 import { Route as PageDocsAffordanceFocusRouteImport } from "./routes/_page/docs/affordance/focus";
 import { Route as PageDocsAffordanceFoldRouteImport } from "./routes/_page/docs/affordance/fold";
 import { Route as PageDocsAffordanceForbidRouteImport } from "./routes/_page/docs/affordance/forbid";
+import { Route as PageDocsAffordanceHandlesRouteImport } from "./routes/_page/docs/affordance/handles";
 import { Route as PageDocsAffordanceHistoryRouteImport } from "./routes/_page/docs/affordance/history";
 import { Route as PageDocsAffordanceHoverRouteImport } from "./routes/_page/docs/affordance/hover";
 import { Route as PageDocsAffordanceMarqueeRouteImport } from "./routes/_page/docs/affordance/marquee";
@@ -626,6 +627,12 @@ const PageDocsAffordanceForbidRoute =
     path: "/docs/affordance/forbid",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAffordanceHandlesRoute =
+  PageDocsAffordanceHandlesRouteImport.update({
+    id: "/docs/affordance/handles",
+    path: "/docs/affordance/handles",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAffordanceHistoryRoute =
   PageDocsAffordanceHistoryRouteImport.update({
     id: "/docs/affordance/history",
@@ -968,6 +975,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1106,6 +1114,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1246,6 +1255,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/_page/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/_page/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/_page/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/_page/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/_page/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/_page/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1386,6 +1396,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/focus"
     | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
+    | "/docs/affordance/handles"
     | "/docs/affordance/history"
     | "/docs/affordance/hover"
     | "/docs/affordance/marquee"
@@ -1524,6 +1535,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/focus"
     | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
+    | "/docs/affordance/handles"
     | "/docs/affordance/history"
     | "/docs/affordance/hover"
     | "/docs/affordance/marquee"
@@ -1663,6 +1675,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/focus"
     | "/_page/docs/affordance/fold"
     | "/_page/docs/affordance/forbid"
+    | "/_page/docs/affordance/handles"
     | "/_page/docs/affordance/history"
     | "/_page/docs/affordance/hover"
     | "/_page/docs/affordance/marquee"
@@ -2363,6 +2376,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAffordanceForbidRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/affordance/handles": {
+      id: "/_page/docs/affordance/handles";
+      path: "/docs/affordance/handles";
+      fullPath: "/docs/affordance/handles";
+      preLoaderRoute: typeof PageDocsAffordanceHandlesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/affordance/history": {
       id: "/_page/docs/affordance/history";
       path: "/docs/affordance/history";
@@ -2834,6 +2854,7 @@ interface PageRouteChildren {
   PageDocsAffordanceFocusRoute: typeof PageDocsAffordanceFocusRoute;
   PageDocsAffordanceFoldRoute: typeof PageDocsAffordanceFoldRoute;
   PageDocsAffordanceForbidRoute: typeof PageDocsAffordanceForbidRoute;
+  PageDocsAffordanceHandlesRoute: typeof PageDocsAffordanceHandlesRoute;
   PageDocsAffordanceHistoryRoute: typeof PageDocsAffordanceHistoryRoute;
   PageDocsAffordanceHoverRoute: typeof PageDocsAffordanceHoverRoute;
   PageDocsAffordanceMarqueeRoute: typeof PageDocsAffordanceMarqueeRoute;
@@ -2946,6 +2967,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAffordanceFocusRoute: PageDocsAffordanceFocusRoute,
   PageDocsAffordanceFoldRoute: PageDocsAffordanceFoldRoute,
   PageDocsAffordanceForbidRoute: PageDocsAffordanceForbidRoute,
+  PageDocsAffordanceHandlesRoute: PageDocsAffordanceHandlesRoute,
   PageDocsAffordanceHistoryRoute: PageDocsAffordanceHistoryRoute,
   PageDocsAffordanceHoverRoute: PageDocsAffordanceHoverRoute,
   PageDocsAffordanceMarqueeRoute: PageDocsAffordanceMarqueeRoute,

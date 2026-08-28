@@ -140,6 +140,7 @@ describe("official site shell", () => {
       "Marquee",
       "Drop",
       "Duplicate",
+      "Interaction Handles",
       "Resize",
       "Pan",
       "Scroll",

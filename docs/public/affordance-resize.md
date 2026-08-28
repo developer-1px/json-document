@@ -3,6 +3,9 @@
 Resize는 가장자리·모서리·칸 경계·창 분할선을 움직이는 손입니다.
 CSS predefined 리사이즈 커서가 이 손을 닫습니다.
 
+Drag·Resize·Control 손잡이의 공통 소유권과 책임 경계는
+[Interaction Handles](affordance-handles.md)에서 설명합니다.
+
 `InteractionHandleDescriptor`가 Drag·Resize·Control 손잡이의 축, cursor와
 `start → preview → commit / cancel` lifecycle을 하나의 정본 계약으로 묶습니다.
 DOM pointer capture는 React/Web binding이 맡고, 제품은 delta를 자기 Intent로
@@ -78,7 +81,3 @@ function onPointerUp(event: PointerEvent, objectId: string, edge: "se") {
 - 스냅은 [Snap](affordance-snap.md)
 
 근거: [CSS UI cursor resize](https://www.w3.org/TR/css-ui-4/#cursor), [CSS UI resize](https://www.w3.org/TR/css-ui-4/#resize), [APG Window Splitter](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/), Figma/Keynote/Illustrator 바운딩 박스
-
-```live-demo
-/affordances/handles
-```
