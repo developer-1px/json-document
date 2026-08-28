@@ -10,6 +10,7 @@ export type {
 } from "./surfaces.js";
 export { useListbox } from "./listbox.js";
 export { formatFileSize } from "./file-size.js";
+export { calendarEventLabel, type CalendarEventLabelValue } from "./calendar-event-label.js";
 export type { ListboxBinding, ListboxItem, UseListboxOptions } from "./listbox.js";
 export {
   ActionButton,
@@ -37,6 +38,7 @@ export {
   addCalendarDays,
   addCalendarMonths,
   addCalendarYears,
+  calendarCellInterval,
   calendarCells,
   calendarMonthWeeks,
   calendarTimeLabel,
@@ -45,6 +47,8 @@ export {
   startOfIsoWeek,
   startOfYear,
   visiblePeriodLabel,
+  type CalendarCell,
+  type CalendarCellInterval,
   type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,
