@@ -44,7 +44,9 @@ export {
   startOfIsoWeek,
   startOfYear,
   visiblePeriodLabel,
+  type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,
   type HtmlDateType,
+  type VisiblePeriodLabelOptions,
 } from "./date-values.js";

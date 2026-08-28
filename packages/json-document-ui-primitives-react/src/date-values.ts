@@ -2,7 +2,12 @@ import { Temporal } from "@js-temporal/polyfill";
 
 export type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
 export type CalendarGrain = "week" | "month" | "year";
+export type CalendarPeriod = "day" | CalendarGrain;
 export type DateRangeValue = { readonly start: string; readonly end: string };
+export type VisiblePeriodLabelOptions = {
+  readonly monthNames?: ReadonlyArray<string>;
+  readonly weekSeparator?: string;
+};
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME = /^(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
@@ -174,10 +179,23 @@ export function calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyA
   return Array.from({ length: 6 }, (_, index) => cells.slice(index * 7, index * 7 + 7));
 }
 
-export function visiblePeriodLabel(grain: CalendarGrain, visibleDate: string): string {
+export function visiblePeriodLabel(
+  period: CalendarPeriod,
+  visibleDate: string,
+  options: VisiblePeriodLabelOptions = {},
+): string {
+  if (period === "day") return visibleDate;
   const parts = civil(visibleDate);
-  if (grain === "week") return `${startOfIsoWeek(visibleDate)} · week`;
-  if (grain === "month") return `${padYear(parts.year)}-${pad(parts.month)}`;
+  if (period === "week") {
+    const start = startOfIsoWeek(visibleDate);
+    if (options.weekSeparator === undefined) return `${start} · week`;
+    return `${start}${options.weekSeparator}${addCalendarDays(start, 6)}`;
+  }
+  if (period === "month") {
+    const fallback = `${padYear(parts.year)}-${pad(parts.month)}`;
+    const monthName = options.monthNames?.[parts.month - 1];
+    return monthName === undefined ? fallback : `${monthName} ${padYear(parts.year)}`;
+  }
   return padYear(parts.year);
 }
 

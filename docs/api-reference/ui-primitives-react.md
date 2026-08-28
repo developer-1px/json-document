@@ -51,6 +51,11 @@ CalendarGrid(props: { readonly label: string; readonly value: string | null; rea
 ```ts
 calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>>
 ```
+## `CalendarPeriod`
+
+```ts
+type CalendarPeriod = "day" | CalendarGrain;
+```
 ## `calendarYearMonths`
 
 ```ts
@@ -339,5 +344,13 @@ interface UseListboxOptions<Item extends ListboxItem> {
 ## `visiblePeriodLabel`
 
 ```ts
-visiblePeriodLabel(grain: CalendarGrain, visibleDate: string): string
+visiblePeriodLabel(period: CalendarPeriod, visibleDate: string, options?: VisiblePeriodLabelOptions): string
+```
+## `VisiblePeriodLabelOptions`
+
+```ts
+type VisiblePeriodLabelOptions = {
+  readonly monthNames?: ReadonlyArray<string>;
+  readonly weekSeparator?: string;
+};
 ```

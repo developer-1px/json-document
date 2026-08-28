@@ -48,6 +48,7 @@ import {
   shiftVisibleDate,
   startOfIsoWeek,
   startOfYear,
+  visiblePeriodLabel,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
@@ -498,7 +499,10 @@ export function CalendarDemoRoute(props: {
               <IconButton label="Previous" onClick={() => setVisibleDate(shiftView(visibleDate, view, -1))}>
                 <ChevronLeft aria-hidden="true" size={16} />
               </IconButton>
-              <span className={styles.period()}>{periodLabel(view, visibleDate)}</span>
+              <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
+                monthNames: months,
+                weekSeparator: " – ",
+              })}</span>
               <IconButton label="Next" onClick={() => setVisibleDate(shiftView(visibleDate, view, 1))}>
                 <ChevronRight aria-hidden="true" size={16} />
               </IconButton>
@@ -886,18 +890,6 @@ function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
 
 function clockLabel(instant: string): string {
   return instant.includes("T") ? instant.slice(11, 16) : "";
-}
-
-function periodLabel(view: CalendarView, date: string): string {
-  if (view === "day") return date;
-  if (view === "year") return date.slice(0, 4);
-  if (view === "month") {
-    const month = Number(date.slice(5, 7));
-    return `${months[month - 1] ?? date.slice(0, 7)} ${date.slice(0, 4)}`;
-  }
-  const start = startOfIsoWeek(date);
-  const end = addCalendarDays(start, 6);
-  return `${start} – ${end}`;
 }
 
 function shiftView(date: string, view: CalendarView, direction: 1 | -1): string {
