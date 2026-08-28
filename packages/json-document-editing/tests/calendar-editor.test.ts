@@ -1,14 +1,47 @@
 import { describe, expect, test } from "vitest";
 import {
+  calendarAllDayLayout,
+  calendarBusyDates,
+  calendarMonthDayLayout,
+  calendarNowMarker,
   calendarTimedLayout,
+  calendarVisibleEvents,
   createCalendarEditor,
+  projectCalendarOccurrences,
   type CalendarDocument,
+  type CalendarEvent,
 } from "../src/index.js";
 
+function event(fields: {
+  readonly id: string;
+  readonly title: string;
+  readonly start: string;
+  readonly end: string;
+  readonly allDay?: boolean;
+  readonly calendarId?: string;
+  readonly recurrence?: CalendarEvent["recurrence"];
+  readonly excludeDates?: CalendarEvent["excludeDates"];
+}): CalendarEvent {
+  return {
+    id: fields.id,
+    title: fields.title,
+    start: fields.start,
+    end: fields.end,
+    allDay: fields.allDay === true,
+    calendarId: fields.calendarId ?? "home",
+    recurrence: fields.recurrence ?? null,
+    excludeDates: fields.excludeDates ?? [],
+  };
+}
+
 const initial: CalendarDocument = {
+  calendars: [
+    { id: "home", title: "Home", hidden: false },
+    { id: "work", title: "Work", hidden: false },
+  ],
   events: [
-    { id: "standup", title: "Standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30", allDay: false },
-    { id: "review", title: "Review", start: "2026-08-03T14:00", end: "2026-08-03T15:00", allDay: false },
+    event({ id: "standup", title: "Standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30", allDay: false }),
+    event({ id: "review", title: "Review", start: "2026-08-03T14:00", end: "2026-08-03T15:00", allDay: false }),
   ],
 };
 
@@ -21,13 +54,13 @@ describe("calendar editor", () => {
       end: "2026-08-03T11:00",
       title: "Write",
     }).ok).toBe(true);
-    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toEqual({
+    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toEqual(event({
       id: "draft",
       title: "Write",
       start: "2026-08-03T10:00",
       end: "2026-08-03T11:00",
       allDay: false,
-    });
+    }));
 
     expect(editor.dispatch({ type: "event.move", eventId: "draft", start: "2026-08-03T13:00" }).ok).toBe(true);
     expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toMatchObject({
@@ -117,13 +150,13 @@ describe("calendar editor", () => {
       allDay: true,
       title: "Holiday",
     }).ok).toBe(true);
-    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toEqual({
+    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toEqual(event({
       id: "holiday",
       title: "Holiday",
       start: "2026-08-03",
       end: "2026-08-04",
       allDay: true,
-    });
+    }));
 
     expect(editor.dispatch({ type: "event.move-day", eventId: "holiday", day: "2026-08-05" }).ok).toBe(true);
     expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toMatchObject({
@@ -155,12 +188,12 @@ describe("calendar editor", () => {
 
   test("timed layout occupies the start/end span, not a single hour cell", () => {
     const layout = calendarTimedLayout([
-      { id: "span", title: "Write", start: "2026-08-03T10:00", end: "2026-08-03T11:30", allDay: false },
-      { id: "holiday", title: "Holiday", start: "2026-08-03", end: "2026-08-04", allDay: true },
+      event({ id: "span", title: "Write", start: "2026-08-03T10:00", end: "2026-08-03T11:30", allDay: false }),
+      event({ id: "holiday", title: "Holiday", start: "2026-08-03", end: "2026-08-04", allDay: true }),
     ], "2026-08-03");
     expect(layout).toEqual([
       {
-        event: { id: "span", title: "Write", start: "2026-08-03T10:00", end: "2026-08-03T11:30", allDay: false },
+        event: event({ id: "span", title: "Write", start: "2026-08-03T10:00", end: "2026-08-03T11:30", allDay: false }),
         startMinutes: 600,
         endMinutes: 690,
         lane: 0,
@@ -169,16 +202,93 @@ describe("calendar editor", () => {
     ]);
   });
 
+  test("lays out a multi-day timed event as that day's midnight-to-midnight minutes", () => {
+    const layout = calendarTimedLayout([
+      event({
+        id: "span",
+        title: "Write",
+        start: "2026-08-03T10:00",
+        end: "2026-08-06T15:30",
+        allDay: false,
+      }),
+    ], "2026-08-04");
+    expect(layout.map((item) => ({
+      startMinutes: item.startMinutes,
+      endMinutes: item.endMinutes,
+    }))).toEqual([{ startMinutes: 0, endMinutes: 1440 }]);
+  });
+
   test("places overlapping timed events in parallel lanes", () => {
     const layout = calendarTimedLayout([
-      { id: "first", title: "First", start: "2026-08-03T09:00", end: "2026-08-03T10:30", allDay: false },
-      { id: "second", title: "Second", start: "2026-08-03T10:00", end: "2026-08-03T11:00", allDay: false },
-      { id: "third", title: "Third", start: "2026-08-03T11:00", end: "2026-08-03T11:30", allDay: false },
+      event({ id: "first", title: "First", start: "2026-08-03T09:00", end: "2026-08-03T10:30", allDay: false }),
+      event({ id: "second", title: "Second", start: "2026-08-03T10:00", end: "2026-08-03T11:00", allDay: false }),
+      event({ id: "third", title: "Third", start: "2026-08-03T11:00", end: "2026-08-03T11:30", allDay: false }),
     ], "2026-08-03");
     expect(layout.map(({ event, lane, laneCount }) => ({ id: event.id, lane, laneCount }))).toEqual([
       { id: "first", lane: 0, laneCount: 2 },
       { id: "second", lane: 1, laneCount: 2 },
       { id: "third", lane: 0, laneCount: 1 },
+    ]);
+  });
+
+  test("marks now on that day only", () => {
+    expect(calendarNowMarker("2026-08-03T09:15", "2026-08-03")).toEqual({ minutes: 555 });
+    expect(calendarNowMarker("2026-08-03T09:15", "2026-08-04")).toBeNull();
+  });
+
+  test("lays out each all-day occurrence instead of spanning the series", () => {
+    const series = event({
+      id: "holiday",
+      title: "Holiday",
+      start: "2026-08-03",
+      end: "2026-08-04",
+      allDay: true,
+      recurrence: { freq: "daily", interval: 1, until: "2026-08-05" },
+    });
+    const days = ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06"];
+    expect(calendarAllDayLayout([series], days).map((item) => ({
+      id: item.event.id,
+      start: item.event.start,
+      startIndex: item.startIndex,
+      span: item.span,
+    }))).toEqual([
+      { id: "holiday", start: "2026-08-03", startIndex: 0, span: 1 },
+      { id: "holiday", start: "2026-08-04", startIndex: 1, span: 1 },
+      { id: "holiday", start: "2026-08-05", startIndex: 2, span: 1 },
+    ]);
+  });
+
+  test("monthly recurrence on the 31st stays on the last day of shorter months", () => {
+    const series = event({
+      id: "month-end",
+      title: "Month-end",
+      start: "2026-05-31T18:00",
+      end: "2026-05-31T18:30",
+      recurrence: { freq: "monthly", interval: 1, until: "2026-08-31" },
+    });
+    expect(projectCalendarOccurrences([series], "2026-05-01", "2026-09-01").map((item) => item.start)).toEqual([
+      "2026-05-31T18:00",
+      "2026-06-30T18:00",
+      "2026-07-31T18:00",
+      "2026-08-31T18:00",
+    ]);
+  });
+
+  test("places overlapping all-day events on separate lanes", () => {
+    const days = ["2026-08-03", "2026-08-04", "2026-08-05"];
+    const layout = calendarAllDayLayout([
+      event({ id: "holiday", title: "Holiday", start: "2026-08-03", end: "2026-08-04", allDay: true }),
+      event({ id: "travel", title: "Travel", start: "2026-08-03", end: "2026-08-05", allDay: true }),
+    ], days);
+    expect(layout.map((item) => ({
+      id: item.event.id,
+      startIndex: item.startIndex,
+      span: item.span,
+      lane: item.lane,
+      laneCount: item.laneCount,
+    }))).toEqual([
+      { id: "travel", startIndex: 0, span: 2, lane: 0, laneCount: 2 },
+      { id: "holiday", startIndex: 0, span: 1, lane: 1, laneCount: 2 },
     ]);
   });
 
@@ -201,5 +311,295 @@ describe("calendar editor", () => {
       start: "2026-02-30T10:00",
       end: "2026-02-30T11:00",
     }).ok).toBe(false);
+  });
+
+  test("names a created event and updates title, time, and all-day", () => {
+    const editor = createCalendarEditor(initial, { createId: () => "named" });
+    expect(editor.dispatch({
+      type: "event.create",
+      start: "2026-08-03T10:00",
+      end: "2026-08-03T11:30",
+    }).ok).toBe(true);
+    expect(editor.dispatch({ type: "event.update", eventId: "named", title: "Write brief" }).ok).toBe(true);
+    expect(editor.dispatch({
+      type: "event.update",
+      eventId: "named",
+      start: "2026-08-03T11:00",
+      end: "2026-08-03T12:00",
+    }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toMatchObject({
+      title: "Write brief",
+      start: "2026-08-03T11:00",
+      end: "2026-08-03T12:00",
+      allDay: false,
+    });
+    expect(editor.dispatch({ type: "event.update", eventId: "named", allDay: true }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toMatchObject({
+      start: "2026-08-03",
+      end: "2026-08-04",
+      allDay: true,
+    });
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.at(-1)?.title).toBe("Event");
+  });
+
+  test("updating only start keeps duration for timed and all-day events", () => {
+    const editor = createCalendarEditor(initial, { createId: () => "holiday" });
+    expect(editor.dispatch({
+      type: "event.update",
+      eventId: "standup",
+      start: "2026-08-04T11:00",
+    }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events[0]).toMatchObject({
+      start: "2026-08-04T11:00",
+      end: "2026-08-04T11:30",
+    });
+
+    expect(editor.dispatch({
+      type: "event.create",
+      start: "2026-08-03",
+      end: "2026-08-04",
+      allDay: true,
+      title: "Holiday",
+    }).ok).toBe(true);
+    expect(editor.dispatch({ type: "event.update", eventId: "holiday", start: "2026-08-06" }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.at(-1)).toMatchObject({
+      start: "2026-08-06",
+      end: "2026-08-07",
+      allDay: true,
+    });
+  });
+
+  test("expands a weekly event and edits this, following, and all", () => {
+    let sequence = 0;
+    const editor = createCalendarEditor(initial, { createId: () => `split-${++sequence}` });
+    expect(editor.dispatch({
+      type: "event.create",
+      start: "2026-08-03T09:00",
+      end: "2026-08-03T09:30",
+      title: "Standup series",
+      recurrence: { freq: "weekly", interval: 1, until: "" },
+    }).ok).toBe(true);
+    const occurrences = projectCalendarOccurrences(
+      [(editor.snapshot.value as CalendarDocument).events.at(-1)!],
+      "2026-08-03",
+      "2026-08-25",
+    );
+    expect(occurrences.map((item) => item.start)).toEqual([
+      "2026-08-03T09:00",
+      "2026-08-10T09:00",
+      "2026-08-17T09:00",
+      "2026-08-24T09:00",
+    ]);
+
+    expect(editor.dispatch({
+      type: "occurrence.edit",
+      eventId: "split-1",
+      occurrenceStart: "2026-08-10T09:00",
+      scope: "this",
+      title: "Skip-week standup",
+    }).ok).toBe(true);
+    const afterThis = editor.snapshot.value as CalendarDocument;
+    expect(afterThis.events.find((item) => item.id === "split-1")?.excludeDates).toEqual(["2026-08-10"]);
+    expect(afterThis.events.at(-1)).toMatchObject({
+      title: "Skip-week standup",
+      start: "2026-08-10T09:00",
+      end: "2026-08-10T09:30",
+      recurrence: null,
+    });
+    expect(calendarTimedLayout(calendarVisibleEvents(afterThis), "2026-08-10").map((item) => ({
+      id: item.event.id,
+      start: item.event.start,
+      end: item.event.end,
+    }))).toEqual([{ id: "split-2", start: "2026-08-10T09:00", end: "2026-08-10T09:30" }]);
+
+    let following = 0;
+    const series = createCalendarEditor(initial, { createId: () => `series-${++following}` });
+    series.dispatch({
+      type: "event.create",
+      start: "2026-08-03T09:00",
+      end: "2026-08-03T09:30",
+      title: "Standup series",
+      recurrence: { freq: "weekly", interval: 1, until: "" },
+    });
+    expect(series.dispatch({
+      type: "occurrence.edit",
+      eventId: "series-1",
+      occurrenceStart: "2026-08-10T09:00",
+      scope: "this-and-following",
+      title: "Later standup",
+    }).ok).toBe(true);
+    const afterFollowing = series.snapshot.value as CalendarDocument;
+    expect(afterFollowing.events.find((item) => item.id === "series-1")?.recurrence).toMatchObject({ until: "2026-08-09" });
+    expect(afterFollowing.events.at(-1)).toMatchObject({
+      title: "Later standup",
+      start: "2026-08-10T09:00",
+      end: "2026-08-10T09:30",
+    });
+    expect(projectCalendarOccurrences(
+      calendarVisibleEvents(afterFollowing),
+      "2026-08-10",
+      "2026-08-25",
+    ).map((item) => ({ id: item.event.id, start: item.start, end: item.end }))).toEqual([
+      { id: "series-2", start: "2026-08-10T09:00", end: "2026-08-10T09:30" },
+      { id: "series-2", start: "2026-08-17T09:00", end: "2026-08-17T09:30" },
+      { id: "series-2", start: "2026-08-24T09:00", end: "2026-08-24T09:30" },
+    ]);
+
+    const all = createCalendarEditor(initial, { createId: () => "all" });
+    all.dispatch({
+      type: "event.create",
+      start: "2026-08-03T09:00",
+      end: "2026-08-03T09:30",
+      title: "Standup series",
+      recurrence: { freq: "weekly", interval: 1, until: "" },
+    });
+    expect(all.dispatch({
+      type: "occurrence.edit",
+      eventId: "all",
+      occurrenceStart: "2026-08-10T09:00",
+      scope: "all",
+      title: "Team standup",
+    }).ok).toBe(true);
+    expect((all.snapshot.value as CalendarDocument).events.at(-1)?.title).toBe("Team standup");
+    expect(all.undo().ok).toBe(true);
+    expect((all.snapshot.value as CalendarDocument).events.at(-1)?.title).toBe("Standup series");
+  });
+
+  test("this-scope remove excludes that occurrence without deleting the series", () => {
+    const editor = createCalendarEditor({
+      calendars: [{ id: "home", title: "Home", hidden: false }],
+      events: [
+        event({
+          id: "standup",
+          title: "Standup",
+          start: "2026-08-03T09:00",
+          end: "2026-08-03T09:30",
+          recurrence: { freq: "daily", interval: 1, until: "2026-08-05" },
+        }),
+      ],
+    });
+    expect(editor.dispatch({
+      type: "occurrence.remove",
+      eventId: "standup",
+      occurrenceStart: "2026-08-04T09:00",
+      scope: "this",
+    }).ok).toBe(true);
+    const document = editor.snapshot.value as CalendarDocument;
+    expect(document.events).toHaveLength(1);
+    expect(document.events[0]?.excludeDates).toEqual(["2026-08-04"]);
+    expect(projectCalendarOccurrences(document.events, "2026-08-03", "2026-08-06").map((item) => item.start)).toEqual([
+      "2026-08-03T09:00",
+      "2026-08-05T09:00",
+    ]);
+  });
+
+  test("all-scope start edit from a later occurrence shifts the series by the same delta", () => {
+    const editor = createCalendarEditor({
+      calendars: [{ id: "home", title: "Home", hidden: false }],
+      events: [
+        event({
+          id: "standup",
+          title: "Standup",
+          start: "2026-08-03T09:00",
+          end: "2026-08-03T09:30",
+          recurrence: { freq: "daily", interval: 1, until: "2026-08-05" },
+        }),
+      ],
+    });
+    expect(editor.dispatch({
+      type: "occurrence.edit",
+      eventId: "standup",
+      occurrenceStart: "2026-08-04T09:00",
+      scope: "all",
+      start: "2026-08-04T11:00",
+    }).ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events[0]).toMatchObject({
+      start: "2026-08-03T11:00",
+      end: "2026-08-03T11:30",
+      recurrence: { freq: "daily", interval: 1, until: "2026-08-05" },
+    });
+  });
+
+  test("opens a document that omits calendars", () => {
+    const editor = createCalendarEditor({
+      events: [
+        { id: "standup", title: "Standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30", allDay: false },
+      ],
+    } as unknown as CalendarDocument);
+    expect(calendarVisibleEvents(editor.snapshot.value as CalendarDocument).map((item) => item.id)).toEqual(["standup"]);
+    expect(editor.dispatch({
+      type: "event.create",
+      start: "2026-08-03T10:00",
+      end: "2026-08-03T11:00",
+      title: "Write",
+    }).ok).toBe(true);
+  });
+
+  test("hides a calendar's events without deleting them", () => {
+    const editor = createCalendarEditor(initial);
+    expect(editor.dispatch({ type: "event.update", eventId: "review", calendarId: "work" }).ok).toBe(true);
+    expect(calendarVisibleEvents(editor.snapshot.value as CalendarDocument).map((item) => item.id)).toEqual([
+      "standup",
+      "review",
+    ]);
+    expect(editor.dispatch({ type: "calendar.set-hidden", calendarId: "work", hidden: true }).ok).toBe(true);
+    expect(calendarVisibleEvents(editor.snapshot.value as CalendarDocument).map((item) => item.id)).toEqual(["standup"]);
+    expect((editor.snapshot.value as CalendarDocument).events.map((item) => item.id)).toEqual(["standup", "review"]);
+    expect(editor.dispatch({ type: "calendar.set-hidden", calendarId: "work", hidden: false }).ok).toBe(true);
+    expect(calendarVisibleEvents(editor.snapshot.value as CalendarDocument).map((item) => item.id)).toEqual([
+      "standup",
+      "review",
+    ]);
+  });
+
+  test("month day layout puts all-day events first and keeps overflow off the last row", () => {
+    const events = [
+      event({ id: "late", title: "Late", start: "2026-08-03T16:00", end: "2026-08-03T17:00" }),
+      event({ id: "early", title: "Early", start: "2026-08-03T09:00", end: "2026-08-03T09:30" }),
+      event({
+        id: "holiday",
+        title: "Holiday",
+        start: "2026-08-03",
+        end: "2026-08-04",
+        allDay: true,
+      }),
+      event({ id: "noon", title: "Noon", start: "2026-08-03T12:00", end: "2026-08-03T13:00" }),
+    ];
+    expect(calendarMonthDayLayout(events, "2026-08-03", 3).events.map((item) => item.id)).toEqual([
+      "holiday",
+      "early",
+    ]);
+    expect(calendarMonthDayLayout(events, "2026-08-03", 3).hiddenCount).toBe(2);
+    expect(calendarMonthDayLayout(events, "2026-08-03", 4).hiddenCount).toBe(0);
+    expect(calendarMonthDayLayout(events, "2026-08-03", 4).events.map((item) => item.id)).toEqual([
+      "holiday",
+      "early",
+      "noon",
+      "late",
+    ]);
+  });
+
+  test("busy dates mark every civil day an occurrence occupies", () => {
+    const events = [
+      event({ id: "standup", title: "Standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30" }),
+      event({
+        id: "offsite",
+        title: "Offsite",
+        start: "2026-08-04",
+        end: "2026-08-06",
+        allDay: true,
+      }),
+      event({ id: "overnight", title: "Overnight", start: "2026-08-06T22:00", end: "2026-08-07T02:00" }),
+    ];
+    expect([...calendarBusyDates(events, "2026-08-03", "2026-08-08")].sort()).toEqual([
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+    ]);
   });
 });

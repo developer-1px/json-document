@@ -1,9 +1,11 @@
-import type { CalendarIntent } from "./calendar.js";
-import { addCalendarDate } from "./calendar-validation.js";
+import type { CalendarEvent, CalendarIntent } from "./calendar.js";
+import { calendarEventRecurrence } from "./calendar-occurrence.js";
+import { addCalendarDate, calendarDatePart, isCalendarAllDay, parseCalendarDate } from "./calendar-validation.js";
 
 export type CalendarMonthPointerRelease = {
   readonly originDay: string;
   readonly originEventId: string | null;
+  readonly originEventStart?: string | null;
   readonly targetDay: string;
   readonly eventsOnTargetDay: ReadonlyArray<{ readonly id: string }>;
 };
@@ -20,14 +22,44 @@ export function interpretCalendarMonthPointer(
     if (release.originEventId !== null) {
       return { type: "selection.set", eventIds: [release.originEventId] };
     }
-    const occupant = release.eventsOnTargetDay[0];
-    if (occupant !== undefined) {
-      return { type: "selection.set", eventIds: [occupant.id] };
-    }
     const end = addCalendarDate(release.targetDay, 1);
     if (end === null) return null;
     return { type: "event.create", start: release.targetDay, end, allDay: true };
   }
   if (release.originEventId === null) return null;
-  return { type: "event.move-day", eventId: release.originEventId, day: release.targetDay };
+  const originStart = calendarDatePart(release.originEventStart ?? release.originDay);
+  const origin = parseCalendarDate(release.originDay);
+  const target = parseCalendarDate(release.targetDay);
+  if (origin === null || target === null) return null;
+  const day = addCalendarDate(originStart, (target - origin) / 86_400_000);
+  if (day === null) return null;
+  return { type: "event.move-day", eventId: release.originEventId, day };
+}
+
+export function bindCalendarMonthIntent(
+  intent: CalendarMonthPointerIntent | null,
+  event: CalendarEvent | undefined,
+  occurrenceStart: string | null,
+  scope: "this" | "this-and-following" | "all" = "this",
+): CalendarIntent | null {
+  if (intent === null) return null;
+  if (intent.type !== "event.move-day") return intent;
+  if (event === undefined || calendarEventRecurrence(event) === null) return intent;
+  const start = occurrenceStart ?? event.start;
+  const occDay = calendarDatePart(start);
+  const origin = parseCalendarDate(occDay);
+  const next = parseCalendarDate(intent.day);
+  if (origin === null || next === null) return intent;
+  if (scope === "all") {
+    const day = addCalendarDate(calendarDatePart(event.start), (next - origin) / 86_400_000);
+    if (day === null) return intent;
+    return { type: "event.move-day", eventId: intent.eventId, day };
+  }
+  return {
+    type: "occurrence.edit",
+    eventId: intent.eventId,
+    occurrenceStart: start,
+    scope,
+    start: isCalendarAllDay(event) ? intent.day : `${intent.day}T${start.slice(11)}`,
+  };
 }

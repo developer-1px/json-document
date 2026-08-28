@@ -1,15 +1,33 @@
-import type { CalendarDocument, CalendarEvent } from "./calendar.js";
+import type { CalendarCalendar, CalendarDocument, CalendarEvent } from "./calendar.js";
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
 const DAY_MS = 86_400_000;
 const MINUTE_MS = 60_000;
 
+export function calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar> {
+  return Array.isArray(document.calendars) ? document.calendars : [];
+}
+
+export function calendarDocumentEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent> {
+  return Array.isArray(document.events) ? document.events : [];
+}
+
 export function assertCalendarDocument(document: CalendarDocument): void {
+  const calendarIds = new Set<string>();
+  for (const calendar of calendarDocumentCalendars(document)) {
+    if (calendar.id.length === 0) throw new Error("Calendar ids must not be empty.");
+    if (calendarIds.has(calendar.id)) throw new Error(`Calendar id must be unique: ${JSON.stringify(calendar.id)}.`);
+    calendarIds.add(calendar.id);
+  }
   const ids = new Set<string>();
-  for (const event of document.events) {
+  for (const event of calendarDocumentEvents(document)) {
     if (event.id.length === 0) throw new Error("Calendar event ids must not be empty.");
     if (ids.has(event.id)) throw new Error(`Calendar event id must be unique: ${JSON.stringify(event.id)}.`);
+    const calendarId = typeof event.calendarId === "string" ? event.calendarId : "";
+    if (calendarId.length > 0 && calendarIds.size > 0 && !calendarIds.has(calendarId)) {
+      throw new Error(`Calendar event must belong to a calendar: ${JSON.stringify(event.id)}.`);
+    }
     if (isCalendarAllDay(event)) {
       if (parseCalendarDate(event.start) === null || parseCalendarDate(event.end) === null) {
         throw new Error(`All-day calendar events must use date strings: ${JSON.stringify(event.id)}.`);

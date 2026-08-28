@@ -86,6 +86,16 @@ interface AnnotationSource extends Record<string, JSONValue> { readonly id: stri
 ```ts
 assertAnnotationDocument(document: AnnotationDocument): void
 ```
+## `bindCalendarMonthIntent`
+
+```ts
+bindCalendarMonthIntent(intent: CalendarMonthPointerIntent | null, event: CalendarEvent | undefined, occurrenceStart: string | null, scope?: "this" | "this-and-following" | "all"): CalendarIntent | null
+```
+## `bindCalendarTimeGridIntent`
+
+```ts
+bindCalendarTimeGridIntent(intent: CalendarTimeGridPointerIntent | null, event: CalendarEvent | undefined, occurrenceStart: string | null, scope?: "this" | "this-and-following" | "all"): CalendarIntent | null
+```
 ## `BlockDocument`
 
 ```ts
@@ -101,7 +111,7 @@ type CalendarAllDayHandle = "body" | "start" | "end";
 ## `calendarAllDayLayout`
 
 ```ts
-calendarAllDayLayout(events: ReadonlyArray<CalendarEvent>, days: ReadonlyArray<string>): ReadonlyArray<{ readonly event: CalendarEvent; readonly startIndex: number; readonly span: number; }>
+calendarAllDayLayout(events: ReadonlyArray<CalendarEvent>, days: ReadonlyArray<string>): ReadonlyArray<{ readonly event: CalendarEvent; readonly startIndex: number; readonly span: number; readonly lane: number; readonly laneCount: number; }>
 ```
 ## `CalendarAllDayPointerIntent`
 
@@ -122,10 +132,25 @@ type CalendarAllDayPointerRelease = {
   readonly targetDay: string;
 };
 ```
+## `calendarBusyDates`
+
+```ts
+calendarBusyDates(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlySet<string>
+```
+## `CalendarCalendar`
+
+```ts
+interface CalendarCalendar extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly title: string;
+  readonly hidden: boolean;
+}
+```
 ## `CalendarDocument`
 
 ```ts
 interface CalendarDocument extends Record<string, JSONValue> {
+  readonly calendars: ReadonlyArray<CalendarCalendar>;
   readonly events: ReadonlyArray<CalendarEvent>;
 }
 ```
@@ -150,6 +175,9 @@ interface CalendarEvent extends Record<string, JSONValue> {
   readonly start: string;
   readonly end: string;
   readonly allDay: boolean;
+  readonly calendarId: string;
+  readonly recurrence: CalendarRecurrence | null;
+  readonly excludeDates: ReadonlyArray<string>;
 }
 ```
 ## `calendarEventsInMonth`
@@ -183,10 +211,43 @@ type CalendarIntent =
       readonly end: string;
       readonly title?: string;
       readonly allDay?: boolean;
+      readonly calendarId?: string;
+      readonly recurrence?: CalendarRecurrence | null;
     }
   | { readonly type: "event.move"; readonly eventId: string; readonly start: string }
   | { readonly type: "event.resize"; readonly eventId: string; readonly edge: "start" | "end"; readonly instant: string }
-  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string };
+  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string }
+  | {
+      readonly type: "event.update";
+      readonly eventId: string;
+      readonly title?: string;
+      readonly start?: string;
+      readonly end?: string;
+      readonly allDay?: boolean;
+      readonly calendarId?: string;
+      readonly recurrence?: CalendarRecurrence | null;
+    }
+  | {
+      readonly type: "occurrence.edit";
+      readonly eventId: string;
+      readonly occurrenceStart: string;
+      readonly scope: "this" | "this-and-following" | "all";
+      readonly title?: string;
+      readonly start?: string;
+      readonly end?: string;
+    }
+  | {
+      readonly type: "occurrence.remove";
+      readonly eventId: string;
+      readonly occurrenceStart: string;
+      readonly scope: "this" | "this-and-following" | "all";
+    }
+  | { readonly type: "calendar.set-hidden"; readonly calendarId: string; readonly hidden: boolean };
+```
+## `calendarMonthDayLayout`
+
+```ts
+calendarMonthDayLayout(events: ReadonlyArray<CalendarEvent>, day: string, rowLimit: number): { readonly events: ReadonlyArray<CalendarEvent>; readonly hiddenCount: number; }
 ```
 ## `CalendarMonthPointerIntent`
 
@@ -202,9 +263,33 @@ type CalendarMonthPointerIntent = Extract<
 type CalendarMonthPointerRelease = {
   readonly originDay: string;
   readonly originEventId: string | null;
+  readonly originEventStart?: string | null;
   readonly targetDay: string;
   readonly eventsOnTargetDay: ReadonlyArray<{ readonly id: string }>;
 };
+```
+## `calendarNowMarker`
+
+```ts
+calendarNowMarker(nowInstant: string, day: string): { readonly minutes: number; } | null
+```
+## `CalendarOccurrence`
+
+```ts
+type CalendarOccurrence = {
+  readonly event: CalendarEvent;
+  readonly start: string;
+  readonly end: string;
+};
+```
+## `CalendarRecurrence`
+
+```ts
+interface CalendarRecurrence extends Record<string, JSONValue> {
+  readonly freq: "daily" | "weekly" | "monthly" | "yearly";
+  readonly interval: number;
+  readonly until: string;
+}
 ```
 ## `CalendarSelection`
 
@@ -253,6 +338,11 @@ type CalendarTimeGridPointerRelease = {
 
 ```ts
 type CalendarView = "day" | "week" | "month" | "year";
+```
+## `calendarVisibleEvents`
+
+```ts
+calendarVisibleEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent>
 ```
 ## `createAnnotationEditor`
 
@@ -960,6 +1050,21 @@ interface OrderSelection extends Record<string, JSONValue> {
   readonly ranges: ReadonlyArray<OrderRange>;
   readonly primaryIndex: number | null;
 }
+```
+## `previewCalendarAllDay`
+
+```ts
+previewCalendarAllDay(events: ReadonlyArray<CalendarEvent>, release: CalendarAllDayPointerRelease): ReadonlyArray<CalendarEvent>
+```
+## `previewCalendarTimeGrid`
+
+```ts
+previewCalendarTimeGrid(events: ReadonlyArray<CalendarEvent>, release: CalendarTimeGridPointerRelease, scope?: "this" | "this-and-following" | "all"): ReadonlyArray<CalendarEvent>
+```
+## `projectCalendarOccurrences`
+
+```ts
+projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlyArray<CalendarOccurrence>
 ```
 ## `projectTreeVisibility`
 

@@ -4,6 +4,8 @@ import calendarEditingSource from "../../../../packages/json-document-editing/sr
 import calendarAllDayPointerSource from "../../../../packages/json-document-editing/src/calendar-allday-pointer.ts?raw";
 import calendarMonthPointerSource from "../../../../packages/json-document-editing/src/calendar-month-pointer.ts?raw";
 import calendarTimeGridPointerSource from "../../../../packages/json-document-editing/src/calendar-time-grid-pointer.ts?raw";
+import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
+import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
@@ -129,6 +131,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-allday-pointer.ts", calendarAllDayPointerSource],
   ["packages/json-document-editing/src/calendar-month-pointer.ts", calendarMonthPointerSource],
   ["packages/json-document-editing/src/calendar-time-grid-pointer.ts", calendarTimeGridPointerSource],
+  ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
+  ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
   ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
@@ -212,6 +216,16 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarMonthDayLayout",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarBusyDates",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
     symbol: "interpretCalendarAllDayPointer",
     sourcePath: "packages/json-document-editing/src/calendar-allday-pointer.ts",
   },
@@ -224,6 +238,21 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "interpretCalendarTimeGridPointer",
     sourcePath: "packages/json-document-editing/src/calendar-time-grid-pointer.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "projectCalendarOccurrences",
+    sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "previewCalendarAllDay",
+    sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "previewCalendarTimeGrid",
+    sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
