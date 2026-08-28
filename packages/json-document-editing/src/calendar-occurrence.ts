@@ -1,9 +1,9 @@
+import { Temporal } from "@js-temporal/polyfill";
 import type { CalendarEvent, CalendarRecurrence } from "./calendar.js";
 import {
   addCalendarDate,
   calendarDatePart,
   calendarEventBounds,
-  formatCalendarDate,
   formatCalendarInstant,
   isCalendarAllDay,
   parseCalendarDate,
@@ -91,9 +91,9 @@ function shiftOccurrence(
 function shiftDate(value: string, freq: CalendarRecurrence["freq"], steps: number): string | null {
   if (freq === "daily") return addCalendarDate(value, steps);
   if (freq === "weekly") return addCalendarDate(value, steps * 7);
-  const utc = parseCalendarDate(value);
-  if (utc === null) return null;
-  return formatCalendarDate(shiftMonthOrYear(utc, freq, steps));
+  if (parseCalendarDate(value) === null) return null;
+  const duration = freq === "monthly" ? { months: steps } : { years: steps };
+  return Temporal.PlainDate.from(value).add(duration, { overflow: "constrain" }).toString();
 }
 
 function shiftInstant(value: string, freq: CalendarRecurrence["freq"], steps: number): string | null {
@@ -101,19 +101,6 @@ function shiftInstant(value: string, freq: CalendarRecurrence["freq"], steps: nu
   if (utc === null) return null;
   if (freq === "daily") return formatCalendarInstant(utc + steps * 86_400_000);
   if (freq === "weekly") return formatCalendarInstant(utc + steps * 7 * 86_400_000);
-  return formatCalendarInstant(shiftMonthOrYear(utc, freq, steps));
-}
-
-function shiftMonthOrYear(utc: number, freq: "monthly" | "yearly", steps: number): number {
-  const date = new Date(utc);
-  const day = date.getUTCDate();
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  date.setUTCDate(1);
-  if (freq === "monthly") date.setUTCMonth(date.getUTCMonth() + steps);
-  else date.setUTCFullYear(date.getUTCFullYear() + steps);
-  const year = date.getUTCFullYear();
-  const month = date.getUTCMonth();
-  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  return Date.UTC(year, month, Math.min(day, lastDay), hours, minutes);
+  const duration = freq === "monthly" ? { months: steps } : { years: steps };
+  return Temporal.PlainDateTime.from(value).add(duration, { overflow: "constrain" }).toString({ smallestUnit: "minute" });
 }

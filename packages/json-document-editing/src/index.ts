@@ -33,6 +33,14 @@ export {
   createCalendarEditor,
 } from "./calendar.js";
 export { projectCalendarOccurrences } from "./calendar-occurrence.js";
+export {
+  calendarOccurrenceAfterIntent,
+  calendarOccurrenceForInspector,
+  calendarOccurrenceFromSelection,
+  calendarUpdateIntent,
+  calendarVisibleHourBand,
+} from "./calendar-selection.js";
+export type { CalendarEventPatch, CalendarOccurrenceRange } from "./calendar-selection.js";
 export { previewCalendarAllDay, previewCalendarMonth, previewCalendarTimeGrid } from "./calendar-preview.js";
 export { bindCalendarAllDayIntent, interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
 export { bindCalendarMonthIntent, interpretCalendarMonthPointer } from "./calendar-month-pointer.js";

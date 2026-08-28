@@ -16,6 +16,21 @@ activeDescendantContainerProps(activeId: string | null): Readonly<{ tabIndex: 0;
 ```ts
 activeDescendantItemProps(id: string): Readonly<{ id: string; }>
 ```
+## `calendarCommandFromWebKeyboardEvent`
+
+```ts
+calendarCommandFromWebKeyboardEvent(event: WebCalendarKeyboardEvent): WebCalendarCommand | null
+```
+## `calendarDayDeltaFromWebWidth`
+
+```ts
+calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number
+```
+## `calendarMinutesFromWebGrid`
+
+```ts
+calendarMinutesFromWebGrid(clientY: number, bounds: { readonly top: number; readonly height: number; }, options: { readonly hourStart: number; readonly hourEnd: number; readonly stepMinutes: number; }): number
+```
 ## `chordFromStroke`
 
 ```ts
@@ -226,6 +241,27 @@ interface WebAnnotationRasterStyle {
   readonly fill: string;
   readonly lineWidth: number;
   readonly labelFont: string;
+}
+```
+## `WebCalendarCommand`
+
+```ts
+type WebCalendarCommand =
+  | { readonly type: "view"; readonly view: CalendarView }
+  | { readonly type: "shift"; readonly direction: 1 | -1 }
+  | { readonly type: "today" }
+  | { readonly type: "create" }
+  | { readonly type: "remove" };
+```
+## `WebCalendarKeyboardEvent`
+
+```ts
+interface WebCalendarKeyboardEvent {
+  readonly key: string;
+  readonly target: unknown;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
+  readonly altKey?: boolean;
 }
 ```
 ## `WebClientPoint`

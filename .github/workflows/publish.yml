@@ -11,6 +11,7 @@ on:
       - "json-document-selection-v*"
       - "json-document-editing-v*"
       - "json-document-database-v*"
+      - "json-document-calendar-v*"
       - "json-document-tanstack-table-v*"
       - "json-document-web-v*"
       - "json-document-contenteditable-v*"

@@ -10,6 +10,7 @@ export const apiReferencePackages = [
   ["affordance", "@interactive-os/json-document-affordance", "packages/json-document-affordance/src/index.ts", "Affordance", "입력 문법과 interaction session"],
   ["ui-primitives-react", "@interactive-os/json-document-ui-primitives-react", "packages/json-document-ui-primitives-react/src/index.ts", "UI Primitives", "표준 React UI primitive"],
   ["database", "@interactive-os/json-document-database", "packages/json-document-database/src/index.ts", "Hands", "Database Hand domain 계약"],
+  ["calendar", "@interactive-os/json-document-calendar", "packages/json-document-calendar/src/index.ts", "Hands", "Calendar React lifecycle와 occurrence interaction 계약"],
   ["web", "@interactive-os/json-document-web", "packages/json-document-web/src/index.ts", "Adapter", "Web platform adapter"],
   ["contenteditable", "@interactive-os/json-document-contenteditable", "packages/json-document-contenteditable/src/index.ts", "Adapter", "contenteditable platform adapter"],
   ["rich-text", "@interactive-os/json-document-rich-text", "packages/json-document-rich-text/src/index.ts", "Editing", "Rich Text domain과 editing 계약"],

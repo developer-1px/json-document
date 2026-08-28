@@ -10,6 +10,7 @@ import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-ta
 import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
 import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
 import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
+import calendarApiMarkdown from "../../../../docs/api-reference/calendar.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
@@ -165,6 +166,7 @@ export const docPages = {
   affordanceApi: docPage("/docs/api/affordance", affordanceApiMarkdown),
   uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
+  calendarApi: docPage("/docs/api/calendar", calendarApiMarkdown),
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),

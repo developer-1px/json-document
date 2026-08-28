@@ -221,6 +221,7 @@ foundation으로 유지한다.
 | `packages/json-document-ui-primitives-react` | React UI Primitive family | 수렴한 Hands의 minimalist surface와 framework lifecycle을 책임별 module로 유지 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-database` | Product-facing Hand | 기본 admin UI와 customization contract를 소유하고 headless domain package를 내부 구현으로 조합 |
+| `packages/json-document-calendar` | Product-facing Hand | Calendar editor 관찰, occurrence focus, naming, Web pointer interaction lifecycle을 정본 hook으로 유지 |
 | `packages/json-document-tanstack-table` | Single-native Connector | 하나의 Table/Sheet binding으로 flat 유지 |
 | `packages/json-document-web` | Adapter family | keyboard/clipboard/input/modifier 책임 file과 root facade 유지 |
 | `packages/json-document-contenteditable` | Composite Adapter | React entry, binding, DOM adapter 책임 분리 유지 |

@@ -77,6 +77,7 @@ describe("official site shell", () => {
       "API · Composer",
       "API · Composer React",
       "API · Database",
+      "API · Calendar",
       "Overview",
       "Official Hands · TBD",
       "Viewport Position",

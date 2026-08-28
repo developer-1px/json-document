@@ -39,6 +39,7 @@
     "@interactive-os/json-document-web": "*",
     "@interactive-os/json-document-zod": "*",
     "@interactive-os/json-document-database": "*",
+    "@interactive-os/json-document-calendar": "*",
     "@tanstack/react-router": "^1.170.27",
     "@tanstack/react-table": "^8.21.3",
     "ajv": "^8.20.0",

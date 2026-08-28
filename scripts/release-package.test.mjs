@@ -17,6 +17,7 @@ const firstKit = [
   ["json-document-rich-text-mention-react-v0.1.0-rc.0", "@interactive-os/json-document-rich-text-mention-react", "next", "packages/json-document-rich-text-mention-react/package.json"],
   ["json-document-web-v0.1.0-rc.0", "@interactive-os/json-document-web", "next", "packages/json-document-web/package.json"],
   ["json-document-react-v0.1.0-rc.0", "@interactive-os/json-document-react", "next", "packages/json-document-react/package.json"],
+  ["json-document-calendar-v0.1.0-rc.0", "@interactive-os/json-document-calendar", "next", "packages/json-document-calendar/package.json"],
 ];
 
 const databaseHand = [

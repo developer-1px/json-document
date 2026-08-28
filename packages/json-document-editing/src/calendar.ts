@@ -8,6 +8,7 @@ import {
   type KeySelectionCommand,
   type KeySelectionContext,
 } from "@interactive-os/json-document-selection";
+import { Temporal } from "@js-temporal/polyfill";
 import {
   createEditingSession,
   type EditingResult,
@@ -773,9 +774,7 @@ export function calendarEventsInMonth(
   const start = `${month}-01`;
   const startUtc = parseCalendarDate(start);
   if (startUtc === null) return [];
-  const year = Number(month.slice(0, 4));
-  const monthNumber = Number(month.slice(5, 7));
-  const end = formatCalendarDate(Date.UTC(year, monthNumber, 1));
+  const end = Temporal.PlainYearMonth.from(month).add({ months: 1 }).toPlainDate({ day: 1 }).toString();
   return projectCalendarOccurrences(events, start, end).map((item) => ({
     ...item.event,
     start: item.start,

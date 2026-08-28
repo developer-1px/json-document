@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
 
 import {
@@ -13,27 +13,15 @@ import {
   calendarShiftInstant,
   calendarTimedLayout,
   calendarVisibleEvents,
+  calendarVisibleHourBand,
   createCalendarEditor,
-  interpretCalendarAllDayPointer,
-  interpretCalendarMonthPointer,
-  bindCalendarAllDayIntent,
-  bindCalendarMonthIntent,
-  bindCalendarTimeGridIntent,
-  interpretCalendarTimeGridPointer,
   isCalendarAllDay,
-  previewCalendarAllDay,
-  previewCalendarMonth,
-  previewCalendarTimeGrid,
-  type CalendarAllDayPointerRelease,
-  type CalendarMonthPointerRelease,
   type CalendarDocument,
   type CalendarEvent,
-  type CalendarIntent,
   type CalendarRecurrence,
-  type CalendarTimeGridHandle,
-  type CalendarTimeGridPointerRelease,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
+import { useCalendarHand, useCalendarPointerInteractions } from "@interactive-os/json-document-calendar";
 import {
   ActionButton,
   HtmlDateField,
@@ -50,19 +38,13 @@ import {
   shiftVisibleDate,
   startOfIsoWeek,
 } from "@interactive-os/json-document-ui-primitives-react";
-import { createWebPointerSession, findWebPointTarget } from "@interactive-os/json-document-web";
+import {
+  calendarCommandFromWebKeyboardEvent,
+} from "@interactive-os/json-document-web";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
 import { ProductApp } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
-import {
-  calendarAllDayResizeDays,
-  calendarInspectorOccurrence,
-  calendarPointerOccurrence,
-  calendarSelectionOccurrence,
-  calendarVisibleHourBand,
-} from "./calendar-pointer-occurrence";
-import { interpretCalendarHotkey } from "./calendar-hotkeys";
 import { CalendarDemoNavigator } from "./calendar-demo-navigator";
 import { calendarSearchDefaults } from "./calendar-search";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
@@ -127,7 +109,7 @@ const monthDayRows = 3;
 const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-type OccurrenceScope = Extract<CalendarIntent, { type: "occurrence.edit" }>["scope"];
+type OccurrenceScope = "this" | "this-and-following" | "all";
 
 export function CalendarDemoRoute(props: {
   readonly view?: CalendarView;
@@ -142,34 +124,46 @@ export function CalendarDemoRoute(props: {
     let sequence = 0;
     return createCalendarEditor(initial, { createId: () => `event-${++sequence}` });
   });
+  const hand = useCalendarHand(editor, {
+    initialOccurrence: { start: initial.events[0]?.start ?? null, end: initial.events[0]?.end ?? null },
+    defaultTitle: "Event",
+  });
   const [viewState, setViewState] = useState<CalendarView>(calendarSearchDefaults.view);
   const [visibleDateState, setVisibleDateState] = useState(calendarSearchDefaults.date);
-  const [timePreview, setTimePreview] = useState<CalendarTimeGridPointerRelease | null>(null);
-  const [allDayPreview, setAllDayPreview] = useState<CalendarAllDayPointerRelease | null>(null);
-  const allDayPreviewRef = useRef<CalendarAllDayPointerRelease | null>(null);
-  allDayPreviewRef.current = allDayPreview;
-  const [monthPreview, setMonthPreview] = useState<CalendarMonthPointerRelease | null>(null);
-  const [occurrenceStart, setOccurrenceStart] = useState<string | null>(initial.events[0]?.start ?? null);
-  const [occurrenceEnd, setOccurrenceEnd] = useState<string | null>(initial.events[0]?.end ?? null);
-  const [scope, setScope] = useState<OccurrenceScope>("this");
-  const [naming, setNaming] = useState(false);
-  const [titleDraft, setTitleDraft] = useState("");
+  const timePreview = hand.timePreview;
+  const allDayPreview = hand.allDayPreview;
+  const monthPreview = hand.monthPreview;
+  const occurrenceStart = hand.occurrence.start;
+  const occurrenceEnd = hand.occurrence.end;
+  const scope = hand.scope;
+  const setScope = hand.setScope;
+  const naming = hand.naming;
+  const titleDraft = hand.titleDraft;
+  const setTitleDraft = hand.setTitleDraft;
   const [overflowDay, setOverflowDay] = useState<string | null>(null);
-  const [timePointer] = useState(() => createWebPointerSession<CalendarTimeGridPointerRelease & {
-    readonly originEventEnd: string | null;
-  }>());
-  const [allDayPointer] = useState(() => createWebPointerSession<CalendarAllDayPointerRelease & {
-    readonly originEventEnd: string | null;
-  }>());
-  const [monthPointer] = useState(() => createWebPointerSession<{
-    readonly originDay: string;
-    readonly originEventId: string | null;
-    readonly originEventStart: string | null;
-    readonly originEventEnd: string | null;
-    readonly targetDay: string;
-    readonly eventsOnTargetDay: ReadonlyArray<{ readonly id: string }>;
-  }>());
-  const [, setRevision] = useState(0);
+  const {
+    instantAt,
+    timePointerDown,
+    timePointerMove,
+    timePointerUp,
+    allDayPointerDown,
+    allDayPointerMove,
+    allDayPointerUp,
+    monthPointerDown,
+    monthPointerMove,
+    monthPointerUp,
+    cancelTimePointer,
+    cancelAllDayPointer,
+    cancelMonthPointer,
+    resizeTimed,
+    resizeAllDay,
+  } = useCalendarPointerInteractions(hand, {
+    hourStart,
+    hourEnd,
+    stepMinutes: 15,
+    pixelsPerHour: pxPerHour,
+    onMonthPointerBegin: () => setOverflowDay(null),
+  });
   const view = props.view ?? viewState;
   const visibleDate = props.visibleDate ?? visibleDateState;
 
@@ -187,21 +181,12 @@ export function CalendarDemoRoute(props: {
     setLocation(view, next);
   }
 
-  const refresh = () => setRevision((value) => value + 1);
-  const document = editor.snapshot.value as CalendarDocument;
-  const selected = new Set(editor.snapshot.selection.keys);
-  const selectedEvent = editor.selectedEvents[0] ?? null;
-  const inspected = selectedEvent === null
-    ? null
-    : calendarInspectorOccurrence(selectedEvent, { start: occurrenceStart, end: occurrenceEnd });
+  const document = hand.document;
+  const selected = new Set(hand.snapshot.selection.keys);
+  const selectedEvent = hand.selectedEvent;
+  const inspected = hand.inspectedInterval;
   const visibleEvents = calendarVisibleEvents(document);
-  const paintedEvents = allDayPreview !== null
-    ? previewCalendarAllDay(visibleEvents, allDayPreview, scope)
-    : timePreview !== null
-      ? previewCalendarTimeGrid(visibleEvents, timePreview, scope)
-      : monthPreview !== null
-        ? previewCalendarMonth(visibleEvents, monthPreview, scope)
-        : visibleEvents;
+  const paintedEvents = hand.paintedEvents;
   const weekStart = startOfIsoWeek(visibleDate);
   const days = view === "day"
     ? [visibleDate]
@@ -217,10 +202,6 @@ export function CalendarDemoRoute(props: {
       addCalendarDate(yearEnd, 14) ?? yearEnd,
     )
     : null;
-
-  useEffect(() => {
-    setTitleDraft(selectedEvent?.title ?? "");
-  }, [selectedEvent?.id, selectedEvent?.title, occurrenceStart]);
 
   useEffect(() => {
     if (!naming) return;
@@ -259,7 +240,7 @@ export function CalendarDemoRoute(props: {
   useEffect(() => {
     if (embedded) return;
     function onKeyDown(event: KeyboardEvent): void {
-      const command = interpretCalendarHotkey(event);
+      const command = calendarCommandFromWebKeyboardEvent(event);
       if (command === null) return;
       event.preventDefault();
       if (command.type === "view") setView(command.view);
@@ -288,378 +269,45 @@ export function CalendarDemoRoute(props: {
     };
   }, [embedded, today, view, visibleDate, naming, titleDraft, selectedEvent?.id, overflowDay]);
 
-  useEffect(() => {
-    function onPointerUp(): void {
-      const release = allDayPreviewRef.current;
-      if (release === null || (release.originHandle !== "start" && release.originHandle !== "end")) return;
-      commitAllDayRelease(release);
-    }
-    window.addEventListener("pointerup", onPointerUp, true);
-    return () => window.removeEventListener("pointerup", onPointerUp, true);
-  }, []);
-
-  function dispatchIntent(intent: CalendarIntent | null): boolean {
-    const ok = intent !== null && editor.dispatch(intent).ok;
-    refresh();
-    return ok;
-  }
-
   function createOnVisibleDate(): void {
     const start = calendarInstantAt(visibleDate.slice(0, 10), 10 * 60);
     const end = start === null ? null : calendarShiftInstant(start, 30);
     if (start === null || end === null) return;
-    commitCreated({ type: "event.create", start, end }, start, end);
+    hand.createInterval(start, end);
   }
 
   function createTimedAt(day: string, clientY: number, grid: Element): void {
     const start = instantAt(day, clientY, grid);
     const end = start === null ? null : calendarShiftInstant(start, 60);
     if (start === null || end === null) return;
-    commitCreated({ type: "event.create", start, end }, start, end);
+    hand.createInterval(start, end);
   }
 
   function createAllDayOn(day: string): void {
     const end = addCalendarDate(day, 1);
     if (end === null) return;
-    commitCreated({ type: "event.create", start: day, end, allDay: true }, day, end);
-  }
-
-  function commitCreated(intent: Extract<CalendarIntent, { type: "event.create" }>, start: string, end: string): void {
-    if (!dispatchIntent(intent)) return;
-    rememberPointerOccurrence(intent, start, end);
+    hand.createInterval(day, end, { allDay: true });
   }
 
   function cancelCreated(): void {
-    if (!naming) {
-      setNaming(false);
-      return;
-    }
-    if (titleDraft.trim() === "" || titleDraft.trim() === "Event") {
-      dispatchIntent({ type: "selection.remove" });
-    }
-    setNaming(false);
-    rememberSelectedOccurrence();
+    hand.cancelNaming();
   }
 
   function removeSelected(): void {
-    if (selectedEvent !== null && selectedEvent.recurrence !== null && occurrenceStart !== null) {
-      dispatchIntent({
-        type: "occurrence.remove",
-        eventId: selectedEvent.id,
-        occurrenceStart,
-        scope,
-      });
-    } else {
-      dispatchIntent({ type: "selection.remove" });
-    }
-    rememberSelectedOccurrence();
-  }
-
-  function rememberSelectedOccurrence(): void {
-    const next = calendarSelectionOccurrence(editor.selectedEvents[0] ?? null);
-    rememberOccurrence(next.start, next.end);
-  }
-
-  function bindTimeGridIntent(
-    intent: ReturnType<typeof interpretCalendarTimeGridPointer>,
-    occurrenceStart: string | null,
-  ): CalendarIntent | null {
-    const eventId = intent?.type === "event.move" || intent?.type === "event.resize" ? intent.eventId : null;
-    const event = eventId === null ? undefined : document.events.find((item) => item.id === eventId);
-    return bindCalendarTimeGridIntent(intent, event, occurrenceStart, scope);
-  }
-
-  function rememberOccurrence(start: string | null, end?: string | null): void {
-    setOccurrenceStart(start);
-    setOccurrenceEnd(end ?? null);
-  }
-
-  function rememberPointerOccurrence(
-    intent: CalendarIntent | null,
-    originStart: string | null,
-    originEnd: string | null,
-  ): void {
-    const selected = editor.selectedEvents[0];
-    const next = calendarPointerOccurrence(
-      intent,
-      { start: originStart, end: originEnd },
-      selected === undefined ? null : { start: selected.start, end: selected.end },
-    );
-    rememberOccurrence(next.start, next.end);
-    if (intent?.type === "event.create") {
-      setScope("this");
-      setNaming(true);
-      return;
-    }
-    setNaming(false);
-  }
-
-  function instantAt(day: string, clientY: number, grid: Element): string | null {
-    const rect = grid.getBoundingClientRect();
-    const raw = hourStart * 60 + ((clientY - rect.top) / rect.height) * (hourEnd - hourStart) * 60;
-    const minutes = Math.round(Math.max(hourStart * 60, Math.min(hourEnd * 60, raw)) / 15) * 15;
-    return calendarInstantAt(day, minutes);
-  }
-
-  function timePointerDown(
-    event: PointerEvent<HTMLElement>,
-    day: string,
-    originEventId: string | null,
-    originEventStart: string | null,
-    originEventEnd: string | null,
-    originHandle: CalendarTimeGridHandle | null,
-  ): void {
-    if (event.button !== 0) return;
-    const grid = event.currentTarget.closest("[data-calendar-grid=\"time\"]");
-    if (grid === null) return;
-    const originInstant = instantAt(day, event.clientY, grid);
-    if (originInstant === null) return;
-    const release = {
-      originInstant,
-      originEventId,
-      originEventStart,
-      originEventEnd,
-      originHandle,
-      targetInstant: originInstant,
-    };
-    timePointer.begin(event.currentTarget, event.pointerId, release);
-    setTimePreview(release);
-  }
-
-  function timePointerMove(event: PointerEvent<HTMLElement>): void {
-    if (timePointer.getSnapshot()?.pointerId !== event.pointerId) return;
-    const grid = findWebPointTarget<Element>("[data-calendar-grid=\"time\"]", { x: event.clientX, y: event.clientY });
-    const targetDay = grid?.getAttribute("data-calendar-day");
-    if (grid === null || grid === undefined || targetDay === null || targetDay === undefined) return;
-    const targetInstant = instantAt(targetDay, event.clientY, grid);
-    if (targetInstant === null) return;
-    const next = timePointer.preview(event.pointerId, (state) => ({ ...state, targetInstant }));
-    if (next !== null) setTimePreview(next);
-  }
-
-  function timePointerUp(event: PointerEvent<HTMLElement>): void {
-    const origin = timePointer.commit(event.pointerId);
-    setTimePreview(null);
-    if (origin === null) return;
-    const intent = bindTimeGridIntent(interpretCalendarTimeGridPointer(origin), origin.originEventStart);
-    dispatchIntent(intent);
-    rememberPointerOccurrence(intent, origin.originEventStart, origin.originEventEnd);
-  }
-
-  function allDayPointerDown(
-    event: PointerEvent<HTMLElement>,
-    day: string,
-    originEventId: string | null,
-    originEventStart: string | null,
-    originEventEnd: string | null,
-    originHandle: "body" | "start" | "end" | null,
-  ): void {
-    if (event.button !== 0) return;
-    const release = {
-      originDay: day,
-      originEventId,
-      originEventStart,
-      originEventEnd,
-      originHandle,
-      targetDay: day,
-    };
-    allDayPointer.begin(event.currentTarget, event.pointerId, release);
-    setAllDayPreview(release);
-  }
-
-  function allDayPointerMove(event: PointerEvent<HTMLElement>): void {
-    if (allDayPointer.getSnapshot()?.pointerId !== event.pointerId) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })
-      ?.getAttribute("data-calendar-allday-day");
-    if (targetDay === null || targetDay === undefined) return;
-    const next = allDayPointer.preview(event.pointerId, (state) => ({ ...state, targetDay }));
-    if (next !== null) setAllDayPreview(next);
-  }
-
-  function allDayPointerUp(event: PointerEvent<HTMLElement>): void {
-    const origin = allDayPointer.commit(event.pointerId);
-    setAllDayPreview(null);
-    if (origin === null) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })
-      ?.getAttribute("data-calendar-allday-day");
-    if (targetDay === null || targetDay === undefined) return;
-    const raw = interpretCalendarAllDayPointer({
-      originDay: origin.originDay,
-      originEventId: origin.originEventId,
-      originEventStart: origin.originEventStart,
-      originHandle: origin.originHandle,
-      targetDay,
-    });
-    const eventId = raw?.type === "event.move-day" || raw?.type === "event.resize" ? raw.eventId : null;
-    const matched = eventId === null ? undefined : document.events.find((item) => item.id === eventId);
-    const intent = bindCalendarAllDayIntent(raw, matched, origin.originEventStart, scope);
-    dispatchIntent(intent);
-    rememberPointerOccurrence(intent, origin.originEventStart, origin.originEventEnd);
-  }
-
-  function monthPointerDown(
-    event: PointerEvent<HTMLElement>,
-    day: string,
-    originEventId: string | null,
-    originEventStart: string | null,
-    originEventEnd: string | null,
-  ): void {
-    if (event.button !== 0) return;
-    setOverflowDay(null);
-    const release = {
-      originDay: day,
-      originEventId,
-      originEventStart,
-      originEventEnd,
-      targetDay: day,
-      eventsOnTargetDay: [] as ReadonlyArray<{ readonly id: string }>,
-    };
-    monthPointer.begin(event.currentTarget, event.pointerId, release);
-    setMonthPreview(release);
-  }
-
-  function monthPointerMove(event: PointerEvent<HTMLElement>): void {
-    if (monthPointer.getSnapshot()?.pointerId !== event.pointerId) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })
-      ?.getAttribute("data-calendar-day");
-    if (targetDay === null || targetDay === undefined) return;
-    const next = monthPointer.preview(event.pointerId, (state) => ({ ...state, targetDay }));
-    if (next !== null) {
-      setMonthPreview({
-        originDay: next.originDay,
-        originEventId: next.originEventId,
-        originEventStart: next.originEventStart,
-        targetDay: next.targetDay,
-        eventsOnTargetDay: [],
-      });
-    }
-  }
-
-  function monthPointerUp(event: PointerEvent<HTMLElement>): void {
-    const origin = monthPointer.commit(event.pointerId);
-    setMonthPreview(null);
-    if (origin === null) return;
-    const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })
-      ?.getAttribute("data-calendar-day");
-    if (targetDay === null || targetDay === undefined) return;
-    const raw = interpretCalendarMonthPointer({
-      originDay: origin.originDay,
-      originEventId: origin.originEventId,
-      originEventStart: origin.originEventStart,
-      targetDay,
-      eventsOnTargetDay: calendarEventsOnDay(visibleEvents, targetDay).map((item) => ({ id: item.id })),
-    });
-    const eventId = raw?.type === "event.move-day" ? raw.eventId : null;
-    const matched = eventId === null ? undefined : document.events.find((item) => item.id === eventId);
-    const intent = bindCalendarMonthIntent(raw, matched, origin.originEventStart, scope);
-    dispatchIntent(intent);
-    rememberPointerOccurrence(intent, origin.originEventStart, origin.originEventEnd);
-  }
-
-  function resizeTimed(
-    eventId: string,
-    edge: "start" | "end",
-    occurrenceStart: string,
-    origin: string,
-    delta: number,
-    phase: "preview" | "commit",
-  ): void {
-    const minutes = Math.round(delta / (pxPerHour / 60) / 15) * 15;
-    const targetInstant = calendarShiftInstant(origin, minutes);
-    if (targetInstant === null) return;
-    const release: CalendarTimeGridPointerRelease = {
-      originInstant: origin,
-      originEventId: eventId,
-      originEventStart: occurrenceStart,
-      originHandle: edge,
-      targetInstant,
-    };
-    if (phase === "preview") {
-      setTimePreview(release);
-      return;
-    }
-    setTimePreview(null);
-    const intent = bindTimeGridIntent(interpretCalendarTimeGridPointer(release), occurrenceStart);
-    dispatchIntent(intent);
-    rememberPointerOccurrence(intent, occurrenceStart, targetInstant);
-  }
-
-  function resizeAllDay(
-    eventId: string,
-    edge: "start" | "end",
-    originDay: string,
-    occurrenceStart: string,
-    delta: number,
-    phase: "preview" | "commit",
-  ): void {
-    const column = globalThis.document.querySelector("[data-calendar-allday-day]")
-      ?? globalThis.document.querySelector("[data-calendar-week] [data-calendar-day]");
-    const daysDelta = calendarAllDayResizeDays(delta, column?.getBoundingClientRect().width ?? 0);
-    const targetDay = addCalendarDate(originDay, daysDelta);
-    if (targetDay === null) return;
-    const release: CalendarAllDayPointerRelease = {
-      originDay,
-      originEventId: eventId,
-      originEventStart: occurrenceStart,
-      originHandle: edge,
-      targetDay,
-    };
-    if (phase === "preview") {
-      setAllDayPreview(release);
-      return;
-    }
-    commitAllDayRelease(release);
-  }
-
-  function commitAllDayRelease(release: CalendarAllDayPointerRelease): void {
-    const eventId = release.originEventId;
-    if (eventId === null) {
-      setAllDayPreview(null);
-      return;
-    }
-    setAllDayPreview(null);
-    const occurrenceStart = release.originEventStart;
-    const raw = interpretCalendarAllDayPointer(release);
-    const matched = (editor.snapshot.value as CalendarDocument).events.find((item) => item.id === eventId);
-    const intent = bindCalendarAllDayIntent(raw, matched, occurrenceStart, scope);
-    dispatchIntent(intent);
-    rememberPointerOccurrence(intent, occurrenceStart, matched?.end ?? null);
+    hand.removeSelected();
   }
 
   function commitTitle(): void {
     const next = titleDraft.trim();
     if (selectedEvent === null || next === selectedEvent.title) {
-      setNaming(false);
+      hand.finishNaming();
       return;
     }
-    applySelectedPatch({ title: next === "" ? "Event" : next });
-    setNaming(false);
+    hand.applySelectedPatch({ title: next === "" ? "Event" : next });
+    hand.finishNaming();
   }
 
-  function applySelectedPatch(patch: {
-    readonly title?: string;
-    readonly start?: string;
-    readonly end?: string;
-    readonly allDay?: boolean;
-    readonly calendarId?: string;
-    readonly recurrence?: CalendarRecurrence | null;
-  }): void {
-    if (selectedEvent === null) return;
-    const seriesFields = patch.allDay !== undefined || patch.calendarId !== undefined || patch.recurrence !== undefined;
-    const intent: CalendarIntent = !seriesFields && selectedEvent.recurrence !== null && occurrenceStart !== null
-      ? {
-          type: "occurrence.edit",
-          eventId: selectedEvent.id,
-          occurrenceStart,
-          scope,
-          title: patch.title,
-          start: patch.start,
-          end: patch.end,
-        }
-      : { type: "event.update", eventId: selectedEvent.id, ...patch };
-    if (!dispatchIntent(intent)) return;
-    rememberSelectedOccurrence();
-  }
+  const applySelectedPatch = hand.applySelectedPatch;
 
   const allDayItems = calendarAllDayLayout(paintedEvents, days);
   const allDayLaneCount = allDayItems[0]?.laneCount ?? 1;
@@ -706,10 +354,7 @@ export function CalendarDemoRoute(props: {
             onPointerDown={(event) => allDayPointerDown(event, day, null, null, null, null)}
             onPointerUp={allDayPointerUp}
             onDoubleClick={() => createAllDayOn(day)}
-            onPointerCancel={(event) => {
-              allDayPointer.cancel(event.pointerId);
-              setAllDayPreview(null);
-            }}
+            onPointerCancel={(event) => cancelAllDayPointer(event.pointerId)}
           />
         ))}
         {allDayItems.map((item) => (
@@ -794,10 +439,7 @@ export function CalendarDemoRoute(props: {
                 if (grid === null) return;
                 createTimedAt(day, event.clientY, grid);
               }}
-              onPointerCancel={(event) => {
-                timePointer.cancel(event.pointerId);
-                setTimePreview(null);
-              }}
+              onPointerCancel={(event) => cancelTimePointer(event.pointerId)}
             >
               {Array.from({ length: hourEnd - hourStart }, (_, index) => (
                 index === 0 ? null : (
@@ -912,8 +554,8 @@ export function CalendarDemoRoute(props: {
               <ActionButton onClick={createOnVisibleDate}>
                 Create
               </ActionButton>
-              <IconButton label="Undo" onClick={() => { editor.undo(); refresh(); rememberSelectedOccurrence(); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
-              <IconButton label="Redo" onClick={() => { editor.redo(); refresh(); rememberSelectedOccurrence(); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
+              <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
+              <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
               <IconButton label="Delete" onClick={removeSelected}>
                 <Trash2 aria-hidden="true" size={16} />
               </IconButton>
@@ -931,11 +573,7 @@ export function CalendarDemoRoute(props: {
                 aria-label={`Show ${calendar.title}`}
                 data-calendar-color={calendarColor(document, calendar.id)}
                 className={styles.calendarToggle()}
-                onClick={() => dispatchIntent({
-                  type: "calendar.set-hidden",
-                  calendarId: calendar.id,
-                  hidden: !calendar.hidden,
-                })}
+                onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
               >
                 <span
                   aria-hidden="true"
@@ -995,11 +633,8 @@ export function CalendarDemoRoute(props: {
                             onPointerDown={(event) => monthPointerDown(event, cell.date, null, null, null)}
                             onPointerUp={monthPointerUp}
                             onDoubleClick={() => createAllDayOn(cell.date)}
-                            onPointerCancel={(event) => {
-                              monthPointer.cancel(event.pointerId);
-                              setMonthPreview(null);
-                            }}
-                            onLostPointerCapture={(event) => { monthPointer.cancel(event.pointerId, "lost-capture"); }}
+                            onPointerCancel={(event) => cancelMonthPointer(event.pointerId)}
+                            onLostPointerCapture={(event) => cancelMonthPointer(event.pointerId, "lost-capture")}
                           >
                             {overflowDay === cell.date ? (
                               <div
@@ -1022,10 +657,7 @@ export function CalendarDemoRoute(props: {
                                     aria-label={monthEventLabel(item)}
                                     data-calendar-color={calendarColor(document, item.calendarId)}
                                     className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
-                                    onClick={() => {
-                                      dispatchIntent({ type: "selection.set", eventIds: [item.id] });
-                                      rememberOccurrence(item.start, item.end);
-                                    }}
+                                    onClick={() => hand.selectOccurrence(item.id, item.start, item.end)}
                                   >
                                     <MonthEventCopy event={item} />
                                   </SelectableItem>

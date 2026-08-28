@@ -71,6 +71,7 @@ test("Calendar Usage exposes its canonical Editing and pointer sources", async (
   await expect(sourceTabs).toBeVisible();
   await usage.getByRole("tab", { name: "CalendarDemoRoute.tsx", exact: true }).click();
   await expect(usage.getByRole("tab", { name: "calendar.ts", exact: true })).toBeVisible();
+  await expect(usage.getByRole("tab", { name: "calendar-input.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar-time-grid-pointer.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar-allday-pointer.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar-month-pointer.ts", exact: true })).toBeVisible();

@@ -1,19 +1,21 @@
 import type { CalendarView } from "@interactive-os/json-document-editing";
 
-export type CalendarHotkey =
+export type WebCalendarCommand =
   | { readonly type: "view"; readonly view: CalendarView }
   | { readonly type: "shift"; readonly direction: 1 | -1 }
   | { readonly type: "today" }
   | { readonly type: "create" }
   | { readonly type: "remove" };
 
-export function interpretCalendarHotkey(event: {
+export interface WebCalendarKeyboardEvent {
   readonly key: string;
-  readonly target: EventTarget | null;
+  readonly target: unknown;
   readonly metaKey?: boolean;
   readonly ctrlKey?: boolean;
   readonly altKey?: boolean;
-}): CalendarHotkey | null {
+}
+
+export function calendarCommandFromWebKeyboardEvent(event: WebCalendarKeyboardEvent): WebCalendarCommand | null {
   if (event.metaKey === true || event.ctrlKey === true || event.altKey === true) return null;
   if (isTextEntryTarget(event.target)) return null;
   if (event.key === "d") return { type: "view", view: "day" };
@@ -32,9 +34,25 @@ export function interpretCalendarHotkey(event: {
   return null;
 }
 
-function isTextEntryTarget(target: EventTarget | null): boolean {
+export function calendarMinutesFromWebGrid(
+  clientY: number,
+  bounds: { readonly top: number; readonly height: number },
+  options: { readonly hourStart: number; readonly hourEnd: number; readonly stepMinutes: number },
+): number {
+  const start = options.hourStart * 60;
+  const end = options.hourEnd * 60;
+  const raw = start + ((clientY - bounds.top) / bounds.height) * (end - start);
+  return Math.round(Math.max(start, Math.min(end, raw)) / options.stepMinutes) * options.stepMinutes;
+}
+
+export function calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number {
+  if (columnWidthPx <= 0) return 0;
+  return Math.round(deltaPx / columnWidthPx);
+}
+
+function isTextEntryTarget(target: unknown): boolean {
   if (target == null) return false;
-  const node = target as Partial<Pick<HTMLInputElement, "tagName" | "isContentEditable" | "type">>;
+  const node = target as { readonly tagName?: string; readonly isContentEditable?: boolean; readonly type?: string };
   if (node.isContentEditable === true) return true;
   const tagName = node.tagName?.toUpperCase();
   if (tagName === "TEXTAREA" || tagName === "SELECT") return true;
@@ -43,15 +61,15 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
   return type !== "radio" && type !== "checkbox" && type !== "button" && type !== "submit" && type !== "reset";
 }
 
-function isRadioOrTab(target: EventTarget | null): boolean {
+function isRadioOrTab(target: unknown): boolean {
   if (target == null) return false;
   const role = readAttribute(target, "role");
   if (role === "radio" || role === "tab") return true;
-  const node = target as Partial<Pick<HTMLInputElement, "type">>;
+  const node = target as { readonly type?: string };
   return node.type === "radio";
 }
 
-function readAttribute(target: EventTarget, name: string): string | null {
+function readAttribute(target: unknown, name: string): string | null {
   const getAttribute = (target as { getAttribute?: (key: string) => string | null }).getAttribute;
   return typeof getAttribute === "function" ? getAttribute.call(target, name) : null;
 }

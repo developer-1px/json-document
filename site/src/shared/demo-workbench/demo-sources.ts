@@ -6,6 +6,7 @@ import calendarMonthPointerSource from "../../../../packages/json-document-editi
 import calendarTimeGridPointerSource from "../../../../packages/json-document-editing/src/calendar-time-grid-pointer.ts?raw";
 import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
+import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
@@ -28,6 +29,9 @@ import treeEditingSource from "../../../../packages/json-document-react/src/use-
 import webDragDropSessionSource from "../../../../packages/json-document-web/src/drag-drop-session.ts?raw";
 import webPointerSessionSource from "../../../../packages/json-document-web/src/pointer-session.ts?raw";
 import webPointTargetSource from "../../../../packages/json-document-web/src/point-target.ts?raw";
+import webCalendarSource from "../../../../packages/json-document-web/src/calendar-input.ts?raw";
+import calendarHandSource from "../../../../packages/json-document-calendar/src/use-calendar-hand.ts?raw";
+import calendarPointerInteractionsSource from "../../../../packages/json-document-calendar/src/use-calendar-pointer-interactions.ts?raw";
 import webKanbanDropTargetSource from "../../../../packages/json-document-web/src/kanban-drop-target.ts?raw";
 import boardDragSessionSource from "../../../../packages/json-document-affordance/src/board-drag-session.ts?raw";
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
@@ -133,6 +137,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-time-grid-pointer.ts", calendarTimeGridPointerSource],
   ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
+  ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
   ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
@@ -156,6 +161,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/drag-drop-session.ts", webDragDropSessionSource],
   ["packages/json-document-web/src/pointer-session.ts", webPointerSessionSource],
   ["packages/json-document-web/src/point-target.ts", webPointTargetSource],
+  ["packages/json-document-web/src/calendar-input.ts", webCalendarSource],
+  ["packages/json-document-calendar/src/use-calendar-hand.ts", calendarHandSource],
+  ["packages/json-document-calendar/src/use-calendar-pointer-interactions.ts", calendarPointerInteractionsSource],
   ["packages/json-document-web/src/kanban-drop-target.ts", webKanbanDropTargetSource],
   ["packages/json-document-affordance/src/board-drag-session.ts", boardDragSessionSource],
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
@@ -204,6 +212,16 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-zod/src/index.ts", zodSource],
 ]);
 const registeredPublicUsages = [
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarHand",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "useCalendarPointerInteractions",
+    sourcePath: "packages/json-document-calendar/src/use-calendar-pointer-interactions.ts",
+  },
   {
     packageName: "@interactive-os/json-document-web",
     symbol: "findWebPointTarget",
@@ -263,6 +281,26 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "previewCalendarMonth",
     sourcePath: "packages/json-document-editing/src/calendar-preview.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarOccurrenceAfterIntent",
+    sourcePath: "packages/json-document-editing/src/calendar-selection.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarUpdateIntent",
+    sourcePath: "packages/json-document-editing/src/calendar-selection.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "calendarCommandFromWebKeyboardEvent",
+    sourcePath: "packages/json-document-web/src/calendar-input.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "calendarMinutesFromWebGrid",
+    sourcePath: "packages/json-document-web/src/calendar-input.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",

@@ -37,6 +37,9 @@
     "@interactive-os/json-document": "^3.0.0",
     "@interactive-os/json-document-selection": "^0.1.0-rc.0"
   },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1"
+  },
   "devDependencies": {
     "@interactive-os/json-document": "*",
     "@interactive-os/json-document-selection": "*",

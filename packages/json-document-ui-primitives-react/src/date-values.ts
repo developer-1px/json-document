@@ -1,3 +1,5 @@
+import { Temporal } from "@js-temporal/polyfill";
+
 export type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
 export type CalendarGrain = "week" | "month" | "year";
 export type DateRangeValue = { readonly start: string; readonly end: string };
@@ -7,7 +9,6 @@ const TIME = /^(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
 const DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
 const MONTH = /^(\d{4})-(\d{2})$/;
 const WEEK = /^(\d{4})-W(\d{2})$/;
-const DAY_MS = 86_400_000;
 
 export function parseHtmlDateValue(type: HtmlDateType, value: string): string | null {
   if (type === "date") return parseDate(value);
@@ -18,40 +19,42 @@ export function parseHtmlDateValue(type: HtmlDateType, value: string): string | 
 }
 
 export function parseDate(value: string): string | null {
-  const match = DATE.exec(value);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  if (!isCivilDate(year, month, day)) return null;
-  return formatDate(year, month, day);
+  if (!DATE.test(value)) return null;
+  try {
+    return Temporal.PlainDate.from(value).toString();
+  } catch {
+    return null;
+  }
 }
 
 export function parseTime(value: string): string | null {
   const match = TIME.exec(value);
   if (!match) return null;
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) return null;
-  return `${pad(hour)}:${pad(minute)}`;
+  try {
+    return Temporal.PlainTime.from(value).toString({ smallestUnit: "minute" });
+  } catch {
+    return null;
+  }
 }
 
 export function parseDateTimeLocal(value: string): string | null {
-  const match = DATETIME.exec(value);
-  if (!match) return null;
-  const date = parseDate(`${match[1]}-${match[2]}-${match[3]}`);
-  const time = parseTime(`${match[4]}:${match[5]}`);
-  if (date === null || time === null) return null;
-  return `${date}T${time}`;
+  if (!DATETIME.test(value)) return null;
+  try {
+    return Temporal.PlainDateTime.from(value).toString({ smallestUnit: "minute" });
+  } catch {
+    return null;
+  }
 }
 
 export function parseMonth(value: string): string | null {
   const match = MONTH.exec(value);
   if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  if (month < 1 || month > 12) return null;
-  return `${padYear(year)}-${pad(month)}`;
+  try {
+    const date = Temporal.PlainYearMonth.from(value);
+    return date.toString();
+  } catch {
+    return null;
+  }
 }
 
 export function parseWeek(value: string): string | null {
@@ -68,24 +71,15 @@ export function formatDate(year: number, month: number, day: number): string {
 }
 
 export function addCalendarDays(date: string, days: number): string {
-  const parts = civil(date);
-  const utc = Date.UTC(parts.year, parts.month - 1, parts.day) + days * DAY_MS;
-  const next = new Date(utc);
-  return formatDate(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate());
+  return Temporal.PlainDate.from(date).add({ days }).toString();
 }
 
 export function addCalendarMonths(date: string, months: number): string {
-  const parts = civil(date);
-  const monthIndex = parts.year * 12 + parts.month - 1 + months;
-  const year = Math.floor(monthIndex / 12);
-  const month = ((monthIndex % 12) + 12) % 12 + 1;
-  return formatDate(year, month, Math.min(parts.day, daysInMonth(year, month)));
+  return Temporal.PlainDate.from(date).add({ months }, { overflow: "constrain" }).toString();
 }
 
 export function addCalendarYears(date: string, years: number): string {
-  const parts = civil(date);
-  const year = parts.year + years;
-  return formatDate(year, parts.month, Math.min(parts.day, daysInMonth(year, parts.month)));
+  return Temporal.PlainDate.from(date).add({ years }, { overflow: "constrain" }).toString();
 }
 
 export function startOfIsoWeek(date: string): string {
@@ -94,25 +88,23 @@ export function startOfIsoWeek(date: string): string {
 }
 
 export function startOfMonth(date: string): string {
-  const parts = civil(date);
-  return formatDate(parts.year, parts.month, 1);
+  return Temporal.PlainDate.from(date).with({ day: 1 }).toString();
 }
 
 export function startOfYear(date: string): string {
-  return formatDate(civil(date).year, 1, 1);
+  return Temporal.PlainDate.from(date).with({ month: 1, day: 1 }).toString();
 }
 
 export function isoWeekday(date: string): number {
-  const parts = civil(date);
-  const day = new Date(Date.UTC(parts.year, parts.month - 1, parts.day)).getUTCDay();
-  return day === 0 ? 7 : day;
+  return Temporal.PlainDate.from(date).dayOfWeek;
 }
 
 export function isoWeekFromDate(date: string): string {
-  const thursday = addCalendarDays(date, 4 - isoWeekday(date));
-  const year = civil(thursday).year;
-  const week = Math.floor((utcDay(thursday) - utcDay(formatDate(year, 1, 4))) / 7) + 1;
-  return `${padYear(year)}-W${pad(week)}`;
+  const parsed = Temporal.PlainDate.from(date);
+  if (parsed.yearOfWeek === undefined || parsed.weekOfYear === undefined) {
+    throw new RangeError("ISO calendar date must expose a week year and week number.");
+  }
+  return `${padYear(parsed.yearOfWeek)}-W${pad(parsed.weekOfYear)}`;
 }
 
 export function dateFromIsoWeek(value: string): string | null {
@@ -120,8 +112,8 @@ export function dateFromIsoWeek(value: string): string | null {
   if (parsed === null) return null;
   const year = Number(parsed.slice(0, 4));
   const week = Number(parsed.slice(6));
-  const jan4 = formatDate(year, 1, 4);
-  return addCalendarDays(startOfIsoWeek(jan4), (week - 1) * 7);
+  const jan4 = Temporal.PlainDate.from({ year, month: 1, day: 4 });
+  return jan4.subtract({ days: jan4.dayOfWeek - 1 }).add({ weeks: week - 1 }).toString();
 }
 
 export function compareDates(left: string, right: string): number {
@@ -184,25 +176,8 @@ function cell(date: string, inVisiblePeriod: boolean): CalendarCell {
 }
 
 function civil(date: string): { year: number; month: number; day: number } {
-  return { year: Number(date.slice(0, 4)), month: Number(date.slice(5, 7)), day: Number(date.slice(8, 10)) };
-}
-
-function utcDay(date: string): number {
-  const parts = civil(date);
-  return Date.UTC(parts.year, parts.month - 1, parts.day) / DAY_MS;
-}
-
-function isCivilDate(year: number, month: number, day: number): boolean {
-  if (month < 1 || month > 12 || day < 1) return false;
-  return day <= daysInMonth(year, month);
-}
-
-function daysInMonth(year: number, month: number): number {
-  return [31, isLeap(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]!;
-}
-
-function isLeap(year: number): boolean {
-  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const parsed = Temporal.PlainDate.from(date);
+  return { year: parsed.year, month: parsed.month, day: parsed.day };
 }
 
 function isoWeekCount(year: number): number {
