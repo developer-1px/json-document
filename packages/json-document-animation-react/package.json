@@ -1,0 +1,41 @@
+{
+  "name": "@interactive-os/json-document-animation-react",
+  "version": "0.1.0-rc.0",
+  "description": "Canonical wait-animation visuals for json-document Hosts: shimmer, skeleton, caret, dots, orb, and sweep.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": ["*.css"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-animation-react"
+  },
+  "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
+  "files": ["dist", "!dist/.tsbuildinfo", "styles.css", "README.md", "LICENSE"],
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./styles.css": "./styles.css"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -b tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": { "react": "^18.0.0 || ^19.0.0" },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.1.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7"
+  }
+}

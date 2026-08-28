@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Added canonical wait-animation visuals: mono and spectrum shimmer text,
+  wave dots and Claude-style wave grid, streaming caret, pulsing markers,
+  morse beats, loading bar, progress ring, staggered skeleton lines, and
+  gradient / beam / hue outlines, and large form masses (orb, blob, aurora,
+  ring field, cloud).
+- Tightened wait visuals against live catalog source: dual-layer shimmer
+  text, skewed placeholder sheen, ellipse wave grid, offset-path border
+  beam, and radial shine rim.
 - Gave Calendar app chrome: a collapsible site rail, no docs header or demo
   workbench, and a full-height product surface.
 - Added HTML date, time, datetime-local, month, and week controls plus APG

@@ -25,6 +25,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/demo/kanban": demo(() => import("../routes/kanban-demo/KanbanDemoRoute"), "KanbanDemoRoute", "routes/kanban-demo/KanbanDemoRoute.tsx"),
   "/demo/calendar": demo(() => import("../routes/calendar-demo/CalendarDemoRoute"), "CalendarDemoRoute", "routes/calendar-demo/CalendarDemoRoute.tsx"),
   "/demo/date-controls": demo(() => import("../routes/date-controls-demo/DateControlsDemoRoute"), "DateControlsDemoRoute", "routes/date-controls-demo/DateControlsDemoRoute.tsx"),
+  "/demo/animation": demo(() => import("../routes/animation-demo/AnimationDemoRoute"), "AnimationDemoRoute", "routes/animation-demo/AnimationDemoRoute.tsx"),
   "/demo/database": demo(() => import("../routes/database-demo/DatabaseDemoRoute"), "DatabaseDemoRoute", "routes/database-demo/DatabaseDemoRoute.tsx"),
   "/demo/composer": demo(() => import("../routes/composer-demo/ComposerDemoRoute"), "ComposerDemoRoute", "routes/composer-demo/ComposerDemoRoute.tsx"),
   "/demo/annotation": demo(() => import("../routes/annotation-demo/AnnotationDemoRoute"), "AnnotationDemoRoute", "routes/annotation-demo/AnnotationDemoRoute.tsx"),

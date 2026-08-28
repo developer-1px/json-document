@@ -39,6 +39,7 @@
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",
     "@interactive-os/json-document-ui-primitives-react": "*",
+    "@interactive-os/json-document-animation-react": "*",
     "@interactive-os/json-document-ajv": "*",
     "@interactive-os/json-document-contenteditable": "*",
     "@interactive-os/json-document-collaboration": "*",
