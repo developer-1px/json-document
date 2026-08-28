@@ -268,7 +268,7 @@ createLineFocusSession<Key extends string>(options: { readonly initialKey?: Key 
 ## `createRenameSession`
 
 ```ts
-createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
+createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string) => void; readonly onCancel?: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
 ```
 ## `createTypeaheadSession`
 

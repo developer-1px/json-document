@@ -40,7 +40,7 @@ describe("useCalendarHand", () => {
     });
   });
 
-  test("owns preview and create-naming lifecycle state", () => {
+  test("composes the canonical Rename session for created-event cancellation", () => {
     const editor = createCalendarEditor(initial, { createId: () => "draft" });
     const { result } = renderHook(() => useCalendarHand(editor, { defaultTitle: "Event" }));
 
@@ -58,15 +58,36 @@ describe("useCalendarHand", () => {
     act(() => {
       result.current.createInterval("2026-08-03T10:00", "2026-08-03T11:00", { title: "Event" });
     });
-    expect(result.current.naming).toBe(true);
+    expect(result.current.renaming).toBe(true);
     expect(result.current.occurrence).toEqual({
       start: "2026-08-03T10:00",
       end: "2026-08-03T11:00",
     });
 
-    act(() => result.current.cancelNaming());
-    expect(result.current.naming).toBe(false);
+    act(() => result.current.cancelTitleRename());
+    expect(result.current.renaming).toBe(false);
     expect(result.current.document.events).toHaveLength(1);
+  });
+
+  test("commits and cancels title drafts through the canonical Rename session", () => {
+    const editor = createCalendarEditor(initial);
+    const { result } = renderHook(() => useCalendarHand(editor));
+
+    act(() => result.current.selectOccurrence("standup", "2026-08-03T09:00", "2026-08-03T09:30"));
+    act(() => {
+      result.current.beginTitleRename();
+      result.current.setTitleDraft("Daily standup");
+      result.current.commitTitleRename();
+    });
+    expect(result.current.selectedEvent?.title).toBe("Daily standup");
+
+    act(() => {
+      result.current.beginTitleRename();
+      result.current.setTitleDraft("Discard me");
+      result.current.cancelTitleRename();
+    });
+    expect(result.current.selectedEvent?.title).toBe("Daily standup");
+    expect(result.current.titleDraft).toBe("Daily standup");
   });
 
   test("owns normalized resize preview and commit across React, Web, and Editing", () => {
@@ -93,5 +114,38 @@ describe("useCalendarHand", () => {
     ));
     expect(result.current.hand.selectedEvent?.end).toBe("2026-08-03T10:00");
     expect(result.current.hand.timePreview).toBeNull();
+  });
+
+  test("projects month span pointer coordinates through the Web row adapter", () => {
+    const editor = createCalendarEditor(initial);
+    const { result } = renderHook(() => {
+      const hand = useCalendarHand(editor);
+      const pointer = useCalendarPointerInteractions(hand, {
+        hourStart: 0,
+        hourEnd: 24,
+        stepMinutes: 15,
+        pixelsPerHour: 60,
+      });
+      return { hand, pointer };
+    });
+    const row = { getBoundingClientRect: () => ({ left: 100, width: 700 }) };
+    const target = {
+      closest: () => row,
+      setPointerCapture: () => undefined,
+      hasPointerCapture: () => false,
+      releasePointerCapture: () => undefined,
+    };
+
+    act(() => result.current.pointer.monthPointerDown({
+      button: 0,
+      clientX: 450,
+      currentTarget: target,
+      pointerId: 1,
+    } as never, "2026-08-02", [
+      "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05",
+      "2026-08-06", "2026-08-07", "2026-08-08",
+    ], "standup", "2026-08-03T09:00", "2026-08-03T09:30"));
+
+    expect(result.current.hand.monthPreview?.originDay).toBe("2026-08-05");
   });
 });
