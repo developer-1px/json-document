@@ -1168,7 +1168,7 @@ export function CalendarDemoRoute(props: {
                 <input
                   ref={titleRef}
                   aria-label="Title"
-                  className={classes(ui.field.seamless, "px-0 text-base font-semibold")}
+                  className={classes(ui.field.seamless, styles.inspectorTitle())}
                   value={titleDraft}
                   onChange={(event) => setTitleDraft(event.target.value)}
                   onBlur={commitTitle}

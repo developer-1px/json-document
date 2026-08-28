@@ -35,6 +35,7 @@ export const calendarDemoRecipe = tv({
     sidebar: "flex w-44 shrink-0 flex-col gap-3 overflow-auto pr-1",
     inspector: "flex w-72 min-w-0 shrink-0 flex-col gap-2 overflow-auto border-l border-line-subtle/30 pl-4",
     field: "grid gap-1",
+    inspectorTitle: "px-0 text-base font-semibold",
     calendarToggle: "group w-full justify-start gap-2 border-0 bg-transparent px-1 shadow-none hover:border-0 hover:bg-transparent aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",
     calendarSwatch: "size-2.5 shrink-0 rounded-full bg-foreground-muted opacity-40 data-[calendar-color=accent]:bg-background-accent group-aria-pressed:opacity-100",
     eventTime: "truncate text-[0.65rem] font-normal text-foreground-muted",
