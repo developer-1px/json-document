@@ -712,14 +712,22 @@ export function CalendarDemoRoute(props: {
             {view === "year" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                 {calendarYearMonths(visibleDate).map((monthStart, index) => (
-                  <section key={monthStart} aria-label={monthStart.slice(0, 7)} className={styles.yearMonth()}>
+                  <section
+                    key={monthStart}
+                    aria-label={visiblePeriodLabel("month", monthStart)}
+                    className={styles.yearMonth()}
+                  >
                     <ActionButton
                       className={classes("text-left", styles.quietAction(), ui.text.body)}
                       onClick={() => setLocation("month", monthStart)}
                     >
                       {months[index]}
                     </ActionButton>
-                    <div role="grid" aria-label={monthStart.slice(0, 7)} className="grid grid-cols-7">
+                    <div
+                      role="grid"
+                      aria-label={visiblePeriodLabel("month", monthStart)}
+                      className="grid grid-cols-7"
+                    >
                       {weekdays.map((name) => (
                         <div key={name} role="columnheader" className={classes("text-center", ui.text.meta)}>
                           {name.slice(0, 1)}

@@ -48,9 +48,15 @@ test("Calendar month and year views show date grids", async ({ page }) => {
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
   await expect(page.getByRole("gridcell", { name: "2026-05-25", exact: true })).toBeVisible();
   await expect(page.getByRole("radio", { name: "Month", exact: true })).toBeChecked();
+  await expect(page.getByRole("grid", { name: "Jump 2026-05", exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Next month", exact: true }).click();
+  await expect(page.getByRole("grid", { name: "Jump 2026-06", exact: true })).toBeVisible();
 
   await page.getByRole("radio", { name: "Year", exact: true }).click();
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
+  await expect(page.getByRole("grid", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
   await expect(page).toHaveURL(/view=year/);
   await expect(page).toHaveURL(/date=2026-05-25/);
 });

@@ -1,8 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { addCalendarDate, calendarBusyDates, type CalendarEvent } from "@interactive-os/json-document-editing";
-import { ActionButton, IconButton } from "@interactive-os/json-document-ui-primitives-react";
-import { addCalendarMonths, calendarCells } from "@interactive-os/json-document-ui-primitives-react";
+import {
+  ActionButton,
+  IconButton,
+  addCalendarMonths,
+  calendarCells,
+  visiblePeriodLabel,
+} from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
 
@@ -25,7 +30,7 @@ export function CalendarDemoNavigator(props: {
   const busy = first === undefined || last === undefined
     ? null
     : calendarBusyDates(props.events, first, addCalendarDate(last, 1) ?? last);
-  const monthLabel = railDate.slice(0, 7);
+  const monthLabel = visiblePeriodLabel("month", railDate);
 
   return (
     <section aria-label="Jump to date" className={styles.yearMonth()}>
