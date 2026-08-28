@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
-  addCalendarDate,
   calendarAllDayLayout,
   calendarAllDaySpan,
   calendarBusyDates,
@@ -44,14 +43,13 @@ import {
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
-  addCalendarYears,
+  calendarCellInterval,
   calendarCells,
   calendarEventLabel,
   calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
   shiftVisibleDate,
-  startOfYear,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
@@ -205,15 +203,13 @@ export function CalendarDemoRoute(props: {
   const days = timeGridCells.map((cell) => cell.date);
   const nowInstant = formatCalendarInstant(Temporal.Now.plainDateTimeISO());
   const today = calendarDatePart(nowInstant);
-  const yearStart = startOfYear(visibleDate);
-  const yearEnd = addCalendarYears(yearStart, 1);
-  const yearBusyDates = view === "year"
-    ? calendarBusyDates(
-      paintedEvents,
-      addCalendarDate(yearStart, -7) ?? yearStart,
-      addCalendarDate(yearEnd, 14) ?? yearEnd,
-    )
+  const yearMonths = calendarYearMonths(visibleDate);
+  const yearCellInterval = view === "year"
+    ? calendarCellInterval(yearMonths.flatMap((monthStart) => calendarCells("month", monthStart)))
     : null;
+  const yearBusyDates = yearCellInterval === null
+    ? null
+    : calendarBusyDates(paintedEvents, yearCellInterval.start, yearCellInterval.end);
 
   useEffect(() => {
     setOverflowDay(null);
@@ -710,7 +706,7 @@ export function CalendarDemoRoute(props: {
             ) : null}
             {view === "year" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {calendarYearMonths(visibleDate).map((monthStart, index) => (
+                {yearMonths.map((monthStart, index) => (
                   <section
                     key={monthStart}
                     aria-label={visiblePeriodLabel("month", monthStart)}

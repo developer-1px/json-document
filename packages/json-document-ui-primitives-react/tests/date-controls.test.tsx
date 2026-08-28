@@ -4,6 +4,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { useState } from "react";
 import {
   CalendarGrid,
+  calendarCellInterval,
   calendarCells,
   calendarMonthWeeks,
   calendarTimeLabel,
@@ -79,6 +80,14 @@ describe("HTML date values", () => {
     ]);
     expect(weeks[0]?.map((cell) => cell.day)).toEqual([27, 28, 29, 30, 1, 2, 3]);
     expect(weeks[5]?.at(-1)?.date).toBe("2026-06-07");
+  });
+
+  test("projects ordered calendar cells to a half-open query interval", () => {
+    expect(calendarCellInterval([])).toBeNull();
+    expect(calendarCellInterval(calendarCells("month", "2026-05-25"))).toEqual({
+      start: "2026-04-27",
+      end: "2026-06-08",
+    });
   });
 
   test("preserves default labels and accepts Calendar toolbar copy policy", () => {

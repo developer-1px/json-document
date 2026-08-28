@@ -68,6 +68,9 @@ Calendar datetime-local minute 문자열을 만듭니다. clock source와 저장
 월간 42개 날짜 cell을 6개의 ISO 주 행으로 투영하는 일은 UI Primitives 날짜 값
 정본의 `calendarMonthWeeks`가 소유하며, Host는 각 행의 event layout과 DOM을
 조합합니다.
+표시 cell collection의 첫 날짜부터 마지막 날짜 다음 날까지의 half-open query
+범위는 UI Primitives `calendarCellInterval`이 소유합니다. 연간 12개 month grid와
+sidebar navigator가 같은 interval을 Editing occurrence query에 전달합니다.
 Day와 week time grid의 ordered 날짜 cell도 UI Primitives `calendarCells`가
 소유합니다. Day는 정확한 ISO weekday를 포함한 단일 cell, week는 ISO 주의
 7개 cell을 반환합니다. 각 `CalendarCell`은 canonical date에서 투영한 `day`와
