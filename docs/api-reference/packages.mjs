@@ -9,6 +9,7 @@ export const apiReferencePackages = [
   ["tanstack-table", "@interactive-os/json-document-tanstack-table", "packages/json-document-tanstack-table/src/index.ts", "Connector", "TanStack Table connector"],
   ["affordance", "@interactive-os/json-document-affordance", "packages/json-document-affordance/src/index.ts", "Affordance", "입력 문법과 interaction session"],
   ["ui-primitives-react", "@interactive-os/json-document-ui-primitives-react", "packages/json-document-ui-primitives-react/src/index.ts", "UI Primitives", "표준 React UI primitive"],
+  ["animation-react", "@interactive-os/json-document-animation-react", "packages/json-document-animation-react/src/index.ts", "UI Primitives", "생성 대기 시각 언어"],
   ["database", "@interactive-os/json-document-database", "packages/json-document-database/src/index.ts", "Hands", "Database Hand domain 계약"],
   ["calendar", "@interactive-os/json-document-calendar", "packages/json-document-calendar/src/index.ts", "Hands", "Calendar React lifecycle와 occurrence interaction 계약"],
   ["web", "@interactive-os/json-document-web", "packages/json-document-web/src/index.ts", "Adapter", "Web platform adapter"],

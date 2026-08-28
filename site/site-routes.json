@@ -217,6 +217,14 @@
     "navigationGroup": "UI Primitives"
   },
   {
+    "path": "/docs/api/animation-react",
+    "label": "API · Animation",
+    "title": "Animation API - json-document",
+    "description": "@interactive-os/json-document-animation-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives"
+  },
+  {
     "path": "/docs/api/database",
     "label": "API · Database",
     "title": "Database API - json-document",
@@ -545,6 +553,27 @@
     "description": "HTML date, time, month, week, datetime-local fields with calendar and range pickers.",
     "language": "ko",
     "parentPath": "/docs/ui-primitives",
+    "navigationGroup": "UI Primitives",
+    "sidebar": false
+  },
+  {
+    "path": "/docs/animation",
+    "label": "Animation",
+    "title": "Animation - json-document",
+    "heading": "Animation",
+    "description": "생성 대기 구간의 시각 언어를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives",
+    "relatedDemoPath": "/demo/animation",
+    "relatedDemoLabel": "Animation"
+  },
+  {
+    "path": "/demo/animation",
+    "label": "Wait animations",
+    "title": "Wait animation visuals - json-document",
+    "description": "Shimmer, skeleton, caret, dots, orb, morse, and gradient sweep.",
+    "language": "ko",
+    "parentPath": "/docs/animation",
     "navigationGroup": "UI Primitives",
     "sidebar": false
   },

@@ -27,6 +27,7 @@ import { Route as PageConnectorsReactHookFormRouteImport } from "./routes/_page/
 import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/connectors/tanstack-table";
 import { Route as PageConnectorsWebRouteImport } from "./routes/_page/connectors/web";
 import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
+import { Route as PageDemoAnimationRouteImport } from "./routes/_page/demo/animation";
 import { Route as PageDemoAnnotationRouteImport } from "./routes/_page/demo/annotation";
 import { Route as PageDemoCalendarRouteImport } from "./routes/_page/demo/calendar";
 import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
@@ -51,6 +52,7 @@ import { Route as PageDocsAdapterInteractionRouteImport } from "./routes/_page/d
 import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs/adapter-keyboard";
 import { Route as PageDocsAdapterVirtualSelectionRouteImport } from "./routes/_page/docs/adapter-virtual-selection";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
+import { Route as PageDocsAnimationRouteImport } from "./routes/_page/docs/animation";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsComposerRouteImport } from "./routes/_page/docs/composer";
@@ -115,6 +117,7 @@ import { Route as PageDocsAffordanceTypeaheadRouteImport } from "./routes/_page/
 import { Route as PageDocsAffordanceZoomRouteImport } from "./routes/_page/docs/affordance/zoom";
 import { Route as PageDocsApiAffordanceRouteImport } from "./routes/_page/docs/api/affordance";
 import { Route as PageDocsApiAjvRouteImport } from "./routes/_page/docs/api/ajv";
+import { Route as PageDocsApiAnimationReactRouteImport } from "./routes/_page/docs/api/animation-react";
 import { Route as PageDocsApiCalendarRouteImport } from "./routes/_page/docs/api/calendar";
 import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
 import { Route as PageDocsApiComposerRouteImport } from "./routes/_page/docs/api/composer";
@@ -240,6 +243,11 @@ const PageDemoIndexRoute = PageDemoIndexRouteImport.update({
   path: "/demo/",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoAnimationRoute = PageDemoAnimationRouteImport.update({
+  id: "/demo/animation",
+  path: "/demo/animation",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoAnnotationRoute = PageDemoAnnotationRouteImport.update({
   id: "/demo/annotation",
   path: "/demo/annotation",
@@ -362,6 +370,11 @@ const PageDocsAdapterVirtualSelectionRoute =
 const PageDocsAdaptersRoute = PageDocsAdaptersRouteImport.update({
   id: "/docs/adapters",
   path: "/docs/adapters",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAnimationRoute = PageDocsAnimationRouteImport.update({
+  id: "/docs/animation",
+  path: "/docs/animation",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsApiRoute = PageDocsApiRouteImport.update({
@@ -703,6 +716,12 @@ const PageDocsApiAjvRoute = PageDocsApiAjvRouteImport.update({
   path: "/ajv",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiAnimationReactRoute =
+  PageDocsApiAnimationReactRouteImport.update({
+    id: "/animation-react",
+    path: "/animation-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
 const PageDocsApiCalendarRoute = PageDocsApiCalendarRouteImport.update({
   id: "/calendar",
   path: "/calendar",
@@ -887,6 +906,7 @@ export interface FileRoutesByFullPath {
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/animation": typeof PageDemoAnimationRoute;
   "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
@@ -910,6 +930,7 @@ export interface FileRoutesByFullPath {
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
+  "/docs/animation": typeof PageDocsAnimationRoute;
   "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
@@ -976,6 +997,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
   "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
@@ -1024,6 +1046,7 @@ export interface FileRoutesByTo {
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/animation": typeof PageDemoAnimationRoute;
   "/demo/annotation": typeof PageDemoAnnotationRoute;
   "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
@@ -1047,6 +1070,7 @@ export interface FileRoutesByTo {
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
+  "/docs/animation": typeof PageDocsAnimationRoute;
   "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
@@ -1113,6 +1137,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
   "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
@@ -1163,6 +1188,7 @@ export interface FileRoutesById {
   "/_page/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/_page/connectors/web": typeof PageConnectorsWebRoute;
+  "/_page/demo/animation": typeof PageDemoAnimationRoute;
   "/_page/demo/annotation": typeof PageDemoAnnotationRoute;
   "/_page/demo/calendar": typeof PageDemoCalendarRoute;
   "/_page/demo/canvas": typeof PageDemoCanvasRoute;
@@ -1186,6 +1212,7 @@ export interface FileRoutesById {
   "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
   "/_page/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
+  "/_page/docs/animation": typeof PageDocsAnimationRoute;
   "/_page/docs/api": typeof PageDocsApiRouteWithChildren;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
@@ -1252,6 +1279,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
   "/_page/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/_page/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/_page/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
   "/_page/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/_page/docs/api/composer": typeof PageDocsApiComposerRoute;
@@ -1302,6 +1330,7 @@ export interface FileRouteTypes {
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/animation"
     | "/demo/annotation"
     | "/demo/calendar"
     | "/demo/canvas"
@@ -1325,6 +1354,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-keyboard"
     | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
+    | "/docs/animation"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/composer"
@@ -1391,6 +1421,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/zoom"
     | "/docs/api/affordance"
     | "/docs/api/ajv"
+    | "/docs/api/animation-react"
     | "/docs/api/calendar"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
@@ -1439,6 +1470,7 @@ export interface FileRouteTypes {
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/animation"
     | "/demo/annotation"
     | "/demo/calendar"
     | "/demo/canvas"
@@ -1462,6 +1494,7 @@ export interface FileRouteTypes {
     | "/docs/adapter-keyboard"
     | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
+    | "/docs/animation"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/composer"
@@ -1528,6 +1561,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/zoom"
     | "/docs/api/affordance"
     | "/docs/api/ajv"
+    | "/docs/api/animation-react"
     | "/docs/api/calendar"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
@@ -1577,6 +1611,7 @@ export interface FileRouteTypes {
     | "/_page/connectors/react-hook-form"
     | "/_page/connectors/tanstack-table"
     | "/_page/connectors/web"
+    | "/_page/demo/animation"
     | "/_page/demo/annotation"
     | "/_page/demo/calendar"
     | "/_page/demo/canvas"
@@ -1600,6 +1635,7 @@ export interface FileRouteTypes {
     | "/_page/docs/adapter-keyboard"
     | "/_page/docs/adapter-virtual-selection"
     | "/_page/docs/adapters"
+    | "/_page/docs/animation"
     | "/_page/docs/api"
     | "/_page/docs/clipboard"
     | "/_page/docs/composer"
@@ -1666,6 +1702,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/zoom"
     | "/_page/docs/api/affordance"
     | "/_page/docs/api/ajv"
+    | "/_page/docs/api/animation-react"
     | "/_page/docs/api/calendar"
     | "/_page/docs/api/collaboration"
     | "/_page/docs/api/composer"
@@ -1831,6 +1868,13 @@ declare module "@tanstack/react-router" {
       path: "/demo";
       fullPath: "/demo/";
       preLoaderRoute: typeof PageDemoIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/animation": {
+      id: "/_page/demo/animation";
+      path: "/demo/animation";
+      fullPath: "/demo/animation";
+      preLoaderRoute: typeof PageDemoAnimationRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/annotation": {
@@ -1999,6 +2043,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/adapters";
       fullPath: "/docs/adapters";
       preLoaderRoute: typeof PageDocsAdaptersRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/animation": {
+      id: "/_page/docs/animation";
+      path: "/docs/animation";
+      fullPath: "/docs/animation";
+      preLoaderRoute: typeof PageDocsAnimationRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/api": {
@@ -2449,6 +2500,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiAjvRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/animation-react": {
+      id: "/_page/docs/api/animation-react";
+      path: "/animation-react";
+      fullPath: "/docs/api/animation-react";
+      preLoaderRoute: typeof PageDocsApiAnimationReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/calendar": {
       id: "/_page/docs/api/calendar";
       path: "/calendar";
@@ -2665,6 +2723,7 @@ declare module "@tanstack/react-router" {
 interface PageDocsApiRouteChildren {
   PageDocsApiAffordanceRoute: typeof PageDocsApiAffordanceRoute;
   PageDocsApiAjvRoute: typeof PageDocsApiAjvRoute;
+  PageDocsApiAnimationReactRoute: typeof PageDocsApiAnimationReactRoute;
   PageDocsApiCalendarRoute: typeof PageDocsApiCalendarRoute;
   PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
   PageDocsApiComposerRoute: typeof PageDocsApiComposerRoute;
@@ -2694,6 +2753,7 @@ interface PageDocsApiRouteChildren {
 const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiAffordanceRoute: PageDocsApiAffordanceRoute,
   PageDocsApiAjvRoute: PageDocsApiAjvRoute,
+  PageDocsApiAnimationReactRoute: PageDocsApiAnimationReactRoute,
   PageDocsApiCalendarRoute: PageDocsApiCalendarRoute,
   PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
   PageDocsApiComposerRoute: PageDocsApiComposerRoute,
@@ -2740,6 +2800,7 @@ interface PageRouteChildren {
   PageConnectorsReactHookFormRoute: typeof PageConnectorsReactHookFormRoute;
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
   PageConnectorsWebRoute: typeof PageConnectorsWebRoute;
+  PageDemoAnimationRoute: typeof PageDemoAnimationRoute;
   PageDemoAnnotationRoute: typeof PageDemoAnnotationRoute;
   PageDemoCalendarRoute: typeof PageDemoCalendarRoute;
   PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
@@ -2763,6 +2824,7 @@ interface PageRouteChildren {
   PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
   PageDocsAdapterVirtualSelectionRoute: typeof PageDocsAdapterVirtualSelectionRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
+  PageDocsAnimationRoute: typeof PageDocsAnimationRoute;
   PageDocsApiRoute: typeof PageDocsApiRouteWithChildren;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
@@ -2851,6 +2913,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageConnectorsReactHookFormRoute: PageConnectorsReactHookFormRoute,
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,
   PageConnectorsWebRoute: PageConnectorsWebRoute,
+  PageDemoAnimationRoute: PageDemoAnimationRoute,
   PageDemoAnnotationRoute: PageDemoAnnotationRoute,
   PageDemoCalendarRoute: PageDemoCalendarRoute,
   PageDemoCanvasRoute: PageDemoCanvasRoute,
@@ -2874,6 +2937,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
   PageDocsAdapterVirtualSelectionRoute: PageDocsAdapterVirtualSelectionRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
+  PageDocsAnimationRoute: PageDocsAnimationRoute,
   PageDocsApiRoute: PageDocsApiRouteWithChildren,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,

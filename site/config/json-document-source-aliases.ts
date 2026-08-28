@@ -44,6 +44,14 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-ui-primitives-react/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-animation-react/styles.css",
+      replacement: sourceFile("packages/json-document-animation-react/styles.css"),
+    },
+    {
+      find: "@interactive-os/json-document-animation-react",
+      replacement: sourceFile("packages/json-document-animation-react/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-zod",
       replacement: sourceFile("packages/json-document-zod/src/index.ts"),
     },

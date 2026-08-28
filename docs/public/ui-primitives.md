@@ -184,3 +184,5 @@ HTML이 이름 붙인 날짜·시간 값과 APG 캘린더 격자를 Primitive가
 ```live-demo
 /demo/date-controls
 ```
+
+생성 대기의 시각 언어는 [Animation](animation.md)이 소유합니다.

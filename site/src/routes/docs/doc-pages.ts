@@ -9,6 +9,7 @@ import zodApiMarkdown from "../../../../docs/api-reference/zod.md?raw";
 import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-table.md?raw";
 import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
 import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
+import animationApiMarkdown from "../../../../docs/api-reference/animation-react.md?raw";
 import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
 import calendarApiMarkdown from "../../../../docs/api-reference/calendar.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
@@ -28,6 +29,7 @@ import contenteditableCollaborationApiMarkdown from "../../../../docs/api-refere
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
 import affordanceMarkdown from "../../../../docs/public/affordance.md?raw";
 import uiPrimitivesMarkdown from "../../../../docs/public/ui-primitives.md?raw";
+import animationMarkdown from "../../../../docs/public/animation.md?raw";
 import affordanceDragMarkdown from "../../../../docs/public/affordance-drag.md?raw";
 import affordanceFoldMarkdown from "../../../../docs/public/affordance-fold.md?raw";
 import affordanceHistoryMarkdown from "../../../../docs/public/affordance-history.md?raw";
@@ -105,6 +107,7 @@ export const docPages = {
   adapterContenteditable: docPage("/docs/adapter-contenteditable", adapterContenteditableMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),
   uiPrimitives: docPage("/docs/ui-primitives", uiPrimitivesMarkdown),
+  animation: docPage("/docs/animation", animationMarkdown),
   affordanceSelect: docPage("/docs/affordance/select", affordanceSelectMarkdown),
   affordanceFold: docPage("/docs/affordance/fold", affordanceFoldMarkdown),
   affordanceDrag: docPage("/docs/affordance/drag", affordanceDragMarkdown),
@@ -165,6 +168,7 @@ export const docPages = {
   tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
   affordanceApi: docPage("/docs/api/affordance", affordanceApiMarkdown),
   uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
+  animationApi: docPage("/docs/api/animation-react", animationApiMarkdown),
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
   calendarApi: docPage("/docs/api/calendar", calendarApiMarkdown),
   webApi: docPage("/docs/api/web", webApiMarkdown),

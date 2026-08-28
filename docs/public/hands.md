@@ -111,7 +111,7 @@ Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
 | [Mention](mention.md) | Cstar mention | 이름으로 보이는 안정적인 entity reference atom을 삽입 |
 
 Transcript, 말풍선, think·stream·tool animation은 표현과 runtime lifecycle입니다.
-Hands가 아닙니다.
+Hands가 아닙니다. 대기 시각 언어는 [Animation](animation.md)이 소유합니다.
 
 ## Hands가 공유하는 Viewport Position
 
