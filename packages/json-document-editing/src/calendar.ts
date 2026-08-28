@@ -18,6 +18,7 @@ import { resolveDocumentSource, type EditingDocumentSource } from "./document-so
 import {
   addCalendarDate,
   assertCalendarDocument,
+  calendarAllDaySpan,
   calendarDatePart,
   calendarDaysBetween,
   calendarDocumentCalendars,
@@ -323,7 +324,7 @@ export function createCalendarEditor(
     const allDay = intent.allDay ?? event.allDay;
     if (intent.allDay === true && !event.allDay) {
       start = calendarDatePart(event.start);
-      end = addCalendarDate(start, 1) ?? start;
+      end = calendarAllDaySpan(start, start)?.end ?? start;
     } else if (intent.allDay === false && event.allDay) {
       start = `${calendarDatePart(event.start)}T09:00`;
       end = `${calendarDatePart(event.start)}T10:00`;

@@ -5,6 +5,7 @@ import { Temporal } from "@js-temporal/polyfill";
 import {
   addCalendarDate,
   calendarAllDayLayout,
+  calendarAllDaySpan,
   calendarBusyDates,
   calendarDatePart,
   calendarEventsOnDay,
@@ -248,9 +249,9 @@ export function CalendarDemoRoute(props: {
   }
 
   function createAllDayOn(day: string): void {
-    const end = addCalendarDate(day, 1);
-    if (end === null) return;
-    hand.createInterval(day, end, { allDay: true });
+    const span = calendarAllDaySpan(day, day);
+    if (span === null) return;
+    hand.createInterval(span.start, span.end, { allDay: true });
   }
 
   function removeSelected(): void {
@@ -788,7 +789,7 @@ export function CalendarDemoRoute(props: {
                     )
                     : (inspected?.end ?? selectedEvent.end)}
                   onValueChange={(value) => applySelectedPatch({
-                    end: selectedEvent.allDay ? (addCalendarDate(value, 1) ?? value) : value,
+                    end: selectedEvent.allDay ? (calendarAllDaySpan(value, value)?.end ?? value) : value,
                   })}
                 />
                 <Select

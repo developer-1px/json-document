@@ -68,6 +68,9 @@ Editing `calendarDatePart`가 소유합니다. 현재 시각의 오늘 날짜와
 Day와 week time grid의 ordered 날짜 cell도 UI Primitives `calendarCells`가
 소유합니다. Day는 정확한 ISO weekday를 포함한 단일 cell, week는 ISO 주의
 7개 cell을 반환하며 Host는 이 정본 metadata로 header와 event grid를 조합합니다.
+Inclusive UI 날짜 endpoint를 all-day event의 exclusive storage interval로 바꾸는
+projection은 Editing `calendarAllDaySpan`이 소유합니다. 빈 drag, end resize,
+timed→all-day 전환, 단일 생성과 Inspector 수정이 모두 같은 정본 규칙을 사용합니다.
 막대 가장자리는 종일 밴드와 같이 `event.resize`입니다.
 점유 칸은 origin 이벤트 선택, 다른 날로 끌 때만 `event.move-day`입니다.
 월간 span에서 누른 Web `clientX`는 `calendarKeyFromWebRow`가 주 행 bounds와

@@ -39,13 +39,13 @@ export function interpretCalendarAllDayPointer(
   }
 
   if (handle === "end") {
-    const exclusiveEnd = addCalendarDate(release.targetDay, 1);
-    if (exclusiveEnd === null) return null;
+    const span = calendarAllDaySpan(release.targetDay, release.targetDay);
+    if (span === null) return null;
     return {
       type: "event.resize",
       eventId: release.originEventId,
       edge: "end",
-      instant: exclusiveEnd,
+      instant: span.end,
     };
   }
 
