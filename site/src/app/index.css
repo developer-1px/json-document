@@ -185,9 +185,13 @@
     @apply w-full min-w-0 rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
-  [data-ui-control="field"],
+  [data-ui-control="field"]:not([data-ui-presentation="seamless"]),
   [data-ui-control="search"] input {
     @apply rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
+  }
+
+  [data-ui-control="field"][data-ui-presentation="seamless"] {
+    @apply border-0 bg-transparent px-3 py-2 text-sm leading-6 text-foreground-strong outline-none focus-visible:bg-background-canvas focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
   [data-ui-control="check"] {
@@ -309,12 +313,8 @@
     @apply rounded-control border-transparent bg-background-subtle/60 shadow-none hover:border-transparent hover:bg-background-subtle focus-visible:border-transparent;
   }
 
-  :where([data-ui-control="selectable"]) {
-    @apply cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 focus-within:ring-2 focus-within:ring-line-accent/25 data-[selected=true]:border-line-accent data-[selected=true]:bg-background-subtle data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-line-accent data-[focus=true]:outline data-[focus=true]:outline-2 data-[focus=true]:-outline-offset-2 data-[focus=true]:outline-foreground-default;
-  }
-
-  :where([data-ui-control="selectable"])[data-selected="true"][data-focus="true"] {
-    outline-color: theme("colors.line-accent");
+  [data-ui-control="selectable"] {
+    @apply cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 focus-within:ring-2 focus-within:ring-line-accent/25 data-[selected=true]:border-line-subtle data-[selected=true]:bg-background-subtle data-[focus=true]:border-line-default;
   }
 
   [data-ui-control="disclosure"] {

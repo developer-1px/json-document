@@ -511,8 +511,18 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
 
   await unselected.click();
   await expect(unselected).toHaveAttribute("data-selected", "true");
-  await expect.poll(async () => unselected.evaluate((element) => getComputedStyle(element).outlineColor))
-    .toBe("rgb(222, 109, 85)");
+  await expect.poll(async () => unselected.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderColor: style.borderColor,
+      outlineColor: style.outlineColor,
+    };
+  })).toEqual({
+    backgroundColor: "rgb(251, 248, 242)",
+    borderColor: "rgb(119, 115, 107)",
+    outlineColor: "rgba(0, 0, 0, 0)",
+  });
 
   await page.goto("/demo/sheet");
   expect(await page.getByRole("columnheader", { name: "Name" }).evaluate((element) => (

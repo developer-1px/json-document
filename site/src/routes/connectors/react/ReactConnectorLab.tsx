@@ -11,7 +11,7 @@ import {
 } from "@interactive-os/json-document-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
-import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -52,10 +52,10 @@ function JSONDocumentSubscriptionLab() {
 
       <label className={classes("grid gap-1", ui.text.meta)}>
         Document title
-        <input
+        <Field
+          label="Document title"
           value={value.title}
-          onChange={(event) => replace("/title", event.currentTarget.value)}
-          className={ui.field.control}
+          onValueChange={(value) => replace("/title", value)}
         />
       </label>
       <Command label={`Count ${value.count}`}

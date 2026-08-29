@@ -45,7 +45,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { Command, Tabs, Toggle, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, Tabs, Toggle, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -443,14 +443,15 @@ function CommentComposer(props: {
         transform: dockTransform(dock),
       }}
     >
-      <textarea
-        ref={inputRef}
-        aria-label="Annotation instruction"
-        className={classes(ui.field.control, annotationDemoStyles.commentInput())}
+      <Field
+        controlRef={inputRef}
+        label="Annotation instruction"
+        multiline
+        className={annotationDemoStyles.commentInput()}
         onBlur={() => {
           if (draft.trim() !== "") props.onSave(draft);
         }}
-        onChange={(event) => setDraft(event.target.value)}
+        onValueChange={setDraft}
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
             event.preventDefault();
