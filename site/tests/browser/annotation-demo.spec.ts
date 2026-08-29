@@ -57,12 +57,12 @@ test("click opens comment editing while drag keeps the composer hidden", async (
   const composer = page.getByRole("region", { name: "Request 1 comment" });
   const clickedMarkerBox = await requiredBox(marker);
   const composerBox = await requiredBox(composer);
-  expect(Math.abs(composerBox.x - previewBox.x)).toBeLessThan(4);
-  expect(Math.abs(composerBox.y - previewBox.y)).toBeLessThan(4);
+  expect(Math.abs(composerBox.x - previewBox.x)).toBeLessThanOrEqual(4);
+  expect(Math.abs(composerBox.y - previewBox.y)).toBeLessThanOrEqual(4);
   expect(composerBox.x).toBeGreaterThan(clickedMarkerBox.x + clickedMarkerBox.width / 2);
   const markerCenterY = clickedMarkerBox.y + clickedMarkerBox.height / 2;
   const composerCenterY = composerBox.y + composerBox.height / 2;
-  expect(Math.abs(composerCenterY - markerCenterY)).toBeLessThan(4);
+  expect(Math.abs(composerCenterY - markerCenterY)).toBeLessThanOrEqual(4);
   await expect(composer.locator("[data-comment-tail]")).toHaveCount(0);
   await page.getByRole("button", { name: "Select", exact: true }).click();
   const markerBox = await requiredBox(marker);

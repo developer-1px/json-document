@@ -61,7 +61,7 @@ export function DemoWorkbench(props: {
 
   return (
     <section className={classes("min-w-0", ui.product.frame, expanded && "fixed inset-3 z-50 overflow-auto bg-background-canvas shadow-overlay")} aria-label="Demo workbench" data-expanded={expanded || undefined}>
-      <div className={classes(ui.demoWorkbench.header, "flex items-start justify-between gap-2")}>
+      <div className={classes(ui.demoWorkbench.header, "flex items-center justify-between gap-2")}>
         <Tabs
           className={ui.demoWorkbench.tabList}
           tabClassName={ui.demoWorkbench.tab}

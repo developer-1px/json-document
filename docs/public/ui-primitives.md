@@ -199,13 +199,15 @@ logical focus와 action 뒤 focus 복원을 소유합니다. `restoreFocusOnActi
 ```tsx
 <Check label="Select row" checked={selected} onCheckedChange={setSelected} />
 <Field label="Title" value={title} onValueChange={setTitle} />
+<Field label="Cell value" value={cell} presentation="seamless" onValueChange={setCell} />
 <Search label="Search documents" query={query} onQueryChange={setQuery} results={<Results />} />
 <ValueInput label="Zoom" value={zoom} min={25} max={200} presentation="continuous" onValueChange={setZoom} />
 <Popover label="Formatting" open={open} onOpenChange={setOpen} trigger="Format">…</Popover>
 <Dialog label="Delete document" open={confirming} onOpenChange={setConfirming}>…</Dialog>
 ```
 
-`Check`는 desktop 표·목록의 다중 선택 예외, `Field`는 text input, `Search`는
+`Check`는 desktop 표·목록의 다중 선택 예외, `Field`는 같은 값 입력 역할의
+standard/seamless presentation, `Search`는
 query와 result surface, `ValueInput`은 continuous/stepped value 역할을 각각
 소유합니다. `Popover`와 `Dialog`는 anchored/modal presentation lifecycle을
 소유하며 제품 copy와 contents는 Host가 제공합니다.

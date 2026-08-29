@@ -717,7 +717,7 @@ function Showroom(): ReactNode {
           </div>
         </div>
         <div className={styles.composer()}>
-          <Field label="Ask about this artifact" value={prompt} onValueChange={setPrompt} placeholder="Ask for a change…" className={styles.composerField()} />
+          <Field label="Ask about this artifact" value={prompt} onValueChange={setPrompt} presentation="seamless" placeholder="Ask for a change…" className={styles.composerField()} />
           <Choice
             presentation="popup"
             label="Response mode"

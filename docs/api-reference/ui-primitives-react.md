@@ -98,7 +98,7 @@ type DragHandleProps = Omit<InteractionHandleButtonProps<DragHandleDescriptor>, 
 ## `Field`
 
 ```ts
-Field(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; readonly multiline?: boolean; readonly disabled?: boolean; readonly placeholder?: string; readonly className?: string; }): ReactNode
+Field(props: FieldProps): ReactNode
 ```
 ## `FileDropRegion`
 

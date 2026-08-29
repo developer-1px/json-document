@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ClipboardPaste, Copy, CopyPlus, Plus, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
@@ -173,18 +173,18 @@ export function DocumentDemoRoute() {
           toolbarLabel="Document actions"
           toolbar={(
             <>
-              <Action label="Add" icon={<Plus aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
-              <Action label="Duplicate" icon={<CopyPlus aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
-              <Action label="Move up" icon={<ArrowUp aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
-              <Action label="Move down" icon={<ArrowDown aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
+              <Command label="Add" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")}><Plus aria-hidden="true" size={16} /></Command>
+              <Command label="Duplicate" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")}><CopyPlus aria-hidden="true" size={16} /></Command>
+              <Command label="Move up" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")}><ArrowUp aria-hidden="true" size={16} /></Command>
+              <Command label="Move down" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")}><ArrowDown aria-hidden="true" size={16} /></Command>
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
-              <Action label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
-              <Action label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} onClick={pasteSelection} disabled={!clipboard} />
-              <Action label="Delete" icon={<Trash2 aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
+              <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+              <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+              <Command label="Paste" onClick={pasteSelection} disabled={!clipboard}><ClipboardPaste aria-hidden="true" size={16} /></Command>
+              <Command label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Command label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
+              <Command label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
             </>
           )}
           inspector={(
@@ -263,8 +263,4 @@ export function DocumentDemoRoute() {
         </ProductShell>
     </DemoPage>
   );
-}
-
-function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <Command label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</Command>;
 }

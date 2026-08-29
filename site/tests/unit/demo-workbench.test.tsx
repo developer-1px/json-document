@@ -148,6 +148,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/interaction-handle.ts",
