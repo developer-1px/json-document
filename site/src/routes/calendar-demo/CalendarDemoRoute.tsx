@@ -367,7 +367,7 @@ export function CalendarDemoRoute(props: {
             ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
             data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
             data-calendar-allday-day={days[item.startIndex]}
-            className="relative z-10 mx-0.5 my-1"
+            className="group/event relative z-10 mx-0.5 my-1"
             style={{ gridColumn: `${item.startIndex + 2} / span ${item.span}`, gridRow: 2 + item.lane }}
           >
             <SelectableItem
@@ -397,23 +397,15 @@ export function CalendarDemoRoute(props: {
               {item.event.title}
             </SelectableItem>
             {item.event.id === "preview" || !isPrimary(item.event) ? null : (
-              <>
-                <ResizeHandle
-                  label={`Resize ${item.event.title} start`}
-                  orientation="horizontal"
-                  className={classes("left-0 top-0 h-full w-2", styles.resizeEdgeVertical())}
-                  onResize={(delta, phase) => resizeAllDay(item.event.id, "start", item.event.start, item.event.start, delta, phase)}
-                />
-                <ResizeHandle
-                  label={`Resize ${item.event.title} end`}
-                  orientation="horizontal"
-                  className={classes("right-0 top-0 h-full w-2", styles.resizeEdgeVertical())}
-                  onResize={(delta, phase) => {
-                    const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
-                    resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
-                  }}
-                />
-              </>
+              <ResizeHandle
+                label={`Resize ${item.event.title} end`}
+                orientation="horizontal"
+                className={classes("right-0 top-0 h-full w-2", styles.resizeEdgeVertical())}
+                onResize={(delta, phase) => {
+                  const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
+                  resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
+                }}
+              />
             )}
           </div>
         ))}
@@ -511,7 +503,7 @@ export function CalendarDemoRoute(props: {
                   key={`${item.event.id}:${item.event.start}`}
                   ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
                   data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
-                  className="absolute z-10"
+                  className="group/event absolute z-10"
                   style={{
                     top: (startMinutes - hourStart * 60) * (pxPerHour / 60),
                     height: Math.max(18, (endMinutes - startMinutes) * (pxPerHour / 60)),
@@ -548,20 +540,12 @@ export function CalendarDemoRoute(props: {
                     <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
                   </SelectableItem>
                   {item.event.id === "preview" || !isPrimary(item.event) ? null : (
-                    <>
-                      <ResizeHandle
-                        label={`Resize ${item.event.title} start`}
-                        orientation="vertical"
-                        className={classes("inset-x-0 top-0 h-2", styles.resizeEdge())}
-                        onResize={(delta, phase) => resizeTimed(item.event.id, "start", item.event.start, item.event.start, delta, phase)}
-                      />
-                      <ResizeHandle
-                        label={`Resize ${item.event.title} end`}
-                        orientation="vertical"
-                        className={classes("inset-x-0 bottom-0 h-2", styles.resizeEdge())}
-                        onResize={(delta, phase) => resizeTimed(item.event.id, "end", item.event.start, item.event.end, delta, phase)}
-                      />
-                    </>
+                    <ResizeHandle
+                      label={`Resize ${item.event.title} end`}
+                      orientation="vertical"
+                      className={classes("inset-x-0 bottom-0 h-2", styles.resizeEdge())}
+                      onResize={(delta, phase) => resizeTimed(item.event.id, "end", item.event.start, item.event.end, delta, phase)}
+                    />
                   )}
                 </div>
                 );
@@ -769,10 +753,8 @@ export function CalendarDemoRoute(props: {
                         );
                       })}
                       {overflowDay === null ? layout.items.map((item) => {
-                        const weekFirst = dates[0];
                         const weekLast = dates.at(-1);
                         const lastDay = calendarIntervalLastDate(item.event.start, item.event.end, true);
-                        const clipStart = isCalendarAllDay(item.event) && weekFirst !== undefined && item.event.start < weekFirst;
                         const clipEnd = isCalendarAllDay(item.event) && weekLast !== undefined && lastDay > weekLast;
                         return (
                         <div
@@ -782,7 +764,7 @@ export function CalendarDemoRoute(props: {
                           ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
                           data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
                           data-calendar-span={String(item.span)}
-                          className="relative z-10 min-w-0 w-full"
+                          className="group/event relative z-10 min-w-0 w-full"
                           style={{
                             gridColumn: `${item.startIndex + 1} / span ${item.span}`,
                             gridRow: 2 + item.lane,
@@ -815,27 +797,17 @@ export function CalendarDemoRoute(props: {
                             <MonthEventCopy event={item.event} />
                           </SelectableItem>
                           {item.event.id === "preview" || !isCalendarAllDay(item.event) || !isPrimary(item.event) ? null : (
-                            <>
-                              {clipStart ? null : (
-                                <ResizeHandle
-                                  label={`Resize ${item.event.title} start`}
-                                  orientation="horizontal"
-                                  className={classes("left-0 top-0 z-20 h-full w-2", styles.resizeEdgeVertical())}
-                                  onResize={(delta, phase) => resizeAllDay(item.event.id, "start", item.event.start, item.event.start, delta, phase)}
-                                />
-                              )}
-                              {clipEnd ? null : (
-                                <ResizeHandle
-                                  label={`Resize ${item.event.title} end`}
-                                  orientation="horizontal"
-                                  className={classes("right-0 top-0 z-20 h-full w-2", styles.resizeEdgeVertical())}
-                                  onResize={(delta, phase) => {
-                                    const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
-                                    resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
-                                  }}
-                                />
-                              )}
-                            </>
+                            clipEnd ? null : (
+                              <ResizeHandle
+                                label={`Resize ${item.event.title} end`}
+                                orientation="horizontal"
+                                className={classes("right-0 top-0 z-20 h-full w-2", styles.resizeEdgeVertical())}
+                                onResize={(delta, phase) => {
+                                  const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
+                                  resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
+                                }}
+                              />
+                            )
                           )}
                         </div>
                         );
