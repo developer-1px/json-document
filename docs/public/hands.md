@@ -95,6 +95,15 @@ Host는 이벤트와 날짜 목록만 연결합니다.
 `+N more`는 그 날의 이벤트 목록을 열고 월 보기에 남습니다. 이 매핑은
 `interpretCalendarTimeGridPointer`, `interpretCalendarAllDayPointer`,
 `interpretCalendarMonthPointer`가 소유하며 현재 선택은 입력이 아닙니다.
+
+선택한 occurrence의 body drag는 이 단건 pointer intent를 반복하지 않습니다.
+Selection의 `resolveMaterializedSelectionDragSource`가 source snapshot을 확정하고,
+Editing의 `planCalendarSelectionMove`가 anchor에서 target까지의 temporal delta를
+모든 occurrence에 동일하게 적용합니다. React Calendar binding은 Web pointer
+session과 Affordance `createGestureSession`을 합성해 같은 plan으로 preview한 뒤
+`selection.move`를 한 번 dispatch합니다. 따라서 document 변경, `selectionAfter`,
+undo/redo는 한 Editing transaction으로 함께 이동합니다. ResizeHandle은 이
+selection drag와 별개의 edge geometry lifecycle을 유지합니다.
 연 보기는 12개 미니 월입니다. 월 이름은 월 보기로, 날짜는 일 보기로
 들어갑니다. 연간 12개 월 시작일은 UI Primitives 날짜 값 정본의
 `calendarYearMonths`가 만들고, Host는 월 이름과 grid layout 및 navigation만

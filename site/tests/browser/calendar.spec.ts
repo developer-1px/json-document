@@ -90,6 +90,28 @@ test("Calendar selection uses the native clipboard and one history across copy, 
   await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
 });
 
+test("Calendar drags the selected occurrence set with one temporal delta and one undo", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const first = page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true });
+  const second = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  await first.click();
+  await second.click({ modifiers: ["Meta"] });
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(second).toHaveAttribute("data-selected", "true");
+
+  await dragBy(page, first, 0, 72);
+  const movedFirst = page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true });
+  const movedSecond = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  await expect(movedFirst).toContainText("08:15");
+  await expect(movedSecond).toContainText("12:15");
+  await expect(movedFirst).toHaveAttribute("data-selected", "true");
+  await expect(movedSecond).toHaveAttribute("data-selected", "true");
+
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true })).toContainText("07:00");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toContainText("11:00");
+});
+
 test("Calendar pastes into a selected empty time slot", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });

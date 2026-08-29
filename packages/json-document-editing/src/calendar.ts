@@ -5,6 +5,7 @@ import {
 } from "@interactive-os/json-document";
 import {
   createMaterializedRangeSelectionFamily,
+  resolveMaterializedSelectionDragSource,
   type MaterializedRangeSelection,
   type MaterializedRangeSelectionCommand,
   type OrderedTopology,
@@ -35,6 +36,10 @@ import {
   parseCalendarInstant,
 } from "./calendar-validation.js";
 import { calendarEventExcludeDates, calendarEventRecurrence, projectCalendarOccurrences } from "./calendar-occurrence.js";
+import {
+  planCalendarSelectionMove,
+  type CalendarSelectionMoveTarget,
+} from "./calendar-selection-move.js";
 
 export interface CalendarCalendar extends Record<string, JSONValue> {
   readonly id: string;
@@ -105,6 +110,13 @@ export interface CalendarOccurrenceSelection {
   readonly end: string;
 }
 
+export interface CalendarSelectionDragSource {
+  readonly anchor: CalendarOccurrencePoint;
+  readonly primary: CalendarOccurrencePoint;
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
+  readonly occurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+}
+
 export const calendarClipboardFormat = {
   mimeType: "application/vnd.interactive-os.calendar+json" as const,
   parse(value: unknown): CalendarClipboard | null {
@@ -136,6 +148,12 @@ export type CalendarIntent =
     }
   | { readonly type: "selection.clear" }
   | { readonly type: "selection.remove" }
+  | {
+      readonly type: "selection.move";
+      readonly source: CalendarSelectionDragSource;
+      readonly target: CalendarSelectionMoveTarget;
+      readonly scope?: "this" | "this-and-following" | "all";
+    }
   | {
       readonly type: "event.create";
       readonly start: string;
@@ -180,6 +198,10 @@ export interface CalendarEditor {
   readonly selectedEvents: ReadonlyArray<CalendarEvent>;
   readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
   readonly primaryOccurrence: CalendarOccurrenceSelection | null;
+  prepareSelectionDrag(
+    point: CalendarOccurrencePoint,
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): CalendarSelectionDragSource | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
   cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
@@ -280,6 +302,22 @@ export function createCalendarEditor(
     }
 
     if (intent.type === "selection.clear") return success(session.select(emptyCalendarSelection()));
+
+    if (intent.type === "selection.move") {
+      const plan = planCalendarSelectionMove(
+        value().events,
+        intent.source.occurrences,
+        intent.source.anchor,
+        intent.target,
+        { ...(intent.scope === undefined ? {} : { scope: intent.scope }), createId, primary: intent.source.primary },
+      );
+      if (!plan.ok) return failure(plan.code);
+      return session.apply({
+        operations: [{ op: "replace", path: "/events", value: plan.events }],
+        selectionAfter: plan.selectionAfter,
+        origin: intent.type,
+      });
+    }
 
     if (intent.type === "event.create") {
       if (intent.start >= intent.end) return failure("event.invalid-interval");
@@ -631,6 +669,28 @@ export function createCalendarEditor(
     };
   }
 
+  function prepareSelectionDrag(
+    point: CalendarOccurrencePoint,
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): CalendarSelectionDragSource | null {
+    const context = selectionContext(topology?.points ?? [point]);
+    const source = resolveMaterializedSelectionDragSource(session.snapshot.selection, point, context);
+    if (source === null) return null;
+    if (source.selectionChanged) session.select(asCalendarSelection(source.selection));
+    const occurrences = source.points.flatMap((candidate) => {
+      const occurrence = resolveCalendarOccurrence(value().events, candidate);
+      return occurrence === null ? [] : [occurrence];
+    });
+    const primaryIndex = source.selection.primaryIndex;
+    const primary = primaryIndex === null ? source.anchor : source.selection.ranges[primaryIndex]?.focus ?? source.anchor;
+    return occurrences.length !== source.points.length ? null : {
+      anchor: source.anchor,
+      primary,
+      points: source.points,
+      occurrences,
+    };
+  }
+
   function removeClipboard(clipboard: CalendarClipboard): EditingResult<CalendarSelection> {
     if (clipboard.items.length === 0) return failure("clipboard.empty");
     const events = value().events;
@@ -709,6 +769,7 @@ export function createCalendarEditor(
     get selectedEvents() { return selectedEvents(); },
     get selectedOccurrences() { return selectedOccurrences(); },
     get primaryOccurrence() { return primaryOccurrence(); },
+    prepareSelectionDrag,
     dispatch,
     copy,
     cut: (occurrences) => cutEditingClipboard(

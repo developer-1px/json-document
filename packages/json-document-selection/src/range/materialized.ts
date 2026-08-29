@@ -28,6 +28,13 @@ export interface MaterializedRangeSelectionMapping<Point> {
   mapPoint(point: Point): Point | null;
 }
 
+export interface MaterializedSelectionDragSource<Point> {
+  readonly selection: MaterializedRangeSelection<Point>;
+  readonly anchor: Point;
+  readonly points: readonly Point[];
+  readonly selectionChanged: boolean;
+}
+
 export function emptyMaterializedRangeSelection<Point>(): MaterializedRangeSelection<Point> {
   return { kind: "range", ranges: [], primaryIndex: null };
 }
@@ -75,6 +82,30 @@ export function createMaterializedRangeSelectionFamily<Point>(): SelectionFamily
         context.topology.equals,
       );
     },
+  };
+}
+
+/** Resolves the immutable selection snapshot used by a selection-backed drag. */
+export function resolveMaterializedSelectionDragSource<Point>(
+  state: MaterializedRangeSelection<Point>,
+  point: Point,
+  context: MaterializedRangeSelectionContext<Point>,
+): MaterializedSelectionDragSource<Point> | null {
+  const family = createMaterializedRangeSelectionFamily<Point>();
+  const current = family.reconcile(state, context).state;
+  const currentPoints = family.targets(current, context);
+  const pressedInside = currentPoints.some((candidate) => context.topology.equals(candidate, point));
+  const result = pressedInside
+    ? { state: current, changed: current !== state }
+    : family.transition(current, { type: "collapse", point }, context);
+  const points = family.targets(result.state, context);
+  const anchor = points.find((candidate) => context.topology.equals(candidate, point));
+  if (anchor === undefined || points.length === 0) return null;
+  return {
+    selection: result.state,
+    anchor,
+    points,
+    selectionChanged: result.changed,
   };
 }
 

@@ -4,6 +4,7 @@ import {
   createMaterializedRangeSelectionFamily,
   createRangeSelectionFamily,
   emptyRangeSelection,
+  resolveMaterializedSelectionDragSource,
   type OrderedTopology,
 } from "../src/index.js";
 
@@ -79,6 +80,31 @@ describe("range selection family", () => {
 });
 
 describe("materialized range selection family", () => {
+  test("keeps the whole snapshot when drag starts inside the current selection", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const context = { topology: topology(["a", "b", "c"]) };
+    let state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, { type: "collapse", point: "a" }, context).state;
+    state = family.transition(state, { type: "toggle-point", point: "c" }, context).state;
+
+    expect(resolveMaterializedSelectionDragSource(state, "c", context)).toEqual({
+      selection: state,
+      anchor: "c",
+      points: ["a", "c"],
+      selectionChanged: false,
+    });
+  });
+
+  test("replace-selects a pressed point outside the current selection", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const context = { topology: topology(["a", "b", "c"]) };
+    const state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, { type: "collapse", point: "a" }, context).state;
+
+    const source = resolveMaterializedSelectionDragSource(state, "b", context);
+    expect(source?.points).toEqual(["b"]);
+    expect(source?.selectionChanged).toBe(true);
+    expect(source?.selection.ranges).toEqual([{ anchor: "b", focus: "b", points: ["b"] }]);
+  });
+
   test("keeps resolved points when the visible interval changes", () => {
     const family = createMaterializedRangeSelectionFamily<string>();
     const first = { topology: topology(["a", "b", "c", "d"]) };

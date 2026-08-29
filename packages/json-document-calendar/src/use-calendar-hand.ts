@@ -9,6 +9,7 @@ import {
   previewCalendarAllDay,
   previewCalendarMonth,
   previewCalendarTimeGrid,
+  planCalendarSelectionMove,
   type CalendarAllDayPointerRelease,
   type CalendarDocument,
   type CalendarClipboard,
@@ -17,6 +18,8 @@ import {
   type CalendarEventPatch,
   type CalendarIntent,
   type CalendarSelection,
+  type CalendarSelectionDragSource,
+  type CalendarSelectionMoveTarget,
   type EditingResult,
   type CalendarMonthPointerRelease,
   type CalendarOccurrenceRange,
@@ -27,6 +30,10 @@ import {
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
 
 type OccurrenceScope = Extract<CalendarIntent, { type: "occurrence.edit" }>["scope"];
+export interface CalendarSelectionDragPreview {
+  readonly source: CalendarSelectionDragSource;
+  readonly target: CalendarSelectionMoveTarget;
+}
 
 export type CalendarHandOptions = {
   readonly initialOccurrence?: CalendarOccurrenceRange;
@@ -47,6 +54,7 @@ export interface CalendarHand {
   readonly timePreview: CalendarTimeGridPointerRelease | null;
   readonly allDayPreview: CalendarAllDayPointerRelease | null;
   readonly monthPreview: CalendarMonthPointerRelease | null;
+  readonly selectionDragPreview: CalendarSelectionDragPreview | null;
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
@@ -57,6 +65,9 @@ export interface CalendarHand {
   setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
   setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
   setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
+  prepareSelectionDrag(eventId: string, occurrenceStart: string): CalendarSelectionDragSource | null;
+  previewSelectionDrag(preview: CalendarSelectionDragPreview | null): void;
+  commitSelectionDrag(preview: CalendarSelectionDragPreview): boolean;
   dispatch(intent: CalendarIntent | null): boolean;
   commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean;
   rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
@@ -120,9 +131,19 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   const [timePreview, setTimePreview] = useState<CalendarTimeGridPointerRelease | null>(null);
   const [allDayPreview, setAllDayPreview] = useState<CalendarAllDayPointerRelease | null>(null);
   const [monthPreview, setMonthPreview] = useState<CalendarMonthPointerRelease | null>(null);
+  const [selectionDragPreview, setSelectionDragPreview] = useState<CalendarSelectionDragPreview | null>(null);
   const document = snapshot.value as CalendarDocument;
   const visibleEvents = calendarVisibleEvents(document);
-  const paintedEvents = allDayPreview !== null
+  const dragPlan = selectionDragPreview === null ? null : planCalendarSelectionMove(
+    visibleEvents,
+    selectionDragPreview.source.occurrences,
+    selectionDragPreview.source.anchor,
+    selectionDragPreview.target,
+    { scope, primary: selectionDragPreview.source.primary },
+  );
+  const paintedEvents = dragPlan?.ok === true
+    ? dragPlan.events
+    : allDayPreview !== null
     ? previewCalendarAllDay(visibleEvents, allDayPreview, scope)
     : timePreview !== null
       ? previewCalendarTimeGrid(visibleEvents, timePreview, scope)
@@ -175,6 +196,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     end: string,
     createOptions: { readonly allDay?: boolean; readonly title?: string } = {},
   ): boolean {
+    setSelectionDragPreview(null);
     return commitIntent({
       type: "event.create",
       start,
@@ -185,12 +207,19 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function isOccurrenceSelected(eventId: string, occurrenceStart: string): boolean {
-    return selectedOccurrences.some((item) => item.eventId === eventId && item.start === occurrenceStart);
+    const occurrences = dragPlan?.ok === true ? dragPlan.movedOccurrences : selectedOccurrences;
+    return occurrences.some((item) => item.eventId === eventId && item.start === occurrenceStart);
   }
 
   function isPrimaryOccurrence(eventId: string, occurrenceStart: string): boolean {
+    if (dragPlan?.ok === true) {
+      const index = dragPlan.selectionAfter.primaryIndex;
+      const point = index === null ? null : dragPlan.selectionAfter.ranges[index]?.focus ?? null;
+      return point?.eventId === eventId && point.occurrenceStart === occurrenceStart;
+    }
     const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
-    return primary?.eventId === eventId && primary.start === occurrenceStart;
+    return (primary?.eventId === eventId && primary.start === occurrenceStart)
+      || (selectedEvent?.id === eventId && occurrence.start === occurrenceStart);
   }
 
   function selectOccurrence(
@@ -208,6 +237,23 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     })) return false;
     const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
     setOccurrence(primary === null ? { start: null, end: null } : { start: primary.start, end: primary.end });
+    return true;
+  }
+
+  function prepareSelectionDrag(eventId: string, occurrenceStart: string): CalendarSelectionDragSource | null {
+    return editor.prepareSelectionDrag({ eventId, occurrenceStart });
+  }
+
+  function commitSelectionDrag(preview: CalendarSelectionDragPreview): boolean {
+    setSelectionDragPreview(null);
+    if (!dispatch({
+      type: "selection.move",
+      source: preview.source,
+      target: preview.target,
+      scope,
+    })) return false;
+    renameSession.commit();
+    rememberSelection();
     return true;
   }
 
@@ -240,11 +286,13 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function undo(): void {
+    setSelectionDragPreview(null);
     editor.undo();
     rememberSelection();
   }
 
   function redo(): void {
+    setSelectionDragPreview(null);
     editor.redo();
     rememberSelection();
   }
@@ -279,6 +327,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     timePreview,
     allDayPreview,
     monthPreview,
+    selectionDragPreview,
     setScope,
     setOccurrence,
     setTitleDraft,
@@ -289,6 +338,9 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     setTimePreview,
     setAllDayPreview,
     setMonthPreview,
+    prepareSelectionDrag,
+    previewSelectionDrag: setSelectionDragPreview,
+    commitSelectionDrag,
     dispatch,
     commitIntent,
     rememberIntent,

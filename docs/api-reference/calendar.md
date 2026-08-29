@@ -87,6 +87,7 @@ interface CalendarHand {
   readonly timePreview: CalendarTimeGridPointerRelease | null;
   readonly allDayPreview: CalendarAllDayPointerRelease | null;
   readonly monthPreview: CalendarMonthPointerRelease | null;
+  readonly selectionDragPreview: CalendarSelectionDragPreview | null;
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
@@ -97,6 +98,9 @@ interface CalendarHand {
   setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
   setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
   setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
+  prepareSelectionDrag(eventId: string, occurrenceStart: string): CalendarSelectionDragSource | null;
+  previewSelectionDrag(preview: CalendarSelectionDragPreview | null): void;
+  commitSelectionDrag(preview: CalendarSelectionDragPreview): boolean;
   dispatch(intent: CalendarIntent | null): boolean;
   commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean;
   rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
@@ -174,6 +178,8 @@ interface CalendarPointerInteractions {
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
   clearTimeHover(): void;
+  consumeEventClick(): boolean;
+  consumeEventDoubleClick(): boolean;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
@@ -222,6 +228,15 @@ interface CalendarRenameInputOptions {
 
 ```ts
 calendarTimeLabel(value: string): string
+```
+
+## `CalendarSelectionDragPreview`
+
+```ts
+interface CalendarSelectionDragPreview {
+  readonly source: CalendarSelectionDragSource;
+  readonly target: CalendarSelectionMoveTarget;
+}
 ```
 ## `CalendarViewportPositionOptions`
 

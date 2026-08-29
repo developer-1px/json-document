@@ -1,10 +1,12 @@
-import { useState, type PointerEvent } from "react";
+import { useRef, useState, type PointerEvent } from "react";
+import { createGestureSession } from "@interactive-os/json-document-affordance";
 import {
   addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
   calendarEventsOnDay, calendarInstantAt, calendarShiftInstant, calendarVisibleEvents,
   interpretCalendarAllDayPointer, interpretCalendarMonthPointer, interpretCalendarTimeGridPointer,
   type CalendarAllDayPointerRelease, type CalendarIntent, type CalendarTimeGridHandle,
   type CalendarTimeGridPointerRelease,
+  type CalendarSelectionDragSource,
 } from "@interactive-os/json-document-editing";
 import {
   calendarDayDeltaFromWebWidth, calendarKeyFromWebRow, calendarMinutesFromWebGrid,
@@ -21,8 +23,9 @@ export type CalendarPointerPolicy = {
 };
 
 type Phase = "preview" | "commit";
-type TimeRelease = CalendarTimeGridPointerRelease & { readonly originEventEnd: string | null };
-type AllDayRelease = CalendarAllDayPointerRelease & { readonly originEventEnd: string | null };
+type DragCandidate = { readonly eventId: string; readonly occurrenceStart: string };
+type TimeRelease = CalendarTimeGridPointerRelease & { readonly originEventEnd: string | null; readonly dragCandidate: DragCandidate | null; readonly dragSource: CalendarSelectionDragSource | null };
+type AllDayRelease = CalendarAllDayPointerRelease & { readonly originEventEnd: string | null; readonly dragCandidate: DragCandidate | null; readonly dragSource: CalendarSelectionDragSource | null };
 type MonthRelease = {
   readonly originDay: string;
   readonly originEventId: string | null;
@@ -30,6 +33,13 @@ type MonthRelease = {
   readonly originEventEnd: string | null;
   readonly targetDay: string;
   readonly eventsOnTargetDay: ReadonlyArray<{ readonly id: string }>;
+  readonly dragSource: CalendarSelectionDragSource | null;
+  readonly dragCandidate: DragCandidate | null;
+};
+type CalendarSelectionDragGesture = {
+  readonly type: "calendar-selection-drag";
+  readonly source: CalendarSelectionDragSource;
+  readonly target: { readonly type: "instant"; readonly instant: string } | { readonly type: "day"; readonly day: string };
 };
 
 export interface CalendarPointerInteractions {
@@ -39,6 +49,8 @@ export interface CalendarPointerInteractions {
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
   clearTimeHover(): void;
+  consumeEventClick(): boolean;
+  consumeEventDoubleClick(): boolean;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
@@ -57,6 +69,9 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   const [timePointer] = useState(() => createWebPointerSession<TimeRelease>());
   const [allDayPointer] = useState(() => createWebPointerSession<AllDayRelease>());
   const [monthPointer] = useState(() => createWebPointerSession<MonthRelease>());
+  const [selectionDrag] = useState(() => createGestureSession<CalendarSelectionDragGesture>());
+  const suppressEventClick = useRef(false);
+  const suppressEventDoubleClick = useRef(false);
   const [hoveredTime, setHoveredTime] = useState<CalendarPointerInteractions["hoveredTime"]>(null);
   const document = hand.document;
   const visibleEvents = calendarVisibleEvents(document);
@@ -92,7 +107,10 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (grid === null) return;
     const originInstant = instantAt(day, event.clientY, grid);
     if (originInstant === null) return;
-    const release = { originInstant, originEventId, originEventStart, originEventEnd, originHandle, targetInstant: originInstant };
+    const dragCandidate = originHandle === "body" && originEventId !== null && originEventStart !== null
+      ? { eventId: originEventId, occurrenceStart: originEventStart }
+      : null;
+    const release = { originInstant, originEventId, originEventStart, originEventEnd, originHandle, targetInstant: originInstant, dragCandidate, dragSource: null };
     timePointer.begin(event.currentTarget, event.pointerId, release);
     hand.setTimePreview(release);
   }
@@ -114,14 +132,31 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     setHoveredTime(null);
     const targetInstant = instantAt(day, event.clientY, grid);
     if (targetInstant === null) return;
-    const next = timePointer.preview(event.pointerId, (state) => ({ ...state, targetInstant }));
-    if (next !== null) hand.setTimePreview(next);
+    const next = timePointer.preview(event.pointerId, (state) => {
+      const dragSource = state.dragSource ?? (state.dragCandidate !== null && targetInstant !== state.originInstant
+        ? hand.prepareSelectionDrag(state.dragCandidate.eventId, state.dragCandidate.occurrenceStart)
+        : null);
+      return { ...state, targetInstant, dragSource };
+    });
+    if (next?.dragSource !== null && next?.dragSource !== undefined) {
+      if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "instant", instant: next.originInstant } });
+      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "instant", instant: targetInstant } }));
+      hand.previewSelectionDrag(gesture);
+    } else if (next !== null) hand.setTimePreview(next);
   }
 
   function timePointerUp(event: PointerEvent<HTMLElement>): void {
     const release = timePointer.commit(event.pointerId);
     hand.setTimePreview(null);
     if (release === null) return;
+    if (release.dragSource !== null) {
+      suppressEventClick.current = true;
+      suppressDoubleClickBriefly();
+      const gesture = selectionDrag.commit();
+      if (gesture !== null) hand.commitSelectionDrag(gesture);
+      return;
+    }
+    if (release.dragCandidate !== null) return;
     if (release.originEventId === null && release.originInstant === release.targetInstant) {
       hand.dispatch({ type: "selection.clear" });
       hand.setOccurrence({ start: release.targetInstant, end: release.targetInstant });
@@ -133,7 +168,10 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   function allDayPointerDown(event: PointerEvent<HTMLElement>, originDay: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: "body" | "start" | "end" | null): void {
     if (event.button !== 0) return;
     event.currentTarget.focus();
-    const release = { originDay, originEventId, originEventStart, originEventEnd, originHandle, targetDay: originDay };
+    const dragCandidate = originHandle === "body" && originEventId !== null && originEventStart !== null
+      ? { eventId: originEventId, occurrenceStart: originEventStart }
+      : null;
+    const release = { originDay, originEventId, originEventStart, originEventEnd, originHandle, targetDay: originDay, dragCandidate, dragSource: null };
     allDayPointer.begin(event.currentTarget, event.pointerId, release);
     hand.setAllDayPreview(release);
   }
@@ -142,8 +180,17 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (allDayPointer.getSnapshot()?.pointerId !== event.pointerId) return;
     const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-allday-day");
     if (targetDay == null) return;
-    const next = allDayPointer.preview(event.pointerId, (state) => ({ ...state, targetDay }));
-    if (next !== null) hand.setAllDayPreview(next);
+    const next = allDayPointer.preview(event.pointerId, (state) => {
+      const dragSource = state.dragSource ?? (state.dragCandidate !== null && targetDay !== state.originDay
+        ? hand.prepareSelectionDrag(state.dragCandidate.eventId, state.dragCandidate.occurrenceStart)
+        : null);
+      return { ...state, targetDay, dragSource };
+    });
+    if (next?.dragSource !== null && next?.dragSource !== undefined) {
+      if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "day", day: next.originDay } });
+      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "day", day: targetDay } }));
+      hand.previewSelectionDrag(gesture);
+    } else if (next !== null) hand.setAllDayPreview(next);
   }
 
   function allDayPointerUp(event: PointerEvent<HTMLElement>): void {
@@ -152,6 +199,14 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (release === null) return;
     const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-allday-day");
     if (targetDay == null) return;
+    if (release.dragSource !== null) {
+      suppressEventClick.current = true;
+      suppressDoubleClickBriefly();
+      const gesture = selectionDrag.commit();
+      if (gesture !== null) hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: targetDay } });
+      return;
+    }
+    if (release.dragCandidate !== null) return;
     const raw = interpretCalendarAllDayPointer({ ...release, targetDay });
     if (release.originEventId === null && release.originDay === targetDay) {
       hand.dispatch({ type: "selection.clear" });
@@ -171,7 +226,10 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
       ? fallbackDay
       : calendarKeyFromWebRow(event.clientX, row.getBoundingClientRect(), rowDays) ?? fallbackDay;
     policy.onMonthPointerBegin?.();
-    const release = { originDay, originEventId, originEventStart, originEventEnd, targetDay: originDay, eventsOnTargetDay: [] };
+    const dragCandidate = originEventId !== null && originEventStart !== null
+      ? { eventId: originEventId, occurrenceStart: originEventStart }
+      : null;
+    const release = { originDay, originEventId, originEventStart, originEventEnd, targetDay: originDay, eventsOnTargetDay: [], dragCandidate, dragSource: null };
     monthPointer.begin(event.currentTarget, event.pointerId, release);
     hand.setMonthPreview(release);
   }
@@ -180,8 +238,17 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (monthPointer.getSnapshot()?.pointerId !== event.pointerId) return;
     const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-day");
     if (targetDay == null) return;
-    const next = monthPointer.preview(event.pointerId, (state) => ({ ...state, targetDay }));
-    if (next !== null) hand.setMonthPreview({ ...next, eventsOnTargetDay: [] });
+    const next = monthPointer.preview(event.pointerId, (state) => {
+      const dragSource = state.dragSource ?? (state.dragCandidate !== null && targetDay !== state.originDay
+        ? hand.prepareSelectionDrag(state.dragCandidate.eventId, state.dragCandidate.occurrenceStart)
+        : null);
+      return { ...state, targetDay, dragSource };
+    });
+    if (next?.dragSource !== null && next?.dragSource !== undefined) {
+      if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "day", day: next.originDay } });
+      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "day", day: targetDay } }));
+      hand.previewSelectionDrag(gesture);
+    } else if (next !== null) hand.setMonthPreview({ ...next, eventsOnTargetDay: [] });
   }
 
   function monthPointerUp(event: PointerEvent<HTMLElement>): void {
@@ -190,6 +257,14 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     if (release === null) return;
     const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-day");
     if (targetDay == null) return;
+    if (release.dragSource !== null) {
+      suppressEventClick.current = true;
+      suppressDoubleClickBriefly();
+      const gesture = selectionDrag.commit();
+      if (gesture !== null) hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: targetDay } });
+      return;
+    }
+    if (release.dragCandidate !== null) return;
     const raw = interpretCalendarMonthPointer({ ...release, targetDay, eventsOnTargetDay: calendarEventsOnDay(visibleEvents, targetDay).map(({ id }) => ({ id })) });
     if (release.originEventId === null && release.originDay === targetDay) {
       hand.dispatch({ type: "selection.clear" });
@@ -222,17 +297,28 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
 
   function cancelTimePointer(pointerId: number, reason: "cancel" | "lost-capture" = "cancel"): void {
     timePointer.cancel(pointerId, reason);
+    selectionDrag.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel");
+    hand.previewSelectionDrag(null);
     hand.setTimePreview(null);
   }
 
   function cancelAllDayPointer(pointerId: number, reason: "cancel" | "lost-capture" = "cancel"): void {
     allDayPointer.cancel(pointerId, reason);
+    selectionDrag.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel");
+    hand.previewSelectionDrag(null);
     hand.setAllDayPreview(null);
   }
 
   function cancelMonthPointer(pointerId: number, reason: "cancel" | "lost-capture" = "cancel"): void {
     monthPointer.cancel(pointerId, reason);
+    selectionDrag.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel");
+    hand.previewSelectionDrag(null);
     hand.setMonthPreview(null);
+  }
+
+  function suppressDoubleClickBriefly(): void {
+    suppressEventDoubleClick.current = true;
+    globalThis.setTimeout(() => { suppressEventDoubleClick.current = false; }, 500);
   }
 
   return {
@@ -242,6 +328,16 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     timePointerMove,
     timePointerUp,
     clearTimeHover: () => setHoveredTime(null),
+    consumeEventClick: () => {
+      if (!suppressEventClick.current) return false;
+      suppressEventClick.current = false;
+      return true;
+    },
+    consumeEventDoubleClick: () => {
+      if (!suppressEventDoubleClick.current) return false;
+      suppressEventDoubleClick.current = false;
+      return true;
+    },
     allDayPointerDown,
     allDayPointerMove,
     allDayPointerUp,
