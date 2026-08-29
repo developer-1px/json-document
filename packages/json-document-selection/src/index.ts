@@ -15,6 +15,7 @@ export {
   createMaterializedRangeSelectionFamily,
   emptyMaterializedRangeSelection,
   normalizeMaterializedRangeSelection,
+  resolveMaterializedSelectionDragSource,
 } from "./range/materialized.js";
 export {
   idlePointerInteraction,
@@ -57,6 +58,7 @@ export type {
   MaterializedRangeSelectionContext,
   MaterializedRangeSelectionMapping,
   MaterializedSelectionRange,
+  MaterializedSelectionDragSource,
 } from "./range/materialized.js";
 export type {
   InteractionResult,

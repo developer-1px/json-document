@@ -173,6 +173,62 @@ describe("useCalendarHand", () => {
     expect(result.current.hand.timePreview).toBeNull();
   });
 
+  test("moves the selected occurrence set through Web pointer and semantic gesture sessions", () => {
+    const second = {
+      ...initial.events[0]!,
+      id: "review",
+      title: "Review",
+      start: "2026-08-04T11:00",
+      end: "2026-08-04T12:00",
+      excludeDates: [],
+    };
+    const editor = createCalendarEditor({ ...initial, events: [...initial.events, second] }, { initialEventIds: [] });
+    const { result } = renderHook(() => {
+      const hand = useCalendarHand(editor);
+      const pointer = useCalendarPointerInteractions(hand, {
+        hourStart: 0, hourEnd: 24, stepMinutes: 15, pixelsPerHour: 60,
+      });
+      return { hand, pointer };
+    });
+    const points = [
+      { eventId: "standup", occurrenceStart: "2026-08-03T09:00" },
+      { eventId: "review", occurrenceStart: "2026-08-04T11:00" },
+    ];
+    act(() => result.current.hand.dispatch({ type: "selection.set", point: points[0]!, topology: { points } }));
+    act(() => result.current.hand.dispatch({ type: "selection.set", point: points[1]!, topology: { points }, mode: "toggle" }));
+
+    const grid = document.createElement("div");
+    grid.dataset.calendarGrid = "time";
+    grid.dataset.calendarDay = "2026-08-03";
+    grid.getBoundingClientRect = () => ({ left: 0, right: 100, top: 0, bottom: 1440, width: 100, height: 1440, x: 0, y: 0, toJSON: () => ({}) });
+    document.body.append(grid);
+    const target = {
+      closest: () => grid,
+      focus: () => undefined,
+      setPointerCapture: () => undefined,
+      hasPointerCapture: () => false,
+      releasePointerCapture: () => undefined,
+    };
+    act(() => result.current.pointer.timePointerDown({
+      button: 0, clientY: 540, currentTarget: target, pointerId: 7,
+    } as never, "2026-08-03", "standup", "2026-08-03T09:00", "2026-08-03T09:30", "body"));
+    act(() => result.current.pointer.timePointerMove({ pointerId: 7, clientX: 50, clientY: 600, target } as never));
+    expect(result.current.hand.selectionDragPreview).not.toBeNull();
+    expect(result.current.hand.paintedEvents.map((item) => item.start)).toEqual([
+      "2026-08-03T10:00", "2026-08-04T12:00",
+    ]);
+    act(() => result.current.pointer.timePointerUp({ pointerId: 7 } as never));
+    expect(result.current.hand.document.events.map((item) => item.start)).toEqual([
+      "2026-08-03T10:00", "2026-08-04T12:00",
+    ]);
+    expect(result.current.hand.selectedOccurrences).toHaveLength(2);
+    act(() => result.current.hand.undo());
+    expect(result.current.hand.document.events.map((item) => item.start)).toEqual([
+      "2026-08-03T09:00", "2026-08-04T11:00",
+    ]);
+    grid.remove();
+  });
+
   test("projects month span pointer coordinates through the Web row adapter", () => {
     const editor = createCalendarEditor(initial);
     const { result } = renderHook(() => {

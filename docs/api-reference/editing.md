@@ -212,6 +212,10 @@ interface CalendarEditor {
   readonly selectedEvents: ReadonlyArray<CalendarEvent>;
   readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
   readonly primaryOccurrence: CalendarOccurrenceSelection | null;
+  prepareSelectionDrag(
+    point: CalendarOccurrencePoint,
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): CalendarSelectionDragSource | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
   cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
@@ -274,6 +278,12 @@ type CalendarIntent =
     }
   | { readonly type: "selection.clear" }
   | { readonly type: "selection.remove" }
+  | {
+      readonly type: "selection.move";
+      readonly source: CalendarSelectionDragSource;
+      readonly target: CalendarSelectionMoveTarget;
+      readonly scope?: "this" | "this-and-following" | "all";
+    }
   | {
       readonly type: "event.create";
       readonly start: string;
@@ -445,6 +455,35 @@ interface CalendarSelection extends Record<string, JSONValue> {
   readonly ranges: ReadonlyArray<CalendarSelectionRange>;
   readonly primaryIndex: number | null;
 }
+```
+## `CalendarSelectionDragSource`
+
+```ts
+interface CalendarSelectionDragSource {
+  readonly anchor: CalendarOccurrencePoint;
+  readonly primary: CalendarOccurrencePoint;
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
+  readonly occurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+}
+```
+## `CalendarSelectionMovePlan`
+
+```ts
+type CalendarSelectionMovePlan =
+  | {
+      readonly ok: true;
+      readonly events: ReadonlyArray<CalendarEvent>;
+      readonly selectionAfter: CalendarSelection;
+      readonly movedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+    }
+  | { readonly ok: false; readonly code: string };
+```
+## `CalendarSelectionMoveTarget`
+
+```ts
+type CalendarSelectionMoveTarget =
+  | { readonly type: "instant"; readonly instant: string }
+  | { readonly type: "day"; readonly day: string };
 ```
 ## `CalendarSelectionRange`
 
@@ -1258,6 +1297,11 @@ interface OrderSelection extends Record<string, JSONValue> {
 
 ```ts
 parseCalendarView(value: unknown): CalendarView | null
+```
+## `planCalendarSelectionMove`
+
+```ts
+planCalendarSelectionMove(events: ReadonlyArray<CalendarEvent>, occurrences: ReadonlyArray<CalendarOccurrenceSelection>, anchor: CalendarOccurrencePoint, target: CalendarSelectionMoveTarget, options?: { readonly scope?: "this" | "this-and-following" | "all"; readonly createId?: () => string; readonly primary?: CalendarOccurrencePoint; }): CalendarSelectionMovePlan
 ```
 ## `previewCalendarAllDay`
 

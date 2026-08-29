@@ -23,6 +23,7 @@ interface CalendarHand {
   readonly timePreview: CalendarTimeGridPointerRelease | null;
   readonly allDayPreview: CalendarAllDayPointerRelease | null;
   readonly monthPreview: CalendarMonthPointerRelease | null;
+  readonly selectionDragPreview: CalendarSelectionDragPreview | null;
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
@@ -33,6 +34,9 @@ interface CalendarHand {
   setTimePreview(preview: CalendarTimeGridPointerRelease | null): void;
   setAllDayPreview(preview: CalendarAllDayPointerRelease | null): void;
   setMonthPreview(preview: CalendarMonthPointerRelease | null): void;
+  prepareSelectionDrag(eventId: string, occurrenceStart: string): CalendarSelectionDragSource | null;
+  previewSelectionDrag(preview: CalendarSelectionDragPreview | null): void;
+  commitSelectionDrag(preview: CalendarSelectionDragPreview): boolean;
   dispatch(intent: CalendarIntent | null): boolean;
   commitIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): boolean;
   rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
@@ -142,6 +146,14 @@ interface CalendarRenameInputBinding {
 interface CalendarRenameInputOptions {
   /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
   readonly commitOnBlur?: boolean;
+}
+```
+## `CalendarSelectionDragPreview`
+
+```ts
+interface CalendarSelectionDragPreview {
+  readonly source: CalendarSelectionDragSource;
+  readonly target: CalendarSelectionMoveTarget;
 }
 ```
 ## `CalendarViewportPositionOptions`
