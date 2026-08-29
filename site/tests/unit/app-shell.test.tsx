@@ -133,6 +133,7 @@ describe("official site shell", () => {
       "Rename",
       "Nudge",
       "Hover",
+      "Contextual",
       "Double-click",
       "Triple-click",
       "Context menu",
