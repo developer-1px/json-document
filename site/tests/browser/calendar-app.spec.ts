@@ -43,14 +43,17 @@ test("Calendar positions the work hour until the user claims the viewport", asyn
   await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(640);
 });
 
-test("Calendar reveals event time on approach and opens editing on one click", async ({ page }) => {
+test("Calendar keeps event time visible, hints an empty creation time, and edits on one click", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
   const time = event.getByText("11:00", { exact: true });
 
-  await expect(time).toHaveCSS("opacity", "0");
-  await event.hover();
   await expect(time).toHaveCSS("opacity", "1");
+  const monday = page.locator('[data-calendar-grid="time"][data-calendar-day="2026-05-25"]');
+  const box = await monday.boundingBox();
+  if (box === null) throw new Error("Monday time grid is not visible.");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height * (14.25 / 24));
+  await expect(page.locator("[data-calendar-create-time]")).toHaveText("14:15");
   await event.click();
   await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("고객사 싱크");
 });

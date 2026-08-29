@@ -157,10 +157,12 @@ export function CalendarDemoRoute(props: {
   const titleInput = useCalendarRenameInput(hand, { commitOnBlur: false });
   const [overflowDay, setOverflowDay] = useState<string | null>(null);
   const {
+    hoveredTime,
     instantAt,
     timePointerDown,
     timePointerMove,
     timePointerUp,
+    clearTimeHover,
     allDayPointerDown,
     allDayPointerMove,
     allDayPointerUp,
@@ -278,6 +280,7 @@ export function CalendarDemoRoute(props: {
         timePointerMove(event);
         allDayPointerMove(event);
       }}
+      onPointerLeave={clearTimeHover}
     >
       <div
         className={classes("grid", styles.weekSticky())}
@@ -425,6 +428,15 @@ export function CalendarDemoRoute(props: {
                   style={{ top: nowTop }}
                 />
               ) : null}
+              {hoveredTime?.day === day && timePreview === null ? (
+                <div
+                  data-calendar-create-time=""
+                  className={styles.creationTimeHint()}
+                  style={{ top: (hoveredTime.minutes - hourStart * 60) * (pxPerHour / 60) }}
+                >
+                  {calendarTimeLabel(hoveredTime.instant)}
+                </div>
+              ) : null}
               {calendarTimedLayout(paintedEvents, day).map((item) => {
                 const band = calendarVisibleHourBand(item.startMinutes, item.endMinutes, hourStart, hourEnd);
                 if (band === null) return null;
@@ -443,6 +455,7 @@ export function CalendarDemoRoute(props: {
                   <SelectableItem
                     selected={selected.has(item.event.id) && (occurrenceStart === null || occurrenceStart === item.event.start)}
                     aria-label={item.event.title}
+                    data-calendar-event=""
                     data-calendar-color={calendarColor(document, item.event.calendarId)}
                     data-preview={item.event.id === "preview" || timePreview?.originEventId === item.event.id ? "true" : undefined}
                     className={styles.timedEvent()}

@@ -44,7 +44,8 @@ export const calendarDemoRecipe = tv({
     inspectorTitle: "px-0 text-base font-semibold",
     calendarToggle: "group w-full justify-start gap-2 border-0 bg-transparent px-1 shadow-none hover:border-0 hover:bg-transparent aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",
     calendarSwatch: "size-2.5 shrink-0 rounded-full bg-foreground-muted opacity-40 data-[calendar-color=accent]:bg-background-accent group-aria-pressed:opacity-100",
-    eventTime: "truncate text-overline font-normal text-foreground-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100",
+    eventTime: "truncate text-overline font-normal text-foreground-muted",
+    creationTimeHint: "pointer-events-none absolute inset-x-0 z-20 flex items-center gap-1 border-t border-line-accent text-overline text-foreground-accent",
     hourLabel: "absolute right-1 whitespace-nowrap text-right text-overline tabular-nums leading-none text-foreground-muted",
   },
 });

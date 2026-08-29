@@ -33,10 +33,12 @@ type MonthRelease = {
 };
 
 export interface CalendarPointerInteractions {
+  readonly hoveredTime: { readonly day: string; readonly instant: string; readonly minutes: number } | null;
   instantAt(day: string, clientY: number, grid: Element): string | null;
   timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
+  clearTimeHover(): void;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
@@ -55,6 +57,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   const [timePointer] = useState(() => createWebPointerSession<TimeRelease>());
   const [allDayPointer] = useState(() => createWebPointerSession<AllDayRelease>());
   const [monthPointer] = useState(() => createWebPointerSession<MonthRelease>());
+  const [hoveredTime, setHoveredTime] = useState<CalendarPointerInteractions["hoveredTime"]>(null);
   const document = hand.document;
   const visibleEvents = calendarVisibleEvents(document);
 
@@ -94,10 +97,20 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   }
 
   function timePointerMove(event: PointerEvent<HTMLElement>): void {
-    if (timePointer.getSnapshot()?.pointerId !== event.pointerId) return;
     const grid = findWebPointTarget<Element>('[data-calendar-grid="time"]', { x: event.clientX, y: event.clientY });
     const day = grid?.getAttribute("data-calendar-day");
     if (grid == null || day == null) return;
+    if (timePointer.getSnapshot()?.pointerId !== event.pointerId) {
+      const target = event.target as { closest?: (selector: string) => Element | null };
+      if (target.closest?.("[data-calendar-event]") != null) return setHoveredTime(null);
+      const minutes = calendarMinutesFromWebGrid(event.clientY, grid.getBoundingClientRect(), {
+        hourStart: policy.hourStart, hourEnd: policy.hourEnd, stepMinutes: policy.stepMinutes,
+      });
+      const instant = calendarInstantAt(day, minutes);
+      setHoveredTime(instant === null ? null : { day, instant, minutes });
+      return;
+    }
+    setHoveredTime(null);
     const targetInstant = instantAt(day, event.clientY, grid);
     if (targetInstant === null) return;
     const next = timePointer.preview(event.pointerId, (state) => ({ ...state, targetInstant }));
@@ -204,5 +217,23 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     hand.setMonthPreview(null);
   }
 
-  return { instantAt, timePointerDown, timePointerMove, timePointerUp, allDayPointerDown, allDayPointerMove, allDayPointerUp, monthPointerDown, monthPointerMove, monthPointerUp, cancelTimePointer, cancelAllDayPointer, cancelMonthPointer, resizeTimed, resizeAllDay };
+  return {
+    hoveredTime,
+    instantAt,
+    timePointerDown,
+    timePointerMove,
+    timePointerUp,
+    clearTimeHover: () => setHoveredTime(null),
+    allDayPointerDown,
+    allDayPointerMove,
+    allDayPointerUp,
+    monthPointerDown,
+    monthPointerMove,
+    monthPointerUp,
+    cancelTimePointer,
+    cancelAllDayPointer,
+    cancelMonthPointer,
+    resizeTimed,
+    resizeAllDay,
+  };
 }

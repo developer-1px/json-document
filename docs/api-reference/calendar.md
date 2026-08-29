@@ -80,10 +80,12 @@ interface CalendarKeyboardTarget {
 
 ```ts
 interface CalendarPointerInteractions {
+  readonly hoveredTime: { readonly day: string; readonly instant: string; readonly minutes: number } | null;
   instantAt(day: string, clientY: number, grid: Element): string | null;
   timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
+  clearTimeHover(): void;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
