@@ -187,8 +187,14 @@ export type {
   CalendarRecurrence,
   CalendarSelection,
   CalendarSelectionRange,
+  CalendarSelectionDragSource,
   CalendarView,
 } from "./calendar.js";
+export { planCalendarSelectionMove } from "./calendar-selection-move.js";
+export type {
+  CalendarSelectionMovePlan,
+  CalendarSelectionMoveTarget,
+} from "./calendar-selection-move.js";
 export type { CalendarOccurrence } from "./calendar-occurrence.js";
 export type {
   CalendarAllDayHandle,

@@ -178,6 +178,16 @@ interface MaterializedRangeSelectionMapping<Point> {
   mapPoint(point: Point): Point | null;
 }
 ```
+## `MaterializedSelectionDragSource`
+
+```ts
+interface MaterializedSelectionDragSource<Point> {
+  readonly selection: MaterializedRangeSelection<Point>;
+  readonly anchor: Point;
+  readonly points: readonly Point[];
+  readonly selectionChanged: boolean;
+}
+```
 ## `MaterializedSelectionRange`
 
 ```ts
@@ -352,6 +362,11 @@ reducePressInteraction<Point>(state: PointerInteractionState<Point>, sample: Poi
 interface RegionBuilder<Point, Region> {
   fromPoints(start: Point, current: Point): Region;
 }
+```
+## `resolveMaterializedSelectionDragSource`
+
+```ts
+resolveMaterializedSelectionDragSource<Point>(state: MaterializedRangeSelection<Point>, point: Point, context: MaterializedRangeSelectionContext<Point>): MaterializedSelectionDragSource<Point> | null
 ```
 ## `ScopedSelection`
 

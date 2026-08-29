@@ -7,6 +7,7 @@ import calendarTimeGridPointerSource from "../../../../packages/json-document-ed
 import calendarOccurrenceSource from "../../../../packages/json-document-editing/src/calendar-occurrence.ts?raw";
 import calendarPreviewSource from "../../../../packages/json-document-editing/src/calendar-preview.ts?raw";
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
+import calendarSelectionMoveSource from "../../../../packages/json-document-editing/src/calendar-selection-move.ts?raw";
 import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
 import calendarEventLabelSource from "../../../../packages/json-document-ui-primitives-react/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
@@ -153,6 +154,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-occurrence.ts", calendarOccurrenceSource],
   ["packages/json-document-editing/src/calendar-preview.ts", calendarPreviewSource],
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
+  ["packages/json-document-editing/src/calendar-selection-move.ts", calendarSelectionMoveSource],
   ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
   ["packages/json-document-ui-primitives-react/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
@@ -541,6 +543,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-selection",
     symbol: "createMaterializedRangeSelectionFamily",
     sourcePath: "packages/json-document-selection/src/range/materialized.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "resolveMaterializedSelectionDragSource",
+    sourcePath: "packages/json-document-selection/src/range/materialized.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "planCalendarSelectionMove",
+    sourcePath: "packages/json-document-editing/src/calendar-selection-move.ts",
   },
   {
     packageName: "@interactive-os/json-document-contenteditable",

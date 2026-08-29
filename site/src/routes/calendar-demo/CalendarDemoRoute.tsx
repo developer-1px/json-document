@@ -177,6 +177,8 @@ export function CalendarDemoRoute(props: {
     timePointerMove,
     timePointerUp,
     clearTimeHover,
+    consumeEventClick,
+    consumeEventDoubleClick,
     allDayPointerDown,
     allDayPointerMove,
     allDayPointerUp,
@@ -367,10 +369,12 @@ export function CalendarDemoRoute(props: {
               onPointerUp={allDayPointerUp}
               onClick={(event) => {
                 event.stopPropagation();
+                if (consumeEventClick()) return;
                 selectEvent(item.event, event);
               }}
               onDoubleClick={(event) => {
                 event.stopPropagation();
+                if (consumeEventDoubleClick()) return;
                 hand.beginTitleRename(item.event.id);
               }}
             >
@@ -512,10 +516,12 @@ export function CalendarDemoRoute(props: {
                     onPointerUp={timePointerUp}
                     onClick={(event) => {
                       event.stopPropagation();
+                      if (consumeEventClick()) return;
                       selectEvent(item.event, event);
                     }}
                     onDoubleClick={(event) => {
                       event.stopPropagation();
+                      if (consumeEventDoubleClick()) return;
                       hand.beginTitleRename(item.event.id);
                     }}
                   >
@@ -602,7 +608,7 @@ export function CalendarDemoRoute(props: {
                 editing={hand.renaming}
                 capabilities={[
                   { id: "create", phases: ["approach", "selected", "editing"] },
-                  { id: "history", phases: ["approach", "selected"] },
+                  { id: "history", phases: ["approach", "selected", "editing"] },
                   { id: "delete", phases: ["selected", "editing"] },
                 ] as const}
               >
@@ -799,10 +805,12 @@ export function CalendarDemoRoute(props: {
                             onPointerUp={monthPointerUp}
                             onClick={(event) => {
                               event.stopPropagation();
+                              if (consumeEventClick()) return;
                               selectEvent(item.event, event);
                             }}
                             onDoubleClick={(event) => {
                               event.stopPropagation();
+                              if (consumeEventDoubleClick()) return;
                               hand.beginTitleRename(item.event.id);
                             }}
                           >
