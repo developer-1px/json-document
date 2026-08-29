@@ -5,14 +5,25 @@ import {
   BlobMass,
   BorderBeam,
   CloudMass,
+  CometArc,
+  DualRings,
+  EqualizerBars,
+  FadeSpokes,
   GradientSweep,
+  HelixDots,
+  HelixRings,
   HueOutline,
+  InfinityStroke,
   LoadingBar,
   MassOrb,
   MorseCode,
+  MorphSquare,
+  OrbitDots,
+  ParticleBurst,
   ProgressRing,
   PulsingDot,
   PulsingOrb,
+  RadarSweep,
   RingMass,
   Shimmer,
   ShimmerText,
@@ -43,8 +54,19 @@ describe("wait animation visuals", () => {
         <PulsingDot data-testid="pulse" />
         <PulsingOrb data-testid="orb" />
         <MorseCode data-testid="morse" />
+        <OrbitDots data-testid="orbit" />
+        <EqualizerBars data-testid="eq" />
         <LoadingBar data-testid="bar" />
         <ProgressRing data-testid="ring" />
+        <DualRings data-testid="dual" />
+        <FadeSpokes data-testid="spokes" />
+        <RadarSweep data-testid="radar" />
+        <InfinityStroke data-testid="infinity" />
+        <MorphSquare data-testid="morph" />
+        <CometArc data-testid="comet" />
+        <HelixDots data-testid="helix" />
+        <ParticleBurst data-testid="burst" />
+        <HelixRings data-testid="helix-rings" />
         <GradientSweep data-testid="sweep">Draft</GradientSweep>
         <BorderBeam data-testid="beam">Beam</BorderBeam>
         <HueOutline data-testid="hue">Hue</HueOutline>
@@ -71,8 +93,27 @@ describe("wait animation visuals", () => {
     expect(screen.getByTestId("pulse").getAttribute("data-ui-animation")).toBe("pulsing-dot");
     expect(screen.getByTestId("orb").querySelectorAll("[data-ui-animation]")).toHaveLength(3);
     expect(screen.getByTestId("morse").querySelectorAll('[data-ui-animation="morse-beat"]')).toHaveLength(4);
+    expect(screen.getByTestId("orbit").querySelectorAll('[data-ui-animation="orbit-dot"]')).toHaveLength(6);
+    expect(screen.getByTestId("eq").querySelectorAll('[data-ui-animation="eq-bar"]')).toHaveLength(5);
     expect(screen.getByTestId("bar").getAttribute("data-ui-animation")).toBe("loading-bar");
     expect(screen.getByTestId("ring").getAttribute("data-ui-animation")).toBe("progress-ring");
+    expect(screen.getByTestId("dual").getAttribute("data-ui-animation")).toBe("dual-rings");
+    expect(screen.getByTestId("dual").querySelectorAll('[data-ui-animation="dual-ring"]')).toHaveLength(2);
+    expect(screen.getByTestId("spokes").getAttribute("data-ui-animation")).toBe("fade-spokes");
+    expect(screen.getByTestId("spokes").querySelectorAll('[data-ui-animation="spoke"]')).toHaveLength(12);
+    expect(screen.getByTestId("radar").getAttribute("data-ui-animation")).toBe("radar-sweep");
+    expect(screen.getByTestId("radar").querySelector('[data-ui-animation="radar-beam"]')).toBeTruthy();
+    expect(screen.getByTestId("infinity").getAttribute("data-ui-animation")).toBe("infinity-stroke");
+    expect(screen.getByTestId("infinity").querySelector('[data-ui-infinity="stroke"]')).toBeTruthy();
+    expect(screen.getByTestId("morph").getAttribute("data-ui-animation")).toBe("morph-square");
+    expect(screen.getByTestId("comet").getAttribute("data-ui-animation")).toBe("comet-arc");
+    expect(screen.getByTestId("comet").querySelector('[data-ui-animation="comet-tip"]')).toBeTruthy();
+    expect(screen.getByTestId("helix").getAttribute("data-ui-animation")).toBe("helix-dots");
+    expect(screen.getByTestId("helix").querySelectorAll('[data-ui-animation="helix-pair"]')).toHaveLength(5);
+    expect(screen.getByTestId("burst").getAttribute("data-ui-animation")).toBe("particle-burst");
+    expect(screen.getByTestId("burst").querySelectorAll('[data-ui-animation="burst-particle"]')).toHaveLength(8);
+    expect(screen.getByTestId("helix-rings").getAttribute("data-ui-animation")).toBe("helix-rings");
+    expect(screen.getByTestId("helix-rings").querySelectorAll("[data-ui-helix-ring]")).toHaveLength(2);
     expect(screen.getByTestId("sweep").getAttribute("data-ui-animation")).toBe("gradient-sweep");
     expect(screen.getByTestId("beam").getAttribute("data-ui-animation")).toBe("border-beam");
     expect(screen.getByTestId("hue").getAttribute("data-ui-animation")).toBe("hue-outline");

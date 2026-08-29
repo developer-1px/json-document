@@ -128,6 +128,38 @@ export function MorseCode(props: SpanProps): ReactNode {
   );
 }
 
+export function OrbitDots(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="orbit-dots">
+      {Array.from({ length: 6 }, (_, index) => (
+        <span
+          key={index}
+          data-ui-animation="orbit-dot"
+          style={{ "--angle": `${index * 60}deg` } as CSSProperties}
+        />
+      ))}
+      {children}
+    </span>
+  );
+}
+
+export function EqualizerBars(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="equalizer">
+      {Array.from({ length: 5 }, (_, index) => (
+        <span
+          key={index}
+          data-ui-animation="eq-bar"
+          style={{ "--delay": `${index * 0.16}s` } as CSSProperties}
+        />
+      ))}
+      {children}
+    </span>
+  );
+}
+
 export function LoadingBar(props: DivProps): ReactNode {
   return (
     <div {...props} data-ui-animation="loading-bar" aria-hidden={props["aria-hidden"] ?? true}>
@@ -140,6 +172,130 @@ export function ProgressRing(props: SpanProps): ReactNode {
   const { announce, label, children, ...spanProps } = props;
   return (
     <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="progress-ring">
+      {children}
+    </span>
+  );
+}
+
+export function DualRings(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="dual-rings">
+      <span data-ui-animation="dual-ring" data-ui-dual="outer" />
+      <span data-ui-animation="dual-ring" data-ui-dual="inner" />
+      {children}
+    </span>
+  );
+}
+
+export function FadeSpokes(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="fade-spokes">
+      {Array.from({ length: 12 }, (_, index) => (
+        <span
+          key={index}
+          data-ui-animation="spoke"
+          style={{ "--angle": `${index * 30}deg`, "--i": index } as CSSProperties}
+        />
+      ))}
+      {children}
+    </span>
+  );
+}
+
+export function RadarSweep(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="radar-sweep">
+      <span data-ui-animation="radar-face" />
+      <span data-ui-animation="radar-beam" />
+      {children}
+    </span>
+  );
+}
+
+const INFINITY_PATH =
+  "M50,20 C50,4 72,4 72,20 C72,36 94,36 94,20 C94,4 72,4 72,20 C72,36 50,36 50,20 C50,4 28,4 28,20 C28,36 6,36 6,20 C6,4 28,4 28,20 C28,36 50,36 50,20";
+
+export function InfinityStroke(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="infinity-stroke">
+      <svg viewBox="0 0 100 40" aria-hidden="true">
+        <path data-ui-infinity="track" d={INFINITY_PATH} pathLength={100} />
+        <path data-ui-infinity="stroke" d={INFINITY_PATH} pathLength={100} />
+      </svg>
+      {children}
+    </span>
+  );
+}
+
+export function MorphSquare(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="morph-square">
+      {children}
+    </span>
+  );
+}
+
+export function CometArc(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="comet-arc">
+      <span data-ui-animation="comet-sweep">
+        <span data-ui-animation="comet-trail" />
+        <span data-ui-animation="comet-tip" />
+      </span>
+      {children}
+    </span>
+  );
+}
+
+export function HelixDots(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="helix-dots">
+      {Array.from({ length: 5 }, (_, index) => (
+        <span
+          key={index}
+          data-ui-animation="helix-pair"
+          style={{ "--delay": `${index * 0.32}s` } as CSSProperties}
+        >
+          <span data-ui-helix="a" />
+          <span data-ui-helix="bridge" />
+          <span data-ui-helix="b" />
+        </span>
+      ))}
+      {children}
+    </span>
+  );
+}
+
+export function ParticleBurst(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="particle-burst">
+      <span data-ui-animation="burst-core" />
+      {Array.from({ length: 8 }, (_, index) => (
+        <span
+          key={index}
+          data-ui-animation="burst-particle"
+          style={{ "--angle": `${index * 45}deg`, "--delay": `${index * 0.08}s` } as CSSProperties}
+        />
+      ))}
+      {children}
+    </span>
+  );
+}
+
+export function HelixRings(props: SpanProps): ReactNode {
+  const { announce, label, children, ...spanProps } = props;
+  return (
+    <span {...spanProps} {...statusProps(announce, label)} data-ui-animation="helix-rings">
+      <span data-ui-helix-ring="x" />
+      <span data-ui-helix-ring="y" />
       {children}
     </span>
   );

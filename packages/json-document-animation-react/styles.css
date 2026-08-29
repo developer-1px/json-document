@@ -228,6 +228,40 @@
 [data-ui-animation="morse-beat"]:nth-child(3) { animation-delay: 0.44s; }
 [data-ui-animation="morse-beat"]:nth-child(4) { animation-delay: 0.66s; }
 
+[data-ui-animation="orbit-dots"] {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+[data-ui-animation="orbit-dot"] {
+  position: absolute;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: currentColor;
+  animation: jd-orbit 8.5s linear infinite;
+}
+
+[data-ui-animation="equalizer"] {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.2em;
+  height: 1.15em;
+}
+
+[data-ui-animation="eq-bar"] {
+  width: 0.22em;
+  height: 100%;
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center bottom;
+  animation: jd-eq 1.85s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
 [data-ui-animation="loading-bar"] {
   position: relative;
   display: block;
@@ -261,6 +295,275 @@
   mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
   animation: jd-animation-spin var(--jd-animation-spin) linear infinite;
+}
+
+[data-ui-animation="dual-rings"] {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+[data-ui-animation="dual-ring"] {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-bottom-color: var(--jd-animation-dim);
+  animation: jd-animation-spin var(--jd-animation-spin) linear infinite;
+}
+
+[data-ui-dual="inner"] {
+  inset: 24%;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: var(--jd-animation-accent-a);
+  border-right-color: var(--jd-animation-accent-b);
+  animation-direction: reverse;
+  animation-duration: calc(var(--jd-animation-spin) * 1.4);
+}
+
+[data-ui-animation="fade-spokes"] {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+[data-ui-animation="spoke"] {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 0.14rem;
+  height: 0.38rem;
+  margin-left: -0.07rem;
+  border-radius: 999px;
+  background: currentColor;
+  transform: rotate(var(--angle, 0deg));
+  transform-origin: 50% 0.875rem;
+  opacity: 0.12;
+  animation: jd-spoke-fade var(--jd-animation-spin) linear infinite;
+  animation-delay: calc(var(--i, 0) * var(--jd-animation-spin) / -12);
+}
+
+[data-ui-animation="radar-sweep"] {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+[data-ui-animation="radar-face"] {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--jd-animation-dim);
+  background:
+    radial-gradient(circle at center, currentColor 0.11rem, transparent 0.12rem),
+    repeating-radial-gradient(
+      circle at center,
+      transparent 0 0.24rem,
+      var(--jd-animation-muted) 0.24rem 0.27rem
+    );
+}
+
+[data-ui-animation="radar-beam"] {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    currentColor 0deg,
+    color-mix(in srgb, currentColor 32%, transparent) 38deg,
+    transparent 92deg 360deg
+  );
+  opacity: 0.48;
+  animation: jd-animation-spin calc(var(--jd-animation-spin) * 1.35) linear infinite;
+}
+
+[data-ui-animation="infinity-stroke"] {
+  display: inline-flex;
+  width: 2.6rem;
+  height: 1.15rem;
+}
+
+[data-ui-animation="infinity-stroke"] svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+[data-ui-infinity] {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-ui-infinity="track"] {
+  stroke: var(--jd-animation-muted);
+}
+
+[data-ui-infinity="stroke"] {
+  stroke: currentColor;
+  stroke-dasharray: 28 72;
+  animation: jd-infinity-stroke var(--jd-animation-identity) linear infinite;
+}
+
+[data-ui-animation="morph-square"] {
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid currentColor;
+  border-radius: 0.2rem;
+  animation: jd-morph-square var(--jd-animation-identity) ease-in-out infinite;
+}
+
+[data-ui-animation="comet-arc"] {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+[data-ui-animation="comet-arc"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--jd-animation-muted);
+}
+
+[data-ui-animation="comet-sweep"] {
+  position: absolute;
+  inset: 0;
+  animation: jd-animation-spin var(--jd-animation-spin) linear infinite;
+}
+
+[data-ui-animation="comet-trail"] {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 200deg,
+    color-mix(in srgb, currentColor 16%, transparent) 250deg,
+    color-mix(in srgb, currentColor 48%, transparent) 320deg,
+    currentColor 360deg
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
+}
+
+[data-ui-animation="comet-tip"] {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translate(-50%, -30%);
+  box-shadow: 0 0 0.32rem color-mix(in srgb, currentColor 42%, transparent);
+}
+
+[data-ui-animation="helix-dots"] {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+[data-ui-animation="helix-pair"] {
+  display: flex;
+  align-items: center;
+  height: 0.4rem;
+}
+
+[data-ui-helix="a"],
+[data-ui-helix="b"] {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+  animation: jd-helix-a var(--jd-animation-identity) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+[data-ui-helix="a"] {
+  background: var(--jd-animation-accent-a);
+}
+
+[data-ui-helix="b"] {
+  background: var(--jd-animation-accent-b);
+  animation-name: jd-helix-b;
+}
+
+[data-ui-helix="bridge"] {
+  width: 0.7rem;
+  height: 1px;
+  background: linear-gradient(to right, var(--jd-animation-accent-a), var(--jd-animation-accent-b));
+  transform-origin: center;
+  animation: jd-helix-bridge var(--jd-animation-identity) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+[data-ui-animation="particle-burst"] {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+[data-ui-animation="burst-core"] {
+  position: absolute;
+  inset: 34%;
+  border-radius: 50%;
+  background: currentColor;
+  animation: jd-mass-breathe var(--jd-animation-pulse) ease-in-out infinite;
+}
+
+[data-ui-animation="burst-particle"] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.22rem;
+  height: 0.22rem;
+  margin: -0.11rem 0 0 -0.11rem;
+  border-radius: 50%;
+  background: currentColor;
+  animation: jd-particle-burst var(--jd-animation-place) ease-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+[data-ui-animation="helix-rings"] {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+  perspective: 3.2rem;
+}
+
+[data-ui-helix-ring] {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transform-style: preserve-3d;
+}
+
+[data-ui-helix-ring="x"] {
+  border-top-color: currentColor;
+  border-bottom-color: var(--jd-animation-dim);
+  animation: jd-helix-ring-x calc(var(--jd-animation-spin) * 1.2) linear infinite;
+}
+
+[data-ui-helix-ring="y"] {
+  inset: 18%;
+  border-left-color: var(--jd-animation-accent-a);
+  border-right-color: var(--jd-animation-accent-b);
+  animation: jd-helix-ring-y calc(var(--jd-animation-spin) * 1.55) linear infinite reverse;
 }
 
 [data-ui-animation="gradient-sweep"],
@@ -407,6 +710,20 @@
   32% { opacity: 0.82; }
 }
 
+@keyframes jd-orbit {
+  from {
+    transform: rotate(var(--angle, 0deg)) translateY(-1.7rem);
+  }
+  to {
+    transform: rotate(calc(var(--angle, 0deg) + 360deg)) translateY(-1.7rem);
+  }
+}
+
+@keyframes jd-eq {
+  0% { transform: scaleY(0.28); opacity: 0.38; }
+  100% { transform: scaleY(1); opacity: 0.92; }
+}
+
 @keyframes jd-animation-bar {
   0% { transform: translateX(-70%); }
   100% { transform: translateX(220%); }
@@ -414,6 +731,71 @@
 
 @keyframes jd-animation-spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes jd-spoke-fade {
+  0% { opacity: 0.95; }
+  16% { opacity: 0.95; }
+  100% { opacity: 0.12; }
+}
+
+@keyframes jd-helix-ring-x {
+  to { transform: rotateX(360deg); }
+}
+
+@keyframes jd-helix-ring-y {
+  to { transform: rotateY(360deg); }
+}
+
+@keyframes jd-particle-burst {
+  0% {
+    transform: rotate(var(--angle, 0deg)) translateY(0) scale(0.7);
+    opacity: 0.7;
+  }
+  38% {
+    transform: rotate(var(--angle, 0deg)) translateY(-0.52rem) scale(1);
+    opacity: 0.82;
+  }
+  100% {
+    transform: rotate(var(--angle, 0deg)) translateY(-0.78rem) scale(0.15);
+    opacity: 0;
+  }
+}
+
+@keyframes jd-infinity-stroke {
+  to { stroke-dashoffset: -100; }
+}
+
+@keyframes jd-morph-square {
+  0%, 100% {
+    border-radius: 0.2rem;
+    transform: rotate(0deg);
+  }
+  25% {
+    border-radius: 50% 0.2rem;
+  }
+  50% {
+    border-radius: 50%;
+    transform: rotate(90deg);
+  }
+  75% {
+    border-radius: 0.2rem 50%;
+  }
+}
+
+@keyframes jd-helix-a {
+  0%, 100% { transform: translateX(0.26rem); opacity: 0.38; }
+  50% { transform: translateX(-0.26rem); opacity: 0.95; }
+}
+
+@keyframes jd-helix-b {
+  0%, 100% { transform: translateX(-0.26rem); opacity: 0.95; }
+  50% { transform: translateX(0.26rem); opacity: 0.38; }
+}
+
+@keyframes jd-helix-bridge {
+  0%, 100% { transform: scaleX(1); opacity: 0.32; }
+  50% { transform: scaleX(0.08); opacity: 0; }
 }
 
 @keyframes jd-animation-gradient {
@@ -656,8 +1038,20 @@
   [data-ui-animation="orb-core"],
   [data-ui-animation="orb-ring"],
   [data-ui-animation="morse-beat"],
+  [data-ui-animation="orbit-dot"],
+  [data-ui-animation="eq-bar"],
   [data-ui-animation="loading-fill"],
   [data-ui-animation="progress-ring"],
+  [data-ui-animation="dual-ring"],
+  [data-ui-animation="spoke"],
+  [data-ui-animation="radar-beam"],
+  [data-ui-infinity="stroke"],
+  [data-ui-animation="morph-square"],
+  [data-ui-animation="comet-sweep"],
+  [data-ui-helix],
+  [data-ui-animation="burst-core"],
+  [data-ui-animation="burst-particle"],
+  [data-ui-helix-ring],
   [data-ui-animation="gradient-sweep"]::before,
   [data-ui-animation="hue-outline"]::before,
   [data-ui-animation="beam-spark"]::after,
@@ -678,8 +1072,21 @@
   [data-ui-animation="wave-cell"],
   [data-ui-animation="pulsing-dot"],
   [data-ui-animation="orb-core"],
-  [data-ui-animation="morse-beat"] {
+  [data-ui-animation="morse-beat"],
+  [data-ui-animation="orbit-dot"],
+  [data-ui-animation="eq-bar"],
+  [data-ui-helix="a"],
+  [data-ui-helix="b"] {
     opacity: 0.7;
+  }
+
+  [data-ui-animation="spoke"] {
+    opacity: calc(0.14 + (11 - var(--i, 0)) / 11 * 0.72);
+  }
+
+  [data-ui-animation="radar-beam"] {
+    transform: rotate(-32deg);
+    opacity: 0.38;
   }
 
   [data-ui-animation="orb-ring"] {
@@ -689,5 +1096,36 @@
   [data-ui-animation="loading-fill"] {
     width: 42%;
     transform: none;
+  }
+
+  [data-ui-infinity="stroke"] {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    opacity: 0.7;
+  }
+
+  [data-ui-animation="morph-square"] {
+    border-radius: 0.4rem;
+    transform: none;
+    opacity: 0.7;
+  }
+
+  [data-ui-animation="burst-core"] {
+    opacity: 0.7;
+  }
+
+  [data-ui-animation="burst-particle"] {
+    transform: rotate(var(--angle, 0deg)) translateY(-0.42rem) scale(0.7);
+    opacity: 0.5;
+  }
+
+  [data-ui-helix-ring="x"] {
+    transform: rotateX(58deg);
+    opacity: 0.7;
+  }
+
+  [data-ui-helix-ring="y"] {
+    transform: rotateY(58deg);
+    opacity: 0.55;
   }
 }
