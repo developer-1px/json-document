@@ -12,7 +12,7 @@ import {
   moveLinePoint,
   projectWebWidgetState,
 } from "@interactive-os/json-document-web";
-import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, SelectableItem, Toolbar } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   historyAffordance,
@@ -84,7 +84,7 @@ export function ToolbarWidgetRoute() {
       illustration="clipboard"
       widgetLabel="Toolbar"
       widget={(
-        <div className={classes("flex flex-wrap gap-1", ui.product.toolbar)} role="toolbar" aria-label="History">
+        <Toolbar label="History">
           <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}><Undo2 aria-hidden="true" size={16} /></IconButton>
           <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}><Redo2 aria-hidden="true" size={16} /></IconButton>
           <ActionButton onClick={() => {
@@ -93,7 +93,7 @@ export function ToolbarWidgetRoute() {
           }}>
             Select Today
           </ActionButton>
-        </div>
+        </Toolbar>
       )}
       surfaceLabel="Listbox"
       surface={(

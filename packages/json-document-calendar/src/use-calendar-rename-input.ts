@@ -10,8 +10,16 @@ export interface CalendarRenameInputBinding {
   onKeyDown(event: KeyboardEvent<HTMLInputElement>): void;
 }
 
+export interface CalendarRenameInputOptions {
+  /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
+  readonly commitOnBlur?: boolean;
+}
+
 /** Binds Calendar title input events and focus realization to the canonical Rename session. */
-export function useCalendarRenameInput(hand: CalendarHand): CalendarRenameInputBinding {
+export function useCalendarRenameInput(
+  hand: CalendarHand,
+  options: CalendarRenameInputOptions = {},
+): CalendarRenameInputBinding {
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -25,7 +33,9 @@ export function useCalendarRenameInput(hand: CalendarHand): CalendarRenameInputB
     value: hand.titleDraft,
     onFocus: hand.beginTitleRename,
     onChange: (event) => hand.setTitleDraft(event.currentTarget.value),
-    onBlur: () => hand.commitTitleRename(),
+    onBlur: () => {
+      if (options.commitOnBlur !== false) hand.commitTitleRename();
+    },
     onKeyDown(event) {
       if (!hand.handleTitleRenameKey(event.key)) return;
       event.preventDefault();

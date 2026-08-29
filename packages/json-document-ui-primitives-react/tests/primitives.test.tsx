@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   ActionButton,
   ChoiceChip,
+  ContextualControls,
   ControlHandle,
   DragHandle,
   DisclosureButton,
@@ -13,11 +14,18 @@ import {
   GridCell,
   IconButton,
   Menu,
+  ProductShell,
   ResizeHandle,
   Select,
   SelectableItem,
   SegmentedControl,
   Tabs,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarLayout,
+  ToolbarRegion,
+  ToolbarSeparator,
+  ToolbarSpacer,
   ToggleButton,
   useListbox,
 } from "../src/index.js";
@@ -25,6 +33,69 @@ import {
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("ProductShell and Toolbar expose one structural composition contract", () => {
+    render(
+      <ProductShell
+        fill
+        toolbar={(
+          <>
+            <ToolbarGroup label="Navigation"><ActionButton>Today</ActionButton></ToolbarGroup>
+            <ToolbarSeparator />
+            <ToolbarSpacer />
+            <ToolbarGroup label="History"><IconButton label="Undo">↶</IconButton></ToolbarGroup>
+          </>
+        )}
+        toolbarLabel="Calendar controls"
+        inspector={<p>Inspector</p>}
+      >
+        <p>Calendar content</p>
+      </ProductShell>,
+    );
+
+    expect(screen.getByRole("toolbar", { name: "Calendar controls" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Navigation" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "History" })).toBeTruthy();
+    expect(screen.getByRole("separator").getAttribute("aria-orientation")).toBe("vertical");
+    expect(screen.getByText("Calendar content").parentElement?.dataset.uiComponent).toBe("product-canvas");
+    expect(screen.getByText("Inspector").parentElement?.dataset.uiComponent).toBe("product-inspector");
+  });
+
+  test("Toolbar can own a standalone action collection", () => {
+    render(<Toolbar label="History"><ActionButton>Undo</ActionButton></Toolbar>);
+    expect(screen.getByRole("toolbar", { name: "History" })).toBeTruthy();
+  });
+
+  test("ToolbarLayout exposes stable start, center, and end regions", () => {
+    render(
+      <Toolbar label="Calendar controls">
+        <ToolbarLayout>
+          <ToolbarRegion placement="start" label="Period">2026</ToolbarRegion>
+          <ToolbarRegion placement="center" label="View">Week</ToolbarRegion>
+          <ToolbarRegion placement="end" label="Actions">Create</ToolbarRegion>
+        </ToolbarLayout>
+      </Toolbar>,
+    );
+
+    expect(screen.getByRole("group", { name: "Period" }).dataset.placement).toBe("start");
+    expect(screen.getByRole("group", { name: "View" }).dataset.placement).toBe("center");
+    expect(screen.getByRole("group", { name: "Actions" }).dataset.placement).toBe("end");
+  });
+
+  test("ContextualControls reveals the same capability by pointer approach and keyboard focus", () => {
+    const capabilities = [{ id: "navigate", phases: ["approach"] }] as const;
+    render(
+      <ContextualControls capabilities={capabilities}>
+        {(snapshot) => <button>{snapshot.visible.includes("navigate") ? "Previous" : "Calendar"}</button>}
+      </ContextualControls>,
+    );
+    const root = screen.getByText("Calendar").parentElement!;
+    fireEvent.pointerEnter(root);
+    expect(screen.getByRole("button", { name: "Previous" })).toBeTruthy();
+    fireEvent.pointerLeave(root);
+    fireEvent.focus(screen.getByRole("button", { name: "Calendar" }));
+    expect(screen.getByRole("button", { name: "Previous" })).toBeTruthy();
+  });
+
   test("formats file metadata with one canonical compact unit policy", () => {
     expect(formatFileSize(512)).toBe("512 B");
     expect(formatFileSize(1536)).toBe("2 KB");

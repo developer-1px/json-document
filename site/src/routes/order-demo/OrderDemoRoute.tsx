@@ -28,7 +28,8 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -184,7 +185,7 @@ export function OrderDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Order actions"
         toolbar={(
           <>
@@ -257,7 +258,7 @@ export function OrderDemoRoute() {
           </ol>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes an item.</p>
         </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

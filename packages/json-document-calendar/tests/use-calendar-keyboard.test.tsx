@@ -21,6 +21,11 @@ describe("useCalendarKeyboard", () => {
     expect(actions.onView).toHaveBeenCalledWith("day");
     expect(view.defaultPrevented).toBe(true);
 
+    const rename = key("F2");
+    act(() => target.dispatchEvent(rename));
+    expect(actions.onRename).toHaveBeenCalledOnce();
+    expect(rename.defaultPrevented).toBe(true);
+
     const ignoredDismiss = key("Escape");
     act(() => target.dispatchEvent(ignoredDismiss));
     expect(ignoredDismiss.defaultPrevented).toBe(false);
@@ -43,6 +48,7 @@ function createActions(): Omit<CalendarKeyboardOptions, "active" | "target" | "o
     onShift: vi.fn(),
     onToday: vi.fn(),
     onCreate: vi.fn(),
+    onRename: vi.fn(),
     onRemove: vi.fn(),
   };
 }

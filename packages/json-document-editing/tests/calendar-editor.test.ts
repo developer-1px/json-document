@@ -67,6 +67,12 @@ const initial: CalendarDocument = {
 };
 
 describe("calendar editor", () => {
+  test("can start without selecting fixture content", () => {
+    const editor = createCalendarEditor(initial, { initialEventIds: [] });
+    expect(editor.selectedEvents).toEqual([]);
+    expect(editor.snapshot.selection.keys).toEqual([]);
+  });
+
   test("creates a week-grid interval, moves it, resizes it, and restores with undo", () => {
     const editor = createCalendarEditor(initial, { createId: () => "draft" });
     expect(editor.dispatch({

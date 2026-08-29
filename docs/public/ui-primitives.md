@@ -103,6 +103,44 @@ children으로 구성합니다.
 brand token은 Host 책임이지만 최소 hit target, focus-visible, disabled/pressed와
 tooltip 가시성은 UI Primitive styling hook의 불변식입니다.
 
+## Product shell and toolbar
+
+제품 surface는 control을 임의의 flex row에 놓지 않고 같은 shell·toolbar 문법으로
+조립합니다. `ProductShell`은 toolbar, canvas, inspector의 위치를 소유하고,
+`Toolbar`는 접근 가능한 action collection을 제공합니다. `ToolbarGroup`,
+`ToolbarSeparator`, `ToolbarSpacer`는 action의 의미 구역과 흐름 정렬을 표현합니다.
+`ToolbarLayout`과 `ToolbarRegion`은 toolbar를 start / center / end의 세 축으로
+나눕니다. center는 양쪽 콘텐츠 폭과 독립된 중앙 축에 놓이므로 기간 label이나
+contextual action의 폭이 변해도 핵심 탭의 위치가 이동하지 않습니다.
+제품 command, copy, permission과 구역의 순서는 Host가 정합니다.
+
+```tsx
+<ProductShell
+  toolbarLabel="Calendar controls"
+  toolbar={(
+    <ToolbarLayout>
+      <ToolbarRegion placement="start" label="Navigation">…</ToolbarRegion>
+      <ToolbarRegion placement="center" label="View">…</ToolbarRegion>
+      <ToolbarRegion placement="end" label="Actions">
+        <ContextualControls capabilities={capabilities}>…</ContextualControls>
+      </ToolbarRegion>
+    </ToolbarLayout>
+  )}
+>
+  <Calendar />
+</ProductShell>
+```
+
+영구 탐색은 `ProductToolbar` 흐름에 남고, 콘텐츠 상태에 따라 나타나는 action만
+`ContextualControls`가 감쌉니다. Toolbar 전체를 contextual lifecycle에 넣지
+않습니다. 순차 action 모음은 기본 `Toolbar` 흐름을, 위치가 변하면 안 되는 제품
+navigation은 `ToolbarLayout`의 세 region을 사용합니다. 고정 폭 placeholder나
+absolute positioning을 Host에 만들지 않습니다. size·visual variant는 shell API에 두지 않으며 제품 theme은 안정된
+`data-ui-component` hook을 semantic token에 연결합니다.
+
+[Toolbar Usage](/widgets/toolbar)는 이 공개 API를 실제 history action collection으로
+소비합니다.
+
 ## `Select`
 
 ```tsx

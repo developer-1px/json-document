@@ -46,7 +46,8 @@ import {
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { IconButton, Tabs, ToggleButton, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { CodeBlock } from "../../shared/ui/code-block";
 import {
@@ -347,7 +348,7 @@ export function AnnotationDemoRoute() {
         이미지 위에서 위치를 표시하고 수정 요청을 남겨 보세요.
       </PageHeader>
     )}>
-      <ProductApp canvasClassName={annotationDemoStyles.productCanvas()}>
+      <ProductShell canvasClassName={annotationDemoStyles.productCanvas()}>
         <div className={annotationDemoStyles.canvasFrame()} style={{ aspectRatio: `${source.width} / ${source.height}` }}>
           <div className={annotationDemoStyles.stage()} style={{ width: `${zoom * 100}%` }}>
             <svg
@@ -390,7 +391,7 @@ export function AnnotationDemoRoute() {
             <IconButton label="Download annotated image" className={annotationDemoStyles.dockButton()} onClick={() => void downloadImage()}><Download aria-hidden="true" size={16} /></IconButton>
           </nav>
         </div>
-      </ProductApp>
+      </ProductShell>
       <details className={classes("fixed bottom-4 right-4 z-50 max-h-[calc(100vh-2rem)] w-[min(34rem,calc(100vw-2rem))] overflow-auto p-3", ui.surface.overlay)}>
         <summary className={ui.interactive.link.prominent}>Annotation output</summary>
         <div className="mt-3">

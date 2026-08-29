@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } 
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
 import { ArrowLeft, ArrowRight, ArrowUpDown, Check, Columns3, ListFilter, Minus, Plus, RefreshCw, X } from "lucide-react";
 import { databaseValueFromText } from "@interactive-os/json-document-editing";
+import { ToolbarGroup } from "@interactive-os/json-document-ui-primitives-react";
 import { DatabaseHand, type DatabaseHandCellRenderProps } from "./database-hand.js";
 import { DatabaseProvider, useDatabase, type DatabaseProviderProps } from "./database-context.js";
 import type {
@@ -80,7 +81,7 @@ export function DatabaseViewToolbar() {
   }
 
   return (
-    <div className="jd-database__toolbar-group" aria-label="Database view">
+    <ToolbarGroup className="jd-database__toolbar-group" label="Database view">
       <label>
         <span className="jd-database__sr-only">Active view</span>
         <select
@@ -128,14 +129,14 @@ export function DatabaseViewToolbar() {
       {database.capabilities.saveView && view.ownership !== "locked" ? (
         <button type="button" aria-label="Save view" title="Save view" onClick={() => void database.saveView(view)}><Check aria-hidden="true" size={16} /></button>
       ) : <span aria-label="Locked view">Locked</span>}
-    </div>
+    </ToolbarGroup>
   );
 }
 
 export function DatabaseRecordActions() {
   const database = useDatabase();
   return (
-    <div className="jd-database__toolbar-group" aria-label="Record actions">
+    <ToolbarGroup className="jd-database__toolbar-group" label="Record actions">
       <button
         type="button"
         disabled={!database.capabilities.delete || database.selectedRowIds.length === 0 || (database.selectedRowIds.length > 1 && !database.capabilities.bulkDelete)}
@@ -148,7 +149,7 @@ export function DatabaseRecordActions() {
       ><Minus aria-hidden="true" size={16} />{database.selectedRowIds.length > 0 ? <small>{database.selectedRowIds.length}</small> : null}</button>
       <button type="button" aria-label="Refresh" title="Refresh" disabled={database.status.phase === "loading"} onClick={() => void database.refresh()}><RefreshCw aria-hidden="true" size={16} /></button>
       <span>{database.total} records</span>
-    </div>
+    </ToolbarGroup>
   );
 }
 

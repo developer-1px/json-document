@@ -30,6 +30,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   affordanceRename: "terminal",
   affordanceNudge: "peek",
   affordanceHover: "cursor",
+  affordanceContextual: "cursor",
   affordanceDoubleClick: "peek",
   affordanceTripleClick: "peek",
   affordanceContextMenu: "clipboard",

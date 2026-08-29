@@ -42,12 +42,7 @@ export const ui = {
     meta: "text-xs leading-5 text-foreground-muted",
   },
   product: {
-    frame: "rounded-surface bg-background-canvas shadow-surface",
-    fill: "flex h-full min-h-0 flex-col rounded-none shadow-none",
-    toolbar: "flex flex-wrap items-center gap-1 border-b border-line-subtle/40 px-3 py-2",
-    canvas: "p-3",
-    fillCanvas: "min-h-0 flex-1",
-    panel: "border-t border-line-subtle/40 px-3 py-2",
+    frame: "rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface",
   },
   demoWorkbench: {
     header: "sticky top-0 z-20 bg-background-subtle",

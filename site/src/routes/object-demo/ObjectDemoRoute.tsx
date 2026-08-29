@@ -17,7 +17,8 @@ import {
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
 import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -99,7 +100,7 @@ export function ObjectDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Object actions"
         canvasClassName="relative min-h-[20rem] overflow-hidden"
         toolbar={(
@@ -169,7 +170,7 @@ export function ObjectDemoRoute() {
           ))}
           <p className={classes("absolute bottom-3 left-3 mb-0", ui.text.meta)}>Click a box. Mod-click toggles. Fill uses the selected IDs only.</p>
         </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

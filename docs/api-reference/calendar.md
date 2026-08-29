@@ -25,7 +25,7 @@ interface CalendarHand {
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
-  beginTitleRename(): void;
+  beginTitleRename(eventId?: string): void;
   commitTitleRename(): void;
   cancelTitleRename(): void;
   handleTitleRenameKey(key: string): boolean;
@@ -63,6 +63,7 @@ interface CalendarKeyboardOptions {
   readonly onShift: (direction: 1 | -1) => void;
   readonly onToday: () => void;
   readonly onCreate: () => void;
+  readonly onRename: () => void;
   readonly onRemove: () => void;
   readonly onDismiss?: () => boolean;
 }
@@ -79,10 +80,12 @@ interface CalendarKeyboardTarget {
 
 ```ts
 interface CalendarPointerInteractions {
+  readonly hoveredTime: { readonly day: string; readonly instant: string; readonly minutes: number } | null;
   instantAt(day: string, clientY: number, grid: Element): string | null;
   timePointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: CalendarTimeGridHandle | null): void;
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
+  clearTimeHover(): void;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
@@ -119,6 +122,14 @@ interface CalendarRenameInputBinding {
   onKeyDown(event: KeyboardEvent<HTMLInputElement>): void;
 }
 ```
+## `CalendarRenameInputOptions`
+
+```ts
+interface CalendarRenameInputOptions {
+  /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
+  readonly commitOnBlur?: boolean;
+}
+```
 ## `CalendarViewportPositionOptions`
 
 ```ts
@@ -148,7 +159,7 @@ useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy
 ## `useCalendarRenameInput`
 
 ```ts
-useCalendarRenameInput(hand: CalendarHand): CalendarRenameInputBinding
+useCalendarRenameInput(hand: CalendarHand, options?: CalendarRenameInputOptions): CalendarRenameInputBinding
 ```
 ## `useCalendarViewportPosition`
 

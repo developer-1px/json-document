@@ -43,6 +43,7 @@ import affordanceDeleteMarkdown from "../../../../docs/public/affordance-delete.
 import affordanceRenameMarkdown from "../../../../docs/public/affordance-rename.md?raw";
 import affordanceNudgeMarkdown from "../../../../docs/public/affordance-nudge.md?raw";
 import affordanceHoverMarkdown from "../../../../docs/public/affordance-hover.md?raw";
+import affordanceContextualMarkdown from "../../../../docs/public/affordance-contextual.md?raw";
 import affordanceDoubleClickMarkdown from "../../../../docs/public/affordance-double-click.md?raw";
 import affordanceTripleClickMarkdown from "../../../../docs/public/affordance-triple-click.md?raw";
 import affordanceContextMenuMarkdown from "../../../../docs/public/affordance-context-menu.md?raw";
@@ -122,6 +123,7 @@ export const docPages = {
   affordanceRename: docPage("/docs/affordance/rename", affordanceRenameMarkdown),
   affordanceNudge: docPage("/docs/affordance/nudge", affordanceNudgeMarkdown),
   affordanceHover: docPage("/docs/affordance/hover", affordanceHoverMarkdown),
+  affordanceContextual: docPage("/docs/affordance/contextual", affordanceContextualMarkdown),
   affordanceDoubleClick: docPage("/docs/affordance/double-click", affordanceDoubleClickMarkdown),
   affordanceTripleClick: docPage("/docs/affordance/triple-click", affordanceTripleClickMarkdown),
   affordanceContextMenu: docPage("/docs/affordance/context-menu", affordanceContextMenuMarkdown),

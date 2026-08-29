@@ -128,7 +128,10 @@ export interface CalendarEditor {
 
 export function createCalendarEditor(
   source: EditingDocumentSource<CalendarDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: {
+    readonly createId?: () => string;
+    readonly initialEventIds?: ReadonlyArray<string>;
+  } = {},
 ): CalendarEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as CalendarDocument;
@@ -137,9 +140,13 @@ export function createCalendarEditor(
   const createId = options.createId ?? (() => `event-${++sequence}`);
   const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.events[0];
+  const availableIds = new Set(initial.events.map((event) => event.id));
+  const initialEventIds = options.initialEventIds === undefined
+    ? (first ? [first.id] : [])
+    : options.initialEventIds.filter((id) => availableIds.has(id));
   const session = createEditingSession({
     document,
-    selection: first ? selectionFor([first.id]) : selectionFor([]),
+    selection: selectionFor(initialEventIds),
   });
 
   function value(): CalendarDocument {

@@ -17,6 +17,7 @@ export interface CalendarKeyboardOptions {
   readonly onShift: (direction: 1 | -1) => void;
   readonly onToday: () => void;
   readonly onCreate: () => void;
+  readonly onRename: () => void;
   readonly onRemove: () => void;
   readonly onDismiss?: () => boolean;
 }
@@ -47,6 +48,7 @@ function dispatchCalendarKeyboardCommand(
   if (command.type === "shift") options.onShift(command.direction);
   if (command.type === "today") options.onToday();
   if (command.type === "create") options.onCreate();
+  if (command.type === "rename") options.onRename();
   if (command.type === "remove") options.onRemove();
   if (command.type === "dismiss") return options.onDismiss?.() === true;
   return true;

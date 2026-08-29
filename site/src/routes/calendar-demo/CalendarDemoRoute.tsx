@@ -39,12 +39,17 @@ import {
 } from "@interactive-os/json-document-calendar";
 import {
   ActionButton,
+  ContextualControls,
   HtmlDateField,
   IconButton,
   ResizeHandle,
   SegmentedControl,
   Select,
   SelectableItem,
+  ToolbarGroup,
+  ToolbarLayout,
+  ToolbarRegion,
+  ToolbarSeparator,
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
@@ -59,7 +64,7 @@ import {
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
-import { ProductApp } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { CalendarDemoNavigator } from "./calendar-demo-navigator";
 import { calendarSearchDefaults } from "./calendar-search";
@@ -135,10 +140,13 @@ export function CalendarDemoRoute(props: {
   const hoursRef = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => {
     let sequence = 0;
-    return createCalendarEditor(initial, { createId: () => `event-${++sequence}` });
+    return createCalendarEditor(initial, {
+      createId: () => `event-${++sequence}`,
+      initialEventIds: [],
+    });
   });
   const hand = useCalendarHand(editor, {
-    initialOccurrence: { start: initial.events[0]?.start ?? null, end: initial.events[0]?.end ?? null },
+    initialOccurrence: { start: null, end: null },
     defaultTitle: "Event",
   });
   const [viewState, setViewState] = useState<CalendarView>(calendarSearchDefaults.view);
@@ -150,13 +158,15 @@ export function CalendarDemoRoute(props: {
   const occurrenceEnd = hand.occurrence.end;
   const scope = hand.scope;
   const setScope = hand.setScope;
-  const titleInput = useCalendarRenameInput(hand);
+  const titleInput = useCalendarRenameInput(hand, { commitOnBlur: false });
   const [overflowDay, setOverflowDay] = useState<string | null>(null);
   const {
+    hoveredTime,
     instantAt,
     timePointerDown,
     timePointerMove,
     timePointerUp,
+    clearTimeHover,
     allDayPointerDown,
     allDayPointerMove,
     allDayPointerUp,
@@ -227,6 +237,7 @@ export function CalendarDemoRoute(props: {
     onShift: (direction) => setVisibleDate(shiftVisibleDate(visibleDate, view, direction)),
     onToday: () => setLocation(view === "year" ? "month" : view, today),
     onCreate: createOnVisibleDate,
+    onRename: hand.beginTitleRename,
     onRemove: removeSelected,
     onDismiss: () => {
       if (overflowDay === null) return false;
@@ -273,6 +284,7 @@ export function CalendarDemoRoute(props: {
         timePointerMove(event);
         allDayPointerMove(event);
       }}
+      onPointerLeave={clearTimeHover}
     >
       <div
         className={classes("grid", styles.weekSticky())}
@@ -327,11 +339,14 @@ export function CalendarDemoRoute(props: {
                 allDayPointerDown(event, days[item.startIndex] ?? visibleDate, item.event.id, item.event.start, item.event.end, "body");
               }}
               onPointerUp={allDayPointerUp}
-              onDoubleClick={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation();
+                hand.beginTitleRename(item.event.id);
+              }}
             >
               {item.event.title}
             </SelectableItem>
-            {item.event.id === "preview" ? null : (
+            {item.event.id === "preview" || !selected.has(item.event.id) ? null : (
               <>
                 <ResizeHandle
                   label={`Resize ${item.event.title} start`}
@@ -417,6 +432,15 @@ export function CalendarDemoRoute(props: {
                   style={{ top: nowTop }}
                 />
               ) : null}
+              {hoveredTime?.day === day && timePreview === null ? (
+                <div
+                  data-calendar-create-time=""
+                  className={styles.creationTimeHint()}
+                  style={{ top: (hoveredTime.minutes - hourStart * 60) * (pxPerHour / 60) }}
+                >
+                  {calendarTimeLabel(hoveredTime.instant)}
+                </div>
+              ) : null}
               {calendarTimedLayout(paintedEvents, day).map((item) => {
                 const band = calendarVisibleHourBand(item.startMinutes, item.endMinutes, hourStart, hourEnd);
                 if (band === null) return null;
@@ -435,6 +459,7 @@ export function CalendarDemoRoute(props: {
                   <SelectableItem
                     selected={selected.has(item.event.id) && (occurrenceStart === null || occurrenceStart === item.event.start)}
                     aria-label={item.event.title}
+                    data-calendar-event=""
                     data-calendar-color={calendarColor(document, item.event.calendarId)}
                     data-preview={item.event.id === "preview" || timePreview?.originEventId === item.event.id ? "true" : undefined}
                     className={styles.timedEvent()}
@@ -443,14 +468,15 @@ export function CalendarDemoRoute(props: {
                       timePointerDown(event, day, item.event.id, item.event.start, item.event.end, "body");
                     }}
                     onPointerUp={timePointerUp}
-                    onDoubleClick={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      hand.beginTitleRename(item.event.id);
+                    }}
                   >
                     <span className="min-w-0 truncate">{item.event.title}</span>
-                    {endMinutes - startMinutes >= 40 ? (
-                      <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
-                    ) : null}
+                    <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
                   </SelectableItem>
-                  {item.event.id === "preview" ? null : (
+                  {item.event.id === "preview" || !selected.has(item.event.id) ? null : (
                     <>
                       <ResizeHandle
                         label={`Resize ${item.event.title} start`}
@@ -478,13 +504,31 @@ export function CalendarDemoRoute(props: {
 
   return (
     <DemoSurface>
-      <ProductApp
+      <ProductShell
         fill={!embedded}
-        toolbarLabel="Calendar"
         canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
+        toolbarLabel="Calendar controls"
         toolbar={(
-          <>
-            <div className={classes("min-w-0 flex-1", styles.toolbarCluster())}>
+          <ToolbarLayout>
+            <ToolbarRegion placement="start" label="Calendar navigation">
+              <ToolbarGroup label="Period navigation">
+                <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
+                  monthNames: months,
+                  weekSeparator: " – ",
+                })}</span>
+                <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
+                  <ChevronLeft aria-hidden="true" size={16} />
+                </IconButton>
+                <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
+                  <ChevronRight aria-hidden="true" size={16} />
+                </IconButton>
+              </ToolbarGroup>
+              <ToolbarSeparator />
+              <ToolbarGroup label="Date shortcuts">
+                <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
+              </ToolbarGroup>
+            </ToolbarRegion>
+            <ToolbarRegion placement="center" label="Calendar view">
               <SegmentedControl
                 label="View"
                 value={view}
@@ -496,63 +540,79 @@ export function CalendarDemoRoute(props: {
                 ]}
                 onValueChange={setView}
               />
-            </div>
-            <div className={styles.toolbarCluster()}>
-              <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
-                <ChevronLeft aria-hidden="true" size={16} />
-              </IconButton>
-              <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
-                monthNames: months,
-                weekSeparator: " – ",
-              })}</span>
-              <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
-                <ChevronRight aria-hidden="true" size={16} />
-              </IconButton>
-              <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>
-                Today
-              </ActionButton>
-            </div>
-            <div className={classes("min-w-0 flex-1 justify-end", styles.toolbarCluster())}>
-              <ActionButton onClick={createOnVisibleDate}>
-                Create
-              </ActionButton>
-              <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
-              <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
-              <IconButton label="Delete" onClick={removeSelected}>
-                <Trash2 aria-hidden="true" size={16} />
-              </IconButton>
-            </div>
-          </>
+            </ToolbarRegion>
+            <ToolbarRegion placement="end" label="Calendar actions">
+              <ContextualControls
+                aria-label="Calendar contextual actions"
+                tabIndex={0}
+                className={styles.contextualActions()}
+                selected={selectedEvent !== null}
+                editing={hand.renaming}
+                capabilities={[
+                  { id: "create", phases: ["approach", "selected", "editing"] },
+                  { id: "history", phases: ["approach", "selected"] },
+                  { id: "delete", phases: ["selected", "editing"] },
+                ] as const}
+              >
+                {(context) => (
+                  <>
+                    {context.visible.includes("create") ? (
+                      <ActionButton onClick={createOnVisibleDate}>Create</ActionButton>
+                    ) : null}
+                    {context.visible.includes("history") ? (
+                      <ToolbarGroup label="History">
+                        <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
+                        <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
+                      </ToolbarGroup>
+                    ) : null}
+                    {context.visible.includes("delete") ? (
+                      <IconButton label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
+                    ) : null}
+                  </>
+                )}
+              </ContextualControls>
+            </ToolbarRegion>
+          </ToolbarLayout>
         )}
       >
-        <div className="flex h-full min-h-0 min-w-0 gap-4">
-          <nav aria-label="Calendars" className={styles.sidebar()}>
-            <p className={ui.text.label}>Calendars</p>
-            {calendars.map((calendar) => (
-              <ToggleButton
-                key={calendar.id}
-                pressed={!calendar.hidden}
-                aria-label={`Show ${calendar.title}`}
-                data-calendar-color={calendarColor(document, calendar.id)}
-                className={styles.calendarToggle()}
-                onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
-              >
-                <span
-                  aria-hidden="true"
-                  data-calendar-color={calendarColor(document, calendar.id)}
-                  className={styles.calendarSwatch()}
-                />
-                {calendar.title}
-              </ToggleButton>
-            ))}
-            <CalendarDemoNavigator
-              visibleDate={visibleDate}
-              today={today}
-              events={paintedEvents}
-              onDateChange={setVisibleDate}
-            />
-          </nav>
-          <div className={classes("min-w-0 flex-1", view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
+        <div className="relative flex h-full min-h-0 min-w-0 flex-col">
+          <div className="flex min-h-0 min-w-0 flex-1 gap-4">
+            <ContextualControls
+              aria-label="Calendar sources"
+              tabIndex={0}
+              className={styles.contextualSidebar()}
+              capabilities={[{ id: "sources", phases: ["approach"] }] as const}
+            >
+              {(context) => context.visible.includes("sources") ? (
+                <nav aria-label="Calendars" className={styles.sidebar()}>
+                  <p className={ui.text.label}>Calendars</p>
+                  {calendars.map((calendar) => (
+                    <ToggleButton
+                      key={calendar.id}
+                      pressed={!calendar.hidden}
+                      aria-label={`Show ${calendar.title}`}
+                      data-calendar-color={calendarColor(document, calendar.id)}
+                      className={styles.calendarToggle()}
+                      onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
+                    >
+                      <span
+                        aria-hidden="true"
+                        data-calendar-color={calendarColor(document, calendar.id)}
+                        className={styles.calendarSwatch()}
+                      />
+                      {calendar.title}
+                    </ToggleButton>
+                  ))}
+                  <CalendarDemoNavigator
+                    visibleDate={visibleDate}
+                    today={today}
+                    events={paintedEvents}
+                    onDateChange={setVisibleDate}
+                  />
+                </nav>
+              ) : <span className={styles.sidebarHint()}>Calendars</span>}
+            </ContextualControls>
+            <div className={classes("min-w-0 flex-1", view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
             {view === "day" || view === "week" ? timeGrid : null}
             {view === "month" ? (
               <div role="grid" aria-label="Month" className="min-w-[36rem]" onPointerMove={monthPointerMove}>
@@ -619,7 +679,10 @@ export function CalendarDemoRoute(props: {
                                     aria-label={calendarEventLabel(item)}
                                     data-calendar-color={calendarColor(document, item.calendarId)}
                                     className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
-                                    onClick={() => hand.selectOccurrence(item.id, item.start, item.end)}
+                                    onClick={() => {
+                                      hand.selectOccurrence(item.id, item.start, item.end);
+                                      hand.beginTitleRename(item.id);
+                                    }}
                                   >
                                     <MonthEventCopy event={item} />
                                   </SelectableItem>
@@ -674,11 +737,14 @@ export function CalendarDemoRoute(props: {
                               monthPointerDown(event, dates[item.startIndex] ?? visibleDate, dates, item.event.id, item.event.start, item.event.end);
                             }}
                             onPointerUp={monthPointerUp}
-                            onDoubleClick={(event) => event.stopPropagation()}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              hand.beginTitleRename(item.event.id);
+                            }}
                           >
                             <MonthEventCopy event={item.event} />
                           </SelectableItem>
-                          {item.event.id === "preview" || !isCalendarAllDay(item.event) ? null : (
+                          {item.event.id === "preview" || !isCalendarAllDay(item.event) || !selected.has(item.event.id) ? null : (
                             <>
                               {clipStart ? null : (
                                 <ResizeHandle
@@ -756,11 +822,13 @@ export function CalendarDemoRoute(props: {
               </div>
             ) : null}
           </div>
-          <section aria-label="Event" className={styles.inspector()}>
-            {selectedEvent === null ? (
-              <p className={ui.text.meta}>Select or create an event.</p>
-            ) : (
-              <>
+            {selectedEvent === null || !hand.renaming ? null : (
+              <ContextualControls
+                editing
+                capabilities={[{ id: "editor", phases: ["editing"] }] as const}
+              >
+                {(context) => context.visible.includes("editor") ? (
+                  <section aria-label="Event" className={classes(styles.inspector(), ui.surface.overlay)}>
                 <input
                   ref={titleInput.ref}
                   aria-label="Title"
@@ -862,11 +930,13 @@ export function CalendarDemoRoute(props: {
                     onValueChange={setScope}
                   />
                 )}
-              </>
+                  </section>
+                ) : null}
+              </ContextualControls>
             )}
-          </section>
+          </div>
         </div>
-      </ProductApp>
+      </ProductShell>
     </DemoSurface>
   );
 }

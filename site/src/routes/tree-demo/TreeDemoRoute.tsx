@@ -18,7 +18,8 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -117,7 +118,7 @@ export function TreeDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Tree actions"
         toolbar={(
           <>
@@ -179,7 +180,7 @@ export function TreeDemoRoute() {
           </ul>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
         </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

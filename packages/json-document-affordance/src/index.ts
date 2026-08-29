@@ -22,6 +22,12 @@ export {
   interactionHandleDelta,
 } from "./interaction-handle.js";
 export { createViewportPositionSession } from "./viewport-position.js";
+export { contextualAffordance } from "./contextual.js";
+export type {
+  ContextualAffordanceCapability,
+  ContextualAffordancePhase,
+  ContextualAffordanceSnapshot,
+} from "./contextual.js";
 export type {
   BoardDragCancelReason,
   BoardDragSession,

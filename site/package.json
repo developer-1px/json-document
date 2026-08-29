@@ -13,6 +13,8 @@
     "check:segmented-control-id": "node scripts/check-segmented-control-id.mjs",
     "check:canonical-modules": "node scripts/check-canonical-module-closure.mjs",
     "check:interaction-handles": "node scripts/check-interaction-handles.mjs",
+    "check:contextual-affordance": "node scripts/check-contextual-affordance.mjs",
+    "check:product-shell-toolbar": "node scripts/check-product-shell-toolbar.mjs",
     "check:calendar-temporal": "node scripts/check-calendar-temporal.mjs",
     "check:calendar-keyboard": "node scripts/check-calendar-keyboard.mjs",
     "check:calendar-rename": "node scripts/check-calendar-rename.mjs",
@@ -34,7 +36,7 @@
     "check:calendar-recurrence-transition": "node scripts/check-calendar-recurrence-transition.mjs",
     "check:calendar-document-calendars": "node scripts/check-calendar-document-calendars.mjs",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:segmented-control-id && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:calendar-temporal && npm run check:calendar-keyboard && npm run check:calendar-rename && npm run check:calendar-viewport && npm run check:calendar-pointer-coordinate && npm run check:calendar-year-months && npm run check:calendar-month-weeks && npm run check:calendar-period-label && npm run check:calendar-visible-date-shift && npm run check:calendar-time-label && npm run check:calendar-event-label && npm run check:calendar-interval-last-date && npm run check:calendar-date-part && npm run check:calendar-period-cells && npm run check:calendar-allday-span && npm run check:calendar-view-parser && npm run check:calendar-instant-format && npm run check:calendar-cell-interval && npm run check:calendar-recurrence-transition && npm run check:calendar-document-calendars && npm run check:tokens && tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run check:ui && npm run check:icons && npm run check:primitives && npm run check:segmented-control-id && npm run check:canonical-modules && npm run check:interaction-handles && npm run check:contextual-affordance && npm run check:product-shell-toolbar && npm run check:calendar-temporal && npm run check:calendar-keyboard && npm run check:calendar-rename && npm run check:calendar-viewport && npm run check:calendar-pointer-coordinate && npm run check:calendar-year-months && npm run check:calendar-month-weeks && npm run check:calendar-period-label && npm run check:calendar-visible-date-shift && npm run check:calendar-time-label && npm run check:calendar-event-label && npm run check:calendar-interval-last-date && npm run check:calendar-date-part && npm run check:calendar-period-cells && npm run check:calendar-allday-span && npm run check:calendar-view-parser && npm run check:calendar-instant-format && npm run check:calendar-cell-interval && npm run check:calendar-recurrence-transition && npm run check:calendar-document-calendars && npm run check:tokens && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@interactive-os/json-document-affordance": "*",

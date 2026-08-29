@@ -6,6 +6,7 @@ export type WebCalendarCommand =
   | { readonly type: "shift"; readonly direction: 1 | -1 }
   | { readonly type: "today" }
   | { readonly type: "create" }
+  | { readonly type: "rename" }
   | { readonly type: "remove" }
   | { readonly type: "dismiss" };
 
@@ -25,6 +26,7 @@ const calendarKeymap = Object.freeze({
   y: { type: "view", view: "year" },
   t: { type: "today" },
   c: { type: "create" },
+  F2: { type: "rename" },
   Delete: { type: "remove" },
   Backspace: { type: "remove" },
   Escape: { type: "dismiss" },

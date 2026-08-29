@@ -125,6 +125,7 @@ const markdownHrefs: Readonly<Record<string, string>> = {
   "affordance-rename.md": "/docs/affordance/rename",
   "affordance-nudge.md": "/docs/affordance/nudge",
   "affordance-hover.md": "/docs/affordance/hover",
+  "affordance-contextual.md": "/docs/affordance/contextual",
   "affordance-double-click.md": "/docs/affordance/double-click",
   "affordance-triple-click.md": "/docs/affordance/triple-click",
   "affordance-context-menu.md": "/docs/affordance/context-menu",

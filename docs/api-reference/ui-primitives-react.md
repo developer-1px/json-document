@@ -105,6 +105,11 @@ calendarYearMonths(visibleDate: string): ReadonlyArray<string>
 ```ts
 ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
 ```
+## `ContextualControls`
+
+```ts
+ContextualControls<Id extends string>(props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; readonly selected?: boolean; readonly editing?: boolean; readonly children: (snapshot: ContextualAffordanceSnapshot<Id>) => ReactNode; }): ReactNode
+```
 ## `ControlHandle`
 
 ```ts
@@ -246,6 +251,26 @@ MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>): import("<reposit
 ```ts
 parseHtmlDateValue(type: HtmlDateType, value: string): string | null
 ```
+## `ProductCanvas`
+
+```ts
+ProductCanvas(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ProductInspector`
+
+```ts
+ProductInspector(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ProductShell`
+
+```ts
+ProductShell(props: HTMLAttributes<HTMLDivElement> & { readonly toolbar?: ReactNode; readonly toolbarLabel?: string; readonly inspector?: ReactNode; readonly canvasClassName?: string; readonly fill?: boolean; }): ReactNode
+```
+## `ProductToolbar`
+
+```ts
+ProductToolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label: string; }): ReactNode
+```
 ## `RangeCalendar`
 
 ```ts
@@ -355,6 +380,41 @@ Tabs<T extends string | number>(props: { readonly label: string; readonly value:
 
 ```ts
 ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly label?: string; readonly tooltip?: string; }): ReactNode
+```
+## `Toolbar`
+
+```ts
+Toolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label: string; }): ReactNode
+```
+## `ToolbarGroup`
+
+```ts
+ToolbarGroup(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; }): ReactNode
+```
+## `ToolbarLayout`
+
+```ts
+ToolbarLayout(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ToolbarRegion`
+
+```ts
+ToolbarRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; readonly placement: ToolbarRegionPlacement; }): ReactNode
+```
+## `ToolbarRegionPlacement`
+
+```ts
+type ToolbarRegionPlacement = "start" | "center" | "end";
+```
+## `ToolbarSeparator`
+
+```ts
+ToolbarSeparator(props: HTMLAttributes<HTMLSpanElement>): ReactNode
+```
+## `ToolbarSpacer`
+
+```ts
+ToolbarSpacer(props: HTMLAttributes<HTMLSpanElement>): ReactNode
 ```
 ## `useInteractionHandle`
 
