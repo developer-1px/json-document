@@ -80,6 +80,7 @@ import richTextReactSurfaceSource from "../../../../packages/json-document-rich-
 import uiFileSizeSource from "../../../../packages/json-document-ui-primitives-react/src/file-size.ts?raw";
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
+import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
@@ -225,6 +226,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/file-size.ts", uiFileSizeSource],
   ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
+  ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
@@ -270,6 +272,11 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-editing",
     symbol: "createCalendarEditor",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarOccurrenceTopology",
     sourcePath: "packages/json-document-editing/src/calendar.ts",
   },
   {
@@ -466,6 +473,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-selection",
     symbol: "collapsedRangeSelection",
     sourcePath: "packages/json-document-selection/src/range/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-selection",
+    symbol: "createMaterializedRangeSelectionFamily",
+    sourcePath: "packages/json-document-selection/src/range/materialized.ts",
   },
   {
     packageName: "@interactive-os/json-document-contenteditable",

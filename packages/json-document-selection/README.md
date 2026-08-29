@@ -18,9 +18,12 @@ editing history ──┘
 
 - `KeySelection`: explicit keys or symbolic `all` with exclusions and a host-issued universe token.
 - `RangeSelection`: directional anchor/focus ranges over a host-provided `OrderedTopology`.
+- `MaterializedRangeSelection`: directional ranges whose resolved points survive virtualized or paged topology changes. Each range keeps its anchor/focus and the points produced by the topology at transition time; reconciliation removes only identities that the topology no longer recognizes.
 - `MaskSelection`: an extension protocol whose weighted representation and algebra remain host-owned.
 
 These families share `SelectionFamily`; they do not share a universal reducer.
+
+Use `createMaterializedRangeSelectionFamily` when the visible topology can change while logical selection must remain stable. Supply `reconcilePoint` for the full identity universe and `interval` for the currently visible order. `targets()` then publishes the stored points instead of reinterpreting old endpoints through a new view.
 
 ## Platform adapters
 

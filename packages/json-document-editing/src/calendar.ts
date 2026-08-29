@@ -4,9 +4,10 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import {
-  createKeySelectionFamily,
-  type KeySelectionCommand,
-  type KeySelectionContext,
+  createMaterializedRangeSelectionFamily,
+  type MaterializedRangeSelection,
+  type MaterializedRangeSelectionCommand,
+  type OrderedTopology,
 } from "@interactive-os/json-document-selection";
 import { Temporal } from "@js-temporal/polyfill";
 import {
@@ -64,10 +65,25 @@ export interface CalendarDocument extends Record<string, JSONValue> {
   readonly events: ReadonlyArray<CalendarEvent>;
 }
 
+export interface CalendarOccurrencePoint extends Record<string, JSONValue> {
+  readonly eventId: string;
+  readonly occurrenceStart: string;
+}
+
+export interface CalendarSelectionRange extends Record<string, JSONValue> {
+  readonly anchor: CalendarOccurrencePoint;
+  readonly focus: CalendarOccurrencePoint;
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
+}
+
 export interface CalendarSelection extends Record<string, JSONValue> {
-  readonly kind: "explicit";
-  readonly keys: ReadonlyArray<string>;
-  readonly primaryKey: string | null;
+  readonly kind: "range";
+  readonly ranges: ReadonlyArray<CalendarSelectionRange>;
+  readonly primaryIndex: number | null;
+}
+
+export interface CalendarOccurrenceTopologySnapshot extends Record<string, JSONValue> {
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
 }
 
 export interface CalendarClipboardItem extends Record<string, JSONValue> {
@@ -78,6 +94,7 @@ export interface CalendarClipboardItem extends Record<string, JSONValue> {
 
 export interface CalendarClipboard extends Record<string, JSONValue> {
   readonly type: "application/vnd.interactive-os.calendar+json";
+  readonly anchorOccurrenceStart: string;
   readonly items: ReadonlyArray<CalendarClipboardItem>;
   readonly text: string;
 }
@@ -93,12 +110,18 @@ export const calendarClipboardFormat = {
   parse(value: unknown): CalendarClipboard | null {
     if (!isRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
     if (!Array.isArray(value.items) || value.items.length === 0) return null;
-    return value.items.every((item) => (
+    if (!value.items.every((item) => (
       isRecord(item)
       && typeof item.sourceEventId === "string"
       && typeof item.occurrenceStart === "string"
       && isCalendarClipboardEvent(item.event)
-    )) ? value as CalendarClipboard : null;
+    ))) return null;
+    return {
+      ...value,
+      anchorOccurrenceStart: typeof value.anchorOccurrenceStart === "string"
+        ? value.anchorOccurrenceStart
+        : (value.items[0] as CalendarClipboardItem).occurrenceStart,
+    } as CalendarClipboard;
   },
 };
 
@@ -107,9 +130,11 @@ export type CalendarView = "day" | "week" | "month" | "year";
 export type CalendarIntent =
   | {
       readonly type: "selection.set";
-      readonly eventIds: ReadonlyArray<string>;
+      readonly point: CalendarOccurrencePoint;
+      readonly topology?: CalendarOccurrenceTopologySnapshot;
       readonly mode?: "replace" | "extend" | "toggle";
     }
+  | { readonly type: "selection.clear" }
   | { readonly type: "selection.remove" }
   | {
       readonly type: "event.create";
@@ -153,6 +178,8 @@ export type CalendarIntent =
 export interface CalendarEditor {
   readonly snapshot: EditingSnapshot<CalendarSelection>;
   readonly selectedEvents: ReadonlyArray<CalendarEvent>;
+  readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+  readonly primaryOccurrence: CalendarOccurrenceSelection | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
   cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
@@ -174,7 +201,7 @@ export function createCalendarEditor(
   assertCalendarDocument(initial);
   let sequence = 0;
   const createId = options.createId ?? (() => `event-${++sequence}`);
-  const selectionFamily = createKeySelectionFamily<string>();
+  const selectionFamily = createMaterializedRangeSelectionFamily<CalendarOccurrencePoint>();
   const first = initial.events[0];
   const availableIds = new Set(initial.events.map((event) => event.id));
   const initialEventIds = options.initialEventIds === undefined
@@ -182,7 +209,7 @@ export function createCalendarEditor(
     : options.initialEventIds.filter((id) => availableIds.has(id));
   const session = createEditingSession({
     document,
-    selection: selectionFor(initialEventIds),
+    selection: selectionForEvents(initial.events, initialEventIds),
   });
 
   function value(): CalendarDocument {
@@ -190,36 +217,69 @@ export function createCalendarEditor(
   }
 
   function selectedEvents(): CalendarEvent[] {
-    const ids = new Set(selectionFamily.targets(session.snapshot.selection, selectionContext()));
-    return value().events.filter((event) => ids.has(event.id));
+    const events = value().events;
+    const byId = new Map(events.map((event) => [event.id, event]));
+    const seen = new Set<string>();
+    return selectedPoints().flatMap((point) => {
+      if (seen.has(point.eventId)) return [];
+      const event = byId.get(point.eventId);
+      if (event === undefined) return [];
+      seen.add(point.eventId);
+      return [event];
+    });
   }
 
-  function selectionContext(): KeySelectionContext<string> {
-    return {
-      keys: value().events.map((event) => event.id),
-      universe: "events",
-      universeMismatch: "clear",
-    };
+  function selectionTargetPoints(): CalendarOccurrencePoint[] {
+    const context = selectionContext(session.snapshot.selection.ranges.flatMap((range) => range.points));
+    return [...selectionFamily.targets(session.snapshot.selection, context)];
+  }
+
+  function selectedPoints(): CalendarOccurrencePoint[] {
+    const points = selectionTargetPoints();
+    const primary = session.snapshot.selection.primaryIndex === null
+      ? null
+      : session.snapshot.selection.ranges[session.snapshot.selection.primaryIndex]?.focus ?? null;
+    if (primary === null) return points;
+    const primaryTargetIndex = points.findIndex((point) => sameCalendarOccurrencePoint(point, primary));
+    return primaryTargetIndex <= 0
+      ? points
+      : [points[primaryTargetIndex]!, ...points.filter((_, index) => index !== primaryTargetIndex)];
+  }
+
+  function selectedOccurrences(): CalendarOccurrenceSelection[] {
+    return selectionTargetPoints().flatMap((point) => {
+      const occurrence = resolveCalendarOccurrence(value().events, point);
+      return occurrence === null ? [] : [occurrence];
+    });
+  }
+
+  function primaryOccurrence(): CalendarOccurrenceSelection | null {
+    const index = session.snapshot.selection.primaryIndex;
+    const point = index === null ? null : session.snapshot.selection.ranges[index]?.focus ?? null;
+    return point === null ? null : resolveCalendarOccurrence(value().events, point);
+  }
+
+  function selectionContext(visiblePoints: ReadonlyArray<CalendarOccurrencePoint>) {
+    return { topology: calendarOccurrenceOrderedTopology(value().events, visiblePoints) };
   }
 
   function dispatch(intent: CalendarIntent): EditingResult<CalendarSelection> {
     if (intent.type === "selection.set") {
-      const available = new Set(value().events.map((event) => event.id));
-      if (intent.eventIds.some((id) => !available.has(id))) return failure("selection.event-not-found");
-      const command: KeySelectionCommand<string> = {
-        type: intent.mode === "extend" ? "add" : intent.mode ?? "replace",
-        keys: intent.eventIds,
-      };
+      if (resolveCalendarOccurrence(value().events, intent.point) === null) return failure("selection.event-not-found");
+      const command: MaterializedRangeSelectionCommand<CalendarOccurrencePoint> = intent.mode === "extend"
+        ? { type: "extend-primary", point: intent.point }
+        : intent.mode === "toggle"
+          ? { type: "toggle-point", point: intent.point }
+          : { type: "collapse", point: intent.point };
       const selection = selectionFamily.transition(
         session.snapshot.selection,
         command,
-        selectionContext(),
+        selectionContext(intent.topology?.points ?? [intent.point]),
       ).state;
-      return success(session.select(selectionFor(
-        selectionFamily.targets(selection, selectionContext()),
-        selection.primaryKey,
-      )));
+      return success(session.select(asCalendarSelection(selection)));
     }
+
+    if (intent.type === "selection.clear") return success(session.select(emptyCalendarSelection()));
 
     if (intent.type === "event.create") {
       if (intent.start >= intent.end) return failure("event.invalid-interval");
@@ -240,7 +300,7 @@ export function createCalendarEditor(
       };
       return session.apply({
         operations: [{ op: "add", path: `/events/${events.length}`, value: event }],
-        selectionAfter: selectionFor([event.id]),
+        selectionAfter: selectionForEvents([...events, event], [event.id]),
         origin: intent.type,
       });
     }
@@ -294,7 +354,7 @@ export function createCalendarEditor(
         { op: "replace", path: buildPointer(["events", index, "start"]), value: start },
         { op: "replace", path: buildPointer(["events", index, "end"]), value: nextEnd },
       ],
-      selectionAfter: selectionFor([eventId]),
+      selectionAfter: selectionForOccurrence(eventId, start),
       origin: "event.move",
     });
   }
@@ -315,7 +375,7 @@ export function createCalendarEditor(
     if (start >= end) return failure("event.invalid-interval");
     return session.apply({
       operations: [{ op: "replace", path: buildPointer(["events", index, edge]), value: instant }],
-      selectionAfter: selectionFor([eventId]),
+      selectionAfter: selectionForOccurrence(eventId, start),
       origin: "event.resize",
     });
   }
@@ -332,12 +392,14 @@ export function createCalendarEditor(
       const nextDay = parseCalendarDate(day);
       if (from === null || to === null || nextDay === null) return failure("event.invalid-instant");
       const delta = calendarDaysBetween(from, nextDay);
+      const movedStart = formatCalendarDate(from.add({ days: delta }));
+      const movedEnd = formatCalendarDate(to.add({ days: delta }));
       return session.apply({
         operations: [
-          { op: "replace", path: buildPointer(["events", index, "start"]), value: formatCalendarDate(from.add({ days: delta })) },
-          { op: "replace", path: buildPointer(["events", index, "end"]), value: formatCalendarDate(to.add({ days: delta })) },
+          { op: "replace", path: buildPointer(["events", index, "start"]), value: movedStart },
+          { op: "replace", path: buildPointer(["events", index, "end"]), value: movedEnd },
         ],
-        selectionAfter: selectionFor([eventId]),
+        selectionAfter: selectionForOccurrence(eventId, movedStart),
         origin: "event.move-day",
       });
     }
@@ -347,12 +409,14 @@ export function createCalendarEditor(
     const nextDay = parseCalendarInstant(`${day}T00:00`);
     if (from === null || to === null || currentDay === null || nextDay === null) return failure("event.invalid-instant");
     const delta = calendarMinutesBetween(currentDay, nextDay);
+    const movedStart = formatCalendarInstant(from.add({ minutes: delta }));
+    const movedEnd = formatCalendarInstant(to.add({ minutes: delta }));
     return session.apply({
       operations: [
-        { op: "replace", path: buildPointer(["events", index, "start"]), value: formatCalendarInstant(from.add({ minutes: delta })) },
-        { op: "replace", path: buildPointer(["events", index, "end"]), value: formatCalendarInstant(to.add({ minutes: delta })) },
+        { op: "replace", path: buildPointer(["events", index, "start"]), value: movedStart },
+        { op: "replace", path: buildPointer(["events", index, "end"]), value: movedEnd },
       ],
-      selectionAfter: selectionFor([eventId]),
+      selectionAfter: selectionForOccurrence(eventId, movedStart),
       origin: "event.move-day",
     });
   }
@@ -392,7 +456,7 @@ export function createCalendarEditor(
     }
     return session.apply({
       operations: [{ op: "replace", path: buildPointer(["events", index]), value: next }],
-      selectionAfter: selectionFor([event.id]),
+      selectionAfter: selectionForOccurrence(event.id, next.start),
       origin: intent.type,
     });
   }
@@ -451,7 +515,7 @@ export function createCalendarEditor(
           },
           { op: "add", path: `/events/${events.length}`, value: split },
         ],
-        selectionAfter: selectionFor([split.id]),
+        selectionAfter: selectionForEvents([...events, split], [split.id]),
         origin: intent.type,
       });
     }
@@ -470,7 +534,7 @@ export function createCalendarEditor(
         { op: "replace", path: buildPointer(["events", index, "recurrence"]), value: { ...recurrence, until } },
         { op: "add", path: `/events/${events.length}`, value: following },
       ],
-      selectionAfter: selectionFor([following.id]),
+      selectionAfter: selectionForEvents([...events, following], [following.id]),
       origin: intent.type,
     });
   }
@@ -494,7 +558,7 @@ export function createCalendarEditor(
           path: buildPointer(["events", index, "excludeDates"]),
           value: [...calendarEventExcludeDates(event), occurrenceDate],
         }],
-        selectionAfter: selectionFor([event.id]),
+        selectionAfter: selectionForEvents(events, [event.id]),
         origin: intent.type,
       });
     }
@@ -508,7 +572,7 @@ export function createCalendarEditor(
         path: buildPointer(["events", index, "recurrence"]),
         value: { ...recurrence, until },
       }],
-      selectionAfter: selectionFor([event.id]),
+      selectionAfter: selectionForEvents(events, [event.id]),
       origin: intent.type,
     });
   }
@@ -536,17 +600,13 @@ export function createCalendarEditor(
     const next = remaining[Math.min(firstRemoved, remaining.length - 1)];
     return session.apply({
       operations: indices.map((index) => ({ op: "remove", path: buildPointer(["events", index]) })),
-      selectionAfter: selectionFor(next ? [next.id] : []),
+      selectionAfter: selectionForEvents(remaining, next ? [next.id] : []),
       origin: "selection.remove",
     });
   }
 
   function copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null {
-    const source = occurrences ?? selectedEvents().map((event) => ({
-      eventId: event.id,
-      start: event.start,
-      end: event.end,
-    }));
+    const source = occurrences ?? selectedOccurrences();
     const items = source.flatMap((occurrence): CalendarClipboardItem[] => {
       const event = value().events.find((candidate) => candidate.id === occurrence.eventId);
       if (event === undefined || occurrence.start >= occurrence.end) return [];
@@ -565,6 +625,7 @@ export function createCalendarEditor(
     if (items.length === 0) return null;
     return {
       type: "application/vnd.interactive-os.calendar+json",
+      anchorOccurrenceStart: items[0]!.occurrenceStart,
       items,
       text: items.map((item) => `${item.event.start}\t${item.event.end}\t${item.event.title}`).join("\n"),
     };
@@ -593,7 +654,7 @@ export function createCalendarEditor(
     for (const index of events.map((event, index) => removals.has(event.id) ? index : -1).filter((index) => index >= 0).sort((a, b) => b - a)) {
       operations.push({ op: "remove", path: buildPointer(["events", index]) });
     }
-    return session.apply({ operations, selectionAfter: selectionFor([]), origin: "clipboard.cut" });
+    return session.apply({ operations, selectionAfter: emptyCalendarSelection(), origin: "clipboard.cut" });
   }
 
   function paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection> {
@@ -603,8 +664,10 @@ export function createCalendarEditor(
     const targetInstant = parseCalendarInstant(resolvedTarget);
     const targetDate = parseCalendarDate(calendarDatePart(resolvedTarget));
     if (targetInstant === null && targetDate === null) return failure("clipboard.invalid-target");
-    const timedAnchor = clipboard.items.map((item) => parseCalendarInstant(item.event.start)).find((item) => item !== null) ?? null;
-    const dateAnchor = parseCalendarDate(calendarDatePart(clipboard.items[0]!.event.start));
+    const timedAnchor = parseCalendarInstant(clipboard.anchorOccurrenceStart)
+      ?? clipboard.items.map((item) => parseCalendarInstant(item.event.start)).find((item) => item !== null)
+      ?? null;
+    const dateAnchor = parseCalendarDate(calendarDatePart(clipboard.anchorOccurrenceStart));
     if (dateAnchor === null) return failure("clipboard.invalid");
     const existing = [...value().events];
     const pasted: CalendarEvent[] = [];
@@ -636,7 +699,7 @@ export function createCalendarEditor(
     }
     return session.apply({
       operations: pasted.map((event, offset) => ({ op: "add", path: `/events/${existing.length + offset}`, value: event })),
-      selectionAfter: selectionFor(pasted.map((event) => event.id)),
+      selectionAfter: selectionForEvents([...existing, ...pasted], pasted.map((event) => event.id)),
       origin: "clipboard.paste",
     });
   }
@@ -644,6 +707,8 @@ export function createCalendarEditor(
   return {
     get snapshot() { return session.snapshot; },
     get selectedEvents() { return selectedEvents(); },
+    get selectedOccurrences() { return selectedOccurrences(); },
+    get primaryOccurrence() { return primaryOccurrence(); },
     dispatch,
     copy,
     cut: (occurrences) => cutEditingClipboard(
@@ -679,6 +744,77 @@ export function calendarVisibleEvents(document: CalendarDocument): ReadonlyArray
   const hidden = new Set(calendarDocumentCalendars(document).filter((item) => item.hidden).map((item) => item.id));
   if (hidden.size === 0) return events;
   return events.filter((event) => !hidden.has(event.calendarId));
+}
+
+export function calendarOccurrenceTopology(
+  document: CalendarDocument,
+  rangeStart: string,
+  rangeEnd: string,
+): CalendarOccurrenceTopologySnapshot {
+  const points = projectCalendarOccurrences(calendarVisibleEvents(document), rangeStart, rangeEnd)
+    .map((occurrence): CalendarOccurrencePoint => ({
+      eventId: occurrence.event.id,
+      occurrenceStart: occurrence.start,
+    }))
+    .sort((left, right) => compareCalendarOccurrencePoints(document.events, left, right));
+  return { points };
+}
+
+export function sameCalendarOccurrencePoint(
+  left: CalendarOccurrencePoint,
+  right: CalendarOccurrencePoint,
+): boolean {
+  return left.eventId === right.eventId && left.occurrenceStart === right.occurrenceStart;
+}
+
+function calendarOccurrenceOrderedTopology(
+  events: ReadonlyArray<CalendarEvent>,
+  visiblePoints: ReadonlyArray<CalendarOccurrencePoint>,
+): OrderedTopology<CalendarOccurrencePoint, CalendarOccurrencePoint> {
+  return {
+    equals: sameCalendarOccurrencePoint,
+    interval(anchor, focus) {
+      const start = visiblePoints.findIndex((point) => sameCalendarOccurrencePoint(point, anchor));
+      const end = visiblePoints.findIndex((point) => sameCalendarOccurrencePoint(point, focus));
+      if (start < 0 || end < 0) return [];
+      return visiblePoints.slice(Math.min(start, end), Math.max(start, end) + 1);
+    },
+    reconcilePoint: (point) => resolveCalendarOccurrence(events, point) === null ? null : point,
+  };
+}
+
+function compareCalendarOccurrencePoints(
+  events: ReadonlyArray<CalendarEvent>,
+  left: CalendarOccurrencePoint,
+  right: CalendarOccurrencePoint,
+): number {
+  const date = calendarDatePart(left.occurrenceStart).localeCompare(calendarDatePart(right.occurrenceStart));
+  if (date !== 0) return date;
+  const leftEvent = events.find((event) => event.id === left.eventId);
+  const rightEvent = events.find((event) => event.id === right.eventId);
+  const band = Number(leftEvent?.allDay !== true) - Number(rightEvent?.allDay !== true);
+  return band
+    || left.occurrenceStart.localeCompare(right.occurrenceStart)
+    || left.eventId.localeCompare(right.eventId);
+}
+
+function resolveCalendarOccurrence(
+  events: ReadonlyArray<CalendarEvent>,
+  point: CalendarOccurrencePoint,
+): CalendarOccurrenceSelection | null {
+  const event = events.find((candidate) => candidate.id === point.eventId);
+  if (event === undefined) return null;
+  const day = calendarDatePart(point.occurrenceStart);
+  const next = addCalendarDate(day, 1);
+  if (next === null) return null;
+  const occurrence = projectCalendarOccurrences([event], day, next).find((candidate) => (
+    candidate.start === point.occurrenceStart
+  ));
+  return occurrence === undefined ? null : {
+    eventId: event.id,
+    start: occurrence.start,
+    end: occurrence.end,
+  };
 }
 
 export function calendarNowMarker(nowInstant: string, day: string): { readonly minutes: number } | null {
@@ -1011,11 +1147,42 @@ function createUniqueId(events: ReadonlyArray<CalendarEvent>, createId: () => st
   throw new Error("createId did not produce a unique calendar event id");
 }
 
-function selectionFor(
-  keys: ReadonlyArray<string>,
-  primaryKey: string | null = keys.at(-1) ?? null,
+function emptyCalendarSelection(): CalendarSelection {
+  return { kind: "range", ranges: [], primaryIndex: null };
+}
+
+function selectionForOccurrence(eventId: string, occurrenceStart: string): CalendarSelection {
+  const point: CalendarOccurrencePoint = { eventId, occurrenceStart };
+  return {
+    kind: "range",
+    ranges: [{ anchor: point, focus: point, points: [point] }],
+    primaryIndex: 0,
+  };
+}
+
+function asCalendarSelection(selection: MaterializedRangeSelection<CalendarOccurrencePoint>): CalendarSelection {
+  return {
+    kind: "range",
+    ranges: selection.ranges.map((range) => ({
+      anchor: range.anchor,
+      focus: range.focus,
+      points: [...range.points],
+    })),
+    primaryIndex: selection.primaryIndex,
+  };
+}
+
+function selectionForEvents(
+  events: ReadonlyArray<CalendarEvent>,
+  eventIds: ReadonlyArray<string>,
 ): CalendarSelection {
-  return { kind: "explicit", keys: [...keys], primaryKey };
+  const byId = new Map(events.map((event) => [event.id, event]));
+  const ranges = eventIds.flatMap((eventId) => {
+    const event = byId.get(eventId);
+    if (event === undefined) return [];
+    return selectionForOccurrence(eventId, event.start).ranges;
+  });
+  return { kind: "range", ranges, primaryIndex: ranges.length === 0 ? null : ranges.length - 1 };
 }
 
 function success(snapshot: EditingSnapshot<CalendarSelection>): EditingResult<CalendarSelection> {

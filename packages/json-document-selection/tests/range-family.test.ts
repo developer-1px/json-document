@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   collapsedRangeSelection,
+  createMaterializedRangeSelectionFamily,
   createRangeSelectionFamily,
   emptyRangeSelection,
   type OrderedTopology,
@@ -74,5 +75,34 @@ describe("range selection family", () => {
       mapPoint: (point) => point === "b" ? "b2" : point,
     }, context);
     expect(result.state.ranges).toEqual([{ anchor: "a", focus: "b2" }]);
+  });
+});
+
+describe("materialized range selection family", () => {
+  test("keeps resolved points when the visible interval changes", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const first = { topology: topology(["a", "b", "c", "d"]) };
+    let state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, {
+      type: "collapse",
+      point: "a",
+    }, first).state;
+    state = family.transition(state, { type: "extend-primary", point: "c" }, first).state;
+
+    const nextView: OrderedTopology<string, string> = {
+      equals: (left, right) => left === right,
+      interval: (anchor, focus) => anchor === focus && ["c", "d"].includes(anchor) ? [anchor] : [],
+      reconcilePoint: (point) => ["a", "b", "c", "d"].includes(point) ? point : null,
+    };
+    expect(family.targets(state, { topology: nextView })).toEqual(["a", "b", "c"]);
+    expect(family.reconcile(state, { topology: nextView }).state).toEqual(state);
+  });
+
+  test("toggle removes a point from a materialized interval", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const context = { topology: topology(["a", "b", "c"]) };
+    let state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, { type: "collapse", point: "a" }, context).state;
+    state = family.transition(state, { type: "extend-primary", point: "c" }, context).state;
+    state = family.transition(state, { type: "toggle-point", point: "b" }, context).state;
+    expect(family.targets(state, context)).toEqual(["a", "c"]);
   });
 });

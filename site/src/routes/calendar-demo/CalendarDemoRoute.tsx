@@ -15,6 +15,7 @@ import {
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
+  calendarOccurrenceTopology,
   calendarRecurrenceWithFrequency,
   calendarRecurrenceWithInterval,
   calendarRecurrenceWithUntil,
@@ -31,6 +32,7 @@ import {
   type CalendarRecurrence,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
+import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
 import { createWebClipboardSurface, createWebJSONClipboardRepresentation, isWebEditableTarget } from "@interactive-os/json-document-web";
 import {
   useCalendarHand,
@@ -163,7 +165,6 @@ export function CalendarDemoRoute(props: {
   const timePreview = hand.timePreview;
   const allDayPreview = hand.allDayPreview;
   const monthPreview = hand.monthPreview;
-  const occurrenceStart = hand.occurrence.start;
   const occurrenceEnd = hand.occurrence.end;
   const scope = hand.scope;
   const setScope = hand.setScope;
@@ -219,13 +220,23 @@ export function CalendarDemoRoute(props: {
 
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
-  const selected = new Set(hand.snapshot.selection.keys);
   const selectedEvent = hand.selectedEvent;
+  const selectedSlot = selectedEvent === null ? hand.occurrence.start : null;
   const inspected = hand.inspectedInterval;
   const visibleEvents = calendarVisibleEvents(document);
   const paintedEvents = hand.paintedEvents;
   const timeGridCells = calendarCells(view === "day" ? "day" : "week", visibleDate);
   const days = timeGridCells.map((cell) => cell.date);
+  const selectionCells = view === "month" ? calendarCells("month", visibleDate) : timeGridCells;
+  const selectionInterval = calendarCellInterval(selectionCells);
+  const selectionTopology = selectionInterval === null
+    ? { points: [] }
+    : calendarOccurrenceTopology(document, selectionInterval.start, selectionInterval.end);
+  const isSelected = (event: CalendarEvent) => hand.isOccurrenceSelected(event.id, event.start);
+  const isPrimary = (event: CalendarEvent) => hand.isPrimaryOccurrence(event.id, event.start);
+  const selectEvent = (event: CalendarEvent, modifiers: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }) => (
+    hand.selectOccurrence(event.id, event.start, event.end, selectionModeFromModifiers(modifiers), selectionTopology)
+  );
   const nowInstant = formatCalendarInstant(Temporal.Now.plainDateTimeISO());
   const today = calendarDatePart(nowInstant);
   const yearMonths = calendarYearMonths(visibleDate);
@@ -289,6 +300,7 @@ export function CalendarDemoRoute(props: {
   const timeGrid = (
     <div
       role="grid"
+      aria-multiselectable="true"
       aria-label={view === "day" ? "Day" : "Week"}
       className={classes("min-w-[36rem]", !embedded && "flex min-h-0 flex-1 flex-col")}
       onPointerMove={(event) => {
@@ -324,6 +336,8 @@ export function CalendarDemoRoute(props: {
           <div
             key={`allday-${day}`}
             data-calendar-allday-day={day}
+            tabIndex={-1}
+            data-selected={selectedSlot === day ? "true" : undefined}
             className={classes("min-h-10", styles.weekCell())}
             style={{ gridRow: `2 / span ${allDayLaneCount}` }}
             onPointerDown={(event) => allDayPointerDown(event, day, null, null, null, null)}
@@ -340,7 +354,8 @@ export function CalendarDemoRoute(props: {
             style={{ gridColumn: `${item.startIndex + 2} / span ${item.span}`, gridRow: 2 + item.lane }}
           >
             <SelectableItem
-              selected={selected.has(item.event.id) && (occurrenceStart === null || occurrenceStart === item.event.start)}
+              selected={isSelected(item.event)}
+              data-primary={isPrimary(item.event) ? "true" : undefined}
               aria-label={item.event.title}
               data-calendar-color={calendarColor(document, item.event.calendarId)}
               data-preview={item.event.id === "preview" ? "true" : undefined}
@@ -352,6 +367,7 @@ export function CalendarDemoRoute(props: {
               onPointerUp={allDayPointerUp}
               onClick={(event) => {
                 event.stopPropagation();
+                selectEvent(item.event, event);
               }}
               onDoubleClick={(event) => {
                 event.stopPropagation();
@@ -360,7 +376,7 @@ export function CalendarDemoRoute(props: {
             >
               {item.event.title}
             </SelectableItem>
-            {item.event.id === "preview" || !selected.has(item.event.id) ? null : (
+            {item.event.id === "preview" || !isPrimary(item.event) ? null : (
               <>
                 <ResizeHandle
                   label={`Resize ${item.event.title} start`}
@@ -418,6 +434,7 @@ export function CalendarDemoRoute(props: {
               key={day}
               data-calendar-day={day}
               data-calendar-grid="time"
+              tabIndex={-1}
               className={classes("overflow-hidden", styles.weekCell())}
               style={{ height: (hourEnd - hourStart) * pxPerHour }}
               onPointerDown={(event) => timePointerDown(event, day, null, null, null, null)}
@@ -429,6 +446,16 @@ export function CalendarDemoRoute(props: {
               }}
               onPointerCancel={(event) => cancelTimePointer(event.pointerId)}
             >
+              {selectedSlot?.startsWith(`${day}T`) ? (
+                <div
+                  data-calendar-selected-slot={selectedSlot}
+                  className={styles.selectedSlot()}
+                  style={{
+                    top: (Number(selectedSlot.slice(11, 13)) * 60 + Number(selectedSlot.slice(14, 16)) - hourStart * 60) * (pxPerHour / 60),
+                    height: 15 * (pxPerHour / 60),
+                  }}
+                />
+              ) : null}
               {Array.from({ length: hourEnd - hourStart }, (_, index) => (
                 index === 0 ? null : (
                   <div
@@ -471,7 +498,8 @@ export function CalendarDemoRoute(props: {
                   }}
                 >
                   <SelectableItem
-                    selected={selected.has(item.event.id) && (occurrenceStart === null || occurrenceStart === item.event.start)}
+                    selected={isSelected(item.event)}
+                    data-primary={isPrimary(item.event) ? "true" : undefined}
                     aria-label={item.event.title}
                     data-calendar-event=""
                     data-calendar-color={calendarColor(document, item.event.calendarId)}
@@ -484,6 +512,7 @@ export function CalendarDemoRoute(props: {
                     onPointerUp={timePointerUp}
                     onClick={(event) => {
                       event.stopPropagation();
+                      selectEvent(item.event, event);
                     }}
                     onDoubleClick={(event) => {
                       event.stopPropagation();
@@ -493,7 +522,7 @@ export function CalendarDemoRoute(props: {
                     <span className="min-w-0 truncate">{item.event.title}</span>
                     <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
                   </SelectableItem>
-                  {item.event.id === "preview" || !selected.has(item.event.id) ? null : (
+                  {item.event.id === "preview" || !isPrimary(item.event) ? null : (
                     <>
                       <ResizeHandle
                         label={`Resize ${item.event.title} start`}
@@ -638,7 +667,7 @@ export function CalendarDemoRoute(props: {
             <div className={classes("min-w-0 flex-1", view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
             {view === "day" || view === "week" ? timeGrid : null}
             {view === "month" ? (
-              <div role="grid" aria-label="Month" className="min-w-[36rem]" onPointerMove={monthPointerMove}>
+              <div role="grid" aria-label="Month" aria-multiselectable="true" className="min-w-[36rem]" onPointerMove={monthPointerMove}>
                 <div className="grid grid-cols-7">
                   {weekdays.map((name) => (
                     <div key={name} role="columnheader" className={styles.monthHead()}>
@@ -666,9 +695,11 @@ export function CalendarDemoRoute(props: {
                             key={cell.date}
                             role="gridcell"
                             aria-label={cell.date}
-                            aria-selected={onDay.some((item) => selected.has(item.id))}
+                            aria-selected={onDay.some(isSelected) || selectedSlot === cell.date}
                             aria-current={cell.date === today ? "date" : undefined}
                             data-calendar-day={cell.date}
+                            tabIndex={-1}
+                            data-selected={selectedSlot === cell.date ? "true" : undefined}
                             className={classes(
                               styles.monthDay(),
                               cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
@@ -698,13 +729,14 @@ export function CalendarDemoRoute(props: {
                                 {calendarMonthDayLayout(paintedEvents, cell.date, Math.max(onDay.length, 1)).events.map((item) => (
                                   <SelectableItem
                                     key={`${item.id}:${item.start}`}
-                                    selected={selected.has(item.id) && (occurrenceStart === null || occurrenceStart === item.start)}
+                                    selected={isSelected(item)}
+                                    data-primary={isPrimary(item) ? "true" : undefined}
                                     aria-label={calendarEventLabel(item)}
                                     data-calendar-color={calendarColor(document, item.calendarId)}
                                     className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
                                     onClick={(event) => {
                                       event.stopPropagation();
-                                      hand.selectOccurrence(item.id, item.start, item.end);
+                                      selectEvent(item, event);
                                     }}
                                     onDoubleClick={(event) => {
                                       event.stopPropagation();
@@ -754,7 +786,8 @@ export function CalendarDemoRoute(props: {
                           }}
                         >
                           <SelectableItem
-                            selected={selected.has(item.event.id) && (occurrenceStart === null || occurrenceStart === item.event.start)}
+                            selected={isSelected(item.event)}
+                            data-primary={isPrimary(item.event) ? "true" : undefined}
                             aria-label={calendarEventLabel(item.event)}
                             data-calendar-color={calendarColor(document, item.event.calendarId)}
                             data-preview={item.event.id === "preview" ? "true" : undefined}
@@ -766,6 +799,7 @@ export function CalendarDemoRoute(props: {
                             onPointerUp={monthPointerUp}
                             onClick={(event) => {
                               event.stopPropagation();
+                              selectEvent(item.event, event);
                             }}
                             onDoubleClick={(event) => {
                               event.stopPropagation();
@@ -774,7 +808,7 @@ export function CalendarDemoRoute(props: {
                           >
                             <MonthEventCopy event={item.event} />
                           </SelectableItem>
-                          {item.event.id === "preview" || !isCalendarAllDay(item.event) || !selected.has(item.event.id) ? null : (
+                          {item.event.id === "preview" || !isCalendarAllDay(item.event) || !isPrimary(item.event) ? null : (
                             <>
                               {clipStart ? null : (
                                 <ResizeHandle

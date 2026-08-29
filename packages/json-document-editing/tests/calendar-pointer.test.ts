@@ -80,7 +80,7 @@ describe("interpretCalendarTimeGridPointer", () => {
 
   test("empty click clears selection instead of creating", () => {
     const editor = createCalendarEditor(initial);
-    expect(editor.snapshot.selection.primaryKey).toBe("standup");
+    expect(editor.selectedEvents[0]?.id).toBe("standup");
     const intent = interpretCalendarTimeGridPointer({
       originInstant: "2026-08-04T10:00",
       originEventId: null,
@@ -88,9 +88,9 @@ describe("interpretCalendarTimeGridPointer", () => {
       originHandle: null,
       targetInstant: "2026-08-04T10:00",
     });
-    expect(intent).toEqual({ type: "selection.set", eventIds: [] });
+    expect(intent).toEqual({ type: "selection.clear" });
     expect(editor.dispatch(intent!).ok).toBe(true);
-    expect(editor.snapshot.selection.primaryKey).toBeNull();
+    expect(editor.snapshot.selection.primaryIndex).toBeNull();
     expect((editor.snapshot.value as CalendarDocument).events).toHaveLength(initial.events.length);
   });
 
@@ -101,7 +101,7 @@ describe("interpretCalendarTimeGridPointer", () => {
       originEventStart: "2026-08-03T14:00",
       originHandle: "body",
       targetInstant: "2026-08-03T14:00",
-    })).toEqual({ type: "selection.set", eventIds: ["review"] });
+    })).toBeNull();
   });
 
   test("body drag moves the origin event and keeps duration", () => {
@@ -498,7 +498,7 @@ describe("interpretCalendarAllDayPointer", () => {
       originEventStart: null,
       originHandle: null,
       targetDay: "2026-08-10",
-    })).toEqual({ type: "selection.set", eventIds: [] });
+    })).toEqual({ type: "selection.clear" });
   });
 
   test("empty span drag creates an all-day range", () => {
@@ -523,7 +523,7 @@ describe("interpretCalendarAllDayPointer", () => {
       originEventStart: "2026-08-03",
       originHandle: "body",
       targetDay: "2026-08-03",
-    })).toEqual({ type: "selection.set", eventIds: ["holiday"] });
+    })).toBeNull();
   });
 
   test("body drag move-days the origin all-day event", () => {

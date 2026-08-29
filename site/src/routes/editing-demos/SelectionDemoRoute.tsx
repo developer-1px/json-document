@@ -4,12 +4,32 @@ import { SegmentedControl, SelectableItem } from "@interactive-os/json-document-
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
-import { collapsedRangeSelection } from "@interactive-os/json-document-selection";
+import {
+  collapsedRangeSelection,
+  createMaterializedRangeSelectionFamily,
+  type OrderedTopology,
+} from "@interactive-os/json-document-selection";
 import { selectionLabDocument, useSelectionLab } from "./useSelectionLab";
 
 export function SelectionDemoRoute() {
   const { editing, lastIntent, lastResult, mode, setMode, snapshot } = useSelectionLab();
   const canonicalInitialSelection = collapsedRangeSelection({ blockId: selectionLabDocument.blocks[0]!.id, offset: 0 });
+  const materializedFamily = createMaterializedRangeSelectionFamily<string>();
+  const materializedTopology: OrderedTopology<string, string> = {
+    equals: (left, right) => left === right,
+    interval: (anchor, focus) => {
+      const ids = selectionLabDocument.blocks.map((block) => block.id);
+      const start = ids.indexOf(anchor);
+      const end = ids.indexOf(focus);
+      return start < 0 || end < 0 ? [] : ids.slice(Math.min(start, end), Math.max(start, end) + 1);
+    },
+    reconcilePoint: (point) => selectionLabDocument.blocks.some((block) => block.id === point) ? point : null,
+  };
+  const materializedSeed = materializedFamily.transition(
+    { kind: "range", ranges: [], primaryIndex: null },
+    { type: "collapse", point: selectionLabDocument.blocks[0]!.id },
+    { topology: materializedTopology },
+  ).state;
 
   return (
     <DemoPage documentation={(
@@ -52,6 +72,7 @@ export function SelectionDemoRoute() {
           <Inspector label="Inspect result state" items={[
             { label: "selection", value: snapshot.selection, testId: "selection-demo-selection", size: "compact" },
             { label: "selection family seed", value: canonicalInitialSelection, testId: "selection-demo-family", size: "compact" },
+            { label: "materialized range", value: materializedSeed, testId: "selection-demo-materialized-range", size: "compact" },
             { label: "document.value", value: snapshot.value, testId: "selection-demo-document", size: "compact" },
             {
               label: "history",

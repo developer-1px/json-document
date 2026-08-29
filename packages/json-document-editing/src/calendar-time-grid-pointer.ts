@@ -14,7 +14,7 @@ export type CalendarTimeGridPointerRelease = {
 
 export type CalendarTimeGridPointerIntent = Extract<
   CalendarIntent,
-  { type: "event.create" } | { type: "selection.set" } | { type: "event.move" } | { type: "event.resize" }
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move" } | { type: "event.resize" }
 >;
 
 export function interpretCalendarTimeGridPointer(
@@ -27,7 +27,7 @@ export function interpretCalendarTimeGridPointer(
     if (originTime === null || targetTime === null) return null;
     const startTime = originTime <= targetTime ? originTime : targetTime;
     const endTime = originTime <= targetTime ? targetTime : originTime;
-    if (startTime === endTime) return { type: "selection.set", eventIds: [] };
+    if (startTime === endTime) return { type: "selection.clear" };
     return { type: "event.create", start: `${day}T${startTime}`, end: `${day}T${endTime}` };
   }
 
@@ -42,7 +42,7 @@ export function interpretCalendarTimeGridPointer(
   }
 
   if (release.originInstant === release.targetInstant) {
-    return { type: "selection.set", eventIds: [release.originEventId] };
+    return null;
   }
 
   const origin = parseCalendarInstant(release.originInstant);

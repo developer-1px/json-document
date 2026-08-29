@@ -20,6 +20,8 @@ import {
   type EditingResult,
   type CalendarMonthPointerRelease,
   type CalendarOccurrenceRange,
+  type CalendarOccurrenceSelection,
+  type CalendarOccurrenceTopologySnapshot,
   type CalendarTimeGridPointerRelease,
 } from "@interactive-os/json-document-editing";
 import { useEditingSnapshot } from "@interactive-os/json-document-react";
@@ -35,6 +37,7 @@ export interface CalendarHand {
   readonly snapshot: CalendarEditor["snapshot"];
   readonly document: CalendarDocument;
   readonly selectedEvent: CalendarEvent | null;
+  readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
   readonly inspectedInterval: { readonly start: string; readonly end: string } | null;
   readonly occurrence: CalendarOccurrenceRange;
   readonly scope: OccurrenceScope;
@@ -59,7 +62,15 @@ export interface CalendarHand {
   rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
   applySelectedPatch(patch: CalendarEventPatch): boolean;
   createInterval(start: string, end: string, options?: { readonly allDay?: boolean; readonly title?: string }): boolean;
-  selectOccurrence(eventId: string, start: string, end: string): boolean;
+  isOccurrenceSelected(eventId: string, occurrenceStart: string): boolean;
+  isPrimaryOccurrence(eventId: string, occurrenceStart: string): boolean;
+  selectOccurrence(
+    eventId: string,
+    start: string,
+    end: string,
+    mode?: "replace" | "extend" | "toggle",
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): boolean;
   removeSelected(): boolean;
   setCalendarHidden(calendarId: string, hidden: boolean): boolean;
   rememberSelection(): void;
@@ -73,6 +84,7 @@ export interface CalendarHand {
 export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOptions = {}): CalendarHand {
   const snapshot = useEditingSnapshot(editor);
   const selectedEvent = editor.selectedEvents[0] ?? null;
+  const selectedOccurrences = editor.selectedOccurrences;
   const [occurrence, setOccurrence] = useState<CalendarOccurrenceRange>(
     options.initialOccurrence ?? calendarOccurrenceFromSelection(selectedEvent),
   );
@@ -172,9 +184,30 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     }, { start, end });
   }
 
-  function selectOccurrence(eventId: string, start: string, end: string): boolean {
-    if (!dispatch({ type: "selection.set", eventIds: [eventId] })) return false;
-    setOccurrence({ start, end });
+  function isOccurrenceSelected(eventId: string, occurrenceStart: string): boolean {
+    return selectedOccurrences.some((item) => item.eventId === eventId && item.start === occurrenceStart);
+  }
+
+  function isPrimaryOccurrence(eventId: string, occurrenceStart: string): boolean {
+    const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
+    return primary?.eventId === eventId && primary.start === occurrenceStart;
+  }
+
+  function selectOccurrence(
+    eventId: string,
+    start: string,
+    end: string,
+    mode: "replace" | "extend" | "toggle" = "replace",
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): boolean {
+    if (!dispatch({
+      type: "selection.set",
+      point: { eventId, occurrenceStart: start },
+      mode,
+      ...(topology === undefined ? {} : { topology }),
+    })) return false;
+    const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
+    setOccurrence(primary === null ? { start: null, end: null } : { start: primary.start, end: primary.end });
     return true;
   }
 
@@ -216,18 +249,12 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     rememberSelection();
   }
 
-  function occurrenceSelection() {
-    return selectedEvent !== null && occurrence.start !== null && occurrence.end !== null
-      ? [{ eventId: selectedEvent.id, start: occurrence.start, end: occurrence.end }]
-      : undefined;
-  }
-
   function copy(): CalendarClipboard | null {
-    return editor.copy(occurrenceSelection());
+    return editor.copy();
   }
 
   function cut(): EditingResult<CalendarSelection> | null {
-    const cut = editor.cut(occurrenceSelection());
+    const cut = editor.cut();
     if (cut?.result.ok) rememberSelection();
     return cut?.result ?? null;
   }
@@ -242,6 +269,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     snapshot,
     document,
     selectedEvent,
+    selectedOccurrences,
     inspectedInterval: selectedEvent === null ? null : calendarOccurrenceForInspector(selectedEvent, occurrence),
     occurrence,
     scope,
@@ -266,6 +294,8 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     rememberIntent,
     applySelectedPatch,
     createInterval,
+    isOccurrenceSelected,
+    isPrimaryOccurrence,
     selectOccurrence,
     removeSelected,
     setCalendarHidden,

@@ -12,7 +12,7 @@ export type CalendarMonthPointerRelease = {
 
 export type CalendarMonthPointerIntent = Extract<
   CalendarIntent,
-  { type: "event.create" } | { type: "selection.set" } | { type: "event.move-day" }
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move-day" }
 >;
 
 export function interpretCalendarMonthPointer(
@@ -20,9 +20,9 @@ export function interpretCalendarMonthPointer(
 ): CalendarMonthPointerIntent | null {
   if (release.originDay === release.targetDay) {
     if (release.originEventId !== null) {
-      return { type: "selection.set", eventIds: [release.originEventId] };
+      return null;
     }
-    return { type: "selection.set", eventIds: [] };
+    return { type: "selection.clear" };
   }
   if (release.originEventId === null) {
     const span = calendarAllDaySpan(release.originDay, release.targetDay);

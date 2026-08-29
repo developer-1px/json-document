@@ -30,6 +30,7 @@ export {
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
+  calendarOccurrenceTopology,
   calendarTimedLayout,
   calendarVisibleEvents,
   createCalendarEditor,
@@ -181,8 +182,11 @@ export type {
   CalendarEvent,
   CalendarIntent,
   CalendarOccurrenceSelection,
+  CalendarOccurrencePoint,
+  CalendarOccurrenceTopologySnapshot,
   CalendarRecurrence,
   CalendarSelection,
+  CalendarSelectionRange,
   CalendarView,
 } from "./calendar.js";
 export type { CalendarOccurrence } from "./calendar-occurrence.js";

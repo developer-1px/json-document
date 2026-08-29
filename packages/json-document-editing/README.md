@@ -78,6 +78,14 @@ end, moves by day, deletes, and undoes on one document across day, week, month,
 and year views. Its `copy`, `cut`, and `paste` methods preserve occurrence
 duration and relative offsets, apply each mutation as one history transaction,
 and expose `calendarClipboardFormat` as the domain-owned validation contract.
+Calendar structural selection identifies an occurrence as
+`{ eventId, occurrenceStart }` and stores materialized range targets from
+`@interactive-os/json-document-selection`. `calendarOccurrenceTopology`
+projects the visible date interval into the canonical date → all-day/timed →
+start → stable-id order. Hosts pass that snapshot with `selection.set`; they do
+not reproduce sorting or modifier semantics. `selectedOccurrences`,
+`primaryOccurrence`, `copy`, and `cut` keep off-screen identities stable across
+view changes while rendering intersects them with the current projection.
 `cutEditingClipboard` is the canonical copy-before-remove lifecycle shared by
 the public editors; each domain still owns its projection and removal plan.
 `interpretCalendarTimeGridPointer`,

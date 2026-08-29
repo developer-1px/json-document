@@ -41,16 +41,16 @@ const initial: CalendarDocument = {
 describe("interpretCalendarMonthPointer", () => {
   test("empty same-day click clears selection instead of creating", () => {
     const editor = createCalendarEditor(initial);
-    expect(editor.snapshot.selection.primaryKey).toBe("standup");
+    expect(editor.selectedEvents[0]?.id).toBe("standup");
     const intent = interpretCalendarMonthPointer({
       originDay: "2026-08-10",
       originEventId: null,
       targetDay: "2026-08-10",
       eventsOnTargetDay: [],
     });
-    expect(intent).toEqual({ type: "selection.set", eventIds: [] });
+    expect(intent).toEqual({ type: "selection.clear" });
     expect(editor.dispatch(intent!).ok).toBe(true);
-    expect(editor.snapshot.selection.primaryKey).toBeNull();
+    expect(editor.snapshot.selection.primaryIndex).toBeNull();
     expect((editor.snapshot.value as CalendarDocument).events).toHaveLength(initial.events.length);
   });
 
@@ -60,7 +60,7 @@ describe("interpretCalendarMonthPointer", () => {
       originEventId: null,
       targetDay: "2026-08-03",
       eventsOnTargetDay: [{ id: "standup" }, { id: "review" }],
-    })).toEqual({ type: "selection.set", eventIds: [] });
+    })).toEqual({ type: "selection.clear" });
   });
 
   test("occupied same-day click selects the origin event, not the current selection", () => {
@@ -69,7 +69,7 @@ describe("interpretCalendarMonthPointer", () => {
       originEventId: "review",
       targetDay: "2026-08-03",
       eventsOnTargetDay: [{ id: "standup" }, { id: "review" }],
-    })).toEqual({ type: "selection.set", eventIds: ["review"] });
+    })).toBeNull();
   });
 
   test("dragging the origin event to another day moves that event", () => {

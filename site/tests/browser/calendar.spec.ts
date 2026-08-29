@@ -90,6 +90,66 @@ test("Calendar selection uses the native clipboard and one history across copy, 
   await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
 });
 
+test("Calendar pastes into a selected empty time slot", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  await event.click();
+  await page.keyboard.press("ControlOrMeta+c");
+
+  const target = timeGridDay(page, "2026-05-27");
+  await target.click({ position: { x: 20, y: 12 * 72 } });
+  await expect(target).toBeFocused();
+  await expect(page.locator('[data-calendar-selected-slot="2026-05-27T12:00"]')).toBeVisible();
+
+  await page.keyboard.press("ControlOrMeta+v");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
+  expect(await page.getByRole("button", { name: "고객사 싱크", exact: true }).allTextContents())
+    .toContain("고객사 싱크12:00");
+});
+
+test("Calendar occurrence selection shares replace, toggle, extend, focus, and clipboard semantics", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const first = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  const second = page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true });
+
+  await first.click();
+  await second.click({ modifiers: ["ControlOrMeta"] });
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(second).toHaveAttribute("data-selected", "true");
+  await expect(second).toHaveAttribute("data-primary", "true");
+  await first.focus();
+  await expect(first).toBeFocused();
+  await expect(first).not.toHaveAttribute("data-primary", "true");
+
+  await page.keyboard.press("ControlOrMeta+c");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("고객사 싱크");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("주간 사용량 리포트 요약");
+  await page.keyboard.press("ControlOrMeta+v");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toHaveCount(2);
+  expect(await page.getByRole("button", { name: "고객사 싱크", exact: true }).allTextContents())
+    .toEqual(["고객사 싱크10:00", "고객사 싱크11:00"]);
+  expect(await page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true }).allTextContents())
+    .toEqual(["주간 사용량 리포트 요약09:00", "주간 사용량 리포트 요약10:00"]);
+  await page.keyboard.press("ControlOrMeta+z");
+
+  await first.click();
+  await second.click({ modifiers: ["Shift"] });
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(second).toHaveAttribute("data-selected", "true");
+
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
+  await page.getByRole("radio", { name: "Month", exact: true }).click();
+  const month = page.getByRole("grid", { name: "Month", exact: true });
+  await expect(month.getByRole("gridcell", { name: "2026-05-25", exact: true })).toHaveAttribute("aria-selected", "true");
+  const monthFirst = month.getByRole("button").filter({ hasText: "경쟁사 가격 모니터링" }).first();
+  const monthSecond = month.getByRole("button").filter({ hasText: "매일 뉴스 브리핑" }).first();
+  await monthFirst.click();
+  await monthSecond.click({ modifiers: ["ControlOrMeta"] });
+  await expect(monthFirst).toHaveAttribute("data-selected", "true");
+  await expect(monthSecond).toHaveAttribute("data-selected", "true");
+});
+
 test("Calendar clipboard remains reachable from day, month, and recurring occurrence selections", async ({ page }) => {
   for (const { view, title } of [
     { view: "day", title: "고객사 싱크" },
@@ -107,12 +167,15 @@ test("Calendar clipboard remains reachable from day, month, and recurring occurr
   }
 
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  const occurrence = page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first();
-  await occurrence.click();
+  const occurrences = page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true });
+  await occurrences.nth(0).click();
+  await occurrences.nth(1).click({ modifiers: ["ControlOrMeta"] });
+  await expect(occurrences.nth(0)).toHaveAttribute("data-selected", "true");
+  await expect(occurrences.nth(1)).toHaveAttribute("data-selected", "true");
   await page.keyboard.press("ControlOrMeta+c");
-  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("매일 뉴스 브리핑");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText().then((text) => text.split("\n").length))).toBe(2);
   await page.keyboard.press("ControlOrMeta+v");
-  await expect(page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true })).toHaveCount(6);
+  await expect(page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true })).toHaveCount(7);
 });
 
 test("Calendar title editing preserves the input's native text clipboard", async ({ page }) => {
