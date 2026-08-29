@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-ui-primitives-react/src/date-values.ts");
-const eventLabelOwner = read("packages/json-document-ui-primitives-react/src/calendar-event-label.ts");
-const ownerIndex = read("packages/json-document-ui-primitives-react/src/index.ts");
+const owner = read("packages/json-document-calendar/src/date-values.ts");
+const eventLabelOwner = read("packages/json-document-calendar/src/calendar-event-label.ts");
+const ownerIndex = read("packages/json-document-calendar/src/index.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarTimeLabel");
@@ -15,7 +15,7 @@ requireCount(eventLabelOwner, "calendarTimeLabel(", 1);
 forbid(host, /function clockLabel/);
 forbid(host, /slice\(11, 16\)/);
 
-console.log("Calendar time label guard ok; UI Primitives owner, three Host consumers, and event-label consumer checked.");
+console.log("Calendar time label guard ok; Calendar owner, three Host consumers, and event-label consumer checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

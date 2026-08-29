@@ -1,5 +1,5 @@
 import { parseCalendarView, type CalendarView } from "@interactive-os/json-document-editing";
-import { parseHtmlDateValue } from "@interactive-os/json-document-ui-primitives-react";
+import { parseHtmlDateValue } from "@interactive-os/json-document-calendar";
 
 export type CalendarSearch = {
   readonly view: CalendarView;

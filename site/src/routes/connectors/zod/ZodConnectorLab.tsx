@@ -4,7 +4,7 @@ import { useEditing, useReactConnector } from "@interactive-os/json-document-rea
 import { createZodValidator } from "@interactive-os/json-document-zod";
 import * as z from "zod/v4";
 import { Inspector } from "../../../shared/ui/inspector";
-import { ActionButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const profileSchema = z.object({
@@ -68,13 +68,13 @@ export function ZodConnectorLab() {
           className={ui.field.control}
         />
       </SelectableItem>
-      <ActionButton
+      <Command
         kind="primary"
         onClick={commitDraft}
         className="mt-3"
       >
         Commit draft
-      </ActionButton>
+      </Command>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <JSONPanel label="Commit result" testId="zod-validation-result" value={result} />

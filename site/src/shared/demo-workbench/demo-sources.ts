@@ -9,10 +9,10 @@ import calendarPreviewSource from "../../../../packages/json-document-editing/sr
 import calendarSelectionSource from "../../../../packages/json-document-editing/src/calendar-selection.ts?raw";
 import calendarSelectionMoveSource from "../../../../packages/json-document-editing/src/calendar-selection-move.ts?raw";
 import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
-import calendarEventLabelSource from "../../../../packages/json-document-ui-primitives-react/src/calendar-event-label.ts?raw";
-import dateControlsSource from "../../../../packages/json-document-ui-primitives-react/src/date-controls.tsx?raw";
+import calendarEventLabelSource from "../../../../packages/json-document-calendar/src/calendar-event-label.ts?raw";
+import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
-import dateValuesSource from "../../../../packages/json-document-ui-primitives-react/src/date-values.ts?raw";
+import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
@@ -58,6 +58,9 @@ import uiMenuSource from "../../../../packages/json-document-ui-primitives-react
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
+import uiChoiceSource from "../../../../packages/json-document-ui-primitives-react/src/choice.tsx?raw";
+import uiInputControlsSource from "../../../../packages/json-document-ui-primitives-react/src/input-controls.tsx?raw";
+import uiPresentationsSource from "../../../../packages/json-document-ui-primitives-react/src/presentations.tsx?raw";
 import uiContextualControlsSource from "../../../../packages/json-document-ui-primitives-react/src/contextual-controls.tsx?raw";
 import uiProductShellSource from "../../../../packages/json-document-ui-primitives-react/src/product-shell.tsx?raw";
 import uiToolbarSource from "../../../../packages/json-document-ui-primitives-react/src/toolbar.tsx?raw";
@@ -79,7 +82,7 @@ import mentionSource from "../../../../packages/json-document-rich-text-mention/
 import mentionReactSource from "../../../../packages/json-document-rich-text-mention-react/src/index.tsx?raw";
 import webFileIntakeSource from "../../../../packages/json-document-web/src/file-intake.ts?raw";
 import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
-import uiFileSizeSource from "../../../../packages/json-document-ui-primitives-react/src/file-size.ts?raw";
+import uiFileSizeSource from "../../../../packages/json-document-file-intake/src/file-size.ts?raw";
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
@@ -156,10 +159,10 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-selection.ts", calendarSelectionSource],
   ["packages/json-document-editing/src/calendar-selection-move.ts", calendarSelectionMoveSource],
   ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
-  ["packages/json-document-ui-primitives-react/src/calendar-event-label.ts", calendarEventLabelSource],
-  ["packages/json-document-ui-primitives-react/src/date-controls.tsx", dateControlsSource],
+  ["packages/json-document-calendar/src/calendar-event-label.ts", calendarEventLabelSource],
+  ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
-  ["packages/json-document-ui-primitives-react/src/date-values.ts", dateValuesSource],
+  ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
@@ -206,6 +209,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
+  ["packages/json-document-ui-primitives-react/src/choice.tsx", uiChoiceSource],
+  ["packages/json-document-ui-primitives-react/src/input-controls.tsx", uiInputControlsSource],
+  ["packages/json-document-ui-primitives-react/src/presentations.tsx", uiPresentationsSource],
   ["packages/json-document-ui-primitives-react/src/contextual-controls.tsx", uiContextualControlsSource],
   ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
   ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
@@ -227,7 +233,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-rich-text-mention-react/src/index.tsx", mentionReactSource],
   ["packages/json-document-web/src/file-intake.ts", webFileIntakeSource],
   ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
-  ["packages/json-document-ui-primitives-react/src/file-size.ts", uiFileSizeSource],
+  ["packages/json-document-file-intake/src/file-size.ts", uiFileSizeSource],
   ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
@@ -416,7 +422,7 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "CalendarGrid",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+    sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-animation-react",
@@ -462,22 +468,22 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "HtmlDateField",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+    sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "DatePicker",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+    sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "DateRangePicker",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+    sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "RangeCalendar",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+    sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
@@ -487,47 +493,47 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarEventLabel",
-    sourcePath: "packages/json-document-ui-primitives-react/src/calendar-event-label.ts",
+    sourcePath: "packages/json-document-calendar/src/calendar-event-label.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarCells",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarCellInterval",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarMonthWeeks",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarTimeLabel",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "calendarYearMonths",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "visiblePeriodLabel",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "shiftVisibleDate",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+    sourcePath: "packages/json-document-calendar/src/date-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "startOfYear",
-    sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts",
+    sourcePath: "packages/json-document-calendar/src/date-values.ts",
   },
   {
     packageName: "@interactive-os/json-document",
@@ -692,7 +698,7 @@ const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "formatFileSize",
-    sourcePath: "packages/json-document-ui-primitives-react/src/file-size.ts",
+    sourcePath: "packages/json-document-file-intake/src/file-size.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",
@@ -714,12 +720,12 @@ const registeredPublicUsages = [
     symbol: "useListbox",
     sourcePath: "packages/json-document-ui-primitives-react/src/listbox.ts",
   },
-  ...(["ActionButton", "ToggleButton", "IconButton", "ChoiceChip", "SelectableItem", "SegmentedControl", "Tabs", "DisclosureButton"] as const).map((symbol) => ({
+  ...(["Command", "Toggle", "SelectableItem", "Tabs", "DisclosureButton"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
   })),
-  ...(["ProductShell", "ProductToolbar", "ProductCanvas", "ProductInspector"] as const).map((symbol) => ({
+  ...(["ProductShell", "ProductCanvas", "ProductInspector"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/product-shell.tsx",
@@ -946,9 +952,19 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
-    symbol: "Select",
-    sourcePath: "packages/json-document-ui-primitives-react/src/select.tsx",
+    symbol: "Choice",
+    sourcePath: "packages/json-document-ui-primitives-react/src/choice.tsx",
   },
+  ...(["Check", "Field", "Search", "ValueInput"] as const).map((symbol) => ({
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol,
+    sourcePath: "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+  })),
+  ...(["Popover", "Dialog"] as const).map((symbol) => ({
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol,
+    sourcePath: "packages/json-document-ui-primitives-react/src/presentations.tsx",
+  })),
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "Menu",

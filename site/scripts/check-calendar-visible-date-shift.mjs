@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-ui-primitives-react/src/date-controls.tsx");
-const ownerIndex = read("packages/json-document-ui-primitives-react/src/index.ts");
+const owner = read("packages/json-document-calendar/src/date-controls.tsx");
+const ownerIndex = read("packages/json-document-calendar/src/index.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "shiftVisibleDate");
@@ -14,7 +14,7 @@ requireText(host, "shiftVisibleDate(visibleDate, view, -1)");
 requireText(host, "shiftVisibleDate(visibleDate, view, 1)");
 forbid(host, /function shiftView/);
 
-console.log("Calendar visible-date shift guard ok; UI Primitives owner and Host consumers checked.");
+console.log("Calendar visible-date shift guard ok; Calendar owner and Host consumers checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

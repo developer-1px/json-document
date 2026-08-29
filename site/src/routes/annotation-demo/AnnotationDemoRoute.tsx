@@ -45,7 +45,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
-import { IconButton, Tabs, ToggleButton, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Tabs, Toggle, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -382,13 +382,13 @@ export function AnnotationDemoRoute() {
           </div>
           <nav aria-label="Annotation tools" className={annotationDemoStyles.toolDock()}>
             {(["select", "comment", "draw", "arrow", "like", "dislike"] as const).map((value) => (
-              <ToggleButton label={toolLabel(value)} tooltip={`${toolLabel(value)} (${toolShortcut(value)})`} pressed={tool === value} className={annotationDemoStyles.dockButton()} key={value} onClick={() => chooseTool(value)}>
+              <Toggle label={toolLabel(value)} tooltip={`${toolLabel(value)} (${toolShortcut(value)})`} pressed={tool === value} className={annotationDemoStyles.dockButton()} key={value} onClick={() => chooseTool(value)}>
                 <ToolIcon tool={value} />
-              </ToggleButton>
+              </Toggle>
             ))}
             <span className={annotationDemoStyles.dockDivider()} aria-hidden="true" />
-            <IconButton label="Delete annotation" className={annotationDemoStyles.dockButton()} disabled={selected === null} onClick={deleteSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Download annotated image" className={annotationDemoStyles.dockButton()} onClick={() => void downloadImage()}><Download aria-hidden="true" size={16} /></IconButton>
+            <Command label="Delete annotation" className={annotationDemoStyles.dockButton()} disabled={selected === null} onClick={deleteSelected}><Trash2 aria-hidden="true" size={16} /></Command>
+            <Command label="Download annotated image" className={annotationDemoStyles.dockButton()} onClick={() => void downloadImage()}><Download aria-hidden="true" size={16} /></Command>
           </nav>
         </div>
       </ProductShell>
@@ -462,7 +462,7 @@ function CommentComposer(props: {
         rows={1}
         value={draft}
       />
-      <IconButton
+      <Command
         label="Send comment"
         rootClassName="shrink-0"
         className={annotationDemoStyles.sendButton()}
@@ -471,7 +471,7 @@ function CommentComposer(props: {
         onMouseDown={(event) => event.preventDefault()}
       >
         <SendHorizontal aria-hidden="true" size={15} />
-      </IconButton>
+      </Command>
     </section>
   );
 }
@@ -711,8 +711,8 @@ function OutputPanel(props: {
       {props.output === "structured" ? (
         <div id="annotation-output-panel-structured" role="tabpanel" aria-labelledby="annotation-output-tab-structured" className="grid gap-2">
           <div className="flex flex-wrap gap-1">
-            <IconButton label="Save state" onClick={props.onSave}><Save aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Restore state" disabled={!props.canRestore} onClick={props.onRestore}><RotateCcw aria-hidden="true" size={16} /></IconButton>
+            <Command label="Save state" onClick={props.onSave}><Save aria-hidden="true" size={16} /></Command>
+            <Command label="Restore state" disabled={!props.canRestore} onClick={props.onRestore}><RotateCcw aria-hidden="true" size={16} /></Command>
             <a className={ui.interactive.link.prominent} download="annotation-request.json" href={props.structuredDownloadUrl}>Download JSON</a>
           </div>
           <CodeBlock

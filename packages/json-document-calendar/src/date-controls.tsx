@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { SegmentedControl } from "./controls.js";
+import { Choice } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
   addCalendarMonths,
@@ -213,7 +213,7 @@ export function DatePicker(props: {
       <button
         ref={triggerRef}
         type="button"
-        data-ui-control="action"
+        data-ui-control="command"
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label={`Choose ${props.label}`}
@@ -290,7 +290,7 @@ export function DateRangePicker(props: {
       <button
         ref={triggerRef}
         type="button"
-        data-ui-control="action"
+        data-ui-control="command"
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label={`Choose ${props.label}`}
@@ -337,7 +337,7 @@ function GrainSwitch(props: {
   readonly onGrainChange: (grain: CalendarGrain) => void;
 }): ReactNode {
   return (
-    <SegmentedControl
+    <Choice presentation="inline"
       label={props.label}
       value={props.grain}
       options={[

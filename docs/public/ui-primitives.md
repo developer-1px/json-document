@@ -16,8 +16,8 @@ Hands
 Host
 ```
 
-`@interactive-os/json-document-ui-primitives-react`는 현재 control, selection,
-disclosure, menu, select와 surface primitive를 제공합니다. Host는 같은 상태와
+`@interactive-os/json-document-ui-primitives-react`는 command, toggle, choice,
+navigation, disclosure, menu와 direct-manipulation primitive를 제공합니다. Host는 같은 상태와
 event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 
 제품의 option 목록, permission, workflow, persistence와 브랜드 디자인은 이
@@ -25,6 +25,7 @@ event 경계를 만족하는 외부 구현으로 교체할 수 있습니다.
 control의 의미·상태·focus·keyboard 계약을 다시 구현하지 않습니다.
 
 정본 구현: `packages/json-document-ui-primitives-react/src/controls.tsx`,
+`packages/json-document-ui-primitives-react/src/choice.tsx`,
 `packages/json-document-ui-primitives-react/src/menu.tsx`
 
 ```sh
@@ -33,7 +34,7 @@ npm i @interactive-os/json-document-ui-primitives-react
 
 ## Catalog
 
-토큰, control, shell, overlay, date, surface, wait animation을 한 페이지에서
+토큰, 역할 control, shell composition, presentation, surface를 한 페이지에서
 소비합니다.
 
 ```live-demo
@@ -63,18 +64,36 @@ const listbox = useListbox({
 active-descendant ARIA, pointer active와 Enter/Space activation을 소유합니다.
 `activeId`와 `selectedId`는 서로 독립이며 이동만으로 selection을 commit하지
 않습니다. `referenceProps`는 Composer처럼 DOM focus를 외부 editor에 유지하는
-경로에, `listboxProps`는 Select처럼 listbox 자체가 focus를 받는 경로에 씁니다.
+경로에, `listboxProps`는 Choice처럼 listbox 자체가 focus를 받는 경로에 씁니다.
 Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host가
 합성합니다.
 
 ## Control primitives
 
+공개 표면은 시각 형태가 아니라 사용자 역할로 고정합니다.
+
+| 역할 | 정본 primitive | 허용 presentation |
+| --- | --- | --- |
+| 명령 실행 | `Command` | label, icon |
+| 이진 상태 | `Toggle` | button, chip |
+| 단일 값 선택 | `Choice` | inline, popup |
+| 다중 포함 여부 | `Check` | checkbox |
+| surface 이동 | `Tabs` | tab list |
+| 내용 공개 | `DisclosureButton` | disclosure trigger |
+| 값 입력 | `Field`, `ValueInput` | text/multiline, continuous/stepped |
+| 검색 | `Search` | query + results |
+| 일시적 제시 | `Popover`, `Dialog` | anchored, modal/sheet |
+
+새로운 모양이 필요해도 같은 역할이면 이 표에 primitive를 추가하지 않고 기존
+primitive의 presentation을 확장합니다. Radio, segmented control, select, chip,
+icon button은 독립 역할이 아니므로 공개 primitive가 아닙니다.
+
 ```tsx
-<ActionButton kind="primary" onClick={save}>Save</ActionButton>
-<ToggleButton label="Filter ready rows" pressed={filtered} onClick={toggleFilter}>◉</ToggleButton>
-<IconButton label="Copy" onClick={copy}>⧉</IconButton>
-<ChoiceChip selected={density === "compact"} onClick={compact}>Compact</ChoiceChip>
-<SegmentedControl
+<Command kind="primary" onClick={save}>Save</Command>
+<Toggle label="Filter ready rows" pressed={filtered} onClick={toggleFilter}>◉</Toggle>
+<Command label="Copy" onClick={copy}>⧉</Command>
+<Toggle pressed={compact} presentation="chip" onClick={toggleCompact}>Compact</Toggle>
+<Choice presentation="inline"
   label="View"
   value={view}
   options={[{ id: "canvas", label: "Canvas" }, { id: "json", label: "JSON" }]}
@@ -96,12 +115,12 @@ Escape/Tab의 popup close와 focus restore, filtering과 option content는 Host�
 ```
 
 모든 button primitive는 기본 `type="button"`을 제공하고 명시적 override를
-보존합니다. `ActionButton`은 흐름을 진행하거나 완료하는 text CTA입니다.
-`ToggleButton`은 `pressed`를 `aria-pressed`에 투영하며 icon-only인 경우
-`label`을 visible tooltip과 accessible name으로 사용합니다. `IconButton`도
-`label`을 visible tooltip과 accessible name에 투영합니다. `ChoiceChip`은 선택을
-radio chrome 없이 표시하고 `SegmentedControl`과 `Tabs`는 단일 선택 및 roving
-keyboard focus를 소유합니다. 두 control은 option ID generic을 callback까지
+보존합니다. `Command`는 명령 실행 역할 하나를 소유하며 label과 icon은 presentation입니다.
+`Toggle`은 `pressed`를 `aria-pressed`에 투영하며 icon-only인 경우
+`label`을 visible tooltip과 accessible name으로 사용합니다. `Command`도
+`label`을 visible tooltip과 accessible name에 투영합니다. `Toggle`은 binary state를,
+`Choice`는 single choice를, `Tabs`는 navigation surface 전환을 소유합니다.
+`Choice`와 `Tabs`는 option ID generic을 callback까지
 보존하므로 Host는 선택 값을 다시 cast하지 않습니다. `DisclosureButton`은
 `expanded`와 `controls`를 disclosure ARIA에 연결하며 표현 markup은 Host가
 children으로 구성합니다.
@@ -140,7 +159,7 @@ contextual action의 폭이 변해도 핵심 탭의 위치가 이동하지 않�
 </ProductShell>
 ```
 
-영구 탐색은 `ProductToolbar` 흐름에 남고, 콘텐츠 상태에 따라 나타나는 action만
+영구 탐색은 `Toolbar` 흐름에 남고, 콘텐츠 상태에 따라 나타나는 action만
 `ContextualControls`가 감쌉니다. Toolbar 전체를 contextual lifecycle에 넣지
 않습니다. 순차 action 모음은 기본 `Toolbar` 흐름을, 위치가 변하면 안 되는 제품
 navigation은 `ToolbarLayout`의 세 region을 사용합니다. 고정 폭 placeholder나
@@ -150,10 +169,10 @@ absolute positioning을 Host에 만들지 않습니다. size·visual variant는 
 [Toolbar Usage](/widgets/toolbar)는 이 공개 API를 실제 history action collection으로
 소비합니다.
 
-## `Select`
+## `Choice`
 
 ```tsx
-<Select
+<Choice presentation="popup"
   label="Model"
   value={modelId}
   options={[{ id: "fast", label: "Fast" }]}
@@ -161,7 +180,7 @@ absolute positioning을 Host에 만들지 않습니다. size·visual variant는 
 />
 ```
 
-`options`는 `{ id, label, disabled? }` 배열입니다. `Select`는 listbox keyboard,
+`options`는 `{ id, label, disabled? }` 배열입니다. `Choice`는 listbox keyboard,
 typeahead, active option과 trigger focus 복원을 소유합니다. Host는 value와 option
 목록을 소유하며 `renderValue`, `renderOption`, `classNames`로 표현을 확장합니다.
 
@@ -174,6 +193,22 @@ typeahead, active option과 trigger focus 복원을 소유합니다. Host는 val
 `items`는 `{ id, label, disabled?, content? }` 배열입니다. `Menu`는 menu keyboard,
 logical focus와 action 뒤 focus 복원을 소유합니다. `restoreFocusOnAction={false}`로
 다음 surface가 focus를 인계받는 흐름을 선언할 수 있습니다.
+
+## Input and presentation roles
+
+```tsx
+<Check label="Select row" checked={selected} onCheckedChange={setSelected} />
+<Field label="Title" value={title} onValueChange={setTitle} />
+<Search label="Search documents" query={query} onQueryChange={setQuery} results={<Results />} />
+<ValueInput label="Zoom" value={zoom} min={25} max={200} presentation="continuous" onValueChange={setZoom} />
+<Popover label="Formatting" open={open} onOpenChange={setOpen} trigger="Format">…</Popover>
+<Dialog label="Delete document" open={confirming} onOpenChange={setConfirming}>…</Dialog>
+```
+
+`Check`는 desktop 표·목록의 다중 선택 예외, `Field`는 text input, `Search`는
+query와 result surface, `ValueInput`은 continuous/stepped value 역할을 각각
+소유합니다. `Popover`와 `Dialog`는 anchored/modal presentation lifecycle을
+소유하며 제품 copy와 contents는 Host가 제공합니다.
 
 ## `FileDropRegion`
 
@@ -207,30 +242,7 @@ Pointer capture lifecycle과 cursor를 소유하고 시작점 기준 `delta`를
 `preview | commit` phase로 전달합니다. 최소·최대 크기와 canonical commit은 Host
 정책입니다.
 
-## Date and time controls
-
-HTML이 이름 붙인 날짜·시간 값과 APG 캘린더 격자를 Primitive가 닫습니다.
-필드는 유효한 문자열만 commit하고, 잘못된 draft는 이전 값으로 돌아갑니다.
-
-```ts
-<HtmlDateField type="date" label="Date" value={date} onValueChange={setDate} />
-<HtmlDateField type="time" label="Time" value={time} onValueChange={setTime} />
-<HtmlDateField type="datetime-local" label="DateTime" value={dateTime} onValueChange={setDateTime} />
-<HtmlDateField type="month" label="Month" value={month} onValueChange={setMonth} />
-<HtmlDateField type="week" label="Week" value={week} onValueChange={setWeek} />
-<CalendarGrid label="Calendar" value={date} grain={grain} visibleDate={date} onValueChange={setDate} onGrainChange={setGrain} onVisibleDateChange={setDate} />
-<RangeCalendar label="Range" value={range} grain={grain} visibleDate={range.start} onValueChange={setRange} onGrainChange={setGrain} onVisibleDateChange={setVisible} />
-<DatePicker label="Event date" value={date} onValueChange={setDate} />
-<DateRangePicker label="Trip" value={range} onValueChange={setRange} />
-```
-
-`date`는 `YYYY-MM-DD`, `time`은 `HH:mm`, `datetime-local`은 `YYYY-MM-DDTHH:mm`,
-`month`는 `YYYY-MM`, `week`는 `YYYY-Www`입니다. Calendar와 RangeCalendar는
-주·월·연 입자를 바꾸고 화살표로 날을 옮깁니다. DatePicker와 DateRangePicker는
-필드와 격자가 같은 commit 값을 쓰며 Escape는 확정하지 않은 선택을 버립니다.
-
-```live-demo
-/demo/date-controls
-```
+Calendar field·grid·picker와 날짜 projection은
+[`@interactive-os/json-document-calendar` API](/docs/api/calendar)가 소유합니다.
 
 생성 대기의 시각 언어는 [Animation](animation.md)이 소유합니다.

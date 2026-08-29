@@ -32,8 +32,8 @@ if (calendarTemporalViolations(goodFixture, "conforming fixture").length !== 0) 
 const files = [
   ...collect(path.join(repositoryRoot, "packages/json-document-editing/src"), /^calendar.*\.ts$/),
   ...collect(path.join(repositoryRoot, "packages/json-document-calendar/src"), /\.[jt]sx?$/),
-  path.join(repositoryRoot, "packages/json-document-ui-primitives-react/src/date-values.ts"),
-  path.join(repositoryRoot, "packages/json-document-ui-primitives-react/src/date-controls.tsx"),
+  path.join(repositoryRoot, "packages/json-document-calendar/src/date-values.ts"),
+  path.join(repositoryRoot, "packages/json-document-calendar/src/date-controls.tsx"),
   path.join(repositoryRoot, "packages/json-document-web/src/calendar-input.ts"),
   ...collect(path.join(siteRoot, "src/routes/calendar-demo"), /\.[jt]sx?$/),
 ];

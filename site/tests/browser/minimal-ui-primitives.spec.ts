@@ -18,7 +18,7 @@ test("context actions keep a visible tooltip, focus ring hook, and compact hit t
   await expect(copy).not.toHaveCSS("box-shadow", "none");
 });
 
-test("canonical Tabs and SegmentedControl own roving keyboard selection", async ({ page }) => {
+test("canonical Tabs and inline Choice own roving keyboard selection", async ({ page }) => {
   await page.goto("/demo");
   const tablist = page.getByRole("tablist", { name: "Demo and source files" });
   const demo = tablist.getByRole("tab", { name: "Demo", exact: true });

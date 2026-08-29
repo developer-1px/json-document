@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createViewportPositionSession, type ViewportPositionSession } from "@interactive-os/json-document-affordance";
 import { createWebViewportPositionPorts } from "@interactive-os/json-document-web";
-import { ActionButton } from "@interactive-os/json-document-ui-primitives-react";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
@@ -174,7 +174,7 @@ export function ViewportPositionDemoRoute() {
             <div><dt>Source entries</dt><dd>{fixture.capture.sourceEntryCount.toLocaleString()}</dd></div>
             <div><dt>Dropped</dt><dd>{fixture.capture.droppedEntries}</dd></div>
           </dl>
-          <ActionButton onClick={submitCapturedPrompt}>{submitted ? "Replay captured response" : "Submit captured prompt"}</ActionButton>
+          <Command onClick={submitCapturedPrompt}>{submitted ? "Replay captured response" : "Submit captured prompt"}</Command>
           <p aria-live="polite" data-testid="viewport-status" className={ui.text.body}>{status}</p>
           <p className={ui.text.meta}>position control: {owned ? "active" : "released"}</p>
           <p className={ui.text.meta}>requested viewport offset: {requestedViewportOffset}px</p>

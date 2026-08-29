@@ -147,29 +147,29 @@
     @apply px-3 py-2;
   }
 
-  [data-ui-control="action"],
+  [data-ui-control="command"],
   [data-ui-control="toggle"],
-  [data-ui-control="choice-chip"],
+  [data-ui-control="toggle"][data-ui-presentation="chip"],
   [data-ui-segment="true"],
   [data-ui-tab="true"] {
     @apply cursor-pointer rounded-control border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-line-subtle/60 disabled:bg-transparent disabled:text-foreground-muted;
   }
 
-  [data-ui-control="action"] {
+  [data-ui-control="command"] {
     @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle;
   }
 
-  [data-ui-control="action"]:is([data-kind="primary"], [data-ui-kind="primary"]) {
+  [data-ui-control="command"]:is([data-kind="primary"], [data-ui-kind="primary"]) {
     @apply border-line-action-primary bg-background-action-primary text-foreground-inverse hover:border-foreground-strong hover:bg-background-action-primary-hovered;
   }
 
-  [data-ui-control="action"]:is([data-kind="danger"], [data-ui-kind="danger"]) {
+  [data-ui-control="command"]:is([data-kind="danger"], [data-ui-kind="danger"]) {
     @apply border-line-accent/60 bg-background-canvas text-foreground-accent hover:border-line-accent hover:bg-background-accent-subtle;
   }
 
-  [data-ui-control="action"]:disabled,
-  [data-ui-control="action"]:is([data-kind="primary"], [data-ui-kind="primary"]):disabled,
-  [data-ui-control="action"]:is([data-kind="danger"], [data-ui-kind="danger"]):disabled {
+  [data-ui-control="command"]:disabled,
+  [data-ui-control="command"]:is([data-kind="primary"], [data-ui-kind="primary"]):disabled,
+  [data-ui-control="command"]:is([data-kind="danger"], [data-ui-kind="danger"]):disabled {
     @apply border-line-subtle/60 bg-transparent text-foreground-muted hover:border-line-subtle/60 hover:bg-transparent hover:text-foreground-muted;
   }
 
@@ -183,6 +183,35 @@
 
   [data-ui-control="date-field"] input {
     @apply w-full min-w-0 rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
+  }
+
+  [data-ui-control="field"],
+  [data-ui-control="search"] input {
+    @apply rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
+  }
+
+  [data-ui-control="check"] {
+    @apply size-4 accent-background-accent;
+  }
+
+  [data-ui-control="value"][data-ui-presentation="stepped"] {
+    @apply inline-flex items-center gap-2 rounded-control bg-background-subtle p-0.5;
+  }
+
+  [data-ui-control="value"][data-ui-presentation="stepped"] button {
+    @apply grid size-8 place-items-center rounded-control border-0 bg-transparent text-foreground-default hover:bg-background-canvas disabled:text-foreground-disabled;
+  }
+
+  [data-ui-presentation="popover"] {
+    @apply relative inline-flex;
+  }
+
+  [data-ui-presentation="popover"] > [role="dialog"] {
+    @apply absolute left-0 top-full z-20 mt-1 min-w-40;
+  }
+
+  [data-ui-presentation="dialog-backdrop"] {
+    @apply fixed inset-0 z-40 grid place-items-center bg-foreground-strong/10;
   }
 
   [data-ui-control="date-picker"],
@@ -234,26 +263,26 @@
     outline-color: theme("colors.line-accent");
   }
 
-  [data-ui-control="choice-chip"],
+  [data-ui-control="toggle"][data-ui-presentation="chip"],
   [data-ui-segment="true"],
   [data-ui-tab="true"] {
     @apply border-transparent bg-transparent text-foreground-muted hover:bg-background-subtle hover:text-foreground-strong;
   }
 
-  [data-ui-control="choice-chip"][data-selected="true"],
+  [data-ui-control="toggle"][data-ui-presentation="chip"][data-selected="true"],
   [data-ui-segment="true"][aria-checked="true"],
   [data-ui-tab="true"][aria-selected="true"] {
     @apply border-line-subtle bg-background-canvas text-foreground-strong;
   }
 
-  [data-ui-control="segmented"] {
+  [data-ui-control="choice"][data-ui-presentation="inline"] {
     @apply inline-flex max-w-full min-w-0 flex-wrap items-center rounded-control bg-background-subtle p-0.5;
   }
 
   [data-ui-component="contextual-controls"] :is(
-    [data-ui-control="action"],
+    [data-ui-control="command"],
     [data-ui-control="toggle"],
-    [data-ui-control="icon"],
+    [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
     @apply rounded-control border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-background-subtle;
@@ -264,9 +293,9 @@
   }
 
   [data-ui-toolbar="product"] :is(
-    [data-ui-control="action"],
+    [data-ui-control="command"],
     [data-ui-control="toggle"],
-    [data-ui-control="icon"],
+    [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
     @apply rounded-control border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-background-subtle;
@@ -296,11 +325,11 @@
     transform: rotate(180deg);
   }
 
-  [data-ui-control="icon"] {
+  [data-ui-control="command"][data-ui-presentation="icon"] {
     @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-control border border-transparent bg-transparent text-foreground-muted outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-foreground-disabled;
   }
 
-  [data-ui-component="icon-action"] {
+  :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]) {
     @apply relative inline-flex;
   }
 
@@ -308,8 +337,8 @@
     @apply pointer-events-none absolute left-1/2 top-full z-50 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-control bg-foreground-strong px-2 py-1 text-overline font-medium text-background-canvas shadow-overlay;
   }
 
-  [data-ui-component="icon-action"]:hover [data-ui-tooltip="true"],
-  [data-ui-component="icon-action"]:focus-within [data-ui-tooltip="true"] {
+  :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]):hover [data-ui-tooltip="true"],
+  :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]):focus-within [data-ui-tooltip="true"] {
     @apply block;
   }
 }

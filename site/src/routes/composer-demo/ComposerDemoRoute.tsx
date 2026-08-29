@@ -1,7 +1,8 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { AudioLines, Clock3, FileText, Image, Plus, Search, X } from "lucide-react";
 import type { JSONValue } from "@interactive-os/json-document";
-import { ActionButton, FileDropRegion, IconButton, Menu, Select, SelectableItem, formatFileSize } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, FileDropRegion, Menu, Choice, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { formatFileSize } from "@interactive-os/json-document-file-intake";
 import { createRichTextNodeId, type RichTextNode } from "@interactive-os/json-document-rich-text";
 import {
   COMPOSER_HOST_PROFILE_V1,
@@ -94,7 +95,7 @@ export function ComposerDemoRoute() {
                     <span className="composer-file-name">{file.name}</span>
                     <span className="composer-file-size">{formatFileSize(file.size)}</span>
                   </span>
-                  <IconButton className="composer-file-remove" label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}><X aria-hidden="true" size={16} /></IconButton>
+                  <Command className="composer-file-remove" label={`${file.name} 제거`} onClick={() => composer.removeAttachment(file.id)}><X aria-hidden="true" size={16} /></Command>
                 </div>
               ))}
             </div>
@@ -125,7 +126,7 @@ export function ComposerDemoRoute() {
                 spellCheck={false}
               />
             </div>
-            <Select
+            <Choice presentation="popup"
               id="composer-model"
               label="모델 선택"
               value={hostConfig.models.find((option) => option.value === composer.model)?.id ?? hostConfig.models[0]!.id}
@@ -138,8 +139,8 @@ export function ComposerDemoRoute() {
               renderOption={(option) => <><strong>{option.label}</strong><small>{hostConfig.models.find((model) => model.id === option.id)?.description}</small></>}
               classNames={{ root: "composer-select-root", trigger: "composer-model-pill", listbox: "composer-layer composer-model-layer", focusedOption: "selected" }}
             />
-            <IconButton className="composer-icon-button" label="음성 입력"><AudioLines aria-hidden="true" size={16} /></IconButton>
-            <ActionButton kind="primary" aria-label="전송 (Enter)" className={`composer-send-button${composer.hasContent ? " is-active" : ""}`} disabled={!composer.hasContent} onClick={composer.submit}>전송</ActionButton>
+            <Command className="composer-icon-button" label="음성 입력"><AudioLines aria-hidden="true" size={16} /></Command>
+            <Command kind="primary" label="전송 (Enter)" className={`composer-send-button${composer.hasContent ? " is-active" : ""}`} disabled={!composer.hasContent} onClick={composer.submit}>전송</Command>
           </div>
 
           {composer.commandKind === "mention" ? (
@@ -159,9 +160,9 @@ export function ComposerDemoRoute() {
         </FileDropRegion>
 
         <div className="composer-action-chips" aria-label="추천 작업">
-          <ActionButton onClick={() => composer.insertText("경쟁사 최신 동향을 조사해줘")}><Search aria-hidden="true" size={16} /> 경쟁사 최신 동향 조사</ActionButton>
-          <ActionButton onClick={() => composer.insertText("전략 기획서 초안을 작성해줘")}><FileText aria-hidden="true" size={16} /> 전략 기획서 초안 작성</ActionButton>
-          <ActionButton onClick={() => composer.insertText("뉴스 브리핑을 매일 예약해줘")}><Clock3 aria-hidden="true" size={16} /> 뉴스 브리핑 예약 설정</ActionButton>
+          <Command onClick={() => composer.insertText("경쟁사 최신 동향을 조사해줘")}><Search aria-hidden="true" size={16} /> 경쟁사 최신 동향 조사</Command>
+          <Command onClick={() => composer.insertText("전략 기획서 초안을 작성해줘")}><FileText aria-hidden="true" size={16} /> 전략 기획서 초안 작성</Command>
+          <Command onClick={() => composer.insertText("뉴스 브리핑을 매일 예약해줘")}><Clock3 aria-hidden="true" size={16} /> 뉴스 브리핑 예약 설정</Command>
         </div>
         {submitted ? <p className="composer-submit-status" role="status">canonical Composer turn을 제출했습니다.</p> : null}
       </div>

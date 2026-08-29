@@ -11,10 +11,11 @@ const calendar = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const consumers = files("site/src/routes").map((path) => [path, read(path)]);
 const databaseConsumers = files("packages/json-document-database/src").map((path) => [path, read(path)]);
 
-for (const symbol of ["ProductShell", "ProductToolbar", "ProductCanvas", "ProductInspector"]) {
+for (const symbol of ["ProductShell", "ProductCanvas", "ProductInspector"]) {
   requireText(shellOwner, `export function ${symbol}`);
   requireText(ownerIndex, symbol);
 }
+if (ownerIndex.includes("ProductToolbar")) throw new Error("ProductToolbar가 Toolbar와 중복 export됩니다.");
 for (const symbol of ["Toolbar", "ToolbarGroup", "ToolbarLayout", "ToolbarRegion", "ToolbarSeparator", "ToolbarSpacer"]) {
   requireText(toolbarOwner, `export function ${symbol}`);
   requireText(ownerIndex, symbol);

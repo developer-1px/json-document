@@ -562,8 +562,8 @@
     "title": "Date controls - json-document",
     "description": "HTML date, time, month, week, datetime-local fields with calendar and range pickers.",
     "language": "ko",
-    "parentPath": "/docs/ui-primitives",
-    "navigationGroup": "UI Primitives",
+    "parentPath": "/docs/api/calendar",
+    "navigationGroup": "Hands",
     "sidebar": false
   },
   {

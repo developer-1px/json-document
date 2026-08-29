@@ -58,7 +58,7 @@ test("Toolbar binds Undo and Redo to canUndo and canRedo", async ({ page }) => {
   await expect(page.getByRole("option", { name: "Inbox" })).toBeVisible();
 });
 
-test("Toolbar consumes canonical ActionButton Press timing and pointer cancellation", async ({ page }) => {
+test("Toolbar consumes canonical Command press timing and pointer cancellation", async ({ page }) => {
   await page.goto("/widgets/toolbar");
   const custom = page.getByRole("button", { name: "Select Today" });
 

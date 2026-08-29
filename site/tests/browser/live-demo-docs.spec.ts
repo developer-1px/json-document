@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const pages = [
-  ["/editors", 6],
+  ["/editors", 7],
   ["/docs/topology", 1],
   ["/docs/selection", 1],
   ["/docs/clipboard", 1],
@@ -10,7 +10,7 @@ const pages = [
   ["/docs/object", 2],
   ["/docs/tree", 1],
   ["/docs/database", 1],
-  ["/docs/ui-primitives", 2],
+  ["/docs/ui-primitives", 1],
   ["/docs/animation", 1],
   ["/docs/adapter-keyboard", 1],
   ["/docs/adapter-clipboard", 1],
