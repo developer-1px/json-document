@@ -24,10 +24,7 @@ export const calendarDemoRecipe = tv({
     weekCell: "relative",
     resizeEdge: "absolute z-20 appearance-none border-0 bg-transparent p-0 shadow-none",
     period: "px-1 text-sm font-medium text-foreground-strong",
-    toolbarCluster: "flex items-center gap-1",
-    contextualHeader: "relative z-40 mb-1 flex min-h-9 items-center justify-center gap-1 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
-    contextualNavigation: "flex items-center gap-1",
-    contextualHistory: "absolute right-9 top-0 flex items-center gap-0.5",
+    contextualActions: "relative z-40 flex min-h-8 min-w-8 items-center justify-end gap-1 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
     contextualSidebar: "relative z-30 w-20 shrink-0 rounded-control px-1 py-2 outline-none transition-[width] focus-within:w-44 hover:w-44 focus-visible:ring-2 focus-visible:ring-line-accent/25",
     sidebarHint: "block text-center text-overline text-foreground-muted [writing-mode:vertical-rl]",
 

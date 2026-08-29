@@ -1,5 +1,7 @@
 export { Menu, MenuItemButton, type MenuItem } from "./menu.js";
 export { ContextualControls } from "./contextual-controls.js";
+export { ProductCanvas, ProductInspector, ProductShell, ProductToolbar } from "./product-shell.js";
+export { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarSpacer } from "./toolbar.js";
 export { Select, type SelectClassNames, type SelectOption } from "./select.js";
 export { ControlHandle, DragHandle, FileDropRegion, GridCell, ResizeHandle, useInteractionHandle } from "./surfaces.js";
 export type {

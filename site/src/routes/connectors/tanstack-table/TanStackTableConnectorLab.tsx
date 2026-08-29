@@ -27,7 +27,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
-import { IconButton, SelectableItem, ToggleButton } from "@interactive-os/json-document-ui-primitives-react";
+import { IconButton, SelectableItem, ToggleButton, Toolbar, ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -131,12 +131,12 @@ export function TanStackTableConnectorLab() {
       {...clipboardSurface}
       className={classes("p-4", ui.surface.raised)}
     >
-      <div className="mb-3 flex flex-wrap gap-2" role="toolbar" aria-label="TanStack view and editing actions">
+      <Toolbar className="mb-3 gap-2" label="TanStack view and editing actions">
         <Control label="Ready rows" icon={<ListFilter aria-hidden="true" size={16} />} active={columnFilters.length > 0} onClick={() => setColumnFilters((current) => current.length === 0 ? [{ id: "status", value: "Ready" }] : [])} />
         <Control label="Score descending" icon={<ArrowDownWideNarrow aria-hidden="true" size={16} />} active={sorting.length > 0} onClick={() => setSorting((current) => current.length === 0 ? [{ id: "score", desc: true }] : [])} />
         <Control label="Score first" icon={<Columns3 aria-hidden="true" size={16} />} active={columnOrder[0] === "score"} onClick={() => setColumnOrder((current) => current[0] === "score" ? ["name", "status", "score"] : ["score", "name", "status"])} />
         <Control label="Hide status" icon={<EyeOff aria-hidden="true" size={16} />} active={columnVisibility.status === false} onClick={() => setColumnVisibility((current) => ({ ...current, status: current.status === false }))} />
-        <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
+        <ToolbarSeparator />
         <Control label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
         <Control label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
         <Control label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} disabled={clipboard === null} onClick={pasteSelection} />
@@ -146,7 +146,7 @@ export function TanStackTableConnectorLab() {
         )} />
         <Control label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} disabled={commands.undo.disabled} onClick={() => run(binding.undo, "Undone")} />
         <Control label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} disabled={commands.redo.disabled} onClick={() => run(binding.redo, "Redone")} />
-      </div>
+      </Toolbar>
 
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>
         <output aria-live="polite">{announcement}</output>

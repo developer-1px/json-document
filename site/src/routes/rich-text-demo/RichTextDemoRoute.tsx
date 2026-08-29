@@ -12,7 +12,7 @@ import {
 import { RichTextEditorSurface, RichTextRenderer } from "@interactive-os/json-document-rich-text-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { ActionButton, IconButton, SelectableItem, Toolbar, ToolbarSpacer } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { richTextRecipe } from "./rich-text-styles";
@@ -157,12 +157,13 @@ export function RichTextDemoRoute() {
       </PageHeader>
 
     )}>
-      <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
+      <Toolbar className={classes("mb-3 gap-2 p-2", ui.surface.workspace)} label="Rich Text history">
         <ActionButton preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
         <IconButton preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></IconButton>
         <IconButton preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></IconButton>
-        <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
-      </div>
+        <ToolbarSpacer />
+        <span className={ui.text.meta} aria-live="polite">last: {lastAction}</span>
+      </Toolbar>
 
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="group" aria-label="Official Rich Text intent proofs">
         <span className={ui.text.meta}>Schema-aware intent proofs</span>

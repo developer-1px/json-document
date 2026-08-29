@@ -5,7 +5,8 @@ import { createContentEditableAdapter } from "@interactive-os/json-document-cont
 import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Inspector } from "../../shared/ui/inspector";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 
 const initial = { title: "여기에서 함께 편집해 보세요." };
@@ -48,7 +49,7 @@ export function CollaborationDemoRoute() {
         Collaboration runtime과 native-input DOM lease를 하나의 canonical document surface로 조립합니다.
       </PageHeader>
     )}>
-      <ProductApp>
+      <ProductShell>
         <section className="grid gap-4 p-4" aria-label="Collaborative text surface">
           <div className="flex items-center justify-between gap-3">
             <p className={classes("m-0", ui.text.meta)}>로컬 입력과 원격 change가 같은 document로 수렴합니다.</p>
@@ -67,7 +68,7 @@ export function CollaborationDemoRoute() {
             { label: "replica", value: replica, testId: "collaboration-replica", size: "compact" },
           ]} />
         </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

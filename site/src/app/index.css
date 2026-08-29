@@ -89,6 +89,50 @@
 }
 
 @layer components {
+  [data-ui-component="product-shell"] {
+    @apply rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface;
+  }
+
+  [data-ui-component="product-shell"][data-fill="true"] {
+    @apply flex h-full min-h-0 flex-col rounded-none shadow-none;
+  }
+
+  [data-ui-component="toolbar"] {
+    @apply flex min-w-0 flex-wrap items-center gap-1;
+  }
+
+  [data-ui-toolbar="product"] {
+    @apply shrink-0 border-b border-line-subtle/40 px-2 py-1;
+  }
+
+  [data-ui-component="toolbar-group"] {
+    @apply flex min-w-0 items-center gap-1;
+  }
+
+  [data-ui-component="toolbar-separator"] {
+    @apply mx-1 h-5 w-px shrink-0 bg-line-subtle/40;
+  }
+
+  [data-ui-component="toolbar-spacer"] {
+    @apply min-w-2 flex-1;
+  }
+
+  [data-ui-component="product-canvas"] {
+    @apply p-3;
+  }
+
+  [data-ui-component="product-shell"][data-fill="true"] > [data-ui-component="product-canvas"] {
+    @apply min-h-0 flex-1;
+  }
+
+  [data-ui-component="product-canvas"][data-scroll="auto"] {
+    @apply overflow-auto;
+  }
+
+  [data-ui-component="product-inspector"] {
+    @apply border-t border-line-subtle/40 px-3 py-2;
+  }
+
   [data-ui-control="action"],
   [data-ui-control="toggle"],
   [data-ui-control="choice-chip"],
@@ -147,6 +191,19 @@
   }
 
   [data-ui-component="contextual-controls"] [data-ui-segment="true"][aria-checked="true"] {
+    @apply border-transparent bg-background-subtle shadow-none;
+  }
+
+  [data-ui-toolbar="product"] :is(
+    [data-ui-control="action"],
+    [data-ui-control="toggle"],
+    [data-ui-control="icon"],
+    [data-ui-segment="true"]
+  ) {
+    @apply rounded-control border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-background-subtle;
+  }
+
+  [data-ui-toolbar="product"] [data-ui-segment="true"][aria-checked="true"] {
     @apply border-transparent bg-background-subtle shadow-none;
   }
 

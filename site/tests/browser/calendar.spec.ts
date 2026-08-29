@@ -37,14 +37,14 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   expect(afterResize).not.toBeNull();
   expect(afterResize!.width).toBeGreaterThan(beforeResize!.width);
 
-  await page.getByLabel("Calendar controls", { exact: true }).focus();
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Month", exact: true }).click();
   const emptyMonthDay = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
   await emptyMonthDay.dblclick();
   const month = page.getByRole("grid", { name: "Month", exact: true });
   await expect(month.getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
-  await page.getByLabel("Calendar controls", { exact: true }).focus();
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Year", exact: true }).click();
   const may = page.getByRole("region", { name: "2026-05", exact: true });
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
@@ -52,7 +52,7 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
   await expect(page.getByRole("grid", { name: "Month", exact: true }).getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
-  await page.getByLabel("Calendar controls", { exact: true }).focus();
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Year", exact: true }).click();
   await page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Day", exact: true })).toBeVisible();

@@ -30,7 +30,8 @@ import {
 import { GridCell } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
 import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -171,7 +172,7 @@ export function SheetDemo() {
         >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
 
     )}>
-        <ProductApp
+        <ProductShell
           toolbarLabel="Sheet actions"
           toolbar={(
             <>
@@ -249,7 +250,7 @@ export function SheetDemo() {
             </table>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
           </section>
-        </ProductApp>
+        </ProductShell>
     </DemoPage>
   );
 }

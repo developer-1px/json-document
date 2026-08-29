@@ -14,11 +14,16 @@ import {
   GridCell,
   IconButton,
   Menu,
+  ProductShell,
   ResizeHandle,
   Select,
   SelectableItem,
   SegmentedControl,
   Tabs,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSeparator,
+  ToolbarSpacer,
   ToggleButton,
   useListbox,
 } from "../src/index.js";
@@ -26,6 +31,38 @@ import {
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("ProductShell and Toolbar expose one structural composition contract", () => {
+    render(
+      <ProductShell
+        fill
+        toolbar={(
+          <>
+            <ToolbarGroup label="Navigation"><ActionButton>Today</ActionButton></ToolbarGroup>
+            <ToolbarSeparator />
+            <ToolbarSpacer />
+            <ToolbarGroup label="History"><IconButton label="Undo">↶</IconButton></ToolbarGroup>
+          </>
+        )}
+        toolbarLabel="Calendar controls"
+        inspector={<p>Inspector</p>}
+      >
+        <p>Calendar content</p>
+      </ProductShell>,
+    );
+
+    expect(screen.getByRole("toolbar", { name: "Calendar controls" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Navigation" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "History" })).toBeTruthy();
+    expect(screen.getByRole("separator").getAttribute("aria-orientation")).toBe("vertical");
+    expect(screen.getByText("Calendar content").parentElement?.dataset.uiComponent).toBe("product-canvas");
+    expect(screen.getByText("Inspector").parentElement?.dataset.uiComponent).toBe("product-inspector");
+  });
+
+  test("Toolbar can own a standalone action collection", () => {
+    render(<Toolbar label="History"><ActionButton>Undo</ActionButton></Toolbar>);
+    expect(screen.getByRole("toolbar", { name: "History" })).toBeTruthy();
+  });
+
   test("ContextualControls reveals the same capability by pointer approach and keyboard focus", () => {
     const capabilities = [{ id: "navigate", phases: ["approach"] }] as const;
     render(

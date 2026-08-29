@@ -4,7 +4,7 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
 
-  await page.getByLabel("Calendar controls", { exact: true }).focus();
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("button", { name: "Create", exact: true }).click();
   const inspector = page.getByRole("region", { name: "Event" });
   await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
@@ -21,7 +21,7 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
 
 test("Calendar c hotkey creates a timed event on the visible date", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByLabel("Calendar controls", { exact: true }).focus();
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.keyboard.press("c");
   const inspector = page.getByRole("region", { name: "Event" });
   await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
@@ -31,7 +31,7 @@ test("Calendar c hotkey creates a timed event on the visible date", async ({ pag
 
 test("Calendar view and period hotkeys use the canonical Web keymap", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByLabel("Calendar controls", { exact: true }).focus();
+  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.keyboard.press("m");
   await expect(page).toHaveURL(/view=month/);
   await expect(page.getByRole("gridcell", { name: "2026-05-25", exact: true })).toBeVisible();

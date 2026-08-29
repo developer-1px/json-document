@@ -524,8 +524,8 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
   await page.goto("/demo/tree");
 
   await expect(page.locator("[data-page-header]")).toHaveCount(1);
-  await expect(page.locator("[data-product-app]")).toHaveCount(1);
-  const app = page.locator("[data-product-app]");
+  await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(1);
+  const app = page.locator('[data-ui-component="product-shell"]');
   await expect(app.getByRole("toolbar", { name: "Tree actions" })).toBeVisible();
   await expect(app.getByRole("treeitem").or(app.getByText("Fruit", { exact: true })).first()).toBeVisible();
   await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
@@ -534,7 +534,7 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
   ))).toBe("rgba(0, 0, 0, 0)");
 
   await page.goto("/demo/selection");
-  await expect(page.locator("[data-product-app]")).toHaveCount(0);
+  await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(0);
 });
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {

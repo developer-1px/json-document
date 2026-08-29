@@ -22,7 +22,8 @@ import {
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
 import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -87,7 +88,7 @@ export function KanbanDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
@@ -169,7 +170,7 @@ export function KanbanDemoRoute() {
           </div>
         ))}
       </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

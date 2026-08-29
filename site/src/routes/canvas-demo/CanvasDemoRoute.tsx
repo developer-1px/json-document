@@ -34,7 +34,8 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
 import { IconButton, MenuItemButton, SelectableItem, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -636,7 +637,7 @@ export function CanvasDemoRoute() {
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
         toolbar={objectDemoColors.map((color) => (
@@ -805,7 +806,7 @@ export function CanvasDemoRoute() {
             </div>
           ) : null}
         </div>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

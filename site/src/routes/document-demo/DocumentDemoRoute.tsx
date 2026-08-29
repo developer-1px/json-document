@@ -28,7 +28,8 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
 import { ActionButton, ChoiceChip, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -168,7 +169,7 @@ export function DocumentDemoRoute() {
         >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
 
     )}>
-        <ProductApp
+        <ProductShell
           toolbarLabel="Document actions"
           toolbar={(
             <>
@@ -258,7 +259,7 @@ export function DocumentDemoRoute() {
             </div>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
-        </ProductApp>
+        </ProductShell>
     </DemoPage>
   );
 }

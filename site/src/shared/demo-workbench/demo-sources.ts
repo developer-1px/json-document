@@ -55,6 +55,8 @@ import uiMenuSource from "../../../../packages/json-document-ui-primitives-react
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
+import uiProductShellSource from "../../../../packages/json-document-ui-primitives-react/src/product-shell.tsx?raw";
+import uiToolbarSource from "../../../../packages/json-document-ui-primitives-react/src/toolbar.tsx?raw";
 import uiListboxSource from "../../../../packages/json-document-ui-primitives-react/src/listbox.ts?raw";
 import composerModelSource from "../../../../packages/json-document-composer/src/model.ts?raw";
 import composerSchemaSource from "../../../../packages/json-document-composer/src/schema.ts?raw";
@@ -196,6 +198,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
+  ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
+  ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
   ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
   ["packages/json-document-composer/src/model.ts", composerModelSource],
   ["packages/json-document-composer/src/schema.ts", composerSchemaSource],
@@ -623,6 +627,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
+  })),
+  ...(["ProductShell", "ProductToolbar", "ProductCanvas", "ProductInspector"] as const).map((symbol) => ({
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol,
+    sourcePath: "packages/json-document-ui-primitives-react/src/product-shell.tsx",
+  })),
+  ...(["Toolbar", "ToolbarGroup", "ToolbarSeparator", "ToolbarSpacer"] as const).map((symbol) => ({
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol,
+    sourcePath: "packages/json-document-ui-primitives-react/src/toolbar.tsx",
   })),
   {
     packageName: "@interactive-os/json-document-affordance",

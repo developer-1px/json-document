@@ -46,6 +46,9 @@ import {
   SegmentedControl,
   Select,
   SelectableItem,
+  ToolbarGroup,
+  ToolbarSeparator,
+  ToolbarSpacer,
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
@@ -60,7 +63,7 @@ import {
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
-import { ProductApp } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { CalendarDemoNavigator } from "./calendar-demo-navigator";
 import { calendarSearchDefaults } from "./calendar-search";
@@ -500,64 +503,76 @@ export function CalendarDemoRoute(props: {
 
   return (
     <DemoSurface>
-      <ProductApp
+      <ProductShell
         fill={!embedded}
         canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
-      >
-        <div className="relative flex h-full min-h-0 min-w-0 flex-col">
-          <ContextualControls
-            aria-label="Calendar controls"
-            tabIndex={0}
-            className={styles.contextualHeader()}
-            selected={selectedEvent !== null}
-            editing={hand.renaming}
-            capabilities={[
-              { id: "create", phases: ["approach", "selected", "editing"] },
-              { id: "history", phases: ["approach", "selected"] },
-              { id: "delete", phases: ["selected", "editing"] },
-            ] as const}
-          >
-            {(context) => (
-              <>
-                <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
-                  monthNames: months,
-                  weekSeparator: " – ",
-                })}</span>
-                <div className={styles.contextualNavigation()}>
-                  <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
-                    <ChevronLeft aria-hidden="true" size={16} />
-                  </IconButton>
-                  <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
-                    <ChevronRight aria-hidden="true" size={16} />
-                  </IconButton>
-                  <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
-                  <SegmentedControl
-                    label="View"
-                    value={view}
-                    options={[
-                      { id: "day", label: "Day" },
-                      { id: "week", label: "Week" },
-                      { id: "month", label: "Month" },
-                      { id: "year", label: "Year" },
-                    ]}
-                    onValueChange={setView}
-                  />
+        toolbarLabel="Calendar controls"
+        toolbar={(
+          <>
+            <ToolbarGroup label="Period navigation">
+              <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
+                monthNames: months,
+                weekSeparator: " – ",
+              })}</span>
+              <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
+                <ChevronLeft aria-hidden="true" size={16} />
+              </IconButton>
+              <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
+                <ChevronRight aria-hidden="true" size={16} />
+              </IconButton>
+            </ToolbarGroup>
+            <ToolbarSeparator />
+            <ToolbarGroup label="Date shortcuts">
+              <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
+            </ToolbarGroup>
+            <ToolbarSeparator />
+            <ToolbarGroup label="Calendar view">
+              <SegmentedControl
+                label="View"
+                value={view}
+                options={[
+                  { id: "day", label: "Day" },
+                  { id: "week", label: "Week" },
+                  { id: "month", label: "Month" },
+                  { id: "year", label: "Year" },
+                ]}
+                onValueChange={setView}
+              />
+            </ToolbarGroup>
+            <ToolbarSpacer />
+            <ContextualControls
+              aria-label="Calendar contextual actions"
+              tabIndex={0}
+              className={styles.contextualActions()}
+              selected={selectedEvent !== null}
+              editing={hand.renaming}
+              capabilities={[
+                { id: "create", phases: ["approach", "selected", "editing"] },
+                { id: "history", phases: ["approach", "selected"] },
+                { id: "delete", phases: ["selected", "editing"] },
+              ] as const}
+            >
+              {(context) => (
+                <>
                   {context.visible.includes("create") ? (
                     <ActionButton onClick={createOnVisibleDate}>Create</ActionButton>
                   ) : null}
-                </div>
-                {context.visible.includes("history") ? (
-                  <div className={styles.contextualHistory()}>
-                    <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
-                    <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
-                  </div>
-                ) : null}
-                {context.visible.includes("delete") ? (
-                  <IconButton label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
-                ) : null}
-              </>
-            )}
-          </ContextualControls>
+                  {context.visible.includes("history") ? (
+                    <ToolbarGroup label="History">
+                      <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
+                      <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
+                    </ToolbarGroup>
+                  ) : null}
+                  {context.visible.includes("delete") ? (
+                    <IconButton label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
+                  ) : null}
+                </>
+              )}
+            </ContextualControls>
+          </>
+        )}
+      >
+        <div className="relative flex h-full min-h-0 min-w-0 flex-col">
           <div className="flex min-h-0 min-w-0 flex-1 gap-4">
             <ContextualControls
               aria-label="Calendar sources"
@@ -918,7 +933,7 @@ export function CalendarDemoRoute(props: {
             )}
           </div>
         </div>
-      </ProductApp>
+      </ProductShell>
     </DemoSurface>
   );
 }

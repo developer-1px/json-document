@@ -251,6 +251,26 @@ MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>): import("<reposit
 ```ts
 parseHtmlDateValue(type: HtmlDateType, value: string): string | null
 ```
+## `ProductCanvas`
+
+```ts
+ProductCanvas(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ProductInspector`
+
+```ts
+ProductInspector(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ProductShell`
+
+```ts
+ProductShell(props: HTMLAttributes<HTMLDivElement> & { readonly toolbar?: ReactNode; readonly toolbarLabel?: string; readonly inspector?: ReactNode; readonly canvasClassName?: string; readonly fill?: boolean; }): ReactNode
+```
+## `ProductToolbar`
+
+```ts
+ProductToolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label: string; }): ReactNode
+```
 ## `RangeCalendar`
 
 ```ts
@@ -360,6 +380,26 @@ Tabs<T extends string | number>(props: { readonly label: string; readonly value:
 
 ```ts
 ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly label?: string; readonly tooltip?: string; }): ReactNode
+```
+## `Toolbar`
+
+```ts
+Toolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label: string; }): ReactNode
+```
+## `ToolbarGroup`
+
+```ts
+ToolbarGroup(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; }): ReactNode
+```
+## `ToolbarSeparator`
+
+```ts
+ToolbarSeparator(props: HTMLAttributes<HTMLSpanElement>): ReactNode
+```
+## `ToolbarSpacer`
+
+```ts
+ToolbarSpacer(props: HTMLAttributes<HTMLSpanElement>): ReactNode
 ```
 ## `useInteractionHandle`
 

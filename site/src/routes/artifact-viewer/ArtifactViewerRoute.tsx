@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Undo2 } from "lucide-react";
 import { ActionButton, IconButton, SegmentedControl, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { artifactViewerRecipe } from "./artifact-viewer-styles";
 
@@ -24,7 +25,7 @@ export function ArtifactViewerRoute() {
         실제 파일 호환보다 먼저, 서로 다른 artifact surface가 같은 Core와 Hands를 조합하는 방식을 기록합니다.
       </PageHeader>
 
-      <ProductApp
+      <ProductShell
         toolbarLabel="Artifact 선택"
         toolbar={(
           <>
@@ -40,7 +41,7 @@ export function ArtifactViewerRoute() {
         {active === "md" ? <MarkdownArtifact /> : null}
         {active === "ppt" ? <PresentationArtifact /> : null}
         {active === "sheet" ? <SheetArtifact /> : null}
-      </ProductApp>
+      </ProductShell>
 
       <section className={styles.futureMap()} aria-labelledby="viewer-model-title">
         <p className={ui.text.label}>Dependency map</p>

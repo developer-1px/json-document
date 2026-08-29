@@ -36,7 +36,7 @@ import {
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
-import { useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
@@ -465,7 +465,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       data-readonly={props.readOnly ? "true" : "false"}
       data-database-table-surface=""
     >
-      <div className="jd-database__toolbar" role="toolbar" aria-label="Database actions">
+      <Toolbar className="jd-database__toolbar" label="Database actions">
         {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" aria-label={props.labels.newRecord} title={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></button> : null}
         {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" aria-label={props.labels.deleteRecord} title={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></button> : null}
         {props.features.history && !props.readOnly ? (
@@ -506,7 +506,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         {props.toolbar}
         {props.renderToolbar?.(context)}
         {announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
-      </div>
+      </Toolbar>
 
       <div
         className="jd-database__viewport"
