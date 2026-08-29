@@ -352,6 +352,9 @@ export function CalendarDemoRoute(props: {
               onPointerUp={allDayPointerUp}
               onClick={(event) => {
                 event.stopPropagation();
+              }}
+              onDoubleClick={(event) => {
+                event.stopPropagation();
                 hand.beginTitleRename(item.event.id);
               }}
             >
@@ -480,6 +483,9 @@ export function CalendarDemoRoute(props: {
                     }}
                     onPointerUp={timePointerUp}
                     onClick={(event) => {
+                      event.stopPropagation();
+                    }}
+                    onDoubleClick={(event) => {
                       event.stopPropagation();
                       hand.beginTitleRename(item.event.id);
                     }}
@@ -696,8 +702,12 @@ export function CalendarDemoRoute(props: {
                                     aria-label={calendarEventLabel(item)}
                                     data-calendar-color={calendarColor(document, item.calendarId)}
                                     className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
-                                    onClick={() => {
+                                    onClick={(event) => {
+                                      event.stopPropagation();
                                       hand.selectOccurrence(item.id, item.start, item.end);
+                                    }}
+                                    onDoubleClick={(event) => {
+                                      event.stopPropagation();
                                       hand.beginTitleRename(item.id);
                                     }}
                                   >
@@ -755,6 +765,9 @@ export function CalendarDemoRoute(props: {
                             }}
                             onPointerUp={monthPointerUp}
                             onClick={(event) => {
+                              event.stopPropagation();
+                            }}
+                            onDoubleClick={(event) => {
                               event.stopPropagation();
                               hand.beginTitleRename(item.event.id);
                             }}

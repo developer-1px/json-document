@@ -56,7 +56,7 @@ test("Calendar positions the work hour until the user claims the viewport", asyn
   await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(640);
 });
 
-test("Calendar keeps event time visible, hints an empty creation time, and edits on one click", async ({ page }) => {
+test("Calendar keeps event time visible, hints an empty creation time, and separates selection from editing", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
   const time = event.getByText("11:00", { exact: true });
@@ -68,6 +68,9 @@ test("Calendar keeps event time visible, hints an empty creation time, and edits
   await page.mouse.move(box.x + box.width / 2, box.y + box.height * (14.25 / 24));
   await expect(page.locator("[data-calendar-create-time]")).toHaveText("14:15");
   await event.click();
+  await expect(event).toHaveAttribute("data-selected", "true");
+  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+  await event.dblclick();
   const title = page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" });
   await expect(title).toHaveValue("고객사 싱크");
 
@@ -112,7 +115,7 @@ test("Calendar month and year views show date grids", async ({ page }) => {
 
 test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first().click();
+  await page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first().dblclick();
   const following = page.getByRole("radio", { name: "Following", exact: true });
   await following.click();
   await expect(following).toBeChecked();
