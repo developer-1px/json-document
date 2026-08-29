@@ -225,6 +225,16 @@
     "navigationGroup": "UI Primitives"
   },
   {
+    "path": "/demo/ui-primitives",
+    "label": "Design system",
+    "title": "Design system - json-document",
+    "heading": "Design system",
+    "description": "토큰, control, shell, overlay, date, surface, wait animation을 한 페이지에서 보여 줍니다.",
+    "language": "ko",
+    "parentPath": "/docs/ui-primitives",
+    "navigationGroup": "UI Primitives"
+  },
+  {
     "path": "/docs/api/database",
     "label": "API · Database",
     "title": "Database API - json-document",
@@ -907,6 +917,8 @@
     "description": "표준화된 Hands 행동과 디자인 시스템을 갖춘 minimalist React UI를 설명합니다.",
     "language": "ko",
     "navigationGroup": "UI Primitives",
+    "relatedDemoPath": "/demo/ui-primitives",
+    "relatedDemoLabel": "Design system",
     "sidebar": false
   },
   {

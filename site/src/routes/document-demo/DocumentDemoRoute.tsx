@@ -213,7 +213,7 @@ export function DocumentDemoRoute() {
             ]} />
           )}
         >
-          <section aria-label="Editable document">
+          <section aria-label="Editable document" className="mx-auto max-w-2xl">
             <div
               ref={surfaceRef}
               tabIndex={0}
@@ -251,7 +251,7 @@ export function DocumentDemoRoute() {
                     onClickCount={setLastClickCount}
                     onTextInput={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
                     rows={Math.max(1, Math.ceil(block.text.length / 64))}
-                    className={classes("min-h-11 resize-none", ui.field.seamless)}
+                    className={classes("min-h-12 resize-none", ui.field.seamless)}
                   />
                 </SelectableItem>
                 );
