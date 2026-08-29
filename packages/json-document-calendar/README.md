@@ -14,6 +14,13 @@ const calendar = useCalendarHand(editor);
 
 calendar.dispatch({ type: "selection.set", eventIds: [eventId] });
 calendar.applySelectedPatch({ title: "Planning" });
+const payload = calendar.copy();
+calendar.paste(payload);
 const titleInput = useCalendarRenameInput(calendar);
 useCalendarKeyboard({ active: true, onView, onShift, onToday, onCreate, onRemove });
 ```
+
+The Hand resolves the currently focused occurrence as the copy/cut source and
+paste target. The Host selects Web representations; Calendar schema,
+occurrence projection, temporal placement, selection, and history remain in
+their canonical owners.

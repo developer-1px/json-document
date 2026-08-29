@@ -10,6 +10,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
 import {
@@ -67,6 +68,17 @@ export interface SheetClipboard extends Record<string, JSONValue> {
   readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>>;
   readonly text: string;
 }
+
+export const sheetClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.sheet+json" as const,
+  parse(value: unknown): SheetClipboard | null {
+    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.cells) || value.cells.length === 0 || !Array.isArray(value.cells[0])) return null;
+    const width = value.cells[0].length;
+    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width && row.every(isClipboardJSONValue))
+      ? value as SheetClipboard : null;
+  },
+};
 
 export type SheetIntent =
   | {
@@ -230,32 +242,25 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
   }
 
   function cut(topology?: SheetTopology): { readonly clipboard: SheetClipboard; readonly result: EditingResult<SheetSelection> } | null {
-    const clipboard = copy(topology);
-    if (!clipboard) return null;
-    const document = value();
-    const axes = resolveTopology(document, topology, index(document));
-    const range = primaryRange(session.snapshot.selection);
-    const bounds = range === null ? null : rangeBounds(axes, range);
-    if (bounds === null) return null;
-    const operations: JSONPatchOperation[] = [];
-    for (const rowId of axes.rowIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
-      for (const columnId of axes.columnIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
-        const row = resolvePointWithIndices(document, rowId, columnId, index(document))!;
-        operations.push({
-          op: "replace",
-          path: buildPointer(["rows", row.rowIndex, "cells", columnId]),
-          value: null,
-        });
+    return cutEditingClipboard(() => copy(topology), () => {
+      const document = value();
+      const axes = resolveTopology(document, topology, index(document));
+      const range = primaryRange(session.snapshot.selection);
+      const bounds = range === null ? null : rangeBounds(axes, range);
+      if (bounds === null) return failure("selection.empty");
+      const operations: JSONPatchOperation[] = [];
+      for (const rowId of axes.rowIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
+        for (const columnId of axes.columnIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
+          const row = resolvePointWithIndices(document, rowId, columnId, index(document))!;
+          operations.push({ op: "replace", path: buildPointer(["rows", row.rowIndex, "cells", columnId]), value: null });
+        }
       }
-    }
-    return {
-      clipboard,
-      result: session.apply({
+      return session.apply({
         operations,
         selectionAfter: session.snapshot.selection,
         origin: "clipboard.cut",
-      }),
-    };
+      });
+    });
   }
 
   return {

@@ -76,6 +76,11 @@ createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPo
 ```ts
 createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item, Target>): WebDragDropSession<Item, Target>
 ```
+## `createWebJSONClipboardRepresentation`
+
+```ts
+createWebJSONClipboardRepresentation<Payload extends WebClipboardPayload>(format: WebJSONClipboardFormat<Payload>): WebClipboardCodec<Payload>
+```
 ## `createWebKeyboardAdapter`
 
 ```ts
@@ -147,6 +152,11 @@ focusWebItem<Item extends WebFocusableItem>(root: WebFocusItemRoot<Item> | null,
 
 ```ts
 gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): GridPoint | null
+```
+## `isWebEditableTarget`
+
+```ts
+isWebEditableTarget(target: object | null): boolean
 ```
 ## `kanbanCardDropTargetFromWebElement`
 
@@ -301,7 +311,7 @@ interface WebClipboardBindingOptions<
   readonly codec: WebClipboardCodec<Payload>;
   readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
   readonly read: () => Payload | null;
-  readonly cut?: (payload: Payload) => EditingResult;
+  readonly cut?: (payload: Payload) => EditingResult | null;
   readonly paste: (payload: Payload) => EditingResult;
 }
 ```
@@ -507,6 +517,14 @@ webGridCellAddressProps(point: GridPoint): WebGridCellAddressAttributes
 ```ts
 interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
   querySelectorAll(selectors: string): ArrayLike<Cell>;
+}
+```
+## `WebJSONClipboardFormat`
+
+```ts
+interface WebJSONClipboardFormat<Payload extends WebClipboardPayload> {
+  readonly mimeType: Payload["type"];
+  parse(value: unknown): Payload | null;
 }
 ```
 ## `webKanbanCardProps`

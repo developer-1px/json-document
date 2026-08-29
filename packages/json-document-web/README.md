@@ -48,10 +48,13 @@ reserve, writes temporary scroll range, performs smooth or instant positioning,
 and observes layout and target visibility without choosing product policy.
 
 ```ts
-import { createDocumentEditor } from "@interactive-os/json-document-editing";
+import {
+  createDocumentEditor,
+  documentClipboardFormat,
+} from "@interactive-os/json-document-editing";
 import {
   createWebClipboardSurface,
-  documentClipboardCodec,
+  createWebJSONClipboardRepresentation,
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
   textInputFromControl,
@@ -62,7 +65,7 @@ const editor = createDocumentEditor({
 });
 
 const clipboardSurface = createWebClipboardSurface({
-  codec: documentClipboardCodec,
+  codec: createWebJSONClipboardRepresentation(documentClipboardFormat),
   read: () => editor.copy(),
   cut: () => editor.cut()?.result ?? { ok: false },
   paste: (payload) => editor.dispatch({
@@ -106,8 +109,12 @@ const attributes = webGridCellAddressProps(point);
 const cell = findWebGridCell<HTMLElement>(table, point);
 ```
 
-Document, Sheet, Order, Object, Tree, and Database codecs write both the
-structured json-document MIME payload and its `text/plain` projection. Paste
+Each Editing domain owns its clipboard format and validation. A Host declares
+the formats it enables and their priority, while
+`createWebJSONClipboardRepresentation` owns JSON serialization. The legacy
+named codecs remain compatibility aliases over those domain formats. Clipboard
+surfaces write both the structured json-document MIME payload and its
+`text/plain` projection. Paste
 consumes only a valid structured payload. Parsing arbitrary external plain text
 into domain records or cells remains a host policy.
 
@@ -126,13 +133,15 @@ available.
 projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
 every result through `onResult`. `createWebClipboardBinding` remains available
 for hosts that need to invoke or install each operation independently.
+`isWebEditableTarget` keeps those surface bindings from replacing the native
+clipboard lifecycle inside inputs, selects, textareas, and contenteditable
+regions.
 
 ## Boundary
 
 The Adapter owns:
 
-- structured MIME serialization and validation for public domain clipboard
-  values;
+- structured MIME serialization for public domain clipboard values;
 - `ClipboardEvent` copy/cut/paste translation;
 - conventional Web modifier translation to `replace`, `extend`, or `toggle`.
 - the official keyboard adapter: conventional chords, a host-overridable keymap,
@@ -149,6 +158,7 @@ The host owns:
 - the event target, canonical focus, when a command applies, and role workflow policy;
 - DOM/canvas geometry and hit testing;
 - external plain-text interpretation and product-specific paste policy;
+- enabled representations and their priority;
 - native text selection, IME, drag/drop, persistence, and remote protocols.
 
 The module does not access `window`, `document`, or `navigator` during import,

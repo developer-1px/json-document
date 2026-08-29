@@ -19,6 +19,7 @@ import {
   createWebPointerSession,
   createWebClipboardBinding,
   createWebClipboardSurface,
+  createWebJSONClipboardRepresentation,
   createWebClipboardTextWriter,
   databaseClipboardCodec,
   documentClipboardCodec,
@@ -204,6 +205,19 @@ describe("Web grid cell address", () => {
 });
 
 describe("Web clipboard Adapter", () => {
+  test("creates a JSON representation from a domain-owned format without a Web catalog entry", () => {
+    type Payload = { readonly type: "application/x-local"; readonly text: string; readonly value: number };
+    const representation = createWebJSONClipboardRepresentation<Payload>({
+      mimeType: "application/x-local",
+      parse: (value) => typeof value === "object" && value !== null && "value" in value
+        ? value as Payload
+        : null,
+    });
+    const payload: Payload = { type: "application/x-local", text: "seven", value: 7 };
+    expect(representation.decode(representation.encode(payload))).toEqual(payload);
+    expect(representation.decode("{}")) .toBeNull();
+  });
+
   test("normalizes imperative text write success, unsupported, and rejection", async () => {
     const writes: string[] = [];
     const writer = createWebClipboardTextWriter({

@@ -11,6 +11,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds } from "./topology.js";
 import { acceptsDatabaseValue, defaultDatabaseValue } from "./database-property-value.js";
 import { assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
@@ -114,6 +115,17 @@ export interface DatabaseClipboard extends Record<string, JSONValue> {
   readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>>;
   readonly text: string;
 }
+
+export const databaseClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.database+json" as const,
+  parse(value: unknown): DatabaseClipboard | null {
+    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.cells) || value.cells.length === 0 || !Array.isArray(value.cells[0])) return null;
+    const width = value.cells[0].length;
+    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width && row.every(isClipboardJSONValue))
+      ? value as DatabaseClipboard : null;
+  },
+};
 
 export type DatabaseIntent =
   | {

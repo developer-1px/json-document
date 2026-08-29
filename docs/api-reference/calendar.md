@@ -43,6 +43,9 @@ interface CalendarHand {
   rememberSelection(): void;
   undo(): void;
   redo(): void;
+  copy(): CalendarClipboard | null;
+  cut(): EditingResult<CalendarSelection> | null;
+  paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection>;
 }
 ```
 ## `CalendarHandOptions`
@@ -65,6 +68,8 @@ interface CalendarKeyboardOptions {
   readonly onCreate: () => void;
   readonly onRename: () => void;
   readonly onRemove: () => void;
+  readonly onUndo?: () => void;
+  readonly onRedo?: () => void;
   readonly onDismiss?: () => boolean;
 }
 ```

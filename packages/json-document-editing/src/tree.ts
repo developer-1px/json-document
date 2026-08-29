@@ -3,6 +3,7 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   createRangeSelectionFamily,
   type OrderedTopology,
@@ -55,6 +56,20 @@ export interface TreeClipboard extends Record<string, JSONValue> {
   readonly nodes: ReadonlyArray<TreeNode>;
   readonly text: string;
 }
+
+export const treeClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.tree+json" as const,
+  parse(value: unknown): TreeClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.nodes)
+      && value.nodes.every((node) => isClipboardRecord(node)
+        && typeof node.id === "string" && typeof node.label === "string"
+        && (node.parentId === null || typeof node.parentId === "string"))
+      ? value as TreeClipboard : null;
+  },
+};
 
 export type TreeIntent =
   | {
@@ -235,11 +250,10 @@ export function createTreeEditor(
     selectedNodeIdsIn,
     dispatch,
     copy,
-    cut(topology) {
-      const clipboard = copy(topology);
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(resolveTopology(topology), selectedNodeIdsIn(topology)) };
-    },
+    cut: (topology) => cutEditingClipboard(
+      () => copy(topology),
+      () => removeSelected(resolveTopology(topology), selectedNodeIdsIn(topology)),
+    ),
     reconcile,
     undo: () => session.undo(),
     redo: () => session.redo(),

@@ -730,6 +730,26 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-web",
+    symbol: "createWebJSONClipboardRepresentation",
+    sourcePath: "packages/json-document-web/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "isWebEditableTarget",
+    sourcePath: "packages/json-document-web/src/input.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "calendarClipboardFormat",
+    sourcePath: "packages/json-document-editing/src/calendar.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "cutEditingClipboard",
+    sourcePath: "packages/json-document-editing/src/clipboard.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
     symbol: "createWebClipboardTextWriter",
     sourcePath: "packages/json-document-web/src/clipboard.ts",
   },

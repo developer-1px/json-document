@@ -1,14 +1,10 @@
-import type {
-  DatabaseClipboard,
-  DocumentBlock,
-  DocumentClipboard,
-  DocumentObject,
-  OrderClipboard,
-  OrderItem,
-  ObjectClipboard,
-  SheetClipboard,
-  TreeClipboard,
-  TreeNode,
+import {
+  databaseClipboardFormat,
+  documentClipboardFormat,
+  objectClipboardFormat,
+  orderClipboardFormat,
+  sheetClipboardFormat,
+  treeClipboardFormat,
 } from "@interactive-os/json-document-editing";
 
 export interface WebClipboardPayload {
@@ -31,6 +27,11 @@ export interface WebClipboardCodec<Payload extends WebClipboardPayload> {
   readonly mimeType: Payload["type"];
   encode(payload: Payload): string;
   decode(serialized: string): Payload | null;
+}
+
+export interface WebJSONClipboardFormat<Payload extends WebClipboardPayload> {
+  readonly mimeType: Payload["type"];
+  parse(value: unknown): Payload | null;
 }
 
 export interface WebClipboardRepresentation<Payload extends WebClipboardPayload> {
@@ -57,7 +58,7 @@ export interface WebClipboardBindingOptions<
   readonly codec: WebClipboardCodec<Payload>;
   readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
   readonly read: () => Payload | null;
-  readonly cut?: (payload: Payload) => EditingResult;
+  readonly cut?: (payload: Payload) => EditingResult | null;
   readonly paste: (payload: Payload) => EditingResult;
 }
 
@@ -104,35 +105,30 @@ export function createWebClipboardTextWriter(options?: {
   };
 }
 
-export const documentClipboardCodec: WebClipboardCodec<DocumentClipboard> = jsonCodec(
-  "application/vnd.interactive-os.blocks+json",
-  isDocumentClipboard,
-);
+export const documentClipboardCodec = createWebJSONClipboardRepresentation(documentClipboardFormat);
 
-export const sheetClipboardCodec: WebClipboardCodec<SheetClipboard> = jsonCodec(
-  "application/vnd.interactive-os.sheet+json",
-  isSheetClipboard,
-);
+export const sheetClipboardCodec = createWebJSONClipboardRepresentation(sheetClipboardFormat);
 
-export const orderClipboardCodec: WebClipboardCodec<OrderClipboard> = jsonCodec(
-  "application/vnd.interactive-os.order+json",
-  isOrderClipboard,
-);
+export const orderClipboardCodec = createWebJSONClipboardRepresentation(orderClipboardFormat);
 
-export const objectClipboardCodec: WebClipboardCodec<ObjectClipboard> = jsonCodec(
-  "application/vnd.interactive-os.objects+json",
-  isObjectClipboard,
-);
+export const objectClipboardCodec = createWebJSONClipboardRepresentation(objectClipboardFormat);
 
-export const treeClipboardCodec: WebClipboardCodec<TreeClipboard> = jsonCodec(
-  "application/vnd.interactive-os.tree+json",
-  isTreeClipboard,
-);
+export const treeClipboardCodec = createWebJSONClipboardRepresentation(treeClipboardFormat);
 
-export const databaseClipboardCodec: WebClipboardCodec<DatabaseClipboard> = jsonCodec(
-  "application/vnd.interactive-os.database+json",
-  isDatabaseClipboard,
-);
+export const databaseClipboardCodec = createWebJSONClipboardRepresentation(databaseClipboardFormat);
+
+export function createWebJSONClipboardRepresentation<Payload extends WebClipboardPayload>(
+  format: WebJSONClipboardFormat<Payload>,
+): WebClipboardCodec<Payload> {
+  return {
+    mimeType: format.mimeType,
+    encode: (payload) => JSON.stringify(payload),
+    decode(serialized) {
+      if (serialized.length === 0) return null;
+      return format.parse(JSON.parse(serialized));
+    },
+  };
+}
 
 export function createWebClipboardBinding<
   Payload extends WebClipboardPayload,
@@ -172,6 +168,7 @@ export function createWebClipboardBinding<
       const written = write(event);
       if (!written.ok) return written;
       const result = options.cut(written.payload);
+      if (result === null) return failure("editing.rejected", "clipboard.empty");
       if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);
       event.preventDefault();
       return { ok: true, operation: "cut", payload: written.payload, result };
@@ -229,96 +226,6 @@ export function createWebClipboardSurface<
     onCut: (event) => handle("cut", event),
     onPaste: (event) => handle("paste", event),
   };
-}
-
-function jsonCodec<Payload extends WebClipboardPayload>(
-  mimeType: Payload["type"],
-  accepts: (value: unknown) => value is Payload,
-): WebClipboardCodec<Payload> {
-  return {
-    mimeType,
-    encode: (payload) => JSON.stringify(payload),
-    decode(serialized) {
-      if (serialized.length === 0) return null;
-      const value: unknown = JSON.parse(serialized);
-      return accepts(value) ? value : null;
-    },
-  };
-}
-
-function isDocumentClipboard(value: unknown): value is DocumentClipboard {
-  if (!isRecord(value) || value.type !== documentClipboardCodec.mimeType || typeof value.text !== "string") return false;
-  return Array.isArray(value.blocks) && value.blocks.every(isDocumentBlock);
-}
-
-function isDocumentBlock(value: unknown): value is DocumentBlock {
-  return isRecord(value) && typeof value.id === "string" && typeof value.text === "string";
-}
-
-function isOrderClipboard(value: unknown): value is OrderClipboard {
-  if (!isRecord(value) || value.type !== orderClipboardCodec.mimeType || typeof value.text !== "string") return false;
-  return Array.isArray(value.items) && value.items.every(isOrderItem);
-}
-
-function isOrderItem(value: unknown): value is OrderItem {
-  return isRecord(value) && typeof value.id === "string" && typeof value.label === "string";
-}
-
-function isObjectClipboard(value: unknown): value is ObjectClipboard {
-  if (!isRecord(value) || value.type !== objectClipboardCodec.mimeType || typeof value.text !== "string") return false;
-  return Array.isArray(value.objects) && value.objects.every(isDocumentObject);
-}
-
-function isDocumentObject(value: unknown): value is DocumentObject {
-  return isRecord(value)
-    && typeof value.id === "string"
-    && typeof value.label === "string"
-    && typeof value.x === "number"
-    && typeof value.y === "number"
-    && typeof value.width === "number"
-    && typeof value.height === "number"
-    && typeof value.color === "string";
-}
-
-function isTreeClipboard(value: unknown): value is TreeClipboard {
-  if (!isRecord(value) || value.type !== treeClipboardCodec.mimeType || typeof value.text !== "string") return false;
-  return Array.isArray(value.nodes) && value.nodes.every(isTreeNode);
-}
-
-function isTreeNode(value: unknown): value is TreeNode {
-  return isRecord(value)
-    && typeof value.id === "string"
-    && typeof value.label === "string"
-    && (value.parentId === null || typeof value.parentId === "string");
-}
-
-function isDatabaseClipboard(value: unknown): value is DatabaseClipboard {
-  return isRectangularClipboard(value, databaseClipboardCodec.mimeType);
-}
-
-function isSheetClipboard(value: unknown): value is SheetClipboard {
-  return isRectangularClipboard(value, sheetClipboardCodec.mimeType);
-}
-
-function isRectangularClipboard(value: unknown, mimeType: string): value is SheetClipboard {
-  if (!isRecord(value) || value.type !== mimeType || typeof value.text !== "string") return false;
-  if (!Array.isArray(value.cells) || value.cells.length === 0) return false;
-  const width = Array.isArray(value.cells[0]) ? value.cells[0].length : 0;
-  return width > 0 && value.cells.every((row) => (
-    Array.isArray(row)
-    && row.length === width
-    && row.every(isJSONValue)
-  ));
-}
-
-function isJSONValue(value: unknown): boolean {
-  if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return true;
-  if (Array.isArray(value)) return value.every(isJSONValue);
-  return isRecord(value) && Object.values(value).every(isJSONValue);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function failure(

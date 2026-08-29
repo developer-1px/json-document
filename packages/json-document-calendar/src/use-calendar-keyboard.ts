@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import {
   calendarCommandFromWebKeyboardEvent,
+  createWebKeyboardAdapter,
   type WebCalendarCommand,
 } from "@interactive-os/json-document-web";
 import type { CalendarView } from "@interactive-os/json-document-editing";
+
+const editingKeyboard = createWebKeyboardAdapter();
 
 export interface CalendarKeyboardTarget {
   addEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
@@ -19,6 +22,8 @@ export interface CalendarKeyboardOptions {
   readonly onCreate: () => void;
   readonly onRename: () => void;
   readonly onRemove: () => void;
+  readonly onUndo?: () => void;
+  readonly onRedo?: () => void;
   readonly onDismiss?: () => boolean;
 }
 
@@ -31,6 +36,17 @@ export function useCalendarKeyboard(options: CalendarKeyboardOptions): void {
     if (!options.active) return;
     const target: CalendarKeyboardTarget = options.target ?? globalThis.window;
     function onKeyDown(event: KeyboardEvent): void {
+      const editingCommand = editingKeyboard.resolve(event);
+      if (editingCommand?.type === "undo" && optionsRef.current.onUndo !== undefined) {
+        optionsRef.current.onUndo();
+        event.preventDefault();
+        return;
+      }
+      if (editingCommand?.type === "redo" && optionsRef.current.onRedo !== undefined) {
+        optionsRef.current.onRedo();
+        event.preventDefault();
+        return;
+      }
       const command = calendarCommandFromWebKeyboardEvent(event);
       if (command === null || !dispatchCalendarKeyboardCommand(command, optionsRef.current)) return;
       event.preventDefault();

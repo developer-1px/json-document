@@ -1,4 +1,6 @@
-export { createDocumentEditor, documentSelectionFocus } from "./document.js";
+export { createDocumentEditor, documentClipboardFormat, documentSelectionFocus } from "./document.js";
+export { cutEditingClipboard } from "./clipboard.js";
+export type { EditingClipboardCut } from "./clipboard.js";
 export { jsonCellText } from "./cell-text.js";
 export {
   gridCellsInRange,
@@ -11,13 +13,13 @@ export {
   lineTopology,
 } from "./topology.js";
 export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./topology.js";
-export { createDatabaseEditor, nextDatabasePropertySort } from "./database.js";
+export { createDatabaseEditor, databaseClipboardFormat, nextDatabasePropertySort } from "./database.js";
 export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } from "./database-property-value.js";
-export { createObjectEditor } from "./object.js";
-export { createOrderEditor } from "./order.js";
+export { createObjectEditor, objectClipboardFormat } from "./object.js";
+export { createOrderEditor, orderClipboardFormat } from "./order.js";
 export { createEditingSession } from "./session.js";
-export { createSheetEditor } from "./sheet.js";
-export { createTreeEditor } from "./tree.js";
+export { createSheetEditor, sheetClipboardFormat } from "./sheet.js";
+export { createTreeEditor, treeClipboardFormat } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
 export {
@@ -31,6 +33,7 @@ export {
   calendarTimedLayout,
   calendarVisibleEvents,
   createCalendarEditor,
+  calendarClipboardFormat,
 } from "./calendar.js";
 export {
   calendarRecurrenceWithFrequency,
@@ -171,10 +174,13 @@ export type {
 } from "./kanban.js";
 export type {
   CalendarCalendar,
+  CalendarClipboard,
+  CalendarClipboardItem,
   CalendarDocument,
   CalendarEditor,
   CalendarEvent,
   CalendarIntent,
+  CalendarOccurrenceSelection,
   CalendarRecurrence,
   CalendarSelection,
   CalendarView,

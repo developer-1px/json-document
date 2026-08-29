@@ -157,6 +157,29 @@ interface CalendarCalendar extends Record<string, JSONValue> {
   readonly color: string;
 }
 ```
+## `CalendarClipboard`
+
+```ts
+interface CalendarClipboard extends Record<string, JSONValue> {
+  readonly type: "application/vnd.interactive-os.calendar+json";
+  readonly items: ReadonlyArray<CalendarClipboardItem>;
+  readonly text: string;
+}
+```
+## `calendarClipboardFormat`
+
+```ts
+const calendarClipboardFormat: { mimeType: "application/vnd.interactive-os.calendar+json"; parse(value: unknown): CalendarClipboard | null; }
+```
+## `CalendarClipboardItem`
+
+```ts
+interface CalendarClipboardItem extends Record<string, JSONValue> {
+  readonly sourceEventId: string;
+  readonly occurrenceStart: string;
+  readonly event: CalendarEvent;
+}
+```
 ## `calendarDatePart`
 
 ```ts
@@ -187,6 +210,9 @@ interface CalendarEditor {
   readonly snapshot: EditingSnapshot<CalendarSelection>;
   readonly selectedEvents: ReadonlyArray<CalendarEvent>;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
+  copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
+  cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
+  paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection>;
   undo(): EditingResult<CalendarSelection>;
   redo(): EditingResult<CalendarSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;
@@ -353,6 +379,15 @@ type CalendarOccurrenceRange = {
   readonly end: string | null;
 };
 ```
+## `CalendarOccurrenceSelection`
+
+```ts
+interface CalendarOccurrenceSelection {
+  readonly eventId: string;
+  readonly start: string;
+  readonly end: string;
+}
+```
 ## `CalendarRecurrence`
 
 ```ts
@@ -490,6 +525,11 @@ createSheetEditor(source: EditingDocumentSource<SheetDocument>): SheetEditor
 ```ts
 createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: { readonly createId?: () => string; }): TreeEditor
 ```
+## `cutEditingClipboard`
+
+```ts
+cutEditingClipboard<Payload, Result>(copy: () => Payload | null, remove: (clipboard: Payload) => Result): EditingClipboardCut<Payload, Result> | null
+```
 ## `DatabaseCell`
 
 ```ts
@@ -505,6 +545,11 @@ interface DatabaseClipboard extends Record<string, JSONValue> {
   readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>>;
   readonly text: string;
 }
+```
+## `databaseClipboardFormat`
+
+```ts
+const databaseClipboardFormat: { mimeType: "application/vnd.interactive-os.database+json"; parse(value: unknown): DatabaseClipboard | null; }
 ```
 ## `DatabaseDocument`
 
@@ -695,6 +740,11 @@ interface DocumentClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `documentClipboardFormat`
+
+```ts
+const documentClipboardFormat: { mimeType: "application/vnd.interactive-os.blocks+json"; parse(value: unknown): DocumentClipboard | null; }
+```
 ## `DocumentEditor`
 
 ```ts
@@ -763,6 +813,14 @@ interface DocumentSelection extends Record<string, JSONValue> {
 
 ```ts
 documentSelectionFocus(selection: DocumentSelection): DocumentPoint | null
+```
+## `EditingClipboardCut`
+
+```ts
+interface EditingClipboardCut<Payload, Result> {
+  readonly clipboard: Payload;
+  readonly result: Result;
+}
 ```
 ## `EditingDispatch`
 
@@ -1006,6 +1064,11 @@ interface ObjectClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `objectClipboardFormat`
+
+```ts
+const objectClipboardFormat: { mimeType: "application/vnd.interactive-os.objects+json"; parse(value: unknown): ObjectClipboard | null; }
+```
 ## `ObjectDocument`
 
 ```ts
@@ -1085,6 +1148,11 @@ interface OrderClipboard extends Record<string, JSONValue> {
   readonly items: ReadonlyArray<OrderItem>;
   readonly text: string;
 }
+```
+## `orderClipboardFormat`
+
+```ts
+const orderClipboardFormat: { mimeType: "application/vnd.interactive-os.order+json"; parse(value: unknown): OrderClipboard | null; }
 ```
 ## `OrderDocument`
 
@@ -1198,6 +1266,11 @@ interface SheetClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `sheetClipboardFormat`
+
+```ts
+const sheetClipboardFormat: { mimeType: "application/vnd.interactive-os.sheet+json"; parse(value: unknown): SheetClipboard | null; }
+```
 ## `SheetColumn`
 
 ```ts
@@ -1305,6 +1378,11 @@ interface TreeClipboard extends Record<string, JSONValue> {
   readonly nodes: ReadonlyArray<TreeNode>;
   readonly text: string;
 }
+```
+## `treeClipboardFormat`
+
+```ts
+const treeClipboardFormat: { mimeType: "application/vnd.interactive-os.tree+json"; parse(value: unknown): TreeClipboard | null; }
 ```
 ## `TreeDocument`
 
