@@ -16,7 +16,7 @@ test("Calendar launch shows a week interval editor then month view", async ({ pa
   expect(start < end).toBe(true);
   await title.press("Enter");
   await expect(page.getByRole("button", { name: "Planning", exact: true })).toBeVisible();
-  await expect(inspector).toHaveCount(0);
+  await expect(inspector).toBeVisible();
 
   await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("button", { name: "Create", exact: true }).click();

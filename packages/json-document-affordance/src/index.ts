@@ -22,7 +22,19 @@ export {
   interactionHandleDelta,
 } from "./interaction-handle.js";
 export { createViewportPositionSession } from "./viewport-position.js";
+export { computeAnchoredFloatingPosition } from "./anchored-floating-position.js";
 export { contextualAffordance } from "./contextual.js";
+export type {
+  AnchoredFloatingPosition,
+  AnchoredFloatingPositionInput,
+  FloatingAlignment,
+  FloatingOverflow,
+  FloatingPlacement,
+  FloatingPlacementPolicy,
+  FloatingRect,
+  FloatingSide,
+  FloatingSize,
+} from "./anchored-floating-position.js";
 export type {
   ContextualAffordanceCapability,
   ContextualAffordancePhase,

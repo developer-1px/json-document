@@ -148,6 +148,8 @@ interface CalendarRenameInputBinding {
 interface CalendarRenameInputOptions {
   /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
   readonly commitOnBlur?: boolean;
+  /** Retries focus realization when an enclosing positioned editor becomes interactive. */
+  readonly realizationKey?: string | number | boolean | null;
 }
 ```
 ## `CalendarSelectionDragPreview`

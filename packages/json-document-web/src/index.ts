@@ -27,6 +27,7 @@ export {
   type WebCalendarKeyboardEvent,
 } from "./calendar-input.js";
 export { createWebViewportPositionPorts } from "./viewport-position.js";
+export { createWebAnchoredFloatingPositionPorts } from "./anchored-floating-position.js";
 export { projectWebClientPointToSVG, webSVGViewportFromElement } from "./svg-coordinate.js";
 export { readWebRasterFile } from "./raster-source.js";
 export { composerAttachmentCandidateFromWebFile, composerAttachmentCandidatesFromWebClipboard, composerAttachmentCandidatesFromWebFiles, fileCandidateFromWebFile, fileCandidatesFromWebClipboard, fileCandidatesFromWebFiles } from "./file-intake.js";
@@ -53,6 +54,15 @@ export {
   moveGridPoint,
   moveLinePoint,
 } from "./keyboard.js";
+export type {
+  WebAnchoredFloatingElement,
+  WebAnchoredFloatingGeometry,
+  WebAnchoredFloatingPositionOptions,
+  WebAnchoredFloatingPositionPorts,
+  WebAnchoredFloatingResizeObserver,
+  WebAnchoredFloatingViewport,
+  WebFloatingRect,
+} from "./anchored-floating-position.js";
 export type {
   WebClipboardBinding,
   WebClipboardBindingOptions,

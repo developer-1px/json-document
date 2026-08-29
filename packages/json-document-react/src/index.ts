@@ -61,6 +61,11 @@ export {
   useVirtualSelectionScope,
   type UseVirtualSelectionScopeOptions,
 } from "./use-virtual-selection-scope.js";
+export {
+  useAnchoredFloatingPosition,
+  type AnchoredFloatingPositionBinding,
+  type UseAnchoredFloatingPositionOptions,
+} from "./use-anchored-floating-position.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
   const subscribe = useCallback(

@@ -5,6 +5,11 @@ React callback ref. The hook keeps the latest complete-text reader across
 rerenders and unregisters the owner-document scope when the element changes or
 unmounts.
 
+`useAnchoredFloatingPosition` composes platform-independent anchored placement
+with Web measurement and React ref lifecycles. Consumers declare preferred or
+locked placement policy and keep Tooltip, Dropdown, Popover, and product
+semantics in their own canonical owners.
+
 React Connector for `@interactive-os/json-document` and
 `@interactive-os/json-document-editing`.
 

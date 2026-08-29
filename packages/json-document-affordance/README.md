@@ -66,4 +66,11 @@ viewport offset. It creates the missing trailing scroll range near the document
 end, reconciles that range as layout grows, and removes it when the target
 leaves the viewport; target meaning remains in the Host.
 
+`computeAnchoredFloatingPosition` places platform-independent floating geometry
+beside an anchor rectangle. A `preferred` policy evaluates collision fallbacks;
+a `locked` policy preserves its declared side and reports overflow instead of
+pretending that complete viewport visibility is possible. The result exposes
+the final placement and available size while Tooltip, Menu, Dialog, and product
+open/focus semantics remain outside this geometry contract.
+
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)

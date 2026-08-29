@@ -47,6 +47,10 @@ and document Intent remain in the host.
 reserve, writes temporary scroll range, performs smooth or instant positioning,
 and observes layout and target visibility without choosing product policy.
 
+`createWebAnchoredFloatingPositionPorts` measures anchor, floating, and clipping
+boundary rectangles and coalesces captured scroll, viewport resize, and element
+resize changes. It does not choose placement or render overlay semantics.
+
 ```ts
 import {
   createDocumentEditor,

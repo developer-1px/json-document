@@ -162,7 +162,7 @@ test("Calendar empty month cell click clears selection and does not create", asy
   const occurrence = month.getByRole("button", { name: "09:00 매일 뉴스 브리핑", exact: true }).first();
   await occurrence.click();
   await expect(occurrence).toHaveAttribute("data-selected", "true");
-  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Event" })).toBeVisible();
   await page.getByRole("gridcell", { name: "2026-05-21", exact: true }).click();
   await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
   await expect(month.getByRole("button", { name: "Event", exact: true })).toHaveCount(0);
@@ -190,7 +190,7 @@ test("Calendar month +N more opens that day's events without leaving month view"
   const lunch = overflow.getByRole("button", { name: "12:00 점심", exact: true });
   await lunch.click();
   await expect(lunch).toHaveAttribute("data-selected", "true");
-  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Event" })).toBeVisible();
   await lunch.dblclick();
   await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("점심");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
