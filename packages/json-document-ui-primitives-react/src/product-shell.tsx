@@ -19,18 +19,11 @@ export function ProductShell(props: HTMLAttributes<HTMLDivElement> & {
   } = props;
   return (
     <div {...shellProps} data-ui-component="product-shell" data-fill={fill ? "true" : "false"}>
-      {toolbar == null ? null : <ProductToolbar label={toolbarLabel ?? "Product actions"}>{toolbar}</ProductToolbar>}
+      {toolbar == null ? null : <Toolbar label={toolbarLabel ?? "Product actions"} data-ui-toolbar="product">{toolbar}</Toolbar>}
       <ProductCanvas className={canvasClassName} data-scroll={fill && canvasClassName === undefined ? "auto" : undefined}>{children}</ProductCanvas>
       {inspector == null ? null : <ProductInspector>{inspector}</ProductInspector>}
     </div>
   );
-}
-
-export function ProductToolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & {
-  readonly label: string;
-}): ReactNode {
-  const { label, ...toolbarProps } = props;
-  return <Toolbar {...toolbarProps} label={label} data-ui-toolbar="product" />;
 }
 
 export function ProductCanvas(props: HTMLAttributes<HTMLDivElement>): ReactNode {

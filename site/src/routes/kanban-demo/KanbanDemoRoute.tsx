@@ -21,7 +21,7 @@ import {
   commitAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -92,8 +92,8 @@ export function KanbanDemoRoute() {
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
       >

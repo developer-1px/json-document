@@ -9,6 +9,7 @@
     { "path": "../json-document-affordance" },
     { "path": "../json-document-editing" },
     { "path": "../json-document-react" },
+    { "path": "../json-document-ui-primitives-react" },
     { "path": "../json-document-web" }
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx"]

@@ -23,6 +23,7 @@
     "@interactive-os/json-document-affordance": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-editing": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-react": ">=0.1.0-rc.0 <1",
+    "@interactive-os/json-document-ui-primitives-react": ">=0.1.0-rc.0 <1",
     "@interactive-os/json-document-web": ">=0.1.0-rc.0 <1",
     "react": "^18.0.0 || ^19.0.0"
   },
@@ -30,6 +31,7 @@
     "@interactive-os/json-document-affordance": "*",
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-react": "*",
+    "@interactive-os/json-document-ui-primitives-react": "*",
     "@interactive-os/json-document-web": "*",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.14",

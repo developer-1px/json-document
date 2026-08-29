@@ -27,7 +27,7 @@
   "dependencies": {
     "@interactive-os/json-document-affordance": "0.1.0-rc.0",
     "@interactive-os/json-document-web": "0.1.0-rc.0",
-    "@js-temporal/polyfill": "^0.5.1"
+    "lucide-react": "^1.33.0"
   },
   "devDependencies": {
     "@interactive-os/json-document-affordance": "*",

@@ -15,7 +15,7 @@ const glyphPattern = `[${glyphs}]`;
 export function canonicalIconViolations(source, file = "source") {
   const violations = [];
   const patterns = [
-    [new RegExp(`<IconButton\\b[\\s\\S]*?<\\/IconButton>`, "g"), "IconButton character glyph"],
+    [new RegExp(`<Command\\b[\\s\\S]*?<\\/Command>`, "g"), "Command character glyph"],
     [new RegExp(`\\b(?:icon|trigger)=["']${glyphPattern}["']`, "g"), "character icon prop"],
     [new RegExp(`aria-hidden=["']true["'][^>]*>\\s*${glyphPattern}`, "g"), "aria-hidden character glyph"],
     [/function\s+\w*Icon\b[\s\S]*?<svg\b/g, "consumer-local SVG icon"],
@@ -30,7 +30,7 @@ export function canonicalIconViolations(source, file = "source") {
   return violations;
 }
 
-const fixture = '<IconButton label="Undo">↶</IconButton>\nfunction CopyIcon() { return <svg />; }';
+const fixture = '<Command label="Undo">↶</Command>\nfunction CopyIcon() { return <svg />; }';
 if (canonicalIconViolations(fixture, "violation fixture").length !== 2) {
   throw new Error("Canonical icon guard did not reject its violation fixture.");
 }

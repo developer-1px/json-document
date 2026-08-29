@@ -2,7 +2,7 @@ import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Copy, Scissors } from "lucide-react";
 import { type BlockDocument } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -35,8 +35,8 @@ export function ClipboardDemoRoute() {
             ))}
           </div>
           <div className="mt-3 flex gap-2">
-            <IconButton label="Copy" onClick={copy}><Copy aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Cut" onClick={cut}><Scissors aria-hidden="true" size={16} /></IconButton>
+            <Command label="Copy" onClick={copy}><Copy aria-hidden="true" size={16} /></Command>
+            <Command label="Cut" onClick={cut}><Scissors aria-hidden="true" size={16} /></Command>
           </div>
         </section>
 
@@ -46,7 +46,7 @@ export function ClipboardDemoRoute() {
           <Inspector label="Inspect clipboard payload" items={[
             { label: "clipboard", value: clipboard, testId: "clipboard-demo-payload", size: "compact" },
           ]} />
-          <ActionButton className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>payload 붙여넣기</ActionButton>
+          <Command className="mt-3" kind="primary" onClick={paste} disabled={!clipboard}>payload 붙여넣기</Command>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="clipboard-result">

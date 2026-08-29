@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Undo2 } from "lucide-react";
-import { ActionButton, IconButton, SegmentedControl, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Choice, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -29,10 +29,10 @@ export function ArtifactViewerRoute() {
         toolbarLabel="Artifact 선택"
         toolbar={(
           <>
-            <SegmentedControl label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={setActive} />
+            <Choice presentation="inline" label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={setActive} />
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
             <span className={ui.text.meta}>{artifact.name} · mock artifact</span>
-            <IconButton label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={<Composer artifactName={artifact.name} />}
@@ -57,15 +57,15 @@ export function ArtifactViewerRoute() {
 }
 
 function Composer({ artifactName }: { readonly artifactName: string }) {
+  const [request, setRequest] = useState("");
   return (
     <section className={styles.composer()} aria-label="Composer mock">
       <div className={styles.context()} aria-label="Composer context">
         <span>@Agent</span>
         <span>#{artifactName}</span>
       </div>
-      <label className="sr-only" htmlFor="artifact-composer">Agent에게 이어서 요청</label>
-      <input id="artifact-composer" className={ui.field.control} placeholder="이 artifact에서 무엇을 바꿀까요?" />
-      <ActionButton kind="primary">Send</ActionButton>
+      <Field label="Agent에게 이어서 요청" value={request} onValueChange={setRequest} className={ui.field.control} placeholder="이 artifact에서 무엇을 바꿀까요?" />
+      <Command kind="primary">Send</Command>
       <p className={classes("col-span-full m-0", ui.text.meta)}>
         Composer와 Mention은 agent에게 지시와 artifact context를 건네는 Hands입니다.
       </p>

@@ -62,7 +62,7 @@ Web `File`과 `ClipboardEvent`에서 이름·크기·media type을 읽는 일은
 DOM과 Web object를 알지 않으며, Web adapter는 ID·허용 정책·attachment kind를 결정하지 않습니다.
 
 Host는 config 값과 runtime port를 주입하고 composer의 배치, copy, CSS와 첨부 preview를
-그립니다. 파일 metadata 표시는 UI primitives의 `formatFileSize`를 사용합니다.
+그립니다. 파일 metadata 표시는 File Intake 정본의 `formatFileSize`를 사용합니다.
 후보 자료·제품 copy·권한은 Host가 정하지만 suggestion open/dismiss, keyboard focus,
 pointer active state와 mention 삽입 lifecycle은 정본 Hands가 소유합니다.
 검색 source, 파일 저장소, Agent runtime, transcript, think·stream·tool 상태는

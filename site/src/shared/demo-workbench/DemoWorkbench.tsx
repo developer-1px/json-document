@@ -3,7 +3,7 @@ import { Maximize2, Minimize2 } from "lucide-react";
 import { Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../ui/styles";
 import { ActionLink } from "../ui/interactive";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { ShikiSourceCodeBlock } from "./ShikiSourceCodeBlock";
 import { demoEntrySource, discoverDemoSources, type DemoSourceFile } from "./demo-sources";
 
@@ -72,9 +72,9 @@ export function DemoWorkbench(props: {
           tabId={(_tab, index) => `${id}-tab-${index}`}
           panelId={(_tab, index) => `${id}-panel-${index}`}
         />
-        <IconButton label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
+        <Command label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
           {expanded ? <Minimize2 aria-hidden="true" size={16} /> : <Maximize2 aria-hidden="true" size={16} />}
-        </IconButton>
+        </Command>
       </div>
 
       <div

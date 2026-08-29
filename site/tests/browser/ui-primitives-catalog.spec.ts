@@ -4,8 +4,30 @@ test("design system catalog shows tokens and canonical primitives", async ({ pag
   await page.goto("/demo/ui-primitives");
   await expect(page.getByRole("heading", { level: 1, name: "Design system" })).toBeVisible();
   await expect(page.getByTestId("design-system-catalog")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Demo", exact: true })).toHaveCount(0);
+  await expect(page.getByText("UiPrimitivesCatalogRoute.tsx", { exact: true })).toHaveCount(0);
   await expect(page.getByTestId("token-color-background-canvas")).toBeVisible();
   await expect(page.getByTestId("token-color-line-accent")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  await page.getByRole("link", { name: "Controls", exact: true }).click();
+  const catalogNavigation = page.getByRole("navigation", { name: "Design system sections" });
+  const controlsHeading = page.getByRole("heading", { level: 2, name: "Controls" });
+  const [navigationBox, headingBox] = await Promise.all([catalogNavigation.boundingBox(), controlsHeading.boundingBox()]);
+  expect(navigationBox).not.toBeNull();
+  expect(headingBox).not.toBeNull();
+  expect(headingBox!.y).toBeGreaterThanOrEqual(navigationBox!.y + navigationBox!.height);
+
+  const showroom = page.getByRole("region", { name: "Showroom" });
+  await expect(showroom.getByRole("article")).toHaveCount(3);
+  await showroom.getByRole("radio", { name: "Edit" }).click();
+  await expect(showroom.getByText("Editing is active.", { exact: false })).toBeVisible();
+  await showroom.getByRole("button", { name: "Market research" }).click();
+  await expect(showroom.getByRole("heading", { name: "Market research" })).toBeVisible();
+  const showroomSend = showroom.getByRole("button", { name: "Send request" });
+  await expect(showroomSend).toBeDisabled();
+  await showroom.getByRole("textbox", { name: "Ask about this artifact" }).fill("Tighten the opening");
+  await expect(showroomSend).toBeEnabled();
 
   await expect(page.getByRole("button", { name: "Save", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Delete", exact: true }).first()).toBeVisible();

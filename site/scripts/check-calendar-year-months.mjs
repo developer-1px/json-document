@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-ui-primitives-react/src/date-values.ts");
-const ownerIndex = read("packages/json-document-ui-primitives-react/src/index.ts");
+const owner = read("packages/json-document-calendar/src/date-values.ts");
+const ownerIndex = read("packages/json-document-calendar/src/index.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarYearMonths");
@@ -12,7 +12,7 @@ requireText(host, "calendarYearMonths(visibleDate)");
 forbid(host, /function yearMonths/);
 forbid(host, /Array\.from\(\{ length: 12 \}/);
 
-console.log("Calendar year months guard ok; UI Primitives owner, public export, and Host consumer checked.");
+console.log("Calendar year months guard ok; Calendar owner, public export, and Host consumer checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

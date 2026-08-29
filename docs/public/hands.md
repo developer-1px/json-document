@@ -129,6 +129,13 @@ event 값만 받아 UI Primitives가 Editing package에 의존하지 않도록 �
 /demo/calendar
 ```
 
+Date inputs and single-value date choices are owned by Calendar rather than the
+generic UI primitive package:
+
+```live-demo
+/demo/date-controls
+```
+
 Hands는 사람이 artifact와 agent를 다루게 하는 장르별 완료 기준입니다.
 App도, 단일 화면 component도, 하나의 공통 package도 아닙니다. 실제 제품을
 끝까지 만져 보며 발견한 전형적인 인간의 손과 그 조합 증거를 가리킵니다.

@@ -268,7 +268,7 @@ describe("DatePicker and DateRangePicker", () => {
     }
     render(<Harness />);
     const trigger = screen.getByRole("button", { name: "Choose Event date" });
-    expect(trigger.getAttribute("data-ui-control")).toBe("action");
+    expect(trigger.getAttribute("data-ui-control")).toBe("command");
     await user.click(trigger);
     expect(screen.getByRole("gridcell", { name: "2026-08-03" }).getAttribute("data-ui-control")).toBe("calendar-day");
   });

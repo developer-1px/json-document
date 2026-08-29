@@ -7,25 +7,25 @@ import {
 } from "react";
 import { createTypeaheadSession } from "@interactive-os/json-document-affordance";
 
-export interface ListboxItem {
-  readonly id: string;
+export interface ListboxItem<Id extends string = string> {
+  readonly id: Id;
   readonly textValue: string;
   readonly disabled?: boolean;
 }
 
-export interface UseListboxOptions<Item extends ListboxItem> {
+export interface UseListboxOptions<Id extends string = string, Item extends ListboxItem<Id> = ListboxItem<Id>> {
   readonly id: string;
   readonly label: string;
   readonly items: ReadonlyArray<Item>;
-  readonly activeId: string | null;
-  readonly selectedId?: string | null;
+  readonly activeId: Id | null;
+  readonly selectedId?: Id | null;
   readonly wrap?: boolean;
-  readonly onActiveChange: (id: string | null) => void;
-  readonly onAction: (id: string) => void;
+  readonly onActiveChange: (id: Id | null) => void;
+  readonly onAction: (id: Id) => void;
 }
 
-export interface ListboxBinding<Item extends ListboxItem> {
-  readonly activeId: string | null;
+export interface ListboxBinding<Id extends string = string, Item extends ListboxItem<Id> = ListboxItem<Id>> {
+  readonly activeId: Id | null;
   readonly referenceProps: {
     readonly "aria-controls": string;
     readonly "aria-expanded": boolean;
@@ -36,12 +36,12 @@ export interface ListboxBinding<Item extends ListboxItem> {
   optionProps(item: Item): ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
-export function useListbox<Item extends ListboxItem>(
-  options: UseListboxOptions<Item>,
-): ListboxBinding<Item> {
+export function useListbox<Id extends string, Item extends ListboxItem<Id>>(
+  options: UseListboxOptions<Id, Item>,
+): ListboxBinding<Id, Item> {
   const optionsRef = useRef(options);
   optionsRef.current = options;
-  const [typeahead] = useState(() => createTypeaheadSession<string>({
+  const [typeahead] = useState(() => createTypeaheadSession<Id>({
     onMatch: (id) => optionsRef.current.onActiveChange(id),
   }));
   const enabled = options.items.filter((item) => !item.disabled);

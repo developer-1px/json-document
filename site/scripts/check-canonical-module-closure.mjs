@@ -16,9 +16,12 @@ const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*\
   symbol: match[2],
   sourcePath: match[3],
 }));
-for (const symbol of ["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "DisclosureButton"]) {
+for (const symbol of ["Command", "Toggle", "SelectableItem", "Tabs", "DisclosureButton"]) {
   usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol, sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx" });
 }
+usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Choice", sourcePath: "packages/json-document-ui-primitives-react/src/choice.tsx" });
+for (const symbol of ["Check", "Field", "Search", "ValueInput"]) usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol, sourcePath: "packages/json-document-ui-primitives-react/src/input-controls.tsx" });
+for (const symbol of ["Popover", "Dialog"]) usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol, sourcePath: "packages/json-document-ui-primitives-react/src/presentations.tsx" });
 
 const packageDirectories = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && existsSync(join(repositoryRoot, "packages", entry.name, "package.json")))

@@ -9,7 +9,7 @@ import {
   RangeCalendar,
   type CalendarGrain,
   type DateRangeValue,
-} from "@interactive-os/json-document-ui-primitives-react";
+} from "@interactive-os/json-document-calendar";
 
 
 export function DateControlsDemoRoute() {

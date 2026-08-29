@@ -36,7 +36,7 @@ import {
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
-import { Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Check, Command, Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
@@ -466,12 +466,12 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       data-database-table-surface=""
     >
       <Toolbar className="jd-database__toolbar" label="Database actions">
-        {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" aria-label={props.labels.newRecord} title={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></button> : null}
-        {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" aria-label={props.labels.deleteRecord} title={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></button> : null}
+        {props.features.create && !props.readOnly ? <Command type="button" data-kind="primary" label={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></Command> : null}
+        {props.features.delete && !props.readOnly ? <Command type="button" data-kind="danger" label={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></Command> : null}
         {props.features.history && !props.readOnly ? (
           <>
-            <button type="button" aria-label={props.labels.undo} title={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><Undo2 aria-hidden="true" size={16} /></button>
-            <button type="button" aria-label={props.labels.redo} title={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><Redo2 aria-hidden="true" size={16} /></button>
+            <Command type="button" label={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command type="button" label={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         ) : null}
         {props.features.filter ? (
@@ -490,11 +490,11 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
             <div className="jd-database__column-menu">
               {document.schema.properties.map((property) => (
                 <label key={property.id}>
-                  <input
-                    type="checkbox"
+                  <Check
+                    label={property.name}
                     checked={view.propertyVisibility[property.id] !== false}
-                    onChange={(event) => configure({
-                      propertyVisibility: { ...view.propertyVisibility, [property.id]: event.currentTarget.checked },
+                    onCheckedChange={(checked) => configure({
+                      propertyVisibility: { ...view.propertyVisibility, [property.id]: checked },
                     })}
                   />
                   {property.name}
@@ -546,10 +546,10 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   style={{ ...columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned), position: "relative" }}
                   data-pinned={props.presentation?.propertyPinned?.[property.id]}
                 >
-                  <button type="button" onClick={() => configure({ sort: nextDatabasePropertySort(view.sort, property.id) })}>
+                  <Command type="button" onClick={() => configure({ sort: nextDatabasePropertySort(view.sort, property.id) })}>
                     <span>{property.name}</span>
                     <small>{property.type}{sortMark(view.sort, property.id)}</small>
-                  </button>
+                  </Command>
                   <DatabaseColumnResizeHandle
                     label={`${property.name} column width`}
                     propertyId={property.id}
@@ -634,9 +634,9 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
           const property = document.schema.properties.find((candidate) => candidate.id === headerMenu.propertyId);
           if (!property) return null;
           return <div role="menu" aria-label={`${property.name} property`} className="jd-database__column-menu" style={{ position: "fixed", left: headerMenu.x, top: headerMenu.y }}>
-            <button type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...view.propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</button>
-            {filterItems(property).map((item) => <button key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</button>)}
-            {view.filter?.propertyId === property.id ? <button type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</button> : null}
+            <Command type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...view.propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</Command>
+            {filterItems(property).map((item) => <Command key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</Command>)}
+            {view.filter?.propertyId === property.id ? <Command type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</Command> : null}
           </div>;
         })() : null}
       </div>
@@ -762,7 +762,7 @@ function FilterControl(props: {
         </select>
       </label>
       {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      {props.filter ? <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></button> : null}
+      {props.filter ? <Command type="button" label={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></Command> : null}
     </div>
   );
 }

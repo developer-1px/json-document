@@ -24,3 +24,16 @@ The Hand resolves the currently focused occurrence as the copy/cut source and
 paste target. The Host selects Web representations; Calendar schema,
 occurrence projection, temporal placement, selection, and history remain in
 their canonical owners.
+
+Date and time controls belong to this Calendar owner rather than the generic UI
+Primitive package:
+
+```tsx
+<HtmlDateField type="date" label="Date" value={date} onValueChange={setDate} />
+<CalendarGrid label="Calendar" value={date} grain={grain} visibleDate={date} onValueChange={setDate} onGrainChange={setGrain} onVisibleDateChange={setDate} />
+<RangeCalendar label="Range" value={range} grain={grain} visibleDate={range.start} onValueChange={setRange} onGrainChange={setGrain} onVisibleDateChange={setVisible} />
+<DatePicker label="Event date" value={date} onValueChange={setDate} />
+<DateRangePicker label="Trip" value={range} onValueChange={setRange} />
+```
+
+`/demo/date-controls` exercises the public controls and links their source.
