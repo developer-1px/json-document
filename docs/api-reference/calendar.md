@@ -224,12 +224,6 @@ interface CalendarRenameInputOptions {
   readonly commitOnBlur?: boolean;
 }
 ```
-## `calendarTimeLabel`
-
-```ts
-calendarTimeLabel(value: string): string
-```
-
 ## `CalendarSelectionDragPreview`
 
 ```ts
@@ -237,6 +231,11 @@ interface CalendarSelectionDragPreview {
   readonly source: CalendarSelectionDragSource;
   readonly target: CalendarSelectionMoveTarget;
 }
+```
+## `calendarTimeLabel`
+
+```ts
+calendarTimeLabel(value: string): string
 ```
 ## `CalendarViewportPositionOptions`
 
