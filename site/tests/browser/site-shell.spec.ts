@@ -112,6 +112,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Rename",
     "Nudge",
     "Hover",
+    "Contextual",
     "Double-click",
     "Triple-click",
     "Context menu",
