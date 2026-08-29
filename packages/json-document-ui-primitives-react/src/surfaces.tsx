@@ -110,6 +110,7 @@ export function useInteractionHandle<ElementType extends Element = HTMLElement>(
     cursor: interactionHandleCursor(options.descriptor, sessionActive ? "active" : "idle") as CSSProperties["cursor"],
     handleProps: {
       "data-interaction-handle": options.descriptor.kind,
+      "data-active": sessionActive || undefined,
       onPointerDown(event: PointerEvent<ElementType>) {
         if (event.button !== 0) return;
         event.preventDefault();

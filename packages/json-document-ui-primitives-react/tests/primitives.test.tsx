@@ -328,9 +328,12 @@ describe("UI Primitives", () => {
       hasPointerCapture: (pointerId: number) => captured === pointerId,
       releasePointerCapture: () => { captured = null; },
     });
+    expect(handle.getAttribute("data-active")).toBeNull();
     fireEvent.pointerDown(handle, { pointerId: 7, clientX: 10 });
+    expect(handle.getAttribute("data-active")).toBe("true");
     fireEvent.pointerMove(handle, { pointerId: 7, clientX: 24 });
     fireEvent.pointerUp(handle, { pointerId: 7, clientX: 30 });
+    expect(handle.getAttribute("data-active")).toBeNull();
     expect(onResize).toHaveBeenNthCalledWith(1, 14, "preview");
     expect(onResize).toHaveBeenNthCalledWith(2, 20, "commit");
 

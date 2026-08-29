@@ -88,6 +88,36 @@ test("Calendar keeps event time visible, hints an empty creation time, and opens
   await expect(title).toHaveCSS("font-family", productFont);
 });
 
+test("Calendar distinguishes the selection set, primary event, move surface, and active resize edge", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const first = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  const second = page.getByRole("button", { name: "점심", exact: true });
+
+  await first.click();
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(first).toHaveAttribute("data-primary", "true");
+  await expect(first).toHaveCSS("cursor", "grab");
+  await expect(first).toHaveCSS("outline-width", "2px");
+
+  const startHandle = page.getByRole("button", { name: "Resize 고객사 싱크 start", exact: true });
+  await expect(startHandle).toHaveCSS("cursor", "row-resize");
+  await expect(startHandle).not.toHaveAttribute("data-active", "true");
+  await startHandle.hover();
+  await page.mouse.down();
+  await expect(startHandle).toHaveAttribute("data-active", "true");
+  await page.mouse.up();
+  await expect(startHandle).not.toHaveAttribute("data-active", "true");
+
+  await second.click({ modifiers: ["ControlOrMeta"] });
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(first).not.toHaveAttribute("data-primary", "true");
+  await expect(first).toHaveCSS("outline-width", "1px");
+  await expect(second).toHaveAttribute("data-selected", "true");
+  await expect(second).toHaveAttribute("data-primary", "true");
+  await expect(page.getByRole("button", { name: "Resize 고객사 싱크 start", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Resize 점심 start", exact: true })).toBeVisible();
+});
+
 test("Calendar details follow the primary occurrence and flip inside a narrow viewport", async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 600 });
   await page.goto("/demo/calendar?view=week&date=2026-05-25");

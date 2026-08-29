@@ -375,6 +375,7 @@ export function CalendarDemoRoute(props: {
               data-primary={isPrimary(item.event) ? "true" : undefined}
               aria-label={item.event.title}
               data-calendar-color={calendarColor(document, item.event.calendarId)}
+              data-calendar-move-surface="true"
               data-preview={item.event.id === "preview" ? "true" : undefined}
               className={styles.allDayEvent()}
               onPointerDown={(event) => {
@@ -524,6 +525,7 @@ export function CalendarDemoRoute(props: {
                     aria-label={item.event.title}
                     data-calendar-event=""
                     data-calendar-color={calendarColor(document, item.event.calendarId)}
+                    data-calendar-move-surface="true"
                     data-preview={item.event.id === "preview" || timePreview?.originEventId === item.event.id ? "true" : undefined}
                     className={styles.timedEvent()}
                     onPointerDown={(event) => {
@@ -791,6 +793,7 @@ export function CalendarDemoRoute(props: {
                             data-primary={isPrimary(item.event) ? "true" : undefined}
                             aria-label={calendarEventLabel(item.event)}
                             data-calendar-color={calendarColor(document, item.event.calendarId)}
+                            data-calendar-move-surface="true"
                             data-preview={item.event.id === "preview" ? "true" : undefined}
                             className={isCalendarAllDay(item.event) ? styles.monthAllDay() : styles.monthTimed()}
                             onPointerDown={(event) => {
