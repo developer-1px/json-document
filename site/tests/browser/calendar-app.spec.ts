@@ -55,7 +55,14 @@ test("Calendar keeps event time visible, hints an empty creation time, and edits
   await page.mouse.move(box.x + box.width / 2, box.y + box.height * (14.25 / 24));
   await expect(page.locator("[data-calendar-create-time]")).toHaveText("14:15");
   await event.click();
-  await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("고객사 싱크");
+  const title = page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" });
+  await expect(title).toHaveValue("고객사 싱크");
+
+  const productFont = await page.locator("[data-product-app]").evaluate((element) => getComputedStyle(element).fontFamily);
+  await expect(page.getByRole("radio", { name: "Week", exact: true })).toHaveCSS("font-family", productFont);
+  await expect(event).toHaveCSS("font-family", productFont);
+  await expect(time).toHaveCSS("font-family", productFont);
+  await expect(title).toHaveCSS("font-family", productFont);
 });
 
 test("Calendar day view uses the visible date's canonical weekday cell", async ({ page }) => {
