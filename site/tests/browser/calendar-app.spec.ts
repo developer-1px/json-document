@@ -29,6 +29,19 @@ test("Calendar app chrome fills the page without docs or workbench", async ({ pa
   await expect(page.getByRole("toolbar", { name: "Calendar controls", exact: true })).toBeVisible();
 });
 
+test("Calendar view tabs stay on one toolbar axis across variable period labels", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const viewRegion = page.getByRole("group", { name: "Calendar view", exact: true });
+  const initialX = await viewRegion.evaluate((element) => element.getBoundingClientRect().x);
+
+  for (const view of ["Day", "Month", "Year", "Week"] as const) {
+    await page.getByRole("radio", { name: view, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`view=${view.toLowerCase()}`));
+    await expect.poll(async () => viewRegion.evaluate((element) => element.getBoundingClientRect().x))
+      .toBeCloseTo(initialX, 1);
+  }
+});
+
 test("Calendar positions the work hour until the user claims the viewport", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const viewport = page.locator("[data-calendar-time-viewport]");

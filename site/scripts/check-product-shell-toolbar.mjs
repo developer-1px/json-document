@@ -15,7 +15,7 @@ for (const symbol of ["ProductShell", "ProductToolbar", "ProductCanvas", "Produc
   requireText(shellOwner, `export function ${symbol}`);
   requireText(ownerIndex, symbol);
 }
-for (const symbol of ["Toolbar", "ToolbarGroup", "ToolbarSeparator", "ToolbarSpacer"]) {
+for (const symbol of ["Toolbar", "ToolbarGroup", "ToolbarLayout", "ToolbarRegion", "ToolbarSeparator", "ToolbarSpacer"]) {
   requireText(toolbarOwner, `export function ${symbol}`);
   requireText(ownerIndex, symbol);
 }
@@ -25,6 +25,8 @@ requireText(usage, "<ProductShell");
 requireText(usage, "/widgets/toolbar");
 requireText(calendar, 'toolbarLabel="Calendar controls"');
 requireText(calendar, 'aria-label="Calendar contextual actions"');
+requireText(calendar, '<ToolbarRegion placement="center" label="Calendar view">');
+requireText(usage, '<ToolbarRegion placement="center" label="View">');
 
 const productShellConsumers = consumers.filter(([, source]) => source.includes("<ProductShell"));
 if (productShellConsumers.length !== 12) {

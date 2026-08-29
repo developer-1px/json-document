@@ -47,8 +47,9 @@ import {
   Select,
   SelectableItem,
   ToolbarGroup,
+  ToolbarLayout,
+  ToolbarRegion,
   ToolbarSeparator,
-  ToolbarSpacer,
   ToggleButton,
 } from "@interactive-os/json-document-ui-primitives-react";
 import {
@@ -508,25 +509,26 @@ export function CalendarDemoRoute(props: {
         canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
         toolbarLabel="Calendar controls"
         toolbar={(
-          <>
-            <ToolbarGroup label="Period navigation">
-              <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
-                monthNames: months,
-                weekSeparator: " – ",
-              })}</span>
-              <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
-                <ChevronLeft aria-hidden="true" size={16} />
-              </IconButton>
-              <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
-                <ChevronRight aria-hidden="true" size={16} />
-              </IconButton>
-            </ToolbarGroup>
-            <ToolbarSeparator />
-            <ToolbarGroup label="Date shortcuts">
-              <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
-            </ToolbarGroup>
-            <ToolbarSeparator />
-            <ToolbarGroup label="Calendar view">
+          <ToolbarLayout>
+            <ToolbarRegion placement="start" label="Calendar navigation">
+              <ToolbarGroup label="Period navigation">
+                <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
+                  monthNames: months,
+                  weekSeparator: " – ",
+                })}</span>
+                <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
+                  <ChevronLeft aria-hidden="true" size={16} />
+                </IconButton>
+                <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
+                  <ChevronRight aria-hidden="true" size={16} />
+                </IconButton>
+              </ToolbarGroup>
+              <ToolbarSeparator />
+              <ToolbarGroup label="Date shortcuts">
+                <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
+              </ToolbarGroup>
+            </ToolbarRegion>
+            <ToolbarRegion placement="center" label="Calendar view">
               <SegmentedControl
                 label="View"
                 value={view}
@@ -538,38 +540,39 @@ export function CalendarDemoRoute(props: {
                 ]}
                 onValueChange={setView}
               />
-            </ToolbarGroup>
-            <ToolbarSpacer />
-            <ContextualControls
-              aria-label="Calendar contextual actions"
-              tabIndex={0}
-              className={styles.contextualActions()}
-              selected={selectedEvent !== null}
-              editing={hand.renaming}
-              capabilities={[
-                { id: "create", phases: ["approach", "selected", "editing"] },
-                { id: "history", phases: ["approach", "selected"] },
-                { id: "delete", phases: ["selected", "editing"] },
-              ] as const}
-            >
-              {(context) => (
-                <>
-                  {context.visible.includes("create") ? (
-                    <ActionButton onClick={createOnVisibleDate}>Create</ActionButton>
-                  ) : null}
-                  {context.visible.includes("history") ? (
-                    <ToolbarGroup label="History">
-                      <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
-                      <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
-                    </ToolbarGroup>
-                  ) : null}
-                  {context.visible.includes("delete") ? (
-                    <IconButton label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
-                  ) : null}
-                </>
-              )}
-            </ContextualControls>
-          </>
+            </ToolbarRegion>
+            <ToolbarRegion placement="end" label="Calendar actions">
+              <ContextualControls
+                aria-label="Calendar contextual actions"
+                tabIndex={0}
+                className={styles.contextualActions()}
+                selected={selectedEvent !== null}
+                editing={hand.renaming}
+                capabilities={[
+                  { id: "create", phases: ["approach", "selected", "editing"] },
+                  { id: "history", phases: ["approach", "selected"] },
+                  { id: "delete", phases: ["selected", "editing"] },
+                ] as const}
+              >
+                {(context) => (
+                  <>
+                    {context.visible.includes("create") ? (
+                      <ActionButton onClick={createOnVisibleDate}>Create</ActionButton>
+                    ) : null}
+                    {context.visible.includes("history") ? (
+                      <ToolbarGroup label="History">
+                        <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
+                        <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
+                      </ToolbarGroup>
+                    ) : null}
+                    {context.visible.includes("delete") ? (
+                      <IconButton label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
+                    ) : null}
+                  </>
+                )}
+              </ContextualControls>
+            </ToolbarRegion>
+          </ToolbarLayout>
         )}
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">

@@ -102,7 +102,28 @@
   }
 
   [data-ui-toolbar="product"] {
-    @apply shrink-0 border-b border-line-subtle/40 px-2 py-1;
+    @apply block shrink-0 border-b border-line-subtle/40 px-2 py-1;
+  }
+
+  [data-ui-component="toolbar-layout"] {
+    @apply grid w-full min-w-0 items-center;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  [data-ui-component="toolbar-region"] {
+    @apply flex min-w-0 items-center gap-1;
+  }
+
+  [data-ui-component="toolbar-region"][data-placement="start"] {
+    @apply col-start-1 justify-self-start overflow-hidden;
+  }
+
+  [data-ui-component="toolbar-region"][data-placement="center"] {
+    @apply col-start-2 justify-self-center;
+  }
+
+  [data-ui-component="toolbar-region"][data-placement="end"] {
+    @apply col-start-3 justify-self-end overflow-hidden;
   }
 
   [data-ui-component="toolbar-group"] {

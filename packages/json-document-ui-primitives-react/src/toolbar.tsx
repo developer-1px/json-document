@@ -1,5 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
+export type ToolbarRegionPlacement = "start" | "center" | "end";
+
 export function Toolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & {
   readonly label: string;
 }): ReactNode {
@@ -17,6 +19,26 @@ export function ToolbarGroup(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-l
       role={label === undefined ? "presentation" : "group"}
       aria-label={label}
       data-ui-component="toolbar-group"
+    />
+  );
+}
+
+export function ToolbarLayout(props: HTMLAttributes<HTMLDivElement>): ReactNode {
+  return <div {...props} data-ui-component="toolbar-layout" />;
+}
+
+export function ToolbarRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & {
+  readonly label?: string;
+  readonly placement: ToolbarRegionPlacement;
+}): ReactNode {
+  const { label, placement, ...regionProps } = props;
+  return (
+    <div
+      {...regionProps}
+      role={label === undefined ? "presentation" : "group"}
+      aria-label={label}
+      data-ui-component="toolbar-region"
+      data-placement={placement}
     />
   );
 }

@@ -391,6 +391,21 @@ Toolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly l
 ```ts
 ToolbarGroup(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; }): ReactNode
 ```
+## `ToolbarLayout`
+
+```ts
+ToolbarLayout(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ToolbarRegion`
+
+```ts
+ToolbarRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; readonly placement: ToolbarRegionPlacement; }): ReactNode
+```
+## `ToolbarRegionPlacement`
+
+```ts
+type ToolbarRegionPlacement = "start" | "center" | "end";
+```
 ## `ToolbarSeparator`
 
 ```ts

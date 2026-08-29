@@ -22,6 +22,8 @@ import {
   Tabs,
   Toolbar,
   ToolbarGroup,
+  ToolbarLayout,
+  ToolbarRegion,
   ToolbarSeparator,
   ToolbarSpacer,
   ToggleButton,
@@ -61,6 +63,22 @@ describe("UI Primitives", () => {
   test("Toolbar can own a standalone action collection", () => {
     render(<Toolbar label="History"><ActionButton>Undo</ActionButton></Toolbar>);
     expect(screen.getByRole("toolbar", { name: "History" })).toBeTruthy();
+  });
+
+  test("ToolbarLayout exposes stable start, center, and end regions", () => {
+    render(
+      <Toolbar label="Calendar controls">
+        <ToolbarLayout>
+          <ToolbarRegion placement="start" label="Period">2026</ToolbarRegion>
+          <ToolbarRegion placement="center" label="View">Week</ToolbarRegion>
+          <ToolbarRegion placement="end" label="Actions">Create</ToolbarRegion>
+        </ToolbarLayout>
+      </Toolbar>,
+    );
+
+    expect(screen.getByRole("group", { name: "Period" }).dataset.placement).toBe("start");
+    expect(screen.getByRole("group", { name: "View" }).dataset.placement).toBe("center");
+    expect(screen.getByRole("group", { name: "Actions" }).dataset.placement).toBe("end");
   });
 
   test("ContextualControls reveals the same capability by pointer approach and keyboard focus", () => {
