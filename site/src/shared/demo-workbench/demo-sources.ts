@@ -18,6 +18,7 @@ import viewportPositionSource from "../../../../packages/json-document-affordanc
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
 import webViewportPositionSource from "../../../../packages/json-document-web/src/viewport-position.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
+import webInputSource from "../../../../packages/json-document-web/src/input.ts?raw";
 import virtualSelectionSource from "../../../../packages/json-document-web/src/virtual-selection-scope.ts?raw";
 import virtualSelectionReactSource from "../../../../packages/json-document-react/src/use-virtual-selection-scope.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
@@ -162,6 +163,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
   ["packages/json-document-web/src/viewport-position.ts", webViewportPositionSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
+  ["packages/json-document-web/src/input.ts", webInputSource],
   ["packages/json-document-web/src/virtual-selection-scope.ts", virtualSelectionSource],
   ["packages/json-document-react/src/use-virtual-selection-scope.ts", virtualSelectionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
