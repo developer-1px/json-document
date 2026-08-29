@@ -27,7 +27,7 @@ import {
   renameAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -189,9 +189,9 @@ export function OrderDemoRoute() {
         toolbarLabel="Order actions"
         toolbar={(
           <>
-            <IconButton label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Paste"
+            <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+            <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+            <Command label="Paste"
               disabled={!clipboard}
               onClick={() => {
                 if (!clipboard) return;
@@ -199,11 +199,11 @@ export function OrderDemoRoute() {
               }}
             >
               <ClipboardPaste aria-hidden="true" size={16} />
-            </IconButton>
-            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></IconButton>
+            </Command>
+            <Command label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={(

@@ -14,24 +14,33 @@ if (liveDemoPaths.length !== 39) {
 const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];
 const files = roots.flatMap(walk).filter((file) => extname(file) === ".tsx" && !file.includes("/routes/docs/"));
 const findings = [];
-const counts = { action: 0, icon: 0, toggle: 0, choice: 0, segmented: 0, tabs: 0, disclosure: 0, menu: 0, dragHandle: 0, resizeHandle: 0, controlHandle: 0 };
+const counts = { command: 0, toggle: 0, choice: 0, tabs: 0, disclosure: 0, menu: 0, dragHandle: 0, resizeHandle: 0, controlHandle: 0 };
 
 for (const file of files) {
   const source = readFileSync(file, "utf8");
   for (const match of source.matchAll(/<button\b/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} raw <button>`);
   for (const match of source.matchAll(/<(?!button\b)[A-Za-z][^>]*\brole=["']button["']/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} non-button role=button`);
-  for (const match of source.matchAll(/<ToggleButton\b[^>]*\brole=["']tab["']/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} tab을 ToggleButton으로 우회`);
-  counts.action += matches(source, /<ActionButton\b/g);
-  counts.icon += matches(source, /<IconButton\b/g);
-  counts.toggle += matches(source, /<ToggleButton\b/g);
-  counts.choice += matches(source, /<ChoiceChip\b/g);
-  counts.segmented += matches(source, /<SegmentedControl\b/g);
+  for (const match of source.matchAll(/<Toggle\b[^>]*\brole=["']tab["']/g)) findings.push(`${relative(siteRoot, file)}:${lineOf(source, match.index)} tab을 Toggle로 우회`);
+  counts.command += matches(source, /<Command\b/g);
+  counts.toggle += matches(source, /<Toggle\b/g);
+  counts.choice += matches(source, /<Choice\b/g);
   counts.tabs += matches(source, /<Tabs\b/g);
   counts.disclosure += matches(source, /<DisclosureButton\b/g);
-  counts.menu += matches(source, /<(?:Menu|MenuItemButton)\b/g);
+  counts.menu += matches(source, /<Menu\b/g);
   counts.dragHandle += matches(source, /<DragHandle\b/g);
   counts.resizeHandle += matches(source, /<ResizeHandle\b/g);
   counts.controlHandle += matches(source, /<ControlHandle\b/g);
+}
+
+for (const legacy of ["ActionButton", "IconButton", "ToggleButton", "ChoiceChip", "SegmentedControl", "MenuItemButton", "ProductToolbar"]) {
+  for (const file of files) {
+    const source = readFileSync(file, "utf8");
+    if (new RegExp(`\\b${legacy}\\b`).test(source)) findings.push(`${relative(siteRoot, file)} legacy ${legacy}`);
+  }
+}
+for (const file of files) {
+  const source = readFileSync(file, "utf8");
+  if (/<Select\b/.test(source)) findings.push(`${relative(siteRoot, file)} legacy Select component`);
 }
 
 if (findings.length > 0) throw new Error(`Live Demo가 canonical UI Primitive를 우회합니다:\n${findings.join("\n")}`);

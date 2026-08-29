@@ -40,23 +40,7 @@ import {
   useCalendarPointerInteractions,
   useCalendarRenameInput,
   useCalendarViewportPosition,
-} from "@interactive-os/json-document-calendar";
-import {
-  ActionButton,
-  ContextualControls,
   HtmlDateField,
-  IconButton,
-  ResizeHandle,
-  SegmentedControl,
-  Select,
-  SelectableItem,
-  ToolbarGroup,
-  ToolbarLayout,
-  ToolbarRegion,
-  ToolbarSeparator,
-  ToggleButton,
-} from "@interactive-os/json-document-ui-primitives-react";
-import {
   calendarCellInterval,
   calendarCells,
   calendarEventLabel,
@@ -65,6 +49,18 @@ import {
   calendarYearMonths,
   shiftVisibleDate,
   visiblePeriodLabel,
+} from "@interactive-os/json-document-calendar";
+import {
+  Command,
+  ContextualControls,
+  ResizeHandle,
+  Choice,
+  SelectableItem,
+  ToolbarGroup,
+  ToolbarLayout,
+  ToolbarRegion,
+  ToolbarSeparator,
+  Toggle,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
 import { DemoSurface } from "../../shared/demo-workbench/DemoSurface";
@@ -568,20 +564,20 @@ export function CalendarDemoRoute(props: {
                   monthNames: months,
                   weekSeparator: " – ",
                 })}</span>
-                <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
+                <Command label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
                   <ChevronLeft aria-hidden="true" size={16} />
-                </IconButton>
-                <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
+                </Command>
+                <Command label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
                   <ChevronRight aria-hidden="true" size={16} />
-                </IconButton>
+                </Command>
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup label="Date shortcuts">
-                <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
+                <Command onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
               </ToolbarGroup>
             </ToolbarRegion>
             <ToolbarRegion placement="center" label="Calendar view">
-              <SegmentedControl
+              <Choice presentation="inline"
                 label="View"
                 value={view}
                 options={[
@@ -609,16 +605,16 @@ export function CalendarDemoRoute(props: {
                 {(context) => (
                   <>
                     {context.visible.includes("create") ? (
-                      <ActionButton onClick={createOnVisibleDate}>Create</ActionButton>
+                      <Command onClick={createOnVisibleDate}>Create</Command>
                     ) : null}
                     {context.visible.includes("history") ? (
                       <ToolbarGroup label="History">
-                        <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
-                        <IconButton label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></IconButton>
+                        <Command label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></Command>
+                        <Command label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></Command>
                       </ToolbarGroup>
                     ) : null}
                     {context.visible.includes("delete") ? (
-                      <IconButton label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></IconButton>
+                      <Command label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></Command>
                     ) : null}
                   </>
                 )}
@@ -639,7 +635,7 @@ export function CalendarDemoRoute(props: {
                 <nav aria-label="Calendars" className={styles.sidebar()}>
                   <p className={ui.text.label}>Calendars</p>
                   {calendars.map((calendar) => (
-                    <ToggleButton
+                    <Toggle
                       key={calendar.id}
                       pressed={!calendar.hidden}
                       aria-label={`Show ${calendar.title}`}
@@ -653,7 +649,7 @@ export function CalendarDemoRoute(props: {
                         className={styles.calendarSwatch()}
                       />
                       {calendar.title}
-                    </ToggleButton>
+                    </Toggle>
                   ))}
                   <CalendarDemoNavigator
                     visibleDate={visibleDate}
@@ -720,12 +716,12 @@ export function CalendarDemoRoute(props: {
                                 onPointerDown={(event) => event.stopPropagation()}
                                 onDoubleClick={(event) => event.stopPropagation()}
                               >
-                                <ActionButton
+                                <Command
                                   className={classes("px-1 text-left", styles.quietAction(), ui.text.body)}
                                   onClick={() => setLocation("day", cell.date)}
                                 >
                                   {cell.date}
-                                </ActionButton>
+                                </Command>
                                 {calendarMonthDayLayout(paintedEvents, cell.date, Math.max(onDay.length, 1)).events.map((item) => (
                                   <SelectableItem
                                     key={`${item.id}:${item.start}`}
@@ -754,13 +750,13 @@ export function CalendarDemoRoute(props: {
                                 </span>
                                 <div className="shrink-0" style={{ height: `${layout.laneCount * 1.25}rem` }} />
                                 {(layout.hiddenCounts[index] ?? 0) > 0 ? (
-                                  <ActionButton
+                                  <Command
                                     className={classes(styles.monthMore(), ui.text.meta)}
                                     onPointerDown={(event) => event.stopPropagation()}
                                     onClick={() => setOverflowDay(cell.date)}
                                   >
                                     {`+${layout.hiddenCounts[index]} more`}
-                                  </ActionButton>
+                                  </Command>
                                 ) : null}
                               </>
                             )}
@@ -848,12 +844,12 @@ export function CalendarDemoRoute(props: {
                     aria-label={visiblePeriodLabel("month", monthStart)}
                     className={styles.yearMonth()}
                   >
-                    <ActionButton
+                    <Command
                       className={classes("text-left", styles.quietAction(), ui.text.body)}
                       onClick={() => setLocation("month", monthStart)}
                     >
                       {months[index]}
-                    </ActionButton>
+                    </Command>
                     <div
                       role="grid"
                       aria-label={visiblePeriodLabel("month", monthStart)}
@@ -865,7 +861,7 @@ export function CalendarDemoRoute(props: {
                         </div>
                       ))}
                       {calendarCells("month", monthStart).map((cell) => (
-                        <ActionButton
+                        <Command
                           key={cell.date}
                           aria-label={cell.date}
                           aria-current={cell.date === today ? "date" : undefined}
@@ -878,7 +874,7 @@ export function CalendarDemoRoute(props: {
                           onClick={() => setLocation("day", cell.date)}
                         >
                           {cell.day}
-                        </ActionButton>
+                        </Command>
                       ))}
                     </div>
                   </section>
@@ -903,14 +899,14 @@ export function CalendarDemoRoute(props: {
                   onBlur={titleInput.onBlur}
                   onKeyDown={titleInput.onKeyDown}
                 />
-                <ToggleButton
+                <Toggle
                   pressed={selectedEvent.allDay}
                   aria-label="All-day"
                   className={classes(styles.calendarToggle(), "w-auto px-0")}
                   onClick={() => applySelectedPatch({ allDay: !selectedEvent.allDay })}
                 >
                   All-day
-                </ToggleButton>
+                </Toggle>
                 <HtmlDateField
                   key={selectedEvent.allDay ? "start-date" : "start-datetime"}
                   type={selectedEvent.allDay ? "date" : "datetime-local"}
@@ -933,13 +929,13 @@ export function CalendarDemoRoute(props: {
                     end: selectedEvent.allDay ? (calendarAllDaySpan(value, value)?.end ?? value) : value,
                   })}
                 />
-                <Select
+                <Choice presentation="popup"
                   label="Calendar"
                   value={selectedEvent.calendarId}
                   options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
                   onValueChange={(value) => applySelectedPatch({ calendarId: value })}
                 />
-                <Select
+                <Choice presentation="popup"
                   label="Repeat"
                   value={selectedEvent.recurrence?.freq ?? "none"}
                   options={[
@@ -983,7 +979,7 @@ export function CalendarDemoRoute(props: {
                   </>
                 )}
                 {selectedEvent.recurrence === null ? null : (
-                  <SegmentedControl
+                  <Choice presentation="inline"
                     label="Edit occurrence"
                     value={scope}
                     options={[

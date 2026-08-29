@@ -6,6 +6,70 @@ Calendar React lifecycle와 occurrence interaction 계약의 public entrypoint�
 
 > 이 문서는 `packages/json-document-calendar/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `addCalendarDays`
+
+```ts
+addCalendarDays(date: string, days: number): string
+```
+## `addCalendarMonths`
+
+```ts
+addCalendarMonths(date: string, months: number): string
+```
+## `addCalendarYears`
+
+```ts
+addCalendarYears(date: string, years: number): string
+```
+## `CalendarCell`
+
+```ts
+type CalendarCell = {
+  readonly date: string;
+  readonly day: number;
+  readonly inVisiblePeriod: boolean;
+  readonly weekday: number;
+};
+```
+## `calendarCellInterval`
+
+```ts
+calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null
+```
+## `CalendarCellInterval`
+
+```ts
+type CalendarCellInterval = { readonly start: string; readonly end: string };
+```
+## `calendarCells`
+
+```ts
+calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell>
+```
+## `calendarEventLabel`
+
+```ts
+calendarEventLabel(event: CalendarEventLabelValue): string
+```
+## `CalendarEventLabelValue`
+
+```ts
+type CalendarEventLabelValue = {
+  readonly title: string;
+  readonly start: string;
+  readonly allDay: boolean;
+};
+```
+## `CalendarGrain`
+
+```ts
+type CalendarGrain = "week" | "month" | "year";
+```
+## `CalendarGrid`
+
+```ts
+CalendarGrid(props: { readonly label: string; readonly value: string | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: string) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
+```
 ## `CalendarHand`
 
 ```ts
@@ -90,6 +154,16 @@ interface CalendarKeyboardTarget {
   removeEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
 }
 ```
+## `calendarMonthWeeks`
+
+```ts
+calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>>
+```
+## `CalendarPeriod`
+
+```ts
+type CalendarPeriod = "day" | CalendarGrain;
+```
 ## `CalendarPointerInteractions`
 
 ```ts
@@ -144,6 +218,11 @@ interface CalendarRenameInputOptions {
   readonly commitOnBlur?: boolean;
 }
 ```
+## `calendarTimeLabel`
+
+```ts
+calendarTimeLabel(value: string): string
+```
 ## `CalendarViewportPositionOptions`
 
 ```ts
@@ -154,6 +233,61 @@ interface CalendarViewportPositionOptions {
   readonly targetHour: number;
   readonly viewportOffset?: number;
 }
+```
+## `calendarYearMonths`
+
+```ts
+calendarYearMonths(visibleDate: string): ReadonlyArray<string>
+```
+## `DatePicker`
+
+```ts
+DatePicker(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+```
+## `DateRangePicker`
+
+```ts
+DateRangePicker(props: { readonly label: string; readonly value: DateRangeValue; readonly onValueChange: (value: DateRangeValue) => void; }): ReactNode
+```
+## `DateRangeValue`
+
+```ts
+type DateRangeValue = { readonly start: string; readonly end: string };
+```
+## `HtmlDateField`
+
+```ts
+HtmlDateField(props: { readonly type: HtmlDateType; readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+```
+## `HtmlDateType`
+
+```ts
+type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
+```
+## `parseHtmlDateValue`
+
+```ts
+parseHtmlDateValue(type: HtmlDateType, value: string): string | null
+```
+## `RangeCalendar`
+
+```ts
+RangeCalendar(props: { readonly label: string; readonly value: DateRangeValue | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: DateRangeValue) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
+```
+## `shiftVisibleDate`
+
+```ts
+shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string
+```
+## `startOfIsoWeek`
+
+```ts
+startOfIsoWeek(date: string): string
+```
+## `startOfYear`
+
+```ts
+startOfYear(date: string): string
 ```
 ## `useCalendarHand`
 
@@ -179,4 +313,17 @@ useCalendarRenameInput(hand: CalendarHand, options?: CalendarRenameInputOptions)
 
 ```ts
 useCalendarViewportPosition(options: CalendarViewportPositionOptions): void
+```
+## `visiblePeriodLabel`
+
+```ts
+visiblePeriodLabel(period: CalendarPeriod, visibleDate: string, options?: VisiblePeriodLabelOptions): string
+```
+## `VisiblePeriodLabelOptions`
+
+```ts
+type VisiblePeriodLabelOptions = {
+  readonly monthNames?: ReadonlyArray<string>;
+  readonly weekSeparator?: string;
+};
 ```

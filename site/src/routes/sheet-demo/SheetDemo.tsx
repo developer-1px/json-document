@@ -29,7 +29,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { GridCell } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -260,5 +260,5 @@ function focusCell(surface: HTMLElement | null, point: { readonly rowId: string;
 }
 
 function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
+  return <Command label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</Command>;
 }

@@ -16,7 +16,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { initialObjectDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import { Inspector } from "../../shared/ui/inspector";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -106,18 +106,18 @@ export function ObjectDemoRoute() {
         toolbar={(
           <>
             {objectDemoColors.map((color) => (
-              <IconButton
+              <Command
                 key={color}
                 label={`Fill ${color}`}
                 onClick={() => run({ type: "selection.fill", color }, "Fill applied")}
               >
                 <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
-              </IconButton>
+              </Command>
             ))}
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Paste"
+            <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+            <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+            <Command label="Paste"
               disabled={!clipboard}
               onClick={() => {
                 if (!clipboard) return;
@@ -129,11 +129,11 @@ export function ObjectDemoRoute() {
               }}
             >
               <ClipboardPaste aria-hidden="true" size={16} />
-            </IconButton>
-            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></IconButton>
+            </Command>
+            <Command label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={(

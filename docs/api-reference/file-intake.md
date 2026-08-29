@@ -31,6 +31,11 @@ type FileIntakeResult<Candidate extends FileCandidate = FileCandidate> =
   | { readonly ok: true; readonly candidates: ReadonlyArray<Candidate> }
   | { readonly ok: false; readonly code: "file-intake.invalid" | "file-intake.limit" | "file-intake.media-type" | "file-intake.size"; readonly candidate: Candidate };
 ```
+## `formatFileSize`
+
+```ts
+formatFileSize(bytes: number): string
+```
 ## `validateFileCandidates`
 
 ```ts

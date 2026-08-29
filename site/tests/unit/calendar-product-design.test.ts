@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 
 import { calendarDemoRecipe } from "../../src/routes/calendar-demo/calendar-demo-styles";
 import { ui } from "../../src/shared/ui/styles";
 
 const forbidden = ["border-l-line-accent", "outline-line-accent", "ring-line-accent"] as const;
+const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 function assertNoAccentChrome(source: string, label: string): void {
   for (const token of forbidden) {
@@ -41,9 +43,9 @@ describe("calendar product design", () => {
     assertNoAccentChrome(styles.yearDayBusy(), "yearDayBusy");
   });
 
-  test("segmented controls wrap inside a narrow inspector", () => {
-    const css = readFileSync(path.join(process.cwd(), "src/app/index.css"), "utf8");
-    const start = css.indexOf('[data-ui-control="segmented"] {');
+  test("inline choices wrap inside a narrow inspector", () => {
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
+    const start = css.indexOf('[data-ui-control="choice"][data-ui-presentation="inline"] {');
     expect(start).toBeGreaterThan(-1);
     const block = css.slice(start, css.indexOf("}", start) + 1);
     expect(block).toContain("flex-wrap");
@@ -51,7 +53,7 @@ describe("calendar product design", () => {
   });
 
   test("date-field stacks its label above the input", () => {
-    const css = readFileSync(path.join(process.cwd(), "src/app/index.css"), "utf8");
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const start = css.indexOf('[data-ui-control="date-field"] {');
     expect(start).toBeGreaterThan(-1);
     const block = css.slice(start, css.indexOf("}", start) + 1);
@@ -63,7 +65,7 @@ describe("calendar product design", () => {
 
   test("shared Toggle pressed is fill and text without an accent ring", () => {
     assertNoAccentChrome(ui.interactive.toggle, "ui.interactive.toggle");
-    const css = readFileSync(path.join(process.cwd(), "src/app/index.css"), "utf8");
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const start = css.indexOf('[data-ui-control="toggle"] {');
     expect(start).toBeGreaterThan(-1);
     const block = css.slice(start, css.indexOf("}", start) + 1);
@@ -74,7 +76,7 @@ describe("calendar product design", () => {
 
   test("month and year views compose date grids instead of title lists", () => {
     const source = readFileSync(
-      path.join(process.cwd(), "src/routes/calendar-demo/CalendarDemoRoute.tsx"),
+      path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"),
       "utf8",
     );
     expect(source).toContain("calendarMonthDayLayout");

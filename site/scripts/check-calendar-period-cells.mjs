@@ -2,10 +2,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-ui-primitives-react/src/date-values.ts");
-const ownerIndex = read("packages/json-document-ui-primitives-react/src/index.ts");
-const ownerTest = read("packages/json-document-ui-primitives-react/tests/date-controls.test.tsx");
-const ownerControls = read("packages/json-document-ui-primitives-react/src/date-controls.tsx");
+const owner = read("packages/json-document-calendar/src/date-values.ts");
+const ownerIndex = read("packages/json-document-calendar/src/index.ts");
+const ownerTest = read("packages/json-document-calendar/tests/date-controls.test.tsx");
+const ownerControls = read("packages/json-document-calendar/src/date-controls.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const navigator = read("site/src/routes/calendar-demo/calendar-demo-navigator.tsx");
 const usage = read("site/src/shared/demo-workbench/demo-sources.ts");
@@ -28,7 +28,7 @@ forbid(host, /cell\.date\.slice\(8\)/);
 forbid(navigator, /cell\.date\.slice\(8\)/);
 forbid(ownerControls, /cell\.date\.slice\(8\)/);
 requireText(usage, 'symbol: "calendarCells"');
-requireText(usage, 'sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts"');
+requireText(usage, 'sourcePath: "packages/json-document-calendar/src/date-values.ts"');
 
 console.log("Calendar period-cells guard ok; CalendarCell day owner, five consumers, public type, and Usage checked.");
 

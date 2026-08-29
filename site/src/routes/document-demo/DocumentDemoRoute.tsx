@@ -27,7 +27,7 @@ import {
   editingCommandFromWebKeyboardStroke,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, ChoiceChip, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Toggle, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -222,7 +222,7 @@ export function DocumentDemoRoute() {
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (
-                <ActionButton kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
+                <Command kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</Command>
               ) : document.blocks.map((block, index) => {
                 const item = editing.getItem(block.id);
                 return (
@@ -233,11 +233,12 @@ export function DocumentDemoRoute() {
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                   {...editingItemProps(item)}
                 >
-                  <ChoiceChip
-                    selected={item.getIsSelected()}
+                  <Toggle
+                    pressed={item.getIsSelected()}
+                    presentation="chip"
                     aria-label={`Select block ${index + 1}`}
                     className={classes(ui.surface.documentIndex, ui.text.meta)}
-                  >{index + 1}</ChoiceChip>
+                  >{index + 1}</Toggle>
                   <DocumentTextControl
                     aria-label={`Block ${index + 1} text`}
                     text={block.text}
@@ -265,5 +266,5 @@ export function DocumentDemoRoute() {
 }
 
 function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
+  return <Command label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</Command>;
 }

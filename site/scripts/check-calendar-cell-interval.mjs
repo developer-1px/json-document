@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const owner = read("packages/json-document-ui-primitives-react/src/date-values.ts");
-const ownerIndex = read("packages/json-document-ui-primitives-react/src/index.ts");
-const ownerTest = read("packages/json-document-ui-primitives-react/tests/date-controls.test.tsx");
+const owner = read("packages/json-document-calendar/src/date-values.ts");
+const ownerIndex = read("packages/json-document-calendar/src/index.ts");
+const ownerTest = read("packages/json-document-calendar/tests/date-controls.test.tsx");
 const calendar = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const navigator = read("site/src/routes/calendar-demo/calendar-demo-navigator.tsx");
 const usage = read("docs/public/hands.md");
@@ -20,9 +20,9 @@ forbid(calendar, /addCalendarDate\(yearEnd,\s*14\)/);
 forbid(navigator, /cells\[0\]\?\.date|cells\.at\(-1\)\?\.date/);
 requireText(usage, "UI Primitives `calendarCellInterval`");
 requireText(sources, 'symbol: "calendarCellInterval"');
-requireText(sources, 'sourcePath: "packages/json-document-ui-primitives-react/src/date-values.ts"');
+requireText(sources, 'sourcePath: "packages/json-document-calendar/src/date-values.ts"');
 
-console.log("Calendar cell interval guard ok; UI Primitives owner/test, year and navigator consumers, Usage, and source registration checked.");
+console.log("Calendar cell interval guard ok; Calendar owner/test, year and navigator consumers, Usage, and source registration checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

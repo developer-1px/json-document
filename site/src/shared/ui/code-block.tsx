@@ -3,7 +3,7 @@ import { Check, Copy } from "lucide-react";
 import { createWebClipboardTextWriter } from "@interactive-os/json-document-web";
 import { useVirtualSelectionScope } from "@interactive-os/json-document-react";
 import { codeLanguageLabel, tokenizeCodeLine, type CodeLanguage } from "./code-tokens";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "./styles";
 
 type CodeBlockSize = "compact" | "content" | "standard" | "tall";
@@ -50,7 +50,7 @@ export function CodeBlock(props: {
         {props.meta ? <> · {props.meta}</> : null}
         {props.signal ? <> · {props.signal}</> : null}
       </figcaption>
-      <IconButton
+      <Command
         rootClassName={ui.code.block.copyRoot}
         label={copied ? "Copied" : "Copy"}
         className={ui.code.block.copy}
@@ -58,7 +58,7 @@ export function CodeBlock(props: {
         onClick={() => void copySource()}
       >
         <CopyIcon copied={copied} />
-      </IconButton>
+      </Command>
       <pre
         ref={selectionRef}
         data-testid={props.testId}

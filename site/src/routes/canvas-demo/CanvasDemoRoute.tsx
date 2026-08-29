@@ -33,7 +33,7 @@ import {
   type InteractionHandleEvent,
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
-import { IconButton, MenuItemButton, SelectableItem, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -641,12 +641,12 @@ export function CanvasDemoRoute() {
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
         toolbar={objectDemoColors.map((color) => (
-          <IconButton label={`Fill ${color}`}
+          <Command label={`Fill ${color}`}
             key={color}
             onClick={() => editor.dispatch({ type: "selection.fill", color })}
           >
             <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
-          </IconButton>
+          </Command>
         ))}
       >
         <div
@@ -794,7 +794,7 @@ export function CanvasDemoRoute() {
               className={ui.interactive.contextMenu}
               style={{ left: menu.x, top: menu.y }}
             >
-              <MenuItemButton
+              <Command
                 className={ui.interactive.contextMenuItem}
                 onClick={() => {
                   editor.dispatch({ type: "selection.remove" });
@@ -802,7 +802,7 @@ export function CanvasDemoRoute() {
                 }}
               >
                 Delete
-              </MenuItemButton>
+              </Command>
             </div>
           ) : null}
         </div>

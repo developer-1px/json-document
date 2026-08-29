@@ -27,7 +27,7 @@ import {
 } from "@interactive-os/json-document-web";
 import { CodeBlock } from "../../../shared/ui/code-block";
 import { Inspector } from "../../../shared/ui/inspector";
-import { IconButton, SelectableItem, ToggleButton, Toolbar, ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem, Toggle, Toolbar, ToolbarSeparator } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -217,7 +217,7 @@ export function TanStackTableConnectorLab() {
 
 function Control(props: { readonly label: string; readonly icon: ReactNode; readonly active?: boolean; readonly disabled?: boolean; readonly onClick: () => void }) {
   if (props.active !== undefined) {
-    return <ToggleButton label={props.label} pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.icon}</ToggleButton>;
+    return <Toggle label={props.label} pressed={props.active} disabled={props.disabled} onClick={props.onClick}>{props.icon}</Toggle>;
   }
-  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
+  return <Command label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</Command>;
 }

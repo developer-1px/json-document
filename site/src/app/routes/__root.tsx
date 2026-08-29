@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
-import { DisclosureButton, IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { DisclosureButton, Command } from "@interactive-os/json-document-ui-primitives-react";
 import { ActionLink } from "../../shared/ui/interactive";
 import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
@@ -54,9 +54,9 @@ function AppShell() {
       </a>
       {collapsed ? (
         <nav aria-label="Site navigation" className={classes(ui.frame.navigationRail, ui.frame.navigation)}>
-          <IconButton label="Open navigation" onClick={() => setNavCollapsed(false)}>
+          <Command label="Open navigation" onClick={() => setNavCollapsed(false)}>
             <PanelLeft aria-hidden="true" size={16} />
-          </IconButton>
+          </Command>
           <ActionLink to="/" className={classes("grid size-7 place-items-center", ui.frame.brand)}>
             <span className="sr-only">json-document</span>
             <CatMenuMark />
@@ -73,9 +73,9 @@ function AppShell() {
             <JsonDocumentWordmark className="h-auto w-full max-w-40" />
           </ActionLink>
           {appChrome ? (
-            <IconButton label="Collapse navigation" className="mt-2 mr-1" onClick={() => setNavCollapsed(true)}>
+            <Command label="Collapse navigation" className="mt-2 mr-1" onClick={() => setNavCollapsed(true)}>
               <PanelLeftClose aria-hidden="true" size={16} />
-            </IconButton>
+            </Command>
           ) : null}
         </div>
         <div className={ui.nav.menu}>

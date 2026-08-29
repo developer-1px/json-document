@@ -6,104 +6,55 @@
 
 > 이 문서는 `packages/json-document-ui-primitives-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
-## `ActionButton`
+## `Check`
 
 ```ts
-ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement> & FocusPreservingControl & { readonly kind?: ActionButtonKind; }): ReactNode
+Check(props: { readonly label: string; readonly checked: boolean; readonly onCheckedChange: (checked: boolean) => void; readonly disabled?: boolean; readonly className?: string; }): ReactNode
 ```
-## `ActionButtonKind`
+## `Choice`
 
 ```ts
-type ActionButtonKind = "primary" | "secondary" | "danger";
+Choice<Id extends string>(props: ChoiceProps<Id>): ReactNode
 ```
-## `addCalendarDays`
+## `ChoiceClassNames`
 
 ```ts
-addCalendarDays(date: string, days: number): string
+type ChoiceClassNames = PopupChoiceClassNames;
 ```
-## `addCalendarMonths`
+## `ChoiceOption`
 
 ```ts
-addCalendarMonths(date: string, months: number): string
+type ChoiceOption<Id extends string = string> = InlineChoiceOption<Id>;
 ```
-## `addCalendarYears`
+## `ChoiceProps`
 
 ```ts
-addCalendarYears(date: string, years: number): string
+type ChoiceProps<Id extends string = string> = {
+  readonly label: string;
+  readonly value: Id;
+  readonly options: ReadonlyArray<ChoiceOption<Id>>;
+  readonly onValueChange: (value: Id) => void;
+} & (
+  | { readonly presentation: "inline"; readonly className?: string }
+  | {
+      readonly presentation: "popup";
+      readonly id?: string;
+      readonly renderValue?: (option: ChoiceOption<Id>) => ReactNode;
+      readonly renderOption?: (option: ChoiceOption<Id>) => ReactNode;
+      readonly classNames?: ChoiceClassNames;
+      readonly disabled?: boolean;
+    }
+);
 ```
-## `CalendarCell`
+## `Command`
 
 ```ts
-type CalendarCell = {
-  readonly date: string;
-  readonly day: number;
-  readonly inVisiblePeriod: boolean;
-  readonly weekday: number;
-};
+Command(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & { readonly kind?: CommandKind; readonly label?: string; readonly rootClassName?: string; }): ReactNode
 ```
-## `calendarCellInterval`
+## `CommandKind`
 
 ```ts
-calendarCellInterval(cells: ReadonlyArray<CalendarCell>): CalendarCellInterval | null
-```
-## `CalendarCellInterval`
-
-```ts
-type CalendarCellInterval = { readonly start: string; readonly end: string };
-```
-## `calendarCells`
-
-```ts
-calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell>
-```
-## `calendarEventLabel`
-
-```ts
-calendarEventLabel(event: CalendarEventLabelValue): string
-```
-## `CalendarEventLabelValue`
-
-```ts
-type CalendarEventLabelValue = {
-  readonly title: string;
-  readonly start: string;
-  readonly allDay: boolean;
-};
-```
-## `CalendarGrain`
-
-```ts
-type CalendarGrain = "week" | "month" | "year";
-```
-## `CalendarGrid`
-
-```ts
-CalendarGrid(props: { readonly label: string; readonly value: string | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: string) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
-```
-## `calendarMonthWeeks`
-
-```ts
-calendarMonthWeeks(visibleDate: string): ReadonlyArray<ReadonlyArray<CalendarCell>>
-```
-## `CalendarPeriod`
-
-```ts
-type CalendarPeriod = "day" | CalendarGrain;
-```
-## `calendarTimeLabel`
-
-```ts
-calendarTimeLabel(value: string): string
-```
-## `calendarYearMonths`
-
-```ts
-calendarYearMonths(visibleDate: string): ReadonlyArray<string>
-```
-## `ChoiceChip`
-
-```ts
-ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
+type CommandKind = "primary" | "secondary" | "danger";
 ```
 ## `ContextualControls`
 
@@ -122,20 +73,10 @@ type ControlHandleProps = Omit<InteractionHandleButtonProps<ControlHandleDescrip
   readonly descriptor?: ControlHandleDescriptor;
 };
 ```
-## `DatePicker`
+## `Dialog`
 
 ```ts
-DatePicker(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
-```
-## `DateRangePicker`
-
-```ts
-DateRangePicker(props: { readonly label: string; readonly value: DateRangeValue; readonly onValueChange: (value: DateRangeValue) => void; }): ReactNode
-```
-## `DateRangeValue`
-
-```ts
-type DateRangeValue = { readonly start: string; readonly end: string };
+Dialog(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly children: ReactNode; readonly className?: string; readonly presentation?: "modal" | "sheet"; }): ReactNode
 ```
 ## `DisclosureButton`
 
@@ -154,35 +95,20 @@ type DragHandleProps = Omit<InteractionHandleButtonProps<DragHandleDescriptor>, 
   readonly descriptor?: DragHandleDescriptor;
 };
 ```
+## `Field`
+
+```ts
+Field(props: { readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; readonly multiline?: boolean; readonly disabled?: boolean; readonly placeholder?: string; readonly className?: string; }): ReactNode
+```
 ## `FileDropRegion`
 
 ```ts
 FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & { readonly onFiles: (files: ReadonlyArray<File>) => void; readonly overlay?: ReactNode; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
-## `formatFileSize`
-
-```ts
-formatFileSize(bytes: number): string
-```
 ## `GridCell`
 
 ```ts
 GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly focus?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
-```
-## `HtmlDateField`
-
-```ts
-HtmlDateField(props: { readonly type: HtmlDateType; readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
-```
-## `HtmlDateType`
-
-```ts
-type HtmlDateType = "date" | "time" | "datetime-local" | "month" | "week";
-```
-## `IconButton`
-
-```ts
-IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & FocusPreservingControl & { readonly label: string; readonly rootClassName?: string; }): ReactNode
 ```
 ## `InteractionHandleBindingOptions`
 
@@ -205,8 +131,8 @@ type InteractionHandleButtonProps<Descriptor extends InteractionHandleDescriptor
 ## `ListboxBinding`
 
 ```ts
-interface ListboxBinding<Item extends ListboxItem> {
-  readonly activeId: string | null;
+interface ListboxBinding<Id extends string = string, Item extends ListboxItem<Id> = ListboxItem<Id>> {
+  readonly activeId: Id | null;
   readonly referenceProps: {
     readonly "aria-controls": string;
     readonly "aria-expanded": boolean;
@@ -220,8 +146,8 @@ interface ListboxBinding<Item extends ListboxItem> {
 ## `ListboxItem`
 
 ```ts
-interface ListboxItem {
-  readonly id: string;
+interface ListboxItem<Id extends string = string> {
+  readonly id: Id;
   readonly textValue: string;
   readonly disabled?: boolean;
 }
@@ -241,15 +167,10 @@ type MenuItem = {
   readonly content?: ReactNode;
 };
 ```
-## `MenuItemButton`
+## `Popover`
 
 ```ts
-MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
-```
-## `parseHtmlDateValue`
-
-```ts
-parseHtmlDateValue(type: HtmlDateType, value: string): string | null
+Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
 ```
 ## `ProductCanvas`
 
@@ -265,16 +186,6 @@ ProductInspector(props: HTMLAttributes<HTMLDivElement>): ReactNode
 
 ```ts
 ProductShell(props: HTMLAttributes<HTMLDivElement> & { readonly toolbar?: ReactNode; readonly toolbarLabel?: string; readonly inspector?: ReactNode; readonly canvasClassName?: string; readonly fill?: boolean; }): ReactNode
-```
-## `ProductToolbar`
-
-```ts
-ProductToolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label: string; }): ReactNode
-```
-## `RangeCalendar`
-
-```ts
-RangeCalendar(props: { readonly label: string; readonly value: DateRangeValue | null; readonly grain: CalendarGrain; readonly visibleDate: string; readonly onValueChange: (value: DateRangeValue) => void; readonly onGrainChange: (grain: CalendarGrain) => void; readonly onVisibleDateChange: (date: string) => void; readonly commitOnArrow?: boolean; }): ReactNode
 ```
 ## `ResizeHandle`
 
@@ -293,24 +204,10 @@ type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-lab
   readonly className?: string;
 };
 ```
-## `SegmentedControl`
+## `Search`
 
 ```ts
-SegmentedControl<Id extends string>(props: { readonly label: string; readonly value: Id; readonly options: ReadonlyArray<SegmentedControlOption<Id>>; readonly onValueChange: (value: Id) => void; readonly className?: string; }): ReactNode
-```
-## `SegmentedControlOption`
-
-```ts
-type SegmentedControlOption<Id extends string = string> = {
-  readonly id: Id;
-  readonly label: ReactNode;
-  readonly disabled?: boolean;
-};
-```
-## `Select`
-
-```ts
-Select(props: { readonly id?: string; readonly label: string; readonly value: string; readonly options: ReadonlyArray<SelectOption>; readonly onValueChange: (value: string) => void; readonly renderValue?: (option: SelectOption) => ReactNode; readonly renderOption?: (option: SelectOption) => ReactNode; readonly classNames?: SelectClassNames; readonly disabled?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+Search(props: { readonly label: string; readonly query: string; readonly onQueryChange: (query: string) => void; readonly results?: ReactNode; readonly className?: string; readonly inputClassName?: string; }): ReactNode
 ```
 ## `SelectableItem`
 
@@ -326,42 +223,6 @@ type SelectableItemProps<T extends ElementType = "button"> = {
   readonly focus?: boolean;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 ```
-## `SelectClassNames`
-
-```ts
-type SelectClassNames = {
-  readonly root?: string;
-  readonly trigger?: string;
-  readonly listbox?: string;
-  readonly option?: string;
-  readonly focusedOption?: string;
-  readonly selectedOption?: string;
-};
-```
-## `SelectOption`
-
-```ts
-type SelectOption = {
-  readonly id: string;
-  readonly label: string;
-  readonly disabled?: boolean;
-};
-```
-## `shiftVisibleDate`
-
-```ts
-shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string
-```
-## `startOfIsoWeek`
-
-```ts
-startOfIsoWeek(date: string): string
-```
-## `startOfYear`
-
-```ts
-startOfYear(date: string): string
-```
 ## `TabOption`
 
 ```ts
@@ -376,10 +237,10 @@ type TabOption<T extends string | number> = {
 ```ts
 Tabs<T extends string | number>(props: { readonly label: string; readonly value: T; readonly options: ReadonlyArray<TabOption<T>>; readonly onValueChange: (value: T) => void; readonly tabId: (value: T, index: number) => string; readonly panelId: (value: T, index: number) => string; readonly className?: string; readonly tabClassName?: string; }): ReactNode
 ```
-## `ToggleButton`
+## `Toggle`
 
 ```ts
-ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly label?: string; readonly tooltip?: string; }): ReactNode
+Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly presentation?: "button" | "chip"; readonly label?: string; readonly tooltip?: string; }): ReactNode
 ```
 ## `Toolbar`
 
@@ -424,32 +285,24 @@ useInteractionHandle<ElementType extends Element = HTMLElement>(options: Interac
 ## `useListbox`
 
 ```ts
-useListbox<Item extends ListboxItem>(options: UseListboxOptions<Item>): ListboxBinding<Item>
+useListbox<Id extends string, Item extends ListboxItem<Id>>(options: UseListboxOptions<Id, Item>): ListboxBinding<Id, Item>
 ```
 ## `UseListboxOptions`
 
 ```ts
-interface UseListboxOptions<Item extends ListboxItem> {
+interface UseListboxOptions<Id extends string = string, Item extends ListboxItem<Id> = ListboxItem<Id>> {
   readonly id: string;
   readonly label: string;
   readonly items: ReadonlyArray<Item>;
-  readonly activeId: string | null;
-  readonly selectedId?: string | null;
+  readonly activeId: Id | null;
+  readonly selectedId?: Id | null;
   readonly wrap?: boolean;
-  readonly onActiveChange: (id: string | null) => void;
-  readonly onAction: (id: string) => void;
+  readonly onActiveChange: (id: Id | null) => void;
+  readonly onAction: (id: Id) => void;
 }
 ```
-## `visiblePeriodLabel`
+## `ValueInput`
 
 ```ts
-visiblePeriodLabel(period: CalendarPeriod, visibleDate: string, options?: VisiblePeriodLabelOptions): string
-```
-## `VisiblePeriodLabelOptions`
-
-```ts
-type VisiblePeriodLabelOptions = {
-  readonly monthNames?: ReadonlyArray<string>;
-  readonly weekSeparator?: string;
-};
+ValueInput(props: { readonly label: string; readonly value: number; readonly min: number; readonly max: number; readonly step?: number; readonly onValueChange: (value: number) => void; readonly presentation: "continuous" | "stepped"; readonly disabled?: boolean; readonly className?: string; }): ReactNode
 ```
