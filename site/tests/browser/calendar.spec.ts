@@ -65,6 +65,66 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   await expect(dayGrid.getByRole("button", { name: "Event", exact: true })).toHaveCount(0);
 });
 
+test("Calendar selection uses the native clipboard and one history across copy, cut, paste, undo, and redo", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
+
+  await event.click();
+  await expect(event).toHaveAttribute("data-selected", "true");
+  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+
+  await page.keyboard.press("ControlOrMeta+c");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("고객사 싱크");
+
+  await page.keyboard.press("ControlOrMeta+v");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
+
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(1);
+  await page.keyboard.press("ControlOrMeta+Shift+z");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
+
+  await page.keyboard.press("ControlOrMeta+x");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(1);
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
+});
+
+test("Calendar clipboard remains reachable from day, month, and recurring occurrence selections", async ({ page }) => {
+  for (const { view, title } of [
+    { view: "day", title: "고객사 싱크" },
+    { view: "month", title: "경쟁사 가격 모니터링" },
+  ] as const) {
+    await page.goto(`/demo/calendar?view=${view}&date=2026-05-25`);
+    const event = view === "month"
+      ? page.getByRole("grid", { name: "Month", exact: true }).getByRole("button").filter({ hasText: title }).first()
+      : page.getByRole("button", { name: title, exact: true }).first();
+    await event.click();
+    await expect(event).toHaveAttribute("data-selected", "true");
+    await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+    await page.keyboard.press("ControlOrMeta+c");
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain(title);
+  }
+
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const occurrence = page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first();
+  await occurrence.click();
+  await page.keyboard.press("ControlOrMeta+c");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("매일 뉴스 브리핑");
+  await page.keyboard.press("ControlOrMeta+v");
+  await expect(page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true })).toHaveCount(6);
+});
+
+test("Calendar title editing preserves the input's native text clipboard", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  await event.dblclick();
+  const title = page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" });
+  await title.selectText();
+  await page.keyboard.press("ControlOrMeta+c");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("고객사 싱크");
+});
+
 
 test("Calendar Usage exposes its canonical Editing and pointer sources", async ({ page }) => {
   await page.goto("/editors");
