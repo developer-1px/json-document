@@ -94,6 +94,7 @@ export interface CalendarClipboardItem extends Record<string, JSONValue> {
 
 export interface CalendarClipboard extends Record<string, JSONValue> {
   readonly type: "application/vnd.interactive-os.calendar+json";
+  readonly anchorOccurrenceStart: string;
   readonly items: ReadonlyArray<CalendarClipboardItem>;
   readonly text: string;
 }
@@ -109,12 +110,18 @@ export const calendarClipboardFormat = {
   parse(value: unknown): CalendarClipboard | null {
     if (!isRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
     if (!Array.isArray(value.items) || value.items.length === 0) return null;
-    return value.items.every((item) => (
+    if (!value.items.every((item) => (
       isRecord(item)
       && typeof item.sourceEventId === "string"
       && typeof item.occurrenceStart === "string"
       && isCalendarClipboardEvent(item.event)
-    )) ? value as CalendarClipboard : null;
+    ))) return null;
+    return {
+      ...value,
+      anchorOccurrenceStart: typeof value.anchorOccurrenceStart === "string"
+        ? value.anchorOccurrenceStart
+        : (value.items[0] as CalendarClipboardItem).occurrenceStart,
+    } as CalendarClipboard;
   },
 };
 
@@ -618,6 +625,9 @@ export function createCalendarEditor(
     if (items.length === 0) return null;
     return {
       type: "application/vnd.interactive-os.calendar+json",
+      anchorOccurrenceStart: occurrences === undefined
+        ? (primaryOccurrence()?.start ?? items[0]!.occurrenceStart)
+        : items[0]!.occurrenceStart,
       items,
       text: items.map((item) => `${item.event.start}\t${item.event.end}\t${item.event.title}`).join("\n"),
     };
@@ -656,8 +666,10 @@ export function createCalendarEditor(
     const targetInstant = parseCalendarInstant(resolvedTarget);
     const targetDate = parseCalendarDate(calendarDatePart(resolvedTarget));
     if (targetInstant === null && targetDate === null) return failure("clipboard.invalid-target");
-    const timedAnchor = clipboard.items.map((item) => parseCalendarInstant(item.event.start)).find((item) => item !== null) ?? null;
-    const dateAnchor = parseCalendarDate(calendarDatePart(clipboard.items[0]!.event.start));
+    const timedAnchor = parseCalendarInstant(clipboard.anchorOccurrenceStart)
+      ?? clipboard.items.map((item) => parseCalendarInstant(item.event.start)).find((item) => item !== null)
+      ?? null;
+    const dateAnchor = parseCalendarDate(calendarDatePart(clipboard.anchorOccurrenceStart));
     if (dateAnchor === null) return failure("clipboard.invalid");
     const existing = [...value().events];
     const pasted: CalendarEvent[] = [];

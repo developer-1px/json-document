@@ -162,6 +162,7 @@ interface CalendarCalendar extends Record<string, JSONValue> {
 ```ts
 interface CalendarClipboard extends Record<string, JSONValue> {
   readonly type: "application/vnd.interactive-os.calendar+json";
+  readonly anchorOccurrenceStart: string;
   readonly items: ReadonlyArray<CalendarClipboardItem>;
   readonly text: string;
 }

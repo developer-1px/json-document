@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   calendarAllDayLayout,
   calendarBusyDates,
+  calendarClipboardFormat,
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
@@ -78,7 +79,9 @@ describe("calendar editor", () => {
       topology,
     }).ok).toBe(true);
     expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["standup", "review"]);
-    expect(editor.copy()?.items.map((item) => item.sourceEventId)).toEqual(["standup", "review"]);
+    const clipboard = editor.copy();
+    expect(clipboard?.items.map((item) => item.sourceEventId)).toEqual(["standup", "review"]);
+    expect(clipboard?.anchorOccurrenceStart).toBe("2026-08-03T14:00");
 
     expect(editor.dispatch({
       type: "selection.set",
@@ -87,6 +90,33 @@ describe("calendar editor", () => {
       topology,
     }).ok).toBe(true);
     expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["review"]);
+  });
+
+  test("pastes a multi-occurrence group relative to its primary anchor", () => {
+    const editor = createCalendarEditor(initial, { createId: (() => {
+      let sequence = 0;
+      return () => `anchored-${++sequence}`;
+    })() });
+    const topology = calendarOccurrenceTopology(initial, "2026-08-03", "2026-08-04");
+    editor.dispatch({
+      type: "selection.set",
+      point: { eventId: "review", occurrenceStart: "2026-08-03T14:00" },
+      mode: "extend",
+      topology,
+    });
+    const clipboard = editor.copy();
+    expect(clipboard).not.toBeNull();
+    expect(editor.paste(clipboard!, "2026-08-04T14:00").ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.slice(-2)).toMatchObject([
+      { id: "anchored-1", start: "2026-08-04T09:00", end: "2026-08-04T09:30" },
+      { id: "anchored-2", start: "2026-08-04T14:00", end: "2026-08-04T15:00" },
+    ]);
+  });
+
+  test("reads legacy Calendar clipboard payloads with the first occurrence as anchor", () => {
+    const clipboard = createCalendarEditor(initial).copy();
+    const { anchorOccurrenceStart: _anchor, ...legacy } = clipboard!;
+    expect(calendarClipboardFormat.parse(legacy)?.anchorOccurrenceStart).toBe("2026-08-03T09:00");
   });
 
   test("preserves materialized occurrence identities outside the next visible topology", () => {
