@@ -15,14 +15,14 @@ export type CalendarAllDayPointerRelease = {
 
 export type CalendarAllDayPointerIntent = Extract<
   CalendarIntent,
-  { type: "event.create" } | { type: "selection.set" } | { type: "event.move-day" } | { type: "event.resize" }
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move-day" } | { type: "event.resize" }
 >;
 
 export function interpretCalendarAllDayPointer(
   release: CalendarAllDayPointerRelease,
 ): CalendarAllDayPointerIntent | null {
   if (release.originEventId === null) {
-    if (release.originDay === release.targetDay) return { type: "selection.set", eventIds: [] };
+    if (release.originDay === release.targetDay) return { type: "selection.clear" };
     const span = calendarAllDaySpan(release.originDay, release.targetDay);
     if (span === null) return null;
     return { type: "event.create", start: span.start, end: span.end, allDay: true };
@@ -50,7 +50,7 @@ export function interpretCalendarAllDayPointer(
   }
 
   if (release.originDay === release.targetDay) {
-    return { type: "selection.set", eventIds: [release.originEventId] };
+    return null;
   }
 
   const origin = parseCalendarDate(release.originDay);

@@ -123,7 +123,7 @@ calendarAllDayLayout(events: ReadonlyArray<CalendarEvent>, days: ReadonlyArray<s
 ```ts
 type CalendarAllDayPointerIntent = Extract<
   CalendarIntent,
-  { type: "event.create" } | { type: "selection.set" } | { type: "event.move-day" } | { type: "event.resize" }
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move-day" } | { type: "event.resize" }
 >;
 ```
 ## `CalendarAllDayPointerRelease`
@@ -209,6 +209,8 @@ calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCal
 interface CalendarEditor {
   readonly snapshot: EditingSnapshot<CalendarSelection>;
   readonly selectedEvents: ReadonlyArray<CalendarEvent>;
+  readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+  readonly primaryOccurrence: CalendarOccurrenceSelection | null;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
   copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
   cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
@@ -265,9 +267,11 @@ calendarInstantAt(day: string, minutesFromMidnight: number): string | null
 type CalendarIntent =
   | {
       readonly type: "selection.set";
-      readonly eventIds: ReadonlyArray<string>;
+      readonly point: CalendarOccurrencePoint;
+      readonly topology?: CalendarOccurrenceTopologySnapshot;
       readonly mode?: "replace" | "extend" | "toggle";
     }
+  | { readonly type: "selection.clear" }
   | { readonly type: "selection.remove" }
   | {
       readonly type: "event.create";
@@ -323,7 +327,7 @@ calendarMonthDayLayout(events: ReadonlyArray<CalendarEvent>, day: string, rowLim
 ```ts
 type CalendarMonthPointerIntent = Extract<
   CalendarIntent,
-  { type: "event.create" } | { type: "selection.set" } | { type: "event.move-day" }
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move-day" }
 >;
 ```
 ## `CalendarMonthPointerRelease`
@@ -371,6 +375,14 @@ calendarOccurrenceForInspector(selected: Pick<CalendarEvent, "start" | "end" | "
 ```ts
 calendarOccurrenceFromSelection(selected: Pick<CalendarEvent, "start" | "end"> | null): CalendarOccurrenceRange
 ```
+## `CalendarOccurrencePoint`
+
+```ts
+interface CalendarOccurrencePoint extends Record<string, JSONValue> {
+  readonly eventId: string;
+  readonly occurrenceStart: string;
+}
+```
 ## `CalendarOccurrenceRange`
 
 ```ts
@@ -386,6 +398,18 @@ interface CalendarOccurrenceSelection {
   readonly eventId: string;
   readonly start: string;
   readonly end: string;
+}
+```
+## `calendarOccurrenceTopology`
+
+```ts
+calendarOccurrenceTopology(document: CalendarDocument, rangeStart: string, rangeEnd: string): CalendarOccurrenceTopologySnapshot
+```
+## `CalendarOccurrenceTopologySnapshot`
+
+```ts
+interface CalendarOccurrenceTopologySnapshot extends Record<string, JSONValue> {
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
 }
 ```
 ## `CalendarRecurrence`
@@ -416,9 +440,18 @@ calendarRecurrenceWithUntil(current: CalendarRecurrence | null, until: string): 
 
 ```ts
 interface CalendarSelection extends Record<string, JSONValue> {
-  readonly kind: "explicit";
-  readonly keys: ReadonlyArray<string>;
-  readonly primaryKey: string | null;
+  readonly kind: "range";
+  readonly ranges: ReadonlyArray<CalendarSelectionRange>;
+  readonly primaryIndex: number | null;
+}
+```
+## `CalendarSelectionRange`
+
+```ts
+interface CalendarSelectionRange extends Record<string, JSONValue> {
+  readonly anchor: CalendarOccurrencePoint;
+  readonly focus: CalendarOccurrencePoint;
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
 }
 ```
 ## `calendarShiftInstant`
@@ -441,7 +474,7 @@ type CalendarTimeGridHandle = "body" | "start" | "end";
 ```ts
 type CalendarTimeGridPointerIntent = Extract<
   CalendarIntent,
-  { type: "event.create" } | { type: "selection.set" } | { type: "event.move" } | { type: "event.resize" }
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move" } | { type: "event.resize" }
 >;
 ```
 ## `CalendarTimeGridPointerRelease`

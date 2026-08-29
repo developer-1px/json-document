@@ -12,6 +12,11 @@ export {
   primaryRange,
 } from "./range/index.js";
 export {
+  createMaterializedRangeSelectionFamily,
+  emptyMaterializedRangeSelection,
+  normalizeMaterializedRangeSelection,
+} from "./range/materialized.js";
+export {
   idlePointerInteraction,
   reduceMarqueeInteraction,
   reduceNavigation,
@@ -46,6 +51,13 @@ export type {
   RangeSelectionMapping,
   SelectionRange,
 } from "./range/index.js";
+export type {
+  MaterializedRangeSelection,
+  MaterializedRangeSelectionCommand,
+  MaterializedRangeSelectionContext,
+  MaterializedRangeSelectionMapping,
+  MaterializedSelectionRange,
+} from "./range/materialized.js";
 export type {
   InteractionResult,
   MarqueeContext,

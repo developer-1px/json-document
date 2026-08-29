@@ -34,7 +34,7 @@ export function previewCalendarAllDay(
   scope: "this" | "this-and-following" | "all" = "this",
 ): ReadonlyArray<CalendarEvent> {
   const intent = interpretCalendarAllDayPointer(release);
-  if (intent === null || intent.type === "selection.set") return events;
+  if (intent === null || intent.type === "selection.set" || intent.type === "selection.clear") return events;
   if (intent.type === "event.create") {
     return [...events, {
       id: "preview",
@@ -97,7 +97,7 @@ export function previewCalendarTimeGrid(
   scope: "this" | "this-and-following" | "all" = "this",
 ): ReadonlyArray<CalendarEvent> {
   const intent = interpretCalendarTimeGridPointer(release);
-  if (intent === null || intent.type === "selection.set") return events;
+  if (intent === null || intent.type === "selection.set" || intent.type === "selection.clear") return events;
   if (intent.type === "event.create") {
     return [...events, {
       id: "preview",
@@ -148,7 +148,7 @@ export function previewCalendarMonth(
   scope: "this" | "this-and-following" | "all" = "this",
 ): ReadonlyArray<CalendarEvent> {
   const intent = interpretCalendarMonthPointer(release);
-  if (intent === null || intent.type === "selection.set") return events;
+  if (intent === null || intent.type === "selection.set" || intent.type === "selection.clear") return events;
   if (intent.type === "event.create") {
     return [...events, {
       id: "preview",

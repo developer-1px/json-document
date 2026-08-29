@@ -1,6 +1,6 @@
 import { tv } from "tailwind-variants";
 
-const chipSelected = "data-[preview=true]:opacity-60 data-[selected=true]:font-semibold data-[selected=true]:text-foreground-strong data-[selected=true]:outline-none";
+const chipSelected = "data-[preview=true]:opacity-60 data-[selected=true]:font-semibold data-[selected=true]:text-foreground-strong data-[selected=true]:ring-1 data-[selected=true]:ring-line-strong/30 data-[primary=true]:ring-2 data-[primary=true]:ring-line-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong";
 const chipRail = "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-foreground-default data-[calendar-color=accent]:before:bg-background-accent";
 const chipFill = "bg-background-subtle text-foreground-strong data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent hover:bg-background-subtle data-[calendar-color=accent]:hover:bg-background-accent-subtle";
 

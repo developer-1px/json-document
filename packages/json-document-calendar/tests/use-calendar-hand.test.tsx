@@ -119,7 +119,10 @@ describe("useCalendarHand", () => {
       });
       return { hand, pointer };
     });
-    act(() => result.current.hand.dispatch({ type: "selection.set", eventIds: ["standup"] }));
+    act(() => result.current.hand.dispatch({
+      type: "selection.set",
+      point: { eventId: "standup", occurrenceStart: "2026-08-03T09:00" },
+    }));
 
     act(() => result.current.pointer.resizeTimed(
       "standup", "end", "2026-08-03T09:00", "2026-08-03T09:30", 30, "preview",

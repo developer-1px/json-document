@@ -5,6 +5,7 @@ import {
   calendarMonthDayLayout,
   calendarMonthWeekLayout,
   calendarNowMarker,
+  calendarOccurrenceTopology,
   calendarTimedLayout,
   calendarVisibleEvents,
   createCalendarEditor,
@@ -67,6 +68,70 @@ const initial: CalendarDocument = {
 };
 
 describe("calendar editor", () => {
+  test("selects occurrence ranges, toggles points, and copies every selected occurrence", () => {
+    const editor = createCalendarEditor(initial);
+    const topology = calendarOccurrenceTopology(initial, "2026-08-03", "2026-08-04");
+    expect(editor.dispatch({
+      type: "selection.set",
+      point: { eventId: "review", occurrenceStart: "2026-08-03T14:00" },
+      mode: "extend",
+      topology,
+    }).ok).toBe(true);
+    expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["standup", "review"]);
+    expect(editor.copy()?.items.map((item) => item.sourceEventId)).toEqual(["standup", "review"]);
+
+    expect(editor.dispatch({
+      type: "selection.set",
+      point: { eventId: "standup", occurrenceStart: "2026-08-03T09:00" },
+      mode: "toggle",
+      topology,
+    }).ok).toBe(true);
+    expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["review"]);
+  });
+
+  test("preserves materialized occurrence identities outside the next visible topology", () => {
+    const editor = createCalendarEditor(initial);
+    const day = calendarOccurrenceTopology(initial, "2026-08-03", "2026-08-04");
+    editor.dispatch({
+      type: "selection.set",
+      point: { eventId: "review", occurrenceStart: "2026-08-03T14:00" },
+      mode: "extend",
+      topology: day,
+    });
+    expect(editor.dispatch({ type: "calendar.set-hidden", calendarId: "home", hidden: true }).ok).toBe(true);
+    expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["standup", "review"]);
+  });
+
+  test("cuts multiple occurrences from the same recurring event in one transaction", () => {
+    const document: CalendarDocument = {
+      calendars: initial.calendars,
+      events: [event({
+        id: "daily",
+        title: "Daily",
+        start: "2026-08-03T09:00",
+        end: "2026-08-03T09:30",
+        recurrence: { freq: "daily", interval: 1, until: "2026-08-10" },
+      })],
+    };
+    const editor = createCalendarEditor(document);
+    const topology = calendarOccurrenceTopology(document, "2026-08-03", "2026-08-06");
+    editor.dispatch({
+      type: "selection.set",
+      point: { eventId: "daily", occurrenceStart: "2026-08-05T09:00" },
+      mode: "extend",
+      topology,
+    });
+    expect(editor.selectedOccurrences).toHaveLength(3);
+    expect(editor.cut()?.result.ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events[0]?.excludeDates).toEqual([
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.selectedOccurrences).toHaveLength(3);
+  });
+
   test("copies, cuts, pastes, and restores occurrences through one history transaction", () => {
     let sequence = 0;
     const editor = createCalendarEditor(initial, { createId: () => `copy-${++sequence}` });
@@ -86,7 +151,7 @@ describe("calendar editor", () => {
     expect(editor.redo().ok).toBe(true);
     expect((editor.snapshot.value as CalendarDocument).events).toHaveLength(4);
 
-    expect(editor.dispatch({ type: "selection.set", eventIds: ["standup"] }).ok).toBe(true);
+    expect(editor.dispatch({ type: "selection.set", point: { eventId: "standup", occurrenceStart: "2026-08-03T09:00" } }).ok).toBe(true);
     const cut = editor.cut();
     expect(cut?.clipboard.items[0]?.event.title).toBe("Standup");
     expect((editor.snapshot.value as CalendarDocument).events.some((item) => item.id === "standup")).toBe(false);
@@ -118,7 +183,7 @@ describe("calendar editor", () => {
   test("can start without selecting fixture content", () => {
     const editor = createCalendarEditor(initial, { initialEventIds: [] });
     expect(editor.selectedEvents).toEqual([]);
-    expect(editor.snapshot.selection.keys).toEqual([]);
+    expect(editor.snapshot.selection.ranges).toEqual([]);
   });
 
   test("creates a week-grid interval, moves it, resizes it, and restores with undo", () => {
@@ -156,7 +221,7 @@ describe("calendar editor", () => {
     expect(editor.undo().ok).toBe(true);
     expect(editor.undo().ok).toBe(true);
     expect(editor.snapshot.value).toEqual(initial);
-    expect(editor.snapshot.selection.keys).toEqual(["standup"]);
+    expect(editor.selectedEvents.map((event) => event.id)).toEqual(["standup"]);
   });
 
   test("moves an event by day without changing its duration or time of day", () => {
@@ -166,15 +231,15 @@ describe("calendar editor", () => {
       start: "2026-08-05T14:00",
       end: "2026-08-05T15:00",
     });
-    expect(editor.snapshot.selection.keys).toEqual(["review"]);
+    expect(editor.selectedEvents.map((event) => event.id)).toEqual(["review"]);
   });
 
   test("deletes the selection and restores it selected", () => {
     const editor = createCalendarEditor(initial);
-    editor.dispatch({ type: "selection.set", eventIds: ["standup"] });
+    editor.dispatch({ type: "selection.set", point: { eventId: "standup", occurrenceStart: "2026-08-03T09:00" } });
     expect(editor.dispatch({ type: "selection.remove" }).ok).toBe(true);
     expect((editor.snapshot.value as CalendarDocument).events.map((event) => event.id)).toEqual(["review"]);
-    expect(editor.snapshot.selection.primaryKey).toBe("review");
+    expect(editor.selectedEvents[0]?.id).toBe("review");
     expect(editor.undo().ok).toBe(true);
     expect(editor.selectedEvents.map((event) => event.id)).toEqual(["standup"]);
   });
@@ -213,7 +278,7 @@ describe("calendar editor", () => {
       instant: "2026-08-03T15:00",
     }).ok).toBe(true);
     expect((editor.snapshot.value as CalendarDocument).events.at(-1)?.end).toBe("2026-08-03T15:00");
-    expect(editor.snapshot.selection.keys).toEqual(["span"]);
+    expect(editor.selectedEvents.map((event) => event.id)).toEqual(["span"]);
   });
 
   test("creates an all-day event, moves it by day, and keeps it all-day", () => {

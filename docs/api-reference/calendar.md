@@ -13,6 +13,7 @@ interface CalendarHand {
   readonly snapshot: CalendarEditor["snapshot"];
   readonly document: CalendarDocument;
   readonly selectedEvent: CalendarEvent | null;
+  readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
   readonly inspectedInterval: { readonly start: string; readonly end: string } | null;
   readonly occurrence: CalendarOccurrenceRange;
   readonly scope: OccurrenceScope;
@@ -37,7 +38,15 @@ interface CalendarHand {
   rememberIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange): void;
   applySelectedPatch(patch: CalendarEventPatch): boolean;
   createInterval(start: string, end: string, options?: { readonly allDay?: boolean; readonly title?: string }): boolean;
-  selectOccurrence(eventId: string, start: string, end: string): boolean;
+  isOccurrenceSelected(eventId: string, occurrenceStart: string): boolean;
+  isPrimaryOccurrence(eventId: string, occurrenceStart: string): boolean;
+  selectOccurrence(
+    eventId: string,
+    start: string,
+    end: string,
+    mode?: "replace" | "extend" | "toggle",
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): boolean;
   removeSelected(): boolean;
   setCalendarHidden(calendarId: string, hidden: boolean): boolean;
   rememberSelection(): void;
