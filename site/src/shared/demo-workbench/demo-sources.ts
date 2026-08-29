@@ -22,6 +22,7 @@ import virtualSelectionSource from "../../../../packages/json-document-web/src/v
 import virtualSelectionReactSource from "../../../../packages/json-document-react/src/use-virtual-selection-scope.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
+import editingClipboardSource from "../../../../packages/json-document-editing/src/clipboard.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import kanbanEditingSource from "../../../../packages/json-document-editing/src/kanban.ts?raw";
 import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
@@ -165,6 +166,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-virtual-selection-scope.ts", virtualSelectionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
+  ["packages/json-document-editing/src/clipboard.ts", editingClipboardSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/kanban.ts", kanbanEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
