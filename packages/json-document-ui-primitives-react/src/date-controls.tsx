@@ -213,6 +213,7 @@ export function DatePicker(props: {
       <button
         ref={triggerRef}
         type="button"
+        data-ui-control="action"
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label={`Choose ${props.label}`}
@@ -289,6 +290,7 @@ export function DateRangePicker(props: {
       <button
         ref={triggerRef}
         type="button"
+        data-ui-control="action"
         aria-expanded={open}
         aria-controls={dialogId}
         aria-label={`Choose ${props.label}`}
@@ -371,6 +373,7 @@ function renderDayCells(
           role="gridcell"
           aria-label={cell.date}
           aria-selected={options.selected(cell.date)}
+          data-ui-control="calendar-day"
           data-focused={options.focused(cell.date) ? "true" : undefined}
           data-outside={cell.inVisiblePeriod ? undefined : "true"}
           tabIndex={options.focused(cell.date) ? 0 : -1}

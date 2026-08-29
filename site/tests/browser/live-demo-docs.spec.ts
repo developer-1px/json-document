@@ -10,7 +10,7 @@ const pages = [
   ["/docs/object", 2],
   ["/docs/tree", 1],
   ["/docs/database", 1],
-  ["/docs/ui-primitives", 1],
+  ["/docs/ui-primitives", 2],
   ["/docs/animation", 1],
   ["/docs/adapter-keyboard", 1],
   ["/docs/adapter-clipboard", 1],

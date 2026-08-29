@@ -132,6 +132,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "UI Primitives" }).getByRole("link")).toHaveText([
     "API Reference",
     "API · Animation",
+    "Design system",
     "Animation",
   ]);
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
@@ -468,7 +469,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
     fontSize: getComputedStyle(element).fontSize,
   }))).toEqual({
     borderTopWidth: "0px",
-    fontSize: "18px",
+    fontSize: "16px",
   });
 
   const horizon = page.locator("[data-page-header] [data-petite-cat]").locator("xpath=..");

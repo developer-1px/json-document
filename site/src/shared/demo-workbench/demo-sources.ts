@@ -57,6 +57,7 @@ import uiMenuSource from "../../../../packages/json-document-ui-primitives-react
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
+import uiContextualControlsSource from "../../../../packages/json-document-ui-primitives-react/src/contextual-controls.tsx?raw";
 import uiProductShellSource from "../../../../packages/json-document-ui-primitives-react/src/product-shell.tsx?raw";
 import uiToolbarSource from "../../../../packages/json-document-ui-primitives-react/src/toolbar.tsx?raw";
 import uiListboxSource from "../../../../packages/json-document-ui-primitives-react/src/listbox.ts?raw";
@@ -203,6 +204,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
+  ["packages/json-document-ui-primitives-react/src/contextual-controls.tsx", uiContextualControlsSource],
   ["packages/json-document-ui-primitives-react/src/product-shell.tsx", uiProductShellSource],
   ["packages/json-document-ui-primitives-react/src/toolbar.tsx", uiToolbarSource],
   ["packages/json-document-ui-primitives-react/src/listbox.ts", uiListboxSource],
@@ -418,6 +420,67 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-animation-react",
     symbol: "ShimmerText",
     sourcePath: "packages/json-document-animation-react/src/animations.tsx",
+  },
+  ...([
+    "AuroraMass",
+    "BlobMass",
+    "BorderBeam",
+    "CloudMass",
+    "CometArc",
+    "DualRings",
+    "EqualizerBars",
+    "FadeSpokes",
+    "GradientSweep",
+    "HelixDots",
+    "HelixRings",
+    "HueOutline",
+    "InfinityStroke",
+    "LoadingBar",
+    "MassOrb",
+    "MorseCode",
+    "MorphSquare",
+    "OrbitDots",
+    "ParticleBurst",
+    "ProgressRing",
+    "PulsingDot",
+    "PulsingOrb",
+    "RadarSweep",
+    "RingMass",
+    "Shimmer",
+    "Skeleton",
+    "StaggerLines",
+    "StreamingCaret",
+    "WaveDots",
+    "WaveGrid",
+  ] as const).map((symbol) => ({
+    packageName: "@interactive-os/json-document-animation-react",
+    symbol,
+    sourcePath: "packages/json-document-animation-react/src/animations.tsx",
+  })),
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "HtmlDateField",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "DatePicker",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "DateRangePicker",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "RangeCalendar",
+    sourcePath: "packages/json-document-ui-primitives-react/src/date-controls.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ContextualControls",
+    sourcePath: "packages/json-document-ui-primitives-react/src/contextual-controls.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",
@@ -639,7 +702,7 @@ const registeredPublicUsages = [
     symbol: "useListbox",
     sourcePath: "packages/json-document-ui-primitives-react/src/listbox.ts",
   },
-  ...(["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "SegmentedControl", "DisclosureButton"] as const).map((symbol) => ({
+  ...(["ActionButton", "ToggleButton", "IconButton", "ChoiceChip", "SelectableItem", "SegmentedControl", "Tabs", "DisclosureButton"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
@@ -649,7 +712,7 @@ const registeredPublicUsages = [
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/product-shell.tsx",
   })),
-  ...(["Toolbar", "ToolbarGroup", "ToolbarSeparator", "ToolbarSpacer"] as const).map((symbol) => ({
+  ...(["Toolbar", "ToolbarGroup", "ToolbarLayout", "ToolbarRegion", "ToolbarSeparator", "ToolbarSpacer"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/toolbar.tsx",

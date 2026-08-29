@@ -1,0 +1,77 @@
+import { tv } from "tailwind-variants";
+
+export const uiPrimitivesCatalog = tv({
+  slots: {
+    catalog: "grid gap-10",
+    section: "grid gap-3",
+    row: "flex flex-wrap items-center gap-2",
+    stack: "grid gap-2",
+    swatchGrid: "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4",
+    swatch: "grid gap-2 rounded-surface border border-line-subtle bg-background-subtle p-3",
+    swatchChip: "h-12 rounded-control border border-line-subtle",
+    typeRow: "grid gap-1 rounded-surface border border-line-subtle bg-background-subtle p-3",
+    metricRow: "flex flex-wrap items-end gap-3",
+    radiusBox: "grid h-16 w-16 place-items-center border border-line-subtle bg-background-canvas text-overline text-foreground-muted",
+    shadowBox: "grid h-16 min-w-28 place-items-center bg-background-canvas px-3 text-overline text-foreground-muted",
+    specimen: "grid gap-3 rounded-surface border border-line-subtle bg-background-subtle p-4",
+    overlay: "absolute z-10 mt-1 min-w-40 rounded-surface border border-line-subtle bg-background-canvas py-1 shadow-overlay",
+    option: "block w-full px-3 py-1.5 text-left text-xs text-foreground-default hover:bg-background-subtle",
+    optionFocused: "bg-background-subtle text-foreground-strong",
+    optionSelected: "font-medium text-foreground-strong",
+    trigger: "cursor-pointer rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-xs font-medium text-foreground-default outline-none hover:border-line-default hover:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25",
+    menuRoot: "relative",
+    drop: "grid min-h-24 place-items-center rounded-surface border border-dashed border-line-subtle bg-background-subtle p-4 data-[drop-active=true]:border-line-accent data-[drop-active=true]:bg-background-accent-subtle",
+    dropOverlay: "pointer-events-none text-sm font-medium text-foreground-accent",
+    gridTable: "w-full border-collapse bg-background-canvas text-left text-sm",
+    gridHead: "border border-line-subtle bg-background-subtle px-3 py-2 text-xs font-medium text-foreground-default",
+    gridCell: "border border-line-subtle bg-background-canvas px-3 py-2 text-sm text-foreground-strong data-[selected=true]:bg-background-subtle data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-line-accent data-[focus=true]:outline data-[focus=true]:outline-2 data-[focus=true]:-outline-offset-2 data-[focus=true]:outline-foreground-default",
+    handleStage: "relative min-h-44 overflow-hidden rounded-surface border border-line-subtle bg-background-canvas",
+    handleCard: "absolute left-4 top-4 flex h-16 w-40 items-center gap-2 border border-line-default bg-background-canvas p-2",
+    dragHandle: "border-0 bg-transparent p-1 text-foreground-muted",
+    resizePanel: "absolute left-52 top-16 h-16 border border-line-default bg-background-canvas p-3",
+    resizeHandle: "absolute inset-y-0 right-0 w-2 border-0 bg-line-accent/30 p-0",
+    controlPlane: "absolute right-8 top-6 h-24 w-24 border border-dashed border-line-default",
+    controlHandle: "absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-background-canvas bg-line-accent p-0",
+    motionGrid: "grid gap-3 md:grid-cols-2 lg:grid-cols-3",
+    motionStage: "flex min-h-24 items-center p-4",
+    identity: "w-full rounded-surface bg-background-canvas px-4 py-3 text-foreground-strong",
+    bar: "w-full",
+    massFill: "h-24 w-full overflow-hidden rounded-surface",
+    panel: "rounded-surface border border-line-subtle bg-background-canvas p-3",
+    list: "m-0 grid list-none gap-1 p-0",
+    shellCanvas: "grid min-h-28 place-items-center",
+    wide: "md:col-span-2 lg:col-span-3",
+  },
+});
+
+export const tokenColorClass = {
+  "background-canvas": "bg-background-canvas",
+  "background-subtle": "bg-background-subtle",
+  "background-accent": "bg-background-accent",
+  "background-accent-subtle": "bg-background-accent-subtle",
+  "background-action-primary": "bg-background-action-primary",
+  "background-action-primary-hovered": "bg-background-action-primary-hovered",
+  "foreground-default": "bg-foreground-default",
+  "foreground-strong": "bg-foreground-strong",
+  "foreground-muted": "bg-foreground-muted",
+  "foreground-disabled": "bg-foreground-disabled",
+  "foreground-inverse": "bg-foreground-inverse",
+  "foreground-accent": "bg-foreground-accent",
+  "foreground-success": "bg-foreground-success",
+  "line-subtle": "bg-line-subtle",
+  "line-default": "bg-line-default",
+  "line-accent": "bg-line-accent",
+  "line-action-primary": "bg-line-action-primary",
+} as const;
+
+export const tokenRadiusClass = {
+  tight: "rounded-tight",
+  control: "rounded-control",
+  surface: "rounded-surface",
+} as const;
+
+export const tokenShadowClass = {
+  surface: "shadow-surface",
+  overlay: "shadow-overlay",
+  inset: "shadow-inset",
+} as const;

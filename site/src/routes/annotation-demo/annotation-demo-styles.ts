@@ -5,7 +5,7 @@ export const annotationDemoRecipe = tv({
     productCanvas: "!p-0",
     canvasFrame: "relative overflow-hidden rounded-surface bg-background-subtle",
     stage: "relative",
-    canvas: "block h-auto w-full touch-none cursor-crosshair outline-none focus-visible:ring-2 focus-visible:ring-line-accent/35",
+    canvas: "block h-auto w-full touch-none cursor-crosshair outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
     draftComposer: "absolute bottom-6 left-1/2 z-10 flex min-h-14 w-[380px] max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-surface border border-line-subtle bg-background-canvas px-4 py-3 shadow-overlay",
     draftIdentity: "size-6 shrink-0 rounded-full bg-background-accent",
     commentInput: "min-h-6 max-h-32 min-w-0 flex-1 resize-none overflow-y-auto [field-sizing:content] !border-0 !bg-transparent !p-0 text-sm leading-6 text-foreground-strong !outline-none !ring-0 placeholder:text-foreground-muted",

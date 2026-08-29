@@ -260,6 +260,19 @@ describe("DatePicker and DateRangePicker", () => {
     expect((screen.getByLabelText("Boundary date") as HTMLInputElement).value).toBe("2026-09-01");
   });
 
+  test("projects date picker trigger and day cells on UI primitive hooks", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [value, setValue] = useState("2026-08-03");
+      return <DatePicker label="Event date" value={value} onValueChange={setValue} />;
+    }
+    render(<Harness />);
+    const trigger = screen.getByRole("button", { name: "Choose Event date" });
+    expect(trigger.getAttribute("data-ui-control")).toBe("action");
+    await user.click(trigger);
+    expect(screen.getByRole("gridcell", { name: "2026-08-03" }).getAttribute("data-ui-control")).toBe("calendar-day");
+  });
+
   test("range fields and range calendar write the same committed range", async () => {
     const user = userEvent.setup();
     function Harness() {

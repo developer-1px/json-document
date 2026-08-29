@@ -31,6 +31,15 @@ control의 의미·상태·focus·keyboard 계약을 다시 구현하지 않습�
 npm i @interactive-os/json-document-ui-primitives-react
 ```
 
+## Catalog
+
+토큰, control, shell, overlay, date, surface, wait animation을 한 페이지에서
+소비합니다.
+
+```live-demo
+/demo/ui-primitives
+```
+
 ## `useListbox`
 
 ```tsx

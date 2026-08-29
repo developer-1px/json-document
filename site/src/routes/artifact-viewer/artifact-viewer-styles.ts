@@ -11,7 +11,7 @@ export const artifactViewerRecipe = tv({
     grid: "grid grid-cols-4",
     cell: "min-h-12 px-3 py-3 text-xs",
     composer: "grid grid-cols-[minmax(0,1fr)_auto] gap-2",
-    context: "col-span-full flex gap-2 [&>span]:rounded-inline [&>span]:bg-background-accent-subtle [&>span]:px-2 [&>span]:py-1 [&>span]:text-xs [&>span]:font-medium [&>span]:text-foreground-accent",
+    context: "col-span-full flex gap-2 [&>span]:rounded-tight [&>span]:bg-background-accent-subtle [&>span]:px-2 [&>span]:py-1 [&>span]:text-xs [&>span]:font-medium [&>span]:text-foreground-accent",
     futureMap: "mt-8 border-t border-line-subtle/40 pt-6 [&>p]:m-0 [&>ol]:mt-4 [&>ol]:grid [&>ol]:list-none [&>ol]:gap-3 [&>ol]:p-0 sm:[&>ol]:grid-cols-3 [&_li]:grid [&_li]:gap-1 [&_li]:rounded-surface [&_li]:bg-background-subtle [&_li]:p-4 [&_li]:text-xs [&_li]:text-foreground-muted [&_strong]:text-foreground-strong",
   },
 });

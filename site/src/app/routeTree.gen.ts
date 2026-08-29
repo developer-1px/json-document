@@ -44,6 +44,7 @@ import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selec
 import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDemoTopologyRouteImport } from "./routes/_page/demo/topology";
 import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
+import { Route as PageDemoUiPrimitivesRouteImport } from "./routes/_page/demo/ui-primitives";
 import { Route as PageDemoViewportRouteImport } from "./routes/_page/demo/viewport";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsAdapterClipboardRouteImport } from "./routes/_page/docs/adapter-clipboard";
@@ -329,6 +330,11 @@ const PageDemoTopologyRoute = PageDemoTopologyRouteImport.update({
 const PageDemoTreeRoute = PageDemoTreeRouteImport.update({
   id: "/demo/tree",
   path: "/demo/tree",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoUiPrimitivesRoute = PageDemoUiPrimitivesRouteImport.update({
+  id: "/demo/ui-primitives",
+  path: "/demo/ui-primitives",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoViewportRoute = PageDemoViewportRouteImport.update({
@@ -943,6 +949,7 @@ export interface FileRoutesByFullPath {
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
   "/demo/viewport": typeof PageDemoViewportRoute;
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
@@ -1086,6 +1093,7 @@ export interface FileRoutesByTo {
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
   "/demo/viewport": typeof PageDemoViewportRoute;
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
@@ -1231,6 +1239,7 @@ export interface FileRoutesById {
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/demo/topology": typeof PageDemoTopologyRoute;
   "/_page/demo/tree": typeof PageDemoTreeRoute;
+  "/_page/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
   "/_page/demo/viewport": typeof PageDemoViewportRoute;
   "/_page/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/_page/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
@@ -1376,6 +1385,7 @@ export interface FileRouteTypes {
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/demo/ui-primitives"
     | "/demo/viewport"
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
@@ -1519,6 +1529,7 @@ export interface FileRouteTypes {
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/demo/ui-primitives"
     | "/demo/viewport"
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
@@ -1663,6 +1674,7 @@ export interface FileRouteTypes {
     | "/_page/demo/sheet"
     | "/_page/demo/topology"
     | "/_page/demo/tree"
+    | "/_page/demo/ui-primitives"
     | "/_page/demo/viewport"
     | "/_page/docs/adapter-clipboard"
     | "/_page/docs/adapter-contenteditable"
@@ -2025,6 +2037,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/tree";
       fullPath: "/demo/tree";
       preLoaderRoute: typeof PageDemoTreeRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/ui-primitives": {
+      id: "/_page/demo/ui-primitives";
+      path: "/demo/ui-primitives";
+      fullPath: "/demo/ui-primitives";
+      preLoaderRoute: typeof PageDemoUiPrimitivesRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/viewport": {
@@ -2876,6 +2895,7 @@ interface PageRouteChildren {
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDemoTopologyRoute: typeof PageDemoTopologyRoute;
   PageDemoTreeRoute: typeof PageDemoTreeRoute;
+  PageDemoUiPrimitivesRoute: typeof PageDemoUiPrimitivesRoute;
   PageDemoViewportRoute: typeof PageDemoViewportRoute;
   PageDocsAdapterClipboardRoute: typeof PageDocsAdapterClipboardRoute;
   PageDocsAdapterContenteditableRoute: typeof PageDocsAdapterContenteditableRoute;
@@ -2992,6 +3012,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDemoTopologyRoute: PageDemoTopologyRoute,
   PageDemoTreeRoute: PageDemoTreeRoute,
+  PageDemoUiPrimitivesRoute: PageDemoUiPrimitivesRoute,
   PageDemoViewportRoute: PageDemoViewportRoute,
   PageDocsAdapterClipboardRoute: PageDocsAdapterClipboardRoute,
   PageDocsAdapterContenteditableRoute: PageDocsAdapterContenteditableRoute,
