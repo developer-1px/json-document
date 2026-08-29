@@ -8,7 +8,7 @@ export const calendarDemoRecipe = tv({
   slots: {
     allDayEvent: `h-full w-full rounded-control border-0 px-2 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
     hourRule: "absolute inset-x-0 border-t border-line-subtle/15",
-    timedEvent: `flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
+    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
     monthWeek: "relative grid min-w-[36rem] grid-cols-7 border-t border-line-subtle/30",
     monthDay: "relative z-0 flex min-h-32 w-full flex-col items-stretch px-1.5 pb-1 text-left text-xs",
     monthAllDay: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail} ${chipSelected}`,
@@ -26,7 +26,7 @@ export const calendarDemoRecipe = tv({
     period: "px-1 text-sm font-medium text-foreground-strong",
     toolbarCluster: "flex items-center gap-1",
     contextualHeader: "relative z-40 mb-1 flex min-h-9 items-center justify-center gap-1 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
-    contextualNavigation: "absolute left-1/2 top-full z-40 flex -translate-x-1/2 items-center gap-1 rounded-surface bg-background-canvas/95 p-1 shadow-overlay",
+    contextualNavigation: "flex items-center gap-1",
     contextualHistory: "absolute right-9 top-0 flex items-center gap-0.5",
     contextualSidebar: "relative z-30 w-20 shrink-0 rounded-control px-1 py-2 outline-none transition-[width] focus-within:w-44 hover:w-44 focus-visible:ring-2 focus-visible:ring-line-accent/25",
     sidebarHint: "block text-center text-overline text-foreground-muted [writing-mode:vertical-rl]",
@@ -44,7 +44,7 @@ export const calendarDemoRecipe = tv({
     inspectorTitle: "px-0 text-base font-semibold",
     calendarToggle: "group w-full justify-start gap-2 border-0 bg-transparent px-1 shadow-none hover:border-0 hover:bg-transparent aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",
     calendarSwatch: "size-2.5 shrink-0 rounded-full bg-foreground-muted opacity-40 data-[calendar-color=accent]:bg-background-accent group-aria-pressed:opacity-100",
-    eventTime: "truncate text-overline font-normal text-foreground-muted",
+    eventTime: "truncate text-overline font-normal text-foreground-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100",
     hourLabel: "absolute right-1 whitespace-nowrap text-right text-overline tabular-nums leading-none text-foreground-muted",
   },
 });

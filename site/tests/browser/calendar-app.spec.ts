@@ -9,6 +9,9 @@ test("Calendar app chrome fills the page without docs or workbench", async ({ pa
   await expect(page.getByRole("grid", { name: "Week" })).toBeVisible();
   const controls = page.getByLabel("Calendar controls", { exact: true });
   await expect(controls).toBeVisible();
+  await expect(page.getByRole("button", { name: "Previous", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Today", exact: true })).toBeVisible();
+  await expect(page.getByRole("radio", { name: "Week", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Create", exact: true })).toHaveCount(0);
   await controls.focus();
   await expect(page.getByRole("button", { name: "Create", exact: true })).toBeVisible();
@@ -38,6 +41,18 @@ test("Calendar positions the work hour until the user claims the viewport", asyn
     element.style.height = "480px";
   });
   await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(640);
+});
+
+test("Calendar reveals event time on approach and opens editing on one click", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  const time = event.getByText("11:00", { exact: true });
+
+  await expect(time).toHaveCSS("opacity", "0");
+  await event.hover();
+  await expect(time).toHaveCSS("opacity", "1");
+  await event.click();
+  await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("고객사 싱크");
 });
 
 test("Calendar day view uses the visible date's canonical weekday cell", async ({ page }) => {
@@ -74,7 +89,7 @@ test("Calendar month and year views show date grids", async ({ page }) => {
 
 test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first().dblclick();
+  await page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first().click();
   const following = page.getByRole("radio", { name: "Following", exact: true });
   await following.click();
   await expect(following).toBeChecked();

@@ -44,7 +44,7 @@ export interface CalendarHand {
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
-  beginTitleRename(): void;
+  beginTitleRename(eventId?: string): void;
   commitTitleRename(): void;
   cancelTitleRename(): void;
   handleTitleRenameKey(key: string): boolean;
@@ -186,9 +186,12 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     return dispatch({ type: "calendar.set-hidden", calendarId, hidden });
   }
 
-  function beginTitleRename(): void {
-    if (selectedEvent !== null && renameSession.getSnapshot()?.key !== selectedEvent.id) {
-      renameSession.begin(selectedEvent.id, selectedEvent.title);
+  function beginTitleRename(eventId?: string): void {
+    const target = eventId === undefined
+      ? selectedEvent
+      : document.events.find((event) => event.id === eventId) ?? null;
+    if (target !== null && renameSession.getSnapshot()?.key !== target.id) {
+      renameSession.begin(target.id, target.title);
     }
   }
 

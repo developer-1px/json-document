@@ -332,9 +332,9 @@ export function CalendarDemoRoute(props: {
                 allDayPointerDown(event, days[item.startIndex] ?? visibleDate, item.event.id, item.event.start, item.event.end, "body");
               }}
               onPointerUp={allDayPointerUp}
-              onDoubleClick={(event) => {
+              onClick={(event) => {
                 event.stopPropagation();
-                hand.beginTitleRename();
+                hand.beginTitleRename(item.event.id);
               }}
             >
               {item.event.title}
@@ -451,15 +451,13 @@ export function CalendarDemoRoute(props: {
                       timePointerDown(event, day, item.event.id, item.event.start, item.event.end, "body");
                     }}
                     onPointerUp={timePointerUp}
-                    onDoubleClick={(event) => {
+                    onClick={(event) => {
                       event.stopPropagation();
-                      hand.beginTitleRename();
+                      hand.beginTitleRename(item.event.id);
                     }}
                   >
                     <span className="min-w-0 truncate">{item.event.title}</span>
-                    {endMinutes - startMinutes >= 40 ? (
-                      <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
-                    ) : null}
+                    <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
                   </SelectableItem>
                   {item.event.id === "preview" || !selected.has(item.event.id) ? null : (
                     <>
@@ -501,9 +499,9 @@ export function CalendarDemoRoute(props: {
             selected={selectedEvent !== null}
             editing={hand.renaming}
             capabilities={[
-              { id: "navigation", phases: ["approach", "selected", "editing"] },
+              { id: "create", phases: ["approach", "selected", "editing"] },
               { id: "history", phases: ["approach", "selected"] },
-              { id: "delete", phases: ["selected"] },
+              { id: "delete", phases: ["selected", "editing"] },
             ] as const}
           >
             {(context) => (
@@ -512,29 +510,29 @@ export function CalendarDemoRoute(props: {
                   monthNames: months,
                   weekSeparator: " – ",
                 })}</span>
-                {context.visible.includes("navigation") ? (
-                  <div className={styles.contextualNavigation()}>
-                    <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
-                      <ChevronLeft aria-hidden="true" size={16} />
-                    </IconButton>
-                    <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
-                      <ChevronRight aria-hidden="true" size={16} />
-                    </IconButton>
-                    <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
-                    <SegmentedControl
-                      label="View"
-                      value={view}
-                      options={[
-                        { id: "day", label: "Day" },
-                        { id: "week", label: "Week" },
-                        { id: "month", label: "Month" },
-                        { id: "year", label: "Year" },
-                      ]}
-                      onValueChange={setView}
-                    />
+                <div className={styles.contextualNavigation()}>
+                  <IconButton label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
+                    <ChevronLeft aria-hidden="true" size={16} />
+                  </IconButton>
+                  <IconButton label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
+                    <ChevronRight aria-hidden="true" size={16} />
+                  </IconButton>
+                  <ActionButton onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</ActionButton>
+                  <SegmentedControl
+                    label="View"
+                    value={view}
+                    options={[
+                      { id: "day", label: "Day" },
+                      { id: "week", label: "Week" },
+                      { id: "month", label: "Month" },
+                      { id: "year", label: "Year" },
+                    ]}
+                    onValueChange={setView}
+                  />
+                  {context.visible.includes("create") ? (
                     <ActionButton onClick={createOnVisibleDate}>Create</ActionButton>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
                 {context.visible.includes("history") ? (
                   <div className={styles.contextualHistory()}>
                     <IconButton label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></IconButton>
@@ -650,7 +648,10 @@ export function CalendarDemoRoute(props: {
                                     aria-label={calendarEventLabel(item)}
                                     data-calendar-color={calendarColor(document, item.calendarId)}
                                     className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
-                                    onClick={() => hand.selectOccurrence(item.id, item.start, item.end)}
+                                    onClick={() => {
+                                      hand.selectOccurrence(item.id, item.start, item.end);
+                                      hand.beginTitleRename(item.id);
+                                    }}
                                   >
                                     <MonthEventCopy event={item} />
                                   </SelectableItem>
@@ -705,9 +706,9 @@ export function CalendarDemoRoute(props: {
                               monthPointerDown(event, dates[item.startIndex] ?? visibleDate, dates, item.event.id, item.event.start, item.event.end);
                             }}
                             onPointerUp={monthPointerUp}
-                            onDoubleClick={(event) => {
+                            onClick={(event) => {
                               event.stopPropagation();
-                              hand.beginTitleRename();
+                              hand.beginTitleRename(item.event.id);
                             }}
                           >
                             <MonthEventCopy event={item.event} />

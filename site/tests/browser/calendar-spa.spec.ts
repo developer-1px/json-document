@@ -159,7 +159,7 @@ test("Calendar month all-day bar resizes by its start handle", async ({ page }) 
 test("Calendar empty month cell click clears selection and does not create", async ({ page }) => {
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   const month = page.getByRole("grid", { name: "Month", exact: true });
-  await month.getByRole("button", { name: "09:00 매일 뉴스 브리핑", exact: true }).first().dblclick();
+  await month.getByRole("button", { name: "09:00 매일 뉴스 브리핑", exact: true }).first().click();
   await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("매일 뉴스 브리핑");
   await page.getByRole("gridcell", { name: "2026-05-21", exact: true }).click();
   await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
@@ -186,7 +186,6 @@ test("Calendar month +N more opens that day's events without leaving month view"
   await day.getByRole("button", { name: /\+\d+ more/ }).click();
   await expect(overflow).toBeVisible();
   await overflow.getByRole("button", { name: "12:00 점심", exact: true }).click();
-  await page.keyboard.press("F2");
   await expect(page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" })).toHaveValue("점심");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
 });

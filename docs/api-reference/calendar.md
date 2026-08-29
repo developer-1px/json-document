@@ -25,7 +25,7 @@ interface CalendarHand {
   setScope(scope: OccurrenceScope): void;
   setOccurrence(occurrence: CalendarOccurrenceRange): void;
   setTitleDraft(title: string): void;
-  beginTitleRename(): void;
+  beginTitleRename(eventId?: string): void;
   commitTitleRename(): void;
   cancelTitleRename(): void;
   handleTitleRenameKey(key: string): boolean;
