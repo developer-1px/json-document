@@ -1,4 +1,4 @@
-import { useState, type PointerEvent } from "react";
+import { useRef, useState, type PointerEvent } from "react";
 import { createGestureSession } from "@interactive-os/json-document-affordance";
 import {
   addCalendarDate, bindCalendarAllDayIntent, bindCalendarMonthIntent, bindCalendarTimeGridIntent,
@@ -49,6 +49,8 @@ export interface CalendarPointerInteractions {
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
   clearTimeHover(): void;
+  consumeEventClick(): boolean;
+  consumeEventDoubleClick(): boolean;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;
@@ -68,6 +70,8 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
   const [allDayPointer] = useState(() => createWebPointerSession<AllDayRelease>());
   const [monthPointer] = useState(() => createWebPointerSession<MonthRelease>());
   const [selectionDrag] = useState(() => createGestureSession<CalendarSelectionDragGesture>());
+  const suppressEventClick = useRef(false);
+  const suppressEventDoubleClick = useRef(false);
   const [hoveredTime, setHoveredTime] = useState<CalendarPointerInteractions["hoveredTime"]>(null);
   const document = hand.document;
   const visibleEvents = calendarVisibleEvents(document);
@@ -146,6 +150,8 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     hand.setTimePreview(null);
     if (release === null) return;
     if (release.dragSource !== null) {
+      suppressEventClick.current = true;
+      suppressDoubleClickBriefly();
       const gesture = selectionDrag.commit();
       if (gesture !== null) hand.commitSelectionDrag(gesture);
       return;
@@ -194,6 +200,8 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-allday-day");
     if (targetDay == null) return;
     if (release.dragSource !== null) {
+      suppressEventClick.current = true;
+      suppressDoubleClickBriefly();
       const gesture = selectionDrag.commit();
       if (gesture !== null) hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: targetDay } });
       return;
@@ -250,6 +258,8 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-day");
     if (targetDay == null) return;
     if (release.dragSource !== null) {
+      suppressEventClick.current = true;
+      suppressDoubleClickBriefly();
       const gesture = selectionDrag.commit();
       if (gesture !== null) hand.commitSelectionDrag({ ...gesture, target: { type: "day", day: targetDay } });
       return;
@@ -306,6 +316,11 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     hand.setMonthPreview(null);
   }
 
+  function suppressDoubleClickBriefly(): void {
+    suppressEventDoubleClick.current = true;
+    globalThis.setTimeout(() => { suppressEventDoubleClick.current = false; }, 500);
+  }
+
   return {
     hoveredTime,
     instantAt,
@@ -313,6 +328,16 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     timePointerMove,
     timePointerUp,
     clearTimeHover: () => setHoveredTime(null),
+    consumeEventClick: () => {
+      if (!suppressEventClick.current) return false;
+      suppressEventClick.current = false;
+      return true;
+    },
+    consumeEventDoubleClick: () => {
+      if (!suppressEventDoubleClick.current) return false;
+      suppressEventDoubleClick.current = false;
+      return true;
+    },
     allDayPointerDown,
     allDayPointerMove,
     allDayPointerUp,

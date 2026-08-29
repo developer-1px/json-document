@@ -196,6 +196,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     end: string,
     createOptions: { readonly allDay?: boolean; readonly title?: string } = {},
   ): boolean {
+    setSelectionDragPreview(null);
     return commitIntent({
       type: "event.create",
       start,
@@ -217,7 +218,8 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
       return point?.eventId === eventId && point.occurrenceStart === occurrenceStart;
     }
     const primary = editor.primaryOccurrence ?? editor.selectedOccurrences[0] ?? null;
-    return primary?.eventId === eventId && primary.start === occurrenceStart;
+    return (primary?.eventId === eventId && primary.start === occurrenceStart)
+      || (selectedEvent?.id === eventId && occurrence.start === occurrenceStart);
   }
 
   function selectOccurrence(
@@ -250,6 +252,7 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
       target: preview.target,
       scope,
     })) return false;
+    renameSession.commit();
     rememberSelection();
     return true;
   }
@@ -283,11 +286,13 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
   }
 
   function undo(): void {
+    setSelectionDragPreview(null);
     editor.undo();
     rememberSelection();
   }
 
   function redo(): void {
+    setSelectionDragPreview(null);
     editor.redo();
     rememberSelection();
   }

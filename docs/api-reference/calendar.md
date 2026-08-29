@@ -104,6 +104,8 @@ interface CalendarPointerInteractions {
   timePointerMove(event: PointerEvent<HTMLElement>): void;
   timePointerUp(event: PointerEvent<HTMLElement>): void;
   clearTimeHover(): void;
+  consumeEventClick(): boolean;
+  consumeEventDoubleClick(): boolean;
   allDayPointerDown(event: PointerEvent<HTMLElement>, day: string, id: string | null, start: string | null, end: string | null, handle: "body" | "start" | "end" | null): void;
   allDayPointerMove(event: PointerEvent<HTMLElement>): void;
   allDayPointerUp(event: PointerEvent<HTMLElement>): void;

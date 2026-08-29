@@ -218,6 +218,7 @@ describe("useCalendarHand", () => {
       "2026-08-03T10:00", "2026-08-04T12:00",
     ]);
     act(() => result.current.pointer.timePointerUp({ pointerId: 7 } as never));
+    expect(result.current.hand.selectionDragPreview).toBeNull();
     expect(result.current.hand.document.events.map((item) => item.start)).toEqual([
       "2026-08-03T10:00", "2026-08-04T12:00",
     ]);
@@ -227,6 +228,27 @@ describe("useCalendarHand", () => {
       "2026-08-03T09:00", "2026-08-04T11:00",
     ]);
     grid.remove();
+  });
+
+  test("finishes an outstanding create rename when selection drag commits", () => {
+    const editor = createCalendarEditor(initial, { createId: () => "draft" });
+    const { result } = renderHook(() => useCalendarHand(editor));
+    act(() => result.current.createInterval("2026-08-04T10:00", "2026-08-04T11:00"));
+    expect(result.current.renaming).toBe(true);
+    act(() => result.current.selectOccurrence("standup", "2026-08-03T09:00", "2026-08-03T09:30"));
+    const source = result.current.prepareSelectionDrag("standup", "2026-08-03T09:00");
+    act(() => result.current.commitSelectionDrag({
+      source: source!,
+      target: { type: "instant", instant: "2026-08-03T10:00" },
+    }));
+    expect(result.current.renaming).toBe(false);
+  });
+
+  test("keeps a newly created all-day occurrence primary after selection history", () => {
+    const editor = createCalendarEditor(initial, { createId: () => "all-day" });
+    const { result } = renderHook(() => useCalendarHand(editor));
+    act(() => result.current.createInterval("2026-08-04", "2026-08-05", { allDay: true }));
+    expect(result.current.isPrimaryOccurrence("all-day", "2026-08-04")).toBe(true);
   });
 
   test("projects month span pointer coordinates through the Web row adapter", () => {
