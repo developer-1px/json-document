@@ -45,11 +45,13 @@ test("Demo chrome and selection use quiet, separated state grammar", async ({ pa
   expect(Math.abs((tabsBox!.y + tabsBox!.height / 2) - (expandBox!.y + expandBox!.height / 2))).toBeLessThanOrEqual(2);
 
   await expect(selected).toBeVisible();
+  await selected.click();
   const state = await selected.evaluate((element) => {
     const style = getComputedStyle(element);
-    return { background: style.backgroundColor, border: style.borderColor, outline: style.outlineColor };
+    return { background: style.backgroundColor, border: style.borderColor, outline: style.outlineColor, boxShadow: style.boxShadow };
   });
   expect(state.background).not.toBe("rgba(0, 0, 0, 0)");
   expect(state.border).not.toBe("rgb(222, 109, 85)");
   expect(state.outline).toBe("rgba(0, 0, 0, 0)");
+  expect(state.boxShadow).toBe("none");
 });

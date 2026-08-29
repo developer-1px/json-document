@@ -87,11 +87,11 @@
   }
 
   [data-ui-component="toolbar"] {
-    @apply flex min-w-0 flex-wrap items-center gap-1;
+    @apply flex min-w-0 flex-wrap items-center gap-1.5;
   }
 
   [data-ui-toolbar="product"] {
-    @apply block shrink-0 border-b border-line-subtle/40 px-2 py-1;
+    @apply block shrink-0 border-b border-line-subtle/40 bg-background-subtle/50 px-3 py-2;
   }
 
   [data-ui-component="toolbar-layout"] {
@@ -152,11 +152,11 @@
   [data-ui-control="toggle"][data-ui-presentation="chip"],
   [data-ui-segment="true"],
   [data-ui-tab="true"] {
-    @apply cursor-pointer rounded-control border px-3 py-2 text-xs font-medium outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-line-subtle/60 disabled:bg-transparent disabled:text-foreground-muted;
+    @apply inline-flex min-h-8 cursor-pointer items-center justify-center rounded-control border px-3 py-1.5 text-xs font-medium leading-5 outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-transparent disabled:bg-background-subtle/40 disabled:text-foreground-disabled;
   }
 
   [data-ui-control="command"] {
-    @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle;
+    @apply border-line-subtle/70 bg-background-subtle/70 text-foreground-default hover:border-line-default hover:bg-background-subtle;
   }
 
   [data-ui-control="command"]:is([data-kind="primary"], [data-ui-kind="primary"]) {
@@ -174,7 +174,7 @@
   }
 
   [data-ui-control="toggle"] {
-    @apply border-line-subtle bg-background-canvas text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-subtle aria-pressed:bg-background-subtle aria-pressed:text-foreground-strong disabled:aria-pressed:border-line-subtle/60 disabled:aria-pressed:bg-transparent disabled:aria-pressed:text-foreground-muted;
+    @apply border-line-subtle/70 bg-background-subtle/70 text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-default aria-pressed:bg-background-canvas aria-pressed:text-foreground-strong disabled:aria-pressed:border-transparent disabled:aria-pressed:bg-background-subtle/40 disabled:aria-pressed:text-foreground-disabled;
   }
 
   [data-ui-control="date-field"] {
@@ -182,12 +182,12 @@
   }
 
   [data-ui-control="date-field"] input {
-    @apply w-full min-w-0 rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
+    @apply min-h-9 w-full min-w-0 rounded-control border border-transparent bg-background-subtle/70 px-3 py-1.5 text-sm leading-6 text-foreground-strong outline-none hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:bg-background-canvas focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
   [data-ui-control="field"]:not([data-ui-presentation="seamless"]),
   [data-ui-control="search"] input {
-    @apply rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
+    @apply min-h-9 rounded-control border border-transparent bg-background-subtle/70 px-3 py-1.5 text-sm leading-6 text-foreground-strong outline-none hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:bg-background-canvas focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
   [data-ui-control="field"][data-ui-presentation="seamless"] {
@@ -270,7 +270,7 @@
   [data-ui-control="toggle"][data-ui-presentation="chip"],
   [data-ui-segment="true"],
   [data-ui-tab="true"] {
-    @apply border-transparent bg-transparent text-foreground-muted hover:bg-background-subtle hover:text-foreground-strong;
+    @apply border-transparent bg-background-subtle/60 text-foreground-muted hover:bg-background-subtle hover:text-foreground-strong;
   }
 
   [data-ui-control="toggle"][data-ui-presentation="chip"][data-selected="true"],
@@ -289,7 +289,7 @@
     [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
-    @apply rounded-control border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-background-subtle;
+    @apply rounded-control border-transparent bg-background-subtle/60 shadow-none hover:border-line-subtle hover:bg-background-subtle;
   }
 
   [data-ui-component="contextual-controls"] [data-ui-segment="true"][aria-checked="true"] {
@@ -302,7 +302,7 @@
     [data-ui-control="command"][data-ui-presentation="icon"],
     [data-ui-segment="true"]
   ) {
-    @apply rounded-control border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-background-subtle;
+    @apply rounded-control border-line-subtle/60 bg-background-canvas shadow-none hover:border-line-default hover:bg-background-canvas;
   }
 
   [data-ui-toolbar="product"] [data-ui-segment="true"][aria-checked="true"] {
@@ -314,7 +314,7 @@
   }
 
   [data-ui-control="selectable"] {
-    @apply cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 focus-within:ring-2 focus-within:ring-line-accent/25 data-[selected=true]:border-line-subtle data-[selected=true]:bg-background-subtle data-[focus=true]:border-line-default;
+    @apply cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 data-[selected=true]:border-line-subtle data-[selected=true]:bg-background-subtle;
   }
 
   [data-ui-control="disclosure"] {
@@ -326,7 +326,7 @@
   }
 
   [data-ui-control="command"][data-ui-presentation="icon"] {
-    @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-control border border-transparent bg-transparent text-foreground-muted outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-foreground-disabled;
+    @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border border-line-subtle/60 bg-background-subtle/70 p-0 text-foreground-default outline-none transition-colors hover:border-line-default hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-line-subtle/40 disabled:bg-background-subtle/50 disabled:text-foreground-muted;
   }
 
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]) {
