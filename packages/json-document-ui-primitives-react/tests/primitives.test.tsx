@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   ActionButton,
   ChoiceChip,
+  ContextualControls,
   ControlHandle,
   DragHandle,
   DisclosureButton,
@@ -25,6 +26,21 @@ import {
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("ContextualControls reveals the same capability by pointer approach and keyboard focus", () => {
+    const capabilities = [{ id: "navigate", phases: ["approach"] }] as const;
+    render(
+      <ContextualControls capabilities={capabilities}>
+        {(snapshot) => <button>{snapshot.visible.includes("navigate") ? "Previous" : "Calendar"}</button>}
+      </ContextualControls>,
+    );
+    const root = screen.getByText("Calendar").parentElement!;
+    fireEvent.pointerEnter(root);
+    expect(screen.getByRole("button", { name: "Previous" })).toBeTruthy();
+    fireEvent.pointerLeave(root);
+    fireEvent.focus(screen.getByRole("button", { name: "Calendar" }));
+    expect(screen.getByRole("button", { name: "Previous" })).toBeTruthy();
+  });
+
   test("formats file metadata with one canonical compact unit policy", () => {
     expect(formatFileSize(512)).toBe("512 B");
     expect(formatFileSize(1536)).toBe("2 KB");

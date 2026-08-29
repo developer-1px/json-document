@@ -16,6 +16,7 @@ describe("Calendar Web adapters", () => {
       ["y", { type: "view", view: "year" }],
       ["t", { type: "today" }],
       ["c", { type: "create" }],
+      ["F2", { type: "rename" }],
       ["Delete", { type: "remove" }],
       ["Backspace", { type: "remove" }],
       ["Escape", { type: "dismiss" }],

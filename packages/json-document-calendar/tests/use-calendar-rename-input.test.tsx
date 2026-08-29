@@ -36,13 +36,32 @@ describe("useCalendarRenameInput", () => {
 
     expect((editor.snapshot.value as CalendarDocument).events).toEqual([]);
   });
+
+  test("keeps rename active across focus changes inside a larger editor", async () => {
+    const user = userEvent.setup();
+    const editor = createCalendarEditor(initial, { createId: () => "draft" });
+    render(<CalendarRenameHarness editor={editor} commitOnBlur={false} />);
+
+    await user.click(screen.getByRole("button", { name: "Create" }));
+    await user.tab();
+
+    expect(screen.getByRole("textbox", { name: "Title" })).not.toBeNull();
+    expect((editor.snapshot.value as CalendarDocument).events[0]?.title).toBe("Event");
+  });
 });
 
-function CalendarRenameHarness({ editor }: { readonly editor: ReturnType<typeof createCalendarEditor> }) {
+function CalendarRenameHarness({
+  editor,
+  commitOnBlur,
+}: {
+  readonly editor: ReturnType<typeof createCalendarEditor>;
+  readonly commitOnBlur?: boolean;
+}) {
   const hand = useCalendarHand(editor, { defaultTitle: "Event" });
-  const title = useCalendarRenameInput(hand);
+  const title = useCalendarRenameInput(hand, commitOnBlur === undefined ? {} : { commitOnBlur });
   return <>
     <button onClick={() => hand.createInterval("2026-08-03T10:00", "2026-08-03T11:00", { title: "Event" })}>Create</button>
-    {hand.selectedEvent === null ? null : <input aria-label="Title" {...title} />}
+    {hand.selectedEvent === null || !hand.renaming ? null : <input aria-label="Title" {...title} />}
+    <button>Next field</button>
   </>;
 }
