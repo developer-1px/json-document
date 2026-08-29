@@ -128,9 +128,9 @@ test("Calendar occurrence selection shares replace, toggle, extend, focus, and c
   await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
   await expect(page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toHaveCount(2);
   expect(await page.getByRole("button", { name: "고객사 싱크", exact: true }).allTextContents())
-    .toEqual(["고객사 싱크11:00", "고객사 싱크11:00"]);
+    .toEqual(["고객사 싱크10:00", "고객사 싱크11:00"]);
   expect(await page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true }).allTextContents())
-    .toEqual(["주간 사용량 리포트 요약10:00", "주간 사용량 리포트 요약10:00"]);
+    .toEqual(["주간 사용량 리포트 요약09:00", "주간 사용량 리포트 요약10:00"]);
   await page.keyboard.press("ControlOrMeta+z");
 
   await first.click();

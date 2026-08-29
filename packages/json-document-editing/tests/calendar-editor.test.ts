@@ -81,7 +81,7 @@ describe("calendar editor", () => {
     expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["standup", "review"]);
     const clipboard = editor.copy();
     expect(clipboard?.items.map((item) => item.sourceEventId)).toEqual(["standup", "review"]);
-    expect(clipboard?.anchorOccurrenceStart).toBe("2026-08-03T14:00");
+    expect(clipboard?.anchorOccurrenceStart).toBe("2026-08-03T09:00");
 
     expect(editor.dispatch({
       type: "selection.set",
@@ -92,7 +92,7 @@ describe("calendar editor", () => {
     expect(editor.selectedOccurrences.map((item) => item.eventId)).toEqual(["review"]);
   });
 
-  test("pastes a multi-occurrence group relative to its primary anchor", () => {
+  test("applies one offset to a multi-occurrence group relative to its first item", () => {
     const editor = createCalendarEditor(initial, { createId: (() => {
       let sequence = 0;
       return () => `anchored-${++sequence}`;
@@ -108,8 +108,8 @@ describe("calendar editor", () => {
     expect(clipboard).not.toBeNull();
     expect(editor.paste(clipboard!, "2026-08-04T14:00").ok).toBe(true);
     expect((editor.snapshot.value as CalendarDocument).events.slice(-2)).toMatchObject([
-      { id: "anchored-1", start: "2026-08-04T09:00", end: "2026-08-04T09:30" },
-      { id: "anchored-2", start: "2026-08-04T14:00", end: "2026-08-04T15:00" },
+      { id: "anchored-1", start: "2026-08-04T14:00", end: "2026-08-04T14:30" },
+      { id: "anchored-2", start: "2026-08-04T19:00", end: "2026-08-04T20:00" },
     ]);
   });
 

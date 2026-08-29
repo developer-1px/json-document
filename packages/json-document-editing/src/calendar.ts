@@ -625,9 +625,7 @@ export function createCalendarEditor(
     if (items.length === 0) return null;
     return {
       type: "application/vnd.interactive-os.calendar+json",
-      anchorOccurrenceStart: occurrences === undefined
-        ? (primaryOccurrence()?.start ?? items[0]!.occurrenceStart)
-        : items[0]!.occurrenceStart,
+      anchorOccurrenceStart: items[0]!.occurrenceStart,
       items,
       text: items.map((item) => `${item.event.start}\t${item.event.end}\t${item.event.title}`).join("\n"),
     };
