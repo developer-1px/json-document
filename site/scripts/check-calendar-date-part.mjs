@@ -11,12 +11,12 @@ const usage = read("site/src/shared/demo-workbench/demo-sources.ts");
 requireText(owner, "export function calendarDatePart");
 requireText(ownerIndex, "calendarDatePart");
 requireText(ownerTest, 'calendarDatePart("2026-05-25T23:30")');
-requireCount(host, "calendarDatePart(", 2);
+requireCount(host, "calendarDatePart(", 3);
 forbid(host, /\.slice\(0,\s*10\)/);
 requireText(usage, 'symbol: "calendarDatePart"');
 requireText(usage, 'sourcePath: "packages/json-document-editing/src/calendar-validation.ts"');
 
-console.log("Calendar date-part guard ok; Editing owner, public export, contract test, Usage, and two Host consumers checked.");
+console.log("Calendar date-part guard ok; Editing owner, public export, contract test, Usage, and three Host consumers checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

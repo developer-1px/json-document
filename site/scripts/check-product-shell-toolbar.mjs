@@ -24,8 +24,8 @@ requireText(sources, 'sourcePath: "packages/json-document-ui-primitives-react/sr
 requireText(sources, 'sourcePath: "packages/json-document-ui-primitives-react/src/toolbar.tsx"');
 requireText(usage, "<ProductShell");
 requireText(usage, "/widgets/toolbar");
+requireText(calendar, "<ProductShell");
 requireText(calendar, 'toolbarLabel="Calendar controls"');
-requireText(calendar, 'aria-label="Calendar contextual actions"');
 requireText(calendar, '<ToolbarRegion placement="center" label="Calendar view">');
 requireText(usage, '<ToolbarRegion placement="center" label="View">');
 

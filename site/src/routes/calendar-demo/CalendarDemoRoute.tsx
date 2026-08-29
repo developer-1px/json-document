@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Redo2, Trash2, Undo2 } from "lucide-react";
+import { ArrowUp, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Repeat2, Sparkles, Trash2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
@@ -165,6 +165,7 @@ export function CalendarDemoRoute(props: {
   const scope = hand.scope;
   const setScope = hand.setScope;
   const [overflowDay, setOverflowDay] = useState<string | null>(null);
+  const [detailsEditing, setDetailsEditing] = useState(false);
   const {
     hoveredTime,
     instantAt,
@@ -218,6 +219,7 @@ export function CalendarDemoRoute(props: {
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
   const selectedEvent = hand.selectedEvent;
+  useEffect(() => setDetailsEditing(hand.renaming), [hand.renaming, selectedEvent?.id, selectedEvent?.start]);
   const eventDetailsPosition = useAnchoredFloatingPosition<HTMLDivElement, HTMLElement>({
     active: selectedEvent !== null,
     policy: {
@@ -234,6 +236,8 @@ export function CalendarDemoRoute(props: {
   });
   const selectedSlot = selectedEvent === null ? hand.occurrence.start : null;
   const inspected = hand.inspectedInterval;
+  const inspectedStart = inspected?.start ?? selectedEvent?.start ?? "";
+  const inspectedEnd = inspected?.end ?? selectedEvent?.end ?? "";
   const visibleEvents = calendarVisibleEvents(document);
   const paintedEvents = hand.paintedEvents;
   const timeGridCells = calendarCells(view === "day" ? "day" : "week", visibleDate);
@@ -396,13 +400,13 @@ export function CalendarDemoRoute(props: {
                 <ResizeHandle
                   label={`Resize ${item.event.title} start`}
                   orientation="horizontal"
-                  className={classes("left-0 top-0 h-full w-2", styles.resizeEdge())}
+                  className={classes("left-0 top-0 h-full w-2", styles.resizeEdgeVertical())}
                   onResize={(delta, phase) => resizeAllDay(item.event.id, "start", item.event.start, item.event.start, delta, phase)}
                 />
                 <ResizeHandle
                   label={`Resize ${item.event.title} end`}
                   orientation="horizontal"
-                  className={classes("right-0 top-0 h-full w-2", styles.resizeEdge())}
+                  className={classes("right-0 top-0 h-full w-2", styles.resizeEdgeVertical())}
                   onResize={(delta, phase) => {
                     const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
                     resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
@@ -576,6 +580,7 @@ export function CalendarDemoRoute(props: {
         onPaste={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onPaste(event); }}
       >
       <ProductShell
+        className={styles.shell()}
         fill={!embedded}
         canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
         toolbarLabel="Calendar controls"
@@ -596,7 +601,7 @@ export function CalendarDemoRoute(props: {
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup label="Date shortcuts">
-                <Command onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
+                <Command className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
               </ToolbarGroup>
             </ToolbarRegion>
             <ToolbarRegion placement="center" label="Calendar view">
@@ -612,42 +617,12 @@ export function CalendarDemoRoute(props: {
                 onValueChange={setView}
               />
             </ToolbarRegion>
-            <ToolbarRegion placement="end" label="Calendar actions">
-              <ContextualControls
-                aria-label="Calendar contextual actions"
-                tabIndex={0}
-                className={styles.contextualActions()}
-                selected={selectedEvent !== null}
-                editing={hand.renaming}
-                capabilities={[
-                  { id: "create", phases: ["approach", "selected", "editing"] },
-                  { id: "history", phases: ["approach", "selected", "editing"] },
-                  { id: "delete", phases: ["selected", "editing"] },
-                ] as const}
-              >
-                {(context) => (
-                  <>
-                    {context.visible.includes("create") ? (
-                      <Command onClick={createOnVisibleDate}>Create</Command>
-                    ) : null}
-                    {context.visible.includes("history") ? (
-                      <ToolbarGroup label="History">
-                        <Command label="Undo" onClick={hand.undo}><Undo2 aria-hidden="true" size={16} /></Command>
-                        <Command label="Redo" onClick={hand.redo}><Redo2 aria-hidden="true" size={16} /></Command>
-                      </ToolbarGroup>
-                    ) : null}
-                    {context.visible.includes("delete") ? (
-                      <Command label="Delete" onClick={removeSelected}><Trash2 aria-hidden="true" size={16} /></Command>
-                    ) : null}
-                  </>
-                )}
-              </ContextualControls>
-            </ToolbarRegion>
+            <ToolbarRegion placement="end" />
           </ToolbarLayout>
         )}
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
-          <div className="flex min-h-0 min-w-0 flex-1 gap-4">
+          <div className="flex min-h-0 min-w-0 flex-1 gap-4 pb-24">
             <ContextualControls
               aria-label="Calendar sources"
               tabIndex={0}
@@ -842,7 +817,7 @@ export function CalendarDemoRoute(props: {
                                 <ResizeHandle
                                   label={`Resize ${item.event.title} start`}
                                   orientation="horizontal"
-                                  className={classes("left-0 top-0 z-20 h-full w-2", styles.resizeEdge())}
+                                  className={classes("left-0 top-0 z-20 h-full w-2", styles.resizeEdgeVertical())}
                                   onResize={(delta, phase) => resizeAllDay(item.event.id, "start", item.event.start, item.event.start, delta, phase)}
                                 />
                               )}
@@ -850,7 +825,7 @@ export function CalendarDemoRoute(props: {
                                 <ResizeHandle
                                   label={`Resize ${item.event.title} end`}
                                   orientation="horizontal"
-                                  className={classes("right-0 top-0 z-20 h-full w-2", styles.resizeEdge())}
+                                  className={classes("right-0 top-0 z-20 h-full w-2", styles.resizeEdgeVertical())}
                                   onResize={(delta, phase) => {
                                     const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
                                     resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
@@ -929,16 +904,43 @@ export function CalendarDemoRoute(props: {
                     style={eventDetailsPosition.style}
                     className={classes(styles.inspector(), ui.surface.overlay)}
                   >
-                <input
-                  ref={titleInput.ref}
-                  aria-label="Title"
-                  className={classes(ui.field.seamless, styles.inspectorTitle())}
-                  value={titleInput.value}
-                  onFocus={titleInput.onFocus}
-                  onChange={titleInput.onChange}
-                  onBlur={titleInput.onBlur}
-                  onKeyDown={titleInput.onKeyDown}
-                />
+                <header className={styles.inspectorHeader()}>
+                  {hand.renaming ? (
+                    <input
+                      ref={titleInput.ref}
+                      aria-label="Title"
+                      className={classes(ui.field.seamless, styles.inspectorTitle())}
+                      value={titleInput.value}
+                      onFocus={titleInput.onFocus}
+                      onChange={titleInput.onChange}
+                      onBlur={titleInput.onBlur}
+                      onKeyDown={titleInput.onKeyDown}
+                    />
+                  ) : <h2 className={styles.inspectorTitle()}>{selectedEvent.title}</h2>}
+                  <div className={styles.inspectorActions()}>
+                    <Command label="Edit details" onClick={() => setDetailsEditing((value) => !value)}>
+                      <Pencil aria-hidden="true" size={14} />
+                    </Command>
+                    <Command label="Delete" onClick={removeSelected}>
+                      <Trash2 aria-hidden="true" size={14} />
+                    </Command>
+                  </div>
+                </header>
+                <div className={styles.eventSummary()}>
+                  <p>
+                    <Clock3 aria-hidden="true" size={14} />
+                    <span>
+                      {calendarDatePart(inspectedStart)} · {selectedEvent.allDay
+                        ? "All day"
+                        : `${calendarTimeLabel(inspectedStart)}–${calendarTimeLabel(inspectedEnd)}`}
+                    </span>
+                  </p>
+                  <p><CalendarDays aria-hidden="true" size={14} /><span>{calendarDocumentCalendar(document, selectedEvent.calendarId)?.title ?? selectedEvent.calendarId}</span></p>
+                  {selectedEvent.recurrence === null ? null : (
+                    <p><Repeat2 aria-hidden="true" size={14} /><span>Repeats</span></p>
+                  )}
+                </div>
+                {detailsEditing ? <div className={styles.detailsEditor()}>
                 <Toggle
                   pressed={selectedEvent.allDay}
                   aria-label="All-day"
@@ -1030,10 +1032,30 @@ export function CalendarDemoRoute(props: {
                     onValueChange={setScope}
                   />
                 )}
+                </div> : null}
                   </section>
                 ) : null}
               </ContextualControls>
             )}
+          </div>
+          <div
+            className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
+            role="group"
+            aria-label="AI Composer preview"
+            aria-disabled="true"
+          >
+            <Sparkles aria-hidden="true" className={styles.composerSpark()} size={18} />
+            <input
+              aria-label="Ask about your calendar"
+              aria-describedby="calendar-composer-preview-note"
+              className={styles.composerInput()}
+              placeholder="Ask about your calendar…"
+              readOnly
+            />
+            <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
+            <Command disabled label="AI commands unavailable" className={styles.composerSend()}>
+              <ArrowUp aria-hidden="true" size={16} />
+            </Command>
           </div>
         </div>
       </ProductShell>

@@ -10,12 +10,12 @@ const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 requireText(owner, "calendarTimeLabel");
 requireText(owner, "Temporal.PlainDateTime.from(parsed).toPlainTime()");
 requireText(ownerIndex, "calendarTimeLabel");
-requireCount(host, "calendarTimeLabel(", 3);
+requireCount(host, "calendarTimeLabel(", 5);
 requireCount(eventLabelOwner, "calendarTimeLabel(", 1);
 forbid(host, /function clockLabel/);
 forbid(host, /slice\(11, 16\)/);
 
-console.log("Calendar time label guard ok; Calendar owner, three Host consumers, and event-label consumer checked.");
+console.log("Calendar time label guard ok; Calendar owner, five Host consumers, and event-label consumer checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");
