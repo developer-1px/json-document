@@ -75,6 +75,12 @@ test("Calendar keeps event time visible, hints an empty creation time, and opens
   await expect(details).toHaveAttribute("data-floating-placement", /^(right|left|top|bottom)/);
   await expect(details.getByRole("heading", { name: "고객사 싱크", exact: true })).toBeVisible();
   await expect(details.getByRole("textbox", { name: "Title" })).toHaveCount(0);
+  const editDetails = page.getByRole("button", { name: "Edit details", exact: true });
+  const detailsActions = editDetails.locator("../..");
+  await page.mouse.move(0, 0);
+  await expect(detailsActions).toHaveCSS("opacity", "0");
+  await details.hover();
+  await expect(detailsActions).toHaveCSS("opacity", "1");
   await expect(page.getByRole("button", { name: "Resize 고객사 싱크 end", exact: true })).toBeVisible();
   await event.dblclick();
   const title = details.getByRole("textbox", { name: "Title" });
