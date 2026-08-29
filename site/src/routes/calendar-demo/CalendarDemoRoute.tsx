@@ -221,6 +221,7 @@ export function CalendarDemoRoute(props: {
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
   const selectedEvent = hand.selectedEvent;
+  const selectedSlot = selectedEvent === null ? hand.occurrence.start : null;
   const inspected = hand.inspectedInterval;
   const visibleEvents = calendarVisibleEvents(document);
   const paintedEvents = hand.paintedEvents;
@@ -335,6 +336,8 @@ export function CalendarDemoRoute(props: {
           <div
             key={`allday-${day}`}
             data-calendar-allday-day={day}
+            tabIndex={-1}
+            data-selected={selectedSlot === day ? "true" : undefined}
             className={classes("min-h-10", styles.weekCell())}
             style={{ gridRow: `2 / span ${allDayLaneCount}` }}
             onPointerDown={(event) => allDayPointerDown(event, day, null, null, null, null)}
@@ -431,6 +434,7 @@ export function CalendarDemoRoute(props: {
               key={day}
               data-calendar-day={day}
               data-calendar-grid="time"
+              tabIndex={-1}
               className={classes("overflow-hidden", styles.weekCell())}
               style={{ height: (hourEnd - hourStart) * pxPerHour }}
               onPointerDown={(event) => timePointerDown(event, day, null, null, null, null)}
@@ -442,6 +446,16 @@ export function CalendarDemoRoute(props: {
               }}
               onPointerCancel={(event) => cancelTimePointer(event.pointerId)}
             >
+              {selectedSlot?.startsWith(`${day}T`) ? (
+                <div
+                  data-calendar-selected-slot={selectedSlot}
+                  className={styles.selectedSlot()}
+                  style={{
+                    top: (Number(selectedSlot.slice(11, 13)) * 60 + Number(selectedSlot.slice(14, 16)) - hourStart * 60) * (pxPerHour / 60),
+                    height: 15 * (pxPerHour / 60),
+                  }}
+                />
+              ) : null}
               {Array.from({ length: hourEnd - hourStart }, (_, index) => (
                 index === 0 ? null : (
                   <div
@@ -681,9 +695,11 @@ export function CalendarDemoRoute(props: {
                             key={cell.date}
                             role="gridcell"
                             aria-label={cell.date}
-                            aria-selected={onDay.some(isSelected)}
+                            aria-selected={onDay.some(isSelected) || selectedSlot === cell.date}
                             aria-current={cell.date === today ? "date" : undefined}
                             data-calendar-day={cell.date}
+                            tabIndex={-1}
+                            data-selected={selectedSlot === cell.date ? "true" : undefined}
                             className={classes(
                               styles.monthDay(),
                               cell.inVisiblePeriod ? ui.text.body : ui.text.meta,

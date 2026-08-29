@@ -87,6 +87,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
 
   function timePointerDown(event: PointerEvent<HTMLElement>, day: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: CalendarTimeGridHandle | null): void {
     if (event.button !== 0) return;
+    event.currentTarget.focus();
     const grid = event.currentTarget.closest('[data-calendar-grid="time"]');
     if (grid === null) return;
     const originInstant = instantAt(day, event.clientY, grid);
@@ -121,11 +122,17 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const release = timePointer.commit(event.pointerId);
     hand.setTimePreview(null);
     if (release === null) return;
+    if (release.originEventId === null && release.originInstant === release.targetInstant) {
+      hand.dispatch({ type: "selection.clear" });
+      hand.setOccurrence({ start: release.targetInstant, end: release.targetInstant });
+      return;
+    }
     remember(bindTime(interpretCalendarTimeGridPointer(release), release.originEventStart), release.originEventStart, release.originEventEnd);
   }
 
   function allDayPointerDown(event: PointerEvent<HTMLElement>, originDay: string, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null, originHandle: "body" | "start" | "end" | null): void {
     if (event.button !== 0) return;
+    event.currentTarget.focus();
     const release = { originDay, originEventId, originEventStart, originEventEnd, originHandle, targetDay: originDay };
     allDayPointer.begin(event.currentTarget, event.pointerId, release);
     hand.setAllDayPreview(release);
@@ -146,6 +153,11 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const targetDay = findWebPointTarget<Element>("[data-calendar-allday-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-allday-day");
     if (targetDay == null) return;
     const raw = interpretCalendarAllDayPointer({ ...release, targetDay });
+    if (release.originEventId === null && release.originDay === targetDay) {
+      hand.dispatch({ type: "selection.clear" });
+      hand.setOccurrence({ start: targetDay, end: targetDay });
+      return;
+    }
     const id = raw?.type === "event.move-day" || raw?.type === "event.resize" ? raw.eventId : null;
     const intent = bindCalendarAllDayIntent(raw, id === null ? undefined : document.events.find((item) => item.id === id), release.originEventStart, hand.scope);
     remember(intent, release.originEventStart, release.originEventEnd);
@@ -153,6 +165,7 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
 
   function monthPointerDown(event: PointerEvent<HTMLElement>, fallbackDay: string, rowDays: ReadonlyArray<string>, originEventId: string | null, originEventStart: string | null, originEventEnd: string | null): void {
     if (event.button !== 0) return;
+    event.currentTarget.focus();
     const row = event.currentTarget.closest("[data-calendar-week]");
     const originDay = row === null
       ? fallbackDay
@@ -178,6 +191,11 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
     const targetDay = findWebPointTarget<Element>("[data-calendar-day]", { x: event.clientX, y: event.clientY })?.getAttribute("data-calendar-day");
     if (targetDay == null) return;
     const raw = interpretCalendarMonthPointer({ ...release, targetDay, eventsOnTargetDay: calendarEventsOnDay(visibleEvents, targetDay).map(({ id }) => ({ id })) });
+    if (release.originEventId === null && release.originDay === targetDay) {
+      hand.dispatch({ type: "selection.clear" });
+      hand.setOccurrence({ start: targetDay, end: targetDay });
+      return;
+    }
     const id = raw?.type === "event.move-day" ? raw.eventId : null;
     const intent = bindCalendarMonthIntent(raw, id === null ? undefined : document.events.find((item) => item.id === id), release.originEventStart, hand.scope);
     remember(intent, release.originEventStart, release.originEventEnd);

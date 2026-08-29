@@ -57,6 +57,43 @@ describe("useCalendarHand", () => {
     expect(result.current.document.events.some((item) => item.id === "copy-1")).toBe(true);
   });
 
+  test("selects an empty time slot as the temporal paste destination", () => {
+    let sequence = 0;
+    const editor = createCalendarEditor(initial, { createId: () => `copy-${++sequence}` });
+    const { result } = renderHook(() => {
+      const hand = useCalendarHand(editor);
+      const pointer = useCalendarPointerInteractions(hand, {
+        hourStart: 0,
+        hourEnd: 24,
+        stepMinutes: 15,
+        pixelsPerHour: 60,
+      });
+      return { hand, pointer };
+    });
+    const payload = result.current.hand.copy();
+    const grid = { getBoundingClientRect: () => ({ top: 0, height: 1440 }) };
+    const target = {
+      closest: () => grid,
+      focus: () => undefined,
+      setPointerCapture: () => undefined,
+      hasPointerCapture: () => false,
+      releasePointerCapture: () => undefined,
+    };
+
+    act(() => result.current.pointer.timePointerDown({
+      button: 0,
+      clientY: 660,
+      currentTarget: target,
+      pointerId: 1,
+    } as never, "2026-08-04", null, null, null, null));
+    act(() => result.current.pointer.timePointerUp({ pointerId: 1 } as never));
+
+    expect(result.current.hand.selectedEvent).toBeNull();
+    expect(result.current.hand.occurrence.start).toBe("2026-08-04T11:00");
+    act(() => { expect(result.current.hand.paste(payload!).ok).toBe(true); });
+    expect(result.current.hand.selectedEvent).toMatchObject({ id: "copy-1", start: "2026-08-04T11:00" });
+  });
+
   test("composes the canonical Rename session for created-event cancellation", () => {
     const editor = createCalendarEditor(initial, { createId: () => "draft" });
     const { result } = renderHook(() => useCalendarHand(editor, { defaultTitle: "Event" }));
@@ -151,6 +188,7 @@ describe("useCalendarHand", () => {
     const row = { getBoundingClientRect: () => ({ left: 100, width: 700 }) };
     const target = {
       closest: () => row,
+      focus: () => undefined,
       setPointerCapture: () => undefined,
       hasPointerCapture: () => false,
       releasePointerCapture: () => undefined,

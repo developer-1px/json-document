@@ -90,6 +90,23 @@ test("Calendar selection uses the native clipboard and one history across copy, 
   await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
 });
 
+test("Calendar pastes into a selected empty time slot", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  await event.click();
+  await page.keyboard.press("ControlOrMeta+c");
+
+  const target = timeGridDay(page, "2026-05-27");
+  await target.click({ position: { x: 20, y: 12 * 72 } });
+  await expect(target).toBeFocused();
+  await expect(page.locator('[data-calendar-selected-slot="2026-05-27T12:00"]')).toBeVisible();
+
+  await page.keyboard.press("ControlOrMeta+v");
+  await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toHaveCount(2);
+  expect(await page.getByRole("button", { name: "고객사 싱크", exact: true }).allTextContents())
+    .toContain("고객사 싱크12:00");
+});
+
 test("Calendar occurrence selection shares replace, toggle, extend, focus, and clipboard semantics", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const first = page.getByRole("button", { name: "고객사 싱크", exact: true });
