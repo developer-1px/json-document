@@ -448,7 +448,7 @@ createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): Annot
 ## `createCalendarEditor`
 
 ```ts
-createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: { readonly createId?: () => string; }): CalendarEditor
+createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: { readonly createId?: () => string; readonly initialEventIds?: ReadonlyArray<string>; }): CalendarEditor
 ```
 ## `createDatabaseEditor`
 

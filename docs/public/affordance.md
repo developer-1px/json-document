@@ -74,6 +74,7 @@ Editing은 선택과 작업을 기억합니다. Adapter는 키 chord를 command�
 | [Press / Activate](affordance-activate.md) | `pressAffordance`, `activateAffordance` | custom Press lifecycle, native activation |
 | [Delete](affordance-delete.md) | `deleteAffordance` | Delete, Backspace |
 | [Hover](affordance-hover.md) | `hoverAffordance` | 평면 윤곽, 툴팁 지연 |
+| [Contextual](affordance-contextual.md) | `contextualAffordance` | rest·approach·selected·editing에 따른 shy control 출현 |
 | [Context menu](affordance-context-menu.md) | `contextMenuAffordance` | 오른쪽 클릭, 선택은 유지 |
 | [Drop](affordance-drop.md) | `dropAffordance`, `createBoardDragSession` | drop 대상, Board preview/commit/cancel, 선택 유지, no-drop |
 | [Duplicate](affordance-copy-drag.md) | `dragOperation` | Alt/Option 드래그 복제 |

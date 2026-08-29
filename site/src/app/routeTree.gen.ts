@@ -95,6 +95,7 @@ import { Route as PageDocsAffordanceActivateRouteImport } from "./routes/_page/d
 import { Route as PageDocsAffordanceCancelRouteImport } from "./routes/_page/docs/affordance/cancel";
 import { Route as PageDocsAffordanceCaretRouteImport } from "./routes/_page/docs/affordance/caret";
 import { Route as PageDocsAffordanceContextMenuRouteImport } from "./routes/_page/docs/affordance/context-menu";
+import { Route as PageDocsAffordanceContextualRouteImport } from "./routes/_page/docs/affordance/contextual";
 import { Route as PageDocsAffordanceCopyDragRouteImport } from "./routes/_page/docs/affordance/copy-drag";
 import { Route as PageDocsAffordanceDeleteRouteImport } from "./routes/_page/docs/affordance/delete";
 import { Route as PageDocsAffordanceDoubleClickRouteImport } from "./routes/_page/docs/affordance/double-click";
@@ -596,6 +597,12 @@ const PageDocsAffordanceContextMenuRoute =
     path: "/docs/affordance/context-menu",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAffordanceContextualRoute =
+  PageDocsAffordanceContextualRouteImport.update({
+    id: "/docs/affordance/contextual",
+    path: "/docs/affordance/contextual",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAffordanceCopyDragRoute =
   PageDocsAffordanceCopyDragRouteImport.update({
     id: "/docs/affordance/copy-drag",
@@ -988,6 +995,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/docs/affordance/contextual": typeof PageDocsAffordanceContextualRoute;
   "/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
   "/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
   "/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
@@ -1130,6 +1138,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/docs/affordance/contextual": typeof PageDocsAffordanceContextualRoute;
   "/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
   "/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
   "/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
@@ -1274,6 +1283,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/_page/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/_page/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/_page/docs/affordance/contextual": typeof PageDocsAffordanceContextualRoute;
   "/_page/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
   "/_page/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
   "/_page/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
@@ -1418,6 +1428,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/cancel"
     | "/docs/affordance/caret"
     | "/docs/affordance/context-menu"
+    | "/docs/affordance/contextual"
     | "/docs/affordance/copy-drag"
     | "/docs/affordance/delete"
     | "/docs/affordance/double-click"
@@ -1560,6 +1571,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/cancel"
     | "/docs/affordance/caret"
     | "/docs/affordance/context-menu"
+    | "/docs/affordance/contextual"
     | "/docs/affordance/copy-drag"
     | "/docs/affordance/delete"
     | "/docs/affordance/double-click"
@@ -1703,6 +1715,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/cancel"
     | "/_page/docs/affordance/caret"
     | "/_page/docs/affordance/context-menu"
+    | "/_page/docs/affordance/contextual"
     | "/_page/docs/affordance/copy-drag"
     | "/_page/docs/affordance/delete"
     | "/_page/docs/affordance/double-click"
@@ -2371,6 +2384,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAffordanceContextMenuRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/affordance/contextual": {
+      id: "/_page/docs/affordance/contextual";
+      path: "/docs/affordance/contextual";
+      fullPath: "/docs/affordance/contextual";
+      preLoaderRoute: typeof PageDocsAffordanceContextualRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/affordance/copy-drag": {
       id: "/_page/docs/affordance/copy-drag";
       path: "/docs/affordance/copy-drag";
@@ -2908,6 +2928,7 @@ interface PageRouteChildren {
   PageDocsAffordanceCancelRoute: typeof PageDocsAffordanceCancelRoute;
   PageDocsAffordanceCaretRoute: typeof PageDocsAffordanceCaretRoute;
   PageDocsAffordanceContextMenuRoute: typeof PageDocsAffordanceContextMenuRoute;
+  PageDocsAffordanceContextualRoute: typeof PageDocsAffordanceContextualRoute;
   PageDocsAffordanceCopyDragRoute: typeof PageDocsAffordanceCopyDragRoute;
   PageDocsAffordanceDeleteRoute: typeof PageDocsAffordanceDeleteRoute;
   PageDocsAffordanceDoubleClickRoute: typeof PageDocsAffordanceDoubleClickRoute;
@@ -3023,6 +3044,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAffordanceCancelRoute: PageDocsAffordanceCancelRoute,
   PageDocsAffordanceCaretRoute: PageDocsAffordanceCaretRoute,
   PageDocsAffordanceContextMenuRoute: PageDocsAffordanceContextMenuRoute,
+  PageDocsAffordanceContextualRoute: PageDocsAffordanceContextualRoute,
   PageDocsAffordanceCopyDragRoute: PageDocsAffordanceCopyDragRoute,
   PageDocsAffordanceDeleteRoute: PageDocsAffordanceDeleteRoute,
   PageDocsAffordanceDoubleClickRoute: PageDocsAffordanceDoubleClickRoute,

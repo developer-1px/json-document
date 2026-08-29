@@ -1058,6 +1058,18 @@
     "parentPath": "/docs/affordance"
   },
   {
+    "path": "/docs/affordance/contextual",
+    "label": "Contextual",
+    "title": "Contextual affordance - json-document",
+    "heading": "Contextual affordance",
+    "description": "콘텐츠 상태에 따라 필요한 shy control만 가까이 드러내는 정본 계약입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/calendar",
+    "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
     "path": "/docs/affordance/double-click",
     "label": "Double-click",
     "title": "Double-click - json-document",

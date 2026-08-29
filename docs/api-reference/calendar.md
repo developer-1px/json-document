@@ -63,6 +63,7 @@ interface CalendarKeyboardOptions {
   readonly onShift: (direction: 1 | -1) => void;
   readonly onToday: () => void;
   readonly onCreate: () => void;
+  readonly onRename: () => void;
   readonly onRemove: () => void;
   readonly onDismiss?: () => boolean;
 }
@@ -119,6 +120,14 @@ interface CalendarRenameInputBinding {
   onKeyDown(event: KeyboardEvent<HTMLInputElement>): void;
 }
 ```
+## `CalendarRenameInputOptions`
+
+```ts
+interface CalendarRenameInputOptions {
+  /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
+  readonly commitOnBlur?: boolean;
+}
+```
 ## `CalendarViewportPositionOptions`
 
 ```ts
@@ -148,7 +157,7 @@ useCalendarPointerInteractions(hand: CalendarHand, policy: CalendarPointerPolicy
 ## `useCalendarRenameInput`
 
 ```ts
-useCalendarRenameInput(hand: CalendarHand): CalendarRenameInputBinding
+useCalendarRenameInput(hand: CalendarHand, options?: CalendarRenameInputOptions): CalendarRenameInputBinding
 ```
 ## `useCalendarViewportPosition`
 

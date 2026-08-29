@@ -231,6 +231,32 @@ commitAffordance<H extends AffordanceHand>(result: AffordancePreview<H>): Afford
 ```ts
 contextMenuAffordance(input: { readonly type?: string; readonly button?: number; readonly key?: string; readonly shiftKey?: boolean; }): AffordancePreview
 ```
+## `contextualAffordance`
+
+```ts
+contextualAffordance<Id extends string>(input: { readonly approached?: boolean; readonly focused?: boolean; readonly selected?: boolean; readonly editing?: boolean; readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; }): ContextualAffordanceSnapshot<Id>
+```
+## `ContextualAffordanceCapability`
+
+```ts
+type ContextualAffordanceCapability<Id extends string = string> = {
+  readonly id: Id;
+  readonly phases: ReadonlyArray<Exclude<ContextualAffordancePhase, "rest">>;
+};
+```
+## `ContextualAffordancePhase`
+
+```ts
+type ContextualAffordancePhase = "rest" | "approach" | "selected" | "editing";
+```
+## `ContextualAffordanceSnapshot`
+
+```ts
+type ContextualAffordanceSnapshot<Id extends string = string> = {
+  readonly phase: ContextualAffordancePhase;
+  readonly visible: ReadonlyArray<Id>;
+};
+```
 ## `ControlHandleDescriptor`
 
 ```ts

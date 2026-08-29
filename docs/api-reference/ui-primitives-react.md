@@ -105,6 +105,11 @@ calendarYearMonths(visibleDate: string): ReadonlyArray<string>
 ```ts
 ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
 ```
+## `ContextualControls`
+
+```ts
+ContextualControls<Id extends string>(props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; readonly selected?: boolean; readonly editing?: boolean; readonly children: (snapshot: ContextualAffordanceSnapshot<Id>) => ReactNode; }): ReactNode
+```
 ## `ControlHandle`
 
 ```ts
