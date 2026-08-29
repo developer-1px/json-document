@@ -19,6 +19,8 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-contenteditable-collaboration",
 ]);
 validateSiteRoutes(routes, fail);
+const rootRoute = routes.find((route) => route.path === "/");
+if (rootRoute === undefined) fail("live site routes are missing the root route.");
 
 function fail(message) {
   throw new Error(message);
@@ -41,8 +43,10 @@ async function fetchText(path, allowedStatuses = [200]) {
 
 async function checkOnce() {
   const index = await fetchText("/");
+  if (!index.includes(`<title>${rootRoute.title}</title>`)) {
+    fail("live index is missing the canonical root route title.");
+  }
   for (const pattern of [
-    /<title>json-document - Headless JSON editing<\/title>/,
     /name="description"/,
     /property="og:title"/,
     /rel="icon"/,
@@ -82,7 +86,7 @@ async function checkOnce() {
     !/^# json-document v3$/m.test(llms)
     || !/공개 Root는 정확히 다음 21개 symbol/.test(llms)
     || !/`JSONDocument`의 필수 member는 정확히 여섯 개다/.test(llms)
-    || !/## Connector, host adapter와 companion/.test(llms)
+    || !/## Adapter, Connector와 companion/.test(llms)
     || !/@interactive-os\/editable/.test(llms)
   ) {
     fail("live llms.txt is missing the v3 Core contract.");
@@ -108,7 +112,7 @@ async function checkOnce() {
   }
 
   const favicon = await fetchText("/favicon.svg");
-  if (!/<svg/.test(favicon) || !/aria-label="@interactive-os\/json-document"/.test(favicon)) {
+  if (!/<svg/.test(favicon) || !/aria-label="json-document cat"/.test(favicon)) {
     fail("live favicon.svg is missing expected SVG content.");
   }
 
