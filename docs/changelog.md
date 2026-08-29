@@ -10,6 +10,16 @@
 - Tightened wait visuals against live catalog source: dual-layer shimmer
   text, skewed placeholder sheen, ellipse wave grid, offset-path border
   beam, and radial shine rim.
+- Added orbit dots and equalizer bars as wait visuals.
+- Added dual counter-rotate rings as a wait visual.
+- Added an infinity stroke as a wait visual.
+- Added a morph square-to-circle spinner as a wait visual.
+- Added a comet arc with a leading-edge tip as a wait visual.
+- Added helix paired dots as a wait visual.
+- Added a particle burst from a core as a wait visual.
+- Added dual-axis helix rings as a wait visual.
+- Added fading radial spokes as a wait visual.
+- Added a radar sweep scan as a wait visual.
 - Gave Calendar app chrome: a collapsible site rail, no docs header or demo
   workbench, and a full-height product surface.
 - Added HTML date, time, datetime-local, month, and week controls plus APG

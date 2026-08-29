@@ -3,14 +3,25 @@ import {
   BlobMass,
   BorderBeam,
   CloudMass,
+  CometArc,
+  DualRings,
+  EqualizerBars,
+  FadeSpokes,
   GradientSweep,
+  HelixDots,
+  HelixRings,
   HueOutline,
+  InfinityStroke,
   LoadingBar,
   MassOrb,
   MorseCode,
+  MorphSquare,
+  OrbitDots,
+  ParticleBurst,
   ProgressRing,
   PulsingDot,
   PulsingOrb,
+  RadarSweep,
   RingMass,
   Shimmer,
   ShimmerText,
@@ -106,6 +117,12 @@ export function AnimationDemoRoute() {
           <Specimen title="Morse code">
             <MorseCode />
           </Specimen>
+          <Specimen title="Orbit dots">
+            <OrbitDots />
+          </Specimen>
+          <Specimen title="Equalizer">
+            <EqualizerBars />
+          </Specimen>
           <Specimen title="Pulsing orb">
             <PulsingOrb />
           </Specimen>
@@ -113,6 +130,60 @@ export function AnimationDemoRoute() {
             <span className={styles.copy()}>
               <ProgressRing />
               Generating
+            </span>
+          </Specimen>
+          <Specimen title="Dual rings">
+            <span className={styles.copy()}>
+              <DualRings />
+              Working
+            </span>
+          </Specimen>
+          <Specimen title="Fade spokes">
+            <span className={styles.copy()}>
+              <FadeSpokes />
+              Busy
+            </span>
+          </Specimen>
+          <Specimen title="Radar sweep">
+            <span className={styles.copy()}>
+              <RadarSweep />
+              Searching
+            </span>
+          </Specimen>
+          <Specimen title="Infinity stroke">
+            <span className={styles.copy()}>
+              <InfinityStroke />
+              Syncing
+            </span>
+          </Specimen>
+          <Specimen title="Morph square">
+            <span className={styles.copy()}>
+              <MorphSquare />
+              Shaping
+            </span>
+          </Specimen>
+          <Specimen title="Comet arc">
+            <span className={styles.copy()}>
+              <CometArc />
+              Tracing
+            </span>
+          </Specimen>
+          <Specimen title="Helix dots">
+            <span className={styles.copy()}>
+              <HelixDots />
+              Pairing
+            </span>
+          </Specimen>
+          <Specimen title="Particle burst">
+            <span className={styles.copy()}>
+              <ParticleBurst />
+              Sparking
+            </span>
+          </Specimen>
+          <Specimen title="Helix rings">
+            <span className={styles.copy()}>
+              <HelixRings />
+              Gyroscope
             </span>
           </Specimen>
           <Specimen title="Loading bar" wide>

@@ -36,15 +36,50 @@ BorderBeam(props: DivProps): ReactNode
 ```ts
 CloudMass(props: DivProps): ReactNode
 ```
+## `CometArc`
+
+```ts
+CometArc(props: SpanProps): ReactNode
+```
+## `DualRings`
+
+```ts
+DualRings(props: SpanProps): ReactNode
+```
+## `EqualizerBars`
+
+```ts
+EqualizerBars(props: SpanProps): ReactNode
+```
+## `FadeSpokes`
+
+```ts
+FadeSpokes(props: SpanProps): ReactNode
+```
 ## `GradientSweep`
 
 ```ts
 GradientSweep(props: DivProps): ReactNode
 ```
+## `HelixDots`
+
+```ts
+HelixDots(props: SpanProps): ReactNode
+```
+## `HelixRings`
+
+```ts
+HelixRings(props: SpanProps): ReactNode
+```
 ## `HueOutline`
 
 ```ts
 HueOutline(props: DivProps): ReactNode
+```
+## `InfinityStroke`
+
+```ts
+InfinityStroke(props: SpanProps): ReactNode
 ```
 ## `LoadingBar`
 
@@ -56,10 +91,25 @@ LoadingBar(props: DivProps): ReactNode
 ```ts
 MassOrb(props: SpanProps): ReactNode
 ```
+## `MorphSquare`
+
+```ts
+MorphSquare(props: SpanProps): ReactNode
+```
 ## `MorseCode`
 
 ```ts
 MorseCode(props: SpanProps): ReactNode
+```
+## `OrbitDots`
+
+```ts
+OrbitDots(props: SpanProps): ReactNode
+```
+## `ParticleBurst`
+
+```ts
+ParticleBurst(props: SpanProps): ReactNode
 ```
 ## `ProgressRing`
 
@@ -75,6 +125,11 @@ PulsingDot(props: SpanProps): ReactNode
 
 ```ts
 PulsingOrb(props: SpanProps): ReactNode
+```
+## `RadarSweep`
+
+```ts
+RadarSweep(props: SpanProps): ReactNode
 ```
 ## `RingMass`
 

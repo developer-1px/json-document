@@ -9,7 +9,7 @@ Included visuals:
 - `ShimmerText` — standing text with a highlight band, or a spectrum fill
 - `WaveDots` / `WaveGrid` — bouncing dots and a Claude-style ellipse matrix
 - `StreamingCaret` — live edge of a stream
-- `PulsingDot` / `PulsingOrb` / `MorseCode` / `ProgressRing` / `LoadingBar`
+- `PulsingDot` / `PulsingOrb` / `MorseCode` / `OrbitDots` / `EqualizerBars` / `ProgressRing` / `DualRings` / `FadeSpokes` / `RadarSweep` / `InfinityStroke` / `MorphSquare` / `CometArc` / `HelixDots` / `ParticleBurst` / `HelixRings` / `LoadingBar`
 - `Skeleton` / `StaggerLines` / `Shimmer` — placeholders
 - `GradientSweep` / `BorderBeam` / `HueOutline` — identity outlines
 - `MassOrb` / `BlobMass` / `AuroraMass` / `RingMass` / `CloudMass` — large form masses

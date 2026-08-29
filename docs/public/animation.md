@@ -19,13 +19,35 @@ npm i @interactive-os/json-document-animation-react
 import {
   AuroraMass,
   BlobMass,
+  CometArc,
+  DualRings,
+  EqualizerBars,
+  FadeSpokes,
+  HelixDots,
+  HelixRings,
+  InfinityStroke,
   MassOrb,
+  MorphSquare,
+  OrbitDots,
+  ParticleBurst,
+  RadarSweep,
   RingMass,
   ShimmerText,
   WaveDots,
 } from "@interactive-os/json-document-animation-react";
 import "@interactive-os/json-document-animation-react/styles.css";
 
+<OrbitDots />
+<EqualizerBars />
+<DualRings />
+<FadeSpokes />
+<RadarSweep />
+<InfinityStroke />
+<MorphSquare />
+<CometArc />
+<HelixDots />
+<ParticleBurst />
+<HelixRings />
 <MassOrb />
 <BlobMass />
 <AuroraMass />
