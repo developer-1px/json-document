@@ -5,8 +5,13 @@ test("Calendar app chrome fills the page without docs or workbench", async ({ pa
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Calendar", exact: true })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Demo workbench" })).toHaveCount(0);
-  await expect(page.getByRole("toolbar", { name: "Calendar" })).toBeVisible();
+  await expect(page.getByRole("toolbar", { name: "Calendar" })).toHaveCount(0);
   await expect(page.getByRole("grid", { name: "Week" })).toBeVisible();
+  const controls = page.getByLabel("Calendar controls", { exact: true });
+  await expect(controls).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create", exact: true })).toHaveCount(0);
+  await controls.focus();
+  await expect(page.getByRole("button", { name: "Create", exact: true })).toBeVisible();
 
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("button", { name: "Open navigation" })).toBeVisible();
@@ -18,7 +23,7 @@ test("Calendar app chrome fills the page without docs or workbench", async ({ pa
 
   await navigation.getByRole("button", { name: "Collapse navigation" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" })).toHaveCount(0);
-  await expect(page.getByRole("toolbar", { name: "Calendar" })).toBeVisible();
+  await expect(page.getByRole("toolbar", { name: "Calendar" })).toHaveCount(0);
 });
 
 test("Calendar positions the work hour until the user claims the viewport", async ({ page }) => {
@@ -47,13 +52,16 @@ test("Calendar month and year views show date grids", async ({ page }) => {
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
   await expect(page.getByRole("gridcell", { name: "2026-05-25", exact: true })).toContainText("25");
+  await page.getByLabel("Calendar controls", { exact: true }).focus();
   await expect(page.getByRole("radio", { name: "Month", exact: true })).toBeChecked();
+  await page.getByLabel("Calendar sources", { exact: true }).focus();
   await expect(page.getByRole("grid", { name: "Jump 2026-05", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "2026-04-27", exact: true }).first()).toHaveText("27");
 
   await page.getByRole("button", { name: "Next month", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Jump 2026-06", exact: true })).toBeVisible();
 
+  await page.getByLabel("Calendar controls", { exact: true }).focus();
   await page.getByRole("radio", { name: "Month", exact: true }).press("ArrowRight");
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01" })).toHaveText("1");
@@ -62,15 +70,16 @@ test("Calendar month and year views show date grids", async ({ page }) => {
   await expect(page).toHaveURL(/view=year/);
   await expect(page).toHaveURL(/date=2026-05-25/);
 
+});
+
+test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.getByRole("button", { name: "매일 뉴스 브리핑", exact: true }).first().dblclick();
   const following = page.getByRole("radio", { name: "Following", exact: true });
   await following.click();
   await expect(following).toBeChecked();
   await following.press("ArrowRight");
   await expect(page.getByRole("radio", { name: "All", exact: true })).toBeChecked();
-});
-
-test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const repeat = page.getByRole("button", { name: "Repeat", exact: true });
 
   await repeat.click();
@@ -94,6 +103,7 @@ test("Calendar location writes one search snapshot and restores on back", async 
   await page.goto("/demo/calendar?view=month&date=2026-05-25");
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
 
+  await page.getByLabel("Calendar controls", { exact: true }).focus();
   await page.getByRole("radio", { name: "Week", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
   await expect(page).toHaveURL(/view=week/);
@@ -107,6 +117,7 @@ test("Calendar location writes one search snapshot and restores on back", async 
 test("Calendar invalid search falls back to the fixture week", async ({ page }) => {
   await page.goto("/demo/calendar?view=agenda&date=nope");
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
+  await page.getByLabel("Calendar controls", { exact: true }).focus();
   await expect(page.getByRole("radio", { name: "Week", exact: true })).toBeChecked();
   await expect(page.getByText("2026-05-25 – 2026-05-31", { exact: true })).toBeVisible();
 });
@@ -116,6 +127,7 @@ test("Calendar Usage embed does not write view search params", async ({ page }) 
   const usage = page.locator('[data-live-demo="/demo/calendar"]');
   await expect(usage).toHaveCount(1);
   await usage.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await usage.getByLabel("Calendar controls", { exact: true }).focus();
   await usage.getByRole("radio", { name: "Month", exact: true }).click();
   await expect(usage.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
   await expect(page).not.toHaveURL(/view=/);

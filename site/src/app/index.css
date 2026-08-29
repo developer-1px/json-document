@@ -137,6 +137,23 @@
     @apply inline-flex max-w-full min-w-0 flex-wrap items-center rounded-control bg-background-subtle p-0.5;
   }
 
+  [data-ui-component="contextual-controls"] :is(
+    [data-ui-control="action"],
+    [data-ui-control="toggle"],
+    [data-ui-control="icon"],
+    [data-ui-segment="true"]
+  ) {
+    @apply rounded-control border-transparent bg-transparent shadow-none hover:border-transparent hover:bg-background-subtle;
+  }
+
+  [data-ui-component="contextual-controls"] [data-ui-segment="true"][aria-checked="true"] {
+    @apply border-transparent bg-background-subtle shadow-none;
+  }
+
+  [data-ui-component="contextual-controls"] input {
+    @apply rounded-control border-transparent bg-background-subtle/60 shadow-none hover:border-transparent hover:bg-background-subtle focus-visible:border-transparent;
+  }
+
   :where([data-ui-control="selectable"]) {
     @apply cursor-pointer outline-none transition-[background-color,border-color,box-shadow] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 focus-within:ring-2 focus-within:ring-line-accent/25 data-[selected=true]:border-line-accent data-[selected=true]:bg-background-subtle data-[selected=true]:outline data-[selected=true]:outline-2 data-[selected=true]:-outline-offset-2 data-[selected=true]:outline-line-accent data-[focus=true]:outline data-[focus=true]:outline-2 data-[focus=true]:-outline-offset-1 data-[focus=true]:outline-foreground-default;
   }
