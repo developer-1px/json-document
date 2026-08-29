@@ -67,6 +67,54 @@ const initial: CalendarDocument = {
 };
 
 describe("calendar editor", () => {
+  test("copies, cuts, pastes, and restores occurrences through one history transaction", () => {
+    let sequence = 0;
+    const editor = createCalendarEditor(initial, { createId: () => `copy-${++sequence}` });
+    const clipboard = editor.copy([
+      { eventId: "standup", start: "2026-08-03T09:00", end: "2026-08-03T09:30" },
+      { eventId: "review", start: "2026-08-03T14:00", end: "2026-08-03T15:00" },
+    ]);
+    expect(clipboard?.text).toContain("Standup");
+    expect(clipboard?.items).toHaveLength(2);
+    expect(editor.paste(clipboard!, "2026-08-04T10:00").ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.slice(-2)).toMatchObject([
+      { id: "copy-1", start: "2026-08-04T10:00", end: "2026-08-04T10:30" },
+      { id: "copy-2", start: "2026-08-04T15:00", end: "2026-08-04T16:00" },
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events).toHaveLength(2);
+    expect(editor.redo().ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events).toHaveLength(4);
+
+    expect(editor.dispatch({ type: "selection.set", eventIds: ["standup"] }).ok).toBe(true);
+    const cut = editor.cut();
+    expect(cut?.clipboard.items[0]?.event.title).toBe("Standup");
+    expect((editor.snapshot.value as CalendarDocument).events.some((item) => item.id === "standup")).toBe(false);
+    expect(editor.undo().ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events.some((item) => item.id === "standup")).toBe(true);
+  });
+
+  test("copies a recurring occurrence as an independent event and cuts only that occurrence", () => {
+    const editor = createCalendarEditor({
+      calendars: initial.calendars,
+      events: [event({
+        id: "daily",
+        title: "Daily",
+        start: "2026-08-03T09:00",
+        end: "2026-08-03T09:30",
+        recurrence: { freq: "daily", interval: 1, until: "2026-08-10" },
+      })],
+    });
+    const occurrence = [{ eventId: "daily", start: "2026-08-05T09:00", end: "2026-08-05T09:30" }];
+    expect(editor.copy(occurrence)?.items[0]?.event).toMatchObject({
+      start: "2026-08-05T09:00",
+      recurrence: null,
+      excludeDates: [],
+    });
+    expect(editor.cut(occurrence)?.result.ok).toBe(true);
+    expect((editor.snapshot.value as CalendarDocument).events[0]?.excludeDates).toEqual(["2026-08-05"]);
+  });
+
   test("can start without selecting fixture content", () => {
     const editor = createCalendarEditor(initial, { initialEventIds: [] });
     expect(editor.selectedEvents).toEqual([]);

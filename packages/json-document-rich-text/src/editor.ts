@@ -8,6 +8,7 @@ import {
 } from "@interactive-os/json-document";
 import {
   createEditingSession,
+  cutEditingClipboard,
   type EditingResult,
   type EditingSnapshot,
 } from "@interactive-os/json-document-editing";
@@ -161,11 +162,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       });
     },
     copy: copySelection,
-    cut() {
-      const clipboard = copySelection();
-      if (clipboard === null) return null;
-      return { clipboard, result: removeSelections() };
-    },
+    cut: () => cutEditingClipboard(copySelection, removeSelections),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

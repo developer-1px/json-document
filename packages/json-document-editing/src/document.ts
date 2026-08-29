@@ -1,5 +1,6 @@
 import { type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { createEditingSession, type EditingResult, type EditingSession, type EditingSnapshot } from "./session.js";
 import {
   collapsedRangeSelection,
@@ -44,6 +45,18 @@ export interface DocumentClipboard extends Record<string, JSONValue> {
   readonly blocks: ReadonlyArray<DocumentBlock>;
   readonly text: string;
 }
+
+export const documentClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.blocks+json" as const,
+  parse(value: unknown): DocumentClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.blocks)
+      && value.blocks.every((block) => isClipboardRecord(block) && typeof block.id === "string" && typeof block.text === "string")
+      ? value as DocumentClipboard : null;
+  },
+};
 
 export type DocumentIntent =
   | { readonly type: "selection.set"; readonly blockId: string; readonly mode?: "replace" | "extend" | "toggle"; readonly offset?: number }
@@ -185,11 +198,7 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
     get selectedBlockIds() { return selectedIds(); },
     dispatch,
     copy,
-    cut() {
-      const clipboard = copy();
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(session, value().blocks, selectedIds()) };
-    },
+    cut: () => cutEditingClipboard(copy, () => removeSelected(session, value().blocks, selectedIds())),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

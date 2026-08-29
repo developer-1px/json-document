@@ -40,6 +40,23 @@ describe("useCalendarHand", () => {
     });
   });
 
+  test("uses the focused occurrence for copy, cut, and temporal paste", () => {
+    let sequence = 0;
+    const editor = createCalendarEditor(initial, { createId: () => `copy-${++sequence}` });
+    const { result } = renderHook(() => useCalendarHand(editor));
+
+    act(() => result.current.selectOccurrence("standup", "2026-08-03T09:00", "2026-08-03T09:30"));
+    const payload = result.current.copy();
+    act(() => result.current.setOccurrence({ start: "2026-08-04T11:00", end: "2026-08-04T11:30" }));
+    act(() => { expect(result.current.paste(payload!).ok).toBe(true); });
+    expect(result.current.selectedEvent).toMatchObject({ id: "copy-1", start: "2026-08-04T11:00" });
+
+    act(() => { expect(result.current.cut()?.ok).toBe(true); });
+    expect(result.current.document.events.some((item) => item.id === "copy-1")).toBe(false);
+    act(() => result.current.undo());
+    expect(result.current.document.events.some((item) => item.id === "copy-1")).toBe(true);
+  });
+
   test("composes the canonical Rename session for created-event cancellation", () => {
     const editor = createCalendarEditor(initial, { createId: () => "draft" });
     const { result } = renderHook(() => useCalendarHand(editor, { defaultTitle: "Event" }));

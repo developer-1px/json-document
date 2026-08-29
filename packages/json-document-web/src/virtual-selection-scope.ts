@@ -1,3 +1,5 @@
+import { isWebEditableTarget } from "./input.js";
+
 export type WebVirtualSelectionScopeActivation = "contained" | "fallback";
 
 export interface WebVirtualSelectionScopeElementRef {
@@ -96,7 +98,7 @@ class WebVirtualSelectionCoordinator {
   };
 
   private readonly handleKeyDown = (event: KeyboardEvent) => {
-    if (isEditableTarget(event.target)) return;
+    if (isWebEditableTarget(event.target)) return;
     if (isPlatformShortcut(event, "a")) {
       const scope = this.resolveKeyboardScope(event.target);
       const selectionRoot = scope?.selectionRef.current;
@@ -114,7 +116,7 @@ class WebVirtualSelectionCoordinator {
   };
 
   private readonly handlePointerDown = (event: PointerEvent) => {
-    this.pointerTargetEditable = isEditableTarget(event.target);
+    this.pointerTargetEditable = isWebEditableTarget(event.target);
     this.pointerScope = this.resolveScope(event.target) ?? null;
   };
 
@@ -199,13 +201,6 @@ function isPlatformShortcut(
 function selectionFor(document: Document): Selection | null {
   return document.defaultView?.getSelection()
     ?? (typeof document.getSelection === "function" ? document.getSelection() : null);
-}
-
-function isEditableTarget(target: EventTarget | null): boolean {
-  if (!isElement(target)) return false;
-  return target.isContentEditable
-    || target.closest('[contenteditable]:not([contenteditable="false"])') !== null
-    || ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName);
 }
 
 function isDocumentLevelTarget(target: EventTarget | null): boolean {

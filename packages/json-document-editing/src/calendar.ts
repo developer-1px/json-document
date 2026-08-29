@@ -14,6 +14,7 @@ import {
   type EditingResult,
   type EditingSnapshot,
 } from "./session.js";
+import { cutEditingClipboard, type EditingClipboardCut } from "./clipboard.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import {
   addCalendarDate,
@@ -69,6 +70,38 @@ export interface CalendarSelection extends Record<string, JSONValue> {
   readonly primaryKey: string | null;
 }
 
+export interface CalendarClipboardItem extends Record<string, JSONValue> {
+  readonly sourceEventId: string;
+  readonly occurrenceStart: string;
+  readonly event: CalendarEvent;
+}
+
+export interface CalendarClipboard extends Record<string, JSONValue> {
+  readonly type: "application/vnd.interactive-os.calendar+json";
+  readonly items: ReadonlyArray<CalendarClipboardItem>;
+  readonly text: string;
+}
+
+export interface CalendarOccurrenceSelection {
+  readonly eventId: string;
+  readonly start: string;
+  readonly end: string;
+}
+
+export const calendarClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.calendar+json" as const,
+  parse(value: unknown): CalendarClipboard | null {
+    if (!isRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.items) || value.items.length === 0) return null;
+    return value.items.every((item) => (
+      isRecord(item)
+      && typeof item.sourceEventId === "string"
+      && typeof item.occurrenceStart === "string"
+      && isCalendarClipboardEvent(item.event)
+    )) ? value as CalendarClipboard : null;
+  },
+};
+
 export type CalendarView = "day" | "week" | "month" | "year";
 
 export type CalendarIntent =
@@ -121,6 +154,9 @@ export interface CalendarEditor {
   readonly snapshot: EditingSnapshot<CalendarSelection>;
   readonly selectedEvents: ReadonlyArray<CalendarEvent>;
   dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
+  copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
+  cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
+  paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection>;
   undo(): EditingResult<CalendarSelection>;
   redo(): EditingResult<CalendarSelection>;
   subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;
@@ -505,14 +541,137 @@ export function createCalendarEditor(
     });
   }
 
+  function copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null {
+    const source = occurrences ?? selectedEvents().map((event) => ({
+      eventId: event.id,
+      start: event.start,
+      end: event.end,
+    }));
+    const items = source.flatMap((occurrence): CalendarClipboardItem[] => {
+      const event = value().events.find((candidate) => candidate.id === occurrence.eventId);
+      if (event === undefined || occurrence.start >= occurrence.end) return [];
+      return [{
+        sourceEventId: event.id,
+        occurrenceStart: occurrence.start,
+        event: {
+          ...event,
+          start: occurrence.start,
+          end: occurrence.end,
+          recurrence: null,
+          excludeDates: [],
+        },
+      }];
+    });
+    if (items.length === 0) return null;
+    return {
+      type: "application/vnd.interactive-os.calendar+json",
+      items,
+      text: items.map((item) => `${item.event.start}\t${item.event.end}\t${item.event.title}`).join("\n"),
+    };
+  }
+
+  function removeClipboard(clipboard: CalendarClipboard): EditingResult<CalendarSelection> {
+    if (clipboard.items.length === 0) return failure("clipboard.empty");
+    const events = value().events;
+    const removals = new Set<string>();
+    const exclusions = new Map<string, Set<string>>();
+    for (const item of clipboard.items) {
+      const event = events.find((candidate) => candidate.id === item.sourceEventId);
+      if (event === undefined) return failure("selection.event-not-found");
+      if (calendarEventRecurrence(event) === null) removals.add(event.id);
+      else {
+        const dates = exclusions.get(event.id) ?? new Set(calendarEventExcludeDates(event));
+        dates.add(calendarDatePart(item.occurrenceStart));
+        exclusions.set(event.id, dates);
+      }
+    }
+    const operations: JSONPatchOperation[] = [];
+    for (const [eventId, dates] of exclusions) {
+      const index = events.findIndex((event) => event.id === eventId);
+      operations.push({ op: "replace", path: buildPointer(["events", index, "excludeDates"]), value: [...dates] });
+    }
+    for (const index of events.map((event, index) => removals.has(event.id) ? index : -1).filter((index) => index >= 0).sort((a, b) => b - a)) {
+      operations.push({ op: "remove", path: buildPointer(["events", index]) });
+    }
+    return session.apply({ operations, selectionAfter: selectionFor([]), origin: "clipboard.cut" });
+  }
+
+  function paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection> {
+    if (clipboard.items.length === 0) return failure("clipboard.empty");
+    const resolvedTarget = target ?? selectedEvents()[0]?.start;
+    if (resolvedTarget === undefined) return failure("clipboard.invalid-target");
+    const targetInstant = parseCalendarInstant(resolvedTarget);
+    const targetDate = parseCalendarDate(calendarDatePart(resolvedTarget));
+    if (targetInstant === null && targetDate === null) return failure("clipboard.invalid-target");
+    const timedAnchor = clipboard.items.map((item) => parseCalendarInstant(item.event.start)).find((item) => item !== null) ?? null;
+    const dateAnchor = parseCalendarDate(calendarDatePart(clipboard.items[0]!.event.start));
+    if (dateAnchor === null) return failure("clipboard.invalid");
+    const existing = [...value().events];
+    const pasted: CalendarEvent[] = [];
+    for (const item of clipboard.items) {
+      const source = item.event;
+      let start: string;
+      let end: string;
+      if (!source.allDay && targetInstant !== null && timedAnchor !== null) {
+        const from = parseCalendarInstant(source.start);
+        const to = parseCalendarInstant(source.end);
+        if (from === null || to === null) return failure("clipboard.invalid");
+        const offset = calendarMinutesBetween(timedAnchor, from);
+        const duration = calendarMinutesBetween(from, to);
+        const nextStart = targetInstant.add({ minutes: offset });
+        start = formatCalendarInstant(nextStart);
+        end = formatCalendarInstant(nextStart.add({ minutes: duration }));
+      } else {
+        const from = parseCalendarDate(calendarDatePart(source.start));
+        const to = parseCalendarDate(calendarDatePart(source.end));
+        if (from === null || to === null || targetDate === null) return failure("clipboard.invalid");
+        const offset = calendarDaysBetween(dateAnchor, from);
+        const duration = calendarDaysBetween(from, to);
+        const nextStart = targetDate.add({ days: offset });
+        start = source.allDay ? formatCalendarDate(nextStart) : `${formatCalendarDate(nextStart)}T${source.start.slice(11)}`;
+        end = source.allDay ? formatCalendarDate(nextStart.add({ days: duration })) : `${formatCalendarDate(nextStart.add({ days: duration }))}T${source.end.slice(11)}`;
+      }
+      const event = { ...source, id: createUniqueId([...existing, ...pasted], createId), start, end, recurrence: null, excludeDates: [] };
+      pasted.push(event);
+    }
+    return session.apply({
+      operations: pasted.map((event, offset) => ({ op: "add", path: `/events/${existing.length + offset}`, value: event })),
+      selectionAfter: selectionFor(pasted.map((event) => event.id)),
+      origin: "clipboard.paste",
+    });
+  }
+
   return {
     get snapshot() { return session.snapshot; },
     get selectedEvents() { return selectedEvents(); },
     dispatch,
+    copy,
+    cut: (occurrences) => cutEditingClipboard(
+      () => copy(occurrences),
+      removeClipboard,
+    ),
+    paste,
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),
   };
+}
+
+function isCalendarClipboardEvent(value: unknown): value is CalendarEvent {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.title === "string"
+    && typeof value.start === "string"
+    && typeof value.end === "string"
+    && typeof value.allDay === "boolean"
+    && typeof value.calendarId === "string"
+    && value.recurrence === null
+    && Array.isArray(value.excludeDates)
+    && value.excludeDates.every((date) => typeof date === "string");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function calendarVisibleEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent> {

@@ -26,6 +26,16 @@ describe("useCalendarKeyboard", () => {
     expect(actions.onRename).toHaveBeenCalledOnce();
     expect(rename.defaultPrevented).toBe(true);
 
+    const undo = key("z", { metaKey: true });
+    act(() => target.dispatchEvent(undo));
+    expect(actions.onUndo).toHaveBeenCalledOnce();
+    expect(undo.defaultPrevented).toBe(true);
+
+    const redo = key("z", { metaKey: true, shiftKey: true });
+    act(() => target.dispatchEvent(redo));
+    expect(actions.onRedo).toHaveBeenCalledOnce();
+    expect(redo.defaultPrevented).toBe(true);
+
     const ignoredDismiss = key("Escape");
     act(() => target.dispatchEvent(ignoredDismiss));
     expect(ignoredDismiss.defaultPrevented).toBe(false);
@@ -50,9 +60,11 @@ function createActions(): Omit<CalendarKeyboardOptions, "active" | "target" | "o
     onCreate: vi.fn(),
     onRename: vi.fn(),
     onRemove: vi.fn(),
+    onUndo: vi.fn(),
+    onRedo: vi.fn(),
   };
 }
 
-function key(value: string): KeyboardEvent {
-  return new KeyboardEvent("keydown", { key: value, bubbles: true, cancelable: true });
+function key(value: string, modifiers: KeyboardEventInit = {}): KeyboardEvent {
+  return new KeyboardEvent("keydown", { key: value, bubbles: true, cancelable: true, ...modifiers });
 }

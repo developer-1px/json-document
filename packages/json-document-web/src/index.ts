@@ -1,5 +1,6 @@
 export {
   createWebClipboardBinding,
+  createWebJSONClipboardRepresentation,
   createWebClipboardSurface,
   createWebClipboardTextWriter,
   databaseClipboardCodec,
@@ -10,7 +11,7 @@ export {
   treeClipboardCodec,
 } from "./clipboard.js";
 export { selectionOperationFromModifiers } from "./modifiers.js";
-export { textInputFromControl } from "./input.js";
+export { isWebEditableTarget, textInputFromControl } from "./input.js";
 export { pressInteractionFromWeb } from "./press.js";
 export { focusWebItem, webFocusItemProps } from "./focus-item.js";
 export { findWebGridCell, webGridCellAddressProps } from "./grid-cell.js";
@@ -59,6 +60,7 @@ export type {
   WebClipboardData,
   WebClipboardEvent,
   WebClipboardPayload,
+  WebJSONClipboardFormat,
   WebClipboardRepresentation,
   WebClipboardResult,
   WebClipboardSurface,

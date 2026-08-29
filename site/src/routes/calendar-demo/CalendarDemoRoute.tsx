@@ -22,6 +22,7 @@ import {
   calendarTimedLayout,
   calendarVisibleEvents,
   calendarVisibleHourBand,
+  calendarClipboardFormat,
   createCalendarEditor,
   formatCalendarInstant,
   isCalendarAllDay,
@@ -30,6 +31,7 @@ import {
   type CalendarRecurrence,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
+import { createWebClipboardSurface, createWebJSONClipboardRepresentation, isWebEditableTarget } from "@interactive-os/json-document-web";
 import {
   useCalendarHand,
   useCalendarKeyboard,
@@ -149,6 +151,13 @@ export function CalendarDemoRoute(props: {
     initialOccurrence: { start: null, end: null },
     defaultTitle: "Event",
   });
+  const clipboard = createWebClipboardSurface({
+    codec: createWebJSONClipboardRepresentation(calendarClipboardFormat),
+    read: hand.copy,
+    cut: hand.cut,
+    paste: hand.paste,
+    onResult: () => {},
+  });
   const [viewState, setViewState] = useState<CalendarView>(calendarSearchDefaults.view);
   const [visibleDateState, setVisibleDateState] = useState(calendarSearchDefaults.date);
   const timePreview = hand.timePreview;
@@ -239,6 +248,8 @@ export function CalendarDemoRoute(props: {
     onCreate: createOnVisibleDate,
     onRename: hand.beginTitleRename,
     onRemove: removeSelected,
+    onUndo: hand.undo,
+    onRedo: hand.redo,
     onDismiss: () => {
       if (overflowDay === null) return false;
       setOverflowDay(null);
@@ -504,6 +515,12 @@ export function CalendarDemoRoute(props: {
 
   return (
     <DemoSurface>
+      <div
+        className="contents"
+        onCopy={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onCopy(event); }}
+        onCut={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onCut(event); }}
+        onPaste={(event) => { if (!isWebEditableTarget(event.target)) clipboard.onPaste(event); }}
+      >
       <ProductShell
         fill={!embedded}
         canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
@@ -937,6 +954,7 @@ export function CalendarDemoRoute(props: {
           </div>
         </div>
       </ProductShell>
+      </div>
     </DemoSurface>
   );
 }

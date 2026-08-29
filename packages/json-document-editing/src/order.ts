@@ -3,6 +3,7 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
@@ -46,6 +47,18 @@ export interface OrderClipboard extends Record<string, JSONValue> {
   readonly items: ReadonlyArray<OrderItem>;
   readonly text: string;
 }
+
+export const orderClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.order+json" as const,
+  parse(value: unknown): OrderClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.items)
+      && value.items.every((item) => isClipboardRecord(item) && typeof item.id === "string" && typeof item.label === "string")
+      ? value as OrderClipboard : null;
+  },
+};
 
 export type OrderIntent =
   | {
@@ -170,11 +183,7 @@ export function createOrderEditor(
     get selectedItemIds() { return selectedItemIds(); },
     dispatch,
     copy,
-    cut() {
-      const clipboard = copy();
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(selectedItemIds()) };
-    },
+    cut: () => cutEditingClipboard(copy, () => removeSelected(selectedItemIds())),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

@@ -11,10 +11,13 @@ import {
   previewCalendarTimeGrid,
   type CalendarAllDayPointerRelease,
   type CalendarDocument,
+  type CalendarClipboard,
   type CalendarEditor,
   type CalendarEvent,
   type CalendarEventPatch,
   type CalendarIntent,
+  type CalendarSelection,
+  type EditingResult,
   type CalendarMonthPointerRelease,
   type CalendarOccurrenceRange,
   type CalendarTimeGridPointerRelease,
@@ -62,6 +65,9 @@ export interface CalendarHand {
   rememberSelection(): void;
   undo(): void;
   redo(): void;
+  copy(): CalendarClipboard | null;
+  cut(): EditingResult<CalendarSelection> | null;
+  paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection>;
 }
 
 export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOptions = {}): CalendarHand {
@@ -210,6 +216,28 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     rememberSelection();
   }
 
+  function occurrenceSelection() {
+    return selectedEvent !== null && occurrence.start !== null && occurrence.end !== null
+      ? [{ eventId: selectedEvent.id, start: occurrence.start, end: occurrence.end }]
+      : undefined;
+  }
+
+  function copy(): CalendarClipboard | null {
+    return editor.copy(occurrenceSelection());
+  }
+
+  function cut(): EditingResult<CalendarSelection> | null {
+    const cut = editor.cut(occurrenceSelection());
+    if (cut?.result.ok) rememberSelection();
+    return cut?.result ?? null;
+  }
+
+  function paste(clipboard: CalendarClipboard): EditingResult<CalendarSelection> {
+    const result = editor.paste(clipboard, occurrence.start ?? selectedEvent?.start);
+    if (result.ok) rememberSelection();
+    return result;
+  }
+
   return {
     snapshot,
     document,
@@ -244,5 +272,8 @@ export function useCalendarHand(editor: CalendarEditor, options: CalendarHandOpt
     rememberSelection,
     undo,
     redo,
+    copy,
+    cut,
+    paste,
   };
 }

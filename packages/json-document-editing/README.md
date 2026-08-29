@@ -75,7 +75,12 @@ and `calendarDocumentCalendar` owns id lookup while Hosts retain visual policy.
 Hosts only pass UI values and choose whether recurrence is disabled.
 `createCalendarEditor` creates, moves while keeping duration, resizes start or
 end, moves by day, deletes, and undoes on one document across day, week, month,
-and year views. `interpretCalendarTimeGridPointer`,
+and year views. Its `copy`, `cut`, and `paste` methods preserve occurrence
+duration and relative offsets, apply each mutation as one history transaction,
+and expose `calendarClipboardFormat` as the domain-owned validation contract.
+`cutEditingClipboard` is the canonical copy-before-remove lifecycle shared by
+the public editors; each domain still owns its projection and removal plan.
+`interpretCalendarTimeGridPointer`,
 `interpretCalendarAllDayPointer`, and `interpretCalendarMonthPointer` map a
 press-release to those intents from the origin event, not the current
 selection. `calendarTimedLayout` places a timed event on its `start`/`end`
