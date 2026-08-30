@@ -51,6 +51,36 @@ describe("LLM Agent Artifact", () => {
     const request = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
     expect(JSON.parse(String(request?.[1]?.body))).toMatchObject({ threadId: "thread-saved", messages: [{ role: "user", content: "계속해줘" }] });
   });
+
+  test("closes a failed assistant stream and exposes the error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
+      ? Promise.resolve(Response.json({ threads: [] }))
+      : Promise.resolve(new Response("연결 실패", { status: 500 }))));
+    render(<LlmAgentArtifactRoute />);
+
+    fireEvent.change(screen.getByLabelText("메시지"), { target: { value: "실패해줘" } });
+    fireEvent.click(screen.getByRole("button", { name: "전송" }));
+
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("연결 실패"));
+    const renderedError = screen.getAllByText("연결 실패").find((element) => element.closest("[data-markdown-renderer]"));
+    expect(renderedError?.closest("[data-markdown-renderer]")?.getAttribute("data-markdown-streaming")).toBeNull();
+    expect(screen.getByRole("button", { name: "전송" })).toBeTruthy();
+  });
+
+  test("aborts an active turn without adding an error message", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).endsWith("/sessions")) return Promise.resolve(Response.json({ threads: [] }));
+      return new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError"))));
+    }));
+    render(<LlmAgentArtifactRoute />);
+
+    fireEvent.change(screen.getByLabelText("메시지"), { target: { value: "긴 작업" } });
+    fireEvent.click(screen.getByRole("button", { name: "전송" }));
+    fireEvent.click(await screen.findByRole("button", { name: "중단" }));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "전송" })).toBeTruthy());
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
 });
 
 function agUiResponse(threadId: string, content: string) {

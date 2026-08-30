@@ -64,4 +64,21 @@ describe("A2UI streaming document", () => {
     } } });
     engine.dispose();
   });
+
+  test("closes partial text and active tools when a run is interrupted", () => {
+    const adapter = createAgUiA2uiAdapter("run-interrupted");
+    const engine = createA2uiStreamingDocumentEngine();
+    [
+      { type: EventType.TEXT_MESSAGE_START, messageId: "partial", role: "assistant" as const },
+      { type: EventType.TEXT_MESSAGE_CONTENT, messageId: "partial", delta: "작성 중" },
+      { type: EventType.TOOL_CALL_START, toolCallId: "tool-running", toolCallName: "codex.commandExecution" },
+      { type: EventType.RUN_ERROR, message: "중단됨" },
+    ].flatMap((event) => adapter.push(event)).forEach((message) => engine.dispatch(message));
+
+    expect(engine.document.value).toMatchObject({ surfaces: { "run-interrupted": {
+      components: { partial: { component: "Markdown", streaming: false } },
+      dataModel: { content: { partial: "작성 중" }, tools: { "tool-running": { status: "error" } } },
+    } } });
+    engine.dispose();
+  });
 });
