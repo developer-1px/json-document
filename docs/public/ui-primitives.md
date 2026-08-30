@@ -131,6 +131,24 @@ children으로 구성합니다.
 brand token은 Host 책임이지만 최소 hit target, focus-visible, disabled/pressed와
 tooltip 가시성은 UI Primitive styling hook의 불변식입니다.
 
+### `ControlAffordance`
+
+제품은 semantic role을 복제하지 않고 control이 현재 composition에서 어떻게
+드러나는지만 `affordance`로 선언할 수 있습니다. Primitive는 이를 안정된
+`data-ui-affordance` hook으로 투영하고 제품 theme이 시각 문법을 한 번만
+해석합니다.
+
+```tsx
+<Command affordance="persistent">Today</Command>
+<SelectableItem affordance="content-control" selected={selected}>Event</SelectableItem>
+<ResizeHandle affordance="direct" label="Resize end" orientation="vertical" onResize={resize} />
+<Command affordance="contextual-danger" label="Delete">…</Command>
+```
+
+허용 값은 `persistent`, `content-control`, `stateful`, `contextual`,
+`contextual-danger`, `direct`, `field`, `disabled-preview`입니다. 이 분류는 command,
+toggle, choice 같은 semantic role이나 selection·focus 상태를 대체하지 않습니다.
+
 ## Product shell and toolbar
 
 제품 surface는 control을 임의의 flex row에 놓지 않고 같은 shell·toolbar 문법으로

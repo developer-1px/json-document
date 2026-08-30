@@ -161,7 +161,7 @@ export function KanbanDemoRoute() {
                     dragSession.begin(card.id);
                   }}
                   onDragEnd={() => dragSession.cancel()}
-                  className={classes("w-full p-3 text-left", ui.surface.documentBlock, ui.interactive.selectable)}
+                  className={classes("w-full p-3 text-left", ui.surface.documentBlock)}
                 >
                   {card.title}
                 </SelectableItem>

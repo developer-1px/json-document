@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useListbox } from "./listbox.js";
+import type { ControlAffordanceProps } from "./control-affordance.js";
 
 export type PopupChoiceOption<Id extends string = string> = {
   readonly id: Id;
@@ -33,7 +34,7 @@ export function PopupChoice<Id extends string>(props: {
   readonly renderOption?: (option: PopupChoiceOption<Id>) => ReactNode;
   readonly classNames?: PopupChoiceClassNames;
   readonly disabled?: boolean;
-}) {
+} & ControlAffordanceProps) {
   const generatedId = useId();
   const listboxId = props.id ?? `json-document-select-${generatedId.replaceAll(":", "")}`;
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -74,7 +75,7 @@ export function PopupChoice<Id extends string>(props: {
   }
 
   return (
-    <div className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup">
+    <div className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup" data-ui-affordance={props.affordance}>
       <button
         ref={triggerRef}
         type="button"

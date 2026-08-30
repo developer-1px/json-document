@@ -317,6 +317,75 @@
     outline-color: theme("colors.line-accent");
   }
 
+  /* Canonical product control grammar: semantic primitives emit the role, the product owns tone. */
+  [data-ui-affordance="content-control"] {
+    @apply border-transparent bg-transparent shadow-none transition-[background-color,color,opacity,outline-color] duration-interaction hover:bg-background-subtle/60 focus-visible:ring-2 focus-visible:ring-line-accent/25;
+  }
+
+  [data-ui-affordance="content-control"][data-selected="true"] {
+    @apply bg-background-subtle/60 outline outline-1 -outline-offset-1 outline-line-subtle;
+  }
+
+  [data-ui-affordance="stateful"][data-selected="true"],
+  [data-ui-affordance="direct"][data-selected="true"] {
+    @apply text-foreground-strong outline outline-1 -outline-offset-1 outline-line-subtle;
+  }
+
+  [data-ui-affordance="direct"] {
+    @apply transition-[background-color,color,opacity,outline-color] duration-interaction;
+  }
+
+  [data-ui-affordance="direct"][data-calendar-move-surface="true"] {
+    @apply cursor-grab active:cursor-grabbing hover:bg-background-canvas hover:shadow-surface;
+  }
+
+  [data-ui-primitive="resize-handle"][data-ui-affordance="direct"] {
+    @apply absolute z-20 appearance-none border-0 bg-transparent p-0 opacity-0 shadow-none transition-[opacity,background-color] duration-interaction after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-foreground-muted/70 hover:after:bg-foreground-default data-[active=true]:bg-background-subtle data-[active=true]:opacity-100 data-[active=true]:after:bg-foreground-strong focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-accent focus-visible:after:bg-foreground-default;
+  }
+
+  .group\/event:hover [data-ui-primitive="resize-handle"][data-ui-affordance="direct"],
+  .group\/event:focus-within [data-ui-primitive="resize-handle"][data-ui-affordance="direct"] {
+    @apply opacity-100;
+  }
+
+  [data-ui-primitive="resize-handle"][data-ui-orientation="vertical"] {
+    @apply after:h-0.5 after:w-7 hover:after:w-9 data-[active=true]:after:w-9 focus-visible:after:w-9;
+  }
+
+  [data-ui-primitive="resize-handle"][data-ui-orientation="horizontal"] {
+    @apply after:h-3 after:w-0.5 hover:after:h-4 data-[active=true]:after:h-4 focus-visible:after:h-4;
+  }
+
+  [data-ui-affordance="contextual"],
+  [data-ui-affordance="contextual-danger"] {
+    @apply opacity-0 transition-[background-color,color,opacity] duration-interaction;
+  }
+
+  [data-ui-component="contextual-controls"]:hover [data-ui-affordance="contextual"],
+  [data-ui-component="contextual-controls"]:hover [data-ui-affordance="contextual-danger"],
+  [data-ui-component="contextual-controls"]:focus-within [data-ui-affordance="contextual"],
+  [data-ui-component="contextual-controls"]:focus-within [data-ui-affordance="contextual-danger"],
+  [data-ui-affordance="contextual"]:focus-visible,
+  [data-ui-affordance="contextual-danger"]:focus-visible {
+    @apply opacity-100;
+  }
+
+  [data-ui-affordance="contextual-danger"] {
+    @apply text-foreground-accent hover:bg-background-accent-subtle;
+  }
+
+  [data-ui-affordance="disabled-preview"] {
+    @apply cursor-default text-foreground-muted opacity-70;
+  }
+
+  @media (hover: none) {
+    [data-ui-primitive="resize-handle"][data-ui-affordance="direct"],
+    [data-ui-affordance="contextual"],
+    [data-ui-affordance="contextual-danger"] {
+      @apply opacity-100;
+    }
+  }
+
   [data-ui-control="disclosure"] {
     @apply flex w-full cursor-pointer items-center justify-between gap-3 rounded-control border border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-foreground-strong outline-none transition-colors hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:text-foreground-muted;
   }

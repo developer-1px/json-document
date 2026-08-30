@@ -229,7 +229,7 @@ export function SheetDemo() {
                           {...rovingFocusItemProps(item.getIsFocus())}
                           data-row-id={row.id}
                           data-column-id={column.id}
-                          className={classes(ui.interactive.selectable, "p-0", ui.surface.gridCell)}
+                          className={classes("p-0", ui.surface.gridCell)}
                           {...editingItemProps(item)}
                         >
                             <input

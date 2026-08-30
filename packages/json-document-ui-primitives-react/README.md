@@ -15,6 +15,9 @@ presentations rather than parallel component owners:
 
 The package emits stable `data-ui-*` hooks. Products may map those hooks to
 their tokens, but must not recreate semantic, focus, or keyboard behavior.
+Products may declare the composition-specific exposure grammar through the
+public `ControlAffordance` vocabulary; primitives project it as
+`data-ui-affordance` without changing their semantic control role.
 
 Calendar widgets and projections belong to `@interactive-os/json-document-calendar`.
 File metadata formatting belongs to `@interactive-os/json-document-file-intake`.

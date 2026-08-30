@@ -1,20 +1,19 @@
 import { tv } from "tailwind-variants";
 
-const chipSelected = "data-[calendar-move-surface=true]:cursor-grab data-[calendar-move-surface=true]:active:cursor-grabbing data-[preview=true]:opacity-60 data-[selected=true]:text-foreground-strong data-[selected=true]:shadow-none data-[selected=true]:outline data-[selected=true]:outline-1 data-[selected=true]:-outline-offset-1 data-[selected=true]:outline-line-subtle data-[primary=true]:z-10 data-[primary=true]:!outline-1 data-[primary=true]:!-outline-offset-1 data-[primary=true]:!outline-line-default/70";
 const chipRail = "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-foreground-default data-[calendar-color=accent]:before:bg-background-accent";
-const chipFill = "bg-background-subtle text-foreground-strong transition-[background-color,box-shadow,color] data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent hover:bg-background-canvas hover:shadow-surface data-[calendar-color=accent]:hover:bg-background-accent-subtle";
+const chipFill = "bg-background-subtle text-foreground-strong data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10";
 
 export const calendarDemoRecipe = tv({
   slots: {
     shell: "relative isolate overflow-hidden bg-background-canvas",
-    allDayEvent: `h-full w-full rounded-control border-0 px-2 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
+    allDayEvent: `h-full w-full rounded-control border-0 px-2 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
     hourRule: "absolute inset-x-0 border-t border-line-subtle/10",
-    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
+    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
     monthWeek: "relative grid min-w-[36rem] grid-cols-7 border-t border-line-subtle/30",
-    monthDay: "relative z-0 flex min-h-32 w-full flex-col items-stretch px-1.5 pb-1 text-left text-xs data-[selected=true]:bg-background-accent-subtle data-[selected=true]:ring-2 data-[selected=true]:ring-inset data-[selected=true]:ring-line-strong",
-    monthAllDay: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail} ${chipSelected}`,
-    monthTimed: `relative mx-0.5 flex h-5 w-full min-w-0 items-center justify-between gap-1 truncate rounded-control border-0 bg-transparent px-1 pl-2 text-left text-xs leading-5 hover:bg-background-subtle ${chipRail} ${chipSelected}`,
-    monthEvent: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail} ${chipSelected}`,
+    monthDay: "relative z-0 flex min-h-32 w-full flex-col items-stretch px-1.5 pb-1 text-left text-xs",
+    monthAllDay: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail}`,
+    monthTimed: `relative mx-0.5 flex h-5 w-full min-w-0 items-center justify-between gap-1 truncate rounded-control border-0 bg-transparent px-1 pl-2 text-left text-xs leading-5 ${chipRail}`,
+    monthEvent: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail}`,
     monthMore: "relative z-10 h-5 w-full truncate border-0 bg-transparent px-1 text-left text-xs leading-5 text-foreground-muted shadow-none hover:border-0 hover:bg-transparent",
     quietAction: "border-0 bg-transparent p-0 shadow-none hover:border-0 hover:bg-transparent",
     monthOverflow: "absolute left-0 top-0 z-30 flex w-max min-w-full max-w-56 flex-col gap-0.5 p-1.5",
@@ -22,10 +21,10 @@ export const calendarDemoRecipe = tv({
     weekSticky: "z-30 shrink-0 border-b border-line-subtle/20 bg-background-canvas",
     weekHours: "min-h-0 flex-1 overflow-auto",
     weekHead: "flex flex-col items-center gap-0.5 px-1 py-2 text-center",
-    weekCell: "relative data-[selected=true]:bg-background-accent-subtle data-[selected=true]:ring-2 data-[selected=true]:ring-inset data-[selected=true]:ring-line-strong",
+    weekCell: "relative",
     selectedSlot: "pointer-events-none absolute inset-x-0 z-10 rounded-control bg-background-subtle/60 ring-1 ring-inset ring-line-subtle/40",
-    resizeEdge: "absolute z-20 appearance-none border-0 bg-transparent p-0 opacity-0 shadow-none transition-[opacity,background-color] group-hover/event:opacity-100 after:absolute after:left-1/2 after:top-1/2 after:h-0.5 after:w-7 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-foreground-muted/70 after:transition-[width,background-color] hover:after:w-9 hover:after:bg-foreground-default data-[active=true]:bg-background-subtle data-[active=true]:opacity-100 data-[active=true]:after:w-9 data-[active=true]:after:bg-foreground-strong focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-accent focus-visible:after:w-9 focus-visible:after:bg-foreground-default",
-    resizeEdgeVertical: "absolute z-20 appearance-none border-0 bg-transparent p-0 opacity-0 shadow-none transition-[opacity,background-color] group-hover/event:opacity-100 after:absolute after:left-1/2 after:top-1/2 after:h-3 after:w-0.5 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-foreground-muted/70 after:transition-[height,background-color] hover:after:h-4 hover:after:bg-foreground-default data-[active=true]:bg-background-subtle data-[active=true]:opacity-100 data-[active=true]:after:h-4 data-[active=true]:after:bg-foreground-strong focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-accent focus-visible:after:h-4 focus-visible:after:bg-foreground-default",
+    resizeEdge: "absolute inset-x-0 bottom-0 h-2",
+    resizeEdgeVertical: "absolute right-0 top-0 h-full w-2",
     period: "px-1 text-sm font-medium text-foreground-strong",
     todayAction: "border-0 bg-transparent px-2 shadow-none hover:border-0 hover:bg-background-subtle",
     contextualSidebar: "relative z-30 w-20 shrink-0 rounded-control px-1 py-2 outline-none transition-[width] focus-within:w-44 hover:w-44 focus-visible:ring-2 focus-visible:ring-line-accent/25",
@@ -43,7 +42,7 @@ export const calendarDemoRecipe = tv({
     field: "grid gap-1",
     inspectorHeader: "flex min-w-0 items-start gap-2",
     inspectorTitle: "m-0 min-w-0 flex-1 truncate px-0 text-base font-semibold tracking-tight text-foreground-strong",
-    inspectorActions: "flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/details:opacity-100 focus-within:opacity-100 [&_[data-ui-control=command]]:size-7 [&_[data-ui-control=command]]:border-0 [&_[data-ui-control=command]]:bg-transparent [&_[data-ui-control=command]]:p-0 [&_[data-ui-control=command]]:shadow-none",
+    inspectorActions: "flex shrink-0 items-center gap-0.5 [&_[data-ui-control=command]]:size-7 [&_[data-ui-control=command]]:border-0 [&_[data-ui-control=command]]:bg-transparent [&_[data-ui-control=command]]:p-0 [&_[data-ui-control=command]]:shadow-none",
     eventSummary: "grid gap-2 border-t border-line-subtle/40 pt-3 text-xs text-foreground-muted [&_p]:m-0 [&_p]:flex [&_p]:items-center [&_p]:gap-2 [&_svg]:shrink-0 [&_svg]:text-foreground-muted",
     detailsEditor: "grid gap-2 border-t border-line-subtle/40 pt-3",
     calendarToggle: "group w-full justify-start gap-2 border-0 bg-transparent px-1 shadow-none hover:border-0 hover:bg-transparent aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",

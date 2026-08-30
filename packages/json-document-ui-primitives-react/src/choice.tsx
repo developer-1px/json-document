@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { InlineChoice, type InlineChoiceOption } from "./controls.js";
 import { PopupChoice, type PopupChoiceClassNames } from "./select.js";
+import type { ControlAffordanceProps } from "./control-affordance.js";
 
 export type ChoiceOption<Id extends string = string> = InlineChoiceOption<Id>;
 
@@ -11,7 +12,7 @@ export type ChoiceProps<Id extends string = string> = {
   readonly value: Id;
   readonly options: ReadonlyArray<ChoiceOption<Id>>;
   readonly onValueChange: (value: Id) => void;
-} & (
+} & ControlAffordanceProps & (
   | { readonly presentation: "inline"; readonly className?: string }
   | {
       readonly presentation: "popup";
