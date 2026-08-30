@@ -5,6 +5,7 @@ import {
   addCalendarMonths,
   calendarCellInterval,
   calendarCells,
+  DateGrid,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-calendar";
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
@@ -12,7 +13,15 @@ import { classes, ui } from "../../shared/ui/styles";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
 import { calendarControlAffordance } from "./calendar-control-affordances";
 
-const weekdays = ["M", "T", "W", "T", "F", "S", "S"];
+const weekdays = [
+  { label: "Monday", content: "M" },
+  { label: "Tuesday", content: "T" },
+  { label: "Wednesday", content: "W" },
+  { label: "Thursday", content: "T" },
+  { label: "Friday", content: "F" },
+  { label: "Saturday", content: "S" },
+  { label: "Sunday", content: "S" },
+];
 
 export function CalendarDemoNavigator(props: {
   readonly visibleDate: string;
@@ -41,30 +50,26 @@ export function CalendarDemoNavigator(props: {
           <ChevronRight aria-hidden="true" size={16} />
         </Command>
       </div>
-      <div role="grid" aria-label={`Jump ${monthLabel}`} className="grid grid-cols-7">
-        {weekdays.map((name, index) => (
-          <div key={`${name}:${index}`} role="columnheader" className={classes("text-center", ui.text.meta)}>
-            {name}
-          </div>
-        ))}
-        {cells.map((cell) => (
-          <Command
-            affordance={calendarControlAffordance("miniDate")}
-            key={cell.date}
-            aria-label={cell.date}
-            aria-current={cell.date === props.today ? "date" : undefined}
-            className={classes(
-              styles.yearDay(),
-              cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
-              (cell.date === props.today || cell.date === props.visibleDate) && styles.todayMark(),
-              busy?.has(cell.date) && cell.date !== props.today && styles.yearDayBusy(),
-            )}
-            onClick={() => props.onDateChange(cell.date)}
-          >
-            {cell.day}
-          </Command>
-        ))}
-      </div>
+      <DateGrid
+        label={`Jump ${monthLabel}`}
+        cells={cells}
+        grain="month"
+        focusDate={props.visibleDate}
+        today={props.today}
+        rowClassName="grid grid-cols-7"
+        columnHeaders={weekdays}
+        columnHeaderClassName={classes("text-center", ui.text.meta)}
+        cellAffordance={calendarControlAffordance("miniDate")}
+        isDateSelected={(date) => date === props.visibleDate}
+        getCellClassName={({ cell, selected, today }) => classes(
+          styles.yearDay(),
+          cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
+          (today || selected) && styles.todayMark(),
+          busy?.has(cell.date) && !today && styles.yearDayBusy(),
+        )}
+        onDateSelect={props.onDateChange}
+        onFocusDateChange={setRailDate}
+      />
     </section>
   );
 }

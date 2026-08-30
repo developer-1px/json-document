@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Choice, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
@@ -7,16 +7,15 @@ import {
   calendarCells,
   compareDates,
   dateInRange,
-  moveCalendarDate,
   orderedRange,
   parseHtmlDateValue,
   visiblePeriodLabel,
-  type CalendarCell,
   type CalendarPeriod,
   type CalendarGrain,
   type DateRangeValue,
   type HtmlDateType,
 } from "./date-values.js";
+import { DateGrid } from "./date-grid.js";
 
 export type { CalendarGrain, DateRangeValue, HtmlDateType };
 
@@ -84,40 +83,27 @@ export function CalendarGrid(props: {
     setFocus(props.value ?? props.visibleDate);
   }, [props.value, props.visibleDate]);
 
-  function move(key: string): void {
-    const next = moveCalendarDate(focus, props.grain, key);
-    setFocus(next);
-    requestedVisibleDate.current = next;
-    props.onVisibleDateChange(next);
-    if (commitOnArrow) props.onValueChange(next);
-  }
-
   return (
     <div data-ui-control="calendar" data-ui-grain={props.grain}>
       <GrainSwitch label={`${props.label} grain`} grain={props.grain} onGrainChange={props.onGrainChange} />
       <p data-ui-calendar-period="true">{visiblePeriodLabel(props.grain, props.visibleDate)}</p>
-      <div
-        role="grid"
-        aria-label={props.label}
-        tabIndex={0}
-        onKeyDown={(event) => onGridKey(event, (key) => {
-          if (key === "Enter" || key === " ") {
-            event.preventDefault();
-            props.onValueChange(focus);
-            return;
-          }
-          move(key);
-        })}
-      >
-        {renderDayCells(cells, {
-          selected: (date) => date === props.value,
-          focused: (date) => date === focus,
-          onSelect: (date) => {
-            setFocus(date);
-            props.onValueChange(date);
-          },
-        })}
-      </div>
+      <DateGrid
+        label={props.label}
+        cells={cells}
+        grain={props.grain}
+        focusDate={focus}
+        isDateSelected={(date) => date === props.value}
+        onDateSelect={(date) => {
+          setFocus(date);
+          props.onValueChange(date);
+        }}
+        onFocusDateChange={(date) => {
+          setFocus(date);
+          requestedVisibleDate.current = date;
+          props.onVisibleDateChange(date);
+        }}
+        {...(commitOnArrow ? { onDateMove: props.onValueChange } : {})}
+      />
     </div>
   );
 }
@@ -157,37 +143,24 @@ export function RangeCalendar(props: {
     props.onValueChange(orderedRange(props.value.start, date));
   }
 
-  function move(key: string): void {
-    const next = moveCalendarDate(focus, props.grain, key);
-    setFocus(next);
-    requestedVisibleDate.current = next;
-    props.onVisibleDateChange(next);
-    if (commitOnArrow) select(next, true);
-  }
-
   return (
     <div data-ui-control="range-calendar" data-ui-grain={props.grain}>
       <GrainSwitch label={`${props.label} grain`} grain={props.grain} onGrainChange={props.onGrainChange} />
       <p data-ui-calendar-period="true">{visiblePeriodLabel(props.grain, props.visibleDate)}</p>
-      <div
-        role="grid"
-        aria-label={props.label}
-        tabIndex={0}
-        onKeyDown={(event) => onGridKey(event, (key) => {
-          if (key === "Enter" || key === " ") {
-            event.preventDefault();
-            select(focus);
-            return;
-          }
-          move(key);
-        })}
-      >
-        {renderDayCells(cells, {
-          selected: (date) => props.value !== null && dateInRange(date, props.value),
-          focused: (date) => date === focus,
-          onSelect: select,
-        })}
-      </div>
+      <DateGrid
+        label={props.label}
+        cells={cells}
+        grain={props.grain}
+        focusDate={focus}
+        isDateSelected={(date) => props.value !== null && dateInRange(date, props.value)}
+        onDateSelect={select}
+        onFocusDateChange={(date) => {
+          setFocus(date);
+          requestedVisibleDate.current = date;
+          props.onVisibleDateChange(date);
+        }}
+        {...(commitOnArrow ? { onDateMove: (date: string) => select(date, true) } : {})}
+      />
     </div>
   );
 }
@@ -349,56 +322,6 @@ function GrainSwitch(props: {
       onValueChange={props.onGrainChange}
     />
   );
-}
-
-function renderDayCells(
-  cells: ReadonlyArray<CalendarCell>,
-  options: {
-    readonly selected: (date: string) => boolean;
-    readonly focused: (date: string) => boolean;
-    readonly onSelect: (date: string) => void;
-  },
-): ReactNode {
-  const weeks: Array<Array<CalendarCell>> = [];
-  for (const cell of cells) {
-    const last = weeks.at(-1);
-    if (last === undefined || last.length === 7) weeks.push([cell]);
-    else last.push(cell);
-  }
-  return weeks.map((week) => (
-    <div key={week[0]!.date} role="row">
-      {week.map((cell) => (
-        <button
-          key={cell.date}
-          type="button"
-          role="gridcell"
-          aria-label={cell.date}
-          aria-selected={options.selected(cell.date)}
-          data-ui-control="calendar-day"
-          data-focused={options.focused(cell.date) ? "true" : undefined}
-          data-outside={cell.inVisiblePeriod ? undefined : "true"}
-          tabIndex={options.focused(cell.date) ? 0 : -1}
-          onClick={() => options.onSelect(cell.date)}
-        >
-          {cell.day}
-        </button>
-      ))}
-    </div>
-  ));
-}
-
-function onGridKey(event: KeyboardEvent<HTMLDivElement>, handle: (key: string) => void): void {
-  if (
-    event.key === "ArrowLeft"
-    || event.key === "ArrowRight"
-    || event.key === "ArrowUp"
-    || event.key === "ArrowDown"
-    || event.key === "Enter"
-    || event.key === " "
-  ) {
-    event.preventDefault();
-    handle(event.key);
-  }
 }
 
 export function shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string {

@@ -12,10 +12,15 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
   await expect(page.getByRole("grid", { name: "Week", exact: true }).getByRole("button", { name: "Event", exact: true })).toBeVisible();
 
   await page.getByLabel("Calendar sources", { exact: true }).focus();
-  await page.getByRole("region", { name: "Jump to date" }).getByRole("button", { name: "2026-05-26", exact: true }).click();
+  const dateGrid = page.getByRole("region", { name: "Jump to date" }).getByRole("grid", { name: "Jump 2026-05", exact: true });
+  await dateGrid.getByRole("gridcell", { name: "2026-05-26", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
   await expect(page).toHaveURL(/view=week/);
   await expect(page).toHaveURL(/date=2026-05-26/);
+  await dateGrid.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/date=2026-05-27/);
 });
 
 test("Calendar c hotkey creates a timed event on the visible date", async ({ page }) => {

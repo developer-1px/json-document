@@ -3,6 +3,8 @@ import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { PageHeader } from "../../shared/ui/primitives";
 import {
   CalendarGrid,
+  calendarCells,
+  DateGrid,
   DatePicker,
   DateRangePicker,
   HtmlDateField,
@@ -35,6 +37,17 @@ export function DateControlsDemoRoute() {
         <HtmlDateField type="week" label="Week" value={week} onValueChange={setWeek} />
         <DatePicker label="Picker date" value={date} onValueChange={setDate} />
         <DateRangePicker label="Picker range" value={range} onValueChange={setRange} />
+        <DateGrid
+          label="Compact date grid"
+          cells={calendarCells("month", date)}
+          grain="month"
+          focusDate={date}
+          today="2026-08-04"
+          isDateSelected={(candidate) => candidate === date}
+          onDateSelect={setDate}
+          onFocusDateChange={setDate}
+          renderCellDecoration={({ cell }) => cell.date === "2026-08-05" ? <span aria-hidden="true">•</span> : null}
+        />
         <CalendarGrid
           label="Calendar"
           value={date}
