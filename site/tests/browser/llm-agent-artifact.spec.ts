@@ -71,6 +71,31 @@ test("여러 A2UI 메시지가 구조와 데이터를 누적·교체하고 weigh
   await expect(page.locator(".llm-agent-chat").getByText(/createSurface/)).toHaveCount(0);
 });
 
+test("한 응답의 여러 surface를 각각 렌더링하고 원문 JSONL은 숨긴다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const messages = [
+    { version: "v0.9", createSurface: { surfaceId: "summary", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "summary", components: [{ id: "root", component: "Text", text: "요약 화면", variant: "h2" }] } },
+    { version: "v0.9", createSurface: { surfaceId: "detail", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "detail", components: [{ id: "root", component: "Card", child: "body" }, { id: "body", component: "Text", text: { path: "/copy" } }] } },
+    { version: "v0.9", updateDataModel: { surfaceId: "detail", path: "/copy", value: "상세 화면" } },
+  ];
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({
+    body: agUiStream("thread-multi", ["두 화면입니다.\n```a2ui\n", ...messages.map((message) => `${JSON.stringify(message)}\n`), "```"]),
+    contentType: "text/event-stream",
+  }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("두 화면을 만들어줘");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  await expect(page.getByRole("heading", { name: "요약 화면" })).toBeVisible();
+  await expect(page.getByText("상세 화면")).toBeVisible();
+  await expect(page.locator("[data-a2ui-surface]")).toHaveCount(2);
+  await expect(page.locator(".llm-agent-chat").getByText(/updateComponents/)).toHaveCount(0);
+});
+
 function agUiStream(threadId: string, text: string | ReadonlyArray<string>): string {
   const runId = "run-browser";
   const messageId = "message-browser";

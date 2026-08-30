@@ -37,6 +37,23 @@ describe("A2UI streaming document", () => {
     engine.dispose();
   });
 
+  test("produces the same document at every possible transport split", () => {
+    const messages = [
+      { version: "v0.9", createSurface: { surfaceId: "all-splits", catalogId: A2UI_BASIC_CATALOG_ID } },
+      { version: "v0.9", updateComponents: { surfaceId: "all-splits", components: [{ id: "root", component: "Text", text: { path: "/answer" } }] } },
+      { version: "v0.9", updateDataModel: { surfaceId: "all-splits", path: "/answer", value: "경계 무관" } },
+    ];
+    const jsonl = messages.map(JSON.stringify).join("\n");
+    for (let split = 0; split <= jsonl.length; split += 1) {
+      const engine = createA2uiStreamingDocumentEngine();
+      engine.write(jsonl.slice(0, split));
+      engine.write(jsonl.slice(split));
+      engine.complete();
+      expect(engine.document.value).toMatchObject({ surfaces: { "all-splits": { dataModel: { answer: "경계 무관" } } } });
+      engine.dispose();
+    }
+  });
+
   test("converts text, tool, and artifact AG-UI events into one A2UI surface stream", () => {
     const adapter = createAgUiA2uiAdapter("run-1");
     const events = [
@@ -96,6 +113,29 @@ describe("A2UI streaming document", () => {
     expect(complete.markdown).not.toContain("createSurface");
   });
 
+  test("keeps ordinary code fences and supports multiple A2UI fences", () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "multi", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const data = JSON.stringify({ version: "v0.9", updateDataModel: { surfaceId: "multi", path: "/value", value: 2 } });
+    const projection = projectA2uiFences(`앞\n\`\`\`json\n{"visible":true}\n\`\`\`\n\`\`\`a2ui\n${create}\n\`\`\`\n중간\n\`\`\`a2ui\n${data}\n\`\`\`\n뒤`);
+
+    expect(projection.messages).toHaveLength(2);
+    expect(projection.markdown).toContain('```json\n{"visible":true}\n```');
+    expect(projection.markdown).toContain("앞");
+    expect(projection.markdown).toContain("중간");
+    expect(projection.markdown).toContain("뒤");
+    expect(projection.markdown).not.toContain("createSurface");
+  });
+
+  test("waits for an incomplete JSONL line and reports malformed complete JSON", () => {
+    const incomplete = projectA2uiFences('```a2ui\n{"version":"v0.9"');
+    expect(incomplete.messages).toHaveLength(0);
+    expect(incomplete.errors).toHaveLength(0);
+
+    const malformed = projectA2uiFences('```a2ui\n{"version":}\n```');
+    expect(malformed.messages).toHaveLength(0);
+    expect(malformed.errors).toHaveLength(1);
+  });
+
   test("streams fenced A2UI messages from the assistant into the canonical document", () => {
     const adapter = createAgUiA2uiAdapter("chat");
     const engine = createA2uiStreamingDocumentEngine();
@@ -147,6 +187,35 @@ describe("A2UI streaming document", () => {
     expect(() => engine.dispatch({ version: "v0.9", updateComponents: { surfaceId: "validated", components: [{ id: "card", component: "Card", children: ["body"] }] } })).toThrow();
     expect(() => engine.dispatch({ version: "v0.9", updateComponents: { surfaceId: "validated", components: [{ id: "button", component: "Button", text: "지원하지 않음" }] } })).toThrow("지원하지 않는 A2UI Basic Catalog component");
     expect(engine.document.value).toMatchObject({ surfaces: { validated: { components: {} } } });
+    engine.dispose();
+  });
+
+  test("replaces and removes nested data, then deletes the surface", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "lifecycle", catalogId: A2UI_BASIC_CATALOG_ID } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/", value: { profile: { name: "이전", optional: true } } } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/profile/name", value: "변경" } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/profile/optional", value: null } });
+    expect(engine.document.value).toMatchObject({ surfaces: { lifecycle: { dataModel: { profile: { name: "변경" } } } } });
+    engine.dispatch({ version: "v0.9", deleteSurface: { surfaceId: "lifecycle" } });
+    expect(engine.document.value).toEqual({ surfaces: {} });
+    engine.dispose();
+  });
+
+  test("isolates surfaces and leaves the document unchanged after invalid updates", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "first", catalogId: A2UI_BASIC_CATALOG_ID } });
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "second", catalogId: A2UI_BASIC_CATALOG_ID } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "first", path: "/value", value: "첫째" } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "second", path: "/value", value: "둘째" } });
+    const beforeInvalid = structuredClone(engine.document.value);
+
+    expect(() => engine.dispatch({ version: "v0.9", updateComponents: { surfaceId: "first", components: [
+      { id: "valid", component: "Text", text: "임시" },
+      { id: "invalid", component: "Button", text: "실패" },
+    ] } })).toThrow();
+    expect(engine.document.value).toEqual(beforeInvalid);
+    expect(engine.document.value).toMatchObject({ surfaces: { first: { dataModel: { value: "첫째" } }, second: { dataModel: { value: "둘째" } } } });
     engine.dispose();
   });
 });

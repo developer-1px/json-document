@@ -99,6 +99,23 @@ describe("LLM Agent Artifact", () => {
     expect(screen.queryByText(/createSurface/)).toBeNull();
     expect(screen.queryByText(/```a2ui/)).toBeNull();
   });
+
+  test("reconstructs generated A2UI from a saved assistant message", async () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "saved-ui", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "saved-ui", components: [{ id: "root", component: "Text", text: "복원된 화면", variant: "h2" }] } });
+    window.history.replaceState(null, "", "/artifact/llm-agent?session=thread-saved-ui");
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/sessions")) return Promise.resolve(Response.json({ threads: [{ id: "thread-saved-ui", preview: "저장 UI", updatedAt: 1 }] }));
+      return Promise.resolve(Response.json({ messages: [{ id: "saved-answer", role: "assistant", text: `기록입니다.\n\`\`\`a2ui\n${create}\n${components}\n\`\`\`` }] }));
+    }));
+
+    render(<LlmAgentArtifactRoute />);
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "복원된 화면" })).toBeTruthy());
+    expect(screen.getByText("기록입니다.")).toBeTruthy();
+    expect(screen.queryByText(/createSurface/)).toBeNull();
+  });
 });
 
 function agUiResponse(threadId: string, content: string | ReadonlyArray<string>) {
