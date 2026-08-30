@@ -4,7 +4,6 @@ Canonical resilient Markdown projection and React renderer for streamed json-doc
 
 ```tsx
 import { MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
-import "@interactive-os/json-document-markdown-react/styles.css";
 
 <MarkdownRenderer content={deltaAccumulatedSource} streaming components={{ code: MyCode }} />
 ```

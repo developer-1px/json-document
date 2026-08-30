@@ -1,5 +1,3 @@
-import { MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
-import "@interactive-os/json-document-markdown-react/styles.css";
 import rehypeSlug from "rehype-slug";
 import { InlineCode } from "../../shared/ui/code-block";
 import { codeLanguage } from "../../shared/ui/code-tokens";
@@ -7,13 +5,14 @@ import { ShikiSourceCodeBlock } from "../../shared/demo-workbench/ShikiSourceCod
 import { ActionLink } from "../../shared/ui/interactive";
 import { classes, ui } from "../../shared/ui/styles";
 import { LiveDemo } from "../../app/live-demo-registry";
+import { MarkdownContent } from "../../shared/ui/markdown-content";
 
 type MarkdownHeading = { id: string; level: number; text: string };
 
 export function MarkdownViewer({ source, hideTitle = false }: { source: string; hideTitle?: boolean }) {
   return (
-    <article className={classes("grid gap-4", ui.text.body)}>
-      <MarkdownRenderer
+    <article>
+      <MarkdownContent
         content={source}
         rehypePlugins={[rehypeSlug]}
         components={{
@@ -29,23 +28,6 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
             <h3 id={id} className={classes("mb-0 mt-2", ui.text.heading)}>
               {children}
             </h3>
-          ),
-          p: ({ children }) => (
-            <p className={classes("m-0", ui.text.body)}>{children}</p>
-          ),
-          ul: ({ children }) => (
-            <ul className={classes("m-0 list-disc pl-5", ui.text.body)}>{children}</ul>
-          ),
-          table: ({ children }) => (
-            <div className="overflow-x-auto">
-              <table className={classes("w-full min-w-[28rem]", ui.surface.table, ui.text.body)}>{children}</table>
-            </div>
-          ),
-          th: ({ children }) => (
-            <th className={classes("py-1.5 pr-3", ui.surface.tableHead, ui.text.heading)}>{children}</th>
-          ),
-          td: ({ children }) => (
-            <td className={classes("py-1.5 pr-3 align-top", ui.surface.tableCell, ui.text.body)}>{children}</td>
           ),
           code: ({ children, className }) => {
             if (!className) return <InlineCode>{children}</InlineCode>;

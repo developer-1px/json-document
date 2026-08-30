@@ -78,6 +78,11 @@
 }
 
 @layer components {
+  /* Tailwind recipes own Markdown presentation; CSS only owns stream-state animation. */
+  [data-markdown-streaming="true"] > :last-child {
+    animation: markdown-stream-in 180ms ease-out;
+  }
+
   [data-ui-component="product-shell"] {
     @apply rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface;
   }
@@ -435,4 +440,12 @@
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]):focus-within [data-ui-tooltip="true"] {
     @apply block;
   }
+}
+
+@keyframes markdown-stream-in {
+  from { opacity: 0.45; transform: translateY(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-markdown-streaming="true"] > :last-child { animation: none; }
 }
