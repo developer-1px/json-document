@@ -13,6 +13,7 @@ export async function streamLlmAgentTurn(options: {
   readonly sessionId: string | null;
   readonly onSession: (sessionId: string) => void;
   readonly write: (delta: string) => void;
+  readonly onEvent?: (event: AGUIEvent) => void;
 }) {
   const response = await fetch("/api/llm-agent/turn", {
     method: "POST",
@@ -47,7 +48,12 @@ function parseSseEvent(frame: string): AGUIEvent {
   return JSON.parse(data) as AGUIEvent;
 }
 
-function applyAgUiEvent(event: AGUIEvent, options: { readonly onSession: (sessionId: string) => void; readonly write: (delta: string) => void }) {
+function applyAgUiEvent(event: AGUIEvent, options: {
+  readonly onSession: (sessionId: string) => void;
+  readonly write: (delta: string) => void;
+  readonly onEvent?: (event: AGUIEvent) => void;
+}) {
+  options.onEvent?.(event);
   if (event.type === EventType.RUN_STARTED) options.onSession(event.threadId);
   else if (event.type === EventType.TEXT_MESSAGE_CONTENT) options.write(event.delta);
   else if (event.type === EventType.RUN_ERROR) throw new Error(event.message);
