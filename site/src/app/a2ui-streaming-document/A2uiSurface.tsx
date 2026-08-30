@@ -16,6 +16,7 @@ export function A2uiSurface({ document, markdown: Markdown, surfaceId }: { reado
 
 function BasicCatalogSurface({ markdown, surface }: { readonly markdown: MarkdownSurface; readonly surface: A2uiSurfaceDocument }) {
   const root = surface.components.root;
+  if (!root && Object.keys(surface.components).length === 0) return null;
   if (!root) return <section className={ui.a2ui.root} aria-label="생성된 UI" data-a2ui-surface><p className={ui.text.meta}>{A2UI_PROJECTION_ERROR_TEXT}</p></section>;
   const rendered = renderBasicComponent(root, surface, markdown, new Set(), "/");
   return <section className={ui.a2ui.root} aria-label="생성된 UI" data-a2ui-surface>{rendered ?? <p className={ui.text.meta}>{A2UI_PROJECTION_ERROR_TEXT}</p>}</section>;
@@ -82,7 +83,10 @@ function childReferences(value: unknown, dataModel: unknown, basePath: string): 
 
 function boundValue(dataModel: unknown, binding: unknown, basePath = "/"): unknown {
   if (!binding || typeof binding !== "object" || !("path" in binding) || typeof binding.path !== "string") return binding;
-  return resolvePath(basePath, binding.path).split("/").slice(1).reduce<unknown>((value, segment) => value && typeof value === "object" ? (value as Record<string, unknown>)[segment] : undefined, dataModel);
+  return resolvePath(basePath, binding.path).split("/").slice(1).reduce<unknown>((value, encoded) => {
+    const segment = encoded.replace(/~1/g, "/").replace(/~0/g, "~");
+    return value && typeof value === "object" && Object.prototype.hasOwnProperty.call(value, segment) ? (value as Record<string, unknown>)[segment] : undefined;
+  }, dataModel);
 }
 
 function layoutValue(values: Readonly<Record<string, string>>, value: unknown): string | undefined {

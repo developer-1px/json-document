@@ -7,6 +7,7 @@ import { codexNotificationToAgUi, type CodexAgUiState, type CodexNotification } 
 import { A2UI_DEVELOPER_INSTRUCTIONS } from "./a2ui-developer-instructions";
 
 const CODEX_PATH = "/api/llm-agent";
+const CODEX_MODEL = process.env.CODEX_LLM_MODEL?.trim() || undefined;
 
 export function codexAppServer(): Plugin {
   return {
@@ -81,8 +82,8 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
     if (message.id === 1) {
       send({ method: "initialized" });
       send(sessionId
-        ? { method: "thread/resume", id: 2, params: { threadId: sessionId, cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", excludeTurns: true, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS } }
-        : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS } });
+        ? { method: "thread/resume", id: 2, params: { threadId: sessionId, cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", excludeTurns: true, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS, ...(CODEX_MODEL ? { model: CODEX_MODEL } : {}) } }
+        : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false, developerInstructions: A2UI_DEVELOPER_INSTRUCTIONS, ...(CODEX_MODEL ? { model: CODEX_MODEL } : {}) } });
     } else if (message.id === 2 && message.result?.thread) {
       const threadId = message.result.thread.id;
       mappingState = { threadId, runId: requestedRunId };
