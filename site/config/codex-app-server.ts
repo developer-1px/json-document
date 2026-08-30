@@ -1,6 +1,9 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import type { Plugin } from "vite";
+import { EventType, RunAgentInputSchema, type BaseEvent } from "@ag-ui/core";
+import { EventEncoder } from "@ag-ui/encoder";
+import { codexNotificationToAgUi, type CodexAgUiState, type CodexNotification } from "./codex-ag-ui";
 
 const CODEX_PATH = "/api/llm-agent";
 
@@ -22,24 +25,29 @@ export function codexAppServer(): Plugin {
         req.setEncoding("utf8");
         req.on("data", (chunk) => { body += chunk; });
         req.on("end", () => {
-          const request = JSON.parse(body) as { prompt?: unknown; sessionId?: unknown };
-          streamCodex(String(request.prompt ?? ""), typeof request.sessionId === "string" ? request.sessionId : undefined, res);
+          const input = RunAgentInputSchema.parse(JSON.parse(body));
+          const userMessage = [...input.messages].reverse().find((message) => message.role === "user");
+          const prompt = typeof userMessage?.content === "string" ? userMessage.content : "";
+          streamCodex(prompt, input.threadId || undefined, input.runId, res);
         });
       });
     },
   };
 }
 
-function streamCodex(prompt: string, sessionId: string | undefined, res: import("node:http").ServerResponse) {
+function streamCodex(prompt: string, sessionId: string | undefined, requestedRunId: string, res: import("node:http").ServerResponse) {
   const child = spawn("codex", ["app-server", "--stdio"], { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] });
   const lines = createInterface({ input: child.stdout });
   const send = (message: object) => child.stdin.write(`${JSON.stringify(message)}\n`);
 
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  const encoder = new EventEncoder({ accept: String(res.req.headers.accept ?? "text/event-stream") });
+  const emit = (event: BaseEvent) => res.write(encoder.encode(event));
+  let mappingState: CodexAgUiState | undefined;
+  res.setHeader("Content-Type", encoder.getContentType());
   res.setHeader("Cache-Control", "no-store");
 
   lines.on("line", (line) => {
-    const message = JSON.parse(line) as { id?: number; method?: string; result?: { thread?: { id: string } }; error?: { message?: string }; params?: { delta?: string } };
+    const message = JSON.parse(line) as { id?: number; method?: string; result?: { thread?: { id: string } }; error?: { message?: string }; params?: { threadId?: string; turnId?: string; itemId?: string; delta?: string; turn?: { id: string; status: string; error?: { message?: string } | null } } };
     if (message.id === 1) {
       send({ method: "initialized" });
       send(sessionId
@@ -47,17 +55,20 @@ function streamCodex(prompt: string, sessionId: string | undefined, res: import(
         : { method: "thread/start", id: 2, params: { cwd: process.cwd(), approvalPolicy: "never", sandbox: "read-only", ephemeral: false } });
     } else if (message.id === 2 && message.result?.thread) {
       const threadId = message.result.thread.id;
-      res.setHeader("X-Codex-Thread-Id", threadId);
+      mappingState = { threadId, runId: requestedRunId };
       send({ method: "turn/start", id: 3, params: { threadId, input: [{ type: "text", text: prompt, text_elements: [] }] } });
     } else if (message.id === 2 && message.error) {
-      res.statusCode = 400;
-      res.end(message.error.message ?? "Codex thread를 열 수 없습니다.");
-      child.kill();
-    } else if (message.method === "item/agentMessage/delta" && message.params?.delta) {
-      res.write(message.params.delta);
-    } else if (message.method === "turn/completed") {
+      emit({ type: EventType.RUN_ERROR, message: message.error.message ?? "Codex thread를 열 수 없습니다." });
       res.end();
       child.kill();
+    } else if (mappingState && message.method) {
+      const mapped = codexNotificationToAgUi(mappingState, message as CodexNotification);
+      mappingState = mapped.state;
+      for (const event of mapped.events) emit(event);
+      if (mapped.completed) {
+        res.end();
+        child.kill();
+      }
     }
   });
 

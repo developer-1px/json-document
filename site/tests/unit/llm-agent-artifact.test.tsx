@@ -1,5 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { EventType } from "@ag-ui/core";
+import { EventEncoder } from "@ag-ui/encoder";
 import { LlmAgentArtifactRoute } from "../../src/routes/llm-agent-artifact/LlmAgentArtifactRoute";
 
 afterEach(() => {
@@ -13,7 +15,7 @@ describe("LLM Agent Artifact", () => {
   test("sends a plain chat message and renders the Codex stream", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
       ? Promise.resolve(Response.json({ threads: [] }))
-      : Promise.resolve(new Response("연결완료", { headers: { "X-Codex-Thread-Id": "thread-123" } }))));
+      : Promise.resolve(agUiResponse("thread-123", "연결완료"))));
     render(<LlmAgentArtifactRoute />);
 
     expect(screen.getByText("Local Codex")).toBeTruthy();
@@ -29,7 +31,7 @@ describe("LLM Agent Artifact", () => {
   test("selects a saved session and sends the next turn to it", async () => {
     const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
       ? Promise.resolve(Response.json({ threads: [{ id: "thread-saved", preview: "이전 채팅", updatedAt: 1 }] }))
-      : Promise.resolve(new Response("계속완료", { headers: { "X-Codex-Thread-Id": "thread-saved" } })));
+      : Promise.resolve(agUiResponse("thread-saved", "계속완료")));
     vi.stubGlobal("fetch", fetchMock);
     render(<LlmAgentArtifactRoute />);
 
@@ -40,6 +42,19 @@ describe("LLM Agent Artifact", () => {
 
     await waitFor(() => expect(screen.getByRole("status").textContent).toBe("계속완료"));
     const request = fetchMock.mock.calls.find(([input]) => !String(input).endsWith("/sessions"));
-    expect(JSON.parse(String(request?.[1]?.body))).toMatchObject({ sessionId: "thread-saved", prompt: "계속해줘" });
+    expect(JSON.parse(String(request?.[1]?.body))).toMatchObject({ threadId: "thread-saved", messages: [{ role: "user", content: "계속해줘" }] });
   });
 });
+
+function agUiResponse(threadId: string, content: string) {
+  const encoder = new EventEncoder();
+  const runId = "run-test";
+  const messageId = "message-test";
+  return new Response([
+    { type: EventType.RUN_STARTED, threadId, runId },
+    { type: EventType.TEXT_MESSAGE_START, messageId, role: "assistant" },
+    { type: EventType.TEXT_MESSAGE_CONTENT, messageId, delta: content },
+    { type: EventType.TEXT_MESSAGE_END, messageId },
+    { type: EventType.RUN_FINISHED, threadId, runId },
+  ].map((event) => encoder.encodeSSE(event)).join(""), { headers: { "Content-Type": "text/event-stream" } });
+}
