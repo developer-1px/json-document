@@ -540,9 +540,10 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
   await expect(app.getByRole("toolbar", { name: "Tree actions" })).toBeVisible();
   await expect(app.getByRole("treeitem").or(app.getByText("Fruit", { exact: true })).first()).toBeVisible();
   await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
-  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => (
-    getComputedStyle(element).backgroundColor
-  ))).toBe("rgba(251, 248, 242, 0.7)");
+  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => ({
+    backgroundColor: getComputedStyle(element).backgroundColor,
+    borderWidth: getComputedStyle(element).borderWidth,
+  }))).toEqual({ backgroundColor: "rgba(0, 0, 0, 0)", borderWidth: "0px" });
 
   await page.goto("/demo/selection");
   await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(0);
