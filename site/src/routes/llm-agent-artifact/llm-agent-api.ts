@@ -21,6 +21,7 @@ export async function streamLlmAgentTurn(options: {
   readonly onSession: (sessionId: string) => void;
   readonly write: (delta: string) => void;
   readonly onEvent?: (event: AGUIEvent) => void;
+  readonly signal?: AbortSignal;
 }) {
   const response = await fetch("/api/llm-agent/turn", {
     method: "POST",
@@ -33,6 +34,7 @@ export async function streamLlmAgentTurn(options: {
       context: [],
       forwardedProps: {},
     } satisfies RunAgentInput),
+    signal: options.signal,
   });
   if (!response.ok || !response.body) throw new Error(await response.text());
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -40,7 +42,7 @@ export async function streamLlmAgentTurn(options: {
   for (;;) {
     const { value, done } = await reader.read();
     buffer += value ?? "";
-    const frames = buffer.split("\n\n");
+    const frames = buffer.split(/\r?\n\r?\n/);
     buffer = frames.pop() ?? "";
     for (const frame of frames) applyAgUiEvent(parseSseEvent(frame), options);
     if (done) {
@@ -51,7 +53,8 @@ export async function streamLlmAgentTurn(options: {
 }
 
 function parseSseEvent(frame: string): AGUIEvent {
-  const data = frame.split("\n").filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trimStart()).join("\n");
+  const data = frame.split(/\r?\n/).filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trimStart()).join("\n");
+  if (!data) throw new Error("AG-UI event에 data가 없습니다.");
   return JSON.parse(data) as AGUIEvent;
 }
 

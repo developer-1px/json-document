@@ -9,6 +9,8 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
   const text = new Map<string, string>();
   const roles = new Map<string, "assistant" | "developer" | "system" | "user">();
   const toolArguments = new Map<string, string>();
+  const openText = new Set<string>();
+  const openTools = new Set<string>();
   let created = false;
   return { push(event) {
     const messages: A2uiMessage[] = [];
@@ -21,6 +23,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
     }
     if (event.type === EventType.TEXT_MESSAGE_START) {
       roles.set(event.messageId, event.role);
+      openText.add(event.messageId);
       messages.push(component(surfaceId, event.messageId, "Markdown", { role: event.role, streaming: true }));
     }
     if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
@@ -28,7 +31,10 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       text.set(event.messageId, value);
       messages.push(data(surfaceId, `/content/${event.messageId}`, value));
     }
-    if (event.type === EventType.TEXT_MESSAGE_END) messages.push(component(surfaceId, event.messageId, "Markdown", { role: roles.get(event.messageId) ?? "assistant", streaming: false }));
+    if (event.type === EventType.TEXT_MESSAGE_END) {
+      openText.delete(event.messageId);
+      messages.push(component(surfaceId, event.messageId, "Markdown", { role: roles.get(event.messageId) ?? "assistant", streaming: false }));
+    }
     if (event.type === EventType.REASONING_MESSAGE_START) messages.push(component(surfaceId, event.messageId, "Reasoning"));
     if (event.type === EventType.REASONING_MESSAGE_CONTENT) {
       const value = `${text.get(event.messageId) ?? ""}${event.delta}`;
@@ -36,6 +42,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       messages.push(data(surfaceId, `/content/${event.messageId}`, value));
     }
     if (event.type === EventType.TOOL_CALL_START) {
+      openTools.add(event.toolCallId);
       messages.push(component(surfaceId, event.toolCallId, "ToolActivity"));
       messages.push(data(surfaceId, `/tools/${event.toolCallId}`, { name: event.toolCallName, status: "running", arguments: "" }));
     }
@@ -45,12 +52,21 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       messages.push(data(surfaceId, `/tools/${event.toolCallId}/arguments`, value));
     }
     if (event.type === EventType.TOOL_CALL_RESULT) {
+      openTools.delete(event.toolCallId);
       messages.push(data(surfaceId, `/tools/${event.toolCallId}/status`, "done"));
       messages.push(data(surfaceId, `/tools/${event.toolCallId}/result`, event.content));
       const artifact = artifactFrom(event);
       if (artifact) {
         messages.push(component(surfaceId, `${event.toolCallId}-artifact`, "Artifact", {}, `/artifacts/${event.toolCallId}`));
         messages.push(data(surfaceId, `/artifacts/${event.toolCallId}`, artifact));
+      }
+    }
+    if (event.type === EventType.RUN_ERROR || event.type === EventType.RUN_FINISHED) {
+      for (const messageId of openText) messages.push(component(surfaceId, messageId, "Markdown", { role: roles.get(messageId) ?? "assistant", streaming: false }));
+      openText.clear();
+      if (event.type === EventType.RUN_ERROR) {
+        for (const toolCallId of openTools) messages.push(data(surfaceId, `/tools/${toolCallId}/status`, "error"));
+        openTools.clear();
       }
     }
     return messages;

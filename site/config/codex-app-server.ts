@@ -29,9 +29,25 @@ export function codexAppServer(): Plugin {
         req.setEncoding("utf8");
         req.on("data", (chunk) => { body += chunk; });
         req.on("end", () => {
-          const input = RunAgentInputSchema.parse(JSON.parse(body));
+          let candidate: unknown;
+          try {
+            candidate = JSON.parse(body);
+          } catch {
+            res.statusCode = 400;
+            return res.end("요청 JSON이 올바르지 않습니다.");
+          }
+          const parsed = RunAgentInputSchema.safeParse(candidate);
+          if (!parsed.success) {
+            res.statusCode = 400;
+            return res.end("AG-UI RunAgentInput이 올바르지 않습니다.");
+          }
+          const input = parsed.data;
           const userMessage = [...input.messages].reverse().find((message) => message.role === "user");
           const prompt = typeof userMessage?.content === "string" ? userMessage.content : "";
+          if (!prompt.trim()) {
+            res.statusCode = 400;
+            return res.end("사용자 메시지가 비어 있습니다.");
+          }
           streamCodex(prompt, input.threadId || undefined, input.runId, res);
         });
       });
@@ -47,11 +63,20 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
   const encoder = new EventEncoder({ accept: String(res.req.headers.accept ?? "text/event-stream") });
   const emit = (event: BaseEvent) => res.write(encoder.encode(event));
   let mappingState: CodexAgUiState | undefined;
+  let completed = false;
   res.setHeader("Content-Type", encoder.getContentType());
   res.setHeader("Cache-Control", "no-store");
 
   lines.on("line", (line) => {
-    const message = JSON.parse(line) as { id?: number; method?: string; result?: { thread?: { id: string } }; error?: { message?: string }; params?: { threadId?: string; turnId?: string; itemId?: string; delta?: string; turn?: { id: string; status: string; error?: { message?: string } | null } } };
+    let message: { id?: number; method?: string; result?: { thread?: { id: string } }; error?: { message?: string }; params?: { threadId?: string; turnId?: string; itemId?: string; delta?: string; turn?: { id: string; status: string; error?: { message?: string } | null } } };
+    try {
+      message = JSON.parse(line) as typeof message;
+    } catch {
+      completed = true;
+      emit({ type: EventType.RUN_ERROR, message: "Codex app-server 응답을 해석하지 못했습니다." });
+      res.end();
+      return child.kill();
+    }
     if (message.id === 1) {
       send({ method: "initialized" });
       send(sessionId
@@ -70,6 +95,7 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
       mappingState = mapped.state;
       for (const event of mapped.events) emit(event);
       if (mapped.completed) {
+        completed = true;
         res.end();
         child.kill();
       }
@@ -77,8 +103,15 @@ function streamCodex(prompt: string, sessionId: string | undefined, requestedRun
   });
 
   child.on("error", (error) => {
+    completed = true;
     res.statusCode = 500;
     res.end(error.message);
+  });
+  child.on("close", (code) => {
+    if (completed || res.writableEnded || res.destroyed) return;
+    completed = true;
+    emit({ type: EventType.RUN_ERROR, message: `Codex app-server가 응답을 완료하지 못했습니다. (exit ${code ?? "unknown"})` });
+    res.end();
   });
   res.on("close", () => child.kill());
 
