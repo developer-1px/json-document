@@ -138,7 +138,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Artifact" }).click();
-  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet", "API · File Intake"]);
+  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet", "API · File Intake", "API · Markdown", "Streaming Markdown", "LLM Agent"]);
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "JSON Document",
     "Editing",
@@ -540,9 +540,10 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
   await expect(app.getByRole("toolbar", { name: "Tree actions" })).toBeVisible();
   await expect(app.getByRole("treeitem").or(app.getByText("Fruit", { exact: true })).first()).toBeVisible();
   await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
-  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => (
-    getComputedStyle(element).backgroundColor
-  ))).toBe("rgba(251, 248, 242, 0.7)");
+  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => ({
+    backgroundColor: getComputedStyle(element).backgroundColor,
+    borderWidth: getComputedStyle(element).borderWidth,
+  }))).toEqual({ backgroundColor: "rgba(0, 0, 0, 0)", borderWidth: "0px" });
 
   await page.goto("/demo/selection");
   await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(0);

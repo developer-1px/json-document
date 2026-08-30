@@ -78,6 +78,11 @@
 }
 
 @layer components {
+  /* Tailwind recipes own Markdown presentation; CSS only owns stream-state animation. */
+  [data-markdown-streaming="true"] > :last-child {
+    animation: markdown-stream-in 180ms ease-out;
+  }
+
   [data-ui-component="product-shell"] {
     @apply rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface;
   }
@@ -420,7 +425,7 @@
   }
 
   [data-ui-control="command"][data-ui-presentation="icon"] {
-    @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border border-line-subtle/60 bg-background-subtle/70 p-0 text-foreground-default outline-none transition-colors hover:border-line-default hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-line-subtle/40 disabled:bg-background-subtle/50 disabled:text-foreground-muted;
+    @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-foreground-default outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-foreground-muted;
   }
 
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]) {
@@ -435,4 +440,12 @@
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]):focus-within [data-ui-tooltip="true"] {
     @apply block;
   }
+}
+
+@keyframes markdown-stream-in {
+  from { opacity: 0.45; transform: translateY(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-markdown-streaming="true"] > :last-child { animation: none; }
 }

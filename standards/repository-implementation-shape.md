@@ -220,6 +220,7 @@ foundation으로 유지한다.
 | `packages/json-document-affordance` | Responsibility family | select/fold/drag/history 책임 file과 root facade 유지 |
 | `packages/json-document-ui-primitives-react` | React UI Primitive family | 수렴한 Hands의 minimalist surface와 framework lifecycle을 책임별 module로 유지 |
 | `packages/json-document-animation-react` | React UI Primitive family | 생성 대기의 시각 언어를 책임 module과 stylesheet로 유지 |
+| `packages/json-document-markdown-react` | React projection family | 불완전한 스트리밍 Markdown의 복구 투영, GFM renderer, customization contract와 stylesheet를 유지 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-database` | Product-facing Hand | 기본 admin UI와 customization contract를 소유하고 headless domain package를 내부 구현으로 조합 |
 | `packages/json-document-calendar` | Product-facing Hand | Calendar editor 관찰, occurrence focus, naming, Web pointer interaction lifecycle을 정본 hook으로 유지 |

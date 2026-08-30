@@ -14,6 +14,7 @@ import dateControlsSource from "../../../../packages/json-document-calendar/src/
 import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
 import calendarMonthGridSource from "../../../../packages/json-document-calendar/src/calendar-month-grid.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
+import markdownRendererSource from "../../../../packages/json-document-markdown-react/src/MarkdownRenderer.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
@@ -122,6 +123,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-affordance/", "/docs/api/affordance"],
   ["packages/json-document-ui-primitives-react/", "/docs/api/ui-primitives-react"],
   ["packages/json-document-animation-react/", "/docs/api/animation-react"],
+  ["packages/json-document-markdown-react/", "/docs/api/markdown-react"],
   ["packages/json-document-database/", "/docs/api/database"],
   ["packages/json-document-web/", "/docs/api/web"],
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
@@ -170,6 +172,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
   ["packages/json-document-calendar/src/calendar-month-grid.tsx", calendarMonthGridSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
+  ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
@@ -465,6 +468,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-animation-react",
     symbol: "ShimmerText",
     sourcePath: "packages/json-document-animation-react/src/animations.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-markdown-react",
+    symbol: "MarkdownRenderer",
+    sourcePath: "packages/json-document-markdown-react/src/MarkdownRenderer.tsx",
   },
   ...([
     "AuroraMass",

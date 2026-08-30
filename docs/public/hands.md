@@ -180,6 +180,14 @@ Hands는 다음 증거가 함께 있을 때 닫혔다고 부릅니다.
 Transcript, 말풍선, think·stream·tool animation은 표현과 runtime lifecycle입니다.
 Hands가 아닙니다. 대기 시각 언어는 [Animation](animation.md)이 소유합니다.
 
+Agent의 Markdown delta는 canonical source를 바꾸지 않고 render projection에서만
+불완전한 delimiter를 닫습니다. 정적 문서와 streaming 응답은 같은 renderer와
+제품 디자인 recipe를 사용합니다.
+
+```live-demo
+/demo/markdown
+```
+
 ## Hands가 공유하는 Viewport Position
 
 특정 오브젝트를 지정한 화면 위치로 보내고, 문서 끝에서도 그 위치에 도달하도록

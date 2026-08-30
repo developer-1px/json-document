@@ -12,6 +12,7 @@
     "packages/json-document-affordance",
     "packages/json-document-ui-primitives-react",
     "packages/json-document-animation-react",
+    "packages/json-document-markdown-react",
     "packages/json-document-zod",
     "packages/json-document-database",
     "packages/json-document-calendar",
@@ -77,5 +78,10 @@
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.27.7",
     "@rollup/rollup-linux-x64-gnu": "4.60.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "site/public"
+    ]
   }
 }

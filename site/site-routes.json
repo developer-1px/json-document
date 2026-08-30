@@ -225,6 +225,26 @@
     "navigationGroup": "UI Primitives"
   },
   {
+    "path": "/docs/api/markdown-react",
+    "label": "API · Markdown",
+    "title": "Markdown React API - json-document",
+    "description": "@interactive-os/json-document-markdown-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact",
+    "relatedDemoPath": "/demo/markdown",
+    "relatedDemoLabel": "Streaming Markdown"
+  },
+  {
+    "path": "/demo/markdown",
+    "label": "Streaming Markdown",
+    "title": "Streaming Markdown - json-document",
+    "heading": "Streaming Markdown",
+    "description": "불완전한 Markdown 스트림과 커스텀 component renderer를 정본 패키지로 검증합니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact",
+    "parentPath": "/docs/api/markdown-react"
+  },
+  {
     "path": "/demo/ui-primitives",
     "label": "Design system",
     "title": "Design system - json-document",
@@ -622,6 +642,14 @@
     "description": "Cstar 디자인을 이식하고 canonical Rich Text, inline atom, 파일 context, history와 clipboard로 재구현한 Agent Chat Composer입니다.",
     "parentPath": "/docs/composer",
     "sidebar": false
+  },
+  {
+    "path": "/artifact/llm-agent",
+    "label": "LLM Agent",
+    "title": "LLM Agent - json-document",
+    "description": "로컬 Codex thread를 선택하고 이어서 대화하며 agent turn을 스트리밍하는 Artifact 앱입니다.",
+    "navigationGroup": "Artifact",
+    "chrome": "app"
   },
   {
     "path": "/docs/mention",

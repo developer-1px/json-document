@@ -5,6 +5,7 @@ import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { jsonDocumentSourceAliases } from "./config/json-document-source-aliases.ts";
+import { codexAppServer } from "./config/codex-app-server.ts";
 import siteRoutes from "./site-routes.json";
 
 function rootLlmsTxt(): Plugin {
@@ -114,6 +115,7 @@ export default defineConfig({
       semicolons: true,
     }),
     react(),
+    process.env.VITE_LLM_BACKEND !== "mock" ? codexAppServer() : undefined,
     rootLlmsTxt(),
     productionSiteAssets(),
   ],
