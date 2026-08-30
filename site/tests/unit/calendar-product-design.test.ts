@@ -62,6 +62,20 @@ describe("calendar product design", () => {
     expect(css).toContain("bg-transparent");
   });
 
+  test("details editor aligns popup fields with the canonical product field grammar", () => {
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
+    const source = readFileSync(
+      path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"),
+      "utf8",
+    );
+    expect(css).toContain('[data-ui-control="choice"][data-ui-presentation="popup"] > button[aria-haspopup="listbox"]');
+    expect(css).toContain('[data-ui-control="choice"][data-ui-presentation="popup"] > [role="listbox"]');
+    expect(source).toContain('<span className={ui.text.label}>Calendar</span>');
+    expect(source).toContain('<span className={ui.text.label}>Repeat</span>');
+    expect(styles.calendarToggle()).toContain("justify-start");
+    expect(styles.calendarToggle()).toContain("text-left");
+  });
+
   test("date-field stacks its label above the input", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const start = css.indexOf('[data-ui-control="date-field"] {');

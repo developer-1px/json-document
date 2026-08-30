@@ -185,6 +185,27 @@
     @apply w-full min-w-0 rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
+  [data-ui-control="choice"][data-ui-presentation="popup"] {
+    @apply relative grid min-w-0;
+  }
+
+  [data-ui-control="choice"][data-ui-presentation="popup"] > button[aria-haspopup="listbox"] {
+    @apply flex w-full min-w-0 items-center justify-between rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-left text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;
+  }
+
+  [data-ui-control="choice"][data-ui-presentation="popup"] > button[aria-haspopup="listbox"]::after {
+    content: "⌄";
+    @apply ml-2 shrink-0 text-foreground-muted;
+  }
+
+  [data-ui-control="choice"][data-ui-presentation="popup"] > [role="listbox"] {
+    @apply absolute inset-x-0 top-full z-50 mt-1 grid max-h-52 overflow-auto rounded-control border border-line-subtle bg-background-canvas p-1 shadow-overlay outline-none;
+  }
+
+  [data-ui-control="choice"][data-ui-presentation="popup"] > [role="listbox"] > [role="option"] {
+    @apply w-full rounded-control px-2 py-1.5 text-left text-sm text-foreground-default hover:bg-background-subtle focus-visible:outline-none data-[focus=true]:bg-background-subtle aria-selected:text-foreground-strong;
+  }
+
   [data-ui-control="field"],
   [data-ui-control="search"] input {
     @apply rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25;

@@ -971,30 +971,36 @@ export function CalendarDemoRoute(props: {
                     end: selectedEvent.allDay ? (calendarAllDaySpan(value, value)?.end ?? value) : value,
                   })}
                 />
-                <Choice presentation="popup"
-                  affordance={calendarControlAffordance("calendarChoice")}
-                  label="Calendar"
-                  value={selectedEvent.calendarId}
-                  options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
-                  onValueChange={(value) => applySelectedPatch({ calendarId: value })}
-                />
-                <Choice presentation="popup"
-                  affordance={calendarControlAffordance("recurrenceChoice")}
-                  label="Repeat"
-                  value={selectedEvent.recurrence?.freq ?? "none"}
-                  options={[
-                    { id: "none", label: "None" },
-                    { id: "daily", label: "Daily" },
-                    { id: "weekly", label: "Weekly" },
-                    { id: "monthly", label: "Monthly" },
-                    { id: "yearly", label: "Yearly" },
-                  ]}
-                  onValueChange={(value) => applySelectedPatch({
-                    recurrence: value === "none"
-                      ? null
-                      : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
-                  })}
-                />
+                <div className={styles.field()}>
+                  <span className={ui.text.label}>Calendar</span>
+                  <Choice presentation="popup"
+                    affordance={calendarControlAffordance("calendarChoice")}
+                    label="Calendar"
+                    value={selectedEvent.calendarId}
+                    options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
+                    onValueChange={(value) => applySelectedPatch({ calendarId: value })}
+                  />
+                </div>
+                <div className={styles.field()}>
+                  <span className={ui.text.label}>Repeat</span>
+                  <Choice presentation="popup"
+                    affordance={calendarControlAffordance("recurrenceChoice")}
+                    label="Repeat"
+                    value={selectedEvent.recurrence?.freq ?? "none"}
+                    options={[
+                      { id: "none", label: "None" },
+                      { id: "daily", label: "Daily" },
+                      { id: "weekly", label: "Weekly" },
+                      { id: "monthly", label: "Monthly" },
+                      { id: "yearly", label: "Yearly" },
+                    ]}
+                    onValueChange={(value) => applySelectedPatch({
+                      recurrence: value === "none"
+                        ? null
+                        : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
+                    })}
+                  />
+                </div>
                 {selectedEvent.recurrence === null ? null : (
                   <>
                     <label className={styles.field()}>
