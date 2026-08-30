@@ -448,6 +448,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-calendar/src/date-grid.tsx",
   },
   {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "CalendarMonthGrid",
+    sourcePath: "packages/json-document-calendar/src/calendar-month-grid.tsx",
+  },
+  {
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol: "CalendarGrid",
     sourcePath: "packages/json-document-calendar/src/date-controls.tsx",

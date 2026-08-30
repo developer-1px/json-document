@@ -8,6 +8,14 @@ export {
 } from "./use-calendar-rename-input.js";
 export { useCalendarViewportPosition } from "./use-calendar-viewport-position.js";
 export { DateGrid, type DateGridCellRenderProps, type DateGridColumnHeader, type DateGridProps } from "./date-grid.js";
+export {
+  CalendarMonthGrid,
+  type CalendarMonthGridAffordances,
+  type CalendarMonthGridClassNames,
+  type CalendarMonthGridHandle,
+  type CalendarMonthGridLabels,
+  type CalendarMonthGridProps,
+} from "./calendar-month-grid.js";
 export { calendarEventLabel, type CalendarEventLabelValue } from "./calendar-event-label.js";
 export {
   CalendarGrid,

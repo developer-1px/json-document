@@ -158,6 +158,87 @@ interface CalendarKeyboardTarget {
   removeEventListener(type: "keydown", listener: (event: KeyboardEvent) => void): void;
 }
 ```
+## `CalendarMonthGrid`
+
+```ts
+CalendarMonthGrid(props: CalendarMonthGridProps & React.RefAttributes<CalendarMonthGridHandle>): ReactNode
+```
+## `CalendarMonthGridAffordances`
+
+```ts
+interface CalendarMonthGridAffordances {
+  readonly dateCell: ControlAffordance;
+  readonly event: ControlAffordance;
+  readonly eventResizeEnd: ControlAffordance;
+  readonly moreDisclosure: ControlAffordance;
+  readonly overflowDate: ControlAffordance;
+  readonly overflowEvent: ControlAffordance;
+}
+```
+## `CalendarMonthGridClassNames`
+
+```ts
+interface CalendarMonthGridClassNames {
+  readonly root?: string;
+  readonly headerRow?: string;
+  readonly header?: string;
+  readonly week?: string;
+  readonly day?: string;
+  readonly dayInPeriod?: string;
+  readonly dayOutsidePeriod?: string;
+  readonly dayOverflow?: string;
+  readonly dayNumber?: string;
+  readonly today?: string;
+  readonly laneSpacer?: string;
+  readonly moreDisclosure?: string;
+  readonly overflow?: string;
+  readonly overflowDate?: string;
+  readonly overflowEventContainer?: string;
+  readonly eventContainer?: string;
+  readonly allDayEvent?: string;
+  readonly timedEvent?: string;
+  readonly eventTitle?: string;
+  readonly eventTime?: string;
+  readonly resizeEnd?: string;
+}
+```
+## `CalendarMonthGridHandle`
+
+```ts
+interface CalendarMonthGridHandle {
+  dismissOverflow(): boolean;
+}
+```
+## `CalendarMonthGridLabels`
+
+```ts
+interface CalendarMonthGridLabels {
+  readonly grid: string;
+  overflow(date: string): string;
+  more(count: number): string;
+  resizeEnd(event: CalendarEvent): string;
+}
+```
+## `CalendarMonthGridProps`
+
+```ts
+interface CalendarMonthGridProps {
+  readonly visibleDate: string;
+  readonly today: string;
+  readonly events: ReadonlyArray<CalendarEvent>;
+  readonly weekdays: ReadonlyArray<string>;
+  readonly rowLimit: number;
+  readonly hand: CalendarHand;
+  readonly interactions: CalendarPointerInteractions;
+  readonly selectionTopology: CalendarOccurrenceTopologySnapshot;
+  readonly affordances: CalendarMonthGridAffordances;
+  readonly classNames: CalendarMonthGridClassNames;
+  readonly labels: CalendarMonthGridLabels;
+  readonly primaryEventRef?: Ref<HTMLDivElement>;
+  readonly getEventColor: (event: CalendarEvent) => string;
+  readonly onNavigateDate: (date: string) => void;
+}
+```
 ## `calendarMonthWeeks`
 
 ```ts

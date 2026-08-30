@@ -2,16 +2,25 @@ import { useState } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { PageHeader } from "../../shared/ui/primitives";
 import {
+  calendarOccurrenceTopology,
+  createCalendarEditor,
+  type CalendarDocument,
+} from "@interactive-os/json-document-editing";
+import {
   CalendarGrid,
+  CalendarMonthGrid,
   calendarCells,
   DateGrid,
   DatePicker,
   DateRangePicker,
   HtmlDateField,
   RangeCalendar,
+  useCalendarHand,
+  useCalendarPointerInteractions,
   type CalendarGrain,
   type DateRangeValue,
 } from "@interactive-os/json-document-calendar";
+import { dateControlsDemoRecipe } from "./date-controls-demo-styles";
 
 
 export function DateControlsDemoRoute() {
@@ -48,6 +57,7 @@ export function DateControlsDemoRoute() {
           onFocusDateChange={setDate}
           renderCellDecoration={({ cell }) => cell.date === "2026-08-05" ? <span aria-hidden="true">•</span> : null}
         />
+        <CalendarMonthGridUsage />
         <CalendarGrid
           label="Calendar"
           value={date}
@@ -68,5 +78,72 @@ export function DateControlsDemoRoute() {
         />
       </div>
     </DemoPage>
+  );
+}
+
+const monthGridDocument: CalendarDocument = {
+  calendars: [{ id: "work", title: "Work", hidden: false, color: "blue" }],
+  events: [
+    { id: "planning", title: "Planning", start: "2026-08-03", end: "2026-08-05", allDay: true, calendarId: "work", recurrence: null, excludeDates: [] },
+    { id: "review", title: "Review", start: "2026-08-04T10:00", end: "2026-08-04T10:30", allDay: false, calendarId: "work", recurrence: null, excludeDates: [] },
+  ],
+};
+
+function CalendarMonthGridUsage() {
+  const [editor] = useState(() => createCalendarEditor(monthGridDocument));
+  const hand = useCalendarHand(editor);
+  const interactions = useCalendarPointerInteractions(hand, {
+    hourStart: 0,
+    hourEnd: 24,
+    stepMinutes: 15,
+    pixelsPerHour: 72,
+  });
+  const styles = dateControlsDemoRecipe();
+
+  return (
+    <CalendarMonthGrid
+      visibleDate="2026-08-03"
+      today="2026-08-04"
+      events={hand.paintedEvents}
+      weekdays={["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]}
+      rowLimit={2}
+      hand={hand}
+      interactions={interactions}
+      selectionTopology={calendarOccurrenceTopology(hand.document, "2026-07-27", "2026-09-07")}
+      affordances={{
+        dateCell: "content-control",
+        event: "direct",
+        eventResizeEnd: "direct",
+        moreDisclosure: "content-control",
+        overflowDate: "content-control",
+        overflowEvent: "direct",
+      }}
+      classNames={{
+        root: styles.monthRoot(),
+        headerRow: styles.monthHeaderRow(),
+        header: styles.monthHeader(),
+        week: styles.monthWeek(),
+        day: styles.monthDay(),
+        dayOutsidePeriod: styles.monthOutside(),
+        dayNumber: styles.monthDayNumber(),
+        today: styles.monthToday(),
+        eventContainer: styles.monthEventContainer(),
+        allDayEvent: styles.monthAllDayEvent(),
+        timedEvent: styles.monthTimedEvent(),
+        eventTitle: styles.monthEventTitle(),
+        eventTime: styles.monthEventTime(),
+        moreDisclosure: styles.monthMore(),
+        overflow: styles.monthOverflow(),
+        overflowEventContainer: styles.monthOverflowEvent(),
+      }}
+      labels={{
+        grid: "Occurrence month grid",
+        overflow: (date) => `Events on ${date}`,
+        more: (count) => `+${count} more`,
+        resizeEnd: (event) => `Resize ${event.title} end`,
+      }}
+      getEventColor={() => "blue"}
+      onNavigateDate={() => undefined}
+    />
   );
 }

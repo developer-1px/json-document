@@ -55,3 +55,26 @@ selection binding canonical while allowing product-owned cell decoration:
 ```
 
 `/demo/date-controls` exercises the public controls and links their source.
+
+`CalendarMonthGrid` is the canonical occurrence-bearing month surface. It owns
+month cells, occurrence lanes, overflow, selection, creation, move, and resize
+bindings. Hosts provide document state, policy values, product copy, colors,
+styles, and navigation without rebuilding the month interaction surface:
+
+```tsx
+<CalendarMonthGrid
+  visibleDate={visibleDate}
+  today={today}
+  events={hand.paintedEvents}
+  weekdays={weekdays}
+  rowLimit={3}
+  hand={hand}
+  interactions={pointerInteractions}
+  selectionTopology={topology}
+  affordances={affordances}
+  classNames={classNames}
+  labels={labels}
+  getEventColor={getEventColor}
+  onNavigateDate={setVisibleDate}
+/>
+```
