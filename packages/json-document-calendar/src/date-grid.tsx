@@ -36,6 +36,7 @@ export interface DateGridProps {
 /** Owns canonical date-cell semantics, focus movement, and selection binding. */
 export function DateGrid(props: DateGridProps): ReactNode {
   const [focus, setFocus] = useState(props.focusDate);
+  const [focusWithin, setFocusWithin] = useState(false);
   useEffect(() => { setFocus(props.focusDate); }, [props.focusDate]);
 
   function move(key: string): void {
@@ -56,6 +57,10 @@ export function DateGrid(props: DateGridProps): ReactNode {
       aria-label={props.label}
       className={props.className}
       tabIndex={0}
+      onFocus={() => setFocusWithin(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusWithin(false);
+      }}
       onKeyDown={(event) => onGridKey(event, (key) => {
         if (key === "Enter" || key === " ") return select(focus);
         move(key);
@@ -90,7 +95,7 @@ export function DateGrid(props: DateGridProps): ReactNode {
                 className={props.getCellClassName?.(state)}
                 data-ui-control="calendar-day"
                 data-ui-affordance={props.cellAffordance}
-                data-focused={state.focused ? "true" : undefined}
+                data-focused={focusWithin && state.focused ? "true" : undefined}
                 data-outside={cell.inVisiblePeriod ? undefined : "true"}
                 data-today={state.today ? "true" : undefined}
                 tabIndex={state.focused ? 0 : -1}
@@ -128,6 +133,7 @@ function onGridKey(event: KeyboardEvent<HTMLDivElement>, handle: (key: string) =
     || event.key === " "
   ) {
     event.preventDefault();
+    event.stopPropagation();
     handle(event.key);
   }
 }

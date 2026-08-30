@@ -7,6 +7,7 @@ const ownerIndex = read("packages/json-document-calendar/src/index.ts");
 const ownerTest = read("packages/json-document-calendar/tests/date-controls.test.tsx");
 const controls = read("packages/json-document-calendar/src/date-controls.tsx");
 const navigator = read("site/src/routes/calendar-demo/calendar-demo-navigator.tsx");
+const calendarRoute = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const usage = read("site/src/routes/date-controls-demo/DateControlsDemoRoute.tsx");
 const sources = read("site/src/shared/demo-workbench/demo-sources.ts");
 
@@ -15,13 +16,16 @@ requireText(ownerIndex, "DateGrid");
 requireText(ownerTest, '<DateGrid');
 requireText(controls, '<DateGrid');
 requireText(navigator, '<DateGrid');
+requireText(calendarRoute, '<DateGrid');
+requireText(calendarRoute, 'focusDate={monthStart}');
 requireText(usage, '<DateGrid');
 requireText(sources, 'symbol: "DateGrid"');
 requireText(sources, 'sourcePath: "packages/json-document-calendar/src/date-grid.tsx"');
 forbid(navigator, /<div\s+role=["']grid["']/);
 forbid(navigator, /cells\.map\s*\(/);
+forbid(calendarRoute, /calendarCells\(["']month["'],\s*monthStart\)\.map\s*\(/);
 
-console.log("Calendar DateGrid guard ok; public owner, tests, controls, Demo consumer, Usage, and source registration checked.");
+console.log("Calendar DateGrid guard ok; public owner, tests, controls, navigator and year-view consumers, Usage, and source registration checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

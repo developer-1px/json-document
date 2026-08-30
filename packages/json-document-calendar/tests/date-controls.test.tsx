@@ -149,8 +149,9 @@ describe("CalendarGrid and RangeCalendar", () => {
     function Harness() {
       const [selected, setSelected] = useState("2026-08-03");
       const [visible, setVisible] = useState("2026-08-03");
+      const [bubbledKeys, setBubbledKeys] = useState(0);
       return (
-        <>
+        <div onKeyDown={() => setBubbledKeys((count) => count + 1)}>
           <DateGrid
             label="Available dates"
             cells={cells}
@@ -165,21 +166,25 @@ describe("CalendarGrid and RangeCalendar", () => {
           />
           <output aria-label="selected">{selected}</output>
           <output aria-label="visible">{visible}</output>
-        </>
+          <output aria-label="bubbled keys">{bubbledKeys}</output>
+        </div>
       );
     }
 
     render(<Harness />);
     expect(screen.getByRole("columnheader", { name: "Monday" }).textContent).toBe("M");
+    expect(screen.getByRole("gridcell", { name: "2026-08-03" }).getAttribute("data-focused")).toBeNull();
     expect(screen.getByRole("gridcell", { name: "2026-08-04" }).getAttribute("aria-current")).toBe("date");
     expect(screen.getByRole("gridcell", { name: "2026-08-05" }).textContent).toBe("5busy");
     await user.click(screen.getByRole("gridcell", { name: "2026-08-06" }));
     expect(screen.getByLabelText("selected").textContent).toBe("2026-08-06");
     screen.getByRole("grid", { name: "Available dates" }).focus();
+    expect(screen.getByRole("gridcell", { name: "2026-08-06" }).getAttribute("data-focused")).toBe("true");
     await user.keyboard("{ArrowRight}");
     expect(screen.getByLabelText("visible").textContent).toBe("2026-08-07");
     await user.keyboard("{Enter}");
     expect(screen.getByLabelText("selected").textContent).toBe("2026-08-07");
+    expect(screen.getByLabelText("bubbled keys").textContent).toBe("0");
   });
 
   test("requests the next visible period when focus crosses the supplied cells", async () => {
