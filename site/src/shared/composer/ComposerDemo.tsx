@@ -50,11 +50,25 @@ const hostConfig = {
 
 if (hostConfig.profile !== composerHostConfigSchema.$id) throw new TypeError("Composer Host config profile does not match its schema.");
 
-export function ComposerDemo(props: {
+type ComposerSurfaceProps = {
   readonly title?: string;
   readonly description?: ReactNode;
   readonly submit?: (draft: ComposerDraft, write: (delta: string) => void) => Promise<void>;
-} = {}) {
+};
+
+export function ComposerDemo(props: ComposerSurfaceProps = {}) {
+  return (
+    <DemoPage documentation={(
+      <PageHeader label="Hands" title={props.title ?? "Agent Chat Composer"} illustration="cursor">
+        {props.description ?? "Cstar Composer의 제품 TSX 구조와 시각 언어를 옮기고, 입력·atom·selection·history·clipboard를 JSON Document로 다시 연결했습니다."}
+      </PageHeader>
+    )}>
+      <ComposerSurface {...props} inspectDraft />
+    </DemoPage>
+  );
+}
+
+export function ComposerSurface(props: ComposerSurfaceProps & { readonly inspectDraft?: boolean } = {}) {
   const [submitted, setSubmitted] = useState<ComposerDraft | null>(null);
   const [response, setResponse] = useState("");
   const hostPorts: ComposerHostPorts<ComposerModel> = {
@@ -78,11 +92,7 @@ export function ComposerDemo(props: {
   ];
 
   return (
-    <DemoPage documentation={(
-      <PageHeader label="Hands" title={props.title ?? "Agent Chat Composer"} illustration="cursor">
-        {props.description ?? "Cstar Composer의 제품 TSX 구조와 시각 언어를 옮기고, 입력·atom·selection·history·clipboard를 JSON Document로 다시 연결했습니다."}
-      </PageHeader>
-    )}>
+    <>
       <div className="composer-demo-stage">
         <div className="composer-demo-copy">
           <h2>무엇부터 시작해 볼까요?</h2>
@@ -178,10 +188,10 @@ export function ComposerDemo(props: {
         {submitted ? <p className="composer-submit-status" role="status">{props.submit ? response || "Codex가 응답하고 있습니다…" : "canonical Composer turn을 제출했습니다."}</p> : null}
       </div>
 
-      <section className="composer-json-panel" aria-label="Canonical Composer JSON">
+      {props.inspectDraft ? <section className="composer-json-panel" aria-label="Canonical Composer JSON">
         <h2>Canonical Composer draft</h2>
         <JsonInspector label="Composer draft JSON" testId="composer-draft-json" value={composer.document.value} />
-      </section>
-    </DemoPage>
+      </section> : null}
+    </>
   );
 }

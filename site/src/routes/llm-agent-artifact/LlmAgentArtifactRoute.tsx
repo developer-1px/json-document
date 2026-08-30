@@ -1,14 +1,16 @@
 import { richTextPlainText } from "@interactive-os/json-document-rich-text";
 import type { ComposerDraft } from "@interactive-os/json-document-composer";
-import { ComposerDemo } from "../../shared/composer/ComposerDemo";
+import { ComposerSurface } from "../../shared/composer/ComposerDemo";
 
-export function LlmAgentHandRoute() {
+export function LlmAgentArtifactRoute() {
   return (
-    <ComposerDemo
-      title="LLM Agent Hand"
-      description="Canonical Composer의 한 턴을 로컬 Codex app-server에 전달하고 응답을 스트리밍합니다."
-      submit={submitToCodex}
-    />
+    <div className="llm-agent-app">
+      <header className="llm-agent-app-header">
+        <strong>LLM Agent</strong>
+        <span>Local Codex</span>
+      </header>
+      <ComposerSurface submit={submitToCodex} />
+    </div>
   );
 }
 

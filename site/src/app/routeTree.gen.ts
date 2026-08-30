@@ -20,6 +20,7 @@ import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/
 import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
 import { Route as PageAdaptersVirtualSelectionRouteImport } from "./routes/_page/adapters/virtual-selection";
 import { Route as PageAffordancesHandlesRouteImport } from "./routes/_page/affordances/handles";
+import { Route as PageArtifactLlmAgentRouteImport } from "./routes/_page/artifact/llm-agent";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
@@ -38,7 +39,6 @@ import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/databa
 import { Route as PageDemoDateControlsRouteImport } from "./routes/_page/demo/date-controls";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
-import { Route as PageDemoLlmAgentChatRouteImport } from "./routes/_page/demo/llm-agent-chat";
 import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
 import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
@@ -210,6 +210,11 @@ const PageAffordancesHandlesRoute = PageAffordancesHandlesRouteImport.update({
   path: "/affordances/handles",
   getParentRoute: () => PageRoute,
 } as any);
+const PageArtifactLlmAgentRoute = PageArtifactLlmAgentRouteImport.update({
+  id: "/artifact/llm-agent",
+  path: "/artifact/llm-agent",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
   id: "/connectors/",
   path: "/connectors/",
@@ -301,11 +306,6 @@ const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
 const PageDemoKanbanRoute = PageDemoKanbanRouteImport.update({
   id: "/demo/kanban",
   path: "/demo/kanban",
-  getParentRoute: () => PageRoute,
-} as any);
-const PageDemoLlmAgentChatRoute = PageDemoLlmAgentChatRouteImport.update({
-  id: "/demo/llm-agent-chat",
-  path: "/demo/llm-agent-chat",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoObjectRoute = PageDemoObjectRouteImport.update({
@@ -933,6 +933,7 @@ export interface FileRoutesByFullPath {
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -949,7 +950,6 @@ export interface FileRoutesByFullPath {
   "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
-  "/demo/llm-agent-chat": typeof PageDemoLlmAgentChatRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -1078,6 +1078,7 @@ export interface FileRoutesByTo {
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
@@ -1094,7 +1095,6 @@ export interface FileRoutesByTo {
   "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
-  "/demo/llm-agent-chat": typeof PageDemoLlmAgentChatRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -1225,6 +1225,7 @@ export interface FileRoutesById {
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/_page/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/_page/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/_page/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
@@ -1241,7 +1242,6 @@ export interface FileRoutesById {
   "/_page/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
-  "/_page/demo/llm-agent-chat": typeof PageDemoLlmAgentChatRoute;
   "/_page/demo/object": typeof PageDemoObjectRoute;
   "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
@@ -1372,6 +1372,7 @@ export interface FileRouteTypes {
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
     | "/affordances/handles"
+    | "/artifact/llm-agent"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1388,7 +1389,6 @@ export interface FileRouteTypes {
     | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
-    | "/demo/llm-agent-chat"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -1517,6 +1517,7 @@ export interface FileRouteTypes {
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
     | "/affordances/handles"
+    | "/artifact/llm-agent"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
@@ -1533,7 +1534,6 @@ export interface FileRouteTypes {
     | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
-    | "/demo/llm-agent-chat"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -1663,6 +1663,7 @@ export interface FileRouteTypes {
     | "/_page/adapters/keyboard"
     | "/_page/adapters/virtual-selection"
     | "/_page/affordances/handles"
+    | "/_page/artifact/llm-agent"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
@@ -1679,7 +1680,6 @@ export interface FileRouteTypes {
     | "/_page/demo/date-controls"
     | "/_page/demo/history"
     | "/_page/demo/kanban"
-    | "/_page/demo/llm-agent-chat"
     | "/_page/demo/object"
     | "/_page/demo/order"
     | "/_page/demo/selection"
@@ -1883,6 +1883,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageAffordancesHandlesRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/artifact/llm-agent": {
+      id: "/_page/artifact/llm-agent";
+      path: "/artifact/llm-agent";
+      fullPath: "/artifact/llm-agent";
+      preLoaderRoute: typeof PageArtifactLlmAgentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/connectors/": {
       id: "/_page/connectors/";
       path: "/connectors";
@@ -2007,13 +2014,6 @@ declare module "@tanstack/react-router" {
       path: "/demo/kanban";
       fullPath: "/demo/kanban";
       preLoaderRoute: typeof PageDemoKanbanRouteImport;
-      parentRoute: typeof PageRoute;
-    };
-    "/_page/demo/llm-agent-chat": {
-      id: "/_page/demo/llm-agent-chat";
-      path: "/demo/llm-agent-chat";
-      fullPath: "/demo/llm-agent-chat";
-      preLoaderRoute: typeof PageDemoLlmAgentChatRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/object": {
@@ -2892,6 +2892,7 @@ interface PageRouteChildren {
   PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
   PageAdaptersVirtualSelectionRoute: typeof PageAdaptersVirtualSelectionRoute;
   PageAffordancesHandlesRoute: typeof PageAffordancesHandlesRoute;
+  PageArtifactLlmAgentRoute: typeof PageArtifactLlmAgentRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
@@ -2908,7 +2909,6 @@ interface PageRouteChildren {
   PageDemoDateControlsRoute: typeof PageDemoDateControlsRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
-  PageDemoLlmAgentChatRoute: typeof PageDemoLlmAgentChatRoute;
   PageDemoObjectRoute: typeof PageDemoObjectRoute;
   PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
@@ -3010,6 +3010,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
   PageAdaptersVirtualSelectionRoute: PageAdaptersVirtualSelectionRoute,
   PageAffordancesHandlesRoute: PageAffordancesHandlesRoute,
+  PageArtifactLlmAgentRoute: PageArtifactLlmAgentRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
@@ -3026,7 +3027,6 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoDateControlsRoute: PageDemoDateControlsRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,
-  PageDemoLlmAgentChatRoute: PageDemoLlmAgentChatRoute,
   PageDemoObjectRoute: PageDemoObjectRoute,
   PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
