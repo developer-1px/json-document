@@ -11,6 +11,7 @@ import calendarSelectionMoveSource from "../../../../packages/json-document-edit
 import calendarValidationSource from "../../../../packages/json-document-editing/src/calendar-validation.ts?raw";
 import calendarEventLabelSource from "../../../../packages/json-document-calendar/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
+import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
@@ -164,6 +165,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/calendar-validation.ts", calendarValidationSource],
   ["packages/json-document-calendar/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
+  ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
@@ -439,6 +441,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-web",
     symbol: "calendarKeyFromWebRow",
     sourcePath: "packages/json-document-web/src/calendar-input.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "DateGrid",
+    sourcePath: "packages/json-document-calendar/src/date-grid.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",

@@ -255,6 +255,51 @@ interface CalendarViewportPositionOptions {
 ```ts
 calendarYearMonths(visibleDate: string): ReadonlyArray<string>
 ```
+## `DateGrid`
+
+```ts
+DateGrid(props: DateGridProps): ReactNode
+```
+## `DateGridCellRenderProps`
+
+```ts
+interface DateGridCellRenderProps {
+  readonly cell: CalendarCell;
+  readonly selected: boolean;
+  readonly focused: boolean;
+  readonly today: boolean;
+}
+```
+## `DateGridColumnHeader`
+
+```ts
+interface DateGridColumnHeader {
+  readonly label: string;
+  readonly content: ReactNode;
+}
+```
+## `DateGridProps`
+
+```ts
+interface DateGridProps {
+  readonly label: string;
+  readonly cells: ReadonlyArray<CalendarCell>;
+  readonly grain: CalendarGrain;
+  readonly focusDate: string;
+  readonly today?: string;
+  readonly className?: string;
+  readonly rowClassName?: string;
+  readonly columnHeaders?: ReadonlyArray<DateGridColumnHeader>;
+  readonly columnHeaderClassName?: string;
+  readonly cellAffordance?: ControlAffordance;
+  readonly isDateSelected: (date: string) => boolean;
+  readonly onDateSelect: (date: string) => void;
+  readonly onFocusDateChange?: (date: string) => void;
+  readonly onDateMove?: (date: string) => void;
+  readonly getCellClassName?: (props: DateGridCellRenderProps) => string | undefined;
+  readonly renderCellDecoration?: (props: DateGridCellRenderProps) => ReactNode;
+}
+```
 ## `DatePicker`
 
 ```ts

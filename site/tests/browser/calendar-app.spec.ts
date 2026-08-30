@@ -175,7 +175,7 @@ test("Calendar month and year views show date grids", async ({ page }) => {
   await expect(page.getByRole("radio", { name: "Month", exact: true })).toBeChecked();
   await page.getByLabel("Calendar sources", { exact: true }).focus();
   await expect(page.getByRole("grid", { name: "Jump 2026-05", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "2026-04-27", exact: true }).first()).toHaveText("27");
+  await expect(page.getByRole("gridcell", { name: "2026-04-27", exact: true }).first()).toHaveText("27");
 
   await page.getByRole("button", { name: "Next month", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Jump 2026-06", exact: true })).toBeVisible();

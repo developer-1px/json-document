@@ -11,6 +11,7 @@ import {
   calendarYearMonths,
   DatePicker,
   DateRangePicker,
+  DateGrid,
   HtmlDateField,
   RangeCalendar,
   shiftVisibleDate,
@@ -142,6 +143,71 @@ describe("HtmlDateField", () => {
 });
 
 describe("CalendarGrid and RangeCalendar", () => {
+  test("owns date-cell selection, focus movement, today state, and decoration", async () => {
+    const user = userEvent.setup();
+    const cells = calendarCells("month", "2026-08-03");
+    function Harness() {
+      const [selected, setSelected] = useState("2026-08-03");
+      const [visible, setVisible] = useState("2026-08-03");
+      return (
+        <>
+          <DateGrid
+            label="Available dates"
+            cells={cells}
+            grain="month"
+            focusDate={selected}
+            today="2026-08-04"
+            columnHeaders={[{ label: "Monday", content: "M" }]}
+            isDateSelected={(date) => date === selected}
+            onDateSelect={setSelected}
+            onFocusDateChange={setVisible}
+            renderCellDecoration={({ cell }) => cell.date === "2026-08-05" ? <span>busy</span> : null}
+          />
+          <output aria-label="selected">{selected}</output>
+          <output aria-label="visible">{visible}</output>
+        </>
+      );
+    }
+
+    render(<Harness />);
+    expect(screen.getByRole("columnheader", { name: "Monday" }).textContent).toBe("M");
+    expect(screen.getByRole("gridcell", { name: "2026-08-04" }).getAttribute("aria-current")).toBe("date");
+    expect(screen.getByRole("gridcell", { name: "2026-08-05" }).textContent).toBe("5busy");
+    await user.click(screen.getByRole("gridcell", { name: "2026-08-06" }));
+    expect(screen.getByLabelText("selected").textContent).toBe("2026-08-06");
+    screen.getByRole("grid", { name: "Available dates" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByLabelText("visible").textContent).toBe("2026-08-07");
+    await user.keyboard("{Enter}");
+    expect(screen.getByLabelText("selected").textContent).toBe("2026-08-07");
+  });
+
+  test("requests the next visible period when focus crosses the supplied cells", async () => {
+    const user = userEvent.setup();
+    function Harness() {
+      const [visible, setVisible] = useState("2026-08-31");
+      return (
+        <>
+          <DateGrid
+            label="Period boundary"
+            cells={calendarCells("month", "2026-08-31")}
+            grain="month"
+            focusDate="2026-08-31"
+            isDateSelected={() => false}
+            onDateSelect={() => undefined}
+            onFocusDateChange={setVisible}
+          />
+          <output aria-label="visible boundary">{visible}</output>
+        </>
+      );
+    }
+
+    render(<Harness />);
+    screen.getByRole("grid", { name: "Period boundary" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByLabelText("visible boundary").textContent).toBe("2026-09-01");
+  });
+
   test("moves visible periods without skipping clamped civil dates", () => {
     expect(shiftVisibleDate("2026-01-01", "day", -1)).toBe("2025-12-31");
     expect(shiftVisibleDate("2026-01-31", "month", 1)).toBe("2026-02-28");

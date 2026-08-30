@@ -36,4 +36,22 @@ Primitive package:
 <DateRangePicker label="Trip" value={range} onValueChange={setRange} />
 ```
 
+`DateGrid` is the reusable date-cell boundary underneath complete Calendar
+controls and product navigators. It keeps grid semantics, focus movement, and
+selection binding canonical while allowing product-owned cell decoration:
+
+```tsx
+<DateGrid
+  label="Available dates"
+  cells={calendarCells("month", visibleDate)}
+  grain="month"
+  focusDate={value}
+  today={today}
+  isDateSelected={(date) => date === value}
+  onDateSelect={setValue}
+  onFocusDateChange={setVisibleDate}
+  renderCellDecoration={({ cell }) => busyDates.has(cell.date) ? <span>•</span> : null}
+/>
+```
+
 `/demo/date-controls` exercises the public controls and links their source.
