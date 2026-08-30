@@ -425,7 +425,7 @@
   }
 
   [data-ui-control="command"][data-ui-presentation="icon"] {
-    @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border border-line-subtle/60 bg-background-subtle/70 p-0 text-foreground-default outline-none transition-colors hover:border-line-default hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-line-subtle/40 disabled:bg-background-subtle/50 disabled:text-foreground-muted;
+    @apply flex size-8 min-h-8 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-foreground-default outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-foreground-muted;
   }
 
   :is([data-ui-component="command-presentation"], [data-ui-component="toggle-presentation"]) {

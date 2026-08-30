@@ -115,7 +115,7 @@ export const ui = {
     resizeHandle: "absolute h-2 w-2 border border-background-canvas bg-line-accent",
     contextMenu: "absolute z-10 min-w-28 rounded-surface border border-line-subtle bg-background-canvas py-1 shadow-overlay",
     contextMenuItem: "block w-full px-3 py-1 text-left text-xs text-foreground-default hover:bg-background-subtle",
-    icon: "flex size-8 cursor-pointer items-center justify-center rounded-control border border-line-subtle/60 bg-background-subtle/70 text-foreground-default outline-none transition-colors hover:border-line-default hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-line-subtle/40 disabled:bg-background-subtle/50 disabled:text-foreground-muted",
+    icon: "flex size-8 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent text-foreground-default outline-none transition-colors hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-foreground-muted",
   },
   field: {
     control: "min-h-9 rounded-control border border-transparent bg-background-subtle/70 px-3 py-1.5 text-sm leading-6 text-foreground-strong outline-none hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:bg-background-canvas focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-background-subtle disabled:text-foreground-muted",
