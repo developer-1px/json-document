@@ -165,6 +165,43 @@ test("dynamic children template가 상대 binding 목록을 스트리밍 교체�
   await expect(page.getByText("진행")).toHaveCount(1);
 });
 
+test("component는 있지만 root가 없는 surface를 빈 화면으로 숨기지 않는다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const messages = [
+    { version: "v0.9", createSurface: { surfaceId: "missing-root", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "missing-root", components: [{ id: "title", component: "Text", text: "도달 불가" }] } },
+  ];
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({ body: agUiStream("thread-missing-root", ["root가 없습니다.\n```a2ui\n", ...messages.map((message) => `${JSON.stringify(message)}\n`), "```"]), contentType: "text/event-stream" }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("root 없는 화면");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  await expect(page.getByText("생성된 UI를 해석하지 못했습니다.")).toBeVisible();
+  await expect(page.getByText("도달 불가")).toHaveCount(0);
+  await expect(page.getByText(/createSurface/)).toHaveCount(0);
+});
+
+test("A2UI Text body가 site Markdown renderer와 디자인을 재사용한다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const messages = [
+    { version: "v0.9", createSurface: { surfaceId: "markdown-body", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "markdown-body", components: [{ id: "root", component: "Text", text: "**중요**\n\n- 첫째\n- 둘째", variant: "body" }] } },
+  ];
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({ body: agUiStream("thread-markdown-body", ["Markdown 본문입니다.\n```a2ui\n", ...messages.map((message) => `${JSON.stringify(message)}\n`), "```"]), contentType: "text/event-stream" }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("Markdown 본문");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  const generated = page.locator("[data-a2ui-surface]");
+  await expect(generated.locator("strong")).toHaveText("중요");
+  await expect(generated.locator("li")).toHaveText(["첫째", "둘째"]);
+  await expect(generated.locator("[data-markdown-renderer]")).toBeVisible();
+});
+
 function agUiStream(threadId: string, text: string | ReadonlyArray<string>): string {
   const runId = "run-browser";
   const messageId = "message-browser";
