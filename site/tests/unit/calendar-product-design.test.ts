@@ -117,27 +117,32 @@ describe("calendar product design", () => {
   });
 
   test("month and year views compose date grids instead of title lists", () => {
-    const source = readFileSync(
+    const host = readFileSync(
       path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"),
       "utf8",
     );
-    expect(source).toContain("calendarMonthDayLayout");
-    expect(source).toContain("calendarMonthWeekLayout");
-    expect(source).toContain("Resize ${item.event.title} end");
-    expect(source).toContain("useCalendarHand");
-    expect(source).toContain("clipEnd");
-    expect(source).toContain("calendarBusyDates");
-    expect(source).toContain('calendarCells("month"');
-    expect(source).toContain("Repeat every");
-    expect(source).toContain("const hourStart = 0");
-    expect(source).toContain("const hourEnd = 24");
-    expect(source).toContain("overflowDay");
-    expect(source).toContain("Events on");
-    expect(source).toContain("setOverflowDay(cell.date)");
-    expect(source).toContain("paintedEvents = hand.paintedEvents");
-    expect(source).toContain('color: "accent"');
-    expect(source).not.toContain("uniqueTitles");
-    expect(source).not.toContain('!isPrimary(item.event) ? null : (');
-    expect(source).toContain('affordance={calendarControlAffordance("eventResizeEnd")}');
+    const monthGrid = readFileSync(
+      path.join(siteRoot, "../packages/json-document-calendar/src/calendar-month-grid.tsx"),
+      "utf8",
+    );
+    expect(monthGrid).toContain("calendarMonthDayLayout");
+    expect(monthGrid).toContain("calendarMonthWeekLayout");
+    expect(monthGrid).toContain("props.labels.resizeEnd(item.event)");
+    expect(monthGrid).toContain("clippedEnd");
+    expect(monthGrid).toContain("overflowDay");
+    expect(monthGrid).toContain("setOverflowDay(cell.date)");
+    expect(host).toContain("<CalendarMonthGrid");
+    expect(host).toContain("useCalendarHand");
+    expect(host).toContain("calendarBusyDates");
+    expect(host).toContain('calendarCells("month"');
+    expect(host).toContain("Repeat every");
+    expect(host).toContain("const hourStart = 0");
+    expect(host).toContain("const hourEnd = 24");
+    expect(host).toContain("Events on");
+    expect(host).toContain("paintedEvents = hand.paintedEvents");
+    expect(host).toContain('color: "accent"');
+    expect(host).not.toContain("uniqueTitles");
+    expect(monthGrid).not.toContain('!hand.isPrimaryOccurrence(item.event.id, item.event.start) ? null : (');
+    expect(host).toContain('eventResizeEnd: calendarControlAffordance("eventResizeEnd")');
   });
 });

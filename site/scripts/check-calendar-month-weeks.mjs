@@ -4,15 +4,17 @@ import { resolve } from "node:path";
 const root = resolve(new URL("../..", import.meta.url).pathname);
 const owner = read("packages/json-document-calendar/src/date-values.ts");
 const ownerIndex = read("packages/json-document-calendar/src/index.ts");
+const monthGrid = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarMonthWeeks");
 requireText(ownerIndex, "calendarMonthWeeks");
-requireText(host, "calendarMonthWeeks(visibleDate)");
+requireText(monthGrid, "calendarMonthWeeks(props.visibleDate)");
+requireText(host, "<CalendarMonthGrid");
 forbid(host, /function monthWeeks/);
 forbid(host, /index \+= 7/);
 
-console.log("Calendar month weeks guard ok; Calendar owner, public export, and Host consumer checked.");
+console.log("Calendar month weeks guard ok; Calendar projection owner, CalendarMonthGrid, and Host consumer checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

@@ -12,6 +12,7 @@ import calendarValidationSource from "../../../../packages/json-document-editing
 import calendarEventLabelSource from "../../../../packages/json-document-calendar/src/calendar-event-label.ts?raw";
 import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
 import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
+import calendarMonthGridSource from "../../../../packages/json-document-calendar/src/calendar-month-grid.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
@@ -62,6 +63,7 @@ import uiMenuSource from "../../../../packages/json-document-ui-primitives-react
 import uiSelectSource from "../../../../packages/json-document-ui-primitives-react/src/select.tsx?raw";
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
+import uiControlAffordanceSource from "../../../../packages/json-document-ui-primitives-react/src/control-affordance.ts?raw";
 import uiChoiceSource from "../../../../packages/json-document-ui-primitives-react/src/choice.tsx?raw";
 import uiInputControlsSource from "../../../../packages/json-document-ui-primitives-react/src/input-controls.tsx?raw";
 import uiPresentationsSource from "../../../../packages/json-document-ui-primitives-react/src/presentations.tsx?raw";
@@ -166,6 +168,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-calendar/src/calendar-event-label.ts", calendarEventLabelSource],
   ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
+  ["packages/json-document-calendar/src/calendar-month-grid.tsx", calendarMonthGridSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
   ["packages/json-document-react/src/editing-observation.ts", editingObservationSource],
@@ -217,6 +220,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/select.tsx", uiSelectSource],
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
+  ["packages/json-document-ui-primitives-react/src/control-affordance.ts", uiControlAffordanceSource],
   ["packages/json-document-ui-primitives-react/src/choice.tsx", uiChoiceSource],
   ["packages/json-document-ui-primitives-react/src/input-controls.tsx", uiInputControlsSource],
   ["packages/json-document-ui-primitives-react/src/presentations.tsx", uiPresentationsSource],
@@ -446,6 +450,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-calendar",
     symbol: "DateGrid",
     sourcePath: "packages/json-document-calendar/src/date-grid.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "CalendarMonthGrid",
+    sourcePath: "packages/json-document-calendar/src/calendar-month-grid.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",

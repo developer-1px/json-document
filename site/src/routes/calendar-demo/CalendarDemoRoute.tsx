@@ -9,11 +9,8 @@ import {
   calendarDatePart,
   calendarDocumentCalendar,
   calendarDocumentCalendars,
-  calendarEventsOnDay,
   calendarInstantAt,
   calendarIntervalLastDate,
-  calendarMonthDayLayout,
-  calendarMonthWeekLayout,
   calendarNowMarker,
   calendarOccurrenceTopology,
   calendarRecurrenceWithFrequency,
@@ -43,11 +40,11 @@ import {
   HtmlDateField,
   calendarCellInterval,
   calendarCells,
-  calendarEventLabel,
-  calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
   DateGrid,
+  CalendarMonthGrid,
+  type CalendarMonthGridHandle,
   shiftVisibleDate,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-calendar";
@@ -140,6 +137,7 @@ export function CalendarDemoRoute(props: {
   const styles = calendarDemoRecipe();
   const embedded = useDemoEmbed();
   const hoursRef = useRef<HTMLDivElement>(null);
+  const monthGridRef = useRef<CalendarMonthGridHandle>(null);
   const [editor] = useState(() => {
     let sequence = 0;
     return createCalendarEditor(initial, {
@@ -166,8 +164,14 @@ export function CalendarDemoRoute(props: {
   const occurrenceEnd = hand.occurrence.end;
   const scope = hand.scope;
   const setScope = hand.setScope;
-  const [overflowDay, setOverflowDay] = useState<string | null>(null);
   const [detailsEditing, setDetailsEditing] = useState(false);
+  const pointerInteractions = useCalendarPointerInteractions(hand, {
+    hourStart,
+    hourEnd,
+    stepMinutes: 15,
+    pixelsPerHour: pxPerHour,
+    onMonthPointerBegin: () => monthGridRef.current?.dismissOverflow(),
+  });
   const {
     hoveredTime,
     instantAt,
@@ -180,21 +184,11 @@ export function CalendarDemoRoute(props: {
     allDayPointerDown,
     allDayPointerMove,
     allDayPointerUp,
-    monthPointerDown,
-    monthPointerMove,
-    monthPointerUp,
     cancelTimePointer,
     cancelAllDayPointer,
-    cancelMonthPointer,
     resizeTimed,
     resizeAllDay,
-  } = useCalendarPointerInteractions(hand, {
-    hourStart,
-    hourEnd,
-    stepMinutes: 15,
-    pixelsPerHour: pxPerHour,
-    onMonthPointerBegin: () => setOverflowDay(null),
-  });
+  } = pointerInteractions;
   const view = props.view ?? viewState;
   const visibleDate = props.visibleDate ?? visibleDateState;
   useCalendarViewportPosition({
@@ -264,10 +258,6 @@ export function CalendarDemoRoute(props: {
     ? null
     : calendarBusyDates(paintedEvents, yearCellInterval.start, yearCellInterval.end);
 
-  useEffect(() => {
-    setOverflowDay(null);
-  }, [view, visibleDate]);
-
   useCalendarKeyboard({
     active: !embedded,
     onView: setView,
@@ -279,9 +269,7 @@ export function CalendarDemoRoute(props: {
     onUndo: hand.undo,
     onRedo: hand.redo,
     onDismiss: () => {
-      if (overflowDay === null) return false;
-      setOverflowDay(null);
-      return true;
+      return monthGridRef.current?.dismissOverflow() ?? false;
     },
   });
 
@@ -660,182 +648,56 @@ export function CalendarDemoRoute(props: {
             <div className={classes("min-w-0 flex-1", view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
             {view === "day" || view === "week" ? timeGrid : null}
             {view === "month" ? (
-              <div role="grid" aria-label="Month" aria-multiselectable="true" className="min-w-[36rem]" onPointerMove={monthPointerMove}>
-                <div className="grid grid-cols-7">
-                  {weekdays.map((name) => (
-                    <div key={name} role="columnheader" className={styles.monthHead()}>
-                      {name}
-                    </div>
-                  ))}
-                </div>
-                {calendarMonthWeeks(visibleDate).map((week) => {
-                  const dates = week.map((cell) => cell.date);
-                  const layout = calendarMonthWeekLayout(paintedEvents, dates, monthDayRows);
-                  return (
-                    <div
-                      key={dates[0]}
-                      role="row"
-                      data-calendar-week={dates[0]}
-                      className={styles.monthWeek()}
-                      style={{
-                        gridTemplateRows: `1.75rem repeat(${layout.laneCount}, 1.25rem) minmax(2.5rem, 1fr)`,
-                      }}
-                    >
-                      {week.map((cell, index) => {
-                        const onDay = calendarEventsOnDay(paintedEvents, cell.date);
-                        return (
-                          <div
-                            key={cell.date}
-                            role="gridcell"
-                            aria-label={cell.date}
-                            aria-selected={onDay.some(isSelected) || selectedSlot === cell.date}
-                            aria-current={cell.date === today ? "date" : undefined}
-                            data-calendar-day={cell.date}
-                            tabIndex={-1}
-                            data-selected={selectedSlot === cell.date ? "true" : undefined}
-                            data-ui-affordance={calendarControlAffordance("monthCell")}
-                            className={classes(
-                              styles.monthDay(),
-                              cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
-                              overflowDay === cell.date && "z-20",
-                            )}
-                            style={{ gridColumn: index + 1, gridRow: "1 / -1" }}
-                            onPointerDown={(event) => monthPointerDown(event, cell.date, dates, null, null, null)}
-                            onPointerUp={monthPointerUp}
-                            onDoubleClick={() => createAllDayOn(cell.date)}
-                            onPointerCancel={(event) => cancelMonthPointer(event.pointerId)}
-                            onLostPointerCapture={(event) => cancelMonthPointer(event.pointerId, "lost-capture")}
-                          >
-                            {overflowDay === cell.date ? (
-                              <div
-                                role="dialog"
-                                aria-label={`Events on ${cell.date}`}
-                                className={classes(styles.monthOverflow(), ui.surface.overlay)}
-                                onPointerDown={(event) => event.stopPropagation()}
-                                onDoubleClick={(event) => event.stopPropagation()}
-                              >
-                                <Command
-                                  affordance={calendarControlAffordance("overflowDate")}
-                                  className={classes("px-1 text-left", styles.quietAction(), ui.text.body)}
-                                  onClick={() => setLocation("day", cell.date)}
-                                >
-                                  {cell.date}
-                                </Command>
-                                {calendarMonthDayLayout(paintedEvents, cell.date, Math.max(onDay.length, 1)).events.map((item) => (
-                                  <div
-                                    key={`${item.id}:${item.start}`}
-                                    ref={isPrimary(item) ? eventDetailsPosition.anchorRef : undefined}
-                                    data-calendar-event-anchor={isPrimary(item) ? "primary" : undefined}
-                                  >
-                                    <SelectableItem
-                                      affordance={calendarControlAffordance("overflowEvent")}
-                                      selected={isSelected(item)}
-                                      data-primary={isPrimary(item) ? "true" : undefined}
-                                      aria-label={calendarEventLabel(item)}
-                                      data-calendar-color={calendarColor(document, item.calendarId)}
-                                      className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
-                                      onClick={(event) => {
-                                        event.stopPropagation();
-                                        selectEvent(item, event);
-                                      }}
-                                      onDoubleClick={(event) => {
-                                        event.stopPropagation();
-                                        hand.beginTitleRename(item.id);
-                                      }}
-                                    >
-                                      <MonthEventCopy event={item} />
-                                    </SelectableItem>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <>
-                                <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
-                                  {cell.day}
-                                </span>
-                                <div className="shrink-0" style={{ height: `${layout.laneCount * 1.25}rem` }} />
-                                {(layout.hiddenCounts[index] ?? 0) > 0 ? (
-                                  <Command
-                                    affordance={calendarControlAffordance("moreDisclosure")}
-                                    className={classes(styles.monthMore(), ui.text.meta)}
-                                    onPointerDown={(event) => event.stopPropagation()}
-                                    onClick={() => setOverflowDay(cell.date)}
-                                  >
-                                    {`+${layout.hiddenCounts[index]} more`}
-                                  </Command>
-                                ) : null}
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
-                      {overflowDay === null ? layout.items.map((item) => {
-                        const weekLast = dates.at(-1);
-                        const lastDay = calendarIntervalLastDate(item.event.start, item.event.end, true);
-                        const clipEnd = isCalendarAllDay(item.event) && weekLast !== undefined && lastDay > weekLast;
-                        return (
-                        <div
-                          key={`${item.event.id}:${allDayPreview?.originEventId === item.event.id
-                            ? allDayPreview.originEventStart ?? item.event.start
-                            : item.event.start}`}
-                          ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
-                          data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
-                          data-calendar-span={String(item.span)}
-                          className="group/event relative z-10 min-w-0 w-full"
-                          style={{
-                            gridColumn: `${item.startIndex + 1} / span ${item.span}`,
-                            gridRow: 2 + item.lane,
-                          }}
-                        >
-                          <SelectableItem
-                            affordance={calendarControlAffordance("eventMonth")}
-                            selected={isSelected(item.event)}
-                            data-primary={isPrimary(item.event) ? "true" : undefined}
-                            aria-label={calendarEventLabel(item.event)}
-                            data-calendar-color={calendarColor(document, item.event.calendarId)}
-                            data-calendar-move-surface="true"
-                            data-preview={item.event.id === "preview" ? "true" : undefined}
-                            className={isCalendarAllDay(item.event) ? styles.monthAllDay() : styles.monthTimed()}
-                            onPointerDown={(event) => {
-                              event.stopPropagation();
-                              monthPointerDown(event, dates[item.startIndex] ?? visibleDate, dates, item.event.id, item.event.start, item.event.end);
-                            }}
-                            onPointerUp={monthPointerUp}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              if (consumeEventClick()) return;
-                              selectEvent(item.event, event);
-                            }}
-                            onDoubleClick={(event) => {
-                              event.stopPropagation();
-                              if (consumeEventDoubleClick()) return;
-                              hand.beginTitleRename(item.event.id);
-                            }}
-                          >
-                            <MonthEventCopy event={item.event} />
-                          </SelectableItem>
-                          {item.event.id === "preview" || !isCalendarAllDay(item.event) ? null : (
-                            clipEnd ? null : (
-                              <ResizeHandle
-                                affordance={calendarControlAffordance("eventResizeEnd")}
-                                label={`Resize ${item.event.title} end`}
-                                orientation="horizontal"
-                                className={styles.resizeEdgeVertical()}
-                                onResize={(delta, phase) => {
-                                  const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
-                                  resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
-                                }}
-                              />
-                            )
-                          )}
-                        </div>
-                        );
-                      }) : null}
-
-                    </div>
-                  );
-                })}
-              </div>
+              <CalendarMonthGrid
+                ref={monthGridRef}
+                visibleDate={visibleDate}
+                today={today}
+                events={paintedEvents}
+                weekdays={weekdays}
+                rowLimit={monthDayRows}
+                hand={hand}
+                interactions={pointerInteractions}
+                selectionTopology={selectionTopology}
+                primaryEventRef={eventDetailsPosition.anchorRef}
+                affordances={{
+                  dateCell: calendarControlAffordance("monthCell"),
+                  event: calendarControlAffordance("eventMonth"),
+                  eventResizeEnd: calendarControlAffordance("eventResizeEnd"),
+                  moreDisclosure: calendarControlAffordance("moreDisclosure"),
+                  overflowDate: calendarControlAffordance("overflowDate"),
+                  overflowEvent: calendarControlAffordance("overflowEvent"),
+                }}
+                classNames={{
+                  root: "min-w-[36rem]",
+                  headerRow: "grid grid-cols-7",
+                  header: styles.monthHead(),
+                  week: styles.monthWeek(),
+                  day: styles.monthDay(),
+                  dayInPeriod: ui.text.body,
+                  dayOutsidePeriod: ui.text.meta,
+                  dayOverflow: "z-20",
+                  dayNumber: styles.dayNumber(),
+                  today: styles.todayMark(),
+                  laneSpacer: "shrink-0",
+                  moreDisclosure: classes(styles.monthMore(), ui.text.meta),
+                  overflow: classes(styles.monthOverflow(), ui.surface.overlay),
+                  overflowDate: classes("px-1 text-left", styles.quietAction(), ui.text.body),
+                  eventContainer: "group/event relative z-10 min-w-0 w-full",
+                  allDayEvent: styles.monthAllDay(),
+                  timedEvent: styles.monthTimed(),
+                  eventTitle: "min-w-0 truncate",
+                  eventTime: styles.eventTime(),
+                  resizeEnd: styles.resizeEdgeVertical(),
+                }}
+                labels={{
+                  grid: "Month",
+                  overflow: (date) => `Events on ${date}`,
+                  more: (count) => `+${count} more`,
+                  resizeEnd: (event) => `Resize ${event.title} end`,
+                }}
+                getEventColor={(event) => calendarColor(document, event.calendarId)}
+                onNavigateDate={(date) => setLocation("day", date)}
+              />
             ) : null}
             {view === "year" ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
@@ -1070,16 +932,4 @@ export function CalendarDemoRoute(props: {
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
   return calendarDocumentCalendar(document, calendarId)?.color === "accent" ? "accent" : "subtle";
-}
-
-function MonthEventCopy(props: { readonly event: CalendarEvent }): ReactNode {
-  const styles = calendarDemoRecipe();
-  const time = calendarTimeLabel(props.event.start);
-  if (isCalendarAllDay(props.event)) return props.event.title;
-  return (
-    <>
-      <span className="min-w-0 truncate">{props.event.title}</span>
-      {time.length > 0 ? <span className={styles.eventTime()}>{time}</span> : null}
-    </>
-  );
 }

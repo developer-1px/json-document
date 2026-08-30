@@ -4,16 +4,18 @@ import { resolve } from "node:path";
 const root = resolve(new URL("../..", import.meta.url).pathname);
 const owner = read("packages/json-document-calendar/src/calendar-event-label.ts");
 const ownerIndex = read("packages/json-document-calendar/src/index.ts");
+const monthGrid = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarEventLabel");
 requireText(owner, "calendarTimeLabel(event.start)");
 forbid(owner, /json-document-editing/);
 requireText(ownerIndex, "calendarEventLabel");
-requireCount(host, "calendarEventLabel(", 2);
+requireCount(host, "calendarEventLabel(", 0);
+requireCount(monthGrid, "calendarEventLabel(", 1);
 forbid(host, /function monthEventLabel/);
 
-console.log("Calendar event label guard ok; structural Calendar owner and two Host consumers checked.");
+console.log("Calendar event label guard ok; structural Calendar owner and CalendarMonthGrid consumer checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");
