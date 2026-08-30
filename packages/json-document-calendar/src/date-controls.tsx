@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { Choice } from "@interactive-os/json-document-ui-primitives-react";
+import { Choice, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import {
   addCalendarDays,
   addCalendarMonths,
@@ -25,6 +25,7 @@ export function HtmlDateField(props: {
   readonly label: string;
   readonly value: string;
   readonly onValueChange: (value: string) => void;
+  readonly affordance?: ControlAffordance;
 }): ReactNode {
   const [draft, setDraft] = useState(props.value);
   useEffect(() => { setDraft(props.value); }, [props.value]);
@@ -40,7 +41,7 @@ export function HtmlDateField(props: {
   }
 
   return (
-    <label data-ui-control="date-field" data-ui-date-type={props.type}>
+    <label data-ui-control="date-field" data-ui-date-type={props.type} data-ui-affordance={props.affordance}>
       <span>{props.label}</span>
       <input
         type={props.type}

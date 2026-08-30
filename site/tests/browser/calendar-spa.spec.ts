@@ -108,7 +108,7 @@ test("Calendar month all-day bar resizes by its end handle", async ({ page }) =>
   await page.mouse.up();
   const month = page.getByRole("grid", { name: "Month", exact: true });
   await expect(month.locator("[data-calendar-span=\"2\"]")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Resize Event start", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Resize Event start", exact: true })).toHaveCount(0);
   const handle = page.getByRole("button", { name: "Resize Event end", exact: true });
   const box = await handle.boundingBox();
   if (box === null) throw new Error("Month resize handle is not visible.");
@@ -123,35 +123,6 @@ test("Calendar month all-day bar resizes by its end handle", async ({ page }) =>
   await expect(inspector.getByLabel("Start", { exact: true })).toHaveValue("2026-05-22");
   const endValue = await inspector.getByLabel("End", { exact: true }).inputValue();
   expect(endValue >= "2026-05-24").toBe(true);
-  await expect(month).toBeVisible();
-});
-
-test("Calendar month all-day bar resizes by its start handle", async ({ page }) => {
-  await page.goto("/demo/calendar?view=month&date=2026-05-25");
-  const from = page.getByRole("gridcell", { name: "2026-05-22", exact: true });
-  const to = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
-  const start = await from.boundingBox();
-  const end = await to.boundingBox();
-  if (start === null || end === null) throw new Error("Month days are not visible.");
-  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, { steps: 8 });
-  await page.mouse.up();
-  const month = page.getByRole("grid", { name: "Month", exact: true });
-  await expect(month.locator("[data-calendar-span=\"2\"]")).toBeVisible();
-  const handle = page.getByRole("button", { name: "Resize Event start", exact: true });
-  const box = await handle.boundingBox();
-  if (box === null) throw new Error("Month start resize handle is not visible.");
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width / 2 - start.width, box.y + box.height / 2, { steps: 8 });
-  await page.mouse.up();
-  await expect(month.locator("[data-calendar-span=\"3\"]")).toBeVisible();
-  await page.keyboard.press("F2");
-  const inspector = page.getByRole("region", { name: "Event" });
-  const startValue = await inspector.getByLabel("Start", { exact: true }).inputValue();
-  expect(startValue <= "2026-05-21").toBe(true);
-  await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-23");
   await expect(month).toBeVisible();
 });
 

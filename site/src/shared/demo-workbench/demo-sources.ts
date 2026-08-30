@@ -746,6 +746,11 @@ const registeredPublicUsages = [
     symbol,
     sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx",
   })),
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "ControlAffordance",
+    sourcePath: "packages/json-document-ui-primitives-react/src/control-affordance.ts",
+  },
   ...(["ProductShell", "ProductCanvas", "ProductInspector"] as const).map((symbol) => ({
     packageName: "@interactive-os/json-document-ui-primitives-react",
     symbol,

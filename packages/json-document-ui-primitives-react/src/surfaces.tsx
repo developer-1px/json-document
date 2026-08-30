@@ -9,6 +9,7 @@ import {
   type ResizeHandleDescriptor,
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession } from "@interactive-os/json-document-web";
+import type { ControlAffordanceProps } from "./control-affordance.js";
 
 export function FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & {
   readonly onFiles: (files: ReadonlyArray<File>) => void;
@@ -164,7 +165,7 @@ export function ControlHandle(props: ControlHandleProps) {
   return <button {...buttonProps} {...binding.handleProps} type="button" aria-label={label} data-ui-primitive="control-handle" style={{ ...style, cursor: binding.cursor }} />;
 }
 
-export type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & {
+export type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & ControlAffordanceProps & {
   readonly label: string;
   readonly orientation: "horizontal" | "vertical";
   readonly onResize: (delta: number, phase: "preview" | "commit") => void;
@@ -174,7 +175,7 @@ export type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "a
 };
 
 export function ResizeHandle(props: ResizeHandleProps) {
-  const { label, orientation, onResize, onHandle, descriptor = {
+  const { affordance, label, orientation, onResize, onHandle, descriptor = {
     kind: "resize",
     edge: orientation === "horizontal" ? "e" : "s",
     cursor: { idle: orientation === "horizontal" ? "col-resize" : "row-resize" },
@@ -187,5 +188,5 @@ export function ResizeHandle(props: ResizeHandleProps) {
       onResize(orientation === "horizontal" ? event.delta.dx : event.delta.dy, event.phase);
     },
   });
-  return <button {...buttonProps} {...binding.handleProps} type="button" aria-label={label} data-ui-primitive="resize-handle" className={className} style={{ ...style, cursor: binding.cursor }} />;
+  return <button {...buttonProps} {...binding.handleProps} type="button" aria-label={label} data-ui-primitive="resize-handle" data-ui-affordance={affordance} data-ui-orientation={orientation} className={className} style={{ ...style, cursor: binding.cursor }} />;
 }

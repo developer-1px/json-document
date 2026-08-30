@@ -69,6 +69,7 @@ import { classes, ui } from "../../shared/ui/styles";
 import { CalendarDemoNavigator } from "./calendar-demo-navigator";
 import { calendarSearchDefaults } from "./calendar-search";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
+import { calendarControlAffordance } from "./calendar-control-affordances";
 
 function event(fields: {
   readonly id: string;
@@ -353,6 +354,7 @@ export function CalendarDemoRoute(props: {
             data-calendar-allday-day={day}
             tabIndex={-1}
             data-selected={selectedSlot === day ? "true" : undefined}
+            data-ui-affordance={calendarControlAffordance("allDayCell")}
             className={classes("min-h-10", styles.weekCell())}
             style={{ gridRow: `2 / span ${allDayLaneCount}` }}
             onPointerDown={(event) => allDayPointerDown(event, day, null, null, null, null)}
@@ -371,6 +373,7 @@ export function CalendarDemoRoute(props: {
             style={{ gridColumn: `${item.startIndex + 2} / span ${item.span}`, gridRow: 2 + item.lane }}
           >
             <SelectableItem
+              affordance={calendarControlAffordance("eventAllDay")}
               selected={isSelected(item.event)}
               data-primary={isPrimary(item.event) ? "true" : undefined}
               aria-label={item.event.title}
@@ -396,11 +399,12 @@ export function CalendarDemoRoute(props: {
             >
               {item.event.title}
             </SelectableItem>
-            {item.event.id === "preview" || !isPrimary(item.event) ? null : (
+            {item.event.id === "preview" ? null : (
               <ResizeHandle
+                affordance={calendarControlAffordance("eventResizeEnd")}
                 label={`Resize ${item.event.title} end`}
                 orientation="horizontal"
-                className={classes("right-0 top-0 h-full w-2", styles.resizeEdgeVertical())}
+                className={styles.resizeEdgeVertical()}
                 onResize={(delta, phase) => {
                   const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
                   resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
@@ -447,6 +451,8 @@ export function CalendarDemoRoute(props: {
               data-calendar-day={day}
               data-calendar-grid="time"
               tabIndex={-1}
+              data-ui-affordance={calendarControlAffordance("timeCell")}
+              data-ui-presentation="calendar-time-grid"
               className={classes("overflow-hidden", styles.weekCell())}
               style={{ height: (hourEnd - hourStart) * pxPerHour }}
               onPointerDown={(event) => timePointerDown(event, day, null, null, null, null)}
@@ -461,6 +467,7 @@ export function CalendarDemoRoute(props: {
               {selectedSlot?.startsWith(`${day}T`) ? (
                 <div
                   data-calendar-selected-slot={selectedSlot}
+                  data-ui-affordance={calendarControlAffordance("selectedSlot")}
                   className={styles.selectedSlot()}
                   style={{
                     top: (Number(selectedSlot.slice(11, 13)) * 60 + Number(selectedSlot.slice(14, 16)) - hourStart * 60) * (pxPerHour / 60),
@@ -512,6 +519,7 @@ export function CalendarDemoRoute(props: {
                   }}
                 >
                   <SelectableItem
+                    affordance={calendarControlAffordance("eventTimed")}
                     selected={isSelected(item.event)}
                     data-primary={isPrimary(item.event) ? "true" : undefined}
                     aria-label={item.event.title}
@@ -539,11 +547,12 @@ export function CalendarDemoRoute(props: {
                     <span className="min-w-0 truncate">{item.event.title}</span>
                     <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
                   </SelectableItem>
-                  {item.event.id === "preview" || !isPrimary(item.event) ? null : (
+                  {item.event.id === "preview" ? null : (
                     <ResizeHandle
+                      affordance={calendarControlAffordance("eventResizeEnd")}
                       label={`Resize ${item.event.title} end`}
                       orientation="vertical"
-                      className={classes("inset-x-0 bottom-0 h-2", styles.resizeEdge())}
+                      className={styles.resizeEdge()}
                       onResize={(delta, phase) => resizeTimed(item.event.id, "end", item.event.start, item.event.end, delta, phase)}
                     />
                   )}
@@ -578,20 +587,21 @@ export function CalendarDemoRoute(props: {
                   monthNames: months,
                   weekSeparator: " – ",
                 })}</span>
-                <Command label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
+                <Command affordance={calendarControlAffordance("periodPrevious")} label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
                   <ChevronLeft aria-hidden="true" size={16} />
                 </Command>
-                <Command label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
+                <Command affordance={calendarControlAffordance("periodNext")} label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
                   <ChevronRight aria-hidden="true" size={16} />
                 </Command>
               </ToolbarGroup>
               <ToolbarSeparator />
               <ToolbarGroup label="Date shortcuts">
-                <Command className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
+                <Command affordance={calendarControlAffordance("today")} className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
               </ToolbarGroup>
             </ToolbarRegion>
             <ToolbarRegion placement="center" label="Calendar view">
               <Choice presentation="inline"
+                affordance={calendarControlAffordance("viewChoice")}
                 label="View"
                 value={view}
                 options={[
@@ -610,6 +620,7 @@ export function CalendarDemoRoute(props: {
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
           <div className="flex min-h-0 min-w-0 flex-1 gap-4 pb-24">
             <ContextualControls
+              data-ui-affordance={calendarControlAffordance("sourceDisclosure")}
               aria-label="Calendar sources"
               tabIndex={0}
               className={styles.contextualSidebar()}
@@ -620,6 +631,7 @@ export function CalendarDemoRoute(props: {
                   <p className={ui.text.label}>Calendars</p>
                   {calendars.map((calendar) => (
                     <Toggle
+                      affordance={calendarControlAffordance("sourceToggle")}
                       key={calendar.id}
                       pressed={!calendar.hidden}
                       aria-label={`Show ${calendar.title}`}
@@ -680,6 +692,7 @@ export function CalendarDemoRoute(props: {
                             data-calendar-day={cell.date}
                             tabIndex={-1}
                             data-selected={selectedSlot === cell.date ? "true" : undefined}
+                            data-ui-affordance={calendarControlAffordance("monthCell")}
                             className={classes(
                               styles.monthDay(),
                               cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
@@ -701,6 +714,7 @@ export function CalendarDemoRoute(props: {
                                 onDoubleClick={(event) => event.stopPropagation()}
                               >
                                 <Command
+                                  affordance={calendarControlAffordance("overflowDate")}
                                   className={classes("px-1 text-left", styles.quietAction(), ui.text.body)}
                                   onClick={() => setLocation("day", cell.date)}
                                 >
@@ -713,6 +727,7 @@ export function CalendarDemoRoute(props: {
                                     data-calendar-event-anchor={isPrimary(item) ? "primary" : undefined}
                                   >
                                     <SelectableItem
+                                      affordance={calendarControlAffordance("overflowEvent")}
                                       selected={isSelected(item)}
                                       data-primary={isPrimary(item) ? "true" : undefined}
                                       aria-label={calendarEventLabel(item)}
@@ -740,6 +755,7 @@ export function CalendarDemoRoute(props: {
                                 <div className="shrink-0" style={{ height: `${layout.laneCount * 1.25}rem` }} />
                                 {(layout.hiddenCounts[index] ?? 0) > 0 ? (
                                   <Command
+                                    affordance={calendarControlAffordance("moreDisclosure")}
                                     className={classes(styles.monthMore(), ui.text.meta)}
                                     onPointerDown={(event) => event.stopPropagation()}
                                     onClick={() => setOverflowDay(cell.date)}
@@ -771,6 +787,7 @@ export function CalendarDemoRoute(props: {
                           }}
                         >
                           <SelectableItem
+                            affordance={calendarControlAffordance("eventMonth")}
                             selected={isSelected(item.event)}
                             data-primary={isPrimary(item.event) ? "true" : undefined}
                             aria-label={calendarEventLabel(item.event)}
@@ -796,12 +813,13 @@ export function CalendarDemoRoute(props: {
                           >
                             <MonthEventCopy event={item.event} />
                           </SelectableItem>
-                          {item.event.id === "preview" || !isCalendarAllDay(item.event) || !isPrimary(item.event) ? null : (
+                          {item.event.id === "preview" || !isCalendarAllDay(item.event) ? null : (
                             clipEnd ? null : (
                               <ResizeHandle
+                                affordance={calendarControlAffordance("eventResizeEnd")}
                                 label={`Resize ${item.event.title} end`}
                                 orientation="horizontal"
-                                className={classes("right-0 top-0 z-20 h-full w-2", styles.resizeEdgeVertical())}
+                                className={styles.resizeEdgeVertical()}
                                 onResize={(delta, phase) => {
                                   const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
                                   resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
@@ -827,6 +845,7 @@ export function CalendarDemoRoute(props: {
                     className={styles.yearMonth()}
                   >
                     <Command
+                      affordance={calendarControlAffordance("yearMonth")}
                       className={classes("text-left", styles.quietAction(), ui.text.body)}
                       onClick={() => setLocation("month", monthStart)}
                     >
@@ -844,6 +863,7 @@ export function CalendarDemoRoute(props: {
                       ))}
                       {calendarCells("month", monthStart).map((cell) => (
                         <Command
+                          affordance={calendarControlAffordance("yearDate")}
                           key={cell.date}
                           aria-label={cell.date}
                           aria-current={cell.date === today ? "date" : undefined}
@@ -876,6 +896,7 @@ export function CalendarDemoRoute(props: {
                     aria-label="Event"
                     data-floating-placement={eventDetailsPosition.position?.placement}
                     data-floating-fits={eventDetailsPosition.position?.fits ? "true" : "false"}
+                    data-ui-affordance={calendarControlAffordance("inspector")}
                     style={eventDetailsPosition.style}
                     className={classes(styles.inspector(), ui.surface.overlay)}
                   >
@@ -884,6 +905,7 @@ export function CalendarDemoRoute(props: {
                     <input
                       ref={titleInput.ref}
                       aria-label="Title"
+                      data-ui-affordance={calendarControlAffordance("titleField")}
                       className={classes(ui.field.seamless, styles.inspectorTitle())}
                       value={titleInput.value}
                       onFocus={titleInput.onFocus}
@@ -893,10 +915,10 @@ export function CalendarDemoRoute(props: {
                     />
                   ) : <h2 className={styles.inspectorTitle()}>{selectedEvent.title}</h2>}
                   <div className={styles.inspectorActions()}>
-                    <Command label="Edit details" onClick={() => setDetailsEditing((value) => !value)}>
+                    <Command affordance={calendarControlAffordance("inspectorEdit")} label="Edit details" onClick={() => setDetailsEditing((value) => !value)}>
                       <Pencil aria-hidden="true" size={14} />
                     </Command>
-                    <Command label="Delete" onClick={removeSelected}>
+                    <Command affordance={calendarControlAffordance("inspectorDelete")} kind="danger" label="Delete" onClick={removeSelected}>
                       <Trash2 aria-hidden="true" size={14} />
                     </Command>
                   </div>
@@ -917,6 +939,7 @@ export function CalendarDemoRoute(props: {
                 </div>
                 {detailsEditing ? <div className={styles.detailsEditor()}>
                 <Toggle
+                  affordance={calendarControlAffordance("allDayToggle")}
                   pressed={selectedEvent.allDay}
                   aria-label="All-day"
                   className={classes(styles.calendarToggle(), "w-auto px-0")}
@@ -925,6 +948,7 @@ export function CalendarDemoRoute(props: {
                   All-day
                 </Toggle>
                 <HtmlDateField
+                  affordance={calendarControlAffordance("startField")}
                   key={selectedEvent.allDay ? "start-date" : "start-datetime"}
                   type={selectedEvent.allDay ? "date" : "datetime-local"}
                   label="Start"
@@ -932,6 +956,7 @@ export function CalendarDemoRoute(props: {
                   onValueChange={(value) => applySelectedPatch({ start: value })}
                 />
                 <HtmlDateField
+                  affordance={calendarControlAffordance("endField")}
                   key={selectedEvent.allDay ? "end-date" : "end-datetime"}
                   type={selectedEvent.allDay ? "date" : "datetime-local"}
                   label="End"
@@ -946,33 +971,42 @@ export function CalendarDemoRoute(props: {
                     end: selectedEvent.allDay ? (calendarAllDaySpan(value, value)?.end ?? value) : value,
                   })}
                 />
-                <Choice presentation="popup"
-                  label="Calendar"
-                  value={selectedEvent.calendarId}
-                  options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
-                  onValueChange={(value) => applySelectedPatch({ calendarId: value })}
-                />
-                <Choice presentation="popup"
-                  label="Repeat"
-                  value={selectedEvent.recurrence?.freq ?? "none"}
-                  options={[
-                    { id: "none", label: "None" },
-                    { id: "daily", label: "Daily" },
-                    { id: "weekly", label: "Weekly" },
-                    { id: "monthly", label: "Monthly" },
-                    { id: "yearly", label: "Yearly" },
-                  ]}
-                  onValueChange={(value) => applySelectedPatch({
-                    recurrence: value === "none"
-                      ? null
-                      : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
-                  })}
-                />
+                <div className={styles.field()}>
+                  <span className={ui.text.label}>Calendar</span>
+                  <Choice presentation="popup"
+                    affordance={calendarControlAffordance("calendarChoice")}
+                    label="Calendar"
+                    value={selectedEvent.calendarId}
+                    options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
+                    onValueChange={(value) => applySelectedPatch({ calendarId: value })}
+                  />
+                </div>
+                <div className={styles.field()}>
+                  <span className={ui.text.label}>Repeat</span>
+                  <Choice presentation="popup"
+                    affordance={calendarControlAffordance("recurrenceChoice")}
+                    label="Repeat"
+                    value={selectedEvent.recurrence?.freq ?? "none"}
+                    options={[
+                      { id: "none", label: "None" },
+                      { id: "daily", label: "Daily" },
+                      { id: "weekly", label: "Weekly" },
+                      { id: "monthly", label: "Monthly" },
+                      { id: "yearly", label: "Yearly" },
+                    ]}
+                    onValueChange={(value) => applySelectedPatch({
+                      recurrence: value === "none"
+                        ? null
+                        : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
+                    })}
+                  />
+                </div>
                 {selectedEvent.recurrence === null ? null : (
                   <>
                     <label className={styles.field()}>
                       <span className={ui.text.label}>Every</span>
                       <input
+                        data-ui-affordance={calendarControlAffordance("recurrenceInterval")}
                         type="number"
                         min={1}
                         aria-label="Repeat every"
@@ -986,6 +1020,7 @@ export function CalendarDemoRoute(props: {
                       />
                     </label>
                     <HtmlDateField
+                      affordance={calendarControlAffordance("endField")}
                       type="date"
                       label="Repeat until"
                       value={selectedEvent.recurrence.until}
@@ -997,6 +1032,7 @@ export function CalendarDemoRoute(props: {
                 )}
                 {selectedEvent.recurrence === null ? null : (
                   <Choice presentation="inline"
+                    affordance={calendarControlAffordance("recurrenceInterval")}
                     label="Edit occurrence"
                     value={scope}
                     options={[
@@ -1021,6 +1057,7 @@ export function CalendarDemoRoute(props: {
           >
             <Sparkles aria-hidden="true" className={styles.composerSpark()} size={18} />
             <input
+              data-ui-affordance={calendarControlAffordance("composerInput")}
               aria-label="Ask about your calendar"
               aria-describedby="calendar-composer-preview-note"
               className={styles.composerInput()}
@@ -1028,7 +1065,7 @@ export function CalendarDemoRoute(props: {
               readOnly
             />
             <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
-            <Command disabled label="AI commands unavailable" className={styles.composerSend()}>
+            <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
               <ArrowUp aria-hidden="true" size={16} />
             </Command>
           </div>
