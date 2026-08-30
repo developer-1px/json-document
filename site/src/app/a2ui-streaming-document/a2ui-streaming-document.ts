@@ -8,6 +8,8 @@ export const HANDS_CATALOG_ID = "https://interactive-os.dev/catalogs/hands/v1";
 export type A2uiComponent = Readonly<{ id?: string; component: string; [key: string]: unknown }>;
 export type A2uiSurfaceDocument = Readonly<{
   catalogId: string;
+  theme?: JSONValue;
+  sendDataModel?: boolean;
   components: Readonly<Record<string, A2uiComponent>>;
   dataModel: JSONValue;
 }>;
@@ -60,8 +62,14 @@ export function createA2uiStreamingDocumentEngine(): A2uiStreamingDocumentEngine
 
 function messageOperations(document: JSONDocument, message: A2uiMessage): JSONPatchOperation[] {
   if ("createSurface" in message) {
-    const { surfaceId, catalogId } = message.createSurface;
-    return [upsert(document, surfacePath(surfaceId), { catalogId, components: {}, dataModel: { content: {}, tools: {}, artifacts: {} } })];
+    const { surfaceId, catalogId, theme, sendDataModel } = message.createSurface;
+    return [upsert(document, surfacePath(surfaceId), {
+      catalogId,
+      ...(theme === undefined ? {} : { theme: theme as JSONValue }),
+      ...(sendDataModel === undefined ? {} : { sendDataModel }),
+      components: {},
+      dataModel: { content: {}, tools: {}, artifacts: {} },
+    })];
   }
   if ("deleteSurface" in message) return document.at(surfacePath(message.deleteSurface.surfaceId)).ok
     ? [{ op: "remove", path: surfacePath(message.deleteSurface.surfaceId) }]
@@ -74,8 +82,11 @@ function messageOperations(document: JSONDocument, message: A2uiMessage): JSONPa
   });
   const { surfaceId, path = "", value } = message.updateDataModel;
   const target = `${surfacePath(surfaceId)}/dataModel${path === "/" ? "" : path}`;
-  if (value === null && document.at(target).ok) return [{ op: "remove", path: target }];
-  return [upsert(document, target, (value ?? null) as JSONValue)];
+  if (value === undefined) {
+    if (!document.at(target).ok) return [];
+    return path === "/" || path === "" ? [{ op: "replace", path: target, value: null }] : [{ op: "remove", path: target }];
+  }
+  return [upsert(document, target, value as JSONValue)];
 }
 
 function upsert(document: JSONDocument, path: string, value: JSONValue): JSONPatchOperation {

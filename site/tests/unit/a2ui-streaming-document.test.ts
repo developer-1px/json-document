@@ -22,6 +22,18 @@ describe("A2UI streaming document", () => {
     engine.dispose();
   });
 
+  test("preserves optional createSurface protocol state in the editable document", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "themed", catalogId: A2UI_BASIC_CATALOG_ID, theme: { density: "compact", accent: "blue" }, sendDataModel: true } });
+
+    expect(engine.document.value).toMatchObject({ surfaces: { themed: {
+      catalogId: A2UI_BASIC_CATALOG_ID,
+      theme: { density: "compact", accent: "blue" },
+      sendDataModel: true,
+    } } });
+    engine.dispose();
+  });
+
   test("decodes A2UI JSONL across arbitrary transport chunks", () => {
     const engine = createA2uiStreamingDocumentEngine();
     const jsonl = [
@@ -227,10 +239,22 @@ describe("A2UI streaming document", () => {
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "lifecycle", catalogId: A2UI_BASIC_CATALOG_ID } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/", value: { profile: { name: "이전", optional: true } } } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/profile/name", value: "변경" } });
-    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/profile/optional", value: null } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/profile/optional" } });
     expect(engine.document.value).toMatchObject({ surfaces: { lifecycle: { dataModel: { profile: { name: "변경" } } } } });
     engine.dispatch({ version: "v0.9", deleteSurface: { surfaceId: "lifecycle" } });
     expect(engine.document.value).toEqual({ surfaces: {} });
+    engine.dispose();
+  });
+
+  test("stores null and reserves an omitted value for deletion like the official DataModel", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "nullable", catalogId: A2UI_BASIC_CATALOG_ID } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "nullable", path: "/kept", value: null } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "nullable", path: "/removed", value: "삭제 예정" } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "nullable", path: "/removed" } });
+
+    expect(engine.document.value).toMatchObject({ surfaces: { nullable: { dataModel: { kept: null } } } });
+    expect((engine.document.value as { surfaces: { nullable: { dataModel: Record<string, unknown> } } }).surfaces.nullable.dataModel).not.toHaveProperty("removed");
     engine.dispose();
   });
 
