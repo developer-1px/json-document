@@ -520,7 +520,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
     };
   })).toEqual({
     backgroundColor: "rgb(251, 248, 242)",
-    borderColor: "rgb(119, 115, 107)",
+    borderColor: "rgb(216, 209, 197)",
     outlineColor: "rgba(0, 0, 0, 0)",
   });
 
