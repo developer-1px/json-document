@@ -452,6 +452,7 @@ export function CalendarDemoRoute(props: {
               data-calendar-grid="time"
               tabIndex={-1}
               data-ui-affordance={calendarControlAffordance("timeCell")}
+              data-ui-presentation="calendar-time-grid"
               className={classes("overflow-hidden", styles.weekCell())}
               style={{ height: (hourEnd - hourStart) * pxPerHour }}
               onPointerDown={(event) => timePointerDown(event, day, null, null, null, null)}

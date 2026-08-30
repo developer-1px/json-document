@@ -322,6 +322,10 @@
     @apply border-transparent bg-transparent shadow-none transition-[background-color,color,opacity,outline-color] duration-interaction hover:bg-background-subtle/60 focus-visible:ring-2 focus-visible:ring-line-accent/25;
   }
 
+  [data-ui-affordance="content-control"][data-ui-presentation="calendar-time-grid"]:hover {
+    @apply bg-transparent;
+  }
+
   [data-ui-affordance="content-control"][data-selected="true"] {
     @apply bg-background-subtle/60 outline outline-1 -outline-offset-1 outline-line-subtle;
   }

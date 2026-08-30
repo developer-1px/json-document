@@ -50,6 +50,16 @@ describe("calendar product design", () => {
     expect(block).toContain("min-w-0");
   });
 
+  test("time grid keeps calendar structure visible without a full-column hover wash", () => {
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
+    expect(styles.hourRule()).toContain("border-line-subtle/30");
+    expect(styles.weekCell()).toContain("border-line-subtle/20");
+    expect(styles.creationTimeHint()).toContain("text-foreground-muted");
+    expect(styles.creationTimeHint()).not.toContain("text-foreground-muted/70");
+    expect(css).toContain('[data-ui-presentation="calendar-time-grid"]:hover');
+    expect(css).toContain("bg-transparent");
+  });
+
   test("date-field stacks its label above the input", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const start = css.indexOf('[data-ui-control="date-field"] {');
