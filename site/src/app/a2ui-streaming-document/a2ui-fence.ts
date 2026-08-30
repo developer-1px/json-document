@@ -1,7 +1,5 @@
 import { A2uiMessageSchema, type A2uiMessage } from "@a2ui/web_core/v0_9";
 
-export const A2UI_BASIC_CATALOG_ID = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
-
 export type A2uiFenceProjection = Readonly<{
   markdown: string;
   messages: ReadonlyArray<A2uiMessage>;

@@ -57,6 +57,16 @@ export const ui = {
     tableCell: "border-b border-line-subtle/70 py-1.5 pr-3 align-top text-foreground-default",
     image: "my-1 h-auto max-w-full rounded-surface",
   },
+  a2ui: {
+    root: "mb-8",
+    column: "grid gap-3",
+    row: "flex flex-wrap items-start gap-3",
+    child: "contents",
+    weightedChild: "block min-w-0 basis-0",
+    card: "p-4",
+    divider: "my-1 w-full border-0 border-t border-line-subtle/70",
+    text: "m-0 tracking-tight",
+  },
   product: {
     frame: "rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface",
   },

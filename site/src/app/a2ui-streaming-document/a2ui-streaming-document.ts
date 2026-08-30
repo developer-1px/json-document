@@ -1,6 +1,7 @@
 import { createJSONDocument, type JSONDocument, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { A2uiMessageSchema, type A2uiMessage } from "@a2ui/web_core/v0_9";
 import { BehaviorSubject, Subject, type Observable } from "rxjs";
+import { A2UI_BASIC_CATALOG_ID, validateBasicCatalogComponent } from "./basic-catalog";
 
 export const HANDS_CATALOG_ID = "https://interactive-os.dev/catalogs/hands/v1";
 
@@ -66,6 +67,8 @@ function messageOperations(document: JSONDocument, message: A2uiMessage): JSONPa
     ? [{ op: "remove", path: surfacePath(message.deleteSurface.surfaceId) }]
     : [];
   if ("updateComponents" in message) return message.updateComponents.components.flatMap((component, index) => {
+    const surface = document.at(surfacePath(message.updateComponents.surfaceId));
+    if (surface.ok && (surface.value as { catalogId?: unknown }).catalogId === A2UI_BASIC_CATALOG_ID) validateBasicCatalogComponent(component);
     const id = component.id ?? `anonymous-${index}`;
     return [upsert(document, `${surfacePath(message.updateComponents.surfaceId)}/components/${escapeToken(id)}`, component as JSONValue)];
   });

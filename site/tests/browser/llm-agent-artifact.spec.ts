@@ -64,7 +64,7 @@ test("여러 A2UI 메시지가 구조와 데이터를 누적·교체하고 weigh
   await expect(page.getByRole("heading", { name: "운영 대시보드" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "48" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "동기화 완료" })).toBeVisible();
-  const widths = await page.locator(".a2ui-row > .a2ui-child.weighted").evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().width)));
+  const widths = await page.locator('[data-a2ui-component="Row"] > [data-a2ui-child][data-weighted="true"]').evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().width)));
   expect(widths).toHaveLength(3);
   expect(widths[0] / widths[1]).toBeCloseTo(2, 1);
   expect(widths[1] / widths[2]).toBeCloseTo(1, 1);

@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from "react";
-import { A2UI_BASIC_CATALOG_ID } from "./a2ui-fence";
+import { A2UI_BASIC_CATALOG_ID } from "./basic-catalog";
 import type { A2uiComponent, A2uiStreamingDocument, A2uiSurfaceDocument } from "./a2ui-streaming-document";
+import { classes, ui } from "../../shared/ui/styles";
 
 type MarkdownSurface = ComponentType<{ readonly content?: string | null; readonly streaming?: boolean }>;
 
@@ -15,7 +16,7 @@ export function A2uiSurface({ document, markdown: Markdown, surfaceId }: { reado
 function BasicCatalogSurface({ markdown, surface }: { readonly markdown: MarkdownSurface; readonly surface: A2uiSurfaceDocument }) {
   const root = surface.components.root;
   if (!root) return null;
-  return <section className="a2ui-generated-surface" aria-label="생성된 UI">{renderBasicComponent(root, surface, markdown, new Set())}</section>;
+  return <section className={ui.a2ui.root} aria-label="생성된 UI" data-a2ui-surface>{renderBasicComponent(root, surface, markdown, new Set())}</section>;
 }
 
 function renderBasicComponent(component: A2uiComponent, surface: A2uiSurfaceDocument, Markdown: MarkdownSurface, ancestors: ReadonlySet<string>): ReactNode {
@@ -27,24 +28,26 @@ function renderBasicComponent(component: A2uiComponent, surface: A2uiSurfaceDocu
     const child = surface.components[childId];
     if (!child) return null;
     const weight = typeof child.weight === "number" && child.weight > 0 ? child.weight : undefined;
-    return <span className={weight ? "a2ui-child weighted" : "a2ui-child"} key={childId} style={weight ? { flexGrow: weight } : undefined}>{renderBasicComponent(child, surface, Markdown, next)}</span>;
+    return <span className={weight ? ui.a2ui.weightedChild : ui.a2ui.child} data-a2ui-child data-weighted={weight ? "true" : undefined} key={childId} style={weight ? { flexGrow: weight } : undefined}>{renderBasicComponent(child, surface, Markdown, next)}</span>;
   });
   const text = String(boundValue(surface.dataModel, component.text) ?? "");
 
-  if (component.component === "Column") return <div className="a2ui-column">{children}</div>;
-  if (component.component === "Row") return <div className="a2ui-row">{children}</div>;
+  if (component.component === "Column") return <div className={ui.a2ui.column} data-a2ui-component="Column">{children}</div>;
+  if (component.component === "Row") return <div className={ui.a2ui.row} data-a2ui-component="Row">{children}</div>;
   if (component.component === "Card") {
     const child = typeof component.child === "string" ? surface.components[component.child] : undefined;
-    return <section className="a2ui-card">{child ? renderBasicComponent(child, surface, Markdown, next) : null}</section>;
+    return <section className={classes(ui.surface.raised, ui.a2ui.card)} data-a2ui-component="Card">{child ? renderBasicComponent(child, surface, Markdown, next) : null}</section>;
   }
-  if (component.component === "Divider") return <hr className="a2ui-divider" />;
+  if (component.component === "Divider") return <hr className={ui.a2ui.divider} data-a2ui-component="Divider" />;
   if (component.component === "Text") {
     const variant = typeof component.variant === "string" ? component.variant : "body";
-    if (variant === "h1") return <h1>{text}</h1>;
-    if (variant === "h2") return <h2>{text}</h2>;
-    if (variant === "h3") return <h3>{text}</h3>;
-    if (variant === "caption") return <small>{text}</small>;
-    return <Markdown content={text} />;
+    if (variant === "h1") return <h1 className={classes(ui.text.title, ui.a2ui.text)}>{text}</h1>;
+    if (variant === "h2") return <h2 className={classes(ui.text.heading, ui.a2ui.text)}>{text}</h2>;
+    if (variant === "h3") return <h3 className={classes(ui.text.heading, ui.a2ui.text)}>{text}</h3>;
+    if (variant === "h4") return <h4 className={classes(ui.text.label, ui.a2ui.text)}>{text}</h4>;
+    if (variant === "h5") return <h5 className={classes(ui.text.label, ui.a2ui.text)}>{text}</h5>;
+    if (variant === "caption") return <small className={ui.text.meta}>{text}</small>;
+    return <div className={ui.text.body}><Markdown content={text} /></div>;
   }
   return null;
 }

@@ -139,4 +139,14 @@ describe("A2UI streaming document", () => {
     subscription.unsubscribe();
     engine.dispose();
   });
+
+  test("validates supported components with the official Basic Catalog schemas", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "validated", catalogId: A2UI_BASIC_CATALOG_ID } });
+
+    expect(() => engine.dispatch({ version: "v0.9", updateComponents: { surfaceId: "validated", components: [{ id: "card", component: "Card", children: ["body"] }] } })).toThrow();
+    expect(() => engine.dispatch({ version: "v0.9", updateComponents: { surfaceId: "validated", components: [{ id: "button", component: "Button", text: "지원하지 않음" }] } })).toThrow("지원하지 않는 A2UI Basic Catalog component");
+    expect(engine.document.value).toMatchObject({ surfaces: { validated: { components: {} } } });
+    engine.dispose();
+  });
 });
