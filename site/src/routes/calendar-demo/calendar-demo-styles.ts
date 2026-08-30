@@ -37,7 +37,7 @@ export const calendarDemoRecipe = tv({
     todayMark: "font-semibold text-foreground-strong",
     dayNumber: "inline-flex size-7 items-center justify-center text-sm font-medium",
     sidebar: "flex w-44 shrink-0 flex-col gap-3 overflow-auto pr-1",
-    inspector: "absolute right-2 top-12 z-40 flex max-h-[calc(100%-3.5rem)] w-72 min-w-0 flex-col gap-2 overflow-auto p-3",
+    inspector: "z-40 flex w-72 min-w-0 flex-col gap-2 overflow-auto p-3",
     field: "grid gap-1",
     inspectorTitle: "px-0 text-base font-semibold",
     calendarToggle: "group w-full justify-start gap-2 border-0 bg-transparent px-1 shadow-none hover:border-0 hover:bg-transparent aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",

@@ -16,12 +16,15 @@ import dateValuesSource from "../../../../packages/json-document-calendar/src/da
 import editingItemSource from "../../../../packages/json-document-react/src/use-editing.ts?raw";
 import affordanceSessionSource from "../../../../packages/json-document-affordance/src/session.ts?raw";
 import viewportPositionSource from "../../../../packages/json-document-affordance/src/viewport-position.ts?raw";
+import anchoredFloatingPositionSource from "../../../../packages/json-document-affordance/src/anchored-floating-position.ts?raw";
 import webFocusItemSource from "../../../../packages/json-document-web/src/focus-item.ts?raw";
 import webViewportPositionSource from "../../../../packages/json-document-web/src/viewport-position.ts?raw";
+import webAnchoredFloatingPositionSource from "../../../../packages/json-document-web/src/anchored-floating-position.ts?raw";
 import clipboardSource from "../../../../packages/json-document-web/src/clipboard.ts?raw";
 import webInputSource from "../../../../packages/json-document-web/src/input.ts?raw";
 import virtualSelectionSource from "../../../../packages/json-document-web/src/virtual-selection-scope.ts?raw";
 import virtualSelectionReactSource from "../../../../packages/json-document-react/src/use-virtual-selection-scope.ts?raw";
+import anchoredFloatingPositionReactSource from "../../../../packages/json-document-react/src/use-anchored-floating-position.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
 import editingClipboardSource from "../../../../packages/json-document-editing/src/clipboard.ts?raw";
@@ -167,12 +170,15 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-editing.ts", editingItemSource],
   ["packages/json-document-affordance/src/session.ts", affordanceSessionSource],
   ["packages/json-document-affordance/src/viewport-position.ts", viewportPositionSource],
+  ["packages/json-document-affordance/src/anchored-floating-position.ts", anchoredFloatingPositionSource],
   ["packages/json-document-web/src/focus-item.ts", webFocusItemSource],
   ["packages/json-document-web/src/viewport-position.ts", webViewportPositionSource],
+  ["packages/json-document-web/src/anchored-floating-position.ts", webAnchoredFloatingPositionSource],
   ["packages/json-document-web/src/clipboard.ts", clipboardSource],
   ["packages/json-document-web/src/input.ts", webInputSource],
   ["packages/json-document-web/src/virtual-selection-scope.ts", virtualSelectionSource],
   ["packages/json-document-react/src/use-virtual-selection-scope.ts", virtualSelectionReactSource],
+  ["packages/json-document-react/src/use-anchored-floating-position.ts", anchoredFloatingPositionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
   ["packages/json-document-editing/src/clipboard.ts", editingClipboardSource],
@@ -253,6 +259,21 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-calendar",
     symbol: "useCalendarHand",
     sourcePath: "packages/json-document-calendar/src/use-calendar-hand.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-react",
+    symbol: "useAnchoredFloatingPosition",
+    sourcePath: "packages/json-document-react/src/use-anchored-floating-position.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "computeAnchoredFloatingPosition",
+    sourcePath: "packages/json-document-affordance/src/anchored-floating-position.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
+    symbol: "createWebAnchoredFloatingPositionPorts",
+    sourcePath: "packages/json-document-web/src/anchored-floating-position.ts",
   },
   {
     packageName: "@interactive-os/json-document-calendar",

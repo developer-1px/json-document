@@ -71,7 +71,7 @@ test("Calendar selection uses the native clipboard and one history across copy, 
 
   await event.click();
   await expect(event).toHaveAttribute("data-selected", "true");
-  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Event" })).toBeVisible();
 
   await page.keyboard.press("ControlOrMeta+c");
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("고객사 싱크");
@@ -183,7 +183,7 @@ test("Calendar clipboard remains reachable from day, month, and recurring occurr
       : page.getByRole("button", { name: title, exact: true }).first();
     await event.click();
     await expect(event).toHaveAttribute("data-selected", "true");
-    await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Event" })).toBeVisible();
     await page.keyboard.press("ControlOrMeta+c");
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain(title);
   }
@@ -228,6 +228,8 @@ test("Calendar Usage exposes its canonical Editing and pointer sources", async (
   await expect(usage.getByRole("tab", { name: "use-calendar-viewport-position.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "use-calendar-rename-input.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "use-calendar-keyboard.ts", exact: true })).toBeVisible();
+  await expect(usage.getByRole("tab", { name: "use-anchored-floating-position.ts", exact: true })).toBeVisible();
+  await expect(usage.getByRole("tab", { name: "anchored-floating-position.ts", exact: true })).toHaveCount(2);
 });
 
 function timeGridDay(page: Page, day: string): Locator {

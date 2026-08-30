@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, describe, expect, test } from "vitest";
 import { createCalendarEditor, type CalendarDocument } from "@interactive-os/json-document-editing";
@@ -48,6 +49,17 @@ describe("useCalendarRenameInput", () => {
     expect(screen.getByRole("textbox", { name: "Title" })).not.toBeNull();
     expect((editor.snapshot.value as CalendarDocument).events[0]?.title).toBe("Event");
   });
+
+  test("realizes focus after a positioned editor becomes interactive", async () => {
+    const user = userEvent.setup();
+    const editor = createCalendarEditor(initial, { createId: () => "draft" });
+    render(<DeferredCalendarRenameHarness editor={editor} />);
+
+    await user.click(screen.getByRole("button", { name: "Create" }));
+    expect(screen.queryByRole("textbox", { name: "Title" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Positioned" }));
+    expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Title" }));
+  });
 });
 
 function CalendarRenameHarness({
@@ -63,5 +75,16 @@ function CalendarRenameHarness({
     <button onClick={() => hand.createInterval("2026-08-03T10:00", "2026-08-03T11:00", { title: "Event" })}>Create</button>
     {hand.selectedEvent === null || !hand.renaming ? null : <input aria-label="Title" {...title} />}
     <button>Next field</button>
+  </>;
+}
+
+function DeferredCalendarRenameHarness({ editor }: { readonly editor: ReturnType<typeof createCalendarEditor> }) {
+  const [positioned, setPositioned] = useState(false);
+  const hand = useCalendarHand(editor, { defaultTitle: "Event" });
+  const title = useCalendarRenameInput(hand, { realizationKey: positioned });
+  return <>
+    <button onClick={() => hand.createInterval("2026-08-03T10:00", "2026-08-03T11:00", { title: "Event" })}>Create</button>
+    <button onClick={() => setPositioned(true)}>Positioned</button>
+    {hand.selectedEvent === null || !hand.renaming || !positioned ? null : <input aria-label="Title" {...title} />}
   </>;
 }

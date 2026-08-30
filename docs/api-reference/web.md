@@ -56,6 +56,11 @@ composerAttachmentCandidatesFromWebClipboard(event: WebFileClipboardEvent): Read
 ```ts
 composerAttachmentCandidatesFromWebFiles(files: WebFileCandidateList | ReadonlyArray<WebFileCandidate>): ReadonlyArray<FileCandidate>
 ```
+## `createWebAnchoredFloatingPositionPorts`
+
+```ts
+createWebAnchoredFloatingPositionPorts(options: WebAnchoredFloatingPositionOptions): WebAnchoredFloatingPositionPorts
+```
 ## `createWebClipboardBinding`
 
 ```ts
@@ -242,6 +247,68 @@ textInputFromControl(event: WebTextControlEvent): WebTextInput
 
 ```ts
 const treeClipboardCodec: WebClipboardCodec<TreeClipboard>
+```
+## `WebAnchoredFloatingElement`
+
+```ts
+interface WebAnchoredFloatingElement {
+  getBoundingClientRect(): {
+    readonly x?: number;
+    readonly y?: number;
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  };
+}
+```
+## `WebAnchoredFloatingGeometry`
+
+```ts
+interface WebAnchoredFloatingGeometry {
+  readonly anchor: WebFloatingRect;
+  readonly floating: WebFloatingRect;
+  readonly boundary: WebFloatingRect;
+}
+```
+## `WebAnchoredFloatingPositionOptions`
+
+```ts
+interface WebAnchoredFloatingPositionOptions {
+  readonly getAnchor: () => WebAnchoredFloatingElement | null;
+  readonly getFloating: () => WebAnchoredFloatingElement | null;
+  readonly getBoundary?: () => WebAnchoredFloatingElement | null;
+  readonly viewport: WebAnchoredFloatingViewport;
+  readonly createResizeObserver?: (callback: () => void) => WebAnchoredFloatingResizeObserver;
+}
+```
+## `WebAnchoredFloatingPositionPorts`
+
+```ts
+interface WebAnchoredFloatingPositionPorts {
+  measure(): WebAnchoredFloatingGeometry | null;
+  observe(callback: () => void): () => void;
+}
+```
+## `WebAnchoredFloatingResizeObserver`
+
+```ts
+interface WebAnchoredFloatingResizeObserver {
+  observe(target: object): void;
+  disconnect(): void;
+}
+```
+## `WebAnchoredFloatingViewport`
+
+```ts
+interface WebAnchoredFloatingViewport {
+  readonly innerWidth: number;
+  readonly innerHeight: number;
+  addEventListener(type: "resize" | "scroll", listener: () => void, options?: boolean): void;
+  removeEventListener(type: "resize" | "scroll", listener: () => void, options?: boolean): void;
+  requestAnimationFrame(callback: () => void): number;
+  cancelAnimationFrame(handle: number): void;
+}
 ```
 ## `WebAnnotationRasterResult`
 
@@ -462,6 +529,16 @@ interface WebFileCandidateList {
 ```ts
 interface WebFileClipboardEvent {
   readonly clipboardData: { readonly files: WebFileCandidateList } | null;
+}
+```
+## `WebFloatingRect`
+
+```ts
+interface WebFloatingRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
 }
 ```
 ## `WebFocusableItem`

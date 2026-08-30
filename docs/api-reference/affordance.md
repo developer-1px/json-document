@@ -132,6 +132,31 @@ type AffordanceResult<H extends AffordanceHand = AffordanceHand> =
   | AffordancePreview<H>
   | AffordanceCommit<H>;
 ```
+## `AnchoredFloatingPosition`
+
+```ts
+interface AnchoredFloatingPosition {
+  readonly x: number;
+  readonly y: number;
+  readonly placement: FloatingPlacement;
+  readonly availableWidth: number;
+  readonly availableHeight: number;
+  readonly overflow: FloatingOverflow;
+  readonly fits: boolean;
+}
+```
+## `AnchoredFloatingPositionInput`
+
+```ts
+interface AnchoredFloatingPositionInput {
+  readonly anchor: FloatingRect;
+  readonly floating: FloatingSize;
+  readonly boundary: FloatingRect;
+  readonly policy: FloatingPlacementPolicy;
+  readonly offset?: number;
+  readonly boundaryPadding?: number;
+}
+```
 ## `applyAffordance`
 
 ```ts
@@ -225,6 +250,11 @@ clickCountAffordance(detail: number): AffordancePreview
 
 ```ts
 commitAffordance<H extends AffordanceHand>(result: AffordancePreview<H>): AffordanceCommit<H> | null
+```
+## `computeAnchoredFloatingPosition`
+
+```ts
+computeAnchoredFloatingPosition(input: AnchoredFloatingPositionInput): AnchoredFloatingPosition
 ```
 ## `contextMenuAffordance`
 
@@ -349,6 +379,63 @@ editingCommandFromWebKeyboardStroke(stroke: WebKeyboardStroke): WebKeyboardComma
 
 ```ts
 escapeAffordance(input: { readonly key?: string; readonly type?: string; readonly grabbing?: boolean; readonly selected?: boolean; }): AffordancePreview
+```
+## `FloatingAlignment`
+
+```ts
+type FloatingAlignment = "start" | "center" | "end";
+```
+## `FloatingOverflow`
+
+```ts
+interface FloatingOverflow {
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+```
+## `FloatingPlacement`
+
+```ts
+type FloatingPlacement = FloatingSide | `${FloatingSide}-${Exclude<FloatingAlignment, "center">}`;
+```
+## `FloatingPlacementPolicy`
+
+```ts
+type FloatingPlacementPolicy =
+  | {
+      readonly type: "preferred";
+      readonly placement: FloatingPlacement;
+      readonly fallbacks?: ReadonlyArray<FloatingPlacement>;
+    }
+  | {
+      readonly type: "locked";
+      readonly placement: FloatingPlacement;
+    };
+```
+## `FloatingRect`
+
+```ts
+interface FloatingRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+```
+## `FloatingSide`
+
+```ts
+type FloatingSide = "top" | "right" | "bottom" | "left";
+```
+## `FloatingSize`
+
+```ts
+interface FloatingSize {
+  readonly width: number;
+  readonly height: number;
+}
 ```
 ## `focusAffordance`
 

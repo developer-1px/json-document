@@ -32,7 +32,7 @@ import {
   type CalendarRecurrence,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
-import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
+import { selectionModeFromModifiers, useAnchoredFloatingPosition } from "@interactive-os/json-document-react";
 import { createWebClipboardSurface, createWebJSONClipboardRepresentation, isWebEditableTarget } from "@interactive-os/json-document-web";
 import {
   useCalendarHand,
@@ -164,7 +164,6 @@ export function CalendarDemoRoute(props: {
   const occurrenceEnd = hand.occurrence.end;
   const scope = hand.scope;
   const setScope = hand.setScope;
-  const titleInput = useCalendarRenameInput(hand, { commitOnBlur: false });
   const [overflowDay, setOverflowDay] = useState<string | null>(null);
   const {
     hoveredTime,
@@ -219,6 +218,20 @@ export function CalendarDemoRoute(props: {
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
   const selectedEvent = hand.selectedEvent;
+  const eventDetailsPosition = useAnchoredFloatingPosition<HTMLDivElement, HTMLElement>({
+    active: selectedEvent !== null,
+    policy: {
+      type: "preferred",
+      placement: "right-start",
+      fallbacks: ["left-start", "bottom-start", "top-start"],
+    },
+    offset: 8,
+    boundaryPadding: 8,
+  });
+  const titleInput = useCalendarRenameInput(hand, {
+    commitOnBlur: false,
+    realizationKey: eventDetailsPosition.position?.placement ?? null,
+  });
   const selectedSlot = selectedEvent === null ? hand.occurrence.start : null;
   const inspected = hand.inspectedInterval;
   const visibleEvents = calendarVisibleEvents(document);
@@ -347,6 +360,8 @@ export function CalendarDemoRoute(props: {
         {allDayItems.map((item) => (
           <div
             key={`${item.event.id}:${item.event.start}`}
+            ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
+            data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
             data-calendar-allday-day={days[item.startIndex]}
             className="relative z-10 mx-0.5 my-1"
             style={{ gridColumn: `${item.startIndex + 2} / span ${item.span}`, gridRow: 2 + item.lane }}
@@ -489,6 +504,8 @@ export function CalendarDemoRoute(props: {
                 return (
                 <div
                   key={`${item.event.id}:${item.event.start}`}
+                  ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
+                  data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
                   className="absolute z-10"
                   style={{
                     top: (startMinutes - hourStart * 60) * (pxPerHour / 60),
@@ -729,24 +746,29 @@ export function CalendarDemoRoute(props: {
                                   {cell.date}
                                 </Command>
                                 {calendarMonthDayLayout(paintedEvents, cell.date, Math.max(onDay.length, 1)).events.map((item) => (
-                                  <SelectableItem
+                                  <div
                                     key={`${item.id}:${item.start}`}
-                                    selected={isSelected(item)}
-                                    data-primary={isPrimary(item) ? "true" : undefined}
-                                    aria-label={calendarEventLabel(item)}
-                                    data-calendar-color={calendarColor(document, item.calendarId)}
-                                    className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      selectEvent(item, event);
-                                    }}
-                                    onDoubleClick={(event) => {
-                                      event.stopPropagation();
-                                      hand.beginTitleRename(item.id);
-                                    }}
+                                    ref={isPrimary(item) ? eventDetailsPosition.anchorRef : undefined}
+                                    data-calendar-event-anchor={isPrimary(item) ? "primary" : undefined}
                                   >
-                                    <MonthEventCopy event={item} />
-                                  </SelectableItem>
+                                    <SelectableItem
+                                      selected={isSelected(item)}
+                                      data-primary={isPrimary(item) ? "true" : undefined}
+                                      aria-label={calendarEventLabel(item)}
+                                      data-calendar-color={calendarColor(document, item.calendarId)}
+                                      className={isCalendarAllDay(item) ? styles.monthAllDay() : styles.monthTimed()}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        selectEvent(item, event);
+                                      }}
+                                      onDoubleClick={(event) => {
+                                        event.stopPropagation();
+                                        hand.beginTitleRename(item.id);
+                                      }}
+                                    >
+                                      <MonthEventCopy event={item} />
+                                    </SelectableItem>
+                                  </div>
                                 ))}
                               </div>
                             ) : (
@@ -780,6 +802,8 @@ export function CalendarDemoRoute(props: {
                           key={`${item.event.id}:${allDayPreview?.originEventId === item.event.id
                             ? allDayPreview.originEventStart ?? item.event.start
                             : item.event.start}`}
+                          ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
+                          data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
                           data-calendar-span={String(item.span)}
                           className="relative z-10 min-w-0 w-full"
                           style={{
@@ -890,13 +914,21 @@ export function CalendarDemoRoute(props: {
               </div>
             ) : null}
           </div>
-            {selectedEvent === null || !hand.renaming ? null : (
+            {selectedEvent === null ? null : (
               <ContextualControls
-                editing
-                capabilities={[{ id: "editor", phases: ["editing"] }] as const}
+                selected
+                editing={hand.renaming}
+                capabilities={[{ id: "editor", phases: ["selected", "editing"] }] as const}
               >
                 {(context) => context.visible.includes("editor") ? (
-                  <section aria-label="Event" className={classes(styles.inspector(), ui.surface.overlay)}>
+                  <section
+                    ref={eventDetailsPosition.floatingRef}
+                    aria-label="Event"
+                    data-floating-placement={eventDetailsPosition.position?.placement}
+                    data-floating-fits={eventDetailsPosition.position?.fits ? "true" : "false"}
+                    style={eventDetailsPosition.style}
+                    className={classes(styles.inspector(), ui.surface.overlay)}
+                  >
                 <input
                   ref={titleInput.ref}
                   aria-label="Title"

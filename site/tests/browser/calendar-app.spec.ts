@@ -56,7 +56,7 @@ test("Calendar positions the work hour until the user claims the viewport", asyn
   await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(640);
 });
 
-test("Calendar keeps event time visible, hints an empty creation time, and separates selection from editing", async ({ page }) => {
+test("Calendar keeps event time visible, hints an empty creation time, and opens anchored details on selection", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
   const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
   const time = event.getByText("11:00", { exact: true });
@@ -69,9 +69,11 @@ test("Calendar keeps event time visible, hints an empty creation time, and separ
   await expect(page.locator("[data-calendar-create-time]")).toHaveText("14:15");
   await event.click();
   await expect(event).toHaveAttribute("data-selected", "true");
-  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+  const details = page.getByRole("region", { name: "Event" });
+  await expect(details).toBeVisible();
+  await expect(details).toHaveAttribute("data-floating-placement", /^(right|left|top|bottom)/);
   await event.dblclick();
-  const title = page.getByRole("region", { name: "Event" }).getByRole("textbox", { name: "Title" });
+  const title = details.getByRole("textbox", { name: "Title" });
   await expect(title).toHaveValue("고객사 싱크");
 
   const productFont = await page.locator('[data-ui-component="product-shell"]').evaluate((element) => getComputedStyle(element).fontFamily);
@@ -79,6 +81,29 @@ test("Calendar keeps event time visible, hints an empty creation time, and separ
   await expect(event).toHaveCSS("font-family", productFont);
   await expect(time).toHaveCSS("font-family", productFont);
   await expect(title).toHaveCSS("font-family", productFont);
+});
+
+test("Calendar details follow the primary occurrence and flip inside a narrow viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+
+  const leftEvent = page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true });
+  await leftEvent.click();
+  const details = page.getByRole("region", { name: "Event" });
+  await expect(details).toHaveAttribute("data-floating-placement", "right-start");
+  await expect(details).toHaveAttribute("data-floating-fits", "true");
+  await expect(leftEvent.locator("..")).toHaveAttribute("data-calendar-event-anchor", "primary");
+
+  const rightEvent = page.getByRole("button", { name: "월말 비용 정리", exact: true });
+  await rightEvent.click();
+  await expect(details).toHaveAttribute("data-floating-placement", "left-start");
+  await expect(details).toHaveAttribute("data-floating-fits", "true");
+  const box = await details.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(8);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(792);
+  expect(box!.y).toBeGreaterThanOrEqual(8);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(592);
 });
 
 test("Calendar day view uses the visible date's canonical weekday cell", async ({ page }) => {

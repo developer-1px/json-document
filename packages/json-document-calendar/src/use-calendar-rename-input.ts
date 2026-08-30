@@ -13,6 +13,8 @@ export interface CalendarRenameInputBinding {
 export interface CalendarRenameInputOptions {
   /** Commit when focus leaves the title. Disable inside a larger contextual editor. */
   readonly commitOnBlur?: boolean;
+  /** Retries focus realization when an enclosing positioned editor becomes interactive. */
+  readonly realizationKey?: string | number | boolean | null;
 }
 
 /** Binds Calendar title input events and focus realization to the canonical Rename session. */
@@ -26,7 +28,7 @@ export function useCalendarRenameInput(
     if (!hand.renaming) return;
     ref.current?.focus();
     ref.current?.select();
-  }, [hand.renaming, hand.selectedEvent?.id]);
+  }, [hand.renaming, hand.selectedEvent?.id, options.realizationKey]);
 
   return {
     ref,
