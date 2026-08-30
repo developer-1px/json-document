@@ -149,6 +149,7 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-affordance",
   "@interactive-os/json-document-ui-primitives-react",
   "@interactive-os/json-document-animation-react",
+  "@interactive-os/json-document-markdown-react",
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
   "@interactive-os/json-document-calendar",

@@ -12,6 +12,7 @@
     "packages/json-document-affordance",
     "packages/json-document-ui-primitives-react",
     "packages/json-document-animation-react",
+    "packages/json-document-markdown-react",
     "packages/json-document-zod",
     "packages/json-document-database",
     "packages/json-document-calendar",

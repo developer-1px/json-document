@@ -59,6 +59,7 @@
     "@interactive-os/json-document-database": "*",
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-file-intake": "*",
+    "@interactive-os/json-document-markdown-react": "*",
     "@interactive-os/json-document-react": "*",
     "@interactive-os/json-document-react-hook-form": "*",
     "@interactive-os/json-document-rich-text": "*",

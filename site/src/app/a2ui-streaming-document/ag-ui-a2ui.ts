@@ -7,6 +7,7 @@ export interface AgUiA2uiAdapter {
 
 export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
   const text = new Map<string, string>();
+  const roles = new Map<string, "assistant" | "developer" | "system" | "user">();
   const toolArguments = new Map<string, string>();
   let created = false;
   return { push(event) {
@@ -18,12 +19,16 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
         { version: "v0.9", updateComponents: { surfaceId, components: [{ id: "root", component: "Column", children: [] }] } },
       );
     }
-    if (event.type === EventType.TEXT_MESSAGE_START) messages.push(component(surfaceId, event.messageId, "Markdown", { role: event.role }));
+    if (event.type === EventType.TEXT_MESSAGE_START) {
+      roles.set(event.messageId, event.role);
+      messages.push(component(surfaceId, event.messageId, "Markdown", { role: event.role, streaming: true }));
+    }
     if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
       const value = `${text.get(event.messageId) ?? ""}${event.delta}`;
       text.set(event.messageId, value);
       messages.push(data(surfaceId, `/content/${event.messageId}`, value));
     }
+    if (event.type === EventType.TEXT_MESSAGE_END) messages.push(component(surfaceId, event.messageId, "Markdown", { role: roles.get(event.messageId) ?? "assistant", streaming: false }));
     if (event.type === EventType.REASONING_MESSAGE_START) messages.push(component(surfaceId, event.messageId, "Reasoning"));
     if (event.type === EventType.REASONING_MESSAGE_CONTENT) {
       const value = `${text.get(event.messageId) ?? ""}${event.delta}`;

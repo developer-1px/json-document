@@ -80,6 +80,7 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   affordanceApi: "patch",
   uiPrimitivesApi: "patch",
   animationApi: "patch",
+  markdownReactApi: "patch",
   databaseApi: "database",
   calendarApi: "database",
   webApi: "terminal",

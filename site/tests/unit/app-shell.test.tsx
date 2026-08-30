@@ -154,7 +154,7 @@ describe("official site shell", () => {
     expect(nav.queryByRole("group", { name: "Demos" })).toBeNull();
     expect(nav.queryByRole("group", { name: "Reference" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Artifact" }));
-    expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet", "API · File Intake", "LLM Agent"]);
+    expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet", "API · File Intake", "API · Markdown", "Streaming Markdown", "LLM Agent"]);
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
       "Editing",

@@ -1,6 +1,6 @@
-import ReactMarkdown from "react-markdown";
+import { MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
+import "@interactive-os/json-document-markdown-react/styles.css";
 import rehypeSlug from "rehype-slug";
-import remarkGfm from "remark-gfm";
 import { InlineCode } from "../../shared/ui/code-block";
 import { codeLanguage } from "../../shared/ui/code-tokens";
 import { ShikiSourceCodeBlock } from "../../shared/demo-workbench/ShikiSourceCodeBlock";
@@ -13,8 +13,8 @@ type MarkdownHeading = { id: string; level: number; text: string };
 export function MarkdownViewer({ source, hideTitle = false }: { source: string; hideTitle?: boolean }) {
   return (
     <article className={classes("grid gap-4", ui.text.body)}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+      <MarkdownRenderer
+        content={source}
         rehypePlugins={[rehypeSlug]}
         components={{
           h1: ({ children, id }) => hideTitle
@@ -63,9 +63,7 @@ export function MarkdownViewer({ source, hideTitle = false }: { source: string; 
             return target ? <ActionLink href={target}>{children}</ActionLink> : <span>{children}</span>;
           },
         }}
-      >
-        {source}
-      </ReactMarkdown>
+      />
     </article>
   );
 }

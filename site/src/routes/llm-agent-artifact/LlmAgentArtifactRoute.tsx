@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { ArrowUp, Plus } from "lucide-react";
 import { Command, Field } from "@interactive-os/json-document-ui-primitives-react";
+import { MarkdownRenderer } from "@interactive-os/json-document-markdown-react";
+import "@interactive-os/json-document-markdown-react/styles.css";
 import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "./llm-agent-api";
 import { A2uiSurface, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, type A2uiStreamingDocument, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
 import "./llm-agent-artifact.css";
@@ -97,7 +99,7 @@ export function LlmAgentArtifactRoute() {
       <div className="llm-agent-main">
       <header className="llm-agent-app-header"><strong>LLM Agent</strong><span>{sessionId ? sessionId.slice(0, 8) : "Local Codex"}</span></header>
       <section className="llm-agent-chat" aria-label="대화">
-        {!document.surfaces[CHAT_SURFACE_ID] ? <div className="llm-agent-empty"><h1>무엇을 도와드릴까요?</h1><p>로컬 Codex와 대화를 시작하세요.</p></div> : <A2uiSurface document={document} surfaceId={CHAT_SURFACE_ID} />}
+        {!document.surfaces[CHAT_SURFACE_ID] ? <div className="llm-agent-empty"><h1>무엇을 도와드릴까요?</h1><p>로컬 Codex와 대화를 시작하세요.</p></div> : <A2uiSurface document={document} markdown={MarkdownRenderer} surfaceId={CHAT_SURFACE_ID} />}
       </section>
       <form className="llm-agent-input" onSubmit={submit}>
         <Field multiline label="메시지" placeholder="메시지를 입력하세요" value={input} onValueChange={setInput} onKeyDown={handleKeyDown} rows={1} />

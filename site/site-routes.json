@@ -225,6 +225,26 @@
     "navigationGroup": "UI Primitives"
   },
   {
+    "path": "/docs/api/markdown-react",
+    "label": "API · Markdown",
+    "title": "Markdown React API - json-document",
+    "description": "@interactive-os/json-document-markdown-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact",
+    "relatedDemoPath": "/demo/markdown",
+    "relatedDemoLabel": "Streaming Markdown"
+  },
+  {
+    "path": "/demo/markdown",
+    "label": "Streaming Markdown",
+    "title": "Streaming Markdown - json-document",
+    "heading": "Streaming Markdown",
+    "description": "불완전한 Markdown 스트림과 커스텀 component renderer를 정본 패키지로 검증합니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact",
+    "parentPath": "/docs/api/markdown-react"
+  },
+  {
     "path": "/demo/ui-primitives",
     "label": "Design system",
     "title": "Design system - json-document",

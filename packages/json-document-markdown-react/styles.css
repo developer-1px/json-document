@@ -1,0 +1,16 @@
+[data-markdown-renderer] { color: inherit; font-size: 0.95rem; line-height: 1.72; overflow-wrap: anywhere; }
+[data-markdown-renderer] > :first-child { margin-top: 0; }
+[data-markdown-renderer] > :last-child { margin-bottom: 0; }
+[data-markdown-renderer] h1, [data-markdown-renderer] h2, [data-markdown-renderer] h3 { line-height: 1.25; letter-spacing: -0.025em; margin: 1.4em 0 0.55em; }
+[data-markdown-renderer] p, [data-markdown-renderer] ul, [data-markdown-renderer] ol, [data-markdown-renderer] blockquote { margin: 0.72em 0; }
+[data-markdown-renderer] ul, [data-markdown-renderer] ol { padding-left: 1.4em; }
+[data-markdown-renderer] blockquote { border-left: 3px solid color-mix(in srgb, currentColor 22%, transparent); color: color-mix(in srgb, currentColor 72%, transparent); padding-left: 1em; }
+[data-markdown-renderer] a { color: #2563eb; text-underline-offset: 0.18em; }
+[data-markdown-renderer] code { background: color-mix(in srgb, currentColor 8%, transparent); border-radius: 0.38em; font: 0.9em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 0.12em 0.34em; }
+[data-markdown-renderer] pre { background: #111827; border-radius: 0.75rem; color: #e5e7eb; overflow-x: auto; padding: 0.9rem 1rem; }
+[data-markdown-renderer] pre code { background: transparent; padding: 0; }
+[data-markdown-renderer] table { border-collapse: collapse; display: block; max-width: 100%; overflow-x: auto; }
+[data-markdown-renderer] th, [data-markdown-renderer] td { border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent); padding: 0.45rem 0.8rem 0.45rem 0; text-align: left; }
+[data-markdown-streaming="true"] > :last-child { animation: jd-markdown-stream-in 180ms ease-out; }
+@keyframes jd-markdown-stream-in { from { opacity: 0.45; transform: translateY(0.12em); } }
+@media (prefers-reduced-motion: reduce) { [data-markdown-streaming="true"] > :last-child { animation: none; } }
