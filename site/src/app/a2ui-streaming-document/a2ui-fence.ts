@@ -8,7 +8,7 @@ export type A2uiFenceProjection = Readonly<{
 
 /** Projects accumulated assistant Markdown into visible prose and complete A2UI JSONL messages. */
 export function projectA2uiFences(source: string, complete = false): A2uiFenceProjection {
-  const lines = source.match(/.*(?:\n|$)/g)?.filter(Boolean) ?? [];
+  const lines = source.match(/[^\n]*(?:\n|$)/g)?.filter(Boolean) ?? [];
   const markdown: string[] = [];
   const messages: A2uiMessage[] = [];
   const errors: string[] = [];
@@ -17,9 +17,9 @@ export function projectA2uiFences(source: string, complete = false): A2uiFencePr
   for (const [index, line] of lines.entries()) {
     const hasNewline = line.endsWith("\n");
     const value = line.replace(/\r?\n$/, "");
-    if (!inside && /^```a2ui\s*$/.test(value)) { inside = true; continue; }
-    if (!inside && !hasNewline && "```a2ui".startsWith(value.trim())) continue;
-    if (inside && /^```\s*$/.test(value)) { inside = false; continue; }
+    if (!inside && /^ {0,3}```a2ui\s*$/.test(value)) { inside = true; continue; }
+    if (!inside && !hasNewline && partialA2uiFence(value)) continue;
+    if (inside && /^ {0,3}```\s*$/.test(value)) { inside = false; continue; }
     if (!inside) { markdown.push(line); continue; }
     if (!value.trim() || (!hasNewline && !complete && index === lines.length - 1)) continue;
     try {
@@ -30,4 +30,10 @@ export function projectA2uiFences(source: string, complete = false): A2uiFencePr
   }
 
   return { markdown: markdown.join(""), messages, errors };
+}
+
+function partialA2uiFence(value: string): boolean {
+  const match = /^( {0,3})(.*)$/.exec(value);
+  const suffix = match?.[2];
+  return suffix !== undefined && "```a2ui".startsWith(suffix);
 }

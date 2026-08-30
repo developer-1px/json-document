@@ -138,6 +138,24 @@ describe("A2UI streaming document", () => {
     expect(projection.markdown).not.toContain("createSurface");
   });
 
+  test("accepts Markdown fences indented by up to three spaces without exposing JSONL", () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "indented", catalogId: A2UI_BASIC_CATALOG_ID } });
+    for (const indent of [" ", "  ", "   "]) {
+      const projection = projectA2uiFences(`목록 다음\r\n${indent}\`\`\`a2ui\r\n${create}\r\n${indent}\`\`\`\r\n완료`);
+      expect(projection.messages).toHaveLength(1);
+      expect(projection.markdown).toBe("목록 다음\r\n완료");
+      expect(projection.markdown).not.toContain("createSurface");
+    }
+  });
+
+  test("keeps four-space-indented A2UI-looking code as ordinary Markdown", () => {
+    const source = '    ```a2ui\n    {"example":true}\n    ```';
+    const projection = projectA2uiFences(source);
+
+    expect(projection.messages).toHaveLength(0);
+    expect(projection.markdown).toBe(source);
+  });
+
   test("waits for an incomplete JSONL line and reports malformed complete JSON", () => {
     const incomplete = projectA2uiFences('```a2ui\n{"version":"v0.9"');
     expect(incomplete.messages).toHaveLength(0);
