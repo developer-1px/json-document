@@ -9,6 +9,7 @@ import {
 import {
   CalendarGrid,
   CalendarMonthGrid,
+  CalendarTimeGrid,
   calendarCells,
   DateGrid,
   DatePicker,
@@ -58,6 +59,7 @@ export function DateControlsDemoRoute() {
           renderCellDecoration={({ cell }) => cell.date === "2026-08-05" ? <span aria-hidden="true">•</span> : null}
         />
         <CalendarMonthGridUsage />
+        <CalendarTimeGridUsage />
         <CalendarGrid
           label="Calendar"
           value={date}
@@ -78,6 +80,59 @@ export function DateControlsDemoRoute() {
         />
       </div>
     </DemoPage>
+  );
+}
+
+function CalendarTimeGridUsage() {
+  const [editor] = useState(() => createCalendarEditor(monthGridDocument));
+  const hand = useCalendarHand(editor);
+  const interactions = useCalendarPointerInteractions(hand, { hourStart: 7, hourEnd: 19, stepMinutes: 15, pixelsPerHour: 48 });
+  const styles = dateControlsDemoRecipe();
+  return (
+    <CalendarTimeGrid
+      cells={calendarCells("week", "2026-08-03")}
+      weekdays={["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]}
+      events={hand.paintedEvents}
+      today="2026-08-04"
+      nowInstant="2026-08-04T10:15"
+      hourStart={7}
+      hourEnd={19}
+      workHourStart={9}
+      stepMinutes={15}
+      defaultTimedDurationMinutes={60}
+      pixelsPerHour={48}
+      fillViewport={false}
+      hand={hand}
+      interactions={interactions}
+      selectionTopology={calendarOccurrenceTopology(hand.document, "2026-08-03", "2026-08-10")}
+      affordances={{ allDayCell: "content-control", allDayEvent: "direct", eventResizeEnd: "direct", timeCell: "content-control", selectedSlot: "stateful", timedEvent: "direct" }}
+      classNames={{
+        root: styles.timeRoot(),
+        stickyHeader: styles.timeHeader(),
+        columnHeader: styles.timeColumnHeader(),
+        weekday: styles.timeMeta(),
+        dayNumber: styles.timeDayNumber(),
+        today: styles.timeToday(),
+        allDayLabel: styles.timeAllDayLabel(),
+        allDayCell: styles.timeAllDayCell(),
+        allDayEventContainer: styles.timeAllDayEventContainer(),
+        allDayEvent: styles.timeAllDayEvent(),
+        timeViewport: styles.timeViewport(),
+        hourGutter: styles.timeHourGutter(),
+        viewportAnchor: styles.timeViewportAnchor(),
+        hourLabel: styles.timeHourLabel(),
+        timeCell: styles.timeCell(),
+        selectedSlot: styles.timeSelectedSlot(),
+        hourRule: styles.timeHourRule(),
+        nowLine: styles.timeNowLine(),
+        timedEventContainer: styles.timeEventContainer(),
+        timedEvent: styles.timeEvent(),
+        eventTitle: styles.timeEventTitle(),
+        eventTime: styles.timeMeta(),
+      }}
+      labels={{ grid: "Occurrence week grid", allDay: "all-day", now: "Now", resizeEnd: (event) => `Resize ${event.title} end`, hour: (hour) => String(hour).padStart(2, "0") }}
+      getEventColor={() => "blue"}
+    />
   );
 }
 

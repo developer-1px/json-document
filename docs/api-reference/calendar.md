@@ -315,6 +315,94 @@ interface CalendarSelectionDragPreview {
   readonly target: CalendarSelectionMoveTarget;
 }
 ```
+## `CalendarTimeGrid`
+
+```ts
+CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode
+```
+## `CalendarTimeGridAffordances`
+
+```ts
+interface CalendarTimeGridAffordances {
+  readonly allDayCell: ControlAffordance;
+  readonly allDayEvent: ControlAffordance;
+  readonly eventResizeEnd: ControlAffordance;
+  readonly timeCell: ControlAffordance;
+  readonly selectedSlot: ControlAffordance;
+  readonly timedEvent: ControlAffordance;
+}
+```
+## `CalendarTimeGridClassNames`
+
+```ts
+interface CalendarTimeGridClassNames {
+  readonly root?: string;
+  readonly rootFill?: string;
+  readonly stickyHeader?: string;
+  readonly columnHeader?: string;
+  readonly weekday?: string;
+  readonly dayNumber?: string;
+  readonly today?: string;
+  readonly allDayLabel?: string;
+  readonly allDayCell?: string;
+  readonly allDayEventContainer?: string;
+  readonly allDayEvent?: string;
+  readonly resizeAllDayEnd?: string;
+  readonly timeViewport?: string;
+  readonly timeViewportFill?: string;
+  readonly hourGutter?: string;
+  readonly viewportAnchor?: string;
+  readonly hourLabel?: string;
+  readonly timeCell?: string;
+  readonly selectedSlot?: string;
+  readonly hourRule?: string;
+  readonly nowLine?: string;
+  readonly creationTimeHint?: string;
+  readonly timedEventContainer?: string;
+  readonly timedEvent?: string;
+  readonly eventTitle?: string;
+  readonly eventTime?: string;
+  readonly resizeTimedEnd?: string;
+}
+```
+## `CalendarTimeGridLabels`
+
+```ts
+interface CalendarTimeGridLabels {
+  readonly grid: string;
+  readonly allDay: string;
+  readonly now: string;
+  resizeEnd(event: CalendarEvent): string;
+  hour(hour: number): string;
+}
+```
+## `CalendarTimeGridProps`
+
+```ts
+interface CalendarTimeGridProps {
+  readonly cells: ReadonlyArray<CalendarCell>;
+  readonly weekdays: ReadonlyArray<string>;
+  readonly events: ReadonlyArray<CalendarEvent>;
+  readonly today: string;
+  readonly nowInstant: string;
+  readonly hourStart: number;
+  readonly hourEnd: number;
+  readonly workHourStart: number;
+  readonly stepMinutes: number;
+  readonly defaultTimedDurationMinutes: number;
+  readonly pixelsPerHour: number;
+  readonly fillViewport: boolean;
+  readonly hand: CalendarHand;
+  readonly interactions: CalendarPointerInteractions;
+  readonly selectionTopology: CalendarOccurrenceTopologySnapshot;
+  readonly affordances: CalendarTimeGridAffordances;
+  readonly classNames: CalendarTimeGridClassNames;
+  readonly labels: CalendarTimeGridLabels;
+  readonly timeViewportRef?: Ref<HTMLDivElement>;
+  readonly primaryEventRef?: Ref<HTMLDivElement>;
+  readonly getEventColor: (event: CalendarEvent) => string;
+}
+```
 ## `calendarTimeLabel`
 
 ```ts

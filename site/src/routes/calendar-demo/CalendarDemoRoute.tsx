@@ -3,7 +3,6 @@ import { ArrowUp, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Repea
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
-  calendarAllDayLayout,
   calendarAllDaySpan,
   calendarBusyDates,
   calendarDatePart,
@@ -11,25 +10,21 @@ import {
   calendarDocumentCalendars,
   calendarInstantAt,
   calendarIntervalLastDate,
-  calendarNowMarker,
   calendarOccurrenceTopology,
   calendarRecurrenceWithFrequency,
   calendarRecurrenceWithInterval,
   calendarRecurrenceWithUntil,
   calendarShiftInstant,
-  calendarTimedLayout,
   calendarVisibleEvents,
-  calendarVisibleHourBand,
   calendarClipboardFormat,
   createCalendarEditor,
   formatCalendarInstant,
-  isCalendarAllDay,
   type CalendarDocument,
   type CalendarEvent,
   type CalendarRecurrence,
   type CalendarView,
 } from "@interactive-os/json-document-editing";
-import { selectionModeFromModifiers, useAnchoredFloatingPosition } from "@interactive-os/json-document-react";
+import { useAnchoredFloatingPosition } from "@interactive-os/json-document-react";
 import { createWebClipboardSurface, createWebJSONClipboardRepresentation, isWebEditableTarget } from "@interactive-os/json-document-web";
 import {
   useCalendarHand,
@@ -44,6 +39,7 @@ import {
   calendarYearMonths,
   DateGrid,
   CalendarMonthGrid,
+  CalendarTimeGrid,
   type CalendarMonthGridHandle,
   shiftVisibleDate,
   visiblePeriodLabel,
@@ -51,9 +47,7 @@ import {
 import {
   Command,
   ContextualControls,
-  ResizeHandle,
   Choice,
-  SelectableItem,
   ToolbarGroup,
   ToolbarLayout,
   ToolbarRegion,
@@ -158,10 +152,6 @@ export function CalendarDemoRoute(props: {
   });
   const [viewState, setViewState] = useState<CalendarView>(calendarSearchDefaults.view);
   const [visibleDateState, setVisibleDateState] = useState(calendarSearchDefaults.date);
-  const timePreview = hand.timePreview;
-  const allDayPreview = hand.allDayPreview;
-  const monthPreview = hand.monthPreview;
-  const occurrenceEnd = hand.occurrence.end;
   const scope = hand.scope;
   const setScope = hand.setScope;
   const [detailsEditing, setDetailsEditing] = useState(false);
@@ -172,23 +162,6 @@ export function CalendarDemoRoute(props: {
     pixelsPerHour: pxPerHour,
     onMonthPointerBegin: () => monthGridRef.current?.dismissOverflow(),
   });
-  const {
-    hoveredTime,
-    instantAt,
-    timePointerDown,
-    timePointerMove,
-    timePointerUp,
-    clearTimeHover,
-    consumeEventClick,
-    consumeEventDoubleClick,
-    allDayPointerDown,
-    allDayPointerMove,
-    allDayPointerUp,
-    cancelTimePointer,
-    cancelAllDayPointer,
-    resizeTimed,
-    resizeAllDay,
-  } = pointerInteractions;
   const view = props.view ?? viewState;
   const visibleDate = props.visibleDate ?? visibleDateState;
   useCalendarViewportPosition({
@@ -230,7 +203,6 @@ export function CalendarDemoRoute(props: {
     commitOnBlur: false,
     realizationKey: eventDetailsPosition.position?.placement ?? null,
   });
-  const selectedSlot = selectedEvent === null ? hand.occurrence.start : null;
   const inspected = hand.inspectedInterval;
   const inspectedStart = inspected?.start ?? selectedEvent?.start ?? "";
   const inspectedEnd = inspected?.end ?? selectedEvent?.end ?? "";
@@ -243,11 +215,6 @@ export function CalendarDemoRoute(props: {
   const selectionTopology = selectionInterval === null
     ? { points: [] }
     : calendarOccurrenceTopology(document, selectionInterval.start, selectionInterval.end);
-  const isSelected = (event: CalendarEvent) => hand.isOccurrenceSelected(event.id, event.start);
-  const isPrimary = (event: CalendarEvent) => hand.isPrimaryOccurrence(event.id, event.start);
-  const selectEvent = (event: CalendarEvent, modifiers: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }) => (
-    hand.selectOccurrence(event.id, event.start, event.end, selectionModeFromModifiers(modifiers), selectionTopology)
-  );
   const nowInstant = formatCalendarInstant(Temporal.Now.plainDateTimeISO());
   const today = calendarDatePart(nowInstant);
   const yearMonths = calendarYearMonths(visibleDate);
@@ -280,279 +247,77 @@ export function CalendarDemoRoute(props: {
     hand.createInterval(start, end);
   }
 
-  function createTimedAt(day: string, clientY: number, grid: Element): void {
-    const start = instantAt(day, clientY, grid);
-    const end = start === null ? null : calendarShiftInstant(start, 60);
-    if (start === null || end === null) return;
-    hand.createInterval(start, end);
-  }
-
-  function createAllDayOn(day: string): void {
-    const span = calendarAllDaySpan(day, day);
-    if (span === null) return;
-    hand.createInterval(span.start, span.end, { allDay: true });
-  }
-
   function removeSelected(): void {
     hand.removeSelected();
   }
 
   const applySelectedPatch = hand.applySelectedPatch;
 
-  const allDayItems = calendarAllDayLayout(paintedEvents, days);
-  const allDayLaneCount = allDayItems[0]?.laneCount ?? 1;
-
   const timeGrid = (
-    <div
-      role="grid"
-      aria-multiselectable="true"
-      aria-label={view === "day" ? "Day" : "Week"}
-      className={classes("min-w-[36rem]", !embedded && "flex min-h-0 flex-1 flex-col")}
-      onPointerMove={(event) => {
-        timePointerMove(event);
-        allDayPointerMove(event);
+    <CalendarTimeGrid
+      cells={timeGridCells}
+      weekdays={weekdays}
+      events={paintedEvents}
+      today={today}
+      nowInstant={nowInstant}
+      hourStart={hourStart}
+      hourEnd={hourEnd}
+      workHourStart={workHourStart}
+      stepMinutes={15}
+      defaultTimedDurationMinutes={60}
+      pixelsPerHour={pxPerHour}
+      fillViewport={!embedded}
+      hand={hand}
+      interactions={pointerInteractions}
+      selectionTopology={selectionTopology}
+      timeViewportRef={hoursRef}
+      primaryEventRef={eventDetailsPosition.anchorRef}
+      affordances={{
+        allDayCell: calendarControlAffordance("allDayCell"),
+        allDayEvent: calendarControlAffordance("eventAllDay"),
+        eventResizeEnd: calendarControlAffordance("eventResizeEnd"),
+        timeCell: calendarControlAffordance("timeCell"),
+        selectedSlot: calendarControlAffordance("selectedSlot"),
+        timedEvent: calendarControlAffordance("eventTimed"),
       }}
-      onPointerLeave={clearTimeHover}
-    >
-      <div
-        className={classes("grid", styles.weekSticky())}
-        style={{ gridTemplateColumns: `3.25rem repeat(${days.length}, minmax(4.5rem, 1fr))` }}
-      >
-        <div className={styles.weekHead()} />
-        {timeGridCells.map((cell) => (
-          <div
-            key={cell.date}
-            role="columnheader"
-            className={styles.weekHead()}
-          >
-            <span className={ui.text.meta}>{weekdays[cell.weekday - 1]}</span>
-            <span className={classes(styles.dayNumber(), cell.date === today && styles.todayMark())}>
-              {cell.day}
-            </span>
-          </div>
-        ))}
-        <div
-          className={classes("px-1 py-2 text-right", ui.text.meta)}
-          style={{ gridRow: `2 / span ${allDayLaneCount}` }}
-        >
-          all-day
-        </div>
-        {days.map((day) => (
-          <div
-            key={`allday-${day}`}
-            data-calendar-allday-day={day}
-            tabIndex={-1}
-            data-selected={selectedSlot === day ? "true" : undefined}
-            data-ui-affordance={calendarControlAffordance("allDayCell")}
-            className={classes("min-h-10", styles.weekCell())}
-            style={{ gridRow: `2 / span ${allDayLaneCount}` }}
-            onPointerDown={(event) => allDayPointerDown(event, day, null, null, null, null)}
-            onPointerUp={allDayPointerUp}
-            onDoubleClick={() => createAllDayOn(day)}
-            onPointerCancel={(event) => cancelAllDayPointer(event.pointerId)}
-          />
-        ))}
-        {allDayItems.map((item) => (
-          <div
-            key={`${item.event.id}:${item.event.start}`}
-            ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
-            data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
-            data-calendar-allday-day={days[item.startIndex]}
-            className="group/event relative z-10 mx-0.5 my-1"
-            style={{ gridColumn: `${item.startIndex + 2} / span ${item.span}`, gridRow: 2 + item.lane }}
-          >
-            <SelectableItem
-              affordance={calendarControlAffordance("eventAllDay")}
-              selected={isSelected(item.event)}
-              data-primary={isPrimary(item.event) ? "true" : undefined}
-              aria-label={item.event.title}
-              data-calendar-color={calendarColor(document, item.event.calendarId)}
-              data-calendar-move-surface="true"
-              data-preview={item.event.id === "preview" ? "true" : undefined}
-              className={styles.allDayEvent()}
-              onPointerDown={(event) => {
-                event.stopPropagation();
-                allDayPointerDown(event, days[item.startIndex] ?? visibleDate, item.event.id, item.event.start, item.event.end, "body");
-              }}
-              onPointerUp={allDayPointerUp}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (consumeEventClick()) return;
-                selectEvent(item.event, event);
-              }}
-              onDoubleClick={(event) => {
-                event.stopPropagation();
-                if (consumeEventDoubleClick()) return;
-                hand.beginTitleRename(item.event.id);
-              }}
-            >
-              {item.event.title}
-            </SelectableItem>
-            {item.event.id === "preview" ? null : (
-              <ResizeHandle
-                affordance={calendarControlAffordance("eventResizeEnd")}
-                label={`Resize ${item.event.title} end`}
-                orientation="horizontal"
-                className={styles.resizeEdgeVertical()}
-                onResize={(delta, phase) => {
-                  const last = calendarIntervalLastDate(item.event.start, item.event.end, true);
-                  resizeAllDay(item.event.id, "end", last, item.event.start, delta, phase);
-                }}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-      <div
-        ref={hoursRef}
-        data-calendar-time-viewport=""
-        className={classes("grid", !embedded && styles.weekHours())}
-        style={{
-          gridTemplateColumns: `3.25rem repeat(${days.length}, minmax(4.5rem, 1fr))`,
-          height: embedded ? (hourEnd - hourStart) * pxPerHour : undefined,
-        }}
-      >
-        <div className="relative overflow-hidden" style={{ height: (hourEnd - hourStart) * pxPerHour }}>
-          <div
-            aria-hidden="true"
-            data-calendar-viewport-hour={String(workHourStart).padStart(2, "0")}
-            className="pointer-events-none absolute left-0 top-0"
-            style={{ transform: `translateY(${(workHourStart - hourStart) * pxPerHour}px)` }}
-          />
-          {Array.from({ length: hourEnd - hourStart }, (_, index) => hourStart + index).map((hour) => (
-            <div
-              key={hour}
-              data-calendar-hour={String(hour).padStart(2, "0")}
-              className={styles.hourLabel()}
-              style={{ top: (hour - hourStart) * pxPerHour + 4 }}
-            >
-              {String(hour).padStart(2, "0")}
-            </div>
-          ))}
-        </div>
-        {days.map((day) => {
-          const now = calendarNowMarker(nowInstant, day);
-          const nowTop = now === null ? null : (now.minutes - hourStart * 60) * (pxPerHour / 60);
-          const nowVisible = nowTop !== null && nowTop >= 0 && nowTop <= (hourEnd - hourStart) * pxPerHour;
-          return (
-            <div
-              key={day}
-              data-calendar-day={day}
-              data-calendar-grid="time"
-              tabIndex={-1}
-              data-ui-affordance={calendarControlAffordance("timeCell")}
-              data-ui-presentation="calendar-time-grid"
-              className={classes("overflow-hidden", styles.weekCell())}
-              style={{ height: (hourEnd - hourStart) * pxPerHour }}
-              onPointerDown={(event) => timePointerDown(event, day, null, null, null, null)}
-              onPointerUp={timePointerUp}
-              onDoubleClick={(event) => {
-                const grid = event.currentTarget.closest("[data-calendar-grid=\"time\"]");
-                if (grid === null) return;
-                createTimedAt(day, event.clientY, grid);
-              }}
-              onPointerCancel={(event) => cancelTimePointer(event.pointerId)}
-            >
-              {selectedSlot?.startsWith(`${day}T`) ? (
-                <div
-                  data-calendar-selected-slot={selectedSlot}
-                  data-ui-affordance={calendarControlAffordance("selectedSlot")}
-                  className={styles.selectedSlot()}
-                  style={{
-                    top: (Number(selectedSlot.slice(11, 13)) * 60 + Number(selectedSlot.slice(14, 16)) - hourStart * 60) * (pxPerHour / 60),
-                    height: 15 * (pxPerHour / 60),
-                  }}
-                />
-              ) : null}
-              {Array.from({ length: hourEnd - hourStart }, (_, index) => (
-                index === 0 ? null : (
-                  <div
-                    key={index}
-                    className={styles.hourRule()}
-                    style={{ top: index * pxPerHour }}
-                  />
-                )
-              ))}
-              {nowVisible ? (
-                <div
-                  role="presentation"
-                  aria-label="Now"
-                  className={styles.nowLine()}
-                  style={{ top: nowTop }}
-                />
-              ) : null}
-              {hoveredTime?.day === day && timePreview === null ? (
-                <div
-                  data-calendar-create-time=""
-                  className={styles.creationTimeHint()}
-                  style={{ top: (hoveredTime.minutes - hourStart * 60) * (pxPerHour / 60) }}
-                >
-                  {calendarTimeLabel(hoveredTime.instant)}
-                </div>
-              ) : null}
-              {calendarTimedLayout(paintedEvents, day).map((item) => {
-                const band = calendarVisibleHourBand(item.startMinutes, item.endMinutes, hourStart, hourEnd);
-                if (band === null) return null;
-                const { startMinutes, endMinutes } = band;
-                return (
-                <div
-                  key={`${item.event.id}:${item.event.start}`}
-                  ref={isPrimary(item.event) ? eventDetailsPosition.anchorRef : undefined}
-                  data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}
-                  className="group/event absolute z-10"
-                  style={{
-                    top: (startMinutes - hourStart * 60) * (pxPerHour / 60),
-                    height: Math.max(18, (endMinutes - startMinutes) * (pxPerHour / 60)),
-                    left: `calc(${item.lane / item.laneCount * 100}% + 0.25rem)`,
-                    width: `calc(${100 / item.laneCount}% - 0.5rem)`,
-                  }}
-                >
-                  <SelectableItem
-                    affordance={calendarControlAffordance("eventTimed")}
-                    selected={isSelected(item.event)}
-                    data-primary={isPrimary(item.event) ? "true" : undefined}
-                    aria-label={item.event.title}
-                    data-calendar-event=""
-                    data-calendar-color={calendarColor(document, item.event.calendarId)}
-                    data-calendar-move-surface="true"
-                    data-preview={item.event.id === "preview" || timePreview?.originEventId === item.event.id ? "true" : undefined}
-                    className={styles.timedEvent()}
-                    onPointerDown={(event) => {
-                      event.stopPropagation();
-                      timePointerDown(event, day, item.event.id, item.event.start, item.event.end, "body");
-                    }}
-                    onPointerUp={timePointerUp}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (consumeEventClick()) return;
-                      selectEvent(item.event, event);
-                    }}
-                    onDoubleClick={(event) => {
-                      event.stopPropagation();
-                      if (consumeEventDoubleClick()) return;
-                      hand.beginTitleRename(item.event.id);
-                    }}
-                  >
-                    <span className="min-w-0 truncate">{item.event.title}</span>
-                    <span className={styles.eventTime()}>{calendarTimeLabel(item.event.start)}</span>
-                  </SelectableItem>
-                  {item.event.id === "preview" ? null : (
-                    <ResizeHandle
-                      affordance={calendarControlAffordance("eventResizeEnd")}
-                      label={`Resize ${item.event.title} end`}
-                      orientation="vertical"
-                      className={styles.resizeEdge()}
-                      onResize={(delta, phase) => resizeTimed(item.event.id, "end", item.event.start, item.event.end, delta, phase)}
-                    />
-                  )}
-                </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      classNames={{
+        root: "min-w-[36rem]",
+        rootFill: "flex min-h-0 flex-1 flex-col",
+        stickyHeader: classes("grid", styles.weekSticky()),
+        columnHeader: styles.weekHead(),
+        weekday: ui.text.meta,
+        dayNumber: styles.dayNumber(),
+        today: styles.todayMark(),
+        allDayLabel: classes("px-1 py-2 text-right", ui.text.meta),
+        allDayCell: classes("min-h-10", styles.weekCell()),
+        allDayEventContainer: "group/event relative z-10 mx-0.5 my-1",
+        allDayEvent: styles.allDayEvent(),
+        resizeAllDayEnd: styles.resizeEdgeVertical(),
+        timeViewport: "grid",
+        timeViewportFill: styles.weekHours(),
+        hourGutter: "relative overflow-hidden",
+        viewportAnchor: "pointer-events-none absolute left-0 top-0",
+        hourLabel: styles.hourLabel(),
+        timeCell: classes("overflow-hidden", styles.weekCell()),
+        selectedSlot: styles.selectedSlot(),
+        hourRule: styles.hourRule(),
+        nowLine: styles.nowLine(),
+        creationTimeHint: styles.creationTimeHint(),
+        timedEventContainer: "group/event absolute z-10",
+        timedEvent: styles.timedEvent(),
+        eventTitle: "min-w-0 truncate",
+        eventTime: styles.eventTime(),
+        resizeTimedEnd: styles.resizeEdge(),
+      }}
+      labels={{
+        grid: view === "day" ? "Day" : "Week",
+        allDay: "all-day",
+        now: "Now",
+        resizeEnd: (event) => `Resize ${event.title} end`,
+        hour: (hour) => String(hour).padStart(2, "0"),
+      }}
+      getEventColor={(event) => calendarColor(document, event.calendarId)}
+    />
   );
 
   return (

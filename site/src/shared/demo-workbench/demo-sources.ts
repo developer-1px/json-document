@@ -13,6 +13,7 @@ import calendarEventLabelSource from "../../../../packages/json-document-calenda
 import dateControlsSource from "../../../../packages/json-document-calendar/src/date-controls.tsx?raw";
 import dateGridSource from "../../../../packages/json-document-calendar/src/date-grid.tsx?raw";
 import calendarMonthGridSource from "../../../../packages/json-document-calendar/src/calendar-month-grid.tsx?raw";
+import calendarTimeGridSource from "../../../../packages/json-document-calendar/src/calendar-time-grid.tsx?raw";
 import animationSource from "../../../../packages/json-document-animation-react/src/animations.tsx?raw";
 import markdownRendererSource from "../../../../packages/json-document-markdown-react/src/MarkdownRenderer.tsx?raw";
 import dateValuesSource from "../../../../packages/json-document-calendar/src/date-values.ts?raw";
@@ -171,6 +172,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-calendar/src/date-controls.tsx", dateControlsSource],
   ["packages/json-document-calendar/src/date-grid.tsx", dateGridSource],
   ["packages/json-document-calendar/src/calendar-month-grid.tsx", calendarMonthGridSource],
+  ["packages/json-document-calendar/src/calendar-time-grid.tsx", calendarTimeGridSource],
   ["packages/json-document-animation-react/src/animations.tsx", animationSource],
   ["packages/json-document-markdown-react/src/MarkdownRenderer.tsx", markdownRendererSource],
   ["packages/json-document-calendar/src/date-values.ts", dateValuesSource],
@@ -458,6 +460,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-calendar",
     symbol: "CalendarMonthGrid",
     sourcePath: "packages/json-document-calendar/src/calendar-month-grid.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-calendar",
+    symbol: "CalendarTimeGrid",
+    sourcePath: "packages/json-document-calendar/src/calendar-time-grid.tsx",
   },
   {
     packageName: "@interactive-os/json-document-ui-primitives-react",

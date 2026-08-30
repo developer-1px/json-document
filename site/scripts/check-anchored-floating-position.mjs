@@ -6,6 +6,7 @@ const affordance = read("packages/json-document-affordance/src/anchored-floating
 const web = read("packages/json-document-web/src/anchored-floating-position.ts");
 const react = read("packages/json-document-react/src/use-anchored-floating-position.ts");
 const calendar = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const calendarTimeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
 const styles = read("site/src/routes/calendar-demo/calendar-demo-styles.ts");
 const sources = read("site/src/shared/demo-workbench/demo-sources.ts");
 
@@ -15,7 +16,7 @@ requireText(affordance, 'readonly type: "locked"');
 requireText(web, "createWebAnchoredFloatingPositionPorts");
 requireText(react, "useAnchoredFloatingPosition");
 requireText(calendar, "useAnchoredFloatingPosition");
-requireText(calendar, 'data-calendar-event-anchor={isPrimary(item.event) ? "primary" : undefined}');
+requireText(calendarTimeGrid, 'data-calendar-event-anchor={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "primary" : undefined}');
 requireText(calendar, "eventDetailsPosition.floatingRef");
 requireText(sources, 'symbol: "useAnchoredFloatingPosition"');
 requireText(sources, 'symbol: "computeAnchoredFloatingPosition"');

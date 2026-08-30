@@ -6,18 +6,20 @@ const owner = read("packages/json-document-calendar/src/date-values.ts");
 const eventLabelOwner = read("packages/json-document-calendar/src/calendar-event-label.ts");
 const ownerIndex = read("packages/json-document-calendar/src/index.ts");
 const monthGrid = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
+const timeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarTimeLabel");
 requireText(owner, "Temporal.PlainDateTime.from(parsed).toPlainTime()");
 requireText(ownerIndex, "calendarTimeLabel");
-requireCount(host, "calendarTimeLabel(", 4);
+requireCount(host, "calendarTimeLabel(", 2);
 requireCount(monthGrid, "calendarTimeLabel(", 1);
+requireCount(timeGrid, "calendarTimeLabel(", 2);
 requireCount(eventLabelOwner, "calendarTimeLabel(", 1);
 forbid(host, /function clockLabel/);
 forbid(host, /slice\(11, 16\)/);
 
-console.log("Calendar time label guard ok; Calendar owner, Host, month-grid, and event-label consumers checked.");
+console.log("Calendar time label guard ok; Calendar owner, Host, month/time-grid, and event-label consumers checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");
