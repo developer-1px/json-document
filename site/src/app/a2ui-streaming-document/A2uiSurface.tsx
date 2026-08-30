@@ -15,7 +15,6 @@ function A2uiComponentView({ component, dataModel, markdown: Markdown }: { reado
   if (component.component === "Markdown") {
     const role = component.role === "user" ? "user" : "assistant";
     return <article className={`llm-agent-message ${role}`}>
-      <strong>{role === "user" ? "나" : "Codex"}</strong>
       <div role={role === "assistant" ? "status" : undefined}>
         <Markdown content={String(value ?? "")} streaming={component.streaming === true} />
       </div>
