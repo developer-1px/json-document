@@ -1,0 +1,64 @@
+import { EventType, type AGUIEvent } from "@ag-ui/core";
+import { HANDS_CATALOG_ID, type A2uiMessage } from "./a2ui-streaming-document";
+
+export interface AgUiA2uiAdapter {
+  push(event: AGUIEvent): ReadonlyArray<A2uiMessage>;
+}
+
+export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
+  const text = new Map<string, string>();
+  const toolArguments = new Map<string, string>();
+  let created = false;
+  return { push(event) {
+    const messages: A2uiMessage[] = [];
+    if (!created) {
+      created = true;
+      messages.push(
+        { version: "v0.9", createSurface: { surfaceId, catalogId: HANDS_CATALOG_ID } },
+        { version: "v0.9", updateComponents: { surfaceId, components: [{ id: "root", component: "Column", children: [] }] } },
+      );
+    }
+    if (event.type === EventType.TEXT_MESSAGE_START) messages.push(component(surfaceId, event.messageId, "Markdown", { role: event.role }));
+    if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
+      const value = `${text.get(event.messageId) ?? ""}${event.delta}`;
+      text.set(event.messageId, value);
+      messages.push(data(surfaceId, `/content/${event.messageId}`, value));
+    }
+    if (event.type === EventType.REASONING_MESSAGE_START) messages.push(component(surfaceId, event.messageId, "Reasoning"));
+    if (event.type === EventType.REASONING_MESSAGE_CONTENT) {
+      const value = `${text.get(event.messageId) ?? ""}${event.delta}`;
+      text.set(event.messageId, value);
+      messages.push(data(surfaceId, `/content/${event.messageId}`, value));
+    }
+    if (event.type === EventType.TOOL_CALL_START) {
+      messages.push(component(surfaceId, event.toolCallId, "ToolActivity"));
+      messages.push(data(surfaceId, `/tools/${event.toolCallId}`, { name: event.toolCallName, status: "running", arguments: "" }));
+    }
+    if (event.type === EventType.TOOL_CALL_ARGS) {
+      const value = `${toolArguments.get(event.toolCallId) ?? ""}${event.delta}`;
+      toolArguments.set(event.toolCallId, value);
+      messages.push(data(surfaceId, `/tools/${event.toolCallId}/arguments`, value));
+    }
+    if (event.type === EventType.TOOL_CALL_RESULT) {
+      messages.push(data(surfaceId, `/tools/${event.toolCallId}/status`, "done"));
+      messages.push(data(surfaceId, `/tools/${event.toolCallId}/result`, event.content));
+      const artifact = artifactFrom(event);
+      if (artifact) {
+        messages.push(component(surfaceId, `${event.toolCallId}-artifact`, "Artifact", {}, `/artifacts/${event.toolCallId}`));
+        messages.push(data(surfaceId, `/artifacts/${event.toolCallId}`, artifact));
+      }
+    }
+    return messages;
+  } };
+}
+
+function component(surfaceId: string, id: string, type: string, properties: Record<string, unknown> = {}, valuePath?: string): A2uiMessage {
+  return { version: "v0.9", updateComponents: { surfaceId, components: [{ id, component: type, value: { path: valuePath ?? (type === "ToolActivity" ? `/tools/${id}` : `/content/${id}`) }, ...properties }] } };
+}
+function data(surfaceId: string, path: string, value: unknown): A2uiMessage {
+  return { version: "v0.9", updateDataModel: { surfaceId, path, value } };
+}
+function artifactFrom(event: Extract<AGUIEvent, { type: EventType.TOOL_CALL_RESULT }>): unknown | undefined {
+  const raw = event.rawEvent as { params?: { item?: { type?: string; changes?: unknown } } } | undefined;
+  return raw?.params?.item?.type === "fileChange" ? { kind: "fileChange", changes: raw.params.item.changes, content: event.content } : undefined;
+}
