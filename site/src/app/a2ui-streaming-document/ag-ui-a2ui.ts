@@ -14,6 +14,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
   const openText = new Set<string>();
   const openTools = new Set<string>();
   const projectedA2ui = new Map<string, number>();
+  const projectedMarkdown = new Map<string, string>();
   let created = false;
   return { push(event) {
     const messages: A2uiMessage[] = [];
@@ -33,7 +34,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       const source = `${text.get(event.messageId) ?? ""}${event.delta}`;
       text.set(event.messageId, source);
       const projection = roles.get(event.messageId) === "assistant" ? projectA2uiFences(source) : { markdown: source, messages: [] };
-      messages.push(data(surfaceId, `/content/${event.messageId}`, visibleMarkdown(projection)));
+      pushVisibleMarkdown(messages, projectedMarkdown, surfaceId, event.messageId, projection);
       const consumed = projectedA2ui.get(event.messageId) ?? 0;
       messages.push(...projection.messages.slice(consumed));
       projectedA2ui.set(event.messageId, projection.messages.length);
@@ -42,7 +43,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       openText.delete(event.messageId);
       if (roles.get(event.messageId) === "assistant") {
         const projection = projectA2uiFences(text.get(event.messageId) ?? "", true);
-        messages.push(data(surfaceId, `/content/${event.messageId}`, visibleMarkdown(projection)));
+        pushVisibleMarkdown(messages, projectedMarkdown, surfaceId, event.messageId, projection);
         const consumed = projectedA2ui.get(event.messageId) ?? 0;
         messages.push(...projection.messages.slice(consumed));
         projectedA2ui.set(event.messageId, projection.messages.length);
@@ -90,6 +91,13 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
 function visibleMarkdown(projection: Readonly<{ markdown: string; errors?: ReadonlyArray<string> }>): string {
   if (!projection.errors?.length) return projection.markdown;
   return `${projection.markdown}${projection.markdown.endsWith("\n") || !projection.markdown ? "" : "\n\n"}${A2UI_PROJECTION_ERROR_TEXT}`;
+}
+
+function pushVisibleMarkdown(messages: A2uiMessage[], projected: Map<string, string>, surfaceId: string, messageId: string, projection: Readonly<{ markdown: string; errors?: ReadonlyArray<string> }>) {
+  const markdown = visibleMarkdown(projection);
+  if (projected.get(messageId) === markdown) return;
+  projected.set(messageId, markdown);
+  messages.push(data(surfaceId, `/content/${messageId}`, markdown));
 }
 
 function component(surfaceId: string, id: string, type: string, properties: Record<string, unknown> = {}, valuePath?: string): A2uiMessage {

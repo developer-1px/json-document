@@ -171,6 +171,23 @@ describe("A2UI streaming document", () => {
     engine.dispose();
   });
 
+  test("does not commit unchanged visible Markdown for every character inside an A2UI fence", () => {
+    const adapter = createAgUiA2uiAdapter("chat-efficient");
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "efficient", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "efficient", components: [{ id: "root", component: "Text", text: "완료" }] } });
+    const source = `설명\n\`\`\`a2ui\n${create}\n${components}\n\`\`\``;
+    const messages = [
+      ...adapter.push({ type: EventType.TEXT_MESSAGE_START, messageId: "tiny", role: "assistant" }),
+      ...[...source].flatMap((delta) => adapter.push({ type: EventType.TEXT_MESSAGE_CONTENT, messageId: "tiny", delta })),
+      ...adapter.push({ type: EventType.TEXT_MESSAGE_END, messageId: "tiny" }),
+    ];
+    const visibleWrites = messages.filter((message) => "updateDataModel" in message && message.updateDataModel.surfaceId === "chat-efficient" && message.updateDataModel.path === "/content/tiny");
+
+    expect(visibleWrites).toHaveLength(3);
+    expect(messages.filter((message) => "createSurface" in message && message.createSurface.surfaceId === "efficient")).toHaveLength(1);
+    expect(messages.filter((message) => "updateComponents" in message && message.updateComponents.surfaceId === "efficient")).toHaveLength(1);
+  });
+
   test("accumulates repeated component batches and replaces existing component and data values", () => {
     const engine = createA2uiStreamingDocumentEngine();
     const states: unknown[] = [];
