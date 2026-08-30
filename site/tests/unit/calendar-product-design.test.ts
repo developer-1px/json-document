@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 
 import { calendarDemoRecipe } from "../../src/routes/calendar-demo/calendar-demo-styles";
-import { ui } from "../../src/shared/ui/styles";
+import { calendarControlAffordances } from "../../src/routes/calendar-demo/calendar-control-affordances";
 
 const forbidden = ["border-l-line-accent", "outline-line-accent", "ring-line-accent"] as const;
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -25,11 +25,9 @@ describe("calendar product design", () => {
     assertNoAccentChrome(styles.monthTimed(), "monthTimed");
     assertNoAccentChrome(styles.monthAllDay(), "monthAllDay");
     assertNoAccentChrome(styles.todayMark(), "todayMark");
-    expect(styles.timedEvent()).toContain("data-[selected=true]:font-semibold");
-    expect(styles.timedEvent()).toContain("data-[selected=true]:text-foreground-strong");
+    expect(styles.timedEvent()).not.toContain("data-[selected=true]");
     expect(styles.timedEvent()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
     expect(styles.timedEvent()).toContain("rounded-control");
-    expect(styles.resizeEdge()).toContain("bg-transparent");
     expect(styles.resizeEdge()).not.toContain("bg-line-accent");
     expect(styles.timedEvent()).not.toContain("data-[selected=true]:bg-background-subtle");
     expect(styles.monthTimed()).not.toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
@@ -52,6 +50,32 @@ describe("calendar product design", () => {
     expect(block).toContain("min-w-0");
   });
 
+  test("time grid keeps calendar structure visible without a full-column hover wash", () => {
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
+    expect(styles.hourRule()).toContain("border-line-subtle/70");
+    expect(styles.weekCell()).toContain("border-line-subtle/60");
+    expect(styles.weekSticky()).toContain("border-line-subtle/60");
+    expect(styles.monthWeek()).toContain("border-line-subtle/60");
+    expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
+    expect(styles.hourLabel()).toContain("text-foreground-muted");
+    expect(css).toContain('[data-ui-presentation="calendar-time-grid"]:hover');
+    expect(css).toContain("bg-transparent");
+  });
+
+  test("details editor aligns popup fields with the canonical product field grammar", () => {
+    const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
+    const source = readFileSync(
+      path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"),
+      "utf8",
+    );
+    expect(css).toContain('[data-ui-control="choice"][data-ui-presentation="popup"] > button[aria-haspopup="listbox"]');
+    expect(css).toContain('[data-ui-control="choice"][data-ui-presentation="popup"] > [role="listbox"]');
+    expect(source).toContain('<span className={ui.text.label}>Calendar</span>');
+    expect(source).toContain('<span className={ui.text.label}>Repeat</span>');
+    expect(styles.calendarToggle()).toContain("justify-start");
+    expect(styles.calendarToggle()).toContain("text-left");
+  });
+
   test("date-field stacks its label above the input", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const start = css.indexOf('[data-ui-control="date-field"] {');
@@ -63,8 +87,7 @@ describe("calendar product design", () => {
     expect(block).toContain("w-full");
   });
 
-  test("shared Toggle pressed is fill and text without an accent ring", () => {
-    assertNoAccentChrome(ui.interactive.toggle, "ui.interactive.toggle");
+  test("the canonical product grammar owns shared control states", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const start = css.indexOf('[data-ui-control="toggle"] {');
     expect(start).toBeGreaterThan(-1);
@@ -72,6 +95,25 @@ describe("calendar product design", () => {
     expect(block).toContain("aria-pressed:bg-background-subtle");
     expect(block).toContain("aria-pressed:text-foreground-strong");
     assertNoAccentChrome(block, "toggle css");
+    expect(css).toContain('[data-ui-affordance="content-control"]');
+    expect(css).toContain('[data-ui-affordance="direct"]');
+    expect(css).toContain('[data-ui-affordance="contextual"]');
+    expect(css).toContain('[data-ui-affordance="contextual-danger"]');
+    expect(css).toContain('[data-ui-affordance="disabled-preview"]');
+  });
+
+  test("classifies all 34 Calendar control surfaces with the canonical vocabulary", () => {
+    expect(Object.keys(calendarControlAffordances)).toHaveLength(34);
+    expect(new Set(Object.values(calendarControlAffordances))).toEqual(new Set([
+      "persistent",
+      "content-control",
+      "stateful",
+      "contextual",
+      "contextual-danger",
+      "direct",
+      "field",
+      "disabled-preview",
+    ]));
   });
 
   test("month and year views compose date grids instead of title lists", () => {
@@ -83,7 +125,6 @@ describe("calendar product design", () => {
     expect(source).toContain("calendarMonthWeekLayout");
     expect(source).toContain("Resize ${item.event.title} end");
     expect(source).toContain("useCalendarHand");
-    expect(source).toContain("clipStart");
     expect(source).toContain("clipEnd");
     expect(source).toContain("calendarBusyDates");
     expect(source).toContain('calendarCells("month"');
@@ -96,5 +137,7 @@ describe("calendar product design", () => {
     expect(source).toContain("paintedEvents = hand.paintedEvents");
     expect(source).toContain('color: "accent"');
     expect(source).not.toContain("uniqueTitles");
+    expect(source).not.toContain('!isPrimary(item.event) ? null : (');
+    expect(source).toContain('affordance={calendarControlAffordance("eventResizeEnd")}');
   });
 });

@@ -201,10 +201,10 @@ export function UiPrimitivesCatalogRoute() {
             <span className={ui.text.meta}>Launch brief · unsaved</span>
           </div>
           <div className={styles.row()}>
-            <Command kind="primary">Save</Command>
-            <Command kind="secondary">Cancel</Command>
-            <Command kind="danger">Delete</Command>
-            <Command kind="primary" disabled>Disabled</Command>
+            <Command affordance="persistent" kind="primary">Save</Command>
+            <Command affordance="persistent" kind="secondary">Cancel</Command>
+            <Command affordance="contextual-danger" kind="danger">Delete</Command>
+            <Command affordance="disabled-preview" kind="primary" disabled>Disabled</Command>
           </div>
           <div className={styles.controlToolbar()}>
             <span className={styles.controlSettingLabel()}>Utilities</span>

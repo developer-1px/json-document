@@ -107,6 +107,12 @@ const binding = useInteractionHandle<SVGCircleElement>({
 return <circle {...binding.handleProps} style={{ cursor: binding.cursor }} />;
 ```
 
+`handleProps`는 손잡이 종류를 `data-interaction-handle`로, pointer session이
+진행 중인 동안에는 `data-active="true"`로 투영합니다. 제품은 이 상태를
+hover·focus·active 시각 피드백에 사용할 수 있으며 pointer lifecycle을 다시
+구현하지 않습니다. `binding.cursor`는 descriptor에 맞는 idle·active cursor를
+그대로 제공합니다.
+
 ## 제품 Intent로 닫기
 
 InteractionHandle은 문서를 직접 수정하지 않습니다. Calendar는 날짜 범위,

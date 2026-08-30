@@ -75,7 +75,11 @@ test("Calendar keeps event time visible, hints an empty creation time, and opens
   await expect(details).toHaveAttribute("data-floating-placement", /^(right|left|top|bottom)/);
   await expect(details.getByRole("heading", { name: "고객사 싱크", exact: true })).toBeVisible();
   await expect(details.getByRole("textbox", { name: "Title" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Resize 고객사 싱크 start", exact: true })).toBeVisible();
+  const editDetails = page.getByRole("button", { name: "Edit details", exact: true });
+  await page.mouse.move(0, 0);
+  await expect(editDetails).toHaveCSS("opacity", "0");
+  await details.hover();
+  await expect(editDetails).toHaveCSS("opacity", "1");
   await expect(page.getByRole("button", { name: "Resize 고객사 싱크 end", exact: true })).toBeVisible();
   await event.dblclick();
   const title = details.getByRole("textbox", { name: "Title" });
@@ -86,6 +90,51 @@ test("Calendar keeps event time visible, hints an empty creation time, and opens
   await expect(event).toHaveCSS("font-family", productFont);
   await expect(time).toHaveCSS("font-family", productFont);
   await expect(title).toHaveCSS("font-family", productFont);
+});
+
+test("Calendar distinguishes the selection set, primary event, move surface, and active resize edge", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const first = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  const second = page.getByRole("button", { name: "점심", exact: true });
+  const endHandle = page.getByRole("button", { name: "Resize 고객사 싱크 end", exact: true });
+
+  await expect(first).toHaveAttribute("data-selected", "false");
+  await expect(endHandle).toHaveCount(1);
+  await expect(endHandle).toHaveCSS("opacity", "0");
+  await first.hover();
+  await expect(endHandle).toHaveCSS("opacity", "1");
+  await page.mouse.move(0, 0);
+  await first.focus();
+  await expect(endHandle).toHaveCSS("opacity", "1");
+
+  await first.click();
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(first).toHaveAttribute("data-primary", "true");
+  await expect(first).toHaveCSS("cursor", "grab");
+  await expect(first).toHaveCSS("outline-width", "1px");
+
+  await expect(endHandle).toHaveCSS("cursor", "row-resize");
+  await expect(endHandle).not.toHaveAttribute("data-active", "true");
+  await page.mouse.move(0, 0);
+  await page.getByRole("button", { name: "Today", exact: true }).focus();
+  await expect(endHandle).toHaveCSS("opacity", "0");
+  await first.hover();
+  await expect(endHandle).toHaveCSS("opacity", "1");
+  await endHandle.hover();
+  await page.mouse.down();
+  await expect(endHandle).toHaveAttribute("data-active", "true");
+  await page.mouse.up();
+  await expect(endHandle).not.toHaveAttribute("data-active", "true");
+
+  await second.click({ modifiers: ["ControlOrMeta"] });
+  await expect(first).toHaveAttribute("data-selected", "true");
+  await expect(first).not.toHaveAttribute("data-primary", "true");
+  await expect(first).toHaveCSS("outline-width", "1px");
+  await expect(second).toHaveAttribute("data-selected", "true");
+  await expect(second).toHaveAttribute("data-primary", "true");
+  await expect(page.getByRole("button", { name: "Resize 고객사 싱크 end", exact: true })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Resize 고객사 싱크 end", exact: true })).toHaveCSS("opacity", "0");
+  await expect(page.getByRole("button", { name: "Resize 점심 end", exact: true })).toBeVisible();
 });
 
 test("Calendar details follow the primary occurrence and flip inside a narrow viewport", async ({ page }) => {

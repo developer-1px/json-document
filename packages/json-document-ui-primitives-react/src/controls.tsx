@@ -6,6 +6,7 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
+import type { ControlAffordanceProps } from "./control-affordance.js";
 
 export type CommandKind = "primary" | "secondary" | "danger";
 
@@ -16,13 +17,13 @@ type FocusPreservingControl = {
 
 /** Executes a command. Label-only and icon-only appearances share this semantic contract. */
 export function Command(
-  props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & {
+  props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & ControlAffordanceProps & {
     readonly kind?: CommandKind;
     readonly label?: string;
     readonly rootClassName?: string;
   },
 ): ReactNode {
-  const { "aria-label": ariaLabel, children, kind = "secondary", label, onMouseDown, preserveFocus = false, rootClassName, type = "button", ...buttonProps } = props;
+  const { "aria-label": ariaLabel, affordance, children, kind = "secondary", label, onMouseDown, preserveFocus = false, rootClassName, type = "button", ...buttonProps } = props;
   const accessibleLabel = label ?? ariaLabel;
   const tooltipId = useId();
   const command = (
@@ -32,6 +33,7 @@ export function Command(
       aria-describedby={label ? tooltipId : undefined}
       aria-label={accessibleLabel}
       data-ui-control="command"
+      data-ui-affordance={affordance}
       data-ui-kind={kind}
       data-ui-presentation={label ? "icon" : "label"}
       onMouseDown={preservePointerFocus(preserveFocus, onMouseDown)}
@@ -48,14 +50,14 @@ export function Command(
 
 /** Changes a persistent binary state. Visual forms such as a switch or chip are styling concerns. */
 export function Toggle(
-  props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & {
+  props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & {
     readonly pressed: boolean;
     readonly presentation?: "button" | "chip";
     readonly label?: string;
     readonly tooltip?: string;
   },
 ): ReactNode {
-  const { "aria-label": ariaLabel, children, label, onMouseDown, presentation = "button", preserveFocus = false, pressed, tooltip, type = "button", ...buttonProps } = props;
+  const { "aria-label": ariaLabel, affordance, children, label, onMouseDown, presentation = "button", preserveFocus = false, pressed, tooltip, type = "button", ...buttonProps } = props;
   const accessibleLabel = label ?? ariaLabel;
   const tooltipId = useId();
   const button = (
@@ -66,6 +68,7 @@ export function Toggle(
       aria-label={accessibleLabel}
       aria-pressed={pressed}
       data-ui-control="toggle"
+      data-ui-affordance={affordance}
       data-ui-presentation={presentation}
       data-selected={pressed ? "true" : "false"}
       onMouseDown={preservePointerFocus(preserveFocus, onMouseDown)}
@@ -142,7 +145,7 @@ export function InlineChoice<Id extends string>(props: {
   readonly options: ReadonlyArray<InlineChoiceOption<Id>>;
   readonly onValueChange: (value: Id) => void;
   readonly className?: string;
-}): ReactNode {
+} & ControlAffordanceProps): ReactNode {
   const enabled = props.options.filter((option) => !option.disabled);
   const move = (from: Id, direction: 1 | -1) => {
     const index = enabled.findIndex((option) => option.id === from);
@@ -150,7 +153,7 @@ export function InlineChoice<Id extends string>(props: {
     if (next) props.onValueChange(next.id);
   };
   return (
-    <div role="radiogroup" aria-label={props.label} className={props.className} data-ui-control="choice" data-ui-presentation="inline">
+    <div role="radiogroup" aria-label={props.label} className={props.className} data-ui-control="choice" data-ui-presentation="inline" data-ui-affordance={props.affordance}>
       {props.options.map((option) => (
         <button
           key={option.id}
@@ -182,28 +185,29 @@ export type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
   readonly selected: boolean;
   readonly focus?: boolean;
-} & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
+} & ControlAffordanceProps & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 
 export function SelectableItem<T extends ElementType = "button">(
   props: SelectableItemProps<T>,
 ): ReactNode {
-  const { as, selected, focus = false, ...itemProps } = props;
+  const { affordance, as, selected, focus = false, ...itemProps } = props;
   const Component = as ?? "button";
   return createElement(Component, {
     ...itemProps,
     "data-selected": selected ? "true" : "false",
     "data-focus": focus ? "true" : "false",
     "data-ui-control": "selectable",
+    "data-ui-affordance": affordance,
   });
 }
 
 export function DisclosureButton(
-  props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & {
+  props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & ControlAffordanceProps & {
     readonly expanded: boolean;
     readonly controls: string;
   },
 ): ReactNode {
-  const { expanded, controls, type = "button", ...buttonProps } = props;
+  const { affordance, expanded, controls, type = "button", ...buttonProps } = props;
   return (
     <button
       {...buttonProps}
@@ -211,6 +215,7 @@ export function DisclosureButton(
       aria-expanded={expanded}
       aria-controls={controls}
       data-ui-control="disclosure"
+      data-ui-affordance={affordance}
     />
   );
 }

@@ -35,6 +35,20 @@ import {
 afterEach(cleanup);
 
 describe("UI Primitives", () => {
+  test("projects product affordance without changing the semantic control role", () => {
+    render(<>
+      <Command affordance="persistent">Today</Command>
+      <Toggle affordance="stateful" pressed={true}>Work</Toggle>
+      <SelectableItem affordance="content-control" selected={false}>Event</SelectableItem>
+      <ResizeHandle affordance="direct" label="Resize end" orientation="vertical" onResize={() => undefined} />
+    </>);
+    expect(screen.getByRole("button", { name: "Today" }).getAttribute("data-ui-affordance")).toBe("persistent");
+    expect(screen.getByRole("button", { name: "Work" }).getAttribute("data-ui-affordance")).toBe("stateful");
+    expect(screen.getByRole("button", { name: "Event" }).getAttribute("data-ui-affordance")).toBe("content-control");
+    expect(screen.getByRole("button", { name: "Resize end" }).getAttribute("data-ui-affordance")).toBe("direct");
+    expect(screen.getByRole("button", { name: "Resize end" }).getAttribute("data-ui-orientation")).toBe("vertical");
+  });
+
   test("role inputs preserve native semantics without parallel shape APIs", async () => {
     const user = userEvent.setup();
     const checked = vi.fn<(value: boolean) => void>();
@@ -344,9 +358,12 @@ describe("UI Primitives", () => {
       hasPointerCapture: (pointerId: number) => captured === pointerId,
       releasePointerCapture: () => { captured = null; },
     });
+    expect(handle.getAttribute("data-active")).toBeNull();
     fireEvent.pointerDown(handle, { pointerId: 7, clientX: 10 });
+    expect(handle.getAttribute("data-active")).toBe("true");
     fireEvent.pointerMove(handle, { pointerId: 7, clientX: 24 });
     fireEvent.pointerUp(handle, { pointerId: 7, clientX: 30 });
+    expect(handle.getAttribute("data-active")).toBeNull();
     expect(onResize).toHaveBeenNthCalledWith(1, 14, "preview");
     expect(onResize).toHaveBeenNthCalledWith(2, 20, "commit");
 
