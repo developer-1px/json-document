@@ -1,0 +1,15 @@
+.llm-agent-app { display: flex; min-height: 0; flex: 1; flex-direction: column; background: var(--color-background-canvas); color: var(--color-foreground-strong); }
+.llm-agent-app-header { display: flex; height: 48px; flex: 0 0 48px; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--color-border-subtle); }
+.llm-agent-app-header strong { font-size: 14px; }
+.llm-agent-app-header span { color: var(--color-foreground-muted); font-size: 12px; }
+.llm-agent-chat { width: min(720px, calc(100% - 32px)); min-height: 0; flex: 1; align-self: center; padding: 40px 0 120px; overflow-y: auto; }
+.llm-agent-empty { display: grid; height: 100%; place-content: center; text-align: center; }
+.llm-agent-empty h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; }
+.llm-agent-empty p { margin: 10px 0 0; color: var(--color-foreground-muted); }
+.llm-agent-message { padding: 18px 0; }
+.llm-agent-message strong { display: block; margin-bottom: 8px; font-size: 12px; }
+.llm-agent-message p { margin: 0; white-space: pre-wrap; line-height: 1.7; }
+.llm-agent-message.user { margin: 12px 0 12px auto; padding: 12px 16px; border-radius: var(--radius-surface); background: var(--color-background-subtle); }
+.llm-agent-input { display: flex; width: min(720px, calc(100% - 32px)); align-self: center; gap: 8px; margin: 0 16px 20px; padding: 10px 10px 10px 16px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-surface); background: var(--color-background-canvas); box-shadow: var(--shadow-surface); }
+.llm-agent-input textarea { min-height: 28px; flex: 1; resize: none; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 28px; }
+.llm-agent-input button { display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: var(--radius-control); }

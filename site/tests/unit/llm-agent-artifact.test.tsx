@@ -8,16 +8,15 @@ afterEach(() => {
 });
 
 describe("LLM Agent Artifact", () => {
-  test("reuses the canonical Composer and renders the Codex stream", async () => {
+  test("sends a plain chat message and renders the Codex stream", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("연결완료")));
     render(<LlmAgentArtifactRoute />);
 
     expect(screen.getByText("Local Codex")).toBeTruthy();
-    expect(screen.queryByText("Canonical Composer draft")).toBeNull();
+    fireEvent.change(screen.getByLabelText("메시지"), { target: { value: "안녕" } });
+    fireEvent.click(screen.getByRole("button", { name: "전송" }));
 
-    fireEvent.click(screen.getByRole("button", { name: /전략 기획서 초안 작성/ }));
-    fireEvent.click(screen.getByRole("button", { name: "전송 (Enter)" }));
-
+    expect(screen.getByText("안녕")).toBeTruthy();
     await waitFor(() => expect(screen.getByRole("status").textContent).toBe("연결완료"));
   });
 });

@@ -87,12 +87,6 @@
 .composer-json-panel { margin-top: 18px; }
 .composer-json-panel h2 { font-size: 15px; }
 
-.llm-agent-app { display: flex; min-height: 0; flex: 1; flex-direction: column; background: var(--color-background-canvas); }
-.llm-agent-app-header { display: flex; height: 48px; flex: 0 0 48px; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--color-border-subtle); color: var(--color-foreground-strong); }
-.llm-agent-app-header strong { font-size: 14px; }
-.llm-agent-app-header span { color: var(--color-foreground-muted); font-size: 12px; }
-.llm-agent-app .composer-demo-stage { min-height: 0; flex: 1; border: 0; border-radius: 0; }
-
 @media (max-width: 720px) {
   .composer-demo-stage { padding: 44px 14px; }
   .home-composer-single, .home-composer-single-filled { width: min(100%, 92vw); }
