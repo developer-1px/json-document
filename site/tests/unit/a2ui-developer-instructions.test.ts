@@ -20,5 +20,8 @@ describe("A2UI Codex developer instructions", () => {
     expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("key literally named operation");
     expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("fence label must be exactly a2ui");
     expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain('children may be {"componentId":"template-id","path":"/items"}');
+    expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("Static children must be an array");
+    expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("only a data-driven repeated list");
+    expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("does not execute function calls");
   });
 });

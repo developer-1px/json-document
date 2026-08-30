@@ -29,6 +29,7 @@ describe("A2UI Basic Catalog contract", () => {
     [{ id: "text", component: "Text", text: "본문", variant: "display" }, /invalid_enum_value/],
     [{ id: "card", component: "Card", children: ["text"] }, /Required/],
     [{ id: "row", component: "Row", children: "text" }, /Invalid input/],
+    [{ id: "text", component: "Text", text: { call: "formatNumber", args: { value: 42 } } }, /function call/],
   ])("rejects a component outside the supported schema: %o", (component, message) => {
     expect(() => validateBasicCatalogComponent(component)).toThrow(message);
   });

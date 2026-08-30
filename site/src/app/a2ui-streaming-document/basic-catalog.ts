@@ -18,4 +18,13 @@ export function validateBasicCatalogComponent(candidate: Readonly<{ id?: string;
   if (!schema) throw new Error(`지원하지 않는 A2UI Basic Catalog component입니다: ${candidate.component}`);
   const { id: _id, component: _component, ...properties } = candidate;
   schema.parse(properties);
+  if (containsFunctionCall(candidate.text) || containsFunctionCall(candidate.accessibility)) {
+    throw new Error("현재 A2UI renderer는 dynamic function call을 지원하지 않습니다.");
+  }
+}
+
+function containsFunctionCall(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  if ("call" in value) return true;
+  return Object.values(value).some(containsFunctionCall);
 }
