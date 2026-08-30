@@ -4,7 +4,7 @@ import { createAjvValidator } from "@interactive-os/json-document-ajv";
 import { useEditing, useReactConnector } from "@interactive-os/json-document-react";
 import { Ajv } from "ajv";
 import { Inspector } from "../../../shared/ui/inspector";
-import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 
 const ajv = new Ajv({ useDefaults: true });
@@ -74,11 +74,11 @@ export function AjvConnectorLab() {
         className={classes("grid gap-1 p-2", ui.text.meta)}
       >
         Profile title draft
-        <input
+        <Field
+          label="Profile title draft"
           value={draft}
-          onChange={(event) => setDraft(event.currentTarget.value)}
+          onValueChange={setDraft}
           onFocus={title.getPressHandler()}
-          className={ui.field.control}
         />
       </SelectableItem>
       <Command kind="primary" onClick={commitDraft} className="mt-3">

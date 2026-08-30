@@ -77,8 +77,9 @@ test("keeps documentation above the sticky product workbench", async ({ page }) 
 
   await tablist.getByRole("tab", { name: "DocumentDemoRoute.tsx" }).click();
   await expect(page.getByText("routes/document-demo/DocumentDemoRoute.tsx")).toBeVisible();
+  await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText("export function DocumentDemoRoute()");
   await page.evaluate(() => window.scrollTo(0, 900));
   const stickyTabs = await tablist.boundingBox();
   expect(stickyTabs).not.toBeNull();
-  expect(stickyTabs!.y).toBeLessThanOrEqual(1);
+  expect(stickyTabs!.y).toBeLessThanOrEqual(9);
 });

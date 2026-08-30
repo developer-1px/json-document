@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
@@ -32,7 +32,25 @@ requireText(docs, "역할", "role-first contract");
 for (const source of databaseHands) {
   if (/<button\b/.test(source)) throw new Error("Database Hands가 Command 정본을 우회합니다.");
 }
-console.log(`UI role primitive guard ok; roles=${roles.length}, retired=${retired.length}, displaced=${displaced.length}.`);
+
+const nativeControlBoundaries = new Map([
+  ["site/src/routes/composer-demo/ComposerDemoRoute.tsx", 1],
+  ["site/src/routes/connectors/react-hook-form/ReactHookFormConnectorLab.tsx", 3],
+  ["site/src/routes/connectors/react/ReactConnectorLab.tsx", 1],
+  ["site/src/routes/connectors/tanstack-table/TanStackTableConnectorLab.tsx", 1],
+]);
+let nativeControlCount = 0;
+for (const absolutePath of globSync(resolve(root, "site/src/routes/**/*.tsx"))) {
+  const path = absolutePath.slice(root.length + 1);
+  if (path.includes("/calendar-demo/") || path.includes("/ui-primitives-catalog/")) continue;
+  const source = readFileSync(absolutePath, "utf8");
+  if (/function\s+Action\b/.test(source)) throw new Error(`route-local Action alias가 Command 정본을 우회합니다: ${path}`);
+  const count = source.match(/<(?:button|input|select|textarea|dialog)\b/g)?.length ?? 0;
+  const allowed = nativeControlBoundaries.get(path) ?? 0;
+  if (count !== allowed) throw new Error(`native control 경계가 정본 role과 다릅니다: ${path} expected=${allowed} actual=${count}`);
+  nativeControlCount += count;
+}
+console.log(`UI role primitive guard ok; roles=${roles.length}, retired=${retired.length}, displaced=${displaced.length}, native-boundaries=${nativeControlCount}.`);
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

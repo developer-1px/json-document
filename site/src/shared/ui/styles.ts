@@ -45,8 +45,8 @@ export const ui = {
     frame: "rounded-surface bg-background-canvas font-sans text-foreground-default antialiased shadow-surface",
   },
   demoWorkbench: {
-    header: "sticky top-0 z-20 bg-background-subtle",
-    tabList: "flex overflow-x-auto border-b border-line-subtle/40 px-2 pt-2",
+    header: "sticky top-0 z-20 border-b border-line-subtle/40 bg-background-subtle px-2 pt-2",
+    tabList: "flex min-w-0 flex-1 overflow-x-auto",
     tab: "-mb-px shrink-0 cursor-pointer border-x-0 border-b-2 border-t-0 border-transparent bg-transparent px-3 py-2 font-mono text-xs text-foreground-muted outline-none hover:text-foreground-strong aria-selected:border-line-accent aria-selected:bg-background-canvas aria-selected:text-foreground-strong focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-line-accent/25",
     panel: "min-w-0 bg-background-canvas",
   },
@@ -81,18 +81,28 @@ export const ui = {
     marquee: "rounded-none border border-dashed border-line-accent/50 bg-line-accent/10",
   },
   interactive: {
+    control: "inline-flex min-h-8 cursor-pointer items-center justify-center rounded-control border px-3 py-1.5 text-xs font-medium leading-5 outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-transparent disabled:bg-background-subtle/40 disabled:text-foreground-disabled",
+    action: {
+      primary: "border-line-action-primary bg-background-action-primary text-foreground-inverse hover:border-foreground-strong hover:bg-background-action-primary-hovered",
+      secondary: "border-line-subtle/70 bg-background-subtle/70 text-foreground-default hover:border-line-default hover:bg-background-subtle",
+      danger: "border-line-accent/60 bg-background-canvas text-foreground-accent hover:border-line-accent hover:bg-background-accent-subtle",
+    },
     link: {
       prominent: "inline-flex cursor-pointer items-center gap-2 rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-xs font-medium text-foreground-strong no-underline transition-[background-color,border-color,transform] duration-interaction hover:border-line-default hover:bg-background-subtle active:translate-y-px focus-visible:border-line-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
       quiet: "inline-flex cursor-pointer items-center text-foreground-strong underline decoration-line-subtle underline-offset-4 transition-colors hover:decoration-line-accent focus-visible:rounded-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
     },
+    toggle: "border-line-subtle/70 bg-background-subtle/70 text-foreground-default hover:border-line-default hover:bg-background-subtle aria-pressed:border-line-default aria-pressed:bg-background-canvas aria-pressed:text-foreground-strong disabled:aria-pressed:border-transparent disabled:aria-pressed:bg-background-subtle/40 disabled:aria-pressed:text-foreground-disabled",
+    disclosure: "group flex w-full cursor-pointer items-center justify-between gap-3 rounded-control border border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-foreground-strong outline-none transition-colors hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:text-foreground-muted",
     chevron: "text-foreground-muted transition-transform group-aria-expanded:rotate-180",
+    selectable: "cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25",
     planeItem: "absolute grid place-items-center data-[hover=true]:outline data-[hover=true]:outline-1 data-[hover=true]:outline-line-accent/50",
     resizeHandle: "absolute h-2 w-2 border border-background-canvas bg-line-accent",
     contextMenu: "absolute z-10 min-w-28 rounded-surface border border-line-subtle bg-background-canvas py-1 shadow-overlay",
     contextMenuItem: "block w-full px-3 py-1 text-left text-xs text-foreground-default hover:bg-background-subtle",
+    icon: "flex size-8 cursor-pointer items-center justify-center rounded-control border border-line-subtle/60 bg-background-subtle/70 text-foreground-default outline-none transition-colors hover:border-line-default hover:bg-background-subtle hover:text-foreground-strong active:bg-background-subtle focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:border-line-subtle/40 disabled:bg-background-subtle/50 disabled:text-foreground-muted",
   },
   field: {
-    control: "rounded-control border border-line-subtle bg-background-canvas px-3 py-2 text-sm leading-6 text-foreground-strong outline-none hover:border-line-default focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-background-subtle disabled:text-foreground-muted",
+    control: "min-h-9 rounded-control border border-transparent bg-background-subtle/70 px-3 py-1.5 text-sm leading-6 text-foreground-strong outline-none hover:border-line-subtle hover:bg-background-subtle focus-visible:border-line-accent focus-visible:bg-background-canvas focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:bg-background-subtle disabled:text-foreground-muted",
     seamless: "border-0 bg-transparent px-3 py-2 text-sm leading-6 text-foreground-strong outline-none focus-visible:bg-background-canvas focus-visible:ring-2 focus-visible:ring-line-accent/25",
   },
   contenteditable: {

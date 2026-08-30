@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { useState } from "react";
+import { createRef, useState } from "react";
 import {
   Check,
   Choice,
@@ -72,6 +72,22 @@ describe("UI Primitives", () => {
     expect(query).toHaveBeenCalledWith("j");
     expect(value).toHaveBeenCalledWith(75);
     expect(value).toHaveBeenCalledWith(3);
+  });
+
+  test("Field preserves native input and textarea interaction boundaries", () => {
+    const inputRef = createRef<HTMLInputElement>();
+    const textareaRef = createRef<HTMLTextAreaElement>();
+    const blur = vi.fn();
+    render(<>
+      <Field label="Title" value="Draft" onValueChange={() => undefined} controlRef={inputRef} autoFocus onBlur={blur} />
+      <Field label="Notes" value="Review" onValueChange={() => undefined} controlRef={textareaRef} multiline presentation="seamless" rows={2} />
+    </>);
+    expect(inputRef.current).toBe(screen.getByRole("textbox", { name: "Title" }));
+    expect(textareaRef.current).toBe(screen.getByRole("textbox", { name: "Notes" }));
+    expect(textareaRef.current?.rows).toBe(2);
+    expect(textareaRef.current?.getAttribute("data-ui-presentation")).toBe("seamless");
+    fireEvent.blur(inputRef.current!);
+    expect(blur).toHaveBeenCalledOnce();
   });
 
   test("presentation roles close on Escape", async () => {

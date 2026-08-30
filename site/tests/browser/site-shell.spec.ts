@@ -496,7 +496,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   await page.locator('[data-live-demo="/connectors/react"]').scrollIntoViewIfNeeded();
   expect(await page.getByLabel("Document title").evaluate((element) => (
     getComputedStyle(element).borderColor
-  ))).toBe("rgb(216, 209, 197)");
+  ))).toBe("rgba(0, 0, 0, 0)");
 
   await page.goto("/demo/selection");
   expect(await page.getByRole("region", { name: "모드와 블록 선택하기" }).evaluate((element) => ({
@@ -511,8 +511,18 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
 
   await unselected.click();
   await expect(unselected).toHaveAttribute("data-selected", "true");
-  await expect.poll(async () => unselected.evaluate((element) => getComputedStyle(element).outlineColor))
-    .toBe("rgb(222, 109, 85)");
+  await expect.poll(async () => unselected.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderColor: style.borderColor,
+      outlineColor: style.outlineColor,
+    };
+  })).toEqual({
+    backgroundColor: "rgb(251, 248, 242)",
+    borderColor: "rgb(216, 209, 197)",
+    outlineColor: "rgba(0, 0, 0, 0)",
+  });
 
   await page.goto("/demo/sheet");
   expect(await page.getByRole("columnheader", { name: "Name" }).evaluate((element) => (
@@ -532,7 +542,7 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
   await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
   expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => (
     getComputedStyle(element).backgroundColor
-  ))).toBe("rgba(0, 0, 0, 0)");
+  ))).toBe("rgba(251, 248, 242, 0.7)");
 
   await page.goto("/demo/selection");
   await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(0);
@@ -545,8 +555,8 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
 
   const titleInput = page.getByLabel("Document title");
   expect(await titleInput.evaluate(controlSnapshot)).toMatchObject({
-    backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(216, 209, 197)",
+    backgroundColor: "rgba(251, 248, 242, 0.7)",
+    borderColor: "rgba(0, 0, 0, 0)",
     color: "rgb(41, 40, 36)",
   });
 

@@ -40,7 +40,7 @@ export const uiPrimitivesCatalog = tv({
     agentStage: "grid min-h-64 content-center gap-5 bg-background-subtle/55 p-7 sm:p-9",
     agentDraft: "rounded-surface bg-background-canvas p-4 shadow-surface",
     composer: "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-t border-line-subtle p-4",
-    composerField: "min-w-0 border-0 bg-transparent px-2 py-2 text-sm text-foreground-strong outline-none placeholder:text-foreground-muted",
+    composerField: "min-w-0 placeholder:text-foreground-muted",
     quietTrigger: "cursor-pointer border-0 bg-transparent px-2 py-2 text-xs text-foreground-muted outline-none hover:text-foreground-strong focus-visible:ring-2 focus-visible:ring-line-accent/25",
     row: "flex flex-wrap items-center gap-2",
     stack: "grid max-w-4xl gap-8",

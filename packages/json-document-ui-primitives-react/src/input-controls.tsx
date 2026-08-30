@@ -1,4 +1,10 @@
-import type { ChangeEvent, ReactNode } from "react";
+import type {
+  ChangeEvent,
+  InputHTMLAttributes,
+  ReactNode,
+  Ref,
+  TextareaHTMLAttributes,
+} from "react";
 import { Minus, Plus } from "lucide-react";
 import { Command } from "./controls.js";
 
@@ -22,25 +28,54 @@ export function Check(props: {
   );
 }
 
-export function Field(props: {
+type FieldBaseProps = {
   readonly label: string;
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly multiline?: boolean;
+  readonly presentation?: "standard" | "seamless";
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-}): ReactNode {
+};
+
+type FieldProps = FieldBaseProps & (
+  | ({
+    readonly multiline?: false;
+    readonly controlRef?: Ref<HTMLInputElement>;
+  } & Omit<InputHTMLAttributes<HTMLInputElement>, "aria-label" | "className" | "disabled" | "onChange" | "placeholder" | "ref" | "type" | "value">)
+  | ({
+    readonly multiline: true;
+    readonly controlRef?: Ref<HTMLTextAreaElement>;
+  } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "aria-label" | "className" | "disabled" | "onChange" | "placeholder" | "ref" | "value">)
+);
+
+export function Field(props: FieldProps): ReactNode {
+  const {
+    label,
+    value,
+    onValueChange,
+    multiline,
+    presentation = "standard",
+    controlRef,
+    disabled,
+    placeholder,
+    className,
+    ...controlProps
+  } = props;
   const common = {
-    "aria-label": props.label,
-    value: props.value,
-    disabled: props.disabled,
-    placeholder: props.placeholder,
-    className: props.className,
+    "aria-label": label,
+    value,
+    disabled,
+    placeholder,
+    className,
     "data-ui-control": "field",
-    onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => props.onValueChange(event.currentTarget.value),
+    "data-ui-presentation": presentation,
+    onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onValueChange(event.currentTarget.value),
   } as const;
-  return props.multiline ? <textarea {...common} /> : <input {...common} type="text" />;
+  if (multiline) {
+    return <textarea {...controlProps as TextareaHTMLAttributes<HTMLTextAreaElement>} {...common} ref={controlRef as Ref<HTMLTextAreaElement>} />;
+  }
+  return <input {...controlProps as InputHTMLAttributes<HTMLInputElement>} {...common} ref={controlRef as Ref<HTMLInputElement>} type="text" />;
 }
 
 export function Search(props: {

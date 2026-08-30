@@ -27,7 +27,7 @@ import {
   renameAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -223,17 +223,18 @@ export function OrderDemoRoute() {
             {...clipboardSurface}
           >
             {document.items.map((item, index) => renaming?.id === item.id ? (
-              <input
+              <Field
                 key={item.id}
                 autoFocus
-                aria-label={`Rename ${item.label}`}
+                label={`Rename ${item.label}`}
+                presentation="seamless"
                 value={renaming.draft}
-                onChange={(event) => renameSession.update(event.currentTarget.value)}
+                onValueChange={renameSession.update}
                 onKeyDown={(event) => {
                   event.stopPropagation();
                   if (renameSession.handleKey(event.key)) event.preventDefault();
                 }}
-                className={classes("w-full", ui.field.seamless)}
+                className="w-full"
               />
             ) : (
               <SelectableItem
