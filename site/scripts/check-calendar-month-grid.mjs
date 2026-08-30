@@ -16,6 +16,8 @@ requireText(host, "<CalendarMonthGrid");
 requireText(usage, "<CalendarMonthGrid");
 requireText(sources, 'symbol: "CalendarMonthGrid"');
 requireText(sources, 'sourcePath: "packages/json-document-calendar/src/calendar-month-grid.tsx"');
+requireText(sources, 'calendarMonthGridSource from "../../../../packages/json-document-calendar/src/calendar-month-grid.tsx?raw"');
+requireText(sources, '["packages/json-document-calendar/src/calendar-month-grid.tsx", calendarMonthGridSource]');
 forbid(owner, /render(?:Cell|Event)/);
 forbid(host, /calendarMonthWeekLayout|calendarMonthDayLayout|function MonthEvent/);
 
