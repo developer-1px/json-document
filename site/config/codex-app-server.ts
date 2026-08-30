@@ -13,6 +13,10 @@ export function codexAppServer(): Plugin {
     apply: "serve",
     configureServer(server) {
       server.middlewares.use(CODEX_PATH, (req, res) => {
+        const sessionMatch = req.url?.match(/^\/sessions\/([^?]+)/);
+        if (req.method === "GET" && sessionMatch) {
+          return readCodexThread(decodeURIComponent(sessionMatch[1]!), res);
+        }
         if (req.method === "GET" && req.url?.startsWith("/sessions")) {
           return listCodexThreads(res);
         }
@@ -100,4 +104,33 @@ function listCodexThreads(res: import("node:http").ServerResponse) {
   child.on("error", (error) => { res.statusCode = 500; res.end(JSON.stringify({ error: error.message })); });
   res.on("close", () => child.kill());
   send({ method: "initialize", id: 1, params: { clientInfo: { name: "json-document-dev", title: "JSON Document Dev", version: "0.1.0" }, capabilities: { experimentalApi: true, requestAttestation: false } } });
+}
+
+function readCodexThread(threadId: string, res: import("node:http").ServerResponse) {
+  const child = spawn("codex", ["app-server", "--stdio"], { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] });
+  const lines = createInterface({ input: child.stdout });
+  const send = (message: object) => child.stdin.write(`${JSON.stringify(message)}\n`);
+  lines.on("line", (line) => {
+    const message = JSON.parse(line) as { id?: number; result?: { thread?: { turns?: Array<{ items?: Array<Record<string, unknown>> }> } }; error?: { message?: string } };
+    if (message.id === 1) {
+      send({ method: "initialized" });
+      send({ method: "thread/read", id: 2, params: { threadId, includeTurns: true } });
+    } else if (message.id === 2) {
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      if (message.error) res.statusCode = 500;
+      const items = message.result?.thread?.turns?.flatMap((turn) => turn.items ?? []) ?? [];
+      res.end(JSON.stringify(message.error ? { error: message.error.message } : { messages: items.flatMap(toChatMessage) }));
+      child.kill();
+    }
+  });
+  child.on("error", (error) => { res.statusCode = 500; res.end(JSON.stringify({ error: error.message })); });
+  res.on("close", () => child.kill());
+  send({ method: "initialize", id: 1, params: { clientInfo: { name: "json-document-dev", title: "JSON Document Dev", version: "0.1.0" }, capabilities: { experimentalApi: true, requestAttestation: false } } });
+}
+
+function toChatMessage(item: Record<string, unknown>): Array<{ id: string; role: "user" | "assistant"; text: string }> {
+  if (item.type === "agentMessage" && typeof item.id === "string" && typeof item.text === "string") return [{ id: item.id, role: "assistant", text: item.text }];
+  if (item.type !== "userMessage" || typeof item.id !== "string" || !Array.isArray(item.content)) return [];
+  const text = item.content.flatMap((content) => typeof content === "object" && content && "text" in content && typeof content.text === "string" ? [content.text] : []).join("\n");
+  return text ? [{ id: item.id, role: "user", text }] : [];
 }

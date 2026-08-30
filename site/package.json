@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "dev:codex": "VITE_LLM_BACKEND=codex vite --host 127.0.0.1",
+    "dev:codex": "vite --host 127.0.0.1",
+    "dev:mock": "VITE_LLM_BACKEND=mock vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview",
     "check:tokens": "node scripts/check-design-tokens.mjs",

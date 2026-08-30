@@ -1,15 +1,14 @@
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowUp, Plus } from "lucide-react";
 import { Command, Field } from "@interactive-os/json-document-ui-primitives-react";
-import { listLlmAgentSessions, streamLlmAgentTurn, type LlmAgentSession } from "./llm-agent-api";
+import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "./llm-agent-api";
 import "./llm-agent-artifact.css";
 
-type Message = { readonly id: number; readonly role: "user" | "assistant"; readonly text: string };
 const LAST_SESSION_KEY = "llm-agent-last-session";
 
 export function LlmAgentArtifactRoute() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ReadonlyArray<Message>>([]);
+  const [messages, setMessages] = useState<ReadonlyArray<LlmAgentMessage>>([]);
   const [pending, setPending] = useState(false);
   const [sessions, setSessions] = useState<ReadonlyArray<LlmAgentSession>>([]);
   const [sessionId, setSessionId] = useState(() => new URLSearchParams(window.location.search).get("session") ?? window.localStorage.getItem(LAST_SESSION_KEY));
@@ -17,14 +16,15 @@ export function LlmAgentArtifactRoute() {
   useEffect(() => {
     if (sessionId && !new URLSearchParams(window.location.search).has("session")) setSessionUrl(sessionId);
     void listLlmAgentSessions().then(setSessions);
+    if (sessionId) void readLlmAgentSession(sessionId).then(setMessages).catch(() => setMessages([]));
   }, []);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     const prompt = input.trim();
     if (!prompt || pending) return;
-    const userId = Date.now();
-    const assistantId = userId + 1;
+    const userId = crypto.randomUUID();
+    const assistantId = crypto.randomUUID();
     setInput("");
     setPending(true);
     setMessages((current) => [...current, { id: userId, role: "user", text: prompt }, { id: assistantId, role: "assistant", text: "" }]);
@@ -52,7 +52,10 @@ export function LlmAgentArtifactRoute() {
   function selectSession(id: string | null) {
     setSessionId(id);
     setMessages([]);
-    if (id) rememberSession(id);
+    if (id) {
+      rememberSession(id);
+      void readLlmAgentSession(id).then(setMessages).catch(() => setMessages([]));
+    }
     else {
       window.localStorage.removeItem(LAST_SESSION_KEY);
       setSessionUrl(null);

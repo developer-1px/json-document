@@ -1,11 +1,18 @@
 import { EventType, type AGUIEvent, type RunAgentInput } from "@ag-ui/core";
 
 export type LlmAgentSession = { readonly id: string; readonly preview: string; readonly updatedAt: number };
+export type LlmAgentMessage = { readonly id: string; readonly role: "user" | "assistant"; readonly text: string };
 
 export async function listLlmAgentSessions(): Promise<ReadonlyArray<LlmAgentSession>> {
   const response = await fetch("/api/llm-agent/sessions");
   if (!response.ok) return [];
   return ((await response.json()) as { threads?: ReadonlyArray<LlmAgentSession> }).threads ?? [];
+}
+
+export async function readLlmAgentSession(sessionId: string): Promise<ReadonlyArray<LlmAgentMessage>> {
+  const response = await fetch(`/api/llm-agent/sessions/${encodeURIComponent(sessionId)}`);
+  if (!response.ok) throw new Error("채팅 기록을 불러오지 못했습니다.");
+  return ((await response.json()) as { messages?: ReadonlyArray<LlmAgentMessage> }).messages ?? [];
 }
 
 export async function streamLlmAgentTurn(options: {

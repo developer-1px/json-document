@@ -29,19 +29,26 @@ describe("LLM Agent Artifact", () => {
   });
 
   test("selects a saved session and sends the next turn to it", async () => {
-    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
-      ? Promise.resolve(Response.json({ threads: [{ id: "thread-saved", preview: "이전 채팅", updatedAt: 1 }] }))
-      : Promise.resolve(agUiResponse("thread-saved", "계속완료")));
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/sessions")) return Promise.resolve(Response.json({ threads: [{ id: "thread-saved", preview: "이전 채팅", updatedAt: 1 }] }));
+      if (url.endsWith("/sessions/thread-saved")) return Promise.resolve(Response.json({ messages: [
+        { id: "old-user", role: "user", text: "이전 질문" },
+        { id: "old-assistant", role: "assistant", text: "이전 답변" },
+      ] }));
+      return Promise.resolve(agUiResponse("thread-saved", "계속완료"));
+    });
     vi.stubGlobal("fetch", fetchMock);
     render(<LlmAgentArtifactRoute />);
 
     await waitFor(() => screen.getByRole("button", { name: "이전 채팅" }));
     fireEvent.click(screen.getByRole("button", { name: "이전 채팅" }));
+    await waitFor(() => expect(screen.getByText("이전 답변")).toBeTruthy());
     fireEvent.change(screen.getByLabelText("메시지"), { target: { value: "계속해줘" } });
     fireEvent.click(screen.getByRole("button", { name: "전송" }));
 
-    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("계속완료"));
-    const request = fetchMock.mock.calls.find(([input]) => !String(input).endsWith("/sessions"));
+    await waitFor(() => expect(screen.getByText("계속완료")).toBeTruthy());
+    const request = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
     expect(JSON.parse(String(request?.[1]?.body))).toMatchObject({ threadId: "thread-saved", messages: [{ role: "user", content: "계속해줘" }] });
   });
 });

@@ -115,7 +115,7 @@ export default defineConfig({
       semicolons: true,
     }),
     react(),
-    process.env.VITE_LLM_BACKEND === "codex" ? codexAppServer() : undefined,
+    process.env.VITE_LLM_BACKEND !== "mock" ? codexAppServer() : undefined,
     rootLlmsTxt(),
     productionSiteAssets(),
   ],
