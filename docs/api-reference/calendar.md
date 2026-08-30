@@ -46,6 +46,101 @@ type CalendarCellInterval = { readonly start: string; readonly end: string };
 ```ts
 calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell>
 ```
+## `CalendarEventInspector`
+
+```ts
+CalendarEventInspector(props: CalendarEventInspectorProps): ReactNode
+```
+## `CalendarEventInspectorAffordances`
+
+```ts
+interface CalendarEventInspectorAffordances {
+  readonly inspector: ControlAffordance;
+  readonly edit: ControlAffordance;
+  readonly remove: ControlAffordance;
+  readonly titleField: ControlAffordance;
+  readonly allDayToggle: ControlAffordance;
+  readonly startField: ControlAffordance;
+  readonly endField: ControlAffordance;
+  readonly calendarChoice: ControlAffordance;
+  readonly recurrenceChoice: ControlAffordance;
+  readonly recurrenceInterval: ControlAffordance;
+}
+```
+## `CalendarEventInspectorClassNames`
+
+```ts
+interface CalendarEventInspectorClassNames {
+  readonly root?: string;
+  readonly header?: string;
+  readonly title?: string;
+  readonly titleInput?: string;
+  readonly actions?: string;
+  readonly summary?: string;
+  readonly details?: string;
+  readonly field?: string;
+  readonly fieldLabel?: string;
+  readonly toggle?: string;
+  readonly numberInput?: string;
+}
+```
+## `CalendarEventInspectorIcons`
+
+```ts
+interface CalendarEventInspectorIcons {
+  readonly edit?: ReactNode;
+  readonly remove?: ReactNode;
+  readonly time?: ReactNode;
+  readonly calendar?: ReactNode;
+  readonly repeat?: ReactNode;
+}
+```
+## `CalendarEventInspectorLabels`
+
+```ts
+interface CalendarEventInspectorLabels {
+  readonly inspector: string;
+  readonly title: string;
+  readonly edit: string;
+  readonly remove: string;
+  readonly allDay: string;
+  readonly allDaySummary: string;
+  readonly start: string;
+  readonly end: string;
+  readonly calendar: string;
+  readonly repeat: string;
+  readonly repeats: string;
+  readonly none: string;
+  readonly daily: string;
+  readonly weekly: string;
+  readonly monthly: string;
+  readonly yearly: string;
+  readonly every: string;
+  readonly repeatEvery: string;
+  readonly repeatUntil: string;
+  readonly editOccurrence: string;
+  readonly thisOccurrence: string;
+  readonly followingOccurrences: string;
+  readonly allOccurrences: string;
+}
+```
+## `CalendarEventInspectorProps`
+
+```ts
+interface CalendarEventInspectorProps {
+  readonly hand: CalendarHand;
+  readonly calendars: ReadonlyArray<CalendarCalendar>;
+  readonly affordances: CalendarEventInspectorAffordances;
+  readonly classNames: CalendarEventInspectorClassNames;
+  readonly labels: CalendarEventInspectorLabels;
+  readonly icons?: CalendarEventInspectorIcons;
+  readonly realizationKey?: string | null;
+  readonly rootRef?: Ref<HTMLElement>;
+  readonly style?: CSSProperties;
+  readonly placement?: string;
+  readonly fits?: boolean;
+}
+```
 ## `calendarEventLabel`
 
 ```ts
@@ -320,17 +415,6 @@ interface CalendarSelectionDragPreview {
 ```ts
 CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode
 ```
-## `CalendarEventInspector`
-
-```ts
-CalendarEventInspector(props: CalendarEventInspectorProps): ReactNode
-```
-
-`CalendarEventInspectorProps` binds a `CalendarHand` and concrete calendars to
-the canonical selected-event summary, rename, delete, detail, recurrence, and
-occurrence-scope surface. `affordances`, `classNames`, `labels`, and `icons` are
-finite presentation slots; `rootRef`, `style`, `placement`, and `fits` let a
-Host compose its anchored floating position without owning inspector behavior.
 ## `CalendarTimeGridAffordances`
 
 ```ts
