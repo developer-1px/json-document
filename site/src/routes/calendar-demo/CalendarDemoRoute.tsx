@@ -47,6 +47,7 @@ import {
   calendarMonthWeeks,
   calendarTimeLabel,
   calendarYearMonths,
+  DateGrid,
   shiftVisibleDate,
   visiblePeriodLabel,
 } from "@interactive-os/json-document-calendar";
@@ -851,34 +852,25 @@ export function CalendarDemoRoute(props: {
                     >
                       {months[index]}
                     </Command>
-                    <div
-                      role="grid"
-                      aria-label={visiblePeriodLabel("month", monthStart)}
-                      className="grid grid-cols-7"
-                    >
-                      {weekdays.map((name) => (
-                        <div key={name} role="columnheader" className={classes("text-center", ui.text.meta)}>
-                          {name.slice(0, 1)}
-                        </div>
-                      ))}
-                      {calendarCells("month", monthStart).map((cell) => (
-                        <Command
-                          affordance={calendarControlAffordance("yearDate")}
-                          key={cell.date}
-                          aria-label={cell.date}
-                          aria-current={cell.date === today ? "date" : undefined}
-                          className={classes(
-                            styles.yearDay(),
-                            cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
-                            cell.date === today ? styles.todayMark() : null,
-                            yearBusyDates?.has(cell.date) && cell.date !== today && styles.yearDayBusy(),
-                          )}
-                          onClick={() => setLocation("day", cell.date)}
-                        >
-                          {cell.day}
-                        </Command>
-                      ))}
-                    </div>
+                    <DateGrid
+                      label={visiblePeriodLabel("month", monthStart)}
+                      cells={calendarCells("month", monthStart)}
+                      grain="month"
+                      focusDate={monthStart}
+                      today={today}
+                      rowClassName="grid grid-cols-7"
+                      columnHeaders={weekdays.map((name) => ({ label: name, content: name.slice(0, 1) }))}
+                      columnHeaderClassName={classes("text-center", ui.text.meta)}
+                      cellAffordance={calendarControlAffordance("yearDate")}
+                      isDateSelected={() => false}
+                      getCellClassName={({ cell, today: isToday }) => classes(
+                        styles.yearDay(),
+                        cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
+                        isToday ? styles.todayMark() : null,
+                        yearBusyDates?.has(cell.date) && !isToday && styles.yearDayBusy(),
+                      )}
+                      onDateSelect={(date) => setLocation("day", date)}
+                    />
                   </section>
                 ))}
               </div>

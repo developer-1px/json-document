@@ -51,7 +51,7 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   await expect(page.getByRole("grid", { name: "Month", exact: true }).getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
   await page.getByRole("radio", { name: "Year", exact: true }).click();
-  await page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01", exact: true }).click();
+  await page.getByRole("region", { name: "2026-05", exact: true }).getByRole("gridcell", { name: "2026-05-01", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Day", exact: true })).toBeVisible();
   const dayGrid = timeGridDay(page, "2026-05-01");
   await dragWithin(page, dayGrid, 4 / 12, 5.5 / 12);

@@ -22,7 +22,7 @@ requireCount(ownerDateGrid, "{cell.day}", 1);
 requireText(ownerControls, "<DateGrid");
 requireText(host, 'calendarCells(view === "day" ? "day" : "week", visibleDate)');
 requireText(host, "weekdays[cell.weekday - 1]");
-requireCount(host, "{cell.day}", 3);
+requireCount(host, "{cell.day}", 2);
 requireText(navigator, "<DateGrid");
 forbid(host, /Array\.from\(\{ length: 7 \},[^\n]*addCalendarDays/);
 forbid(host, /startOfIsoWeek\(visibleDate\)/);
@@ -33,7 +33,7 @@ forbid(ownerDateGrid, /cell\.date\.slice\(8\)/);
 requireText(usage, 'symbol: "calendarCells"');
 requireText(usage, 'sourcePath: "packages/json-document-calendar/src/date-values.ts"');
 
-console.log("Calendar period-cells guard ok; CalendarCell day owner, five consumers, public type, and Usage checked.");
+console.log("Calendar period-cells guard ok; CalendarCell day owner, canonical DateGrid and Host consumers, public type, and Usage checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

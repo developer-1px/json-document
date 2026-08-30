@@ -182,12 +182,17 @@ test("Calendar month and year views show date grids", async ({ page }) => {
 
   await page.getByRole("radio", { name: "Month", exact: true }).press("ArrowRight");
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
-  await expect(page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01" })).toHaveText("1");
+  const mayGrid = page.getByRole("region", { name: "2026-05", exact: true }).getByRole("grid", { name: "2026-05", exact: true });
+  await expect(mayGrid.getByRole("gridcell", { name: "2026-05-01" })).toHaveText("1");
   await expect(page.getByRole("region", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
   await expect(page.getByRole("grid", { name: /^2026-(0[1-9]|1[0-2])$/ })).toHaveCount(12);
   await expect(page).toHaveURL(/view=year/);
   await expect(page).toHaveURL(/date=2026-05-25/);
-
+  await mayGrid.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/view=day/);
+  await expect(page).toHaveURL(/date=2026-05-02/);
 });
 
 test("Calendar recurrence inspector applies canonical model transitions", async ({ page }) => {
