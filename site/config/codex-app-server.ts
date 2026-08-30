@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import type { Plugin } from "vite";
 
-const CODEX_PATH = "/__dev/codex";
+const CODEX_PATH = "/api/llm-agent";
 
 export function codexAppServer(): Plugin {
   return {
@@ -10,10 +10,10 @@ export function codexAppServer(): Plugin {
     apply: "serve",
     configureServer(server) {
       server.middlewares.use(CODEX_PATH, (req, res) => {
-        if (req.method === "GET" && req.url?.startsWith("/threads")) {
+        if (req.method === "GET" && req.url?.startsWith("/sessions")) {
           return listCodexThreads(res);
         }
-        if (req.method !== "POST") {
+        if (req.method !== "POST" || !req.url?.startsWith("/turn")) {
           res.statusCode = 405;
           return res.end();
         }

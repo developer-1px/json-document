@@ -11,7 +11,7 @@ afterEach(() => {
 
 describe("LLM Agent Artifact", () => {
   test("sends a plain chat message and renders the Codex stream", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/threads")
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
       ? Promise.resolve(Response.json({ threads: [] }))
       : Promise.resolve(new Response("연결완료", { headers: { "X-Codex-Thread-Id": "thread-123" } }))));
     render(<LlmAgentArtifactRoute />);
@@ -27,7 +27,7 @@ describe("LLM Agent Artifact", () => {
   });
 
   test("selects a saved session and sends the next turn to it", async () => {
-    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/threads")
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
       ? Promise.resolve(Response.json({ threads: [{ id: "thread-saved", preview: "이전 채팅", updatedAt: 1 }] }))
       : Promise.resolve(new Response("계속완료", { headers: { "X-Codex-Thread-Id": "thread-saved" } })));
     vi.stubGlobal("fetch", fetchMock);
@@ -39,7 +39,7 @@ describe("LLM Agent Artifact", () => {
     fireEvent.click(screen.getByRole("button", { name: "전송" }));
 
     await waitFor(() => expect(screen.getByRole("status").textContent).toBe("계속완료"));
-    const request = fetchMock.mock.calls.find(([input]) => !String(input).endsWith("/threads"));
+    const request = fetchMock.mock.calls.find(([input]) => !String(input).endsWith("/sessions"));
     expect(JSON.parse(String(request?.[1]?.body))).toMatchObject({ sessionId: "thread-saved", prompt: "계속해줘" });
   });
 });

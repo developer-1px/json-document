@@ -115,7 +115,7 @@ export default defineConfig({
       semicolons: true,
     }),
     react(),
-    codexAppServer(),
+    process.env.VITE_LLM_BACKEND === "codex" ? codexAppServer() : undefined,
     rootLlmsTxt(),
     productionSiteAssets(),
   ],
