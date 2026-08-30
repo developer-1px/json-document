@@ -2,6 +2,7 @@ import type { ComponentType, ReactNode } from "react";
 import { A2UI_BASIC_CATALOG_ID } from "./basic-catalog";
 import type { A2uiComponent, A2uiStreamingDocument, A2uiSurfaceDocument } from "./a2ui-streaming-document";
 import { classes, ui } from "../../shared/ui/styles";
+import { A2UI_PROJECTION_ERROR_TEXT } from "./protocol-error";
 
 type MarkdownSurface = ComponentType<{ readonly content?: string | null; readonly streaming?: boolean }>;
 
@@ -15,30 +16,31 @@ export function A2uiSurface({ document, markdown: Markdown, surfaceId }: { reado
 
 function BasicCatalogSurface({ markdown, surface }: { readonly markdown: MarkdownSurface; readonly surface: A2uiSurfaceDocument }) {
   const root = surface.components.root;
-  if (!root) return null;
-  return <section className={ui.a2ui.root} aria-label="생성된 UI" data-a2ui-surface>{renderBasicComponent(root, surface, markdown, new Set())}</section>;
+  if (!root) return <section className={ui.a2ui.root} aria-label="생성된 UI" data-a2ui-surface><p className={ui.text.meta}>{A2UI_PROJECTION_ERROR_TEXT}</p></section>;
+  const rendered = renderBasicComponent(root, surface, markdown, new Set(), "/");
+  return <section className={ui.a2ui.root} aria-label="생성된 UI" data-a2ui-surface>{rendered ?? <p className={ui.text.meta}>{A2UI_PROJECTION_ERROR_TEXT}</p>}</section>;
 }
 
-function renderBasicComponent(component: A2uiComponent, surface: A2uiSurfaceDocument, Markdown: MarkdownSurface, ancestors: ReadonlySet<string>): ReactNode {
+function renderBasicComponent(component: A2uiComponent, surface: A2uiSurfaceDocument, Markdown: MarkdownSurface, ancestors: ReadonlySet<string>, basePath: string): ReactNode {
   const id = component.id;
   if (id && ancestors.has(id)) return null;
   const next = new Set(ancestors);
   if (id) next.add(id);
-  const children = childIds(component.children).map((childId) => {
-    const child = surface.components[childId];
+  const children = childReferences(component.children, surface.dataModel, basePath).map((reference) => {
+    const child = surface.components[reference.id];
     if (!child) return null;
     const weight = typeof child.weight === "number" && child.weight > 0 ? child.weight : undefined;
-    return <span className={weight ? ui.a2ui.weightedChild : ui.a2ui.child} data-a2ui-child data-weighted={weight ? "true" : undefined} key={childId} style={weight ? { flexGrow: weight } : undefined}>{renderBasicComponent(child, surface, Markdown, next)}</span>;
+    return <span className={weight ? ui.a2ui.weightedChild : ui.a2ui.child} data-a2ui-child data-weighted={weight ? "true" : undefined} key={`${reference.id}:${reference.basePath}`} style={weight ? { flexGrow: weight } : undefined}>{renderBasicComponent(child, surface, Markdown, next, reference.basePath)}</span>;
   });
-  const text = String(boundValue(surface.dataModel, component.text) ?? "");
-  const accessibility = accessibilityProps(surface.dataModel, component.accessibility);
+  const text = String(boundValue(surface.dataModel, component.text, basePath) ?? "");
+  const accessibility = accessibilityProps(surface.dataModel, component.accessibility, basePath);
   const layout = classes(layoutValue(ui.a2ui.justify, component.justify), layoutValue(ui.a2ui.align, component.align));
 
   if (component.component === "Column") return <div {...accessibility} className={classes(ui.a2ui.column, layout)} data-a2ui-component="Column">{children}</div>;
   if (component.component === "Row") return <div {...accessibility} className={classes(ui.a2ui.row, layout)} data-a2ui-component="Row">{children}</div>;
   if (component.component === "Card") {
     const child = typeof component.child === "string" ? surface.components[component.child] : undefined;
-    return <section {...accessibility} className={classes(ui.surface.raised, ui.a2ui.card)} data-a2ui-component="Card">{child ? renderBasicComponent(child, surface, Markdown, next) : null}</section>;
+    return <section {...accessibility} className={classes(ui.surface.raised, ui.a2ui.card)} data-a2ui-component="Card">{child ? renderBasicComponent(child, surface, Markdown, next, basePath) : null}</section>;
   }
   if (component.component === "Divider") return <hr {...accessibility} className={component.axis === "vertical" ? ui.a2ui.divider.vertical : ui.a2ui.divider.horizontal} data-a2ui-axis={component.axis === "vertical" ? "vertical" : "horizontal"} data-a2ui-component="Divider" />;
   if (component.component === "Text") {
@@ -67,26 +69,39 @@ function HandsComponent({ component, dataModel, markdown: Markdown }: { readonly
   return null;
 }
 
-function childIds(value: unknown): ReadonlyArray<string> {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+function childReferences(value: unknown, dataModel: unknown, basePath: string): ReadonlyArray<Readonly<{ id: string; basePath: string }>> {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string").map((id) => ({ id, basePath }));
+  if (!value || typeof value !== "object") return [];
+  const template = value as Record<string, unknown>;
+  if (typeof template.componentId !== "string" || typeof template.path !== "string") return [];
+  const items = boundValue(dataModel, { path: template.path }, basePath);
+  if (!Array.isArray(items)) return [];
+  const listPath = resolvePath(basePath, template.path);
+  return items.map((_, index) => ({ id: template.componentId as string, basePath: resolvePath(listPath, String(index)) }));
 }
 
-function boundValue(dataModel: unknown, binding: unknown): unknown {
+function boundValue(dataModel: unknown, binding: unknown, basePath = "/"): unknown {
   if (!binding || typeof binding !== "object" || !("path" in binding) || typeof binding.path !== "string") return binding;
-  return binding.path.split("/").slice(1).reduce<unknown>((value, segment) => value && typeof value === "object" ? (value as Record<string, unknown>)[segment] : undefined, dataModel);
+  return resolvePath(basePath, binding.path).split("/").slice(1).reduce<unknown>((value, segment) => value && typeof value === "object" ? (value as Record<string, unknown>)[segment] : undefined, dataModel);
 }
 
 function layoutValue(values: Readonly<Record<string, string>>, value: unknown): string | undefined {
   return typeof value === "string" ? values[value] : undefined;
 }
 
-function accessibilityProps(dataModel: unknown, value: unknown): Readonly<{ "aria-label"?: string; "aria-description"?: string }> {
+function accessibilityProps(dataModel: unknown, value: unknown, basePath: string): Readonly<{ "aria-label"?: string; "aria-description"?: string }> {
   if (!value || typeof value !== "object") return {};
   const accessibility = value as Record<string, unknown>;
-  const label = boundValue(dataModel, accessibility.label);
-  const description = boundValue(dataModel, accessibility.description);
+  const label = boundValue(dataModel, accessibility.label, basePath);
+  const description = boundValue(dataModel, accessibility.description, basePath);
   return {
     "aria-label": typeof label === "string" ? label : undefined,
     "aria-description": typeof description === "string" ? description : undefined,
   };
+}
+
+function resolvePath(basePath: string, path: string): string {
+  if (path.startsWith("/")) return path;
+  if (!path || path === ".") return basePath;
+  return `${basePath === "/" ? "" : basePath.replace(/\/$/, "")}/${path}`;
 }

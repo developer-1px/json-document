@@ -217,6 +217,16 @@ describe("A2UI streaming document", () => {
     engine.dispose();
   });
 
+  test("appends a streamed list item through the JSON Pointer dash token", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "append", catalogId: A2UI_BASIC_CATALOG_ID } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "append", path: "/items", value: [{ label: "첫째" }] } });
+    engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "append", path: "/items/-", value: { label: "둘째" } } });
+
+    expect(engine.document.value).toMatchObject({ surfaces: { append: { dataModel: { items: [{ label: "첫째" }, { label: "둘째" }] } } } });
+    engine.dispose();
+  });
+
   test("isolates surfaces and leaves the document unchanged after invalid updates", () => {
     const engine = createA2uiStreamingDocumentEngine();
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "first", catalogId: A2UI_BASIC_CATALOG_ID } });

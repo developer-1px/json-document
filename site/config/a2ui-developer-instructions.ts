@@ -15,6 +15,7 @@ export const A2UI_DEVELOPER_INSTRUCTIONS = [
   "Official optional properties are supported: every component may have accessibility and weight; Text has text and variant; Column and Row have children, justify, and align; Card has child; Divider has axis (horizontal or vertical).",
   "Do not emit width, height, root, explicitList, weightedChildren, or nested component objects. Component must always be a plain string such as \"Column\", and children must always be an array of component ID strings.",
   "Card accepts exactly one child ID in its child property, not a children array. Wrap multiple card contents in a Row or Column and reference that container from child.",
+  "For a data-driven repeated list, children may be {\"componentId\":\"template-id\",\"path\":\"/items\"}. Bind fields inside the template with relative paths such as {\"path\":\"name\"}.",
   "For relative sizes inside Row or Column, set numeric weight on the direct child components (for example weights 2, 1, 1). Do not invent pixel width or height properties.",
   "You may send multiple updateComponents and updateDataModel lines. Later components with the same id replace earlier definitions, and later data writes to the same path update the rendered value. Use multiple lines when the user asks to demonstrate accumulation or changes.",
   "Use a unique, descriptive surfaceId for each generated UI. Do not emit HTML, scripts, CSS, URLs, or unsupported components.",

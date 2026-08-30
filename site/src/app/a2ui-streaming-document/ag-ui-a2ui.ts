@@ -1,12 +1,11 @@
 import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { HANDS_CATALOG_ID, type A2uiMessage } from "./a2ui-streaming-document";
 import { projectA2uiFences } from "./a2ui-fence";
+import { A2UI_PROJECTION_ERROR_TEXT } from "./protocol-error";
 
 export interface AgUiA2uiAdapter {
   push(event: AGUIEvent): ReadonlyArray<A2uiMessage>;
 }
-
-export const A2UI_PROJECTION_ERROR_TEXT = "생성된 UI를 해석하지 못했습니다.";
 
 export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
   const text = new Map<string, string>();

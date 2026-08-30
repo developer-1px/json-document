@@ -83,6 +83,25 @@ describe("A2UI Basic Catalog renderer", () => {
     expect(container.querySelector('[data-a2ui-axis="vertical"]')).toBeTruthy();
   });
 
+  test("repeats a component template with relative bindings for every list item", () => {
+    const { rerender } = render(<A2uiSurface document={documentWith({
+      root: { id: "root", component: "Column", children: { componentId: "item", path: "/people" } },
+      item: { id: "item", component: "Card", child: "name" },
+      name: { id: "name", component: "Text", text: { path: "name" }, accessibility: { label: { path: "label" } } },
+    }, { people: [{ name: "민지", label: "첫 번째 사람" }, { name: "준호", label: "두 번째 사람" }] })} markdown={MarkdownStub} surfaceId="main" />);
+
+    expect(screen.getAllByTestId("markdown").map((element) => element.textContent)).toEqual(["민지", "준호"]);
+    expect(screen.getByLabelText("첫 번째 사람")).toBeTruthy();
+    expect(screen.getByLabelText("두 번째 사람")).toBeTruthy();
+
+    rerender(<A2uiSurface document={documentWith({
+      root: { id: "root", component: "Column", children: { componentId: "item", path: "/people" } },
+      item: { id: "item", component: "Card", child: "name" },
+      name: { id: "name", component: "Text", text: { path: "name" } },
+    }, { people: [{ name: "수정됨" }] })} markdown={MarkdownStub} surfaceId="main" />);
+    expect(screen.getAllByTestId("markdown").map((element) => element.textContent)).toEqual(["수정됨"]);
+  });
+
   test("ignores missing children and terminates cyclic component references", () => {
     const { container } = renderSurface({
       root: { id: "root", component: "Column", children: ["missing", "loop", "safe"] },
@@ -94,13 +113,13 @@ describe("A2UI Basic Catalog renderer", () => {
     expect(container.querySelectorAll('[data-a2ui-component="Column"]')).toHaveLength(2);
   });
 
-  test("renders nothing for an absent surface, root, or unknown root component", () => {
+  test("renders nothing for an absent surface and reports a missing or unknown root", () => {
     const { container, rerender } = render(<A2uiSurface document={{ surfaces: {} }} markdown={MarkdownStub} surfaceId="main" />);
     expect(container.childElementCount).toBe(0);
     rerender(<A2uiSurface document={documentWith({})} markdown={MarkdownStub} surfaceId="main" />);
-    expect(container.childElementCount).toBe(0);
+    expect(screen.getByText("생성된 UI를 해석하지 못했습니다.")).toBeTruthy();
     rerender(<A2uiSurface document={documentWith({ root: { id: "root", component: "Unknown" } })} markdown={MarkdownStub} surfaceId="main" />);
-    expect(screen.getByLabelText("생성된 UI").childElementCount).toBe(0);
+    expect(screen.getByText("생성된 UI를 해석하지 못했습니다.")).toBeTruthy();
   });
 });
 

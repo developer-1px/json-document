@@ -138,6 +138,33 @@ test("잘못된 A2UI schema를 숨기지 않고 간결한 오류로 표시한다
   await expect(page.getByText(/invalid_enum_value|diagonal/)).toHaveCount(0);
 });
 
+test("dynamic children template가 상대 binding 목록을 스트리밍 교체한다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const messages = [
+    { version: "v0.9", createSurface: { surfaceId: "tasks", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "tasks", components: [
+      { id: "root", component: "Column", children: { componentId: "task-card", path: "/tasks" } },
+      { id: "task-card", component: "Card", child: "task-content", accessibility: { label: { path: "title" } } },
+      { id: "task-content", component: "Row", children: ["title", "status"], justify: "spaceBetween" },
+      { id: "title", component: "Text", text: { path: "title" } },
+      { id: "status", component: "Text", text: { path: "status" }, variant: "caption" },
+    ] } },
+    { version: "v0.9", updateDataModel: { surfaceId: "tasks", path: "/tasks", value: [{ title: "명세 확인", status: "완료" }, { title: "엔진 구현", status: "진행" }, { title: "화면 검증", status: "대기" }] } },
+    { version: "v0.9", updateDataModel: { surfaceId: "tasks", path: "/tasks", value: [{ title: "명세 확인", status: "완료" }, { title: "엔진 구현", status: "완료" }, { title: "화면 검증", status: "진행" }, { title: "결과 공유", status: "대기" }] } },
+  ];
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({ body: agUiStream("thread-template", ["반복 목록입니다.\n```a2ui\n", ...messages.map((message) => `${JSON.stringify(message)}\n`), "```"]), contentType: "text/event-stream" }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("할 일 목록");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  await expect(page.locator('[data-a2ui-component="Card"]')).toHaveCount(4);
+  await expect(page.getByLabel("결과 공유")).toBeVisible();
+  await expect(page.getByText("완료")).toHaveCount(2);
+  await expect(page.getByText("진행")).toHaveCount(1);
+});
+
 function agUiStream(threadId: string, text: string | ReadonlyArray<string>): string {
   const runId = "run-browser";
   const messageId = "message-browser";

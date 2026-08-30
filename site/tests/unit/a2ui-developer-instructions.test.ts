@@ -19,5 +19,6 @@ describe("A2UI Codex developer instructions", () => {
     }
     expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("key literally named operation");
     expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain("fence label must be exactly a2ui");
+    expect(A2UI_DEVELOPER_INSTRUCTIONS).toContain('children may be {"componentId":"template-id","path":"/items"}');
   });
 });
