@@ -1,19 +1,14 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { ArrowUp, CalendarDays, ChevronLeft, ChevronRight, Clock3, Pencil, Repeat2, Sparkles, Trash2 } from "lucide-react";
 import { Temporal } from "@js-temporal/polyfill";
 
 import {
-  calendarAllDaySpan,
   calendarBusyDates,
   calendarDatePart,
   calendarDocumentCalendar,
   calendarDocumentCalendars,
   calendarInstantAt,
-  calendarIntervalLastDate,
   calendarOccurrenceTopology,
-  calendarRecurrenceWithFrequency,
-  calendarRecurrenceWithInterval,
-  calendarRecurrenceWithUntil,
   calendarShiftInstant,
   calendarVisibleEvents,
   calendarClipboardFormat,
@@ -30,9 +25,7 @@ import {
   useCalendarHand,
   useCalendarKeyboard,
   useCalendarPointerInteractions,
-  useCalendarRenameInput,
   useCalendarViewportPosition,
-  HtmlDateField,
   calendarCellInterval,
   calendarCells,
   calendarTimeLabel,
@@ -40,6 +33,7 @@ import {
   DateGrid,
   CalendarMonthGrid,
   CalendarTimeGrid,
+  CalendarEventInspector,
   type CalendarMonthGridHandle,
   shiftVisibleDate,
   visiblePeriodLabel,
@@ -152,9 +146,6 @@ export function CalendarDemoRoute(props: {
   });
   const [viewState, setViewState] = useState<CalendarView>(calendarSearchDefaults.view);
   const [visibleDateState, setVisibleDateState] = useState(calendarSearchDefaults.date);
-  const scope = hand.scope;
-  const setScope = hand.setScope;
-  const [detailsEditing, setDetailsEditing] = useState(false);
   const pointerInteractions = useCalendarPointerInteractions(hand, {
     hourStart,
     hourEnd,
@@ -188,7 +179,6 @@ export function CalendarDemoRoute(props: {
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
   const selectedEvent = hand.selectedEvent;
-  useEffect(() => setDetailsEditing(hand.renaming), [hand.renaming, selectedEvent?.id, selectedEvent?.start]);
   const eventDetailsPosition = useAnchoredFloatingPosition<HTMLDivElement, HTMLElement>({
     active: selectedEvent !== null,
     policy: {
@@ -199,13 +189,6 @@ export function CalendarDemoRoute(props: {
     offset: 8,
     boundaryPadding: 8,
   });
-  const titleInput = useCalendarRenameInput(hand, {
-    commitOnBlur: false,
-    realizationKey: eventDetailsPosition.position?.placement ?? null,
-  });
-  const inspected = hand.inspectedInterval;
-  const inspectedStart = inspected?.start ?? selectedEvent?.start ?? "";
-  const inspectedEnd = inspected?.end ?? selectedEvent?.end ?? "";
   const visibleEvents = calendarVisibleEvents(document);
   const paintedEvents = hand.paintedEvents;
   const timeGridCells = calendarCells(view === "day" ? "day" : "week", visibleDate);
@@ -250,8 +233,6 @@ export function CalendarDemoRoute(props: {
   function removeSelected(): void {
     hand.removeSelected();
   }
-
-  const applySelectedPatch = hand.applySelectedPatch;
 
   const timeGrid = (
     <CalendarTimeGrid
@@ -502,171 +483,73 @@ export function CalendarDemoRoute(props: {
                 ))}
               </div>
             ) : null}
-          </div>
-            {selectedEvent === null ? null : (
-              <ContextualControls
-                selected
-                editing={hand.renaming}
-                capabilities={[{ id: "editor", phases: ["selected", "editing"] }] as const}
-              >
-                {(context) => context.visible.includes("editor") ? (
-                  <section
-                    ref={eventDetailsPosition.floatingRef}
-                    aria-label="Event"
-                    data-floating-placement={eventDetailsPosition.position?.placement}
-                    data-floating-fits={eventDetailsPosition.position?.fits ? "true" : "false"}
-                    data-ui-affordance={calendarControlAffordance("inspector")}
-                    style={eventDetailsPosition.style}
-                    className={classes(styles.inspector(), ui.surface.overlay)}
-                  >
-                <header className={styles.inspectorHeader()}>
-                  {hand.renaming ? (
-                    <input
-                      ref={titleInput.ref}
-                      aria-label="Title"
-                      data-ui-affordance={calendarControlAffordance("titleField")}
-                      className={classes(ui.field.seamless, styles.inspectorTitle())}
-                      value={titleInput.value}
-                      onFocus={titleInput.onFocus}
-                      onChange={titleInput.onChange}
-                      onBlur={titleInput.onBlur}
-                      onKeyDown={titleInput.onKeyDown}
-                    />
-                  ) : <h2 className={styles.inspectorTitle()}>{selectedEvent.title}</h2>}
-                  <div className={styles.inspectorActions()}>
-                    <Command affordance={calendarControlAffordance("inspectorEdit")} label="Edit details" onClick={() => setDetailsEditing((value) => !value)}>
-                      <Pencil aria-hidden="true" size={14} />
-                    </Command>
-                    <Command affordance={calendarControlAffordance("inspectorDelete")} kind="danger" label="Delete" onClick={removeSelected}>
-                      <Trash2 aria-hidden="true" size={14} />
-                    </Command>
-                  </div>
-                </header>
-                <div className={styles.eventSummary()}>
-                  <p>
-                    <Clock3 aria-hidden="true" size={14} />
-                    <span>
-                      {calendarDatePart(inspectedStart)} · {selectedEvent.allDay
-                        ? "All day"
-                        : `${calendarTimeLabel(inspectedStart)}–${calendarTimeLabel(inspectedEnd)}`}
-                    </span>
-                  </p>
-                  <p><CalendarDays aria-hidden="true" size={14} /><span>{calendarDocumentCalendar(document, selectedEvent.calendarId)?.title ?? selectedEvent.calendarId}</span></p>
-                  {selectedEvent.recurrence === null ? null : (
-                    <p><Repeat2 aria-hidden="true" size={14} /><span>Repeats</span></p>
-                  )}
-                </div>
-                {detailsEditing ? <div className={styles.detailsEditor()}>
-                <Toggle
-                  affordance={calendarControlAffordance("allDayToggle")}
-                  pressed={selectedEvent.allDay}
-                  aria-label="All-day"
-                  className={classes(styles.calendarToggle(), "w-auto px-0")}
-                  onClick={() => applySelectedPatch({ allDay: !selectedEvent.allDay })}
-                >
-                  All-day
-                </Toggle>
-                <HtmlDateField
-                  affordance={calendarControlAffordance("startField")}
-                  key={selectedEvent.allDay ? "start-date" : "start-datetime"}
-                  type={selectedEvent.allDay ? "date" : "datetime-local"}
-                  label="Start"
-                  value={inspected?.start ?? selectedEvent.start}
-                  onValueChange={(value) => applySelectedPatch({ start: value })}
-                />
-                <HtmlDateField
-                  affordance={calendarControlAffordance("endField")}
-                  key={selectedEvent.allDay ? "end-date" : "end-datetime"}
-                  type={selectedEvent.allDay ? "date" : "datetime-local"}
-                  label="End"
-                  value={selectedEvent.allDay
-                    ? calendarIntervalLastDate(
-                      inspected?.start ?? selectedEvent.start,
-                      inspected?.end ?? selectedEvent.end,
-                      true,
-                    )
-                    : (inspected?.end ?? selectedEvent.end)}
-                  onValueChange={(value) => applySelectedPatch({
-                    end: selectedEvent.allDay ? (calendarAllDaySpan(value, value)?.end ?? value) : value,
-                  })}
-                />
-                <div className={styles.field()}>
-                  <span className={ui.text.label}>Calendar</span>
-                  <Choice presentation="popup"
-                    affordance={calendarControlAffordance("calendarChoice")}
-                    label="Calendar"
-                    value={selectedEvent.calendarId}
-                    options={calendars.map((calendar) => ({ id: calendar.id, label: calendar.title }))}
-                    onValueChange={(value) => applySelectedPatch({ calendarId: value })}
-                  />
-                </div>
-                <div className={styles.field()}>
-                  <span className={ui.text.label}>Repeat</span>
-                  <Choice presentation="popup"
-                    affordance={calendarControlAffordance("recurrenceChoice")}
-                    label="Repeat"
-                    value={selectedEvent.recurrence?.freq ?? "none"}
-                    options={[
-                      { id: "none", label: "None" },
-                      { id: "daily", label: "Daily" },
-                      { id: "weekly", label: "Weekly" },
-                      { id: "monthly", label: "Monthly" },
-                      { id: "yearly", label: "Yearly" },
-                    ]}
-                    onValueChange={(value) => applySelectedPatch({
-                      recurrence: value === "none"
-                        ? null
-                        : calendarRecurrenceWithFrequency(selectedEvent.recurrence, value),
-                    })}
-                  />
-                </div>
-                {selectedEvent.recurrence === null ? null : (
-                  <>
-                    <label className={styles.field()}>
-                      <span className={ui.text.label}>Every</span>
-                      <input
-                        data-ui-affordance={calendarControlAffordance("recurrenceInterval")}
-                        type="number"
-                        min={1}
-                        aria-label="Repeat every"
-                        className={ui.field.control}
-                        value={selectedEvent.recurrence.interval}
-                        onChange={(event) => {
-                          applySelectedPatch({
-                            recurrence: calendarRecurrenceWithInterval(selectedEvent.recurrence, event.target.value),
-                          });
-                        }}
-                      />
-                    </label>
-                    <HtmlDateField
-                      affordance={calendarControlAffordance("endField")}
-                      type="date"
-                      label="Repeat until"
-                      value={selectedEvent.recurrence.until}
-                      onValueChange={(value) => applySelectedPatch({
-                        recurrence: calendarRecurrenceWithUntil(selectedEvent.recurrence, value),
-                      })}
-                    />
-                  </>
-                )}
-                {selectedEvent.recurrence === null ? null : (
-                  <Choice presentation="inline"
-                    affordance={calendarControlAffordance("recurrenceInterval")}
-                    label="Edit occurrence"
-                    value={scope}
-                    options={[
-                      { id: "this", label: "This" },
-                      { id: "this-and-following", label: "Following" },
-                      { id: "all", label: "All" },
-                    ]}
-                    onValueChange={setScope}
-                  />
-                )}
-                </div> : null}
-                  </section>
-                ) : null}
-              </ContextualControls>
-            )}
+            </div>
+            <CalendarEventInspector
+              hand={hand}
+              calendars={calendars}
+              realizationKey={eventDetailsPosition.position?.placement ?? null}
+              rootRef={eventDetailsPosition.floatingRef}
+              style={eventDetailsPosition.style}
+              placement={eventDetailsPosition.position?.placement}
+              fits={eventDetailsPosition.position?.fits}
+              affordances={{
+                inspector: calendarControlAffordance("inspector"),
+                edit: calendarControlAffordance("inspectorEdit"),
+                remove: calendarControlAffordance("inspectorDelete"),
+                titleField: calendarControlAffordance("titleField"),
+                allDayToggle: calendarControlAffordance("allDayToggle"),
+                startField: calendarControlAffordance("startField"),
+                endField: calendarControlAffordance("endField"),
+                calendarChoice: calendarControlAffordance("calendarChoice"),
+                recurrenceChoice: calendarControlAffordance("recurrenceChoice"),
+                recurrenceInterval: calendarControlAffordance("recurrenceInterval"),
+              }}
+              classNames={{
+                root: classes(styles.inspector(), ui.surface.overlay),
+                header: styles.inspectorHeader(),
+                title: styles.inspectorTitle(),
+                titleInput: ui.field.seamless,
+                actions: styles.inspectorActions(),
+                summary: styles.eventSummary(),
+                details: styles.detailsEditor(),
+                field: styles.field(),
+                fieldLabel: ui.text.label,
+                toggle: classes(styles.calendarToggle(), "w-auto px-0"),
+                numberInput: ui.field.control,
+              }}
+              labels={{
+                inspector: "Event",
+                title: "Title",
+                edit: "Edit details",
+                remove: "Delete",
+                allDay: "All-day",
+                allDaySummary: "All day",
+                start: "Start",
+                end: "End",
+                calendar: "Calendar",
+                repeat: "Repeat",
+                repeats: "Repeats",
+                none: "None",
+                daily: "Daily",
+                weekly: "Weekly",
+                monthly: "Monthly",
+                yearly: "Yearly",
+                every: "Every",
+                repeatEvery: "Repeat every",
+                repeatUntil: "Repeat until",
+                editOccurrence: "Edit occurrence",
+                thisOccurrence: "This",
+                followingOccurrences: "Following",
+                allOccurrences: "All",
+              }}
+              icons={{
+                edit: <Pencil aria-hidden="true" size={14} />,
+                remove: <Trash2 aria-hidden="true" size={14} />,
+                time: <Clock3 aria-hidden="true" size={14} />,
+                calendar: <CalendarDays aria-hidden="true" size={14} />,
+                repeat: <Repeat2 aria-hidden="true" size={14} />,
+              }}
+            />
           </div>
           <div
             className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}

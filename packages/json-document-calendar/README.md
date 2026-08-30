@@ -107,3 +107,23 @@ copy, colors, classes, and the concrete Hand and pointer interactions:
   getEventColor={getEventColor}
 />
 ```
+
+`CalendarEventInspector` is the canonical selected-event editing surface. It
+owns the summary, rename and delete lifecycle, detail fields, recurrence, and
+occurrence-scope bindings. Hosts supply anchored placement and product copy,
+icons, affordances, and classes through finite presentation slots:
+
+```tsx
+<CalendarEventInspector
+  hand={hand}
+  calendars={calendars}
+  rootRef={floating.floatingRef}
+  style={floating.style}
+  placement={floating.position?.placement}
+  fits={floating.position?.fits}
+  affordances={affordances}
+  classNames={classNames}
+  labels={labels}
+  icons={icons}
+/>
+```

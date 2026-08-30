@@ -8,6 +8,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import {
   CalendarGrid,
+  CalendarEventInspector,
   CalendarMonthGrid,
   CalendarTimeGrid,
   calendarCells,
@@ -60,6 +61,7 @@ export function DateControlsDemoRoute() {
         />
         <CalendarMonthGridUsage />
         <CalendarTimeGridUsage />
+        <CalendarEventInspectorUsage />
         <CalendarGrid
           label="Calendar"
           value={date}
@@ -132,6 +134,40 @@ function CalendarTimeGridUsage() {
       }}
       labels={{ grid: "Occurrence week grid", allDay: "all-day", now: "Now", resizeEnd: (event) => `Resize ${event.title} end`, hour: (hour) => String(hour).padStart(2, "0") }}
       getEventColor={() => "blue"}
+    />
+  );
+}
+
+function CalendarEventInspectorUsage() {
+  const [editor] = useState(() => createCalendarEditor(monthGridDocument, { initialEventIds: ["review"] }));
+  const hand = useCalendarHand(editor);
+  const styles = dateControlsDemoRecipe();
+  return (
+    <CalendarEventInspector
+      hand={hand}
+      calendars={monthGridDocument.calendars}
+      affordances={{
+        inspector: "stateful", edit: "content-control", remove: "content-control", titleField: "stateful",
+        allDayToggle: "stateful", startField: "stateful", endField: "stateful", calendarChoice: "stateful",
+        recurrenceChoice: "stateful", recurrenceInterval: "stateful",
+      }}
+      classNames={{
+        root: styles.inspectorRoot(),
+        header: styles.inspectorHeader(),
+        title: styles.inspectorTitle(),
+        actions: styles.inspectorActions(),
+        summary: styles.inspectorSummary(),
+        details: styles.inspectorDetails(),
+        field: styles.inspectorField(),
+        fieldLabel: styles.inspectorFieldLabel(),
+      }}
+      labels={{
+        inspector: "Selected event", title: "Title", edit: "Edit details", remove: "Delete", allDay: "All-day",
+        allDaySummary: "All day", start: "Start", end: "End", calendar: "Calendar", repeat: "Repeat",
+        repeats: "Repeats", none: "None", daily: "Daily", weekly: "Weekly", monthly: "Monthly", yearly: "Yearly",
+        every: "Every", repeatEvery: "Repeat every", repeatUntil: "Repeat until", editOccurrence: "Edit occurrence",
+        thisOccurrence: "This", followingOccurrences: "Following", allOccurrences: "All",
+      }}
     />
   );
 }

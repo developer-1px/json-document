@@ -320,6 +320,17 @@ interface CalendarSelectionDragPreview {
 ```ts
 CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode
 ```
+## `CalendarEventInspector`
+
+```ts
+CalendarEventInspector(props: CalendarEventInspectorProps): ReactNode
+```
+
+`CalendarEventInspectorProps` binds a `CalendarHand` and concrete calendars to
+the canonical selected-event summary, rename, delete, detail, recurrence, and
+occurrence-scope surface. `affordances`, `classNames`, `labels`, and `icons` are
+finite presentation slots; `rootRef`, `style`, `placement`, and `fits` let a
+Host compose its anchored floating position without owning inspector behavior.
 ## `CalendarTimeGridAffordances`
 
 ```ts

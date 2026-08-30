@@ -7,6 +7,7 @@ const ownerIndex = read("packages/json-document-ui-primitives-react/src/index.ts
 const ownerTest = read("packages/json-document-ui-primitives-react/tests/primitives.test.tsx");
 const dateControls = read("packages/json-document-calendar/src/date-controls.tsx");
 const calendar = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const calendarInspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const selection = read("site/src/routes/editing-demos/SelectionDemoRoute.tsx");
 const topology = read("site/src/routes/editing-demos/TopologyDemoRoute.tsx");
 const artifact = read("site/src/routes/artifact-viewer/ArtifactViewerRoute.tsx");
@@ -21,11 +22,11 @@ requireText(ownerIndex, "type ChoiceOption");
 requireText(ownerTest, 'vi.fn<(value: "canvas" | "json") => void>()');
 requireText(dateControls, "onValueChange={props.onGrainChange}");
 requireText(calendar, "onValueChange={setView}");
-requireText(calendar, "onValueChange={setScope}");
+requireText(calendarInspector, "onValueChange={hand.setScope}");
 requireText(selection, "onValueChange={setMode}");
 requireText(topology, "onValueChange={setOrder}");
 requireText(artifact, "onValueChange={setActive}");
-for (const consumer of [dateControls, calendar, selection, topology, artifact]) {
+for (const consumer of [dateControls, calendar, calendarInspector, selection, topology, artifact]) {
   forbid(consumer, /onValueChange=\{\(value\)[^\n]*\bas\b/);
 }
 requireText(usage, "option ID generic을 callback까지");

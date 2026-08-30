@@ -23,6 +23,14 @@ export {
   type CalendarTimeGridLabels,
   type CalendarTimeGridProps,
 } from "./calendar-time-grid.js";
+export {
+  CalendarEventInspector,
+  type CalendarEventInspectorAffordances,
+  type CalendarEventInspectorClassNames,
+  type CalendarEventInspectorIcons,
+  type CalendarEventInspectorLabels,
+  type CalendarEventInspectorProps,
+} from "./calendar-event-inspector.js";
 export { calendarEventLabel, type CalendarEventLabelValue } from "./calendar-event-label.js";
 export {
   CalendarGrid,

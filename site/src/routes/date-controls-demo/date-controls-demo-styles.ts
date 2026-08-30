@@ -39,5 +39,13 @@ export const dateControlsDemoRecipe = tv({
     timeEventContainer: "absolute z-10",
     timeEvent: "flex h-full w-full flex-col overflow-hidden rounded-control bg-background-subtle px-1 text-left text-xs",
     timeEventTitle: "truncate",
+    inspectorRoot: "max-w-sm rounded-surface border border-line-subtle bg-background-canvas p-4",
+    inspectorHeader: "flex items-center justify-between gap-2",
+    inspectorTitle: "font-medium",
+    inspectorActions: "flex gap-2",
+    inspectorSummary: "mt-3 text-sm text-foreground-muted",
+    inspectorDetails: "mt-3 grid gap-2",
+    inspectorField: "grid gap-1",
+    inspectorFieldLabel: "text-xs text-foreground-muted",
   },
 });

@@ -6,12 +6,14 @@ const owner = read("packages/json-document-editing/src/calendar-validation.ts");
 const ownerIndex = read("packages/json-document-editing/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-validation.test.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const usage = read("site/src/shared/demo-workbench/demo-sources.ts");
 
 requireText(owner, "export function calendarDatePart");
 requireText(ownerIndex, "calendarDatePart");
 requireText(ownerTest, 'calendarDatePart("2026-05-25T23:30")');
-requireCount(host, "calendarDatePart(", 3);
+requireCount(host, "calendarDatePart(", 2);
+requireCount(inspector, "calendarDatePart(", 1);
 forbid(host, /\.slice\(0,\s*10\)/);
 requireText(usage, 'symbol: "calendarDatePart"');
 requireText(usage, 'sourcePath: "packages/json-document-editing/src/calendar-validation.ts"');
