@@ -22,6 +22,7 @@ export type {
   ResizeHandleProps,
 } from "./surfaces.js";
 export { useListbox } from "./listbox.js";
+export type { ControlAffordance, ControlAffordanceProps } from "./control-affordance.js";
 export type { ListboxBinding, ListboxItem, UseListboxOptions } from "./listbox.js";
 export {
   Command,

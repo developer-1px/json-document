@@ -34,7 +34,7 @@ type ChoiceProps<Id extends string = string> = {
   readonly value: Id;
   readonly options: ReadonlyArray<ChoiceOption<Id>>;
   readonly onValueChange: (value: Id) => void;
-} & (
+} & ControlAffordanceProps & (
   | { readonly presentation: "inline"; readonly className?: string }
   | {
       readonly presentation: "popup";
@@ -49,7 +49,7 @@ type ChoiceProps<Id extends string = string> = {
 ## `Command`
 
 ```ts
-Command(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & { readonly kind?: CommandKind; readonly label?: string; readonly rootClassName?: string; }): ReactNode
+Command(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & ControlAffordanceProps & { readonly kind?: CommandKind; readonly label?: string; readonly rootClassName?: string; }): ReactNode
 ```
 ## `CommandKind`
 
@@ -60,6 +60,27 @@ type CommandKind = "primary" | "secondary" | "danger";
 
 ```ts
 ContextualControls<Id extends string>(props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; readonly selected?: boolean; readonly editing?: boolean; readonly children: (snapshot: ContextualAffordanceSnapshot<Id>) => ReactNode; }): ReactNode
+```
+## `ControlAffordance`
+
+```ts
+type ControlAffordance =
+  | "persistent"
+  | "content-control"
+  | "stateful"
+  | "contextual"
+  | "contextual-danger"
+  | "direct"
+  | "field"
+  | "disabled-preview";
+```
+## `ControlAffordanceProps`
+
+```ts
+type ControlAffordanceProps = {
+  /** Declares how a product theme reveals this control without changing its semantic role. */
+  readonly affordance?: ControlAffordance;
+};
 ```
 ## `ControlHandle`
 
@@ -81,7 +102,7 @@ Dialog(props: { readonly label: string; readonly open: boolean; readonly onOpenC
 ## `DisclosureButton`
 
 ```ts
-DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & { readonly expanded: boolean; readonly controls: string; }): ReactNode
+DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & ControlAffordanceProps & { readonly expanded: boolean; readonly controls: string; }): ReactNode
 ```
 ## `DragHandle`
 
@@ -195,7 +216,7 @@ ResizeHandle(props: ResizeHandleProps): import("<repository>/node_modules/@types
 ## `ResizeHandleProps`
 
 ```ts
-type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & {
+type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & ControlAffordanceProps & {
   readonly label: string;
   readonly orientation: "horizontal" | "vertical";
   readonly onResize: (delta: number, phase: "preview" | "commit") => void;
@@ -221,7 +242,7 @@ type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
   readonly selected: boolean;
   readonly focus?: boolean;
-} & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
+} & ControlAffordanceProps & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 ```
 ## `TabOption`
 
@@ -240,7 +261,7 @@ Tabs<T extends string | number>(props: { readonly label: string; readonly value:
 ## `Toggle`
 
 ```ts
-Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly presentation?: "button" | "chip"; readonly label?: string; readonly tooltip?: string; }): ReactNode
+Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & { readonly pressed: boolean; readonly presentation?: "button" | "chip"; readonly label?: string; readonly tooltip?: string; }): ReactNode
 ```
 ## `Toolbar`
 

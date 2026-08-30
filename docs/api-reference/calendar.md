@@ -273,7 +273,7 @@ type DateRangeValue = { readonly start: string; readonly end: string };
 ## `HtmlDateField`
 
 ```ts
-HtmlDateField(props: { readonly type: HtmlDateType; readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; }): ReactNode
+HtmlDateField(props: { readonly type: HtmlDateType; readonly label: string; readonly value: string; readonly onValueChange: (value: string) => void; readonly affordance?: ControlAffordance; }): ReactNode
 ```
 ## `HtmlDateType`
 

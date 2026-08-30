@@ -10,6 +10,7 @@ import {
 import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { calendarDemoRecipe } from "./calendar-demo-styles";
+import { calendarControlAffordance } from "./calendar-control-affordances";
 
 const weekdays = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -32,11 +33,11 @@ export function CalendarDemoNavigator(props: {
   return (
     <section aria-label="Jump to date" className={styles.yearMonth()}>
       <div className="flex items-center justify-between gap-1">
-        <Command label="Previous month" onClick={() => setRailDate(addCalendarMonths(railDate, -1))}>
+        <Command affordance={calendarControlAffordance("miniPrevious")} label="Previous month" onClick={() => setRailDate(addCalendarMonths(railDate, -1))}>
           <ChevronLeft aria-hidden="true" size={16} />
         </Command>
         <span className={ui.text.meta}>{monthLabel}</span>
-        <Command label="Next month" onClick={() => setRailDate(addCalendarMonths(railDate, 1))}>
+        <Command affordance={calendarControlAffordance("miniNext")} label="Next month" onClick={() => setRailDate(addCalendarMonths(railDate, 1))}>
           <ChevronRight aria-hidden="true" size={16} />
         </Command>
       </div>
@@ -48,6 +49,7 @@ export function CalendarDemoNavigator(props: {
         ))}
         {cells.map((cell) => (
           <Command
+            affordance={calendarControlAffordance("miniDate")}
             key={cell.date}
             aria-label={cell.date}
             aria-current={cell.date === props.today ? "date" : undefined}
