@@ -24,6 +24,7 @@
 .a2ui-column { display: grid; gap: 12px; }
 .a2ui-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
 .a2ui-child { display: contents; }
+.a2ui-child.weighted { display: block; min-width: 0; flex-basis: 0; }
 .a2ui-card { padding: 18px; border-radius: var(--radius-surface); background: var(--color-background-subtle); }
 .a2ui-divider { width: 100%; margin: 4px 0; border: 0; border-top: 1px solid var(--color-border-subtle); }
 .a2ui-generated-surface h1, .a2ui-generated-surface h2, .a2ui-generated-surface h3 { margin: 0; letter-spacing: -.025em; }

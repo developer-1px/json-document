@@ -115,4 +115,28 @@ describe("A2UI streaming document", () => {
     } });
     engine.dispose();
   });
+
+  test("accumulates repeated component batches and replaces existing component and data values", () => {
+    const engine = createA2uiStreamingDocumentEngine();
+    const states: unknown[] = [];
+    const subscription = engine.document$.subscribe((state) => states.push(state));
+    const messages = [
+      { version: "v0.9", createSurface: { surfaceId: "dashboard", catalogId: A2UI_BASIC_CATALOG_ID } },
+      { version: "v0.9", updateComponents: { surfaceId: "dashboard", components: [{ id: "root", component: "Column", children: ["title", "metrics", "status"] }, { id: "title", component: "Text", text: "운영 대시보드", variant: "h1" }, { id: "metrics", component: "Row", children: ["primary", "secondary", "tertiary"] }] } },
+      { version: "v0.9", updateComponents: { surfaceId: "dashboard", components: [{ id: "primary", component: "Card", child: "primaryValue", weight: 2 }, { id: "primaryValue", component: "Text", text: { path: "/metrics/primary" }, variant: "h2" }, { id: "secondary", component: "Card", child: "secondaryValue", weight: 1 }, { id: "secondaryValue", component: "Text", text: { path: "/metrics/secondary" } }, { id: "tertiary", component: "Card", child: "tertiaryValue", weight: 1 }, { id: "tertiaryValue", component: "Text", text: { path: "/metrics/tertiary" } }, { id: "status", component: "Text", text: "데이터 수신 중" }] } },
+      { version: "v0.9", updateDataModel: { surfaceId: "dashboard", path: "/metrics", value: { primary: "42", secondary: "17", tertiary: "8" } } },
+      { version: "v0.9", updateComponents: { surfaceId: "dashboard", components: [{ id: "status", component: "Text", text: { path: "/status" }, variant: "caption" }] } },
+      { version: "v0.9", updateDataModel: { surfaceId: "dashboard", path: "/status", value: "동기화 완료" } },
+      { version: "v0.9", updateDataModel: { surfaceId: "dashboard", path: "/metrics/primary", value: "48" } },
+    ];
+    for (const message of messages) engine.write(`${JSON.stringify(message)}\n`);
+
+    expect(states).toHaveLength(messages.length + 1);
+    expect(engine.document.value).toMatchObject({ surfaces: { dashboard: {
+      components: { primary: { weight: 2 }, secondary: { weight: 1 }, tertiary: { weight: 1 }, status: { text: { path: "/status" }, variant: "caption" } },
+      dataModel: { metrics: { primary: "48", secondary: "17", tertiary: "8" }, status: "동기화 완료" },
+    } } });
+    subscription.unsubscribe();
+    engine.dispose();
+  });
 });

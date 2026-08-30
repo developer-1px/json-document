@@ -25,13 +25,18 @@ function renderBasicComponent(component: A2uiComponent, surface: A2uiSurfaceDocu
   if (id) next.add(id);
   const children = childIds(component.children).map((childId) => {
     const child = surface.components[childId];
-    return child ? <span className="a2ui-child" key={childId}>{renderBasicComponent(child, surface, Markdown, next)}</span> : null;
+    if (!child) return null;
+    const weight = typeof child.weight === "number" && child.weight > 0 ? child.weight : undefined;
+    return <span className={weight ? "a2ui-child weighted" : "a2ui-child"} key={childId} style={weight ? { flexGrow: weight } : undefined}>{renderBasicComponent(child, surface, Markdown, next)}</span>;
   });
   const text = String(boundValue(surface.dataModel, component.text) ?? "");
 
   if (component.component === "Column") return <div className="a2ui-column">{children}</div>;
   if (component.component === "Row") return <div className="a2ui-row">{children}</div>;
-  if (component.component === "Card") return <section className="a2ui-card">{children}</section>;
+  if (component.component === "Card") {
+    const child = typeof component.child === "string" ? surface.components[component.child] : undefined;
+    return <section className="a2ui-card">{child ? renderBasicComponent(child, surface, Markdown, next) : null}</section>;
+  }
   if (component.component === "Divider") return <hr className="a2ui-divider" />;
   if (component.component === "Text") {
     const variant = typeof component.variant === "string" ? component.variant : "body";

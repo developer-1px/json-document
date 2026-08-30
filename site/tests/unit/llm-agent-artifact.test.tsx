@@ -85,7 +85,7 @@ describe("LLM Agent Artifact", () => {
 
   test("renders streamed a2ui fence as UI without exposing its JSONL", async () => {
     const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "welcome", catalogId: A2UI_BASIC_CATALOG_ID } });
-    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "welcome", components: [{ id: "root", component: "Card", children: ["title", "body"] }, { id: "title", component: "Text", text: "환영합니다", variant: "h2" }, { id: "body", component: "Text", text: "A2UI로 그린 화면입니다.", variant: "body" }] } });
+    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "welcome", components: [{ id: "root", component: "Card", child: "content" }, { id: "content", component: "Column", children: ["title", "body"] }, { id: "title", component: "Text", text: "환영합니다", variant: "h2" }, { id: "body", component: "Text", text: "A2UI로 그린 화면입니다.", variant: "body" }] } });
     vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
       ? Promise.resolve(Response.json({ threads: [] }))
       : Promise.resolve(agUiResponse("thread-a2ui", [`준비했습니다.\n\``, `\`\`a2ui\n${create}\n${components.slice(0, 50)}`, `${components.slice(50)}\n\`\`\``]))));
