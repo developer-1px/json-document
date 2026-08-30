@@ -18,16 +18,16 @@ test("Calendar app chrome fills the page without docs or workbench", async ({ pa
   await expect(page.getByRole("button", { name: "AI commands unavailable" })).toBeDisabled();
 
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("button", { name: "Open navigation" })).toBeVisible();
-  await expect(navigation.getByRole("group", { name: "Hands" })).toHaveCount(0);
-
-  await navigation.getByRole("button", { name: "Open navigation" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" })).toBeVisible();
   await expect(navigation.getByRole("button", { name: "Collapse navigation" })).toBeVisible();
 
   await navigation.getByRole("button", { name: "Collapse navigation" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" })).toHaveCount(0);
+  await expect(navigation.getByRole("button", { name: "Open navigation" })).toBeVisible();
   await expect(page.getByRole("toolbar", { name: "Calendar controls", exact: true })).toBeVisible();
+
+  await navigation.getByRole("button", { name: "Open navigation" }).click();
+  await expect(navigation.getByRole("group", { name: "Hands" })).toBeVisible();
 });
 
 test("Calendar view tabs stay on one toolbar axis across variable period labels", async ({ page }) => {
