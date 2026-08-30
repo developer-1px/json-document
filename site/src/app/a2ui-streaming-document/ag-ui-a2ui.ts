@@ -6,6 +6,8 @@ export interface AgUiA2uiAdapter {
   push(event: AGUIEvent): ReadonlyArray<A2uiMessage>;
 }
 
+export const A2UI_PROJECTION_ERROR_TEXT = "생성된 UI를 해석하지 못했습니다.";
+
 export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
   const text = new Map<string, string>();
   const roles = new Map<string, "assistant" | "developer" | "system" | "user">();
@@ -32,7 +34,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       const source = `${text.get(event.messageId) ?? ""}${event.delta}`;
       text.set(event.messageId, source);
       const projection = roles.get(event.messageId) === "assistant" ? projectA2uiFences(source) : { markdown: source, messages: [] };
-      messages.push(data(surfaceId, `/content/${event.messageId}`, projection.markdown));
+      messages.push(data(surfaceId, `/content/${event.messageId}`, visibleMarkdown(projection)));
       const consumed = projectedA2ui.get(event.messageId) ?? 0;
       messages.push(...projection.messages.slice(consumed));
       projectedA2ui.set(event.messageId, projection.messages.length);
@@ -41,7 +43,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       openText.delete(event.messageId);
       if (roles.get(event.messageId) === "assistant") {
         const projection = projectA2uiFences(text.get(event.messageId) ?? "", true);
-        messages.push(data(surfaceId, `/content/${event.messageId}`, projection.markdown));
+        messages.push(data(surfaceId, `/content/${event.messageId}`, visibleMarkdown(projection)));
         const consumed = projectedA2ui.get(event.messageId) ?? 0;
         messages.push(...projection.messages.slice(consumed));
         projectedA2ui.set(event.messageId, projection.messages.length);
@@ -84,6 +86,11 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
     }
     return messages;
   } };
+}
+
+function visibleMarkdown(projection: Readonly<{ markdown: string; errors?: ReadonlyArray<string> }>): string {
+  if (!projection.errors?.length) return projection.markdown;
+  return `${projection.markdown}${projection.markdown.endsWith("\n") || !projection.markdown ? "" : "\n\n"}${A2UI_PROJECTION_ERROR_TEXT}`;
 }
 
 function component(surfaceId: string, id: string, type: string, properties: Record<string, unknown> = {}, valuePath?: string): A2uiMessage {

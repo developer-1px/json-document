@@ -96,6 +96,48 @@ test("한 응답의 여러 surface를 각각 렌더링하고 원문 JSONL은 숨
   await expect(page.locator(".llm-agent-chat").getByText(/updateComponents/)).toHaveCount(0);
 });
 
+test("official layout, divider axis, accessibility binding을 실제 화면에 반영한다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const messages = [
+    { version: "v0.9", createSurface: { surfaceId: "official-properties", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "official-properties", components: [
+      { id: "root", component: "Row", children: ["left", "divider", "right"], justify: "spaceBetween", align: "center", accessibility: { label: { path: "/label" }, description: "비교 지표" } },
+      { id: "left", component: "Text", text: "왼쪽", accessibility: { label: "왼쪽 지표" } },
+      { id: "divider", component: "Divider", axis: "vertical" },
+      { id: "right", component: "Text", text: "오른쪽" },
+    ] } },
+    { version: "v0.9", updateDataModel: { surfaceId: "official-properties", path: "/label", value: "운영 비교" } },
+  ];
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({ body: agUiStream("thread-official", ["공식 속성입니다.\n```a2ui\n", ...messages.map((message) => `${JSON.stringify(message)}\n`), "```"]), contentType: "text/event-stream" }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("공식 속성 화면");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  const row = page.getByLabel("운영 비교");
+  await expect(row).toHaveClass(/justify-between/);
+  await expect(row).toHaveClass(/items-center/);
+  await expect(row).toHaveAttribute("aria-description", "비교 지표");
+  await expect(page.getByLabel("왼쪽 지표")).toBeVisible();
+  await expect(page.locator('[data-a2ui-axis="vertical"]')).toBeVisible();
+});
+
+test("잘못된 A2UI schema를 숨기지 않고 간결한 오류로 표시한다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const create = { version: "v0.9", createSurface: { surfaceId: "invalid-browser", catalogId } };
+  const invalid = { version: "v0.9", updateComponents: { surfaceId: "invalid-browser", components: [{ id: "root", component: "Divider", axis: "diagonal" }] } };
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({ body: agUiStream("thread-invalid", `화면입니다.\n\`\`\`a2ui\n${JSON.stringify(create)}\n${JSON.stringify(invalid)}\n\`\`\``), contentType: "text/event-stream" }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("잘못된 화면");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  await expect(page.getByRole("alert")).toHaveText("생성된 UI를 해석하지 못했습니다.");
+  await expect(page.getByText(/invalid_enum_value|diagonal/)).toHaveCount(0);
+});
+
 function agUiStream(threadId: string, text: string | ReadonlyArray<string>): string {
   const runId = "run-browser";
   const messageId = "message-browser";

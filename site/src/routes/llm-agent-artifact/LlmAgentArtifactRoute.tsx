@@ -3,7 +3,7 @@ import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { ArrowUp, Plus, Square } from "lucide-react";
 import { Command, Field } from "@interactive-os/json-document-ui-primitives-react";
 import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "./llm-agent-api";
-import { A2uiSurface, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, type A2uiStreamingDocument, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
+import { A2UI_PROJECTION_ERROR_TEXT, A2uiSurface, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, type A2uiStreamingDocument, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
 import { MarkdownContent } from "../../shared/ui/markdown-content";
 import "./llm-agent-artifact.css";
 
@@ -133,7 +133,13 @@ export function LlmAgentArtifactRoute() {
   }
 
   function pushAgUi(event: AGUIEvent) {
-    for (const message of adapterRef.current.push(event)) engine.write(`${JSON.stringify(message)}\n`);
+    for (const message of adapterRef.current.push(event)) {
+      try {
+        engine.write(`${JSON.stringify(message)}\n`);
+      } catch {
+        setError(A2UI_PROJECTION_ERROR_TEXT);
+      }
+    }
   }
 
   function loadHistory(history: ReadonlyArray<LlmAgentMessage>) {

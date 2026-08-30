@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { EventType } from "@ag-ui/core";
-import { A2UI_BASIC_CATALOG_ID, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, projectA2uiFences } from "../../src/app/a2ui-streaming-document";
+import { A2UI_BASIC_CATALOG_ID, A2UI_PROJECTION_ERROR_TEXT, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, projectA2uiFences } from "../../src/app/a2ui-streaming-document";
 
 describe("A2UI streaming document", () => {
   test("accumulates A2UI component and data deltas in json-document", () => {
@@ -134,6 +134,21 @@ describe("A2UI streaming document", () => {
     const malformed = projectA2uiFences('```a2ui\n{"version":}\n```');
     expect(malformed.messages).toHaveLength(0);
     expect(malformed.errors).toHaveLength(1);
+  });
+
+  test("turns malformed fenced A2UI into a visible assistant fallback without exposing JSON", () => {
+    const adapter = createAgUiA2uiAdapter("chat-error");
+    const engine = createA2uiStreamingDocumentEngine();
+    const events = [
+      { type: EventType.TEXT_MESSAGE_START, messageId: "broken", role: "assistant" as const },
+      { type: EventType.TEXT_MESSAGE_CONTENT, messageId: "broken", delta: '화면을 만들었습니다.\n```a2ui\n{"version":"v0.9","operation":{"create":{}}}\n```' },
+      { type: EventType.TEXT_MESSAGE_END, messageId: "broken" },
+    ];
+    events.flatMap((event) => adapter.push(event)).forEach((message) => engine.dispatch(message));
+
+    expect(engine.document.value).toMatchObject({ surfaces: { "chat-error": { dataModel: { content: { broken: `화면을 만들었습니다.\n${A2UI_PROJECTION_ERROR_TEXT}` } } } } });
+    expect(JSON.stringify(engine.document.value)).not.toContain('"operation"');
+    engine.dispose();
   });
 
   test("streams fenced A2UI messages from the assistant into the canonical document", () => {

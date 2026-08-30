@@ -15,10 +15,10 @@ describe("A2UI Basic Catalog contract", () => {
     expect(A2UI_BASIC_COMPONENT_NAMES).toEqual(["Text", "Column", "Row", "Card", "Divider"]);
     const fixtures = [
       { id: "text", component: "Text", text: "본문", variant: "body" },
-      { id: "column", component: "Column", children: ["text"] },
-      { id: "row", component: "Row", children: ["text"] },
+      { id: "column", component: "Column", children: ["text"], justify: "spaceBetween", align: "stretch" },
+      { id: "row", component: "Row", children: ["text"], justify: "center", align: "end" },
       { id: "card", component: "Card", child: "text" },
-      { id: "divider", component: "Divider" },
+      { id: "divider", component: "Divider", axis: "vertical" },
     ];
     for (const fixture of fixtures) expect(() => validateBasicCatalogComponent(fixture)).not.toThrow();
   });
@@ -66,6 +66,21 @@ describe("A2UI Basic Catalog renderer", () => {
     expect(container.querySelector('[data-a2ui-component="Divider"]')).toBeTruthy();
     const weighted = [...container.querySelectorAll<HTMLElement>('[data-weighted="true"]')];
     expect(weighted.map((element) => element.style.flexGrow)).toEqual(["2", "1"]);
+  });
+
+  test("maps official layout, divider axis, and bound accessibility properties", () => {
+    const { container } = renderSurface({
+      root: { id: "root", component: "Row", children: ["copy", "divider"], justify: "spaceBetween", align: "center", accessibility: { label: { path: "/labels/row" }, description: "지표 행 설명" } },
+      copy: { id: "copy", component: "Text", text: "내용", accessibility: { label: "지표 값" } },
+      divider: { id: "divider", component: "Divider", axis: "vertical" },
+    }, { labels: { row: "지표 행" } });
+
+    const row = screen.getByLabelText("지표 행");
+    expect(row.className).toContain("justify-between");
+    expect(row.className).toContain("items-center");
+    expect(row.getAttribute("aria-description")).toBe("지표 행 설명");
+    expect(screen.getByLabelText("지표 값")).toBeTruthy();
+    expect(container.querySelector('[data-a2ui-axis="vertical"]')).toBeTruthy();
   });
 
   test("ignores missing children and terminates cyclic component references", () => {

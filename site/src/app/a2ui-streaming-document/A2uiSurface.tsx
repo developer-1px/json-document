@@ -31,23 +31,25 @@ function renderBasicComponent(component: A2uiComponent, surface: A2uiSurfaceDocu
     return <span className={weight ? ui.a2ui.weightedChild : ui.a2ui.child} data-a2ui-child data-weighted={weight ? "true" : undefined} key={childId} style={weight ? { flexGrow: weight } : undefined}>{renderBasicComponent(child, surface, Markdown, next)}</span>;
   });
   const text = String(boundValue(surface.dataModel, component.text) ?? "");
+  const accessibility = accessibilityProps(surface.dataModel, component.accessibility);
+  const layout = classes(layoutValue(ui.a2ui.justify, component.justify), layoutValue(ui.a2ui.align, component.align));
 
-  if (component.component === "Column") return <div className={ui.a2ui.column} data-a2ui-component="Column">{children}</div>;
-  if (component.component === "Row") return <div className={ui.a2ui.row} data-a2ui-component="Row">{children}</div>;
+  if (component.component === "Column") return <div {...accessibility} className={classes(ui.a2ui.column, layout)} data-a2ui-component="Column">{children}</div>;
+  if (component.component === "Row") return <div {...accessibility} className={classes(ui.a2ui.row, layout)} data-a2ui-component="Row">{children}</div>;
   if (component.component === "Card") {
     const child = typeof component.child === "string" ? surface.components[component.child] : undefined;
-    return <section className={classes(ui.surface.raised, ui.a2ui.card)} data-a2ui-component="Card">{child ? renderBasicComponent(child, surface, Markdown, next) : null}</section>;
+    return <section {...accessibility} className={classes(ui.surface.raised, ui.a2ui.card)} data-a2ui-component="Card">{child ? renderBasicComponent(child, surface, Markdown, next) : null}</section>;
   }
-  if (component.component === "Divider") return <hr className={ui.a2ui.divider} data-a2ui-component="Divider" />;
+  if (component.component === "Divider") return <hr {...accessibility} className={component.axis === "vertical" ? ui.a2ui.divider.vertical : ui.a2ui.divider.horizontal} data-a2ui-axis={component.axis === "vertical" ? "vertical" : "horizontal"} data-a2ui-component="Divider" />;
   if (component.component === "Text") {
     const variant = typeof component.variant === "string" ? component.variant : "body";
-    if (variant === "h1") return <h1 className={classes(ui.text.title, ui.a2ui.text)}>{text}</h1>;
-    if (variant === "h2") return <h2 className={classes(ui.text.heading, ui.a2ui.text)}>{text}</h2>;
-    if (variant === "h3") return <h3 className={classes(ui.text.heading, ui.a2ui.text)}>{text}</h3>;
-    if (variant === "h4") return <h4 className={classes(ui.text.label, ui.a2ui.text)}>{text}</h4>;
-    if (variant === "h5") return <h5 className={classes(ui.text.label, ui.a2ui.text)}>{text}</h5>;
-    if (variant === "caption") return <small className={ui.text.meta}>{text}</small>;
-    return <div className={ui.text.body}><Markdown content={text} /></div>;
+    if (variant === "h1") return <h1 {...accessibility} className={classes(ui.text.title, ui.a2ui.text)}>{text}</h1>;
+    if (variant === "h2") return <h2 {...accessibility} className={classes(ui.text.heading, ui.a2ui.text)}>{text}</h2>;
+    if (variant === "h3") return <h3 {...accessibility} className={classes(ui.text.heading, ui.a2ui.text)}>{text}</h3>;
+    if (variant === "h4") return <h4 {...accessibility} className={classes(ui.text.label, ui.a2ui.text)}>{text}</h4>;
+    if (variant === "h5") return <h5 {...accessibility} className={classes(ui.text.label, ui.a2ui.text)}>{text}</h5>;
+    if (variant === "caption") return <small {...accessibility} className={ui.text.meta}>{text}</small>;
+    return <div {...accessibility} className={ui.text.body}><Markdown content={text} /></div>;
   }
   return null;
 }
@@ -72,4 +74,19 @@ function childIds(value: unknown): ReadonlyArray<string> {
 function boundValue(dataModel: unknown, binding: unknown): unknown {
   if (!binding || typeof binding !== "object" || !("path" in binding) || typeof binding.path !== "string") return binding;
   return binding.path.split("/").slice(1).reduce<unknown>((value, segment) => value && typeof value === "object" ? (value as Record<string, unknown>)[segment] : undefined, dataModel);
+}
+
+function layoutValue(values: Readonly<Record<string, string>>, value: unknown): string | undefined {
+  return typeof value === "string" ? values[value] : undefined;
+}
+
+function accessibilityProps(dataModel: unknown, value: unknown): Readonly<{ "aria-label"?: string; "aria-description"?: string }> {
+  if (!value || typeof value !== "object") return {};
+  const accessibility = value as Record<string, unknown>;
+  const label = boundValue(dataModel, accessibility.label);
+  const description = boundValue(dataModel, accessibility.description);
+  return {
+    "aria-label": typeof label === "string" ? label : undefined,
+    "aria-description": typeof description === "string" ? description : undefined,
+  };
 }

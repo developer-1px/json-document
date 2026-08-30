@@ -64,7 +64,20 @@ export const ui = {
     child: "contents",
     weightedChild: "block min-w-0 basis-0",
     card: "p-4",
-    divider: "my-1 w-full border-0 border-t border-line-subtle/70",
+    justify: {
+      start: "justify-start",
+      center: "justify-center",
+      end: "justify-end",
+      spaceBetween: "justify-between",
+      spaceAround: "justify-around",
+      spaceEvenly: "justify-evenly",
+      stretch: "justify-stretch",
+    },
+    align: { start: "items-start", center: "items-center", end: "items-end", stretch: "items-stretch" },
+    divider: {
+      horizontal: "my-1 w-full border-0 border-t border-line-subtle/70",
+      vertical: "mx-1 min-h-6 w-0 self-stretch border-0 border-l border-line-subtle/70",
+    },
     text: "m-0 tracking-tight",
   },
   product: {

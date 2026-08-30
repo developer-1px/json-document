@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { EventType } from "@ag-ui/core";
 import { EventEncoder } from "@ag-ui/encoder";
 import { LlmAgentArtifactRoute } from "../../src/routes/llm-agent-artifact/LlmAgentArtifactRoute";
-import { A2UI_BASIC_CATALOG_ID } from "../../src/app/a2ui-streaming-document";
+import { A2UI_BASIC_CATALOG_ID, A2UI_PROJECTION_ERROR_TEXT } from "../../src/app/a2ui-streaming-document";
 
 afterEach(() => {
   cleanup();
@@ -115,6 +115,21 @@ describe("LLM Agent Artifact", () => {
     await waitFor(() => expect(screen.getByRole("heading", { name: "복원된 화면" })).toBeTruthy());
     expect(screen.getByText("기록입니다.")).toBeTruthy();
     expect(screen.queryByText(/createSurface/)).toBeNull();
+  });
+
+  test("shows a concise error when an official component schema is violated", async () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "invalid-ui", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const invalid = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "invalid-ui", components: [{ id: "root", component: "Divider", axis: "diagonal" }] } });
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
+      ? Promise.resolve(Response.json({ threads: [] }))
+      : Promise.resolve(agUiResponse("thread-invalid", `화면입니다.\n\`\`\`a2ui\n${create}\n${invalid}\n\`\`\``))));
+    render(<LlmAgentArtifactRoute />);
+
+    fireEvent.change(screen.getByLabelText("메시지"), { target: { value: "잘못된 UI" } });
+    fireEvent.click(screen.getByRole("button", { name: "전송" }));
+
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(A2UI_PROJECTION_ERROR_TEXT));
+    expect(screen.queryByText(/invalid_union|unrecognized_keys|align/)).toBeNull();
   });
 });
 
