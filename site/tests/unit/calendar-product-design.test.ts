@@ -65,13 +65,13 @@ describe("calendar product design", () => {
   test("details editor aligns popup fields with the canonical product field grammar", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const source = readFileSync(
-      path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"),
+      path.resolve(siteRoot, "../packages/json-document-calendar/src/calendar-event-inspector.tsx"),
       "utf8",
     );
     expect(css).toContain('[data-ui-control="choice"][data-ui-presentation="popup"] > button[aria-haspopup="listbox"]');
     expect(css).toContain('[data-ui-control="choice"][data-ui-presentation="popup"] > [role="listbox"]');
-    expect(source).toContain('<span className={ui.text.label}>Calendar</span>');
-    expect(source).toContain('<span className={ui.text.label}>Repeat</span>');
+    expect(source).toContain("<InspectorChoiceField classNames={props.classNames} label={props.labels.calendar}>");
+    expect(source).toContain("<InspectorChoiceField classNames={props.classNames} label={props.labels.repeat}>");
     expect(styles.calendarToggle()).toContain("justify-start");
     expect(styles.calendarToggle()).toContain("text-left");
   });
