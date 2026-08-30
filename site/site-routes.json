@@ -624,6 +624,13 @@
     "sidebar": false
   },
   {
+    "path": "/demo/llm-agent-chat",
+    "label": "LLM Agent Hand",
+    "title": "LLM Agent Hand - json-document",
+    "description": "Canonical Composer를 로컬 Codex app-server에 연결해 실제 agent turn을 스트리밍하는 Hand입니다.",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/mention",
     "label": "Mention",
     "title": "Mention Hands - json-document",

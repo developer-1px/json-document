@@ -7,11 +7,11 @@ const registryPath = join(sourceRoot, "app/live-demo-registry.tsx");
 const registry = readFileSync(registryPath, "utf8");
 const liveDemoPaths = [...registry.matchAll(/^\s*"([^"]+)": demo\(/gm)].map((match) => match[1]);
 
-if (liveDemoPaths.length !== 39) {
-  throw new Error(`Live Demo 감사 집합이 39개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
+if (liveDemoPaths.length !== 40) {
+  throw new Error(`Live Demo 감사 집합이 40개에서 ${liveDemoPaths.length}개로 바뀌었습니다. 새 경로의 control 분류를 이 guard와 함께 갱신하세요.`);
 }
 
-const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];
+const roots = [join(sourceRoot, "routes"), join(sourceRoot, "shared/composer"), join(sourceRoot, "shared/demo-workbench"), join(sourceRoot, "shared/ui")];
 const files = roots.flatMap(walk).filter((file) => extname(file) === ".tsx" && !file.includes("/routes/docs/"));
 const findings = [];
 const counts = { command: 0, toggle: 0, choice: 0, tabs: 0, disclosure: 0, menu: 0, dragHandle: 0, resizeHandle: 0, controlHandle: 0 };

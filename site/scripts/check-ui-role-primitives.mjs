@@ -34,13 +34,13 @@ for (const source of databaseHands) {
 }
 
 const nativeControlBoundaries = new Map([
-  ["site/src/routes/composer-demo/ComposerDemoRoute.tsx", 1],
+  ["site/src/shared/composer/ComposerDemo.tsx", 1],
   ["site/src/routes/connectors/react-hook-form/ReactHookFormConnectorLab.tsx", 3],
   ["site/src/routes/connectors/react/ReactConnectorLab.tsx", 1],
   ["site/src/routes/connectors/tanstack-table/TanStackTableConnectorLab.tsx", 1],
 ]);
 let nativeControlCount = 0;
-for (const absolutePath of globSync(resolve(root, "site/src/routes/**/*.tsx"))) {
+for (const absolutePath of globSync(resolve(root, "site/src/{routes,shared/composer}/**/*.tsx"))) {
   const path = absolutePath.slice(root.length + 1);
   if (path.includes("/calendar-demo/") || path.includes("/ui-primitives-catalog/")) continue;
   const source = readFileSync(absolutePath, "utf8");

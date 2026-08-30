@@ -38,6 +38,7 @@ import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/databa
 import { Route as PageDemoDateControlsRouteImport } from "./routes/_page/demo/date-controls";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
+import { Route as PageDemoLlmAgentChatRouteImport } from "./routes/_page/demo/llm-agent-chat";
 import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
 import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
@@ -300,6 +301,11 @@ const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
 const PageDemoKanbanRoute = PageDemoKanbanRouteImport.update({
   id: "/demo/kanban",
   path: "/demo/kanban",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoLlmAgentChatRoute = PageDemoLlmAgentChatRouteImport.update({
+  id: "/demo/llm-agent-chat",
+  path: "/demo/llm-agent-chat",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoObjectRoute = PageDemoObjectRouteImport.update({
@@ -943,6 +949,7 @@ export interface FileRoutesByFullPath {
   "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
+  "/demo/llm-agent-chat": typeof PageDemoLlmAgentChatRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -1087,6 +1094,7 @@ export interface FileRoutesByTo {
   "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
+  "/demo/llm-agent-chat": typeof PageDemoLlmAgentChatRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
@@ -1233,6 +1241,7 @@ export interface FileRoutesById {
   "/_page/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
+  "/_page/demo/llm-agent-chat": typeof PageDemoLlmAgentChatRoute;
   "/_page/demo/object": typeof PageDemoObjectRoute;
   "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
@@ -1379,6 +1388,7 @@ export interface FileRouteTypes {
     | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
+    | "/demo/llm-agent-chat"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -1523,6 +1533,7 @@ export interface FileRouteTypes {
     | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
+    | "/demo/llm-agent-chat"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
@@ -1668,6 +1679,7 @@ export interface FileRouteTypes {
     | "/_page/demo/date-controls"
     | "/_page/demo/history"
     | "/_page/demo/kanban"
+    | "/_page/demo/llm-agent-chat"
     | "/_page/demo/object"
     | "/_page/demo/order"
     | "/_page/demo/selection"
@@ -1995,6 +2007,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/kanban";
       fullPath: "/demo/kanban";
       preLoaderRoute: typeof PageDemoKanbanRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/llm-agent-chat": {
+      id: "/_page/demo/llm-agent-chat";
+      path: "/demo/llm-agent-chat";
+      fullPath: "/demo/llm-agent-chat";
+      preLoaderRoute: typeof PageDemoLlmAgentChatRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/object": {
@@ -2889,6 +2908,7 @@ interface PageRouteChildren {
   PageDemoDateControlsRoute: typeof PageDemoDateControlsRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
+  PageDemoLlmAgentChatRoute: typeof PageDemoLlmAgentChatRoute;
   PageDemoObjectRoute: typeof PageDemoObjectRoute;
   PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
@@ -3006,6 +3026,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDemoDateControlsRoute: PageDemoDateControlsRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,
+  PageDemoLlmAgentChatRoute: PageDemoLlmAgentChatRoute,
   PageDemoObjectRoute: PageDemoObjectRoute,
   PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
