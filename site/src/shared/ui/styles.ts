@@ -6,7 +6,7 @@ export const ui = {
     page: "min-h-full bg-background-canvas px-layout-page pb-8 pt-4 lg:px-layout-page-wide",
     content: "mx-auto max-w-6xl",
     navigation: "bg-background-subtle text-sm",
-    navigationRail: "flex h-screen w-12 shrink-0 flex-col items-center gap-2 border-r border-line-subtle/40 py-2",
+    navigationRail: "flex h-screen w-12 shrink-0 flex-col items-center gap-[5px] border-r border-line-subtle/40 py-2",
     brand: "font-mono text-foreground-strong no-underline hover:text-foreground-default",
   },
   nav: {
@@ -16,6 +16,9 @@ export const ui = {
     groupActive: "border-l-2 border-l-line-accent",
     groupIdle: "border-l-2 border-l-transparent",
     chevron: "text-foreground-muted",
+    railMenu: "grid gap-3",
+    railItem: "grid h-[30px] w-8 place-items-center rounded-control text-foreground-muted no-underline transition-colors hover:bg-background-canvas hover:text-foreground-strong",
+    railSeparatedItem: "mt-[21px]",
     list: "grid content-start",
     panel: "hidden data-[open=true]:grid",
     item: "flex items-center gap-2 px-2 py-1 text-sm text-foreground-default no-underline hover:text-foreground-strong md:px-3",
