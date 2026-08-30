@@ -137,7 +137,9 @@ export function LlmAgentArtifactRoute() {
   }
 
   function loadHistory(history: ReadonlyArray<LlmAgentMessage>) {
-    if (engine.document.at(`/surfaces/${CHAT_SURFACE_ID}`).ok) engine.dispatch({ version: "v0.9", deleteSurface: { surfaceId: CHAT_SURFACE_ID } });
+    for (const existingSurfaceId of Object.keys((engine.document.value as A2uiStreamingDocument).surfaces)) {
+      engine.dispatch({ version: "v0.9", deleteSurface: { surfaceId: existingSurfaceId } });
+    }
     adapterRef.current = createAgUiA2uiAdapter(CHAT_SURFACE_ID);
     for (const message of history) {
       pushAgUi({ type: EventType.TEXT_MESSAGE_START, messageId: message.id, role: message.role });
@@ -157,7 +159,10 @@ export function LlmAgentArtifactRoute() {
       <div className="llm-agent-main">
       <header className="llm-agent-app-header"><strong>LLM Agent</strong><span>{sessionId ? sessionId.slice(0, 8) : "Local Codex"}</span></header>
       <section className="llm-agent-chat" aria-busy={historyPending} aria-label="대화" ref={chatRef}>
-        {historyPending ? <p className="llm-agent-state">대화를 불러오는 중…</p> : !document.surfaces[CHAT_SURFACE_ID] ? <div className="llm-agent-empty"><h1>무엇을 도와드릴까요?</h1><p>로컬 Codex와 대화를 시작하세요.</p></div> : <A2uiSurface document={document} markdown={MarkdownContent} surfaceId={CHAT_SURFACE_ID} />}
+        {historyPending ? <p className="llm-agent-state">대화를 불러오는 중…</p> : !document.surfaces[CHAT_SURFACE_ID] ? <div className="llm-agent-empty"><h1>무엇을 도와드릴까요?</h1><p>로컬 Codex와 대화를 시작하세요.</p></div> : <>
+          <A2uiSurface document={document} markdown={MarkdownContent} surfaceId={CHAT_SURFACE_ID} />
+          {Object.keys(document.surfaces).filter((id) => id !== CHAT_SURFACE_ID).map((id) => <A2uiSurface document={document} key={id} markdown={MarkdownContent} surfaceId={id} />)}
+        </>}
       </section>
       <form className="llm-agent-input" onSubmit={submit}>
         <Field controlRef={inputRef} multiline label="메시지" placeholder="메시지를 입력하세요" value={input} onValueChange={setInput} onKeyDown={handleKeyDown} rows={1} />

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { EventType } from "@ag-ui/core";
 import { EventEncoder } from "@ag-ui/encoder";
 import { LlmAgentArtifactRoute } from "../../src/routes/llm-agent-artifact/LlmAgentArtifactRoute";
+import { A2UI_BASIC_CATALOG_ID } from "../../src/app/a2ui-streaming-document";
 
 afterEach(() => {
   cleanup();
@@ -81,16 +82,33 @@ describe("LLM Agent Artifact", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "전송" })).toBeTruthy());
     expect(screen.queryByRole("alert")).toBeNull();
   });
+
+  test("renders streamed a2ui fence as UI without exposing its JSONL", async () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "welcome", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "welcome", components: [{ id: "root", component: "Card", children: ["title", "body"] }, { id: "title", component: "Text", text: "환영합니다", variant: "h2" }, { id: "body", component: "Text", text: "A2UI로 그린 화면입니다.", variant: "body" }] } });
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => String(input).endsWith("/sessions")
+      ? Promise.resolve(Response.json({ threads: [] }))
+      : Promise.resolve(agUiResponse("thread-a2ui", [`준비했습니다.\n\``, `\`\`a2ui\n${create}\n${components.slice(0, 50)}`, `${components.slice(50)}\n\`\`\``]))));
+    render(<LlmAgentArtifactRoute />);
+
+    fireEvent.change(screen.getByLabelText("메시지"), { target: { value: "환영 UI를 만들어줘" } });
+    fireEvent.click(screen.getByRole("button", { name: "전송" }));
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "환영합니다" })).toBeTruthy());
+    expect(screen.getByText("A2UI로 그린 화면입니다.")).toBeTruthy();
+    expect(screen.queryByText(/createSurface/)).toBeNull();
+    expect(screen.queryByText(/```a2ui/)).toBeNull();
+  });
 });
 
-function agUiResponse(threadId: string, content: string) {
+function agUiResponse(threadId: string, content: string | ReadonlyArray<string>) {
   const encoder = new EventEncoder();
   const runId = "run-test";
   const messageId = "message-test";
   return new Response([
     { type: EventType.RUN_STARTED, threadId, runId },
     { type: EventType.TEXT_MESSAGE_START, messageId, role: "assistant" },
-    { type: EventType.TEXT_MESSAGE_CONTENT, messageId, delta: content },
+    ...(typeof content === "string" ? [content] : content).map((delta) => ({ type: EventType.TEXT_MESSAGE_CONTENT, messageId, delta })),
     { type: EventType.TEXT_MESSAGE_END, messageId },
     { type: EventType.RUN_FINISHED, threadId, runId },
   ].map((event) => encoder.encodeSSE(event)).join(""), { headers: { "Content-Type": "text/event-stream" } });

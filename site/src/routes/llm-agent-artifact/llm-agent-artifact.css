@@ -20,6 +20,17 @@
 .llm-agent-message.assistant { width: 100%; padding: 22px 0 30px; }
 .llm-agent-message.user { width: fit-content; max-width: min(70%, 36rem); margin: 12px 0 10px auto; padding: 10px 16px; border: 1px solid rgb(var(--color-border-subtle) / .55); border-radius: calc(var(--radius-surface) * 2); background: rgb(var(--color-foreground-strong) / .08); color: rgb(var(--color-foreground-strong)); }
 .llm-agent-message.user [data-markdown-renderer] { display: block; }
+.a2ui-generated-surface { margin: 0 0 30px; }
+.a2ui-column { display: grid; gap: 12px; }
+.a2ui-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+.a2ui-child { display: contents; }
+.a2ui-card { padding: 18px; border-radius: var(--radius-surface); background: var(--color-background-subtle); }
+.a2ui-divider { width: 100%; margin: 4px 0; border: 0; border-top: 1px solid var(--color-border-subtle); }
+.a2ui-generated-surface h1, .a2ui-generated-surface h2, .a2ui-generated-surface h3 { margin: 0; letter-spacing: -.025em; }
+.a2ui-generated-surface h1 { font-size: 28px; }
+.a2ui-generated-surface h2 { font-size: 22px; }
+.a2ui-generated-surface h3 { font-size: 17px; }
+.a2ui-generated-surface small { color: var(--color-foreground-muted); }
 .llm-agent-input { display: flex; width: min(768px, calc(100% - 32px)); align-self: center; gap: 8px; margin: 0 auto 20px; padding: 10px 10px 10px 18px; border: 1px solid var(--color-border-subtle); border-radius: calc(var(--radius-surface) * 2.4); background: var(--color-background-canvas); box-shadow: var(--shadow-surface); }
 .llm-agent-input textarea { min-height: 28px; flex: 1; resize: none; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 28px; }
 .llm-agent-input button { display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: var(--radius-control); }

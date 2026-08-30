@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { EventType } from "@ag-ui/core";
-import { createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter } from "../../src/app/a2ui-streaming-document";
+import { A2UI_BASIC_CATALOG_ID, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, projectA2uiFences } from "../../src/app/a2ui-streaming-document";
 
 describe("A2UI streaming document", () => {
   test("accumulates A2UI component and data deltas in json-document", () => {
@@ -79,6 +79,40 @@ describe("A2UI streaming document", () => {
       components: { partial: { component: "Markdown", streaming: false } },
       dataModel: { content: { partial: "작성 중" }, tools: { "tool-running": { status: "error" } } },
     } } });
+    engine.dispose();
+  });
+
+  test("projects only complete A2UI JSONL lines and hides the fence from Markdown", () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "weather", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "weather", components: [{ id: "root", component: "Column", children: ["title"] }, { id: "title", component: "Text", text: "오늘의 날씨", variant: "h2" }] } });
+
+    const partial = projectA2uiFences(`화면을 만들었습니다.\n\`\`\`a2ui\n${create}\n${components.slice(0, 30)}`);
+    expect(partial.markdown).toBe("화면을 만들었습니다.\n");
+    expect(partial.messages).toHaveLength(1);
+
+    const complete = projectA2uiFences(`화면을 만들었습니다.\n\`\`\`a2ui\n${create}\n${components}\n\`\`\``);
+    expect(complete.messages).toHaveLength(2);
+    expect(complete.markdown).not.toContain("a2ui");
+    expect(complete.markdown).not.toContain("createSurface");
+  });
+
+  test("streams fenced A2UI messages from the assistant into the canonical document", () => {
+    const adapter = createAgUiA2uiAdapter("chat");
+    const engine = createA2uiStreamingDocumentEngine();
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "profile", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "profile", components: [{ id: "root", component: "Column", children: ["title"] }, { id: "title", component: "Text", text: "프로필", variant: "h2" }] } });
+    const events = [
+      { type: EventType.TEXT_MESSAGE_START, messageId: "answer", role: "assistant" as const },
+      { type: EventType.TEXT_MESSAGE_CONTENT, messageId: "answer", delta: `준비했습니다.\n\`\`\`a2ui\n${create}\n${components.slice(0, 20)}` },
+      { type: EventType.TEXT_MESSAGE_CONTENT, messageId: "answer", delta: `${components.slice(20)}\n\`\`\`` },
+      { type: EventType.TEXT_MESSAGE_END, messageId: "answer" },
+    ];
+    events.flatMap((event) => adapter.push(event)).forEach((message) => engine.dispatch(message));
+
+    expect(engine.document.value).toMatchObject({ surfaces: {
+      chat: { dataModel: { content: { answer: "준비했습니다.\n" } } },
+      profile: { catalogId: A2UI_BASIC_CATALOG_ID, components: { title: { text: "프로필" } } },
+    } });
     engine.dispose();
   });
 });

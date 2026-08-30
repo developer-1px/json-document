@@ -1,5 +1,6 @@
 import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { HANDS_CATALOG_ID, type A2uiMessage } from "./a2ui-streaming-document";
+import { projectA2uiFences } from "./a2ui-fence";
 
 export interface AgUiA2uiAdapter {
   push(event: AGUIEvent): ReadonlyArray<A2uiMessage>;
@@ -11,6 +12,7 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
   const toolArguments = new Map<string, string>();
   const openText = new Set<string>();
   const openTools = new Set<string>();
+  const projectedA2ui = new Map<string, number>();
   let created = false;
   return { push(event) {
     const messages: A2uiMessage[] = [];
@@ -27,12 +29,23 @@ export function createAgUiA2uiAdapter(surfaceId: string): AgUiA2uiAdapter {
       messages.push(component(surfaceId, event.messageId, "Markdown", { role: event.role, streaming: true }));
     }
     if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
-      const value = `${text.get(event.messageId) ?? ""}${event.delta}`;
-      text.set(event.messageId, value);
-      messages.push(data(surfaceId, `/content/${event.messageId}`, value));
+      const source = `${text.get(event.messageId) ?? ""}${event.delta}`;
+      text.set(event.messageId, source);
+      const projection = roles.get(event.messageId) === "assistant" ? projectA2uiFences(source) : { markdown: source, messages: [] };
+      messages.push(data(surfaceId, `/content/${event.messageId}`, projection.markdown));
+      const consumed = projectedA2ui.get(event.messageId) ?? 0;
+      messages.push(...projection.messages.slice(consumed));
+      projectedA2ui.set(event.messageId, projection.messages.length);
     }
     if (event.type === EventType.TEXT_MESSAGE_END) {
       openText.delete(event.messageId);
+      if (roles.get(event.messageId) === "assistant") {
+        const projection = projectA2uiFences(text.get(event.messageId) ?? "", true);
+        messages.push(data(surfaceId, `/content/${event.messageId}`, projection.markdown));
+        const consumed = projectedA2ui.get(event.messageId) ?? 0;
+        messages.push(...projection.messages.slice(consumed));
+        projectedA2ui.set(event.messageId, projection.messages.length);
+      }
       messages.push(component(surfaceId, event.messageId, "Markdown", { role: roles.get(event.messageId) ?? "assistant", streaming: false }));
     }
     if (event.type === EventType.REASONING_MESSAGE_START) messages.push(component(surfaceId, event.messageId, "Reasoning"));
