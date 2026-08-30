@@ -89,3 +89,35 @@ Before adding behavior, search for the canonical responsibility and its public
 API. Before finishing a change, audit the affected Demo or Host for equivalent
 local behavior, confirm that Usage and source registration are visible on the
 site, and verify that no arbitrary implementation remains.
+
+## UI visual discipline
+
+Default to omission. Before adding or keeping a visible element, answer in
+order:
+
+1. What product meaning, action, state, or hierarchy does it communicate?
+2. Would removing it make that meaning unavailable or materially ambiguous?
+3. Is another element already communicating the same thing?
+4. Can typography, spacing, alignment, or an existing canonical primitive
+   communicate it with less visual treatment?
+
+Remove the element when its absence does not lose meaning. In particular:
+
+- Do not add a wrapper, container, or card merely to group nearby content.
+- Use a border only for a real boundary, interaction affordance, or state.
+  Icon buttons are borderless by default; preserve hover and keyboard-focus
+  feedback.
+- Use a background only to distinguish a meaningful surface or state, and a
+  shadow only when actual elevation or overlay position must be communicated.
+- Do not add a role label when placement and presentation already make the
+  role unambiguous.
+- Do not express the same distinction repeatedly through text, icon, border,
+  background, and shape. Keep the smallest sufficient combination.
+- Reuse existing semantic tokens, Tailwind recipes, and canonical UI
+  primitives before introducing a new visual concept.
+- Minimize the number of alignment rules, content widths, radii, and surface
+  treatments on one screen.
+
+After implementing UI, audit it by subtraction: remove every treatment whose
+absence preserves information, behavior, state, hierarchy, and accessibility.
+When uncertain, present the simpler version first.
