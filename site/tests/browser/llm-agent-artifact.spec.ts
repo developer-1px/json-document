@@ -43,6 +43,24 @@ test("a2ui fence의 JSONL을 숨기고 생성 UI로 렌더링한다", async ({ p
   await expect(page.getByText(/```a2ui/)).toHaveCount(0);
 });
 
+test("CRLF와 들여쓴 A2UI fence도 제품 스트림에서 UI로 렌더링한다", async ({ page }) => {
+  const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+  const messages = [
+    { version: "v0.9", createSurface: { surfaceId: "crlf-ui", catalogId } },
+    { version: "v0.9", updateComponents: { surfaceId: "crlf-ui", components: [{ id: "root", component: "Text", text: "CRLF 렌더링 완료", variant: "h2" }] } },
+  ];
+  const response = `설명\r\n  \`\`\`a2ui\r\n${messages.map(JSON.stringify).join("\r\n")}\r\n  \`\`\``;
+  await page.route("**/api/llm-agent/sessions", (route) => route.fulfill({ json: { threads: [] } }));
+  await page.route("**/api/llm-agent/turn", (route) => route.fulfill({ body: agUiStream("thread-crlf", [...response]), contentType: "text/event-stream" }));
+
+  await page.goto("/artifact/llm-agent");
+  await page.getByLabel("메시지").fill("CRLF UI");
+  await page.getByRole("button", { name: "전송" }).click();
+
+  await expect(page.getByRole("heading", { name: "CRLF 렌더링 완료" })).toBeVisible();
+  await expect(page.locator(".llm-agent-chat").getByText(/createSurface/)).toHaveCount(0);
+});
+
 test("여러 A2UI 메시지가 구조와 데이터를 누적·교체하고 weight 비율을 반영한다", async ({ page }) => {
   const catalogId = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
   const messages = [
