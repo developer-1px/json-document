@@ -20,7 +20,7 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   await page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true }).click();
   await page.getByRole("button", { name: "Delete", exact: true }).click();
   await expect(page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await page.keyboard.press("ControlOrMeta+z");
   await expect(page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toBeVisible();
 
   const mondayAllDay = page.locator('[data-calendar-allday-day="2026-05-25"]').first();
@@ -37,14 +37,12 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   expect(afterResize).not.toBeNull();
   expect(afterResize!.width).toBeGreaterThan(beforeResize!.width);
 
-  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Month", exact: true }).click();
   const emptyMonthDay = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
   await emptyMonthDay.dblclick();
   const month = page.getByRole("grid", { name: "Month", exact: true });
   await expect(month.getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
-  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Year", exact: true }).click();
   const may = page.getByRole("region", { name: "2026-05", exact: true });
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
@@ -52,7 +50,6 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
   await expect(page.getByRole("grid", { name: "Month", exact: true }).getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
-  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Year", exact: true }).click();
   await page.getByRole("region", { name: "2026-05", exact: true }).getByRole("button", { name: "2026-05-01", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Day", exact: true })).toBeVisible();
@@ -107,7 +104,7 @@ test("Calendar drags the selected occurrence set with one temporal delta and one
   await expect(movedFirst).toHaveAttribute("data-selected", "true");
   await expect(movedSecond).toHaveAttribute("data-selected", "true");
 
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await page.keyboard.press("ControlOrMeta+z");
   await expect(page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true })).toContainText("07:00");
   await expect(page.getByRole("button", { name: "고객사 싱크", exact: true })).toContainText("11:00");
 });
@@ -160,7 +157,6 @@ test("Calendar occurrence selection shares replace, toggle, extend, focus, and c
   await expect(first).toHaveAttribute("data-selected", "true");
   await expect(second).toHaveAttribute("data-selected", "true");
 
-  await page.getByLabel("Calendar contextual actions", { exact: true }).focus();
   await page.getByRole("radio", { name: "Month", exact: true }).click();
   const month = page.getByRole("grid", { name: "Month", exact: true });
   await expect(month.getByRole("gridcell", { name: "2026-05-25", exact: true })).toHaveAttribute("aria-selected", "true");

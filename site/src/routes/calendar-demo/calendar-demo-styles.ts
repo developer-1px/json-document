@@ -1,11 +1,12 @@
 import { tv } from "tailwind-variants";
 
-const chipSelected = "data-[preview=true]:opacity-60 data-[selected=true]:font-semibold data-[selected=true]:text-foreground-strong data-[selected=true]:ring-1 data-[selected=true]:ring-line-strong/30 data-[primary=true]:ring-2 data-[primary=true]:ring-line-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong";
+const chipSelected = "data-[preview=true]:opacity-60 data-[selected=true]:font-semibold data-[selected=true]:text-foreground-strong data-[selected=true]:ring-1 data-[selected=true]:ring-line-strong/40 data-[primary=true]:z-10 data-[primary=true]:ring-2 data-[primary=true]:ring-line-strong data-[primary=true]:shadow-overlay focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong";
 const chipRail = "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-foreground-default data-[calendar-color=accent]:before:bg-background-accent";
-const chipFill = "bg-background-subtle text-foreground-strong data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent hover:bg-background-subtle data-[calendar-color=accent]:hover:bg-background-accent-subtle";
+const chipFill = "bg-background-subtle text-foreground-strong transition-[background-color,box-shadow,color] data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent hover:bg-background-canvas hover:shadow-surface data-[calendar-color=accent]:hover:bg-background-accent-subtle";
 
 export const calendarDemoRecipe = tv({
   slots: {
+    shell: "relative isolate overflow-hidden bg-background-canvas",
     allDayEvent: `h-full w-full rounded-control border-0 px-2 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
     hourRule: "absolute inset-x-0 border-t border-line-subtle/15",
     timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail} ${chipSelected}`,
@@ -23,9 +24,10 @@ export const calendarDemoRecipe = tv({
     weekHead: "flex flex-col items-center gap-0.5 px-1 py-2 text-center",
     weekCell: "relative data-[selected=true]:bg-background-accent-subtle data-[selected=true]:ring-2 data-[selected=true]:ring-inset data-[selected=true]:ring-line-strong",
     selectedSlot: "pointer-events-none absolute inset-x-0 z-10 rounded-control bg-background-accent-subtle ring-2 ring-inset ring-line-strong",
-    resizeEdge: "absolute z-20 appearance-none border-0 bg-transparent p-0 shadow-none",
+    resizeEdge: "absolute z-20 appearance-none border-0 bg-transparent p-0 shadow-none after:absolute after:left-1/2 after:top-1/2 after:h-1 after:w-10 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-foreground-strong after:shadow-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong",
+    resizeEdgeVertical: "absolute z-20 appearance-none border-0 bg-transparent p-0 shadow-none after:absolute after:left-1/2 after:top-1/2 after:h-4 after:w-1 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-foreground-strong after:shadow-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong",
     period: "px-1 text-sm font-medium text-foreground-strong",
-    contextualActions: "relative z-40 flex min-h-8 min-w-8 items-center justify-end gap-1 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
+    todayAction: "border-0 bg-transparent px-2 shadow-none hover:border-0 hover:bg-background-subtle",
     contextualSidebar: "relative z-30 w-20 shrink-0 rounded-control px-1 py-2 outline-none transition-[width] focus-within:w-44 hover:w-44 focus-visible:ring-2 focus-visible:ring-line-accent/25",
     sidebarHint: "block text-center text-overline text-foreground-muted [writing-mode:vertical-rl]",
 
@@ -37,13 +39,23 @@ export const calendarDemoRecipe = tv({
     todayMark: "font-semibold text-foreground-strong",
     dayNumber: "inline-flex size-7 items-center justify-center text-sm font-medium",
     sidebar: "flex w-44 shrink-0 flex-col gap-3 overflow-auto pr-1",
-    inspector: "z-40 flex w-72 min-w-0 flex-col gap-2 overflow-auto p-3",
+    inspector: "z-40 flex w-80 min-w-0 flex-col gap-3 overflow-auto border border-line-subtle/60 p-3.5 shadow-overlay",
     field: "grid gap-1",
-    inspectorTitle: "px-0 text-base font-semibold",
+    inspectorHeader: "flex min-w-0 items-start gap-2",
+    inspectorTitle: "m-0 min-w-0 flex-1 truncate px-0 text-base font-semibold tracking-tight text-foreground-strong",
+    inspectorActions: "flex shrink-0 items-center gap-0.5 opacity-40 transition-opacity hover:opacity-100 focus-within:opacity-100 [&_[data-ui-control=command]]:size-7 [&_[data-ui-control=command]]:border-0 [&_[data-ui-control=command]]:bg-transparent [&_[data-ui-control=command]]:p-0 [&_[data-ui-control=command]]:shadow-none",
+    eventSummary: "grid gap-2 border-t border-line-subtle/40 pt-3 text-xs text-foreground-muted [&_p]:m-0 [&_p]:flex [&_p]:items-center [&_p]:gap-2 [&_svg]:shrink-0 [&_svg]:text-foreground-muted",
+    detailsEditor: "grid gap-2 border-t border-line-subtle/40 pt-3",
     calendarToggle: "group w-full justify-start gap-2 border-0 bg-transparent px-1 shadow-none hover:border-0 hover:bg-transparent aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",
     calendarSwatch: "size-2.5 shrink-0 rounded-full bg-foreground-muted opacity-40 data-[calendar-color=accent]:bg-background-accent group-aria-pressed:opacity-100",
     eventTime: "truncate text-overline font-normal text-foreground-muted",
     creationTimeHint: "pointer-events-none absolute inset-x-0 z-20 flex items-center gap-1 border-t border-line-accent text-overline text-foreground-accent",
     hourLabel: "absolute right-1 whitespace-nowrap text-right text-overline tabular-nums leading-none text-foreground-muted",
+    composerDock: "bottom-4 left-1/2 z-30 flex w-[min(42rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-surface border border-line-subtle/70 bg-background-canvas/95 p-2 pl-3 shadow-overlay backdrop-blur",
+    composerDockFixed: "fixed",
+    composerDockEmbedded: "absolute",
+    composerSpark: "shrink-0 text-foreground-accent",
+    composerInput: "min-w-0 flex-1 border-0 bg-transparent px-1 py-2 text-sm text-foreground-muted outline-none placeholder:text-foreground-muted",
+    composerSend: "grid size-8 shrink-0 place-items-center rounded-full border-0 bg-background-subtle p-0 text-foreground-muted shadow-none disabled:bg-background-subtle disabled:text-foreground-muted",
   },
 });
