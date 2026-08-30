@@ -15,6 +15,7 @@ import {
 } from "../router";
 import { isNavBranch, rootNavRoutes, routeGroup, visibleNavChildren } from "../breadcrumb";
 import { siteLayerGroups, siteLayers } from "../site-layers";
+import { NavigationLayerIcon } from "../navigation-layer-icon";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
 export const Route = createRootRoute({
@@ -26,7 +27,7 @@ function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
   const appChrome = isAppChrome(route);
-  const [navCollapsed, setNavCollapsed] = useState(true);
+  const [navCollapsed, setNavCollapsed] = useState(false);
   const collapsed = appChrome && navCollapsed;
 
   useRouteMetadata(route);
@@ -39,10 +40,6 @@ function AppShell() {
     if (!activeGroup) return;
     setOpenGroups((current) => current.has(activeGroup) ? current : new Set([...current, activeGroup]));
   }, [activeGroup]);
-
-  useEffect(() => {
-    if (appChrome) setNavCollapsed(true);
-  }, [appChrome]);
 
   return (
     <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
@@ -57,10 +54,19 @@ function AppShell() {
           <Command label="Open navigation" onClick={() => setNavCollapsed(false)}>
             <PanelLeft aria-hidden="true" size={16} />
           </Command>
-          <ActionLink to="/" className={classes("grid size-7 place-items-center", ui.frame.brand)}>
-            <span className="sr-only">json-document</span>
-            <CatMenuMark />
-          </ActionLink>
+          <div className={ui.nav.railMenu}>
+            {siteLayers.map((layer) => (
+              <ActionLink
+                key={layer.group}
+                to={layer.path}
+                activePath={route.path}
+                className={classes(ui.nav.railItem, layer.separated ? ui.nav.railSeparatedItem : undefined, ui.nav.current)}
+              >
+                <span className="sr-only">{layer.label}</span>
+                <NavigationLayerIcon group={layer.group} />
+              </ActionLink>
+            ))}
+          </div>
         </nav>
       ) : (
       <nav
@@ -117,7 +123,10 @@ function AppShell() {
                     });
                   }}
                 >
-                  <span>{group}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <NavigationLayerIcon group={group} className="shrink-0" />
+                    <span>{group}</span>
+                  </span>
                   <span aria-hidden="true" className={classes(ui.interactive.chevron, ui.nav.chevron)}>⌄</span>
                 </DisclosureButton>
                 <ul
