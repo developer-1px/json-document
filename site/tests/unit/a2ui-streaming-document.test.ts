@@ -156,6 +156,15 @@ describe("A2UI streaming document", () => {
     expect(projection.markdown).toBe(source);
   });
 
+  test("accepts a longer Markdown closing fence and resumes visible prose", () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "long-close", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const projection = projectA2uiFences(`\`\`\`a2ui\n${create}\n\`\`\`\`\`\n이 문장은 보여야 합니다.`);
+
+    expect(projection.messages).toHaveLength(1);
+    expect(projection.errors).toHaveLength(0);
+    expect(projection.markdown).toBe("이 문장은 보여야 합니다.");
+  });
+
   test("waits for an incomplete JSONL line and reports malformed complete JSON", () => {
     const incomplete = projectA2uiFences('```a2ui\n{"version":"v0.9"');
     expect(incomplete.messages).toHaveLength(0);

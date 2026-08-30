@@ -19,7 +19,7 @@ export function projectA2uiFences(source: string, complete = false): A2uiFencePr
     const value = line.replace(/\r?\n$/, "");
     if (!inside && /^ {0,3}```a2ui\s*$/.test(value)) { inside = true; continue; }
     if (!inside && !hasNewline && partialA2uiFence(value)) continue;
-    if (inside && /^ {0,3}```\s*$/.test(value)) { inside = false; continue; }
+    if (inside && /^ {0,3}`{3,}\s*$/.test(value)) { inside = false; continue; }
     if (!inside) { markdown.push(line); continue; }
     if (!value.trim() || (!hasNewline && !complete && index === lines.length - 1)) continue;
     try {
