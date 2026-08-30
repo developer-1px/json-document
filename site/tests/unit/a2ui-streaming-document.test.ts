@@ -200,6 +200,43 @@ describe("A2UI streaming document", () => {
     expect(messages.filter((message) => "updateComponents" in message && message.updateComponents.surfaceId === "efficient")).toHaveLength(1);
   });
 
+  test("streams a large surface and repeated data changes character by character exactly once", () => {
+    const adapter = createAgUiA2uiAdapter("chat-large");
+    const components = [
+      { id: "root", component: "Column", children: Array.from({ length: 100 }, (_, index) => `item-${index}`) },
+      ...Array.from({ length: 100 }, (_, index) => ({ id: `item-${index}`, component: "Text", text: { path: `/items/${index}` } })),
+    ];
+    const protocol = [
+      { version: "v0.9", createSurface: { surfaceId: "large", catalogId: A2UI_BASIC_CATALOG_ID } },
+      { version: "v0.9", updateComponents: { surfaceId: "large", components } },
+      { version: "v0.9", updateDataModel: { surfaceId: "large", path: "/items", value: Array.from({ length: 100 }, (_, index) => `초기 ${index}`) } },
+      ...Array.from({ length: 25 }, (_, index) => ({ version: "v0.9", updateDataModel: { surfaceId: "large", path: `/items/${index}`, value: `변경 ${index}` } })),
+    ];
+    const source = `대형 화면\n\`\`\`a2ui\n${protocol.map(JSON.stringify).join("\n")}\n\`\`\``;
+    const emitted = [
+      ...adapter.push({ type: EventType.TEXT_MESSAGE_START, messageId: "large-answer", role: "assistant" }),
+      ...[...source].flatMap((delta) => adapter.push({ type: EventType.TEXT_MESSAGE_CONTENT, messageId: "large-answer", delta })),
+      ...adapter.push({ type: EventType.TEXT_MESSAGE_END, messageId: "large-answer" }),
+    ];
+    const projected = emitted.filter((message) =>
+      ("createSurface" in message && message.createSurface.surfaceId === "large")
+      || ("updateComponents" in message && message.updateComponents.surfaceId === "large")
+      || ("updateDataModel" in message && message.updateDataModel.surfaceId === "large"));
+    const engine = createA2uiStreamingDocumentEngine();
+    projected.forEach((message) => engine.dispatch(message));
+
+    expect(projected).toHaveLength(protocol.length);
+    expect(engine.document.value.surfaces.large.components).toHaveProperty("item-99");
+    const items = (engine.document.value.surfaces.large.dataModel as { items: string[] }).items;
+    const expectedItems = [
+      ...Array.from({ length: 25 }, (_, index) => `변경 ${index}`),
+      ...Array.from({ length: 75 }, (_, index) => `초기 ${index + 25}`),
+    ];
+    expect(items).toHaveLength(100);
+    expectedItems.forEach((value, index) => expect(items[index]).toBe(value));
+    engine.dispose();
+  });
+
   test("accumulates repeated component batches and replaces existing component and data values", () => {
     const engine = createA2uiStreamingDocumentEngine();
     const states: unknown[] = [];
