@@ -175,6 +175,17 @@ describe("A2UI streaming document", () => {
     expect(malformed.errors).toHaveLength(1);
   });
 
+  test("projects a final valid JSONL line when the stream ends without newline or closing fence", () => {
+    const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "abrupt-end", catalogId: A2UI_BASIC_CATALOG_ID } });
+    const source = `응답 중단\n\`\`\`a2ui\n${create}`;
+
+    expect(projectA2uiFences(source).messages).toHaveLength(0);
+    const completed = projectA2uiFences(source, true);
+    expect(completed.messages).toHaveLength(1);
+    expect(completed.errors).toHaveLength(0);
+    expect(completed.markdown).toBe("응답 중단\n");
+  });
+
   test("turns malformed fenced A2UI into a visible assistant fallback without exposing JSON", () => {
     const adapter = createAgUiA2uiAdapter("chat-error");
     const engine = createA2uiStreamingDocumentEngine();
