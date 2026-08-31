@@ -31,7 +31,7 @@ export const dateControlsDemoRecipe = tv({
     timeViewport: "grid",
     timeHourGutter: "relative overflow-hidden",
     timeViewportAnchor: "pointer-events-none absolute left-0 top-0",
-    timeHourLabel: "absolute right-1 text-xs text-foreground-muted",
+    timeHourLabel: "absolute right-1 -translate-y-1/2 text-xs text-foreground-muted",
     timeCell: "relative overflow-hidden border-l border-line-subtle",
     timeSelectedSlot: "pointer-events-none absolute inset-x-0 bg-background-subtle",
     timeHourRule: "absolute inset-x-0 border-t border-line-subtle",
