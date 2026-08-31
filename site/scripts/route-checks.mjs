@@ -1,5 +1,6 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
 const navigationGroups = new Set([
+  "Introduction",
   "JSON Document",
   "Document Types",
   "Collaboration",

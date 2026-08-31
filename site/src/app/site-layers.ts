@@ -1,7 +1,7 @@
 import { type SiteNavigationGroup } from "./page-descriptors";
 
 export type SiteSection = {
-  readonly id: "foundation" | "building-blocks" | "hands" | "artifact" | "applications" | "reference";
+  readonly id: "introduce" | "foundation" | "building-blocks" | "hands" | "artifact" | "applications" | "reference";
   readonly path: string;
   readonly label: string;
   readonly blurb: string;
@@ -11,8 +11,15 @@ export type SiteSection = {
 
 export const siteSections: ReadonlyArray<SiteSection> = [
   {
-    id: "foundation",
+    id: "introduce",
     path: "/docs",
+    label: "Introduce",
+    blurb: "Why, concepts, and how we build",
+    groups: ["Introduction"],
+  },
+  {
+    id: "foundation",
+    path: "/docs/foundation",
     label: "Foundation",
     blurb: "Values, meaning, editing, and collaboration",
     groups: ["JSON Document", "Document Types", "Editing", "Collaboration"],
@@ -35,7 +42,7 @@ export const siteSections: ReadonlyArray<SiteSection> = [
     id: "artifact",
     path: "/viewer",
     label: "Artifact",
-    blurb: "Work people and agents can continue",
+    blurb: "Editable content inside applications",
     groups: ["Artifact"],
   },
   {

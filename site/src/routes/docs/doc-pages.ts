@@ -87,6 +87,7 @@ import intentMarkdown from "../../../../docs/public/intent.md?raw";
 import objectMarkdown from "../../../../docs/public/object.md?raw";
 import orderMarkdown from "../../../../docs/public/order.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
+import foundationMarkdown from "../../../../docs/public/foundation.md?raw";
 import reactEditingMarkdown from "../../../../docs/public/react-editing.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
@@ -104,6 +105,7 @@ function docPage(path: string, source: string) {
 
 export const docPages = {
   overview: docPage("/docs", overviewMarkdown),
+  foundation: docPage("/docs/foundation", foundationMarkdown),
   howWeBuild: docPage("/docs/how-we-build", howWeBuildMarkdown),
   applications: docPage("/applications", applicationsMarkdown),
   documentTypes: docPage("/docs/document-types", documentTypesMarkdown),

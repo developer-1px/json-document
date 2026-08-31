@@ -34,18 +34,22 @@ describe("official site shell", () => {
     expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
     expect(within(screen.getByRole("navigation", { name: "Dependency map" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
+      "Introduce",
       "Foundation",
       "Building Blocks",
-      "Hands → Artifact",
+      "Hands",
+      "Artifact",
       "Applications",
     ]);
-    await user.click(nav.getByRole("button", { name: "Foundation" }));
-    expect(groupLinks(nav, "Foundation")).toEqual(expect.arrayContaining([
+    await user.click(nav.getByRole("button", { name: "Introduce" }));
+    expect(groupLinks(nav, "Introduce")).toEqual([
       "Why",
       "Concept Map",
       "How We Build",
-      "API Reference",
-      "Public API",
+    ]);
+    await user.click(nav.getByRole("button", { name: "Foundation" }));
+    expect(groupLinks(nav, "Foundation")).toEqual(expect.arrayContaining([
+      "Overview",
       "Replica",
       "Intent guide",
     ]));
@@ -60,11 +64,12 @@ describe("official site shell", () => {
       "Mention",
     ]));
     await user.click(nav.getByRole("button", { name: "Artifact" }));
-    expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet", "API · File Intake", "API · Markdown"]);
+    expect(groupLinks(nav, "Artifact")).toEqual(["Document · Presentation · Spreadsheet"]);
     await user.click(nav.getByRole("button", { name: "Applications" }));
     expect(groupLinks(nav, "Applications")).toEqual(["Overview", "Calendar", "AI Agent"]);
     expect(nav.getByRole("link", { name: "Reference" }).getAttribute("href")).toBe("/docs/api");
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
+      "Introduce",
       "Foundation",
       "Building Blocks",
       "Hands",
@@ -110,7 +115,7 @@ describe("official site shell", () => {
     expect(screen.getByRole("heading", { level: 2, name: "책임" })).toBeTruthy();
     expect(screen.getByText(/기존 package와 Hands의 실제 소유권 재배치는 아직 결정하지 않습니다/)).toBeTruthy();
     const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
-    expect(breadcrumb.getByRole("link", { name: "Foundation" }).getAttribute("href")).toBe("/docs");
+    expect(breadcrumb.getByRole("link", { name: "Foundation" }).getAttribute("href")).toBe("/docs/foundation");
     expect(breadcrumb.getByText("Overview · TBD")).toBeTruthy();
   });
 
@@ -121,8 +126,8 @@ describe("official site shell", () => {
     const brand = screen.getByRole("link", { name: "json-document" });
     const siteNav = screen.getByRole("navigation", { name: "Site navigation" });
 
-    await user.click(nav.getByRole("button", { name: "Foundation" }));
-    await user.click(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Why" }));
+    await user.click(nav.getByRole("button", { name: "Introduce" }));
+    await user.click(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Why" }));
     await waitFor(() => expect(document.documentElement.lang).toBe("ko"));
     const frame = await waitFor(() => {
       const node = document.querySelector("[data-page-frame]");

@@ -7,7 +7,7 @@
   },
   {
     "path": "/viewer",
-    "label": "MD · PPT · Sheet",
+    "label": "Document · Presentation · Spreadsheet",
     "title": "Artifact - json-document",
     "heading": "Artifact",
     "description": "MD·PPT·Sheet artifact가 한 host에 나타나고 서로 다른 Hands를 얻는 미래의 mock입니다.",
@@ -21,6 +21,15 @@
     "heading": "왜 json-document인가",
     "description": "문서·표·보드가 같은 JSON 계약을 쓰고, 협업과 장르의 손과 붙이는 층을 같은 커널 위에 올리는 이유를 설명합니다.",
     "language": "ko",
+    "navigationGroup": "Introduction"
+  },
+  {
+    "path": "/docs/foundation",
+    "label": "Overview",
+    "title": "Foundation - json-document",
+    "heading": "Foundation",
+    "description": "JSON Document, Document Types, Editing과 Collaboration이 공유하는 기반 계약을 설명합니다.",
+    "language": "ko",
     "navigationGroup": "JSON Document"
   },
   {
@@ -29,7 +38,7 @@
     "title": "Concept Map - json-document",
     "description": "JSON Document에서 Artifact까지 책임이 쌓이는 순서와 각 계층의 경계를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "navigationGroup": "Introduction"
   },
   {
     "path": "/docs/how-we-build",
@@ -38,7 +47,7 @@
     "heading": "제품에서 정본 모듈을 발견하는 방법",
     "description": "Application을 먼저 만들고 실제 제품 책임을 canonical module로 추출한 뒤 제품이 다시 소비하는 개발 순환을 설명합니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "navigationGroup": "Introduction"
   },
   {
     "path": "/applications",

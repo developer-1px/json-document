@@ -100,6 +100,7 @@ function AppShell() {
               item.navigationGroup !== undefined
               && section.groups.includes(item.navigationGroup)
               && item.sidebar !== false
+              && !item.path.startsWith("/docs/api")
             );
             const sectionLabelId = `site-navigation-${section.id}`;
             const open = openSections.has(section.id);

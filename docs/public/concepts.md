@@ -17,9 +17,9 @@ Affordance ─ input grammar ─┐
 UI Primitives ─ standard UI ├─ Host가 장르별 Hands를 조합
 Rich Text 등 domain ────────┘
 
-Hands를 surface에 조합한 결과가 사람이 다루는 Artifact가 됩니다. Application은
-그 Artifact를 navigation, runtime과 제품 정책에 놓아 실제 제품 경험으로
-제공합니다.
+Hands를 surface에 조합한 결과가 사람이 다루는 Artifact가 됩니다. Artifact는
+navigation이나 workflow를 소유하지 않는 콘텐츠입니다. Application은 Artifact와
+다른 콘텐츠를 runtime과 제품 정책에 놓아 실제 제품 경험으로 제공합니다.
 ```
 
 이 그림의 선은 허용된 의존·조합 방향입니다. 모든 노드를 순서대로 설치하라는
@@ -121,8 +121,8 @@ Host 조합에서 함께 동작해야 닫힙니다. 재사용 책임은 owner pa
 
 ## Artifact
 
-Artifact는 다음 책임 계층이 아니라 앞의 책임을 조합해 사람이 보고 고칠 수
-있게 만든 결과입니다.
+Artifact는 독립 App이 아니라 앞의 책임을 조합해 사람이 보고 고칠 수 있게 만든
+Application 내부 콘텐츠입니다. navigation, workflow와 제품 정책은 소유하지 않습니다.
 MD, PPT, Sheet는 서로 다른 화면과 Hands를 사용해도 같은 문서와 편집 계약을
 공유할 수 있습니다.
 

@@ -12,7 +12,8 @@ export type BreadcrumbCrumb = {
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
 const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
-  "JSON Document": { path: "/docs", label: "JSON Document" },
+  Introduction: { path: "/docs", label: "Introduce" },
+  "JSON Document": { path: "/docs/foundation", label: "JSON Document" },
   "Document Types": { path: "/docs/document-types", label: "Document Types" },
   Editing: { path: "/docs/intent-guide", label: "Editing" },
   Collaboration: { path: "/docs/collaboration", label: "Collaboration" },

@@ -24,6 +24,9 @@ Application이 정본 API를 다시 소비한다
 책임 발견: Application → 책임 발견 → Canonical Module → Application
 ```
 
+여기서 Artifact는 독립 App이 아니라 Application이 만들고 편집하는 콘텐츠입니다.
+Navigation, workflow, runtime과 제품 정책은 Application에 남습니다.
+
 ## Application에 남는 것
 
 Application은 화면의 주요 영역과 실행 순서, URL과 navigation, 제품 copy,

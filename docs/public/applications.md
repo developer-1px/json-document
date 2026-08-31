@@ -1,8 +1,8 @@
 # Applications
 
-Application은 Artifact와 Hands를 navigation, runtime, 제품 정책과 함께 조합한
-완성된 제품 표면입니다. Artifact가 사람이 만들고 수정하는 작업물이라면,
-Application은 그 작업물을 실제 경험으로 제공하는 실행 주체입니다.
+Application은 navigation, workflow, runtime과 제품 정책을 소유하는 완성된 제품
+표면입니다. Artifact는 Application과 같은 앱이 아니라, 그 안에서 사람이 만들고
+수정하며 agent와 주고받는 콘텐츠입니다.
 
 ## Calendar
 

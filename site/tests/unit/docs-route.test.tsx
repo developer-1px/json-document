@@ -25,14 +25,14 @@ describe("documentation routes", () => {
     const user = userEvent.setup();
     const nav = within(await screen.findByRole("navigation", { name: "Site navigation" }));
 
-    await user.click(nav.getByRole("button", { name: "Foundation" }));
-    await user.click(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Why" }));
+    await user.click(nav.getByRole("button", { name: "Introduce" }));
+    await user.click(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Why" }));
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://developer-1px.github.io/json-document/docs");
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
-    await user.click(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Concept Map" }));
+    await user.click(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Concept Map" }));
     await waitFor(() => expect(document.title).toBe("Concept Map - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Concept Map" }, { timeout: 10000 })).toBeTruthy();
 
@@ -48,6 +48,7 @@ describe("documentation routes", () => {
     expect(screen.getByRole("heading", { level: 2, name: "useEditingObservation" })).toBeTruthy();
     expect(within(nav.getByRole("group", { name: "Building Blocks" })).getByRole("link", { name: "Editing guide" })).toBeTruthy();
 
+    await user.click(nav.getByRole("button", { name: "Foundation" }));
     await user.click(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Topology" }));
     await waitFor(() => expect(document.title).toBe("Topology - json-document"));
     expect(await screen.findByRole("heading", { level: 1, name: "Topology" }, { timeout: 10000 })).toBeTruthy();
@@ -56,7 +57,7 @@ describe("documentation routes", () => {
     await waitFor(() => expect(document.title).toBe("json-document API - json-document"));
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe("여섯 가지 JSON Document 진입점과 JSON Patch, Pointer, JSONPath 공개 API를 정리합니다.");
     expect(await screen.findByRole("heading", { level: 1, name: "json-document API" }, { timeout: 10000 })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
+    expect(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBeNull();
     expect(nav.getByRole("link", { name: "Reference" }).getAttribute("aria-current")).toBe("page");
     const mobileSections = within(screen.getByRole("navigation", { name: "Documentation sections" }));
     expect(mobileSections.getByRole("link", { name: "작업별 진입점" }).getAttribute("href")).toBe("#작업별-진입점");
@@ -69,7 +70,7 @@ describe("documentation routes", () => {
 
     await waitFor(() => expect(document.title).toBe("json-document Docs - json-document"));
     expect(await screen.findByRole("heading", { level: 1 }, { timeout: 10000 })).toBeTruthy();
-    expect(within(nav.getByRole("group", { name: "Foundation" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
+    expect(within(nav.getByRole("group", { name: "Introduce" })).getByRole("link", { name: "Why" }).getAttribute("aria-current")).toBe("page");
 
     window.history.pushState(null, "", "/docs/topology/");
     window.dispatchEvent(new Event("popstate"));

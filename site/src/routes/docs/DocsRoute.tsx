@@ -4,6 +4,7 @@ import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
+  foundation: "braces",
   howWeBuild: "branch",
   applications: "peek",
   documentTypes: "braces",
@@ -105,6 +106,10 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
+}
+
+export function FoundationRoute() {
+  return <DocsRoute pageId="foundation" />;
 }
 
 export function HowWeBuildRoute() {

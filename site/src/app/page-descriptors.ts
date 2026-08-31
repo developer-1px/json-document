@@ -2,6 +2,7 @@ import siteRoutesJson from "../../site-routes.json";
 export { legacyPageRedirects } from "./legacy-page-redirects";
 
 export type SiteNavigationGroup =
+  | "Introduction"
   | "JSON Document"
   | "Document Types"
   | "Collaboration"

@@ -72,6 +72,7 @@ import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/co
 import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
+import { Route as PageDocsFoundationRouteImport } from "./routes/_page/docs/foundation";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
 import { Route as PageDocsHowWeBuildRouteImport } from "./routes/_page/docs/how-we-build";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
@@ -487,6 +488,11 @@ const PageDocsConnectorsRoute = PageDocsConnectorsRouteImport.update({
 const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
   id: "/docs/database",
   path: "/docs/database",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsFoundationRoute = PageDocsFoundationRouteImport.update({
+  id: "/docs/foundation",
+  path: "/docs/foundation",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
@@ -1033,6 +1039,7 @@ export interface FileRoutesByFullPath {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/foundation": typeof PageDocsFoundationRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
@@ -1186,6 +1193,7 @@ export interface FileRoutesByTo {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/foundation": typeof PageDocsFoundationRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
   "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
@@ -1341,6 +1349,7 @@ export interface FileRoutesById {
   "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
+  "/_page/docs/foundation": typeof PageDocsFoundationRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
   "/_page/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
@@ -1496,6 +1505,7 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/foundation"
     | "/docs/history"
     | "/docs/how-we-build"
     | "/docs/intent"
@@ -1649,6 +1659,7 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/foundation"
     | "/docs/history"
     | "/docs/how-we-build"
     | "/docs/intent"
@@ -1803,6 +1814,7 @@ export interface FileRouteTypes {
     | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
+    | "/_page/docs/foundation"
     | "/_page/docs/history"
     | "/_page/docs/how-we-build"
     | "/_page/docs/intent"
@@ -2345,6 +2357,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/database";
       fullPath: "/docs/database";
       preLoaderRoute: typeof PageDocsDatabaseRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/foundation": {
+      id: "/_page/docs/foundation";
+      path: "/docs/foundation";
+      fullPath: "/docs/foundation";
+      preLoaderRoute: typeof PageDocsFoundationRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/history": {
@@ -3098,6 +3117,7 @@ interface PageRouteChildren {
   PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
+  PageDocsFoundationRoute: typeof PageDocsFoundationRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
   PageDocsHowWeBuildRoute: typeof PageDocsHowWeBuildRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
@@ -3223,6 +3243,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
+  PageDocsFoundationRoute: PageDocsFoundationRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
   PageDocsHowWeBuildRoute: PageDocsHowWeBuildRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,

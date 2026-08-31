@@ -13,13 +13,14 @@ function trail(path: string) {
 
 describe("breadcrumbTrail", () => {
   test("places owner groups below the new IA sections", () => {
-    expect(trail("/docs")).toEqual(["Overview:/", "Foundation:/docs"]);
-    expect(trail("/docs/concepts")).toEqual(["Overview:/", "Foundation:/docs", "Concept Map:/docs/concepts"]);
+    expect(trail("/docs")).toEqual(["Overview:/", "Introduce:/docs"]);
+    expect(trail("/docs/concepts")).toEqual(["Overview:/", "Introduce:/docs", "Concept Map:/docs/concepts"]);
+    expect(trail("/docs/foundation")).toEqual(["Overview:/", "Foundation:/docs/foundation"]);
     expect(trail("/docs/collaboration/replica")).toEqual([
-      "Overview:/", "Foundation:/docs", "Collaboration:/docs/collaboration", "Replica:/docs/collaboration/replica",
+      "Overview:/", "Foundation:/docs/foundation", "Collaboration:/docs/collaboration", "Replica:/docs/collaboration/replica",
     ]);
     expect(trail("/docs/selection")).toEqual([
-      "Overview:/", "Foundation:/docs", "Editing:/docs/intent-guide", "Selection:/docs/selection",
+      "Overview:/", "Foundation:/docs/foundation", "Editing:/docs/intent-guide", "Selection:/docs/selection",
     ]);
     expect(trail("/docs/connector-zod-validate")).toEqual([
       "Overview:/", "Building Blocks:/docs/adapters", "Ecosystem Connectors:/docs/connectors",
