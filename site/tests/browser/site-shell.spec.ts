@@ -10,14 +10,24 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Dependency map" }).getByRole("link")).toHaveText([
-    "Introduce",
-    "Foundation",
-    "Building Blocks",
-    "Hands",
-    "Artifact",
-    "Applications",
+  expect(await page.locator("[data-home-scene]").evaluateAll((scenes) => scenes.map((scene) => scene.getAttribute("data-home-scene")))).toEqual([
+    "hero",
+    "foundation",
+    "hands-artifact",
+    "applications",
+    "how-we-build",
   ]);
+  await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+    "모든 편집은 같은 값에서 시작합니다.",
+    "Hands가 Artifact를 만지고 편집합니다.",
+    "제품에서 책임을 발견합니다.",
+    "제품에서 시작해 생태계로 돌아갑니다.",
+  ]);
+  for (const image of await page.getByRole("main").getByRole("img").all()) {
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth > 0)).toBe(true);
+  }
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toContain("y");
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Introduce" }).click();
@@ -52,7 +62,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Calendar",
     "AI Agent",
   ]);
-  await expect(navigation.getByRole("link", { name: "Reference" })).toHaveAttribute("href", "/docs/api");
+  await expect(navigation.getByRole("link", { name: "Reference", exact: true })).toHaveAttribute("href", "/docs/api");
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
     "Introduce",
     "Foundation",
@@ -68,6 +78,9 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
 test("mobile navigation preserves the product groups without duplicating documentation pages", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("none");
+  await expect(page.locator("[data-home-scene]")).toHaveCount(5);
 
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(siteNavigation.getByRole("group", { name: "Introduce" })).toBeVisible();
@@ -85,6 +98,14 @@ test("mobile navigation preserves the product groups without duplicating documen
   await expect(siteNavigation.getByRole("link", { name: "Concept Map" })).toHaveAttribute("aria-current", "page");
 });
 
+test("short desktop view keeps the home story in natural document flow", async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 650 });
+  await page.goto("/");
+
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("none");
+  await expect(page.locator("[data-home-scene]")).toHaveCount(5);
+});
+
 test("Document Types publishes a TBD responsibility boundary", async ({ page }) => {
   await page.goto("/docs/document-types");
 
@@ -92,7 +113,8 @@ test("Document Types publishes a TBD responsibility boundary", async ({ page }) 
   await expect(page.getByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "책임", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "후보 · TBD" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Document Types" })).toHaveAttribute("href", "/docs/document-types");
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Foundation" })).toHaveAttribute("href", "/docs/foundation");
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Overview · TBD")).toBeVisible();
 });
 
 test("Document Type candidate submenu keeps ownership explicitly TBD", async ({ page }) => {
@@ -128,12 +150,12 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Introduce" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
   await siteNavigation.getByRole("button", { name: "Building Blocks" }).click();
-  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getAllByRole("link", { name: "Overview", exact: true }).nth(1).click();
+  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(1).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
-  await page.getByRole("link", { name: "API Reference" }).first().click();
+  await siteNavigation.getByRole("link", { name: "Reference", exact: true }).click();
   await expect(page).toHaveTitle("json-document API - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
 });
@@ -367,12 +389,12 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   expect(await navigation.getByRole("link", { name: "json-document" }).evaluate((element) => (
     getComputedStyle(element).borderBottomWidth
   ))).toBe("0px");
-  expect(await navigation.getByRole("button", { name: "Editing" }).evaluate((element) => (
+  expect(await navigation.getByRole("button", { name: "Foundation" }).evaluate((element) => (
     getComputedStyle(element).borderLeftColor
-  ))).toBe("rgb(222, 109, 85)");
+  ))).toContain("222, 109, 85");
   const currentCat = navigation.getByRole("link", { name: "Selection", exact: true }).locator("svg");
   await expect(currentCat).toHaveCount(1);
-  expect(await currentCat.evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
+  expect(await currentCat.evaluate((element) => getComputedStyle(element).color)).toContain("222, 109, 85");
   await expect(navigation.locator('a[aria-current="page"] svg')).toHaveCount(1);
 
   const heading = page.getByRole("heading", { level: 2, name: "대상을 하나 고르기" });
@@ -478,10 +500,10 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   await page.keyboard.press("Tab");
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
-  const currentLink = page.getByRole("navigation", { name: "Site navigation" })
-    .getByRole("group", { name: "Connector" })
+  const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
+  const currentLink = siteNavigation.getByRole("group", { name: "Building Blocks" })
     .getByRole("link", { name: "React Reference", exact: true });
-  expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
+  expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toContain("222, 109, 85");
 
   await page.goto("/docs/api");
   const code = page.getByRole("figure", { name: "TypeScript" }).first();

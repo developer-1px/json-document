@@ -16,9 +16,23 @@ describe("official site shell", () => {
     expect((await screen.findByRole("link", { name: "Skip to content" })).getAttribute("href")).toBe("#main-content");
     expect(screen.getByRole("heading", { level: 1, name: "json-document" })).toBeTruthy();
     expect(screen.getByText("Agent-native artifact editing의 개발 정본.")).toBeTruthy();
-    expect(screen.getByText(/구현보다 먼저 공유해야 할 Why/)).toBeTruthy();
+    expect(screen.getByText(/제품을 먼저 만들고/)).toBeTruthy();
     const home = within(screen.getByRole("main"));
-    expect(home.getByRole("link", { name: "Applications 보기" }).getAttribute("href")).toBe("/applications");
+    expect(home.getAllByRole("link", { name: "Applications 보기" }).map((link) => link.getAttribute("href"))).toEqual([
+      "/applications",
+      "/applications",
+    ]);
+    expect(Array.from(document.querySelectorAll("[data-home-scene]")).map((scene) => scene.getAttribute("data-home-scene"))).toEqual([
+      "hero",
+      "foundation",
+      "hands-artifact",
+      "applications",
+      "how-we-build",
+    ]);
+    expect(home.getByRole("heading", { level: 2, name: "모든 편집은 같은 값에서 시작합니다." })).toBeTruthy();
+    expect(home.getByRole("heading", { level: 2, name: "Hands가 Artifact를 만지고 편집합니다." })).toBeTruthy();
+    expect(home.getByRole("heading", { level: 2, name: "제품에서 책임을 발견합니다." })).toBeTruthy();
+    expect(home.getByRole("heading", { level: 2, name: "제품에서 시작해 생태계로 돌아갑니다." })).toBeTruthy();
     expect(home.queryByText("v3.0.0")).toBeNull();
     expect(home.queryByRole("link", { name: "Read the API" })).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Breadcrumb" })).toBeNull();
@@ -33,14 +47,7 @@ describe("official site shell", () => {
     expect(nav.queryByRole("group", { name: "Core" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Why" })).toBeNull();
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
-    expect(within(screen.getByRole("navigation", { name: "Dependency map" })).getAllByRole("link").map((link) => link.textContent)).toEqual([
-      "Introduce",
-      "Foundation",
-      "Building Blocks",
-      "Hands",
-      "Artifact",
-      "Applications",
-    ]);
+    expect(screen.queryByRole("navigation", { name: "Dependency map" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Introduce" }));
     expect(groupLinks(nav, "Introduce")).toEqual([
       "Why",

@@ -242,7 +242,7 @@ test("Canvas select-all, delete, and locked objects", async ({ page }) => {
   await page.goto("/demo/canvas");
   const canvas = page.getByLabel("Canvas", { exact: true });
   const note = page.getByRole("button", { name: "Note" });
-  const lock = page.getByRole("button", { name: "Lock" });
+  const lock = page.getByRole("button", { name: "Lock", exact: true });
   await canvas.focus();
   await page.keyboard.press("ControlOrMeta+A");
   await expect(note).toHaveAttribute("data-selected", "true");

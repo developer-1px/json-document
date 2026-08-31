@@ -1,10 +1,12 @@
 import { Navigate, createFileRoute } from "@tanstack/react-router";
-import { calendarSearchDefaults } from "../../../../routes/calendar-demo/calendar-search";
+import { calendarSearch } from "../../../../routes/calendar-demo/calendar-search";
 
 export const Route = createFileRoute("/_page/demo/calendar")({
+  validateSearch: calendarSearch,
   component: CalendarLegacyRedirect,
 });
 
 function CalendarLegacyRedirect() {
-  return <Navigate to="/applications/calendar" search={calendarSearchDefaults} replace />;
+  const search = Route.useSearch();
+  return <Navigate to="/applications/calendar" search={search} replace />;
 }
