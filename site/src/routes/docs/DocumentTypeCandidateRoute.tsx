@@ -58,6 +58,12 @@ ${profile.schema}
 \`\`\`
 
 근거: \`${profile.sourcePath}\`의 \`${profile.symbol}\`
+
+### 필드 설명
+
+| 항목 | 의미 |
+| --- | --- |
+${profile.fields.map((field) => `| \`${field.name}\` | ${field.description} |`).join("\n")}
 ${auditSource}
 
 ## 확정에 필요한 증거

@@ -17,6 +17,12 @@ for (const candidate of ledger.candidates) {
   for (const field of ["why", "does", "schema", "sourcePath", "symbol"]) {
     if (typeof profile[field] !== "string" || profile[field].trim() === "") throw new Error(`${candidate} candidate profile is missing ${field}`);
   }
+  if (!Array.isArray(profile.fields) || profile.fields.length === 0) throw new Error(`${candidate} candidate profile is missing field descriptions`);
+  for (const field of profile.fields) {
+    if (typeof field.name !== "string" || field.name.trim() === "" || typeof field.description !== "string" || field.description.trim() === "") {
+      throw new Error(`${candidate} candidate profile has an incomplete field description`);
+    }
+  }
   const sourceFile = join(root, profile.sourcePath);
   if (!existsSync(sourceFile)) throw new Error(`${candidate} candidate profile source does not exist: ${profile.sourcePath}`);
   if (!new RegExp(`\\b${profile.symbol}\\b`).test(readFileSync(sourceFile, "utf8"))) throw new Error(`${candidate} candidate profile symbol does not exist: ${profile.symbol}`);

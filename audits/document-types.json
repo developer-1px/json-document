@@ -6,63 +6,129 @@
     "rich-text": {
       "why": "paragraph, list, mark와 extension node의 의미와 유효성을 일반 JSON 편집 규칙만으로 보존할 수 없기 때문입니다.",
       "does": "Rich Text node vocabulary, block/inline 관계, mark와 extension 계약을 정의하고 구조화된 문서를 text·HTML 같은 표현으로 투영합니다.",
-      "schema": "{ profile: string; type: \"doc\"; id: string; content: RichTextBlockNode[] }",
+      "schema": "interface RichTextDocument {\n  readonly id: string;\n  readonly profile: string;\n  readonly type: \"doc\";\n  readonly content: ReadonlyArray<RichTextBlockNode | RichTextExtensionNode>;\n}\n\ntype RichTextBlockNode =\n  | RichTextParagraph\n  | RichTextHeading\n  | RichTextBlockquote\n  | RichTextCodeBlock\n  | RichTextBulletList\n  | RichTextOrderedList;\n\ninterface RichTextText { readonly id: string; readonly type: \"text\"; readonly text: string; readonly marks: ReadonlyArray<RichTextMark> }\ninterface RichTextHardBreak { readonly id: string; readonly type: \"hardBreak\" }\ninterface RichTextParagraph { readonly id: string; readonly type: \"paragraph\"; readonly content: ReadonlyArray<RichTextText | RichTextHardBreak> }\ninterface RichTextHeading { readonly id: string; readonly type: \"heading\"; readonly attrs: { readonly level: 1 | 2 | 3 | 4 | 5 | 6 }; readonly content: ReadonlyArray<RichTextText | RichTextHardBreak> }\ninterface RichTextBlockquote { readonly id: string; readonly type: \"blockquote\"; readonly content: ReadonlyArray<RichTextBlockNode> }\ninterface RichTextCodeBlock { readonly id: string; readonly type: \"codeBlock\"; readonly attrs: { readonly language: string | null }; readonly content: readonly [] | readonly [RichTextText] }\ninterface RichTextListItem { readonly id: string; readonly type: \"listItem\"; readonly content: ReadonlyArray<RichTextBlockNode> }\ninterface RichTextBulletList { readonly id: string; readonly type: \"bulletList\"; readonly content: ReadonlyArray<RichTextListItem> }\ninterface RichTextOrderedList { readonly id: string; readonly type: \"orderedList\"; readonly attrs: { readonly start: number }; readonly content: ReadonlyArray<RichTextListItem> }\ntype RichTextExtensionNode = { readonly id: string; readonly type: `${string}/${string}`; readonly attrs?: Readonly<Record<string, JSONValue>>; readonly content?: ReadonlyArray<RichTextNode> };",
+      "fields": [
+        { "name": "id", "description": "문서와 각 node를 편집·selection·extension에서 안정적으로 참조하는 identity입니다." },
+        { "name": "profile", "description": "문서가 따르는 Rich Text vocabulary와 호환 계약을 식별합니다." },
+        { "name": "type", "description": "document와 node variant를 판별합니다. extension은 namespace/name 형태를 사용합니다." },
+        { "name": "content", "description": "block·inline·list의 허용된 계층을 보존하는 ordered child sequence입니다." },
+        { "name": "attrs", "description": "heading level, code language, ordered-list start와 extension별 구조화 속성입니다." },
+        { "name": "text / marks", "description": "text node의 문자열과 해당 문자열 전체에 적용되는 strong, link 같은 의미 표식입니다." }
+      ],
       "sourcePath": "packages/json-document-rich-text/src/model.ts",
       "symbol": "RichTextDocument"
     },
     "order": {
       "why": "순서가 의미인 item 집합은 배열 위치뿐 아니라 안정된 item identity와 rename 규칙을 보존해야 하기 때문입니다.",
       "does": "식별된 item의 선형 순서와 label을 정의하고 reorder·rename 같은 의미 연산의 기반을 제공합니다.",
-      "schema": "{ items: Array<{ id: string; label: string }> }",
+      "schema": "interface OrderItem {\n  readonly id: string;\n  readonly label: string;\n}\n\ninterface OrderDocument {\n  readonly items: ReadonlyArray<OrderItem>;\n}",
+      "fields": [
+        { "name": "items", "description": "문서가 의미하는 선형 순서입니다. 배열 순서가 곧 item 순서입니다." },
+        { "name": "items[].id", "description": "rename, selection과 paste target이 배열 위치와 무관하게 item을 찾는 identity입니다." },
+        { "name": "items[].label", "description": "item이 사용자에게 나타내는 편집 가능한 이름입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/order.ts",
       "symbol": "OrderDocument"
     },
     "object": {
       "why": "캔버스 object는 identity, geometry와 presentation 값을 하나의 의미 단위로 유지해야 하기 때문입니다.",
       "does": "object의 위치·크기·색상 모델을 정의하고 translate·resize·fill 같은 공간 연산의 기반을 제공합니다.",
-      "schema": "{ objects: Array<{ id: string; label: string; x: number; y: number; width: number; height: number; color: string }> }",
+      "schema": "interface DocumentObject {\n  readonly id: string;\n  readonly label: string;\n  readonly x: number;\n  readonly y: number;\n  readonly width: number;\n  readonly height: number;\n  readonly color: string;\n}\n\ninterface ObjectDocument {\n  readonly objects: ReadonlyArray<DocumentObject>;\n}",
+      "fields": [
+        { "name": "objects", "description": "같은 공간에서 배치·선택되는 object의 ordered collection입니다." },
+        { "name": "objects[].id", "description": "selection, transform과 clipboard가 object를 안정적으로 참조하는 identity입니다." },
+        { "name": "objects[].label", "description": "object의 사용자 가시 이름입니다." },
+        { "name": "x / y", "description": "문서 좌표계에서 object 좌상단의 위치입니다." },
+        { "name": "width / height", "description": "resize 이후에도 유효해야 하는 object의 공간 크기입니다." },
+        { "name": "color", "description": "object가 소유하는 현재 presentation 값입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/object.ts",
       "symbol": "ObjectDocument"
     },
     "tree": {
       "why": "계층 문서는 node identity와 parent reference의 무결성, 순서와 가시성 투영을 함께 보존해야 하기 때문입니다.",
       "does": "parent-linked node 모델을 정의하고 visible tree와 구조 이동을 위한 의미 기반을 제공합니다.",
-      "schema": "{ nodes: Array<{ id: string; parentId: string | null; label: string }> }",
+      "schema": "interface TreeNode {\n  readonly id: string;\n  readonly parentId: string | null;\n  readonly label: string;\n}\n\ninterface TreeDocument {\n  readonly nodes: ReadonlyArray<TreeNode>;\n}",
+      "fields": [
+        { "name": "nodes", "description": "tree node의 저장 순서입니다. 같은 parent 아래 sibling order의 입력이 됩니다." },
+        { "name": "nodes[].id", "description": "parent reference, selection과 구조 연산이 사용하는 고유 identity입니다." },
+        { "name": "nodes[].parentId", "description": "부모 node를 참조하며 null이면 root입니다. 존재하는 id만 참조해야 합니다." },
+        { "name": "nodes[].label", "description": "node가 나타내는 사용자 가시 이름입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/tree.ts",
       "symbol": "TreeDocument"
     },
     "database": {
       "why": "record 값은 property schema와 view가 참조하는 identity·type 규칙을 함께 만족해야 하기 때문입니다.",
       "does": "property schema, record 값과 저장된 table view를 정의하고 typed value·sort·filter projection의 기반을 제공합니다.",
-      "schema": "{ schema: { properties: DatabaseProperty[] }; records: DatabaseRecord[]; views: DatabaseTableView[] }",
+      "schema": "type DatabasePropertyType = \"title\" | \"text\" | \"number\" | \"select\" | \"checkbox\";\ninterface DatabaseSelectOption { readonly id: string; readonly name: string }\ninterface DatabaseProperty { readonly id: string; readonly name: string; readonly type: DatabasePropertyType; readonly options: ReadonlyArray<DatabaseSelectOption> }\ninterface DatabaseRecord { readonly id: string; readonly values: Readonly<Record<string, JSONValue>> }\ninterface DatabaseSort { readonly propertyId: string; readonly direction: \"ascending\" | \"descending\" }\ninterface DatabaseFilter { readonly propertyId: string; readonly operator: \"equals\"; readonly value: JSONValue }\ninterface DatabaseTableView {\n  readonly id: string; readonly name: string; readonly type: \"table\";\n  readonly propertyOrder: ReadonlyArray<string>;\n  readonly propertyVisibility: Readonly<Record<string, boolean>>;\n  readonly propertyWidths: Readonly<Record<string, number>>;\n  readonly sort: DatabaseSort | null; readonly filter: DatabaseFilter | null;\n}\ninterface DatabaseDocument {\n  readonly schema: { readonly properties: ReadonlyArray<DatabaseProperty> };\n  readonly records: ReadonlyArray<DatabaseRecord>;\n  readonly views: ReadonlyArray<DatabaseTableView>;\n}",
+      "fields": [
+        { "name": "schema.properties", "description": "record value의 key, type과 표시 이름을 정의하는 canonical property 목록입니다." },
+        { "name": "properties[].options", "description": "select property가 허용하는 안정된 option identity와 이름입니다. 다른 type에서는 빈 목록입니다." },
+        { "name": "records[].id", "description": "view, selection과 CRUD가 record를 참조하는 고유 identity입니다." },
+        { "name": "records[].values", "description": "property id를 key로 갖는 값 map이며 각 값은 property type을 만족해야 합니다." },
+        { "name": "views", "description": "같은 records를 표시하는 저장된 table projection 설정입니다." },
+        { "name": "propertyOrder / propertyVisibility / propertyWidths", "description": "view별 열 순서·가시성·너비이며 존재하는 property id만 참조해야 합니다." },
+        { "name": "sort / filter", "description": "view 결과를 파생하는 property 참조와 정렬·동등 비교 조건입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/database.ts",
       "symbol": "DatabaseDocument"
     },
     "calendar": {
       "why": "event interval, calendar reference와 recurrence가 시간 의미와 참조 무결성을 함께 보존해야 하기 때문입니다.",
       "does": "calendar와 event·recurrence 모델을 정의하고 occurrence, busy date와 기간별 event projection의 기반을 제공합니다.",
-      "schema": "{ calendars: CalendarCalendar[]; events: Array<{ id: string; title: string; start: string; end: string; allDay: boolean; calendarId: string; recurrence: CalendarRecurrence | null; excludeDates: string[] }> }",
+      "schema": "interface CalendarCalendar { readonly id: string; readonly title: string; readonly hidden: boolean; readonly color: string }\ninterface CalendarRecurrence { readonly freq: \"daily\" | \"weekly\" | \"monthly\" | \"yearly\"; readonly interval: number; readonly until: string }\ninterface CalendarEvent {\n  readonly id: string; readonly title: string; readonly start: string; readonly end: string;\n  readonly allDay: boolean; readonly calendarId: string;\n  readonly recurrence: CalendarRecurrence | null; readonly excludeDates: ReadonlyArray<string>;\n}\ninterface CalendarDocument {\n  readonly calendars: ReadonlyArray<CalendarCalendar>;\n  readonly events: ReadonlyArray<CalendarEvent>;\n}",
+      "fields": [
+        { "name": "calendars", "description": "event를 분류하는 calendar의 고유 목록입니다." },
+        { "name": "calendars[].hidden / color", "description": "calendar별 가시성 상태와 event 표현에 쓰는 비어 있지 않은 색상 값입니다." },
+        { "name": "events[].id / calendarId", "description": "event identity와 소속 calendar reference입니다. calendarId는 존재하는 calendar를 가리켜야 합니다." },
+        { "name": "start / end / allDay", "description": "interval을 정의합니다. allDay이면 date, 아니면 datetime-local 형식을 사용합니다." },
+        { "name": "recurrence.freq / interval / until", "description": "반복 주기, 양의 간격과 반복 종료 경계를 정의합니다." },
+        { "name": "excludeDates", "description": "반복 projection에서 제외할 occurrence date 목록입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/calendar.ts",
       "symbol": "CalendarDocument"
     },
     "sheet": {
       "why": "grid cell 값은 안정된 row·column identity와 좌표 관계를 유지해야 배열 index 변화에도 의미가 보존되기 때문입니다.",
       "does": "column, row와 column-keyed cell 모델을 정의하고 grid topology와 range projection의 기반을 제공합니다.",
-      "schema": "{ columns: Array<{ id: string; label: string }>; rows: Array<{ id: string; cells: Record<string, JSONValue> }> }",
+      "schema": "interface SheetColumn { readonly id: string; readonly label: string }\ninterface SheetRow { readonly id: string; readonly cells: Readonly<Record<string, JSONValue>> }\ninterface SheetDocument {\n  readonly columns: ReadonlyArray<SheetColumn>;\n  readonly rows: ReadonlyArray<SheetRow>;\n}",
+      "fields": [
+        { "name": "columns", "description": "grid의 열 순서와 column identity를 정의합니다." },
+        { "name": "columns[].id / label", "description": "cell key로 쓰는 안정된 identity와 사용자 가시 열 이름입니다." },
+        { "name": "rows", "description": "grid의 행 순서를 정의하는 row 목록입니다." },
+        { "name": "rows[].id", "description": "selection과 range가 배열 위치와 무관하게 row를 참조하는 identity입니다." },
+        { "name": "rows[].cells", "description": "column id를 key로 JSON cell value를 저장합니다. 알려진 column만 key로 사용해야 합니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/sheet.ts",
       "symbol": "SheetDocument"
     },
     "kanban": {
       "why": "card identity와 column의 card reference·순서가 보드 상태의 핵심 불변식이기 때문입니다.",
       "does": "column과 card 모델, column별 card 순서를 정의하고 card 이동 연산의 기반을 제공합니다.",
-      "schema": "{ columns: Array<{ id: string; title: string; cardIds: string[] }>; cards: Array<{ id: string; title: string }> }",
+      "schema": "interface KanbanCard { readonly id: string; readonly title: string }\ninterface KanbanColumn { readonly id: string; readonly title: string; readonly cardIds: ReadonlyArray<string> }\ninterface KanbanDocument {\n  readonly columns: ReadonlyArray<KanbanColumn>;\n  readonly cards: ReadonlyArray<KanbanCard>;\n}",
+      "fields": [
+        { "name": "columns", "description": "보드의 열 순서를 정의하는 고유 column 목록입니다." },
+        { "name": "columns[].id / title", "description": "drop target이 참조하는 identity와 사용자 가시 열 이름입니다." },
+        { "name": "columns[].cardIds", "description": "column 안의 card 순서입니다. 존재하는 card id만 중복 없이 참조해야 합니다." },
+        { "name": "cards", "description": "보드가 소유하는 card의 canonical 목록입니다." },
+        { "name": "cards[].id / title", "description": "이동·selection의 안정된 identity와 사용자 가시 card 제목입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/kanban.ts",
       "symbol": "KanbanDocument"
     },
     "annotation": {
       "why": "annotation은 source identity, selector geometry, instruction body와 presentation 의미를 일관되게 연결해야 하기 때문입니다.",
       "does": "annotation source·selector·body·presentation 모델과 참조 무결성을 정의하고 target별 annotation projection의 기반을 제공합니다.",
-      "schema": "{ profile: \"urn:interactive-os:json-document:annotation:1\"; id: string; sources: AnnotationSource[]; annotations: Annotation[] }",
+      "schema": "type AnnotationSelector =\n  | { readonly type: \"point\"; readonly x: number; readonly y: number }\n  | { readonly type: \"rectangle\"; readonly x: number; readonly y: number; readonly width: number; readonly height: number }\n  | { readonly type: \"path\"; readonly points: ReadonlyArray<{ x: number; y: number }> }\n  | { readonly type: \"arrow\"; readonly from: { x: number; y: number }; readonly to: { x: number; y: number } };\ntype AnnotationPresentation =\n  | { readonly type: \"marker\" } | { readonly type: \"reaction\"; readonly reaction: \"like\" | \"dislike\" }\n  | { readonly type: \"outline\" } | { readonly type: \"stroke\" } | { readonly type: \"arrow\" };\ninterface AnnotationSource { readonly id: string; readonly src: string; readonly width: number; readonly height: number }\ninterface Annotation { readonly id: string; readonly body: { readonly instruction: string }; readonly target: { readonly sourceId: string; readonly selector: AnnotationSelector }; readonly presentation: AnnotationPresentation }\ninterface AnnotationDocument {\n  readonly profile: \"urn:interactive-os:json-document:annotation:1\"; readonly id: string;\n  readonly sources: ReadonlyArray<AnnotationSource>; readonly annotations: ReadonlyArray<Annotation>;\n}",
+      "fields": [
+        { "name": "profile / id", "description": "Annotation v1 계약과 문서 identity를 식별합니다." },
+        { "name": "sources", "description": "annotation target이 참조할 이미지·문서 source와 양의 원본 크기를 정의합니다." },
+        { "name": "annotations[].body.instruction", "description": "선택된 위치에 연결된 사용자 또는 agent 지시 내용입니다." },
+        { "name": "target.sourceId", "description": "존재하는 source를 가리키는 참조입니다." },
+        { "name": "target.selector", "description": "point, rectangle, path 또는 arrow로 target geometry를 표현합니다." },
+        { "name": "presentation", "description": "selector와 호환되는 marker, reaction, outline, stroke 또는 arrow 표현 의미입니다." }
+      ],
       "sourcePath": "packages/json-document-editing/src/annotation.ts",
       "symbol": "AnnotationDocument"
     }
