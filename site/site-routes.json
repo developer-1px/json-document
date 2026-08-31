@@ -32,6 +32,15 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/document-types",
+    "label": "Overview · TBD",
+    "title": "Document Types · TBD - json-document",
+    "heading": "Document Types · TBD",
+    "description": "JSON Document의 의미 모델을 소유하는 Document Type 책임과 아직 확정하지 않은 후보를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",

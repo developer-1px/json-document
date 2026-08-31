@@ -10,6 +10,7 @@ export type SiteLayer = {
 
 export const siteLayers: ReadonlyArray<SiteLayer> = [
   { group: "JSON Document", path: "/docs", label: "JSON Document", blurb: "Values and changes" },
+  { group: "Document Types", path: "/docs/document-types", label: "Document Types", blurb: "Meaningful document contracts" },
   { group: "Editing", path: "/docs/intent-guide", label: "Editing", blurb: "Selection and work" },
   { group: "Adapter", path: "/docs/adapters", label: "Adapter", blurb: "Platform contracts" },
   { group: "Connector", path: "/docs/connectors", label: "Connector", blurb: "Library ecosystems" },

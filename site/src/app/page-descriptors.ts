@@ -3,6 +3,7 @@ export { legacyPageRedirects } from "./legacy-page-redirects";
 
 export type SiteNavigationGroup =
   | "JSON Document"
+  | "Document Types"
   | "Collaboration"
   | "Editing"
   | "Hands"
