@@ -24,7 +24,7 @@ export const calendarDemoRecipe = tv({
     weekHours: "min-h-0 flex-1 overflow-auto",
     weekHead: "flex min-h-12 items-center justify-center gap-1 px-1 py-2 text-center",
     weekCell: "relative border-l border-line-subtle/30 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
-    selectedSlot: "pointer-events-none absolute inset-x-1 z-10 rounded-control bg-background-accent-subtle/70 before:absolute before:inset-y-1 before:left-1 before:w-0.5 before:rounded-full before:bg-background-accent",
+    selectedSlot: "pointer-events-none absolute inset-x-1 z-10 rounded-control border-y-2 border-transparent bg-background-accent-subtle/70 bg-clip-padding before:absolute before:inset-y-1 before:left-1 before:w-0.5 before:rounded-full before:bg-background-accent",
     resizeEdge: "absolute inset-x-0 bottom-0 h-2",
     resizeEdgeVertical: "absolute right-0 top-0 h-full w-2",
     periodHeading: "pointer-events-none absolute left-14 top-4 z-40 m-0 hidden whitespace-nowrap text-sm font-medium text-foreground-strong sm:block",

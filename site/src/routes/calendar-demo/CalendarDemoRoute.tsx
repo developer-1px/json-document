@@ -284,7 +284,7 @@ export function CalendarDemoRoute(props: {
         hourRule: styles.hourRule(),
         nowLine: styles.nowLine(),
         creationTimeHint: classes(styles.creationTimeHint(), ui.text.meta),
-        timedEventContainer: "group/event absolute z-10",
+        timedEventContainer: "group/event absolute z-10 py-0.5",
         timedEvent: styles.timedEvent(),
         eventTitle: classes("min-w-0 truncate", ui.text.meta),
         eventTime: classes(styles.eventTime(), ui.text.meta),

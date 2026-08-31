@@ -58,6 +58,8 @@ describe("calendar product design", () => {
     expect(styles.monthWeek()).toContain("border-line-subtle/60");
     expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
     expect(styles.hourLabel()).toContain("text-foreground-muted");
+    expect(styles.selectedSlot()).toContain("border-y-2");
+    expect(styles.selectedSlot()).toContain("bg-clip-padding");
     expect(css).toContain('[data-ui-presentation="calendar-time-grid"]:hover');
     expect(css).toContain("bg-transparent");
   });
