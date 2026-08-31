@@ -51,7 +51,7 @@ export const calendarDemoRecipe = tv({
     calendarToggle: "group flex w-full items-center justify-start gap-2 rounded-control border-0 bg-transparent px-2 py-1.5 text-left shadow-none outline-none hover:border-0 hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-foreground-muted/25 aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",
     calendarSwatch: "size-2.5 shrink-0 rounded-full bg-foreground-muted opacity-40 data-[calendar-color=accent]:bg-background-accent group-aria-pressed:opacity-100",
     eventTime: "truncate font-normal text-foreground-muted",
-    creationTimeHint: "pointer-events-none absolute left-1 z-20 -translate-y-1/2 whitespace-nowrap tabular-nums text-foreground-muted/55",
+    creationTimeHint: "pointer-events-none absolute left-2 z-20 translate-y-1 whitespace-nowrap tabular-nums text-foreground-muted/55",
     hourLabel: "absolute right-2 -translate-y-1/2 whitespace-nowrap text-right tabular-nums text-foreground-muted/70",
     composerDock: "bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-full border border-line-subtle/55 bg-background-canvas p-2 pl-3 shadow-none",
     composerDockFixed: "fixed",
