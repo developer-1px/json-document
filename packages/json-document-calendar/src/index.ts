@@ -16,6 +16,13 @@ export {
   type CalendarMonthGridLabels,
   type CalendarMonthGridProps,
 } from "./calendar-month-grid.js";
+export {
+  CalendarTimeGrid,
+  type CalendarTimeGridAffordances,
+  type CalendarTimeGridClassNames,
+  type CalendarTimeGridLabels,
+  type CalendarTimeGridProps,
+} from "./calendar-time-grid.js";
 export { calendarEventLabel, type CalendarEventLabelValue } from "./calendar-event-label.js";
 export {
   CalendarGrid,

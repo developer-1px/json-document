@@ -78,3 +78,32 @@ styles, and navigation without rebuilding the month interaction surface:
   onNavigateDate={setVisibleDate}
 />
 ```
+
+`CalendarTimeGrid` is the canonical day/week interaction surface. It owns the
+all-day lane, time columns, occurrence layout, selection, creation, move and
+resize bindings, now marker, and creation-time hint. Hosts supply time policy,
+copy, colors, classes, and the concrete Hand and pointer interactions:
+
+```tsx
+<CalendarTimeGrid
+  cells={calendarCells("week", visibleDate)}
+  weekdays={weekdays}
+  events={hand.paintedEvents}
+  today={today}
+  nowInstant={nowInstant}
+  hourStart={0}
+  hourEnd={24}
+  workHourStart={7}
+  stepMinutes={15}
+  defaultTimedDurationMinutes={60}
+  pixelsPerHour={72}
+  fillViewport
+  hand={hand}
+  interactions={pointerInteractions}
+  selectionTopology={topology}
+  affordances={affordances}
+  classNames={classNames}
+  labels={labels}
+  getEventColor={getEventColor}
+/>
+```

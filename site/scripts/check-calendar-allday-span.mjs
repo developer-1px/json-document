@@ -9,6 +9,7 @@ const editor = read("packages/json-document-editing/src/calendar.ts");
 const allDayPointer = read("packages/json-document-editing/src/calendar-allday-pointer.ts");
 const monthPointer = read("packages/json-document-editing/src/calendar-month-pointer.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const timeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
 const usage = read("site/src/shared/demo-workbench/demo-sources.ts");
 
 requireText(owner, "export function calendarAllDaySpan");
@@ -17,14 +18,15 @@ requireText(ownerTest, 'calendarAllDaySpan("2026-05-27", "2026-05-25")');
 requireText(editor, "calendarAllDaySpan(start, start)?.end");
 requireCount(allDayPointer, "calendarAllDaySpan(", 2);
 requireCount(monthPointer, "calendarAllDaySpan(", 1);
-requireCount(host, "calendarAllDaySpan(", 2);
+requireCount(host, "calendarAllDaySpan(", 1);
+requireCount(timeGrid, "calendarAllDaySpan(", 1);
 forbid(allDayPointer, /addCalendarDate\(release\.targetDay, 1\)/);
 forbid(editor, /addCalendarDate\(start, 1\)/);
 forbid(host, /addCalendarDate\((?:day|value), 1\)/);
 requireText(usage, 'symbol: "calendarAllDaySpan"');
 requireText(usage, 'sourcePath: "packages/json-document-editing/src/calendar-validation.ts"');
 
-console.log("Calendar all-day span guard ok; owner, two pointer consumers, editor, two Host consumers, and Usage checked.");
+console.log("Calendar all-day span guard ok; owner, pointer consumers, editor, Host, CalendarTimeGrid, and Usage checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

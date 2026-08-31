@@ -6,17 +6,19 @@ const owner = read("packages/json-document-editing/src/calendar-validation.ts");
 const editingConsumer = read("packages/json-document-editing/src/calendar.ts");
 const ownerIndex = read("packages/json-document-editing/src/index.ts");
 const monthGrid = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
+const timeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarIntervalLastDate");
 requireText(owner, "endInstant.hour === 0");
 requireText(editingConsumer, "calendarIntervalLastDate(start, end, allDay)");
 requireText(ownerIndex, "calendarIntervalLastDate");
-requireCount(host, "calendarIntervalLastDate(", 2);
+requireCount(host, "calendarIntervalLastDate(", 1);
 requireCount(monthGrid, "calendarIntervalLastDate(", 2);
+requireCount(timeGrid, "calendarIntervalLastDate(", 1);
 forbid(host, /addCalendarDate\([^\n]*\.end[^\n]*, -1\)/);
 
-console.log("Calendar interval last-date guard ok; Editing owner, occurrence, Host, and CalendarMonthGrid consumers checked.");
+console.log("Calendar interval last-date guard ok; Editing owner, occurrence, Host, CalendarMonthGrid, and CalendarTimeGrid consumers checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");

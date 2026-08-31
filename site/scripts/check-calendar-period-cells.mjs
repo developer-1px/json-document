@@ -8,6 +8,7 @@ const ownerTest = read("packages/json-document-calendar/tests/date-controls.test
 const ownerControls = read("packages/json-document-calendar/src/date-controls.tsx");
 const ownerDateGrid = read("packages/json-document-calendar/src/date-grid.tsx");
 const ownerMonthGrid = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
+const ownerTimeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 const navigator = read("site/src/routes/calendar-demo/calendar-demo-navigator.tsx");
 const usage = read("site/src/shared/demo-workbench/demo-sources.ts");
@@ -22,8 +23,8 @@ requireText(ownerTest, "cell.day");
 requireCount(ownerDateGrid, "{cell.day}", 1);
 requireText(ownerControls, "<DateGrid");
 requireText(host, 'calendarCells(view === "day" ? "day" : "week", visibleDate)');
-requireText(host, "weekdays[cell.weekday - 1]");
-requireCount(host, "{cell.day}", 1);
+requireText(ownerTimeGrid, "props.weekdays[cell.weekday - 1]");
+requireCount(ownerTimeGrid, "{cell.day}", 1);
 requireCount(ownerMonthGrid, "{cell.day}", 1);
 requireText(navigator, "<DateGrid");
 forbid(host, /Array\.from\(\{ length: 7 \},[^\n]*addCalendarDays/);
@@ -35,7 +36,7 @@ forbid(ownerDateGrid, /cell\.date\.slice\(8\)/);
 requireText(usage, 'symbol: "calendarCells"');
 requireText(usage, 'sourcePath: "packages/json-document-calendar/src/date-values.ts"');
 
-console.log("Calendar period-cells guard ok; CalendarCell day owner, canonical DateGrid and Host consumers, public type, and Usage checked.");
+console.log("Calendar period-cells guard ok; CalendarCell day owner, canonical DateGrid/TimeGrid and Host consumers, public type, and Usage checked.");
 
 function read(path) {
   return readFileSync(resolve(root, path), "utf8");
