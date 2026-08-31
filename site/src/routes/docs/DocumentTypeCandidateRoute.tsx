@@ -1,6 +1,5 @@
-import { PageFrame, PageHeader } from "../../shared/ui/primitives";
-import { MarkdownViewer } from "./MarkdownViewer";
 import documentTypeAudits from "../../../../audits/document-types.json";
+import { DocumentationPage } from "./DocumentationPage";
 
 const candidateNames = {
   "rich-text": "Rich Text",
@@ -77,13 +76,11 @@ ${auditSource}
 `;
 
   return (
-    <PageFrame>
-      <div className="mx-auto max-w-3xl">
-        <PageHeader title={`${name} Document Type · TBD`} illustration="braces">
-          후보의 이름만 등록했으며 소유권과 구현 경계는 아직 확정하지 않았습니다.
-        </PageHeader>
-        <MarkdownViewer source={source} />
-      </div>
-    </PageFrame>
+    <DocumentationPage
+      title={`${name} Document Type · TBD`}
+      source={source}
+      illustration="braces"
+      summary="후보의 이름만 등록했으며 소유권과 구현 경계는 아직 확정하지 않았습니다."
+    />
   );
 }
