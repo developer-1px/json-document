@@ -11,6 +11,17 @@ const expectedCandidates = siteRoutes
 
 if (JSON.stringify(ledger.candidates) !== JSON.stringify(expectedCandidates)) throw new Error("Document Type audit candidates do not match the TBD navigation denominator");
 
+for (const candidate of ledger.candidates) {
+  const profile = ledger.candidateProfiles[candidate];
+  if (profile === undefined) throw new Error(`${candidate} is missing its candidate profile`);
+  for (const field of ["why", "does", "schema", "sourcePath", "symbol"]) {
+    if (typeof profile[field] !== "string" || profile[field].trim() === "") throw new Error(`${candidate} candidate profile is missing ${field}`);
+  }
+  const sourceFile = join(root, profile.sourcePath);
+  if (!existsSync(sourceFile)) throw new Error(`${candidate} candidate profile source does not exist: ${profile.sourcePath}`);
+  if (!new RegExp(`\\b${profile.symbol}\\b`).test(readFileSync(sourceFile, "utf8"))) throw new Error(`${candidate} candidate profile symbol does not exist: ${profile.symbol}`);
+}
+
 for (const [candidate, audit] of Object.entries(ledger.audits)) {
   if (!ledger.candidates.includes(candidate)) throw new Error(`unknown Document Type audit: ${candidate}`);
   if (audit.denominator !== audit.occurrences.length) throw new Error(`${candidate} audit denominator mismatch: expected ${audit.denominator}, found ${audit.occurrences.length}`);
@@ -38,4 +49,4 @@ if (calendar.status !== "audited-tbd" || !calendar.occurrences.some((occurrence)
   throw new Error("Calendar must remain audited-tbd while nonconforming occurrences remain");
 }
 
-console.log(`Document Type audits ok; candidates=${ledger.candidates.length}; audited=${Object.keys(ledger.audits).length}; Calendar occurrences=${calendar.occurrences.length}.`);
+console.log(`Document Type audits ok; candidates=${ledger.candidates.length}; candidate profiles=${Object.keys(ledger.candidateProfiles).length}; audited=${Object.keys(ledger.audits).length}; Calendar occurrences=${calendar.occurrences.length}.`);

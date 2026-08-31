@@ -2,6 +2,71 @@
   "version": 1,
   "invariant": "same role + same responsibility = same canonical module",
   "candidates": ["rich-text", "order", "object", "tree", "database", "calendar", "sheet", "kanban", "annotation"],
+  "candidateProfiles": {
+    "rich-text": {
+      "why": "paragraph, list, mark와 extension node의 의미와 유효성을 일반 JSON 편집 규칙만으로 보존할 수 없기 때문입니다.",
+      "does": "Rich Text node vocabulary, block/inline 관계, mark와 extension 계약을 정의하고 구조화된 문서를 text·HTML 같은 표현으로 투영합니다.",
+      "schema": "{ profile: string; type: \"doc\"; id: string; content: RichTextBlockNode[] }",
+      "sourcePath": "packages/json-document-rich-text/src/model.ts",
+      "symbol": "RichTextDocument"
+    },
+    "order": {
+      "why": "순서가 의미인 item 집합은 배열 위치뿐 아니라 안정된 item identity와 rename 규칙을 보존해야 하기 때문입니다.",
+      "does": "식별된 item의 선형 순서와 label을 정의하고 reorder·rename 같은 의미 연산의 기반을 제공합니다.",
+      "schema": "{ items: Array<{ id: string; label: string }> }",
+      "sourcePath": "packages/json-document-editing/src/order.ts",
+      "symbol": "OrderDocument"
+    },
+    "object": {
+      "why": "캔버스 object는 identity, geometry와 presentation 값을 하나의 의미 단위로 유지해야 하기 때문입니다.",
+      "does": "object의 위치·크기·색상 모델을 정의하고 translate·resize·fill 같은 공간 연산의 기반을 제공합니다.",
+      "schema": "{ objects: Array<{ id: string; label: string; x: number; y: number; width: number; height: number; color: string }> }",
+      "sourcePath": "packages/json-document-editing/src/object.ts",
+      "symbol": "ObjectDocument"
+    },
+    "tree": {
+      "why": "계층 문서는 node identity와 parent reference의 무결성, 순서와 가시성 투영을 함께 보존해야 하기 때문입니다.",
+      "does": "parent-linked node 모델을 정의하고 visible tree와 구조 이동을 위한 의미 기반을 제공합니다.",
+      "schema": "{ nodes: Array<{ id: string; parentId: string | null; label: string }> }",
+      "sourcePath": "packages/json-document-editing/src/tree.ts",
+      "symbol": "TreeDocument"
+    },
+    "database": {
+      "why": "record 값은 property schema와 view가 참조하는 identity·type 규칙을 함께 만족해야 하기 때문입니다.",
+      "does": "property schema, record 값과 저장된 table view를 정의하고 typed value·sort·filter projection의 기반을 제공합니다.",
+      "schema": "{ schema: { properties: DatabaseProperty[] }; records: DatabaseRecord[]; views: DatabaseTableView[] }",
+      "sourcePath": "packages/json-document-editing/src/database.ts",
+      "symbol": "DatabaseDocument"
+    },
+    "calendar": {
+      "why": "event interval, calendar reference와 recurrence가 시간 의미와 참조 무결성을 함께 보존해야 하기 때문입니다.",
+      "does": "calendar와 event·recurrence 모델을 정의하고 occurrence, busy date와 기간별 event projection의 기반을 제공합니다.",
+      "schema": "{ calendars: CalendarCalendar[]; events: Array<{ id: string; title: string; start: string; end: string; allDay: boolean; calendarId: string; recurrence: CalendarRecurrence | null; excludeDates: string[] }> }",
+      "sourcePath": "packages/json-document-editing/src/calendar.ts",
+      "symbol": "CalendarDocument"
+    },
+    "sheet": {
+      "why": "grid cell 값은 안정된 row·column identity와 좌표 관계를 유지해야 배열 index 변화에도 의미가 보존되기 때문입니다.",
+      "does": "column, row와 column-keyed cell 모델을 정의하고 grid topology와 range projection의 기반을 제공합니다.",
+      "schema": "{ columns: Array<{ id: string; label: string }>; rows: Array<{ id: string; cells: Record<string, JSONValue> }> }",
+      "sourcePath": "packages/json-document-editing/src/sheet.ts",
+      "symbol": "SheetDocument"
+    },
+    "kanban": {
+      "why": "card identity와 column의 card reference·순서가 보드 상태의 핵심 불변식이기 때문입니다.",
+      "does": "column과 card 모델, column별 card 순서를 정의하고 card 이동 연산의 기반을 제공합니다.",
+      "schema": "{ columns: Array<{ id: string; title: string; cardIds: string[] }>; cards: Array<{ id: string; title: string }> }",
+      "sourcePath": "packages/json-document-editing/src/kanban.ts",
+      "symbol": "KanbanDocument"
+    },
+    "annotation": {
+      "why": "annotation은 source identity, selector geometry, instruction body와 presentation 의미를 일관되게 연결해야 하기 때문입니다.",
+      "does": "annotation source·selector·body·presentation 모델과 참조 무결성을 정의하고 target별 annotation projection의 기반을 제공합니다.",
+      "schema": "{ profile: \"urn:interactive-os:json-document:annotation:1\"; id: string; sources: AnnotationSource[]; annotations: Annotation[] }",
+      "sourcePath": "packages/json-document-editing/src/annotation.ts",
+      "symbol": "AnnotationDocument"
+    }
+  },
   "audits": {
     "calendar": {
       "status": "audited-tbd",

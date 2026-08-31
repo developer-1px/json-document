@@ -18,6 +18,7 @@ export type DocumentTypeCandidate = keyof typeof candidateNames;
 
 export function DocumentTypeCandidateRoute(props: { readonly candidate: DocumentTypeCandidate }) {
   const name = candidateNames[props.candidate];
+  const profile = documentTypeAudits.candidateProfiles[props.candidate];
   const audit = props.candidate === "calendar" ? documentTypeAudits.audits.calendar : undefined;
   const auditSource = audit === undefined ? "" : `
 ## 소스 기반 감사 현황
@@ -38,6 +39,25 @@ fixture, copy, layout-only CSS, tests와 generated route는 제외합니다.
 
 ${name}은 현재 Document Type 후보입니다. 기존 package와 Hands에서 실제 책임을
 옮기거나 완료를 선언하지 않았습니다.
+
+## 왜 필요한가
+
+${profile.why}
+
+## 무엇을 하는가
+
+${profile.does}
+
+## 현재 관찰된 schema · TBD
+
+이 schema는 현재 source에 존재하는 document interface를 축약한 감사 입력입니다.
+정본 owner와 schema 계약이 확정됐다는 뜻은 아닙니다.
+
+\`\`\`ts
+${profile.schema}
+\`\`\`
+
+근거: \`${profile.sourcePath}\`의 \`${profile.symbol}\`
 ${auditSource}
 
 ## 확정에 필요한 증거

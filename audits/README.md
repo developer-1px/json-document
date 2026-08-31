@@ -5,7 +5,9 @@ ledger를 소유합니다. 사이트는 결과를 표시할 수 있지만 감사
 site-owned가 아닙니다.
 
 `document-types.json`의 후보 분모는 `site/site-routes.json`의 `Document Types`
-서브 메뉴입니다. 후보를 감사할 때는 다음 순서로 닫습니다.
+서브 메뉴입니다. 모든 후보는 `candidateProfiles`에 필요성, 역할, 현재 관찰된
+schema와 근거 source symbol을 기록합니다. 이 schema는 감사 입력이며 정본 계약을
+미리 확정하지 않습니다. 후보를 감사할 때는 다음 순서로 닫습니다.
 
 1. package public entrypoint, Usage source registry와 live demo registry에서 runtime
    closure를 정한다.
