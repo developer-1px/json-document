@@ -36,7 +36,11 @@ export function ShikiSourceCodeBlock(props: {
   }, [props.language, props.source, visible]);
 
   return (
-    <div ref={rootRef} data-source-highlighter={highlightedLines === undefined ? "fallback" : "shiki"}>
+    <div
+      ref={rootRef}
+      className="min-w-0 max-w-full"
+      data-source-highlighter={highlightedLines === undefined ? "fallback" : "shiki"}
+    >
       <CodeBlock
         highlightedLines={highlightedLines}
         language={props.language}
