@@ -32,6 +32,87 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/document-types",
+    "label": "Overview · TBD",
+    "title": "Document Types · TBD - json-document",
+    "heading": "Document Types · TBD",
+    "description": "JSON Document의 의미 모델을 소유하는 Document Type 책임과 아직 확정하지 않은 후보를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/rich-text",
+    "label": "Rich Text · TBD",
+    "title": "Rich Text Document Type · TBD - json-document",
+    "description": "Rich Text의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/order",
+    "label": "Order · TBD",
+    "title": "Order Document Type · TBD - json-document",
+    "description": "Order의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/object",
+    "label": "Object · TBD",
+    "title": "Object Document Type · TBD - json-document",
+    "description": "Object의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/tree",
+    "label": "Tree · TBD",
+    "title": "Tree Document Type · TBD - json-document",
+    "description": "Tree의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/database",
+    "label": "Database · TBD",
+    "title": "Database Document Type · TBD - json-document",
+    "description": "Database의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/calendar",
+    "label": "Calendar · TBD",
+    "title": "Calendar Document Type · TBD - json-document",
+    "description": "Calendar의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/sheet",
+    "label": "Sheet · TBD",
+    "title": "Sheet Document Type · TBD - json-document",
+    "description": "Sheet의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/kanban",
+    "label": "Kanban · TBD",
+    "title": "Kanban Document Type · TBD - json-document",
+    "description": "Kanban의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/annotation",
+    "label": "Annotation · TBD",
+    "title": "Annotation Document Type · TBD - json-document",
+    "description": "Annotation의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
     "path": "/docs/api",
     "label": "API Reference",
     "title": "json-document API - json-document",

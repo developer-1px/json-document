@@ -2,6 +2,7 @@ import {
   Blocks,
   Braces,
   Cable,
+  FileType2,
   Files,
   Hand,
   Link2,
@@ -19,6 +20,7 @@ type LayerIcon = {
 
 const layerIcons: Readonly<Record<SiteNavigationGroup, LayerIcon>> = {
   "JSON Document": { icon: Braces, size: 19 },
+  "Document Types": { icon: FileType2, size: 19 },
   Editing: { icon: PencilLine, size: 18 },
   Adapter: { icon: Cable, size: 19 },
   Connector: { icon: Link2, size: 21 },

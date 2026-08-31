@@ -7,6 +7,7 @@ import { docPages, type DocPageId } from "./doc-pages";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
+  documentTypes: "braces",
   adapters: "peek",
   adapterKeyboard: "terminal",
   adapterGridCell: "database",
@@ -105,6 +106,10 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
 
 export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
+}
+
+export function DocumentTypesDocsRoute() {
+  return <DocsRoute pageId="documentTypes" />;
 }
 
 export function AdapterDocsRoute() {

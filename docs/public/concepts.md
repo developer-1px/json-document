@@ -7,6 +7,7 @@ Core 주위에 선택적으로 붙습니다.
 ```txt
                          ┌─ Editing ─ Selection · Intent · History
 local JSON Document ─────┤
+                         ├─ Document Types ─ profile · model · schema · operations
                          ├─ Adapter ─ platform contract
 collaborative Document ──┤
                          ├─ Connector ─ named ecosystem
@@ -24,7 +25,7 @@ Hands를 제품 surface에 조합한 결과가 사람이 다루는 Artifact가 �
 외부 라이브러리가 필요할 때 고릅니다. Collaboration은 다음 계층이 아니라
 같은 `JSONDocument` 계약의 다른 구현입니다.
 
-권장 읽기 순서는 `JSON Document → Editing → Adapter → Connector → Affordance
+권장 읽기 순서는 `JSON Document → Document Types → Editing → Adapter → Connector → Affordance
 → UI Primitives → Hands → Artifact`입니다. 이 순서는 학습을 위한 서사일 뿐
 package dependency를 주장하지 않습니다. Collaboration은 Core의 대체 구현과
 profile 포함 관계를 따로 보기 위해 별도 묶음에서 읽습니다.
@@ -46,6 +47,16 @@ Clipboard는 옮길 내용을 기억합니다. History는 값과 선택을 함�
 
 Editing은 화면을 그리지 않습니다. 화면이 보낸 Intent를 현재 문서와 편집
 상태에 적용합니다. 시작점은 [Intent guide](intent-guide.md)입니다.
+
+## Document Types
+
+Document Type은 특정 JSON Document가 무엇을 의미하고 어떤 상태와 변경이
+유효한지를 정의합니다. Profile, Document Model, Schema와 invariant,
+Document Operation, Projection이 이 책임에 속합니다.
+
+Document Type은 selection, History 같은 편집 lifecycle이나 화면 표현을
+소유하지 않습니다. 현재 후보와 아직 결정하지 않은 소유권은
+[Document Types · TBD](document-types.md)에 정리되어 있습니다.
 
 ## Adapter
 

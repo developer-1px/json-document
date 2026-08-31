@@ -93,6 +93,7 @@ import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
 import databaseMarkdown from "../../../../docs/public/database.md?raw";
 import officialHandsMarkdown from "../../../../docs/public/official-hands.md?raw";
+import documentTypesMarkdown from "../../../../docs/public/document-types.md?raw";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 function docPage(path: string, source: string) {
@@ -101,6 +102,7 @@ function docPage(path: string, source: string) {
 
 export const docPages = {
   overview: docPage("/docs", overviewMarkdown),
+  documentTypes: docPage("/docs/document-types", documentTypesMarkdown),
   adapters: docPage("/docs/adapters", adaptersMarkdown),
   adapterKeyboard: docPage("/docs/adapter-keyboard", adapterKeyboardMarkdown),
   adapterGridCell: docPage("/docs/adapter-grid-cell", adapterGridCellMarkdown),

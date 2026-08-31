@@ -45,6 +45,19 @@ describe("official site shell", () => {
       "API Reference",
       "Public API",
     ]);
+    await user.click(nav.getByRole("button", { name: "Document Types" }));
+    expect(groupLinks(nav, "Document Types")).toEqual([
+      "Overview · TBD",
+      "Rich Text · TBD",
+      "Order · TBD",
+      "Object · TBD",
+      "Tree · TBD",
+      "Database · TBD",
+      "Calendar · TBD",
+      "Sheet · TBD",
+      "Kanban · TBD",
+      "Annotation · TBD",
+    ]);
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Collaboration" }));
     expect(groupLinks(nav, "Collaboration")).toEqual([
@@ -157,6 +170,7 @@ describe("official site shell", () => {
     expect(groupLinks(nav, "Artifact")).toEqual(["MD · PPT · Sheet", "API · File Intake", "API · Markdown", "Streaming Markdown", "LLM Agent"]);
     expect(nav.getAllByRole("group").map((group) => group.getAttribute("aria-label"))).toEqual([
       "JSON Document",
+      "Document Types",
       "Editing",
       "Adapter",
       "Connector",
@@ -196,6 +210,17 @@ describe("official site shell", () => {
       { timeout: 5000 },
     )).toBeTruthy();
   }, 10000);
+
+  test("exposes the Document Types TBD boundary", async () => {
+    resetDocument("/docs/document-types");
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "책임" })).toBeTruthy();
+    expect(screen.getByText(/기존 package와 Hands의 실제 소유권 재배치는 아직 결정하지 않습니다/)).toBeTruthy();
+    const breadcrumb = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+    expect(breadcrumb.getByRole("link", { name: "Document Types" }).getAttribute("href")).toBe("/docs/document-types");
+  });
 
   test("keeps the site chrome mounted across interior routes", async () => {
     render(<App />);
