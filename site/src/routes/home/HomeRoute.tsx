@@ -27,26 +27,31 @@ export function HomeRoute() {
           </p>
 
           <div className={homeStyles.entry()}>
-            <ActionLink to="/docs" kind="prominent">JSON Document부터 읽기</ActionLink>
-            <ActionLink to="/viewer">Artifact prototype 보기</ActionLink>
+            <ActionLink to="/docs" kind="prominent">Foundation부터 읽기</ActionLink>
+            <ActionLink to="/applications">Applications 보기</ActionLink>
           </div>
 
           <nav className={homeStyles.index()} aria-label="Dependency map">
             <ol className={homeStyles.indexList()}>
               <li className={homeStyles.indexItem()}>
                 <span className={homeStyles.indexNumber()}>01</span>
-                <span><ActionLink to="/docs" className={homeStyles.indexLink()}>JSON Document</ActionLink>
-                <span className={homeStyles.indexBlurb()}>JSON 값·선택·변경·협업의 기반 계약</span></span>
+                <span><ActionLink to="/docs" className={homeStyles.indexLink()}>Foundation</ActionLink>
+                <span className={homeStyles.indexBlurb()}>값·의미·편집·협업의 기반 계약</span></span>
               </li>
               <li className={homeStyles.indexItem()}>
                 <span className={homeStyles.indexNumber()}>02</span>
-                <span><ActionLink to="/editors" className={homeStyles.indexLink()}>Hands</ActionLink>
-                <span className={homeStyles.indexBlurb()}>Core 위에서 사람이 artifact와 agent를 다루는 편집 도구</span></span>
+                <span><ActionLink to="/docs/adapters" className={homeStyles.indexLink()}>Building Blocks</ActionLink>
+                <span className={homeStyles.indexBlurb()}>플랫폼·생태계·입력·UI를 연결하는 선택 책임</span></span>
               </li>
               <li className={homeStyles.indexItem()}>
                 <span className={homeStyles.indexNumber()}>03</span>
-                <span><ActionLink to="/viewer" className={homeStyles.indexLink()}>Artifact</ActionLink>
-                <span className={homeStyles.indexBlurb()}>아래 계층을 조합한 MD·PPT·Sheet prototype · TBD</span></span>
+                <span><ActionLink to="/editors" className={homeStyles.indexLink()}>Hands → Artifact</ActionLink>
+                <span className={homeStyles.indexBlurb()}>사람이 이어서 작업할 수 있는 편집 경험</span></span>
+              </li>
+              <li className={homeStyles.indexItem()}>
+                <span className={homeStyles.indexNumber()}>04</span>
+                <span><ActionLink to="/applications" className={homeStyles.indexLink()}>Applications</ActionLink>
+                <span className={homeStyles.indexBlurb()}>제품에서 책임을 발견하고 canonical module로 되돌리는 곳</span></span>
               </li>
             </ol>
           </nav>

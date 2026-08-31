@@ -10,6 +10,7 @@ const navigationGroups = new Set([
   "UI Primitives",
   "Hands",
   "Artifact",
+  "Applications",
 ]);
 
 export function validateSiteRoutes(routes, fail) {

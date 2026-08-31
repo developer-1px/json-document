@@ -1,41 +1,33 @@
 import {
   Blocks,
   Braces,
-  Cable,
-  FileType2,
   Files,
   Hand,
-  Link2,
-  MousePointer2,
-  PencilLine,
-  UsersRound,
+  Library,
+  PanelsTopLeft,
   type LucideIcon,
 } from "lucide-react";
-import { type SiteNavigationGroup } from "./page-descriptors";
+import { type SiteSectionId } from "./site-layers";
 
 type LayerIcon = {
   readonly icon: LucideIcon;
   readonly size: number;
 };
 
-const layerIcons: Readonly<Record<SiteNavigationGroup, LayerIcon>> = {
-  "JSON Document": { icon: Braces, size: 19 },
-  "Document Types": { icon: FileType2, size: 19 },
-  Editing: { icon: PencilLine, size: 18 },
-  Adapter: { icon: Cable, size: 19 },
-  Connector: { icon: Link2, size: 21 },
-  Affordance: { icon: MousePointer2, size: 20 },
-  "UI Primitives": { icon: Blocks, size: 18 },
-  Hands: { icon: Hand, size: 19 },
-  Artifact: { icon: Files, size: 18 },
-  Collaboration: { icon: UsersRound, size: 19 },
+const layerIcons: Readonly<Record<SiteSectionId, LayerIcon>> = {
+  foundation: { icon: Braces, size: 19 },
+  "building-blocks": { icon: Blocks, size: 18 },
+  hands: { icon: Hand, size: 19 },
+  artifact: { icon: Files, size: 18 },
+  applications: { icon: PanelsTopLeft, size: 19 },
+  reference: { icon: Library, size: 18 },
 };
 
 export function NavigationLayerIcon(props: {
-  readonly group: SiteNavigationGroup;
+  readonly section: SiteSectionId;
   readonly className?: string;
 }) {
-  const layerIcon = layerIcons[props.group];
+  const layerIcon = layerIcons[props.section];
   const Icon = layerIcon.icon;
   return <Icon aria-hidden="true" className={props.className} size={layerIcon.size} strokeWidth={1.8} />;
 }

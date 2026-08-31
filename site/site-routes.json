@@ -32,6 +32,42 @@
     "navigationGroup": "JSON Document"
   },
   {
+    "path": "/docs/how-we-build",
+    "label": "How We Build",
+    "title": "How We Build - json-document",
+    "heading": "제품에서 정본 모듈을 발견하는 방법",
+    "description": "Application을 먼저 만들고 실제 제품 책임을 canonical module로 추출한 뒤 제품이 다시 소비하는 개발 순환을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "JSON Document"
+  },
+  {
+    "path": "/applications",
+    "label": "Overview",
+    "title": "Applications - json-document",
+    "heading": "Applications",
+    "description": "Artifact와 Hands를 실제 제품 경험으로 조합하고 재사용 책임을 발견하는 Application 목록입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications"
+  },
+  {
+    "path": "/applications/calendar",
+    "label": "Calendar",
+    "title": "Calendar Application - json-document",
+    "description": "Calendar Document Type, Hand, UI와 App-owned policy를 조합한 Calendar Application입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "app"
+  },
+  {
+    "path": "/applications/ai-agent",
+    "label": "AI Agent",
+    "title": "AI Agent Application - json-document",
+    "description": "Composer, Markdown, AG-UI와 A2UI를 session runtime에 조합한 AI Agent Application입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "app"
+  },
+  {
     "path": "/docs/document-types",
     "label": "Overview · TBD",
     "title": "Document Types · TBD - json-document",
@@ -649,13 +685,11 @@
   },
   {
     "path": "/demo/calendar",
-    "label": "Calendar",
-    "title": "Calendar Hands Demo - json-document",
-    "description": "Interval events on one document across day, week, month, and year views.",
+    "label": "Calendar legacy route",
+    "title": "Calendar legacy route - json-document",
+    "description": "Calendar Application의 이전 Demo 경로를 새 Application 경로로 연결합니다.",
     "language": "ko",
-    "parentPath": "/editors",
-    "navigationGroup": "Hands",
-    "chrome": "app"
+    "sidebar": false
   },
   {
     "path": "/demo/date-controls",
@@ -726,11 +760,10 @@
   },
   {
     "path": "/artifact/llm-agent",
-    "label": "LLM Agent",
-    "title": "LLM Agent - json-document",
-    "description": "로컬 Codex thread를 선택하고 이어서 대화하며 agent turn을 스트리밍하는 Artifact 앱입니다.",
-    "navigationGroup": "Artifact",
-    "chrome": "app"
+    "label": "AI Agent legacy route",
+    "title": "AI Agent legacy route - json-document",
+    "description": "AI Agent Application의 이전 Artifact 경로를 새 Application 경로로 연결합니다.",
+    "sidebar": false
   },
   {
     "path": "/docs/mention",

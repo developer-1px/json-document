@@ -11,7 +11,8 @@ export type SiteNavigationGroup =
   | "Adapter"
   | "Connector"
   | "Affordance"
-  | "UI Primitives";
+  | "UI Primitives"
+  | "Applications";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {

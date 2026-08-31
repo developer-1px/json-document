@@ -20,6 +20,9 @@ import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/
 import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
 import { Route as PageAdaptersVirtualSelectionRouteImport } from "./routes/_page/adapters/virtual-selection";
 import { Route as PageAffordancesHandlesRouteImport } from "./routes/_page/affordances/handles";
+import { Route as PageApplicationsIndexRouteImport } from "./routes/_page/applications/index";
+import { Route as PageApplicationsAiAgentRouteImport } from "./routes/_page/applications/ai-agent";
+import { Route as PageApplicationsCalendarRouteImport } from "./routes/_page/applications/calendar";
 import { Route as PageArtifactLlmAgentRouteImport } from "./routes/_page/artifact/llm-agent";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
@@ -70,6 +73,7 @@ import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
+import { Route as PageDocsHowWeBuildRouteImport } from "./routes/_page/docs/how-we-build";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsMentionRouteImport } from "./routes/_page/docs/mention";
@@ -214,6 +218,22 @@ const PageAffordancesHandlesRoute = PageAffordancesHandlesRouteImport.update({
   path: "/affordances/handles",
   getParentRoute: () => PageRoute,
 } as any);
+const PageApplicationsIndexRoute = PageApplicationsIndexRouteImport.update({
+  id: "/applications/",
+  path: "/applications/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageApplicationsAiAgentRoute = PageApplicationsAiAgentRouteImport.update({
+  id: "/applications/ai-agent",
+  path: "/applications/ai-agent",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageApplicationsCalendarRoute =
+  PageApplicationsCalendarRouteImport.update({
+    id: "/applications/calendar",
+    path: "/applications/calendar",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageArtifactLlmAgentRoute = PageArtifactLlmAgentRouteImport.update({
   id: "/artifact/llm-agent",
   path: "/artifact/llm-agent",
@@ -472,6 +492,11 @@ const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
   id: "/docs/history",
   path: "/docs/history",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsHowWeBuildRoute = PageDocsHowWeBuildRouteImport.update({
+  id: "/docs/how-we-build",
+  path: "/docs/how-we-build",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsIntentRoute = PageDocsIntentRouteImport.update({
@@ -960,6 +985,8 @@ export interface FileRoutesByFullPath {
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/applications/ai-agent": typeof PageApplicationsAiAgentRoute;
+  "/applications/calendar": typeof PageApplicationsCalendarRoute;
   "/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
@@ -1007,6 +1034,7 @@ export interface FileRoutesByFullPath {
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
@@ -1028,6 +1056,7 @@ export interface FileRoutesByFullPath {
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters/": typeof PageAdaptersIndexRoute;
+  "/applications/": typeof PageApplicationsIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
@@ -1109,6 +1138,8 @@ export interface FileRoutesByTo {
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/applications/ai-agent": typeof PageApplicationsAiAgentRoute;
+  "/applications/calendar": typeof PageApplicationsCalendarRoute;
   "/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
@@ -1156,6 +1187,7 @@ export interface FileRoutesByTo {
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
@@ -1177,6 +1209,7 @@ export interface FileRoutesByTo {
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters": typeof PageAdaptersIndexRoute;
+  "/applications": typeof PageApplicationsIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
@@ -1260,6 +1293,8 @@ export interface FileRoutesById {
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
   "/_page/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
   "/_page/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/_page/applications/ai-agent": typeof PageApplicationsAiAgentRoute;
+  "/_page/applications/calendar": typeof PageApplicationsCalendarRoute;
   "/_page/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
@@ -1307,6 +1342,7 @@ export interface FileRoutesById {
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
+  "/_page/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/mention": typeof PageDocsMentionRoute;
@@ -1328,6 +1364,7 @@ export interface FileRoutesById {
   "/_page/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/_page/widgets/tree": typeof PageWidgetsTreeRoute;
   "/_page/adapters/": typeof PageAdaptersIndexRoute;
+  "/_page/applications/": typeof PageApplicationsIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
@@ -1411,6 +1448,8 @@ export interface FileRouteTypes {
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
     | "/affordances/handles"
+    | "/applications/ai-agent"
+    | "/applications/calendar"
     | "/artifact/llm-agent"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
@@ -1458,6 +1497,7 @@ export interface FileRouteTypes {
     | "/docs/connectors"
     | "/docs/database"
     | "/docs/history"
+    | "/docs/how-we-build"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
@@ -1479,6 +1519,7 @@ export interface FileRouteTypes {
     | "/widgets/toolbar"
     | "/widgets/tree"
     | "/adapters/"
+    | "/applications/"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
@@ -1560,6 +1601,8 @@ export interface FileRouteTypes {
     | "/adapters/keyboard"
     | "/adapters/virtual-selection"
     | "/affordances/handles"
+    | "/applications/ai-agent"
+    | "/applications/calendar"
     | "/artifact/llm-agent"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
@@ -1607,6 +1650,7 @@ export interface FileRouteTypes {
     | "/docs/connectors"
     | "/docs/database"
     | "/docs/history"
+    | "/docs/how-we-build"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
@@ -1628,6 +1672,7 @@ export interface FileRouteTypes {
     | "/widgets/toolbar"
     | "/widgets/tree"
     | "/adapters"
+    | "/applications"
     | "/connectors"
     | "/demo"
     | "/docs"
@@ -1710,6 +1755,8 @@ export interface FileRouteTypes {
     | "/_page/adapters/keyboard"
     | "/_page/adapters/virtual-selection"
     | "/_page/affordances/handles"
+    | "/_page/applications/ai-agent"
+    | "/_page/applications/calendar"
     | "/_page/artifact/llm-agent"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
@@ -1757,6 +1804,7 @@ export interface FileRouteTypes {
     | "/_page/docs/connectors"
     | "/_page/docs/database"
     | "/_page/docs/history"
+    | "/_page/docs/how-we-build"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
     | "/_page/docs/mention"
@@ -1778,6 +1826,7 @@ export interface FileRouteTypes {
     | "/_page/widgets/toolbar"
     | "/_page/widgets/tree"
     | "/_page/adapters/"
+    | "/_page/applications/"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
@@ -1932,6 +1981,27 @@ declare module "@tanstack/react-router" {
       path: "/affordances/handles";
       fullPath: "/affordances/handles";
       preLoaderRoute: typeof PageAffordancesHandlesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/applications/": {
+      id: "/_page/applications/";
+      path: "/applications";
+      fullPath: "/applications/";
+      preLoaderRoute: typeof PageApplicationsIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/applications/ai-agent": {
+      id: "/_page/applications/ai-agent";
+      path: "/applications/ai-agent";
+      fullPath: "/applications/ai-agent";
+      preLoaderRoute: typeof PageApplicationsAiAgentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/applications/calendar": {
+      id: "/_page/applications/calendar";
+      path: "/applications/calendar";
+      fullPath: "/applications/calendar";
+      preLoaderRoute: typeof PageApplicationsCalendarRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/artifact/llm-agent": {
@@ -2282,6 +2352,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/history";
       fullPath: "/docs/history";
       preLoaderRoute: typeof PageDocsHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/how-we-build": {
+      id: "/_page/docs/how-we-build";
+      path: "/docs/how-we-build";
+      fullPath: "/docs/how-we-build";
+      preLoaderRoute: typeof PageDocsHowWeBuildRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/intent": {
@@ -2973,6 +3050,8 @@ interface PageRouteChildren {
   PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
   PageAdaptersVirtualSelectionRoute: typeof PageAdaptersVirtualSelectionRoute;
   PageAffordancesHandlesRoute: typeof PageAffordancesHandlesRoute;
+  PageApplicationsAiAgentRoute: typeof PageApplicationsAiAgentRoute;
+  PageApplicationsCalendarRoute: typeof PageApplicationsCalendarRoute;
   PageArtifactLlmAgentRoute: typeof PageArtifactLlmAgentRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
@@ -3020,6 +3099,7 @@ interface PageRouteChildren {
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
+  PageDocsHowWeBuildRoute: typeof PageDocsHowWeBuildRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsMentionRoute: typeof PageDocsMentionRoute;
@@ -3041,6 +3121,7 @@ interface PageRouteChildren {
   PageWidgetsToolbarRoute: typeof PageWidgetsToolbarRoute;
   PageWidgetsTreeRoute: typeof PageWidgetsTreeRoute;
   PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
+  PageApplicationsIndexRoute: typeof PageApplicationsIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
@@ -3094,6 +3175,8 @@ const PageRouteChildren: PageRouteChildren = {
   PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
   PageAdaptersVirtualSelectionRoute: PageAdaptersVirtualSelectionRoute,
   PageAffordancesHandlesRoute: PageAffordancesHandlesRoute,
+  PageApplicationsAiAgentRoute: PageApplicationsAiAgentRoute,
+  PageApplicationsCalendarRoute: PageApplicationsCalendarRoute,
   PageArtifactLlmAgentRoute: PageArtifactLlmAgentRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
@@ -3141,6 +3224,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
+  PageDocsHowWeBuildRoute: PageDocsHowWeBuildRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsMentionRoute: PageDocsMentionRoute,
@@ -3162,6 +3246,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageWidgetsToolbarRoute: PageWidgetsToolbarRoute,
   PageWidgetsTreeRoute: PageWidgetsTreeRoute,
   PageAdaptersIndexRoute: PageAdaptersIndexRoute,
+  PageApplicationsIndexRoute: PageApplicationsIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,
