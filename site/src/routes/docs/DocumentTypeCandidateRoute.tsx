@@ -1,5 +1,6 @@
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { MarkdownViewer } from "./MarkdownViewer";
+import documentTypeAudits from "../../../../audits/document-types.json";
 
 const candidateNames = {
   "rich-text": "Rich Text",
@@ -17,10 +18,27 @@ export type DocumentTypeCandidate = keyof typeof candidateNames;
 
 export function DocumentTypeCandidateRoute(props: { readonly candidate: DocumentTypeCandidate }) {
   const name = candidateNames[props.candidate];
+  const audit = props.candidate === "calendar" ? documentTypeAudits.audits.calendar : undefined;
+  const auditSource = audit === undefined ? "" : `
+## 소스 기반 감사 현황
+
+- 상태: **감사됨 · TBD**
+- 감사 분모: **${audit.denominator}개 책임 occurrence**
+- 정본 소비/Host composition: **${audit.occurrences.filter((item) => item.disposition === "canonical consumer" || item.disposition === "Host composition").length}개**
+- canonical move 필요: **${audit.occurrences.filter((item) => item.disposition !== "canonical consumer" && item.disposition !== "Host composition").length}개**
+
+| 책임 | 현재 owner | 판정 | 다음 확인 |
+| --- | --- | --- | --- |
+${audit.occurrences.map((item) => `| ${item.role} | \`${item.currentOwner}\` | ${item.disposition} | ${item.nextCheck} |`).join("\n")}
+
+감사 분모는 \`${audit.horizon.enumerators.join("`, `")}\`에서 출발하며,
+fixture, copy, layout-only CSS, tests와 generated route는 제외합니다.
+`;
   const source = `## 후보 상태
 
 ${name}은 현재 Document Type 후보입니다. 기존 package와 Hands에서 실제 책임을
 옮기거나 완료를 선언하지 않았습니다.
+${auditSource}
 
 ## 확정에 필요한 증거
 

@@ -211,6 +211,9 @@ test("Document Type candidate submenu keeps ownership explicitly TBD", async ({ 
   await expect(page).toHaveTitle("Calendar Document Type · TBD - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · TBD" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "확정에 필요한 증거" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "소스 기반 감사 현황" })).toBeVisible();
+  await expect(page.getByText("10개 책임 occurrence", { exact: false })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "mislocated module", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · TBD" })).toHaveAttribute("aria-current", "page");
 });
 
