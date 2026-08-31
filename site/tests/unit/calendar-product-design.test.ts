@@ -52,9 +52,9 @@ describe("calendar product design", () => {
 
   test("time grid keeps calendar structure visible without a full-column hover wash", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
-    expect(styles.hourRule()).toContain("border-line-subtle/70");
-    expect(styles.weekCell()).toContain("border-line-subtle/60");
-    expect(styles.weekSticky()).toContain("border-line-subtle/60");
+    expect(styles.hourRule()).toContain("border-line-subtle/45");
+    expect(styles.weekCell()).toContain("border-line-subtle/30");
+    expect(styles.weekSticky()).toContain("border-line-subtle/40");
     expect(styles.monthWeek()).toContain("border-line-subtle/60");
     expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
     expect(styles.hourLabel()).toContain("text-foreground-muted");
