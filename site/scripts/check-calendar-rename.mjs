@@ -5,12 +5,14 @@ const root = resolve(new URL("../..", import.meta.url).pathname);
 const owner = read("packages/json-document-affordance/src/session.ts");
 const hand = read("packages/json-document-calendar/src/use-calendar-hand.ts");
 const binding = read("packages/json-document-calendar/src/use-calendar-rename-input.ts");
+const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "readonly onCancel?: (key: Key, draft: string) => void");
 requireText(hand, "createRenameSession");
 requireText(binding, "handleTitleRenameKey");
-requireText(host, "useCalendarRenameInput");
+requireText(inspector, "useCalendarRenameInput");
+requireText(host, "CalendarEventInspector");
 forbid(host, /\b(?:naming|finishNaming|cancelNaming|commitTitle)\b/);
 forbid(host, /titleRef\.current\?\.(?:focus|select)\(/);
 

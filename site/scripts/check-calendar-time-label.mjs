@@ -7,12 +7,14 @@ const eventLabelOwner = read("packages/json-document-calendar/src/calendar-event
 const ownerIndex = read("packages/json-document-calendar/src/index.ts");
 const monthGrid = read("packages/json-document-calendar/src/calendar-month-grid.tsx");
 const timeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
+const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
 
 requireText(owner, "calendarTimeLabel");
 requireText(owner, "Temporal.PlainDateTime.from(parsed).toPlainTime()");
 requireText(ownerIndex, "calendarTimeLabel");
-requireCount(host, "calendarTimeLabel(", 2);
+requireCount(host, "calendarTimeLabel(", 0);
+requireCount(inspector, "calendarTimeLabel(", 2);
 requireCount(monthGrid, "calendarTimeLabel(", 1);
 requireCount(timeGrid, "calendarTimeLabel(", 2);
 requireCount(eventLabelOwner, "calendarTimeLabel(", 1);

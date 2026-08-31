@@ -6,6 +6,7 @@ const owner = read("packages/json-document-editing/src/calendar-validation.ts");
 const ownerIndex = read("packages/json-document-editing/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-validation.test.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const usage = read("docs/public/hands.md");
 const sources = read("site/src/shared/demo-workbench/demo-sources.ts");
 
@@ -13,7 +14,7 @@ for (const symbol of ["calendarDocumentCalendars", "calendarDocumentCalendar"]) 
   requireText(owner, `export function ${symbol}`);
   requireText(ownerIndex, symbol);
   requireText(ownerTest, symbol);
-  requireText(host, symbol);
+  requireText(symbol === "calendarDocumentCalendars" ? host : inspector, symbol);
   requireText(usage, symbol);
   requireText(sources, `symbol: "${symbol}"`);
 }

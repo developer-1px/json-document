@@ -9,6 +9,7 @@ const editor = read("packages/json-document-editing/src/calendar.ts");
 const allDayPointer = read("packages/json-document-editing/src/calendar-allday-pointer.ts");
 const monthPointer = read("packages/json-document-editing/src/calendar-month-pointer.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const timeGrid = read("packages/json-document-calendar/src/calendar-time-grid.tsx");
 const usage = read("site/src/shared/demo-workbench/demo-sources.ts");
 
@@ -18,7 +19,8 @@ requireText(ownerTest, 'calendarAllDaySpan("2026-05-27", "2026-05-25")');
 requireText(editor, "calendarAllDaySpan(start, start)?.end");
 requireCount(allDayPointer, "calendarAllDaySpan(", 2);
 requireCount(monthPointer, "calendarAllDaySpan(", 1);
-requireCount(host, "calendarAllDaySpan(", 1);
+requireCount(host, "calendarAllDaySpan(", 0);
+requireCount(inspector, "calendarAllDaySpan(", 1);
 requireCount(timeGrid, "calendarAllDaySpan(", 1);
 forbid(allDayPointer, /addCalendarDate\(release\.targetDay, 1\)/);
 forbid(editor, /addCalendarDate\(start, 1\)/);

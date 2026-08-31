@@ -6,6 +6,7 @@ const owner = read("packages/json-document-editing/src/calendar-occurrence.ts");
 const ownerIndex = read("packages/json-document-editing/src/index.ts");
 const ownerTest = read("packages/json-document-editing/tests/calendar-editor.test.ts");
 const host = read("site/src/routes/calendar-demo/CalendarDemoRoute.tsx");
+const inspector = read("packages/json-document-calendar/src/calendar-event-inspector.tsx");
 const usage = read("docs/public/hands.md");
 const sources = read("site/src/shared/demo-workbench/demo-sources.ts");
 const browserTest = read("site/tests/browser/calendar-app.spec.ts");
@@ -14,13 +15,13 @@ for (const symbol of ["calendarRecurrenceWithFrequency", "calendarRecurrenceWith
   requireText(owner, `export function ${symbol}`);
   requireText(ownerIndex, symbol);
   requireText(ownerTest, symbol);
-  requireText(host, symbol);
+  requireText(inspector, symbol);
   requireText(sources, `symbol: "${symbol}"`);
 }
-forbid(host, /as CalendarRecurrence\["freq"\]/);
-forbid(host, /Math\.max\(1, Math\.floor\(Number\(event\.target\.value\)/);
-forbid(host, /recurrence:\s*\{\s*\.\.\.selectedEvent\.recurrence!/);
-forbid(host, /selectedEvent\.recurrence!/);
+forbid(inspector, /as CalendarRecurrence\["freq"\]/);
+forbid(inspector, /Math\.max\(1, Math\.floor\(Number\(event\.target\.value\)/);
+forbid(inspector, /recurrence:\s*\{\s*\.\.\.selectedEvent\.recurrence!/);
+forbid(inspector, /selectedEvent\.recurrence!/);
 requireText(usage, "Editing\n`calendarRecurrenceWithFrequency`");
 requireText(sources, 'sourcePath: "packages/json-document-editing/src/calendar-occurrence.ts"');
 requireText(browserTest, "Calendar recurrence inspector applies canonical model transitions");

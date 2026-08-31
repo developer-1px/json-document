@@ -217,6 +217,7 @@ test("Calendar Usage exposes its canonical Editing and pointer sources", async (
   await usage.getByRole("tab", { name: "CalendarDemoRoute.tsx", exact: true }).click();
   await expect(usage.getByRole("tab", { name: "calendar-month-grid.tsx", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar-time-grid.tsx", exact: true })).toBeVisible();
+  await expect(usage.getByRole("tab", { name: "calendar-event-inspector.tsx", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar-input.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "calendar-time-grid-pointer.ts", exact: true })).toBeVisible();
@@ -224,7 +225,6 @@ test("Calendar Usage exposes its canonical Editing and pointer sources", async (
   await expect(usage.getByRole("tab", { name: "calendar-month-pointer.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "point-target.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "use-calendar-viewport-position.ts", exact: true })).toBeVisible();
-  await expect(usage.getByRole("tab", { name: "use-calendar-rename-input.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "use-calendar-keyboard.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "use-anchored-floating-position.ts", exact: true })).toBeVisible();
   await expect(usage.getByRole("tab", { name: "anchored-floating-position.ts", exact: true })).toHaveCount(2);
