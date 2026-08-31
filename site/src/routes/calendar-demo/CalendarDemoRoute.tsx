@@ -45,7 +45,6 @@ import {
   ToolbarGroup,
   ToolbarLayout,
   ToolbarRegion,
-  ToolbarSeparator,
   Toggle,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
@@ -312,26 +311,19 @@ export function CalendarDemoRoute(props: {
       <ProductShell
         className={styles.shell()}
         fill={!embedded}
-        canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
+        canvasClassName={classes("relative", embedded ? "overflow-x-auto" : "overflow-hidden")}
         toolbarLabel="Calendar controls"
         toolbar={(
-          <ToolbarLayout>
+          <ToolbarLayout className="gap-1" style={{ gridTemplateColumns: "auto auto auto" }}>
             <ToolbarRegion placement="start" label="Calendar navigation">
               <ToolbarGroup label="Period navigation">
-                <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
-                  monthNames: months,
-                  weekSeparator: " – ",
-                })}</span>
                 <Command affordance={calendarControlAffordance("periodPrevious")} label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
                   <ChevronLeft aria-hidden="true" size={16} />
                 </Command>
+                <Command affordance={calendarControlAffordance("today")} className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
                 <Command affordance={calendarControlAffordance("periodNext")} label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
                   <ChevronRight aria-hidden="true" size={16} />
                 </Command>
-              </ToolbarGroup>
-              <ToolbarSeparator />
-              <ToolbarGroup label="Date shortcuts">
-                <Command affordance={calendarControlAffordance("today")} className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
               </ToolbarGroup>
             </ToolbarRegion>
             <ToolbarRegion placement="center" label="Calendar view">
@@ -348,50 +340,147 @@ export function CalendarDemoRoute(props: {
                 onValueChange={setView}
               />
             </ToolbarRegion>
-            <ToolbarRegion placement="end" />
+            <ToolbarRegion placement="end" label="Calendar sources">
+              <ContextualControls
+                data-ui-affordance={calendarControlAffordance("sourceDisclosure")}
+                aria-label="Calendar sources"
+                tabIndex={0}
+                className={styles.toolbarSources()}
+                capabilities={[{ id: "sources", phases: ["approach"] }] as const}
+              >
+                {(context) => (
+                  <>
+                    <span className={styles.sidebarHint()}><CalendarDays aria-hidden="true" size={16} /></span>
+                    {context.visible.includes("sources") ? (
+                      <nav aria-label="Calendars" className={styles.sidebar()}>
+                        <p className={ui.text.label}>Calendars</p>
+                        {calendars.map((calendar) => (
+                          <Toggle
+                            affordance={calendarControlAffordance("sourceToggle")}
+                            key={calendar.id}
+                            pressed={!calendar.hidden}
+                            aria-label={`Show ${calendar.title}`}
+                            data-calendar-color={calendarColor(document, calendar.id)}
+                            className={styles.calendarToggle()}
+                            onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
+                          >
+                            <span
+                              aria-hidden="true"
+                              data-calendar-color={calendarColor(document, calendar.id)}
+                              className={styles.calendarSwatch()}
+                            />
+                            {calendar.title}
+                          </Toggle>
+                        ))}
+                        <CalendarDemoNavigator
+                          visibleDate={visibleDate}
+                          today={today}
+                          events={paintedEvents}
+                          onDateChange={setVisibleDate}
+                        />
+                      </nav>
+                    ) : null}
+                  </>
+                )}
+              </ContextualControls>
+            </ToolbarRegion>
           </ToolbarLayout>
         )}
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
-          <div className="flex min-h-0 min-w-0 flex-1 gap-4 pb-24">
-            <ContextualControls
-              data-ui-affordance={calendarControlAffordance("sourceDisclosure")}
-              aria-label="Calendar sources"
-              tabIndex={0}
-              className={styles.contextualSidebar()}
-              capabilities={[{ id: "sources", phases: ["approach"] }] as const}
+          <div className={styles.controlLayer()}>
+            <CalendarEventInspector
+              hand={hand}
+              calendars={calendars}
+              realizationKey={eventDetailsPosition.position?.placement ?? null}
+              rootRef={eventDetailsPosition.floatingRef}
+              style={eventDetailsPosition.style}
+              placement={eventDetailsPosition.position?.placement}
+              fits={eventDetailsPosition.position?.fits}
+              affordances={{
+                inspector: calendarControlAffordance("inspector"),
+                edit: calendarControlAffordance("inspectorEdit"),
+                remove: calendarControlAffordance("inspectorDelete"),
+                titleField: calendarControlAffordance("titleField"),
+                allDayToggle: calendarControlAffordance("allDayToggle"),
+                startField: calendarControlAffordance("startField"),
+                endField: calendarControlAffordance("endField"),
+                calendarChoice: calendarControlAffordance("calendarChoice"),
+                recurrenceChoice: calendarControlAffordance("recurrenceChoice"),
+                recurrenceInterval: calendarControlAffordance("recurrenceInterval"),
+              }}
+              classNames={{
+                root: classes(styles.inspector(), ui.surface.overlay),
+                header: styles.inspectorHeader(),
+                title: styles.inspectorTitle(),
+                titleInput: ui.field.seamless,
+                actions: styles.inspectorActions(),
+                summary: styles.eventSummary(),
+                details: styles.detailsEditor(),
+                field: styles.field(),
+                fieldLabel: ui.text.label,
+                toggle: classes(styles.calendarToggle(), "w-auto px-0"),
+                numberInput: ui.field.control,
+              }}
+              labels={{
+                inspector: "Event",
+                title: "Title",
+                edit: "Edit details",
+                remove: "Delete",
+                allDay: "All-day",
+                allDaySummary: "All day",
+                start: "Start",
+                end: "End",
+                calendar: "Calendar",
+                repeat: "Repeat",
+                repeats: "Repeats",
+                none: "None",
+                daily: "Daily",
+                weekly: "Weekly",
+                monthly: "Monthly",
+                yearly: "Yearly",
+                every: "Every",
+                repeatEvery: "Repeat every",
+                repeatUntil: "Repeat until",
+                editOccurrence: "Edit occurrence",
+                thisOccurrence: "This",
+                followingOccurrences: "Following",
+                allOccurrences: "All",
+              }}
+              icons={{
+                edit: <Pencil aria-hidden="true" size={14} />,
+                remove: <Trash2 aria-hidden="true" size={14} />,
+                time: <Clock3 aria-hidden="true" size={14} />,
+                calendar: <CalendarDays aria-hidden="true" size={14} />,
+                repeat: <Repeat2 aria-hidden="true" size={14} />,
+              }}
+            />
+            <div
+              className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
+              role="group"
+              aria-label="AI Composer preview"
+              aria-disabled="true"
             >
-              {(context) => context.visible.includes("sources") ? (
-                <nav aria-label="Calendars" className={styles.sidebar()}>
-                  <p className={ui.text.label}>Calendars</p>
-                  {calendars.map((calendar) => (
-                    <Toggle
-                      affordance={calendarControlAffordance("sourceToggle")}
-                      key={calendar.id}
-                      pressed={!calendar.hidden}
-                      aria-label={`Show ${calendar.title}`}
-                      data-calendar-color={calendarColor(document, calendar.id)}
-                      className={styles.calendarToggle()}
-                      onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
-                    >
-                      <span
-                        aria-hidden="true"
-                        data-calendar-color={calendarColor(document, calendar.id)}
-                        className={styles.calendarSwatch()}
-                      />
-                      {calendar.title}
-                    </Toggle>
-                  ))}
-                  <CalendarDemoNavigator
-                    visibleDate={visibleDate}
-                    today={today}
-                    events={paintedEvents}
-                    onDateChange={setVisibleDate}
-                  />
-                </nav>
-              ) : <span className={styles.sidebarHint()}>Calendars</span>}
-            </ContextualControls>
-            <div className={classes("min-w-0 flex-1", view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
+              <Sparkles aria-hidden="true" className={styles.composerSpark()} size={18} />
+              <input
+                data-ui-affordance={calendarControlAffordance("composerInput")}
+                aria-label="Ask about your calendar"
+                aria-describedby="calendar-composer-preview-note"
+                className={styles.composerInput()}
+                placeholder="Ask about your calendar…"
+                readOnly
+              />
+              <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
+              <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
+                <ArrowUp aria-hidden="true" size={16} />
+              </Command>
+            </div>
+          </div>
+          <div className={classes(styles.contentLayer(), view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
+            <p className={styles.periodHeading()}>{visiblePeriodLabel(view, visibleDate, {
+              monthNames: months,
+              weekSeparator: " – ",
+            })}</p>
             {view === "day" || view === "week" ? timeGrid : null}
             {view === "month" ? (
               <CalendarMonthGrid
@@ -483,93 +572,6 @@ export function CalendarDemoRoute(props: {
                 ))}
               </div>
             ) : null}
-            </div>
-            <CalendarEventInspector
-              hand={hand}
-              calendars={calendars}
-              realizationKey={eventDetailsPosition.position?.placement ?? null}
-              rootRef={eventDetailsPosition.floatingRef}
-              style={eventDetailsPosition.style}
-              placement={eventDetailsPosition.position?.placement}
-              fits={eventDetailsPosition.position?.fits}
-              affordances={{
-                inspector: calendarControlAffordance("inspector"),
-                edit: calendarControlAffordance("inspectorEdit"),
-                remove: calendarControlAffordance("inspectorDelete"),
-                titleField: calendarControlAffordance("titleField"),
-                allDayToggle: calendarControlAffordance("allDayToggle"),
-                startField: calendarControlAffordance("startField"),
-                endField: calendarControlAffordance("endField"),
-                calendarChoice: calendarControlAffordance("calendarChoice"),
-                recurrenceChoice: calendarControlAffordance("recurrenceChoice"),
-                recurrenceInterval: calendarControlAffordance("recurrenceInterval"),
-              }}
-              classNames={{
-                root: classes(styles.inspector(), ui.surface.overlay),
-                header: styles.inspectorHeader(),
-                title: styles.inspectorTitle(),
-                titleInput: ui.field.seamless,
-                actions: styles.inspectorActions(),
-                summary: styles.eventSummary(),
-                details: styles.detailsEditor(),
-                field: styles.field(),
-                fieldLabel: ui.text.label,
-                toggle: classes(styles.calendarToggle(), "w-auto px-0"),
-                numberInput: ui.field.control,
-              }}
-              labels={{
-                inspector: "Event",
-                title: "Title",
-                edit: "Edit details",
-                remove: "Delete",
-                allDay: "All-day",
-                allDaySummary: "All day",
-                start: "Start",
-                end: "End",
-                calendar: "Calendar",
-                repeat: "Repeat",
-                repeats: "Repeats",
-                none: "None",
-                daily: "Daily",
-                weekly: "Weekly",
-                monthly: "Monthly",
-                yearly: "Yearly",
-                every: "Every",
-                repeatEvery: "Repeat every",
-                repeatUntil: "Repeat until",
-                editOccurrence: "Edit occurrence",
-                thisOccurrence: "This",
-                followingOccurrences: "Following",
-                allOccurrences: "All",
-              }}
-              icons={{
-                edit: <Pencil aria-hidden="true" size={14} />,
-                remove: <Trash2 aria-hidden="true" size={14} />,
-                time: <Clock3 aria-hidden="true" size={14} />,
-                calendar: <CalendarDays aria-hidden="true" size={14} />,
-                repeat: <Repeat2 aria-hidden="true" size={14} />,
-              }}
-            />
-          </div>
-          <div
-            className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
-            role="group"
-            aria-label="AI Composer preview"
-            aria-disabled="true"
-          >
-            <Sparkles aria-hidden="true" className={styles.composerSpark()} size={18} />
-            <input
-              data-ui-affordance={calendarControlAffordance("composerInput")}
-              aria-label="Ask about your calendar"
-              aria-describedby="calendar-composer-preview-note"
-              className={styles.composerInput()}
-              placeholder="Ask about your calendar…"
-              readOnly
-            />
-            <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
-            <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
-              <ArrowUp aria-hidden="true" size={16} />
-            </Command>
           </div>
         </div>
       </ProductShell>
