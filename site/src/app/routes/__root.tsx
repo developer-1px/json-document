@@ -13,8 +13,8 @@ import {
   useRouteMetadata,
   type SiteRoute,
 } from "../router";
-import { isNavBranch, rootNavRoutes, routeGroup, visibleNavChildren } from "../breadcrumb";
-import { siteLayerGroups, siteLayers } from "../site-layers";
+import { isNavBranch, rootNavRoutes, routeSection, visibleNavChildren } from "../breadcrumb";
+import { siteSections } from "../site-layers";
 import { NavigationLayerIcon } from "../navigation-layer-icon";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
@@ -31,15 +31,15 @@ function AppShell() {
   const collapsed = appChrome && navCollapsed;
 
   useRouteMetadata(route);
-  const activeGroup = routeGroup(route, siteRoutes);
-  const [openGroups, setOpenGroups] = useState<ReadonlySet<(typeof siteLayerGroups)[number]>>(
-    () => new Set(activeGroup ? [activeGroup] : []),
+  const activeSection = routeSection(route, siteRoutes);
+  const [openSections, setOpenSections] = useState<ReadonlySet<(typeof siteSections)[number]["id"]>>(
+    () => new Set(activeSection ? [activeSection.id] : []),
   );
 
   useEffect(() => {
-    if (!activeGroup) return;
-    setOpenGroups((current) => current.has(activeGroup) ? current : new Set([...current, activeGroup]));
-  }, [activeGroup]);
+    if (!activeSection) return;
+    setOpenSections((current) => current.has(activeSection.id) ? current : new Set([...current, activeSection.id]));
+  }, [activeSection]);
 
   return (
     <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
@@ -55,15 +55,15 @@ function AppShell() {
             <PanelLeft aria-hidden="true" size={16} />
           </Command>
           <div className={ui.nav.railMenu}>
-            {siteLayers.map((layer) => (
+            {siteSections.map((section) => (
               <ActionLink
-                key={layer.group}
-                to={layer.path}
+                key={section.id}
+                to={section.path}
                 activePath={route.path}
-                className={classes(ui.nav.railItem, layer.separated ? ui.nav.railSeparatedItem : undefined, ui.nav.current)}
+                className={classes(ui.nav.railItem, section.separated ? ui.nav.railSeparatedItem : undefined, ui.nav.current)}
               >
-                <span className="sr-only">{layer.label}</span>
-                <NavigationLayerIcon group={layer.group} />
+                <span className="sr-only">{section.label}</span>
+                <NavigationLayerIcon section={section.id} />
               </ActionLink>
             ))}
           </div>
@@ -95,56 +95,80 @@ function AppShell() {
               {item.label}
             </ActionLink>
           ))}
-          {siteLayers.map((layer) => {
-            const group = layer.group;
-            const groupRoutes = siteRoutes.filter((item) =>
-              item.navigationGroup === group && item.sidebar !== false
+          {siteSections.map((section) => {
+            const sectionRoutes = siteRoutes.filter((item) =>
+              item.navigationGroup !== undefined
+              && section.groups.includes(item.navigationGroup)
+              && item.sidebar !== false
+              && !item.path.startsWith("/docs/api")
             );
-            if (groupRoutes.length === 0) return null;
-            const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-            const open = openGroups.has(group);
+            const sectionLabelId = `site-navigation-${section.id}`;
+            const open = openSections.has(section.id);
+            if (section.groups.length === 0) return (
+              <ActionLink
+                key={section.id}
+                to={section.path}
+                activePath={route.path}
+                className={classes(ui.nav.item, section.separated ? ui.nav.separatedGroup : undefined, ui.nav.current)}
+              >
+                <NavigationLayerIcon section={section.id} className="shrink-0" />
+                {section.label}
+              </ActionLink>
+            );
+            if (sectionRoutes.length === 0) return null;
             return (
               <div
-                key={group}
+                key={section.id}
                 role="group"
-                aria-label={group}
-                className={classes("grid content-start", layer.separated ? ui.nav.separatedGroup : undefined)}
+                aria-label={section.label}
+                className={classes("grid content-start", section.separated ? ui.nav.separatedGroup : undefined)}
               >
                 <DisclosureButton
-                  className={classes(ui.nav.groupToggle, activeGroup === group ? ui.nav.groupActive : ui.nav.groupIdle)}
+                  className={classes(ui.nav.groupToggle, activeSection?.id === section.id ? ui.nav.groupActive : ui.nav.groupIdle)}
                   expanded={open}
-                  controls={`${groupLabelId}-list`}
+                  controls={`${sectionLabelId}-list`}
                   onClick={() => {
-                    setOpenGroups((current) => {
+                    setOpenSections((current) => {
                       const next = new Set(current);
-                      if (next.has(group)) next.delete(group);
-                      else next.add(group);
+                      if (next.has(section.id)) next.delete(section.id);
+                      else next.add(section.id);
                       return next;
                     });
                   }}
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <NavigationLayerIcon group={group} className="shrink-0" />
-                    <span>{group}</span>
+                    <NavigationLayerIcon section={section.id} className="shrink-0" />
+                    <span>{section.label}</span>
                   </span>
                   <span aria-hidden="true" className={classes(ui.interactive.chevron, ui.nav.chevron)}>⌄</span>
                 </DisclosureButton>
                 <ul
-                  id={`${groupLabelId}-list`}
+                  id={`${sectionLabelId}-list`}
                   className={ui.nav.panel}
                   data-open={open ? "true" : undefined}
                   hidden={!open}
                 >
                   {open
-                    ? groupRoutes.map((item) => (
-                      <NavItem
-                        key={item.path}
-                        item={item}
-                        currentPath={route.path}
-                        routes={siteRoutes}
-                        depth={0}
-                      />
-                    ))
+                    ? section.groups.map((group) => {
+                      const groupRoutes = sectionRoutes.filter((item) => {
+                        if (item.navigationGroup !== group) return false;
+                        const parent = item.parentPath
+                          ? siteRoutes.find((candidate) => candidate.path === item.parentPath)
+                          : undefined;
+                        return parent?.navigationGroup !== group;
+                      });
+                      if (groupRoutes.length === 0) return null;
+                      return (
+                        <li key={group} className="grid content-start">
+                          {section.groups.length > 1 ? <span className={classes("px-4 pt-3", ui.text.meta)}>{group}</span> : null}
+                          <ul className={ui.nav.list}>
+                            {groupRoutes.map((item) => (
+                              <NavItem key={item.path} item={item} currentPath={route.path} routes={siteRoutes} depth={0} />
+                            ))}
+                          </ul>
+                        </li>
+                      );
+                    })
                     : null}
                 </ul>
               </div>

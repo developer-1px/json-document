@@ -1,30 +1,71 @@
 import { type SiteNavigationGroup } from "./page-descriptors";
 
-export type SiteLayer = {
-  readonly group: SiteNavigationGroup;
+export type SiteSection = {
+  readonly id: "introduce" | "foundation" | "building-blocks" | "hands" | "artifact" | "applications" | "reference";
   readonly path: string;
   readonly label: string;
   readonly blurb: string;
+  readonly groups: ReadonlyArray<SiteNavigationGroup>;
   readonly separated?: boolean;
 };
 
-export const siteLayers: ReadonlyArray<SiteLayer> = [
-  { group: "JSON Document", path: "/docs", label: "JSON Document", blurb: "Values and changes" },
-  { group: "Document Types", path: "/docs/document-types", label: "Document Types", blurb: "Meaningful document contracts" },
-  { group: "Editing", path: "/docs/intent-guide", label: "Editing", blurb: "Selection and work" },
-  { group: "Adapter", path: "/docs/adapters", label: "Adapter", blurb: "Platform contracts" },
-  { group: "Connector", path: "/docs/connectors", label: "Connector", blurb: "Library ecosystems" },
-  { group: "Affordance", path: "/docs/affordance", label: "Affordance", blurb: "Keyboard, mouse, and cursor" },
-  { group: "UI Primitives", path: "/docs/ui-primitives", label: "UI Primitives", blurb: "Minimal standard surfaces" },
-  { group: "Hands", path: "/editors", label: "Hands", blurb: "Tools for people" },
-  { group: "Artifact", path: "/viewer", label: "Artifact", blurb: "The complete experience" },
+export const siteSections: ReadonlyArray<SiteSection> = [
   {
-    group: "Collaboration",
-    path: "/docs/collaboration",
-    label: "Collaboration",
-    blurb: "The same contract, other implementation",
+    id: "introduce",
+    path: "/docs",
+    label: "Introduce",
+    blurb: "Why, concepts, and how we build",
+    groups: ["Introduction"],
+  },
+  {
+    id: "foundation",
+    path: "/docs/foundation",
+    label: "Foundation",
+    blurb: "Values, meaning, editing, and collaboration",
+    groups: ["JSON Document", "Document Types", "Editing", "Collaboration"],
+  },
+  {
+    id: "building-blocks",
+    path: "/docs/adapters",
+    label: "Building Blocks",
+    blurb: "Platform, ecosystem, interaction, and UI",
+    groups: ["Adapter", "Connector", "Affordance", "UI Primitives"],
+  },
+  {
+    id: "hands",
+    path: "/editors",
+    label: "Hands",
+    blurb: "Tools that close an editing loop",
+    groups: ["Hands"],
+  },
+  {
+    id: "artifact",
+    path: "/viewer",
+    label: "Artifact",
+    blurb: "Editable content inside applications",
+    groups: ["Artifact"],
+  },
+  {
+    id: "applications",
+    path: "/applications",
+    label: "Applications",
+    blurb: "Products that reveal reusable modules",
+    groups: ["Applications"],
+  },
+  {
+    id: "reference",
+    path: "/docs/api",
+    label: "Reference",
+    blurb: "Canonical package and API indexes",
+    groups: [],
     separated: true,
   },
 ];
 
-export const siteLayerGroups: ReadonlyArray<SiteNavigationGroup> = siteLayers.map((layer) => layer.group);
+export type SiteSectionId = (typeof siteSections)[number]["id"];
+
+export function sectionForGroup(group: SiteNavigationGroup): SiteSection {
+  const section = siteSections.find((candidate) => candidate.groups.includes(group));
+  if (section === undefined) throw new Error(`Site navigation group has no section: ${group}`);
+  return section;
+}

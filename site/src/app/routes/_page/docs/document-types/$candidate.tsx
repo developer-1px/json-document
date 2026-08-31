@@ -1,8 +1,11 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import {
-  DocumentTypeCandidateRoute,
-  type DocumentTypeCandidate,
-} from "../../../../../routes/docs/DocumentTypeCandidateRoute";
+import { lazy, Suspense } from "react";
+import type { DocumentTypeCandidate } from "../../../../../routes/docs/DocumentTypeCandidateRoute";
+
+const DocumentTypeCandidatePage = lazy(async () => {
+  const module = await import("../../../../../routes/docs/DocumentTypeCandidateRoute");
+  return { default: module.DocumentTypeCandidateRoute };
+});
 
 const candidates = new Set<DocumentTypeCandidate>([
   "rich-text",
@@ -25,5 +28,9 @@ export const Route = createFileRoute("/_page/docs/document-types/$candidate")({
 
 function CandidateRoute() {
   const { candidate } = Route.useParams();
-  return <DocumentTypeCandidateRoute candidate={candidate as DocumentTypeCandidate} />;
+  return (
+    <Suspense fallback={null}>
+      <DocumentTypeCandidatePage candidate={candidate as DocumentTypeCandidate} />
+    </Suspense>
+  );
 }

@@ -11,7 +11,7 @@ type MarkdownHeading = { id: string; level: number; text: string };
 
 export function MarkdownViewer({ source, hideTitle = false }: { source: string; hideTitle?: boolean }) {
   return (
-    <article>
+    <article className="min-w-0 max-w-full">
       <MarkdownContent
         content={source}
         rehypePlugins={[rehypeSlug]}

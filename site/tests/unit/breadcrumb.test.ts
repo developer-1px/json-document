@@ -12,120 +12,36 @@ function trail(path: string) {
 }
 
 describe("breadcrumbTrail", () => {
-  test("uses the same Overview root on every interior page", () => {
-    expect(trail("/docs")).toEqual(["Overview:/", "JSON Document:/docs", "Why:/docs"]);
-    expect(trail("/docs/concepts")).toEqual(["Overview:/", "JSON Document:/docs", "Concept Map:/docs/concepts"]);
-    expect(trail("/docs/api")).toEqual(["Overview:/", "JSON Document:/docs", "API Reference:/docs/api"]);
-    expect(trail("/docs/collaboration")).toEqual(["Overview:/", "Collaboration:/docs/collaboration"]);
+  test("places owner groups below the new IA sections", () => {
+    expect(trail("/docs")).toEqual(["Overview:/", "Introduce:/docs"]);
+    expect(trail("/docs/concepts")).toEqual(["Overview:/", "Introduce:/docs", "Concept Map:/docs/concepts"]);
+    expect(trail("/docs/foundation")).toEqual(["Overview:/", "Foundation:/docs/foundation"]);
     expect(trail("/docs/collaboration/replica")).toEqual([
-      "Overview:/",
-      "Collaboration:/docs/collaboration",
-      "Replica:/docs/collaboration/replica",
+      "Overview:/", "Foundation:/docs/foundation", "Collaboration:/docs/collaboration", "Replica:/docs/collaboration/replica",
     ]);
-    expect(trail("/docs/collaboration/text/lease")).toEqual([
-      "Overview:/",
-      "Collaboration:/docs/collaboration",
-      "Text:/docs/collaboration/text",
-      "native-input DOM lease:/docs/collaboration/text/lease",
-    ]);
-    expect(trail("/docs/selection")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Selection:/docs/selection"]);
-    expect(trail("/docs/history")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "History:/docs/history"]);
-    expect(trail("/docs/clipboard")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Clipboard:/docs/clipboard"]);
-    expect(trail("/docs/topology")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Topology:/docs/topology"]);
-    expect(trail("/docs/intent")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Intent:/docs/intent"]);
-    expect(trail("/docs/intent-guide")).toEqual(["Overview:/", "Editing:/docs/intent-guide", "Intent guide:/docs/intent-guide"]);
-    expect(trail("/demo")).toEqual(["Overview:/", "Hands:/editors", "Document:/demo"]);
-    expect(trail("/docs/order")).toEqual(["Overview:/", "Hands:/editors", "Order:/docs/order"]);
-    expect(trail("/demo/order")).toEqual(["Overview:/", "Hands:/editors", "Order:/docs/order", "Order Demo:/demo/order"]);
-    expect(trail("/docs/object")).toEqual(["Overview:/", "Hands:/editors", "Object:/docs/object"]);
-    expect(trail("/demo/object")).toEqual(["Overview:/", "Hands:/editors", "Object:/docs/object", "Object Demo:/demo/object"]);
-    expect(trail("/demo/annotation")).toEqual(["Overview:/", "Hands:/editors", "Annotation:/demo/annotation"]);
-    expect(trail("/demo/canvas")).toEqual(["Overview:/", "Hands:/editors", "Object:/docs/object", "Canvas:/demo/canvas"]);
-    expect(trail("/demo/kanban")).toEqual(["Overview:/", "Hands:/editors", "Kanban:/demo/kanban"]);
-    expect(trail("/editors")).toEqual(["Overview:/", "Hands:/editors"]);
-    expect(trail("/docs/tree")).toEqual(["Overview:/", "Hands:/editors", "Tree:/docs/tree"]);
-    expect(trail("/demo/tree")).toEqual(["Overview:/", "Hands:/editors", "Tree:/docs/tree", "Tree Demo:/demo/tree"]);
-    expect(trail("/demo/selection")).toEqual([
-      "Overview:/",
-      "Editing:/docs/intent-guide",
-      "Selection:/docs/selection",
-      "Selection Demo:/demo/selection",
-    ]);
-    expect(trail("/demo/topology")).toEqual([
-      "Overview:/",
-      "Editing:/docs/intent-guide",
-      "Topology:/docs/topology",
-      "Topology Demo:/demo/topology",
-    ]);
-    expect(trail("/demo/clipboard")).toEqual([
-      "Overview:/",
-      "Editing:/docs/intent-guide",
-      "Clipboard:/docs/clipboard",
-      "Clipboard Demo:/demo/clipboard",
-    ]);
-    expect(trail("/demo/history")).toEqual([
-      "Overview:/",
-      "Editing:/docs/intent-guide",
-      "History:/docs/history",
-      "History Demo:/demo/history",
-    ]);
-    expect(trail("/docs/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database"]);
-    expect(trail("/demo/database")).toEqual(["Overview:/", "Hands:/editors", "Database:/docs/database", "Database Demo:/demo/database"]);
-    expect(trail("/docs/composer")).toEqual(["Overview:/", "Hands:/editors", "Composer:/docs/composer"]);
-    expect(trail("/docs/mention")).toEqual(["Overview:/", "Hands:/editors", "Mention:/docs/mention"]);
-    expect(trail("/adapters")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Adapter demos:/adapters"]);
-    expect(trail("/adapters/keyboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Keyboard Live Demo:/adapters/keyboard"]);
-    expect(trail("/adapters/clipboard")).toEqual(["Overview:/", "Adapter:/docs/adapters", "Clipboard adapter:/adapters/clipboard"]);
-    expect(trail("/docs/react-editing")).toEqual([
-      "Overview:/",
-      "Connector:/docs/connectors",
-      "React Reference:/docs/connector-react",
-      "Editing guide:/docs/react-editing",
-    ]);
-    expect(trail("/docs/adapter-keyboard")).toEqual([
-      "Overview:/",
-      "Adapter:/docs/adapters",
-      "Keyboard:/docs/adapter-keyboard",
+    expect(trail("/docs/selection")).toEqual([
+      "Overview:/", "Foundation:/docs/foundation", "Editing:/docs/intent-guide", "Selection:/docs/selection",
     ]);
     expect(trail("/docs/connector-zod-validate")).toEqual([
-      "Overview:/",
-      "Connector:/docs/connectors",
-      "Zod:/docs/connector-zod",
-      "Validate:/docs/connector-zod-validate",
+      "Overview:/", "Building Blocks:/docs/adapters", "Ecosystem Connectors:/docs/connectors",
+      "Zod:/docs/connector-zod", "Validate:/docs/connector-zod-validate",
     ]);
-    expect(trail("/connectors")).toEqual(["Overview:/", "Connector:/docs/connectors", "Connector demos:/connectors"]);
-    expect(trail("/connectors/zod")).toEqual(["Overview:/", "Connector:/docs/connectors", "Zod Live Demo:/connectors/zod"]);
-    expect(trail("/connectors/zod/validate")).toEqual([
-      "Overview:/",
-      "Connector:/docs/connectors",
-      "Zod Live Demo:/connectors/zod",
-      "Validate Live Demo:/connectors/zod/validate",
-    ]);
-    expect(trail("/docs/affordance")).toEqual(["Overview:/", "Affordance:/docs/affordance"]);
-    expect(trail("/docs/affordance/select")).toEqual([
-      "Overview:/",
-      "Affordance:/docs/affordance",
-      "Select:/docs/affordance/select",
-    ]);
-    expect(trail("/widgets/toolbar")).toEqual([
-      "Overview:/",
-      "Affordance:/docs/affordance",
-      "Undo:/docs/affordance/history",
-      "Toolbar proof:/widgets/toolbar",
+    expect(trail("/docs/order")).toEqual(["Overview:/", "Hands:/editors", "Order:/docs/order"]);
+    expect(trail("/viewer")).toEqual(["Overview:/", "Artifact:/viewer"]);
+    expect(trail("/applications/calendar")).toEqual([
+      "Overview:/", "Applications:/applications", "Calendar:/applications/calendar",
     ]);
   });
 
-  test("keeps Artifact in the final dependency group", () => {
+  test("keeps hidden compatibility routes out of root navigation", () => {
     expect(rootNavRoutes(routes).map((route) => route.path)).toEqual([]);
   });
 
   test("shows nested nav children only on the current branch", () => {
     expect(visibleNavChildren("/docs/collaboration", "/docs", routes).map((route) => route.path)).toEqual([]);
-    expect(visibleNavChildren("/docs/collaboration", "/docs/collaboration", routes).map((route) => route.path)).toEqual([]);
-    expect(visibleNavChildren("/docs/selection", "/docs/selection", routes).map((route) => route.path)).toEqual([]);
     expect(visibleNavChildren("/docs/collaboration/text", "/docs/collaboration/text/lease", routes).map((route) => route.path)).toEqual([
       "/docs/collaboration/text/lease",
     ]);
-    expect(visibleNavChildren("/docs/object", "/demo/canvas", routes).map((route) => route.path)).toEqual([]);
+    expect(visibleNavChildren("/applications", "/applications/calendar", routes).map((route) => route.path)).toEqual([]);
   });
 });

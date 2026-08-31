@@ -1,5 +1,6 @@
 const routePathPattern = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/;
 const navigationGroups = new Set([
+  "Introduction",
   "JSON Document",
   "Document Types",
   "Collaboration",
@@ -10,6 +11,7 @@ const navigationGroups = new Set([
   "UI Primitives",
   "Hands",
   "Artifact",
+  "Applications",
 ]);
 
 export function validateSiteRoutes(routes, fail) {

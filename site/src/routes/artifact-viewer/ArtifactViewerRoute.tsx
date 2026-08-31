@@ -21,8 +21,8 @@ export function ArtifactViewerRoute() {
 
   return (
     <>
-      <PageHeader label="Artifact · Prototype" title="최종 계층의 계약을 먼저 검증합니다." illustration="peek">
-        실제 파일 호환보다 먼저, 서로 다른 artifact surface가 같은 Core와 Hands를 조합하는 방식을 기록합니다.
+      <PageHeader label="Artifact · Content Prototype" title="Application이 다루는 콘텐츠 계약을 검증합니다." illustration="peek">
+        navigation이나 workflow를 소유하지 않고, 서로 다른 Application 안에서 계속 편집할 수 있는 content surface를 기록합니다.
       </PageHeader>
 
       <ProductShell
@@ -45,11 +45,11 @@ export function ArtifactViewerRoute() {
 
       <section className={styles.futureMap()} aria-labelledby="viewer-model-title">
         <p className={ui.text.label}>Dependency map</p>
-        <h2 id="viewer-model-title" className={ui.text.section}>Core에서 시작해 Hands를 거쳐 Artifact가 됩니다.</h2>
+        <h2 id="viewer-model-title" className={ui.text.section}>Core와 Hands가 Application 안의 Artifact를 만듭니다.</h2>
         <ol>
           <li><strong>Core</strong><span>사람과 agent의 변경을 같은 계약에 남깁니다.</span></li>
           <li><strong>Hands</strong><span>사람에게 익숙한 편집 도구를 붙입니다.</span></li>
-          <li><strong>Artifact</strong><span>적절한 surface에서 완성된 경험이 됩니다.</span></li>
+          <li><strong>Artifact</strong><span>Application 안에서 계속 다룰 수 있는 콘텐츠가 됩니다.</span></li>
         </ol>
       </section>
     </>

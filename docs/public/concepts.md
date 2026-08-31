@@ -17,7 +17,9 @@ Affordance ─ input grammar ─┐
 UI Primitives ─ standard UI ├─ Host가 장르별 Hands를 조합
 Rich Text 등 domain ────────┘
 
-Hands를 제품 surface에 조합한 결과가 사람이 다루는 Artifact가 됩니다.
+Hands를 surface에 조합한 결과가 사람이 다루는 Artifact가 됩니다. Artifact는
+navigation이나 workflow를 소유하지 않는 콘텐츠입니다. Application은 Artifact와
+다른 콘텐츠를 runtime과 제품 정책에 놓아 실제 제품 경험으로 제공합니다.
 ```
 
 이 그림의 선은 허용된 의존·조합 방향입니다. 모든 노드를 순서대로 설치하라는
@@ -25,10 +27,22 @@ Hands를 제품 surface에 조합한 결과가 사람이 다루는 Artifact가 �
 외부 라이브러리가 필요할 때 고릅니다. Collaboration은 다음 계층이 아니라
 같은 `JSONDocument` 계약의 다른 구현입니다.
 
-권장 읽기 순서는 `JSON Document → Document Types → Editing → Adapter → Connector → Affordance
-→ UI Primitives → Hands → Artifact`입니다. 이 순서는 학습을 위한 서사일 뿐
-package dependency를 주장하지 않습니다. Collaboration은 Core의 대체 구현과
-profile 포함 관계를 따로 보기 위해 별도 묶음에서 읽습니다.
+권장 읽기 순서는 `Foundation → Building Blocks → Hands → Artifact → Application`입니다.
+Foundation 안에서는 JSON Document, Document Types, Editing과 Collaboration을,
+Building Blocks에서는 Adapter, Connector, Affordance와 UI Primitives를 읽습니다.
+이 순서는 학습을 위한 서사일 뿐 package dependency를 주장하지 않습니다.
+Collaboration은 Core의 대체 구현과 profile 포함 관계로 Foundation 안에서 읽습니다.
+
+프로젝트가 책임을 발견하는 방향은 이 읽기·구현 방향과 반대입니다.
+
+```text
+구현 의존: Foundation → Building Blocks → Hands → Artifact → Application
+책임 발견: Application → 책임 발견 → Canonical Module → Application
+```
+
+먼저 제품을 만들고 실제 사용 흐름에서 반복되는 책임을 찾습니다. 추출된 책임은
+canonical owner와 public API를 얻고, Application은 임시 구현 대신 그 API를 다시
+소비합니다. 자세한 순환은 [How We Build](how-we-build.md)에서 설명합니다.
 
 ## JSON Document
 
@@ -107,8 +121,8 @@ Host 조합에서 함께 동작해야 닫힙니다. 재사용 책임은 owner pa
 
 ## Artifact
 
-Artifact는 다음 책임 계층이 아니라 앞의 책임을 조합해 사람이 보고 고칠 수
-있게 만든 결과입니다.
+Artifact는 독립 App이 아니라 앞의 책임을 조합해 사람이 보고 고칠 수 있게 만든
+Application 내부 콘텐츠입니다. navigation, workflow와 제품 정책은 소유하지 않습니다.
 MD, PPT, Sheet는 서로 다른 화면과 Hands를 사용해도 같은 문서와 편집 계약을
 공유할 수 있습니다.
 
@@ -117,13 +131,25 @@ MD, PPT, Sheet는 서로 다른 화면과 Hands를 사용해도 같은 문서와
 놓는 정보 구조와 시각 가설만 확인하며, 실제 계약 증거는 각 Hands Live Demo와
 package test에서 봅니다.
 
+## Application
+
+Application은 Artifact와 Hands를 실제 제품 경험으로 제공하는 최종 composition
+root입니다. 주요 화면 영역과 실행 순서, URL과 navigation, 제품 copy와 fixture,
+concrete runtime 연결은 Application에 남습니다. 문서의 의미, editing lifecycle,
+platform translation과 반복 UI처럼 같은 역할과 책임을 갖는 코드는 canonical
+module로 추출됩니다.
+
+[Calendar와 AI Agent](/applications)는 제품에서 발견한 책임과 App에 남은 정책을
+함께 보여 줍니다. Calendar Document Type, Calendar Hand와 Calendar Application은
+같은 이름을 공유하지만 서로 다른 owner입니다.
+
 ## Collaboration
 
 Collaboration은 JSON Document 계약을 여러 참여자의 인과 변경으로 구현합니다.
 로컬 구현과 마찬가지로 값을 읽고, 변경을 적용하고, 결과를 구독하지만 내부
 기록은 참여자의 변경 순서와 수렴을 다룹니다.
 
-위치가 Artifact 다음인 것은 의존 방향이 아니라 문서 분류를 나타냅니다.
+Collaboration은 Foundation 안에서 JSON Document와 같은 계약의 대체 구현으로 읽습니다.
 협업 document를 Editing에 주입할 수 있지만 History command는 editor-local
 History 대신 actor-local `runtime.history`로 연결해야 합니다. base → History →
 Text profile의 포함 관계는 [Collaboration](collaboration.md)에 있습니다.

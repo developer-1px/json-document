@@ -5,10 +5,7 @@ test("Widgets catalog redirects to affordance usage", async ({ page }) => {
   await expect(page).toHaveURL(/\/docs\/affordance$/);
   await expect(page.getByRole("heading", { level: 1, name: "Affordance" })).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("link", { name: "Select", exact: true })).toHaveAttribute("href", "/docs/affordance/select");
-  await expect(navigation.getByRole("link", { name: "Expand/Collapse", exact: true })).toHaveAttribute("href", "/docs/affordance/fold");
-  await expect(navigation.getByRole("link", { name: "Drag", exact: true })).toHaveAttribute("href", "/docs/affordance/drag");
-  await expect(navigation.getByRole("link", { name: "Undo", exact: true })).toHaveAttribute("href", "/docs/affordance/history");
+  await expect(navigation.getByRole("group", { name: "Building Blocks" })).toBeVisible();
   const content = page.getByRole("main");
   await expect(content.getByRole("link", { name: "Select" }).first()).toHaveAttribute("href", "/docs/affordance/select");
   await expect(content.getByRole("link", { name: "Expand/Collapse" }).first()).toHaveAttribute("href", "/docs/affordance/fold");

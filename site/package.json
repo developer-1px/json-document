@@ -14,7 +14,7 @@
     "check:primitives": "node scripts/check-live-demo-primitives.mjs",
     "check:ui-roles": "node scripts/check-ui-role-primitives.mjs",
     "check:choice-id": "node scripts/check-choice-id.mjs",
-    "check:canonical-modules": "node scripts/check-canonical-module-closure.mjs",
+    "check:canonical-modules": "node scripts/check-canonical-module-closure.mjs && node scripts/check-document-type-audits.mjs && node scripts/check-documentation-page.mjs",
     "check:interaction-handles": "node scripts/check-interaction-handles.mjs",
     "check:contextual-affordance": "node scripts/check-contextual-affordance.mjs",
     "check:product-shell-toolbar": "node scripts/check-product-shell-toolbar.mjs",
