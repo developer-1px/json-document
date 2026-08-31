@@ -27,7 +27,7 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth > 0)).toBe(true);
   }
-  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toContain("y");
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Introduce" }).click();
@@ -104,6 +104,20 @@ test("short desktop view keeps the home story in natural document flow", async (
 
   expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("none");
   await expect(page.locator("[data-home-scene]")).toHaveCount(5);
+});
+
+test("desktop home scroll settles one mandatory scene at a time", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  const home = page.getByRole("main");
+  expect(await home.evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
+  await home.evaluate((element) => element.scrollBy({ top: element.clientHeight * 0.65 }));
+  await expect.poll(() => home.evaluate((element) => ({
+    height: element.clientHeight,
+    top: element.scrollTop,
+  }))).toEqual({ height: 900, top: 900 });
+  await expect(page.locator('[data-home-scene="foundation"]')).toBeInViewport();
 });
 
 test("Document Types publishes a TBD responsibility boundary", async ({ page }) => {

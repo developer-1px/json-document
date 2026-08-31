@@ -4,7 +4,7 @@ const fullScene = "relative isolate mx-auto min-h-[100svh] max-w-[92rem] overflo
 
 export const homeRecipe = tv({
   slots: {
-    page: "min-h-full bg-background-canvas [@media(min-width:1024px)_and_(min-height:720px)]:h-[100svh] [@media(min-width:1024px)_and_(min-height:720px)]:overflow-y-auto [@media(min-width:1024px)_and_(min-height:720px)]:snap-y [@media(min-width:1024px)_and_(min-height:720px)]:snap-proximity motion-reduce:snap-none",
+    page: "min-h-full bg-background-canvas [@media(min-width:1024px)_and_(min-height:720px)]:h-[100svh] [@media(min-width:1024px)_and_(min-height:720px)]:overflow-y-auto [@media(min-width:1024px)_and_(min-height:720px)]:snap-y [@media(min-width:1024px)_and_(min-height:720px)]:snap-mandatory motion-reduce:snap-none",
     hero: fullScene,
     heroCopy: "relative z-10 flex min-h-[100svh] max-w-2xl flex-col justify-center px-6 pb-[20rem] pt-20 sm:px-12 sm:pb-[18rem] lg:max-w-[42rem] lg:px-16 lg:pb-20 xl:px-24",
     logoHeading: "m-0 w-full max-w-[29rem] text-foreground-strong",
