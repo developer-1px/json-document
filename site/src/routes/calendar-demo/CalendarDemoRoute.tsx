@@ -179,8 +179,13 @@ export function CalendarDemoRoute(props: {
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
   const selectedEvent = hand.selectedEvent;
+  const pointerGestureActive = hand.timePreview !== null
+    || hand.allDayPreview !== null
+    || hand.monthPreview !== null
+    || hand.selectionDragPreview !== null;
+  const eventInspectorVisible = selectedEvent !== null && !pointerGestureActive;
   const eventDetailsPosition = useAnchoredFloatingPosition<HTMLDivElement, HTMLElement>({
-    active: selectedEvent !== null,
+    active: eventInspectorVisible,
     policy: {
       type: "preferred",
       placement: "right-start",
@@ -390,7 +395,7 @@ export function CalendarDemoRoute(props: {
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
           <div className={styles.controlLayer()}>
-            <CalendarEventInspector
+            {eventInspectorVisible ? <CalendarEventInspector
               hand={hand}
               calendars={calendars}
               realizationKey={eventDetailsPosition.position?.placement ?? null}
@@ -455,7 +460,7 @@ export function CalendarDemoRoute(props: {
                 calendar: <CalendarDays aria-hidden="true" size={14} />,
                 repeat: <Repeat2 aria-hidden="true" size={14} />,
               }}
-            />
+            /> : null}
             <div
               className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
               role="group"

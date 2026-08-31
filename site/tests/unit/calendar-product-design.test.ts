@@ -17,6 +17,7 @@ function assertNoAccentChrome(source: string, label: string): void {
 
 describe("calendar product design", () => {
   const styles = calendarDemoRecipe();
+  const route = readFileSync(path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"), "utf8");
 
   test("event chips and calendar-visibility toggles use fill and type, not accent chrome", () => {
     assertNoAccentChrome(styles.timedEvent(), "timedEvent");
@@ -59,6 +60,8 @@ describe("calendar product design", () => {
     expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
     expect(styles.creationTimeHint()).toContain("translate-y-1");
     expect(styles.creationTimeHint()).not.toContain("-translate-y-1/2");
+    expect(route).toContain("const eventInspectorVisible = selectedEvent !== null && !pointerGestureActive");
+    expect(route).toContain("eventInspectorVisible ? <CalendarEventInspector");
     expect(styles.hourLabel()).toContain("text-foreground-muted");
     expect(styles.selectedSlot()).toContain("border-y-2");
     expect(styles.selectedSlot()).toContain("bg-clip-padding");
