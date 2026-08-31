@@ -49,6 +49,7 @@ function fail(message) {
 const publicDocs = {
   overview: read("docs/public/overview.md"),
   concepts: read("docs/public/concepts.md"),
+  documentTypes: read("docs/public/document-types.md"),
   selection: read("docs/public/selection.md"),
   history: read("docs/public/history.md"),
   clipboard: read("docs/public/clipboard.md"),
@@ -215,6 +216,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "connector-zod.md",
   "connectors.md",
   "database.md",
+  "document-types.md",
   "hands.md",
   "history.md",
   "intent-guide.md",
