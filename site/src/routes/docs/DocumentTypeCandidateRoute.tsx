@@ -72,10 +72,10 @@ ${auditSource}
 
   return (
     <PageFrame>
-      <PageHeader title={`${name} Document Type · TBD`} illustration="braces">
-        후보의 이름만 등록했으며 소유권과 구현 경계는 아직 확정하지 않았습니다.
-      </PageHeader>
       <div className="mx-auto max-w-3xl">
+        <PageHeader title={`${name} Document Type · TBD`} illustration="braces">
+          후보의 이름만 등록했으며 소유권과 구현 경계는 아직 확정하지 않았습니다.
+        </PageHeader>
         <MarkdownViewer source={source} />
       </div>
     </PageFrame>
