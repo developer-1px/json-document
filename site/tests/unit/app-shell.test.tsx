@@ -46,7 +46,18 @@ describe("official site shell", () => {
       "Public API",
     ]);
     await user.click(nav.getByRole("button", { name: "Document Types" }));
-    expect(groupLinks(nav, "Document Types")).toEqual(["Overview · TBD"]);
+    expect(groupLinks(nav, "Document Types")).toEqual([
+      "Overview · TBD",
+      "Rich Text · TBD",
+      "Order · TBD",
+      "Object · TBD",
+      "Tree · TBD",
+      "Database · TBD",
+      "Calendar · TBD",
+      "Sheet · TBD",
+      "Kanban · TBD",
+      "Annotation · TBD",
+    ]);
     expect(nav.queryByRole("link", { name: "Replica" })).toBeNull();
     await user.click(nav.getByRole("button", { name: "Collaboration" }));
     expect(groupLinks(nav, "Collaboration")).toEqual([

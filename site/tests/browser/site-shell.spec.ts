@@ -25,7 +25,18 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
     "Public API",
   ]);
   await navigation.getByRole("button", { name: "Document Types" }).click();
-  await expect(navigation.getByRole("group", { name: "Document Types" }).getByRole("link")).toHaveText(["Overview · TBD"]);
+  await expect(navigation.getByRole("group", { name: "Document Types" }).getByRole("link")).toHaveText([
+    "Overview · TBD",
+    "Rich Text · TBD",
+    "Order · TBD",
+    "Object · TBD",
+    "Tree · TBD",
+    "Database · TBD",
+    "Calendar · TBD",
+    "Sheet · TBD",
+    "Kanban · TBD",
+    "Annotation · TBD",
+  ]);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Collaboration" }).click();
   await expect(navigation.getByRole("group", { name: "Collaboration" }).getByRole("link")).toHaveText([
@@ -192,6 +203,15 @@ test("Document Types publishes a TBD responsibility boundary", async ({ page }) 
   await expect(page.getByRole("heading", { level: 2, name: "책임", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "후보 · TBD" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Document Types" })).toHaveAttribute("href", "/docs/document-types");
+});
+
+test("Document Type candidate submenu keeps ownership explicitly TBD", async ({ page }) => {
+  await page.goto("/docs/document-types/calendar");
+
+  await expect(page).toHaveTitle("Calendar Document Type · TBD - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "확정에 필요한 증거" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · TBD" })).toHaveAttribute("aria-current", "page");
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
