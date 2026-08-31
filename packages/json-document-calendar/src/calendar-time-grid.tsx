@@ -112,7 +112,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
     if (start !== null && end !== null) hand.createInterval(start, end);
   }
 
-  const gridColumns = `3.25rem repeat(${days.length}, minmax(4.5rem, 1fr))`;
+  const gridColumns = `4rem repeat(${days.length}, minmax(4.5rem, 1fr))`;
   const gridHeight = (props.hourEnd - props.hourStart) * props.pixelsPerHour;
   return (
     <div
@@ -210,8 +210,8 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             className={props.classNames.viewportAnchor}
             style={{ transform: `translateY(${(props.workHourStart - props.hourStart) * props.pixelsPerHour}px)` }}
           />
-          {Array.from({ length: props.hourEnd - props.hourStart }, (_, index) => props.hourStart + index).map((hour) => (
-            <div key={hour} data-calendar-hour={String(hour).padStart(2, "0")} className={props.classNames.hourLabel} style={{ top: (hour - props.hourStart) * props.pixelsPerHour + 4 }}>
+          {Array.from({ length: props.hourEnd - props.hourStart }, (_, index) => index === 0 ? null : props.hourStart + index).map((hour) => hour === null ? null : (
+            <div key={hour} data-calendar-hour={String(hour).padStart(2, "0")} className={props.classNames.hourLabel} style={{ top: (hour - props.hourStart) * props.pixelsPerHour }}>
               {props.labels.hour(hour)}
             </div>
           ))}

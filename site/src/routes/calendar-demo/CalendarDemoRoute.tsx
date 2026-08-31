@@ -159,6 +159,7 @@ export function CalendarDemoRoute(props: {
     active: !embedded && (view === "day" || view === "week"),
     resetKey: `${view}:${visibleDate}`,
     targetHour: workHourStart,
+    viewportOffset: 16,
   });
 
   function setLocation(nextView: CalendarView, nextDate: string): void {
@@ -267,7 +268,7 @@ export function CalendarDemoRoute(props: {
         columnHeader: styles.weekHead(),
         weekday: ui.text.meta,
         dayNumber: classes(styles.dayNumber(), ui.text.body),
-        today: styles.todayMark(),
+        today: styles.weekToday(),
         allDayLabel: classes("whitespace-nowrap px-1 py-1.5 text-right text-foreground-muted/70", ui.text.meta),
         allDayCell: classes("min-h-8", styles.weekCell()),
         allDayEventContainer: "group/event relative z-10 mx-0.5 my-1",
@@ -294,7 +295,7 @@ export function CalendarDemoRoute(props: {
         allDay: "all-day",
         now: "Now",
         resizeEnd: (event) => `Resize ${event.title} end`,
-        hour: (hour) => String(hour).padStart(2, "0"),
+        hour: calendarHourLabel,
       }}
       getEventColor={(event) => calendarColor(document, event.calendarId)}
     />
@@ -582,4 +583,10 @@ export function CalendarDemoRoute(props: {
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
   return calendarDocumentCalendar(document, calendarId)?.color === "accent" ? "accent" : "subtle";
+}
+
+function calendarHourLabel(hour: number): string {
+  const period = hour < 12 ? "AM" : "PM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour} ${period}`;
 }
