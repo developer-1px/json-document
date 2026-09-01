@@ -64,6 +64,8 @@ describe("calendar product design", () => {
     expect(route).toContain("const eventInspectorVisible = selectedEvent !== null && !pointerGestureActive");
     expect(route).toContain("eventInspectorVisible ? <CalendarEventInspector");
     expect(styles.hourLabel()).toContain("text-foreground-muted");
+    expect(styles.timedEventTitle()).toContain("leading-4");
+    expect(styles.eventTime()).toContain("leading-3");
     expect(styles.selectedSlot()).not.toContain("bg-");
     expect(timeGrid).toContain('contentInteractionAttributes({ role: "insertion", active: true })');
     expect(css).toContain('[data-ui-presentation="calendar-time-grid"]:hover');

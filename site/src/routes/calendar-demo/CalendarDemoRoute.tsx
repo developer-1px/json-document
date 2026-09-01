@@ -291,8 +291,8 @@ export function CalendarDemoRoute(props: {
         creationTimeHint: classes(styles.creationTimeHint(), ui.text.meta),
         timedEventContainer: "group/event absolute z-10 p-0.5",
         timedEvent: styles.timedEvent(),
-        eventTitle: classes("min-w-0 truncate", ui.text.meta),
-        eventTime: classes(styles.eventTime(), ui.text.meta),
+        eventTitle: styles.timedEventTitle(),
+        eventTime: styles.eventTime(),
         resizeTimedEnd: styles.resizeEdge(),
       }}
       labels={{
@@ -544,7 +544,7 @@ export function CalendarDemoRoute(props: {
                   allDayEvent: styles.monthAllDay(),
                   timedEvent: styles.monthTimed(),
                   eventTitle: classes("min-w-0 truncate", ui.text.meta),
-                  eventTime: classes(styles.eventTime(), ui.text.meta),
+                  eventTime: styles.eventTime(),
                   resizeEnd: styles.resizeEdgeVertical(),
                 }}
                 labels={{
