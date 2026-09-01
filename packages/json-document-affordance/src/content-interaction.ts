@@ -6,6 +6,7 @@ export type ContentInteractionInput =
   | {
       readonly role: "content";
       readonly selected?: boolean;
+      readonly primary?: boolean;
       readonly active?: boolean;
       readonly dragging?: boolean;
     }
@@ -18,6 +19,7 @@ export type ContentInteractionAffordance = {
   readonly role: ContentInteractionRole;
   readonly phase: ContentInteractionPhase;
   readonly selected: boolean;
+  readonly primary: boolean;
   readonly elevated: boolean;
 };
 
@@ -30,14 +32,18 @@ export function contentInteractionAffordance(
       role: input.role,
       phase: input.active ? "active" : "rest",
       selected: false,
+      primary: false,
       elevated: false,
     };
   }
   const phase = input.dragging ? "dragging" : input.active ? "active" : "rest";
+  const selected = input.selected ?? false;
+  const primary = selected && (input.primary ?? false);
   return {
     role: input.role,
     phase,
-    selected: input.selected ?? false,
-    elevated: phase === "dragging",
+    selected,
+    primary,
+    elevated: phase === "dragging" || primary,
   };
 }

@@ -13,6 +13,9 @@ describe("content interaction projection", () => {
     expect(item.dataset.uiInteraction).toBe("content");
     expect(item.dataset.uiInteractionPhase).toBe("active");
     expect(item.dataset.selected).toBe("true");
+    rerender(<SelectableItem selected primary>Item</SelectableItem>);
+    expect(item.dataset.primary).toBe("true");
+    expect(item.dataset.elevated).toBe("true");
     rerender(<SelectableItem selected dragging>Item</SelectableItem>);
     expect(item.dataset.uiInteractionPhase).toBe("dragging");
     expect(item.dataset.elevated).toBe("true");

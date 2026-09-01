@@ -21,8 +21,10 @@ public `ControlAffordance` vocabulary; primitives project it as
 
 `SelectableItem`, `GridCell`, and `contentInteractionAttributes` project the
 canonical content interaction grammar. Import `content-interaction.css` once,
-then map its CSS variables to product tokens. Only `dragging` receives
-elevation; selection and active feedback remain layout-neutral.
+then map its CSS variables to product tokens. Selection remains a quiet content
+contour; the primary member of the selection set becomes control-ready through
+low elevation, while `active` and `dragging` continue the same interaction
+grammar without changing layout.
 
 Calendar widgets and projections belong to `@interactive-os/json-document-calendar`.
 File metadata formatting belongs to `@interactive-os/json-document-file-intake`.

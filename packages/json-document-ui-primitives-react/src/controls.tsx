@@ -185,6 +185,7 @@ export function InlineChoice<Id extends string>(props: {
 export type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
   readonly selected: boolean;
+  readonly primary?: boolean;
   readonly focus?: boolean;
   readonly active?: boolean;
   readonly dragging?: boolean;
@@ -193,11 +194,11 @@ export type SelectableItemProps<T extends ElementType = "button"> = {
 export function SelectableItem<T extends ElementType = "button">(
   props: SelectableItemProps<T>,
 ): ReactNode {
-  const { active = false, affordance, as, dragging = false, selected, focus = false, ...itemProps } = props;
+  const { active = false, affordance, as, dragging = false, selected, primary = false, focus = false, ...itemProps } = props;
   const Component = as ?? "button";
   return createElement(Component, {
     ...itemProps,
-    ...contentInteractionAttributes({ role: "content", selected, active, dragging }),
+    ...contentInteractionAttributes({ role: "content", selected, primary, active, dragging }),
     "data-focus": focus ? "true" : "false",
     "data-ui-control": "selectable",
     "data-ui-affordance": affordance,

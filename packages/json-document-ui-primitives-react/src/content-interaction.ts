@@ -7,6 +7,7 @@ export type ContentInteractionAttributes = {
   readonly "data-ui-interaction": "content" | "drop-target" | "insertion";
   readonly "data-ui-interaction-phase": "rest" | "active" | "dragging";
   readonly "data-selected"?: "true" | "false";
+  readonly "data-primary"?: "true";
   readonly "data-elevated"?: "true";
 };
 
@@ -19,6 +20,7 @@ export function contentInteractionAttributes(
     "data-ui-interaction": interaction.role,
     "data-ui-interaction-phase": interaction.phase,
     ...(interaction.role === "content" ? { "data-selected": interaction.selected ? "true" : "false" } : {}),
+    ...(interaction.primary ? { "data-primary": "true" as const } : {}),
     ...(interaction.elevated ? { "data-elevated": "true" as const } : {}),
   };
 }

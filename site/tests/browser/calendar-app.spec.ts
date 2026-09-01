@@ -123,7 +123,7 @@ test("Calendar distinguishes the selection set, primary event, move surface, and
   await expect(endHandle).not.toHaveAttribute("data-active", "true");
   await page.mouse.move(0, 0);
   await page.getByRole("button", { name: "Today", exact: true }).focus();
-  await expect(endHandle).toHaveCSS("opacity", "0");
+  await expect(endHandle).toHaveCSS("opacity", "0.6");
   await first.hover();
   await expect(endHandle).toHaveCSS("opacity", "1");
   await endHandle.hover();

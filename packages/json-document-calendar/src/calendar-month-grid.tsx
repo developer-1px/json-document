@@ -341,8 +341,8 @@ function MonthEvent(props: {
     <SelectableItem
       affordance={props.affordance}
       selected={props.selected}
+      primary={props.primary}
       {...(props.dragging === undefined ? {} : { dragging: props.dragging })}
-      data-primary={props.primary ? "true" : undefined}
       aria-label={calendarEventLabel(props.event)}
       data-calendar-color={props.color}
       data-calendar-move-surface={props.onPointerDown === undefined ? undefined : "true"}

@@ -162,8 +162,8 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             <SelectableItem
               affordance={props.affordances.allDayEvent}
               selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
+              primary={hand.isPrimaryOccurrence(item.event.id, item.event.start)}
               dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
-              data-primary={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "true" : undefined}
               aria-label={item.event.title}
               data-calendar-color={props.getEventColor(item.event)}
               data-calendar-move-surface="true"
@@ -290,8 +290,8 @@ function TimeColumn(input: {
             <SelectableItem
               affordance={props.affordances.timedEvent}
               selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
+              primary={hand.isPrimaryOccurrence(item.event.id, item.event.start)}
               dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
-              data-primary={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "true" : undefined}
               aria-label={item.event.title}
               data-calendar-event=""
               data-calendar-color={props.getEventColor(item.event)}
