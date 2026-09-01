@@ -14,13 +14,13 @@ import { calendarDemoRecipe } from "./calendar-demo-styles";
 import { calendarControlAffordance } from "./calendar-control-affordances";
 
 const weekdays = [
+  { label: "Sunday", content: "S" },
   { label: "Monday", content: "M" },
   { label: "Tuesday", content: "T" },
   { label: "Wednesday", content: "W" },
   { label: "Thursday", content: "T" },
   { label: "Friday", content: "F" },
   { label: "Saturday", content: "S" },
-  { label: "Sunday", content: "S" },
 ];
 
 export function CalendarDemoNavigator(props: {

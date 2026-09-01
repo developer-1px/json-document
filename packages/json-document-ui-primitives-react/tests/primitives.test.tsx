@@ -322,6 +322,15 @@ describe("UI Primitives", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  test("Choice dismisses its popup when another product surface is pressed", async () => {
+    const user = userEvent.setup();
+    render(<><Choice presentation="popup" label="보기" value="week" options={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }]} onValueChange={() => undefined} /><button type="button">일정</button></>);
+    await user.click(screen.getByRole("button", { name: "보기" }));
+    expect(screen.getByRole("listbox", { name: "보기" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "일정" }));
+    expect(screen.queryByRole("listbox", { name: "보기" })).toBeNull();
+  });
+
   test("Menu moves through enabled actions and restores trigger focus", async () => {
     const user = userEvent.setup();
     const onAction = vi.fn();

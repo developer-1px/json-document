@@ -113,7 +113,7 @@ const hourEnd = 24;
 const workHourStart = 7;
 const pxPerHour = 72;
 const monthDayRows = 3;
-const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export function CalendarDemoRoute(props: {
@@ -333,7 +333,7 @@ export function CalendarDemoRoute(props: {
               </ToolbarGroup>
             </ToolbarRegion>
             <ToolbarRegion placement="center" label="Calendar view">
-              <Choice presentation="inline"
+              <Choice presentation="popup"
                 affordance={calendarControlAffordance("viewChoice")}
                 label="View"
                 value={view}
@@ -344,6 +344,14 @@ export function CalendarDemoRoute(props: {
                   { id: "year", label: "Year" },
                 ]}
                 onValueChange={setView}
+                classNames={{
+                  root: styles.viewChoiceRoot(),
+                  trigger: styles.viewChoiceTrigger(),
+                  listbox: styles.viewChoiceListbox(),
+                  option: styles.viewChoiceOption(),
+                  focusedOption: styles.viewChoiceOptionFocused(),
+                  selectedOption: styles.viewChoiceOptionSelected(),
+                }}
               />
             </ToolbarRegion>
             <ToolbarRegion placement="end" label="Calendar sources">

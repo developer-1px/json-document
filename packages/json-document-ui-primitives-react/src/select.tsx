@@ -37,6 +37,7 @@ export function PopupChoice<Id extends string>(props: {
 } & ControlAffordanceProps) {
   const generatedId = useId();
   const listboxId = props.id ?? `json-document-select-${generatedId.replaceAll(":", "")}`;
+  const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -63,6 +64,15 @@ export function PopupChoice<Id extends string>(props: {
     if (open) listboxRef.current?.focus();
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close(false);
+    };
+    document.addEventListener("pointerdown", dismissOutside, true);
+    return () => document.removeEventListener("pointerdown", dismissOutside, true);
+  }, [open]);
+
   function close(restoreFocus = true) {
     setOpen(false);
     if (restoreFocus) queueMicrotask(() => triggerRef.current?.focus());
@@ -75,7 +85,7 @@ export function PopupChoice<Id extends string>(props: {
   }
 
   return (
-    <div className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup" data-ui-affordance={props.affordance}>
+    <div ref={rootRef} className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup" data-ui-affordance={props.affordance}>
       <button
         ref={triggerRef}
         type="button"

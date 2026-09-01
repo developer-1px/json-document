@@ -130,7 +130,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
         <div className={props.classNames.columnHeader} />
         {props.cells.map((cell) => (
           <div key={cell.date} role="columnheader" className={props.classNames.columnHeader}>
-            <span className={props.classNames.weekday}>{props.weekdays[cell.weekday - 1]}</span>
+            <span className={props.classNames.weekday}>{props.weekdays[cell.weekday % 7]}</span>
             <span className={joinClasses(props.classNames.dayNumber, cell.date === props.today ? props.classNames.today : undefined)}>{cell.day}</span>
           </div>
         ))}

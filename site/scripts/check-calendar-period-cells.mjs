@@ -23,7 +23,7 @@ requireText(ownerTest, "cell.day");
 requireCount(ownerDateGrid, "{cell.day}", 1);
 requireText(ownerControls, "<DateGrid");
 requireText(host, 'calendarCells(view === "day" ? "day" : "week", visibleDate)');
-requireText(ownerTimeGrid, "props.weekdays[cell.weekday - 1]");
+requireText(ownerTimeGrid, "props.weekdays[cell.weekday % 7]");
 requireCount(ownerTimeGrid, "{cell.day}", 1);
 requireCount(ownerMonthGrid, "{cell.day}", 1);
 requireText(navigator, "<DateGrid");

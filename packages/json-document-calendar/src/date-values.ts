@@ -98,6 +98,11 @@ export function startOfIsoWeek(date: string): string {
   return addCalendarDays(date, 1 - weekday);
 }
 
+export function startOfCalendarWeek(date: string): string {
+  const weekday = isoWeekday(date);
+  return addCalendarDays(date, -(weekday % 7));
+}
+
 export function startOfMonth(date: string): string {
   return Temporal.PlainDate.from(date).with({ day: 1 }).toString();
 }
@@ -163,12 +168,12 @@ export type CalendarCellInterval = { readonly start: string; readonly end: strin
 export function calendarCells(period: CalendarPeriod, visibleDate: string): ReadonlyArray<CalendarCell> {
   if (period === "day") return [cell(visibleDate, true)];
   if (period === "week") {
-    const start = startOfIsoWeek(visibleDate);
+    const start = startOfCalendarWeek(visibleDate);
     return Array.from({ length: 7 }, (_, index) => cell(addCalendarDays(start, index), true));
   }
   if (period === "month") {
     const monthStart = startOfMonth(visibleDate);
-    const gridStart = startOfIsoWeek(monthStart);
+    const gridStart = startOfCalendarWeek(monthStart);
     const month = civil(visibleDate).month;
     const year = civil(visibleDate).year;
     return Array.from({ length: 42 }, (_, index) => {
@@ -204,7 +209,7 @@ export function visiblePeriodLabel(
   if (period === "day") return visibleDate;
   const parts = civil(visibleDate);
   if (period === "week") {
-    const start = startOfIsoWeek(visibleDate);
+    const start = startOfCalendarWeek(visibleDate);
     if (options.weekSeparator === undefined) return `${start} · week`;
     return `${start}${options.weekSeparator}${addCalendarDays(start, 6)}`;
   }

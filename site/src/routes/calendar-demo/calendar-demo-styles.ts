@@ -1,6 +1,6 @@
 import { tv } from "tailwind-variants";
 
-const chipRail = "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-foreground-default data-[calendar-color=accent]:before:bg-background-accent";
+const chipRail = "relative before:absolute before:inset-y-1 before:left-1 before:w-px before:rounded-full before:bg-foreground-muted/50 data-[calendar-color=accent]:before:bg-background-accent/75";
 const chipFill = "bg-background-subtle text-foreground-strong data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10";
 
 export const calendarDemoRecipe = tv({
@@ -9,9 +9,9 @@ export const calendarDemoRecipe = tv({
     controlLayer: "pointer-events-none absolute inset-0 z-40 [&>*]:pointer-events-auto",
     contentLayer: "relative z-0 h-full min-h-0 min-w-0 pb-24",
     allDayEvent: `h-full w-full rounded-control border-0 px-2 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
-    hourRule: "absolute inset-x-0 border-t border-line-subtle/45",
+    hourRule: "absolute inset-x-0 border-t border-line-subtle/25",
     timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
-    monthWeek: "relative grid min-w-[36rem] grid-cols-7 border-t border-line-subtle/60",
+    monthWeek: "relative grid min-w-[36rem] grid-cols-7 border-t border-line-subtle/35",
     monthDay: "relative z-0 flex min-h-32 w-full flex-col items-stretch px-1.5 pb-1 text-left text-xs",
     monthAllDay: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail}`,
     monthTimed: `relative mx-0.5 flex h-5 w-full min-w-0 items-center justify-between gap-1 truncate rounded-control border-0 bg-transparent px-1 pl-2 text-left text-xs leading-5 ${chipRail}`,
@@ -20,15 +20,21 @@ export const calendarDemoRecipe = tv({
     quietAction: "border-0 bg-transparent p-0 shadow-none hover:border-0 hover:bg-transparent",
     monthOverflow: "absolute left-0 top-0 z-30 flex w-max min-w-full max-w-56 flex-col gap-0.5 p-1.5",
     monthHead: "px-2 py-1.5 text-center text-xs text-foreground-muted",
-    weekSticky: "z-30 shrink-0 border-b border-line-subtle/40 bg-background-canvas pt-14",
+    weekSticky: "z-30 shrink-0 border-b border-line-subtle/25 bg-background-canvas pt-14",
     weekHours: "min-h-0 flex-1 overflow-auto",
     weekHead: "flex min-h-12 items-center justify-center gap-1 px-1 py-2 text-center",
-    weekCell: "relative border-l border-line-subtle/30 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+    weekCell: "relative border-l border-line-subtle/20 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
     selectedSlot: "pointer-events-none absolute inset-x-1 z-10 rounded-control",
     resizeEdge: "absolute inset-x-0 bottom-0 h-2",
     resizeEdgeVertical: "absolute right-0 top-0 h-full w-2",
     periodHeading: "pointer-events-none absolute left-14 top-4 z-40 m-0 hidden whitespace-nowrap text-sm font-medium text-foreground-strong sm:block",
     todayAction: "border-0 bg-transparent px-2 shadow-none hover:border-0 hover:bg-background-subtle",
+    viewChoiceRoot: "relative w-24",
+    viewChoiceTrigger: "flex h-8 w-full items-center justify-between gap-2 rounded-full border-0 bg-background-subtle/70 px-3 text-xs text-foreground-strong outline-none shadow-none hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25",
+    viewChoiceListbox: "absolute right-0 top-[calc(100%+0.5rem)] z-50 grid min-w-28 gap-0.5 rounded-surface border border-line-subtle/45 bg-background-canvas p-1.5 shadow-overlay outline-none",
+    viewChoiceOption: "rounded-control border-0 bg-transparent px-2.5 py-2 text-left text-xs text-foreground-default shadow-none hover:bg-background-subtle",
+    viewChoiceOptionFocused: "bg-background-subtle text-foreground-strong",
+    viewChoiceOptionSelected: "font-medium text-foreground-strong",
     toolbarSources: "relative grid size-8 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-line-accent/25",
     sidebarHint: "grid h-5 place-items-center text-foreground-muted",
 

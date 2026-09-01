@@ -51,6 +51,7 @@ export {
   calendarYearMonths,
   parseHtmlDateValue,
   startOfIsoWeek,
+  startOfCalendarWeek,
   startOfYear,
   visiblePeriodLabel,
   type CalendarCell,

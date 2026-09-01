@@ -63,8 +63,8 @@
     --jd-content-interaction-fill: rgb(var(--color-background-accent) / 0.07);
     --jd-content-interaction-fill-active: rgb(var(--color-background-accent) / 0.12);
     --jd-content-interaction-contour: rgb(var(--color-border-accent) / 0.58);
-    --jd-content-interaction-selection-fill: rgb(var(--color-foreground-default) / 0.045);
-    --jd-content-interaction-selection-contour: rgb(var(--color-foreground-muted) / 0.48);
+    --jd-content-interaction-selection-fill: rgb(var(--color-foreground-default) / 0.025);
+    --jd-content-interaction-selection-contour: rgb(var(--color-foreground-muted) / 0.3);
     --jd-content-interaction-shadow: var(--shadow-surface);
     --jd-content-interaction-active-duration: 80ms;
     --jd-content-interaction-settle-duration: 140ms;
