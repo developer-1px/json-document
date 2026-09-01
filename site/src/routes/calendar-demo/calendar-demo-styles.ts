@@ -1,7 +1,7 @@
 import { tv } from "tailwind-variants";
 import { ui } from "../../shared/ui/styles";
 
-const chipRail = "relative before:absolute before:inset-y-1.5 before:left-1.5 before:w-0.5 before:rounded-full before:bg-foreground-muted/55 data-[calendar-color=accent]:before:bg-background-accent";
+const chipRail = "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-foreground-muted/45 data-[calendar-color=accent]:before:bg-background-accent";
 const chipFill = `${ui.surface.contentObject} text-foreground-strong data-[calendar-color=accent]:border-line-accent/20 data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10`;
 
 export const calendarDemoRecipe = tv({
