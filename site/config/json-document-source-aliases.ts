@@ -40,6 +40,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-affordance/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-ui-primitives-react/content-interaction.css",
+      replacement: sourceFile("packages/json-document-ui-primitives-react/src/content-interaction.css"),
+    },
+    {
       find: "@interactive-os/json-document-ui-primitives-react",
       replacement: sourceFile("packages/json-document-ui-primitives-react/src/index.ts"),
     },

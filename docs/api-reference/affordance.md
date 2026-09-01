@@ -268,6 +268,7 @@ type ContentInteractionAffordance = {
   readonly role: ContentInteractionRole;
   readonly phase: ContentInteractionPhase;
   readonly selected: boolean;
+  readonly primary: boolean;
   readonly elevated: boolean;
 };
 ```
@@ -278,6 +279,7 @@ type ContentInteractionInput =
   | {
       readonly role: "content";
       readonly selected?: boolean;
+      readonly primary?: boolean;
       readonly active?: boolean;
       readonly dragging?: boolean;
     }

@@ -604,6 +604,11 @@ RangeCalendar(props: { readonly label: string; readonly value: DateRangeValue | 
 ```ts
 shiftVisibleDate(visibleDate: string, period: CalendarPeriod, direction: 1 | -1): string
 ```
+## `startOfCalendarWeek`
+
+```ts
+startOfCalendarWeek(date: string): string
+```
 ## `startOfIsoWeek`
 
 ```ts
@@ -650,5 +655,6 @@ visiblePeriodLabel(period: CalendarPeriod, visibleDate: string, options?: Visibl
 type VisiblePeriodLabelOptions = {
   readonly monthNames?: ReadonlyArray<string>;
   readonly weekSeparator?: string;
+  readonly dateStyle?: "iso" | "named";
 };
 ```
