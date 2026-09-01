@@ -31,7 +31,7 @@ describe("calendar product design", () => {
     expect(styles.timedEvent()).toContain("rounded-control");
     expect(styles.resizeEdge()).not.toContain("bg-line-accent");
     expect(styles.timedEvent()).not.toContain("data-[selected=true]:bg-background-subtle");
-    expect(styles.monthTimed()).not.toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
+    expect(styles.monthTimed()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
     expect(styles.todayMark()).toContain("font-semibold");
     expect(styles.todayMark()).toContain("text-foreground-strong");
     expect(styles.todayMark()).not.toContain("bg-background-accent");
@@ -54,9 +54,9 @@ describe("calendar product design", () => {
   test("time grid keeps calendar structure visible without a full-column hover wash", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
     const timeGrid = readFileSync(path.resolve(siteRoot, "../packages/json-document-calendar/src/calendar-time-grid.tsx"), "utf8");
-    expect(styles.hourRule()).toContain("border-line-subtle/25");
-    expect(styles.weekCell()).toContain("border-line-subtle/20");
-    expect(styles.weekSticky()).toContain("border-line-subtle/25");
+    expect(styles.hourRule()).toContain("border-line-subtle/20");
+    expect(styles.weekCell()).toContain("border-line-subtle/15");
+    expect(styles.weekSticky()).toContain("border-line-subtle/20");
     expect(styles.monthWeek()).toContain("border-line-subtle/35");
     expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
     expect(styles.creationTimeHint()).toContain("translate-y-1");

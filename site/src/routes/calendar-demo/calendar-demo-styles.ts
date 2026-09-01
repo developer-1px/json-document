@@ -1,33 +1,33 @@
 import { tv } from "tailwind-variants";
 
-const chipRail = "relative before:absolute before:inset-y-1 before:left-1 before:w-px before:rounded-full before:bg-foreground-muted/50 data-[calendar-color=accent]:before:bg-background-accent/75";
-const chipFill = "bg-background-subtle text-foreground-strong data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10";
+const chipRail = "relative before:absolute before:inset-y-1.5 before:left-1.5 before:w-0.5 before:rounded-full before:bg-foreground-muted/55 data-[calendar-color=accent]:before:bg-background-accent";
+const chipFill = "border border-line-subtle/30 bg-background-subtle/80 text-foreground-strong data-[calendar-color=accent]:border-line-accent/20 data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10";
 
 export const calendarDemoRecipe = tv({
   slots: {
-    shell: "relative isolate overflow-hidden bg-background-canvas [&>[data-ui-toolbar=product]]:absolute [&>[data-ui-toolbar=product]]:right-4 [&>[data-ui-toolbar=product]]:top-3 [&>[data-ui-toolbar=product]]:z-50 [&>[data-ui-toolbar=product]]:w-auto [&>[data-ui-toolbar=product]]:max-w-[calc(100%-1.5rem)] sm:[&>[data-ui-toolbar=product]]:max-w-[calc(100%-8rem)] [&>[data-ui-toolbar=product]]:rounded-full [&>[data-ui-toolbar=product]]:border [&>[data-ui-toolbar=product]]:border-line-subtle/35 [&>[data-ui-toolbar=product]]:bg-background-canvas [&>[data-ui-toolbar=product]]:px-1 [&>[data-ui-toolbar=product]]:py-1 [&>[data-ui-toolbar=product]]:shadow-none [&>[data-ui-toolbar=product]]:transition-[border-color,box-shadow] [&>[data-ui-toolbar=product]]:hover:border-line-subtle/60 [&>[data-ui-toolbar=product]]:focus-within:border-line-subtle/60 [&>[data-ui-toolbar=product]_[data-placement=end]]:overflow-visible [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:rounded-full [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:border-transparent [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:bg-transparent [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:shadow-none [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:hover:bg-background-subtle/60 [&>[data-ui-toolbar=product]_[data-ui-segment=true][aria-checked=true]]:bg-background-subtle [&>[data-ui-toolbar=product]_[data-ui-segment=true][aria-checked=true]]:text-foreground-strong",
+    shell: "relative isolate overflow-hidden bg-background-subtle/20 [&>[data-ui-toolbar=product]]:absolute [&>[data-ui-toolbar=product]]:right-4 [&>[data-ui-toolbar=product]]:top-4 [&>[data-ui-toolbar=product]]:z-50 [&>[data-ui-toolbar=product]]:w-auto [&>[data-ui-toolbar=product]]:max-w-[calc(100%-1.5rem)] sm:[&>[data-ui-toolbar=product]]:max-w-[calc(100%-8rem)] [&>[data-ui-toolbar=product]]:rounded-full [&>[data-ui-toolbar=product]]:border [&>[data-ui-toolbar=product]]:border-line-subtle/50 [&>[data-ui-toolbar=product]]:bg-background-canvas [&>[data-ui-toolbar=product]]:px-1 [&>[data-ui-toolbar=product]]:py-1 [&>[data-ui-toolbar=product]]:shadow-surface [&>[data-ui-toolbar=product]]:transition-[border-color,box-shadow] [&>[data-ui-toolbar=product]]:hover:border-line-subtle/70 [&>[data-ui-toolbar=product]]:focus-within:border-line-subtle/70 [&>[data-ui-toolbar=product]_[data-placement=end]]:overflow-visible [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:rounded-full [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:border-transparent [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:bg-transparent [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:shadow-none [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:hover:bg-background-subtle/60 [&>[data-ui-toolbar=product]_[data-ui-segment=true][aria-checked=true]]:bg-background-subtle [&>[data-ui-toolbar=product]_[data-ui-segment=true][aria-checked=true]]:text-foreground-strong",
     controlLayer: "pointer-events-none absolute inset-0 z-40 [&>*]:pointer-events-auto",
     contentLayer: "relative z-0 h-full min-h-0 min-w-0 pb-24",
-    allDayEvent: `h-full w-full rounded-control border-0 px-2 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
-    hourRule: "absolute inset-x-0 border-t border-line-subtle/25",
-    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control border-0 px-2 py-0.5 pl-2.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
+    allDayEvent: `h-full w-full rounded-control px-2.5 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
+    hourRule: "absolute inset-x-0 border-t border-line-subtle/20",
+    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control px-2.5 py-0.5 pl-3 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
     monthWeek: "relative grid min-w-[36rem] grid-cols-7 border-t border-line-subtle/35",
     monthDay: "relative z-0 flex min-h-32 w-full flex-col items-stretch px-1.5 pb-1 text-left text-xs",
     monthAllDay: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail}`,
-    monthTimed: `relative mx-0.5 flex h-5 w-full min-w-0 items-center justify-between gap-1 truncate rounded-control border-0 bg-transparent px-1 pl-2 text-left text-xs leading-5 ${chipRail}`,
+    monthTimed: `relative mx-0.5 flex h-5 w-full min-w-0 items-center justify-between gap-1 truncate rounded-control px-2 pl-3 text-left text-xs leading-5 ${chipFill} ${chipRail}`,
     monthEvent: `relative mx-0.5 h-5 w-full min-w-0 truncate rounded-control border-0 px-2 text-left text-xs leading-5 ${chipFill} ${chipRail}`,
     monthMore: "relative z-10 h-5 w-full truncate border-0 bg-transparent px-1 text-left text-xs leading-5 text-foreground-muted shadow-none hover:border-0 hover:bg-transparent",
     quietAction: "border-0 bg-transparent p-0 shadow-none hover:border-0 hover:bg-transparent",
     monthOverflow: "absolute left-0 top-0 z-30 flex w-max min-w-full max-w-56 flex-col gap-0.5 p-1.5",
     monthHead: "px-2 py-1.5 text-center text-xs text-foreground-muted",
-    weekSticky: "z-30 shrink-0 border-b border-line-subtle/25 bg-background-canvas pt-14",
+    weekSticky: "z-30 shrink-0 border-b border-line-subtle/20 bg-background-canvas pt-16",
     weekHours: "min-h-0 flex-1 overflow-auto",
-    weekHead: "flex min-h-12 items-center justify-center gap-1 px-1 py-2 text-center",
-    weekCell: "relative border-l border-line-subtle/20 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+    weekHead: "flex min-h-12 items-center justify-center gap-1.5 px-1 py-2 text-center",
+    weekCell: "relative border-l border-line-subtle/15 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
     selectedSlot: "pointer-events-none absolute inset-x-1 z-10 rounded-control",
     resizeEdge: "absolute inset-x-0 bottom-0 h-2",
     resizeEdgeVertical: "absolute right-0 top-0 h-full w-2",
-    periodHeading: "pointer-events-none absolute left-14 top-4 z-40 m-0 hidden whitespace-nowrap text-sm font-medium text-foreground-strong sm:block",
+    periodHeading: "pointer-events-none absolute left-14 top-5 z-40 m-0 hidden whitespace-nowrap text-lg font-semibold tracking-tight text-foreground-strong sm:block",
     todayAction: "border-0 bg-transparent px-2 shadow-none hover:border-0 hover:bg-background-subtle",
     viewChoiceRoot: "relative w-24",
     viewChoiceTrigger: "flex h-8 w-full items-center justify-between gap-2 rounded-full border-0 bg-background-subtle/70 px-3 text-xs text-foreground-strong outline-none shadow-none hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25",
@@ -56,14 +56,14 @@ export const calendarDemoRecipe = tv({
     detailsEditor: "grid gap-3 border-t border-line-subtle/40 pt-3",
     calendarToggle: "group flex w-full items-center justify-start gap-2 rounded-control border-0 bg-transparent px-2 py-1.5 text-left shadow-none outline-none hover:border-0 hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-foreground-muted/25 aria-pressed:border-0 aria-pressed:bg-transparent aria-pressed:text-foreground-strong aria-[pressed=false]:text-foreground-muted",
     calendarSwatch: "size-2.5 shrink-0 rounded-full bg-foreground-muted opacity-40 data-[calendar-color=accent]:bg-background-accent group-aria-pressed:opacity-100",
-    eventTime: "truncate font-normal text-foreground-muted",
+    eventTime: "truncate font-normal leading-3 text-foreground-muted",
     creationTimeHint: "pointer-events-none absolute left-2 z-20 translate-y-1 whitespace-nowrap tabular-nums text-foreground-muted/55",
     hourLabel: "absolute right-2 -translate-y-1/2 whitespace-nowrap text-right tabular-nums text-foreground-muted/70",
-    composerDock: "bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-full border border-line-subtle/55 bg-background-canvas p-2 pl-3 shadow-none",
+    composerDock: "bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-full border border-line-subtle/50 bg-background-canvas p-2 pl-3 shadow-surface",
     composerDockFixed: "fixed",
     composerDockEmbedded: "absolute",
     composerSpark: "shrink-0 text-foreground-accent",
-    composerInput: "min-w-0 flex-1 border-0 bg-transparent px-1 py-2 text-sm text-foreground-muted outline-none placeholder:text-foreground-muted",
+    composerInput: "min-w-0 flex-1 border-0 bg-transparent px-1 py-2 text-sm text-foreground-muted opacity-100 outline-none placeholder:text-foreground-muted/80 disabled:opacity-100",
     composerSend: "grid size-8 shrink-0 place-items-center rounded-full border-0 bg-background-subtle p-0 text-foreground-muted shadow-none disabled:bg-background-subtle disabled:text-foreground-muted",
   },
 });

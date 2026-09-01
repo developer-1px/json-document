@@ -289,7 +289,7 @@ export function CalendarDemoRoute(props: {
         hourRule: styles.hourRule(),
         nowLine: styles.nowLine(),
         creationTimeHint: classes(styles.creationTimeHint(), ui.text.meta),
-        timedEventContainer: "group/event absolute z-10 py-0.5",
+        timedEventContainer: "group/event absolute z-10 p-0.5",
         timedEvent: styles.timedEvent(),
         eventTitle: classes("min-w-0 truncate", ui.text.meta),
         eventTime: classes(styles.eventTime(), ui.text.meta),
@@ -490,7 +490,14 @@ export function CalendarDemoRoute(props: {
               </Command>
             </div>
           </div>
-          <div className={classes(styles.contentLayer(), view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
+          <div className={classes(
+            styles.contentLayer(),
+            view === "day" || view === "week"
+              ? "flex min-h-0 flex-col overflow-hidden"
+              : view === "month"
+                ? "overflow-auto pt-16"
+                : "overflow-auto px-4 pt-16",
+          )}>
             <p className={styles.periodHeading()}>{visiblePeriodLabel(view, visibleDate, {
               monthNames: months,
               weekSeparator: " – ",
