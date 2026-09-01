@@ -1,4 +1,4 @@
-@import "../json-document-ui-primitives-react/src/content-interaction.css";
+@import "@interactive-os/json-document-ui-primitives-react/content-interaction.css";
 
 .jd-database {
   --jd-db-bg: #ffffff;
