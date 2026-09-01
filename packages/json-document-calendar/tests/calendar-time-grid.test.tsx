@@ -66,7 +66,11 @@ describe("CalendarTimeGrid", () => {
     }
 
     render(<Harness />);
-    expect(screen.getByRole("grid", { name: "Week" })).toBeTruthy();
+    const grid = screen.getByRole("grid", { name: "Week" });
+    expect(grid).toBeTruthy();
+    expect((grid.firstElementChild as HTMLElement).style.gridTemplateColumns).toBe("4rem repeat(7, minmax(4.5rem, 1fr))");
+    expect(grid.querySelector('[data-calendar-hour="00"]')).toBeNull();
+    expect((grid.querySelector('[data-calendar-hour="01"]') as HTMLElement).style.top).toBe("72px");
     expect(screen.getAllByRole("columnheader")).toHaveLength(7);
     expect(screen.getByText("all-day")).toBeTruthy();
     expect(screen.getByRole("presentation", { name: "Now" })).toBeTruthy();

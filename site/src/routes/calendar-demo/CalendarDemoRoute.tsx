@@ -45,7 +45,6 @@ import {
   ToolbarGroup,
   ToolbarLayout,
   ToolbarRegion,
-  ToolbarSeparator,
   Toggle,
 } from "@interactive-os/json-document-ui-primitives-react";
 import { useDemoEmbed } from "../../shared/demo-workbench/DemoPage";
@@ -160,6 +159,7 @@ export function CalendarDemoRoute(props: {
     active: !embedded && (view === "day" || view === "week"),
     resetKey: `${view}:${visibleDate}`,
     targetHour: workHourStart,
+    viewportOffset: 16,
   });
 
   function setLocation(nextView: CalendarView, nextDate: string): void {
@@ -179,8 +179,13 @@ export function CalendarDemoRoute(props: {
   const document = hand.document;
   const calendars = calendarDocumentCalendars(document);
   const selectedEvent = hand.selectedEvent;
+  const pointerGestureActive = hand.timePreview !== null
+    || hand.allDayPreview !== null
+    || hand.monthPreview !== null
+    || hand.selectionDragPreview !== null;
+  const eventInspectorVisible = selectedEvent !== null && !pointerGestureActive;
   const eventDetailsPosition = useAnchoredFloatingPosition<HTMLDivElement, HTMLElement>({
-    active: selectedEvent !== null,
+    active: eventInspectorVisible,
     policy: {
       type: "preferred",
       placement: "right-start",
@@ -267,10 +272,10 @@ export function CalendarDemoRoute(props: {
         stickyHeader: classes("grid", styles.weekSticky()),
         columnHeader: styles.weekHead(),
         weekday: ui.text.meta,
-        dayNumber: styles.dayNumber(),
-        today: styles.todayMark(),
-        allDayLabel: classes("px-1 py-2 text-right", ui.text.meta),
-        allDayCell: classes("min-h-10", styles.weekCell()),
+        dayNumber: classes(styles.dayNumber(), ui.text.body),
+        today: styles.weekToday(),
+        allDayLabel: classes("whitespace-nowrap px-1 py-1.5 text-right text-foreground-muted/70", ui.text.meta),
+        allDayCell: classes("min-h-8", styles.weekCell()),
         allDayEventContainer: "group/event relative z-10 mx-0.5 my-1",
         allDayEvent: styles.allDayEvent(),
         resizeAllDayEnd: styles.resizeEdgeVertical(),
@@ -278,16 +283,16 @@ export function CalendarDemoRoute(props: {
         timeViewportFill: styles.weekHours(),
         hourGutter: "relative overflow-hidden",
         viewportAnchor: "pointer-events-none absolute left-0 top-0",
-        hourLabel: styles.hourLabel(),
+        hourLabel: classes(styles.hourLabel(), ui.text.meta),
         timeCell: classes("overflow-hidden", styles.weekCell()),
         selectedSlot: styles.selectedSlot(),
         hourRule: styles.hourRule(),
         nowLine: styles.nowLine(),
-        creationTimeHint: styles.creationTimeHint(),
-        timedEventContainer: "group/event absolute z-10",
+        creationTimeHint: classes(styles.creationTimeHint(), ui.text.meta),
+        timedEventContainer: "group/event absolute z-10 py-0.5",
         timedEvent: styles.timedEvent(),
-        eventTitle: "min-w-0 truncate",
-        eventTime: styles.eventTime(),
+        eventTitle: classes("min-w-0 truncate", ui.text.meta),
+        eventTime: classes(styles.eventTime(), ui.text.meta),
         resizeTimedEnd: styles.resizeEdge(),
       }}
       labels={{
@@ -295,7 +300,7 @@ export function CalendarDemoRoute(props: {
         allDay: "all-day",
         now: "Now",
         resizeEnd: (event) => `Resize ${event.title} end`,
-        hour: (hour) => String(hour).padStart(2, "0"),
+        hour: calendarHourLabel,
       }}
       getEventColor={(event) => calendarColor(document, event.calendarId)}
     />
@@ -312,26 +317,19 @@ export function CalendarDemoRoute(props: {
       <ProductShell
         className={styles.shell()}
         fill={!embedded}
-        canvasClassName={embedded ? "overflow-x-auto" : "overflow-hidden"}
+        canvasClassName={classes("relative", embedded ? "overflow-x-auto" : "overflow-hidden")}
         toolbarLabel="Calendar controls"
         toolbar={(
-          <ToolbarLayout>
+          <ToolbarLayout className="gap-1" style={{ gridTemplateColumns: "auto auto auto" }}>
             <ToolbarRegion placement="start" label="Calendar navigation">
               <ToolbarGroup label="Period navigation">
-                <span className={styles.period()}>{visiblePeriodLabel(view, visibleDate, {
-                  monthNames: months,
-                  weekSeparator: " – ",
-                })}</span>
                 <Command affordance={calendarControlAffordance("periodPrevious")} label="Previous" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, -1))}>
                   <ChevronLeft aria-hidden="true" size={16} />
                 </Command>
+                <Command affordance={calendarControlAffordance("today")} className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
                 <Command affordance={calendarControlAffordance("periodNext")} label="Next" onClick={() => setVisibleDate(shiftVisibleDate(visibleDate, view, 1))}>
                   <ChevronRight aria-hidden="true" size={16} />
                 </Command>
-              </ToolbarGroup>
-              <ToolbarSeparator />
-              <ToolbarGroup label="Date shortcuts">
-                <Command affordance={calendarControlAffordance("today")} className={styles.todayAction()} onClick={() => setLocation(view === "year" ? "month" : view, today)}>Today</Command>
               </ToolbarGroup>
             </ToolbarRegion>
             <ToolbarRegion placement="center" label="Calendar view">
@@ -348,143 +346,56 @@ export function CalendarDemoRoute(props: {
                 onValueChange={setView}
               />
             </ToolbarRegion>
-            <ToolbarRegion placement="end" />
+            <ToolbarRegion placement="end" label="Calendar sources">
+              <ContextualControls
+                data-ui-affordance={calendarControlAffordance("sourceDisclosure")}
+                aria-label="Calendar sources"
+                tabIndex={0}
+                className={styles.toolbarSources()}
+                capabilities={[{ id: "sources", phases: ["approach"] }] as const}
+              >
+                {(context) => (
+                  <>
+                    <span className={styles.sidebarHint()}><CalendarDays aria-hidden="true" size={16} /></span>
+                    {context.visible.includes("sources") ? (
+                      <nav aria-label="Calendars" className={styles.sidebar()}>
+                        <p className={ui.text.label}>Calendars</p>
+                        {calendars.map((calendar) => (
+                          <Toggle
+                            affordance={calendarControlAffordance("sourceToggle")}
+                            key={calendar.id}
+                            pressed={!calendar.hidden}
+                            aria-label={`Show ${calendar.title}`}
+                            data-calendar-color={calendarColor(document, calendar.id)}
+                            className={styles.calendarToggle()}
+                            onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
+                          >
+                            <span
+                              aria-hidden="true"
+                              data-calendar-color={calendarColor(document, calendar.id)}
+                              className={styles.calendarSwatch()}
+                            />
+                            {calendar.title}
+                          </Toggle>
+                        ))}
+                        <CalendarDemoNavigator
+                          visibleDate={visibleDate}
+                          today={today}
+                          events={paintedEvents}
+                          onDateChange={setVisibleDate}
+                        />
+                      </nav>
+                    ) : null}
+                  </>
+                )}
+              </ContextualControls>
+            </ToolbarRegion>
           </ToolbarLayout>
         )}
       >
         <div className="relative flex h-full min-h-0 min-w-0 flex-col">
-          <div className="flex min-h-0 min-w-0 flex-1 gap-4 pb-24">
-            <ContextualControls
-              data-ui-affordance={calendarControlAffordance("sourceDisclosure")}
-              aria-label="Calendar sources"
-              tabIndex={0}
-              className={styles.contextualSidebar()}
-              capabilities={[{ id: "sources", phases: ["approach"] }] as const}
-            >
-              {(context) => context.visible.includes("sources") ? (
-                <nav aria-label="Calendars" className={styles.sidebar()}>
-                  <p className={ui.text.label}>Calendars</p>
-                  {calendars.map((calendar) => (
-                    <Toggle
-                      affordance={calendarControlAffordance("sourceToggle")}
-                      key={calendar.id}
-                      pressed={!calendar.hidden}
-                      aria-label={`Show ${calendar.title}`}
-                      data-calendar-color={calendarColor(document, calendar.id)}
-                      className={styles.calendarToggle()}
-                      onClick={() => hand.setCalendarHidden(calendar.id, !calendar.hidden)}
-                    >
-                      <span
-                        aria-hidden="true"
-                        data-calendar-color={calendarColor(document, calendar.id)}
-                        className={styles.calendarSwatch()}
-                      />
-                      {calendar.title}
-                    </Toggle>
-                  ))}
-                  <CalendarDemoNavigator
-                    visibleDate={visibleDate}
-                    today={today}
-                    events={paintedEvents}
-                    onDateChange={setVisibleDate}
-                  />
-                </nav>
-              ) : <span className={styles.sidebarHint()}>Calendars</span>}
-            </ContextualControls>
-            <div className={classes("min-w-0 flex-1", view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
-            {view === "day" || view === "week" ? timeGrid : null}
-            {view === "month" ? (
-              <CalendarMonthGrid
-                ref={monthGridRef}
-                visibleDate={visibleDate}
-                today={today}
-                events={paintedEvents}
-                weekdays={weekdays}
-                rowLimit={monthDayRows}
-                hand={hand}
-                interactions={pointerInteractions}
-                selectionTopology={selectionTopology}
-                primaryEventRef={eventDetailsPosition.anchorRef}
-                affordances={{
-                  dateCell: calendarControlAffordance("monthCell"),
-                  event: calendarControlAffordance("eventMonth"),
-                  eventResizeEnd: calendarControlAffordance("eventResizeEnd"),
-                  moreDisclosure: calendarControlAffordance("moreDisclosure"),
-                  overflowDate: calendarControlAffordance("overflowDate"),
-                  overflowEvent: calendarControlAffordance("overflowEvent"),
-                }}
-                classNames={{
-                  root: "min-w-[36rem]",
-                  headerRow: "grid grid-cols-7",
-                  header: styles.monthHead(),
-                  week: styles.monthWeek(),
-                  day: styles.monthDay(),
-                  dayInPeriod: ui.text.body,
-                  dayOutsidePeriod: ui.text.meta,
-                  dayOverflow: "z-20",
-                  dayNumber: styles.dayNumber(),
-                  today: styles.todayMark(),
-                  laneSpacer: "shrink-0",
-                  moreDisclosure: classes(styles.monthMore(), ui.text.meta),
-                  overflow: classes(styles.monthOverflow(), ui.surface.overlay),
-                  overflowDate: classes("px-1 text-left", styles.quietAction(), ui.text.body),
-                  eventContainer: "group/event relative z-10 min-w-0 w-full",
-                  allDayEvent: styles.monthAllDay(),
-                  timedEvent: styles.monthTimed(),
-                  eventTitle: "min-w-0 truncate",
-                  eventTime: styles.eventTime(),
-                  resizeEnd: styles.resizeEdgeVertical(),
-                }}
-                labels={{
-                  grid: "Month",
-                  overflow: (date) => `Events on ${date}`,
-                  more: (count) => `+${count} more`,
-                  resizeEnd: (event) => `Resize ${event.title} end`,
-                }}
-                getEventColor={(event) => calendarColor(document, event.calendarId)}
-                onNavigateDate={(date) => setLocation("day", date)}
-              />
-            ) : null}
-            {view === "year" ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {yearMonths.map((monthStart, index) => (
-                  <section
-                    key={monthStart}
-                    aria-label={visiblePeriodLabel("month", monthStart)}
-                    className={styles.yearMonth()}
-                  >
-                    <Command
-                      affordance={calendarControlAffordance("yearMonth")}
-                      className={classes("text-left", styles.quietAction(), ui.text.body)}
-                      onClick={() => setLocation("month", monthStart)}
-                    >
-                      {months[index]}
-                    </Command>
-                    <DateGrid
-                      label={visiblePeriodLabel("month", monthStart)}
-                      cells={calendarCells("month", monthStart)}
-                      grain="month"
-                      focusDate={monthStart}
-                      today={today}
-                      rowClassName="grid grid-cols-7"
-                      columnHeaders={weekdays.map((name) => ({ label: name, content: name.slice(0, 1) }))}
-                      columnHeaderClassName={classes("text-center", ui.text.meta)}
-                      cellAffordance={calendarControlAffordance("yearDate")}
-                      isDateSelected={() => false}
-                      getCellClassName={({ cell, today: isToday }) => classes(
-                        styles.yearDay(),
-                        cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
-                        isToday ? styles.todayMark() : null,
-                        yearBusyDates?.has(cell.date) && !isToday && styles.yearDayBusy(),
-                      )}
-                      onDateSelect={(date) => setLocation("day", date)}
-                    />
-                  </section>
-                ))}
-              </div>
-            ) : null}
-            </div>
-            <CalendarEventInspector
+          <div className={styles.controlLayer()}>
+            {eventInspectorVisible ? <CalendarEventInspector
               hand={hand}
               calendars={calendars}
               realizationKey={eventDetailsPosition.position?.placement ?? null}
@@ -549,27 +460,124 @@ export function CalendarDemoRoute(props: {
                 calendar: <CalendarDays aria-hidden="true" size={14} />,
                 repeat: <Repeat2 aria-hidden="true" size={14} />,
               }}
-            />
+            /> : null}
+            <div
+              className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
+              role="group"
+              aria-label="AI Composer preview"
+              aria-disabled="true"
+            >
+              <Sparkles aria-hidden="true" className={styles.composerSpark()} size={18} />
+              <input
+                data-ui-affordance={calendarControlAffordance("composerInput")}
+                aria-label="Ask about your calendar"
+                aria-describedby="calendar-composer-preview-note"
+                className={styles.composerInput()}
+                placeholder="Ask about your calendar…"
+                readOnly
+              />
+              <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
+              <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
+                <ArrowUp aria-hidden="true" size={16} />
+              </Command>
+            </div>
           </div>
-          <div
-            className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
-            role="group"
-            aria-label="AI Composer preview"
-            aria-disabled="true"
-          >
-            <Sparkles aria-hidden="true" className={styles.composerSpark()} size={18} />
-            <input
-              data-ui-affordance={calendarControlAffordance("composerInput")}
-              aria-label="Ask about your calendar"
-              aria-describedby="calendar-composer-preview-note"
-              className={styles.composerInput()}
-              placeholder="Ask about your calendar…"
-              readOnly
-            />
-            <span id="calendar-composer-preview-note" className="sr-only">Visual preview only. AI commands are not available in this demo.</span>
-            <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
-              <ArrowUp aria-hidden="true" size={16} />
-            </Command>
+          <div className={classes(styles.contentLayer(), view === "day" || view === "week" ? "flex min-h-0 flex-col overflow-hidden" : "overflow-auto")}>
+            <p className={styles.periodHeading()}>{visiblePeriodLabel(view, visibleDate, {
+              monthNames: months,
+              weekSeparator: " – ",
+            })}</p>
+            {view === "day" || view === "week" ? timeGrid : null}
+            {view === "month" ? (
+              <CalendarMonthGrid
+                ref={monthGridRef}
+                visibleDate={visibleDate}
+                today={today}
+                events={paintedEvents}
+                weekdays={weekdays}
+                rowLimit={monthDayRows}
+                hand={hand}
+                interactions={pointerInteractions}
+                selectionTopology={selectionTopology}
+                primaryEventRef={eventDetailsPosition.anchorRef}
+                affordances={{
+                  dateCell: calendarControlAffordance("monthCell"),
+                  event: calendarControlAffordance("eventMonth"),
+                  eventResizeEnd: calendarControlAffordance("eventResizeEnd"),
+                  moreDisclosure: calendarControlAffordance("moreDisclosure"),
+                  overflowDate: calendarControlAffordance("overflowDate"),
+                  overflowEvent: calendarControlAffordance("overflowEvent"),
+                }}
+                classNames={{
+                  root: "min-w-[36rem]",
+                  headerRow: "grid grid-cols-7",
+                  header: styles.monthHead(),
+                  week: styles.monthWeek(),
+                  day: styles.monthDay(),
+                  dayInPeriod: ui.text.body,
+                  dayOutsidePeriod: ui.text.meta,
+                  dayOverflow: "z-20",
+                  dayNumber: classes(styles.dayNumber(), ui.text.body),
+                  today: styles.todayMark(),
+                  laneSpacer: "shrink-0",
+                  moreDisclosure: classes(styles.monthMore(), ui.text.meta),
+                  overflow: classes(styles.monthOverflow(), ui.surface.overlay),
+                  overflowDate: classes("px-1 text-left", styles.quietAction(), ui.text.body),
+                  eventContainer: "group/event relative z-10 min-w-0 w-full",
+                  allDayEvent: styles.monthAllDay(),
+                  timedEvent: styles.monthTimed(),
+                  eventTitle: classes("min-w-0 truncate", ui.text.meta),
+                  eventTime: classes(styles.eventTime(), ui.text.meta),
+                  resizeEnd: styles.resizeEdgeVertical(),
+                }}
+                labels={{
+                  grid: "Month",
+                  overflow: (date) => `Events on ${date}`,
+                  more: (count) => `+${count} more`,
+                  resizeEnd: (event) => `Resize ${event.title} end`,
+                }}
+                getEventColor={(event) => calendarColor(document, event.calendarId)}
+                onNavigateDate={(date) => setLocation("day", date)}
+              />
+            ) : null}
+            {view === "year" ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {yearMonths.map((monthStart, index) => (
+                  <section
+                    key={monthStart}
+                    aria-label={visiblePeriodLabel("month", monthStart)}
+                    className={styles.yearMonth()}
+                  >
+                    <Command
+                      affordance={calendarControlAffordance("yearMonth")}
+                      className={classes("text-left", styles.quietAction(), ui.text.body)}
+                      onClick={() => setLocation("month", monthStart)}
+                    >
+                      {months[index]}
+                    </Command>
+                    <DateGrid
+                      label={visiblePeriodLabel("month", monthStart)}
+                      cells={calendarCells("month", monthStart)}
+                      grain="month"
+                      focusDate={monthStart}
+                      today={today}
+                      rowClassName="grid grid-cols-7"
+                      columnHeaders={weekdays.map((name) => ({ label: name, content: name.slice(0, 1) }))}
+                      columnHeaderClassName={classes("text-center", ui.text.meta)}
+                      cellAffordance={calendarControlAffordance("yearDate")}
+                      isDateSelected={() => false}
+                      getCellClassName={({ cell, today: isToday }) => classes(
+                        styles.yearDay(),
+                        cell.inVisiblePeriod ? ui.text.body : ui.text.meta,
+                        isToday ? styles.todayMark() : null,
+                        yearBusyDates?.has(cell.date) && !isToday && styles.yearDayBusy(),
+                      )}
+                      onDateSelect={(date) => setLocation("day", date)}
+                    />
+                  </section>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </ProductShell>
@@ -580,4 +588,10 @@ export function CalendarDemoRoute(props: {
 
 function calendarColor(document: CalendarDocument, calendarId: string): "accent" | "subtle" {
   return calendarDocumentCalendar(document, calendarId)?.color === "accent" ? "accent" : "subtle";
+}
+
+function calendarHourLabel(hour: number): string {
+  const period = hour < 12 ? "AM" : "PM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour} ${period}`;
 }

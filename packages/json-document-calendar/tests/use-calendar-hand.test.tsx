@@ -210,17 +210,17 @@ describe("useCalendarHand", () => {
       releasePointerCapture: () => undefined,
     };
     act(() => result.current.pointer.timePointerDown({
-      button: 0, clientY: 540, currentTarget: target, pointerId: 7,
+      button: 0, clientY: 555, currentTarget: target, pointerId: 7,
     } as never, "2026-08-03", "standup", "2026-08-03T09:00", "2026-08-03T09:30", "body"));
     act(() => result.current.pointer.timePointerMove({ pointerId: 7, clientX: 50, clientY: 600, target } as never));
     expect(result.current.hand.selectionDragPreview).not.toBeNull();
     expect(result.current.hand.paintedEvents.map((item) => item.start)).toEqual([
-      "2026-08-03T10:00", "2026-08-04T12:00",
+      "2026-08-03T09:45", "2026-08-04T11:45",
     ]);
     act(() => result.current.pointer.timePointerUp({ pointerId: 7 } as never));
     expect(result.current.hand.selectionDragPreview).toBeNull();
     expect(result.current.hand.document.events.map((item) => item.start)).toEqual([
-      "2026-08-03T10:00", "2026-08-04T12:00",
+      "2026-08-03T09:45", "2026-08-04T11:45",
     ]);
     expect(result.current.hand.selectedOccurrences).toHaveLength(2);
     act(() => result.current.hand.undo());
