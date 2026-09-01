@@ -23,6 +23,7 @@ test("Calendar launch shows a week interval editor then month view", async ({ pa
   await title.press("Escape");
   await expect(page.getByRole("button", { name: "Event", exact: true })).toHaveCount(0);
 
-  await page.getByRole("radio", { name: "Month", exact: true }).click();
+  await page.getByRole("button", { name: "View", exact: true }).click();
+  await page.getByRole("option", { name: "Month", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
 });

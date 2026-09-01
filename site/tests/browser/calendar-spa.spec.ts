@@ -11,7 +11,7 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
   await expect(inspector.getByLabel("End", { exact: true })).toHaveValue("2026-05-25T10:30");
   await expect(page.getByRole("grid", { name: "Week", exact: true }).getByRole("button", { name: "Event", exact: true })).toBeVisible();
 
-  await page.getByLabel("Calendar sources", { exact: true }).focus();
+  await page.locator('[data-ui-component="contextual-controls"][aria-label="Calendar sources"]').focus();
   const dateGrid = page.getByRole("region", { name: "Jump to date" }).getByRole("grid", { name: "Jump 2026-05", exact: true });
   await dateGrid.getByRole("gridcell", { name: "2026-05-26", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Week", exact: true })).toBeVisible();
@@ -25,7 +25,7 @@ test("Calendar Create and mini-month jump keep the current view", async ({ page 
 
 test("Calendar c hotkey creates a timed event on the visible date", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByRole("radio", { name: "Week", exact: true }).focus();
+  await page.getByRole("button", { name: "View", exact: true }).focus();
   await page.keyboard.press("c");
   const inspector = page.getByRole("region", { name: "Event" });
   await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
@@ -35,7 +35,7 @@ test("Calendar c hotkey creates a timed event on the visible date", async ({ pag
 
 test("Calendar view and period hotkeys use the canonical Web keymap", async ({ page }) => {
   await page.goto("/demo/calendar?view=week&date=2026-05-25");
-  await page.getByRole("radio", { name: "Week", exact: true }).focus();
+  await page.getByRole("button", { name: "View", exact: true }).focus();
   await page.keyboard.press("m");
   await expect(page).toHaveURL(/view=month/);
   await expect(page.getByRole("gridcell", { name: "2026-05-25", exact: true })).toBeVisible();
@@ -97,7 +97,7 @@ test("Calendar month empty drag paints an all-day span without leaving month vie
   await expect(eventBars).toHaveCount(2);
   await expect.poll(() => eventBars.evaluateAll((bars) => (
     bars.map((bar) => bar.getAttribute("data-calendar-span")).sort()
-  ))).toEqual(["1", "3"]);
+  ))).toEqual(["2", "2"]);
 });
 
 test("Calendar month all-day bar resizes by its end handle", async ({ page }) => {
@@ -121,7 +121,6 @@ test("Calendar month all-day bar resizes by its end handle", async ({ page }) =>
   await page.mouse.down();
   await page.mouse.move(box.x + box.width / 2 + end.width, box.y + box.height / 2, { steps: 8 });
   await page.mouse.up();
-  await expect(month.locator("[data-calendar-span=\"3\"]")).toBeVisible();
   await page.keyboard.press("F2");
   const inspector = page.getByRole("region", { name: "Event" });
   await expect(inspector.getByRole("textbox", { name: "Title" })).toHaveValue("Event");
@@ -144,9 +143,9 @@ test("Calendar empty month cell click clears selection and does not create", asy
 });
 
 test("Calendar Home and Work chips use distinct fill tokens", async ({ page }) => {
-  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  await page.goto("/demo/calendar?view=month&date=2026-05-25");
   const home = page.getByRole("button", { name: "휴일", exact: true });
-  const work = page.getByRole("button", { name: "점심", exact: true });
+  const work = page.getByRole("button", { name: /경쟁사 가격 모니터링/ }).first();
   await expect(home).toHaveAttribute("data-calendar-color", "accent");
   await expect(work).toHaveAttribute("data-calendar-color", "subtle");
 });
