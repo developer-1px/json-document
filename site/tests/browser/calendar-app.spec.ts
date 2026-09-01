@@ -143,6 +143,28 @@ test("Calendar distinguishes the selection set, primary event, move surface, and
   await expect(page.getByRole("button", { name: "Resize 점심 end", exact: true })).toBeVisible();
 });
 
+test("Calendar clears floating controls while a card is moving", async ({ page }) => {
+  await page.goto("/demo/calendar?view=week&date=2026-05-25");
+  const event = page.getByRole("button", { name: "고객사 싱크", exact: true });
+  await event.click();
+  await expect(page.getByRole("region", { name: "Event" })).toBeVisible();
+
+  const box = await event.boundingBox();
+  if (box === null) throw new Error("Calendar event must have a drag surface");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 40);
+
+  await expect(event).toHaveAttribute("data-ui-interaction-phase", "dragging");
+  await expect(page.getByRole("toolbar", { name: "Calendar controls" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
+  await expect(page.getByRole("group", { name: "AI Composer preview" })).toHaveCount(0);
+
+  await page.mouse.up();
+  await expect(page.getByRole("toolbar", { name: "Calendar controls" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "AI Composer preview" })).toBeVisible();
+});
+
 test("Calendar details follow the primary occurrence and flip inside a narrow viewport", async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 600 });
   await page.goto("/demo/calendar?view=week&date=2026-05-25");

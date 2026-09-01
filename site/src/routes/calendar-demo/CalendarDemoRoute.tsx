@@ -320,7 +320,7 @@ export function CalendarDemoRoute(props: {
         toolbarPresentation="floating"
         canvasClassName={classes("relative", embedded ? "overflow-x-auto" : "overflow-hidden")}
         toolbarLabel="Calendar controls"
-        toolbar={(
+        toolbar={pointerGestureActive ? null : (
           <ToolbarLayout className="gap-1" style={{ gridTemplateColumns: "auto auto auto" }}>
             <ToolbarRegion placement="start" label="Calendar navigation">
               <ToolbarGroup label="Period navigation">
@@ -470,7 +470,7 @@ export function CalendarDemoRoute(props: {
                 repeat: <Repeat2 aria-hidden="true" size={14} />,
               }}
             /> : null}
-            <div
+            {pointerGestureActive ? null : <div
               className={classes(styles.composerDock(), embedded ? styles.composerDockEmbedded() : styles.composerDockFixed())}
               role="group"
               aria-label="AI Composer preview"
@@ -489,7 +489,7 @@ export function CalendarDemoRoute(props: {
               <Command affordance={calendarControlAffordance("composerSend")} disabled label="AI commands unavailable" className={styles.composerSend()}>
                 <ArrowUp aria-hidden="true" size={16} />
               </Command>
-            </div>
+            </div>}
           </div>
           <div className={classes(
             styles.contentLayer(),
