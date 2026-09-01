@@ -1,3 +1,5 @@
+@import "../../../packages/json-document-ui-primitives-react/src/content-interaction.css";
+
 @layer tokens, base, components, utilities;
 
 @layer tokens {
@@ -56,6 +58,20 @@
     --letter-spacing-overline: 0.16em;
     --letter-spacing-page-title: -0.025em;
     --duration-interaction: 150ms;
+    --scale-control-pressed: 0.97;
+    --scale-content-active: 0.995;
+    --scale-content-dragging: 1.005;
+    --offset-content-dragging: -2px;
+
+    --jd-content-interaction-accent: rgb(var(--color-border-accent));
+    --jd-content-interaction-fill: rgb(var(--color-background-accent) / 0.07);
+    --jd-content-interaction-fill-active: rgb(var(--color-background-accent) / 0.12);
+    --jd-content-interaction-contour: rgb(var(--color-border-accent) / 0.58);
+    --jd-content-interaction-selection-fill: rgb(var(--color-foreground-default) / 0.025);
+    --jd-content-interaction-selection-contour: rgb(var(--color-foreground-muted) / 0.3);
+    --jd-content-interaction-shadow: var(--shadow-surface);
+    --jd-content-interaction-active-duration: 80ms;
+    --jd-content-interaction-settle-duration: 140ms;
   }
 }
 
@@ -97,6 +113,22 @@
 
   [data-ui-toolbar="product"] {
     @apply block shrink-0 border-b border-line-subtle/40 bg-background-subtle/50 px-3 py-2;
+  }
+
+  [data-ui-toolbar="product"][data-ui-presentation="floating"] {
+    @apply rounded-full border border-line-subtle/50 bg-background-canvas px-1 py-1 shadow-surface transition-[border-color,box-shadow] duration-interaction;
+  }
+
+  [data-ui-toolbar="product"][data-ui-presentation="floating"]:is(:hover, :focus-within) {
+    @apply border-line-subtle/70;
+  }
+
+  [data-ui-toolbar="product"][data-ui-presentation="floating"] [data-ui-segment="true"] {
+    @apply rounded-control border-transparent bg-transparent shadow-none hover:bg-background-subtle/60;
+  }
+
+  [data-ui-toolbar="product"][data-ui-presentation="floating"] [data-ui-segment="true"][aria-checked="true"] {
+    @apply bg-background-subtle text-foreground-strong;
   }
 
   [data-ui-component="toolbar-layout"] {
@@ -158,6 +190,29 @@
   [data-ui-segment="true"],
   [data-ui-tab="true"] {
     @apply inline-flex min-h-8 cursor-pointer items-center justify-center rounded-control border px-3 py-1.5 text-xs font-medium leading-5 outline-none transition-[background-color,border-color,color,transform] duration-interaction active:translate-y-px focus-visible:border-line-accent focus-visible:ring-2 focus-visible:ring-line-accent/25 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-transparent disabled:bg-background-subtle/40 disabled:text-foreground-disabled;
+  }
+
+  [data-ui-control="command"]:active,
+  [data-ui-control="toggle"]:active,
+  [data-ui-segment="true"]:active,
+  [data-ui-tab="true"]:active {
+    transform: scale(var(--scale-control-pressed));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui-control="command"],
+    [data-ui-control="toggle"],
+    [data-ui-segment="true"],
+    [data-ui-tab="true"] {
+      transition-duration: 0s;
+    }
+
+    [data-ui-control="command"]:active,
+    [data-ui-control="toggle"]:active,
+    [data-ui-segment="true"]:active,
+    [data-ui-tab="true"]:active {
+      transform: none;
+    }
   }
 
   [data-ui-control="command"] {
@@ -340,7 +395,7 @@
   }
 
   [data-ui-control="selectable"] {
-    @apply cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 data-[selected=true]:border-line-subtle data-[selected=true]:bg-background-subtle;
+    @apply cursor-pointer outline-none hover:bg-background-subtle;
   }
 
   /* Canonical product control grammar: semantic primitives emit the role, the product owns tone. */
@@ -352,12 +407,7 @@
     @apply bg-transparent;
   }
 
-  [data-ui-affordance="content-control"][data-selected="true"] {
-    @apply bg-background-subtle/60 outline outline-1 -outline-offset-1 outline-line-subtle;
-  }
-
-  [data-ui-affordance="stateful"][data-selected="true"],
-  [data-ui-affordance="direct"][data-selected="true"] {
+  [data-ui-affordance="stateful"][data-selected="true"] {
     @apply text-foreground-strong outline outline-1 -outline-offset-1 outline-line-subtle;
   }
 
@@ -366,11 +416,11 @@
   }
 
   [data-ui-affordance="direct"][data-calendar-move-surface="true"] {
-    @apply cursor-grab active:cursor-grabbing hover:bg-background-canvas hover:shadow-surface;
+    @apply cursor-grab active:cursor-grabbing hover:bg-background-canvas;
   }
 
   [data-ui-primitive="resize-handle"][data-ui-affordance="direct"] {
-    @apply absolute z-20 appearance-none border-0 bg-transparent p-0 opacity-0 shadow-none transition-[opacity,background-color] duration-interaction after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-foreground-muted/70 hover:after:bg-foreground-default data-[active=true]:bg-background-subtle data-[active=true]:opacity-100 data-[active=true]:after:bg-foreground-strong focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-accent focus-visible:after:bg-foreground-default;
+    @apply absolute z-20 appearance-none border-0 bg-transparent p-0 opacity-0 shadow-none transition-[opacity,background-color] duration-interaction after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:bg-line-accent hover:after:bg-background-action-primary data-[active=true]:bg-background-accent-subtle data-[active=true]:opacity-100 data-[active=true]:after:bg-background-action-primary focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-accent focus-visible:after:bg-background-action-primary;
   }
 
   .group\/event:hover [data-ui-primitive="resize-handle"][data-ui-affordance="direct"],

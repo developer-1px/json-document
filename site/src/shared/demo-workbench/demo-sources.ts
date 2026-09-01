@@ -55,6 +55,7 @@ import boardDragSessionSource from "../../../../packages/json-document-affordanc
 import canvasGestureSessionSource from "../../../../packages/json-document-affordance/src/canvas-gesture-session.ts?raw";
 import gestureSessionSource from "../../../../packages/json-document-affordance/src/gesture-session.ts?raw";
 import interactionHandleSource from "../../../../packages/json-document-affordance/src/interaction-handle.ts?raw";
+import contentInteractionAffordanceSource from "../../../../packages/json-document-affordance/src/content-interaction.ts?raw";
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
@@ -67,6 +68,7 @@ import uiSelectSource from "../../../../packages/json-document-ui-primitives-rea
 import uiSurfacesSource from "../../../../packages/json-document-ui-primitives-react/src/surfaces.tsx?raw";
 import uiControlsSource from "../../../../packages/json-document-ui-primitives-react/src/controls.tsx?raw";
 import uiControlAffordanceSource from "../../../../packages/json-document-ui-primitives-react/src/control-affordance.ts?raw";
+import uiContentInteractionSource from "../../../../packages/json-document-ui-primitives-react/src/content-interaction.ts?raw";
 import uiChoiceSource from "../../../../packages/json-document-ui-primitives-react/src/choice.tsx?raw";
 import uiInputControlsSource from "../../../../packages/json-document-ui-primitives-react/src/input-controls.tsx?raw";
 import uiPresentationsSource from "../../../../packages/json-document-ui-primitives-react/src/presentations.tsx?raw";
@@ -216,6 +218,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-affordance/src/canvas-gesture-session.ts", canvasGestureSessionSource],
   ["packages/json-document-affordance/src/gesture-session.ts", gestureSessionSource],
   ["packages/json-document-affordance/src/interaction-handle.ts", interactionHandleSource],
+  ["packages/json-document-affordance/src/content-interaction.ts", contentInteractionAffordanceSource],
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
@@ -228,6 +231,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ui-primitives-react/src/surfaces.tsx", uiSurfacesSource],
   ["packages/json-document-ui-primitives-react/src/controls.tsx", uiControlsSource],
   ["packages/json-document-ui-primitives-react/src/control-affordance.ts", uiControlAffordanceSource],
+  ["packages/json-document-ui-primitives-react/src/content-interaction.ts", uiContentInteractionSource],
   ["packages/json-document-ui-primitives-react/src/choice.tsx", uiChoiceSource],
   ["packages/json-document-ui-primitives-react/src/input-controls.tsx", uiInputControlsSource],
   ["packages/json-document-ui-primitives-react/src/presentations.tsx", uiPresentationsSource],
@@ -282,6 +286,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-affordance",
     symbol: "computeAnchoredFloatingPosition",
     sourcePath: "packages/json-document-affordance/src/anchored-floating-position.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-affordance",
+    symbol: "contentInteractionAffordance",
+    sourcePath: "packages/json-document-affordance/src/content-interaction.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-ui-primitives-react",
+    symbol: "contentInteractionAttributes",
+    sourcePath: "packages/json-document-ui-primitives-react/src/content-interaction.ts",
   },
   {
     packageName: "@interactive-os/json-document-web",

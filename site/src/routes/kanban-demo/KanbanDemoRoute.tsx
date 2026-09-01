@@ -42,6 +42,7 @@ const initialBoard: KanbanDocument = {
 
 export function KanbanDemoRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
+  const [draggingId, setDraggingId] = useState<string | null>(null);
   const [boardDrag] = useState(() => createBoardDragSession<string, KanbanCardDropTarget>({
     onCommit: ({ item: cardId, target }) => {
       editor.dispatch({
@@ -149,18 +150,22 @@ export function KanbanDemoRoute() {
                   type="button"
                   selected={option.selected}
                   focus={option.focus}
+                  dragging={draggingId === card.id}
                   draggable
                   {...webKanbanCardProps(card.id)}
-                  data-selected={option.selected ? "true" : "false"}
                   data-focus={option.focus ? "true" : "false"}
                   aria-selected={option.selected}
                   onClick={option.onClick}
                   onDragStart={(event) => {
                     editing.getItem(card.id).getPressHandler()(event);
+                    setDraggingId(card.id);
                     boardDrag.begin(card.id);
                     dragSession.begin(card.id);
                   }}
-                  onDragEnd={() => dragSession.cancel()}
+                  onDragEnd={() => {
+                    setDraggingId(null);
+                    dragSession.cancel();
+                  }}
                   className={classes("w-full p-3 text-left", ui.surface.documentBlock)}
                 >
                   {card.title}

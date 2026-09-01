@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Undo2 } from "lucide-react";
-import { Command, Choice, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Choice, contentInteractionAttributes, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
@@ -128,11 +128,8 @@ function SheetArtifact() {
           <div
             key={`${rowIndex}-${columnIndex}`}
             role={rowIndex === 0 ? "columnheader" : "gridcell"}
-            className={classes(
-              rowIndex === 0 ? ui.surface.gridHead : ui.surface.gridCell,
-              rowIndex === 2 && columnIndex === 2 && ui.surface.previewSelected,
-              styles.cell(),
-            )}
+            className={classes(rowIndex === 0 ? ui.surface.gridHead : ui.surface.gridCell, styles.cell())}
+            {...(rowIndex === 0 ? {} : contentInteractionAttributes({ role: "content", selected: rowIndex === 2 && columnIndex === 2 }))}
           >{cell}</div>
         )))}
       </div>

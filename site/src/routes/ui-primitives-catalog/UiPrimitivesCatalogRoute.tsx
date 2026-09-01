@@ -19,6 +19,7 @@ import {
 import {
   Check,
   Command,
+  contentInteractionAttributes,
   Toggle,
   ContextualControls,
   ControlHandle,
@@ -258,6 +259,20 @@ export function UiPrimitivesCatalogRoute() {
               />
             </div>
           </div>
+          </div>
+          <div className={styles.controlGroup()}>
+          <div className={styles.controlScenarioHeader()}>
+            <h3 className={styles.controlScenarioTitle()}>Content interaction</h3>
+            <span className={ui.text.meta}>One state grammar across product content</span>
+          </div>
+          <ul className={styles.selectionList()}>
+            <li><SelectableItem selected={false} className={styles.selectionItem()}>Rest</SelectableItem></li>
+            <li><SelectableItem selected className={styles.selectionItem()}>Selected</SelectableItem></li>
+            <li><SelectableItem selected active className={styles.selectionItem()}>Active</SelectableItem></li>
+            <li><SelectableItem selected dragging className={styles.selectionItem()}>Dragging</SelectableItem></li>
+            <li {...contentInteractionAttributes({ role: "drop-target", active: true })} className={styles.selectionItem()}>Drop target</li>
+            <li {...contentInteractionAttributes({ role: "insertion", active: true })} className={styles.selectionItem()}>Insertion</li>
+          </ul>
           </div>
           <div className={styles.controlGroup()}>
           <div className={styles.controlScenarioHeader()}>

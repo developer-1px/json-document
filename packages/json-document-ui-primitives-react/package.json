@@ -4,7 +4,7 @@
   "description": "Official minimalist React UI primitives for json-document Hands.",
   "type": "module",
   "license": "MIT",
-  "sideEffects": false,
+  "sideEffects": ["./dist/content-interaction.css"],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -14,10 +14,13 @@
   },
   "publishConfig": { "access": "public", "provenance": true, "tag": "next" },
   "files": ["dist", "!dist/.tsbuildinfo", "README.md", "LICENSE"],
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./content-interaction.css": "./dist/content-interaction.css"
+  },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -b tsconfig.json",
+    "build": "npm run clean && tsc -b tsconfig.json && cp src/content-interaction.css dist/content-interaction.css",
     "test": "vitest run --config vitest.config.ts",
     "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",

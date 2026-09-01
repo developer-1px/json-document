@@ -10,6 +10,7 @@ import {
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession } from "@interactive-os/json-document-web";
 import type { ControlAffordanceProps } from "./control-affordance.js";
+import { contentInteractionAttributes } from "./content-interaction.js";
 
 export function FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & {
   readonly onFiles: (files: ReadonlyArray<File>) => void;
@@ -27,10 +28,13 @@ export function FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDr
 
 export function GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & {
   readonly selected: boolean;
+  readonly primary?: boolean;
   readonly focus?: boolean;
+  readonly active?: boolean;
+  readonly dragging?: boolean;
 }) {
-  const { selected, focus = false, ...cellProps } = props;
-  return <td {...cellProps} role="gridcell" aria-selected={selected} data-selected={selected || undefined} data-focus={focus || undefined} />;
+  const { active = false, dragging = false, selected, primary = false, focus = false, ...cellProps } = props;
+  return <td {...cellProps} {...contentInteractionAttributes({ role: "content", selected, primary, active, dragging })} role="gridcell" aria-selected={selected} data-focus={focus || undefined} />;
 }
 
 export type InteractionHandleBindingOptions<ElementType extends Element = HTMLElement> = {

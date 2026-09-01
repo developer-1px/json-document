@@ -11,7 +11,7 @@ import {
   type CalendarOccurrenceTopologySnapshot,
 } from "@interactive-os/json-document-editing";
 import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
-import { ResizeHandle, SelectableItem, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
+import { contentInteractionAttributes, ResizeHandle, SelectableItem, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import { calendarTimeLabel, type CalendarCell } from "./date-values.js";
 import type { CalendarHand } from "./use-calendar-hand.js";
 import type { CalendarPointerInteractions } from "./use-calendar-pointer-interactions.js";
@@ -112,7 +112,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
     if (start !== null && end !== null) hand.createInterval(start, end);
   }
 
-  const gridColumns = `3.25rem repeat(${days.length}, minmax(4.5rem, 1fr))`;
+  const gridColumns = `4rem repeat(${days.length}, minmax(4.5rem, 1fr))`;
   const gridHeight = (props.hourEnd - props.hourStart) * props.pixelsPerHour;
   return (
     <div
@@ -130,7 +130,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
         <div className={props.classNames.columnHeader} />
         {props.cells.map((cell) => (
           <div key={cell.date} role="columnheader" className={props.classNames.columnHeader}>
-            <span className={props.classNames.weekday}>{props.weekdays[cell.weekday - 1]}</span>
+            <span className={props.classNames.weekday}>{props.weekdays[cell.weekday % 7]}</span>
             <span className={joinClasses(props.classNames.dayNumber, cell.date === props.today ? props.classNames.today : undefined)}>{cell.day}</span>
           </div>
         ))}
@@ -140,7 +140,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             key={`allday-${day}`}
             data-calendar-allday-day={day}
             tabIndex={-1}
-            data-selected={selectedSlot === day ? "true" : undefined}
+            {...contentInteractionAttributes({ role: "insertion", active: selectedSlot === day })}
             data-ui-affordance={props.affordances.allDayCell}
             className={props.classNames.allDayCell}
             style={{ gridRow: `2 / span ${allDayLaneCount}` }}
@@ -162,7 +162,8 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             <SelectableItem
               affordance={props.affordances.allDayEvent}
               selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
-              data-primary={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "true" : undefined}
+              primary={hand.isPrimaryOccurrence(item.event.id, item.event.start)}
+              dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
               aria-label={item.event.title}
               data-calendar-color={props.getEventColor(item.event)}
               data-calendar-move-surface="true"
@@ -210,8 +211,8 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             className={props.classNames.viewportAnchor}
             style={{ transform: `translateY(${(props.workHourStart - props.hourStart) * props.pixelsPerHour}px)` }}
           />
-          {Array.from({ length: props.hourEnd - props.hourStart }, (_, index) => props.hourStart + index).map((hour) => (
-            <div key={hour} data-calendar-hour={String(hour).padStart(2, "0")} className={props.classNames.hourLabel} style={{ top: (hour - props.hourStart) * props.pixelsPerHour + 4 }}>
+          {Array.from({ length: props.hourEnd - props.hourStart }, (_, index) => index === 0 ? null : props.hourStart + index).map((hour) => hour === null ? null : (
+            <div key={hour} data-calendar-hour={String(hour).padStart(2, "0")} className={props.classNames.hourLabel} style={{ top: (hour - props.hourStart) * props.pixelsPerHour }}>
               {props.labels.hour(hour)}
             </div>
           ))}
@@ -252,6 +253,7 @@ function TimeColumn(input: {
       {input.selectedSlot?.startsWith(`${day}T`) ? (
         <div
           data-calendar-selected-slot={input.selectedSlot}
+          {...contentInteractionAttributes({ role: "insertion", active: true })}
           data-ui-affordance={props.affordances.selectedSlot}
           className={props.classNames.selectedSlot}
           style={{
@@ -288,7 +290,8 @@ function TimeColumn(input: {
             <SelectableItem
               affordance={props.affordances.timedEvent}
               selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
-              data-primary={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "true" : undefined}
+              primary={hand.isPrimaryOccurrence(item.event.id, item.event.start)}
+              dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
               aria-label={item.event.title}
               data-calendar-event=""
               data-calendar-color={props.getEventColor(item.event)}

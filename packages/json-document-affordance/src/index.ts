@@ -24,6 +24,13 @@ export {
 export { createViewportPositionSession } from "./viewport-position.js";
 export { computeAnchoredFloatingPosition } from "./anchored-floating-position.js";
 export { contextualAffordance } from "./contextual.js";
+export { contentInteractionAffordance } from "./content-interaction.js";
+export type {
+  ContentInteractionAffordance,
+  ContentInteractionInput,
+  ContentInteractionPhase,
+  ContentInteractionRole,
+} from "./content-interaction.js";
 export type {
   AnchoredFloatingPosition,
   AnchoredFloatingPositionInput,

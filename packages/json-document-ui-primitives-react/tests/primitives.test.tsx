@@ -161,6 +161,11 @@ describe("UI Primitives", () => {
     expect(screen.getByText("Inspector").parentElement?.dataset.uiComponent).toBe("product-inspector");
   });
 
+  test("ProductShell exposes a canonical floating toolbar presentation", () => {
+    render(<ProductShell toolbar="Actions" toolbarPresentation="floating">Canvas</ProductShell>);
+    expect(screen.getByRole("toolbar").getAttribute("data-ui-presentation")).toBe("floating");
+  });
+
   test("Toolbar can own a standalone action collection", () => {
     render(<Toolbar label="History"><Command>Undo</Command></Toolbar>);
     expect(screen.getByRole("toolbar", { name: "History" })).toBeTruthy();
@@ -320,6 +325,15 @@ describe("UI Primitives", () => {
     await user.keyboard("{Escape}");
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(trigger);
+  });
+
+  test("Choice dismisses its popup when another product surface is pressed", async () => {
+    const user = userEvent.setup();
+    render(<><Choice presentation="popup" label="보기" value="week" options={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }]} onValueChange={() => undefined} /><button type="button">일정</button></>);
+    await user.click(screen.getByRole("button", { name: "보기" }));
+    expect(screen.getByRole("listbox", { name: "보기" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "일정" }));
+    expect(screen.queryByRole("listbox", { name: "보기" })).toBeNull();
   });
 
   test("Menu moves through enabled actions and restores trigger focus", async () => {

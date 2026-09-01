@@ -48,6 +48,10 @@ useEditing({
 `historyAffordance(snapshot).hand` exposes the typed Undo/Redo availability map
 directly. The editing runtime still owns history state and execution.
 
+`contentInteractionAffordance` is the canonical product-content state model.
+It distinguishes persistent selection, transient active feedback, movement,
+drop targets, and insertion positions without owning DOM or product color.
+
 `createTypeaheadSession`, `createRenameSession`, and `createLineFocusSession`
 own the reusable state that spans several events. Product selection and rename
 Intents remain callbacks supplied by the host.

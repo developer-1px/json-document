@@ -59,40 +59,40 @@ describe("HTML date values", () => {
     ]);
   });
 
-  test("projects day and ISO week periods as canonical calendar cells", () => {
+  test("projects day and Sunday-first week periods as canonical calendar cells", () => {
     expect(calendarCells("day", "2026-05-28")).toEqual([
       { date: "2026-05-28", day: 28, inVisiblePeriod: true, weekday: 4 },
     ]);
     const week = calendarCells("week", "2026-05-28");
     expect(week.map((cell) => cell.date)).toEqual([
-      "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28",
-      "2026-05-29", "2026-05-30", "2026-05-31",
+      "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27",
+      "2026-05-28", "2026-05-29", "2026-05-30",
     ]);
-    expect(week.map((cell) => cell.day)).toEqual([25, 26, 27, 28, 29, 30, 31]);
+    expect(week.map((cell) => cell.day)).toEqual([24, 25, 26, 27, 28, 29, 30]);
   });
 
-  test("projects a month grid as six ISO week rows of seven cells", () => {
+  test("projects a month grid as six Sunday-first week rows of seven cells", () => {
     const weeks = calendarMonthWeeks("2026-05-25");
     expect(weeks).toHaveLength(6);
     expect(weeks.every((week) => week.length === 7)).toBe(true);
     expect(weeks[0]?.map((cell) => cell.date)).toEqual([
-      "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30",
-      "2026-05-01", "2026-05-02", "2026-05-03",
+      "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29",
+      "2026-04-30", "2026-05-01", "2026-05-02",
     ]);
-    expect(weeks[0]?.map((cell) => cell.day)).toEqual([27, 28, 29, 30, 1, 2, 3]);
-    expect(weeks[5]?.at(-1)?.date).toBe("2026-06-07");
+    expect(weeks[0]?.map((cell) => cell.day)).toEqual([26, 27, 28, 29, 30, 1, 2]);
+    expect(weeks[5]?.at(-1)?.date).toBe("2026-06-06");
   });
 
   test("projects ordered calendar cells to a half-open query interval", () => {
     expect(calendarCellInterval([])).toBeNull();
     expect(calendarCellInterval(calendarCells("month", "2026-05-25"))).toEqual({
-      start: "2026-04-27",
-      end: "2026-06-08",
+      start: "2026-04-26",
+      end: "2026-06-07",
     });
   });
 
   test("preserves default labels and accepts Calendar toolbar copy policy", () => {
-    expect(visiblePeriodLabel("week", "2026-05-28")).toBe("2026-05-25 · week");
+    expect(visiblePeriodLabel("week", "2026-05-28")).toBe("2026-05-24 · week");
     expect(visiblePeriodLabel("month", "2026-05-28")).toBe("2026-05");
     expect(visiblePeriodLabel("year", "2026-05-28")).toBe("2026");
 
@@ -101,9 +101,12 @@ describe("HTML date values", () => {
       weekSeparator: " – ",
     };
     expect(visiblePeriodLabel("day", "2026-05-28", options)).toBe("2026-05-28");
-    expect(visiblePeriodLabel("week", "2026-05-28", options)).toBe("2026-05-25 – 2026-05-31");
+    expect(visiblePeriodLabel("week", "2026-05-28", options)).toBe("2026-05-24 – 2026-05-30");
     expect(visiblePeriodLabel("month", "2026-05-28", options)).toBe("May 2026");
     expect(visiblePeriodLabel("year", "2026-05-28", options)).toBe("2026");
+    expect(visiblePeriodLabel("day", "2026-05-28", { ...options, dateStyle: "named" })).toBe("May 28, 2026");
+    expect(visiblePeriodLabel("week", "2026-05-28", { ...options, dateStyle: "named" })).toBe("May 24 – 30, 2026");
+    expect(visiblePeriodLabel("week", "2026-06-01", { ...options, dateStyle: "named" })).toBe("May 31 – Jun 6, 2026");
   });
 });
 

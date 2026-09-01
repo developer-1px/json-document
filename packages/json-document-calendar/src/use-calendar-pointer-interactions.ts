@@ -130,7 +130,10 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
       return;
     }
     setHoveredTime(null);
-    const targetInstant = instantAt(day, event.clientY, grid);
+    const targetGridMinutes = calendarMinutesFromWebGrid(event.clientY, grid.getBoundingClientRect(), {
+      hourStart: policy.hourStart, hourEnd: policy.hourEnd, stepMinutes: policy.stepMinutes,
+    });
+    const targetInstant = calendarInstantAt(day, targetGridMinutes);
     if (targetInstant === null) return;
     const next = timePointer.preview(event.pointerId, (state) => {
       const dragSource = state.dragSource ?? (state.dragCandidate !== null && targetInstant !== state.originInstant
@@ -139,8 +142,11 @@ export function useCalendarPointerInteractions(hand: CalendarHand, policy: Calen
       return { ...state, targetInstant, dragSource };
     });
     if (next?.dragSource !== null && next?.dragSource !== undefined) {
-      if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "instant", instant: next.originInstant } });
-      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "instant", instant: targetInstant } }));
+      const originAnchor = next.dragSource.anchor.occurrenceStart;
+      const move = interpretCalendarTimeGridPointer(next);
+      if (move?.type !== "event.move") return;
+      if (selectionDrag.getActive() === null) selectionDrag.begin({ type: "calendar-selection-drag", source: next.dragSource, target: { type: "instant", instant: originAnchor } });
+      const gesture = selectionDrag.preview((active) => ({ ...active, target: { type: "instant", instant: move.start } }));
       hand.previewSelectionDrag(gesture);
     } else if (next !== null) hand.setTimePreview(next);
   }

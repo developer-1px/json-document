@@ -17,6 +17,7 @@ function assertNoAccentChrome(source: string, label: string): void {
 
 describe("calendar product design", () => {
   const styles = calendarDemoRecipe();
+  const route = readFileSync(path.join(siteRoot, "src/routes/calendar-demo/CalendarDemoRoute.tsx"), "utf8");
 
   test("event chips and calendar-visibility toggles use fill and type, not accent chrome", () => {
     assertNoAccentChrome(styles.timedEvent(), "timedEvent");
@@ -28,9 +29,14 @@ describe("calendar product design", () => {
     expect(styles.timedEvent()).not.toContain("data-[selected=true]");
     expect(styles.timedEvent()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
     expect(styles.timedEvent()).toContain("rounded-control");
+    expect(styles.timedEvent()).toContain("border-transparent");
+    expect(styles.timedEvent()).toContain("bg-background-subtle/60");
+    expect(styles.timedEvent()).toContain("[--offset-content-primary:0px]");
+    expect(styles.timedEvent()).toContain("[--offset-content-dragging:0px]");
+    expect(styles.timedEvent()).toContain("[--scale-content-dragging:1]");
     expect(styles.resizeEdge()).not.toContain("bg-line-accent");
     expect(styles.timedEvent()).not.toContain("data-[selected=true]:bg-background-subtle");
-    expect(styles.monthTimed()).not.toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
+    expect(styles.monthTimed()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
     expect(styles.todayMark()).toContain("font-semibold");
     expect(styles.todayMark()).toContain("text-foreground-strong");
     expect(styles.todayMark()).not.toContain("bg-background-accent");
@@ -52,12 +58,24 @@ describe("calendar product design", () => {
 
   test("time grid keeps calendar structure visible without a full-column hover wash", () => {
     const css = readFileSync(path.join(siteRoot, "src/app/index.css"), "utf8");
-    expect(styles.hourRule()).toContain("border-line-subtle/70");
-    expect(styles.weekCell()).toContain("border-line-subtle/60");
-    expect(styles.weekSticky()).toContain("border-line-subtle/60");
-    expect(styles.monthWeek()).toContain("border-line-subtle/60");
+    const timeGrid = readFileSync(path.resolve(siteRoot, "../packages/json-document-calendar/src/calendar-time-grid.tsx"), "utf8");
+    expect(styles.hourRule()).toContain("border-line-subtle/20");
+    expect(styles.weekCell()).toContain("border-line-subtle/15");
+    expect(styles.weekSticky()).toContain("border-line-subtle/20");
+    expect(styles.weekSticky()).toContain("pt-14");
+    expect(styles.monthWeek()).toContain("border-line-subtle/35");
     expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
+    expect(styles.creationTimeHint()).toContain("translate-y-1");
+    expect(styles.creationTimeHint()).not.toContain("-translate-y-1/2");
+    expect(route).toContain("const eventInspectorVisible = selectedEvent !== null && !pointerGestureActive");
+    expect(route).toContain("eventInspectorVisible ? <CalendarEventInspector");
     expect(styles.hourLabel()).toContain("text-foreground-muted");
+    expect(styles.timedEventTitle()).toContain("leading-4");
+    expect(styles.eventTime()).toContain("leading-3");
+    expect(styles.composerDock()).toContain("shadow-none");
+    expect(styles.composerDock()).toContain("border-line-subtle/35");
+    expect(styles.selectedSlot()).not.toContain("bg-");
+    expect(timeGrid).toContain('contentInteractionAttributes({ role: "insertion", active: true })');
     expect(css).toContain('[data-ui-presentation="calendar-time-grid"]:hover');
     expect(css).toContain("bg-transparent");
   });

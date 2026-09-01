@@ -18,7 +18,7 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   await expect(tuesday.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true }).click();
-  await page.getByRole("button", { name: "Delete", exact: true }).click();
+  await page.keyboard.press("Delete");
   await expect(page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toHaveCount(0);
   await page.keyboard.press("ControlOrMeta+z");
   await expect(page.getByRole("button", { name: "주간 사용량 리포트 요약", exact: true })).toBeVisible();
@@ -37,20 +37,20 @@ test("Calendar Hands edits one interval across day, week, month, and year views"
   expect(afterResize).not.toBeNull();
   expect(afterResize!.width).toBeGreaterThan(beforeResize!.width);
 
-  await page.getByRole("radio", { name: "Month", exact: true }).click();
+  await selectCalendarView(page, "Month");
   const emptyMonthDay = page.getByRole("gridcell", { name: "2026-05-23", exact: true });
   await emptyMonthDay.dblclick();
   const month = page.getByRole("grid", { name: "Month", exact: true });
   await expect(month.getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
-  await page.getByRole("radio", { name: "Year", exact: true }).click();
+  await selectCalendarView(page, "Year");
   const may = page.getByRole("region", { name: "2026-05", exact: true });
   await expect(page.getByRole("grid", { name: "2026-05", exact: true })).toBeVisible();
   await may.getByRole("button", { name: "May", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Month", exact: true })).toBeVisible();
   await expect(page.getByRole("grid", { name: "Month", exact: true }).getByRole("button", { name: "Event", exact: true }).first()).toBeVisible();
 
-  await page.getByRole("radio", { name: "Year", exact: true }).click();
+  await selectCalendarView(page, "Year");
   await page.getByRole("region", { name: "2026-05", exact: true }).getByRole("gridcell", { name: "2026-05-01", exact: true }).click();
   await expect(page.getByRole("grid", { name: "Day", exact: true })).toBeVisible();
   const dayGrid = timeGridDay(page, "2026-05-01");
@@ -99,8 +99,8 @@ test("Calendar drags the selected occurrence set with one temporal delta and one
   await dragBy(page, first, 0, 72);
   const movedFirst = page.getByRole("button", { name: "경쟁사 가격 모니터링", exact: true });
   const movedSecond = page.getByRole("button", { name: "고객사 싱크", exact: true });
-  await expect(movedFirst).toContainText("08:15");
-  await expect(movedSecond).toContainText("12:15");
+  await expect(movedFirst).toContainText("08:00");
+  await expect(movedSecond).toContainText("12:00");
   await expect(movedFirst).toHaveAttribute("data-selected", "true");
   await expect(movedSecond).toHaveAttribute("data-selected", "true");
 
@@ -157,7 +157,7 @@ test("Calendar occurrence selection shares replace, toggle, extend, focus, and c
   await expect(first).toHaveAttribute("data-selected", "true");
   await expect(second).toHaveAttribute("data-selected", "true");
 
-  await page.getByRole("radio", { name: "Month", exact: true }).click();
+  await selectCalendarView(page, "Month");
   const month = page.getByRole("grid", { name: "Month", exact: true });
   await expect(month.getByRole("gridcell", { name: "2026-05-25", exact: true })).toHaveAttribute("aria-selected", "true");
   const monthFirst = month.getByRole("button").filter({ hasText: "경쟁사 가격 모니터링" }).first();
@@ -232,6 +232,11 @@ test("Calendar Usage exposes its canonical Editing and pointer sources", async (
 
 function timeGridDay(page: Page, day: string): Locator {
   return page.locator(`[data-calendar-grid="time"][data-calendar-day="${day}"]`);
+}
+
+async function selectCalendarView(page: Page, view: "Day" | "Week" | "Month" | "Year"): Promise<void> {
+  await page.getByRole("button", { name: "View", exact: true }).click();
+  await page.getByRole("option", { name: view, exact: true }).click();
 }
 
 async function dragWithin(page: Page, target: Locator, fromRatio: number, toRatio: number): Promise<void> {

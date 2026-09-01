@@ -53,5 +53,5 @@ test("Demo chrome and selection use quiet, separated state grammar", async ({ pa
   expect(state.background).not.toBe("rgba(0, 0, 0, 0)");
   expect(state.border).not.toBe("rgb(222, 109, 85)");
   expect(state.outline).toBe("rgba(0, 0, 0, 0)");
-  expect(state.boxShadow).toBe("none");
+  expect(state.boxShadow).toContain("inset");
 });

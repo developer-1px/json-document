@@ -125,11 +125,29 @@ icon button은 독립 역할이 아니므로 공개 primitive가 아닙니다.
 `expanded`와 `controls`를 disclosure ARIA에 연결하며 표현 markup은 Host가
 children으로 구성합니다.
 
-`SelectableItem`은 polymorphic element에 `selected/focus` data state와
+`SelectableItem`은 polymorphic element에 `selected/active/dragging/focus` data state와
 `data-ui-control` styling slot을 제공합니다. role, ARIA selection과 roving focus는
 해당 widget의 semantic primitive 또는 Web Adapter가 소유합니다. 제품별 copy와
 brand token은 Host 책임이지만 최소 hit target, focus-visible, disabled/pressed와
 tooltip 가시성은 UI Primitive styling hook의 불변식입니다.
+
+### Content interaction grammar
+
+제품 콘텐츠의 지속 선택, 순간 누름, 이동, 드롭 대상과 삽입 위치는 하나의 상태
+어휘를 사용합니다. `selected`는 레이아웃을 바꾸지 않는 안쪽 윤곽과 tonal fill,
+`active`는 더 강한 안쪽 피드백, `dragging`은 실제 이동을 뜻하는 elevation을
+추가합니다. 빈 칸은 선택된 콘텐츠가 아니라 `insertion`입니다.
+
+```tsx
+<SelectableItem selected={selected} active={pressed} dragging={moving}>Card</SelectableItem>
+<GridCell selected={selected} active={pressed} dragging={moving}>Cell</GridCell>
+<div {...contentInteractionAttributes({ role: "drop-target", active: over })} />
+<div {...contentInteractionAttributes({ role: "insertion", active: emptySlot })} />
+```
+
+focus-visible outer ring은 이 상태들과 독립이며, reduced motion에서는 상태 정보는
+유지하고 전환 시간만 제거합니다. toolbar의 pressed/toggle, 입력 caret, 브라우저의
+native text selection은 이 콘텐츠 문법에 포함하지 않습니다.
 
 ### `ControlAffordance`
 

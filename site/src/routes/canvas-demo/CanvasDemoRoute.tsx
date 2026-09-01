@@ -694,6 +694,7 @@ export function CanvasDemoRoute() {
                   data-hover={hoverId === object.id}
                   selected={option.selected}
                   focus={option.focus}
+                  dragging={offset !== null}
                   onPointerDown={(event) => handleObjectPointerDown(event, object.id)}
                   onPointerMove={handleObjectPointerMove}
                   onPointerUp={commitCurrentDrag}

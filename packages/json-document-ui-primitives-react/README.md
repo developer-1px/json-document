@@ -19,6 +19,16 @@ Products may declare the composition-specific exposure grammar through the
 public `ControlAffordance` vocabulary; primitives project it as
 `data-ui-affordance` without changing their semantic control role.
 
+`SelectableItem`, `GridCell`, and `contentInteractionAttributes` project the
+canonical content interaction grammar. Import `content-interaction.css` once,
+then map its CSS variables to product tokens. Selection remains a quiet content
+contour; the primary member of the selection set becomes control-ready through
+low elevation, while `active` and `dragging` continue the same interaction
+grammar without changing layout.
+
 Calendar widgets and projections belong to `@interactive-os/json-document-calendar`.
 File metadata formatting belongs to `@interactive-os/json-document-file-intake`.
 `ProductShell` is composition over the role primitives, not another control role.
+Use `toolbarPresentation="floating"` when a product's controls form a distinct
+functional layer above edge-to-edge content; the default `attached` presentation
+remains part of document flow.

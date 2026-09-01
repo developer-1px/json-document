@@ -56,6 +56,38 @@ Command(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPre
 ```ts
 type CommandKind = "primary" | "secondary" | "danger";
 ```
+## `contentInteractionAttributes`
+
+```ts
+contentInteractionAttributes(input: ContentInteractionInput): ContentInteractionAttributes
+```
+## `ContentInteractionAttributes`
+
+```ts
+type ContentInteractionAttributes = {
+  readonly "data-ui-interaction": "content" | "drop-target" | "insertion";
+  readonly "data-ui-interaction-phase": "rest" | "active" | "dragging";
+  readonly "data-selected"?: "true" | "false";
+  readonly "data-primary"?: "true";
+  readonly "data-elevated"?: "true";
+};
+```
+## `ContentInteractionInput`
+
+```ts
+type ContentInteractionInput =
+  | {
+      readonly role: "content";
+      readonly selected?: boolean;
+      readonly primary?: boolean;
+      readonly active?: boolean;
+      readonly dragging?: boolean;
+    }
+  | {
+      readonly role: "drop-target" | "insertion";
+      readonly active: boolean;
+    };
+```
 ## `ContextualControls`
 
 ```ts
@@ -129,7 +161,7 @@ FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & { readonl
 ## `GridCell`
 
 ```ts
-GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly focus?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly primary?: boolean; readonly focus?: boolean; readonly active?: boolean; readonly dragging?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
 ## `InteractionHandleBindingOptions`
 
@@ -206,7 +238,7 @@ ProductInspector(props: HTMLAttributes<HTMLDivElement>): ReactNode
 ## `ProductShell`
 
 ```ts
-ProductShell(props: HTMLAttributes<HTMLDivElement> & { readonly toolbar?: ReactNode; readonly toolbarLabel?: string; readonly inspector?: ReactNode; readonly canvasClassName?: string; readonly fill?: boolean; }): ReactNode
+ProductShell(props: HTMLAttributes<HTMLDivElement> & { readonly toolbar?: ReactNode; readonly toolbarLabel?: string; readonly toolbarPresentation?: "attached" | "floating"; readonly inspector?: ReactNode; readonly canvasClassName?: string; readonly fill?: boolean; }): ReactNode
 ```
 ## `ResizeHandle`
 
@@ -241,7 +273,10 @@ SelectableItem<T extends ElementType = "button">(props: SelectableItemProps<T>):
 type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
   readonly selected: boolean;
+  readonly primary?: boolean;
   readonly focus?: boolean;
+  readonly active?: boolean;
+  readonly dragging?: boolean;
 } & ControlAffordanceProps & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 ```
 ## `TabOption`

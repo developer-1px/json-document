@@ -468,7 +468,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
     };
   })).toEqual({
     backgroundColor: "rgb(251, 248, 242)",
-    borderColor: "rgb(216, 209, 197)",
+    borderColor: "rgba(0, 0, 0, 0)",
     outlineColor: "rgba(0, 0, 0, 0)",
   });
 
@@ -547,8 +547,8 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
     backgroundColor: getComputedStyle(element).backgroundColor,
     borderColor: getComputedStyle(element).borderColor,
   }))).toEqual({
-    backgroundColor: "rgb(251, 248, 242)",
-    borderColor: "rgb(222, 109, 85)",
+    backgroundColor: "rgb(255, 255, 255)",
+    borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
   });
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
     backgroundColor: "rgb(255, 255, 255)",
