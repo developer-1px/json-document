@@ -31,6 +31,9 @@ describe("calendar product design", () => {
     expect(styles.timedEvent()).toContain("rounded-control");
     expect(styles.timedEvent()).toContain("border-transparent");
     expect(styles.timedEvent()).toContain("bg-background-subtle/60");
+    expect(styles.timedEvent()).toContain("[--offset-content-primary:0px]");
+    expect(styles.timedEvent()).toContain("[--offset-content-dragging:0px]");
+    expect(styles.timedEvent()).toContain("[--scale-content-dragging:1]");
     expect(styles.resizeEdge()).not.toContain("bg-line-accent");
     expect(styles.timedEvent()).not.toContain("data-[selected=true]:bg-background-subtle");
     expect(styles.monthTimed()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");

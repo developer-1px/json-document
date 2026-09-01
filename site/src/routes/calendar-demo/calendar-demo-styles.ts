@@ -11,7 +11,7 @@ export const calendarDemoRecipe = tv({
     contentLayer: "relative z-0 h-full min-h-0 min-w-0 pb-24",
     allDayEvent: `h-full w-full rounded-control px-2.5 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
     hourRule: "absolute inset-x-0 border-t border-line-subtle/20",
-    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control px-2.5 py-0.5 pl-3 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
+    timedEvent: `group flex h-full w-full flex-col items-stretch gap-0 overflow-hidden rounded-control px-2.5 py-0.5 pl-3 text-left text-xs leading-4 [--offset-content-dragging:0px] [--offset-content-primary:0px] [--scale-content-dragging:1] ${chipFill} ${chipRail}`,
     timedEventTitle: "min-w-0 truncate text-xs font-medium leading-4",
     monthWeek: "relative grid min-w-[36rem] grid-cols-7 border-t border-line-subtle/35",
     monthDay: "relative z-0 flex min-h-32 w-full flex-col items-stretch px-1.5 pb-1 text-left text-xs",

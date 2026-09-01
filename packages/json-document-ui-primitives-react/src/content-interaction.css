@@ -22,7 +22,7 @@
     inset 0 0 0 1px var(--_jd-content-interaction-selection-contour),
     inset 0 0 0 999px var(--_jd-content-interaction-selection-fill),
     var(--_jd-content-interaction-shadow);
-  transform: translateY(-1px);
+  transform: translateY(var(--offset-content-primary, -1px));
 }
 
 :where([data-ui-interaction="content"]:active),

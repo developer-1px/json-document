@@ -156,6 +156,10 @@ test("Calendar clears floating controls while a card is moving", async ({ page }
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 40);
 
   await expect(event).toHaveAttribute("data-ui-interaction-phase", "dragging");
+  await expect.poll(async () => event.evaluate((element) => {
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+    return { x: matrix.m41, y: matrix.m42, scaleX: matrix.a, scaleY: matrix.d };
+  })).toEqual({ x: 0, y: 0, scaleX: 1, scaleY: 1 });
   await expect(page.getByRole("toolbar", { name: "Calendar controls" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Event" })).toHaveCount(0);
   await expect(page.getByRole("group", { name: "AI Composer preview" })).toHaveCount(0);
