@@ -29,6 +29,8 @@ describe("calendar product design", () => {
     expect(styles.timedEvent()).not.toContain("data-[selected=true]");
     expect(styles.timedEvent()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
     expect(styles.timedEvent()).toContain("rounded-control");
+    expect(styles.timedEvent()).toContain("border-transparent");
+    expect(styles.timedEvent()).toContain("bg-background-subtle/60");
     expect(styles.resizeEdge()).not.toContain("bg-line-accent");
     expect(styles.timedEvent()).not.toContain("data-[selected=true]:bg-background-subtle");
     expect(styles.monthTimed()).toContain("data-[calendar-color=accent]:bg-background-accent-subtle");
@@ -57,6 +59,7 @@ describe("calendar product design", () => {
     expect(styles.hourRule()).toContain("border-line-subtle/20");
     expect(styles.weekCell()).toContain("border-line-subtle/15");
     expect(styles.weekSticky()).toContain("border-line-subtle/20");
+    expect(styles.weekSticky()).toContain("pt-14");
     expect(styles.monthWeek()).toContain("border-line-subtle/35");
     expect(styles.creationTimeHint()).toContain("text-foreground-muted/55");
     expect(styles.creationTimeHint()).toContain("translate-y-1");
@@ -66,6 +69,8 @@ describe("calendar product design", () => {
     expect(styles.hourLabel()).toContain("text-foreground-muted");
     expect(styles.timedEventTitle()).toContain("leading-4");
     expect(styles.eventTime()).toContain("leading-3");
+    expect(styles.composerDock()).toContain("shadow-none");
+    expect(styles.composerDock()).toContain("border-line-subtle/35");
     expect(styles.selectedSlot()).not.toContain("bg-");
     expect(timeGrid).toContain('contentInteractionAttributes({ role: "insertion", active: true })');
     expect(css).toContain('[data-ui-presentation="calendar-time-grid"]:hover');

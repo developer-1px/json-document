@@ -2,7 +2,7 @@ import { tv } from "tailwind-variants";
 import { ui } from "../../shared/ui/styles";
 
 const chipRail = "relative before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-foreground-muted/45 data-[calendar-color=accent]:before:bg-background-accent";
-const chipFill = `${ui.surface.contentObject} text-foreground-strong data-[calendar-color=accent]:border-line-accent/20 data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10`;
+const chipFill = `${ui.surface.contentObject} border-transparent bg-background-subtle/60 text-foreground-strong data-[calendar-color=accent]:border-transparent data-[calendar-color=accent]:bg-background-accent-subtle/70 data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10`;
 
 export const calendarDemoRecipe = tv({
   slots: {
@@ -22,7 +22,7 @@ export const calendarDemoRecipe = tv({
     quietAction: "border-0 bg-transparent p-0 shadow-none hover:border-0 hover:bg-transparent",
     monthOverflow: "absolute left-0 top-0 z-30 flex w-max min-w-full max-w-56 flex-col gap-0.5 p-1.5",
     monthHead: "px-2 py-1.5 text-center text-xs text-foreground-muted",
-    weekSticky: `z-30 shrink-0 pt-16 ${ui.surface.scrollEdgeHard}`,
+    weekSticky: `z-30 shrink-0 pt-14 ${ui.surface.scrollEdgeHard}`,
     weekHours: "min-h-0 flex-1 overflow-auto",
     weekHead: "flex min-h-12 items-center justify-center gap-1.5 px-1 py-2 text-center",
     weekCell: "relative border-l border-line-subtle/15 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
@@ -61,7 +61,7 @@ export const calendarDemoRecipe = tv({
     eventTime: "truncate text-xs font-normal leading-3 text-foreground-muted",
     creationTimeHint: "pointer-events-none absolute left-2 z-20 translate-y-1 whitespace-nowrap tabular-nums text-foreground-muted/55",
     hourLabel: "absolute right-2 -translate-y-1/2 whitespace-nowrap text-right tabular-nums text-foreground-muted/70",
-    composerDock: `bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 p-2 pl-3 ${ui.surface.floatingControl}`,
+    composerDock: `${ui.surface.floatingControl} bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 border-line-subtle/35 p-1.5 pl-3 shadow-none`,
     composerDockFixed: "fixed",
     composerDockEmbedded: "absolute",
     composerSpark: "shrink-0 text-foreground-accent",
