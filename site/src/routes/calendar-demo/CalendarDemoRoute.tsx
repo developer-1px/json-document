@@ -317,6 +317,7 @@ export function CalendarDemoRoute(props: {
       <ProductShell
         className={styles.shell()}
         fill={!embedded}
+        toolbarPresentation="floating"
         canvasClassName={classes("relative", embedded ? "overflow-x-auto" : "overflow-hidden")}
         toolbarLabel="Calendar controls"
         toolbar={(
@@ -499,6 +500,7 @@ export function CalendarDemoRoute(props: {
                 : "overflow-auto px-4 pt-16",
           )}>
             <p className={styles.periodHeading()}>{visiblePeriodLabel(view, visibleDate, {
+              dateStyle: "named",
               monthNames: months,
               weekSeparator: " – ",
             })}</p>

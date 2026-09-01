@@ -1,11 +1,12 @@
 import { tv } from "tailwind-variants";
+import { ui } from "../../shared/ui/styles";
 
 const chipRail = "relative before:absolute before:inset-y-1.5 before:left-1.5 before:w-0.5 before:rounded-full before:bg-foreground-muted/55 data-[calendar-color=accent]:before:bg-background-accent";
-const chipFill = "border border-line-subtle/30 bg-background-subtle/80 text-foreground-strong data-[calendar-color=accent]:border-line-accent/20 data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10";
+const chipFill = `${ui.surface.contentObject} text-foreground-strong data-[calendar-color=accent]:border-line-accent/20 data-[calendar-color=accent]:bg-background-accent-subtle data-[calendar-color=accent]:text-foreground-accent data-[preview=true]:opacity-60 data-[primary=true]:z-10`;
 
 export const calendarDemoRecipe = tv({
   slots: {
-    shell: "relative isolate overflow-hidden bg-background-subtle/20 [&>[data-ui-toolbar=product]]:absolute [&>[data-ui-toolbar=product]]:right-4 [&>[data-ui-toolbar=product]]:top-4 [&>[data-ui-toolbar=product]]:z-50 [&>[data-ui-toolbar=product]]:w-auto [&>[data-ui-toolbar=product]]:max-w-[calc(100%-1.5rem)] sm:[&>[data-ui-toolbar=product]]:max-w-[calc(100%-8rem)] [&>[data-ui-toolbar=product]]:rounded-full [&>[data-ui-toolbar=product]]:border [&>[data-ui-toolbar=product]]:border-line-subtle/50 [&>[data-ui-toolbar=product]]:bg-background-canvas [&>[data-ui-toolbar=product]]:px-1 [&>[data-ui-toolbar=product]]:py-1 [&>[data-ui-toolbar=product]]:shadow-surface [&>[data-ui-toolbar=product]]:transition-[border-color,box-shadow] [&>[data-ui-toolbar=product]]:hover:border-line-subtle/70 [&>[data-ui-toolbar=product]]:focus-within:border-line-subtle/70 [&>[data-ui-toolbar=product]_[data-placement=end]]:overflow-visible [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:rounded-full [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:border-transparent [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:bg-transparent [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:shadow-none [&>[data-ui-toolbar=product]_[data-ui-segment=true]]:hover:bg-background-subtle/60 [&>[data-ui-toolbar=product]_[data-ui-segment=true][aria-checked=true]]:bg-background-subtle [&>[data-ui-toolbar=product]_[data-ui-segment=true][aria-checked=true]]:text-foreground-strong",
+    shell: "relative isolate overflow-hidden bg-background-subtle/20 [&>[data-ui-toolbar=product]]:absolute [&>[data-ui-toolbar=product]]:right-4 [&>[data-ui-toolbar=product]]:top-4 [&>[data-ui-toolbar=product]]:z-50 [&>[data-ui-toolbar=product]]:w-auto [&>[data-ui-toolbar=product]]:max-w-[calc(100%-1.5rem)] sm:[&>[data-ui-toolbar=product]]:max-w-[calc(100%-8rem)] [&>[data-ui-toolbar=product]_[data-placement=end]]:overflow-visible",
     controlLayer: "pointer-events-none absolute inset-0 z-40 [&>*]:pointer-events-auto",
     contentLayer: "relative z-0 h-full min-h-0 min-w-0 pb-24",
     allDayEvent: `h-full w-full rounded-control px-2.5 py-0.5 text-left text-xs leading-4 ${chipFill} ${chipRail}`,
@@ -20,7 +21,7 @@ export const calendarDemoRecipe = tv({
     quietAction: "border-0 bg-transparent p-0 shadow-none hover:border-0 hover:bg-transparent",
     monthOverflow: "absolute left-0 top-0 z-30 flex w-max min-w-full max-w-56 flex-col gap-0.5 p-1.5",
     monthHead: "px-2 py-1.5 text-center text-xs text-foreground-muted",
-    weekSticky: "z-30 shrink-0 border-b border-line-subtle/20 bg-background-canvas pt-16",
+    weekSticky: `z-30 shrink-0 pt-16 ${ui.surface.scrollEdgeHard}`,
     weekHours: "min-h-0 flex-1 overflow-auto",
     weekHead: "flex min-h-12 items-center justify-center gap-1.5 px-1 py-2 text-center",
     weekCell: "relative border-l border-line-subtle/15 outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
@@ -30,7 +31,7 @@ export const calendarDemoRecipe = tv({
     periodHeading: "pointer-events-none absolute left-14 top-5 z-40 m-0 hidden whitespace-nowrap text-lg font-semibold tracking-tight text-foreground-strong sm:block",
     todayAction: "border-0 bg-transparent px-2 shadow-none hover:border-0 hover:bg-background-subtle",
     viewChoiceRoot: "relative w-24",
-    viewChoiceTrigger: "flex h-8 w-full items-center justify-between gap-2 rounded-full border-0 bg-background-subtle/70 px-3 text-xs text-foreground-strong outline-none shadow-none hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25",
+    viewChoiceTrigger: "flex h-8 w-full items-center justify-between gap-2 rounded-control border-0 bg-background-subtle/70 px-3 text-xs text-foreground-strong outline-none shadow-none transition-colors duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25",
     viewChoiceListbox: "absolute right-0 top-[calc(100%+0.5rem)] z-50 grid min-w-28 gap-0.5 rounded-surface border border-line-subtle/45 bg-background-canvas p-1.5 shadow-overlay outline-none",
     viewChoiceOption: "rounded-control border-0 bg-transparent px-2.5 py-2 text-left text-xs text-foreground-default shadow-none hover:bg-background-subtle",
     viewChoiceOptionFocused: "bg-background-subtle text-foreground-strong",
@@ -46,8 +47,8 @@ export const calendarDemoRecipe = tv({
     todayMark: "font-semibold text-foreground-strong",
     weekToday: "rounded-full bg-background-accent text-foreground-inverse",
     dayNumber: "inline-flex size-7 items-center justify-center font-medium text-foreground-strong",
-    sidebar: "absolute right-0 top-[calc(100%+0.75rem)] flex max-h-[calc(100vh-8rem)] w-44 shrink-0 flex-col gap-3 overflow-auto rounded-surface border border-line-subtle/45 bg-background-canvas p-3 shadow-overlay",
-    inspector: "group/details z-50 flex w-80 min-w-0 flex-col gap-3 overflow-auto rounded-surface border border-line-subtle/45 bg-background-canvas p-3.5 shadow-surface",
+    sidebar: `absolute right-0 top-[calc(100%+0.75rem)] flex max-h-[calc(100vh-8rem)] w-44 shrink-0 flex-col gap-3 overflow-auto p-3 ${ui.surface.floatingPanel}`,
+    inspector: `group/details z-50 flex w-80 min-w-0 flex-col gap-3 overflow-auto p-3.5 ${ui.surface.floatingPanel}`,
     field: "grid gap-1",
     inspectorHeader: "flex min-w-0 items-center gap-2",
     inspectorTitle: "m-0 min-w-0 flex-1 truncate px-0 text-base font-semibold tracking-tight text-foreground-strong",
@@ -59,7 +60,7 @@ export const calendarDemoRecipe = tv({
     eventTime: "truncate font-normal leading-3 text-foreground-muted",
     creationTimeHint: "pointer-events-none absolute left-2 z-20 translate-y-1 whitespace-nowrap tabular-nums text-foreground-muted/55",
     hourLabel: "absolute right-2 -translate-y-1/2 whitespace-nowrap text-right tabular-nums text-foreground-muted/70",
-    composerDock: "bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-full border border-line-subtle/50 bg-background-canvas p-2 pl-3 shadow-surface",
+    composerDock: `bottom-4 left-1/2 z-30 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 p-2 pl-3 ${ui.surface.floatingControl}`,
     composerDockFixed: "fixed",
     composerDockEmbedded: "absolute",
     composerSpark: "shrink-0 text-foreground-accent",

@@ -104,6 +104,9 @@ describe("HTML date values", () => {
     expect(visiblePeriodLabel("week", "2026-05-28", options)).toBe("2026-05-24 – 2026-05-30");
     expect(visiblePeriodLabel("month", "2026-05-28", options)).toBe("May 2026");
     expect(visiblePeriodLabel("year", "2026-05-28", options)).toBe("2026");
+    expect(visiblePeriodLabel("day", "2026-05-28", { ...options, dateStyle: "named" })).toBe("May 28, 2026");
+    expect(visiblePeriodLabel("week", "2026-05-28", { ...options, dateStyle: "named" })).toBe("May 24 – 30, 2026");
+    expect(visiblePeriodLabel("week", "2026-06-01", { ...options, dateStyle: "named" })).toBe("May 31 – Jun 6, 2026");
   });
 });
 

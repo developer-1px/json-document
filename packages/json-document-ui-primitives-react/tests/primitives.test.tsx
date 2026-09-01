@@ -161,6 +161,11 @@ describe("UI Primitives", () => {
     expect(screen.getByText("Inspector").parentElement?.dataset.uiComponent).toBe("product-inspector");
   });
 
+  test("ProductShell exposes a canonical floating toolbar presentation", () => {
+    render(<ProductShell toolbar="Actions" toolbarPresentation="floating">Canvas</ProductShell>);
+    expect(screen.getByRole("toolbar").getAttribute("data-ui-presentation")).toBe("floating");
+  });
+
   test("Toolbar can own a standalone action collection", () => {
     render(<Toolbar label="History"><Command>Undo</Command></Toolbar>);
     expect(screen.getByRole("toolbar", { name: "History" })).toBeTruthy();

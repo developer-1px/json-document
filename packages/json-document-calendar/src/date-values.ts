@@ -7,6 +7,7 @@ export type DateRangeValue = { readonly start: string; readonly end: string };
 export type VisiblePeriodLabelOptions = {
   readonly monthNames?: ReadonlyArray<string>;
   readonly weekSeparator?: string;
+  readonly dateStyle?: "iso" | "named";
 };
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -206,10 +207,13 @@ export function visiblePeriodLabel(
   visibleDate: string,
   options: VisiblePeriodLabelOptions = {},
 ): string {
-  if (period === "day") return visibleDate;
+  if (period === "day") {
+    return options.dateStyle === "named" ? namedDayLabel(visibleDate, options.monthNames) : visibleDate;
+  }
   const parts = civil(visibleDate);
   if (period === "week") {
     const start = startOfCalendarWeek(visibleDate);
+    if (options.dateStyle === "named") return namedWeekLabel(start, addCalendarDays(start, 6), options.monthNames);
     if (options.weekSeparator === undefined) return `${start} · week`;
     return `${start}${options.weekSeparator}${addCalendarDays(start, 6)}`;
   }
@@ -219,6 +223,24 @@ export function visiblePeriodLabel(
     return monthName === undefined ? fallback : `${monthName} ${padYear(parts.year)}`;
   }
   return padYear(parts.year);
+}
+
+function namedDayLabel(date: string, monthNames: ReadonlyArray<string> | undefined): string {
+  const parts = civil(date);
+  const month = monthNames?.[parts.month - 1] ?? pad(parts.month);
+  return `${month} ${parts.day}, ${padYear(parts.year)}`;
+}
+
+function namedWeekLabel(start: string, end: string, monthNames: ReadonlyArray<string> | undefined): string {
+  const first = civil(start);
+  const last = civil(end);
+  const firstMonth = monthNames?.[first.month - 1] ?? pad(first.month);
+  const lastMonth = monthNames?.[last.month - 1] ?? pad(last.month);
+  if (first.year === last.year && first.month === last.month) {
+    return `${firstMonth} ${first.day} – ${last.day}, ${padYear(first.year)}`;
+  }
+  const firstYear = first.year === last.year ? "" : `, ${padYear(first.year)}`;
+  return `${firstMonth} ${first.day}${firstYear} – ${lastMonth} ${last.day}, ${padYear(last.year)}`;
 }
 
 function cell(date: string, inVisiblePeriod: boolean): CalendarCell {

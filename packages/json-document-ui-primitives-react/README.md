@@ -27,3 +27,6 @@ elevation; selection and active feedback remain layout-neutral.
 Calendar widgets and projections belong to `@interactive-os/json-document-calendar`.
 File metadata formatting belongs to `@interactive-os/json-document-file-intake`.
 `ProductShell` is composition over the role primitives, not another control role.
+Use `toolbarPresentation="floating"` when a product's controls form a distinct
+functional layer above edge-to-edge content; the default `attached` presentation
+remains part of document flow.
