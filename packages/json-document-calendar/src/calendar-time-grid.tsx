@@ -11,7 +11,7 @@ import {
   type CalendarOccurrenceTopologySnapshot,
 } from "@interactive-os/json-document-editing";
 import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
-import { ResizeHandle, SelectableItem, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
+import { contentInteractionAttributes, ResizeHandle, SelectableItem, type ControlAffordance } from "@interactive-os/json-document-ui-primitives-react";
 import { calendarTimeLabel, type CalendarCell } from "./date-values.js";
 import type { CalendarHand } from "./use-calendar-hand.js";
 import type { CalendarPointerInteractions } from "./use-calendar-pointer-interactions.js";
@@ -140,7 +140,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             key={`allday-${day}`}
             data-calendar-allday-day={day}
             tabIndex={-1}
-            data-selected={selectedSlot === day ? "true" : undefined}
+            {...contentInteractionAttributes({ role: "insertion", active: selectedSlot === day })}
             data-ui-affordance={props.affordances.allDayCell}
             className={props.classNames.allDayCell}
             style={{ gridRow: `2 / span ${allDayLaneCount}` }}
@@ -162,6 +162,7 @@ export function CalendarTimeGrid(props: CalendarTimeGridProps): ReactNode {
             <SelectableItem
               affordance={props.affordances.allDayEvent}
               selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
+              dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
               data-primary={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "true" : undefined}
               aria-label={item.event.title}
               data-calendar-color={props.getEventColor(item.event)}
@@ -252,6 +253,7 @@ function TimeColumn(input: {
       {input.selectedSlot?.startsWith(`${day}T`) ? (
         <div
           data-calendar-selected-slot={input.selectedSlot}
+          {...contentInteractionAttributes({ role: "insertion", active: true })}
           data-ui-affordance={props.affordances.selectedSlot}
           className={props.classNames.selectedSlot}
           style={{
@@ -288,6 +290,7 @@ function TimeColumn(input: {
             <SelectableItem
               affordance={props.affordances.timedEvent}
               selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
+              dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
               data-primary={hand.isPrimaryOccurrence(item.event.id, item.event.start) ? "true" : undefined}
               aria-label={item.event.title}
               data-calendar-event=""

@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { ControlAffordanceProps } from "./control-affordance.js";
+import { contentInteractionAttributes } from "./content-interaction.js";
 
 export type CommandKind = "primary" | "secondary" | "danger";
 
@@ -185,16 +186,18 @@ export type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
   readonly selected: boolean;
   readonly focus?: boolean;
+  readonly active?: boolean;
+  readonly dragging?: boolean;
 } & ControlAffordanceProps & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 
 export function SelectableItem<T extends ElementType = "button">(
   props: SelectableItemProps<T>,
 ): ReactNode {
-  const { affordance, as, selected, focus = false, ...itemProps } = props;
+  const { active = false, affordance, as, dragging = false, selected, focus = false, ...itemProps } = props;
   const Component = as ?? "button";
   return createElement(Component, {
     ...itemProps,
-    "data-selected": selected ? "true" : "false",
+    ...contentInteractionAttributes({ role: "content", selected, active, dragging }),
     "data-focus": focus ? "true" : "false",
     "data-ui-control": "selectable",
     "data-ui-affordance": affordance,

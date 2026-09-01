@@ -19,6 +19,11 @@ Products may declare the composition-specific exposure grammar through the
 public `ControlAffordance` vocabulary; primitives project it as
 `data-ui-affordance` without changing their semantic control role.
 
+`SelectableItem`, `GridCell`, and `contentInteractionAttributes` project the
+canonical content interaction grammar. Import `content-interaction.css` once,
+then map its CSS variables to product tokens. Only `dragging` receives
+elevation; selection and active feedback remain layout-neutral.
+
 Calendar widgets and projections belong to `@interactive-os/json-document-calendar`.
 File metadata formatting belongs to `@interactive-os/json-document-file-intake`.
 `ProductShell` is composition over the role primitives, not another control role.

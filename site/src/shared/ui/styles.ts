@@ -116,7 +116,6 @@ export const ui = {
     gridIndex: "border border-line-subtle bg-background-subtle text-foreground-muted",
     gridCell: "border border-line-subtle bg-background-canvas",
     selectableBlock: "border border-transparent bg-background-canvas px-3 py-2 text-left text-xs font-medium",
-    previewSelected: "border-line-accent bg-background-subtle outline outline-2 -outline-offset-2 outline-line-accent",
     documentBlock: "border-b border-line-subtle/70 bg-transparent px-3 py-3 last:border-b-0",
     documentIndex: "rounded-none border-0 border-r border-line-subtle bg-background-subtle text-foreground-muted shadow-none",
     empty: "rounded-none border border-dashed border-line-subtle bg-background-subtle text-foreground-muted",

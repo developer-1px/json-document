@@ -22,7 +22,7 @@ export const calendarDemoRecipe = tv({
     weekHours: "min-h-0 flex-1 overflow-auto",
     weekHead: "flex flex-col items-center gap-0.5 px-1 py-2 text-center",
     weekCell: "relative border-l border-line-subtle/60",
-    selectedSlot: "pointer-events-none absolute inset-x-0 z-10 rounded-control bg-background-subtle/60 ring-1 ring-inset ring-line-subtle/40",
+    selectedSlot: "pointer-events-none absolute inset-x-0 z-10 rounded-control",
     resizeEdge: "absolute inset-x-0 bottom-0 h-2",
     resizeEdgeVertical: "absolute right-0 top-0 h-full w-2",
     period: "px-1 text-sm font-medium text-foreground-strong",

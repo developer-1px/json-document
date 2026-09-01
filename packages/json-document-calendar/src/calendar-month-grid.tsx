@@ -20,6 +20,7 @@ import {
 } from "@interactive-os/json-document-editing";
 import { selectionModeFromModifiers } from "@interactive-os/json-document-react";
 import {
+  contentInteractionAttributes,
   Command,
   ResizeHandle,
   SelectableItem,
@@ -182,6 +183,7 @@ export const CalendarMonthGrid = forwardRef<CalendarMonthGridHandle, CalendarMon
                       classNames={props.classNames}
                       color={props.getEventColor(item.event)}
                       selected={hand.isOccurrenceSelected(item.event.id, item.event.start)}
+                      dragging={hand.selectionDragPreview?.source.points.some((point) => point.eventId === item.event.id) ?? false}
                       primary={hand.isPrimaryOccurrence(item.event.id, item.event.start)}
                       preview={item.event.id === "preview"}
                       onPointerDown={(event) => {
@@ -245,7 +247,7 @@ function MonthDayCell(input: {
       aria-current={cell.date === props.today ? "date" : undefined}
       data-calendar-day={cell.date}
       tabIndex={-1}
-      data-selected={selectedDate === cell.date ? "true" : undefined}
+      {...contentInteractionAttributes({ role: "insertion", active: selectedDate === cell.date })}
       data-ui-affordance={props.affordances.dateCell}
       className={joinClasses(
         props.classNames.day,
@@ -326,6 +328,7 @@ function MonthEvent(props: {
   readonly classNames: CalendarMonthGridClassNames;
   readonly color: string;
   readonly selected: boolean;
+  readonly dragging?: boolean;
   readonly primary: boolean;
   readonly preview?: boolean;
   readonly onPointerDown?: (event: PointerEvent<HTMLElement>) => void;
@@ -338,6 +341,7 @@ function MonthEvent(props: {
     <SelectableItem
       affordance={props.affordance}
       selected={props.selected}
+      {...(props.dragging === undefined ? {} : { dragging: props.dragging })}
       data-primary={props.primary ? "true" : undefined}
       aria-label={calendarEventLabel(props.event)}
       data-calendar-color={props.color}

@@ -1,3 +1,5 @@
+@import "../../../packages/json-document-ui-primitives-react/src/content-interaction.css";
+
 @layer tokens, base, components, utilities;
 
 @layer tokens {
@@ -56,6 +58,16 @@
     --letter-spacing-overline: 0.16em;
     --letter-spacing-page-title: -0.025em;
     --duration-interaction: 150ms;
+
+    --jd-content-interaction-accent: rgb(var(--color-border-accent));
+    --jd-content-interaction-fill: rgb(var(--color-background-accent) / 0.07);
+    --jd-content-interaction-fill-active: rgb(var(--color-background-accent) / 0.12);
+    --jd-content-interaction-contour: rgb(var(--color-border-accent) / 0.58);
+    --jd-content-interaction-selection-fill: rgb(var(--color-foreground-default) / 0.045);
+    --jd-content-interaction-selection-contour: rgb(var(--color-foreground-muted) / 0.48);
+    --jd-content-interaction-shadow: var(--shadow-surface);
+    --jd-content-interaction-active-duration: 80ms;
+    --jd-content-interaction-settle-duration: 140ms;
   }
 }
 
@@ -340,7 +352,7 @@
   }
 
   [data-ui-control="selectable"] {
-    @apply cursor-pointer outline-none transition-[background-color,border-color] duration-interaction hover:bg-background-subtle focus-visible:ring-2 focus-visible:ring-line-accent/25 data-[selected=true]:border-line-subtle data-[selected=true]:bg-background-subtle;
+    @apply cursor-pointer outline-none hover:bg-background-subtle;
   }
 
   /* Canonical product control grammar: semantic primitives emit the role, the product owns tone. */
@@ -352,12 +364,7 @@
     @apply bg-transparent;
   }
 
-  [data-ui-affordance="content-control"][data-selected="true"] {
-    @apply bg-background-subtle/60 outline outline-1 -outline-offset-1 outline-line-subtle;
-  }
-
-  [data-ui-affordance="stateful"][data-selected="true"],
-  [data-ui-affordance="direct"][data-selected="true"] {
+  [data-ui-affordance="stateful"][data-selected="true"] {
     @apply text-foreground-strong outline outline-1 -outline-offset-1 outline-line-subtle;
   }
 
@@ -366,7 +373,7 @@
   }
 
   [data-ui-affordance="direct"][data-calendar-move-surface="true"] {
-    @apply cursor-grab active:cursor-grabbing hover:bg-background-canvas hover:shadow-surface;
+    @apply cursor-grab active:cursor-grabbing hover:bg-background-canvas;
   }
 
   [data-ui-primitive="resize-handle"][data-ui-affordance="direct"] {

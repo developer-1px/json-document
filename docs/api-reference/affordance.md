@@ -256,6 +256,46 @@ commitAffordance<H extends AffordanceHand>(result: AffordancePreview<H>): Afford
 ```ts
 computeAnchoredFloatingPosition(input: AnchoredFloatingPositionInput): AnchoredFloatingPosition
 ```
+## `contentInteractionAffordance`
+
+```ts
+contentInteractionAffordance(input: ContentInteractionInput): ContentInteractionAffordance
+```
+## `ContentInteractionAffordance`
+
+```ts
+type ContentInteractionAffordance = {
+  readonly role: ContentInteractionRole;
+  readonly phase: ContentInteractionPhase;
+  readonly selected: boolean;
+  readonly elevated: boolean;
+};
+```
+## `ContentInteractionInput`
+
+```ts
+type ContentInteractionInput =
+  | {
+      readonly role: "content";
+      readonly selected?: boolean;
+      readonly active?: boolean;
+      readonly dragging?: boolean;
+    }
+  | {
+      readonly role: "drop-target" | "insertion";
+      readonly active: boolean;
+    };
+```
+## `ContentInteractionPhase`
+
+```ts
+type ContentInteractionPhase = "rest" | "active" | "dragging";
+```
+## `ContentInteractionRole`
+
+```ts
+type ContentInteractionRole = "content" | "drop-target" | "insertion";
+```
 ## `contextMenuAffordance`
 
 ```ts

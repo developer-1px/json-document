@@ -2,6 +2,7 @@ import { ActionLink } from "../../shared/ui/interactive";
 import { PageFrame, PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { pageDescriptor } from "../../app/page-descriptors";
+import { contentInteractionAttributes } from "@interactive-os/json-document-ui-primitives-react";
 
 const demos = [
   {
@@ -69,9 +70,8 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
             className={classes(
               "grid grid-cols-[2rem_1fr] items-center",
               ui.surface.documentBlock,
-              index === 1 && ui.surface.previewSelected,
             )}
-            data-selected={index === 1 ? "true" : "false"}
+            {...contentInteractionAttributes({ role: "content", selected: index === 1 })}
           >
             <span className={classes("py-3 text-center", ui.surface.documentIndex, ui.text.meta)}>{index + 1}</span>
             <span className="px-3 py-3">{text}</span>
@@ -98,8 +98,8 @@ function ShowcasePreview(props: { readonly kind: "document" | "sheet" | "databas
                 {row.map((cell, columnIndex) => (
                   <td
                     key={cell}
-                    className={classes("px-2 py-3", ui.surface.gridCell, ui.text.meta, rowIndex < 2 && columnIndex < 2 && ui.surface.previewSelected)}
-                    data-selected={rowIndex < 2 && columnIndex < 2 ? "true" : "false"}
+                    className={classes("px-2 py-3", ui.surface.gridCell, ui.text.meta)}
+                    {...contentInteractionAttributes({ role: "content", selected: rowIndex < 2 && columnIndex < 2 })}
                   >
                     {cell}
                   </td>

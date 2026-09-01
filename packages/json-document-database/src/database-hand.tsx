@@ -36,7 +36,7 @@ import {
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
-import { Check, Command, Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { Check, Command, GridCell, Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
 import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
@@ -575,12 +575,11 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   const hostRecord = hostRecordFor<Row>(record);
                   const custom = props.renderCell?.[property.id];
                   return (
-                    <td
+                    <GridCell
                       key={property.id}
-                      role="gridcell"
+                      selected={selected}
+                      focus={item.getIsFocus()}
                       tabIndex={item.getIsFocus() ? 0 : -1}
-                      aria-selected={selected}
-                      data-selected={selected ? "true" : "false"}
                       {...webGridCellAddressProps(point)}
                       data-record-id={record.id}
                       data-property-id={property.id}
@@ -620,7 +619,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                           }}
                         />
                       )}
-                    </td>
+                    </GridCell>
                   );
                 })}
                 {hiddenProperties.map((property) => <td key={property.id} />)}

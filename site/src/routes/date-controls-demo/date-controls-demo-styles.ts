@@ -33,7 +33,7 @@ export const dateControlsDemoRecipe = tv({
     timeViewportAnchor: "pointer-events-none absolute left-0 top-0",
     timeHourLabel: "absolute right-1 text-xs text-foreground-muted",
     timeCell: "relative overflow-hidden border-l border-line-subtle",
-    timeSelectedSlot: "pointer-events-none absolute inset-x-0 bg-background-subtle",
+    timeSelectedSlot: "pointer-events-none absolute inset-x-0",
     timeHourRule: "absolute inset-x-0 border-t border-line-subtle",
     timeNowLine: "pointer-events-none absolute inset-x-0 z-20 border-t border-line-accent",
     timeEventContainer: "absolute z-10",
