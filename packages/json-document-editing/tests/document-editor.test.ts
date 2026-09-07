@@ -2,6 +2,38 @@ import { describe, expect, test } from "vitest";
 import { createDocumentEditor, documentSelectionFocus } from "../src/index.js";
 
 describe("document editing vertical slice", () => {
+  test("preserves group placement for every selection and direction up to six blocks", () => {
+    for (let size = 1; size <= 6; size += 1) {
+      for (let mask = 1; mask < 2 ** size; mask += 1) {
+        for (const direction of [-1, 1] as const) {
+          const initial = { blocks: Array.from({ length: size }, (_, index) => ({ id: String(index), text: String(index) })) };
+          const editor = createDocumentEditor(initial);
+          const selected = initial.blocks.filter((_, index) => mask & (1 << index));
+          selected.forEach((block, index) => editor.dispatch({ type: "selection.set", blockId: block.id, mode: index === 0 ? "replace" : "toggle" }));
+          const start = Number(selected[0]!.id);
+          const end = Number(selected.at(-1)!.id);
+          const context = `size=${size}, mask=${mask}, direction=${direction}`;
+          const result = editor.dispatch({ type: "selection.move", direction });
+          if ((direction < 0 && start === 0) || (direction > 0 && end === size - 1)) {
+            expect(result, context).toMatchObject({ ok: false, code: "move.boundary" });
+            expect(editor.snapshot.value, context).toEqual(initial);
+            continue;
+          }
+          const expected = initial.blocks.filter((block) => !selected.includes(block));
+          expected.splice(start + direction, 0, ...selected);
+          expect(result.ok, context).toBe(true);
+          if (!result.ok) throw new Error(result.code);
+          expect(result.change?.applied.every((operation) => operation.op === "move"), context).toBe(true);
+          expect(editor.snapshot.value, context).toEqual({ blocks: expected });
+          expect(editor.undo().ok, context).toBe(true);
+          expect(editor.snapshot.value, context).toEqual(initial);
+          expect(editor.redo().ok, context).toBe(true);
+          expect(editor.snapshot.value, context).toEqual({ blocks: expected });
+        }
+      }
+    }
+  });
+
   test("reads the primary Document focus through the public selector", () => {
     const empty = createDocumentEditor({ blocks: [] });
     expect(documentSelectionFocus(empty.snapshot.selection)).toBeNull();

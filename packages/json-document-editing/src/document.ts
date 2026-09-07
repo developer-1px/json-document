@@ -153,10 +153,15 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
       const insertAt = intent.direction < 0 ? start - 1 : start + 1;
       const currentIds = blocks.map((block) => block.id);
       const operations: JSONPatchOperation[] = [];
-      // Plan against the sequential array state; moving preserves member identity.
-      const moves = selected.map((block, offset) => ({ id: block.id, index: insertAt + offset }));
-      if (intent.direction > 0) moves.reverse();
-      for (const { id, index } of moves) {
+      // Noncontiguous groups can need moves in both directions. Place leftward
+      // members first, then rightward members in reverse, without shifting a
+      // member that has already reached its final position.
+      const moves = selected.map((block, offset) => ({ id: block.id, from: currentIds.indexOf(block.id), index: insertAt + offset }));
+      const orderedMoves = [
+        ...moves.filter(({ from, index }) => from > index),
+        ...moves.filter(({ from, index }) => from < index).reverse(),
+      ];
+      for (const { id, index } of orderedMoves) {
         const from = currentIds.indexOf(id);
         if (from === index) continue;
         operations.push({ op: "move", from: `/blocks/${from}`, path: `/blocks/${index}` });
