@@ -18,10 +18,11 @@ member와 편집 문법의 크기는 서로 다른 문제다.
 - Don't: 이번 설계로 Core API를 늘리거나 기존 동작을 변경하지 않는다. 새로운
   범용 editor, command bus, profile registry나 package hierarchy를 만들지 않는다.
 
-구현 근거의 범위는 JSON Document, Selection, Editing, Affordance, Web과
-Document·Sheet·Rich Text의 대표 편집 경로다. Object의 전체 선택과 Database의
-cut 미지원은 profile 차이를 판정하는 사례로 포함한다. 모든 Hands의 완성도,
-브라우저별 입력 일치, 협업 wire protocol의 수렴은 이 설계의 검증 결과가 아니다.
+아래 도출은 11개 내부 편집 사례의 model·의도·조합과 외부 관습을 비교한다.
+실행된 공통 적합성 증거의 범위는 Document·Sheet·Rich Text의 대표 편집 경로와
+Selection·Editing·Affordance·Web 연결이다. 사례를 읽은 것과 같은 profile의
+독립 구현을 검증한 것은 구별한다. 모든 Hands의 완성도, 브라우저별 입력 일치,
+협업 wire protocol의 수렴은 이 설계의 검증 결과가 아니다.
 
 ## 현재 문제와 원인
 
@@ -30,39 +31,207 @@ cut 미지원은 profile 차이를 판정하는 사례로 포함한다. 모든 H
 `dispatch` 형태이며, 동사의 사전 조건과 결과는 editor별 코드와 문서에 있다.
 `Official Hands`도 아직 호환성 약속을 확정하지 않은 후보다.
 
-이 때문에 여러 editor가 같은 API 형태를 제공해도 같은 편집 문법을 따른다는
-증거가 되지 않는다. `selectAllAffordance`의 전체 선택 토글처럼 특정 관습이
-범용 기본값으로 보이고, `selection.move`처럼 문서 변경과 선택 변경이 이름에서
-구별되지 않는 사례도 있다. 동작을 선언하는 규칙과 그 규칙을 검증하는 사례의
-연결이 부족한 것이 원인이다.
+현재 공용 적합성 runner는 대표 editor의 공통 의미를 검증한다. 그 증거를 다른
+장르로 확대하려면 규칙의 적용 조건과 profile 차이가 먼저 드러나야 한다.
+`selectAllAffordance`의 전체 선택 토글과 선택 의도의 멱등성,
+`selection.move`라는 이름 아래의 블록 이동과 선택 위치 이동도 구별해야 한다.
+아직 남은 공백은 앱 사례에서 공통 의미를 도출하는 근거, 중첩된 편집 맥락의
+계약, 같은 profile의 독립 구현 증거다.
 
-## 세 종류의 계약과 기존 소유자
+## 앱 사례에서 최소 문법 도출하기
 
-다음은 새 runtime 계층이 아니라 기존 책임들이 약속할 내용의 구분이다.
+### 명령 이름보다 대상과 결과를 먼저 비교한다
 
-| 계약 | 고정할 의미 | 정본 소유자 |
-| --- | --- | --- |
-| 공통 편집 규칙 | 선택 전이, 편집의 원자성, 복사와 History의 관계 | Selection·Editing |
-| Hands profile | 편집 대상, 범위 해석, 삭제·붙여넣기 결과, 지원 작업 | Document Type과 해당 editor의 기존 owner를 조합한 Hands |
-| 입력 매핑 | 키·포인터·IME를 어떤 편집 의도로 해석하는가 | Adapter·Affordance와 framework Connector |
+Apple의 [1992년 Macintosh Human Interface Guidelines](https://www.vintageapple.org/inside_r/pdf/Human_Interface_Guidelines_1992.pdf)
+인쇄 쪽수 286–300은 선택 후 작업하는 관습과 텍스트·배열·그래픽 선택을 구분하고,
+필드 전체 선택과 내부 텍스트 편집의 차이도 설명한다. Windows의
+[표준 Edit 메뉴](https://learn.microsoft.com/en-us/windows/win32/uxguide/cmd-menus#standard-menus)에도
+같은 명령 어휘가 반복된다. 전자는 역사적 제품 지침, 후자는 Windows 7 시대의
+플랫폼 지침이다. 오래된 공통 어휘의 근거이며 모든 동작이 30년간 동일했다는
+증명은 아니다. 사람의 편집 관습에서 도출하는 것은 관찰 가능한 의미다. Core의
+여섯 member, JSON Patch 표현, package 구조가 그 관습의 유일한 구현이라는
+결론은 나오지 않는다.
+
+다음 표는 현재 구현의 표본이다. 링크는 각 책임의 구현으로 연결된다. 마지막
+열의 중첩 가능성이 모두 구현·검증됐다는 뜻은 아니며 현재 지원과 분리해 읽는다.
+
+| 사례 | 대상·위치·선택 | 현재 대표 작업 | 도출에 필요한 차이 또는 중첩 |
+| --- | --- | --- | --- |
+| [Document](../packages/json-document-editing/src/document.ts) | block ID + text offset, 여러 범위 | 블록 이동·삭제·복사, 블록 text 교체 | Copy는 전체 블록. native 내부 문자열 선택과 대상이 다름 |
+| [Rich Text](../packages/json-document-rich-text/src/editor.ts) | node ID + text/child point + affinity, 여러 범위 | text 삽입, structured slice 대체, mark 변경 | collapsed point에서도 삽입 가능. schema가 허용하는 구간·구조를 함께 판단 |
+| [Order](../packages/json-document-editing/src/order.ts) | item ID, 선형 순서의 범위 | 이름 변경, 항목 제거·복사·삽입 | 항목 선택과 이름 입력 중 문자열 선택을 구별 |
+| [Tree](../packages/json-document-editing/src/tree.ts) | node ID + parent 관계, visible topology의 범위 | 노드 선택·제거·복사·삽입 | Copy·제거는 선택한 노드의 후손까지 포함. 보이는 선택과 실제 영향 집합이 다름 |
+| [Sheet](../packages/json-document-editing/src/sheet.ts) | row/column ID, 셀 직사각형과 primary | 셀 commit, fill, Cut·Paste | Cut은 primary 값을 비움. 셀 구조를 제거하거나 내부 문자열을 잘라내는 작업과 다름 |
+| [Database](../packages/json-document-editing/src/database.ts) | record/property ID, view가 제공하는 표 topology | cell commit, record 추가·삭제, view configure, Paste | 셀 값과 record 구조, 저장되는 view 설정을 구별. 현재 Cut 부재는 보편 규칙이 아님 |
+| [Object](../packages/json-document-editing/src/object.ts) | object ID 집합, x/y/width/height | translate, resize, fill, Copy·Paste | 선택 위치의 이동과 객체 좌표 변경은 다름. 현재 객체 model이 완전한 중첩 text editor는 아님 |
+| [Kanban](../packages/json-document-editing/src/kanban.ts) | card ID 집합, column ID + beforeCardId | 카드 이동·제거 | 이동은 소속과 순서를 바꿈. 보드 모양만으로 새 공통 선택 family를 요구하지 않음 |
+| [Calendar](../packages/json-document-editing/src/calendar.ts) | event ID + occurrenceStart, 구체화된 occurrence 범위 | 생성·이동·resize, Copy·Paste | 선택한 occurrence와 반복 일정 변경 범위는 다름. 시간·반복 규칙은 domain 의미 |
+| [Annotation](../packages/json-document-editing/src/annotation.ts) | annotation ID 집합, source ID + selector | 생성·본문 변경·이동·resize·삭제 | 편집되는 annotation과 가리키는 source 영역을 구별. 원본 이미지 픽셀 편집 사례가 아님 |
+| [Composer](../packages/json-document-composer/src/commands.ts) | Rich Text point, reference atom, attachment ID | text·reference 삽입, attachment·model 변경 | 여러 편집 대상을 한 draft에서 조합. 제출·외부 실행의 효과는 별도 Application 계약 |
+
+11개 사례는 같은 레포의 구현이며 다수가 같은 EditingSession을 쓴다. 그 반복은
+내부 재사용 가능성의 증거다. 서로 다른 생태계가 독립적으로 같은 의미를 채택했다는
+증거로 11번 세지 않는다. Raster·파일 이동은 아래 외부 반례로만 사용한다.
+
+### 하나의 편집을 설명하는 최소 질문
+
+의미를 설명하는 단위는 **작업을 받을 편집 맥락 + 대상·위치 + 의도 → 결과**다.
+API 인자에 모두 넣으라는 뜻은 아니다. 상태나 명시 인자로 이미 정해지는 것은
+그 계약에서 읽으면 된다. 한 범용 state 객체나 command envelope를 추가하지 않는다.
 
 ```text
-keyboard / pointer / IME ─ Adapter·Affordance ─┐
-직접 호출하는 프로그램 ──────────────────────┤
-                                             ↓
-                         해당 editor의 편집 의도
-                         + Selection / Topology
-                                             ↓
-                         EditingPlan + selectionAfter
-                                             ↓
-                         EditingSession → JSONDocument.commit
-                                             ↓
-                         해당 편집의 snapshot / History
+편집의 의미
+├─ 대상: 무엇의 내용·속성·구조를 다루는가
+│  ├─ identity: 같은 대상을 어떻게 알아보는가
+│  └─ position / topology: 어디이며 어떤 순서·관계로 해석하는가
+├─ 작업 맥락: 어느 편집기가 무엇을 대상으로 받는가
+│  ├─ selection: 대상 집합·범위·영역 또는 삽입점
+│  ├─ 입력 focus: 현재 입력을 받는 곳
+│  └─ 중첩: 객체 / 셀 / 그 안의 텍스트 사이의 진입·복귀
+├─ 의도: 탐색·선택 / 내용·구조 변경 / 교환 / 복원
+└─ 결과와 작업 경계
+   ├─ 진행 중인 draft·preview / 확정 / 취소·거절
+   ├─ 변경된 내용과 후속 선택·위치, 교환 payload
+   └─ 관찰 시점과 Undo/Redo의 대상·단위
 ```
 
-이는 대표적인 값 변경 흐름이다. Copy는 조회이며, 선택만 바꾸는 작업은 document
-commit을 만들지 않고, Undo/Redo는 선택한 History owner를 실행한다. 순수 JSON
-소비자에게 Editing이나 Hands 설치를 요구하지 않는다.
+이 트리는 질문의 분류다. 상속 관계나 새 runtime 모듈 목록이 아니다. 다음 구별을
+없애면 실제 사례의 결과를 설명할 수 없다.
+
+| 구별 | 없애면 설명할 수 없는 사례 | 남길 계약 / 기존 연결 |
+| --- | --- | --- |
+| Identity와 position | 같은 블록의 offset 변경, 이동한 같은 카드, 같은 event의 여러 occurrence | Point 단위·동등성·mapping은 해당 editor와 Selection. EG-TARGET |
+| Selection과 실제 작업 대상 | `annotation.create`의 새 대상, `record.delete(recordId)`의 명시 대상, Tree의 선택된 부모와 숨은 후손 | 대상은 selection·명시 인자·삽입 위치와 의도로 정한다. 모든 작업에 non-empty selection을 강제하거나 효과를 보이는 선택에만 제한하지 않음 |
+| 입력 focus와 range의 `focus` | 표 셀 입력 중 문자열의 역방향 선택 | 전자는 입력을 받는 곳, 후자는 범위의 한 endpoint. 이름이 같아도 같은 상태가 아님. EG-SELECT·EG-TARGET |
+| 저장 내용과 보이는 topology | 접힌 Tree, 정렬된 Database, 저장되는 `view.configure` | 가시 순서를 읽는 것과 view 설정을 수정하는 것은 다른 작업. EG-TARGET·EG-EDIT |
+| 요청·진행 중 작업과 확정된 편집 | 여러 pointer preview, IME composition, 여러 입력을 묶는 History | 사건 하나·dispatch 하나·commit 하나·Undo 한 step은 일대일이 아님. EG-GESTURE·EG-HISTORY·DOM lifecycle |
+| 작업 결과와 이후 현재 상태 | 구독 중 재진입, 외부 변경 이후 Undo | 결과의 관찰 시점과 선택한 History owner의 복원 의미를 보존. EG-RESULT·EG-HISTORY |
+
+문자마다 stable ID가 있어야 한다거나 모든 위치를 숫자 하나로 표현해야 한다는
+결론은 나오지 않는다. [Rich Text point](../packages/json-document-rich-text/src/model.ts)의
+text/child 구별·affinity와 [Selection family](../packages/json-document-selection/src/core/family.ts)의
+transition·map·reconcile·targets가 이미 이 차이의 정본 경계를 제공한다.
+
+### 중첩은 입력을 받을 곳의 계약이다
+
+[W3C APG Grid](https://www.w3.org/WAI/ARIA/apg/patterns/grid/#editing-and-navigating-inside-a-cell)는
+셀 탐색에 쓰는 화살표와 셀 안의 caret·widget 조작을 구분한다.
+[Keynote의 텍스트 상자](https://support.apple.com/en-ca/guide/keynote/tan4fd6ee725/mac)는
+객체 자체와 그 안의 텍스트를 따로 선택한다. 두 자료는 지침·제품 관습의 근거이며
+범용 editing scope API를 규정하지 않는다.
+
+```text
+Application
+└─ 표를 다루는 Hand
+   ├─ 셀 선택: Copy → 셀 payload, Delete 입력 → 선택한 셀 정책
+   └─ 셀 내부 편집
+      └─ 텍스트 선택: Copy → 문자열, Delete 입력 → 문자 편집
+
+Canvas Hand
+└─ 텍스트 객체 선택
+   └─ 내부 텍스트 편집
+```
+
+중첩을 조합하는 profile은 진입·복귀, 입력 수신자, 지원하지 않거나 거절한 의도의
+전달 여부, 후속 선택을 결정해야 한다. 내부 편집기가 삭제를 거절했다는 이유만으로
+바깥 객체 삭제가 실행되는 해석을 허용할지 명시해야 한다. 이 설계의 후보는
+**해당 맥락이 맡은 편집의 거절을 바깥의 다른 편집으로 암묵 변환하지 않는 것**이다.
+처리하지 않은 입력의 명시적 위임과 실패를 구별하며, 정확한 키·진입 방법은 입력
+profile이 정한다. 아직 전체 Hands에 실행 검증된 새 규칙은 아니다.
+
+여기서 편집 맥락은 HTML `editing host`, DOM element, JSON subtree, History
+instance와 일대일 대응하지 않는다. Toolbar로 focus가 옮겨져도 편집 명령은 저장된
+선택을 대상으로 할 수 있다. Headless 호출은 DOM focus 없이 대상을 지정할 수 있다.
+Calendar intent의 `scope: "this" | "this-and-following" | "all"`은 반복 일정의
+**변경 범위**이며 이 입력 맥락과 다른 개념이다.
+
+현재 [DocumentTextControl](../packages/json-document-react/src/use-document-text-control.ts)은
+native range의 방향을 투영하고, [Web virtual selection scope](../packages/json-document-web/src/virtual-selection-scope.ts)는
+자신의 영역에서 전체 텍스트 선택·Copy와 editable target 우선 처리를 맡는다.
+이는 기존 소유자의 증거이며 둘 중 하나를 모든 편집 맥락의 정본이라고 선언할
+근거는 아니다. 범용 scope registry나 Host별 dispatcher를 새로 만들지 않는다.
+
+### 반례가 정하는 공통 규칙의 경계
+
+| 과도한 일반화 | 근거 있는 반례 | 이 설계의 처리 |
+| --- | --- | --- |
+| 선택은 언제나 Undo 대상이 아님 | [GIMP Undoing](https://docs.gimp.org/3.0/en/gimp-concepts-undo.html)은 Scissors Select 작업과 Quick Mask 전환의 Undo를 설명 | 현재 일시적 Selection의 EG-SELECT·EG-HISTORY를 유지. Raster 선택 제작의 History 정책으로 일반화하지 않음 |
+| 이동은 항상 Copy 후 즉시 제거한 뒤 Paste | [Finder 이동](https://support.apple.com/en-gb/102650)은 Clipboard의 파일을 목적지에 옮기는 동작을 제공 | EG-CUT은 현재 즉시 제거하는 cut 계약. 지연 이동은 같은 계약의 이름만 다른 구현이 아님 |
+| 복사한 저장 값을 그대로 넣으면 의미도 보존 | [Excel 수식 이동·복사](https://support.microsoft.com/en-us/excel/move-or-copy-a-formula-in-excel)는 복사 시 상대 참조 변경, 수식 이동 시 참조 유지를 구별 | payload의 참조·identity·배치 변환은 profile 계약. JSON 모양이나 text 일치만으로 교환 호환성을 판정하지 않음 |
+| Selection은 항상 문자열의 시작과 끝 | 레포의 Sheet rectangle, Calendar materialized occurrences와 Selection mask 확장 | 대상별 family를 유지. mask algebra의 존재는 raster Hand 완성의 증거가 아님 |
+| 입력이 끝나면 Undo 한 step | 여러 preview와 typing/composition grouping, GIMP의 선택 도구 작업 | 작업의 확정·취소와 History grouping을 따로 명시 |
+
+공통 의미로 남는 것은 대상과 위치의 구별, 같은 의도의 명시된 결과, 효과의
+관찰·실패 경계다. 구체적인 선택 모양, 복사할 내용, 붙여넣기 위치, 영향을 받는
+참조, 기록할 상태와 작업 묶음은 profile이 채운다. Copy의 source 내용 보존과
+clipboard 자체의 변경도 별개의 효과다. 원자적 문서 편집은 이 레포가 제공하는
+강한 계약이며 모든 제품이 이미 같은 실패 보장을 구현했다는 역사적 주장은 아니다.
+
+## 하이라키: 구체화와 조합
+
+고정할 공통 의미와 profile이 결정할 내용을 먼저 나눈다. 그 다음 기존 모듈이
+어떤 부분을 실현하는지 연결한다. 앱 이름과 package 폴더 순서에서 의미의 상속
+관계를 역으로 추정하지 않는다.
+
+```text
+편집 계약
+├─ 공통 규칙: 대상·선택·효과·관찰·실패의 의미
+├─ 대상별 구체화
+│  └─ model / 유효한 position / selection·topology / 연산·교환·복원 정책
+└─ 입력 관습별 구체화
+   └─ key·pointer·IME / focus·중첩 / gesture·native lifecycle
+
+대상별 계약 + 선택한 입력 계약
+                │ 조합하고 함께 검증
+                v
+           Hands profile
+                │ 여러 Hand와 외부 서비스를 조합
+                v
+           Application / Host
+```
+
+대상별 계약과 입력 계약은 서로 다른 축이다. Sheet가 Rich Text를 상속하는 것이
+아니며 Windows·macOS 관습 때문에 문서 model을 복제할 이유도 없다. Hands profile은
+함께 약속하는 조합이다. 위의 구분을 새 package나 public descriptor type으로
+등록하지 않는다. 실제 문서·API·Usage는 아래의 기존 정본 owner에 둔다.
+
+의미를 실현하는 책임 지도는 다음과 같다. 화살표는 이 설계의 책임 연결이며
+현재 package import graph의 모든 edge를 표현하지 않는다.
+
+```text
+Headless API                   Keyboard / Pointer / IME
+     |                                   |
+     |                          Adapter / Affordance
+     +-------------------+---------------+
+                         v
+                   Domain editor
+                    /         \
+          Selection·Topology   EditingPlan + selectionAfter
+                    \         /
+                     v       v
+                    EditingSession
+                 관찰·작업·History 연결
+                         |
+                         v
+                    JSONDocument
+                  값·원자적 commit
+              local / collaboration 구현
+
+Connector: 이 책임들을 framework의 구독·render·focus lifecycle에 연결
+Host: 정본 API의 조합 순서·제품 정책·데이터·layout·외부 instance 주입
+```
+
+Selection의 수학적 전이는 JSONDocument mutation 없이 사용할 수 있고, 순수 JSON
+소비자는 Editing 없이 Core를 사용할 수 있다. Collaboration은 같은 JSONDocument
+계약의 다른 구현이며 `EditingHistory` 연결은 별도 선택이다. 입력 맥락 하나마다
+History를 하나씩 생성하거나 Application 전체에 단일 History를 강제하지 않는다.
+같은 문서를 여러 view에서 편집할 때의 History 귀속은 선택한 owner의 계약이다.
+
+### 기존 소유자와 연결
+
+Copy는 조회이며, 선택만 바꾸는 작업은 document commit을 만들지 않고,
+Undo/Redo는 선택한 History owner를 실행한다. 위의 흐름을 모든 요청이
+Core commit으로 향하는 단일 경로로 해석하지 않는다.
 
 | 기존 owner | 계속 소유할 책임 | 다른 곳으로 넘기지 않을 결정 |
 | --- | --- | --- |
@@ -84,6 +253,13 @@ layout·concrete external instance와 조합을 소유한다.
 아래 ID는 설계 요구사항이다. 실제 동결은 owner의 versioned 계약과 적합성
 증거를 통해 이루어진다. DOM API 모양, JSON 저장 shape, 특정 키 조합은 이
 규칙의 전제가 아니다.
+
+이 표의 적용 범위는 현재 구조·텍스트 편집 profile의 계약이다. EG-SELECT의
+일시적 선택과 문서 History 분리, EG-CUT의 즉시 제거를 다른 장르의 모든 관습으로
+일반화하지 않는다. 범위 확장의 anchor 규칙은 anchor를 가진 range family에
+적용한다. 다른 family나 raster·지연 이동 profile을 동결하려면 해당 상태와
+History·transfer 의미를 먼저 명시해야 하며, 기존 profile의 규칙을 느슨하게
+바꾸어 같은 profile이라고 부르지 않는다.
 
 | ID | 관찰 가능한 규칙 | Owner |
 | --- | --- | --- |
@@ -265,6 +441,29 @@ offset도 비교하며 블록 toggle과 전체 블록 Copy의 의미는 유지�
 방향을 anchor/focus로 전달하고 model이 focus를 발행할 때 기존 native range를
 유지하는 증거다. offset 하나로 과거 native range 전체를 복원한다는 계약이나
 profile 동결로 확대하지 않는다.
+
+## 새 도출의 검증 질문
+
+다음은 실행할 수 있도록 시작 상태와 판정 결과를 적은 **후보 사례**다. 앞의
+기존 적합성 표의 통과 항목과 합산하지 않는다. 이 문서 변경은 새 behavior vector나
+구현을 추가하지 않는다.
+
+| 사례 | 시작 상태 → 작업 → 판정할 결과 | 연결·현재 증거의 한계 |
+| --- | --- | --- |
+| 셀과 내부 문자열 | `Alpha` 셀 선택 / 내부 `ph` 선택 각각에서 Copy → 셀 payload / `ph` | EG-TARGET·EG-COPY. 기존 Sheet·native selection 증거는 각각 있으며 이 중첩 전체의 공통 binding은 없음 |
+| 거절 시 바깥으로 전이 금지 | 선택한 객체 안의 text editor가 Delete 거절 → 객체 제거·외부 History entry가 생기지 않음 | EG-EDIT·입력 계약 후보. [Web clipboard ownership](../packages/json-document-web/tests/clipboard-rejection.test.ts)은 한 binding의 거절 처리 증거이며 일반적인 중첩 거절 vector는 없음 |
+| Toolbar 대상 보존 | editor A에서 범위 선택 → Toolbar에 focus → Copy 실행 → A의 선택 payload | 입력 focus와 Selection 구별. 전체 Hands에 대한 공통 실행 증거 없음 |
+| 셀 값과 행 구조 | 값이 있는 셀을 비움 / 해당 record 삭제 → 전자는 구조 유지, 후자는 record 제거 | EG-EDIT·profile 대상. 현재 Sheet Cut과 Database `record.delete`는 서로 다른 계약 |
+| 반복 일정 영향 범위 | 같은 occurrence에 `this` / `all` 이동 → profile이 정한 반복 일정 집합만 영향 | EG-TARGET·EG-EDIT. Calendar domain 사례이며 입력 맥락 전환으로 해석하지 않음 |
+| Draft 취소와 Undo | 미확정 rename draft 수정 → cancel → 확정 label 불변; 확정 rename → Undo → 이전 label | EG-GESTURE·EG-HISTORY. 구조 gesture runner가 모든 rename·IME 취소를 증명하지 않음 |
+| 외부 참조·다른 profile로 Paste | 수식 또는 reference를 다른 위치·profile에 Paste → 변환·보존·거절 중 선언한 결과 | EG-PASTE. 현재 세 editor의 내부 round trip만으로 cross-profile 교환을 인증할 수 없음 |
+| 공유 문서의 두 편집 맥락 | A에서 편집 → B로 입력 focus 전환 → Undo → 선택한 History owner가 명시한 기여·선택 복원 | EG-HISTORY·EG-RESULT. 외부 History 연결 증거와 모든 Hand의 입력 routing 증거는 다름 |
+
+이번 도출로 설계 방향을 정할 수 있는 부분은 대상·위치·선택·입력 수신자의 구별,
+대상별 계약과 입력 계약의 조합, 기존 owner의 유지다. 아직 동결할 수 없는 부분은
+중첩 편집의 진입·거절·복귀 규칙, profile 간 payload 변환, raster/file 편집의
+적용 범위, 여러 편집 맥락의 History routing이다. 같은 profile을 독립적으로
+구현했을 때 이 사례들의 결과가 일치해야 장기 호환성 약속으로 승격할 수 있다.
 
 ## 장기 호환성
 
