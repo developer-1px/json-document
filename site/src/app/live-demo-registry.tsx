@@ -42,6 +42,7 @@ const liveDemos: Readonly<Record<string, LiveDemoDefinition>> = {
   "/connectors/react": demo(() => import("../routes/connectors/react/ReactConnectorDemoRoute"), "ReactConnectorDemoRoute", "routes/connectors/react/ReactConnectorDemoRoute.tsx"),
   "/connectors/react-hook-form": demo(() => import("../routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute"), "ReactHookFormConnectorDemoRoute", "routes/connectors/react-hook-form/ReactHookFormConnectorDemoRoute.tsx"),
   "/connectors/ajv": demo(() => import("../routes/connectors/ajv/AjvConnectorDemoRoute"), "AjvConnectorDemoRoute", "routes/connectors/ajv/AjvConnectorDemoRoute.tsx"),
+  "/connectors/a2ui": demo(() => import("../routes/connectors/a2ui/A2uiConnectorDemoRoute"), "A2uiConnectorDemoRoute", "routes/connectors/a2ui/A2uiConnectorDemoRoute.tsx"),
   "/connectors/zod": demo(() => import("../routes/connectors/zod/ZodConnectorDemoRoute"), "ZodConnectorDemoRoute", "routes/connectors/zod/ZodConnectorDemoRoute.tsx"),
   "/connectors/zod/validate": demo(() => import("../routes/connectors/zod/ZodValidateDemoRoute"), "ZodValidateDemoRoute", "routes/connectors/zod/ZodValidateDemoRoute.tsx"),
   "/connectors/tanstack-table": demo(() => import("../routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute"), "TanStackTableConnectorDemoRoute", "routes/connectors/tanstack-table/TanStackTableConnectorDemoRoute.tsx"),

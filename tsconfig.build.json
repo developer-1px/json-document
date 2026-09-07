@@ -8,6 +8,7 @@
     { "path": "./packages/json-document-react" },
     { "path": "./packages/json-document-react-hook-form" },
     { "path": "./packages/json-document-ajv" },
+    { "path": "./packages/json-document-a2ui" },
     { "path": "./packages/json-document-affordance" },
     { "path": "./packages/json-document-ui-primitives-react" },
     { "path": "./packages/json-document-animation-react" },

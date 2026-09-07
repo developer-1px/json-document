@@ -303,6 +303,22 @@
     "navigationGroup": "Connector"
   },
   {
+    "path": "/docs/api/a2ui",
+    "label": "API · A2UI",
+    "title": "A2UI API - json-document",
+    "description": "@interactive-os/json-document-a2ui의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/connector-a2ui",
+    "label": "A2UI",
+    "title": "A2UI Connector - json-document",
+    "description": "A2UI 메시지와 JSONL을 JSONDocument로 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
     "path": "/docs/api/zod",
     "label": "API · Zod",
     "title": "Zod API - json-document",
@@ -1026,6 +1042,18 @@
     "integration": {
       "kind": "connector",
       "packageName": "@interactive-os/json-document-ajv"
+    }
+  },
+  {
+    "path": "/connectors/a2ui",
+    "label": "A2UI Live Demo",
+    "title": "A2UI Connector Live Demo - json-document",
+    "description": "분할 A2UI JSONL을 canonical JSONDocument로 연결합니다.",
+    "navigationGroup": "Connector",
+    "sidebar": false,
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-a2ui"
     }
   },
   {

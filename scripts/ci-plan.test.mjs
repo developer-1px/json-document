@@ -40,7 +40,7 @@ test("기반 패키지 변경은 모든 역방향 소비자를 선택한다", ()
   const plan = createPlan(["packages/json-document/src/index.ts"]);
 
   assert.equal(plan.full, false);
-  assert.equal(plan.packageWorkspaces.length, 25);
+  assert.equal(plan.packageWorkspaces.length, 26);
   assert.equal(plan.standards, true);
   assert.equal(plan.externalKit, true);
   assert.deepEqual(plan.browserSpecs, ["site/tests/browser"]);
@@ -104,6 +104,7 @@ test("선택기가 반환하는 모든 browser 경로가 존재한다", () => {
       "json-document",
       "json-document-affordance",
       "json-document-ajv",
+      "json-document-a2ui",
       "json-document-contenteditable",
       "json-document-composer-react",
       "json-document-file-intake",

@@ -661,6 +661,13 @@ identifier에는 canonical vocabulary만 사용한다.
 | --- | --- | --- |
 | keep | `createTanStackTableConnector`, `createTableDocumentBinding`, `TableDocumentBinding`, `TableDocumentOptions` | 공식 TanStack Table Connector 진입점과 하위 Sheet binding |
 
+### A2UI Connector package
+
+| Decision | Current public exports | Canonical rule |
+| --- | --- | --- |
+| keep | `A2uiMessage`, `A2uiComponent`, `A2uiSurfaceDocument`, `A2uiStreamingDocument`, `A2uiStreamingDocumentEngine`, `createA2uiStreamingDocumentEngine` | 기존 streaming document 책임을 공식 Connector로 이관. SDK의 A2ui casing과 외부 envelope 의미를 보존하며 별도 protocol/interface를 만들지 않음 |
+| admit | `A2uiStreamingDocumentOptions`, `parseA2uiMessage` | Host catalog 정책 주입과 동일 SDK envelope 검증을 위한 public 경계. Core API·wire 변경 없음; owner contract test, Usage와 API reference에서 검증 |
+
 ## Target vocabulary
 
 이 목록은 현재 canonical public vocabulary다.

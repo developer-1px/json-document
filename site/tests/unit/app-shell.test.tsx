@@ -95,6 +95,7 @@ describe("official site shell", () => {
       "/connectors/react",
       "/connectors/react-hook-form",
       "/connectors/ajv",
+      "/connectors/a2ui",
       "/connectors/zod",
       "/connectors/tanstack-table",
     ]);

@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { A2UI_BASIC_CATALOG_ID } from "./basic-catalog";
-import type { A2uiComponent, A2uiStreamingDocument, A2uiSurfaceDocument } from "./a2ui-streaming-document";
+import type { A2uiComponent, A2uiStreamingDocument, A2uiSurfaceDocument } from "@interactive-os/json-document-a2ui";
 import { classes, ui } from "../../shared/ui/styles";
 import { A2UI_PROJECTION_ERROR_TEXT } from "./protocol-error";
 
