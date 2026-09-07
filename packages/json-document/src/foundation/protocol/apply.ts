@@ -9,6 +9,7 @@ import {
 } from "../patch/trusted.js";
 import { parseArrayIndex } from "../pointer/array-index.js";
 import { parsePointer } from "../pointer/core.js";
+import { isSharedArray } from "../json/shared-array.js";
 import type {
   JSONAppliedChange,
   JSONPatchFailure,
@@ -183,7 +184,7 @@ function freezeAlongOperations(
   for (const segments of paths) {
     if (!freezeAlongPath(value, segments)) return false;
   }
-  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+  if (value !== null && typeof value === "object" && !isSharedArray(value) && !Object.isFrozen(value)) {
     freezeInspections += 1;
     Object.freeze(value);
   }
@@ -212,7 +213,7 @@ function freezeAlongPath(root: JSONValue, segments: ReadonlyArray<string>): bool
   freezeJSON(current);
   for (let index = stack.length - 1; index >= 0; index -= 1) {
     const container = stack[index]!;
-    if (!Object.isFrozen(container)) Object.freeze(container);
+    if (!isSharedArray(container) && !Object.isFrozen(container)) Object.freeze(container);
   }
   return true;
 }
@@ -220,7 +221,7 @@ function freezeAlongPath(root: JSONValue, segments: ReadonlyArray<string>): bool
 function freezeJSON<T extends JSONValue>(value: T): T {
   if (value === null || typeof value !== "object") return value;
   freezeInspections += 1;
-  if (Object.isFrozen(value)) return value;
+  if (isSharedArray(value) || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) freezeJSON(child as JSONValue);
   Object.freeze(value);
   return value;

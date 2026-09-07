@@ -409,6 +409,29 @@
       }
     },
     {
+      "id": "canceling-structural-batch-does-not-notify",
+      "kind": "commit",
+      "requirements": ["JD3-PATCH-001", "JD3-COMMIT-002", "JD3-NOTIFICATION-001"],
+      "operations": [
+        { "op": "add", "path": "/meta/temporary", "value": true },
+        { "op": "remove", "path": "/meta/temporary" },
+        { "op": "remove", "path": "/items/0" },
+        { "op": "add", "path": "/items/0", "value": { "id": "a", "done": false } },
+        { "op": "add", "path": "/title", "value": "intermediate" },
+        { "op": "replace", "path": "/title", "value": "Draft" }
+      ],
+      "expect": {
+        "probe": { "ok": true },
+        "commit": { "ok": true, "change": { "applied": [] } },
+        "value": {
+          "title": "Draft",
+          "items": [{ "id": "a", "done": false }, { "id": "b", "done": false }],
+          "meta": { "owner": "core" }
+        },
+        "notifications": []
+      }
+    },
+    {
       "id": "validation-cannot-transform-the-candidate",
       "kind": "commit",
       "requirements": [

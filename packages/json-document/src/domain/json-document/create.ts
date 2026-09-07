@@ -216,6 +216,9 @@ function localCommitEffect(
     }
     if (operation.op === "add" || operation.op === "remove") {
       if (typeof operation.path !== "string" || operation.path === "") return "unknown";
+      // A later operation can cancel a structural mutation or overwrite an
+      // object add. Only the final value establishes a multi-operation effect.
+      if (operations.length > 1) return "unknown";
       changed = true;
       continue;
     }
