@@ -235,17 +235,23 @@ export function createHistory(state: RuntimeState): History {
       }
       documentChange = documentCommit.change;
     }
+    const result = Object.freeze({
+      ok: true as const,
+      changeId: freezeChangeId(prepared.value.change.changeId),
+      target: freezeChangeId(prepared.value.target),
+      didChangeDocument: prepared.value.didChangeDocument,
+      change: documentChange ?? null,
+      status: Object.freeze({
+        ...resolveHistoryState().status,
+        canUndo: prepareHistoryChange("undo").ok,
+        canRedo: prepareHistoryChange("redo").ok,
+      }),
+    });
     state.notify({
       ...(documentChange === undefined ? {} : { documentChange }),
       replicaStatus: state.replicaStatus(),
     });
-
-    return Object.freeze({
-      ok: true,
-      changeId: freezeChangeId(prepared.value.change.changeId),
-      target: freezeChangeId(prepared.value.target),
-      didChangeDocument: prepared.value.didChangeDocument,
-    });
+    return result;
   }
 
   return Object.freeze({

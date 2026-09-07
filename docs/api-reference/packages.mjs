@@ -31,6 +31,9 @@ export const apiReferencePackages = [
 ].map(([slug, packageName, entrypoint, owner, responsibility]) => ({
   slug, packageName, entrypoint, owner, responsibility,
   subpaths: slug === "collaboration" ? [{
+    packageName: "@interactive-os/json-document-collaboration/history",
+    entrypoint: "packages/json-document-collaboration/src/history-index.ts",
+  }, {
     packageName: "@interactive-os/json-document-collaboration/editing",
     entrypoint: "packages/json-document-collaboration/src/editing-index.ts",
   }] : [],

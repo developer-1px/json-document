@@ -9,7 +9,7 @@ import {
 } from "@interactive-os/json-document";
 import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
 import { invertEditingPatch } from "./invert-patch.js";
-import type { EditingHistoryOptions, EditingHistoryResult } from "./history.js";
+import type { EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 
 export interface EditingDocumentChange {
   readonly before: JSONValue;
@@ -72,7 +72,12 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   let observedValue = document.value;
   let unsubscribeDocument: (() => void) | null = null;
   let unsubscribeHistory: (() => void) | null = null;
-  let historyRevision = options.history?.status().revision;
+  let observedHistory = options.history?.status();
+  let pendingHistoryRestore: {
+    readonly value: JSONValue;
+    readonly status: EditingHistoryStatus;
+    readonly reference: { readonly value: JSONValue; readonly selection: Selection };
+  } | null = null;
   const historySelections = new Map<string, {
     readonly before: { readonly value: JSONValue; readonly selection: Selection };
     readonly after: { readonly value: JSONValue; readonly selection: Selection };
@@ -91,8 +96,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       value: observedValue,
       selection,
       revision,
-      canUndo: options.history?.status().canUndo ?? undoStack.length > 0,
-      canRedo: options.history?.status().canRedo ?? redoStack.length > 0,
+      canUndo: observedHistory?.canUndo ?? undoStack.length > 0,
+      canRedo: observedHistory?.canRedo ?? redoStack.length > 0,
     });
   }
 
@@ -116,32 +121,50 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     return current;
   }
 
-  function synchronizeExternalChange(change?: JSONAppliedChange): boolean {
-    if (isCommitting) return false;
-    const nextHistoryRevision = options.history?.status().revision;
-    const historyChanged = nextHistoryRevision !== historyRevision;
-    historyRevision = nextHistoryRevision;
-    const latest = document.value;
-    if (jsonEqual(observedValue, latest)) {
-      if (historyChanged) revision += 1;
-      return historyChanged;
+  function mappedSelection(
+    reference: { readonly value: JSONValue; readonly selection: Selection },
+    after: JSONValue,
+    change: JSONAppliedChange | null,
+  ): Selection {
+    let next = reference.selection;
+    if (options.mapSelection) next = ownSelection(options.mapSelection(next, { before: reference.value, after, change }));
+    if (options.reconcileSelection) next = ownSelection(options.reconcileSelection(next, after));
+    return next;
+  }
+
+  function synchronizeExternalChange(change?: JSONAppliedChange): void {
+    if (isCommitting) return;
+    for (;;) {
+      if (pendingHistoryRestore) {
+        completeHistoryRestore();
+        change = undefined;
+        continue;
+      }
+      const nextHistory = options.history?.status();
+      const historyChanged = nextHistory?.revision !== observedHistory?.revision;
+      const latest = document.value;
+      if (jsonEqual(observedValue, latest)) {
+        if (!historyChanged) return;
+        observedHistory = nextHistory;
+      } else {
+        const before = observedValue;
+        const replay = options.mapSelection && change !== undefined ? applyPatch(before, change.applied) : null;
+        // A failed callback leaves the entire observed transition retryable.
+        const nextSelection = mappedSelection({ value: before, selection }, latest,
+          replay?.ok && jsonEqual(replay.value, latest) ? change! : null);
+        observedValue = latest;
+        observedHistory = nextHistory;
+        selection = nextSelection;
+        undoStack = [];
+        redoStack = [];
+        activeHistoryGroup = undefined;
+      }
+      revision += 1;
+      change = undefined;
+      // Publish every revision, then catch up with any subscriber-authored change
+      // before a caller can read the state or author another mutation.
+      publish();
     }
-    const before = observedValue;
-    observedValue = latest;
-    if (options.mapSelection) {
-      const replay = change === undefined ? null : applyPatch(before, change.applied);
-      selection = ownSelection(options.mapSelection(selection, {
-        before,
-        after: latest,
-        change: replay?.ok && jsonEqual(replay.value, latest) ? change! : null,
-      }));
-    }
-    if (options.reconcileSelection) selection = ownSelection(options.reconcileSelection(selection, latest));
-    undoStack = [];
-    redoStack = [];
-    activeHistoryGroup = undefined;
-    revision += 1;
-    return true;
   }
 
   function commit(
@@ -167,14 +190,20 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   }
 
   function observeDocument(change: JSONAppliedChange): void {
-    if (isCommitting) return;
-    if (synchronizeExternalChange(change)) publish();
+    synchronizeExternalChange(change);
   }
 
   function publishCommit(): EditingSnapshot<Selection> {
     const own = publish();
-    if (synchronizeExternalChange()) publish();
+    catchUpAfterCommit();
     return own;
+  }
+
+  function catchUpAfterCommit(): void {
+    try { synchronizeExternalChange(); } catch {
+      // A later external callback failure cannot reject this completed edit.
+      // The next read or command retries synchronization and surfaces the error.
+    }
   }
 
   function apply(plan: EditingPlan<Selection>): EditingResult<Selection> {
@@ -209,7 +238,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     selection = selectionAfter;
     revision += 1;
     const historyStatus = options.history?.status();
-    historyRevision = historyStatus?.revision;
+    observedHistory = historyStatus;
     if (historyStatus?.undoTarget && result.change.applied.length > 0 && jsonEqual(observedValue, document.value)) {
       historySelections.set(historyStatus.undoTarget, {
         before: { value: beforeValue, selection: beforeSelection },
@@ -256,32 +285,37 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
 
   function restoreExternal(direction: "undo" | "redo"): EditingResult<Selection> {
     const history = options.history!;
-    const target = direction === "undo" ? history.status().undoTarget : history.status().redoTarget;
-    const retained = target === null ? undefined : historySelections.get(target);
-    const reference = retained?.[direction === "undo" ? "before" : "after"] ?? { value: observedValue, selection };
     const before = observedValue;
-    const changes: JSONAppliedChange[] = [];
-    const release = document.subscribe((change) => { changes.push(change); });
     let result: EditingHistoryResult;
     isCommitting = true;
     try {
       result = history[direction]();
     } finally {
-      release();
       isCommitting = false;
     }
     if (!result.ok) return result;
-    const change = changes[0];
-    const replay = changes.length > 1 && change ? applyPatch(before, change.applied) : null;
-    observedValue = replay?.ok ? replay.value : document.value;
-    historyRevision = history.status().revision;
-    selection = reference.selection;
-    if (options.mapSelection) selection = ownSelection(options.mapSelection(selection, {
-      before: reference.value, after: observedValue, change: null,
-    }));
-    if (options.reconcileSelection) selection = ownSelection(options.reconcileSelection(selection, observedValue));
+    const replay = result.change === null ? { ok: true as const, value: before } : applyPatch(before, result.change.applied);
+    if (!replay.ok) throw new TypeError("EditingHistory returned a change that cannot apply to its pre-state.");
+    const retained = historySelections.get(result.target);
+    pendingHistoryRestore = {
+      value: replay.value,
+      status: result.status,
+      reference: retained?.[direction === "undo" ? "before" : "after"] ?? { value: before, selection },
+    };
+    const snapshot = completeHistoryRestore();
+    catchUpAfterCommit();
+    return { ok: true, snapshot, ...(result.change === null ? {} : { change: result.change }) };
+  }
+
+  function completeHistoryRestore(): EditingSnapshot<Selection> {
+    const pending = pendingHistoryRestore!;
+    const nextSelection = mappedSelection(pending.reference, pending.value, null);
+    observedValue = pending.value;
+    observedHistory = pending.status;
+    selection = nextSelection;
+    pendingHistoryRestore = null;
     revision += 1;
-    return { ok: true, snapshot: publishCommit(), ...(change === undefined ? {} : { change }) };
+    return publish();
   }
 
   return {
@@ -341,9 +375,12 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       listeners.add(listener);
       unsubscribeDocument ??= document.subscribe(observeDocument);
       unsubscribeHistory ??= options.history?.subscribe(() => {
-        if (synchronizeExternalChange()) publish();
+        synchronizeExternalChange();
       }) ?? null;
+      let active = true;
       return () => {
+        if (!active) return;
+        active = false;
         listeners.delete(listener);
         if (listeners.size > 0) return;
         unsubscribeDocument?.();

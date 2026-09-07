@@ -237,6 +237,13 @@ export type HistoryResult =
       readonly changeId: ChangeId;
       readonly target: ChangeId;
       readonly didChangeDocument: boolean;
+      /** This operation's applied change; null when it only changes causal history. */
+      readonly change: JSONAppliedChange | null;
+      /** Captured before subscribers can author a later transition. */
+      readonly status: HistoryStatus & {
+        readonly canUndo: boolean;
+        readonly canRedo: boolean;
+      };
     }
   | {
       readonly ok: false;

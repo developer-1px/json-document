@@ -940,7 +940,14 @@ interface EditingHistoryOptions {
 
 ```ts
 type EditingHistoryResult =
-  | { readonly ok: true; readonly target: string }
+  | {
+      readonly ok: true;
+      readonly target: string;
+      /** This operation's applied change; null for a history-only transition. */
+      readonly change: JSONAppliedChange | null;
+      /** This operation's status, captured before notifying subscribers. */
+      readonly status: EditingHistoryStatus;
+    }
   | { readonly ok: false; readonly code: string; readonly reason?: string };
 ```
 ## `EditingHistoryStatus`

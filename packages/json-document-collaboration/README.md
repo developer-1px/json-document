@@ -34,6 +34,14 @@ History remains local unless this connection is explicitly configured.
 See [Collaborative History](../../docs/public/collaboration-history.md) and the
 owner [API reference](../../docs/api-reference/collaboration.md).
 
+Successful `runtime.history.undo/redo` results include their own `change`
+(`JSONAppliedChange | null`) and immutable resulting `status`, including
+`canUndo` and `canRedo`. Both are captured before notifying document or replica
+subscribers. A history-only operation returns `change: null`, even when a
+subscriber authors another document change before the call returns. The Editing
+connection forwards that result instead of treating the first observed change
+as the history operation. These fields do not enter bundles or checkpoints.
+
 Remote `document.subscribe` notifications compile visible tree identities into
 ordered JSON Patch moves, insertions, and removals. Consumers can use
 `trackPointer(pointer, change.applied, before)` with the previous snapshot to
