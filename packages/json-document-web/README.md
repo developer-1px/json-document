@@ -223,8 +223,9 @@ port; they do not certify browser-specific clipboard permissions or transport.
 `textSelectionFromControl({ currentTarget })` projects an input or textarea's
 `selectionStart`, `selectionEnd`, and `selectionDirection` into the existing
 `SelectionRange<number>` anchor/focus contract. A backward native selection has
-its anchor at the end and focus at the start. Bounds are clamped to the text;
-a control without end/direction remains a collapsed selection. The existing
+its anchor at the end and focus at the start. Bounds are clamped to the text.
+A missing `selectionEnd` produces a collapsed selection; a missing direction
+uses start as anchor and end as focus. The existing
 `textInputFromControl` text/offset result is unchanged.
 
 ```ts
