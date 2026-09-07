@@ -248,6 +248,11 @@ const sheetClipboardCodec: WebClipboardCodec<SheetClipboard>
 ```ts
 textInputFromControl(event: WebTextControlEvent): WebTextInput
 ```
+## `textSelectionFromControl`
+
+```ts
+textSelectionFromControl(event: WebTextControlEvent): SelectionRange<number>
+```
 ## `treeClipboardCodec`
 
 ```ts
@@ -798,6 +803,8 @@ webSVGViewportFromElement(svg: WebSVGElement): WebSVGViewport
 interface WebTextControl {
   readonly value: string;
   readonly selectionStart: number | null;
+  readonly selectionEnd?: number | null;
+  readonly selectionDirection?: "forward" | "backward" | "none" | null;
 }
 ```
 ## `WebTextControlEvent`

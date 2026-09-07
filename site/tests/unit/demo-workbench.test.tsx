@@ -89,6 +89,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
     const source = await document[0]!.load();
@@ -101,6 +102,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
@@ -111,6 +113,7 @@ describe("Demo definition and source discovery", () => {
       "/docs/api/react",
       "/docs/api/web",
       "/docs/api/react",
+      "/docs/api/web",
       "/docs/api/editing",
     ]);
   });

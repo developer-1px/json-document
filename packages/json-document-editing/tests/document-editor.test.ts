@@ -1,7 +1,78 @@
 import { describe, expect, test } from "vitest";
-import { createDocumentEditor, documentSelectionFocus } from "../src/index.js";
+import { createDocumentEditor, documentSelectionFocus, type DocumentSelection } from "../src/index.js";
 
 describe("document editing vertical slice", () => {
+  test("moves, extends, and collapses offsets inside the same block without editing its contents", () => {
+    const initial = { blocks: [{ id: "a", text: "Alpha" }] };
+    const editor = createDocumentEditor(initial);
+    const published: DocumentSelection[] = [];
+    const release = editor.subscribe((snapshot) => published.push(snapshot.selection));
+    const selection = (anchor: number, focus = anchor): DocumentSelection => ({
+      kind: "range", primaryIndex: 0,
+      ranges: [{ anchor: { blockId: "a", offset: anchor }, focus: { blockId: "a", offset: focus } }],
+    });
+    const steps = [
+      { offset: 2, mode: "replace", expected: selection(2) },
+      { offset: 4, mode: "extend", expected: selection(2, 4) },
+      { offset: 1, mode: "extend", expected: selection(2, 1) },
+      { offset: 3, mode: "replace", expected: selection(3) },
+      { offset: 99, mode: "extend", expected: selection(3, 5) },
+      { offset: -1, mode: "extend", expected: selection(3, 0) },
+      { offset: 99, mode: "replace", expected: selection(5) },
+      { offset: -1, mode: "replace", expected: selection(0) },
+    ] as const;
+    try {
+      for (const { offset, mode, expected } of steps) {
+        expect(editor.dispatch({ type: "selection.set", blockId: "a", offset, mode }))
+          .toMatchObject({ ok: true, snapshot: { value: initial, selection: expected, canUndo: false, canRedo: false } });
+        expect(editor.snapshot.selection).toEqual(expected);
+        expect(editor.selectedBlockIds).toEqual(["a"]);
+        expect(editor.copy()?.blocks).toEqual(initial.blocks);
+        expect(published.at(-1)).toEqual(expected);
+      }
+      expect(published).toEqual(steps.map((step) => step.expected));
+    } finally { release(); }
+  });
+
+  test("keeps block toggle independent of the selected offsets", () => {
+    const editor = createDocumentEditor({ blocks: [{ id: "a", text: "Alpha" }, { id: "b", text: "Beta" }] });
+    editor.dispatch({ type: "selection.set", blockId: "a", offset: 2 });
+    editor.dispatch({ type: "selection.set", blockId: "a", offset: 4, mode: "extend" });
+    const original = editor.snapshot.selection;
+    editor.dispatch({ type: "selection.set", blockId: "b", offset: 1, mode: "toggle" });
+    expect(editor.selectedBlockIds).toEqual(["a", "b"]);
+    editor.dispatch({ type: "selection.set", blockId: "b", offset: 3, mode: "toggle" });
+    expect(editor.snapshot.selection).toEqual(original);
+    expect(editor.selectedBlockIds).toEqual(["a"]);
+    editor.dispatch({ type: "selection.set", blockId: "a", offset: 0, mode: "toggle" });
+    expect(editor.selectedBlockIds).toEqual([]);
+    expect(editor.snapshot.selection).toEqual({ kind: "range", ranges: [], primaryIndex: null });
+  });
+
+  test("restores offset ranges on undo and preserves redo through caret-only movement", () => {
+    const initial = { blocks: [{ id: "a", text: "Alpha" }] };
+    const editor = createDocumentEditor(initial);
+    editor.dispatch({ type: "selection.set", blockId: "a", offset: 4 });
+    editor.dispatch({ type: "selection.set", blockId: "a", offset: 1, mode: "extend" });
+    const before = {
+      value: initial,
+      selection: { kind: "range", primaryIndex: 0, ranges: [{
+        anchor: { blockId: "a", offset: 4 }, focus: { blockId: "a", offset: 1 },
+      }] },
+    };
+    expect(editor.snapshot).toMatchObject(before);
+    expect(editor.dispatch({ type: "text.replace", blockId: "a", text: "Alps", offset: 3 }).ok).toBe(true);
+    const after = editor.snapshot;
+    expect(editor.undo()).toMatchObject({ ok: true, snapshot: { ...before, canUndo: false, canRedo: true } });
+    expect(editor.dispatch({ type: "selection.set", blockId: "a", offset: 2 }))
+      .toMatchObject({ ok: true, snapshot: { value: initial, canUndo: false, canRedo: true } });
+    expect(documentSelectionFocus(editor.snapshot.selection)?.offset).toBe(2);
+    expect(editor.redo()).toMatchObject({ ok: true, snapshot: {
+      value: after.value, selection: after.selection, canUndo: true, canRedo: false,
+    } });
+    expect(editor.undo()).toMatchObject({ ok: true, snapshot: { ...before, canUndo: false, canRedo: true } });
+  });
+
   test("preserves group placement for every selection and direction up to six blocks", () => {
     for (let size = 1; size <= 6; size += 1) {
       for (let mask = 1; mask < 2 ** size; mask += 1) {

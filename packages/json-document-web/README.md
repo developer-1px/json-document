@@ -202,3 +202,24 @@ so non-browser tooling can load it safely.
 | --- | --- |
 | `@interactive-os/json-document-editing` | `>=0.1.0-rc.0 <1` |
 | `@interactive-os/json-document-selection` | `>=0.1.0-rc.0 <1` |
+
+## Native text selection
+
+`textSelectionFromControl({ currentTarget })` projects an input or textarea's
+`selectionStart`, `selectionEnd`, and `selectionDirection` into the existing
+`SelectionRange<number>` anchor/focus contract. A backward native selection has
+its anchor at the end and focus at the start. Bounds are clamped to the text;
+a control without end/direction remains a collapsed selection. The existing
+`textInputFromControl` text/offset result is unchanged.
+
+```ts
+import { textSelectionFromControl } from "@interactive-os/json-document-web";
+
+const range = textSelectionFromControl({ currentTarget: textarea });
+// range.anchor and range.focus preserve the native selection direction.
+```
+
+`DocumentTextControl` consumes this public projection in the live
+[Document Usage](https://developer-1px.github.io/json-document/demo); its source
+view links the React binding to this package's `input.ts` implementation and
+[API reference](https://developer-1px.github.io/json-document/docs/api/web).
