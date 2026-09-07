@@ -12,7 +12,8 @@ order. A returned result describes its own transition, even if a subscriber has
 already performed another transition.
 Every synchronized revision is published, including synchronization started by
 a snapshot read or another command. A reader's subscription order cannot consume
-the notification intended for another observer.
+the notification intended for another observer. Synchronization also catches up
+with writes made by those observers before returning to a read or new command.
 
 Domains can provide `mapSelection(selection, { before, after, change })` and
 `reconcileSelection(selection, value)` to `createEditingSession`. Both are pure

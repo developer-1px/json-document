@@ -48,6 +48,38 @@ test("history results retain their own immutable change and status before subscr
   expect(local.history.status()).toMatchObject({ revision: 3, redoTarget: null });
 });
 
+test("completes a subscriber's pending selection restore before synchronizing later state", () => {
+  const local = runtime();
+  const remote = runtime("remote");
+  let rejects = false;
+  const session = createEditingSession<number>({
+    document: local.document, selection: 0, history: createCollaborationEditingHistory(local),
+    reconcileSelection(selection) {
+      if (rejects) {
+        rejects = false;
+        throw new Error("selection failed once");
+      }
+      return selection;
+    },
+  });
+  session.apply({ operations: [{ op: "replace", path: "/n", value: 1 }], selectionAfter: 1, origin: "local" });
+  const seen: EditingSnapshot<number>[] = [];
+  let failure: unknown;
+  session.subscribe((snapshot) => {
+    seen.push(snapshot);
+    if (snapshot.revision !== 2) return;
+    rejects = true;
+    try { session.undo(); } catch (error) { failure = error; }
+  });
+  remote.replica.ingest(local.replica.exportBundle());
+  remote.document.commit([{ op: "replace", path: "/other", value: 2 }]);
+  local.replica.ingest(remote.replica.exportBundle());
+  expect(failure).toBeInstanceOf(Error);
+  expect((failure as Error).message).toBe("selection failed once");
+  expect(session.snapshot).toMatchObject({ value: { n: 0, other: 2 }, selection: 0, revision: 3, canRedo: true });
+  expect(seen.map(({ revision, selection }) => [revision, selection])).toEqual([[2, 1], [3, 0]]);
+});
+
 test("releases both connections across resubscription and editor recreation", () => {
   const local = runtime();
   const owner = createCollaborationEditingHistory(local);

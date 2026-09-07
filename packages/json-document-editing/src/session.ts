@@ -134,32 +134,37 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
 
   function synchronizeExternalChange(change?: JSONAppliedChange): void {
     if (isCommitting) return;
-    if (pendingHistoryRestore) completeHistoryRestore();
-    const nextHistory = options.history?.status();
-    const historyChanged = nextHistory?.revision !== observedHistory?.revision;
-    const latest = document.value;
-    if (jsonEqual(observedValue, latest)) {
-      if (historyChanged) {
-        observedHistory = nextHistory;
-        revision += 1;
-        publish();
+    for (;;) {
+      if (pendingHistoryRestore) {
+        completeHistoryRestore();
+        change = undefined;
+        continue;
       }
-      return;
+      const nextHistory = options.history?.status();
+      const historyChanged = nextHistory?.revision !== observedHistory?.revision;
+      const latest = document.value;
+      if (jsonEqual(observedValue, latest)) {
+        if (!historyChanged) return;
+        observedHistory = nextHistory;
+      } else {
+        const before = observedValue;
+        const replay = options.mapSelection && change !== undefined ? applyPatch(before, change.applied) : null;
+        // A failed callback leaves the entire observed transition retryable.
+        const nextSelection = mappedSelection({ value: before, selection }, latest,
+          replay?.ok && jsonEqual(replay.value, latest) ? change! : null);
+        observedValue = latest;
+        observedHistory = nextHistory;
+        selection = nextSelection;
+        undoStack = [];
+        redoStack = [];
+        activeHistoryGroup = undefined;
+      }
+      revision += 1;
+      change = undefined;
+      // Publish every revision, then catch up with any subscriber-authored change
+      // before a caller can read the state or author another mutation.
+      publish();
     }
-    const before = observedValue;
-    const replay = options.mapSelection && change !== undefined ? applyPatch(before, change.applied) : null;
-    // A failed callback leaves the entire observed transition retryable.
-    const nextSelection = mappedSelection({ value: before, selection }, latest,
-      replay?.ok && jsonEqual(replay.value, latest) ? change! : null);
-    observedValue = latest;
-    observedHistory = nextHistory;
-    selection = nextSelection;
-    undoStack = [];
-    redoStack = [];
-    activeHistoryGroup = undefined;
-    revision += 1;
-    // Reads and commands must not consume a revision without its notification.
-    publish();
   }
 
   function commit(

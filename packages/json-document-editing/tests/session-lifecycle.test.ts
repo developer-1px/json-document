@@ -1,4 +1,4 @@
-import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
+import { createJSONDocument, type JSONAppliedChange, type JSONValue } from "@interactive-os/json-document";
 import { describe, expect, test } from "vitest";
 import { createEditingSession } from "../src/session.js";
 
@@ -26,6 +26,69 @@ describe("editing observation and recovery", () => {
     session.subscribe((snapshot) => seen.push(snapshot.revision));
     document.commit([{ op: "replace", path: "/n", value: 1 }]);
     expect(seen).toEqual([1, 2]);
+  });
+
+  test("does not reuse an observed patch for a subscriber's equivalent later patch", () => {
+    const document = createJSONDocument({ rows: [] });
+    const changes: Array<JSONAppliedChange | null> = [];
+    const session = createEditingSession({
+      document, selection: null,
+      mapSelection(selection, { change }) { changes.push(change); return selection; },
+    });
+    const seen: number[] = [];
+    session.subscribe((snapshot) => {
+      seen.push(snapshot.revision);
+      if (snapshot.revision === 1) document.commit([{ op: "add", path: "/rows/0", value: 1 }]);
+    });
+    const result = document.commit([{ op: "add", path: "/rows/0", value: 1 }]);
+    if (!result.ok) throw new Error(result.code);
+    expect(changes).toEqual([result.change, null]);
+    expect(seen).toEqual([1, 2]);
+    expect(session.snapshot.value).toEqual({ rows: [1, 1] });
+  });
+
+  test.each(["snapshot", "apply", "select", "reconcile", "undo", "redo"] as const)("blocks %s when synchronization observers write an unreconciled change", (operation) => {
+    const document = createJSONDocument({ n: 0 });
+    let attempted = false;
+    let failure: unknown;
+    document.subscribe(() => {
+      if (attempted) return;
+      attempted = true;
+      try { operations[operation](); } catch (error) { failure = error; }
+    });
+    let rejects = false;
+    const session = createEditingSession<number>({
+      document, selection: 0,
+      mapSelection: (selection) => selection + 10,
+      reconcileSelection(selection, value) {
+        if (rejects && (value as { n: number }).n === 2) throw new Error("selection failed");
+        return selection;
+      },
+    });
+    const operations = {
+      snapshot: () => session.snapshot,
+      apply: () => session.apply({ operations: [{ op: "replace", path: "/n", value: 99 }], selectionAfter: 99, origin: "blocked" }),
+      select: () => session.select(99),
+      reconcile: () => session.reconcile(() => 99),
+      undo: () => session.undo(),
+      redo: () => session.redo(),
+    };
+    const seen: number[] = [];
+    session.subscribe((snapshot) => {
+      seen.push(snapshot.revision);
+      if (snapshot.revision !== 1) return;
+      rejects = true;
+      document.commit([{ op: "replace", path: "/n", value: 2 }]);
+    });
+    document.commit([{ op: "replace", path: "/n", value: 1 }]);
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toBe("selection failed");
+    expect(document.value).toEqual({ n: 2 });
+    expect(seen).toEqual([1]);
+    rejects = false;
+    expect(session.snapshot).toMatchObject({ value: { n: 2 }, selection: 20, revision: 2, canUndo: false });
+    expect(seen).toEqual([1, 2]);
+    expect(session.undo()).toMatchObject({ ok: false, code: "history.empty" });
   });
 
   describe.each([true, false])("callback failure (observed: %s)", (observed) => {
