@@ -25,11 +25,16 @@ export function invertEditingPatch(document: JSONDocument, operations: ReadonlyA
       const to = tryParsePointer(operation.path);
       if (from === null || to === null) return null;
       if (to.every((part, index) => from[index] === part)) {
-        // Moving to an ancestor replaces that entire container. Its previous
-        // contents must be restored at that boundary, including a root move.
+        const destinationParent = parentPointer(operation.path);
+        const destinationContainer = destinationParent === null ? null : working.at(destinationParent);
         const previous = working.at(operation.path);
         if (!previous.ok || !working.commit([operation]).ok) return null;
-        step = [{ op: "replace", path: operation.path, value: previous.value }];
+        // Array ancestors insert, so remove the insertion before restoring the
+        // source. A reverse move would target its own descendant and be invalid.
+        // Root/object ancestors replace the entire destination container.
+        step = destinationContainer?.ok && Array.isArray(destinationContainer.value)
+          ? [{ op: "remove", path: operation.path }, { op: "add", path: operation.from, value: source.value }]
+          : [{ op: "replace", path: operation.path, value: previous.value }];
       } else {
         if (!working.commit([{ op: "remove", path: operation.from }]).ok) return null;
         const path = insertionPath(working, operation.path);

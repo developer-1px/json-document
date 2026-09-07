@@ -64,6 +64,10 @@ describe("editing transaction composition", () => {
     { name: "move across shifted array parents", initial: { list: ["a", {}, { children: [] }] }, operations: [{ op: "move", from: "/list/0", path: "/list/1/children/-" }] },
     { name: "move overwrites within a shifted parent", initial: { list: ["a", {}, { child: "old" }] }, operations: [{ op: "move", from: "/list/0", path: "/list/1/child" }] },
     { name: "move replaces an ancestor", initial: { parent: { child: { text: "a" }, sibling: true } }, operations: [{ op: "move", from: "/parent/child", path: "/parent" }] },
+    { name: "move inserts at an array ancestor", initial: { list: [{ child: 1 }, { sibling: true }] }, operations: [{ op: "move", from: "/list/0/child", path: "/list/0" }] },
+    { name: "move inserts a nested array at its array ancestor", initial: { list: [{ child: [1, 2] }] }, operations: [{ op: "move", from: "/list/0/child", path: "/list/0" }] },
+    { name: "move inserts a deep descendant at its array ancestor", initial: { list: [{ child: [1, 2] }] }, operations: [{ op: "move", from: "/list/0/child/1", path: "/list/0" }] },
+    { name: "move inserts at a root array element ancestor", initial: [{ child: 1 }, "sibling"], operations: [{ op: "move", from: "/0/child", path: "/0" }] },
   ])("undo $name without replacing the document", ({ initial, operations }) => {
     const document = createJSONDocument(initial);
     const session = createEditingSession({ document, selection: null });
