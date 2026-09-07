@@ -26,3 +26,18 @@ export function isWebEditableTarget(target: object | null): boolean {
     || (target instanceof HTMLElement && target.isContentEditable)
     || target.closest('[contenteditable]:not([contenteditable="false"])') !== null;
 }
+
+/** Whether a DOM target belongs to this host rather than a nested editing boundary. */
+export function isWebEditingHostTarget(root: object, target: object | null): boolean {
+  const view = (root as HTMLElement).ownerDocument?.defaultView;
+  if (!view || !(root instanceof view.HTMLElement) || !(target instanceof view.Node) || !root.contains(target)) return false;
+  let element = target instanceof view.Element ? target : target.parentElement;
+  while (element !== null && element !== root) {
+    if (["input", "textarea", "select", "option"].includes(element.localName)) return false;
+    const editable = (element.getAttribute("contenteditable")
+      ?? ("contentEditable" in element ? String(element.contentEditable) : "inherit")).toLowerCase();
+    if (["", "true", "plaintext-only", "false"].includes(editable)) return false;
+    element = element.parentElement;
+  }
+  return element === root;
+}

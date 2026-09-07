@@ -1,7 +1,9 @@
 import { ClipboardAdapterLab } from "./ClipboardAdapterLab";
 import { CatalogDemoPage } from "../../../shared/ui/catalog-demo-page";
 
-const connectionCode = `const clipboardSurface = createWebClipboardSurface({
+const connectionCode = `import { createWebClipboardSurface, documentClipboardCodec, isWebEditingHostTarget } from "@interactive-os/json-document-web";
+
+const clipboardSurface = createWebClipboardSurface({
   codec: documentClipboardCodec,
   read: () => editor.copy(),
   paste: (payload) => editor.dispatch({
@@ -11,7 +13,17 @@ const connectionCode = `const clipboardSurface = createWebClipboardSurface({
   onResult: (result) => setAnnouncement(messageFor(result)),
 });
 
-return <section {...clipboardSurface} />;`;
+return <section
+  onCopy={(event) => {
+    if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onCopy(event);
+  }}
+  onCut={(event) => {
+    if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onCut(event);
+  }}
+  onPaste={(event) => {
+    if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onPaste(event);
+  }}
+/>;`;
 
 export function ClipboardAdapterDemoRoute() {
   return (

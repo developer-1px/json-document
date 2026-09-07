@@ -54,6 +54,12 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("exposes the canonical editing-host predicate in clipboard Usage", async () => {
+    const sources = await discoverDemoSources("routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx");
+    const input = sources.find((file) => file.path === "packages/json-document-web/src/input.ts");
+    expect(input).toBeDefined();
+    expect(await input!.load()).toContain("export function isWebEditingHostTarget");
+  });
   test("registers Editing observation and move rendering owners through public Rich Text usage", async () => {
     const sources = await discoverDemoSources("routes/rich-text-demo/RichTextDemoRoute.tsx");
     const session = sources.find((file) => file.path === "packages/json-document-editing/src/session.ts");

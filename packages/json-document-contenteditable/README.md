@@ -21,3 +21,8 @@ immediately and cannot replace the leased root. Release renders the latest
 string at the bound pointer.
 
 Removing this package does not change canonical JSON or Editing semantics.
+
+Composition-tail input and timer completion both publish the latest model,
+including changes received just after compositionend. They never author a
+second composition commit. Native nested controls retain their own input.
+This Draft revision requires the Web peer's `isWebEditingHostTarget` capability.

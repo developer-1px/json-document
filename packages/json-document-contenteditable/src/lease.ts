@@ -1,4 +1,5 @@
 import { plainTextDOMAdapter } from "./dom/plain-text.js";
+import { isWebEditingHostTarget } from "@interactive-os/json-document-web";
 import type {
   ContentEditableBinding,
   ContentEditableBindingOptions,
@@ -74,6 +75,11 @@ export function createContentEditableBinding({
     if (trailingTimer !== null) clearTimeout(trailingTimer);
     trailingTimer = null;
     trailingComposition = false;
+  };
+
+  const finishTrailing = (): void => {
+    clearTrailing();
+    renderLatest(undefined, true);
   };
 
   const clearActiveLease = (): void => {
@@ -169,14 +175,14 @@ export function createContentEditableBinding({
     if (event.type === "beforeinput") {
       if (trailingComposition) {
         if (isCompositionInput(event)) return NO_CHANGE;
-        clearTrailing();
+        finishTrailing();
       }
       if (activeLease !== null) return NO_CHANGE;
       return begin("native", event);
     }
 
     if (event.type === "compositionstart") {
-      if (trailingComposition) clearTrailing();
+      if (trailingComposition) finishTrailing();
       return begin("composing", event);
     }
 
@@ -185,16 +191,13 @@ export function createContentEditableBinding({
       activeLease.phase = "composing";
       const result = commitObservation();
       trailingComposition = true;
-      trailingTimer = setTimeout(() => {
-        trailingTimer = null;
-        trailingComposition = false;
-      }, 0);
+      trailingTimer = setTimeout(finishTrailing, 0);
       return result;
     }
 
     if (event.type === "input") {
       if (trailingComposition) {
-        clearTrailing();
+        finishTrailing();
         return NO_CHANGE;
       }
       if (activeLease?.phase === "composing") return NO_CHANGE;
@@ -210,7 +213,7 @@ export function createContentEditableBinding({
   };
 
   const boundHandle = (event: Event): void => {
-    if (!eventBelongsToRoot(event, root)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     handleInternal(event);
   };
 
@@ -259,50 +262,6 @@ export function createContentEditableBinding({
       renderLatest(undefined, true);
     },
   });
-}
-
-function eventBelongsToRoot(event: Event, root: HTMLElement): boolean {
-  const target = event.target;
-  const view = root.ownerDocument.defaultView;
-  if (view === null || !(target instanceof view.Node)) return false;
-  if (target === root) return true;
-  if (!root.contains(target)) return false;
-
-  let element = target instanceof view.Element
-    ? target
-    : target.parentElement;
-  while (element !== null && element !== root) {
-    const tag = element.tagName.toLowerCase();
-    if (
-      tag === "input"
-      || tag === "textarea"
-      || tag === "select"
-      || tag === "option"
-    ) {
-      return false;
-    }
-    const editable = element.getAttribute("contenteditable");
-    const editableProperty = "contentEditable" in element
-      && typeof element.contentEditable === "string"
-      ? element.contentEditable.toLowerCase()
-      : "";
-    if (
-      (editable !== null || editableProperty !== "")
-      && (
-        editable === ""
-        || editable?.toLowerCase() === "true"
-        || editable?.toLowerCase() === "plaintext-only"
-        || editable?.toLowerCase() === "false"
-        || editableProperty === "true"
-        || editableProperty === "plaintext-only"
-        || editableProperty === "false"
-      )
-    ) {
-      return false;
-    }
-    element = element.parentElement;
-  }
-  return true;
 }
 
 function isCompositionInput(event: Event): boolean {

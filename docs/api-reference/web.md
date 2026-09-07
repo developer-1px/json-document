@@ -163,6 +163,11 @@ gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): G
 ```ts
 isWebEditableTarget(target: object | null): boolean
 ```
+## `isWebEditingHostTarget`
+
+```ts
+isWebEditingHostTarget(root: object, target: object | null): boolean
+```
 ## `kanbanCardDropTargetFromWebElement`
 
 ```ts

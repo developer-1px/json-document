@@ -18,6 +18,7 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "references": [
+    { "path": "../json-document-web" },
     { "path": "../json-document" },
     { "path": "../json-document-collaboration" },
     { "path": "../json-document-contenteditable" }

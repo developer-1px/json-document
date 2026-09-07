@@ -29,6 +29,17 @@ the final native DOM diff into the canonical document, the surface resumes from
 the committed snapshot. This prevents React renders from terminating Korean
 jamo composition or duplicating the final `insertText` event.
 
+The render lease belongs to each mounted surface, not to the shared editor.
+Other surfaces continue observing the model while one surface composes. Release
+catches up every intervening model change and restores the affected block's DOM
+and selection even after cancellation or rejected input. Ordinary typing keeps
+the incremental render path.
+
+Changes to `onAction` or `createId` use the latest callbacks without restarting
+the binding. An editor change, `as` root replacement, or unmount ends the old
+binding and its active composition. Hosts need not memoize callbacks to protect
+native input.
+
 The official editable surface enforces `white-space: pre-wrap` so consecutive
 U+0020 spaces remain visible and caret geometry stays aligned with canonical
 UTF-16 offsets. Other host-provided inline styles are preserved.
