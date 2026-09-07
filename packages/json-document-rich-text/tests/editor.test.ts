@@ -58,30 +58,6 @@ describe("Official Rich Text editor", () => {
     expect((document.value as RichTextDocument).content.at(-1)).toMatchObject({ type: "paragraph", content: [] });
     expect(editor.snapshot.selection.ranges[0]?.anchor).toMatchObject({ kind: "child", offset: 0 });
   });
-  it("commits text through EditingSession and restores value with selection", () => {
-    const document = createJSONDocument(initial);
-    const selection = collapsed("text-2", 4);
-    const editor = createRichTextEditor({ document, selection });
-
-    const edited = editor.dispatch({ type: "text.insert", text: " works" });
-    expect(edited.ok).toBe(true);
-    expect((document.value as RichTextDocument).content[1]).toMatchObject({
-      content: [{ text: "Text works" }],
-    });
-    expect(editor.snapshot.selection.ranges[0]?.focus).toMatchObject({ nodeId: "text-2", offset: 10 });
-    expect(editor.snapshot.canUndo).toBe(true);
-
-    expect(editor.undo().ok).toBe(true);
-    expect((document.value as RichTextDocument).content[1]).toMatchObject({
-      content: [{ text: "Text" }],
-    });
-    expect(editor.snapshot.selection).toEqual(selection);
-
-    expect(editor.redo().ok).toBe(true);
-    expect((document.value as RichTextDocument).content[1]).toMatchObject({
-      content: [{ text: "Text works" }],
-    });
-  });
 
   it("uses logical topology instead of a rendered DOM order", () => {
     const editor = createRichTextEditor({

@@ -33,6 +33,7 @@ import virtualSelectionReactSource from "../../../../packages/json-document-reac
 import anchoredFloatingPositionReactSource from "../../../../packages/json-document-react/src/use-anchored-floating-position.ts?raw";
 import documentTextControlSource from "../../../../packages/json-document-react/src/use-document-text-control.ts?raw";
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
+import sheetEditingSource from "../../../../packages/json-document-editing/src/sheet.ts?raw";
 import editingClipboardSource from "../../../../packages/json-document-editing/src/clipboard.ts?raw";
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
 import editingIdentitySource from "../../../../packages/json-document-editing/src/identity.ts?raw";
@@ -207,6 +208,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-react/src/use-anchored-floating-position.ts", anchoredFloatingPositionReactSource],
   ["packages/json-document-react/src/use-document-text-control.ts", documentTextControlSource],
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
+  ["packages/json-document-editing/src/sheet.ts", sheetEditingSource],
   ["packages/json-document-editing/src/clipboard.ts", editingClipboardSource],
   ["packages/json-document-editing/src/session.ts", editingSessionSource],
   ["packages/json-document-editing/src/identity.ts", editingIdentitySource],
@@ -1018,6 +1020,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "documentSelectionFocus",
     sourcePath: "packages/json-document-editing/src/document.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createSheetEditor",
+    sourcePath: "packages/json-document-editing/src/sheet.ts",
   },
   {
     packageName: "@interactive-os/json-document-react",

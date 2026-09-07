@@ -137,6 +137,11 @@ reconciliation까지의 DOM 편집 정본은 `standards/dom-editing-lifecycle.md
 identifier나 동작을 바꾸지 않으며, 과거 version 문서는 정본 public surface의
 Root symbol·six-member 계약을 확장하지 않습니다.
 
+편집 문법의 안정화 설계는 `standards/editing-grammar.md`에 있습니다. 공통 편집
+규칙, Hands profile의 선택, 입력 매핑의 소유자와 적합성 증거를 연결하는 Design
+Draft이며 기존 Stable profile의 권위를 변경하지 않습니다. API reference와 Usage는
+각 owner에 유지하고, 설계 문서를 별도의 API catalog로 사용하지 않습니다.
+
 문서 원천, Pages 산출물, live 응답의 공개 계약 검사는
 `public-contract-checks.mjs`가 소유합니다. Root symbol 수는 Core의
 `public-contract.json`, 유효한 package 참조는 `api-reference/packages.mjs`에서

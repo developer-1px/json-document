@@ -32,7 +32,7 @@ function filesUnder(path) {
     .flatMap((entry) => {
       if (
         entry.isDirectory()
-        && [".git", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
+        && [".git", ".worktrees", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
       ) {
         return [];
       }
@@ -220,10 +220,11 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
 
 if (JSON.stringify(fileNames("standards")) !== JSON.stringify([
   "dom-editing-lifecycle.md",
+  "editing-grammar.md",
   "repository-implementation-shape.md",
   "repository-naming.md",
 ])) {
-  fail("standards: repository naming and implementation shape must be the only repository-wide standard files.");
+  fail("standards: only repository naming, implementation shape, DOM editing lifecycle, and the editing grammar design may appear at the root.");
 }
 
 for (const token of [

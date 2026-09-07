@@ -159,14 +159,16 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
-  test("registers React and Web Grid owner sources next to Sheet usage", async () => {
-    expect((await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx")).map((file) => file.path)).toEqual([
+  test("registers the Sheet editor, React and Web Grid owners next to Sheet usage", async () => {
+    const sources = await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx");
+    expect(sources.map((file) => file.path)).toEqual([
       "routes/sheet-demo/SheetDemo.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
@@ -175,6 +177,9 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-web/src/pointer-session.ts",
       "packages/json-document-affordance/src/interaction-handle.ts",
     ]);
+    const owner = sources.find((file) => file.path === "packages/json-document-editing/src/sheet.ts")!;
+    expect(owner.referencePath).toBe("/docs/api/editing");
+    expect(await owner.load()).toContain("export function createSheetEditor");
   });
 
   test("registers the Composer lifecycle owner and its canonical domain closure next to Usage", async () => {

@@ -73,3 +73,28 @@ clone and reuses unchanged subtree identity. Mutating borrowed input after the
 call is outside the contract; use the default for external payloads.
 
 The public surface is not frozen while RFC #363 remains Draft.
+
+## Editing grammar evidence (Draft)
+
+The [inline-slice binding](tests/conformance/editing-grammar.test.ts) runs Editing's
+shared grammar suite through `createRichTextEditor`, `dispatch`, `copy`, `cut`,
+`undo`, `redo`, and `subscribe`. It preserves the existing
+[Rich Text v1 corpus](../../standards/json-document-rich-text-v1) and
+[conformance tests](tests/conformance.test.ts).
+
+| Profile decision | Rich Text v1 binding |
+| --- | --- |
+| Target and identity | Stable node IDs with text/child points and affinity |
+| Selection and topology | Logical document order; multiple directional ranges and a primary index; Copy projects structured slices rather than rendered DOM |
+| Supported operations | Selection, text/node/block/mark transforms, Copy/Cut/Paste, Undo/Redo through the existing typed intents |
+| Paste and resulting selection | Replace selected content with a schema-compatible slice; allocate fresh inserted/split IDs, preserve surviving IDs, and publish the mapped post-insert point |
+| Failure | Reject incompatible clipboard profiles and invalid schema/duplicate identities before committing |
+| History | Local inverse history by default; `historyGroup` explicitly groups typing; external changes clear local history; injected history owns its own steps |
+| Input | Rich Text Web owns DOM selection and native editing arbitration; composition follows the separate DOM editing lifecycle contract |
+
+The fixture checks `Alpha` with offsets 1–3: Copy reads `lp`, Cut leaves `Aha`,
+and pasting `Z` leaves `AZha` with a caret after `Z`. It also checks the exact
+surviving and injected IDs across document, selection, Undo, and Redo. This is
+one inline profile path, not coverage of every structural slice or browser.
+See the [editing grammar design](../../standards/editing-grammar.md) for the
+common rules and the limits of this evidence.
