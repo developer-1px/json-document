@@ -1,4 +1,5 @@
 import type { CodeLanguage } from "../ui/code-tokens";
+import pointerTrackingSource from "../../../../packages/json-document/src/foundation/patch/track.ts?raw";
 import editingObservationSource from "../../../../packages/json-document-react/src/editing-observation.ts?raw";
 import calendarEditingSource from "../../../../packages/json-document-editing/src/calendar.ts?raw";
 import calendarAllDayPointerSource from "../../../../packages/json-document-editing/src/calendar-allday-pointer.ts?raw";
@@ -162,6 +163,7 @@ const excludedSources = new Set([
   "routes/widgets/WidgetDemoFrame.tsx",
 ]);
 const registeredUsageSources = new Map<string, string>([
+  ["packages/json-document/src/foundation/patch/track.ts", pointerTrackingSource],
   ["packages/json-document-editing/src/calendar.ts", calendarEditingSource],
   ["packages/json-document-editing/src/calendar-allday-pointer.ts", calendarAllDayPointerSource],
   ["packages/json-document-editing/src/calendar-month-pointer.ts", calendarMonthPointerSource],
@@ -612,6 +614,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document",
     symbol: "createJSONDocument",
     sourcePath: "packages/json-document/src/application/document/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document",
+    symbol: "trackPointer",
+    sourcePath: "packages/json-document/src/foundation/patch/track.ts",
   },
   {
     packageName: "@interactive-os/json-document-selection",

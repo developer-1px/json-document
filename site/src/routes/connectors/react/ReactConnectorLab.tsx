@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Plus, Redo2, Undo2 } from "lucide-react";
-import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
+import { createJSONDocument, trackPointer, type JSONValue } from "@interactive-os/json-document";
 import { documentSelectionFocus, type BlockDocument } from "@interactive-os/json-document-editing";
 import {
   DocumentTextControl,
@@ -28,7 +28,33 @@ export function ReactConnectorLab() {
       <JSONDocumentSubscriptionLab />
       <EditingSnapshotLab />
       <UseEditingLab />
+      <PointerTrackingLab />
     </div>
+  );
+}
+
+function PointerTrackingLab() {
+  const [shape, setShape] = useState<"array" | "object">("array");
+  const before = shape === "array" ? { items: ["a", "b"] } : { items: { "0": "a", "1": "b" } };
+  const document = createJSONDocument(before);
+  const committed = document.commit([{ op: "add", path: "/items/0", value: "A" }]);
+  const tracked = committed.ok ? trackPointer("/items/1", committed.change.applied, before) : null;
+
+  return (
+    <section aria-label="Context-aware pointer tracking" className="lg:col-span-2">
+      <h2 className={ui.text.heading}>Track a position through a patch</h2>
+      <p className={ui.text.meta}>The previous snapshot distinguishes array insertion from numeric object-key replacement.</p>
+      <div className="flex gap-2">
+        <Command onClick={() => setShape("array")}>Array insertion</Command>
+        <Command onClick={() => setShape("object")}>Numeric object key</Command>
+      </div>
+      <p className={ui.text.meta}>Tracked address: <output data-testid="tracked-pointer">{tracked ?? "removed"}</output></p>
+      <Inspector label="Inspect pointer tracking" items={[
+        { label: "Before", testId: "pointer-before-json", value: before },
+        { label: "After", testId: "pointer-after-json", value: document.value },
+        { label: "Applied", testId: "pointer-applied-json", value: committed.ok ? committed.change.applied : [] },
+      ]} />
+    </section>
   );
 }
 

@@ -106,13 +106,13 @@ Initial value와 patch payload, metadata, exposed document value/change는 docum
 
 ## 공개 root
 
-Root는 21개 public symbol만 공개합니다.
+Root는 23개 public symbol만 공개합니다.
 
 ```txt
 values
   applyPatch, createJSONDocument
   appendSegment, buildPointer, parentPointer, parsePointer
-  trackPointer, tryParsePointer
+  jsonEqual, parseArrayIndex, trackPointer, tryParsePointer
 
 types
   JSONValue, Pointer, JSONPatchOperation

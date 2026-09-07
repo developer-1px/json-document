@@ -86,7 +86,7 @@ JSON이 아니거나 validation에 거부되면 TypeScript reference binding은
 | JD3-HOST-001 | rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem, network, formula engine, CRDT와 OT는 host 또는 extension이 소유해야 하며 Core JSON Document의 필수 data나 member가 되어서는 안 된다. |
 | JD3-CONFORMANCE-001 | conformance는 public factory 또는 injected harness만 사용하는 machine-readable black-box vector로 성공, 실패, atomicity, immutability, probe/commit parity, change notification을 검증해야 한다. private source path, provider object, 특정 dist layout을 요구하면 안 된다. |
 | JD3-CONFORMANCE-002 | 이 profile을 stable이라고 선언하려면 같은 suite가 reference implementation과 최소 한 개의 독립 구현을 통과하고 form, table/data-grid, outliner/tree, rich text, storage/collaboration의 다섯 pressure vertical에서 같은 제약이 확인되어야 한다. |
-| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 21개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
+| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 23개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
 
 ## Result 초안
 
@@ -171,7 +171,7 @@ conformance corpus의 public-root binding을 서로 분리한다.
 | `standards/json-document-v3/conformance/vectors/pressure.json` | form, table/data-grid, outliner/tree, rich text, storage/collaboration 시나리오 |
 | `standards/json-document-v3/conformance/suites/pressure.ts` | 여섯 member만으로 다섯 vertical을 실행하는 injected runner |
 | `standards/json-document-v3/implementations/independent/json-document.ts` | reference runtime을 import하지 않는 독립 6-member test implementation |
-| `standards/json-document-v3/implementations/independent/conformance.test.ts` | 독립 구현에 JSON Document과 pressure suite를 함께 주입하는 binding |
+| `standards/json-document-v3/implementations/independent/conformance.test.ts` | 독립 구현에 JSON Document, pressure, protocol, RFC 6902, RFC 9535 전체 suite를 주입하는 binding |
 | `packages/json-document-collaboration/tests/conformance/json-document.test.ts` | collaboration public root에 같은 두 suite를 주입하는 추가 binding |
 
 suite가 export하는 structural type은 test harness 내부 계약이며 package public
@@ -186,6 +186,13 @@ schema-free `applyPatch`와 validation transform identity는 reference와 독립
 reference와 독립 구현을 모두 통과하며, collaboration public binding도 같은
 다섯 vertical을 통과한다. collaboration 구현은 Core protocol을 조합하므로
 독립 구현 수에는 포함하지 않는다.
+
+독립 구현은 reference parser/evaluator를 재사용하지 않는다. JSONPath는 test-only
+`jsonpath-js@0.3.1`의 public parser/evaluator와 독립적인 RFC 9535 §2.4 함수
+타입 검사로 구성한다. document가 비어 있어도 잘못된 함수 식을 거절해야 한다.
+전체 703개 CTS와 RFC 6902 실행 대상 110개를 reference와 독립 구현 모두에
+적용한다. 이는 저장소 내부의 두 구현에 대한 적합성 증거이며, 외부 팀의
+독립 채택·상호운용 실험이 이루어졌다는 주장은 아니다.
 
 ## Durability primitive boundary
 
@@ -205,13 +212,13 @@ array-property 분류만 공통 leaf에 두고, parity test가 untrusted boundar
 
 ## Package binding
 
-`@interactive-os/json-document`는 root entrypoint 하나와 21개 symbol을
+`@interactive-os/json-document`는 root entrypoint 하나와 23개 symbol을
 공개한다. `JSONDocument`의 canonical member는 여섯 개다.
 
 ```txt
-values  8
+values  10
 types  13
-total  21
+total  23
 ```
 
 패키지는 runtime dependency와 peer dependency가 없다. 제거된 `/session`과

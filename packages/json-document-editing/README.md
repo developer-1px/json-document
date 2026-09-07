@@ -1,5 +1,11 @@
 # @interactive-os/json-document-editing
 
+`EditingSession` observes snapshots by JSON value, not reference identity.
+Fresh-copy JSONDocument implementations retain local history until an actual
+external value change. Undo reverses each operation against its sequential
+pre-state, including object `add` replacement and array index shifts. A
+`historyGroup` composes all grouped inverse operations, including different paths.
+
 Headless editing transactions, selection publication, clipboard coordination,
 and history for `@interactive-os/json-document`. Structural selection state and
 semantic interaction contracts come from `@interactive-os/json-document-selection`.

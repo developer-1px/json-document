@@ -117,9 +117,23 @@ function asPointer(path: string): Pointer | null {
 `null`을 돌려줍니다. `appendSegment`는 Pointer에 segment를 하나 추가하고,
 `parentPointer`는 부모 위치를 돌려줍니다.
 
-`trackPointer(pointer, operations)`는 patch가 적용된 뒤 같은 값이 이동한
-위치를 계산합니다. 값이 제거됐거나 더 이상 한 위치로 추적되지 않으면
-`null`입니다.
+`trackPointer(pointer, change.applied, before)`는 commit 직전 snapshot을 문맥으로
+사용하여 patch 이후 위치를 계산합니다. 각 operation의 중간 상태에서 객체 key와
+배열 index를 구별합니다. 값이 제거되거나 상위 값의 교체로 위치를 잃으면 `null`입니다.
+같은 위치의 `replace`는 유지되며 교체된 값의 자손은 해제됩니다.
+
+```ts
+import { createJSONDocument, trackPointer } from "@interactive-os/json-document";
+
+const document = createJSONDocument({ items: { "0": "a", "1": "b" } });
+const before = document.value;
+const result = document.commit([{ op: "add", path: "/items/0", value: "A" }]);
+if (result.ok) trackPointer("/items/1", result.change.applied, before); // /items/1
+```
+
+기존 두 인자 호출도 호환됩니다. 다만 문맥이 없으면 숫자 segment를 배열 index로
+간주하는 이전 동작이 유지되므로, 숫자 객체 key를 포함할 수 있는 일반 JSON에는
+세 인자 호출을 사용합니다. `operations`에는 commit이 돌려준 concrete `change.applied`를 전달합니다.
 
 JSON Pointer의 array segment를 index로 해석해야 하는 adapter는 정본
 `parseArrayIndex`를 사용합니다. 선행 0, 음수, 안전하지 않은 정수는
@@ -284,13 +298,13 @@ type Failure = {
 
 ## 공개 export
 
-Package root는 다음 21개 symbol을 공개합니다.
+Package root는 다음 23개 symbol을 공개합니다.
 
 ```txt
 values
   applyPatch, createJSONDocument
   appendSegment, buildPointer, parentPointer, parsePointer
-  trackPointer, tryParsePointer
+  jsonEqual, parseArrayIndex, trackPointer, tryParsePointer
 
 types
   JSONValue, Pointer, JSONPatchOperation

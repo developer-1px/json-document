@@ -73,6 +73,7 @@
     "site:evaluate:live": "node site/scripts/evaluate-live.mjs"
   },
   "devDependencies": {
+    "jsonpath-js": "0.3.1",
     "@playwright/test": "^1.60.0"
   },
   "optionalDependencies": {
