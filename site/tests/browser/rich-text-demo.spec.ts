@@ -29,6 +29,8 @@ test("Rich Text Lab consumes replacement DataTransfer and target ranges", async 
     const transfer = new DataTransfer();
     transfer.setData("text/plain", "X");
     const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "insertReplacementText", dataTransfer: transfer });
+    // WebKit omits dataTransfer from constructed InputEvents; supply the synthetic payload explicitly.
+    Object.defineProperty(event, "dataTransfer", { value: transfer });
     Object.defineProperty(event, "getTargetRanges", { value: () => [new StaticRange({ startContainer: node, startOffset: 0, endContainer: node, endOffset: 1 })] });
     root.dispatchEvent(event);
     return event.defaultPrevented;
