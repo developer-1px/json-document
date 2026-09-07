@@ -158,6 +158,7 @@ native range의 방향을 투영하고, [Web virtual selection scope](../package
 | 선택은 언제나 Undo 대상이 아님 | [GIMP Undoing](https://docs.gimp.org/3.0/en/gimp-concepts-undo.html)은 Scissors Select 작업과 Quick Mask 전환의 Undo를 설명 | 현재 일시적 Selection의 EG-SELECT·EG-HISTORY를 유지. Raster 선택 제작의 History 정책으로 일반화하지 않음 |
 | 이동은 항상 Copy 후 즉시 제거한 뒤 Paste | [Finder 이동](https://support.apple.com/en-gb/102650)은 Clipboard의 파일을 목적지에 옮기는 동작을 제공 | EG-CUT은 현재 즉시 제거하는 cut 계약. 지연 이동은 같은 계약의 이름만 다른 구현이 아님 |
 | 복사한 저장 값을 그대로 넣으면 의미도 보존 | [Excel 수식 이동·복사](https://support.microsoft.com/en-us/excel/move-or-copy-a-formula-in-excel)는 복사 시 상대 참조 변경, 수식 이동 시 참조 유지를 구별 | payload의 참조·identity·배치 변환은 profile 계약. JSON 모양이나 text 일치만으로 교환 호환성을 판정하지 않음 |
+| Shift-click 확장은 항상 같은 anchor를 고정 | Apple HIG 1992 인쇄 쪽수 290–291은 addition과 fixed-point 두 방식을 설명 | 현재 EG-SELECT의 고정 anchor 전이를 유지. 다른 입력 관습을 같은 전이로 일반화하지 않음 |
 | Selection은 항상 문자열의 시작과 끝 | 레포의 Sheet rectangle, Calendar materialized occurrences와 Selection mask 확장 | 대상별 family를 유지. mask algebra의 존재는 raster Hand 완성의 증거가 아님 |
 | 입력이 끝나면 Undo 한 step | 여러 preview와 typing/composition grouping, GIMP의 선택 도구 작업 | 작업의 확정·취소와 History grouping을 따로 명시 |
 
@@ -185,9 +186,9 @@ clipboard 자체의 변경도 별개의 효과다. 원자적 문서 편집은 �
                 │ 조합하고 함께 검증
                 v
            Hands profile
-                │ 여러 Hand와 외부 서비스를 조합
+                │ Host가 여러 Hand와 외부 서비스를 조합
                 v
-           Application / Host
+           Application
 ```
 
 대상별 계약과 입력 계약은 서로 다른 축이다. Sheet가 Rich Text를 상속하는 것이
@@ -256,8 +257,8 @@ layout·concrete external instance와 조합을 소유한다.
 
 이 표의 적용 범위는 현재 구조·텍스트 편집 profile의 계약이다. EG-SELECT의
 일시적 선택과 문서 History 분리, EG-CUT의 즉시 제거를 다른 장르의 모든 관습으로
-일반화하지 않는다. 범위 확장의 anchor 규칙은 anchor를 가진 range family에
-적용한다. 다른 family나 raster·지연 이동 profile을 동결하려면 해당 상태와
+일반화하지 않는다. 범위 확장의 anchor 규칙은 고정 anchor로 확장하는 현재
+range 전이에 적용한다. 다른 family나 raster·지연 이동 profile을 동결하려면 해당 상태와
 History·transfer 의미를 먼저 명시해야 하며, 기존 profile의 규칙을 느슨하게
 바꾸어 같은 profile이라고 부르지 않는다.
 
