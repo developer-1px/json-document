@@ -167,10 +167,10 @@ export function createWebClipboardBinding<
       if (options.cut === undefined) return failure("clipboard.unsupported");
       const written = write(event);
       if (!written.ok) return written;
+      event.preventDefault();
       const result = options.cut(written.payload);
       if (result === null) return failure("editing.rejected", "clipboard.empty");
       if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);
-      event.preventDefault();
       return { ok: true, operation: "cut", payload: written.payload, result };
     },
     paste(event) {
@@ -196,9 +196,9 @@ export function createWebClipboardBinding<
       }
       if (!matched) return failure("clipboard.empty");
       if (payload === null) return failure("clipboard.invalid", invalidReason);
+      event.preventDefault();
       const result = options.paste(payload);
       if (!result.ok) return failure("editing.rejected", result.reason ?? result.code);
-      event.preventDefault();
       return { ok: true, operation: "paste", payload, result };
     },
   };

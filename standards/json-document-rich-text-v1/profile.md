@@ -559,7 +559,9 @@ History boundary:
 - explicit selection transition은 active typing group을 닫는다.
 
 현재 `EditingSession`은 외부 document change에서 local history를 비우고 selection
-mapping input을 받지 않는다. Rich Text implementation 전에 shared Editing에
+mapping input을 받지 않는다. 선택적 `reconcileSelection(selection, value)` callback은
+현재 값에 맞는 선택 유효성 보정만 제공하며 의미 기반 mapping을 대신하지 않는다.
+Rich Text implementation 전에 shared Editing에
 external applied change와 `RangeSelectionMapping`을 받는 rebase contract를 추가해야
 한다. 이 gap을 Rich Text package의 private history로 우회하면 안 된다.
 

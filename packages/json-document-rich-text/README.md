@@ -33,6 +33,26 @@ editor.dispatch({ type: "text.insert", text: "hello" });
 Use `tryCreateRichTextEditor` when unavailable profiles must be reported as a
 stable failure result rather than thrown at an application boundary.
 
+All bound pointers use Core JSON Pointer parsing, including escaped subtree
+names. Structural intents validate parent cardinality, descendant schema and ID
+uniqueness before committing; removing the last required root block is rejected.
+`node.move` retains member identity using JSON Patch `move`. Public `apply`
+validates the resulting bound Rich Text document while still allowing adjacent
+JSON fields, such as Composer attachments, in the same local history.
+
+`appliedOperationsFor(value)` exposes recorded operation paths, including the
+source `from` for a move, so consumers such as the React render store can track
+structural changes on both sides. It returns `null` when no record is available;
+consumers must then read the current document instead of assuming no change.
+
+External changes reconcile selection against the current topology (clamping
+surviving points and dropping missing points) before snapshot delivery. This
+requires Editing's `reconcileSelection` option from the same draft revision;
+it is not semantic position mapping or selective collaborative undo. Local
+undo/redo is cleared on external changes. No permanent document subscription is
+created: the last observer's unsubscribe releases the connection, and unobserved
+reads catch up lazily. The React render store follows the same lifetime.
+
 `normalizeRichText` detaches external input by default. When the caller owns an
 immutable canonical value, `{ inputOwnership: "borrowed" }` skips that full
 clone and reuses unchanged subtree identity. Mutating borrowed input after the

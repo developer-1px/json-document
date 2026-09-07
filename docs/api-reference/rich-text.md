@@ -9,7 +9,7 @@ Rich Text domain과 editing 계약의 public entrypoint입니다. 아래 항목�
 ## `appliedOperationsFor`
 
 ```ts
-appliedOperationsFor(value: object): ReadonlyArray<{ readonly op: string; readonly path: string; }> | null
+appliedOperationsFor(value: object): ReadonlyArray<{ readonly op: string; readonly path: string; readonly from?: string; }> | null
 ```
 ## `createRichTextBlockFixture`
 

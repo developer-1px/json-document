@@ -6,6 +6,23 @@ external value change. Undo reverses each operation against its sequential
 pre-state, including object `add` replacement and array index shifts. A
 `historyGroup` composes all grouped inverse operations, including different paths.
 
+Snapshots and their selections are immutable owned values. Subscriber failures
+do not reject completed edits; reentrant notifications are delivered in revision
+order. A returned result describes its own transition, even if a subscriber has
+already performed another transition.
+
+Domains can provide `reconcileSelection(selection, value)` to
+`createEditingSession`. This pure callback runs once for an actual external
+value change, before the new snapshot is observed or delivered. It repairs
+selection validity; it is not an applied-change mapping or collaborative history
+rebase. External changes still clear local undo/redo. Without the callback,
+selection is preserved as before.
+
+The session subscribes to its document only while it has observers. The last
+unsubscribe releases that connection; later reads catch up with external state.
+`DocumentEditor` moves existing blocks with JSON Patch `move`, preserving their
+member identity when composed with a collaboration document.
+
 Headless editing transactions, selection publication, clipboard coordination,
 and history for `@interactive-os/json-document`. Structural selection state and
 semantic interaction contracts come from `@interactive-os/json-document-selection`.

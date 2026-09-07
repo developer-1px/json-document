@@ -54,6 +54,19 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("registers Editing observation and move rendering owners through public Rich Text usage", async () => {
+    const sources = await discoverDemoSources("routes/rich-text-demo/RichTextDemoRoute.tsx");
+    const session = sources.find((file) => file.path === "packages/json-document-editing/src/session.ts");
+    expect(session).toBeDefined();
+    expect(await session!.load()).toContain("reconcileSelection");
+    const renderStore = sources.find((file) => file.path === "packages/json-document-rich-text-react/src/render-store.ts");
+    expect(renderStore).toBeDefined();
+    expect(await renderStore!.load()).toContain("appliedOperationsFor");
+    const appliedChange = sources.find((file) => file.path === "packages/json-document-rich-text/src/applied-change.ts");
+    expect(appliedChange).toBeDefined();
+    expect(await appliedChange!.load()).toContain("readonly from?: string");
+  });
+
   test("keeps source metadata separate from the route component split point", () => {
     const route = defineDemo({ source: "routes/example/ExampleDemo.tsx" });
     expect(route.staticData.demo).toEqual({ source: "routes/example/ExampleDemo.tsx" });
