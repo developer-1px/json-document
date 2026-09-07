@@ -1,11 +1,11 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import type { A2uiStreamingDocument } from "@interactive-os/json-document-a2ui";
 import { afterEach, describe, expect, test } from "vitest";
 import {
   A2UI_BASIC_CATALOG_ID,
   A2UI_BASIC_COMPONENT_NAMES,
   A2uiSurface,
   validateBasicCatalogComponent,
-  type A2uiStreamingDocument,
 } from "../../src/app/a2ui-streaming-document";
 
 afterEach(cleanup);

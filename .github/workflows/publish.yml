@@ -5,6 +5,7 @@ on:
     tags:
       - "json-document-v*"
       - "json-document-ajv-v*"
+      - "json-document-a2ui-v*"
       - "json-document-zod-v*"
       - "json-document-react-hook-form-v*"
       - "json-document-react-v*"

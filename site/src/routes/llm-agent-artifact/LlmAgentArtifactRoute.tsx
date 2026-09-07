@@ -3,7 +3,8 @@ import { EventType, type AGUIEvent } from "@ag-ui/core";
 import { ArrowUp, Plus, Square } from "lucide-react";
 import { Command, Field } from "@interactive-os/json-document-ui-primitives-react";
 import { listLlmAgentSessions, readLlmAgentSession, streamLlmAgentTurn, type LlmAgentMessage, type LlmAgentSession } from "./llm-agent-api";
-import { A2UI_PROJECTION_ERROR_TEXT, A2uiSurface, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, type A2uiStreamingDocument, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
+import { createA2uiStreamingDocumentEngine, type A2uiStreamingDocument } from "@interactive-os/json-document-a2ui";
+import { A2UI_PROJECTION_ERROR_TEXT, A2uiSurface, a2uiCatalogPolicy, createAgUiA2uiAdapter, type AgUiA2uiAdapter } from "../../app/a2ui-streaming-document";
 import { MarkdownContent } from "../../shared/ui/markdown-content";
 import "./llm-agent-artifact.css";
 
@@ -12,7 +13,7 @@ const CHAT_SURFACE_ID = "chat";
 
 export function LlmAgentArtifactRoute() {
   const [input, setInput] = useState("");
-  const [engine] = useState(createA2uiStreamingDocumentEngine);
+  const [engine] = useState(() => createA2uiStreamingDocumentEngine(a2uiCatalogPolicy));
   const adapterRef = useRef<AgUiA2uiAdapter>(createAgUiA2uiAdapter(CHAT_SURFACE_ID));
   const [document, setDocument] = useState(() => engine.document.value as A2uiStreamingDocument);
   const [pending, setPending] = useState(false);

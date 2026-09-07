@@ -76,6 +76,8 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   reactApi: "connector",
   reactHookFormApi: "connector",
   ajvApi: "connector",
+  a2uiApi: "connector",
+  connectorA2ui: "connector",
   zodApi: "connector",
   tanStackTableApi: "connector",
   affordanceApi: "patch",

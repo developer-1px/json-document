@@ -1,4 +1,4 @@
-export * from "./a2ui-streaming-document";
+export * from "./catalog-policy";
 export * from "./basic-catalog";
 export * from "./a2ui-fence";
 export * from "./ag-ui-a2ui";

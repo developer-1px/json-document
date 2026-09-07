@@ -1,4 +1,4 @@
-import { A2uiMessageSchema, type A2uiMessage } from "@a2ui/web_core/v0_9";
+import { parseA2uiMessage, type A2uiMessage } from "@interactive-os/json-document-a2ui";
 
 export type A2uiFenceProjection = Readonly<{
   markdown: string;
@@ -23,7 +23,7 @@ export function projectA2uiFences(source: string, complete = false): A2uiFencePr
     if (!inside) { markdown.push(line); continue; }
     if (!value.trim() || (!hasNewline && !complete && index === lines.length - 1)) continue;
     try {
-      messages.push(A2uiMessageSchema.parse(JSON.parse(value)));
+      messages.push(parseA2uiMessage(JSON.parse(value)));
     } catch (cause) {
       errors.push(cause instanceof Error ? cause.message : "A2UI JSONL을 해석하지 못했습니다.");
     }
