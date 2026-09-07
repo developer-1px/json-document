@@ -58,9 +58,11 @@ export function createMaterializedRangeSelectionFamily<Point>(): SelectionFamily
       return selectionResult(state, next, "reconcile", (left, right) => equal(left, right, context.topology.equals));
     },
     map(state, mapping, context) {
+      let primaryIndex: number | null = null;
+      let mappedCount = 0;
       const mapped: MaterializedRangeSelection<Point> = {
         kind: "range",
-        ranges: state.ranges.flatMap((range) => {
+        ranges: state.ranges.flatMap((range, index) => {
           const anchor = mapping.mapPoint(range.anchor);
           const focus = mapping.mapPoint(range.focus);
           const points = range.points.flatMap((point) => {
@@ -68,10 +70,12 @@ export function createMaterializedRangeSelectionFamily<Point>(): SelectionFamily
             return mappedPoint === null ? [] : [mappedPoint];
           });
           if (anchor === null && focus === null && points.length === 0) return [];
+          if (index === state.primaryIndex) primaryIndex = mappedCount;
+          mappedCount += 1;
           const fallback = anchor ?? focus ?? points[0]!;
           return [{ anchor: anchor ?? fallback, focus: focus ?? fallback, points }];
         }),
-        primaryIndex: state.primaryIndex,
+        primaryIndex: primaryIndex ?? state.primaryIndex,
       };
       const next = normalizeMaterializedRangeSelection(mapped, context.topology);
       return selectionResult(state, next, "map", (left, right) => equal(left, right, context.topology.equals));

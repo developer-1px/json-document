@@ -571,7 +571,7 @@ createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: { r
 ## `createEditingSession`
 
 ```ts
-createEditingSession<Selection extends JSONValue>(options: { readonly document: JSONDocument; readonly selection: Selection; }): EditingSession<Selection>
+createEditingSession<Selection extends JSONValue>(options: { readonly document: JSONDocument; readonly selection: Selection; readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection; }): EditingSession<Selection>
 ```
 ## `createKanbanEditor`
 

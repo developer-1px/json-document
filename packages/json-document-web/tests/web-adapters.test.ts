@@ -396,7 +396,7 @@ describe("Web clipboard Adapter", () => {
     expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["a", "b"]);
   });
 
-  test("malformed and rejected pastes preserve canonical state and native handling", () => {
+  test("malformed pastes pass through but rejected supported pastes cancel native handling", () => {
     const editor = createDocumentEditor({ blocks: [{ id: "a", text: "Alpha" }] });
     const binding = createWebClipboardBinding({
       codec: documentClipboardCodec,
@@ -416,7 +416,7 @@ describe("Web clipboard Adapter", () => {
     expect(binding.copy(event(validData)).ok).toBe(true);
     const rejected = event(validData);
     expect(binding.paste(rejected)).toMatchObject({ ok: false, code: "editing.rejected" });
-    expect(rejected.defaultPrevented).toBe(false);
+    expect(rejected.defaultPrevented).toBe(true);
     expect(editor.snapshot.value).toBe(initial);
     expect(editor.snapshot.canUndo).toBe(false);
   });

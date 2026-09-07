@@ -9,6 +9,12 @@ ARIA projection, composite focus, and text input. It translates native `Clipboar
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
 
+Once a supported cut has written its payload or a paste has decoded a supported
+payload, the binding cancels the native event before calling the editor. A
+rejected edit remains `editing.rejected` and cannot fall through to a browser
+mutation. Unsupported or undecodable paste data keeps its existing pass-through
+behavior.
+
 `registerWebVirtualSelectionScope` coordinates native Select All and copy when a
 surface mounts only part of its model. It selects the mounted root with a real
 DOM Range, then writes the registered complete model text during the native

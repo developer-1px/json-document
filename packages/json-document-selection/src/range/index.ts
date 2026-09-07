@@ -68,15 +68,19 @@ export function createRangeSelectionFamily<Point, Target = Point>(): SelectionFa
       ));
     },
     map(state, mapping, context) {
+      let primaryIndex: number | null = null;
+      let mappedCount = 0;
       const mapped: RangeSelection<Point> = {
         kind: "range",
-        ranges: state.ranges.flatMap((range) => {
+        ranges: state.ranges.flatMap((range, index) => {
           const anchor = mapping.mapPoint(range.anchor);
           const focus = mapping.mapPoint(range.focus);
           if (anchor === null && focus === null) return [];
+          if (index === state.primaryIndex) primaryIndex = mappedCount;
+          mappedCount += 1;
           return [{ anchor: anchor ?? focus!, focus: focus ?? anchor! }];
         }),
-        primaryIndex: state.primaryIndex,
+        primaryIndex: primaryIndex ?? state.primaryIndex,
       };
       const next = normalizeRangeSelection(mapped, context.topology);
       return selectionResult(state, next, "map", (left, right) => (

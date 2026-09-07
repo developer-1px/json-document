@@ -1,4 +1,4 @@
-import { buildPointer, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document";
+import { buildPointer, parsePointer, type JSONPatchOperation, type Pointer } from "@interactive-os/json-document";
 import { hasRichTextContent, isRichTextText, type RichTextDocument, type RichTextNode } from "./model.js";
 import { detachedValue } from "./path.js";
 
@@ -8,7 +8,7 @@ export function diffRichText(
   rootPointer: Pointer = "",
 ): ReadonlyArray<JSONPatchOperation> {
   if (before === after) return [];
-  const operations = diffNode(before, after, parseSegments(rootPointer));
+  const operations = diffNode(before, after, parsePointer(rootPointer));
   return operations.length === 0 && before !== after
     ? [{ op: "replace", path: rootPointer, value: detachedValue(after) }]
     : operations;
@@ -80,12 +80,4 @@ function diffContent(
 
 function sameIds(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
   return left.length === right.length && left.every((id, index) => id === right[index]);
-}
-
-function parseSegments(pointer: Pointer): Array<string | number> {
-  if (pointer === "") return [];
-  return pointer.slice(1).split("/").map((segment) => {
-    const index = Number(segment);
-    return Number.isInteger(index) && String(index) === segment ? index : segment;
-  });
 }

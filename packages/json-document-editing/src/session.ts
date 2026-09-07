@@ -47,9 +47,11 @@ interface HistoryEntry<Selection extends JSONValue>
 export function createEditingSession<Selection extends JSONValue>(options: {
   readonly document: JSONDocument;
   readonly selection: Selection;
+  /** Reconcile domain selection when an external value invalidates local history. */
+  readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection;
 }): EditingSession<Selection> {
   const document = options.document;
-  let selection = clone(options.selection);
+  let selection = ownSelection(options.selection);
   let revision = 0;
   let undoStack: HistoryEntry<Selection>[] = [];
   let redoStack: HistoryEntry<Selection>[] = [];
@@ -58,20 +60,41 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   let observedValue = document.value;
   let unsubscribeDocument: (() => void) | null = null;
   const listeners = new Set<(snapshot: EditingSnapshot<Selection>) => void>();
+  const notifications: Array<{ snapshot: EditingSnapshot<Selection>; listeners: Array<(snapshot: EditingSnapshot<Selection>) => void> }> = [];
+  let isNotifying = false;
+
+  function ownSelection(value: Selection): Selection {
+    // JSON Document owns detachment and immutable JSON values, including selection.
+    return createJSONDocument(clone(value)).value as Selection;
+  }
 
   function currentSnapshot(): EditingSnapshot<Selection> {
-    return {
+    return Object.freeze({
       value: document.value,
       selection,
       revision,
       canUndo: undoStack.length > 0,
       canRedo: redoStack.length > 0,
-    };
+    });
   }
 
   function publish(): EditingSnapshot<Selection> {
     const current = currentSnapshot();
-    for (const listener of listeners) listener(current);
+    notifications.push({ snapshot: current, listeners: [...listeners] });
+    if (isNotifying) return current;
+    isNotifying = true;
+    try {
+      for (let index = 0; index < notifications.length; index += 1) {
+        const notification = notifications[index]!;
+        for (const listener of notification.listeners) {
+          if (!listeners.has(listener)) continue;
+          try { listener(notification.snapshot); } catch { /* Observers cannot reject a completed edit. */ }
+        }
+      }
+    } finally {
+      notifications.length = 0;
+      isNotifying = false;
+    }
     return current;
   }
 
@@ -79,6 +102,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     const latest = document.value;
     if (jsonEqual(observedValue, latest)) return false;
     observedValue = latest;
+    if (options.reconcileSelection) selection = ownSelection(options.reconcileSelection(selection, latest));
     undoStack = [];
     redoStack = [];
     activeHistoryGroup = undefined;
@@ -107,8 +131,9 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   function apply(plan: EditingPlan<Selection>): EditingResult<Selection> {
     synchronizeExternalChange();
     const beforeSelection = selection;
+    const selectionAfter = ownSelection(plan.selectionAfter);
     if (plan.operations.length === 0) {
-      selection = clone(plan.selectionAfter);
+      selection = selectionAfter;
       revision += 1;
       return { ok: true, snapshot: publish() };
     }
@@ -119,12 +144,12 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       editing: {
         origin: plan.origin,
         selectionBefore: clone(beforeSelection),
-        selectionAfter: clone(plan.selectionAfter),
+        selectionAfter: clone(selectionAfter),
       },
     });
     if (!result.ok) return result;
 
-    selection = clone(plan.selectionAfter);
+    selection = selectionAfter;
     revision += 1;
     if (plan.history !== "ignore" && result.change.applied.length > 0) {
       const entry: HistoryEntry<Selection> = {
@@ -158,7 +183,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       editing: { origin: direction, selectionAfter: clone(nextSelection) },
     });
     if (!result.ok) return result;
-    selection = clone(nextSelection);
+    selection = nextSelection;
     revision += 1;
     activeHistoryGroup = undefined;
     return { ok: true, snapshot: currentSnapshot(), change: result.change };
@@ -172,16 +197,16 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     apply,
     select(nextSelection) {
       synchronizeExternalChange();
-      selection = clone(nextSelection);
+      selection = ownSelection(nextSelection);
       revision += 1;
       activeHistoryGroup = undefined;
       return publish();
     },
     reconcile(reconciler) {
       synchronizeExternalChange();
-      const nextSelection = clone(reconciler(clone(selection), document.value));
+      const nextSelection = reconciler(clone(selection), document.value);
       if (jsonEqual(selection, nextSelection)) return currentSnapshot();
-      selection = nextSelection;
+      selection = ownSelection(nextSelection);
       revision += 1;
       activeHistoryGroup = undefined;
       return publish();

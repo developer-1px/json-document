@@ -169,7 +169,7 @@ describe("Official Rich Text local edit costs", () => {
     expect(moved.ok).toBe(true);
     if (!moved.ok) return;
     expect(moved.change?.applied.some((operation) => operation.path === "" || operation.path === "/content")).toBe(false);
-    expect(moved.change?.applied.map((operation) => operation.op)).toEqual(["remove", "add"]);
+    expect(moved.change?.applied.map((operation) => operation.op)).toEqual(["move"]);
     expect(instrument.snapshot().topologyCreates).toBe(0);
     expect(instrument.snapshot().topologyAdopts).toBe(1);
 

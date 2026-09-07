@@ -54,6 +54,13 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("registers the Editing session owner through public Rich Text usage", async () => {
+    const sources = await discoverDemoSources("routes/rich-text-demo/RichTextDemoRoute.tsx");
+    const session = sources.find((file) => file.path === "packages/json-document-editing/src/session.ts");
+    expect(session).toBeDefined();
+    expect(await session!.load()).toContain("reconcileSelection");
+  });
+
   test("keeps source metadata separate from the route component split point", () => {
     const route = defineDemo({ source: "routes/example/ExampleDemo.tsx" });
     expect(route.staticData.demo).toEqual({ source: "routes/example/ExampleDemo.tsx" });

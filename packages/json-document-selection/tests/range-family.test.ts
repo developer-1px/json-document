@@ -22,6 +22,18 @@ function topology(ids: readonly string[]): OrderedTopology<string, string> {
 }
 
 describe("range selection family", () => {
+  test.each([false, true])("mapping preserves the surviving primary (materialized=%s)", (materialized) => {
+    const state = {
+      kind: "range" as const,
+      ranges: ["a", "b", "c"].map((point) => ({ anchor: point, focus: point, points: [point] })),
+      primaryIndex: 1,
+    };
+    const family = materialized ? createMaterializedRangeSelectionFamily<string>() : createRangeSelectionFamily<string>();
+    const result = family.map(state, { mapPoint: (point) => point === "a" ? null : point }, { topology: topology(["b", "c"]) });
+    expect(result.state.primaryIndex).toBe(0);
+    expect(result.state.ranges[result.state.primaryIndex!]?.focus).toBe("b");
+  });
+
   test("preserves directional anchor/focus and a valid primary", () => {
     const family = createRangeSelectionFamily<string>();
     const context = { topology: topology(["a", "b", "c", "d"]) };

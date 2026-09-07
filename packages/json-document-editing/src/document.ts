@@ -151,17 +151,17 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
       if ((intent.direction < 0 && start === 0) || (intent.direction > 0 && end === blocks.length - 1)) return failure("move.boundary");
       const selected = blocks.filter((block) => ids.includes(block.id));
       const insertAt = intent.direction < 0 ? start - 1 : start + 1;
-      const operations: JSONPatchOperation[] = [
-        ...indices.sort((left, right) => right - left).map((index) => ({
-          op: "remove" as const,
-          path: `/blocks/${index}`,
-        })),
-        ...selected.map((block, offset) => ({
-          op: "add" as const,
-          path: `/blocks/${insertAt + offset}`,
-          value: block,
-        })),
-      ];
+      const currentIds = blocks.map((block) => block.id);
+      const operations: JSONPatchOperation[] = [];
+      // Plan against the sequential array state; moving preserves member identity.
+      const moves = selected.map((block, offset) => ({ id: block.id, index: insertAt + offset }));
+      if (intent.direction > 0) moves.reverse();
+      for (const { id, index } of moves) {
+        const from = currentIds.indexOf(id);
+        if (from === index) continue;
+        operations.push({ op: "move", from: `/blocks/${from}`, path: `/blocks/${index}` });
+        currentIds.splice(index, 0, currentIds.splice(from, 1)[0]!);
+      }
       return session.apply({
         operations,
         selectionAfter: session.snapshot.selection,
