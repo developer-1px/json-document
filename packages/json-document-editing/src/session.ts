@@ -1,19 +1,36 @@
 import {
+  applyPatch,
   createJSONDocument,
   jsonEqual,
-  parentPointer,
   type JSONAppliedChange,
   type JSONDocument,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
 import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
+import { invertEditingPatch } from "./invert-patch.js";
+import type { EditingHistoryOptions, EditingHistoryResult } from "./history.js";
+
+export interface EditingDocumentChange {
+  readonly before: JSONValue;
+  readonly after: JSONValue;
+  /** Null when catching up without an observed, matching applied change. */
+  readonly change: JSONAppliedChange | null;
+}
+
+export interface EditingSessionOptions<Selection extends JSONValue> extends EditingHistoryOptions {
+  readonly document: JSONDocument;
+  readonly selection: Selection;
+  readonly mapSelection?: (selection: Selection, change: EditingDocumentChange) => Selection;
+  readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection;
+}
 
 export interface EditingPlan<Selection extends JSONValue> {
   readonly operations: ReadonlyArray<JSONPatchOperation>;
   readonly selectionAfter: Selection;
   readonly origin: string;
   readonly history?: "record" | "ignore";
+  /** Groups local inverse history. An external history owner defines its own steps. */
   readonly historyGroup?: string;
 }
 
@@ -44,12 +61,7 @@ interface HistoryEntry<Selection extends JSONValue>
   readonly group?: string;
 }
 
-export function createEditingSession<Selection extends JSONValue>(options: {
-  readonly document: JSONDocument;
-  readonly selection: Selection;
-  /** Reconcile domain selection when an external value invalidates local history. */
-  readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection;
-}): EditingSession<Selection> {
+export function createEditingSession<Selection extends JSONValue>(options: EditingSessionOptions<Selection>): EditingSession<Selection> {
   const document = options.document;
   let selection = ownSelection(options.selection);
   let revision = 0;
@@ -59,6 +71,12 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   let isCommitting = false;
   let observedValue = document.value;
   let unsubscribeDocument: (() => void) | null = null;
+  let unsubscribeHistory: (() => void) | null = null;
+  let historyRevision = options.history?.status().revision;
+  const historySelections = new Map<string, {
+    readonly before: { readonly value: JSONValue; readonly selection: Selection };
+    readonly after: { readonly value: JSONValue; readonly selection: Selection };
+  }>();
   const listeners = new Set<(snapshot: EditingSnapshot<Selection>) => void>();
   const notifications: Array<{ snapshot: EditingSnapshot<Selection>; listeners: Array<(snapshot: EditingSnapshot<Selection>) => void> }> = [];
   let isNotifying = false;
@@ -70,11 +88,11 @@ export function createEditingSession<Selection extends JSONValue>(options: {
 
   function currentSnapshot(): EditingSnapshot<Selection> {
     return Object.freeze({
-      value: document.value,
+      value: observedValue,
       selection,
       revision,
-      canUndo: undoStack.length > 0,
-      canRedo: redoStack.length > 0,
+      canUndo: options.history?.status().canUndo ?? undoStack.length > 0,
+      canRedo: options.history?.status().canRedo ?? redoStack.length > 0,
     });
   }
 
@@ -98,10 +116,26 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     return current;
   }
 
-  function synchronizeExternalChange(): boolean {
+  function synchronizeExternalChange(change?: JSONAppliedChange): boolean {
+    if (isCommitting) return false;
+    const nextHistoryRevision = options.history?.status().revision;
+    const historyChanged = nextHistoryRevision !== historyRevision;
+    historyRevision = nextHistoryRevision;
     const latest = document.value;
-    if (jsonEqual(observedValue, latest)) return false;
+    if (jsonEqual(observedValue, latest)) {
+      if (historyChanged) revision += 1;
+      return historyChanged;
+    }
+    const before = observedValue;
     observedValue = latest;
+    if (options.mapSelection) {
+      const replay = change === undefined ? null : applyPatch(before, change.applied);
+      selection = ownSelection(options.mapSelection(selection, {
+        before,
+        after: latest,
+        change: replay?.ok && jsonEqual(replay.value, latest) ? change! : null,
+      }));
+    }
     if (options.reconcileSelection) selection = ownSelection(options.reconcileSelection(selection, latest));
     undoStack = [];
     redoStack = [];
@@ -114,22 +148,42 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     operations: ReadonlyArray<JSONPatchOperation>,
     metadata: Readonly<Record<string, JSONValue>>,
   ) {
+    const before = observedValue;
+    let notifications = 0;
+    const release = document.subscribe(() => { notifications++; });
     isCommitting = true;
     try {
-      return document.commit(operations, { metadata });
+      const result = document.commit(operations, { metadata });
+      if (!result.ok) return result;
+      // Normally the current document is exactly this commit's result. Only a
+      // reentrant document write needs a replay to recover the earlier value.
+      const replay = notifications > 1 ? applyPatch(before, result.change.applied) : null;
+      observedValue = replay?.ok ? replay.value : document.value;
+      return result;
     } finally {
+      release();
       isCommitting = false;
-      observedValue = document.value;
     }
   }
 
-  function observeDocument(): void {
+  function observeDocument(change: JSONAppliedChange): void {
     if (isCommitting) return;
+    if (synchronizeExternalChange(change)) publish();
+  }
+
+  function publishCommit(): EditingSnapshot<Selection> {
+    const own = publish();
     if (synchronizeExternalChange()) publish();
+    return own;
   }
 
   function apply(plan: EditingPlan<Selection>): EditingResult<Selection> {
+    if (isCommitting) return { ok: false, code: "editing.reentrancy" };
     synchronizeExternalChange();
+    if (options.history && plan.history === "ignore" && plan.operations.length > 0) {
+      return { ok: false, code: "history.ignore-unsupported", reason: "The external history owner records document commits." };
+    }
+    const beforeValue = observedValue;
     const beforeSelection = selection;
     const selectionAfter = ownSelection(plan.selectionAfter);
     if (plan.operations.length === 0) {
@@ -138,8 +192,11 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return { ok: true, snapshot: publish() };
     }
 
-    const inverse = invertOperations(document, plan.operations);
-    const beforeValue = inverse === null ? clone(document.value) : null;
+    const inverse = options.history ? [] : invertEditingPatch(document, plan.operations);
+    if (inverse === null) {
+      const validation = document.validatePatch(plan.operations);
+      return validation.ok ? { ok: false, code: "history.inverse-unavailable" } : validation;
+    }
     const result = commit(plan.operations, {
       editing: {
         origin: plan.origin,
@@ -151,10 +208,18 @@ export function createEditingSession<Selection extends JSONValue>(options: {
 
     selection = selectionAfter;
     revision += 1;
-    if (plan.history !== "ignore" && result.change.applied.length > 0) {
+    const historyStatus = options.history?.status();
+    historyRevision = historyStatus?.revision;
+    if (historyStatus?.undoTarget && result.change.applied.length > 0 && jsonEqual(observedValue, document.value)) {
+      historySelections.set(historyStatus.undoTarget, {
+        before: { value: beforeValue, selection: beforeSelection },
+        after: { value: observedValue, selection },
+      });
+    }
+    if (!options.history && plan.history !== "ignore" && result.change.applied.length > 0) {
       const entry: HistoryEntry<Selection> = {
-        forward: clonePatchOperations(plan.operations),
-        inverse: inverse ?? [{ op: "replace", path: "", value: beforeValue! }],
+        forward: result.change.applied,
+        inverse,
         selectionBefore: beforeSelection,
         selectionAfter: selection,
         ...(plan.historyGroup === undefined ? {} : { group: plan.historyGroup }),
@@ -173,7 +238,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       activeHistoryGroup = plan.historyGroup;
       redoStack = [];
     }
-    return { ok: true, snapshot: publish(), change: result.change };
+    return { ok: true, snapshot: publishCommit(), change: result.change };
   }
 
   function restore(entry: HistoryEntry<Selection>, direction: "undo" | "redo"): EditingResult<Selection> {
@@ -189,6 +254,36 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     return { ok: true, snapshot: currentSnapshot(), change: result.change };
   }
 
+  function restoreExternal(direction: "undo" | "redo"): EditingResult<Selection> {
+    const history = options.history!;
+    const target = direction === "undo" ? history.status().undoTarget : history.status().redoTarget;
+    const retained = target === null ? undefined : historySelections.get(target);
+    const reference = retained?.[direction === "undo" ? "before" : "after"] ?? { value: observedValue, selection };
+    const before = observedValue;
+    const changes: JSONAppliedChange[] = [];
+    const release = document.subscribe((change) => { changes.push(change); });
+    let result: EditingHistoryResult;
+    isCommitting = true;
+    try {
+      result = history[direction]();
+    } finally {
+      release();
+      isCommitting = false;
+    }
+    if (!result.ok) return result;
+    const change = changes[0];
+    const replay = changes.length > 1 && change ? applyPatch(before, change.applied) : null;
+    observedValue = replay?.ok ? replay.value : document.value;
+    historyRevision = history.status().revision;
+    selection = reference.selection;
+    if (options.mapSelection) selection = ownSelection(options.mapSelection(selection, {
+      before: reference.value, after: observedValue, change: null,
+    }));
+    if (options.reconcileSelection) selection = ownSelection(options.reconcileSelection(selection, observedValue));
+    revision += 1;
+    return { ok: true, snapshot: publishCommit(), ...(change === undefined ? {} : { change }) };
+  }
+
   return {
     get snapshot() {
       synchronizeExternalChange();
@@ -196,6 +291,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
     },
     apply,
     select(nextSelection) {
+      if (isCommitting) return currentSnapshot();
       synchronizeExternalChange();
       selection = ownSelection(nextSelection);
       revision += 1;
@@ -203,6 +299,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return publish();
     },
     reconcile(reconciler) {
+      if (isCommitting) return currentSnapshot();
       synchronizeExternalChange();
       const nextSelection = reconciler(clone(selection), document.value);
       if (jsonEqual(selection, nextSelection)) return currentSnapshot();
@@ -212,26 +309,30 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       return publish();
     },
     undo() {
+      if (isCommitting) return { ok: false, code: "editing.reentrancy" };
       synchronizeExternalChange();
+      if (options.history) return restoreExternal("undo");
       const entry = undoStack.at(-1);
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "undo");
       if (result.ok) {
         undoStack = undoStack.slice(0, -1);
         redoStack = [...redoStack, entry];
-        return { ...result, snapshot: publish() };
+        return { ...result, snapshot: publishCommit() };
       }
       return result;
     },
     redo() {
+      if (isCommitting) return { ok: false, code: "editing.reentrancy" };
       synchronizeExternalChange();
+      if (options.history) return restoreExternal("redo");
       const entry = redoStack.at(-1);
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "redo");
       if (result.ok) {
         redoStack = redoStack.slice(0, -1);
         undoStack = [...undoStack, entry];
-        return { ...result, snapshot: publish() };
+        return { ...result, snapshot: publishCommit() };
       }
       return result;
     },
@@ -239,65 +340,19 @@ export function createEditingSession<Selection extends JSONValue>(options: {
       synchronizeExternalChange();
       listeners.add(listener);
       unsubscribeDocument ??= document.subscribe(observeDocument);
+      unsubscribeHistory ??= options.history?.subscribe(() => {
+        if (synchronizeExternalChange()) publish();
+      }) ?? null;
       return () => {
         listeners.delete(listener);
         if (listeners.size > 0) return;
         unsubscribeDocument?.();
         unsubscribeDocument = null;
+        unsubscribeHistory?.();
+        unsubscribeHistory = null;
       };
     },
   };
-}
-
-function invertOperations(
-  document: JSONDocument,
-  operations: ReadonlyArray<JSONPatchOperation>,
-): ReadonlyArray<JSONPatchOperation> | null {
-  // Every inverse reads the state immediately before its forward operation.
-  // Keep single-operation edits on the original read port; a batch needs an
-  // isolated working document to resolve shifted indexes and overwritten values.
-  const working = operations.length > 1 ? createJSONDocument(document.value) : document;
-  const inverse: JSONPatchOperation[] = [];
-  for (const operation of operations) {
-    if (operation.op === "replace") {
-      const located = working.at(operation.path);
-      if (!located.ok) return null;
-      inverse.push({ op: "replace", path: operation.path, value: clone(located.value) });
-    } else if (operation.op === "remove") {
-      const located = working.at(operation.path);
-      if (!located.ok) return null;
-      inverse.push({ op: "add", path: operation.path, value: clone(located.value) });
-    } else if (operation.op === "add") {
-      const path = appendedIndexPath(working, operation.path);
-      if (path === null) return null;
-      const parent = parentPointer(path);
-      const container = parent === null ? null : working.at(parent);
-      const previous = working.at(path);
-      inverse.push(previous.ok && (parent === null || (container?.ok && !Array.isArray(container.value)))
-        ? { op: "replace", path, value: clone(previous.value) }
-        : { op: "remove", path });
-    } else if (operation.op === "test") {
-      // A successful precondition changes no value and needs no inverse.
-    } else {
-      return null;
-    }
-    if (working !== document && !working.commit([operation]).ok) return null;
-  }
-  return inverse.reverse();
-}
-
-function appendedIndexPath(document: JSONDocument, path: string): string | null {
-  if (!path.endsWith("/-")) return path;
-  const parent = path.slice(0, -2);
-  const located = document.at(parent);
-  if (!located.ok || !Array.isArray(located.value)) return null;
-  return `${parent}/${located.value.length}`;
-}
-
-function clonePatchOperations(
-  operations: ReadonlyArray<JSONPatchOperation>,
-): ReadonlyArray<JSONPatchOperation> {
-  return JSON.parse(JSON.stringify(operations)) as ReadonlyArray<JSONPatchOperation>;
 }
 
 function clone<Value extends JSONValue>(value: Value): Value {

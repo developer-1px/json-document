@@ -18,6 +18,8 @@ export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } fro
 export { createObjectEditor, objectClipboardFormat } from "./object.js";
 export { createOrderEditor, orderClipboardFormat } from "./order.js";
 export { createEditingSession } from "./session.js";
+export { createEditingId } from "./identity.js";
+export type { EditingHistory, EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 export { createSheetEditor, sheetClipboardFormat } from "./sheet.js";
 export { createTreeEditor, treeClipboardFormat } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
@@ -131,6 +133,8 @@ export type {
 export type { EditingDispatch, EditingIntent } from "./intent.js";
 export type {
   EditingPlan,
+  EditingDocumentChange,
+  EditingSessionOptions,
   EditingResult,
   EditingSession,
   EditingSnapshot,

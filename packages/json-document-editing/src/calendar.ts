@@ -18,6 +18,8 @@ import {
 } from "./session.js";
 import { cutEditingClipboard, type EditingClipboardCut } from "./clipboard.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
 import {
   addCalendarDate,
   assertCalendarDocument,
@@ -213,7 +215,7 @@ export interface CalendarEditor {
 
 export function createCalendarEditor(
   source: EditingDocumentSource<CalendarDocument>,
-  options: {
+  options: EditingHistoryOptions & {
     readonly createId?: () => string;
     readonly initialEventIds?: ReadonlyArray<string>;
   } = {},
@@ -221,8 +223,7 @@ export function createCalendarEditor(
   const document = resolveDocumentSource(source);
   const initial = document.value as CalendarDocument;
   assertCalendarDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `event-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("event"));
   const selectionFamily = createMaterializedRangeSelectionFamily<CalendarOccurrencePoint>();
   const first = initial.events[0];
   const availableIds = new Set(initial.events.map((event) => event.id));
@@ -230,8 +231,15 @@ export function createCalendarEditor(
     ? (first ? [first.id] : [])
     : options.initialEventIds.filter((id) => availableIds.has(id));
   const session = createEditingSession({
+    ...options,
     document,
     selection: selectionForEvents(initial.events, initialEventIds),
+    reconcileSelection: (selection, value) => asCalendarSelection(selectionFamily.reconcile(selection, {
+      topology: calendarOccurrenceOrderedTopology(
+        (value as CalendarDocument).events,
+        selection.ranges.flatMap((range) => range.points),
+      ),
+    }).state),
   });
 
   function value(): CalendarDocument {

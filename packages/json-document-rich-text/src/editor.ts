@@ -12,6 +12,7 @@ import {
   cutEditingClipboard,
   type EditingResult,
   type EditingSnapshot,
+  type EditingHistoryOptions,
 } from "@interactive-os/json-document-editing";
 import {
   collapsedRangeSelection,
@@ -50,8 +51,8 @@ import { rememberAppliedOperations } from "./applied-change.js";
 import { indexValidatedRichText, richTextTopology, seedRichTextTopology, type RichTextTopology } from "./topology.js";
 import { validateRichText, validateRichTextNodeAt } from "./validation.js";
 import type { RichTextValidationFailure } from "./validation.js";
-import { readRichTextDocument, validateLocalOrFallback, validateReplacementNodes, validateContentSize } from "./editor-validation.js";
-import { allTextNodes, collapsedAtPoint, firstSelection, mapSelectionByExistingIds, mapSelectionByTextOrder, reconcileOrFirst } from "./selection-mapping.js";
+import { readRichTextDocument, readRichTextSnapshot, validateLocalOrFallback, validateReplacementNodes, validateContentSize } from "./editor-validation.js";
+import { allTextNodes, collapsedAtPoint, firstSelection, mapExternalRichTextSelection, mapSelectionByExistingIds, mapSelectionByTextOrder, reconcileOrFirst } from "./selection-mapping.js";
 import { nextScalarOffset, previousScalarOffset, validTextOffset } from "./text-offset.js";
 
 export type RichTextIntent =
@@ -83,7 +84,7 @@ export interface RichTextEditor {
   subscribe(listener: (snapshot: EditingSnapshot<RichTextSelection>) => void): () => void;
 }
 
-export interface RichTextEditorOptions {
+export interface RichTextEditorOptions extends EditingHistoryOptions {
   readonly document: JSONDocument;
   readonly pointer?: Pointer;
   readonly selection?: RichTextSelection;
@@ -138,11 +139,17 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   };
   const selectionFamily = createRangeSelectionFamily<RichTextPoint, RichTextTarget>();
   const session = createEditingSession<RichTextSelection>({
+    ...(options.history === undefined ? {} : { history: options.history }),
     document,
     selection: options.selection === undefined
       ? firstSelection(initial)
       : asRichTextSelection(selectionFamily.reconcile(options.selection, { topology: initialTopology }).state),
-    reconcileSelection: (selection) => asRichTextSelection(selectionFamily.reconcile(selection, { topology: richTextTopology(value()) }).state),
+    mapSelection: (selection, change) => mapExternalRichTextSelection(
+      readRichTextSnapshot(change.before, pointer), readRichTextSnapshot(change.after, pointer), selection,
+    ),
+    reconcileSelection: (selection, value) => asRichTextSelection(selectionFamily.reconcile(selection, {
+      topology: richTextTopology(readRichTextSnapshot(value, pointer)),
+    }).state),
   });
 
   const createId = options.createId ?? createRichTextNodeId;

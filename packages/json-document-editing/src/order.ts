@@ -3,10 +3,13 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
+  reconcileRangeSelection,
   selectRangePoint,
   type RangeSelectionState,
 } from "./range-selection.js";
@@ -83,17 +86,19 @@ export interface OrderEditor {
 
 export function createOrderEditor(
   source: EditingDocumentSource<OrderDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
 ): OrderEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as OrderDocument;
   assertOrderDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `item-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("item"));
   const first = initial.items[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? collapsed(first.id) : emptySelection(),
+    reconcileSelection: (selection, value) => asOrderSelection(reconcileRangeSelection(selection,
+      (point) => (value as OrderDocument).items.some((item) => item.id === point.itemId) ? point : null)),
   });
 
   function value(): OrderDocument {

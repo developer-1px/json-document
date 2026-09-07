@@ -42,14 +42,16 @@ describe("public collaboration surface", () => {
     expect(text.document.value).toEqual(initial);
   });
 
-  test("package export paths stay the three public entrypoints", () => {
+  test("package export paths include the optional Editing history integration", () => {
     const pkg = JSON.parse(readSrc("package.json")) as {
       exports: Record<string, { import?: string; types?: string }>;
     };
-    expect(Object.keys(pkg.exports).sort()).toEqual([".", "./history", "./text"]);
+    expect(Object.keys(pkg.exports).sort()).toEqual([".", "./editing", "./history", "./text"]);
     expect(pkg.exports["."]?.import).toBe("./dist/index.js");
     expect(pkg.exports["./history"]?.import).toBe("./dist/history-index.js");
     expect(pkg.exports["./text"]?.import).toBe("./dist/text-index.js");
+    expect(pkg.exports["./editing"]?.import).toBe("./dist/editing-index.js");
+    expect(pkg.exports["./editing"]?.types).toBe("./dist/editing-index.d.ts");
   });
 
   test("each independent change reason has one owner module", () => {

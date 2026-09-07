@@ -3,6 +3,9 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { reconcileRangeSelection } from "./range-selection.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   createRangeSelectionFamily,
@@ -100,18 +103,20 @@ export interface TreeEditor {
 
 export function createTreeEditor(
   source: EditingDocumentSource<TreeDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
 ): TreeEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as TreeDocument;
   assertTreeDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `node-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("node"));
   const selectionFamily = createRangeSelectionFamily<TreePoint, string>();
   const first = initial.nodes[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? collapsed(first.id) : emptySelection(),
+    reconcileSelection: (selection, value) => asTreeSelection(reconcileRangeSelection(selection,
+      (point) => (value as TreeDocument).nodes.some((node) => node.id === point.nodeId) ? point : null)),
   });
   let indexedDocument: TreeDocument | undefined = initial;
   let indexedNodes: TreeNodeIndex | undefined = createTreeNodeIndex(initial.nodes);

@@ -1,5 +1,19 @@
 # @interactive-os/json-document-rich-text
 
+External text changes map selection offsets through the changed span of the
+same stable text ID. Common prefix/suffix delimit the replacement; forward
+affinity follows inserted/replacement text, backward affinity stays before it.
+Offsets remain on Unicode scalar boundaries. Deleted identities still reconcile
+through the domain topology. JSON snapshots do not encode an arbitrary author's
+edit intent: an ambiguous whole-string replacement uses these explicit span rules.
+
+`createRichTextEditor({ document, history })` can use the official
+`createCollaborationEditingHistory(runtime)` connection. With `createTextRuntime`,
+undo removes local text contributions while preserving concurrent remote text.
+Selection restoration maps the recorded position through the current document.
+The default remains local inverse history; a collaborative document alone does
+not select a different history owner.
+
 Experimental reference implementation of the Draft JSONDocument Rich Text v1
 profile. It owns canonical Rich Text model types, logical topology, editing
 transforms, and target-neutral rendering while JSONDocument, Selection, and

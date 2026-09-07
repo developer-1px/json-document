@@ -16,6 +16,17 @@ function selection(offset = 4) {
 }
 
 describe("Rich Text extension protocol", () => {
+  it("repeats structural edit and undo after an optimized large-array snapshot", () => {
+    const document = createJSONDocument(createRichTextBlockFixture(100));
+    const point = { kind: "text" as const, nodeId: "block-text-50", offset: 1, affinity: "forward" as const };
+    const editor = createRichTextEditor({ document, selection: { kind: "range", ranges: [{ anchor: point, focus: point }], primaryIndex: 0 } });
+    const initial = document.value;
+    for (let index = 0; index < 3; index++) {
+      expect(editor.dispatch({ type: "block.split" }).ok).toBe(true);
+      expect(editor.undo().ok).toBe(true);
+      expect(document.value).toEqual(initial);
+    }
+  });
   it("rejects descendant schema errors, invalid marks, ID provider collisions and custom cardinality", () => {
     const intents: RichTextIntent[] = [
       { type: "node.insert", point: { kind: "child", nodeId: "doc", offset: 1, affinity: "forward" },
