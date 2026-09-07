@@ -2,6 +2,9 @@ import { useState } from "react";
 import { CornerDownLeft, Redo2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { createJSONDocument } from "@interactive-os/json-document";
+import { createEditingId } from "@interactive-os/json-document-editing";
+import { createTextRuntime } from "@interactive-os/json-document-collaboration/text";
+import { createCollaborationEditingHistory } from "@interactive-os/json-document-collaboration/editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   createRichTextEditor,
@@ -107,7 +110,18 @@ const initialDocument: RichTextDocument = {
 };
 
 export function RichTextDemoRoute() {
-  const [editor] = useState(() => createRichTextEditor({ document: createJSONDocument(initialDocument) }));
+  const [{ editor, collaboration }] = useState(() => {
+    if (new URLSearchParams(window.location.search).get("history") !== "collaboration") {
+      return { editor: createRichTextEditor({ document: createJSONDocument(initialDocument) }), collaboration: null };
+    }
+    const shared = { epochId: "rich-text-history-demo", ruleset: { id: "rich-text/v1", digest: "demo/v1" } };
+    const local = createTextRuntime(initialDocument, { ...shared, actorId: createEditingId("local") });
+    const remote = createTextRuntime(initialDocument, { ...shared, actorId: createEditingId("remote") });
+    return {
+      editor: createRichTextEditor({ document: local.document, history: createCollaborationEditingHistory(local) }),
+      collaboration: { local, remote, remoteEditor: createRichTextEditor({ document: remote.document }) },
+    };
+  });
   const document = editor.snapshot.value as RichTextDocument;
   const primary = editor.snapshot.selection.primaryIndex === null
     ? null
@@ -161,6 +175,11 @@ export function RichTextDemoRoute() {
         <Command preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</Command>
         <Command preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
         <Command preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
+        {collaboration && <Command preserveFocus onClick={() => {
+          collaboration.remote.replica.ingest(collaboration.local.replica.exportBundle());
+          collaboration.remoteEditor.dispatch({ type: "text.insert", text: "remote · " });
+          collaboration.local.replica.ingest(collaboration.remote.replica.exportBundle());
+        }}>원격 변경 수신</Command>}
         <ToolbarSpacer />
         <span className={ui.text.meta} aria-live="polite">last: {lastAction}</span>
       </Toolbar>

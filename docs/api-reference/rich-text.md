@@ -188,7 +188,7 @@ type RichTextEditorCreationResult =
 ## `RichTextEditorOptions`
 
 ```ts
-interface RichTextEditorOptions {
+interface RichTextEditorOptions extends EditingHistoryOptions {
   readonly document: JSONDocument;
   readonly pointer?: Pointer;
   readonly selection?: RichTextSelection;

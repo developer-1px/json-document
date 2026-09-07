@@ -27,4 +27,10 @@ export const apiReferencePackages = [
   ["rich-text-react", "@interactive-os/json-document-rich-text-react", "packages/json-document-rich-text-react/src/index.tsx", "Connector", "Rich Text React connector"],
   ["collaboration", "@interactive-os/json-document-collaboration", "packages/json-document-collaboration/src/index.ts", "Collaboration", "replica, history, text collaboration runtime"],
   ["contenteditable-collaboration", "@interactive-os/json-document-contenteditable-collaboration", "packages/contenteditable-collaboration/src/index.ts", "Collaboration", "collaborative contenteditable lease"],
-].map(([slug, packageName, entrypoint, owner, responsibility]) => ({ slug, packageName, entrypoint, owner, responsibility }));
+].map(([slug, packageName, entrypoint, owner, responsibility]) => ({
+  slug, packageName, entrypoint, owner, responsibility,
+  subpaths: slug === "collaboration" ? [{
+    packageName: "@interactive-os/json-document-collaboration/editing",
+    entrypoint: "packages/json-document-collaboration/src/editing-index.ts",
+  }] : [],
+}));

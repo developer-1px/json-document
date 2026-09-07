@@ -29,6 +29,10 @@ History 항목은 JSON 값이 실제로 바뀐 편집에서 생깁니다. Select
 현재 편집 대상만 바꾸므로 기록을 추가하지 않습니다. 검사를 통과하지 못한
 요청과 문서 값이 그대로인 요청도 되돌릴 값이 없어 기록되지 않습니다.
 
+기본 local history는 외부 문서 변경을 받으면 비워집니다. 다른 참여자의 변경을
+보존하며 내 기여만 취소하려면 [Collaborative History](collaboration-history.md)의
+공식 연결 API를 사용합니다. document만 바꾸는 것으로 history 의미까지 바뀌지는 않습니다.
+
 여기까지 `editor.dispatch`로 시작한 요청이 Selection과 Topology를 읽고,
 Clipboard를 거쳐 문서와 History를 바꾸는 흐름을 살펴봤습니다. editor가
 받는 전체 요청은 [Intent 레퍼런스](intent.md)에서 확인할 수 있습니다.

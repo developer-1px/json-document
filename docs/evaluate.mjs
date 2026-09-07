@@ -146,6 +146,7 @@ const activeCompanionPackages = new Set([
   "@interactive-os/json-document-rich-text-suggestion-react",
   "@interactive-os/json-document-rich-text-mention",
   "@interactive-os/json-document-rich-text-mention-react",
+  "@interactive-os/json-document-rich-text",
   "@interactive-os/json-document-selection",
   "@interactive-os/json-document-react",
   "@interactive-os/json-document-react-hook-form",

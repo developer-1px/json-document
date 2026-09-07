@@ -92,6 +92,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-collaboration/src/text-index.ts"),
     },
     {
+      find: "@interactive-os/json-document-collaboration/editing",
+      replacement: sourceFile("packages/json-document-collaboration/src/editing-index.ts"),
+    },
+    {
       find: "@interactive-os/json-document-collaboration",
       replacement: sourceFile("packages/json-document-collaboration/src/index.ts"),
     },

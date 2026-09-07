@@ -35,6 +35,9 @@ import documentTextControlSource from "../../../../packages/json-document-react/
 import documentEditingSource from "../../../../packages/json-document-editing/src/document.ts?raw";
 import editingClipboardSource from "../../../../packages/json-document-editing/src/clipboard.ts?raw";
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
+import editingIdentitySource from "../../../../packages/json-document-editing/src/identity.ts?raw";
+import editingHistorySource from "../../../../packages/json-document-editing/src/history.ts?raw";
+import editingInverseSource from "../../../../packages/json-document-editing/src/invert-patch.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import kanbanEditingSource from "../../../../packages/json-document-editing/src/kanban.ts?raw";
 import editingTopologySource from "../../../../packages/json-document-editing/src/topology.ts?raw";
@@ -102,10 +105,12 @@ import selectionRangeSource from "../../../../packages/json-document-selection/s
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
 import collaborationCreateSource from "../../../../packages/json-document-collaboration/src/create.ts?raw";
+import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
 import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
 import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
 import richTextSource from "../../../../packages/json-document-rich-text/src/editor.ts?raw";
+import richTextSelectionMappingSource from "../../../../packages/json-document-rich-text/src/selection-mapping.ts?raw";
 import richTextAppliedChangeSource from "../../../../packages/json-document-rich-text/src/applied-change.ts?raw";
 import richTextPlainTextSource from "../../../../packages/json-document-rich-text/src/plain-text.ts?raw";
 import richTextWebSource from "../../../../packages/json-document-rich-text-web/src/contenteditable.ts?raw";
@@ -202,6 +207,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/document.ts", documentEditingSource],
   ["packages/json-document-editing/src/clipboard.ts", editingClipboardSource],
   ["packages/json-document-editing/src/session.ts", editingSessionSource],
+  ["packages/json-document-editing/src/identity.ts", editingIdentitySource],
+  ["packages/json-document-editing/src/history.ts", editingHistorySource],
+  ["packages/json-document-editing/src/invert-patch.ts", editingInverseSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/kanban.ts", kanbanEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
@@ -269,10 +277,12 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
+  ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
   ["packages/json-document-ajv/src/index.ts", ajvSource],
   ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
   ["packages/json-document-rich-text/src/editor.ts", richTextSource],
+  ["packages/json-document-rich-text/src/selection-mapping.ts", richTextSelectionMappingSource],
   ["packages/json-document-rich-text/src/applied-change.ts", richTextAppliedChangeSource],
   ["packages/json-document-rich-text/src/plain-text.ts", richTextPlainTextSource],
   ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
@@ -660,6 +670,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-contenteditable",
     symbol: "ContentEditable",
     sourcePath: "packages/json-document-contenteditable/src/content-editable.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingId",
+    sourcePath: "packages/json-document-editing/src/identity.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-collaboration/editing",
+    symbol: "createCollaborationEditingHistory",
+    sourcePath: "packages/json-document-collaboration/src/editing-index.ts",
   },
   {
     packageName: "@interactive-os/json-document-collaboration/text",
