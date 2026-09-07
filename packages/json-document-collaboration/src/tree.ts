@@ -439,6 +439,20 @@ export function arrayPositionId(member: TreeMember): PositionId | null {
     : null;
 }
 
+/** Visible children keyed by their projected JSON segment, without repeated path scans. */
+export function visibleMemberEntries(tree: TreeState, memberId: MemberId): ReadonlyArray<readonly [string, MemberId]> {
+  const member = tree.members.get(memberId);
+  if (member?.node.kind !== "container") return [];
+  const container = tree.containers.get(member.node.containerId);
+  if (container === undefined) return [];
+  if (container.kind === "array") {
+    return visibleArrayMembers(tree, container).map((child, index) => [String(index), child.id]);
+  }
+  return [...objectGroups(tree, container)].map(([key, members]) => [
+    key, [...members].sort(compareMemberPlacements).at(-1)!.id,
+  ]);
+}
+
 function applySemanticOperation(
   tree: TreeState,
   operation: SemanticOperation,
