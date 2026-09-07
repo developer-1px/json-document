@@ -551,52 +551,57 @@ calendarVisibleHourBand(startMinutes: number, endMinutes: number, hourStart: num
 ## `createAnnotationEditor`
 
 ```ts
-createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): AnnotationEditor
+createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, options?: EditingHistoryOptions): AnnotationEditor
 ```
 ## `createCalendarEditor`
 
 ```ts
-createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: { readonly createId?: () => string; readonly initialEventIds?: ReadonlyArray<string>; }): CalendarEditor
+createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; readonly initialEventIds?: ReadonlyArray<string>; }): CalendarEditor
 ```
 ## `createDatabaseEditor`
 
 ```ts
-createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>): DatabaseEditor
+createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>, options?: EditingHistoryOptions): DatabaseEditor
 ```
 ## `createDocumentEditor`
 
 ```ts
-createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: { readonly createId?: () => string; }): DocumentEditor
+createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): DocumentEditor
+```
+## `createEditingId`
+
+```ts
+createEditingId(prefix: string): string
 ```
 ## `createEditingSession`
 
 ```ts
-createEditingSession<Selection extends JSONValue>(options: { readonly document: JSONDocument; readonly selection: Selection; readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection; }): EditingSession<Selection>
+createEditingSession<Selection extends JSONValue>(options: EditingSessionOptions<Selection>): EditingSession<Selection>
 ```
 ## `createKanbanEditor`
 
 ```ts
-createKanbanEditor(source: EditingDocumentSource<KanbanDocument>): KanbanEditor
+createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options?: EditingHistoryOptions): KanbanEditor
 ```
 ## `createObjectEditor`
 
 ```ts
-createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: { readonly createId?: () => string; }): ObjectEditor
+createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): ObjectEditor
 ```
 ## `createOrderEditor`
 
 ```ts
-createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: { readonly createId?: () => string; }): OrderEditor
+createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): OrderEditor
 ```
 ## `createSheetEditor`
 
 ```ts
-createSheetEditor(source: EditingDocumentSource<SheetDocument>): SheetEditor
+createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: EditingHistoryOptions): SheetEditor
 ```
 ## `createTreeEditor`
 
 ```ts
-createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: { readonly createId?: () => string; }): TreeEditor
+createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): TreeEditor
 ```
 ## `cutEditingClipboard`
 
@@ -902,6 +907,53 @@ interface EditingDispatch<Intent extends EditingIntent, Selection extends JSONVa
   dispatch(intent: Intent): EditingResult<Selection>;
 }
 ```
+## `EditingDocumentChange`
+
+```ts
+interface EditingDocumentChange {
+  readonly before: JSONValue;
+  readonly after: JSONValue;
+  /** Null when catching up without an observed, matching applied change. */
+  readonly change: JSONAppliedChange | null;
+}
+```
+## `EditingHistory`
+
+```ts
+interface EditingHistory {
+  status(): EditingHistoryStatus;
+  undo(): EditingHistoryResult;
+  redo(): EditingHistoryResult;
+  /** Includes history-only changes, even when the document value stays equal. */
+  subscribe(listener: () => void): () => void;
+}
+```
+## `EditingHistoryOptions`
+
+```ts
+interface EditingHistoryOptions {
+  /** Use the history belonging to the same document. Omit for local history. */
+  readonly history?: EditingHistory;
+}
+```
+## `EditingHistoryResult`
+
+```ts
+type EditingHistoryResult =
+  | { readonly ok: true; readonly target: string }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `EditingHistoryStatus`
+
+```ts
+interface EditingHistoryStatus {
+  readonly undoTarget: string | null;
+  readonly redoTarget: string | null;
+  readonly canUndo: boolean;
+  readonly canRedo: boolean;
+  readonly revision: number;
+}
+```
 ## `EditingIntent`
 
 ```ts
@@ -917,6 +969,7 @@ interface EditingPlan<Selection extends JSONValue> {
   readonly selectionAfter: Selection;
   readonly origin: string;
   readonly history?: "record" | "ignore";
+  /** Groups local inverse history. An external history owner defines its own steps. */
   readonly historyGroup?: string;
 }
 ```
@@ -938,6 +991,16 @@ interface EditingSession<Selection extends JSONValue> {
   undo(): EditingResult<Selection>;
   redo(): EditingResult<Selection>;
   subscribe(listener: (snapshot: EditingSnapshot<Selection>) => void): () => void;
+}
+```
+## `EditingSessionOptions`
+
+```ts
+interface EditingSessionOptions<Selection extends JSONValue> extends EditingHistoryOptions {
+  readonly document: JSONDocument;
+  readonly selection: Selection;
+  readonly mapSelection?: (selection: Selection, change: EditingDocumentChange) => Selection;
+  readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection;
 }
 ```
 ## `EditingSnapshot`

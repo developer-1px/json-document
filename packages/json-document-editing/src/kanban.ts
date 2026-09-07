@@ -14,6 +14,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import type { EditingHistoryOptions } from "./history.js";
 import { assertKanbanDocument } from "./kanban-validation.js";
 
 export interface KanbanCard extends Record<string, JSONValue> {
@@ -64,15 +65,25 @@ export interface KanbanEditor {
   subscribe(listener: (snapshot: EditingSnapshot<KanbanSelection>) => void): () => void;
 }
 
-export function createKanbanEditor(source: EditingDocumentSource<KanbanDocument>): KanbanEditor {
+export function createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options: EditingHistoryOptions = {}): KanbanEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as KanbanDocument;
   assertKanbanDocument(initial);
   const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.cards[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? selectionFor([first.id]) : selectionFor([]),
+    reconcileSelection(selection, value) {
+      const context: KeySelectionContext<string> = {
+        keys: (value as KanbanDocument).cards.map((card) => card.id),
+        universe: "cards",
+        universeMismatch: "clear",
+      };
+      const next = selectionFamily.reconcile(selection, context).state;
+      return selectionFor(selectionFamily.targets(next, context), next.primaryKey);
+    },
   });
 
   function value(): KanbanDocument {

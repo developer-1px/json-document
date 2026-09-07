@@ -1,5 +1,6 @@
 import { buildPointer, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import type { EditingHistoryOptions } from "./history.js";
 import { createEditingSession, type EditingResult, type EditingSnapshot } from "./session.js";
 import { assertAnnotation, assertAnnotationDocument } from "./annotation-validation.js";
 
@@ -29,10 +30,19 @@ export type AnnotationIntent =
   | { readonly type: "annotation.delete"; readonly annotationId: string };
 export interface AnnotationEditor { readonly snapshot: EditingSnapshot<AnnotationSelection>; dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection>; undo(): EditingResult<AnnotationSelection>; redo(): EditingResult<AnnotationSelection>; subscribe(listener: () => void): () => void }
 
-export function createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): AnnotationEditor {
+export function createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, options: EditingHistoryOptions = {}): AnnotationEditor {
   const document = resolveDocumentSource(source);
   assertAnnotationDocument(document.value as AnnotationDocument);
-  const session = createEditingSession({ document, selection: selectionFor([]) });
+  const session = createEditingSession({
+    ...options,
+    document,
+    selection: selectionFor([]),
+    reconcileSelection(selection, value) {
+      const available = new Set((value as AnnotationDocument).annotations.map((annotation) => annotation.id));
+      const ids = selection.ids.filter((id) => available.has(id));
+      return selectionFor(ids, selection.primaryId !== null && available.has(selection.primaryId) ? selection.primaryId : ids.at(-1) ?? null);
+    },
+  });
   const value = () => session.snapshot.value as AnnotationDocument;
   function dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection> {
     const annotations = value().annotations;

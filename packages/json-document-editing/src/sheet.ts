@@ -10,6 +10,8 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { reconcileRangeSelection } from "./range-selection.js";
 import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
@@ -116,7 +118,7 @@ export interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 
-export function createSheetEditor(source: EditingDocumentSource<SheetDocument>): SheetEditor {
+export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, options: EditingHistoryOptions = {}): SheetEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as SheetDocument;
   assertSheetDocument(initial);
@@ -126,8 +128,14 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     ? collapsed(firstRow.id, firstColumn.id)
     : emptySelection();
   const session = createEditingSession({
+    ...options,
     document,
     selection: initialSelection,
+    reconcileSelection: (selection, value) => withPrimaryAliases(reconcileRangeSelection(selection, (point) => {
+      const sheet = value as SheetDocument;
+      return sheet.rows.some((row) => row.id === point.rowId)
+        && sheet.columns.some((column) => column.id === point.columnId) ? point : null;
+    })),
   });
   let indexedDocument: SheetDocument | undefined = initial;
   let indexedSheet: SheetIndex | undefined = createSheetIndex(initial);

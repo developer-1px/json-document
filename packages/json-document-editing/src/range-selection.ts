@@ -40,4 +40,18 @@ export function emptyRangeSelection<Point>(): RangeSelectionState<Point> {
   return empty();
 }
 
+/** Reconcile domain points while retaining the canonical range/primary rules. */
+export function reconcileRangeSelection<Point>(
+  selection: RangeSelectionState<Point>,
+  reconcilePoint: (point: Point) => Point | null,
+): RangeSelectionState<Point> {
+  return createRangeSelectionFamily<Point>().reconcile(selection, {
+    topology: {
+      equals: (left, right) => left === right,
+      interval: (anchor, focus) => [anchor, focus],
+      reconcilePoint,
+    },
+  }).state;
+}
+
 export { primaryRange };

@@ -1,5 +1,23 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("Rich Text collaborative history routes DOM undo through the selective owner", async ({ page }) => {
+  await page.goto("/editing/rich-text?history=collaboration");
+  await setSelection(page, "text-heading", 2, 2);
+  await page.keyboard.type("!");
+  await page.getByRole("button", { name: "원격 변경 수신" }).click();
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-heading").text).toBe("remote · Ca!nonical Rich Text");
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-heading").text).toBe("remote · Canonical Rich Text");
+  expect((await json(page, "rich-text-selection-json")).selection.ranges[0].focus.offset).toBe(11);
+  const prevented = await page.getByTestId("rich-text-editor").evaluate(root => {
+    const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "historyRedo" });
+    root.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-heading").text).toBe("remote · Ca!nonical Rich Text");
+});
+
 test("Rich Text Lab leaves nested native input to its own host", async ({ page }) => {
   await page.goto("/editing/rich-text");
   await setSelection(page, "text-editable", 3, 3);

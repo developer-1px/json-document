@@ -1,4 +1,4 @@
-import { createJSONDocument } from "@interactive-os/json-document";
+import { applyPatch, createJSONDocument } from "@interactive-os/json-document";
 import { expect, test } from "vitest";
 
 import {
@@ -21,6 +21,29 @@ test("createJSONDocument freezes a clone and leaves the caller tree mutable", ()
   expect(Object.isFrozen(document.value)).toBe(true);
   items[0]!.title = "Mutated";
   expect((document.value as { items: Array<{ title: string }> }).items[0]?.title).toBe("Draft");
+});
+
+test.each([64, 512, 4096])("owned snapshots remain valid protocol inputs after a leaf replacement (%s items)", (size) => {
+  const document = createJSONDocument({ items: Array.from({ length: size }, (_, id) => ({ id, text: "before" })) });
+  expect(document.commit([{ op: "replace", path: "/items/1/text", value: "after" }]).ok).toBe(true);
+  const snapshot = document.value;
+  expect(createJSONDocument(snapshot).value).toEqual(snapshot);
+  expect(applyPatch(snapshot, [{ op: "replace", path: "/items/2/text", value: "next" }])).toMatchObject({ ok: true });
+  expect(document.at("/items/2/text")).toMatchObject({ ok: true, value: "before" });
+});
+
+test("large-array reflection exposes a frozen dense JSON snapshot without changing indexed reads", () => {
+  const document = createJSONDocument(Array.from({ length: 64 }, (_, id) => ({ id })));
+  document.commit([{ op: "replace", path: "/1/id", value: 99 }]);
+  const snapshot = document.value as ReadonlyArray<{ readonly id: number }>;
+  expect(Reflect.setPrototypeOf(snapshot, null)).toBe(false);
+  expect(Object.getOwnPropertyDescriptor(snapshot, "1")?.value).toEqual({ id: 99 });
+  expect(Object.keys(snapshot)).toHaveLength(64);
+  expect(Object.values(snapshot)).toHaveLength(64);
+  expect(Object.isFrozen(snapshot)).toBe(true);
+  expect(() => Object.freeze(snapshot)).not.toThrow();
+  expect(Reflect.set(snapshot, "1", { id: 0 })).toBe(false);
+  expect(snapshot[1]?.id).toBe(99);
 });
 
 test("a leaf replace freeze inspects the changed path, not every sibling", () => {

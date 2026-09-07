@@ -19,6 +19,8 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
   await page.getByRole("button", { name: "Paste", exact: true }).click();
   await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
   await expect(page.getByRole("textbox", { name: "Block 6 text" })).toHaveValue(/Shift-click/);
+  const pastedIds = (await canonicalDocument(page)).blocks.slice(4).map((block) => block.id);
+  expect(new Set(pastedIds).size).toBe(2);
 
   await page.getByRole("textbox", { name: "Block 5 text" }).fill("한글 편집도 같은 transaction을 사용합니다.");
   await page.getByRole("button", { name: "Select block 5" }).click();
@@ -26,7 +28,7 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
   await page.getByRole("button", { name: "Move up" }).click();
 
   const moved = await canonicalDocument(page);
-  expect(moved.blocks.map((block) => block.id)).toEqual(["welcome", "select", "clipboard", "block-1", "block-2", "json"]);
+  expect(moved.blocks.map((block) => block.id)).toEqual(["welcome", "select", "clipboard", ...pastedIds, "json"]);
 
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await page.getByRole("button", { name: "Undo", exact: true }).click();
@@ -37,7 +39,7 @@ test("minimal document demo completes selection, clipboard, edit, move, undo, an
   await page.getByRole("button", { name: "Redo", exact: true }).click();
   await page.getByRole("button", { name: "Redo", exact: true }).click();
   const redone = await canonicalDocument(page);
-  expect(redone.blocks.find((block) => block.id === "block-1")?.text).toBe("한글 편집도 같은 transaction을 사용합니다.");
+  expect(redone.blocks.find((block) => block.id === pastedIds[0])?.text).toBe("한글 편집도 같은 transaction을 사용합니다.");
   await expect(page.locator("article[data-selected=true]")).toHaveCount(2);
 });
 

@@ -1,6 +1,37 @@
 import { collapsedRangeSelection, createRangeSelectionFamily } from "@interactive-os/json-document-selection";
 import { hasRichTextContent, isRichTextText, type RichTextDocument, type RichTextNode, type RichTextPoint, type RichTextSelection, type RichTextTarget } from "./model.js";
 import { richTextTopology } from "./topology.js";
+import { validTextOffset } from "./text-offset.js";
+
+/** Map stable text identities through the changed span; affinity owns its boundaries. */
+export function mapExternalRichTextSelection(before: RichTextDocument, after: RichTextDocument, selection: RichTextSelection): RichTextSelection {
+  const previous = richTextTopology(before);
+  const topology = richTextTopology(after);
+  return asRichTextSelection(createRangeSelectionFamily<RichTextPoint, RichTextTarget>().map(selection, {
+    mapPoint(point) {
+      const oldNode = previous.locate(point.nodeId)?.node;
+      const newNode = topology.locate(point.nodeId)?.node;
+      if (point.kind !== "text" || !oldNode || !newNode || !isRichTextText(oldNode) || !isRichTextText(newNode)) {
+        return topology.reconcilePoint(point);
+      }
+      return { ...point, offset: mapTextOffset(oldNode.text, newNode.text, point.offset, point.affinity) };
+    },
+  }, { topology }).state);
+}
+
+function mapTextOffset(before: string, after: string, offset: number, affinity: RichTextPoint["affinity"]): number {
+  if (before === after) return offset;
+  let start = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) start++;
+  while (!validTextOffset(before, start) || !validTextOffset(after, start)) start--;
+  let oldEnd = before.length;
+  let newEnd = after.length;
+  while (oldEnd > start && newEnd > start && before[oldEnd - 1] === after[newEnd - 1]) { oldEnd--; newEnd--; }
+  while (!validTextOffset(before, oldEnd) || !validTextOffset(after, newEnd)) { oldEnd++; newEnd++; }
+  if (offset < start) return offset;
+  if (offset > oldEnd) return offset + newEnd - oldEnd;
+  return affinity === "backward" ? start : newEnd;
+}
 
 export function firstSelection(document: RichTextDocument): RichTextSelection {
   const text = findFirstText(document);

@@ -11,12 +11,39 @@ do not reject completed edits; reentrant notifications are delivered in revision
 order. A returned result describes its own transition, even if a subscriber has
 already performed another transition.
 
-Domains can provide `reconcileSelection(selection, value)` to
-`createEditingSession`. This pure callback runs once for an actual external
-value change, before the new snapshot is observed or delivered. It repairs
-selection validity; it is not an applied-change mapping or collaborative history
-rebase. External changes still clear local undo/redo. Without the callback,
-selection is preserved as before.
+Domains can provide `mapSelection(selection, { before, after, change })` and
+`reconcileSelection(selection, value)` to `createEditingSession`. Both are pure
+callbacks and run before publication of an external value change, mapping first.
+`change` is the matching applied change, or `null` when a lazy read or reentrant
+write must catch up from snapshots alone. Mapping must support that case.
+Reconciliation repairs validity without claiming to preserve logical positions.
+All nine built-in editors reconcile external deletion using their own selection
+families; Calendar retains valid off-screen occurrences. Rich Text maps stable
+text IDs through external text replacement, including affinity and scalar boundaries.
+
+External changes clear **local inverse history**, not an optional external
+`EditingHistory` owner. Every domain editor accepts `{ history }`; Rich Text
+accepts it in `RichTextEditorOptions`. The official Collaboration connection is
+`createCollaborationEditingHistory(runtime)` from
+`@interactive-os/json-document-collaboration/editing`.
+Use it with the same runtime's document. Simply injecting a collaboration
+document does not enable selective history.
+
+The external owner defines undo steps. Collaboration uses one causal commit
+per step; local `historyGroup` does not merge those steps. An explicit
+`history: "ignore"` plan is rejected before mutation with
+`history.ignore-unsupported` when an external history owner is configured.
+Availability and history-only notifications come from that owner. Selection
+before/after each editor-authored target is retained locally and mapped to the
+current document on undo/redo. Selections are not added to the collaboration wire.
+Unknown targets (for example, changes made before this editor existed) reconcile
+the current selection instead of inventing historical selection.
+
+`createEditingId(prefix)` supplies opaque UUID-based identities for Document,
+Order, Object, Tree, Calendar and Rich Text. IDs do not restart per editor or
+replica. Custom `createId` injection remains supported; its provider must ensure
+uniqueness across all writers. Environments without `crypto.randomUUID` fail
+explicitly with `editing.id-provider-unavailable`; no weak random fallback is used.
 
 The session subscribes to its document only while it has observers. The last
 unsubscribe releases that connection; later reads catch up with external state.
@@ -33,7 +60,7 @@ domain slice is a small block document used by the official site demo.
 Every domain editor accepts either an initial JSON value or an existing
 `JSONDocument`. Passing an existing instance lets multiple Connectors observe
 and commit the same canonical state while each editor keeps its own structural
-selection and local history.
+selection and, by default, local history.
 
 ```ts
 const document = createJSONDocument(initialSheet);

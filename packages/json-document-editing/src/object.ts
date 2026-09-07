@@ -14,6 +14,8 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { assertObjectDocument } from "./object-validation.js";
 
@@ -104,18 +106,27 @@ export interface ObjectEditor {
 
 export function createObjectEditor(
   source: EditingDocumentSource<ObjectDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
 ): ObjectEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as ObjectDocument;
   assertObjectDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `object-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("object"));
   const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.objects[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? selectionFor([first.id]) : selectionFor([]),
+    reconcileSelection(selection, value) {
+      const context: KeySelectionContext<string> = {
+        keys: (value as ObjectDocument).objects.map((object) => object.id),
+        universe: "objects",
+        universeMismatch: "clear",
+      };
+      const next = selectionFamily.reconcile(selection, context).state;
+      return selectionFor(selectionFamily.targets(next, context), next.primaryKey);
+    },
   });
 
   function value(): ObjectDocument {

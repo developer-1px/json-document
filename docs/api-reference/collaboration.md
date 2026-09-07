@@ -425,3 +425,11 @@ interface TextSpliceOperation {
   readonly inserted: string;
 }
 ```
+## `@interactive-os/json-document-collaboration/editing`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `createCollaborationEditingHistory`
+
+```ts
+createCollaborationEditingHistory(runtime: HistoryRuntime): EditingHistory
+```
