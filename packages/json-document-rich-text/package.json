@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-collaboration": "*",
     "@interactive-os/json-document-editing": "*",
     "@interactive-os/json-document-selection": "*",
     "@types/node": "^25.9.0",
