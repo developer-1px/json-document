@@ -15,6 +15,20 @@ function findings(source: string) {
 }
 
 describe("public documentation contract", () => {
+  test("documents HistoryResult at its owning public subpath without duplicating root exports", () => {
+    const collaboration = apiReferencePackages.find(({ slug }) => slug === "collaboration");
+    expect(collaboration?.subpaths).toContainEqual({
+      packageName: "@interactive-os/json-document-collaboration/history",
+      entrypoint: "packages/json-document-collaboration/src/history-index.ts",
+    });
+    const reference = readFileSync(new URL("../../../docs/api-reference/collaboration.md", import.meta.url), "utf8");
+    const history = reference.split("## `@interactive-os/json-document-collaboration/history`")[1]?.split("## `@interactive-os/json-document-collaboration/editing`")[0];
+    expect(history).toContain("### `HistoryResult`");
+    expect(history).toContain("readonly change: JSONAppliedChange | null");
+    expect(history).toContain("readonly status: HistoryStatus");
+    expect(history).not.toContain("### `ActorId`");
+  });
+
   test("accepts the exact published llms source against the canonical Core contract", () => {
     expect(symbolCount).toBe(23);
     expect(findings(llms)).toEqual([]);

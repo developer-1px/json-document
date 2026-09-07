@@ -10,6 +10,9 @@ Snapshots and their selections are immutable owned values. Subscriber failures
 do not reject completed edits; reentrant notifications are delivered in revision
 order. A returned result describes its own transition, even if a subscriber has
 already performed another transition.
+Every synchronized revision is published, including synchronization started by
+a snapshot read or another command. A reader's subscription order cannot consume
+the notification intended for another observer.
 
 Domains can provide `mapSelection(selection, { before, after, change })` and
 `reconcileSelection(selection, value)` to `createEditingSession`. Both are pure
@@ -20,6 +23,15 @@ Reconciliation repairs validity without claiming to preserve logical positions.
 All nine built-in editors reconcile external deletion using their own selection
 families; Calendar retains valid off-screen occurrences. Rich Text maps stable
 text IDs through external text replacement, including affinity and scalar boundaries.
+
+Mapping and reconciliation must complete before the session advances its value,
+selection, history status or revision. A thrown callback error leaves the last
+coherent state retained; reads and commands retry synchronization and throw again
+until it succeeds, before authoring another mutation. Successful recovery
+publishes the coherent snapshot and invalidates local inverse history. Document
+commits remain committed even if their observer-triggered reconciliation fails.
+An edit whose own transition completed still returns its own success when a later
+subscriber's document write cannot be reconciled; the next read surfaces that error.
 
 External changes clear **local inverse history**, not an optional external
 `EditingHistory` owner. Every domain editor accepts `{ history }`; Rich Text
@@ -39,6 +51,20 @@ current document on undo/redo. Selections are not added to the collaboration wir
 Unknown targets (for example, changes made before this editor existed) reconcile
 the current selection instead of inventing historical selection.
 
+An `EditingHistory` implementation returns `{ ok: true, target, change, status }`.
+`change` is the operation's own `JSONAppliedChange`, or explicitly `null` when
+only history changes. `status` is its resulting `EditingHistoryStatus` captured
+before notifying subscribers, not a later live status. Editing does not infer
+operation ownership from notification order. Custom implementations of the earlier
+target-only result must supply both fields; the official connection supplies them.
+
+If selection restoration throws after a successful external undo/redo, that
+history operation has already committed. The session retains its result and
+selection reference, and retries only selection restoration on the next read.
+Further commands cannot author until restoration succeeds. Fix the callback or
+recreate the editor; do not retry the history operation as if it were rejected.
+Callback exceptions are programming errors, not `{ ok: false }` commit rejections.
+
 `createEditingId(prefix)` supplies opaque UUID-based identities for Document,
 Order, Object, Tree, Calendar and Rich Text. IDs do not restart per editor or
 replica. Custom `createId` injection remains supported; its provider must ensure
@@ -47,6 +73,8 @@ explicitly with `editing.id-provider-unavailable`; no weak random fallback is us
 
 The session subscribes to its document only while it has observers. The last
 unsubscribe releases that connection; later reads catch up with external state.
+Unsubscribe is idempotent: calling an old release again cannot remove a new
+subscription that reuses the same callback.
 `DocumentEditor` moves existing blocks with JSON Patch `move`, preserving their
 member identity when composed with a collaboration document.
 

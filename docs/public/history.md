@@ -33,6 +33,17 @@ History 항목은 JSON 값이 실제로 바뀐 편집에서 생깁니다. Select
 보존하며 내 기여만 취소하려면 [Collaborative History](collaboration-history.md)의
 공식 연결 API를 사용합니다. document만 바꾸는 것으로 history 의미까지 바뀌지는 않습니다.
 
+`createEditingSession`의 선택 mapping/reconciliation 콜백은 외부 변경에 맞는
+선택을 계산한 뒤 값·선택·history 상태·revision을 함께 확정합니다. 콜백이
+예외를 던지면 이전의 일관된 상태를 보관하고, 다음 읽기나 명령에서 동기화를
+재시도합니다. 실패가 지속되는 동안에는 오래된 undo를 현재 문서에 적용하지
+않습니다. 동기화에 성공하면 local history를 비우고 새 snapshot을 알립니다.
+외부 document commit 자체는 이미 완료됐으므로 콜백 오류로 되돌아가지 않습니다.
+
+snapshot 읽기에서 외부 변경을 따라잡아도 그 revision의 알림은 전달됩니다.
+다른 구독자가 먼저 읽었다는 이유로 알림이 누락되지 않습니다. 구독 해제 함수는
+여러 번 호출해도 같은 콜백으로 새로 만든 구독을 해제하지 않습니다.
+
 여기까지 `editor.dispatch`로 시작한 요청이 Selection과 Topology를 읽고,
 Clipboard를 거쳐 문서와 History를 바꾸는 흐름을 살펴봤습니다. editor가
 받는 전체 요청은 [Intent 레퍼런스](intent.md)에서 확인할 수 있습니다.

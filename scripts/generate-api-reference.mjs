@@ -77,7 +77,9 @@ for (const descriptor of apiReferencePackages) {
   for (const subpath of descriptor.subpaths) {
     const subpathEntry = program.getSourceFile(join(root, subpath.entrypoint));
     if (!subpathEntry) throw new Error(`public entrypoint를 찾을 수 없습니다: ${subpath.entrypoint}`);
-    const subpathExports = checker.getExportsOfModule(checker.getSymbolAtLocation(subpathEntry)).sort((a, b) => a.name.localeCompare(b.name));
+    const subpathExports = checker.getExportsOfModule(checker.getSymbolAtLocation(subpathEntry))
+      .filter((symbol) => !exports.some((rootExport) => rootExport === symbol))
+      .sort((a, b) => a.name.localeCompare(b.name));
     exportCount += subpathExports.length;
     sections.push(`## \`${subpath.packageName}\`\n\n아래 API는 package root가 아닌 이 subpath에서 import합니다.`);
     sections.push(...subpathExports.map((symbol) => [

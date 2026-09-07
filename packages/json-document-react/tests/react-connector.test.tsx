@@ -130,4 +130,18 @@ describe("React Connector", () => {
     expect(screen.getByText("Initial")).toBeTruthy();
     expect(editors[0]).toBe(editors[1]);
   });
+
+  test("updates Editing consumers when an earlier document subscriber reads the editor", () => {
+    const document = createJSONDocument({ blocks: [{ id: "a", text: "Alpha" }] });
+    const editor = createDocumentEditor(document);
+    document.subscribe(() => { void editor.snapshot; });
+    function View() {
+      const snapshot = useEditingSnapshot(editor);
+      const value = snapshot.value as { blocks: ReadonlyArray<{ text: string }> };
+      return <output>{snapshot.revision}:{value.blocks[0]?.text}</output>;
+    }
+    render(<View />);
+    act(() => { document.commit([{ op: "replace", path: "/blocks/0/text", value: "External" }]); });
+    expect(screen.getByText("1:External")).toBeTruthy();
+  });
 });
