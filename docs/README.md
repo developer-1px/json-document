@@ -8,6 +8,7 @@
 docs
 |-- changelog.md              # 사용자 영향 중심 변경 기록
 |-- evaluate.mjs              # 공개 문서 구조·내용 검증
+|-- public-contract-checks.mjs # 문서 원천·Pages 산출물·live 응답의 공통 공개 계약 검증
 `-- public
 |   |-- overview.md            # JSON Document: Why / How / What
 |   |-- api.md                 # JSON Document: 레퍼런스
@@ -133,8 +134,13 @@ reconciliation까지의 DOM 편집 정본은 `standards/dom-editing-lifecycle.md
 현재 v3 portable root의 compatibility 정본은 `standards/json-document-v3/profile.md`,
 `standards/json-document-v3/public-surface.json`, 그리고 profile이
 지정한 conformance vector와 language binding입니다. 이름 정본은 stable v3
-identifier나 동작을 바꾸지 않으며, 과거 version 문서는 v3 exact
-21-symbol·six-member 계약을 확장하지 않습니다.
+identifier나 동작을 바꾸지 않으며, 과거 version 문서는 정본 public surface의
+Root symbol·six-member 계약을 확장하지 않습니다.
+
+문서 원천, Pages 산출물, live 응답의 공개 계약 검사는
+`public-contract-checks.mjs`가 소유합니다. Root symbol 수는 Core의
+`public-contract.json`, 유효한 package 참조는 `api-reference/packages.mjs`에서
+읽습니다. 각 evaluator의 파일·HTTP 읽기와 재시도 정책은 그대로 유지합니다.
 
 ## 책임 기준
 

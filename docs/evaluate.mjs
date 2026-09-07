@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { validateLlmsContract, validatePublicPackageReferences } from "./public-contract-checks.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -137,34 +138,6 @@ const publicContract = readJson("packages/json-document/public-contract.json");
 const rootPackage = readJson("package.json");
 const implementationShape = read("standards/repository-implementation-shape.md");
 const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
-const activeCompanionPackages = new Set([
-  "@interactive-os/json-document-editing",
-  "@interactive-os/json-document-composer",
-  "@interactive-os/json-document-composer-react",
-  "@interactive-os/json-document-file-intake",
-  "@interactive-os/json-document-rich-text-suggestion",
-  "@interactive-os/json-document-rich-text-suggestion-react",
-  "@interactive-os/json-document-rich-text-mention",
-  "@interactive-os/json-document-rich-text-mention-react",
-  "@interactive-os/json-document-rich-text",
-  "@interactive-os/json-document-selection",
-  "@interactive-os/json-document-react",
-  "@interactive-os/json-document-react-hook-form",
-  "@interactive-os/json-document-ajv",
-  "@interactive-os/json-document-a2ui",
-  "@interactive-os/json-document-affordance",
-  "@interactive-os/json-document-ui-primitives-react",
-  "@interactive-os/json-document-animation-react",
-  "@interactive-os/json-document-markdown-react",
-  "@interactive-os/json-document-zod",
-  "@interactive-os/json-document-database",
-  "@interactive-os/json-document-calendar",
-  "@interactive-os/json-document-tanstack-table",
-  "@interactive-os/json-document-web",
-  "@interactive-os/json-document-contenteditable",
-  "@interactive-os/json-document-collaboration",
-  "@interactive-os/json-document-contenteditable-collaboration",
-]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "adapter-clipboard.md",
@@ -299,25 +272,8 @@ if (misplacedMarkdown.length > 0) {
 }
 
 for (const [name, source] of Object.entries(surfaces)) {
-  if (/@interactive-os\/json-document\/(?:session|react)\b/.test(source)) {
-    fail(`${name}: removed package subpath is still documented.`);
-  }
-  for (
-    const match of source.matchAll(
-      /@interactive-os\/json-document-[a-z0-9-]+\b/g,
-    )
-  ) {
-    if (
-      !activeCompanionPackages.has(match[0])
-    ) {
-      fail(
-        `${name}: removed json-document extension is still documented as current: ${match[0]}.`,
-      );
-    }
-  }
-  if (/\blabs\/extensions\b/.test(source)) {
-    fail(`${name}: removed lab path is still documented as current.`);
-  }
+  const validate = name === "llms" ? validateLlmsContract : validatePublicPackageReferences;
+  validate(source, (message) => fail(`${name}: ${message}`));
 }
 
 for (const [name, source] of Object.entries(surfaces)) {
