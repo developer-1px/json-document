@@ -5,11 +5,14 @@
 import {
   buildPointer,
   isPrefix,
+  readAt,
   tryParsePointer,
   type Pointer,
 } from "../pointer/core.js";
 import { parseArrayIndex } from "../pointer/array-index.js";
 import type { JSONPatchOperation } from "./contract.js";
+import type { JSONValue } from "../protocol/contract.js";
+import { applyOpRaw } from "./apply.js";
 
 function isArrayIndex(seg: string): boolean {
   return parseArrayIndex(seg) !== null;
@@ -22,12 +25,16 @@ function isArrayIndex(seg: string): boolean {
 // remove 의 경우 delta = -1 (pivot > remove 위치는 한 칸 당겨짐).
 //
 // `at` 의 마지막 segment 가 array index 가 아니거나 "-" 이면 영향 없음.
-function shiftArraySibling(at: string[], target: string[], delta: 1 | -1): string[] | null {
+function shiftArraySibling(at: string[], target: string[], delta: 1 | -1, before?: JSONValue): string[] | null {
   if (at.length === 0) return null;
   const pivotSeg = at[at.length - 1]!;
   if (pivotSeg === "-") return null;
   if (!isArrayIndex(pivotSeg)) return null;
   const parent = at.slice(0, at.length - 1);
+  if (before !== undefined) {
+    const container = readAt(before, parent);
+    if (!container.ok || !Array.isArray(container.value)) return null;
+  }
   if (target.length < at.length) return null;
   for (let i = 0; i < parent.length; i++) {
     if (parent[i] !== target[i]) return null;
@@ -45,7 +52,7 @@ function shiftArraySibling(at: string[], target: string[], delta: 1 | -1): strin
 
 // 한 op 가 한 pointer 에 어떤 영향을 주는가.
 // null = pointer 자체가 cascading drop 됨.
-function trackOne(pointer: Pointer, op: JSONPatchOperation): Pointer | null {
+function trackOne(pointer: Pointer, op: JSONPatchOperation, before?: JSONValue): Pointer | null {
   const target = tryParsePointer(pointer);
   if (target === null) return null;
 
@@ -56,7 +63,12 @@ function trackOne(pointer: Pointer, op: JSONPatchOperation): Pointer | null {
     case "add": {
       const at = tryParsePointer(op.path);
       if (at === null) return null;
-      const shifted = shiftArraySibling(at, target, 1);
+      if (before !== undefined) {
+        const parent = readAt(before, at.slice(0, -1));
+        if ((at.length === 0 || (parent.ok && !Array.isArray(parent.value)))
+          && isPrefix(at, target) && at.length < target.length) return null;
+      }
+      const shifted = shiftArraySibling(at, target, 1, before);
       return shifted ? buildPointer(shifted) : pointer;
     }
 
@@ -65,7 +77,7 @@ function trackOne(pointer: Pointer, op: JSONPatchOperation): Pointer | null {
       if (at === null) return null;
       // 동일 또는 자손이면 drop
       if (isPrefix(at, target)) return null;
-      const shifted = shiftArraySibling(at, target, -1);
+      const shifted = shiftArraySibling(at, target, -1, before);
       return shifted ? buildPointer(shifted) : pointer;
     }
 
@@ -92,14 +104,16 @@ function trackOne(pointer: Pointer, op: JSONPatchOperation): Pointer | null {
         return buildPointer([...to, ...tail]);
       }
       // 그 외: remove(from) 적용 후 add(to) 적용으로 합성
-      const afterRemove = trackOne(pointer, { op: "remove", path: op.from });
+      const afterRemove = trackOne(pointer, { op: "remove", path: op.from }, before);
       if (afterRemove === null) return null;
-      return trackOne(afterRemove, { op: "add", path: op.path, value: null });
+      const removed = before === undefined ? undefined : applyOpRaw(before, { op: "remove", path: op.from });
+      if (removed && "error" in removed) return null;
+      return trackOne(afterRemove, { op: "add", path: op.path, value: null }, removed?.state as JSONValue | undefined);
     }
 
     case "copy": {
       // copy 는 add 와 같은 영향 (target 위치에 새 노드)
-      return trackOne(pointer, { op: "add", path: op.path, value: null });
+      return trackOne(pointer, { op: "add", path: op.path, value: null }, before);
     }
   }
 }
@@ -107,23 +121,25 @@ function trackOne(pointer: Pointer, op: JSONPatchOperation): Pointer | null {
 export function trackPointer(
   pointer: Pointer,
   applied: ReadonlyArray<JSONPatchOperation>,
+  before?: JSONValue,
 ): Pointer | null {
-  return trackPointerFrom(pointer, applied, 0);
-}
-
-function trackPointerFrom(
-  pointer: Pointer,
-  applied: ReadonlyArray<JSONPatchOperation>,
-  startIndex: number,
-): Pointer | null {
+  const segments = tryParsePointer(pointer);
+  if (segments === null || (before !== undefined && !readAt(before, segments).ok)) return null;
   let cur: Pointer | null = pointer;
-  for (let index = startIndex; index < applied.length; index += 1) {
+  let state = before;
+  for (let index = 0; index < applied.length; index += 1) {
     if (cur === null) return null;
     const op = applied[index]!;
-    cur = trackOne(cur, op);
+    cur = trackOne(cur, op, state);
+    if (state !== undefined) {
+      const result = applyOpRaw(state, op);
+      if ("error" in result) return null;
+      state = result.state as JSONValue;
+    }
     // 방어: `/-` 가 결과 pointer 에 누출되면 broken — null 반환.
     // applyPatch 의 applied 는 normalizeOp 으로 이미 concrete index. 이 가드는 hand-built ops 보호용.
-    if (cur !== null && (cur === "-" || cur.endsWith("/-"))) return null;
+    if (cur !== null && (cur === "-" || cur.endsWith("/-"))
+      && (state === undefined || !readAt(state, tryParsePointer(cur)!).ok)) return null;
   }
   return cur;
 }

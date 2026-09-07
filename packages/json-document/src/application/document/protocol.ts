@@ -12,6 +12,7 @@ import {
 import type {
   JSONPatchOperation,
   JSONPatchResult,
+  JSONValue,
   Pointer,
 } from "./contract.js";
 
@@ -56,9 +57,13 @@ export function appendSegment(
   return appendSegmentInternal(pointer, segment);
 }
 
+/** Tracks a location through applied patches using the pre-patch value.
+ * Omitting `before` retains the legacy numeric-segment-as-array interpretation.
+ */
 export function trackPointer(
   pointer: Pointer,
   applied: ReadonlyArray<JSONPatchOperation>,
+  before?: JSONValue,
 ): Pointer | null {
-  return trackPointerInternal(pointer, applied);
+  return trackPointerInternal(pointer, applied, before);
 }

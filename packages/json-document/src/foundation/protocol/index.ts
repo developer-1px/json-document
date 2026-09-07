@@ -1,6 +1,6 @@
 import { trackPointer as trackPointerInternal } from "../patch/track.js";
 import type { Pointer } from "../pointer/core.js";
-import type { JSONPatchOperation } from "./contract.js";
+import type { JSONPatchOperation, JSONValue } from "./contract.js";
 
 export {
   applyOwnedProtocolPatch,
@@ -40,6 +40,7 @@ export { parseArrayIndex } from "../pointer/array-index.js";
 export function trackPointer(
   pointer: Pointer,
   applied: ReadonlyArray<JSONPatchOperation>,
+  before?: JSONValue,
 ): Pointer | null {
-  return trackPointerInternal(pointer, applied);
+  return trackPointerInternal(pointer, applied, before);
 }

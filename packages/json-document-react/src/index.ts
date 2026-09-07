@@ -1,5 +1,5 @@
-import { useCallback, useState, useSyncExternalStore } from "react";
-import type { JSONDocument, JSONValue } from "@interactive-os/json-document";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import { jsonEqual, type JSONDocument, type JSONValue } from "@interactive-os/json-document";
 import {
   createDocumentEditor,
   type BlockDocument,
@@ -68,12 +68,18 @@ export {
 } from "./use-anchored-floating-position.js";
 
 export function useJSONDocumentValue(document: JSONDocument): JSONValue {
-  const subscribe = useCallback(
-    (notify: () => void) => document.subscribe(() => notify()),
-    [document],
-  );
-  const getSnapshot = useCallback(() => document.value, [document]);
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const store = useMemo(() => {
+    let current = document.value;
+    return {
+      subscribe: (notify: () => void) => document.subscribe(() => notify()),
+      getSnapshot() {
+        const latest = document.value;
+        if (!jsonEqual(current, latest)) current = latest;
+        return current;
+      },
+    };
+  }, [document]);
+  return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
 }
 
 /** Official React Connector entry point for a JSONDocument subscription. */
