@@ -34,6 +34,7 @@
       "@interactive-os/json-document-database": ["../packages/json-document-database/src/index.ts"],
       "@interactive-os/json-document-collaboration": ["../packages/json-document-collaboration/src/index.ts"],
       "@interactive-os/json-document-collaboration/text": ["../packages/json-document-collaboration/src/text-index.ts"],
+      "@interactive-os/json-document-collaboration/editing": ["../packages/json-document-collaboration/src/editing-index.ts"],
       "@interactive-os/json-document-contenteditable-collaboration": ["../packages/contenteditable-collaboration/src/index.ts"]
     },
     "jsx": "react-jsx",
