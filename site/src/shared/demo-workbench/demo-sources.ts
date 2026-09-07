@@ -95,6 +95,7 @@ import mentionSource from "../../../../packages/json-document-rich-text-mention/
 import mentionReactSource from "../../../../packages/json-document-rich-text-mention-react/src/index.tsx?raw";
 import webFileIntakeSource from "../../../../packages/json-document-web/src/file-intake.ts?raw";
 import richTextReactSurfaceSource from "../../../../packages/json-document-rich-text-react/src/index.tsx?raw";
+import richTextRenderStoreSource from "../../../../packages/json-document-rich-text-react/src/render-store.ts?raw";
 import uiFileSizeSource from "../../../../packages/json-document-file-intake/src/file-size.ts?raw";
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
@@ -105,6 +106,7 @@ import collaborationContentEditableSource from "../../../../packages/contentedit
 import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
 import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
 import richTextSource from "../../../../packages/json-document-rich-text/src/editor.ts?raw";
+import richTextAppliedChangeSource from "../../../../packages/json-document-rich-text/src/applied-change.ts?raw";
 import richTextPlainTextSource from "../../../../packages/json-document-rich-text/src/plain-text.ts?raw";
 import richTextWebSource from "../../../../packages/json-document-rich-text-web/src/contenteditable.ts?raw";
 import tanStackTableSource from "../../../../packages/json-document-tanstack-table/src/index.ts?raw";
@@ -260,6 +262,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-rich-text-mention-react/src/index.tsx", mentionReactSource],
   ["packages/json-document-web/src/file-intake.ts", webFileIntakeSource],
   ["packages/json-document-rich-text-react/src/index.tsx", richTextReactSurfaceSource],
+  ["packages/json-document-rich-text-react/src/render-store.ts", richTextRenderStoreSource],
   ["packages/json-document-file-intake/src/file-size.ts", uiFileSizeSource],
   ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
@@ -270,6 +273,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-ajv/src/index.ts", ajvSource],
   ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
   ["packages/json-document-rich-text/src/editor.ts", richTextSource],
+  ["packages/json-document-rich-text/src/applied-change.ts", richTextAppliedChangeSource],
   ["packages/json-document-rich-text/src/plain-text.ts", richTextPlainTextSource],
   ["packages/json-document-rich-text-web/src/contenteditable.ts", richTextWebSource],
   ["packages/json-document-tanstack-table/src/index.ts", tanStackTableSource],
@@ -679,6 +683,11 @@ const registeredPublicUsages = [
   },
   {
     packageName: "@interactive-os/json-document-rich-text",
+    symbol: "appliedOperationsFor",
+    sourcePath: "packages/json-document-rich-text/src/applied-change.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text",
     symbol: "richTextPlainText",
     sourcePath: "packages/json-document-rich-text/src/plain-text.ts",
   },
@@ -796,6 +805,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-rich-text-react",
     symbol: "RichTextEditorSurface",
     sourcePath: "packages/json-document-rich-text-react/src/index.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-rich-text-react",
+    symbol: "RichTextEditorSurface",
+    sourcePath: "packages/json-document-rich-text-react/src/render-store.ts",
   },
   {
     packageName: "@interactive-os/json-document-rich-text-react",

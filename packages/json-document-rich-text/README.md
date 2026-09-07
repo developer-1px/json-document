@@ -40,6 +40,11 @@ uniqueness before committing; removing the last required root block is rejected.
 validates the resulting bound Rich Text document while still allowing adjacent
 JSON fields, such as Composer attachments, in the same local history.
 
+`appliedOperationsFor(value)` exposes recorded operation paths, including the
+source `from` for a move, so consumers such as the React render store can track
+structural changes on both sides. It returns `null` when no record is available;
+consumers must then read the current document instead of assuming no change.
+
 External changes reconcile selection against the current topology (clamping
 surviving points and dropping missing points) before snapshot delivery. This
 requires Editing's `reconcileSelection` option from the same draft revision;
