@@ -202,3 +202,18 @@ so non-browser tooling can load it safely.
 | --- | --- |
 | `@interactive-os/json-document-editing` | `>=0.1.0-rc.0 <1` |
 | `@interactive-os/json-document-selection` | `>=0.1.0-rc.0 <1` |
+
+## Cut failure boundary (Draft grammar)
+
+`createWebClipboardBinding` captures the editor payload and writes its
+representations before calling `cut`. A failed write leaves removal uncalled;
+a rejected removal reports `editing.rejected` after native event cancellation.
+Previously written clipboard data can remain in either failure case: the OS
+clipboard and JSONDocument are not one transaction. Headless `editor.cut()`
+returns its captured payload alongside the editing result.
+
+[EG-CUT integration cases](tests/clipboard-rejection.test.ts) use a real
+Document editor to check each write failure, schema-rejected removal, successful
+capture-before-removal, and selection-restoring Undo. Existing unsupported-format
+cases retain their event ownership behavior. These tests exercise the Web event
+port; they do not certify browser-specific clipboard permissions or transport.

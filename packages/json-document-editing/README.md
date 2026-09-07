@@ -149,3 +149,35 @@ targets may use numbered `marker` presentations for instructions or a
 serializable `{ type: "reaction", reaction: "like" | "dislike" }` presentation
 for comment-free feedback. Both use the same create, move, delete, and history
 contracts exposed by `createAnnotationEditor`.
+
+## Editing grammar evidence (Draft)
+
+The [editing grammar design](../../standards/editing-grammar.md) separates shared
+rules from each Hand's interpretation. The [test-only runner](tests/conformance/editing-grammar.ts)
+executes the same selection, copy, edit, cut, paste, rejection, no-op, and local
+undo/redo observations through public APIs. Its [Document and Sheet bindings](tests/conformance/editing-grammar.test.ts)
+keep their own types and expected values; Rich Text binds it from its own package.
+These are applicability checks across different profiles, not independent
+implementations of one frozen profile.
+
+| Profile decision | Document binding | Sheet binding |
+| --- | --- | --- |
+| Target and identity | Stable block ID plus text offset; `selection.move` moves content | Stable row/column IDs; cell values |
+| Selection | Directional block ranges; Copy includes whole blocks even with text offsets | Rectangular ranges; Copy/Cut use the primary rectangle |
+| Topology | Document block order | Document axes by default; supplied visible axes for topology-aware operations |
+| Supported operations | Select, insert, remove, move, duplicate, Copy/Cut/Paste, Undo/Redo | Select, commit/fill cells, Copy/Cut/Paste, Undo/Redo; Cut clears values to `null` |
+| Paste and resulting selection | Insert after the last selected block by default (or `afterId`); fresh IDs; one collapsed range per inserted block, first primary | Start at focus without replacing the old rectangle; select the written rectangle; reject overflow with `paste.out-of-bounds` |
+| Local history | Consecutive text changes in the same block can share a group; selection ends the active group | Consecutive commits to the same cell can share a group; selection ends the active group |
+| Input | Headless calls; Web/Affordance choose physical bindings and native text arbitration | Headless calls; Web/Affordance choose physical bindings and native text arbitration |
+
+Both bindings clear local history on external value changes and reconcile missing
+selection endpoints. An injected `EditingHistory` retains its own step and
+restoration policy. A missing command (the current Database binding has no
+`cut`) is distinct from a supported command that is unavailable for the current
+selection. The existing [clipboard surface test](tests/clipboard-surface.test.ts)
+records that distinction; it does not decide every future Database profile.
+
+Existing public API references and live Usage remain in
+[Editing](https://developer-1px.github.io/json-document/docs/api/editing),
+[Document](https://developer-1px.github.io/json-document/demo), and
+[Sheet](https://developer-1px.github.io/json-document/demo/sheet).

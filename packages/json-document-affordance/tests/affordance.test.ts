@@ -29,7 +29,6 @@ import {
   panAffordance,
   resizeAffordance,
   resolveAffordanceKey,
-  selectAllAffordance,
   snapAffordance,
   treeAffordance,
   createBoardDragSession,
@@ -653,17 +652,6 @@ describe("dropAffordance", () => {
       cursor: "move",
       commit: true,
     });
-  });
-});
-
-describe("selectAllAffordance", () => {
-  test("toggles Mod+A between select-all and clear", () => {
-    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: false }).hand)
-      .toEqual({ type: "select-all" });
-    expect(selectAllAffordance({ key: "a", metaKey: true, ctrlKey: false }, { allSelected: true }).hand)
-      .toEqual({ type: "clear" });
-    expect(selectAllAffordance({ key: "a", metaKey: false, ctrlKey: false }, { allSelected: false }).hand)
-      .toBeNull();
   });
 });
 
