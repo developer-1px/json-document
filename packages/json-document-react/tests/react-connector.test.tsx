@@ -13,6 +13,23 @@ import {
 afterEach(cleanup);
 
 describe("React Connector", () => {
+  test("accepts copied document snapshots without repeated renders", () => {
+    const inner = createJSONDocument({ title: "Draft" });
+    const document = { ...inner, get value() { return structuredClone(inner.value); } };
+    let renders = 0;
+    function View() {
+      renders += 1;
+      const value = useJSONDocumentValue(document) as { title: string };
+      return <output>{value.title}</output>;
+    }
+    render(<View />);
+    expect(screen.getByText("Draft")).toBeTruthy();
+    expect(renders).toBe(1);
+    act(() => { inner.commit([{ op: "replace", path: "/title", value: "Ready" }]); });
+    expect(screen.getByText("Ready")).toBeTruthy();
+    expect(renders).toBe(2);
+  });
+
   test("composes Document textarea caret, click count, input, and cursor restoration", () => {
     const caretRanges: unknown[] = [];
     const inputs: unknown[] = [];

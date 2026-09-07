@@ -3,6 +3,51 @@ import { describe, expect, test } from "vitest";
 import { createEditingSession } from "../src/session.js";
 
 describe("selection-aware editing history", () => {
+  test.each([
+    { name: "object add replaces an existing member", value: { title: "before" }, operations: [{ op: "add", path: "/title", value: "after" }] },
+    { name: "successive removals use intermediate values", value: { items: ["a", "b", "c"] }, operations: [{ op: "remove", path: "/items/0" }, { op: "remove", path: "/items/0" }] },
+    { name: "insert then replace follows the shifted index", value: { items: ["a", "b"] }, operations: [{ op: "add", path: "/items/0", value: "x" }, { op: "replace", path: "/items/1", value: "A" }] },
+    { name: "root add restores the document", value: { title: "before" }, operations: [{ op: "add", path: "", value: { title: "after" } }] },
+  ] as const)("round trips $name", ({ value, operations }) => {
+    const document = createJSONDocument(value);
+    const session = createEditingSession({ document, selection: null });
+    expect(session.apply({ operations, selectionAfter: null, origin: "edit" }).ok).toBe(true);
+    const after = document.value;
+    expect(session.undo().ok).toBe(true);
+    expect(document.value).toEqual(value);
+    expect(session.redo().ok).toBe(true);
+    expect(document.value).toEqual(after);
+  });
+
+  test("a history group restores changes to every affected path", () => {
+    const document = createJSONDocument({ left: 0, right: 0 });
+    const session = createEditingSession({ document, selection: null });
+    for (const path of ["/left", "/right"]) {
+      session.apply({ operations: [{ op: "replace", path, value: 1 }], selectionAfter: null, origin: "edit", historyGroup: "both" });
+    }
+    expect(session.undo().ok).toBe(true);
+    expect(document.value).toEqual({ left: 0, right: 0 });
+    expect(session.redo().ok).toBe(true);
+    expect(document.value).toEqual({ left: 1, right: 1 });
+  });
+
+  test("fresh snapshot copies preserve local history until the value changes", () => {
+    const inner = createJSONDocument({ title: "before" });
+    const document = { ...inner, get value() { return structuredClone(inner.value); } };
+    const session = createEditingSession({ document, selection: null });
+    const revisions: number[] = [];
+    const unsubscribe = session.subscribe((snapshot) => revisions.push(snapshot.revision));
+    session.apply({ operations: [{ op: "replace", path: "/title", value: "after" }], selectionAfter: null, origin: "edit" });
+    expect(session.snapshot.canUndo).toBe(true);
+    expect(session.snapshot.revision).toBe(1);
+    expect(session.undo().ok).toBe(true);
+    expect(inner.value).toEqual({ title: "before" });
+    inner.commit([{ op: "replace", path: "/title", value: "external" }]);
+    expect(session.snapshot.canRedo).toBe(false);
+    expect(revisions).toEqual([1, 2, 3]);
+    unsubscribe();
+  });
+
   test("publishes external document changes and invalidates local history", () => {
     const document = createJSONDocument({ title: "Draft" });
     const session = createEditingSession<{ readonly current: string | null }>({

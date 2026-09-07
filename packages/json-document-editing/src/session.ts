@@ -1,5 +1,7 @@
 import {
+  createJSONDocument,
   jsonEqual,
+  parentPointer,
   type JSONAppliedChange,
   type JSONDocument,
   type JSONPatchOperation,
@@ -74,8 +76,9 @@ export function createEditingSession<Selection extends JSONValue>(options: {
   }
 
   function synchronizeExternalChange(): boolean {
-    if (observedValue === document.value) return false;
-    observedValue = document.value;
+    const latest = document.value;
+    if (jsonEqual(observedValue, latest)) return false;
+    observedValue = latest;
     undoStack = [];
     redoStack = [];
     activeHistoryGroup = undefined;
@@ -136,7 +139,7 @@ export function createEditingSession<Selection extends JSONValue>(options: {
         undoStack = [...undoStack.slice(0, -1), {
           ...entry,
           forward: [...previous.forward, ...entry.forward],
-          inverse: previous.inverse,
+          inverse: [...entry.inverse, ...previous.inverse],
           selectionBefore: previous.selectionBefore,
         }];
       } else {
@@ -225,27 +228,37 @@ function invertOperations(
   document: JSONDocument,
   operations: ReadonlyArray<JSONPatchOperation>,
 ): ReadonlyArray<JSONPatchOperation> | null {
+  // Every inverse reads the state immediately before its forward operation.
+  // Keep single-operation edits on the original read port; a batch needs an
+  // isolated working document to resolve shifted indexes and overwritten values.
+  const working = operations.length > 1 ? createJSONDocument(document.value) : document;
   const inverse: JSONPatchOperation[] = [];
-  for (let index = operations.length - 1; index >= 0; index -= 1) {
-    const operation = operations[index];
-    if (operation === undefined) return null;
+  for (const operation of operations) {
     if (operation.op === "replace") {
-      const located = document.at(operation.path);
+      const located = working.at(operation.path);
       if (!located.ok) return null;
       inverse.push({ op: "replace", path: operation.path, value: clone(located.value) });
     } else if (operation.op === "remove") {
-      const located = document.at(operation.path);
+      const located = working.at(operation.path);
       if (!located.ok) return null;
       inverse.push({ op: "add", path: operation.path, value: clone(located.value) });
     } else if (operation.op === "add") {
-      const path = appendedIndexPath(document, operation.path);
+      const path = appendedIndexPath(working, operation.path);
       if (path === null) return null;
-      inverse.push({ op: "remove", path });
+      const parent = parentPointer(path);
+      const container = parent === null ? null : working.at(parent);
+      const previous = working.at(path);
+      inverse.push(previous.ok && (parent === null || (container?.ok && !Array.isArray(container.value)))
+        ? { op: "replace", path, value: clone(previous.value) }
+        : { op: "remove", path });
+    } else if (operation.op === "test") {
+      // A successful precondition changes no value and needs no inverse.
     } else {
       return null;
     }
+    if (working !== document && !working.commit([operation]).ok) return null;
   }
-  return inverse;
+  return inverse.reverse();
 }
 
 function appendedIndexPath(document: JSONDocument, path: string): string | null {

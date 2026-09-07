@@ -1,5 +1,20 @@
 # @interactive-os/json-document-collaboration
 
+Remote `document.subscribe` notifications compile visible tree identities into
+ordered JSON Patch moves, insertions, and removals. Consumers can use
+`trackPointer(pointer, change.applied, before)` with the previous snapshot to
+follow array reorders, object renames, and cross-container moves. A batch may use
+temporary transfer locations to preserve identities through swaps; only the
+final document is published. Root replacement still invalidates descendants,
+while moving a surviving container to root retains its descendant addresses.
+JSON-equal transitions remain notification-free under the JSONDocument contract.
+
+Data-only causal append reuses the previous materialization. Reordered histories
+and history controls still replay from the epoch base. Causal ancestry uses actor
+frontiers rather than recursive dependency walks. `benchmarks/runtime.mjs` measures
+both remote history ingest and the first subsequent edit by a new actor; no wire
+or checkpoint format changed.
+
 Transport-free causal collaboration engine for the six-member
 `@interactive-os/json-document` JSON Document contract.
 

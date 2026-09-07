@@ -10,7 +10,7 @@ import {
   freezeLocalChange,
   prepareGraph,
 } from "./change.js";
-import { patchBetweenValues } from "./document-patch.js";
+import { patchBetweenTrees } from "./document-patch.js";
 import { jsonEqual } from "@interactive-os/json-document";
 import { materializeChanges } from "./materialize.js";
 import {
@@ -297,6 +297,7 @@ export function createText(state: RuntimeState): Text {
         state.initialTree,
         nextGraph.ordered,
         state.materializeValidation,
+        { ordered: state.graph.ordered, materialized: state.materialized },
       );
       const changeKey = changeIdKey(changeId);
       if (!nextMaterialized.history.appliedKeys.has(changeKey)) {
@@ -314,6 +315,7 @@ export function createText(state: RuntimeState): Text {
         state.documentStore.value,
         nextMaterialized.value,
       );
+      const previousTree = state.materialized.tree;
       assignCausalState(state, {
         known: nextKnown,
         graph: nextGraph,
@@ -323,9 +325,11 @@ export function createText(state: RuntimeState): Text {
 
       let documentChange = undefined;
       if (didChangeDocument) {
-        const documentCommit = state.documentStore.commit(patchBetweenValues(
+        const documentCommit = state.documentStore.commit(patchBetweenTrees(
           state.documentStore.value,
           state.materialized.value,
+          previousTree,
+          state.materialized.tree,
         ), {
           ...(metadataProbe.change.metadata === undefined
             ? {}

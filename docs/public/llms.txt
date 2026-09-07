@@ -23,12 +23,12 @@ import {
 ```
 
 Root는 React, Zod, selection, clipboard, history, DOM을 import하지 않는다.
-공개 Root는 정확히 다음 21개 symbol이다.
+공개 Root는 정확히 다음 23개 symbol이다.
 
 ```txt
 values
   appendSegment, applyPatch, buildPointer, createJSONDocument
-  parentPointer, parsePointer, trackPointer, tryParsePointer
+  jsonEqual, parentPointer, parseArrayIndex, parsePointer, trackPointer, tryParsePointer
 
 types
   JSONAppliedChange, JSONPatchValidationResult

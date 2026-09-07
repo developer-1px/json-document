@@ -31,6 +31,9 @@ function DocumentView() {
 `useReactConnector(document)` is the official stateful Connector entry point
 and connects the six-member `JSONDocument` directly to React.
 `useJSONDocumentValue` remains the lower-level document-value hook.
+Both accept conforming implementations that return a fresh, isolated JSON
+snapshot on every read. The Connector stabilizes equal values for React's
+external-store contract; document implementations need not promise reference identity.
 `useEditingSnapshot` accepts the structural snapshot/subscription surface
 shared by `EditingSession` and `DocumentEditor`.
 `useEditing` adds the shared selection loop. `getIsSelected` is the object

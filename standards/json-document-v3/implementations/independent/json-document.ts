@@ -1,3 +1,6 @@
+import { JSONPathJS } from "jsonpath-js";
+import { validateQueryTypes } from "./query-types.js";
+import type { ProtocolPatchResult } from "../../conformance/suites/protocol.js";
 import type {
   JSONPatchOperation,
   JSONValue,
@@ -22,6 +25,21 @@ interface OperationResult {
   readonly applied: JSONPatchOperation;
 }
 
+export function applyIndependentPatch(initial: unknown, operations: ReadonlyArray<JSONPatchOperation>): ProtocolPatchResult {
+  try {
+    let value = cloneJSON(initial);
+    const applied: JSONPatchOperation[] = [];
+    for (const operation of operations) {
+      const result = applyOperation(value, operation);
+      value = result.value;
+      applied.push(cloneJSON(result.applied) as unknown as JSONPatchOperation);
+    }
+    return Object.freeze({ ok: true, value: freezeJSON(value), change: createChange(applied, undefined) });
+  } catch (error) {
+    return failureFrom(error);
+  }
+}
+
 export function createIndependentJSONDocument(
   validation: JSONDocumentValidation,
   initial: JSONValue,
@@ -38,23 +56,16 @@ export function createIndependentJSONDocument(
     operations: ReadonlyArray<JSONPatchOperation>,
   ): PreparedCommit | JSONDocumentFailure => {
     try {
-      let value = cloneJSON(state);
-      const applied: JSONPatchOperation[] = [];
-      for (const operation of operations) {
-        const result = applyOperation(value, operation);
-        value = result.value;
-        applied.push(
-          cloneJSON(result.applied) as unknown as JSONPatchOperation,
-        );
-      }
-      value = freezeJSON(value);
+      const patched = applyIndependentPatch(state, operations);
+      if (!patched.ok) return patched;
+      const value = patched.value;
       evaluatingValidation = true;
       try {
         accept(validation, value);
       } finally {
         evaluatingValidation = false;
       }
-      return { value, applied };
+      return { value, applied: patched.change.applied };
     } catch (error) {
       return failureFrom(error);
     }
@@ -519,101 +530,11 @@ function parseArrayIndex(segment: string): number | null {
 }
 
 function queryPointers(value: JSONValue, query: string): string[] {
-  const tokens = parseQuery(query);
-  let matches: Array<{ readonly value: JSONValue; readonly path: string }> = [
-    { value, path: "" },
-  ];
-  for (const token of tokens) {
-    const next: Array<{ readonly value: JSONValue; readonly path: string }> = [];
-    for (const match of matches) {
-      if (token === "*") {
-        if (Array.isArray(match.value)) {
-          for (let index = 0; index < match.value.length; index += 1) {
-            next.push({
-              value: match.value[index] as JSONValue,
-              path: appendPointer(match.path, String(index)),
-            });
-          }
-        } else if (isRecord(match.value)) {
-          for (const key of Object.keys(match.value)) {
-            next.push({
-              value: match.value[key] as JSONValue,
-              path: appendPointer(match.path, key),
-            });
-          }
-        }
-        continue;
-      }
-      if (Array.isArray(match.value)) {
-        const index = parseArrayIndex(token);
-        if (index !== null && index < match.value.length) {
-          next.push({
-            value: match.value[index] as JSONValue,
-            path: appendPointer(match.path, token),
-          });
-        }
-      } else if (
-        isRecord(match.value)
-        && Object.prototype.hasOwnProperty.call(match.value, token)
-      ) {
-        next.push({
-          value: match.value[token] as JSONValue,
-          path: appendPointer(match.path, token),
-        });
-      }
-    }
-    matches = next;
-  }
-  return matches.map((match) => match.path);
-}
-
-function parseQuery(query: string): string[] {
-  if (query === "$") return [];
-  if (!query.startsWith("$")) {
-    throw new IndependentError("invalid_query", "JSONPath must start with '$'");
-  }
-
-  const tokens: string[] = [];
-  let index = 1;
-  while (index < query.length) {
-    if (query[index] === ".") {
-      const start = ++index;
-      while (
-        index < query.length
-        && query[index] !== "."
-        && query[index] !== "["
-      ) {
-        index += 1;
-      }
-      if (index === start) {
-        throw new IndependentError("invalid_query", "empty member name");
-      }
-      tokens.push(query.slice(start, index));
-      continue;
-    }
-    if (query[index] === "[") {
-      const close = query.indexOf("]", index + 1);
-      if (close === -1) {
-        throw new IndependentError("invalid_query", "unclosed selector");
-      }
-      const selector = query.slice(index + 1, close);
-      if (selector === "*") {
-        tokens.push("*");
-      } else if (/^(0|[1-9]\d*)$/.test(selector)) {
-        tokens.push(selector);
-      } else {
-        const quoted = /^(["'])(.*)\1$/.exec(selector);
-        if (quoted === null) {
-          throw new IndependentError("invalid_query", "unsupported selector");
-        }
-        tokens.push(quoted[2] as string);
-      }
-      index = close + 1;
-      continue;
-    }
-    throw new IndependentError("invalid_query", "unexpected JSONPath token");
-  }
-  return tokens;
+  const expression = new JSONPathJS(query);
+  validateQueryTypes(expression.rootNode);
+  return expression.pathSegments(value as Parameters<JSONPathJS["pathSegments"]>[0]).map(({ segments }) => (
+    segments.reduce<string>((pointer, segment) => appendPointer(pointer, String(segment)), "")
+  ));
 }
 
 function createChange(

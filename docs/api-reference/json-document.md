@@ -182,7 +182,7 @@ type ReadResult =
 ## `trackPointer`
 
 ```ts
-trackPointer(pointer: Pointer, applied: ReadonlyArray<JSONPatchOperation>): Pointer | null
+trackPointer(pointer: Pointer, applied: ReadonlyArray<JSONPatchOperation>, before?: JSONValue): Pointer | null
 ```
 ## `tryParsePointer`
 
