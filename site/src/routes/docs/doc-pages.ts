@@ -5,6 +5,8 @@ import editingApiMarkdown from "../../../../docs/api-reference/editing.md?raw";
 import reactApiMarkdown from "../../../../docs/api-reference/react.md?raw";
 import reactHookFormApiMarkdown from "../../../../docs/api-reference/react-hook-form.md?raw";
 import ajvApiMarkdown from "../../../../docs/api-reference/ajv.md?raw";
+import a2uiApiMarkdown from "../../../../docs/api-reference/a2ui.md?raw";
+import connectorA2uiMarkdown from "../../../../docs/public/connector-a2ui.md?raw";
 import zodApiMarkdown from "../../../../docs/api-reference/zod.md?raw";
 import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-table.md?raw";
 import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
@@ -177,6 +179,8 @@ export const docPages = {
   reactApi: docPage("/docs/api/react", reactApiMarkdown),
   reactHookFormApi: docPage("/docs/api/react-hook-form", reactHookFormApiMarkdown),
   ajvApi: docPage("/docs/api/ajv", ajvApiMarkdown),
+  a2uiApi: docPage("/docs/api/a2ui", a2uiApiMarkdown),
+  connectorA2ui: docPage("/docs/connector-a2ui", connectorA2uiMarkdown),
   zodApi: docPage("/docs/api/zod", zodApiMarkdown),
   tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
   affordanceApi: docPage("/docs/api/affordance", affordanceApiMarkdown),

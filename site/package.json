@@ -54,6 +54,7 @@
     "@ag-ui/encoder": "^0.0.59",
     "@interactive-os/json-document-affordance": "*",
     "@interactive-os/json-document-ajv": "*",
+    "@interactive-os/json-document-a2ui": "*",
     "@interactive-os/json-document-animation-react": "*",
     "@interactive-os/json-document-calendar": "*",
     "@interactive-os/json-document-collaboration": "*",

@@ -1,5 +1,6 @@
 import { EventType, type AGUIEvent } from "@ag-ui/core";
-import { HANDS_CATALOG_ID, type A2uiMessage } from "./a2ui-streaming-document";
+import type { A2uiMessage } from "@interactive-os/json-document-a2ui";
+import { HANDS_CATALOG_ID } from "./catalog-policy";
 import { projectA2uiFences } from "./a2ui-fence";
 import { A2UI_PROJECTION_ERROR_TEXT } from "./protocol-error";
 

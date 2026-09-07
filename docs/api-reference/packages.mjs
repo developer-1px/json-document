@@ -1,4 +1,5 @@
 export const apiReferencePackages = [
+  ["a2ui", "@interactive-os/json-document-a2ui", "packages/json-document-a2ui/src/index.ts", "Connector", "A2UI streaming document connector"],
   ["json-document", "@interactive-os/json-document", "packages/json-document/src/application/document/index.ts", "JSON Document", "Core document 값·주소·patch 계약"],
   ["selection", "@interactive-os/json-document-selection", "packages/json-document-selection/src/index.ts", "Editing", "구조적 selection과 topology 계약"],
   ["editing", "@interactive-os/json-document-editing", "packages/json-document-editing/src/index.ts", "Editing", "intent, editor, history 편집 계약"],

@@ -108,6 +108,7 @@ import collaborationCreateSource from "../../../../packages/json-document-collab
 import collaborationEditingSource from "../../../../packages/json-document-collaboration/src/editing-index.ts?raw";
 import collaborationContentEditableSource from "../../../../packages/contenteditable-collaboration/src/lease.ts?raw";
 import ajvSource from "../../../../packages/json-document-ajv/src/index.ts?raw";
+import a2uiSource from "../../../../packages/json-document-a2ui/src/index.ts?raw";
 import reactHookFormSource from "../../../../packages/json-document-react-hook-form/src/index.ts?raw";
 import richTextSource from "../../../../packages/json-document-rich-text/src/editor.ts?raw";
 import richTextSelectionMappingSource from "../../../../packages/json-document-rich-text/src/selection-mapping.ts?raw";
@@ -131,6 +132,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-react/", "/docs/api/react"],
   ["packages/json-document-react-hook-form/", "/docs/api/react-hook-form"],
   ["packages/json-document-ajv/", "/docs/api/ajv"],
+  ["packages/json-document-a2ui/", "/docs/api/a2ui"],
   ["packages/json-document-zod/", "/docs/api/zod"],
   ["packages/json-document-tanstack-table/", "/docs/api/tanstack-table"],
   ["packages/json-document-affordance/", "/docs/api/affordance"],
@@ -280,6 +282,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-collaboration/src/editing-index.ts", collaborationEditingSource],
   ["packages/contenteditable-collaboration/src/lease.ts", collaborationContentEditableSource],
   ["packages/json-document-ajv/src/index.ts", ajvSource],
+  ["packages/json-document-a2ui/src/index.ts", a2uiSource],
   ["packages/json-document-react-hook-form/src/index.ts", reactHookFormSource],
   ["packages/json-document-rich-text/src/editor.ts", richTextSource],
   ["packages/json-document-rich-text/src/selection-mapping.ts", richTextSelectionMappingSource],
@@ -695,6 +698,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-ajv",
     symbol: "createAjvValidator",
     sourcePath: "packages/json-document-ajv/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-a2ui",
+    symbol: "createA2uiStreamingDocumentEngine",
+    sourcePath: "packages/json-document-a2ui/src/index.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-a2ui",
+    symbol: "parseA2uiMessage",
+    sourcePath: "packages/json-document-a2ui/src/index.ts",
   },
   {
     packageName: "@interactive-os/json-document-react-hook-form",

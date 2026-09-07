@@ -8,6 +8,10 @@ export interface SourceAlias {
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
     {
+      find: "@interactive-os/json-document-a2ui",
+      replacement: sourceFile("packages/json-document-a2ui/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document",
       replacement: sourceFile("packages/json-document/src/application/document/index.ts"),
     },

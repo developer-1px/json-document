@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { EventType } from "@ag-ui/core";
-import { A2UI_BASIC_CATALOG_ID, A2UI_PROJECTION_ERROR_TEXT, createA2uiStreamingDocumentEngine, createAgUiA2uiAdapter, projectA2uiFences } from "../../src/app/a2ui-streaming-document";
+import { createA2uiStreamingDocumentEngine } from "@interactive-os/json-document-a2ui";
+import { A2UI_BASIC_CATALOG_ID, A2UI_PROJECTION_ERROR_TEXT, a2uiCatalogPolicy, createAgUiA2uiAdapter, projectA2uiFences } from "../../src/app/a2ui-streaming-document";
 
 describe("A2UI streaming document", () => {
   test("accumulates A2UI component and data deltas in json-document", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     const values: unknown[] = [];
     const subscription = engine.document$.subscribe((value) => values.push(value));
 
@@ -23,7 +24,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("preserves optional createSurface protocol state in the editable document", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "themed", catalogId: A2UI_BASIC_CATALOG_ID, theme: { density: "compact", accent: "blue" }, sendDataModel: true } });
 
     expect(engine.document.value).toMatchObject({ surfaces: { themed: {
@@ -35,7 +36,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("decodes A2UI JSONL across arbitrary transport chunks", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     const jsonl = [
       { version: "v0.9", createSurface: { surfaceId: "main", catalogId: "catalog" } },
       { version: "v0.9", updateDataModel: { surfaceId: "main", path: "/content/answer", value: "streamed" } },
@@ -57,7 +58,7 @@ describe("A2UI streaming document", () => {
     ];
     const jsonl = messages.map(JSON.stringify).join("\n");
     for (let split = 0; split <= jsonl.length; split += 1) {
-      const engine = createA2uiStreamingDocumentEngine();
+      const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
       engine.write(jsonl.slice(0, split));
       engine.write(jsonl.slice(split));
       engine.complete();
@@ -75,7 +76,7 @@ describe("A2UI streaming document", () => {
       { type: EventType.TOOL_CALL_RESULT, messageId: "result-1", toolCallId: "tool-1", content: "완료", rawEvent: { params: { item: { type: "fileChange", changes: [{ path: "a.md" }] } } } },
     ];
     const messages = events.flatMap((event) => adapter.push(event));
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     messages.forEach((message) => engine.dispatch(message));
 
     expect(messages.every((message) => message.version === "v0.9")).toBe(true);
@@ -96,7 +97,7 @@ describe("A2UI streaming document", () => {
 
   test("closes partial text and active tools when a run is interrupted", () => {
     const adapter = createAgUiA2uiAdapter("run-interrupted");
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     [
       { type: EventType.TEXT_MESSAGE_START, messageId: "partial", role: "assistant" as const },
       { type: EventType.TEXT_MESSAGE_CONTENT, messageId: "partial", delta: "작성 중" },
@@ -188,7 +189,7 @@ describe("A2UI streaming document", () => {
 
   test("turns malformed fenced A2UI into a visible assistant fallback without exposing JSON", () => {
     const adapter = createAgUiA2uiAdapter("chat-error");
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     const events = [
       { type: EventType.TEXT_MESSAGE_START, messageId: "broken", role: "assistant" as const },
       { type: EventType.TEXT_MESSAGE_CONTENT, messageId: "broken", delta: '화면을 만들었습니다.\n```a2ui\n{"version":"v0.9","operation":{"create":{}}}\n```' },
@@ -203,7 +204,7 @@ describe("A2UI streaming document", () => {
 
   test("streams fenced A2UI messages from the assistant into the canonical document", () => {
     const adapter = createAgUiA2uiAdapter("chat");
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     const create = JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "profile", catalogId: A2UI_BASIC_CATALOG_ID } });
     const components = JSON.stringify({ version: "v0.9", updateComponents: { surfaceId: "profile", components: [{ id: "root", component: "Column", children: ["title"] }, { id: "title", component: "Text", text: "프로필", variant: "h2" }] } });
     const events = [
@@ -260,7 +261,7 @@ describe("A2UI streaming document", () => {
       ("createSurface" in message && message.createSurface.surfaceId === "large")
       || ("updateComponents" in message && message.updateComponents.surfaceId === "large")
       || ("updateDataModel" in message && message.updateDataModel.surfaceId === "large"));
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     projected.forEach((message) => engine.dispatch(message));
 
     expect(projected).toHaveLength(protocol.length);
@@ -276,7 +277,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("accumulates repeated component batches and replaces existing component and data values", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     const states: unknown[] = [];
     const subscription = engine.document$.subscribe((state) => states.push(state));
     const messages = [
@@ -300,7 +301,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("validates supported components with the official Basic Catalog schemas", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "validated", catalogId: A2UI_BASIC_CATALOG_ID } });
 
     expect(() => engine.dispatch({ version: "v0.9", updateComponents: { surfaceId: "validated", components: [{ id: "card", component: "Card", children: ["body"] }] } })).toThrow();
@@ -310,7 +311,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("replaces and removes nested data, then deletes the surface", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "lifecycle", catalogId: A2UI_BASIC_CATALOG_ID } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/", value: { profile: { name: "이전", optional: true } } } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "lifecycle", path: "/profile/name", value: "변경" } });
@@ -322,7 +323,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("stores null and reserves an omitted value for deletion like the official DataModel", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "nullable", catalogId: A2UI_BASIC_CATALOG_ID } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "nullable", path: "/kept", value: null } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "nullable", path: "/removed", value: "삭제 예정" } });
@@ -334,7 +335,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("appends a streamed list item through the JSON Pointer dash token", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "append", catalogId: A2UI_BASIC_CATALOG_ID } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "append", path: "/items", value: [{ label: "첫째" }] } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "append", path: "/items/-", value: { label: "둘째" } } });
@@ -344,7 +345,7 @@ describe("A2UI streaming document", () => {
   });
 
   test("isolates surfaces and leaves the document unchanged after invalid updates", () => {
-    const engine = createA2uiStreamingDocumentEngine();
+    const engine = createA2uiStreamingDocumentEngine(a2uiCatalogPolicy);
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "first", catalogId: A2UI_BASIC_CATALOG_ID } });
     engine.dispatch({ version: "v0.9", createSurface: { surfaceId: "second", catalogId: A2UI_BASIC_CATALOG_ID } });
     engine.dispatch({ version: "v0.9", updateDataModel: { surfaceId: "first", path: "/value", value: "첫째" } });

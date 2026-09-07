@@ -1,0 +1,53 @@
+{
+  "name": "@interactive-os/json-document-a2ui",
+  "version": "0.1.0-rc.0",
+  "description": "Official A2UI v0.9 streaming connector for JSON Document.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-1px/json-document.git",
+    "directory": "packages/json-document-a2ui"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "next"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -b tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "pretypecheck": "node ../../scripts/workspace-tasks.mjs build-dependencies",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@interactive-os/json-document": "^3.0.0",
+    "@a2ui/web_core": "^0.10.6",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@interactive-os/json-document": "*",
+    "@types/node": "^25.9.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.7",
+    "@a2ui/web_core": "^0.10.6",
+    "rxjs": "^7.8.2"
+  }
+}

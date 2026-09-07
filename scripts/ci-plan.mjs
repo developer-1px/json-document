@@ -18,6 +18,7 @@ const alwaysFull = new Set([
 ]);
 
 const packageBrowserSpecs = new Map([
+  ["@interactive-os/json-document-a2ui", ["site/tests/browser/connectors/a2ui.spec.ts", "site/tests/browser/llm-agent-artifact.spec.ts"]],
   ["@interactive-os/json-document-file-intake", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-suggestion", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-suggestion-react", ["site/tests/browser/composer-demo.spec.ts"]],
@@ -61,6 +62,7 @@ const packageBrowserSpecs = new Map([
 ]);
 
 const routeBrowserSpecs = new Map([
+  ["connectors/a2ui", ["site/tests/browser/connectors/a2ui.spec.ts"]],
   ["adapters/clipboard", ["site/tests/browser/adapters/clipboard.spec.ts"]],
   ["adapters/contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
   ["adapters/keyboard", ["site/tests/browser/adapters/keyboard.spec.ts"]],

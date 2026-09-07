@@ -10,6 +10,7 @@ Editing의 공개 계약에 연결합니다. 대상 라이브러리를 교체해
 | --- | --- | --- |
 | React | `@interactive-os/json-document-react` | [React](connector-react.md) |
 | React Hook Form | `@interactive-os/json-document-react-hook-form` | [React Hook Form](connector-react-hook-form.md) |
+| A2UI | `@interactive-os/json-document-a2ui` | [A2UI](connector-a2ui.md) |
 | Ajv | `@interactive-os/json-document-ajv` | [Ajv](connector-ajv.md) |
 | Zod | `@interactive-os/json-document-zod` | [Zod](connector-zod.md) |
 | TanStack Table | `@interactive-os/json-document-tanstack-table` | [TanStack Table](connector-tanstack-table.md) |
