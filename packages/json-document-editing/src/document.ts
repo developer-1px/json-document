@@ -121,7 +121,9 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
         session.snapshot.selection,
         point,
         intent.mode ?? "replace",
-        (left, right) => left.blockId === right.blockId,
+        // Toggle addresses whole blocks; caret/range endpoints also include offset.
+        (left, right) => left.blockId === right.blockId
+          && (intent.mode === "toggle" || left.offset === right.offset),
       );
       return success(session.select(asDocumentSelection(selection)));
     }

@@ -251,14 +251,20 @@ Usage/source 등록은 기존 Editing·Selection·Affordance·Web·Rich Text own
 native caret/IME·브라우저 Clipboard 권한, 모든 Host callback, 협업 History의 전체
 수렴을 보증하지 않는다. #719의 세션 관찰·복구·협업 History 보완은 별도 변경이다.
 
-동결 전 남아 있는 관찰 사례도 구분한다. 초기 Document가
+초기 적합성 작업에서 관찰한 Document offset 공백은 별도 수정과 회귀 증거로
+연결했다. 초기 Document가
 `{ blocks: [{ id: "a", text: "Alpha" }] }`일 때
-`dispatch({ type: "selection.set", blockId: "a", offset: 2 })`는 성공을 반환하지만
-현재 같은 블록의 선택 offset은 0에 남는다. `document.ts`가 range 전이의 point
-동등성을 block ID로 판단하는 경로다. 이번 Document fixture는 블록 간 선택과
-전체 블록 Copy를 검증하며 이 동작을 text-caret의 영구 규칙으로 채택하지 않는다.
-이 재현 사례는 관찰된 공백으로 남기며, 이번 변경에서 runtime 동작을 바꾸거나
-동결하지 않는다.
+`dispatch({ type: "selection.set", blockId: "a", offset: 2 })`의 선택이 0에 남던
+원인은 point 동등성을 block ID만으로 판단한 것이었다. 현재 replace/extend는
+offset도 비교하며 블록 toggle과 전체 블록 Copy의 의미는 유지한다.
+[Document 회귀](../packages/json-document-editing/tests/document-editor.test.ts)는
+같은 블록의 양방향 확장·collapse·경계 보정·History 보존과 Undo의 범위 복원을
+검증한다. [Web 입력 투영](../packages/json-document-web/tests/web-adapters.test.ts),
+[React 연결](../packages/json-document-react/tests/react-connector.test.tsx),
+[Document 브라우저 경로](../site/tests/browser/document-demo.spec.ts)는 네이티브
+방향을 anchor/focus로 전달하고 model이 focus를 발행할 때 기존 native range를
+유지하는 증거다. offset 하나로 과거 native range 전체를 복원한다는 계약이나
+profile 동결로 확대하지 않는다.
 
 ## 장기 호환성
 

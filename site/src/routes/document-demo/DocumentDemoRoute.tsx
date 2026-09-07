@@ -107,19 +107,6 @@ export function DocumentDemoRoute() {
       onRedo: () => {
         run(() => editor.redo(), "Redone");
       },
-      text: {
-        offset: () => documentSelectionFocus(editor.snapshot.selection)?.offset ?? 0,
-        length: () => {
-          const blockId = documentSelectionFocus(editor.snapshot.selection)?.blockId;
-          const block = (editor.snapshot.value as BlockDocument).blocks.find((item) => item.id === blockId);
-          return block?.text.length ?? 0;
-        },
-        onOffset: (offset, mode) => {
-          const blockId = documentSelectionFocus(editor.snapshot.selection)?.blockId;
-          if (!blockId) return;
-          run(() => dispatchIntent({ type: "selection.set", blockId, mode, offset }), "Selection changed");
-        },
-      },
     },
   });
   const snapshot = editing.snapshot;

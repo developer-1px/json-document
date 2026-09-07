@@ -297,6 +297,11 @@ const registeredUsageSources = new Map<string, string>([
 const registeredPublicUsages = [
   {
     packageName: "@interactive-os/json-document-web",
+    symbol: "textSelectionFromControl",
+    sourcePath: "packages/json-document-web/src/input.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-web",
     symbol: "isWebEditingHostTarget",
     sourcePath: "packages/json-document-web/src/input.ts",
   },

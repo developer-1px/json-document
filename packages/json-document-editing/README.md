@@ -210,3 +210,17 @@ Existing public API references and live Usage remain in
 [Editing](https://developer-1px.github.io/json-document/docs/api/editing),
 [Document](https://developer-1px.github.io/json-document/demo), and
 [Sheet](https://developer-1px.github.io/json-document/demo/sheet).
+
+## Document offset selection
+
+For `selection.set`, replace/collapse and extend compare the complete
+`DocumentPoint` (`blockId` and `offset`). Moving within one block updates the
+caret; extension preserves the primary anchor and changes its focus, including
+backward ranges. Offsets are clamped to the block's text bounds.
+
+`mode: "toggle"` continues to address the whole block independently of its text
+offsets. Copy still projects whole selected blocks. Selection-only movement
+preserves document values and existing Undo/Redo records; Undo after an edit
+restores the recorded offset range. These contracts are exercised by
+[Document editor tests](tests/document-editor.test.ts) and the existing
+[Document Usage](https://developer-1px.github.io/json-document/demo).

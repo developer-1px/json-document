@@ -1,5 +1,28 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("Document keeps native caret and directional range offsets in the editor", async ({ page }) => {
+  await page.goto("/demo");
+  await page.getByText("Inspect editing state", { exact: true }).click();
+  const before = await canonicalDocument(page);
+  const text = page.getByRole("textbox", { name: "Block 1 text" });
+  const intent = async () => JSON.parse(await page.getByTestId("document-intent-json").innerText());
+  await text.focus();
+  await text.press("ArrowRight");
+  await expect.poll(intent).toMatchObject({ type: "selection.set", blockId: "welcome", offset: 1 });
+  await text.press("ArrowRight");
+  await expect.poll(intent).toMatchObject({ type: "selection.set", blockId: "welcome", offset: 2 });
+  await text.press("Shift+ArrowRight");
+  await expect.poll(intent).toMatchObject({ type: "selection.set", blockId: "welcome", offset: 3 });
+  await expect.poll(() => text.evaluate((node: HTMLTextAreaElement) => [node.selectionStart, node.selectionEnd])).toEqual([2, 3]);
+  await text.press("Shift+ArrowLeft");
+  await expect.poll(intent).toMatchObject({ type: "selection.set", blockId: "welcome", offset: 2 });
+  await text.press("Shift+ArrowLeft");
+  await expect.poll(intent).toMatchObject({ type: "selection.set", blockId: "welcome", offset: 1 });
+  await expect.poll(() => text.evaluate((node: HTMLTextAreaElement) => [node.selectionStart, node.selectionEnd, node.selectionDirection])).toEqual([1, 2, "backward"]);
+  expect(await canonicalDocument(page)).toEqual(before);
+  await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeDisabled();
+});
+
 test("minimal document demo completes selection, clipboard, edit, move, undo, and redo", async ({ page }) => {
   await page.goto("/demo");
   await page.getByText("Inspect editing state", { exact: true }).click();

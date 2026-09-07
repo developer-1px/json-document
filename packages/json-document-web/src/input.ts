@@ -1,6 +1,10 @@
+import type { SelectionRange } from "@interactive-os/json-document-selection";
+
 export interface WebTextControl {
   readonly value: string;
   readonly selectionStart: number | null;
+  readonly selectionEnd?: number | null;
+  readonly selectionDirection?: "forward" | "backward" | "none" | null;
 }
 
 export interface WebTextControlEvent {
@@ -16,6 +20,15 @@ export function textInputFromControl(event: WebTextControlEvent): WebTextInput {
   const text = event.currentTarget.value;
   const offset = event.currentTarget.selectionStart ?? text.length;
   return { text, offset: Math.min(text.length, Math.max(0, offset)) };
+}
+
+/** Projects a native text control's directional selection into anchor/focus offsets. */
+export function textSelectionFromControl(event: WebTextControlEvent): SelectionRange<number> {
+  const { text, offset: start } = textInputFromControl(event);
+  const end = Math.min(text.length, Math.max(start, event.currentTarget.selectionEnd ?? start));
+  return event.currentTarget.selectionDirection === "backward"
+    ? { anchor: end, focus: start }
+    : { anchor: start, focus: end };
 }
 
 export function isWebEditableTarget(target: object | null): boolean {

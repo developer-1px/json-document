@@ -46,6 +46,13 @@ textarea.
 `useDocumentTextControl` composes cursor restoration, Web text input, and
 caret/click affordances into reusable textarea props. `DocumentTextControl`
 renders that same lifecycle while the host keeps layout and Document Intent.
+`onCaretRange` receives directional anchor/focus offsets projected by Web's
+`textSelectionFromControl`, including backward selections. When native focus
+already equals the supplied `offset`, the native range is preserved. A different
+`offset` restores a collapsed caret through `restoreTextCursor`; an offset alone
+does not encode a historical native range. Native text controls keep their own
+arrow/Shift selection handling; the outer structural keyboard binding need not
+also configure `keyboard.text` for those controls.
 
 `useGridEditing` is the grid-specific React entry point. It accepts canonical
 `GridPoint` values through `selectedPoints`, `focusPoint`, `onSelect`, and

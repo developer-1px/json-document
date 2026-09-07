@@ -46,6 +46,7 @@ import {
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
+  textSelectionFromControl,
   webFocusItemProps,
   webGridCellAddressProps,
   webKanbanCardProps,
@@ -53,6 +54,22 @@ import {
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("native text selection projection", () => {
+  test.each([
+    { selectionStart: 2, selectionEnd: 4, selectionDirection: "forward", expected: { anchor: 2, focus: 4 } },
+    { selectionStart: 1, selectionEnd: 4, selectionDirection: "backward", expected: { anchor: 4, focus: 1 } },
+    { selectionStart: 2, selectionEnd: 2, selectionDirection: "none", expected: { anchor: 2, focus: 2 } },
+    { selectionStart: -1, selectionEnd: 99, selectionDirection: "backward", expected: { anchor: 5, focus: 0 } },
+    { selectionStart: null, selectionEnd: null, selectionDirection: null, expected: { anchor: 5, focus: 5 } },
+  ] as const)("preserves anchor/focus for $selectionDirection $selectionStart:$selectionEnd", ({ expected, ...selection }) => {
+    expect(textSelectionFromControl({ currentTarget: { value: "Alpha", ...selection } })).toEqual(expected);
+  });
+
+  test("accepts an existing cursor-only control as a collapsed selection", () => {
+    expect(textSelectionFromControl({ currentTarget: { value: "Alpha", selectionStart: 2 } })).toEqual({ anchor: 2, focus: 2 });
+  });
+});
 
 describe("Web file intake translation", () => {
   const files = [
