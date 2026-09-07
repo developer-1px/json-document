@@ -21,3 +21,14 @@ official React surface does this automatically.
 
 The Web package does not store canonical state in DOM and does not define
 product keyboard or toolbar policy.
+
+Nested form controls and separate editing hosts never dispatch outer-editor
+commands. This revision uses the Web peer's `isWebEditingHostTarget` capability.
+Replacement, yank, and transpose input accept both `data` and a `text/plain`
+`dataTransfer` representation, using the supplied target ranges.
+
+If a composition endpoint's canonical node changes or disappears during its
+lease, the binding reports `rich-text.composition-stale` through `onAction`,
+does not insert against the stale selection, and releases rendering through
+`onCompositionChange(false)`. Changes outside those endpoints may still commit.
+This is fail-closed recovery, not collaborative semantic selection mapping.

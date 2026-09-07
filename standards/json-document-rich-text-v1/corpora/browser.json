@@ -7,9 +7,9 @@
     {
       "id": "composition",
       "status": "verified",
-      "observation": "composition 중 DOM mutation과 compositionend 뒤 trailing input의 순서는 엔진마다 다를 수 있다.",
-      "invariant": "한 composition session은 canonical document와 history를 정확히 한 번만 변경한다.",
-      "evidence": "korean-ime-composition",
+      "observation": "composition event 순서뿐 아니라 model 변경과 React callback/root 수명 변경이 native DOM을 덮어쓰거나 lease를 폐기할 수 있다.",
+      "invariant": "한 composition은 한 번만 commit하며 model ingestion은 계속되고 surface별 DOM lease는 종료 뒤 latest model로 복구된다.",
+      "evidence": "korean-ime-composition; composition-model-update-recovery (synthetic); packages/json-document-rich-text-react/tests/surface-lifecycle.test.tsx (synthetic)",
       "revisitWhen": "지원 엔진의 native IME 자동화 API 또는 Input Events 규약이 바뀔 때"
     },
     {
@@ -23,9 +23,9 @@
     {
       "id": "deletion",
       "status": "verified",
-      "observation": "keydown과 beforeinput이 같은 Backspace/Delete 동작을 중복 보고할 수 있다.",
-      "invariant": "한 물리 입력은 character delete 또는 block join을 한 번만 dispatch한다.",
-      "evidence": "repeated-backspace-delete",
+      "observation": "keydown과 beforeinput은 같은 삭제를 중복 보고할 수 있고 nested native control의 event도 바깥 root까지 전달된다.",
+      "invariant": "올바른 editing host의 한 입력만 character delete 또는 block join을 한 번 dispatch한다.",
+      "evidence": "repeated-backspace-delete; nested-native-control-ownership",
       "revisitWhen": "keyboard/beforeinput ownership 또는 deletion intent가 바뀔 때"
     },
     {
@@ -57,7 +57,7 @@
       "status": "synthetic",
       "observation": "spellchecker, extension, accessibility 도구가 React가 관리하는 descendant를 바꿀 수 있다.",
       "invariant": "composition lease 밖의 DOM 변경은 canonical model을 덮어쓰지 못하고 다음 publish에서 복구된다.",
-      "evidence": "unexpected-dom-mutation-recovery",
+      "evidence": "unexpected-dom-mutation-recovery; replacement-data-transfer (synthetic)",
       "revisitWhen": "renderer에 mutation observer 또는 외부 mutation recovery가 도입될 때"
     },
     {
@@ -78,6 +78,24 @@
     }
   ],
   "cases": [
+    {
+      "id": "nested-native-control-ownership",
+      "source": { "url": "https://w3c.github.io/input-events/", "meaning": "nested input·textarea·select는 바깥 Rich Text의 삭제·history를 변경하지 않는다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "replacement-data-transfer",
+      "source": { "url": "https://w3c.github.io/input-events/", "meaning": "synthetic DataTransfer와 target range로 replacement payload를 model에 반영한다; native spellcheck 지원 증거는 아님" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
+    {
+      "id": "composition-model-update-recovery",
+      "source": { "url": "https://react.dev/reference/react/useEffect", "meaning": "synthetic composition 중 제품 command로 model을 변경해도 DOM lease를 보존하고 stale 종료에서 최신 model로 복구한다" },
+      "requiresNativeInput": false,
+      "browsers": ["chromium", "firefox", "webkit"]
+    },
     {
       "id": "beforeinput-insert-text",
       "source": { "url": "https://github.com/web-platform-tests/wpt/tree/master/input-events", "meaning": "insertText beforeinput는 Official Rich Text text.insert intent가 된다" },

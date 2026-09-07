@@ -1,5 +1,9 @@
 # json-document-contenteditable-collaboration
 
+Editing-host ownership is supplied by the Web peer's
+`isWebEditingHostTarget` capability. This Draft revision must be consumed with
+that Web revision; causal capture/plan/commit and wire formats are unchanged.
+
 IME-safe native-input DOM lease for
 `@interactive-os/json-document-collaboration/text`.
 

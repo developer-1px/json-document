@@ -3,6 +3,7 @@ import type {
   TextSelection,
 } from "@interactive-os/json-document-collaboration/text";
 import { plainTextDOMAdapter } from "@interactive-os/json-document-contenteditable";
+import { isWebEditingHostTarget } from "@interactive-os/json-document-web";
 import type {
   ContentEditableAdapter,
   ContentEditableOptions,
@@ -309,7 +310,7 @@ export function createContentEditableAdapter({
   };
 
   const boundHandle = (event: Event): void => {
-    if (!eventBelongsToRoot(event, root)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     report(handleInternal(event));
   };
 
@@ -361,49 +362,6 @@ export function createContentEditableAdapter({
       renderLatest(undefined, true);
     },
   });
-}
-
-function eventBelongsToRoot(event: Event, root: HTMLElement): boolean {
-  const target = event.target;
-  if (!(target instanceof root.ownerDocument.defaultView!.Node)) return false;
-  if (target === root) return true;
-  if (!root.contains(target)) return false;
-
-  let element = target instanceof root.ownerDocument.defaultView!.Element
-    ? target
-    : target.parentElement;
-  while (element !== null && element !== root) {
-    const tag = element.tagName.toLowerCase();
-    if (
-      tag === "input"
-      || tag === "textarea"
-      || tag === "select"
-      || tag === "option"
-    ) {
-      return false;
-    }
-    const editable = element.getAttribute("contenteditable");
-    const editableProperty = "contentEditable" in element
-      && typeof element.contentEditable === "string"
-      ? element.contentEditable.toLowerCase()
-      : "";
-    if (
-      (editable !== null || editableProperty !== "")
-      && (
-        editable === ""
-        || editable?.toLowerCase() === "true"
-        || editable?.toLowerCase() === "plaintext-only"
-        || editable?.toLowerCase() === "false"
-        || editableProperty === "true"
-        || editableProperty === "plaintext-only"
-        || editableProperty === "false"
-      )
-    ) {
-      return false;
-    }
-    element = element.parentElement;
-  }
-  return true;
 }
 
 function isCompositionInput(event: Event): boolean {

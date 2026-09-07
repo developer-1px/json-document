@@ -1,5 +1,27 @@
 # @interactive-os/json-document-web
 
+## Editing host ownership
+
+`isWebEditingHostTarget(root, target)` returns whether a DOM target belongs to
+the supplied editing surface. It excludes nested input, textarea, select,
+option, and explicit contenteditable boundaries (including `false`). Root and
+inherited text targets are accepted. It uses the root's owner-document realm;
+invalid or outside-root targets return false. This is distinct from
+`isWebEditableTarget`, which identifies native editable targets without an owner.
+
+```ts
+import { isWebEditingHostTarget } from "@interactive-os/json-document-web";
+
+surface.addEventListener("copy", (event) => {
+  if (isWebEditingHostTarget(surface, event.target)) clipboard.copy(event);
+});
+```
+
+The plain local, collaborative text, and Rich Text bindings all consume this
+same ownership predicate; each keeps its own model reconciliation contract.
+
+## Platform adapters
+
 Official keyboard and clipboard adapters for the public editing
 contracts from `@interactive-os/json-document-editing` and
 `@interactive-os/json-document-selection`.

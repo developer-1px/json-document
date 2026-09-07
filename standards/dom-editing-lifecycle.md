@@ -83,6 +83,9 @@ bind
 - 초기 model을 DOM에 render한다.
 - Nested form control과 별도 contenteditable host의 event를 현재 host의 입력으로
   취급하지 않는다.
+- 세 binding의 root 소유권 판별은 Web `isWebEditingHostTarget`을 소비한다.
+  명시적인 contenteditable=false descendant도 별도 경계이며, atom 전후의
+  parent child-point mapping은 그대로 유지한다.
 - Unbind 또는 destroy는 listener, subscription, timer와 active lease를 해제한다.
 
 ### 2. Observe intent
@@ -144,13 +147,19 @@ bind
 - Late composition event가 종료된 lease를 두 번째 commit으로 만들지 않는다.
 - Rich Text destroy는 pending composition timer를 해제하며 종료된 binding이
   model operation을 만들지 않게 한다.
+- React의 lease는 editor가 아니라 mounted surface별로 소유한다. Callback만
+  달라져도 lease를 재시작하지 않으며 실제 editor/root 교체와 unmount는 해제한다.
+- Local composition tail의 timer/input 종료는 유예한 최신 model을 render한다.
+- Rich Text composition endpoint가 외부 변경으로 바뀌거나 삭제되면
+  `rich-text.composition-stale`로 거절하고 최신 model을 render한다. 이는 full
+  collaborative selection mapping을 추가하는 계약이 아니다.
 
 ## Event ownership
 
 | Event | Local string Binding | Collaborative text Adapter | Rich Text Binding |
 | --- | --- | --- | --- |
 | `beforeinput` | Lease 시작; browser mutation 허용 | Capture와 lease 시작; browser mutation 허용 | 지원 intent는 prevent하고 semantic dispatch; composition input은 browser에 맡김 |
-| `input` | Non-composition DOM observation commit; composition tail 무시 | Non-composition plan/commit; composition tail selection reconcile | Ending composition DOM이 final인지 재검사 |
+| `input` | Non-composition DOM observation commit; composition tail은 추가 commit 없이 latest render | Non-composition plan/commit; composition tail selection reconcile | Ending composition DOM이 final인지 재검사 |
 | `compositionstart` | Composing lease 시작 | Capture를 가진 composing lease 시작 | Selection과 scoped DOM text를 capture |
 | `compositionupdate` | 별도 listener 없음; browser DOM mutation으로 관찰 | 별도 listener 없음; browser DOM mutation으로 관찰 | 별도 listener 없음; scoped DOM mutation으로 관찰 |
 | `compositionend` | DOM string을 한 번 commit하고 trailing input guard 진입 | DOM observation을 plan/commit하고 tail reconciliation 진입 | Ending phase로 전환하고 microtask/timer에서 scoped diff commit |
