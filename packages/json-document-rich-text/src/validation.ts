@@ -78,8 +78,8 @@ function validateRichTextSubtree(
     }
     const spec = schema.nodes[node.type]!;
     if (parentType !== null) {
-      const parent = schema.nodes[parentType]!;
-      if (!parent.content?.allowedTypes.includes(node.type)) {
+      const parent = schema.nodes[parentType];
+      if (!parent?.content?.allowedTypes.includes(node.type)) {
         return fail("rich-text.schema-violation", `${node.type} is not allowed in ${parentType}.`, pointer);
       }
     }

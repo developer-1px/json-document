@@ -4,7 +4,10 @@ import {
   createRichTextSchema,
   createRichTextTopology,
   normalizeRichText,
+  richTextSchemaV1,
   validateRichText,
+  validateRichTextNodeAt,
+  validateRichTextPath,
   tryCreateRichTextEditor,
   type RichTextDocument,
   type RichTextClipboard,
@@ -44,6 +47,15 @@ const canonical: RichTextDocument = {
 };
 
 describe("Official Rich Text schema", () => {
+  it("reports a schema failure when local validation cannot resolve the parent type", () => {
+    const nodes = Object.fromEntries(Object.entries(richTextSchemaV1.nodes).filter(([type]) => type !== "blockquote"));
+    const options = { schema: { ...richTextSchemaV1, nodes } };
+    expect(validateRichTextNodeAt(canonical, [0, 0], { id: "paragraph", type: "paragraph", content: [] }, options))
+      .toMatchObject({ ok: false, code: "rich-text.schema-violation", pointer: "/content/0/content/0" });
+    expect(validateRichTextPath(canonical, [0, 0], options))
+      .toMatchObject({ ok: false, code: "rich-text.schema-violation", pointer: "/content/0/content/0" });
+  });
+
   it("validates every official container and reports stable semantic failures", () => {
     expect(validateRichText(canonical)).toEqual({ ok: true });
     expect(validateRichText({ ...canonical, content: [] })).toMatchObject({ ok: false, code: "rich-text.schema-violation" });
