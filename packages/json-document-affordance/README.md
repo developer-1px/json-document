@@ -78,3 +78,15 @@ the final placement and available size while Tooltip, Menu, Dialog, and product
 open/focus semantics remain outside this geometry contract.
 
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
+
+`selectAllAffordance` implements an explicit Mod+A toggle input convention:
+when everything is selected it emits `clear`; otherwise it emits `select-all`.
+The semantic `select-all` command itself is idempotent. Hosts choosing this
+input convention consume the existing Affordance API.
+
+[Editing grammar integration tests](tests/conformance/editing-grammar.test.ts)
+connect that mapping to KeySelection and connect `createGestureSession` to
+Document's `selection.move`. Structural preview and cancellation leave committed
+value/history unchanged; commit dispatches the latest preview once. This proves
+the tested composition, not every Host callback. IME composition has a separate
+[DOM editing lifecycle](../../standards/dom-editing-lifecycle.md) contract.

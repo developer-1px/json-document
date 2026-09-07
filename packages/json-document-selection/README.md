@@ -42,3 +42,14 @@ Viewport-to-domain coordinate conversion, pointer capture, auto-scroll, and acce
 ## Editing and history
 
 Domain facades translate `{ selection, intent }` into forward/inverse patches plus `selectionAfter`. A document mutation history entry stores `selectionBefore` and `selectionAfter`; selection-only movement does not create a document history entry. Native text selection is represented only by an edit lease in `SelectionSession` and stays owned by the input/editor.
+
+## Select All semantics (Draft grammar)
+
+`KeySelectionCommand`'s `select-all` selects the specified universe. Repeating
+that intent in the same universe preserves the selection; issuing it after
+subtracting targets restores those targets. It does not toggle the universe off.
+[EG-SELECT conformance](tests/conformance/select-all.test.ts) checks empty,
+single-target, ordered multi-target, and excluded-target cases.
+An input profile may translate a second Mod+A into a separate `clear` command,
+as `selectAllAffordance` does. Navigation, selected targets, and a native text
+caret remain separate responsibilities.
