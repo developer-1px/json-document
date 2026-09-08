@@ -11,6 +11,10 @@ Stable admission이나 외부 상호운용성을 주장하지 않는다.
 작은 Core는 장기간 약속할 수 있는 의미만 소유한다. JSON Document의 여섯
 member와 편집 문법의 크기는 서로 다른 문제다.
 
+기반 계약은 여러 편집 정책을 수용하고, **기본 Profile은 사람들이 익숙한 편집
+동작을 구체적인 약속으로 제공한다**. 예외의 존재는 기본값의 적용 범위와 변형을
+설명하는 근거다. 기본값 자체도 장기간 호환성을 지킬 계약에 포함한다.
+
 - Outcome: 같은 Hands profile을 소비하는 제품은 선택·편집·복사·복원에서 같은
   관찰 가능한 의미를 얻는다.
 - Done: 이 설계에서 공통 규칙과 profile 선택을 구분하고, 각 규칙의 기존 owner,
@@ -36,9 +40,39 @@ Selection·Editing·Affordance·Web 연결이다. 사례를 읽은 것과 같은
 `selectAllAffordance`의 전체 선택 토글과 선택 의도의 멱등성,
 `selection.move`라는 이름 아래의 블록 이동과 선택 위치 이동도 구별해야 한다.
 아직 남은 공백은 앱 사례에서 공통 의미를 도출하는 근거, 중첩된 편집 맥락의
-계약, 같은 profile의 독립 구현 증거다.
+계약, 같은 profile의 독립 구현 증거다. 각 owner에 있는 기본 동작을 함께 쓰는
+Profile의 약속과, 그 Profile이 허용할 차이도 연결해야 한다.
 
 ## 앱 사례에서 최소 문법 도출하기
+
+### 단축키가 드러내는 관습부터 찾는다
+
+핵심 기능을 찾는 출발점은 **단축키로 반복 실행하도록 드러낸 작업**이다.
+사용자가 근육기억으로 익힌 조작을 장기 호환성의 대상으로 보고, 여러 제품과
+오랜 자료에 반복되는 기능부터 조사한다. 단축키의 존재는 조사 우선순위의 단서이며,
+그 기능의 영구 불변성이나 Core 소유권을 단독으로 증명하지는 않는다.
+
+[Mac 단축키](https://support.apple.com/en-us/102650)와
+[Excel 단축키](https://support.microsoft.com/en-us/accessibility/excel/keyboard-shortcuts-in-excel)는
+Undo·Copy·선택 확장을 반복해서 제공한다. 반면 문자와 셀의 선택 단위는 다르고,
+Excel의 `F2`는 셀 내부 편집으로 들어가는 맥락을 드러낸다. 현재 제품의 공개
+동작과 아래 역사적 지침을 대조하며, 현재 목록만으로 30년의 연속성을 주장하지 않는다.
+
+| 먼저 살펴볼 입력·기능 | 추출할 의미와 차이 | 기존 책임에 연결할 후보 |
+| --- | --- | --- |
+| Undo·Redo 단축키 | 되돌릴 작업의 단위, 전후 내용·선택, 실행할 History | Editing·History와 입력 계약 |
+| Copy·Cut·Paste 단축키 | 대상 확보, 교환 표현, 제거·삽입 결과 | Editing·domain codec·Web |
+| 방향키·Shift 확장·Select All | 탐색과 선택 확장, 전체의 범위와 반복 입력 결과 | Selection family·topology·입력 계약 |
+| Delete·Backspace | 선택 대상 제거와 삽입점 주변 삭제, 값 비우기와 구조 제거 | 대상별 Editing 계약 |
+| Enter·F2·Escape | 내부 편집 진입, 확정·취소·복귀의 맥락 | Affordance lifecycle·domain·Web |
+| 서식·채우기 등 대상별 단축키 | 같은 입력 계열에서도 다른 대상의 속성·내용 변경 | 해당 domain 계약 |
+| Save·Print | 저장·출력처럼 문서 편집 밖의 효과 | Application 계약 |
+
+이 표는 기능을 모두 추가하라는 목록이 아니다. 발견한 작업을 **시작 맥락·대상 →
+의도 → 결과·선택·History**로 풀고, 여러 대상에서 유지되는 의미를 공통 문법으로,
+대상별 차이를 domain 계약으로, 키와 수신 조건을 입력 계약으로 구체화한다.
+기본 Hands profile은 이를 익숙한 동작으로 조합한다. 단축키에 직접 드러나지 않는
+선택 mapping·원자성·gesture 취소도 그 작업을 성립시키는 데 필요하면 남긴다.
 
 ### 명령 이름보다 대상과 결과를 먼저 비교한다
 
@@ -114,7 +148,7 @@ transition·map·reconcile·targets가 이미 이 차이의 정본 경계를 제
 
 ### 중첩은 입력을 받을 곳의 계약이다
 
-[W3C APG Grid](https://www.w3.org/WAI/ARIA/apg/patterns/grid/#editing-and-navigating-inside-a-cell)는
+[W3C APG Grid](https://www.w3.org/WAI/ARIA/apg/patterns/grid/#keyboardinteraction-settingfocusandnavigatinginsidecells)는
 셀 탐색에 쓰는 화살표와 셀 안의 caret·widget 조작을 구분한다.
 [Keynote의 텍스트 상자](https://support.apple.com/en-ca/guide/keynote/tan4fd6ee725/mac)는
 객체 자체와 그 안의 텍스트를 따로 선택한다. 두 자료는 지침·제품 관습의 근거이며
@@ -139,6 +173,13 @@ Canvas Hand
 처리하지 않은 입력의 명시적 위임과 실패를 구별하며, 정확한 키·진입 방법은 입력
 profile이 정한다. 아직 전체 Hands에 실행 검증된 새 규칙은 아니다.
 
+명령 후보를 찾는 단계의 미적용과 실행한 편집의 거절도 구별한다.
+[ProseMirror Commands](https://prosemirror.net/docs/guide/#commands)는 적용할 수 없는
+명령의 `false`와 다음 후보 탐색을 정의한다. 이를 이 레포의 `EditingResult.ok: false`와
+같은 뜻으로 연결하지 않는다. [DOM Event](https://dom.spec.whatwg.org/#interface-event)의
+기본 동작 취소·전파 중단도 편집 성공과 별개의 관찰이며, 어떤 입력을 맡았는지는
+해당 binding의 계약으로 판단한다.
+
 여기서 편집 맥락은 HTML `editing host`, DOM element, JSON subtree, History
 instance와 일대일 대응하지 않는다. Toolbar로 focus가 옮겨져도 편집 명령은 저장된
 선택을 대상으로 할 수 있다. Headless 호출은 DOM focus 없이 대상을 지정할 수 있다.
@@ -155,7 +196,7 @@ native range의 방향을 투영하고, [Web virtual selection scope](../package
 
 | 과도한 일반화 | 근거 있는 반례 | 이 설계의 처리 |
 | --- | --- | --- |
-| 선택은 언제나 Undo 대상이 아님 | [GIMP Undoing](https://docs.gimp.org/3.0/en/gimp-concepts-undo.html)은 Scissors Select 작업과 Quick Mask 전환의 Undo를 설명 | 현재 일시적 Selection의 EG-SELECT·EG-HISTORY를 유지. Raster 선택 제작의 History 정책으로 일반화하지 않음 |
+| 선택만 바꾼 작업은 어떤 경우에도 Undo 기록이 아님 | [GIMP Undoing](https://docs.gimp.org/3.0/en/gimp-concepts-undo.html)의 선택 도구 작업과 [AppKit Undo](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/UndoArchitecture/Articles/AppKitUndo.html)의 저장되지 않는 view selection 기록 | 편집 전 선택 복원과 selection-only 기록을 구별. 현재 EG-SELECT·EG-HISTORY의 기본 정책을 다른 profile 전체에 강제하지 않음 |
 | 이동은 항상 Copy 후 즉시 제거한 뒤 Paste | [Finder 이동](https://support.apple.com/en-gb/102650)은 Clipboard의 파일을 목적지에 옮기는 동작을 제공 | EG-CUT은 현재 즉시 제거하는 cut 계약. 지연 이동은 같은 계약의 이름만 다른 구현이 아님 |
 | 복사한 저장 값을 그대로 넣으면 의미도 보존 | [Excel 수식 이동·복사](https://support.microsoft.com/en-us/excel/move-or-copy-a-formula-in-excel)는 복사 시 상대 참조 변경, 수식 이동 시 참조 유지를 구별 | payload의 참조·identity·배치 변환은 profile 계약. JSON 모양이나 text 일치만으로 교환 호환성을 판정하지 않음 |
 | Shift-click 확장은 항상 같은 anchor를 고정 | Apple HIG 1992 인쇄 쪽수 290–291은 addition과 fixed-point 두 방식을 설명 | 현재 EG-SELECT의 고정 anchor 전이를 유지. 다른 입력 관습을 같은 전이로 일반화하지 않음 |
@@ -249,6 +290,71 @@ Document·Sheet 등은 Editing에, Rich Text는 자신의 package에 구현돼 �
 Hands는 기존 공개 API들의 함께 검증된 조합이다. Host는 제품 데이터·권한·copy·
 layout·concrete external instance와 조합을 소유한다.
 
+## 기본 Profile이 제공할 편집 동작
+
+이 설계에서 기본 Hands profile은 **선택한 대상·입력·History 계약과 그 조합의
+적합성 기준**을 묶는다.
+기본 Profile은 해당 편집 대상을 사용할 때 추가 정책 선택 없이 기대할 동작을 정한다.
+Text·Sheet·Object가 같은 저장 model이나 선택 모양을 사용할 필요는 없다.
+공통 기본 규칙을 각 대상별 계약과 조합하며, 같은 책임은 기존 정본 모듈에서 구현한다.
+
+| 층위 | 약속하는 것 | 변형의 경계 |
+| --- | --- | --- |
+| Core와 기반 모듈 | JSONDocument의 원자적 commit·관찰, Selection·Editing 등 각 owner의 공개 계약 | 어떤 Profile도 소비하는 기반 계약의 보장을 약화하지 않음 |
+| 기본 Hands profile | 대상별 의미와 정착한 기본 입력·편집 결과·선택·복원 | 설정을 생략했을 때의 동작까지 명시하고 검증 |
+| 허용된 설정 또는 다른 Profile | 다른 입력 관습·기록 범위·교환 정책이 필요한 경우의 선언된 차이 | 같은 Profile 안에서 허용한 선택인지, 별도 Profile/revision인지 식별 |
+
+기존 [JSON Document v3 profile](json-document-v3/profile.md)은 기반 계약을,
+[Rich Text v1 profile](json-document-rich-text-v1/profile.md)은 대상별 계약을 정의한다.
+[Official Hands Profile](../docs/public/official-hands.md)은 입력까지 조합하는 위치다.
+기본 편집 동작을 묶는다는 이유로 이 계약들을 하나의 runtime 객체로 합치지 않는다.
+
+### 채택할 기본 의미와 구체화할 조건
+
+다음은 이 초안이 기본으로 제공하려는 의미다. 기존 동작·EG 규칙과 연결하며,
+뒤에 적은 조합 검증이 끝나기 전까지 모든 Hands의 구현 완료로 표시하지 않는다.
+
+| 동작 | 기본 Profile의 약속 | 구체화할 조건 / 연결 |
+| --- | --- | --- |
+| Undo 입력 | macOS `Cmd+Z`, Windows `Ctrl+Z`를 Undo 의도로 해석 | 편집 맥락의 수신 History, 실행 가능 여부와 조합 중 입력 처리. Web·Affordance |
+| 편집 Undo/Redo | 외부 변경이 개입하지 않은 Undo는 편집 전 내용·선택을, Redo는 편집 후 내용·선택을 함께 복원 | 선택 범위와 방향, 여러 view의 귀속, 외부 변경 후 유효한 위치 복원. EG-HISTORY·EG-RESULT |
+| 선택만 변경 | document와 문서 Undo/Redo 기록을 유지 | 선택 변경을 별도 Undo 대상으로 제공하는 정책과 구별. EG-SELECT |
+| Copy | 현재 편집 맥락의 대상을 읽고 document·selection·History를 유지 | 셀 전체와 내부 문자열, 구조 표현과 교환 표현. EG-TARGET·EG-COPY |
+| Cut/Paste | 확보한 대상에 대한 제거 또는 목적지에 맞는 삽입을 편집 결과와 후속 선택으로 설명 | 표현 선택·변환·거절·native 위임의 경계. EG-CUT·EG-PASTE |
+| 작업 단위 | typing·composition·drag를 사용자에게 의미 있는 Undo 단위로 제공 | grouping의 경계와 취소 결과는 대상·입력·History 계약의 조합에서 명시. EG-GESTURE·EG-HISTORY |
+
+[CKEditor Undo](https://ckeditor.com/docs/ckeditor5/latest/api/module_undo_undo-Undo.html)는
+batch와 편집 전 selection을 함께 기록하며,
+[UndoCommand](https://ckeditor.com/docs/ckeditor5/latest/api/module_undo_undocommand-UndoCommand.html)는
+그 selection을 복원한다. [CodeMirror History](https://codemirror.net/docs/ref/#commands.history)는
+일반 Undo와 selection 변경도 되돌리는 `undoSelection`을 구별한다. 해당 editor의
+공개 계약은 기본 복원의 근거가 되며, 특정 내부 알고리즘을 Core에 요구하지 않는다.
+
+특히 **편집과 함께 선택을 복원하는 것**과 **선택만 바꾼 작업을 새 Undo step으로
+기록하는 것**은 별개의 결정이다. 기본 Profile은 전자를 약속하고 현재 EG-SELECT의
+selection-only 정책을 유지한다. 후자의 변형이 필요하면 History owner의 지원과
+그 Profile의 적합성을 별도로 확인한다.
+
+### 기본값과 설정의 호환성
+
+설정을 생략하는 것도 Profile의 유효한 사용이다. 따라서 기본값만 바꾸는 변경도
+기존 소비자의 결과를 바꾸면 호환성 변경이다. 사용자가 근육기억으로 익힌 조작은
+키 조합뿐 아니라 어느 맥락의 무엇을 어떻게 바꾸는지까지 포함한다. 기본 키가
+같아도 Undo 수신자나 선택 복원을 바꾸면 그 약속을 바꾼 것이다.
+문서와 검증 사례에는 Profile revision, 대상·입력 계약, 선택한 설정과 생략 시
+기본값을 식별할 수 있게 남긴다.
+모든 payload에 새 식별 필드를 추가하라는 요구는 아니다.
+
+| 변경 | 같은 Profile을 유지할 조건 |
+| --- | --- |
+| 내부 구현·캐시 교체 | 같은 입력·설정에서 대상·결과·선택·History·실패 의미가 보존됨 |
+| 사용자의 단축키 재설정 | Profile이 허용한 입력 설정이며 Undo 의도와 복원 결과는 유지됨 |
+| 기본 단축키·selection-only 기록·Paste 우선순위 변경 | 기존 revision의 생략된 설정과 명시된 설정 모두 기존 의미를 유지해야 함. 보존하지 못하면 별도 Profile/revision으로 제공 |
+
+허용할 설정의 목록은 각 Profile에 둔다. keymap을 재정의할 수 있는 API가 있다고
+모든 재정의를 같은 기본 Profile의 적합한 동작으로 인정하지 않는다. 선택지는
+열어 두되, 기본 경로를 사용하는 제품이 반복해서 정책을 설계할 필요가 없게 한다.
+
 ## 공통으로 고정할 편집 규칙
 
 아래 ID는 설계 요구사항이다. 실제 동결은 owner의 versioned 계약과 적합성
@@ -256,7 +362,7 @@ layout·concrete external instance와 조합을 소유한다.
 규칙의 전제가 아니다.
 
 이 표의 적용 범위는 현재 구조·텍스트 편집 profile의 계약이다. EG-SELECT의
-일시적 선택과 문서 History 분리, EG-CUT의 즉시 제거를 다른 장르의 모든 관습으로
+selection-only 기록 정책과 EG-CUT의 즉시 제거를 다른 장르의 모든 관습으로
 일반화하지 않는다. 범위 확장의 anchor 규칙은 고정 anchor로 확장하는 현재
 range 전이에 적용한다. 다른 family나 raster·지연 이동 profile을 동결하려면 해당 상태와
 History·transfer 의미를 먼저 명시해야 하며, 기존 profile의 규칙을 느슨하게
@@ -284,6 +390,13 @@ Headless `cut()`은 보존 가능한 payload를 반환하고, Web event binding�
 서로 다른 결과로 검증한다. 브라우저가 custom edit를 다시 실행하지 않도록 하는
 event ownership은 Web이 소유한다.
 
+Web의 메모리 Clipboard 테스트가 확인하는 것은 표현 쓰기와 editor callback의
+결과다. 쓰기 실패 시 제거 callback이 호출되지 않았더라도 실제 브라우저의 후속
+기본 동작까지 차단됐다고 단정할 수 없다. [Clipboard API 초안의 cut 처리](https://www.w3.org/TR/2026/WD-clipboard-apis-20260624/#cut-action)와
+연결해 event 취소 상태·후속 native 편집·OS Clipboard 반영을 별도로 관찰해야 한다.
+이것은 기본 Cut 보장의 검증 범위이며 확정된 브라우저 결함이나 OS transaction
+보장으로 해석하지 않는다.
+
 EG-HISTORY에서 외부 변경 이후의 의미는 선택한 History 계약을 따른다. 현재
 local inverse History는 이를 비우며, collaboration History는 내 기여를 선택적으로
 되돌린다. 둘을 같은 복원 알고리즘으로 고정하지 않는다. 이미 존재하는
@@ -293,6 +406,12 @@ EG-GESTURE는 구조 편집 preview에 대한 규칙이다. IME의 중간 DOM mu
 composition grouping은 [DOM 편집 lifecycle](dom-editing-lifecycle.md)의 별도
 계약을 따른다. `createGestureSession`의 존재만으로 Host의 preview가 문서를
 변경하지 않는다고 증명할 수 없으므로 실제 연결까지 검증한다.
+
+입력 중 native 표시와 확정된 document, History step도 구별한다.
+[Input Events Level 2 초안](https://www.w3.org/TR/2026/WD-input-events-2-20260501/#input-event-order-during-composition)은
+취소할 수 없는 IME 조합 갱신을 설명한다. 기본 Profile의 입력 결과·취소·Undo
+의미를 고정하고, 실제 입력 trace가 그 결과로 귀결되는지는 Web binding에서
+검증한다. Working Draft의 특정 이벤트 순서나 지연 시간을 Core에 고정하지 않는다.
 
 ## Hands profile이 반드시 결정할 내용
 
@@ -345,6 +464,23 @@ Copy를 부분 문자열 Copy로 바꾸지는 않는다. Sheet의 primary rectan
 새로운 전역 command union이나 capability registry는 이 문제를 해결하는 전제가
 아니다. 이미 다른 의미를 가진 호출들을 한 이름으로 합치면 대상과 결과의 차이가
 숨는다. 공통 protocol은 공유하는 규칙에 두고, 문서의 의미는 기존 owner에 둔다.
+
+### 기본 Profile의 코드 연결을 설계할 위치
+
+다음 표는 후속 구현에서 확인할 정본과 공백을 연결한다. 이 문서 변경은 해당 API를
+확장하지 않으며, 기존 API로 조합할 수 있는지 확인한 뒤 부족한 owner만 확장한다.
+
+| 책임 | 기존 코드와 API | 다음 설계에서 닫을 공백 |
+| --- | --- | --- |
+| 기본 입력 해석·실행 가능 표시 | Web [keyboard.ts](../packages/json-document-web/src/keyboard.ts)의 `defaultWebKeymap`, `createWebKeyboardAdapter`; Affordance의 `historyAffordance` | 설정 생략·허용된 재설정에서 Undo 의도가 보존되는지 확인. 기본 keymap을 Host마다 복제하지 않음 |
+| 편집·선택·History 연결 | Editing의 `createEditingSession`, [EditingHistory](../packages/json-document-editing/src/history.ts) | 모델의 전후 선택과 native 선택 투영을 구별하고, 여러 view에서 실행할 History와 복원 대상 명시 |
+| 중첩 진입·복귀와 입력 수신 | Affordance의 rename/gesture lifecycle, Web의 `isWebEditingHostTarget`, 각 domain의 Web binding | 후보 미적용·맡은 편집 거절·명시적 위임을 구별하는 연결. 유효한 조합을 지원하지 못하면 정본 API에서 해결 |
+| 표현 교환과 Paste | Web의 `createWebClipboardBinding`, domain의 codec·표현·paste API | 표현 선택 실패와 선택한 payload의 편집 거절을 구별. 실제 native 후속 처리까지 관찰 |
+
+먼저 아래의 기본 Undo 사례를 공개 API 조합에 연결하고, 같은 기대 결과를 입력
+binding까지 확장한다. 중첩·여러 view·외부 표현의 차이는 해당 계약에서 별도로
+구체화한다. 구현을 바꿀 때 필요한 owner reference·Usage·source 등록은 각 owning
+package의 기존 위치에서 함께 갱신한다.
 
 ## 적합성 설계
 
@@ -452,6 +588,8 @@ profile 동결로 확대하지 않는다.
 | 사례 | 시작 상태 → 작업 → 판정할 결과 | 연결·현재 증거의 한계 |
 | --- | --- | --- |
 | 셀과 내부 문자열 | `Alpha` 셀 선택 / 내부 `ph` 선택 각각에서 Copy → 셀 payload / `ph` | EG-TARGET·EG-COPY. 기존 Sheet·native selection 증거는 각각 있으며 이 중첩 전체의 공통 binding은 없음 |
+| 기본 Undo와 선택 복원 | 아래의 `Alpha` 범위 교체 → Undo → Redo; 정방향·역방향 각각 실행 | EG-HISTORY·EG-RESULT. 전후 model selection 증거와 실제 native range 복원 증거를 구별 |
+| 선택만 변경한 뒤 Redo | 편집 → Undo → 선택만 이동 → Redo → 기록된 편집 후 내용·선택 | EG-SELECT·EG-HISTORY. 기본 Profile에서 선택 이동이 새 문서 History entry를 만들거나 Redo를 지우지 않음 |
 | 거절 시 바깥으로 전이 금지 | 선택한 객체 안의 text editor가 Delete 거절 → 객체 제거·외부 History entry가 생기지 않음 | EG-EDIT·입력 계약 후보. [Web clipboard ownership](../packages/json-document-web/tests/clipboard-rejection.test.ts)은 한 binding의 거절 처리 증거이며 일반적인 중첩 거절 vector는 없음 |
 | Toolbar 대상 보존 | editor A에서 범위 선택 → Toolbar에 focus → Copy 실행 → A의 선택 payload | 입력 focus와 Selection 구별. 전체 Hands에 대한 공통 실행 증거 없음 |
 | 셀 값과 행 구조 | 값이 있는 셀을 비움 / 해당 record 삭제 → 전자는 구조 유지, 후자는 record 제거 | EG-EDIT·profile 대상. 현재 Sheet Cut과 Database `record.delete`는 서로 다른 계약 |
@@ -459,12 +597,29 @@ profile 동결로 확대하지 않는다.
 | Draft 취소와 Undo | 미확정 rename draft 수정 → cancel → 확정 label 불변; 확정 rename → Undo → 이전 label | EG-GESTURE·EG-HISTORY. 구조 gesture runner가 모든 rename·IME 취소를 증명하지 않음 |
 | 외부 참조·다른 profile로 Paste | 수식 또는 reference를 다른 위치·profile에 Paste → 변환·보존·거절 중 선언한 결과 | EG-PASTE. 현재 세 editor의 내부 round trip만으로 cross-profile 교환을 인증할 수 없음 |
 | 공유 문서의 두 편집 맥락 | A에서 편집 → B로 입력 focus 전환 → Undo → 선택한 History owner가 명시한 기여·선택 복원 | EG-HISTORY·EG-RESULT. 외부 History 연결 증거와 모든 Hand의 입력 routing 증거는 다름 |
+| Cut 쓰기 실패 후 native 처리 | editable selection에서 지원하는 Cut의 표현 쓰기 실패 → 해당 작업의 원본 제거 없음 | EG-CUT·Web. 제거 callback 미호출 외에 event 취소·후속 beforeinput/input·document·History를 관찰. 브라우저 재현 전 검증 공백 |
+| IME와 Undo 수신 | 조합 완료 / 취소 / 조합 중 Undo·focus 이동 → 선언된 내용·선택·History·입력 상태 | EG-HISTORY·Web lifecycle. 합성 composition fixture와 OS IME 검증을 구별 |
 
-이번 도출로 설계 방향을 정할 수 있는 부분은 대상·위치·선택·입력 수신자의 구별,
-대상별 계약과 입력 계약의 조합, 기존 owner의 유지다. 아직 동결할 수 없는 부분은
-중첩 편집의 진입·거절·복귀 규칙, profile 간 payload 변환, raster/file 편집의
-적용 범위, 여러 편집 맥락의 History routing이다. 같은 profile을 독립적으로
-구현했을 때 이 사례들의 결과가 일치해야 장기 호환성 약속으로 승격할 수 있다.
+기본 Undo 사례는 Rich Text에서 다른 변경이 끼어들지 않고 `ph`를 `X`로 교체하는
+상황으로 구체화한다. offset은 같은 text node 안의 위치다.
+
+| 단계 | 내용 | 선택과 History의 기대 결과 |
+| --- | --- | --- |
+| 시작 | `Alpha` | 정방향 `(anchor: 2, focus: 4)` 또는 역방향 `(anchor: 4, focus: 2)`으로 `ph` 선택. History 비어 있음 |
+| 교체 | `AlXa` | offset 3의 collapsed caret. 한 번의 Undo 가능 |
+| Undo | `Alpha` | 시작 때의 범위와 방향 복원. Undo 불가·Redo 가능 |
+| Redo | `AlXa` | offset 3의 collapsed caret 복원. Undo 가능·Redo 불가 |
+
+선택만 바꾼 뒤 Redo하는 후보는 Undo 행과 Redo 행 사이에서 caret을 옮겨 실행한다.
+이 선택 이동은 별도 step이 아니며, Redo는 기록된 교체 후 선택을 복원해야 한다.
+이 표는 공개 동작에 대한 기대 결과다. 새 테스트의 통과를 주장하지 않으며,
+Document의 offset 하나만으로 과거 native range 전체를 복원할 수 있다고 가정하지 않는다.
+
+기본 Profile의 역할과 Undo·선택 복원의 기본 의미는 설계에 채택한다. 입력 수신,
+중첩의 진입·거절·복귀, profile 간 payload 변환과 여러 view의 History 귀속은
+위 사례로 더 구체화한다. 기본값을 정하는 것과 동결을 인증하는 것은 다른 단계다.
+같은 profile을 독립적으로 구현했을 때 결과가 일치하고 실제 입력 경로에서도
+약속이 유지되어야 장기 호환성 증거로 승격할 수 있다.
 
 ## 장기 호환성
 
