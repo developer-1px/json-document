@@ -309,19 +309,37 @@ Text·Sheet·Object가 같은 저장 model이나 선택 모양을 사용할 필�
 [Official Hands Profile](../docs/public/official-hands.md)은 입력까지 조합하는 위치다.
 기본 편집 동작을 묶는다는 이유로 이 계약들을 하나의 runtime 객체로 합치지 않는다.
 
-### 채택할 기본 의미와 구체화할 조건
+### 기본 동작별 계약
 
-다음은 이 초안이 기본으로 제공하려는 의미다. 기존 동작·EG 규칙과 연결하며,
-뒤에 적은 조합 검증이 끝나기 전까지 모든 Hands의 구현 완료로 표시하지 않는다.
+기본 Profile에서 먼저 닫을 범위는 아래 12개 동작이다. 각 대상에 적용되는 동작을
+기본 경로로 제공하며, 미지원과 일시적 실행 불가를 구별한다. 예를 들어 내부 편집을
+제공하는 Hand에는 진입·확정·취소·복귀가 필요하지만, 모든 객체에 text editor를
+내장할 필요는 없다. 표는 이 초안이 채택하는 계약이며 전체 Hands의 구현 완료나
+기존 API 기본값의 즉시 변경을 뜻하지 않는다.
 
-| 동작 | 기본 Profile의 약속 | 구체화할 조건 / 연결 |
-| --- | --- | --- |
-| Undo 입력 | macOS `Cmd+Z`, Windows `Ctrl+Z`를 Undo 의도로 해석 | 편집 맥락의 수신 History, 실행 가능 여부와 조합 중 입력 처리. Web·Affordance |
-| 편집 Undo/Redo | 외부 변경이 개입하지 않은 Undo는 편집 전 내용·선택을, Redo는 편집 후 내용·선택을 함께 복원 | 선택 범위와 방향, 여러 view의 귀속, 외부 변경 후 유효한 위치 복원. EG-HISTORY·EG-RESULT |
-| 선택만 변경 | document와 문서 Undo/Redo 기록을 유지 | 선택 변경을 별도 Undo 대상으로 제공하는 정책과 구별. EG-SELECT |
-| Copy | 현재 편집 맥락의 대상을 읽고 document·selection·History를 유지 | 셀 전체와 내부 문자열, 구조 표현과 교환 표현. EG-TARGET·EG-COPY |
-| Cut/Paste | 확보한 대상에 대한 제거 또는 목적지에 맞는 삽입을 편집 결과와 후속 선택으로 설명 | 표현 선택·변환·거절·native 위임의 경계. EG-CUT·EG-PASTE |
-| 작업 단위 | typing·composition·drag를 사용자에게 의미 있는 Undo 단위로 제공 | grouping의 경계와 취소 결과는 대상·입력·History 계약의 조합에서 명시. EG-GESTURE·EG-HISTORY |
+| 동작 | 대상 → 기본 결과 | 후속 선택·History | 구체화할 차이 / 기존 owner |
+| --- | --- | --- | --- |
+| 탐색 | 현재 맥락의 위치 → 유효한 이웃·경계로 이동, 문서 불변 | 대상별 caret 또는 논리 focus·선택 전이. 문서 History 유지 | 문자·셀·가시 노드의 단위와 선택 동반 여부. Selection·Topology·입력 계약 |
+| 선택 | 유효한 대상·삽입점 → 요청한 선택으로 전이 | 내용·문서 Undo/Redo 기록 유지 | range·key set, primary와 복수 범위. Selection·editor |
+| 선택 확장 | 기존 선택 → 확장한 범위 | 고정 anchor 범위는 anchor를 보존하며 focus 이동. 문서 History 유지 | 문자·셀·가시 순서; key 집합 추가는 별도 전이. Selection·Topology |
+| 전체 선택 | 현재 맥락이 정한 전체 대상 → 한 선택 전이로 전부 선택 | 같은 대상 집합에서 반복해도 유지. 문서 History 유지 | 기본 입력도 선택 해제로 토글하지 않음. 단계적 범위 확대·토글은 다른 입력 정책. Selection·Affordance |
+| 삽입·교체 | 삽입점·대체 범위 또는 명시 대상 → 유효한 새 내용·구조 | 삽입 후 작업 위치 또는 삽입 대상 선택. 확정 작업 단위로 Undo | 문자열 대체·셀 값 commit·객체 삽입의 의미. domain·Editing |
+| 삭제 | 선택 대상 또는 삽입점 주변 → 선언한 내용·구조 제거 | 유효한 남은 위치·대상 또는 빈 선택. 확정 작업 단위로 Undo | 문자 삭제·셀 값 비우기·subtree 제거 구별. domain·Editing |
+| Copy | 현재 맥락의 대상 → 구조 payload와 교환 표현 | document·selection·History 유지 | 셀 전체와 내부 문자열, 표현과 대상 폐포. domain·Web |
+| Cut | 확보한 대상 → payload 확보 후 그 대상 제거 | domain이 정한 삭제 후 선택. 성공한 편집의 Undo | 확보 실패 시 제거 없음, 제거 거절 시 편집 상태 유지. domain·Editing·Web |
+| Paste | 목적지·대체 범위와 payload → 목적지 계약에 맞는 삽입 | 삽입 결과에 맞는 선택. 확정 작업 단위로 Undo | 표현 우선순위·identity·참조 변환·경계·거절. domain·Web·Editing |
+| Undo·Redo | 선택한 History의 작업 → 편집 전·후 상태 복원 | 외부 변경이 없으면 내용과 선택 범위·방향을 함께 복원 | grouping·외부 변경·여러 view의 귀속. Editing·선택한 History owner |
+| 내부 편집 진입 | 선택한 셀·항목·객체 → 해당 내부 편집 맥락 | 진입만으로 문서 History를 만들지 않음. 외부 선택과 복귀 대상 보존 | F2·Enter·pointer의 의미와 내부 선택 초기화. Affordance·domain·Web |
+| 확정·취소·복귀 | 진행 중인 명시적 draft → 성공 시 확정·복귀, 취소 시 확정 내용 유지 | 성공한 확정만 Undo 대상. 확정 거절 시 draft와 편집 맥락 유지 | 대상이 유효한 rename·cell draft의 기본 정책. 연속 입력·IME는 별도 lifecycle. Affordance·domain·Web |
+
+기본 Undo 입력은 macOS `Cmd+Z`, Windows `Ctrl+Z`다. Copy·Cut·Paste와 전체
+선택도 선택한 플랫폼의 기본 입력으로 연결한다. 키 이름만으로 수신자를 정하지
+않으며, 중첩 맥락·native control·조합 중 입력의 소유권을 함께 결정한다.
+typing·composition·drag의 grouping은 각 계약의 작업 경계로 명시한다.
+
+Object의 방향키가 좌표 변경을 뜻하면 그것은 탐색과 다른 편집이며 Undo 대상이다.
+Rich Text의 Enter가 단락 삽입이면 그것을 draft 확정과 같은 작업으로 해석하지
+않는다. 이런 차이는 새 전역 command union 대신 대상별 계약에 남긴다.
 
 [CKEditor Undo](https://ckeditor.com/docs/ckeditor5/latest/api/module_undo_undo-Undo.html)는
 batch와 편집 전 selection을 함께 기록하며,
@@ -433,23 +451,28 @@ composition grouping은 [DOM 편집 lifecycle](dom-editing-lifecycle.md)의 별�
 기대되는 기본 편집 흐름을 생략할 수 없으며, 그 선택의 외부 관습이나 제품 목적을
 profile에서 설명한다.
 
-### 현재 구현을 설명하는 대표 매핑
+### 대상별로 비교한 현재 결과
 
 이 표는 현재 동작의 관찰이다. 관찰된 기본값이 곧 영구히 고정할 규칙은 아니다.
 
-| 항목 | Document | Sheet | Rich Text |
+| 대상 / binding | 선택·Copy 대상 | 교체·제거 → 후속 선택 | Paste → 후속 선택 |
 | --- | --- | --- | --- |
-| 편집 단위 | stable ID를 가진 블록과 text | stable row/column ID의 셀 | stable node ID와 text/child point |
-| Copy 대상 | 선택된 블록 전체 | primary rectangle | 선택된 structured slice |
-| Paste | 기본적으로 마지막 선택 블록 뒤에 삽입 | focus 셀부터 고정 경계 안에 기록 | 선택 구간과 schema에 맞게 slice 삽입 |
-| 제거 | 선택 블록 제거 | Cut은 primary rectangle 값을 `null`로 비움 | 선택 구간 제거·schema 제약 적용 |
-| 후속 선택 | 삽입 블록마다 collapsed range, 첫 블록 primary; 삭제 후 남은 이웃 | 붙여넣은 직사각형, Cut은 기존 선택 | transform 후 mapping된 text/child point |
+| [Rich Text](../packages/json-document-rich-text/src/editor.ts) | node ID + text/child range, structured slice | `text.insert`는 선택 구간 대체; 제거는 schema 제약 적용 → mapping된 point | 선택 구간에 slice 삽입 → 삽입 결과의 point |
+| [Document](../packages/json-document-editing/src/document.ts) | block ID + offset, Copy는 블록 전체 | `text.replace`는 블록 문자열 교체 → 지정 offset 또는 끝; 제거 → 남은 이웃 | 기본적으로 마지막 선택 블록 뒤에 삽입 → 블록마다 collapsed range, 첫 블록 primary |
+| [Tree](../packages/json-document-editing/src/tree.ts) | 가시 노드 범위; Copy·제거는 숨은 후손도 포함 | 선택 subtree 제거 → 남은 가시 이웃 또는 빈 선택 | 대상 노드와 같은 parent 아래 새 ID의 subtree 추가 → 삽입 root들 선택 |
+| [Sheet](../packages/json-document-editing/src/sheet.ts) | 셀 range들의 집합; Copy는 primary rectangle | `cell.commit` → 해당 셀; `selection.fill(null)`은 선택된 셀 값, Cut은 primary 값만 비움 → 선택 유지 | focus 셀부터 경계 내 기록 → 붙여넣은 직사각형 |
+| [Object](../packages/json-document-editing/src/object.ts) | object ID 집합; Copy는 해당 객체 | 속성 변경·이동과 객체 제거를 구별; 제거 → 저장 순서의 남은 이웃 또는 빈 선택 | 새 ID와 선언한 좌표 offset으로 추가 → 삽입 객체들 선택 |
 
-현재 binding은 각각 `json-document-editing/src/document.ts`, `sheet.ts`,
-`json-document-rich-text/src/editor.ts`에 있다. Document의 text offset이 블록
-Copy를 부분 문자열 Copy로 바꾸지는 않는다. Sheet의 primary rectangle 정책도
-여러 범위 전체의 Copy와 구별한다. 이런 차이는 profile 이름과 사용법에서 드러나야
-하며, 공통 함수 이름 때문에 사용자가 동일한 대상을 예상하게 해서는 안 된다.
+이들의 기본 local History는 외부 변경이 없는 편집의 전후 내용·선택을 기록한다.
+같은 Undo 규칙을 공유해도 문자열 range·가시 노드 범위·셀 rectangle·object ID
+집합을 하나의 선택 모양으로 합칠 필요는 없다.
+
+탐색의 단위도 대상별이다. Text의 caret, Tree의 가시 순서, Sheet의 행·열 topology를
+구별하고 Object의 좌표 변경과 분리한다. 항목 label의 내부 편집은 현재
+[Order](../packages/json-document-editing/src/order.ts)의 `item.rename`과
+`createRenameSession` 조합으로 확인한다. Tree·Object에 같은 내부 편집이 이미
+제공된다고 일반화하지 않는다. Database의 record, Calendar의 occurrence, Annotation의
+source 참조와 Composer의 중첩은 앞의 11개 사례에서 정한 domain 차이를 유지한다.
 
 ## 구현에서 계약으로 옮길 때의 결정
 
@@ -465,22 +488,54 @@ Copy를 부분 문자열 Copy로 바꾸지는 않는다. Sheet의 primary rectan
 아니다. 이미 다른 의미를 가진 호출들을 한 이름으로 합치면 대상과 결과의 차이가
 숨는다. 공통 protocol은 공유하는 규칙에 두고, 문서의 의미는 기존 owner에 둔다.
 
-### 기본 Profile의 코드 연결을 설계할 위치
+### 하이라키 검토와 최소 코드 변경안
 
-다음 표는 후속 구현에서 확인할 정본과 공백을 연결한다. 이 문서 변경은 해당 API를
-확장하지 않으며, 기존 API로 조합할 수 있는지 확인한 뒤 부족한 owner만 확장한다.
+기본 Undo 사례는 기존 `createRichTextEditor`와 Web keymap의 공개 API 조합으로
+실행됐다. 따라서 이 경로를 위해 Core에 Selection·History를 넣거나 새 session
+계층을 추가하지 않는다. 현재 공백은 기반 보장을 기본 동작으로 조합하는 계약에 있다.
 
-| 책임 | 기존 코드와 API | 다음 설계에서 닫을 공백 |
+| 확인한 계약과 증거 | 판단 / 최소 변경안 | 완료를 판정할 사례 |
 | --- | --- | --- |
-| 기본 입력 해석·실행 가능 표시 | Web [keyboard.ts](../packages/json-document-web/src/keyboard.ts)의 `defaultWebKeymap`, `createWebKeyboardAdapter`; Affordance의 `historyAffordance` | 설정 생략·허용된 재설정에서 Undo 의도가 보존되는지 확인. 기본 keymap을 Host마다 복제하지 않음 |
-| 편집·선택·History 연결 | Editing의 `createEditingSession`, [EditingHistory](../packages/json-document-editing/src/history.ts) | 모델의 전후 선택과 native 선택 투영을 구별하고, 여러 view에서 실행할 History와 복원 대상 명시 |
-| 중첩 진입·복귀와 입력 수신 | Affordance의 rename/gesture lifecycle, Web의 `isWebEditingHostTarget`, 각 domain의 Web binding | 후보 미적용·맡은 편집 거절·명시적 위임을 구별하는 연결. 유효한 조합을 지원하지 못하면 정본 API에서 해결 |
-| 표현 교환과 Paste | Web의 `createWebClipboardBinding`, domain의 codec·표현·paste API | 표현 선택 실패와 선택한 payload의 편집 거절을 구별. 실제 native 후속 처리까지 관찰 |
+| Rich Text의 범위 교체·Undo·Redo와 [EditingHistory](../packages/json-document-editing/src/history.ts): 아래 12개 공개 API 사례 통과 | 이 범위의 runtime·API 변경 불필요. 기존 owner의 conformance binding에 사례를 정착시키고 실제 native 선택 경로 확인 | 양방향 범위 복원, Undo 후 선택 이동과 Redo 보존. model과 DOM 관찰 구별 |
+| [selectAllAffordance](../packages/json-document-affordance/src/select.ts)는 `allSelected: true`에서 `clear` 반환 | Affordance에 반복 입력 정책을 명시적으로 선택할 수 있는 경로 추가. 기본 Hands는 선택 유지 정책 사용; 기존 토글 호출의 생략된 설정은 보존 | 같은 universe에서 두 번 Mod+A → 전체 선택 유지; 명시한 토글 경로 → 해제 |
+| [createRenameSession](../packages/json-document-affordance/src/session.ts)의 `onCommit`은 `void`; editor 거절 후에도 draft를 지우고 `onFinish` 호출 | Affordance에 성공 여부를 받는 확정 경로 추가. 거절 시 draft 유지, 성공 시 한 번 종료. 기존 `void` callback 경로는 보존 | label 검증 거절 → 내용·선택·History와 draft 유지; 수정 후 재시도 성공 → 한 번 확정·복귀 |
+| [Rich Text Web](../packages/json-document-rich-text-web/src/contenteditable.ts)은 Undo 키 조건을 직접 판단하고, 구조 입력은 [Web keyboard](../packages/json-document-web/src/keyboard.ts)를 소비 | 공통 Undo/Redo 해석은 Web resolver를 소비하도록 연결. Text 삭제·IME·root 소유권은 Rich Text Web에 유지. 기존 modifier 수용 범위의 차이는 명시적 입력 정책으로 보존 | 기본 Cmd/Ctrl+Z와 Redo가 같은 의도로 해석됨; 추가 modifier·조합 중 입력은 선언한 정책으로 판정 |
+| Document·Order·Tree·Sheet의 `selection.set`은 단일 point 전이; 전체 선택을 단일 전이로 받는 공개 경로는 없음 | 기존 domain Intent에 전체 선택 작업을 추가하고 Selection family로 한 번에 적용. 전체 집합은 Document·Order의 순서, Tree의 visible topology, Sheet의 행·열로 결정. Host의 첫·끝 연속 dispatch는 중간 관찰을 노출하므로 채택하지 않음 | 0·1·여러 대상에서 전체 선택 한 작업, 중간 부분 선택 publication 없음, 반복 결과·History 유지 |
 
-먼저 아래의 기본 Undo 사례를 공개 API 조합에 연결하고, 같은 기대 결과를 입력
-binding까지 확장한다. 중첩·여러 view·외부 표현의 차이는 해당 계약에서 별도로
-구체화한다. 구현을 바꿀 때 필요한 owner reference·Usage·source 등록은 각 owning
-package의 기존 위치에서 함께 갱신한다.
+`onCommit` 반환값을 단순히 `void | boolean`으로 바꾸는 안도 기존 callback의
+호환성을 확인해야 한다. 현재 테스트의 `commits.push(...)`처럼 값을 반환하면서
+`void` callback으로 쓰던 호출이 있다. 성공 확인 경로는 기존 호출과 분리해 추가하고,
+정확한 public signature는 그 owner의 호환성 검증과 함께 확정한다.
+
+Affordance의 후속 API 초안은 다음 두 호출을 지원하는 것이다. 아직 존재하지 않는
+옵션을 보여주는 설계 예이며 현재 Usage가 아니다.
+
+```ts
+selectAllAffordance(stroke, state, { repeat: "preserve" });
+createRenameSession<string>({
+  tryCommit: (itemId, label) => editor.dispatch({ type: "item.rename", itemId, label }).ok,
+  onFinish: restoreItemFocus,
+});
+```
+
+`repeat` 생략은 기존 토글을 유지하고 기본 Hands의 조합이 `preserve`를 선택한다.
+rename은 기존 `onCommit`과 새 동기 `tryCommit` 중 하나를 받으며 둘을 함께
+허용하지 않는 안이다. `false`는 draft 유지, `true`는 종료를 뜻하고 Affordance가
+EditingResult나 domain 검증 규칙을 직접 소유하지 않는다. 비동기 확정은 이 안의
+범위가 아니다. domain의 전체 선택 작업도 기존 point 선택 호출을 보존하는 추가
+계약으로 다루며 새 공통 selection state 객체나 registry를 요구하지 않는다.
+
+Host 연결도 구별한다. [Order Demo](../site/src/routes/order-demo/OrderDemoRoute.tsx)는
+정본 rename session을 `item.rename`에 연결하므로 거절 후 draft 처리를 Host에
+다시 구현하지 않는다. [Canvas Demo](../site/src/routes/canvas-demo/CanvasDemoRoute.tsx)의
+전체 선택은 `selectAllAffordance` 결과를 Object의 한 `selection.set`에 연결한다.
+기본 정책의 소유자는 Affordance·Profile이며 Canvas의 조건문으로 바꾸지 않는다.
+
+후속 구현 순서는 기존 Undo 증거의 정착, 기본 전체 선택의 정본 입력·domain 연결,
+명시적 draft 확정 결과의 연결이다. Native Cut·IME·여러 view의 History는 아래
+검증 질문으로 입력·외부 효과를 확인한 뒤 해당 owner에서 설계한다. 구현을 바꿀 때
+owner reference·Usage·source 등록도 각 package의 기존 위치에서 함께 갱신한다.
+이 문서 변경은 표의 runtime 수정이나 public signature를 적용하지 않는다.
 
 ## 적합성 설계
 
@@ -581,20 +636,21 @@ profile 동결로 확대하지 않는다.
 
 ## 새 도출의 검증 질문
 
-다음은 실행할 수 있도록 시작 상태와 판정 결과를 적은 **후보 사례**다. 앞의
-기존 적합성 표의 통과 항목과 합산하지 않는다. 이 문서 변경은 새 behavior vector나
-구현을 추가하지 않는다.
+다음은 시작 상태와 판정 결과를 적은 **조합 검증 사례**다. 일부 model 경로는
+임시 공개 API 실행으로 확인했으며, 영구 conformance vector·native 입력 검증과
+구별한다. 앞의 기존 적합성 표의 통과 항목과 합산하지 않는다. 이 문서 변경은 새
+behavior vector나 runtime 구현을 추가하지 않는다.
 
 | 사례 | 시작 상태 → 작업 → 판정할 결과 | 연결·현재 증거의 한계 |
 | --- | --- | --- |
 | 셀과 내부 문자열 | `Alpha` 셀 선택 / 내부 `ph` 선택 각각에서 Copy → 셀 payload / `ph` | EG-TARGET·EG-COPY. 기존 Sheet·native selection 증거는 각각 있으며 이 중첩 전체의 공통 binding은 없음 |
-| 기본 Undo와 선택 복원 | 아래의 `Alpha` 범위 교체 → Undo → Redo; 정방향·역방향 각각 실행 | EG-HISTORY·EG-RESULT. 전후 model selection 증거와 실제 native range 복원 증거를 구별 |
-| 선택만 변경한 뒤 Redo | 편집 → Undo → 선택만 이동 → Redo → 기록된 편집 후 내용·선택 | EG-SELECT·EG-HISTORY. 기본 Profile에서 선택 이동이 새 문서 History entry를 만들거나 Redo를 지우지 않음 |
+| 기본 Undo와 선택 복원 | 아래의 `Alpha` 범위 교체 → Undo → Redo; 정방향·역방향 각각 실행 | EG-HISTORY·EG-RESULT. 임시 공개 API 실행에서 model 복원 확인; native range와 영구 vector는 별도 |
+| 선택만 변경한 뒤 Redo | 편집 → Undo → 선택만 이동 → Redo → 기록된 편집 후 내용·선택 | EG-SELECT·EG-HISTORY. 임시 실행에서 새 문서 History entry 없이 Redo·편집 후 선택 보존 확인 |
 | 거절 시 바깥으로 전이 금지 | 선택한 객체 안의 text editor가 Delete 거절 → 객체 제거·외부 History entry가 생기지 않음 | EG-EDIT·입력 계약 후보. [Web clipboard ownership](../packages/json-document-web/tests/clipboard-rejection.test.ts)은 한 binding의 거절 처리 증거이며 일반적인 중첩 거절 vector는 없음 |
 | Toolbar 대상 보존 | editor A에서 범위 선택 → Toolbar에 focus → Copy 실행 → A의 선택 payload | 입력 focus와 Selection 구별. 전체 Hands에 대한 공통 실행 증거 없음 |
 | 셀 값과 행 구조 | 값이 있는 셀을 비움 / 해당 record 삭제 → 전자는 구조 유지, 후자는 record 제거 | EG-EDIT·profile 대상. 현재 Sheet Cut과 Database `record.delete`는 서로 다른 계약 |
 | 반복 일정 영향 범위 | 같은 occurrence에 `this` / `all` 이동 → profile이 정한 반복 일정 집합만 영향 | EG-TARGET·EG-EDIT. Calendar domain 사례이며 입력 맥락 전환으로 해석하지 않음 |
-| Draft 취소와 Undo | 미확정 rename draft 수정 → cancel → 확정 label 불변; 확정 rename → Undo → 이전 label | EG-GESTURE·EG-HISTORY. 구조 gesture runner가 모든 rename·IME 취소를 증명하지 않음 |
+| Draft 취소·거절과 Undo | draft 수정 → cancel 또는 검증 거절 → 확정 label 불변; 성공한 rename → Undo → 이전 label | EG-GESTURE·EG-HISTORY. 현재 rename 거절에서 문서 보존은 확인했으나 draft 종료도 관찰. 제안한 거절 후 유지 계약의 공백 |
 | 외부 참조·다른 profile로 Paste | 수식 또는 reference를 다른 위치·profile에 Paste → 변환·보존·거절 중 선언한 결과 | EG-PASTE. 현재 세 editor의 내부 round trip만으로 cross-profile 교환을 인증할 수 없음 |
 | 공유 문서의 두 편집 맥락 | A에서 편집 → B로 입력 focus 전환 → Undo → 선택한 History owner가 명시한 기여·선택 복원 | EG-HISTORY·EG-RESULT. 외부 History 연결 증거와 모든 Hand의 입력 routing 증거는 다름 |
 | Cut 쓰기 실패 후 native 처리 | editable selection에서 지원하는 Cut의 표현 쓰기 실패 → 해당 작업의 원본 제거 없음 | EG-CUT·Web. 제거 callback 미호출 외에 event 취소·후속 beforeinput/input·document·History를 관찰. 브라우저 재현 전 검증 공백 |
@@ -612,8 +668,15 @@ profile 동결로 확대하지 않는다.
 
 선택만 바꾼 뒤 Redo하는 후보는 Undo 행과 Redo 행 사이에서 caret을 옮겨 실행한다.
 이 선택 이동은 별도 step이 아니며, Redo는 기록된 교체 후 선택을 복원해야 한다.
-이 표는 공개 동작에 대한 기대 결과다. 새 테스트의 통과를 주장하지 않으며,
-Document의 offset 하나만으로 과거 native range 전체를 복원할 수 있다고 가정하지 않는다.
+
+이 사례는 기존 공개 entrypoint의 빌드 결과로 실행했다. 정방향·역방향 2가지,
+Undo 후 caret 이동 여부 2가지, 직접 호출·기본 keymap의 metaKey·ctrlKey 해석
+3가지를 조합한 12개 실행에서 내용·선택·Undo/Redo 상태가 기대와 일치했다.
+키 경로는 `createWebKeyboardAdapter().resolve`의 결과를 editor의 `undo`·`redo`에
+전달했다. 실제 DOM event 수신이나 native range 복원을 검증한 것은 아니다.
+재현 코드와 실행 조건은 [이슈의 학습 기록](https://github.com/developer-1px/json-document/issues/725#issuecomment-5577252880)에 보관하고, 영구 suite의 새 테스트로
+집계하지 않는다. Document의 offset 하나로 과거 native range 전체를 복원할 수
+있다고 가정하지 않는다.
 
 기본 Profile의 역할과 Undo·선택 복원의 기본 의미는 설계에 채택한다. 입력 수신,
 중첩의 진입·거절·복귀, profile 간 payload 변환과 여러 view의 History 귀속은
