@@ -108,6 +108,7 @@ import richTextReactSurfaceSource from "../../../../packages/json-document-rich-
 import richTextRenderStoreSource from "../../../../packages/json-document-rich-text-react/src/render-store.ts?raw";
 import uiFileSizeSource from "../../../../packages/json-document-file-intake/src/file-size.ts?raw";
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
+import selectionKeySource from "../../../../packages/json-document-selection/src/key/index.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
@@ -291,6 +292,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-file-intake/src/file-size.ts", uiFileSizeSource],
   ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
+  ["packages/json-document-selection/src/key/index.ts", selectionKeySource],
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
@@ -949,6 +951,17 @@ const registeredPublicUsages = [
     symbol: "createAnnotationEditor",
     sourcePath: "packages/json-document-editing/src/annotation.ts",
   },
+  // Public editor implementation spans its domain projection and the Key owner.
+  ...["packages/json-document-editing/src/annotation-selection.ts", "packages/json-document-selection/src/key/index.ts"].map((sourcePath) => ({
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createAnnotationEditor",
+    sourcePath,
+  })),
+  ...["transformAnnotationSelector", "annotationSelectorBounds", "annotationResizeHandle"].map((symbol) => ({
+    packageName: "@interactive-os/json-document-editing",
+    symbol,
+    sourcePath: "packages/json-document-editing/src/annotation.ts",
+  })),
   {
     packageName: "@interactive-os/json-document-annotation",
     symbol: "AnnotationHand",

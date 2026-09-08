@@ -238,3 +238,21 @@ test("modified Delete is ignored while ordinary Delete and Undo share the editin
   expect((await structured(page)).annotations).toHaveLength(1);
   await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(1);
 });
+
+
+test("source tabs connect Annotation Usage to each canonical responsibility", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const workbench = page.getByRole("region", { name: "Demo workbench" });
+  await workbench.getByRole("tab", { name: "AnnotationDemoRoute.tsx", exact: true }).click();
+  for (const [file, code, api] of [
+    ["annotation-hand.tsx", "useInteractionHandle", "annotation"],
+    ["annotation-output.ts", "export function useAnnotationOutput", "annotation"],
+    ["annotation.ts", "transformAnnotationSelector", "editing"],
+    ["annotation-selection.ts", "family.transition", "editing"],
+    ["index.ts", "createKeySelectionFamily", "selection"],
+  ]) {
+    await workbench.getByRole("tab", { name: file, exact: true }).click();
+    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText(code!);
+    await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", `/docs/api/${api}`);
+  }
+});

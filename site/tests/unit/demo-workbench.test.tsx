@@ -54,6 +54,22 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("Annotation Usage exposes the Hand, output, geometry, selection projection and Key owner", async () => {
+    const sources = await discoverDemoSources("routes/annotation-demo/AnnotationDemoRoute.tsx");
+    for (const path of [
+      "packages/json-document-annotation/src/annotation-hand.tsx",
+      "packages/json-document-annotation/src/annotation-output.ts",
+      "packages/json-document-editing/src/annotation.ts",
+      "packages/json-document-editing/src/annotation-selection.ts",
+      "packages/json-document-selection/src/key/index.ts",
+    ]) {
+      const file = sources.find((source) => source.path === path);
+      expect(file, path).toBeDefined();
+      expect(await file!.load()).not.toBe("");
+      expect(file!.referencePath).toMatch(/^\/docs\/api\//);
+    }
+  });
+
   test("exposes the canonical editing-host predicate in clipboard Usage", async () => {
     const sources = await discoverDemoSources("routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx");
     const input = sources.find((file) => file.path === "packages/json-document-web/src/input.ts");
