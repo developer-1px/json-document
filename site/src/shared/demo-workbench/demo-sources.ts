@@ -41,6 +41,7 @@ import editingClipboardSource from "../../../../packages/json-document-editing/s
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
 import editingIdentitySource from "../../../../packages/json-document-editing/src/identity.ts?raw";
 import editingHistorySource from "../../../../packages/json-document-editing/src/history.ts?raw";
+import editingHistoryInvalidationSource from "../../../../packages/json-document-editing/src/history-invalidation.ts?raw";
 import editingInverseSource from "../../../../packages/json-document-editing/src/invert-patch.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import kanbanEditingSource from "../../../../packages/json-document-editing/src/kanban.ts?raw";
@@ -225,6 +226,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/identity.ts", editingIdentitySource],
   ["packages/json-document-editing/src/history.ts", editingHistorySource],
   ["packages/json-document-editing/src/invert-patch.ts", editingInverseSource],
+  ["packages/json-document-editing/src/history-invalidation.ts", editingHistoryInvalidationSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/kanban.ts", kanbanEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
@@ -324,6 +326,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createEditingSession",
     sourcePath: "packages/json-document-editing/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingSession",
+    sourcePath: "packages/json-document-editing/src/history-invalidation.ts",
   },
   {
     packageName: "@interactive-os/json-document-calendar",

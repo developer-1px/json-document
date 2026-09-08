@@ -168,6 +168,13 @@ describe("Rich Text extension protocol", () => {
     expect(editor.dispatch({ type: "text.insert", text: "!" }).ok).toBe(true);
     expect(inner.at("/content/0/content/0/text")).toMatchObject({ ok: true, value: "a!" });
     unsubscribe();
+    // UI observation is released; only the history invalidation marker remains.
+    expect(active).toBe(1);
+    inner.commit([{ op: "replace", path: "/content/0/content/0/text", value: "external" }]);
+    expect(active).toBe(0);
+    inner.commit([{ op: "replace", path: "/content/0/content/0/text", value: "a!" }]);
+    expect(editor.snapshot.canUndo).toBe(false);
+    expect(editor.undo()).toMatchObject({ ok: false, code: "history.empty" });
     expect(active).toBe(0);
   });
 

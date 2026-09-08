@@ -255,3 +255,97 @@ describe("selection-aware editing history", () => {
     expect(session.reconcile((selection) => selection).revision).toBe(snapshot.revision);
   });
 });
+
+
+describe("local history is independent of UI observation", () => {
+  test.each(["active", "absent", "released", "resubscribed"])("invalidates undo and redo after an external value round trip (%s)", (observation) => {
+    for (const direction of ["undo", "redo"] as const) {
+      const document = createJSONDocument({ n: 0 });
+      const session = createEditingSession<number>({ document, selection: 0 });
+      const release = observation === "absent" ? () => {} : session.subscribe(() => {});
+      expect(session.apply({ operations: [{ op: "replace", path: "/n", value: 1 }], selectionAfter: 1, origin: "local" }).ok).toBe(true);
+      if (direction === "redo") expect(session.undo().ok).toBe(true);
+      if (observation === "released" || observation === "resubscribed") release();
+      const before = session.snapshot;
+      expect(before[direction === "undo" ? "canUndo" : "canRedo"]).toBe(true);
+      expect(document.commit([{ op: "replace", path: "/n", value: 2 }]).ok).toBe(true);
+      expect(document.commit([{ op: "replace", path: "/n", value: direction === "undo" ? 1 : 0 }]).ok).toBe(true);
+      const again = observation === "resubscribed" ? session.subscribe(() => {}) : () => {};
+      expect(session.snapshot).toMatchObject({ value: before.value, canUndo: false, canRedo: false });
+      expect(session[direction]()).toMatchObject({ ok: false, code: "history.empty" });
+      expect(document.value).toEqual(before.value);
+      release();
+      again();
+    }
+  });
+
+  test("fresh copies and document no-ops retain unobserved history", () => {
+    const inner = createJSONDocument({ n: 0 });
+    const document = { ...inner, get value() { return structuredClone(inner.value); } };
+    const session = createEditingSession({ document, selection: null });
+    expect(session.apply({ operations: [{ op: "replace", path: "/n", value: 1 }], selectionAfter: null, origin: "local" }).ok).toBe(true);
+    inner.commit([{ op: "replace", path: "/n", value: 1 }]);
+    expect(session.snapshot).toMatchObject({ revision: 1, canUndo: true });
+    expect(session.undo().ok).toBe(true);
+    inner.commit([{ op: "replace", path: "/n", value: 0 }]);
+    expect(session.snapshot.canRedo).toBe(true);
+    expect(session.redo().ok).toBe(true);
+  });
+
+  test("catches an external round trip authored by a commit subscriber", () => {
+    const document = createJSONDocument({ n: 0 });
+    let written = false;
+    document.subscribe(() => {
+      if (written) return;
+      written = true;
+      document.commit([{ op: "replace", path: "/n", value: 2 }]);
+      document.commit([{ op: "replace", path: "/n", value: 1 }]);
+    });
+    const session = createEditingSession({ document, selection: null });
+    expect(session.apply({ operations: [{ op: "replace", path: "/n", value: 1 }], selectionAfter: null, origin: "local" }).ok).toBe(true);
+    expect(session.snapshot).toMatchObject({ value: { n: 1 }, canUndo: false, canRedo: false });
+    expect(session.undo()).toMatchObject({ ok: false, code: "history.empty" });
+  });
+});
+
+
+test("retains an editor-authored step during an external notification", () => {
+  const document = createJSONDocument({ n: 0 });
+  const session = createEditingSession({ document, selection: null });
+  session.apply({ operations: [{ op: "replace", path: "/n", value: 1 }], selectionAfter: null, origin: "initial" });
+  const release = session.subscribe((snapshot) => {
+    if ((snapshot.value as { n: number }).n === 2) {
+      expect(session.apply({ operations: [{ op: "replace", path: "/n", value: 3 }], selectionAfter: null, origin: "follow-up" }).ok).toBe(true);
+    }
+  });
+  document.commit([{ op: "replace", path: "/n", value: 2 }]);
+  release();
+  expect(session.snapshot).toMatchObject({ value: { n: 3 }, canUndo: true });
+  expect(session.undo()).toMatchObject({ ok: true, snapshot: { value: { n: 2 } } });
+});
+
+test("keeps only a one-shot history marker after UI release", () => {
+  const inner = createJSONDocument({ n: 0 });
+  let connections = 0;
+  const document = { ...inner, get value() { return inner.value; },
+    subscribe(listener: Parameters<typeof inner.subscribe>[0]) {
+      connections++;
+      const release = inner.subscribe(listener);
+      return () => { connections--; release(); };
+    },
+  };
+  const session = createEditingSession({ document, selection: null });
+  expect(connections).toBe(0);
+  const release = session.subscribe(() => {});
+  for (const n of [1, 2, 3]) {
+    session.apply({ operations: [{ op: "replace", path: "/n", value: n }], selectionAfter: null, origin: "local" });
+    expect(connections).toBe(2);
+  }
+  release();
+  expect(connections).toBe(1);
+  document.commit([{ op: "replace", path: "/n", value: 4 }]);
+  expect(connections).toBe(0);
+  document.commit([{ op: "replace", path: "/n", value: 3 }]);
+  expect(session.snapshot.canUndo).toBe(false);
+  expect(connections).toBe(0);
+});
