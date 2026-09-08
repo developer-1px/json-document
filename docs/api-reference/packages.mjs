@@ -13,6 +13,7 @@ export const apiReferencePackages = [
   ["animation-react", "@interactive-os/json-document-animation-react", "packages/json-document-animation-react/src/index.ts", "UI Primitives", "생성 대기 시각 언어"],
   ["markdown-react", "@interactive-os/json-document-markdown-react", "packages/json-document-markdown-react/src/index.ts", "Artifact", "스트리밍 Markdown 투영과 렌더링"],
   ["database", "@interactive-os/json-document-database", "packages/json-document-database/src/index.ts", "Hands", "Database Hand domain 계약"],
+  ["annotation", "@interactive-os/json-document-annotation", "packages/json-document-annotation/src/index.ts", "Hands", "Annotation Hand interaction과 SVG projection"],
   ["calendar", "@interactive-os/json-document-calendar", "packages/json-document-calendar/src/index.ts", "Hands", "Calendar React lifecycle와 occurrence interaction 계약"],
   ["web", "@interactive-os/json-document-web", "packages/json-document-web/src/index.ts", "Adapter", "Web platform adapter"],
   ["contenteditable", "@interactive-os/json-document-contenteditable", "packages/json-document-contenteditable/src/index.ts", "Adapter", "contenteditable platform adapter"],

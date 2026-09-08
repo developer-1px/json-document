@@ -132,6 +132,7 @@ import { Route as PageDocsApiA2uiRouteImport } from "./routes/_page/docs/api/a2u
 import { Route as PageDocsApiAffordanceRouteImport } from "./routes/_page/docs/api/affordance";
 import { Route as PageDocsApiAjvRouteImport } from "./routes/_page/docs/api/ajv";
 import { Route as PageDocsApiAnimationReactRouteImport } from "./routes/_page/docs/api/animation-react";
+import { Route as PageDocsApiAnnotationRouteImport } from "./routes/_page/docs/api/annotation";
 import { Route as PageDocsApiCalendarRouteImport } from "./routes/_page/docs/api/calendar";
 import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
 import { Route as PageDocsApiComposerRouteImport } from "./routes/_page/docs/api/composer";
@@ -812,6 +813,11 @@ const PageDocsApiAnimationReactRoute =
     path: "/animation-react",
     getParentRoute: () => PageDocsApiRoute,
   } as any);
+const PageDocsApiAnnotationRoute = PageDocsApiAnnotationRouteImport.update({
+  id: "/annotation",
+  path: "/annotation",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
 const PageDocsApiCalendarRoute = PageDocsApiCalendarRouteImport.update({
   id: "/calendar",
   path: "/calendar",
@@ -1120,6 +1126,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
   "/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
+  "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
@@ -1277,6 +1284,7 @@ export interface FileRoutesByTo {
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
   "/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
+  "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
@@ -1436,6 +1444,7 @@ export interface FileRoutesById {
   "/_page/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/_page/docs/api/ajv": typeof PageDocsApiAjvRoute;
   "/_page/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
+  "/_page/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
   "/_page/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/_page/docs/api/composer": typeof PageDocsApiComposerRoute;
@@ -1595,6 +1604,7 @@ export interface FileRouteTypes {
     | "/docs/api/affordance"
     | "/docs/api/ajv"
     | "/docs/api/animation-react"
+    | "/docs/api/annotation"
     | "/docs/api/calendar"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
@@ -1752,6 +1762,7 @@ export interface FileRouteTypes {
     | "/docs/api/affordance"
     | "/docs/api/ajv"
     | "/docs/api/animation-react"
+    | "/docs/api/annotation"
     | "/docs/api/calendar"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
@@ -1910,6 +1921,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/affordance"
     | "/_page/docs/api/ajv"
     | "/_page/docs/api/animation-react"
+    | "/_page/docs/api/annotation"
     | "/_page/docs/api/calendar"
     | "/_page/docs/api/collaboration"
     | "/_page/docs/api/composer"
@@ -2815,6 +2827,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiAnimationReactRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/annotation": {
+      id: "/_page/docs/api/annotation";
+      path: "/annotation";
+      fullPath: "/docs/api/annotation";
+      preLoaderRoute: typeof PageDocsApiAnnotationRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/calendar": {
       id: "/_page/docs/api/calendar";
       path: "/calendar";
@@ -3054,6 +3073,7 @@ interface PageDocsApiRouteChildren {
   PageDocsApiAffordanceRoute: typeof PageDocsApiAffordanceRoute;
   PageDocsApiAjvRoute: typeof PageDocsApiAjvRoute;
   PageDocsApiAnimationReactRoute: typeof PageDocsApiAnimationReactRoute;
+  PageDocsApiAnnotationRoute: typeof PageDocsApiAnnotationRoute;
   PageDocsApiCalendarRoute: typeof PageDocsApiCalendarRoute;
   PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
   PageDocsApiComposerRoute: typeof PageDocsApiComposerRoute;
@@ -3086,6 +3106,7 @@ const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiAffordanceRoute: PageDocsApiAffordanceRoute,
   PageDocsApiAjvRoute: PageDocsApiAjvRoute,
   PageDocsApiAnimationReactRoute: PageDocsApiAnimationReactRoute,
+  PageDocsApiAnnotationRoute: PageDocsApiAnnotationRoute,
   PageDocsApiCalendarRoute: PageDocsApiCalendarRoute,
   PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
   PageDocsApiComposerRoute: PageDocsApiComposerRoute,

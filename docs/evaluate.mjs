@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -123,6 +123,7 @@ const surfaces = {
   ajvReadme: read("packages/json-document-ajv/README.md"),
   zodReadme: read("packages/json-document-zod/README.md"),
   databaseReadme: read("packages/json-document-database/README.md"),
+  annotationReadme: read("packages/json-document-annotation/README.md"),
   tanstackTableReadme: read("packages/json-document-tanstack-table/README.md"),
   webReadme: read("packages/json-document-web/README.md"),
   contenteditableReadme: read("packages/json-document-contenteditable/README.md"),
@@ -138,6 +139,7 @@ const publicContract = readJson("packages/json-document/public-contract.json");
 const rootPackage = readJson("package.json");
 const implementationShape = read("standards/repository-implementation-shape.md");
 const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
+const editingSession = read("standards/editing-session.md");
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "adapter-clipboard.md",
@@ -221,10 +223,30 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
 if (JSON.stringify(fileNames("standards")) !== JSON.stringify([
   "dom-editing-lifecycle.md",
   "editing-grammar.md",
+  "editing-session.md",
   "repository-implementation-shape.md",
   "repository-naming.md",
 ])) {
-  fail("standards: only repository naming, implementation shape, DOM editing lifecycle, and the editing grammar design may appear at the root.");
+  fail("standards: only repository naming, implementation shape, DOM editing lifecycle, EditingSession contract, and the editing grammar design may appear at the root.");
+}
+
+// Each normative session rule must retain a concrete behavior case at its owner.
+// This checks evidence references; package test execution checks the behavior itself.
+const sessionRules = new Set([...editingSession.matchAll(/^\| (ES-[A-Z-]+) \| (?!\[)/gm)].map((match) => match[1]));
+const sessionEvidence = [...editingSession.matchAll(/^\| (ES-[A-Z-]+) \| \[[^\]]+\]\(([^)]+)\) \| `([^`]+)` \|$/gm)];
+if (sessionRules.size === 0) fail("EditingSession: missing normative rules.");
+for (const rule of sessionRules) {
+  if (!sessionEvidence.some((match) => match[1] === rule)) fail(`EditingSession: ${rule} has no behavior evidence.`);
+}
+for (const [, rule, path, name] of sessionEvidence) {
+  if (!sessionRules.has(rule)) fail(`EditingSession: evidence refers to unknown rule ${rule}.`);
+  const target = join("standards", path);
+  if (!existsSync(join(root, target)) || !read(target).includes(JSON.stringify(name))) {
+    fail(`EditingSession: ${rule} lost behavior evidence ${path}: ${name}.`);
+  }
+}
+for (const [, path] of editingSession.matchAll(/\]\(([^)]+)\)/g)) {
+  if (!existsSync(join(root, "standards", path))) fail(`EditingSession: missing local reference ${path}.`);
 }
 
 for (const token of [

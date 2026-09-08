@@ -16,6 +16,7 @@
     "packages/json-document-markdown-react",
     "packages/json-document-zod",
     "packages/json-document-database",
+    "packages/json-document-annotation",
     "packages/json-document-calendar",
     "packages/json-document-tanstack-table",
     "packages/json-document-web",

@@ -55,10 +55,14 @@ type EditingResult<Selection extends JSONValue> =
 `EditingSnapshot`은 처리 뒤의 값과 Selection, revision, 실행 취소 상태를
 묶습니다. `type`은 editor가 수행할 동작을 나타내고, 각 동작에 필요한 필드는
 editor별 Intent union에서 정합니다. 성공 결과에는 snapshot이 들어 있으며
-JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다. 실패하면
-문서와 Selection은 요청 전 상태를 유지합니다.
+JSON 값까지 바뀌었다면 적용된 `change`도 함께 들어 있습니다.
 
-값이 바뀐 요청은 History 항목을 만들고
+외부 변경의 동기화를 마친 뒤 요청 자체가 검증·commit에서 거절되면
+문서와 Selection, History는 그 요청의 시작 상태를 유지합니다. 이미 완료된 외부
+commit은 되돌아가지 않습니다. Selection mapping/reconciliation callback의 예외와
+재시도는 [History의 동기화·복구 계약](history.md)에서 설명합니다.
+
+기본 local History에서 기록 대상인 값 변경 요청은 History 항목을 만들고
 `change.metadata.editing.origin`에 `intent.type`을 남깁니다. Selection만 바뀐
 요청은 성공 snapshot을 돌려주지만 History 항목은 만들지 않습니다.
 

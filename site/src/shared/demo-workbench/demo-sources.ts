@@ -41,6 +41,7 @@ import editingClipboardSource from "../../../../packages/json-document-editing/s
 import editingSessionSource from "../../../../packages/json-document-editing/src/session.ts?raw";
 import editingIdentitySource from "../../../../packages/json-document-editing/src/identity.ts?raw";
 import editingHistorySource from "../../../../packages/json-document-editing/src/history.ts?raw";
+import editingHistoryInvalidationSource from "../../../../packages/json-document-editing/src/history-invalidation.ts?raw";
 import editingInverseSource from "../../../../packages/json-document-editing/src/invert-patch.ts?raw";
 import objectEditingSource from "../../../../packages/json-document-editing/src/object.ts?raw";
 import kanbanEditingSource from "../../../../packages/json-document-editing/src/kanban.ts?raw";
@@ -68,6 +69,9 @@ import contentInteractionAffordanceSource from "../../../../packages/json-docume
 import databaseEditingSource from "../../../../packages/json-document-editing/src/database.ts?raw";
 import databasePropertyValueSource from "../../../../packages/json-document-editing/src/database-property-value.ts?raw";
 import databaseHandSource from "../../../../packages/json-document-database/src/database-hand.tsx?raw";
+import annotationSelectionSource from "../../../../packages/json-document-editing/src/annotation-selection.ts?raw";
+import annotationOutputSource from "../../../../packages/json-document-annotation/src/annotation-output.ts?raw";
+import annotationHandSource from "../../../../packages/json-document-annotation/src/annotation-hand.tsx?raw";
 import annotationEditingSource from "../../../../packages/json-document-editing/src/annotation.ts?raw";
 import webSVGCoordinateSource from "../../../../packages/json-document-web/src/svg-coordinate.ts?raw";
 import webRasterSource from "../../../../packages/json-document-web/src/raster-source.ts?raw";
@@ -107,6 +111,7 @@ import uiFileSizeSource from "../../../../packages/json-document-file-intake/src
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
 import corePointerReadSource from "../../../../packages/json-document/src/foundation/protocol/read.ts?raw";
 import coreJSONValidationSource from "../../../../packages/json-document/src/foundation/json/serializable.ts?raw";
+import selectionKeySource from "../../../../packages/json-document-selection/src/key/index.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
@@ -146,6 +151,7 @@ const packageReferencePaths = new Map([
   ["packages/json-document-animation-react/", "/docs/api/animation-react"],
   ["packages/json-document-markdown-react/", "/docs/api/markdown-react"],
   ["packages/json-document-database/", "/docs/api/database"],
+  ["packages/json-document-annotation/", "/docs/api/annotation"],
   ["packages/json-document-web/", "/docs/api/web"],
   ["packages/json-document-contenteditable/", "/docs/api/contenteditable"],
   ["packages/json-document-rich-text/", "/docs/api/rich-text"],
@@ -222,6 +228,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/identity.ts", editingIdentitySource],
   ["packages/json-document-editing/src/history.ts", editingHistorySource],
   ["packages/json-document-editing/src/invert-patch.ts", editingInverseSource],
+  ["packages/json-document-editing/src/history-invalidation.ts", editingHistoryInvalidationSource],
   ["packages/json-document-editing/src/object.ts", objectEditingSource],
   ["packages/json-document-editing/src/kanban.ts", kanbanEditingSource],
   ["packages/json-document-editing/src/topology.ts", editingTopologySource],
@@ -248,6 +255,9 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-editing/src/database.ts", databaseEditingSource],
   ["packages/json-document-editing/src/database-property-value.ts", databasePropertyValueSource],
   ["packages/json-document-database/src/database-hand.tsx", databaseHandSource],
+  ["packages/json-document-annotation/src/annotation-hand.tsx", annotationHandSource],
+  ["packages/json-document-annotation/src/annotation-output.ts", annotationOutputSource],
+  ["packages/json-document-editing/src/annotation-selection.ts", annotationSelectionSource],
   ["packages/json-document-editing/src/annotation.ts", annotationEditingSource],
   ["packages/json-document-web/src/svg-coordinate.ts", webSVGCoordinateSource],
   ["packages/json-document-web/src/raster-source.ts", webRasterSource],
@@ -288,6 +298,7 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document/src/foundation/protocol/read.ts", corePointerReadSource],
   ["packages/json-document/src/foundation/json/serializable.ts", coreJSONValidationSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
+  ["packages/json-document-selection/src/key/index.ts", selectionKeySource],
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
   ["packages/json-document-collaboration/src/create.ts", collaborationCreateSource],
@@ -319,6 +330,11 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createEditingSession",
     sourcePath: "packages/json-document-editing/src/session.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingSession",
+    sourcePath: "packages/json-document-editing/src/history-invalidation.ts",
   },
   {
     packageName: "@interactive-os/json-document-calendar",
@@ -955,6 +971,27 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document-editing",
     symbol: "createAnnotationEditor",
     sourcePath: "packages/json-document-editing/src/annotation.ts",
+  },
+  // Public editor implementation spans its domain projection and the Key owner.
+  ...["packages/json-document-editing/src/annotation-selection.ts", "packages/json-document-selection/src/key/index.ts"].map((sourcePath) => ({
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createAnnotationEditor",
+    sourcePath,
+  })),
+  ...["transformAnnotationSelector", "annotationSelectorBounds", "annotationResizeHandle"].map((symbol) => ({
+    packageName: "@interactive-os/json-document-editing",
+    symbol,
+    sourcePath: "packages/json-document-editing/src/annotation.ts",
+  })),
+  {
+    packageName: "@interactive-os/json-document-annotation",
+    symbol: "AnnotationHand",
+    sourcePath: "packages/json-document-annotation/src/annotation-hand.tsx",
+  },
+  {
+    packageName: "@interactive-os/json-document-annotation",
+    symbol: "useAnnotationOutput",
+    sourcePath: "packages/json-document-annotation/src/annotation-output.ts",
   },
   {
     packageName: "@interactive-os/json-document-react",

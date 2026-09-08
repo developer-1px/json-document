@@ -14,6 +14,7 @@ import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitive
 import animationApiMarkdown from "../../../../docs/api-reference/animation-react.md?raw";
 import markdownReactApiMarkdown from "../../../../docs/api-reference/markdown-react.md?raw";
 import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
+import annotationApiMarkdown from "../../../../docs/api-reference/annotation.md?raw";
 import calendarApiMarkdown from "../../../../docs/api-reference/calendar.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
@@ -188,6 +189,7 @@ export const docPages = {
   animationApi: docPage("/docs/api/animation-react", animationApiMarkdown),
   markdownReactApi: docPage("/docs/api/markdown-react", markdownReactApiMarkdown),
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
+  annotationApi: docPage("/docs/api/annotation", annotationApiMarkdown),
   calendarApi: docPage("/docs/api/calendar", calendarApiMarkdown),
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),

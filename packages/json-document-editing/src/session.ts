@@ -8,6 +8,7 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import type { SelectionHistoryEntry } from "@interactive-os/json-document-selection";
+import { observeHistoryInvalidation } from "./history-invalidation.js";
 import { invertEditingPatch } from "./invert-patch.js";
 import type { EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 
@@ -68,6 +69,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   let undoStack: HistoryEntry<Selection>[] = [];
   let redoStack: HistoryEntry<Selection>[] = [];
   let activeHistoryGroup: string | undefined;
+  let historyInvalidation: { readonly changed: boolean } | undefined;
   let isCommitting = false;
   let observedValue = document.value;
   let unsubscribeDocument: (() => void) | null = null;
@@ -142,10 +144,12 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       }
       const nextHistory = options.history?.status();
       const historyChanged = nextHistory?.revision !== observedHistory?.revision;
+      const localHistoryChanged = historyInvalidation?.changed === true;
       const latest = document.value;
       if (jsonEqual(observedValue, latest)) {
-        if (!historyChanged) return;
+        if (!historyChanged && !localHistoryChanged) return;
         observedHistory = nextHistory;
+        if (localHistoryChanged) clearLocalHistory();
       } else {
         const before = observedValue;
         const replay = options.mapSelection && change !== undefined ? applyPatch(before, change.applied) : null;
@@ -155,9 +159,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
         observedValue = latest;
         observedHistory = nextHistory;
         selection = nextSelection;
-        undoStack = [];
-        redoStack = [];
-        activeHistoryGroup = undefined;
+        clearLocalHistory();
       }
       revision += 1;
       change = undefined;
@@ -165,6 +167,18 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       // before a caller can read the state or author another mutation.
       publish();
     }
+  }
+
+  function clearLocalHistory(): void {
+    undoStack = [];
+    redoStack = [];
+    activeHistoryGroup = undefined;
+    historyInvalidation = undefined;
+  }
+
+  function trackLocalHistory(followedByChange: boolean, pendingOwnChange?: JSONAppliedChange): void {
+    if (options.history || undoStack.length + redoStack.length === 0) return;
+    historyInvalidation = followedByChange ? { changed: true } : observeHistoryInvalidation(document, pendingOwnChange);
   }
 
   function commit(
@@ -182,7 +196,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       // reentrant document write needs a replay to recover the earlier value.
       const replay = notifications > 1 ? applyPatch(before, result.change.applied) : null;
       observedValue = replay?.ok ? replay.value : document.value;
-      return result;
+      return { ...result, followedByChange: notifications > 1, pendingOwnChange: notifications === 0 ? result.change : undefined };
     } finally {
       release();
       isCommitting = false;
@@ -267,6 +281,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       activeHistoryGroup = plan.historyGroup;
       redoStack = [];
     }
+    if (result.change.applied.length > 0) trackLocalHistory(result.followedByChange, result.pendingOwnChange);
     return { ok: true, snapshot: publishCommit(), change: result.change };
   }
 
@@ -280,6 +295,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     selection = nextSelection;
     revision += 1;
     activeHistoryGroup = undefined;
+    if (result.change.applied.length > 0) trackLocalHistory(result.followedByChange, result.pendingOwnChange);
     return { ok: true, snapshot: currentSnapshot(), change: result.change };
   }
 

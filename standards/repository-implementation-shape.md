@@ -192,6 +192,18 @@ Site / Host product
 Kernel의 대체 구현이며 Editing의 하위 구현이 아니다. Selection은 dependency-free
 foundation으로 유지한다.
 
+### 의미를 보존하는 책임 경계
+
+이동하거나 교체하는 구현은 기존 owner의 관찰 가능한 계약을 보존한다.
+Core는 [v3 profile](json-document-v3/profile.md), Editing의 상태·관찰·복원은
+[EditingSession 계약](editing-session.md), 플랫폼 입력 수명은
+[DOM lifecycle](dom-editing-lifecycle.md)을 따른다. Domain은 자신의 유효한 연산과
+다음 선택을 결정하고 Host는 그 public API에 제품 정책 값과 외부 인스턴스를 연결한다.
+
+이 경계는 package 내부 파일 모양이나 현재 export 개수를 동결하지 않는다.
+구현 모양의 통일을 이유로 local/causal History, 선택 family, 플랫폼 입력과
+도메인 연산처럼 다른 의미를 합치거나 소비자에 공통 동작을 다시 구현하지 않는다.
+
 ## Test와 benchmark 배치
 
 - 배포 source는 `src/`, package contract test는 `tests/`, 성능 기준선은
@@ -204,7 +216,7 @@ foundation으로 유지한다.
 
 ## 현재 package 분류
 
-아래 표는 현재 29개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
+아래 표는 현재 30개 library package를 이 문서의 모형으로 빠짐없이 분류한다.
 `후속`은 이 RFC가 source를 이동하지 않고 별도 이슈가 책임짐을 뜻한다.
 
 | Package path | 정본 모형 | 현재 판단 |
@@ -224,6 +236,7 @@ foundation으로 유지한다.
 | `packages/json-document-markdown-react` | React projection family | 불완전한 스트리밍 Markdown의 복구 투영, GFM renderer, customization contract와 stylesheet를 유지 |
 | `packages/json-document-zod` | Composite Connector | validator와 Database translation을 책임 file로 분리한 현재 모양 유지 |
 | `packages/json-document-database` | Product-facing Hand | 기본 admin UI와 customization contract를 소유하고 headless domain package를 내부 구현으로 조합 |
+| `packages/json-document-annotation` | Product-facing Hand | Annotation 도구, gesture-to-Intent, SVG projection, transient preview와 comment UI를 소유 |
 | `packages/json-document-calendar` | Product-facing Hand | Calendar editor 관찰, occurrence focus, naming, Web pointer interaction lifecycle을 정본 hook으로 유지 |
 | `packages/json-document-tanstack-table` | Single-native Connector | 하나의 Table/Sheet binding으로 flat 유지 |
 | `packages/json-document-web` | Adapter family | keyboard/clipboard/input/modifier 책임 file과 root facade 유지 |
