@@ -1,6 +1,6 @@
 import { createJSONDocument, type JSONDocument, type JSONValue } from "@interactive-os/json-document";
 import { describe, expect, test, vi } from "vitest";
-import { createDocumentEditor, createOrderEditor, createObjectEditor, createTreeEditor, createCalendarEditor, createEditingId } from "../src/index.js";
+import { createDocumentEditor, createOrderEditor, createObjectEditor, createTreeEditor, createCalendarEditor, createEditingId, createEditingIdAllocator } from "../src/index.js";
 
 interface Case {
   readonly name: string;
@@ -31,6 +31,43 @@ const cases: Case[] = [
 ];
 
 describe("default domain identities", () => {
+  test("reads 50,000 existing IDs once while reserving 1,000 batch IDs", () => {
+    let reads = 0;
+    function* existingIds() {
+      for (let index = 0; index < 50_000; index++) { reads++; yield `existing-${index}`; }
+    }
+    let sequence = 0;
+    const allocateId = createEditingIdAllocator(existingIds(), () => `copy-${sequence++}`, "object");
+    const allocated = Array.from({ length: 1_000 }, allocateId);
+    expect(reads).toBe(50_000);
+    expect(new Set(allocated).size).toBe(1_000);
+  });
+
+  test("reserves new IDs and gives each allocation exactly 100 collision attempts", () => {
+    const createId = vi.fn().mockReturnValueOnce("occupied").mockReturnValueOnce("copy").mockReturnValue("copy");
+    const allocateId = createEditingIdAllocator(["occupied"], createId, "tree node");
+    expect(allocateId()).toBe("copy");
+    createId.mockClear();
+    expect(allocateId).toThrow("createId did not produce a unique tree node id");
+    expect(createId).toHaveBeenCalledTimes(100);
+    createId.mockReturnValue("next");
+    expect(allocateId()).toBe("next");
+  });
+
+  test.each(cases)("$name preserves the collision limit and document on failure", ({ initial, insert }) => {
+    const randomUUID = vi.fn(() => "collision");
+    vi.stubGlobal("crypto", { randomUUID });
+    try {
+      const document = createJSONDocument(initial);
+      expect(insert(document)).toBe(true);
+      const before = document.value;
+      randomUUID.mockClear();
+      expect(() => insert(document)).toThrow("createId did not produce a unique");
+      expect(randomUUID).toHaveBeenCalledTimes(100);
+      expect(document.value).toBe(before);
+    } finally { vi.unstubAllGlobals(); }
+  });
+
   test.each(cases)("$name does not reuse IDs across independent or recreated editors", ({ initial, pointer, insert }) => {
     const ids: JSONValue[] = [];
     for (let instance = 0; instance < 3; instance++) {

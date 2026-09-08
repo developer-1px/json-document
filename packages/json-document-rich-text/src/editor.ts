@@ -1,6 +1,7 @@
 import {
   buildPointer,
-  createJSONDocument,
+  applyPatch,
+  readPointer,
   isJSONValue,
   parsePointer,
   type JSONDocument,
@@ -42,7 +43,6 @@ import { diffRichText } from "./diff.js";
 import {
   containerContentSegments,
   contentSegments,
-  detachedValue,
   nodeAtPath,
   replaceContentAtPath,
   replaceNodeAtPath,
@@ -182,14 +182,13 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       return pasteClipboard(intent.clipboard);
     },
     apply(operations, applyOptions) {
-      const candidate = createJSONDocument(options.document.value);
-      const applied = candidate.commit(operations);
+      const applied = applyPatch(options.document.value, operations);
       if (!applied.ok) return applied;
-      const located = candidate.at(pointer);
+      const located = readPointer(applied.value, pointer);
       const validation = validateRichText(located.ok ? located.value : undefined, { schema });
       if (!validation.ok) return validation;
       const nextSelection = asRichTextSelection(selectionFamily.reconcile(session.snapshot.selection, {
-        topology: richTextTopology(readRichTextDocument(candidate, pointer)),
+        topology: richTextTopology(readRichTextSnapshot(applied.value, pointer)),
       }).state);
       return session.apply({
         operations,
@@ -220,12 +219,14 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       ranges.forEach((range, rangeIndex) => {
         const anchor = range.anchor as Extract<RichTextPoint, { readonly kind: "text" }>;
         const focus = range.focus as Extract<RichTextPoint, { readonly kind: "text" }>;
-        grouped.set(anchor.nodeId, [...(grouped.get(anchor.nodeId) ?? []), {
+        const replacements = grouped.get(anchor.nodeId) ?? [];
+        grouped.set(anchor.nodeId, replacements);
+        replacements.push({
           start: Math.min(anchor.offset, focus.offset),
           end: Math.max(anchor.offset, focus.offset),
           rangeIndex,
           affinity: focus.affinity,
-        }]);
+        });
       });
       const topology = richTextTopology(before);
       const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [];
@@ -234,7 +235,8 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
         const currentNode = located === null ? null : nodeAtPath(before, located.path);
         if (located === null || currentNode === null || !isRichTextText(currentNode)) return failure("rich-text.point-not-found");
         let nextText = currentNode.text;
-        for (const replacement of [...replacements].sort((left, right) => right.start - left.start)) {
+        replacements.sort((left, right) => right.start - left.start);
+        for (const replacement of replacements) {
           if (!validTextOffset(nextText, replacement.start) || !validTextOffset(nextText, replacement.end)) return failure("rich-text.invalid-offset");
           nextText = nextText.slice(0, replacement.start) + text + nextText.slice(replacement.end);
         }
@@ -242,10 +244,15 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
         const validation = validateRichTextNodeAt(before, located.path, nextNode, { schema });
         if (!validation.ok) return failure(validation.code);
         operations.push({ op: "replace", path: absolutePath(pointer, [...contentSegments(located.path), "text"]), value: nextText });
-        for (const replacement of replacements) {
-          const shift = replacements
-            .filter((candidate) => candidate.start < replacement.start)
-            .reduce((total, candidate) => total + text.length - (candidate.end - candidate.start), 0);
+        let shift = 0;
+        let groupShift = 0;
+        for (let index = replacements.length - 1; index >= 0; index -= 1) {
+          const replacement = replacements[index]!;
+          if (replacement.start !== replacements[index + 1]?.start) {
+            shift += groupShift;
+            groupShift = 0;
+          }
+          groupShift += text.length - (replacement.end - replacement.start);
           const point: RichTextPoint = {
             kind: "text",
             nodeId,
@@ -444,7 +451,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
         : { id: node.id, type: "heading", attrs: { level: Number(attrs!.level) as 1 | 2 | 3 | 4 | 5 | 6 }, content: node.content }) as RichTextNode;
       const validation = validateRichTextNodeAt(current, located.path, nextNode, { schema });
       if (!validation.ok) return failure(validation.code);
-      operations.push({ op: "replace", path: absolutePath(pointer, contentSegments(located.path)), value: detachedValue(nextNode) });
+      operations.push({ op: "replace", path: absolutePath(pointer, contentSegments(located.path)), value: nextNode });
     }
     if (operations.length === 0) return success(session.snapshot);
     return commitOperations(session.snapshot.selection, "rich-text.block.set-type", undefined, operations);
@@ -545,7 +552,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       session.snapshot.selection,
       "rich-text.node.set-attrs",
       undefined,
-      [{ op: "replace", path: absolutePath(pointer, [...contentSegments(located.path), "attrs"]), value: detachedValue(attrs) }],
+      [{ op: "replace", path: absolutePath(pointer, [...contentSegments(located.path), "attrs"]), value: attrs }],
     );
   }
 
@@ -604,7 +611,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
       collapsedAtPoint(caret),
       "rich-text.text.delete",
       "rich-text.typing",
-      [{ op: "replace", path: absolutePath(pointer, containerContentSegments(parentPath)), value: detachedValue(content) }],
+      [{ op: "replace", path: absolutePath(pointer, containerContentSegments(parentPath)), value: content }],
       { path: parentPath },
     );
   }
@@ -684,19 +691,19 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
     if (first === undefined) return failure("rich-text.point-not-found");
     if (removeIndex >= 0 && removeIndex < index) {
       operations.push({ op: "remove", path: `${contentPath}/${removeIndex}` });
-      operations.push({ op: "replace", path: `${contentPath}/${index - 1}`, value: detachedValue(first) });
+      operations.push({ op: "replace", path: `${contentPath}/${index - 1}`, value: first });
       for (let offset = 1; offset < replacements.length; offset += 1) {
         const added = replacements[offset];
         if (added === undefined) continue;
-        operations.push({ op: "add", path: `${contentPath}/${index - 1 + offset}`, value: detachedValue(added) });
+        operations.push({ op: "add", path: `${contentPath}/${index - 1 + offset}`, value: added });
       }
     } else {
       if (removeIndex > index) operations.push({ op: "remove", path: `${contentPath}/${removeIndex}` });
-      operations.push({ op: "replace", path: `${contentPath}/${index}`, value: detachedValue(first) });
+      operations.push({ op: "replace", path: `${contentPath}/${index}`, value: first });
       for (let offset = 1; offset < replacements.length; offset += 1) {
         const added = replacements[offset];
         if (added === undefined) continue;
-        operations.push({ op: "add", path: `${contentPath}/${index + offset}`, value: detachedValue(added) });
+        operations.push({ op: "add", path: `${contentPath}/${index + offset}`, value: added });
       }
     }
     return commitOperations(selectionAfter, origin, undefined, operations);
@@ -860,10 +867,6 @@ function collapsedAt(nodeId: string, offset: number): RichTextSelection {
   }));
 }
 
-function detached(document: RichTextDocument): RichTextDocument {
-  return JSON.parse(JSON.stringify(document)) as RichTextDocument;
-}
-
 interface LocatedRichTextNode {
   readonly node: RichTextNode;
   readonly parent: (RichTextNode | RichTextDocument) & { readonly content: ReadonlyArray<RichTextNode> } | null;
@@ -996,7 +999,11 @@ function groupIntervals(intervals: ReadonlyArray<TextInterval>): ReadonlyArray<{
   readonly intervals: ReadonlyArray<{ readonly from: number; readonly to: number }>;
 }> {
   const grouped = new Map<string, Array<{ from: number; to: number }>>();
-  for (const interval of intervals) grouped.set(interval.nodeId, [...(grouped.get(interval.nodeId) ?? []), { from: interval.from, to: interval.to }]);
+  for (const interval of intervals) {
+    const values = grouped.get(interval.nodeId) ?? [];
+    grouped.set(interval.nodeId, values);
+    values.push({ from: interval.from, to: interval.to });
+  }
   return [...grouped].map(([nodeId, values]) => {
     const sorted = values.sort((left, right) => left.from - right.from || left.to - right.to);
     const merged: Array<{ from: number; to: number }> = [];
@@ -1019,11 +1026,15 @@ function markedSegments(
 ): ReadonlyArray<RichTextNode> {
   const boundaries = [...new Set([0, node.text.length, ...intervals.flatMap((interval) => [interval.from, interval.to])])].sort((a, b) => a - b);
   const nodes: RichTextNode[] = [];
+  let intervalIndex = 0;
   for (let index = 0; index < boundaries.length - 1; index += 1) {
     const from = boundaries[index]!;
     const to = boundaries[index + 1]!;
     if (from === to) continue;
-    const selected = intervals.some((interval) => from >= interval.from && to <= interval.to);
+    // groupIntervals supplies sorted, disjoint ranges; each is visited once.
+    while (intervals[intervalIndex] && intervals[intervalIndex]!.to <= from) intervalIndex += 1;
+    const interval = intervals[intervalIndex];
+    const selected = interval !== undefined && from >= interval.from && to <= interval.to;
     let marks = [...node.marks];
     if (selected) {
       marks = marks.filter((candidate) => candidate.type !== mark.type);
@@ -1115,17 +1126,13 @@ function removeSelectedValue(
     inputOwnership: "borrowed",
   });
   if (!normalized.ok) return { ok: false, code: normalized.code };
+  const order = logicalPointOrder(document);
   const ranges = selection.ranges.map((range) => {
-    const start = earlierPoint(document, range.anchor, range.focus);
+    const start = order(range.anchor) <= order(range.focus) ? range.anchor : range.focus;
     const point = mapPointAfterRemoval(document, normalized.value, start, intervals);
     return { anchor: point, focus: point };
   });
   return { ok: true, value: normalized.value, selection: { ...selection, ranges } as RichTextSelection };
-}
-
-function earlierPoint(document: RichTextDocument, left: RichTextPoint, right: RichTextPoint): RichTextPoint {
-  const order = logicalPointOrder(document);
-  return (order(left) <= order(right)) ? left : right;
 }
 
 function logicalPointOrder(document: RichTextDocument): (point: RichTextPoint) => number {
@@ -1418,10 +1425,10 @@ function siblingReplacementOps(
   const contentPath = absolutePath(rootPointer, containerContentSegments(parentPath));
   const first = replacements[0]!;
   const operations: import("@interactive-os/json-document").JSONPatchOperation[] = [
-    { op: "replace", path: `${contentPath}/${index}`, value: detachedValue(first) },
+    { op: "replace", path: `${contentPath}/${index}`, value: first },
   ];
   for (let offset = 1; offset < replacements.length; offset += 1) {
-    operations.push({ op: "add", path: `${contentPath}/${index + offset}`, value: detachedValue(replacements[offset]!) });
+    operations.push({ op: "add", path: `${contentPath}/${index + offset}`, value: replacements[offset]! });
   }
   return operations;
 }
@@ -1468,7 +1475,7 @@ function planInsertNode(
       operations: [{
         op: "add",
         path: absolutePath(rootPointer, [...containerContentSegments(container.path), point.offset]),
-        value: detachedValue(node),
+        value: node,
       }],
       nodes: [node],
       parentPath: container.path,
@@ -1482,7 +1489,7 @@ function planInsertNode(
   const contentPath = absolutePath(rootPointer, containerContentSegments(parentPath));
   if (point.offset === 0) {
     return {
-      operations: [{ op: "add", path: `${contentPath}/${index}`, value: detachedValue(node) }],
+      operations: [{ op: "add", path: `${contentPath}/${index}`, value: node }],
       nodes: [node],
       parentPath,
       selection: pointAfterInsertedAt(parentIdFromPath(document, parentPath), index, node, point.affinity),
@@ -1490,7 +1497,7 @@ function planInsertNode(
   }
   if (point.offset === located.node.text.length) {
     return {
-      operations: [{ op: "add", path: `${contentPath}/${index + 1}`, value: detachedValue(node) }],
+      operations: [{ op: "add", path: `${contentPath}/${index + 1}`, value: node }],
       nodes: [node],
       parentPath,
       selection: pointAfterInsertedAt(parentIdFromPath(document, parentPath), index + 1, node, point.affinity),
@@ -1500,9 +1507,9 @@ function planInsertNode(
   const right = { ...located.node, id: createId(), text: located.node.text.slice(point.offset) };
   return {
     operations: [
-      { op: "replace", path: `${contentPath}/${index}`, value: detachedValue(left) },
-      { op: "add", path: `${contentPath}/${index + 1}`, value: detachedValue(node) },
-      { op: "add", path: `${contentPath}/${index + 2}`, value: detachedValue(right) },
+      { op: "replace", path: `${contentPath}/${index}`, value: left },
+      { op: "add", path: `${contentPath}/${index + 1}`, value: node },
+      { op: "add", path: `${contentPath}/${index + 2}`, value: right },
     ],
     nodes: [left, node, right],
     parentPath,

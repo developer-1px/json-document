@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 
 import { describe, expect, test, vi } from "vitest";
+import * as core from "@interactive-os/json-document";
+import { prepareCheckpoint } from "../../src/checkpoint.js";
 
 import {
   compactCollaborationCheckpoint,
@@ -108,6 +110,37 @@ function canonicalJSON(value: unknown): string {
 }
 
 describe("@interactive-os/json-document-collaboration checkpoints", () => {
+  test("owns the raw payload once and reuses its base and membership", () => {
+    const source = createCollaborationRuntime(
+      { rows: Array.from({ length: 1_000 }, (_, id) => ({ id })) },
+      options("author", "ownership/v1", membership("author")),
+    );
+    const input = JSON.parse(JSON.stringify(source.replica.exportCheckpoint()));
+    const applyPatch = vi.spyOn(core, "applyPatch");
+    try {
+      const prepared = prepareCheckpoint(input);
+      expect(prepared.ok).toBe(true);
+      expect(applyPatch.mock.calls.filter(([value]) => value === input.payload)).toHaveLength(1);
+      expect(applyPatch.mock.calls.filter(([value]) => value === input.payload.base || value === input.payload.membership)).toHaveLength(0);
+      input.payload.base.rows[0].id = -1;
+      input.payload.membership.members[0].actorId = "poison";
+      if (!prepared.ok) throw new Error(prepared.reason);
+      expect(core.readPointer(prepared.checkpoint.payload.base, "/rows/0/id")).toMatchObject({ value: 0 });
+      expect(prepared.checkpoint.payload.membership).toEqual(membership("author"));
+      expect(Object.isFrozen(prepared.checkpoint.payload.base)).toBe(true);
+    } finally { applyPatch.mockRestore(); }
+  });
+
+  test.each(["base", "membership"])("preserves the missing %s JSON diagnostic and validation order", (field) => {
+    const source = createCollaborationRuntime(null, options("author", "missing/v1", undefined));
+    const input = JSON.parse(JSON.stringify(source.replica.exportCheckpoint()));
+    delete input.payload[field];
+    const missing = core.applyPatch(undefined, []);
+    expect(prepareCheckpoint(input)).toEqual({ ok: false, reason: !missing.ok && missing.reason });
+    input.payload.version = 2;
+    expect(prepareCheckpoint(input)).toEqual({ ok: false, reason: "checkpoint payload kind or version is unsupported" });
+  });
+
   test("round-trips the complete same-epoch causal state", () => {
     const members = membership("actor-a", "actor-b");
     const source = createCollaborationRuntime(

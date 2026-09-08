@@ -1,4 +1,4 @@
-import { applyPatch, createJSONDocument } from "@interactive-os/json-document";
+import { applyPatch, createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
 import { expect, test } from "vitest";
 
 import {
@@ -58,6 +58,34 @@ test("a leaf replace freeze inspects the changed path, not every sibling", () =>
   expect(large.inspections).toBe(small.inspections);
 });
 
+test("a flat replacement batch inspects its common ancestor only once for freezing", () => {
+  const document = createJSONDocument(Object.fromEntries(Array.from({ length: 1_000 }, (_, i) => [i, 0])));
+  resetOwnedPatchFreezeInspections();
+  expect(document.commit(Array.from({ length: 1_000 }, (_, i) => ({
+    op: "replace", path: `/${i}`, value: 1,
+  }))).ok).toBe(true);
+  expect(ownedPatchFreezeInspections()).toBe(1);
+  expect(isDeepFrozen(document.value)).toBe(true);
+});
+
+test.each([
+  { op: "remove", path: "/deleted" },
+  { op: "replace", path: "", value: { last: { n: 1 } } },
+  { op: "copy", from: "/first", path: "/copied" },
+] satisfies JSONPatchOperation[])("a freeze fallback after $op does not skip later changed nodes", (operation) => {
+  const document = createJSONDocument({ first: { n: 0 }, deleted: true, last: { n: 0 } });
+  const before = document.value;
+  const result = document.commit([
+    { op: "replace", path: "/first/n", value: 1 },
+    operation,
+    { op: "replace", path: "/last/n", value: 2 },
+  ]);
+  expect(result.ok).toBe(true);
+  expect(isDeepFrozen(document.value)).toBe(true);
+  expect(Reflect.set((document.value as { last: object }).last, "n", 99)).toBe(false);
+  expect(before).toEqual({ first: { n: 0 }, deleted: true, last: { n: 0 } });
+});
+
 test("a leaf replace does not dense-copy a large sibling array", () => {
   const items = Array.from({ length: 10_000 }, (_, item) => ({ id: `item-${item}`, title: "Draft" }));
   const document = createJSONDocument({ items });
@@ -74,6 +102,22 @@ test("a leaf replace does not dense-copy a large sibling array", () => {
   expect(after.items[79]).toBe(before.items[79]);
   expect(after.items[81]).toBe(before.items[81]);
   expect(denseArrayCopies()).toBe(0);
+});
+
+test.each(([
+  [{ op: "replace", path: "/items/0/n", value: 1 }, { op: "remove", path: "/deleted" }],
+  [{ op: "copy", from: "/items/0", path: "/items/-" }],
+  [{ op: "add", path: "/items/50/n", value: 1 }, { op: "add", path: "/items/0", value: { n: 0 } }],
+  [{ op: "replace", path: "/items/50/n", value: 1 }, { op: "remove", path: "/items/0" }],
+] satisfies JSONPatchOperation[][]).map((prefix) => ({ prefix })))("mixed array patches freeze shifted values, overlays and copied bases: $prefix", ({ prefix }) => {
+  const initial = { items: Array.from({ length: 64 }, () => ({ n: 0 })), deleted: true };
+  const document = createJSONDocument(initial);
+  const before = document.value;
+  resetDenseArrayCopies();
+  expect(document.commit([...prefix, { op: "replace", path: "/items/1/n", value: 2 }]).ok).toBe(true);
+  expect(denseArrayCopies()).toBe(0);
+  expect(isDeepFrozen(document.value)).toBe(true);
+  expect(before).toEqual(initial);
 });
 
 test("a batch of leaf replaces does not walk the whole value or dense-copy the array", () => {
@@ -121,6 +165,83 @@ test("a root replace still freezes the whole owned tree", () => {
   if (!result.ok) return;
   expect(isDeepFrozen(result.value)).toBe(true);
 });
+
+test("overlapping array replacements preserve payloads, snapshots and untouched siblings", () => {
+  const document = createJSONDocument({
+    items: Array.from({ length: 128 }, (_, id) => ({ id, nested: { text: "before" } })),
+  });
+  const before = document.value;
+  const untouched = document.at("/items/11");
+  const payload = { id: 10, nested: { text: "injected" } };
+  const operations: JSONPatchOperation[] = [
+    { op: "replace", path: "/items/10", value: payload },
+    { op: "replace", path: "/items/10/nested/text", value: "first" },
+    { op: "replace", path: "/items/10/nested/text", value: "last" },
+    { op: "replace", path: "/items/80/nested/text", value: null },
+  ];
+
+  resetDenseArrayCopies();
+  resetOwnedPatchFreezeInspections();
+  expect(document.validatePatch(operations)).toEqual({ ok: true });
+  expect(document.value).toBe(before);
+  expect(document.commit(operations)).toEqual({ ok: true, change: { applied: operations } });
+  expect(denseArrayCopies()).toBe(0);
+  expect(ownedPatchFreezeInspections()).toBeLessThan(100);
+  expect(document.at("/items/10/nested/text")).toMatchObject({ ok: true, value: "last" });
+  expect(document.at("/items/80/nested/text")).toMatchObject({ ok: true, value: null });
+  expect(document.at("/items/11")).toEqual(untouched);
+  const after = document.value as { items: Array<{ nested: { text: string | null } }> };
+  expect(after.items[11]).toBe((before as typeof after).items[11]);
+  expect((before as typeof after).items[10]!.nested.text).toBe("before");
+  expect(payload.nested.text).toBe("injected");
+  expect(Object.isFrozen(payload.nested)).toBe(false);
+  expect(isDeepFrozen(after)).toBe(true);
+});
+
+test("replace batches preserve escaped, empty and __proto__ object keys", () => {
+  const initial = JSON.parse('{"__proto__":{"value":0},"a/b":{"~":1},"":2}');
+  const operations: JSONPatchOperation[] = [
+    { op: "replace", path: "/__proto__/value", value: 3 },
+    { op: "replace", path: "/a~1b/~0", value: null },
+    { op: "replace", path: "/", value: 4 },
+  ];
+  const result = applyPatch(initial, operations);
+  expect(result).toEqual({
+    ok: true,
+    value: JSON.parse('{"__proto__":{"value":3},"a/b":{"~":null},"":4}'),
+    change: { applied: operations },
+  });
+  expect(initial.__proto__.value).toBe(0);
+  if (result.ok) expect(Object.getPrototypeOf(result.value)).toBe(Object.prototype);
+});
+
+test.each(["/missing", "/items/01/text", "#/items/0/text"])(
+  "a failed replace batch stays atomic and preserves the first failure (%s)",
+  (path) => {
+    const initial = { items: Array.from({ length: 64 }, () => ({ text: "before" })) };
+    const document = createJSONDocument(initial);
+    const before = document.value;
+    let notifications = 0;
+    document.subscribe(() => { notifications += 1; });
+    const operations = [
+      { op: "replace", path: "/items/0/text", value: "first" },
+      { op: "replace", path, value: "invalid" },
+      { op: "replace", path: "/items/1/text", value: undefined },
+    ] as unknown as JSONPatchOperation[];
+    const expected = {
+      ok: false,
+      code: path[0] === "#" ? "invalid_pointer" : "path_not_found",
+      pointer: path,
+    };
+    expect(applyPatch(initial, operations)).toMatchObject(expected);
+    expect(document.validatePatch(operations)).toMatchObject(expected);
+    expect(document.commit(operations)).toMatchObject(expected);
+    expect(document.value).toBe(before);
+    expect(document.at("/items/0/text")).toMatchObject({ ok: true, value: "before" });
+    expect(notifications).toBe(0);
+    expect(initial.items[0]!.text).toBe("before");
+  },
+);
 
 function applyOwnedAndCount(size: number, index: number) {
   const items = Array.from({ length: size }, (_, item) => ({ id: `item-${item}`, title: "Draft" }));

@@ -8,6 +8,7 @@ interface VisibleMember {
   parent?: VisibleMember;
   key: string;
   children: VisibleMember[];
+  readonly childrenByKey: Map<string, VisibleMember> | undefined;
 }
 
 /** Compile the visible tree transition, retaining member identity in RFC 6902 moves. */
@@ -59,8 +60,8 @@ export function patchBetweenTrees(
     if (staging === undefined) {
       let key = "__json_document_transfer__";
       if (Array.isArray(root.value)) key = String(root.children.length);
-      else while ([...root.children, ...target.children].some((child) => child.key === key)) key += "_";
-      staging = { id: "", value: [], container: "", key, children: [] };
+      else while (root.childrenByKey?.has(key) || target.childrenByKey?.has(key)) key += "_";
+      staging = { id: "", value: [], container: "", key, children: [], childrenByKey: undefined };
       insert(staging, root, key);
       operations.push({ op: "add", path: pointer(staging), value: [] });
     }
@@ -74,12 +75,13 @@ export function patchBetweenTrees(
       for (const child of [...node.children]) vacate(child);
       const value = wanted.container === undefined ? wanted.value : Array.isArray(wanted.value) ? [] : {};
       operations.push({ op: "replace", path: pointer(node), value });
-      const replacement: VisibleMember = { ...wanted, children: [], key: node.key };
+      const replacement: VisibleMember = { ...wanted, children: [], childrenByKey: wanted.childrenByKey && new Map(), key: node.key };
       if (node.parent !== undefined) {
         const parent = node.parent;
         const index = parent.children.indexOf(node);
         replacement.parent = parent;
         parent.children[index] = replacement;
+        parent.childrenByKey?.set(replacement.key, replacement);
       }
       current.set(wanted.id, replacement);
       node = replacement;
@@ -91,11 +93,11 @@ export function patchBetweenTrees(
       if (existing !== undefined && !attached(existing, root)) existing = undefined;
       const occupant = Array.isArray(node.value)
         ? node.children[index]
-        : node.children.find((entry) => entry.key === key);
+        : node.childrenByKey?.get(key);
       if (!Array.isArray(node.value) && occupant !== undefined && occupant !== existing) vacate(occupant);
       if (existing === undefined) {
         const value = child.container === undefined ? child.value : Array.isArray(child.value) ? [] : {};
-        existing = { ...child, value, children: [] };
+        existing = { ...child, value, children: [], childrenByKey: child.childrenByKey && new Map() };
         insert(existing, node, key);
         current.set(child.id, existing);
         operations.push({ op: "add", path: pointer(existing), value });
@@ -123,6 +125,7 @@ function snapshot(tree: TreeState, id: string, value: JSONValue, key: string, me
     container: reference.kind === "container" ? reference.containerId : undefined,
     key,
     children: [],
+    childrenByKey: value !== null && typeof value === "object" && !Array.isArray(value) ? new Map() : undefined,
   };
   members.set(node.id, node);
   if (value !== null && typeof value === "object") {
@@ -131,6 +134,7 @@ function snapshot(tree: TreeState, id: string, value: JSONValue, key: string, me
       const member = snapshot(tree, childId, child, key, members);
       member.parent = node;
       node.children.push(member);
+      node.childrenByKey?.set(key, member);
     }
   }
   return node;
@@ -155,6 +159,7 @@ function pointer(node: VisibleMember): string { return buildPointer(segments(nod
 function detach(node: VisibleMember): void {
   if (node.parent === undefined) throw new Error("cannot detach the document root");
   node.parent.children.splice(node.parent.children.indexOf(node), 1);
+  node.parent.childrenByKey?.delete(node.key);
   delete node.parent;
 }
 
@@ -162,5 +167,8 @@ function insert(node: VisibleMember, parent: VisibleMember, key: string): void {
   node.parent = parent;
   node.key = key;
   if (Array.isArray(parent.value)) parent.children.splice(Number(key), 0, node);
-  else parent.children.push(node);
+  else {
+    parent.children.push(node);
+    parent.childrenByKey!.set(key, node);
+  }
 }

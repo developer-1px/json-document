@@ -1,5 +1,5 @@
 import { benchmarkConfig, measure, reportScaling } from "../../../benchmarks/measure.mjs";
-import { createDatabaseEditor, createSheetEditor, createTreeEditor } from "../dist/index.js";
+import { createDatabaseEditor, createSheetEditor, createTreeEditor, createObjectEditor } from "../dist/index.js";
 
 const config = benchmarkConfig("PERF_EDITING_ITEMS");
 console.log("json-document editing benchmark");
@@ -8,6 +8,17 @@ console.log(`items=${config.sizes.join(",")} rounds=${config.rounds} warmups=${c
 const workloads = new Map();
 for (const size of config.sizes) {
   console.log(`\nitems=${size}`);
+  const objects = Array.from({ length: size }, (_, index) => ({
+    id: `object-${index}`, label: "Object", x: 0, y: 0, width: 1, height: 1, color: "subtle",
+  }));
+  const copies = Math.min(size, 1_000);
+  record("object batch paste", size, measure(config, "object batch paste", () => {
+    let sequence = 0;
+    const editor = createObjectEditor({ objects }, { createId: () => `copy-${sequence++}` });
+    const clipboard = { type: "application/vnd.interactive-os.objects+json", objects: objects.slice(0, copies), text: "" };
+    return () => editor.dispatch({ type: "clipboard.paste", clipboard }).ok
+      && editor.snapshot.value.objects.length === size + copies;
+  }));
   const treeDocument = { nodes: Array.from({ length: size }, (_, index) => ({
     id: `node-${index}`,
     parentId: index === 0 ? null : "node-0",

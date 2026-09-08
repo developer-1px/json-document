@@ -408,6 +408,27 @@ test("a leaf replace keeps unrelated sibling identity and does not emit a root r
     change: { applied: [] },
   });
 });
+test.each([
+  { operations: [
+    { op: "replace", path: "/row/text", value: "temporary" },
+    { op: "test", path: "/row/text", value: "temporary" },
+    { op: "replace", path: "/row/text", value: "before" },
+  ] },
+  { operations: [
+    { op: "replace", path: "/row", value: { transient: 0 } },
+    { op: "replace", path: "/row/transient", value: 1 },
+    { op: "replace", path: "/row", value: { text: "before" } },
+  ] },
+] satisfies Array<{ operations: JSONPatchOperation[] }>)("canceling replacements compare final values at overlapping paths (%#)", ({ operations }) => {
+  const document = createJSONDocument({ row: { text: "before" } });
+  const before = document.value;
+  let notifications = 0;
+  document.subscribe(() => { notifications += 1; });
+  expect(document.commit(operations)).toEqual({ ok: true, change: { applied: [] } });
+  expect(document.value).toBe(before);
+  expect(notifications).toBe(0);
+});
+
 test("an equivalent object add stays a no-op while an array add remains a change", () => {
   const document = createJSONDocument({ item: { title: "Draft" }, values: ["same"] });
   const notifications: unknown[] = [];

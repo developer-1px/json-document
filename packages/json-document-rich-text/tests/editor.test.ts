@@ -32,6 +32,60 @@ const initial: RichTextDocument = {
 };
 
 describe("Official Rich Text editor", () => {
+  it("preserves caret offsets for unsorted, coincident and overlapping replacements", () => {
+    const replacements = [{ start: 6, end: 6 }, { start: 1, end: 3 }, { start: 1, end: 1 }, { start: 4, end: 5 }];
+    const document = createJSONDocument({
+      ...initial, content: [{ id: "p", type: "paragraph", content: [{ id: "t", type: "text", text: "abcdefgh", marks: [] }] }],
+    });
+    const ranges = replacements.map(({ start, end }) => ({ anchor: point("t", start), focus: point("t", end) }));
+    const editor = createRichTextEditor({ document, selection: { kind: "range", ranges, primaryIndex: 2 } });
+    const reconciled = editor.snapshot.selection;
+    const before = document.value;
+    const text = "XY";
+    let expected = "abcdefgh";
+    for (const replacement of [...replacements].sort((left, right) => right.start - left.start)) {
+      expected = expected.slice(0, replacement.start) + text + expected.slice(replacement.end);
+    }
+    expect(editor.dispatch({ type: "text.insert", text }).ok).toBe(true);
+    expect(document.at("/content/0/content/0/text")).toMatchObject({ value: expected });
+    expect(editor.snapshot.selection.ranges.map((range) => range.focus.offset)).toEqual(replacements.map((replacement) => (
+      replacement.start + text.length + replacements.filter((other) => other.start < replacement.start)
+        .reduce((shift, other) => shift + text.length - (other.end - other.start), 0)
+    )));
+    expect(editor.undo()).toMatchObject({ ok: true, snapshot: { selection: reconciled } });
+    expect(document.value).toEqual(before);
+  });
+
+  it("marks the union of overlapping and separated ranges without changing unselected segments", () => {
+    const document = createJSONDocument({
+      ...initial, content: [{ id: "p", type: "paragraph", content: [{ id: "t", type: "text", text: "abcdefghij", marks: [] }] }],
+    });
+    const ranges = [[6, 8], [1, 3], [2, 4]].map(([from, to]) => ({ anchor: point("t", from!), focus: point("t", to!) }));
+    const editor = createRichTextEditor({ document, createId: ids(), selection: { kind: "range", ranges, primaryIndex: 0 } });
+    const before = document.value;
+    expect(editor.dispatch({ type: "mark.toggle", mark: { type: "strong" } }).ok).toBe(true);
+    const content = (document.value as RichTextDocument).content[0] as RichTextParagraph;
+    expect(content.content.map((node) => [(node as RichTextText).text, (node as RichTextText).marks])).toEqual([
+      ["a", []], ["bcd", [{ type: "strong" }]], ["ef", []], ["gh", [{ type: "strong" }]], ["ij", []],
+    ]);
+    expect(editor.undo().ok).toBe(true);
+    expect(document.value).toEqual(before);
+  });
+
+  it("owns inserted payloads and retained change values after internal planning", () => {
+    const document = createJSONDocument(initial);
+    const editor = createRichTextEditor({ document });
+    const node = { id: "external", type: "paragraph" as const, content: [{ id: "external-text", type: "text" as const, text: "safe", marks: [] }] };
+    const inserted = editor.dispatch({ type: "node.insert", point: { kind: "child", nodeId: "document-1", offset: 1, affinity: "forward" }, node });
+    expect(inserted.ok).toBe(true);
+    node.content[0]!.text = "poison";
+    expect(document.at("/content/1/content/0/text")).toMatchObject({ value: "safe" });
+    expect(inserted.ok && inserted.change?.applied[0]).toMatchObject({ value: { content: [{ text: "safe" }] } });
+    expect(editor.undo().ok).toBe(true);
+    expect(editor.redo().ok).toBe(true);
+    expect(document.at("/content/1/content/0/text")).toMatchObject({ value: "safe" });
+  });
+
   it("uses a child boundary for an empty first block and splits at both text boundaries canonically", () => {
     const empty = createJSONDocument({
       profile: "urn:interactive-os:json-document:rich-text:1",

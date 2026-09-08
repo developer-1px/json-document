@@ -18,7 +18,7 @@ import {
 } from "./session.js";
 import { cutEditingClipboard, type EditingClipboardCut } from "./clipboard.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createEditingId } from "./identity.js";
+import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import {
   addCalendarDate,
@@ -335,7 +335,7 @@ export function createCalendarEditor(
       if (start === null || end === null) return failure("event.invalid-instant");
       const events = value().events;
       const event: CalendarEvent = {
-        id: createUniqueId(events, createId),
+        id: createEditingIdAllocator(events.map((event) => event.id), createId, "calendar event")(),
         title: intent.title ?? "Event",
         start: intent.start,
         end: intent.end,
@@ -545,7 +545,7 @@ export function createCalendarEditor(
     if (intent.scope === "this") {
       const split: CalendarEvent = {
         ...event,
-        id: createUniqueId(events, createId),
+        id: createEditingIdAllocator(events.map((event) => event.id), createId, "calendar event")(),
         title: intent.title ?? event.title,
         start: times.start,
         end: times.end,
@@ -568,7 +568,7 @@ export function createCalendarEditor(
     const until = addCalendarDate(occurrenceDate, -1) ?? occurrenceDate;
     const following: CalendarEvent = {
       ...event,
-      id: createUniqueId(events, createId),
+      id: createEditingIdAllocator(events.map((event) => event.id), createId, "calendar event")(),
       title: intent.title ?? event.title,
       start: times.start,
       end: times.end,
@@ -737,7 +737,8 @@ export function createCalendarEditor(
       ?? null;
     const dateAnchor = parseCalendarDate(calendarDatePart(clipboard.anchorOccurrenceStart));
     if (dateAnchor === null) return failure("clipboard.invalid");
-    const existing = [...value().events];
+    const existing = value().events;
+    const allocateId = createEditingIdAllocator(existing.map((event) => event.id), createId, "calendar event");
     const pasted: CalendarEvent[] = [];
     for (const item of clipboard.items) {
       const source = item.event;
@@ -762,7 +763,7 @@ export function createCalendarEditor(
         start = source.allDay ? formatCalendarDate(nextStart) : `${formatCalendarDate(nextStart)}T${source.start.slice(11)}`;
         end = source.allDay ? formatCalendarDate(nextStart.add({ days: duration })) : `${formatCalendarDate(nextStart.add({ days: duration }))}T${source.end.slice(11)}`;
       }
-      const event = { ...source, id: createUniqueId([...existing, ...pasted], createId), start, end, recurrence: null, excludeDates: [] };
+      const event = { ...source, id: allocateId(), start, end, recurrence: null, excludeDates: [] };
       pasted.push(event);
     }
     return session.apply({
@@ -1205,15 +1206,6 @@ function shiftedOccurrenceTimes(
   const duration = calendarMinutesBetween(bounds.from, bounds.to);
   const nextEnd = formatCalendarInstant(from.add({ minutes: duration }));
   return nextStart < nextEnd ? { start: nextStart, end: nextEnd } : null;
-}
-
-function createUniqueId(events: ReadonlyArray<CalendarEvent>, createId: () => string): string {
-  const existing = new Set(events.map((event) => event.id));
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const id = createId();
-    if (!existing.has(id)) return id;
-  }
-  throw new Error("createId did not produce a unique calendar event id");
 }
 
 function emptyCalendarSelection(): CalendarSelection {

@@ -11,6 +11,7 @@ console.log("json-document collaboration benchmark");
 console.log(`items=${config.sizes.join(",")} rounds=${config.rounds} warmups=${config.warmups}`);
 
 const ingestRows = [];
+const objectRows = [];
 for (const size of config.sizes) {
   const initial = { items: Array.from({ length: size }, (_, index) => ({ id: `item-${index}`, done: false })) };
   const author = createCollaborationRuntime(initial, { ...runtimeOptions, actorId: "author" });
@@ -29,6 +30,16 @@ for (const size of config.sizes) {
   });
   ingestRows.push({ size, ...ingest });
 
+  const wide = Object.fromEntries(Array.from({ length: size }, (_, index) => [`field${index}`, index]));
+  const objectAuthor = createCollaborationRuntime(wide, { ...runtimeOptions, actorId: "author" });
+  objectAuthor.document.commit([{ op: "replace", path: `/field${middle}`, value: -1 }]);
+  const objectBundle = objectAuthor.replica.exportBundle();
+  const objectIngest = measure(config, "remote wide object leaf ingest", () => {
+    const receiver = createCollaborationRuntime(wide, { ...runtimeOptions, actorId: "receiver" });
+    return () => receiver.replica.ingest(objectBundle).ok && receiver.document.value[`field${middle}`] === -1;
+  });
+  objectRows.push({ size, ...objectIngest });
+
   measure(config, "export one-change bundle", () => () => (
     author.replica.exportBundle().changes.length === 1
   ));
@@ -36,6 +47,8 @@ for (const size of config.sizes) {
 
 console.log("\nremote leaf ingest");
 reportScaling(ingestRows);
+console.log("\nremote wide object leaf ingest");
+reportScaling(objectRows);
 
 const ledgerSizes = (process.env.PERF_COLLABORATION_CHANGES ?? "100,1000,10000")
   .split(",")

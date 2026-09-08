@@ -1,24 +1,8 @@
 import { jsonSerializableError } from "../../json/serializable.js";
-import {
-  copyRootObject,
-  copyRootObjectKeyPrefix,
-  copyRootObjectKeys,
-  objectHasOwn,
-  removedRootKeysMatchSuffix,
-} from "../object.js";
+import { copyRootObject, objectHasOwn } from "../object.js";
 import { validateOperationShape } from "../apply.js";
 import { applySequentialReplacePatch } from "../sequential-replace.js";
-import {
-  applyAppendOnlyAddPatch,
-  applySameArrayStructuralPatch,
-  applyTailRemovePatch,
-} from "./array.js";
-import {
-  applyIndependentReplacePatch,
-  applySameArrayElementReplacePatch,
-  applySameArrayFieldReplacePatch,
-  applySameArrayNestedReplacePatch,
-} from "./replace.js";
+import { applySameArrayStructuralPatch } from "./array.js";
 import type { FastPatchResult, JSONPatchOperation } from "../contract.js";
 
 type FastPatchSuccess = Extract<FastPatchResult, { handled: true }>;
@@ -29,39 +13,15 @@ type FastPatchStrategy = (
   valuesTrusted: boolean,
 ) => FastPatchResult;
 
-const rootObjectReplaceWhenValuesTrusted: FastPatchStrategy = (state, ops, valuesTrusted) =>
-  valuesTrusted
-    ? applyRootObjectReplacePatch(state, ops, true)
-    : { handled: false };
-
-export const trustedStrategies: readonly FastPatchStrategy[] = [
-  applyAppendOnlyAddPatch,
-  applyTailRemovePatch,
-  applyRootObjectRemovePatch,
-  applyRootObjectAddPatch,
-  applySameArrayFieldReplacePatch,
-  applySameArrayNestedReplacePatch,
-  rootObjectReplaceWhenValuesTrusted,
-  applySameArrayElementReplacePatch,
-  applyIndependentReplacePatch,
+const strategies: readonly FastPatchStrategy[] = [
+  applyRootObjectPatch,
   applySequentialReplacePatch,
   applySameArrayStructuralPatch,
-];
-
-export const validatedStrategies: readonly FastPatchStrategy[] = [
-  applyRootObjectRemovePatch,
-  applyRootObjectAddPatch,
-  applyRootObjectReplacePatch,
-  applySameArrayFieldReplacePatch,
-  applySameArrayNestedReplacePatch,
-  applySameArrayElementReplacePatch,
-  applySequentialReplacePatch,
 ];
 
 export function applyFastPatchStrategies(
   state: unknown,
   ops: ReadonlyArray<JSONPatchOperation>,
-  strategies: readonly FastPatchStrategy[],
   valuesTrusted: boolean,
 ): FastPatchSuccess | null {
   for (const strategy of strategies) {
@@ -71,238 +31,77 @@ export function applyFastPatchStrategies(
   return null;
 }
 
-function applyRootObjectRemovePatch(
+function applyRootObjectPatch(
   state: unknown,
   ops: ReadonlyArray<JSONPatchOperation>,
+  valuesTrusted: boolean,
 ): FastPatchResult {
+  const first = ops[0];
   if (
     ops.length < 2
     || state === null
     || typeof state !== "object"
     || Array.isArray(state)
-    || !firstFlatRootObjectOperationIs(ops, "remove")
-  ) {
-    return { handled: false };
-  }
+    || (first?.op !== "add" && first?.op !== "remove")
+  ) return { handled: false };
+  const firstKey = flatRootObjectKey(first);
+  if (firstKey === null) return { handled: false };
 
   const source = state as Record<string, unknown>;
-  const sourceKeys = Object.keys(source);
-  let matchesSourceKeyOrder = ops.length === sourceKeys.length;
-  let removedKeys: Record<string, true> | null = null;
-  let matchesReverseSuffix = ops.length <= sourceKeys.length;
-  const applied = new Array<JSONPatchOperation>(ops.length);
+  const next = first.op === "add" ? copyRootObject(source) : null;
+  const keys = next === null ? Object.keys(source) : [];
+  let matchesKeyOrder = ops.length === keys.length;
+  let matchesReverseSuffix = ops.length <= keys.length;
+  let removedKeys: Set<string> | null = null;
   for (let index = 0; index < ops.length; index += 1) {
     if (!(index in ops)) return { handled: false };
     const op = ops[index]!;
-    if (
-      validateOperationShape(op) !== null
-      || op.op !== "remove"
-      || typeof op.path !== "string"
-      || op.path === ""
-      || op.path[0] !== "/"
-      || op.path.includes("~")
-      || op.path.indexOf("/", 1) !== -1
-    ) {
-      return { handled: false };
-    }
+    const key = index === 0 ? firstKey : flatRootObjectKey(op);
+    if (key === null || op.op !== first.op) return { handled: false };
 
-    const key = op.path.slice(1);
-    if (matchesSourceKeyOrder && key === sourceKeys[index]) {
-      matchesReverseSuffix = false;
-      applied[index] = op;
-      continue;
-    }
-    matchesSourceKeyOrder = false;
-    if (matchesReverseSuffix && key === sourceKeys[sourceKeys.length - index - 1]) {
-      applied[index] = op;
-      continue;
-    }
-    matchesReverseSuffix = false;
-    if (removedKeys === null) {
-      removedKeys = Object.create(null) as Record<string, true>;
-      for (let seenIndex = 0; seenIndex < index; seenIndex += 1) {
-        removedKeys[ops[seenIndex]!.path.slice(1)] = true;
+    if (op.op === "add" && next !== null) {
+      if (!valuesTrusted && jsonSerializableError(op.value) !== null) return { handled: false };
+      if (key === "__proto__") {
+        Object.defineProperty(next, key, { value: op.value, enumerable: true, configurable: true, writable: true });
+      } else {
+        next[key] = op.value;
       }
-    }
-    if (!objectHasOwn.call(source, key) || objectHasOwn.call(removedKeys, key)) return { handled: false };
-    removedKeys[key] = true;
-    applied[index] = op;
-  }
-
-  if (ops.length === sourceKeys.length) return { handled: true, state: {}, applied };
-  const keepCount = sourceKeys.length - ops.length;
-  if (removedKeys === null || removedRootKeysMatchSuffix(sourceKeys, keepCount, removedKeys)) {
-    return {
-      handled: true,
-      state: copyRootObjectKeyPrefix(source, sourceKeys, keepCount),
-      applied,
-    };
-  }
-  if (ops.length * 2 < sourceKeys.length) {
-    const next = copyRootObjectKeys(source, sourceKeys);
-    for (let index = 0; index < ops.length; index += 1) {
-      delete next[ops[index]!.path.slice(1)];
-    }
-    return { handled: true, state: next, applied };
-  }
-
-  const next: Record<string, unknown> = {};
-  for (const key of sourceKeys) {
-    if (objectHasOwn.call(removedKeys, key)) continue;
-    if (key === "__proto__") {
-      Object.defineProperty(next, key, {
-        value: source[key],
-        enumerable: true,
-        configurable: true,
-        writable: true,
-      });
     } else {
-      next[key] = source[key];
+      matchesKeyOrder &&= key === keys[index];
+      matchesReverseSuffix &&= key === keys[keys.length - index - 1];
+      // Ordered removals need neither membership checks nor a deletion set.
+      if (matchesKeyOrder || matchesReverseSuffix) continue;
+      removedKeys ??= new Set(ops.slice(0, index).map((seen) => seen.path.slice(1)));
+      if (!objectHasOwn.call(source, key) || removedKeys.has(key)) return { handled: false };
+      removedKeys.add(key);
     }
   }
 
-  return { handled: true, state: next, applied };
+  const applied = ops.slice();
+  if (next !== null) return { handled: true, state: next, applied };
+
+  const keepCount = keys.length - ops.length;
+  if (removedKeys === null || keys.slice(keepCount).every((key) => removedKeys.has(key))) {
+    return { handled: true, state: copyRootObject(source, keys.slice(0, keepCount)), applied };
+  }
+  if (ops.length * 2 < keys.length) {
+    const retained = copyRootObject(source, keys);
+    for (const key of removedKeys) delete retained[key];
+    return { handled: true, state: retained, applied };
+  }
+  return {
+    handled: true,
+    state: copyRootObject(source, keys.filter((key) => !removedKeys.has(key))),
+    applied,
+  };
 }
 
-function applyRootObjectAddPatch(
-  state: unknown,
-  ops: ReadonlyArray<JSONPatchOperation>,
-  valuesTrusted = false,
-): FastPatchResult {
+function flatRootObjectKey(op: JSONPatchOperation): string | null {
   if (
-    ops.length < 2
-    || state === null
-    || typeof state !== "object"
-    || Array.isArray(state)
-    || !firstFlatRootObjectOperationIs(ops, "add")
-  ) return { handled: false };
-
-  let next: Record<string, unknown> | null = null;
-  const applied = new Array<JSONPatchOperation>(ops.length);
-  for (let index = 0; index < ops.length; index += 1) {
-    if (!(index in ops)) return { handled: false };
-    const op = ops[index]!;
-    if (
-      validateOperationShape(op) !== null
-      || op.op !== "add"
-      || typeof op.path !== "string"
-      || op.path === ""
-      || op.path[0] !== "/"
-      || op.path.includes("~")
-      || op.path.indexOf("/", 1) !== -1
-    ) {
-      return { handled: false };
-    }
-    if (!valuesTrusted && jsonSerializableError(op.value) !== null) return { handled: false };
-
-    const key = op.path.slice(1);
-    if (next === null) next = copyRootObject(state as Record<string, unknown>);
-    if (key === "__proto__") {
-      Object.defineProperty(next, key, {
-        value: op.value,
-        enumerable: true,
-        configurable: true,
-        writable: true,
-      });
-    } else {
-      next[key] = op.value;
-    }
-    applied[index] = op;
-  }
-
-  return next === null
-    ? { handled: false }
-    : { handled: true, state: next, applied };
-}
-
-function applyRootObjectReplacePatch(
-  state: unknown,
-  ops: ReadonlyArray<JSONPatchOperation>,
-  valuesTrusted = false,
-): FastPatchResult {
-  if (
-    ops.length < 2
-    || state === null
-    || typeof state !== "object"
-    || Array.isArray(state)
-    || !firstFlatRootObjectOperationIs(ops, "replace")
-  ) return { handled: false };
-
-  const source = state as Record<string, unknown>;
-  const sourceKeys = Object.keys(source);
-  let matchesSourceKeyOrder = ops.length === sourceKeys.length;
-  const orderedNext: Record<string, unknown> | null = matchesSourceKeyOrder ? {} : null;
-  const applied = new Array<JSONPatchOperation>(ops.length);
-  for (let index = 0; index < ops.length; index += 1) {
-    if (!(index in ops)) return { handled: false };
-    const op = ops[index]!;
-    if (
-      validateOperationShape(op) !== null
-      || op.op !== "replace"
-      || typeof op.path !== "string"
-      || op.path[0] !== "/"
-      || op.path.includes("~")
-      || op.path.indexOf("/", 1) !== -1
-    ) {
-      return { handled: false };
-    }
-    if (!valuesTrusted && jsonSerializableError(op.value) !== null) return { handled: false };
-
-    const key = op.path.slice(1);
-    if (matchesSourceKeyOrder) {
-      if (key !== "" && key === sourceKeys[index]) {
-        if (key === "__proto__") {
-          Object.defineProperty(orderedNext, key, {
-            value: op.value,
-            enumerable: true,
-            configurable: true,
-            writable: true,
-          });
-        } else {
-          orderedNext![key] = op.value;
-        }
-        applied[index] = op;
-        continue;
-      }
-      matchesSourceKeyOrder = false;
-    }
-
-    if (key === "" || !objectHasOwn.call(state, key)) return { handled: false };
-    applied[index] = op;
-  }
-
-  if (matchesSourceKeyOrder && orderedNext !== null) return { handled: true, state: orderedNext, applied };
-
-  const next = copyRootObjectKeys(source, sourceKeys);
-  const replaceOps = ops as ReadonlyArray<Extract<JSONPatchOperation, { op: "replace" }>>;
-  for (let index = 0; index < replaceOps.length; index += 1) {
-    const op = replaceOps[index]!;
-    const key = op.path.slice(1);
-    if (key === "__proto__") {
-      Object.defineProperty(next, key, {
-        value: op.value,
-        enumerable: true,
-        configurable: true,
-        writable: true,
-      });
-    } else {
-      next[key] = op.value;
-    }
-  }
-  return { handled: true, state: next, applied };
-}
-
-function firstFlatRootObjectOperationIs(
-  ops: ReadonlyArray<JSONPatchOperation>,
-  operation: "add" | "remove" | "replace",
-): boolean {
-  if (!(0 in ops)) return false;
-  const first = ops[0]!;
-  return validateOperationShape(first) === null
-    && first.op === operation
-    && typeof first.path === "string"
-    && first.path.length > 1
-    && first.path[0] === "/"
-    && !first.path.includes("~")
-    && first.path.indexOf("/", 1) === -1;
+    validateOperationShape(op) !== null
+    || op.path[0] !== "/"
+    || op.path.includes("~")
+    || op.path.indexOf("/", 1) !== -1
+  ) return null;
+  return op.path.slice(1);
 }

@@ -23,10 +23,42 @@ console.log(`items=${config.sizes.join(",")} rounds=${config.rounds} warmups=${c
 
 const externalRows = [];
 const submitRows = [];
+const rerenderRows = [];
+const batchRows = [];
 for (const size of config.sizes) {
   const initial = { items: Array.from({ length: size }, (_, index) => ({ id: `item-${index}`, done: false })) };
   const middle = Math.floor(size / 2);
   console.log(`\nitems=${size}`);
+
+  const rerender = await measureAsync(config, "unchanged rerender", async () => {
+    const documentState = createJSONDocument(initial);
+    const hook = renderHook(() => useReactHookFormConnector(documentState));
+    return async () => {
+      await act(async () => { hook.rerender(); });
+      return hook.result.current.snapshot.value === documentState.value;
+    };
+  });
+  cleanup();
+  rerenderRows.push({ size, ...rerender });
+
+  const count = Math.min(size, 5_000);
+  const batch = await measureAsync(config, `external ${count} leaf sync`, async () => {
+    const documentState = createJSONDocument(initial);
+    const hook = renderHook(() => useReactHookFormConnector(documentState));
+    return async () => {
+      let committed;
+      await act(async () => {
+        committed = documentState.commit(Array.from({ length: count }, (_, index) => ({
+          op: "replace", path: `/items/${index}/done`, value: true,
+        })));
+      });
+      const synced = hook.result.current.form.getValues(`items.${count - 1}.done`) === true;
+      hook.unmount();
+      cleanup();
+      return committed?.ok === true && synced;
+    };
+  });
+  batchRows.push({ size, ...batch });
 
   const external = await measureAsync(config, "external leaf sync", async () => {
     const documentState = createJSONDocument(initial);
@@ -63,3 +95,7 @@ console.log("\nexternal leaf sync");
 reportScaling(externalRows);
 console.log("\nwhole form submit");
 reportScaling(submitRows);
+console.log("\nunchanged rerender");
+reportScaling(rerenderRows);
+console.log("\nexternal batch sync");
+reportScaling(batchRows);

@@ -1,4 +1,4 @@
-import { createJSONDocument } from "@interactive-os/json-document";
+import { createJSONDocument, readPointer } from "@interactive-os/json-document";
 import { describe, expect, it } from "vitest";
 import {
   createRichTextBlockFixture,
@@ -9,6 +9,29 @@ import {
 } from "../src/index.js";
 
 describe("Official Rich Text local edit costs", () => {
+  it.each([1_000, 10_000])("reuses the nested snapshot topology across external leaf edits (%s blocks)", (size) => {
+    const document = createJSONDocument({ "a/b": createRichTextBlockFixture(size) });
+    const editor = createRichTextEditor({ document, pointer: "#/a~1b" });
+    const retained = editor.snapshot.value;
+    const topology = editor.topology;
+    const instrument = createRichTextInstrument();
+    runWithRichTextInstrument(instrument, () => {
+      expect(editor.topology).toBe(topology);
+      expect(editor.snapshot.value).toBe(retained);
+      expect(editor.topology).toBe(topology);
+    });
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    const release = editor.subscribe(() => {});
+    runWithRichTextInstrument(instrument, () => {
+      expect(document.commit([{ op: "replace", path: "/a~1b/content/0/content/0/text", value: "external" }]).ok).toBe(true);
+      expect(editor.snapshot.value).toBe(document.value);
+    });
+    expect(instrument.snapshot().topologyCreates).toBe(0);
+    expect(instrument.snapshot().topologyVisits).toBeLessThan(16);
+    expect(readPointer(retained, "/a~1b/content/0/content/0/text")).toMatchObject({ value: "x" });
+    release();
+  });
+
   it("indexes topology during editor create in the same walk as validation", () => {
     const size = 256;
     const instrument = createRichTextInstrument();

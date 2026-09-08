@@ -17,9 +17,9 @@ export function denseArrayCopies(): number {
   return denseCopies;
 }
 
-/** Internal ownership check; public reflection may materialize a dense snapshot. */
-export function isSharedArray(value: object): boolean {
-  return overlays.has(value);
+/** Internal overlay metadata, without materializing a dense snapshot. */
+export function getSharedArrayOverlay(value: object): SharedArrayOverlay | undefined {
+  return overlays.get(value);
 }
 
 export function replaceArrayIndex(

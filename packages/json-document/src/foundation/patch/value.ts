@@ -46,18 +46,7 @@ function applySingleSegmentTrustedValueMutation(
     if (op.op === "replace" && !objectHasOwn.call(state, key)) {
       return { error: "path_not_found", reason: `object key: ${key}`, pointer: op.path };
     }
-    const next = { ...(state as Record<string, unknown>) };
-    if (key === "__proto__") {
-      Object.defineProperty(next, key, {
-        value: op.value,
-        enumerable: true,
-        configurable: true,
-        writable: true,
-      });
-    } else {
-      next[key] = op.value;
-    }
-    return { state: next };
+    return { state: { ...(state as Record<string, unknown>), [key]: op.value } };
   }
 
   const verb = op.op === "add" ? "set" : "replace";

@@ -595,6 +595,11 @@ createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: Edi
 ```ts
 createEditingId(prefix: string): string
 ```
+## `createEditingIdAllocator`
+
+```ts
+createEditingIdAllocator(existingIds: Iterable<string>, createId: () => string, subject: string): () => string
+```
 ## `createEditingSession`
 
 ```ts
