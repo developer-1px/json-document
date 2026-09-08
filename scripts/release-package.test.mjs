@@ -5,6 +5,7 @@ import { readJson } from "./workspace-graph.mjs";
 import { releases, resolveRelease } from "./release-package.mjs";
 
 const firstKit = [
+  ["json-document-a2ui-v0.1.0-rc.0", "@interactive-os/json-document-a2ui", "next", "packages/json-document-a2ui/package.json"],
   ["json-document-v3.0.0", "@interactive-os/json-document", "latest", "packages/json-document/package.json"],
   ["json-document-selection-v0.1.0-rc.0", "@interactive-os/json-document-selection", "next", "packages/json-document-selection/package.json"],
   ["json-document-editing-v0.1.0-rc.0", "@interactive-os/json-document-editing", "next", "packages/json-document-editing/package.json"],
@@ -17,6 +18,7 @@ const firstKit = [
   ["json-document-rich-text-mention-react-v0.1.0-rc.0", "@interactive-os/json-document-rich-text-mention-react", "next", "packages/json-document-rich-text-mention-react/package.json"],
   ["json-document-web-v0.1.0-rc.0", "@interactive-os/json-document-web", "next", "packages/json-document-web/package.json"],
   ["json-document-react-v0.1.0-rc.0", "@interactive-os/json-document-react", "next", "packages/json-document-react/package.json"],
+  ["json-document-calendar-v0.1.0-rc.0", "@interactive-os/json-document-calendar", "next", "packages/json-document-calendar/package.json"],
 ];
 
 const databaseHand = [

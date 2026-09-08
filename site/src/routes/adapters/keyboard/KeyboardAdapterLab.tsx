@@ -13,6 +13,7 @@ import {
   lineBoundary,
   moveLinePoint,
   type WebKeyboardCommand,
+  type WebKeymap,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -26,6 +27,15 @@ const initialDocument: BlockDocument = {
     { id: "gamma", text: "Keyboard commands use the same Intent, Clipboard, and History doors." },
   ],
 };
+
+type ProductKeyboardCommand = { readonly type: "open-command-palette" };
+
+const productKeyboard = createWebKeyboardAdapter<ProductKeyboardCommand>({
+  keymap: {
+    g: { type: "open-command-palette" },
+  } satisfies WebKeymap<ProductKeyboardCommand>,
+  defaults: false,
+});
 
 export function KeyboardAdapterLab() {
   const [editor] = useState<DocumentEditor>(() => createDocumentEditor(initialDocument));
@@ -47,6 +57,7 @@ export function KeyboardAdapterLab() {
   }));
   const [keyboard] = useState(() => createWebKeyboardAdapter());
   const [lastCommand, setLastCommand] = useState<WebKeyboardCommand | null>(null);
+  const [lastProductCommand, setLastProductCommand] = useState<ProductKeyboardCommand | null>(null);
   const editing = useEditing({
     source: editor,
     selectedKeys: editor.selectedBlockIds,
@@ -61,6 +72,8 @@ export function KeyboardAdapterLab() {
     },
     keyboard: {
       resolve: (stroke) => {
+        const productCommand = productKeyboard.resolve(stroke);
+        if (productCommand) setLastProductCommand(productCommand);
         const command = keyboard.resolve(stroke);
         if (command) setLastCommand(command);
         return command;
@@ -131,6 +144,7 @@ export function KeyboardAdapterLab() {
         <Inspector label="Inspect keyboard adapter state" items={[
           { label: "Canonical JSON", signal: `revision ${snapshot.revision}`, value: snapshot.value, testId: "keyboard-document-json", size: "tall" },
           { label: "Keyboard command", value: lastCommand, testId: "keyboard-command-json", size: "compact" },
+          { label: "Product command", value: lastProductCommand, testId: "product-keyboard-command-json", size: "compact" },
           { label: "Intent", value: lastIntent, testId: "keyboard-intent-json", size: "compact" },
           { label: "Selection", value: snapshot.selection, testId: "keyboard-selection-json", size: "compact" },
         ]} />

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Undo2 } from "lucide-react";
-import { ActionButton, IconButton, SegmentedControl, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command, Choice, contentInteractionAttributes, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { artifactViewerRecipe } from "./artifact-viewer-styles";
 
@@ -20,18 +21,18 @@ export function ArtifactViewerRoute() {
 
   return (
     <>
-      <PageHeader label="Artifact · Prototype" title="최종 계층의 계약을 먼저 검증합니다." illustration="peek">
-        실제 파일 호환보다 먼저, 서로 다른 artifact surface가 같은 Core와 Hands를 조합하는 방식을 기록합니다.
+      <PageHeader label="Artifact · Content Prototype" title="Application이 다루는 콘텐츠 계약을 검증합니다." illustration="peek">
+        navigation이나 workflow를 소유하지 않고, 서로 다른 Application 안에서 계속 편집할 수 있는 content surface를 기록합니다.
       </PageHeader>
 
-      <ProductApp
+      <ProductShell
         toolbarLabel="Artifact 선택"
         toolbar={(
           <>
-            <SegmentedControl label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={(value) => setActive(value as ArtifactKind)} />
+            <Choice presentation="inline" label="Artifact 선택" value={active} options={artifacts.map((candidate) => ({ id: candidate.kind, label: candidate.label }))} onValueChange={setActive} />
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
             <span className={ui.text.meta}>{artifact.name} · mock artifact</span>
-            <IconButton label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" className="ml-auto"><Undo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={<Composer artifactName={artifact.name} />}
@@ -40,15 +41,15 @@ export function ArtifactViewerRoute() {
         {active === "md" ? <MarkdownArtifact /> : null}
         {active === "ppt" ? <PresentationArtifact /> : null}
         {active === "sheet" ? <SheetArtifact /> : null}
-      </ProductApp>
+      </ProductShell>
 
       <section className={styles.futureMap()} aria-labelledby="viewer-model-title">
         <p className={ui.text.label}>Dependency map</p>
-        <h2 id="viewer-model-title" className={ui.text.section}>Core에서 시작해 Hands를 거쳐 Artifact가 됩니다.</h2>
+        <h2 id="viewer-model-title" className={ui.text.section}>Core와 Hands가 Application 안의 Artifact를 만듭니다.</h2>
         <ol>
           <li><strong>Core</strong><span>사람과 agent의 변경을 같은 계약에 남깁니다.</span></li>
           <li><strong>Hands</strong><span>사람에게 익숙한 편집 도구를 붙입니다.</span></li>
-          <li><strong>Artifact</strong><span>적절한 surface에서 완성된 경험이 됩니다.</span></li>
+          <li><strong>Artifact</strong><span>Application 안에서 계속 다룰 수 있는 콘텐츠가 됩니다.</span></li>
         </ol>
       </section>
     </>
@@ -56,15 +57,15 @@ export function ArtifactViewerRoute() {
 }
 
 function Composer({ artifactName }: { readonly artifactName: string }) {
+  const [request, setRequest] = useState("");
   return (
     <section className={styles.composer()} aria-label="Composer mock">
       <div className={styles.context()} aria-label="Composer context">
         <span>@Agent</span>
         <span>#{artifactName}</span>
       </div>
-      <label className="sr-only" htmlFor="artifact-composer">Agent에게 이어서 요청</label>
-      <input id="artifact-composer" className={ui.field.control} placeholder="이 artifact에서 무엇을 바꿀까요?" />
-      <ActionButton kind="primary">Send</ActionButton>
+      <Field label="Agent에게 이어서 요청" value={request} onValueChange={setRequest} className={ui.field.control} placeholder="이 artifact에서 무엇을 바꿀까요?" />
+      <Command kind="primary">Send</Command>
       <p className={classes("col-span-full m-0", ui.text.meta)}>
         Composer와 Mention은 agent에게 지시와 artifact context를 건네는 Hands입니다.
       </p>
@@ -127,11 +128,8 @@ function SheetArtifact() {
           <div
             key={`${rowIndex}-${columnIndex}`}
             role={rowIndex === 0 ? "columnheader" : "gridcell"}
-            className={classes(
-              rowIndex === 0 ? ui.surface.gridHead : ui.surface.gridCell,
-              rowIndex === 2 && columnIndex === 2 && ui.surface.previewSelected,
-              styles.cell(),
-            )}
+            className={classes(rowIndex === 0 ? ui.surface.gridHead : ui.surface.gridCell, styles.cell())}
+            {...(rowIndex === 0 ? {} : contentInteractionAttributes({ role: "content", selected: rowIndex === 2 && columnIndex === 2 }))}
           >{cell}</div>
         )))}
       </div>

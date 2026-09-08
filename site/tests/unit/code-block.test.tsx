@@ -1,5 +1,5 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, test } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { CodeBlock, InlineCode } from "../../src/shared/ui/code-block";
 import { codeLanguage, tokenizeCodeLine } from "../../src/shared/ui/code-tokens";
 import { MarkdownViewer } from "../../src/routes/docs/MarkdownViewer";
@@ -17,6 +17,24 @@ describe("shared code language", () => {
     expect(screen.getByTestId("code").querySelector('[data-code-token="keyword"]')?.textContent).toBe("const");
     expect(screen.getByTestId("code").querySelector('[data-code-token="string"]')?.textContent).toBe('"Draft"');
     expect(screen.getByTestId("code").querySelector('[data-code-token="comment"]')?.textContent).toBe("// current");
+  });
+
+  test("uses the source as the contained Select All and native copy projection", () => {
+    const source = "mounted source\nmodel source";
+    render(<CodeBlock language="text" source={source} testId="selectable-code" />);
+    const code = screen.getByTestId("selectable-code");
+    fireEvent.pointerDown(code);
+    const selectAll = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ctrlKey: true, key: "a" });
+    document.dispatchEvent(selectAll);
+    expect(selectAll.defaultPrevented).toBe(true);
+    expect(window.getSelection()?.toString()).toBe(source);
+
+    const setData = vi.fn();
+    const copy = new Event("copy", { bubbles: true, cancelable: true });
+    Object.defineProperty(copy, "clipboardData", { value: { setData } });
+    document.dispatchEvent(copy);
+    expect(setData).toHaveBeenCalledWith("text/plain", source);
+    expect(copy.defaultPrevented).toBe(true);
   });
 
   test("maps Markdown fence aliases onto the restrained tokenizer", () => {

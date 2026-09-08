@@ -8,6 +8,14 @@ Selection round-trips both text offsets and container child boundaries. Copy,
 cut, and paste publish/consume structured Rich Text, safe semantic HTML, and
 plain text in that priority order.
 
+Keyboard Undo/Redo consumes the Web package's `createWebKeyboardAdapter` defaults
+(`Mod-z`, `Mod-Shift-z`). This binding retains its historical Alt variants through
+explicit keymap entries. Root ownership and composition handling stay in this
+binding. [Keyboard history tests](tests/history-keyboard.test.ts) exercise native
+range replacement and meta/control Undo/Redo, including backward ranges and
+selection movement after Undo without losing Redo. These synthetic DOM cases
+complement the Rich Text demo's real-browser input tests.
+
 IME composition uses a DOM reconciliation lease rather than inserting
 `compositionend.data` directly. The binding captures the canonical selection
 and pre-composition DOM text, lets the platform mutate the active DOM while
@@ -21,3 +29,14 @@ official React surface does this automatically.
 
 The Web package does not store canonical state in DOM and does not define
 product keyboard or toolbar policy.
+
+Nested form controls and separate editing hosts never dispatch outer-editor
+commands. This revision uses the Web peer's `isWebEditingHostTarget` capability.
+Replacement, yank, and transpose input accept both `data` and a `text/plain`
+`dataTransfer` representation, using the supplied target ranges.
+
+If a composition endpoint's canonical node changes or disappears during its
+lease, the binding reports `rich-text.composition-stale` through `onAction`,
+does not insert against the stale selection, and releases rendering through
+`onCompositionChange(false)`. Changes outside those endpoints may still commit.
+This is fail-closed recovery, not collaborative semantic selection mapping.

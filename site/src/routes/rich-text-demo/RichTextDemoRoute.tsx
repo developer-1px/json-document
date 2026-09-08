@@ -2,16 +2,20 @@ import { useState } from "react";
 import { CornerDownLeft, Redo2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { createJSONDocument } from "@interactive-os/json-document";
+import { createEditingId } from "@interactive-os/json-document-editing";
+import { createTextRuntime } from "@interactive-os/json-document-collaboration/text";
+import { createCollaborationEditingHistory } from "@interactive-os/json-document-collaboration/editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
   createRichTextEditor,
+  richTextPlainText,
   type RichTextDocument,
   type RichTextPoint,
 } from "@interactive-os/json-document-rich-text";
-import { RichTextEditorSurface } from "@interactive-os/json-document-rich-text-react";
+import { RichTextEditorSurface, RichTextRenderer } from "@interactive-os/json-document-rich-text-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem, Toolbar, ToolbarSpacer } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { richTextRecipe } from "./rich-text-styles";
@@ -106,7 +110,18 @@ const initialDocument: RichTextDocument = {
 };
 
 export function RichTextDemoRoute() {
-  const [editor] = useState(() => createRichTextEditor({ document: createJSONDocument(initialDocument) }));
+  const [{ editor, collaboration }] = useState(() => {
+    if (new URLSearchParams(window.location.search).get("history") !== "collaboration") {
+      return { editor: createRichTextEditor({ document: createJSONDocument(initialDocument) }), collaboration: null };
+    }
+    const shared = { epochId: "rich-text-history-demo", ruleset: { id: "rich-text/v1", digest: "demo/v1" } };
+    const local = createTextRuntime(initialDocument, { ...shared, actorId: createEditingId("local") });
+    const remote = createTextRuntime(initialDocument, { ...shared, actorId: createEditingId("remote") });
+    return {
+      editor: createRichTextEditor({ document: local.document, history: createCollaborationEditingHistory(local) }),
+      collaboration: { local, remote, remoteEditor: createRichTextEditor({ document: remote.document }) },
+    };
+  });
   const document = editor.snapshot.value as RichTextDocument;
   const primary = editor.snapshot.selection.primaryIndex === null
     ? null
@@ -130,6 +145,7 @@ export function RichTextDemoRoute() {
     },
   });
   const snapshot = editing.snapshot;
+  const readOnlyCodeBlocks = document.content.filter((node) => node.type === "codeBlock");
   const commands = historyAffordance(snapshot).hand;
 
   const {
@@ -155,19 +171,25 @@ export function RichTextDemoRoute() {
       </PageHeader>
 
     )}>
-      <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="toolbar" aria-label="Rich Text history">
-        <ActionButton preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</ActionButton>
-        <IconButton preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></IconButton>
-        <IconButton preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></IconButton>
-        <span className={classes("ml-auto", ui.text.meta)} aria-live="polite">last: {lastAction}</span>
-      </div>
+      <Toolbar className={classes("mb-3 gap-2 p-2", ui.surface.workspace)} label="Rich Text history">
+        <Command preserveFocus kind="primary" onClick={applySampleIntent}>Apply sample intent</Command>
+        <Command preserveFocus label="Undo" onClick={() => runHistory("undo")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
+        <Command preserveFocus label="Redo" onClick={() => runHistory("redo")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
+        {collaboration && <Command preserveFocus onClick={() => {
+          collaboration.remote.replica.ingest(collaboration.local.replica.exportBundle());
+          collaboration.remoteEditor.dispatch({ type: "text.insert", text: "remote · " });
+          collaboration.local.replica.ingest(collaboration.remote.replica.exportBundle());
+        }}>원격 변경 수신</Command>}
+        <ToolbarSpacer />
+        <span className={ui.text.meta} aria-live="polite">last: {lastAction}</span>
+      </Toolbar>
 
       <div className={classes("mb-3 flex flex-wrap items-center gap-2 p-2", ui.surface.workspace)} role="group" aria-label="Official Rich Text intent proofs">
         <span className={ui.text.meta}>Schema-aware intent proofs</span>
-        <IconButton preserveFocus label="Toggle strong" onClick={toggleStrong}><strong>B</strong></IconButton>
-        <IconButton preserveFocus label="Set heading" onClick={setHeading}>H</IconButton>
-        <IconButton preserveFocus label="Insert hard break" onClick={insertHardBreak}><CornerDownLeft aria-hidden="true" size={16} /></IconButton>
-        <IconButton preserveFocus label="Set code attrs" onClick={updateCodeAttrs}>{`{}`}</IconButton>
+        <Command preserveFocus label="Toggle strong" onClick={toggleStrong}><strong>B</strong></Command>
+        <Command preserveFocus label="Set heading" onClick={setHeading}>H</Command>
+        <Command preserveFocus label="Insert hard break" onClick={insertHardBreak}><CornerDownLeft aria-hidden="true" size={16} /></Command>
+        <Command preserveFocus label="Set code attrs" onClick={updateCodeAttrs}>{`{}`}</Command>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
@@ -209,6 +231,13 @@ export function RichTextDemoRoute() {
           <p className={classes("mb-0 mt-3", ui.text.meta)}>
             입력·삭제, Enter block split, IME composition, DOM Selection 복원, structured/HTML/plain Clipboard와 undo/redo가 모두 Official Rich Text intent 경로에 연결됩니다.
           </p>
+          <section className={classes("mt-3 p-3", ui.surface.inset)} aria-label="Read-only Rich Text code projection">
+            <p className={classes("mb-2 mt-0", ui.text.label)}>Read-only code projection</p>
+            <RichTextRenderer document={{ ...document, content: readOnlyCodeBlocks }} />
+            <output className="sr-only" data-testid="rich-text-code-plain-text">
+              {richTextPlainText(readOnlyCodeBlocks)}
+            </output>
+          </section>
         </section>
 
         <section className="min-w-0" aria-label="Rich Text state inspectors">

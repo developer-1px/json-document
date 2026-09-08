@@ -17,6 +17,11 @@ export function denseArrayCopies(): number {
   return denseCopies;
 }
 
+/** Internal ownership check; public reflection may materialize a dense snapshot. */
+export function isSharedArray(value: object): boolean {
+  return overlays.has(value);
+}
+
 export function replaceArrayIndex(
   array: readonly unknown[],
   index: number,
@@ -52,7 +57,16 @@ function createSharedArray(
 ): unknown[] {
   const target: unknown[] = [];
   target.length = base.length;
-  Object.freeze(target);
+  let materialized = false;
+  function materialize(): void {
+    if (materialized) return;
+    denseCopies += 1;
+    for (let index = 0; index < base.length; index++) {
+      target[index] = replacements.has(index) ? replacements.get(index) : base[index];
+    }
+    Object.freeze(target);
+    materialized = true;
+  }
   const handler: ProxyHandler<unknown[]> = {
     get(_target, property) {
       if (property === "length") return base.length;
@@ -70,17 +84,23 @@ function createSharedArray(
       };
     },
     getOwnPropertyDescriptor(_target, property) {
-      if (property === "length") {
-        return { value: base.length, writable: false, enumerable: false, configurable: false };
-      }
-      const index = propertyIndex(property);
-      if (index === null || index >= base.length) return undefined;
-      return {
-        value: replacements.has(index) ? replacements.get(index) : base[index],
-        writable: false,
-        enumerable: true,
-        configurable: true,
-      };
+      materialize();
+      return Reflect.getOwnPropertyDescriptor(target, property);
+    },
+    ownKeys() {
+      materialize();
+      return Reflect.ownKeys(target);
+    },
+    isExtensible() {
+      materialize();
+      return false;
+    },
+    preventExtensions() {
+      materialize();
+      return true;
+    },
+    setPrototypeOf() {
+      return false;
     },
     has(_target, property) {
       if (property === "length") return true;
@@ -91,8 +111,9 @@ function createSharedArray(
     set() {
       return false;
     },
-    defineProperty() {
-      return false;
+    defineProperty(_target, property, attributes) {
+      materialize();
+      return Reflect.defineProperty(target, property, attributes);
     },
     deleteProperty() {
       return false;

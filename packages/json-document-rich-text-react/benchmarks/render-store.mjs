@@ -4,7 +4,7 @@ import {
   createRichTextEditor,
 } from "@interactive-os/json-document-rich-text";
 import { benchmarkConfig, measure, reportScaling } from "../../../benchmarks/measure.mjs";
-import { richTextRenderStore } from "../dist/render-store.js";
+import { createRichTextRenderStore } from "../dist/render-store.js";
 
 const config = benchmarkConfig("PERF_RICH_TEXT_REACT_BLOCKS", [1_000, 10_000]);
 const rows = [];
@@ -19,7 +19,7 @@ for (const size of config.sizes) {
       document: createJSONDocument(createRichTextBlockFixture(size, { idPrefix: `p${size}` })),
       selection: collapsed(`p${size}-text-${middle}`, 1),
     });
-    richTextRenderStore(editor).subscribePlaceholder(() => {});
+    createRichTextRenderStore(editor).subscribePlaceholder(() => {});
     return () => editor.dispatch({ type: "text.insert", text: "y" }).ok;
   });
   rows.push({ size, ...result });

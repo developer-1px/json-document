@@ -1,5 +1,103 @@
 import { expect, test, type Page } from "@playwright/test";
 
+for (const modifier of ["Meta", "Control"]) for (const backward of [false, true]) {
+  test(`Rich Text ${modifier} Undo restores ${backward ? "backward" : "forward"} range; selection movement retains Redo`, async ({ page }) => {
+    await page.goto("/editing/rich-text");
+    const before = await json(page, "rich-text-document-json");
+    const text = textNode(before, "text-editable").text;
+    await setSelection(page, "text-editable", backward ? 4 : 2, backward ? 2 : 4);
+    const selectionBefore = (await json(page, "rich-text-selection-json")).selection;
+    await page.keyboard.type("X");
+    await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable").text).toBe(`${text.slice(0, 2)}X${text.slice(4)}`);
+    const after = await json(page, "rich-text-document-json");
+    await page.keyboard.press(`${modifier}+z`);
+    await expect.poll(() => json(page, "rich-text-document-json")).toEqual(before);
+    await expect.poll(async () => (await json(page, "rich-text-selection-json")).selection).toEqual(selectionBefore);
+    await expect.poll(() => domSelection(page)).toEqual({ nodeId: "text-editable", anchorOffset: backward ? 4 : 2, focusOffset: backward ? 2 : 4 });
+    await setSelection(page, "text-editable", 0, 0);
+    await expect(page.getByRole("button", { name: "Redo", exact: true })).toBeEnabled();
+    await page.keyboard.press(`${modifier}+Shift+z`);
+    await expect.poll(() => json(page, "rich-text-document-json")).toEqual(after);
+    await expect.poll(() => domSelection(page)).toEqual({ nodeId: "text-editable", anchorOffset: 3, focusOffset: 3 });
+  });
+}
+
+test("Rich Text collaborative history routes DOM undo through the selective owner", async ({ page }) => {
+  await page.goto("/editing/rich-text?history=collaboration");
+  await setSelection(page, "text-heading", 2, 2);
+  await page.keyboard.type("!");
+  await page.getByRole("button", { name: "원격 변경 수신" }).click();
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-heading").text).toBe("remote · Ca!nonical Rich Text");
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-heading").text).toBe("remote · Canonical Rich Text");
+  expect((await json(page, "rich-text-selection-json")).selection.ranges[0].focus.offset).toBe(11);
+  const prevented = await page.getByTestId("rich-text-editor").evaluate(root => {
+    const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "historyRedo" });
+    root.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-heading").text).toBe("remote · Ca!nonical Rich Text");
+});
+
+test("Rich Text Lab leaves nested native input to its own host", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  await setSelection(page, "text-editable", 3, 3);
+  const before = await json(page, "rich-text-document-json");
+  const editor = page.getByTestId("rich-text-editor");
+  await editor.evaluate(root => {
+    const control = document.createElement("textarea");
+    control.dataset.testid = "nested-native-input";
+    control.value = "inside";
+    root.append(control);
+  });
+  const control = page.getByTestId("nested-native-input");
+  await control.focus();
+  await control.evaluate(element => (element as HTMLTextAreaElement).setSelectionRange(6, 6));
+  await control.press("Backspace");
+  await expect(control).toHaveValue("insid");
+  expect(await json(page, "rich-text-document-json")).toEqual(before);
+  await control.evaluate(element => element.remove());
+});
+
+test("Rich Text Lab consumes replacement DataTransfer and target ranges", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  const editor = page.getByTestId("rich-text-editor");
+  const before = textNode(await json(page, "rich-text-document-json"), "text-editable").text;
+  const prevented = await editor.evaluate(root => {
+    const node = root.querySelector('[data-rich-text-text-id="text-editable"]')!.firstChild!;
+    const transfer = new DataTransfer();
+    transfer.setData("text/plain", "X");
+    const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "insertReplacementText", dataTransfer: transfer });
+    // WebKit omits dataTransfer from constructed InputEvents; supply the synthetic payload explicitly.
+    Object.defineProperty(event, "dataTransfer", { value: transfer });
+    Object.defineProperty(event, "getTargetRanges", { value: () => [new StaticRange({ startContainer: node, startOffset: 0, endContainer: node, endOffset: 1 })] });
+    root.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable").text).toBe(`X${before.slice(1)}`);
+});
+
+test("Rich Text Lab preserves leased DOM during a model change and recovers stale composition", async ({ page }) => {
+  await page.goto("/editing/rich-text");
+  await setSelection(page, "text-editable", 3, 3);
+  const editor = page.getByTestId("rich-text-editor");
+  const before = textNode(await json(page, "rich-text-document-json"), "text-editable").text;
+  await editor.evaluate(root => {
+    root.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    const node = root.querySelector('[data-rich-text-text-id="text-editable"]')!.firstChild!;
+    const text = node.textContent!;
+    node.textContent = `${text.slice(0, 3)}한${text.slice(3)}`;
+  });
+  await page.getByRole("button", { name: "Apply sample intent" }).click();
+  await expect.poll(async () => textNode(await json(page, "rich-text-document-json"), "text-editable").text).toBe(`${before} ✓`);
+  await expect(editor.locator('[data-rich-text-text-id="text-editable"]')).toHaveText(`${before.slice(0, 3)}한${before.slice(3)}`);
+  await editor.evaluate(root => root.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "한" })));
+  await expect(editor.locator('[data-rich-text-text-id="text-editable"]')).toHaveText(`${before} ✓`);
+  await expect(page.getByText("last: rich-text.composition-stale", { exact: true })).toBeVisible();
+});
+
 test("Rich Text Lab commits contenteditable input through JSON Patch and restores history", async ({ page }) => {
   await page.goto("/editing/rich-text");
 

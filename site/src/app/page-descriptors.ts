@@ -2,7 +2,9 @@ import siteRoutesJson from "../../site-routes.json";
 export { legacyPageRedirects } from "./legacy-page-redirects";
 
 export type SiteNavigationGroup =
+  | "Introduction"
   | "JSON Document"
+  | "Document Types"
   | "Collaboration"
   | "Editing"
   | "Hands"
@@ -10,7 +12,8 @@ export type SiteNavigationGroup =
   | "Adapter"
   | "Connector"
   | "Affordance"
-  | "UI Primitives";
+  | "UI Primitives"
+  | "Applications";
 export type IntegrationKind = "adapter" | "connector";
 
 export type SiteRoute = {
@@ -23,6 +26,7 @@ export type SiteRoute = {
   readonly navigationGroup?: SiteNavigationGroup;
   readonly parentPath?: string;
   readonly sidebar?: false;
+  readonly chrome?: "app";
   readonly relatedDemoPath?: string;
   readonly relatedDemoLabel?: string;
   readonly integration?: {
@@ -41,4 +45,8 @@ export function pageDescriptor(path: string): SiteRoute {
 
 export function integrationPageDescriptors(kind: IntegrationKind): ReadonlyArray<SiteRoute> {
   return pageDescriptors.filter((route) => route.integration?.kind === kind);
+}
+
+export function isAppChrome(route: SiteRoute | undefined): boolean {
+  return route?.chrome === "app";
 }

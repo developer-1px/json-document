@@ -52,6 +52,19 @@ JSON 값이 바뀌면 editor는 변경 전후의 Selection을 patch와 함께 �
 질의를 씁니다. KeyboardEvent를 command로 바꾸는 일은
 [Adapters](adapters.md)입니다.
 
+## 선택한 대상을 drag source로 확정하기
+
+
+`resolveMaterializedSelectionDragSource`는 pointer가 누른 점과 현재
+`MaterializedRangeSelection`을 비교합니다. 누른 점이 현재 선택 안에 있으면
+복수 선택 snapshot 전체를 그대로 보존하고, 밖에 있으면 그 점 하나로
+replace-select합니다. 이 API는 좌표나 날짜를 해석하지 않으므로 Calendar,
+Canvas, Kanban이 같은 selection source 계약을 공유할 수 있습니다.
+
+Calendar에서는 React binding이 실제 이동이 시작될 때 이 source를 확정합니다.
+따라서 단순 click과 Cmd/Ctrl/Shift+click은 기존 selection command를 그대로
+사용하고, drag만 immutable source snapshot을 소비합니다.
+
 ## Live Demo
 
 ```live-demo

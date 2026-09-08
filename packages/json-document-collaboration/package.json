@@ -35,6 +35,10 @@
     "./text": {
       "types": "./dist/text-index.d.ts",
       "import": "./dist/text-index.js"
+    },
+    "./editing": {
+      "types": "./dist/editing-index.d.ts",
+      "import": "./dist/editing-index.js"
     }
   },
   "scripts": {
@@ -48,10 +52,15 @@
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
-    "@interactive-os/json-document": "^3.0.0"
+    "@interactive-os/json-document": "^3.0.0",
+    "@interactive-os/json-document-editing": "^0.1.0-rc.0"
+  },
+  "peerDependenciesMeta": {
+    "@interactive-os/json-document-editing": { "optional": true }
   },
   "devDependencies": {
     "@interactive-os/json-document": "*",
+    "@interactive-os/json-document-editing": "*",
     "@types/node": "^25.9.0",
     "typescript": "^5.0.0",
     "vitest": "^4.1.7"

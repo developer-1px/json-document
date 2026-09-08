@@ -13,7 +13,7 @@ import {
   prepareGraph,
   unauthorizedChange,
 } from "./change.js";
-import { patchBetweenValues } from "./document-patch.js";
+import { patchBetweenTrees } from "./document-patch.js";
 import { jsonEqual } from "@interactive-os/json-document";
 import { materializeChanges } from "./materialize.js";
 import { assignCausalState, type RuntimeState } from "./runtime-state.js";
@@ -141,9 +141,11 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
         state.initialTree,
         nextGraph.ordered,
         state.materializeValidation,
+        { ordered: state.graph.ordered, materialized: state.materialized },
       );
       const changed = !jsonEqual(state.documentStore.value, nextMaterialized.value);
 
+      const previousTree = state.materialized.tree;
       assignCausalState(state, {
         known: nextKnown,
         graph: nextGraph,
@@ -160,9 +162,11 @@ export function createReplicaRuntime(state: RuntimeState): CollaborationReplica 
 
       let documentChange = undefined;
       if (changed) {
-        const documentCommit = state.documentStore.commit(patchBetweenValues(
+        const documentCommit = state.documentStore.commit(patchBetweenTrees(
           state.documentStore.value,
           state.materialized.value,
+          previousTree,
+          state.materialized.tree,
         ));
         if (!documentCommit.ok) {
           throw new Error(

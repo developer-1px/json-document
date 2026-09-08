@@ -45,6 +45,7 @@ seed.document.commit([{ op: "replace", path: "/value", value: 1 }]);
 const first = seed.replica.exportBundle().changes[0];
 if (first === undefined || first.ops[0]?.kind !== "set") throw new Error("ledger seed failed");
 const ledgerRows = [];
+const commitRows = [];
 console.log("\nledger replay");
 for (const size of ledgerSizes) {
   const changes = Array.from({ length: size }, (_, index) => ({
@@ -58,5 +59,14 @@ for (const size of ledgerSizes) {
     return () => receiver.replica.ingest(bundle).ok;
   });
   ledgerRows.push({ size, ...result });
+  const commit = measure(config, `${size} prior changes -> new actor commit`, () => {
+    const receiver = createCollaborationRuntime({ value: 0 }, { ...runtimeOptions, actorId: "ledger-receiver" });
+    if (!receiver.replica.ingest(bundle).ok) throw new Error("ledger ingest failed");
+    return () => receiver.document.commit([{ op: "replace", path: "/value", value: 2 }]).ok
+      && receiver.document.value.value === 2;
+  });
+  commitRows.push({ size, ...commit });
 }
 reportScaling(ledgerRows);
+console.log("\ncontinued editing after remote history");
+reportScaling(commitRows);

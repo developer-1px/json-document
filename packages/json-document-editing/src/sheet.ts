@@ -10,6 +10,9 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { reconcileRangeSelection, replaceRangeSelection } from "./range-selection.js";
+import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
 import {
@@ -68,7 +71,19 @@ export interface SheetClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 
+export const sheetClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.sheet+json" as const,
+  parse(value: unknown): SheetClipboard | null {
+    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.cells) || value.cells.length === 0 || !Array.isArray(value.cells[0])) return null;
+    const width = value.cells[0].length;
+    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width && row.every(isClipboardJSONValue))
+      ? value as SheetClipboard : null;
+  },
+};
+
 export type SheetIntent =
+  | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
       readonly rowId: string;
@@ -104,7 +119,7 @@ export interface SheetEditor {
   subscribe(listener: (snapshot: EditingSnapshot<SheetSelection>) => void): () => void;
 }
 
-export function createSheetEditor(source: EditingDocumentSource<SheetDocument>): SheetEditor {
+export function createSheetEditor(source: EditingDocumentSource<SheetDocument>, options: EditingHistoryOptions = {}): SheetEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as SheetDocument;
   assertSheetDocument(initial);
@@ -114,8 +129,14 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
     ? collapsed(firstRow.id, firstColumn.id)
     : emptySelection();
   const session = createEditingSession({
+    ...options,
     document,
     selection: initialSelection,
+    reconcileSelection: (selection, value) => withPrimaryAliases(reconcileRangeSelection(selection, (point) => {
+      const sheet = value as SheetDocument;
+      return sheet.rows.some((row) => row.id === point.rowId)
+        && sheet.columns.some((column) => column.id === point.columnId) ? point : null;
+    })),
   });
   let indexedDocument: SheetDocument | undefined = initial;
   let indexedSheet: SheetIndex | undefined = createSheetIndex(initial);
@@ -176,6 +197,18 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
   }
 
   function dispatch(intent: SheetIntent): EditingResult<SheetSelection> {
+    if (intent.type === "selection.select-all") {
+      const { rowIds, columnIds } = resolveTopology(value(), intent.topology, index());
+      const firstRow = rowIds[0];
+      const firstColumn = columnIds[0];
+      const lastRow = rowIds.at(-1);
+      const lastColumn = columnIds.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        firstRow !== undefined && firstColumn !== undefined && lastRow !== undefined && lastColumn !== undefined
+          ? { anchor: { rowId: firstRow, columnId: firstColumn }, focus: { rowId: lastRow, columnId: lastColumn } }
+          : null, sameSheetPoint);
+      return success(session.select(withPrimaryAliases(selection)));
+    }
     if (intent.type === "selection.set") {
       const point = resolvePoint(value(), intent.rowId, intent.columnId, index());
       if (point === null) return failure("selection.cell-not-found");
@@ -230,32 +263,25 @@ export function createSheetEditor(source: EditingDocumentSource<SheetDocument>):
   }
 
   function cut(topology?: SheetTopology): { readonly clipboard: SheetClipboard; readonly result: EditingResult<SheetSelection> } | null {
-    const clipboard = copy(topology);
-    if (!clipboard) return null;
-    const document = value();
-    const axes = resolveTopology(document, topology, index(document));
-    const range = primaryRange(session.snapshot.selection);
-    const bounds = range === null ? null : rangeBounds(axes, range);
-    if (bounds === null) return null;
-    const operations: JSONPatchOperation[] = [];
-    for (const rowId of axes.rowIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
-      for (const columnId of axes.columnIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
-        const row = resolvePointWithIndices(document, rowId, columnId, index(document))!;
-        operations.push({
-          op: "replace",
-          path: buildPointer(["rows", row.rowIndex, "cells", columnId]),
-          value: null,
-        });
+    return cutEditingClipboard(() => copy(topology), () => {
+      const document = value();
+      const axes = resolveTopology(document, topology, index(document));
+      const range = primaryRange(session.snapshot.selection);
+      const bounds = range === null ? null : rangeBounds(axes, range);
+      if (bounds === null) return failure("selection.empty");
+      const operations: JSONPatchOperation[] = [];
+      for (const rowId of axes.rowIds.slice(bounds.rowStart, bounds.rowEnd + 1)) {
+        for (const columnId of axes.columnIds.slice(bounds.columnStart, bounds.columnEnd + 1)) {
+          const row = resolvePointWithIndices(document, rowId, columnId, index(document))!;
+          operations.push({ op: "replace", path: buildPointer(["rows", row.rowIndex, "cells", columnId]), value: null });
+        }
       }
-    }
-    return {
-      clipboard,
-      result: session.apply({
+      return session.apply({
         operations,
         selectionAfter: session.snapshot.selection,
         origin: "clipboard.cut",
-      }),
-    };
+      });
+    });
   }
 
   return {

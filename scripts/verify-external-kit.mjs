@@ -28,6 +28,7 @@ const kitWorkspaces = [
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
   "@interactive-os/json-document-annotation",
+  "@interactive-os/json-document-calendar",
 ];
 const fixtureSource = join(repositoryRoot, "fixtures", "external-kit");
 const temporaryRoot = await mkdtemp(join(tmpdir(), "json-document-external-kit-"));

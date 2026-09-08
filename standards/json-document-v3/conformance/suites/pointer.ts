@@ -15,6 +15,7 @@ export interface PointerHarness {
   trackPointer(
     pointer: string,
     applied: ReadonlyArray<JSONPatchOperation>,
+    before?: JSONValue,
   ): string | null;
 }
 
@@ -49,6 +50,7 @@ interface PointerManifest {
     readonly id: string;
     readonly pointer: string;
     readonly applied: ReadonlyArray<JSONPatchOperation>;
+    readonly before?: JSONValue;
     readonly expect: string | null;
   }>;
 }
@@ -99,6 +101,7 @@ export function runPointerConformance(harness: PointerHarness): void {
         expect(harness.trackPointer(
           vector.pointer,
           cloneJSON(vector.applied),
+          vector.before === undefined ? undefined : cloneJSON(vector.before),
         )).toBe(vector.expect);
       });
     }

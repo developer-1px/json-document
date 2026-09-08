@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("Artifact prototype switches between MD, PPT, and Sheet concepts", async ({ page }) => {
   await page.goto("/viewer");
 
-  await expect(page.getByRole("heading", { level: 1, name: "최종 계층의 계약을 먼저 검증합니다." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Application이 다루는 콘텐츠 계약을 검증합니다." })).toBeVisible();
   await expect(page.getByLabel("Markdown artifact mock")).toBeVisible();
   await expect(page.getByText(/launch-brief\.md · mock artifact/)).toBeVisible();
 

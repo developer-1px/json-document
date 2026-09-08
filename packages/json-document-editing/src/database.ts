@@ -11,6 +11,9 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { reconcileRangeSelection } from "./range-selection.js";
+import { isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds } from "./topology.js";
 import { acceptsDatabaseValue, defaultDatabaseValue } from "./database-property-value.js";
 import { assertDatabaseDocument, assertDatabaseView } from "./database-validation.js";
@@ -115,6 +118,17 @@ export interface DatabaseClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 
+export const databaseClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.database+json" as const,
+  parse(value: unknown): DatabaseClipboard | null {
+    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!Array.isArray(value.cells) || value.cells.length === 0 || !Array.isArray(value.cells[0])) return null;
+    const width = value.cells[0].length;
+    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width && row.every(isClipboardJSONValue))
+      ? value as DatabaseClipboard : null;
+  },
+};
+
 export type DatabaseIntent =
   | {
       readonly type: "selection.set";
@@ -163,17 +177,23 @@ export interface DatabaseEditor {
   subscribe(listener: (snapshot: EditingSnapshot<DatabaseSelection>) => void): () => void;
 }
 
-export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>): DatabaseEditor {
+export function createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>, options: EditingHistoryOptions = {}): DatabaseEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as DatabaseDocument;
   assertDatabaseDocument(initial);
   const firstRecord = initial.records[0];
   const firstProperty = initial.schema.properties[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: firstRecord && firstProperty
       ? collapsed(firstRecord.id, firstProperty.id)
       : emptySelection(),
+    reconcileSelection: (selection, value) => withPrimaryAliases(reconcileRangeSelection(selection, (point) => {
+      const database = value as DatabaseDocument;
+      return database.records.some((record) => record.id === point.recordId)
+        && database.schema.properties.some((property) => property.id === point.propertyId) ? point : null;
+    })),
   });
   let indexedDocument: DatabaseDocument | undefined = initial;
   let indexedDatabase: DatabaseIndex | undefined = createDatabaseIndex(initial);

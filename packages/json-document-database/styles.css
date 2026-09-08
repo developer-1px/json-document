@@ -1,3 +1,5 @@
+@import "@interactive-os/json-document-ui-primitives-react/content-interaction.css";
+
 .jd-database {
   --jd-db-bg: #ffffff;
   --jd-db-canvas: #ffffff;
@@ -8,6 +10,10 @@
   --jd-db-accent-soft: #eeeeff;
   --jd-db-danger: #c2415d;
   --jd-db-radius: 0;
+  --jd-content-interaction-accent: var(--jd-db-accent);
+  --jd-content-interaction-fill: color-mix(in srgb, var(--jd-db-accent) 7%, transparent);
+  --jd-content-interaction-fill-active: color-mix(in srgb, var(--jd-db-accent) 12%, transparent);
+  --jd-content-interaction-contour: color-mix(in srgb, var(--jd-db-accent) 58%, transparent);
   color: var(--jd-db-text);
   overflow: hidden;
   border: 1px solid var(--jd-db-border);
@@ -74,8 +80,6 @@
 .jd-database td { min-width: 150px; border-bottom: 1px solid var(--jd-db-border); background: var(--jd-db-bg); padding: 0; }
 .jd-database tbody tr:last-child td { border-bottom: 0; }
 .jd-database td:hover { background: var(--jd-db-accent-soft); }
-.jd-database td[data-selected="true"] { border: 1px solid var(--jd-db-accent); background: var(--jd-db-selection-bg, color-mix(in srgb, var(--jd-db-accent) 10%, white)); box-shadow: inset 0 0 0 1px var(--jd-db-accent); }
-.jd-database td:focus { outline: 2px solid var(--jd-db-accent); outline-offset: -2px; }
 .jd-database td > input:not([type="checkbox"]), .jd-database td > select { width: 100%; min-height: 32px; border: 0; outline: 0; background: transparent; padding: 5px 8px; }
 .jd-database td > input:focus, .jd-database td > select:focus { box-shadow: inset 0 0 0 2px var(--jd-db-accent); }
 .jd-database td > input[type="checkbox"] { display: block; width: 17px; height: 17px; margin: 12px auto; accent-color: var(--jd-db-accent); }

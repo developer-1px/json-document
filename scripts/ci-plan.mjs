@@ -18,6 +18,7 @@ const alwaysFull = new Set([
 ]);
 
 const packageBrowserSpecs = new Map([
+  ["@interactive-os/json-document-a2ui", ["site/tests/browser/connectors/a2ui.spec.ts", "site/tests/browser/llm-agent-artifact.spec.ts"]],
   ["@interactive-os/json-document-file-intake", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-suggestion", ["site/tests/browser/composer-demo.spec.ts"]],
   ["@interactive-os/json-document-rich-text-suggestion-react", ["site/tests/browser/composer-demo.spec.ts"]],
@@ -30,7 +31,13 @@ const packageBrowserSpecs = new Map([
   ["@interactive-os/json-document-ajv", ["site/tests/browser/connectors/ajv.spec.ts"]],
   ["@interactive-os/json-document-contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
   ["@interactive-os/json-document-database", ["site/tests/browser/database-demo.spec.ts"]],
-  ["@interactive-os/json-document-annotation", ["site/tests/browser/annotation-demo.spec.ts"]],
+  ["@interactive-os/json-document-annotation", ["site/tests/browser/annotation-demo.spec.ts", "site/tests/browser/copy-selection-closure.spec.ts"]],
+  ["@interactive-os/json-document-calendar", [
+    "site/tests/browser/calendar-app.spec.ts",
+    "site/tests/browser/calendar-launch.spec.ts",
+    "site/tests/browser/calendar-spa.spec.ts",
+    "site/tests/browser/calendar.spec.ts",
+  ]],
   ["@interactive-os/json-document-editing", [
     "site/tests/browser/editing-demos.spec.ts",
     "site/tests/browser/editor-slice-demos.spec.ts",
@@ -56,6 +63,7 @@ const packageBrowserSpecs = new Map([
 ]);
 
 const routeBrowserSpecs = new Map([
+  ["connectors/a2ui", ["site/tests/browser/connectors/a2ui.spec.ts"]],
   ["adapters/clipboard", ["site/tests/browser/adapters/clipboard.spec.ts"]],
   ["adapters/contenteditable", ["site/tests/browser/adapters/contenteditable.spec.ts"]],
   ["adapters/keyboard", ["site/tests/browser/adapters/keyboard.spec.ts"]],
@@ -66,7 +74,7 @@ const routeBrowserSpecs = new Map([
   ["connectors/tanstack-table", ["site/tests/browser/connectors/tanstack-table.spec.ts"]],
   ["connectors/zod", ["site/tests/browser/connectors/zod.spec.ts"]],
   ["database-demo", ["site/tests/browser/database-demo.spec.ts"]],
-  ["annotation-demo", ["site/tests/browser/annotation-demo.spec.ts"]],
+  ["annotation-demo", ["site/tests/browser/annotation-demo.spec.ts", "site/tests/browser/copy-selection-closure.spec.ts"]],
   ["document-demo", ["site/tests/browser/document-demo.spec.ts"]],
   ["editing-demos", ["site/tests/browser/editing-demos.spec.ts"]],
   ["rich-text-demo", ["site/tests/browser/rich-text-demo.spec.ts"]],
@@ -83,6 +91,7 @@ const firstKitWorkspaces = new Set([
   "@interactive-os/json-document-zod",
   "@interactive-os/json-document-database",
   "@interactive-os/json-document-annotation",
+  "@interactive-os/json-document-calendar",
   "@interactive-os/json-document-file-intake",
   "@interactive-os/json-document-rich-text-suggestion",
   "@interactive-os/json-document-rich-text-suggestion-react",

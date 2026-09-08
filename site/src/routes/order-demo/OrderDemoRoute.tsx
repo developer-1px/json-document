@@ -10,6 +10,7 @@ import {
 import { useEditing, useEditingObservation } from "@interactive-os/json-document-react";
 import {
   focusWebItem,
+  isWebEditingHostTarget,
   createWebClipboardSurface,
   lineBoundary,
   moveLinePoint,
@@ -25,10 +26,12 @@ import {
   applyAffordance,
   escapeAffordance,
   renameAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -70,7 +73,7 @@ export function OrderDemoRoute() {
     },
   }));
   const [renameSession] = useState(() => createRenameSession<string>({
-    onCommit: (itemId, label) => run({ type: "item.rename", itemId, label }, "Item renamed"),
+    tryCommit: (itemId, label) => run({ type: "item.rename", itemId, label }, "Item renamed").ok,
     onFinish: (itemId) => requestAnimationFrame(() => focusWebItem<HTMLElement>(orderRef.current, itemId)),
     onSnapshot: (snapshot) => setRenaming(snapshot === null ? null : { id: snapshot.key, draft: snapshot.draft }),
   }));
@@ -132,6 +135,18 @@ export function OrderDemoRoute() {
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLOListElement>) {
+    if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+      applyAffordance(selectAllAffordance(event, {
+        allSelected: editor.selectedItemIds.length === document.items.length,
+      }, { repeat: "preserve" }), {
+        hand: (hand) => {
+          if (hand.type !== "select-all") return;
+          run({ type: "selection.select-all" }, "All items selected");
+          event.preventDefault();
+        },
+      });
+      if (event.defaultPrevented) return;
+    }
     if (focusSession.handle(event, ids())) {
       event.preventDefault();
       const next = focusSession.getFocusKey();
@@ -184,13 +199,13 @@ export function OrderDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Order actions"
         toolbar={(
           <>
-            <IconButton label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Paste"
+            <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+            <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+            <Command label="Paste"
               disabled={!clipboard}
               onClick={() => {
                 if (!clipboard) return;
@@ -198,11 +213,11 @@ export function OrderDemoRoute() {
               }}
             >
               <ClipboardPaste aria-hidden="true" size={16} />
-            </IconButton>
-            <IconButton label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></IconButton>
+            </Command>
+            <Command label="Delete" onClick={() => run({ type: "selection.remove" }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={(
@@ -222,17 +237,18 @@ export function OrderDemoRoute() {
             {...clipboardSurface}
           >
             {document.items.map((item, index) => renaming?.id === item.id ? (
-              <input
+              <Field
                 key={item.id}
                 autoFocus
-                aria-label={`Rename ${item.label}`}
+                label={`Rename ${item.label}`}
+                presentation="seamless"
                 value={renaming.draft}
-                onChange={(event) => renameSession.update(event.currentTarget.value)}
+                onValueChange={renameSession.update}
                 onKeyDown={(event) => {
                   event.stopPropagation();
                   if (renameSession.handleKey(event.key)) event.preventDefault();
                 }}
-                className={classes("w-full", ui.field.seamless)}
+                className="w-full"
               />
             ) : (
               <SelectableItem
@@ -257,7 +273,7 @@ export function OrderDemoRoute() {
           </ol>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes an item.</p>
         </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

@@ -48,6 +48,7 @@ interface TopologyInternals {
 interface TopologyPatch {
   readonly op: string;
   readonly path: string;
+  readonly from?: string;
   readonly value?: unknown;
 }
 
@@ -82,6 +83,18 @@ export function seedRichTextTopology(
   if (previous === next || topologies.has(next)) return;
   const previousTopology = topologies.get(previous);
   const previousInternals = previousTopology === undefined ? undefined : internals.get(previousTopology);
+  const operation = operations.length === 1 ? operations[0] : undefined;
+  if (operation?.op === "move" && operation.from !== undefined) {
+    // Cache maintenance may decompose a sibling move; the committed operation
+    // remains a move so document/replica member identity is never recreated.
+    const from = relativePatchPath(operation.from, rootPointer);
+    const to = relativePatchPath(operation.path, rootPointer);
+    const source = from === null ? null : classifyPointer(from);
+    const destination = to === null ? null : classifyPointer(to);
+    if (source?.kind !== "sibling" || destination?.kind !== "sibling"
+      || !samePath(source.parentPath, destination.parentPath)) return;
+    operations = [{ op: "remove", path: operation.from }, { op: "add", path: operation.path }];
+  }
   if (previousInternals === undefined || !canAdoptTopology(operations, rootPointer)) return;
   const adopted = adoptRichTextTopology(previousInternals, next, operations, rootPointer);
   if (adopted === null) return;
@@ -312,7 +325,8 @@ function iterateIndexed(state: TopologyInternals): IndexedNode[] {
     ordered.push(extras[extraIndex]!);
     extraIndex += 1;
   }
-  return ordered;
+  // Stable IDs can move away from their original linear index slots.
+  return ordered.sort((left, right) => compareKeys(left.path, right.path));
 }
 
 function refreshTopologyPath(

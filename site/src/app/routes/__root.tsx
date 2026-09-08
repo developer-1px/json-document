@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { DisclosureButton } from "@interactive-os/json-document-ui-primitives-react";
+import { PanelLeft, PanelLeftClose } from "lucide-react";
+import { DisclosureButton, Command } from "@interactive-os/json-document-ui-primitives-react";
 import { ActionLink } from "../../shared/ui/interactive";
 import { CatMenuMark, JsonDocumentWordmark } from "../../shared/ui/brand";
 import { classes, ui } from "../../shared/ui/styles";
 import {
   findSiteRoute,
+  isAppChrome,
   siteRoutes,
   usePathname,
   useRouteMetadata,
   type SiteRoute,
 } from "../router";
-import { isNavBranch, rootNavRoutes, routeGroup, visibleNavChildren } from "../breadcrumb";
-import { siteLayerGroups, siteLayers } from "../site-layers";
+import { isNavBranch, rootNavRoutes, routeSection, visibleNavChildren } from "../breadcrumb";
+import { siteSections } from "../site-layers";
+import { NavigationLayerIcon } from "../navigation-layer-icon";
 import { HomeRoute } from "../../routes/home/HomeRoute";
 
 export const Route = createRootRoute({
@@ -23,34 +26,64 @@ export const Route = createRootRoute({
 function AppShell() {
   const pathname = usePathname();
   const route = findSiteRoute(pathname);
+  const appChrome = isAppChrome(route);
+  const [navCollapsed, setNavCollapsed] = useState(false);
+  const collapsed = appChrome && navCollapsed;
 
   useRouteMetadata(route);
-  const activeGroup = routeGroup(route, siteRoutes);
-  const [openGroups, setOpenGroups] = useState<ReadonlySet<(typeof siteLayerGroups)[number]>>(
-    () => new Set(activeGroup ? [activeGroup] : []),
+  const activeSection = routeSection(route, siteRoutes);
+  const [openSections, setOpenSections] = useState<ReadonlySet<(typeof siteSections)[number]["id"]>>(
+    () => new Set(activeSection ? [activeSection.id] : []),
   );
 
   useEffect(() => {
-    if (!activeGroup) return;
-    setOpenGroups((current) => current.has(activeGroup) ? current : new Set([...current, activeGroup]));
-  }, [activeGroup]);
+    if (!activeSection) return;
+    setOpenSections((current) => current.has(activeSection.id) ? current : new Set([...current, activeSection.id]));
+  }, [activeSection]);
 
   return (
-    <div className={classes("flex min-h-screen flex-col md:flex-row", ui.frame.app)}>
+    <div className={classes("flex min-h-screen flex-col md:flex-row", appChrome && "h-screen overflow-hidden", ui.frame.app)}>
       <a
         href="#main-content"
         className={classes("sr-only z-50", ui.state.skipLink)}
       >
         Skip to content
       </a>
+      {collapsed ? (
+        <nav aria-label="Site navigation" className={classes(ui.frame.navigationRail, ui.frame.navigation)}>
+          <Command label="Open navigation" onClick={() => setNavCollapsed(false)}>
+            <PanelLeft aria-hidden="true" size={16} />
+          </Command>
+          <div className={ui.nav.railMenu}>
+            {siteSections.map((section) => (
+              <ActionLink
+                key={section.id}
+                to={section.path}
+                activePath={route.path}
+                className={classes(ui.nav.railItem, section.separated ? ui.nav.railSeparatedItem : undefined, ui.nav.current)}
+              >
+                <span className="sr-only">{section.label}</span>
+                <NavigationLayerIcon section={section.id} />
+              </ActionLink>
+            ))}
+          </div>
+        </nav>
+      ) : (
       <nav
         aria-label="Site navigation"
         className={classes("shrink-0 md:sticky md:top-0 md:h-screen md:w-52 md:self-start md:overflow-y-auto", ui.frame.navigation)}
       >
-        <ActionLink to="/" className={classes("flex px-4 py-3", ui.frame.brand)}>
-          <span className="sr-only">json-document</span>
-          <JsonDocumentWordmark className="h-auto w-full max-w-40" />
-        </ActionLink>
+        <div className="flex items-start justify-between gap-1">
+          <ActionLink to="/" className={classes("flex min-w-0 flex-1 px-4 py-3", ui.frame.brand)}>
+            <span className="sr-only">json-document</span>
+            <JsonDocumentWordmark className="h-auto w-full max-w-40" />
+          </ActionLink>
+          {appChrome ? (
+            <Command label="Collapse navigation" className="mt-2 mr-1" onClick={() => setNavCollapsed(true)}>
+              <PanelLeftClose aria-hidden="true" size={16} />
+            </Command>
+          ) : null}
+        </div>
         <div className={ui.nav.menu}>
           {rootNavRoutes(siteRoutes).map((item) => (
             <ActionLink
@@ -62,53 +95,80 @@ function AppShell() {
               {item.label}
             </ActionLink>
           ))}
-          {siteLayers.map((layer) => {
-            const group = layer.group;
-            const groupRoutes = siteRoutes.filter((item) =>
-              item.navigationGroup === group && item.sidebar !== false
+          {siteSections.map((section) => {
+            const sectionRoutes = siteRoutes.filter((item) =>
+              item.navigationGroup !== undefined
+              && section.groups.includes(item.navigationGroup)
+              && item.sidebar !== false
+              && !item.path.startsWith("/docs/api")
             );
-            if (groupRoutes.length === 0) return null;
-            const groupLabelId = `site-navigation-${group.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-            const open = openGroups.has(group);
+            const sectionLabelId = `site-navigation-${section.id}`;
+            const open = openSections.has(section.id);
+            if (section.groups.length === 0) return (
+              <ActionLink
+                key={section.id}
+                to={section.path}
+                activePath={route.path}
+                className={classes(ui.nav.item, section.separated ? ui.nav.separatedGroup : undefined, ui.nav.current)}
+              >
+                <NavigationLayerIcon section={section.id} className="shrink-0" />
+                {section.label}
+              </ActionLink>
+            );
+            if (sectionRoutes.length === 0) return null;
             return (
               <div
-                key={group}
+                key={section.id}
                 role="group"
-                aria-label={group}
-                className={classes("grid content-start", layer.separated ? ui.nav.separatedGroup : undefined)}
+                aria-label={section.label}
+                className={classes("grid content-start", section.separated ? ui.nav.separatedGroup : undefined)}
               >
                 <DisclosureButton
-                  className={classes(ui.nav.groupToggle, activeGroup === group ? ui.nav.groupActive : ui.nav.groupIdle)}
+                  className={classes(ui.nav.groupToggle, activeSection?.id === section.id ? ui.nav.groupActive : ui.nav.groupIdle)}
                   expanded={open}
-                  controls={`${groupLabelId}-list`}
+                  controls={`${sectionLabelId}-list`}
                   onClick={() => {
-                    setOpenGroups((current) => {
+                    setOpenSections((current) => {
                       const next = new Set(current);
-                      if (next.has(group)) next.delete(group);
-                      else next.add(group);
+                      if (next.has(section.id)) next.delete(section.id);
+                      else next.add(section.id);
                       return next;
                     });
                   }}
                 >
-                  <span>{group}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <NavigationLayerIcon section={section.id} className="shrink-0" />
+                    <span>{section.label}</span>
+                  </span>
                   <span aria-hidden="true" className={classes(ui.interactive.chevron, ui.nav.chevron)}>⌄</span>
                 </DisclosureButton>
                 <ul
-                  id={`${groupLabelId}-list`}
+                  id={`${sectionLabelId}-list`}
                   className={ui.nav.panel}
                   data-open={open ? "true" : undefined}
                   hidden={!open}
                 >
                   {open
-                    ? groupRoutes.map((item) => (
-                      <NavItem
-                        key={item.path}
-                        item={item}
-                        currentPath={route.path}
-                        routes={siteRoutes}
-                        depth={0}
-                      />
-                    ))
+                    ? section.groups.map((group) => {
+                      const groupRoutes = sectionRoutes.filter((item) => {
+                        if (item.navigationGroup !== group) return false;
+                        const parent = item.parentPath
+                          ? siteRoutes.find((candidate) => candidate.path === item.parentPath)
+                          : undefined;
+                        return parent?.navigationGroup !== group;
+                      });
+                      if (groupRoutes.length === 0) return null;
+                      return (
+                        <li key={group} className="grid content-start">
+                          {section.groups.length > 1 ? <span className={classes("px-4 pt-3", ui.text.meta)}>{group}</span> : null}
+                          <ul className={ui.nav.list}>
+                            {groupRoutes.map((item) => (
+                              <NavItem key={item.path} item={item} currentPath={route.path} routes={siteRoutes} depth={0} />
+                            ))}
+                          </ul>
+                        </li>
+                      );
+                    })
                     : null}
                 </ul>
               </div>
@@ -116,7 +176,8 @@ function AppShell() {
           })}
         </div>
       </nav>
-      <div id="main-content" className="min-w-0 flex-1">
+      )}
+      <div id="main-content" className={classes("min-w-0 flex-1", appChrome && "flex min-h-0 flex-col overflow-hidden")}>
         <Outlet />
       </div>
     </div>

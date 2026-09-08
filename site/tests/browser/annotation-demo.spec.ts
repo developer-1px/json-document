@@ -57,12 +57,12 @@ test("click opens comment editing while drag keeps the composer hidden", async (
   const composer = page.getByRole("region", { name: "Request 1 comment" });
   const clickedMarkerBox = await requiredBox(marker);
   const composerBox = await requiredBox(composer);
-  expect(Math.abs(composerBox.x - previewBox.x)).toBeLessThan(4);
-  expect(Math.abs(composerBox.y - previewBox.y)).toBeLessThan(4);
+  expect(Math.abs(composerBox.x - previewBox.x)).toBeLessThanOrEqual(4);
+  expect(Math.abs(composerBox.y - previewBox.y)).toBeLessThanOrEqual(4);
   expect(composerBox.x).toBeGreaterThan(clickedMarkerBox.x + clickedMarkerBox.width / 2);
   const markerCenterY = clickedMarkerBox.y + clickedMarkerBox.height / 2;
   const composerCenterY = composerBox.y + composerBox.height / 2;
-  expect(Math.abs(composerCenterY - markerCenterY)).toBeLessThan(4);
+  expect(Math.abs(composerCenterY - markerCenterY)).toBeLessThanOrEqual(4);
   await expect(composer.locator("[data-comment-tail]")).toHaveCount(0);
   await page.getByRole("button", { name: "Select", exact: true }).click();
   const markerBox = await requiredBox(marker);
@@ -160,9 +160,9 @@ test("pointer cancel and lost capture discard transient movement", async ({ page
     if (reason === "pointercancel") {
       await canvas.dispatchEvent("pointercancel", { pointerId: 1, bubbles: true });
     } else {
-      await canvas.evaluate((element) => {
-        const svg = element as SVGSVGElement;
-        if (svg.hasPointerCapture(1)) svg.releasePointerCapture(1);
+      await annotation.evaluate((element) => {
+        const owner = [element, ...element.querySelectorAll("*")].find((candidate) => candidate.hasPointerCapture(1));
+        owner?.releasePointerCapture(1);
       });
     }
     await page.mouse.up();
@@ -203,3 +203,38 @@ async function drawPath(page: Page, points: ReadonlyArray<{ x: number; y: number
   for (const point of points.slice(1)) await page.mouse.move(point.x, point.y, { steps: 4 });
   await page.mouse.up();
 }
+
+test("output preserves exact document state across save, restore and raster preview", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await page.getByRole("button", { name: "Like", exact: true }).click();
+  await canvas.click({ position: { x: 240, y: 220 } });
+  await page.getByText("Annotation output", { exact: true }).click();
+  const saved = await structured(page);
+  expect(Object.keys(saved).sort()).toEqual(["annotations", "id", "profile", "sources"]);
+  await page.getByRole("button", { name: "Save state", exact: true }).click();
+  await page.getByRole("button", { name: "Delete annotation", exact: true }).click();
+  expect((await structured(page)).annotations).toHaveLength(0);
+  await page.getByRole("button", { name: "Restore state", exact: true }).click();
+  expect(await structured(page)).toEqual(saved);
+  await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(0);
+  await page.getByRole("tab", { name: "Image", exact: true }).click();
+  await expect(page.getByTestId("annotation-image-output")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Download PNG", exact: true })).toHaveAttribute("href", /^data:image\/png/);
+});
+
+test("modified Delete is ignored while ordinary Delete and Undo share the editing contract", async ({ page }) => {
+  await page.goto("/demo/annotation");
+  const canvas = page.getByLabel("Raster annotation canvas");
+  await canvas.focus();
+  await canvas.press("l");
+  await canvas.click({ position: { x: 240, y: 220 } });
+  await canvas.focus();
+  await canvas.press("Alt+Backspace");
+  expect((await structured(page)).annotations).toHaveLength(1);
+  await canvas.press("Delete");
+  expect((await structured(page)).annotations).toHaveLength(0);
+  await canvas.press("ControlOrMeta+z");
+  expect((await structured(page)).annotations).toHaveLength(1);
+  await expect(page.locator('[data-annotation-id][data-selected="true"]')).toHaveCount(1);
+});

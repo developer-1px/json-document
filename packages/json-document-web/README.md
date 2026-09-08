@@ -1,5 +1,27 @@
 # @interactive-os/json-document-web
 
+## Editing host ownership
+
+`isWebEditingHostTarget(root, target)` returns whether a DOM target belongs to
+the supplied editing surface. It excludes nested input, textarea, select,
+option, and explicit contenteditable boundaries (including `false`). Root and
+inherited text targets are accepted. It uses the root's owner-document realm;
+invalid or outside-root targets return false. This is distinct from
+`isWebEditableTarget`, which identifies native editable targets without an owner.
+
+```ts
+import { isWebEditingHostTarget } from "@interactive-os/json-document-web";
+
+surface.addEventListener("copy", (event) => {
+  if (isWebEditingHostTarget(surface, event.target)) clipboard.copy(event);
+});
+```
+
+The plain local, collaborative text, and Rich Text bindings all consume this
+same ownership predicate; each keeps its own model reconciliation contract.
+
+## Platform adapters
+
 Official keyboard and clipboard adapters for the public editing
 contracts from `@interactive-os/json-document-editing` and
 `@interactive-os/json-document-selection`.
@@ -8,6 +30,18 @@ The package provides official Web adapters for clipboard, keyboard, Press,
 ARIA projection, composite focus, and text input. It translates native `ClipboardEvent`/`DataTransfer` shapes and
 conventional keyboard chords without rendering UI or deciding product
 keyboard policy.
+
+Once a supported cut has written its payload or a paste has decoded a supported
+payload, the binding cancels the native event before calling the editor. A
+rejected edit remains `editing.rejected` and cannot fall through to a browser
+mutation. Unsupported or undecodable paste data keeps its existing pass-through
+behavior.
+
+`registerWebVirtualSelectionScope` coordinates native Select All and copy when a
+surface mounts only part of its model. It selects the mounted root with a real
+DOM Range, then writes the registered complete model text during the native
+`copy` event. Nested contained scopes override a single document fallback;
+editable controls keep browser-native selection.
 
 `fileCandidateFromWebFile`, `fileCandidatesFromWebFiles`, and
 `fileCandidatesFromWebClipboard` translate browser file metadata into the platform-independent
@@ -37,11 +71,22 @@ const dragDrop = createWebDragDropSession({
 The sessions own platform lifecycle state. Hit testing, valid targets, geometry,
 and document Intent remain in the host.
 
+`createWebViewportPositionPorts` measures an exact target and its paired tail
+reserve, writes temporary scroll range, performs smooth or instant positioning,
+and observes layout and target visibility without choosing product policy.
+
+`createWebAnchoredFloatingPositionPorts` measures anchor, floating, and clipping
+boundary rectangles and coalesces captured scroll, viewport resize, and element
+resize changes. It does not choose placement or render overlay semantics.
+
 ```ts
-import { createDocumentEditor } from "@interactive-os/json-document-editing";
+import {
+  createDocumentEditor,
+  documentClipboardFormat,
+} from "@interactive-os/json-document-editing";
 import {
   createWebClipboardSurface,
-  documentClipboardCodec,
+  createWebJSONClipboardRepresentation,
   createWebKeyboardAdapter,
   selectionOperationFromModifiers,
   textInputFromControl,
@@ -52,7 +97,7 @@ const editor = createDocumentEditor({
 });
 
 const clipboardSurface = createWebClipboardSurface({
-  codec: documentClipboardCodec,
+  codec: createWebJSONClipboardRepresentation(documentClipboardFormat),
   read: () => editor.copy(),
   cut: () => editor.cut()?.result ?? { ok: false },
   paste: (payload) => editor.dispatch({
@@ -96,8 +141,12 @@ const attributes = webGridCellAddressProps(point);
 const cell = findWebGridCell<HTMLElement>(table, point);
 ```
 
-Document, Sheet, Order, Object, Tree, and Database codecs write both the
-structured json-document MIME payload and its `text/plain` projection. Paste
+Each Editing domain owns its clipboard format and validation. A Host declares
+the formats it enables and their priority, while
+`createWebJSONClipboardRepresentation` owns JSON serialization. The legacy
+named codecs remain compatibility aliases over those domain formats. Clipboard
+surfaces write both the structured json-document MIME payload and its
+`text/plain` projection. Paste
 consumes only a valid structured payload. Parsing arbitrary external plain text
 into domain records or cells remains a host policy.
 
@@ -116,13 +165,15 @@ available.
 projects one binding into `onCopy`, `onCut`, and `onPaste` handlers and reports
 every result through `onResult`. `createWebClipboardBinding` remains available
 for hosts that need to invoke or install each operation independently.
+`isWebEditableTarget` keeps those surface bindings from replacing the native
+clipboard lifecycle inside inputs, selects, textareas, and contenteditable
+regions.
 
 ## Boundary
 
 The Adapter owns:
 
-- structured MIME serialization and validation for public domain clipboard
-  values;
+- structured MIME serialization for public domain clipboard values;
 - `ClipboardEvent` copy/cut/paste translation;
 - conventional Web modifier translation to `replace`, `extend`, or `toggle`.
 - the official keyboard adapter: conventional chords, a host-overridable keymap,
@@ -139,6 +190,7 @@ The host owns:
 - the event target, canonical focus, when a command applies, and role workflow policy;
 - DOM/canvas geometry and hit testing;
 - external plain-text interpretation and product-specific paste policy;
+- enabled representations and their priority;
 - native text selection, IME, drag/drop, persistence, and remote protocols.
 
 The module does not access `window`, `document`, or `navigator` during import,
@@ -150,3 +202,40 @@ so non-browser tooling can load it safely.
 | --- | --- |
 | `@interactive-os/json-document-editing` | `>=0.1.0-rc.0 <1` |
 | `@interactive-os/json-document-selection` | `>=0.1.0-rc.0 <1` |
+
+## Cut failure boundary (Draft grammar)
+
+`createWebClipboardBinding` captures the editor payload and writes its
+representations before calling `cut`. A failed write leaves removal uncalled;
+a rejected removal reports `editing.rejected` after native event cancellation.
+Previously written clipboard data can remain in either failure case: the OS
+clipboard and JSONDocument are not one transaction. Headless `editor.cut()`
+returns its captured payload alongside the editing result.
+
+[EG-CUT integration cases](tests/clipboard-rejection.test.ts) use a real
+Document editor to check each write failure, schema-rejected removal, successful
+capture-before-removal, and selection-restoring Undo. Existing unsupported-format
+cases retain their event ownership behavior. These tests exercise the Web event
+port; they do not certify browser-specific clipboard permissions or transport.
+
+## Native text selection
+
+`textSelectionFromControl({ currentTarget })` projects an input or textarea's
+`selectionStart`, `selectionEnd`, and `selectionDirection` into the existing
+`SelectionRange<number>` anchor/focus contract. A backward native selection has
+its anchor at the end and focus at the start. Bounds are clamped to the text.
+A missing `selectionEnd` produces a collapsed selection; a missing direction
+uses start as anchor and end as focus. The existing
+`textInputFromControl` text/offset result is unchanged.
+
+```ts
+import { textSelectionFromControl } from "@interactive-os/json-document-web";
+
+const range = textSelectionFromControl({ currentTarget: textarea });
+// range.anchor and range.focus preserve the native selection direction.
+```
+
+`DocumentTextControl` consumes this public projection in the live
+[Document Usage](https://developer-1px.github.io/json-document/demo); its source
+view links the React binding to this package's `input.ts` implementation and
+[API reference](https://developer-1px.github.io/json-document/docs/api/web).

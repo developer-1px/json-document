@@ -6,51 +6,186 @@
 
 > 이 문서는 `packages/json-document-ui-primitives-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
-## `ActionButton`
+## `Check`
 
 ```ts
-ActionButton(props: ButtonHTMLAttributes<HTMLButtonElement> & FocusPreservingControl & { readonly kind?: ActionButtonKind; }): ReactNode
+Check(props: { readonly label: string; readonly checked: boolean; readonly onCheckedChange: (checked: boolean) => void; readonly disabled?: boolean; readonly className?: string; }): ReactNode
 ```
-## `ActionButtonKind`
+## `Choice`
 
 ```ts
-type ActionButtonKind = "primary" | "secondary" | "danger";
+Choice<Id extends string>(props: ChoiceProps<Id>): ReactNode
 ```
-## `ChoiceChip`
+## `ChoiceClassNames`
 
 ```ts
-ChoiceChip(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & { readonly selected: boolean; }): ReactNode
+type ChoiceClassNames = PopupChoiceClassNames;
+```
+## `ChoiceOption`
+
+```ts
+type ChoiceOption<Id extends string = string> = InlineChoiceOption<Id>;
+```
+## `ChoiceProps`
+
+```ts
+type ChoiceProps<Id extends string = string> = {
+  readonly label: string;
+  readonly value: Id;
+  readonly options: ReadonlyArray<ChoiceOption<Id>>;
+  readonly onValueChange: (value: Id) => void;
+} & ControlAffordanceProps & (
+  | { readonly presentation: "inline"; readonly className?: string }
+  | {
+      readonly presentation: "popup";
+      readonly id?: string;
+      readonly renderValue?: (option: ChoiceOption<Id>) => ReactNode;
+      readonly renderOption?: (option: ChoiceOption<Id>) => ReactNode;
+      readonly classNames?: ChoiceClassNames;
+      readonly disabled?: boolean;
+    }
+);
+```
+## `Command`
+
+```ts
+Command(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> & FocusPreservingControl & ControlAffordanceProps & { readonly kind?: CommandKind; readonly label?: string; readonly rootClassName?: string; }): ReactNode
+```
+## `CommandKind`
+
+```ts
+type CommandKind = "primary" | "secondary" | "danger";
+```
+## `contentInteractionAttributes`
+
+```ts
+contentInteractionAttributes(input: ContentInteractionInput): ContentInteractionAttributes
+```
+## `ContentInteractionAttributes`
+
+```ts
+type ContentInteractionAttributes = {
+  readonly "data-ui-interaction": "content" | "drop-target" | "insertion";
+  readonly "data-ui-interaction-phase": "rest" | "active" | "dragging";
+  readonly "data-selected"?: "true" | "false";
+  readonly "data-primary"?: "true";
+  readonly "data-elevated"?: "true";
+};
+```
+## `ContentInteractionInput`
+
+```ts
+type ContentInteractionInput =
+  | {
+      readonly role: "content";
+      readonly selected?: boolean;
+      readonly primary?: boolean;
+      readonly active?: boolean;
+      readonly dragging?: boolean;
+    }
+  | {
+      readonly role: "drop-target" | "insertion";
+      readonly active: boolean;
+    };
+```
+## `ContextualControls`
+
+```ts
+ContextualControls<Id extends string>(props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; readonly selected?: boolean; readonly editing?: boolean; readonly children: (snapshot: ContextualAffordanceSnapshot<Id>) => ReactNode; }): ReactNode
+```
+## `ControlAffordance`
+
+```ts
+type ControlAffordance =
+  | "persistent"
+  | "content-control"
+  | "stateful"
+  | "contextual"
+  | "contextual-danger"
+  | "direct"
+  | "field"
+  | "disabled-preview";
+```
+## `ControlAffordanceProps`
+
+```ts
+type ControlAffordanceProps = {
+  /** Declares how a product theme reveals this control without changing its semantic role. */
+  readonly affordance?: ControlAffordance;
+};
+```
+## `ControlHandle`
+
+```ts
+ControlHandle(props: ControlHandleProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `ControlHandleProps`
+
+```ts
+type ControlHandleProps = Omit<InteractionHandleButtonProps<ControlHandleDescriptor>, "descriptor"> & {
+  readonly descriptor?: ControlHandleDescriptor;
+};
+```
+## `Dialog`
+
+```ts
+Dialog(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly children: ReactNode; readonly className?: string; readonly presentation?: "modal" | "sheet"; }): ReactNode
 ```
 ## `DisclosureButton`
 
 ```ts
-DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & { readonly expanded: boolean; readonly controls: string; }): ReactNode
+DisclosureButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-expanded" | "aria-controls"> & ControlAffordanceProps & { readonly expanded: boolean; readonly controls: string; }): ReactNode
+```
+## `DragHandle`
+
+```ts
+DragHandle(props: DragHandleProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+```
+## `DragHandleProps`
+
+```ts
+type DragHandleProps = Omit<InteractionHandleButtonProps<DragHandleDescriptor>, "descriptor"> & {
+  readonly descriptor?: DragHandleDescriptor;
+};
+```
+## `Field`
+
+```ts
+Field(props: FieldProps): ReactNode
 ```
 ## `FileDropRegion`
 
 ```ts
 FileDropRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "onDrop"> & { readonly onFiles: (files: ReadonlyArray<File>) => void; readonly overlay?: ReactNode; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
-## `formatFileSize`
-
-```ts
-formatFileSize(bytes: number): string
-```
 ## `GridCell`
 
 ```ts
-GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly focus?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+GridCell(props: TdHTMLAttributes<HTMLTableCellElement> & { readonly selected: boolean; readonly primary?: boolean; readonly focus?: boolean; readonly active?: boolean; readonly dragging?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
-## `IconButton`
+## `InteractionHandleBindingOptions`
 
 ```ts
-IconButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "title"> & FocusPreservingControl & { readonly label: string; readonly rootClassName?: string; }): ReactNode
+type InteractionHandleBindingOptions<ElementType extends Element = HTMLElement> = {
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly onHandle: (event: InteractionHandleEvent, input: PointerEvent<ElementType>) => void;
+};
+```
+## `InteractionHandleButtonProps`
+
+```ts
+type InteractionHandleButtonProps<Descriptor extends InteractionHandleDescriptor> =
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label"> & {
+    readonly label: string;
+    readonly descriptor: Descriptor;
+    readonly onHandle: (event: InteractionHandleEvent) => void;
+  };
 ```
 ## `ListboxBinding`
 
 ```ts
-interface ListboxBinding<Item extends ListboxItem> {
-  readonly activeId: string | null;
+interface ListboxBinding<Id extends string = string, Item extends ListboxItem<Id> = ListboxItem<Id>> {
+  readonly activeId: Id | null;
   readonly referenceProps: {
     readonly "aria-controls": string;
     readonly "aria-expanded": boolean;
@@ -64,8 +199,8 @@ interface ListboxBinding<Item extends ListboxItem> {
 ## `ListboxItem`
 
 ```ts
-interface ListboxItem {
-  readonly id: string;
+interface ListboxItem<Id extends string = string> {
+  readonly id: Id;
   readonly textValue: string;
   readonly disabled?: boolean;
 }
@@ -85,34 +220,47 @@ type MenuItem = {
   readonly content?: ReactNode;
 };
 ```
-## `MenuItemButton`
+## `Popover`
 
 ```ts
-MenuItemButton(props: ButtonHTMLAttributes<HTMLButtonElement>): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+Popover(props: { readonly label: string; readonly open: boolean; readonly onOpenChange: (open: boolean) => void; readonly trigger: ReactNode; readonly children: ReactNode; readonly className?: string; readonly panelClassName?: string; }): ReactNode
+```
+## `ProductCanvas`
+
+```ts
+ProductCanvas(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ProductInspector`
+
+```ts
+ProductInspector(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ProductShell`
+
+```ts
+ProductShell(props: HTMLAttributes<HTMLDivElement> & { readonly toolbar?: ReactNode; readonly toolbarLabel?: string; readonly toolbarPresentation?: "attached" | "floating"; readonly inspector?: ReactNode; readonly canvasClassName?: string; readonly fill?: boolean; }): ReactNode
 ```
 ## `ResizeHandle`
 
 ```ts
-ResizeHandle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & { readonly label: string; readonly orientation: "horizontal" | "vertical"; readonly onResize: (delta: number, phase: "preview" | "commit") => void; readonly className?: string; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+ResizeHandle(props: ResizeHandleProps): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
 ```
-## `SegmentedControl`
+## `ResizeHandleProps`
 
 ```ts
-SegmentedControl(props: { readonly label: string; readonly value: string; readonly options: ReadonlyArray<SegmentedControlOption>; readonly onValueChange: (value: string) => void; readonly className?: string; }): ReactNode
-```
-## `SegmentedControlOption`
-
-```ts
-type SegmentedControlOption = {
-  readonly id: string;
-  readonly label: ReactNode;
-  readonly disabled?: boolean;
+type ResizeHandleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "onResize"> & ControlAffordanceProps & {
+  readonly label: string;
+  readonly orientation: "horizontal" | "vertical";
+  readonly onResize: (delta: number, phase: "preview" | "commit") => void;
+  readonly onHandle?: (event: InteractionHandleEvent) => void;
+  readonly descriptor?: ResizeHandleDescriptor;
+  readonly className?: string;
 };
 ```
-## `Select`
+## `Search`
 
 ```ts
-Select(props: { readonly id?: string; readonly label: string; readonly value: string; readonly options: ReadonlyArray<SelectOption>; readonly onValueChange: (value: string) => void; readonly renderValue?: (option: SelectOption) => ReactNode; readonly renderOption?: (option: SelectOption) => ReactNode; readonly classNames?: SelectClassNames; readonly disabled?: boolean; }): import("<repository>/node_modules/@types/react/jsx-runtime").JSX.Element
+Search(props: { readonly label: string; readonly query: string; readonly onQueryChange: (query: string) => void; readonly results?: ReactNode; readonly className?: string; readonly inputClassName?: string; }): ReactNode
 ```
 ## `SelectableItem`
 
@@ -125,29 +273,11 @@ SelectableItem<T extends ElementType = "button">(props: SelectableItemProps<T>):
 type SelectableItemProps<T extends ElementType = "button"> = {
   readonly as?: T;
   readonly selected: boolean;
+  readonly primary?: boolean;
   readonly focus?: boolean;
-} & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
-```
-## `SelectClassNames`
-
-```ts
-type SelectClassNames = {
-  readonly root?: string;
-  readonly trigger?: string;
-  readonly listbox?: string;
-  readonly option?: string;
-  readonly focusedOption?: string;
-  readonly selectedOption?: string;
-};
-```
-## `SelectOption`
-
-```ts
-type SelectOption = {
-  readonly id: string;
-  readonly label: string;
-  readonly disabled?: boolean;
-};
+  readonly active?: boolean;
+  readonly dragging?: boolean;
+} & ControlAffordanceProps & Omit<ComponentPropsWithoutRef<T>, "as" | "data-selected" | "data-focus">;
 ```
 ## `TabOption`
 
@@ -163,27 +293,72 @@ type TabOption<T extends string | number> = {
 ```ts
 Tabs<T extends string | number>(props: { readonly label: string; readonly value: T; readonly options: ReadonlyArray<TabOption<T>>; readonly onValueChange: (value: T) => void; readonly tabId: (value: T, index: number) => string; readonly panelId: (value: T, index: number) => string; readonly className?: string; readonly tabClassName?: string; }): ReactNode
 ```
-## `ToggleButton`
+## `Toggle`
 
 ```ts
-ToggleButton(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & { readonly pressed: boolean; readonly label?: string; readonly tooltip?: string; }): ReactNode
+Toggle(props: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-pressed"> & FocusPreservingControl & ControlAffordanceProps & { readonly pressed: boolean; readonly presentation?: "button" | "chip"; readonly label?: string; readonly tooltip?: string; }): ReactNode
+```
+## `Toolbar`
+
+```ts
+Toolbar(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label: string; }): ReactNode
+```
+## `ToolbarGroup`
+
+```ts
+ToolbarGroup(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; }): ReactNode
+```
+## `ToolbarLayout`
+
+```ts
+ToolbarLayout(props: HTMLAttributes<HTMLDivElement>): ReactNode
+```
+## `ToolbarRegion`
+
+```ts
+ToolbarRegion(props: Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> & { readonly label?: string; readonly placement: ToolbarRegionPlacement; }): ReactNode
+```
+## `ToolbarRegionPlacement`
+
+```ts
+type ToolbarRegionPlacement = "start" | "center" | "end";
+```
+## `ToolbarSeparator`
+
+```ts
+ToolbarSeparator(props: HTMLAttributes<HTMLSpanElement>): ReactNode
+```
+## `ToolbarSpacer`
+
+```ts
+ToolbarSpacer(props: HTMLAttributes<HTMLSpanElement>): ReactNode
+```
+## `useInteractionHandle`
+
+```ts
+useInteractionHandle<ElementType extends Element = HTMLElement>(options: InteractionHandleBindingOptions<ElementType>): { ...; }
 ```
 ## `useListbox`
 
 ```ts
-useListbox<Item extends ListboxItem>(options: UseListboxOptions<Item>): ListboxBinding<Item>
+useListbox<Id extends string, Item extends ListboxItem<Id>>(options: UseListboxOptions<Id, Item>): ListboxBinding<Id, Item>
 ```
 ## `UseListboxOptions`
 
 ```ts
-interface UseListboxOptions<Item extends ListboxItem> {
+interface UseListboxOptions<Id extends string = string, Item extends ListboxItem<Id> = ListboxItem<Id>> {
   readonly id: string;
   readonly label: string;
   readonly items: ReadonlyArray<Item>;
-  readonly activeId: string | null;
-  readonly selectedId?: string | null;
+  readonly activeId: Id | null;
+  readonly selectedId?: Id | null;
   readonly wrap?: boolean;
-  readonly onActiveChange: (id: string | null) => void;
-  readonly onAction: (id: string) => void;
+  readonly onActiveChange: (id: Id | null) => void;
+  readonly onAction: (id: Id) => void;
 }
+```
+## `ValueInput`
+
+```ts
+ValueInput(props: { readonly label: string; readonly value: number; readonly min: number; readonly max: number; readonly step?: number; readonly onValueChange: (value: number) => void; readonly presentation: "continuous" | "stepped"; readonly disabled?: boolean; readonly className?: string; }): ReactNode
 ```

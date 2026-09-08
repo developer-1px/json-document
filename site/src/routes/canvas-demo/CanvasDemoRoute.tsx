@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type PointerEvent, type WheelEvent } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type WheelEvent } from "react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { canvasDemoDocument, objectDemoColors } from "../../shared/demo-workbench/object-demo-document";
 import {
@@ -30,10 +30,12 @@ import {
   wheelAffordance,
   zoomAffordance,
   type ResizeEdge,
+  type InteractionHandleEvent,
 } from "@interactive-os/json-document-affordance";
 import { createWebPointerSession, pressInteractionFromWeb } from "@interactive-os/json-document-web";
-import { IconButton, MenuItemButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command, SelectableItem, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -111,7 +113,7 @@ export function CanvasDemoRoute() {
     onCommit: clearGesture,
     onCancel: clearGesture,
   }));
-  const [pointerSession] = useState(() => createWebPointerSession<"drag" | "marquee" | "pan" | "resize">({
+  const [pointerSession] = useState(() => createWebPointerSession<"drag" | "marquee" | "pan">({
     onCancel: (_kind, reason) => gestureSession.cancel(reason === "lost-capture" ? "lost-capture" : "pointer-cancel"),
   }));
   panRef.current = pan;
@@ -300,37 +302,6 @@ export function CanvasDemoRoute() {
     gestureSession.commit();
   }
 
-  function commitCurrentResize(event: PointerEvent<HTMLElement>) {
-    pointerSession.commit(event.pointerId);
-    const current = resizeRef.current;
-    if (!current) return;
-    const committed = commitAffordance(
-      resizeAffordance(
-        { x: current.originX, y: current.originY },
-        { x: event.clientX, y: event.clientY },
-        current.edge,
-        event,
-      ),
-    );
-    if (committed) {
-      applyAffordance(committed, {
-        commit: (hand) => {
-          if (hand.type !== "resize") return;
-          const scaleNow = scaleRef.current;
-          editor.dispatch({
-            type: "object.resize",
-            objectIds: [current.id],
-            dx: hand.dx / scaleNow,
-            dy: hand.dy / scaleNow,
-            dw: hand.dw / scaleNow,
-            dh: hand.dh / scaleNow,
-          });
-        },
-      });
-    }
-    gestureSession.commit();
-  }
-
   function handleObjectPointerDown(event: PointerEvent<HTMLElement>, objectId: string) {
     if (isPanStart(event)) {
       event.preventDefault();
@@ -406,52 +377,40 @@ export function CanvasDemoRoute() {
     );
   }
 
-  function handleResizePointerDown(event: PointerEvent<HTMLElement>, objectId: string, edge: ResizeEdge) {
-    if (event.button !== 0) return;
+  function handleResizeInteraction(interaction: InteractionHandleEvent, event: PointerEvent<HTMLDivElement>, objectId: string, edge: ResizeEdge) {
     event.preventDefault();
-    event.stopPropagation();
-    surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
-    pointerSession.begin(event.currentTarget, event.pointerId, "resize");
-    setResizeState({
-      type: "resize",
-      id: objectId,
-      edge,
-      originX: event.clientX,
-      originY: event.clientY,
-      dx: 0,
-      dy: 0,
-      dw: 0,
-      dh: 0,
-    });
-  }
-
-  function handleResizePointerMove(event: PointerEvent<HTMLElement>) {
+    if (interaction.phase === "start") {
+      surface.current?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+      setResizeState({ type: "resize", id: objectId, edge, originX: interaction.origin.x, originY: interaction.origin.y, dx: 0, dy: 0, dw: 0, dh: 0 });
+      return;
+    }
+    if (interaction.phase === "cancel") {
+      gestureSession.cancel("pointer-cancel");
+      return;
+    }
     const current = resizeRef.current;
-    if (!current) return;
-    applyAffordance(
-      resizeAffordance(
-        { x: current.originX, y: current.originY },
-        { x: event.clientX, y: event.clientY },
-        current.edge,
-        event,
-      ),
-      {
-        cursor: (cursor) => {
-          event.currentTarget.style.cursor = cursor;
-        },
+    if (current === null) return;
+    const result = resizeAffordance(interaction.origin, interaction.point, edge, event);
+    if (interaction.phase === "preview") {
+      applyAffordance(result, {
         hand: (hand) => {
           if (hand.type !== "resize") return;
           const scaleNow = scaleRef.current;
-          setResizeState({
-            ...current,
-            dx: hand.dx / scaleNow,
-            dy: hand.dy / scaleNow,
-            dw: hand.dw / scaleNow,
-            dh: hand.dh / scaleNow,
-          });
+          setResizeState({ ...current, dx: hand.dx / scaleNow, dy: hand.dy / scaleNow, dw: hand.dw / scaleNow, dh: hand.dh / scaleNow });
         },
-      },
-    );
+      });
+      return;
+    }
+    const committed = commitAffordance(result);
+    if (committed !== null) {
+      applyAffordance(committed, {
+        commit: (hand) => {
+          if (hand.type !== "resize") return;
+          editor.dispatch({ type: "object.resize", objectIds: [current.id], dx: hand.dx / scaleRef.current, dy: hand.dy / scaleRef.current, dw: hand.dw / scaleRef.current, dh: hand.dh / scaleRef.current });
+        },
+      });
+    }
+    gestureSession.commit();
   }
 
   function handleSurfacePointerDown(event: PointerEvent<HTMLDivElement>) {
@@ -474,11 +433,6 @@ export function CanvasDemoRoute() {
 
   function handleSurfacePointerMove(event: PointerEvent<HTMLDivElement>) {
     pointerSession.preview(event.pointerId, (kind) => kind);
-    const currentResize = resizeRef.current;
-    if (currentResize) {
-      handleResizePointerMove(event);
-      return;
-    }
     const currentPan = panRef.current;
     if (currentPan.active) {
       applyAffordance(
@@ -516,10 +470,6 @@ export function CanvasDemoRoute() {
   }
 
   function handleSurfacePointerUp(event: PointerEvent<HTMLDivElement>) {
-    if (resizeRef.current) {
-      commitCurrentResize(event);
-      return;
-    }
     const currentPan = panRef.current;
     if (currentPan.active) {
       pointerSession.commit(event.pointerId);
@@ -605,15 +555,11 @@ export function CanvasDemoRoute() {
     applyAffordance(
       selectAllAffordance(event, {
         allSelected: editor.selectedObjects.length === unlockedIds.length && unlockedIds.length > 0,
-      }),
+      }, { repeat: "preserve" }),
       {
         hand: (hand) => {
           if (hand.type === "select-all") {
             editor.dispatch({ type: "selection.set", objectIds: unlockedIds, mode: "replace" });
-            event.preventDefault();
-          }
-          if (hand.type === "clear") {
-            editor.dispatch({ type: "selection.set", objectIds: [], mode: "replace" });
             event.preventDefault();
           }
         },
@@ -687,16 +633,16 @@ export function CanvasDemoRoute() {
         Pick a box, drag it, then fill the selection. The board is the editor.
       </PageHeader>
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Canvas actions"
         canvasClassName="relative min-h-[22rem] overflow-hidden"
         toolbar={objectDemoColors.map((color) => (
-          <IconButton label={`Fill ${color}`}
+          <Command label={`Fill ${color}`}
             key={color}
             onClick={() => editor.dispatch({ type: "selection.fill", color })}
           >
             <span aria-hidden="true" style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", backgroundColor: color }} />
-          </IconButton>
+          </Command>
         ))}
       >
         <div
@@ -744,6 +690,7 @@ export function CanvasDemoRoute() {
                   data-hover={hoverId === object.id}
                   selected={option.selected}
                   focus={option.focus}
+                  dragging={offset !== null}
                   onPointerDown={(event) => handleObjectPointerDown(event, object.id)}
                   onPointerMove={handleObjectPointerMove}
                   onPointerUp={commitCurrentDrag}
@@ -821,16 +768,12 @@ export function CanvasDemoRoute() {
               const width = object.width + (resizing?.dw ?? 0);
               const height = object.height + (resizing?.dh ?? 0);
               return resizeEdges.map((edge) => (
-                <div
+                <CanvasResizeHandle
                   key={`${object.id}-${edge}`}
-                  role="presentation"
-                  data-resize-edge={edge}
                   data-object-id={object.id}
-                  className={ui.interactive.resizeHandle}
+                  edge={edge}
                   style={handleStyle(edge, left, top, width, height)}
-                  onPointerDown={(event) => handleResizePointerDown(event, object.id, edge)}
-                  onPointerMove={handleResizePointerMove}
-                  onPointerUp={commitCurrentResize}
+                  onHandle={(interaction, event) => handleResizeInteraction(interaction, event, object.id, edge)}
                 />
               ));
             })}
@@ -848,7 +791,7 @@ export function CanvasDemoRoute() {
               className={ui.interactive.contextMenu}
               style={{ left: menu.x, top: menu.y }}
             >
-              <MenuItemButton
+              <Command
                 className={ui.interactive.contextMenuItem}
                 onClick={() => {
                   editor.dispatch({ type: "selection.remove" });
@@ -856,17 +799,39 @@ export function CanvasDemoRoute() {
                 }}
               >
                 Delete
-              </MenuItemButton>
+              </Command>
             </div>
           ) : null}
         </div>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }
 
 function clampScale(value: number) {
   return Math.min(4, Math.max(0.25, value));
+}
+
+function CanvasResizeHandle(props: {
+  readonly edge: ResizeEdge;
+  readonly style: CSSProperties;
+  readonly "data-object-id": string;
+  readonly onHandle: (interaction: InteractionHandleEvent, event: PointerEvent<HTMLDivElement>) => void;
+}) {
+  const binding = useInteractionHandle<HTMLDivElement>({
+    descriptor: { kind: "resize", edge: props.edge },
+    onHandle: props.onHandle,
+  });
+  return (
+    <div
+      {...binding.handleProps}
+      role="presentation"
+      data-resize-edge={props.edge}
+      data-object-id={props["data-object-id"]}
+      className={ui.interactive.resizeHandle}
+      style={{ ...props.style, cursor: binding.cursor }}
+    />
+  );
 }
 
 function handleStyle(edge: ResizeEdge, left: number, top: number, width: number, height: number) {

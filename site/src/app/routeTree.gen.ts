@@ -18,7 +18,14 @@ import { Route as PageAdaptersIndexRouteImport } from "./routes/_page/adapters/i
 import { Route as PageAdaptersClipboardRouteImport } from "./routes/_page/adapters/clipboard";
 import { Route as PageAdaptersContenteditableRouteImport } from "./routes/_page/adapters/contenteditable";
 import { Route as PageAdaptersKeyboardRouteImport } from "./routes/_page/adapters/keyboard";
+import { Route as PageAdaptersVirtualSelectionRouteImport } from "./routes/_page/adapters/virtual-selection";
+import { Route as PageAffordancesHandlesRouteImport } from "./routes/_page/affordances/handles";
+import { Route as PageApplicationsIndexRouteImport } from "./routes/_page/applications/index";
+import { Route as PageApplicationsAiAgentRouteImport } from "./routes/_page/applications/ai-agent";
+import { Route as PageApplicationsCalendarRouteImport } from "./routes/_page/applications/calendar";
+import { Route as PageArtifactLlmAgentRouteImport } from "./routes/_page/artifact/llm-agent";
 import { Route as PageConnectorsIndexRouteImport } from "./routes/_page/connectors/index";
+import { Route as PageConnectorsA2uiRouteImport } from "./routes/_page/connectors/a2ui";
 import { Route as PageConnectorsAjvRouteImport } from "./routes/_page/connectors/ajv";
 import { Route as PageConnectorsContenteditableRouteImport } from "./routes/_page/connectors/contenteditable";
 import { Route as PageConnectorsReactRouteImport } from "./routes/_page/connectors/react";
@@ -26,30 +33,39 @@ import { Route as PageConnectorsReactHookFormRouteImport } from "./routes/_page/
 import { Route as PageConnectorsTanstackTableRouteImport } from "./routes/_page/connectors/tanstack-table";
 import { Route as PageConnectorsWebRouteImport } from "./routes/_page/connectors/web";
 import { Route as PageDemoIndexRouteImport } from "./routes/_page/demo/index";
+import { Route as PageDemoAnimationRouteImport } from "./routes/_page/demo/animation";
 import { Route as PageDemoAnnotationRouteImport } from "./routes/_page/demo/annotation";
+import { Route as PageDemoCalendarRouteImport } from "./routes/_page/demo/calendar";
 import { Route as PageDemoCanvasRouteImport } from "./routes/_page/demo/canvas";
 import { Route as PageDemoClipboardRouteImport } from "./routes/_page/demo/clipboard";
 import { Route as PageDemoComposerRouteImport } from "./routes/_page/demo/composer";
 import { Route as PageDemoDatabaseRouteImport } from "./routes/_page/demo/database";
+import { Route as PageDemoDateControlsRouteImport } from "./routes/_page/demo/date-controls";
 import { Route as PageDemoHistoryRouteImport } from "./routes/_page/demo/history";
 import { Route as PageDemoKanbanRouteImport } from "./routes/_page/demo/kanban";
+import { Route as PageDemoMarkdownRouteImport } from "./routes/_page/demo/markdown";
 import { Route as PageDemoObjectRouteImport } from "./routes/_page/demo/object";
 import { Route as PageDemoOrderRouteImport } from "./routes/_page/demo/order";
 import { Route as PageDemoSelectionRouteImport } from "./routes/_page/demo/selection";
 import { Route as PageDemoSheetRouteImport } from "./routes/_page/demo/sheet";
 import { Route as PageDemoTopologyRouteImport } from "./routes/_page/demo/topology";
 import { Route as PageDemoTreeRouteImport } from "./routes/_page/demo/tree";
+import { Route as PageDemoUiPrimitivesRouteImport } from "./routes/_page/demo/ui-primitives";
+import { Route as PageDemoViewportRouteImport } from "./routes/_page/demo/viewport";
 import { Route as PageDocsIndexRouteImport } from "./routes/_page/docs/index";
 import { Route as PageDocsAdapterClipboardRouteImport } from "./routes/_page/docs/adapter-clipboard";
 import { Route as PageDocsAdapterContenteditableRouteImport } from "./routes/_page/docs/adapter-contenteditable";
 import { Route as PageDocsAdapterGridCellRouteImport } from "./routes/_page/docs/adapter-grid-cell";
 import { Route as PageDocsAdapterInteractionRouteImport } from "./routes/_page/docs/adapter-interaction";
 import { Route as PageDocsAdapterKeyboardRouteImport } from "./routes/_page/docs/adapter-keyboard";
+import { Route as PageDocsAdapterVirtualSelectionRouteImport } from "./routes/_page/docs/adapter-virtual-selection";
 import { Route as PageDocsAdaptersRouteImport } from "./routes/_page/docs/adapters";
+import { Route as PageDocsAnimationRouteImport } from "./routes/_page/docs/animation";
 import { Route as PageDocsApiRouteImport } from "./routes/_page/docs/api";
 import { Route as PageDocsClipboardRouteImport } from "./routes/_page/docs/clipboard";
 import { Route as PageDocsComposerRouteImport } from "./routes/_page/docs/composer";
 import { Route as PageDocsConceptsRouteImport } from "./routes/_page/docs/concepts";
+import { Route as PageDocsConnectorA2uiRouteImport } from "./routes/_page/docs/connector-a2ui";
 import { Route as PageDocsConnectorAjvRouteImport } from "./routes/_page/docs/connector-ajv";
 import { Route as PageDocsConnectorReactRouteImport } from "./routes/_page/docs/connector-react";
 import { Route as PageDocsConnectorReactHookFormRouteImport } from "./routes/_page/docs/connector-react-hook-form";
@@ -58,7 +74,9 @@ import { Route as PageDocsConnectorZodRouteImport } from "./routes/_page/docs/co
 import { Route as PageDocsConnectorZodValidateRouteImport } from "./routes/_page/docs/connector-zod-validate";
 import { Route as PageDocsConnectorsRouteImport } from "./routes/_page/docs/connectors";
 import { Route as PageDocsDatabaseRouteImport } from "./routes/_page/docs/database";
+import { Route as PageDocsFoundationRouteImport } from "./routes/_page/docs/foundation";
 import { Route as PageDocsHistoryRouteImport } from "./routes/_page/docs/history";
+import { Route as PageDocsHowWeBuildRouteImport } from "./routes/_page/docs/how-we-build";
 import { Route as PageDocsIntentRouteImport } from "./routes/_page/docs/intent";
 import { Route as PageDocsIntentGuideRouteImport } from "./routes/_page/docs/intent-guide";
 import { Route as PageDocsMentionRouteImport } from "./routes/_page/docs/mention";
@@ -87,6 +105,7 @@ import { Route as PageDocsAffordanceActivateRouteImport } from "./routes/_page/d
 import { Route as PageDocsAffordanceCancelRouteImport } from "./routes/_page/docs/affordance/cancel";
 import { Route as PageDocsAffordanceCaretRouteImport } from "./routes/_page/docs/affordance/caret";
 import { Route as PageDocsAffordanceContextMenuRouteImport } from "./routes/_page/docs/affordance/context-menu";
+import { Route as PageDocsAffordanceContextualRouteImport } from "./routes/_page/docs/affordance/contextual";
 import { Route as PageDocsAffordanceCopyDragRouteImport } from "./routes/_page/docs/affordance/copy-drag";
 import { Route as PageDocsAffordanceDeleteRouteImport } from "./routes/_page/docs/affordance/delete";
 import { Route as PageDocsAffordanceDoubleClickRouteImport } from "./routes/_page/docs/affordance/double-click";
@@ -95,6 +114,7 @@ import { Route as PageDocsAffordanceDropRouteImport } from "./routes/_page/docs/
 import { Route as PageDocsAffordanceFocusRouteImport } from "./routes/_page/docs/affordance/focus";
 import { Route as PageDocsAffordanceFoldRouteImport } from "./routes/_page/docs/affordance/fold";
 import { Route as PageDocsAffordanceForbidRouteImport } from "./routes/_page/docs/affordance/forbid";
+import { Route as PageDocsAffordanceHandlesRouteImport } from "./routes/_page/docs/affordance/handles";
 import { Route as PageDocsAffordanceHistoryRouteImport } from "./routes/_page/docs/affordance/history";
 import { Route as PageDocsAffordanceHoverRouteImport } from "./routes/_page/docs/affordance/hover";
 import { Route as PageDocsAffordanceMarqueeRouteImport } from "./routes/_page/docs/affordance/marquee";
@@ -108,9 +128,12 @@ import { Route as PageDocsAffordanceSnapRouteImport } from "./routes/_page/docs/
 import { Route as PageDocsAffordanceTripleClickRouteImport } from "./routes/_page/docs/affordance/triple-click";
 import { Route as PageDocsAffordanceTypeaheadRouteImport } from "./routes/_page/docs/affordance/typeahead";
 import { Route as PageDocsAffordanceZoomRouteImport } from "./routes/_page/docs/affordance/zoom";
+import { Route as PageDocsApiA2uiRouteImport } from "./routes/_page/docs/api/a2ui";
 import { Route as PageDocsApiAffordanceRouteImport } from "./routes/_page/docs/api/affordance";
 import { Route as PageDocsApiAjvRouteImport } from "./routes/_page/docs/api/ajv";
+import { Route as PageDocsApiAnimationReactRouteImport } from "./routes/_page/docs/api/animation-react";
 import { Route as PageDocsApiAnnotationRouteImport } from "./routes/_page/docs/api/annotation";
+import { Route as PageDocsApiCalendarRouteImport } from "./routes/_page/docs/api/calendar";
 import { Route as PageDocsApiCollaborationRouteImport } from "./routes/_page/docs/api/collaboration";
 import { Route as PageDocsApiComposerRouteImport } from "./routes/_page/docs/api/composer";
 import { Route as PageDocsApiComposerReactRouteImport } from "./routes/_page/docs/api/composer-react";
@@ -120,6 +143,7 @@ import { Route as PageDocsApiDatabaseRouteImport } from "./routes/_page/docs/api
 import { Route as PageDocsApiEditingRouteImport } from "./routes/_page/docs/api/editing";
 import { Route as PageDocsApiFileIntakeRouteImport } from "./routes/_page/docs/api/file-intake";
 import { Route as PageDocsApiJsonDocumentRouteImport } from "./routes/_page/docs/api/json-document";
+import { Route as PageDocsApiMarkdownReactRouteImport } from "./routes/_page/docs/api/markdown-react";
 import { Route as PageDocsApiReactRouteImport } from "./routes/_page/docs/api/react";
 import { Route as PageDocsApiReactHookFormRouteImport } from "./routes/_page/docs/api/react-hook-form";
 import { Route as PageDocsApiRichTextRouteImport } from "./routes/_page/docs/api/rich-text";
@@ -138,6 +162,8 @@ import { Route as PageDocsCollaborationIndexRouteImport } from "./routes/_page/d
 import { Route as PageDocsCollaborationHistoryRouteImport } from "./routes/_page/docs/collaboration/history";
 import { Route as PageDocsCollaborationLifecycleRouteImport } from "./routes/_page/docs/collaboration/lifecycle";
 import { Route as PageDocsCollaborationReplicaRouteImport } from "./routes/_page/docs/collaboration/replica";
+import { Route as PageDocsDocumentTypesIndexRouteImport } from "./routes/_page/docs/document-types/index";
+import { Route as PageDocsDocumentTypesCandidateRouteImport } from "./routes/_page/docs/document-types/$candidate";
 import { Route as PageDocsCollaborationTextIndexRouteImport } from "./routes/_page/docs/collaboration/text/index";
 import { Route as PageDocsCollaborationTextLeaseRouteImport } from "./routes/_page/docs/collaboration/text/lease";
 
@@ -186,9 +212,46 @@ const PageAdaptersKeyboardRoute = PageAdaptersKeyboardRouteImport.update({
   path: "/adapters/keyboard",
   getParentRoute: () => PageRoute,
 } as any);
+const PageAdaptersVirtualSelectionRoute =
+  PageAdaptersVirtualSelectionRouteImport.update({
+    id: "/adapters/virtual-selection",
+    path: "/adapters/virtual-selection",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageAffordancesHandlesRoute = PageAffordancesHandlesRouteImport.update({
+  id: "/affordances/handles",
+  path: "/affordances/handles",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageApplicationsIndexRoute = PageApplicationsIndexRouteImport.update({
+  id: "/applications/",
+  path: "/applications/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageApplicationsAiAgentRoute = PageApplicationsAiAgentRouteImport.update({
+  id: "/applications/ai-agent",
+  path: "/applications/ai-agent",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageApplicationsCalendarRoute =
+  PageApplicationsCalendarRouteImport.update({
+    id: "/applications/calendar",
+    path: "/applications/calendar",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageArtifactLlmAgentRoute = PageArtifactLlmAgentRouteImport.update({
+  id: "/artifact/llm-agent",
+  path: "/artifact/llm-agent",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageConnectorsIndexRoute = PageConnectorsIndexRouteImport.update({
   id: "/connectors/",
   path: "/connectors/",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageConnectorsA2uiRoute = PageConnectorsA2uiRouteImport.update({
+  id: "/connectors/a2ui",
+  path: "/connectors/a2ui",
   getParentRoute: () => PageRoute,
 } as any);
 const PageConnectorsAjvRoute = PageConnectorsAjvRouteImport.update({
@@ -229,9 +292,19 @@ const PageDemoIndexRoute = PageDemoIndexRouteImport.update({
   path: "/demo/",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoAnimationRoute = PageDemoAnimationRouteImport.update({
+  id: "/demo/animation",
+  path: "/demo/animation",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoAnnotationRoute = PageDemoAnnotationRouteImport.update({
   id: "/demo/annotation",
   path: "/demo/annotation",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoCalendarRoute = PageDemoCalendarRouteImport.update({
+  id: "/demo/calendar",
+  path: "/demo/calendar",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoCanvasRoute = PageDemoCanvasRouteImport.update({
@@ -254,6 +327,11 @@ const PageDemoDatabaseRoute = PageDemoDatabaseRouteImport.update({
   path: "/demo/database",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDemoDateControlsRoute = PageDemoDateControlsRouteImport.update({
+  id: "/demo/date-controls",
+  path: "/demo/date-controls",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
   id: "/demo/history",
   path: "/demo/history",
@@ -262,6 +340,11 @@ const PageDemoHistoryRoute = PageDemoHistoryRouteImport.update({
 const PageDemoKanbanRoute = PageDemoKanbanRouteImport.update({
   id: "/demo/kanban",
   path: "/demo/kanban",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoMarkdownRoute = PageDemoMarkdownRouteImport.update({
+  id: "/demo/markdown",
+  path: "/demo/markdown",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDemoObjectRoute = PageDemoObjectRouteImport.update({
@@ -292,6 +375,16 @@ const PageDemoTopologyRoute = PageDemoTopologyRouteImport.update({
 const PageDemoTreeRoute = PageDemoTreeRouteImport.update({
   id: "/demo/tree",
   path: "/demo/tree",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoUiPrimitivesRoute = PageDemoUiPrimitivesRouteImport.update({
+  id: "/demo/ui-primitives",
+  path: "/demo/ui-primitives",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDemoViewportRoute = PageDemoViewportRouteImport.update({
+  id: "/demo/viewport",
+  path: "/demo/viewport",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsIndexRoute = PageDocsIndexRouteImport.update({
@@ -327,9 +420,20 @@ const PageDocsAdapterKeyboardRoute = PageDocsAdapterKeyboardRouteImport.update({
   path: "/docs/adapter-keyboard",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsAdapterVirtualSelectionRoute =
+  PageDocsAdapterVirtualSelectionRouteImport.update({
+    id: "/docs/adapter-virtual-selection",
+    path: "/docs/adapter-virtual-selection",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAdaptersRoute = PageDocsAdaptersRouteImport.update({
   id: "/docs/adapters",
   path: "/docs/adapters",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsAnimationRoute = PageDocsAnimationRouteImport.update({
+  id: "/docs/animation",
+  path: "/docs/animation",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsApiRoute = PageDocsApiRouteImport.update({
@@ -350,6 +454,11 @@ const PageDocsComposerRoute = PageDocsComposerRouteImport.update({
 const PageDocsConceptsRoute = PageDocsConceptsRouteImport.update({
   id: "/docs/concepts",
   path: "/docs/concepts",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsConnectorA2uiRoute = PageDocsConnectorA2uiRouteImport.update({
+  id: "/docs/connector-a2ui",
+  path: "/docs/connector-a2ui",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsConnectorAjvRoute = PageDocsConnectorAjvRouteImport.update({
@@ -395,9 +504,19 @@ const PageDocsDatabaseRoute = PageDocsDatabaseRouteImport.update({
   path: "/docs/database",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsFoundationRoute = PageDocsFoundationRouteImport.update({
+  id: "/docs/foundation",
+  path: "/docs/foundation",
+  getParentRoute: () => PageRoute,
+} as any);
 const PageDocsHistoryRoute = PageDocsHistoryRouteImport.update({
   id: "/docs/history",
   path: "/docs/history",
+  getParentRoute: () => PageRoute,
+} as any);
+const PageDocsHowWeBuildRoute = PageDocsHowWeBuildRouteImport.update({
+  id: "/docs/how-we-build",
+  path: "/docs/how-we-build",
   getParentRoute: () => PageRoute,
 } as any);
 const PageDocsIntentRoute = PageDocsIntentRouteImport.update({
@@ -544,6 +663,12 @@ const PageDocsAffordanceContextMenuRoute =
     path: "/docs/affordance/context-menu",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsAffordanceContextualRoute =
+  PageDocsAffordanceContextualRouteImport.update({
+    id: "/docs/affordance/contextual",
+    path: "/docs/affordance/contextual",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsAffordanceCopyDragRoute =
   PageDocsAffordanceCopyDragRouteImport.update({
     id: "/docs/affordance/copy-drag",
@@ -586,6 +711,12 @@ const PageDocsAffordanceForbidRoute =
   PageDocsAffordanceForbidRouteImport.update({
     id: "/docs/affordance/forbid",
     path: "/docs/affordance/forbid",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsAffordanceHandlesRoute =
+  PageDocsAffordanceHandlesRouteImport.update({
+    id: "/docs/affordance/handles",
+    path: "/docs/affordance/handles",
     getParentRoute: () => PageRoute,
   } as any);
 const PageDocsAffordanceHistoryRoute =
@@ -661,6 +792,11 @@ const PageDocsAffordanceZoomRoute = PageDocsAffordanceZoomRouteImport.update({
   path: "/docs/affordance/zoom",
   getParentRoute: () => PageRoute,
 } as any);
+const PageDocsApiA2uiRoute = PageDocsApiA2uiRouteImport.update({
+  id: "/a2ui",
+  path: "/a2ui",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
 const PageDocsApiAffordanceRoute = PageDocsApiAffordanceRouteImport.update({
   id: "/affordance",
   path: "/affordance",
@@ -671,9 +807,20 @@ const PageDocsApiAjvRoute = PageDocsApiAjvRouteImport.update({
   path: "/ajv",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiAnimationReactRoute =
+  PageDocsApiAnimationReactRouteImport.update({
+    id: "/animation-react",
+    path: "/animation-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
 const PageDocsApiAnnotationRoute = PageDocsApiAnnotationRouteImport.update({
   id: "/annotation",
   path: "/annotation",
+  getParentRoute: () => PageDocsApiRoute,
+} as any);
+const PageDocsApiCalendarRoute = PageDocsApiCalendarRouteImport.update({
+  id: "/calendar",
+  path: "/calendar",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
 const PageDocsApiCollaborationRoute =
@@ -725,6 +872,12 @@ const PageDocsApiJsonDocumentRoute = PageDocsApiJsonDocumentRouteImport.update({
   path: "/json-document",
   getParentRoute: () => PageDocsApiRoute,
 } as any);
+const PageDocsApiMarkdownReactRoute =
+  PageDocsApiMarkdownReactRouteImport.update({
+    id: "/markdown-react",
+    path: "/markdown-react",
+    getParentRoute: () => PageDocsApiRoute,
+  } as any);
 const PageDocsApiReactRoute = PageDocsApiReactRouteImport.update({
   id: "/react",
   path: "/react",
@@ -827,6 +980,18 @@ const PageDocsCollaborationReplicaRoute =
     path: "/docs/collaboration/replica",
     getParentRoute: () => PageRoute,
   } as any);
+const PageDocsDocumentTypesIndexRoute =
+  PageDocsDocumentTypesIndexRouteImport.update({
+    id: "/docs/document-types/",
+    path: "/docs/document-types/",
+    getParentRoute: () => PageRoute,
+  } as any);
+const PageDocsDocumentTypesCandidateRoute =
+  PageDocsDocumentTypesCandidateRouteImport.update({
+    id: "/docs/document-types/$candidate",
+    path: "/docs/document-types/$candidate",
+    getParentRoute: () => PageRoute,
+  } as any);
 const PageDocsCollaborationTextIndexRoute =
   PageDocsCollaborationTextIndexRouteImport.update({
     id: "/docs/collaboration/text/",
@@ -848,35 +1013,50 @@ export interface FileRoutesByFullPath {
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
+  "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/applications/ai-agent": typeof PageApplicationsAiAgentRoute;
+  "/applications/calendar": typeof PageApplicationsCalendarRoute;
+  "/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
+  "/connectors/a2ui": typeof PageConnectorsA2uiRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/animation": typeof PageDemoAnimationRoute;
   "/demo/annotation": typeof PageDemoAnnotationRoute;
+  "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
+  "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
+  "/demo/markdown": typeof PageDemoMarkdownRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
+  "/demo/viewport": typeof PageDemoViewportRoute;
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
   "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
   "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
+  "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
+  "/docs/animation": typeof PageDocsAnimationRoute;
   "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
+  "/docs/connector-a2ui": typeof PageDocsConnectorA2uiRoute;
   "/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
   "/docs/connector-react": typeof PageDocsConnectorReactRoute;
   "/docs/connector-react-hook-form": typeof PageDocsConnectorReactHookFormRoute;
@@ -885,7 +1065,9 @@ export interface FileRoutesByFullPath {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/foundation": typeof PageDocsFoundationRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
@@ -907,6 +1089,7 @@ export interface FileRoutesByFullPath {
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters/": typeof PageAdaptersIndexRoute;
+  "/applications/": typeof PageApplicationsIndexRoute;
   "/connectors/": typeof PageConnectorsIndexRoute;
   "/demo/": typeof PageDemoIndexRoute;
   "/docs/": typeof PageDocsIndexRoute;
@@ -916,6 +1099,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/docs/affordance/contextual": typeof PageDocsAffordanceContextualRoute;
   "/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
   "/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
   "/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
@@ -924,6 +1108,7 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -937,9 +1122,12 @@ export interface FileRoutesByFullPath {
   "/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
   "/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
+  "/docs/api/a2ui": typeof PageDocsApiA2uiRoute;
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
   "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
+  "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -949,6 +1137,7 @@ export interface FileRoutesByFullPath {
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
@@ -966,9 +1155,11 @@ export interface FileRoutesByFullPath {
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
+  "/docs/document-types/$candidate": typeof PageDocsDocumentTypesCandidateRoute;
   "/connectors/zod/": typeof PageConnectorsZodIndexRoute;
   "/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
+  "/docs/document-types/": typeof PageDocsDocumentTypesIndexRoute;
   "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
 }
@@ -980,35 +1171,50 @@ export interface FileRoutesByTo {
   "/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
+  "/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/applications/ai-agent": typeof PageApplicationsAiAgentRoute;
+  "/applications/calendar": typeof PageApplicationsCalendarRoute;
+  "/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
+  "/connectors/a2ui": typeof PageConnectorsA2uiRoute;
   "/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/connectors/react": typeof PageConnectorsReactRoute;
   "/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/connectors/web": typeof PageConnectorsWebRoute;
+  "/demo/animation": typeof PageDemoAnimationRoute;
   "/demo/annotation": typeof PageDemoAnnotationRoute;
+  "/demo/calendar": typeof PageDemoCalendarRoute;
   "/demo/canvas": typeof PageDemoCanvasRoute;
   "/demo/clipboard": typeof PageDemoClipboardRoute;
   "/demo/composer": typeof PageDemoComposerRoute;
   "/demo/database": typeof PageDemoDatabaseRoute;
+  "/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/demo/history": typeof PageDemoHistoryRoute;
   "/demo/kanban": typeof PageDemoKanbanRoute;
+  "/demo/markdown": typeof PageDemoMarkdownRoute;
   "/demo/object": typeof PageDemoObjectRoute;
   "/demo/order": typeof PageDemoOrderRoute;
   "/demo/selection": typeof PageDemoSelectionRoute;
   "/demo/sheet": typeof PageDemoSheetRoute;
   "/demo/topology": typeof PageDemoTopologyRoute;
   "/demo/tree": typeof PageDemoTreeRoute;
+  "/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
+  "/demo/viewport": typeof PageDemoViewportRoute;
   "/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
   "/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
   "/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
+  "/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/docs/adapters": typeof PageDocsAdaptersRoute;
+  "/docs/animation": typeof PageDocsAnimationRoute;
   "/docs/api": typeof PageDocsApiRouteWithChildren;
   "/docs/clipboard": typeof PageDocsClipboardRoute;
   "/docs/composer": typeof PageDocsComposerRoute;
   "/docs/concepts": typeof PageDocsConceptsRoute;
+  "/docs/connector-a2ui": typeof PageDocsConnectorA2uiRoute;
   "/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
   "/docs/connector-react": typeof PageDocsConnectorReactRoute;
   "/docs/connector-react-hook-form": typeof PageDocsConnectorReactHookFormRoute;
@@ -1017,7 +1223,9 @@ export interface FileRoutesByTo {
   "/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/docs/connectors": typeof PageDocsConnectorsRoute;
   "/docs/database": typeof PageDocsDatabaseRoute;
+  "/docs/foundation": typeof PageDocsFoundationRoute;
   "/docs/history": typeof PageDocsHistoryRoute;
+  "/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/docs/intent": typeof PageDocsIntentRoute;
   "/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/docs/mention": typeof PageDocsMentionRoute;
@@ -1039,6 +1247,7 @@ export interface FileRoutesByTo {
   "/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/widgets/tree": typeof PageWidgetsTreeRoute;
   "/adapters": typeof PageAdaptersIndexRoute;
+  "/applications": typeof PageApplicationsIndexRoute;
   "/connectors": typeof PageConnectorsIndexRoute;
   "/demo": typeof PageDemoIndexRoute;
   "/docs": typeof PageDocsIndexRoute;
@@ -1048,6 +1257,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/docs/affordance/contextual": typeof PageDocsAffordanceContextualRoute;
   "/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
   "/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
   "/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
@@ -1056,6 +1266,7 @@ export interface FileRoutesByTo {
   "/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1069,9 +1280,12 @@ export interface FileRoutesByTo {
   "/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
   "/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
   "/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
+  "/docs/api/a2ui": typeof PageDocsApiA2uiRoute;
   "/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
   "/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
+  "/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1081,6 +1295,7 @@ export interface FileRoutesByTo {
   "/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
   "/docs/api/react": typeof PageDocsApiReactRoute;
   "/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
@@ -1098,9 +1313,11 @@ export interface FileRoutesByTo {
   "/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
+  "/docs/document-types/$candidate": typeof PageDocsDocumentTypesCandidateRoute;
   "/connectors/zod": typeof PageConnectorsZodIndexRoute;
   "/docs/affordance": typeof PageDocsAffordanceIndexRoute;
   "/docs/collaboration": typeof PageDocsCollaborationIndexRoute;
+  "/docs/document-types": typeof PageDocsDocumentTypesIndexRoute;
   "/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/docs/collaboration/text": typeof PageDocsCollaborationTextIndexRoute;
 }
@@ -1114,35 +1331,50 @@ export interface FileRoutesById {
   "/_page/adapters/clipboard": typeof PageAdaptersClipboardRoute;
   "/_page/adapters/contenteditable": typeof PageAdaptersContenteditableRoute;
   "/_page/adapters/keyboard": typeof PageAdaptersKeyboardRoute;
+  "/_page/adapters/virtual-selection": typeof PageAdaptersVirtualSelectionRoute;
+  "/_page/affordances/handles": typeof PageAffordancesHandlesRoute;
+  "/_page/applications/ai-agent": typeof PageApplicationsAiAgentRoute;
+  "/_page/applications/calendar": typeof PageApplicationsCalendarRoute;
+  "/_page/artifact/llm-agent": typeof PageArtifactLlmAgentRoute;
+  "/_page/connectors/a2ui": typeof PageConnectorsA2uiRoute;
   "/_page/connectors/ajv": typeof PageConnectorsAjvRoute;
   "/_page/connectors/contenteditable": typeof PageConnectorsContenteditableRoute;
   "/_page/connectors/react": typeof PageConnectorsReactRoute;
   "/_page/connectors/react-hook-form": typeof PageConnectorsReactHookFormRoute;
   "/_page/connectors/tanstack-table": typeof PageConnectorsTanstackTableRoute;
   "/_page/connectors/web": typeof PageConnectorsWebRoute;
+  "/_page/demo/animation": typeof PageDemoAnimationRoute;
   "/_page/demo/annotation": typeof PageDemoAnnotationRoute;
+  "/_page/demo/calendar": typeof PageDemoCalendarRoute;
   "/_page/demo/canvas": typeof PageDemoCanvasRoute;
   "/_page/demo/clipboard": typeof PageDemoClipboardRoute;
   "/_page/demo/composer": typeof PageDemoComposerRoute;
   "/_page/demo/database": typeof PageDemoDatabaseRoute;
+  "/_page/demo/date-controls": typeof PageDemoDateControlsRoute;
   "/_page/demo/history": typeof PageDemoHistoryRoute;
   "/_page/demo/kanban": typeof PageDemoKanbanRoute;
+  "/_page/demo/markdown": typeof PageDemoMarkdownRoute;
   "/_page/demo/object": typeof PageDemoObjectRoute;
   "/_page/demo/order": typeof PageDemoOrderRoute;
   "/_page/demo/selection": typeof PageDemoSelectionRoute;
   "/_page/demo/sheet": typeof PageDemoSheetRoute;
   "/_page/demo/topology": typeof PageDemoTopologyRoute;
   "/_page/demo/tree": typeof PageDemoTreeRoute;
+  "/_page/demo/ui-primitives": typeof PageDemoUiPrimitivesRoute;
+  "/_page/demo/viewport": typeof PageDemoViewportRoute;
   "/_page/docs/adapter-clipboard": typeof PageDocsAdapterClipboardRoute;
   "/_page/docs/adapter-contenteditable": typeof PageDocsAdapterContenteditableRoute;
   "/_page/docs/adapter-grid-cell": typeof PageDocsAdapterGridCellRoute;
   "/_page/docs/adapter-interaction": typeof PageDocsAdapterInteractionRoute;
   "/_page/docs/adapter-keyboard": typeof PageDocsAdapterKeyboardRoute;
+  "/_page/docs/adapter-virtual-selection": typeof PageDocsAdapterVirtualSelectionRoute;
   "/_page/docs/adapters": typeof PageDocsAdaptersRoute;
+  "/_page/docs/animation": typeof PageDocsAnimationRoute;
   "/_page/docs/api": typeof PageDocsApiRouteWithChildren;
   "/_page/docs/clipboard": typeof PageDocsClipboardRoute;
   "/_page/docs/composer": typeof PageDocsComposerRoute;
   "/_page/docs/concepts": typeof PageDocsConceptsRoute;
+  "/_page/docs/connector-a2ui": typeof PageDocsConnectorA2uiRoute;
   "/_page/docs/connector-ajv": typeof PageDocsConnectorAjvRoute;
   "/_page/docs/connector-react": typeof PageDocsConnectorReactRoute;
   "/_page/docs/connector-react-hook-form": typeof PageDocsConnectorReactHookFormRoute;
@@ -1151,7 +1383,9 @@ export interface FileRoutesById {
   "/_page/docs/connector-zod-validate": typeof PageDocsConnectorZodValidateRoute;
   "/_page/docs/connectors": typeof PageDocsConnectorsRoute;
   "/_page/docs/database": typeof PageDocsDatabaseRoute;
+  "/_page/docs/foundation": typeof PageDocsFoundationRoute;
   "/_page/docs/history": typeof PageDocsHistoryRoute;
+  "/_page/docs/how-we-build": typeof PageDocsHowWeBuildRoute;
   "/_page/docs/intent": typeof PageDocsIntentRoute;
   "/_page/docs/intent-guide": typeof PageDocsIntentGuideRoute;
   "/_page/docs/mention": typeof PageDocsMentionRoute;
@@ -1173,6 +1407,7 @@ export interface FileRoutesById {
   "/_page/widgets/toolbar": typeof PageWidgetsToolbarRoute;
   "/_page/widgets/tree": typeof PageWidgetsTreeRoute;
   "/_page/adapters/": typeof PageAdaptersIndexRoute;
+  "/_page/applications/": typeof PageApplicationsIndexRoute;
   "/_page/connectors/": typeof PageConnectorsIndexRoute;
   "/_page/demo/": typeof PageDemoIndexRoute;
   "/_page/docs/": typeof PageDocsIndexRoute;
@@ -1182,6 +1417,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/cancel": typeof PageDocsAffordanceCancelRoute;
   "/_page/docs/affordance/caret": typeof PageDocsAffordanceCaretRoute;
   "/_page/docs/affordance/context-menu": typeof PageDocsAffordanceContextMenuRoute;
+  "/_page/docs/affordance/contextual": typeof PageDocsAffordanceContextualRoute;
   "/_page/docs/affordance/copy-drag": typeof PageDocsAffordanceCopyDragRoute;
   "/_page/docs/affordance/delete": typeof PageDocsAffordanceDeleteRoute;
   "/_page/docs/affordance/double-click": typeof PageDocsAffordanceDoubleClickRoute;
@@ -1190,6 +1426,7 @@ export interface FileRoutesById {
   "/_page/docs/affordance/focus": typeof PageDocsAffordanceFocusRoute;
   "/_page/docs/affordance/fold": typeof PageDocsAffordanceFoldRoute;
   "/_page/docs/affordance/forbid": typeof PageDocsAffordanceForbidRoute;
+  "/_page/docs/affordance/handles": typeof PageDocsAffordanceHandlesRoute;
   "/_page/docs/affordance/history": typeof PageDocsAffordanceHistoryRoute;
   "/_page/docs/affordance/hover": typeof PageDocsAffordanceHoverRoute;
   "/_page/docs/affordance/marquee": typeof PageDocsAffordanceMarqueeRoute;
@@ -1203,9 +1440,12 @@ export interface FileRoutesById {
   "/_page/docs/affordance/triple-click": typeof PageDocsAffordanceTripleClickRoute;
   "/_page/docs/affordance/typeahead": typeof PageDocsAffordanceTypeaheadRoute;
   "/_page/docs/affordance/zoom": typeof PageDocsAffordanceZoomRoute;
+  "/_page/docs/api/a2ui": typeof PageDocsApiA2uiRoute;
   "/_page/docs/api/affordance": typeof PageDocsApiAffordanceRoute;
   "/_page/docs/api/ajv": typeof PageDocsApiAjvRoute;
+  "/_page/docs/api/animation-react": typeof PageDocsApiAnimationReactRoute;
   "/_page/docs/api/annotation": typeof PageDocsApiAnnotationRoute;
+  "/_page/docs/api/calendar": typeof PageDocsApiCalendarRoute;
   "/_page/docs/api/collaboration": typeof PageDocsApiCollaborationRoute;
   "/_page/docs/api/composer": typeof PageDocsApiComposerRoute;
   "/_page/docs/api/composer-react": typeof PageDocsApiComposerReactRoute;
@@ -1215,6 +1455,7 @@ export interface FileRoutesById {
   "/_page/docs/api/editing": typeof PageDocsApiEditingRoute;
   "/_page/docs/api/file-intake": typeof PageDocsApiFileIntakeRoute;
   "/_page/docs/api/json-document": typeof PageDocsApiJsonDocumentRoute;
+  "/_page/docs/api/markdown-react": typeof PageDocsApiMarkdownReactRoute;
   "/_page/docs/api/react": typeof PageDocsApiReactRoute;
   "/_page/docs/api/react-hook-form": typeof PageDocsApiReactHookFormRoute;
   "/_page/docs/api/rich-text": typeof PageDocsApiRichTextRoute;
@@ -1232,9 +1473,11 @@ export interface FileRoutesById {
   "/_page/docs/collaboration/history": typeof PageDocsCollaborationHistoryRoute;
   "/_page/docs/collaboration/lifecycle": typeof PageDocsCollaborationLifecycleRoute;
   "/_page/docs/collaboration/replica": typeof PageDocsCollaborationReplicaRoute;
+  "/_page/docs/document-types/$candidate": typeof PageDocsDocumentTypesCandidateRoute;
   "/_page/connectors/zod/": typeof PageConnectorsZodIndexRoute;
   "/_page/docs/affordance/": typeof PageDocsAffordanceIndexRoute;
   "/_page/docs/collaboration/": typeof PageDocsCollaborationIndexRoute;
+  "/_page/docs/document-types/": typeof PageDocsDocumentTypesIndexRoute;
   "/_page/docs/collaboration/text/lease": typeof PageDocsCollaborationTextLeaseRoute;
   "/_page/docs/collaboration/text/": typeof PageDocsCollaborationTextIndexRoute;
 }
@@ -1248,35 +1491,50 @@ export interface FileRouteTypes {
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
+    | "/adapters/virtual-selection"
+    | "/affordances/handles"
+    | "/applications/ai-agent"
+    | "/applications/calendar"
+    | "/artifact/llm-agent"
+    | "/connectors/a2ui"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/animation"
     | "/demo/annotation"
+    | "/demo/calendar"
     | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/composer"
     | "/demo/database"
+    | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
+    | "/demo/markdown"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/demo/ui-primitives"
+    | "/demo/viewport"
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
     | "/docs/adapter-grid-cell"
     | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
+    | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
+    | "/docs/animation"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
+    | "/docs/connector-a2ui"
     | "/docs/connector-ajv"
     | "/docs/connector-react"
     | "/docs/connector-react-hook-form"
@@ -1285,7 +1543,9 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/foundation"
     | "/docs/history"
+    | "/docs/how-we-build"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
@@ -1307,6 +1567,7 @@ export interface FileRouteTypes {
     | "/widgets/toolbar"
     | "/widgets/tree"
     | "/adapters/"
+    | "/applications/"
     | "/connectors/"
     | "/demo/"
     | "/docs/"
@@ -1316,6 +1577,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/cancel"
     | "/docs/affordance/caret"
     | "/docs/affordance/context-menu"
+    | "/docs/affordance/contextual"
     | "/docs/affordance/copy-drag"
     | "/docs/affordance/delete"
     | "/docs/affordance/double-click"
@@ -1324,6 +1586,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/focus"
     | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
+    | "/docs/affordance/handles"
     | "/docs/affordance/history"
     | "/docs/affordance/hover"
     | "/docs/affordance/marquee"
@@ -1337,9 +1600,12 @@ export interface FileRouteTypes {
     | "/docs/affordance/triple-click"
     | "/docs/affordance/typeahead"
     | "/docs/affordance/zoom"
+    | "/docs/api/a2ui"
     | "/docs/api/affordance"
     | "/docs/api/ajv"
+    | "/docs/api/animation-react"
     | "/docs/api/annotation"
+    | "/docs/api/calendar"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
     | "/docs/api/composer-react"
@@ -1349,6 +1615,7 @@ export interface FileRouteTypes {
     | "/docs/api/editing"
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
+    | "/docs/api/markdown-react"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
@@ -1366,9 +1633,11 @@ export interface FileRouteTypes {
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
+    | "/docs/document-types/$candidate"
     | "/connectors/zod/"
     | "/docs/affordance/"
     | "/docs/collaboration/"
+    | "/docs/document-types/"
     | "/docs/collaboration/text/lease"
     | "/docs/collaboration/text/";
   fileRoutesByTo: FileRoutesByTo;
@@ -1380,35 +1649,50 @@ export interface FileRouteTypes {
     | "/adapters/clipboard"
     | "/adapters/contenteditable"
     | "/adapters/keyboard"
+    | "/adapters/virtual-selection"
+    | "/affordances/handles"
+    | "/applications/ai-agent"
+    | "/applications/calendar"
+    | "/artifact/llm-agent"
+    | "/connectors/a2ui"
     | "/connectors/ajv"
     | "/connectors/contenteditable"
     | "/connectors/react"
     | "/connectors/react-hook-form"
     | "/connectors/tanstack-table"
     | "/connectors/web"
+    | "/demo/animation"
     | "/demo/annotation"
+    | "/demo/calendar"
     | "/demo/canvas"
     | "/demo/clipboard"
     | "/demo/composer"
     | "/demo/database"
+    | "/demo/date-controls"
     | "/demo/history"
     | "/demo/kanban"
+    | "/demo/markdown"
     | "/demo/object"
     | "/demo/order"
     | "/demo/selection"
     | "/demo/sheet"
     | "/demo/topology"
     | "/demo/tree"
+    | "/demo/ui-primitives"
+    | "/demo/viewport"
     | "/docs/adapter-clipboard"
     | "/docs/adapter-contenteditable"
     | "/docs/adapter-grid-cell"
     | "/docs/adapter-interaction"
     | "/docs/adapter-keyboard"
+    | "/docs/adapter-virtual-selection"
     | "/docs/adapters"
+    | "/docs/animation"
     | "/docs/api"
     | "/docs/clipboard"
     | "/docs/composer"
     | "/docs/concepts"
+    | "/docs/connector-a2ui"
     | "/docs/connector-ajv"
     | "/docs/connector-react"
     | "/docs/connector-react-hook-form"
@@ -1417,7 +1701,9 @@ export interface FileRouteTypes {
     | "/docs/connector-zod-validate"
     | "/docs/connectors"
     | "/docs/database"
+    | "/docs/foundation"
     | "/docs/history"
+    | "/docs/how-we-build"
     | "/docs/intent"
     | "/docs/intent-guide"
     | "/docs/mention"
@@ -1439,6 +1725,7 @@ export interface FileRouteTypes {
     | "/widgets/toolbar"
     | "/widgets/tree"
     | "/adapters"
+    | "/applications"
     | "/connectors"
     | "/demo"
     | "/docs"
@@ -1448,6 +1735,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/cancel"
     | "/docs/affordance/caret"
     | "/docs/affordance/context-menu"
+    | "/docs/affordance/contextual"
     | "/docs/affordance/copy-drag"
     | "/docs/affordance/delete"
     | "/docs/affordance/double-click"
@@ -1456,6 +1744,7 @@ export interface FileRouteTypes {
     | "/docs/affordance/focus"
     | "/docs/affordance/fold"
     | "/docs/affordance/forbid"
+    | "/docs/affordance/handles"
     | "/docs/affordance/history"
     | "/docs/affordance/hover"
     | "/docs/affordance/marquee"
@@ -1469,9 +1758,12 @@ export interface FileRouteTypes {
     | "/docs/affordance/triple-click"
     | "/docs/affordance/typeahead"
     | "/docs/affordance/zoom"
+    | "/docs/api/a2ui"
     | "/docs/api/affordance"
     | "/docs/api/ajv"
+    | "/docs/api/animation-react"
     | "/docs/api/annotation"
+    | "/docs/api/calendar"
     | "/docs/api/collaboration"
     | "/docs/api/composer"
     | "/docs/api/composer-react"
@@ -1481,6 +1773,7 @@ export interface FileRouteTypes {
     | "/docs/api/editing"
     | "/docs/api/file-intake"
     | "/docs/api/json-document"
+    | "/docs/api/markdown-react"
     | "/docs/api/react"
     | "/docs/api/react-hook-form"
     | "/docs/api/rich-text"
@@ -1498,9 +1791,11 @@ export interface FileRouteTypes {
     | "/docs/collaboration/history"
     | "/docs/collaboration/lifecycle"
     | "/docs/collaboration/replica"
+    | "/docs/document-types/$candidate"
     | "/connectors/zod"
     | "/docs/affordance"
     | "/docs/collaboration"
+    | "/docs/document-types"
     | "/docs/collaboration/text/lease"
     | "/docs/collaboration/text";
   id:
@@ -1513,35 +1808,50 @@ export interface FileRouteTypes {
     | "/_page/adapters/clipboard"
     | "/_page/adapters/contenteditable"
     | "/_page/adapters/keyboard"
+    | "/_page/adapters/virtual-selection"
+    | "/_page/affordances/handles"
+    | "/_page/applications/ai-agent"
+    | "/_page/applications/calendar"
+    | "/_page/artifact/llm-agent"
+    | "/_page/connectors/a2ui"
     | "/_page/connectors/ajv"
     | "/_page/connectors/contenteditable"
     | "/_page/connectors/react"
     | "/_page/connectors/react-hook-form"
     | "/_page/connectors/tanstack-table"
     | "/_page/connectors/web"
+    | "/_page/demo/animation"
     | "/_page/demo/annotation"
+    | "/_page/demo/calendar"
     | "/_page/demo/canvas"
     | "/_page/demo/clipboard"
     | "/_page/demo/composer"
     | "/_page/demo/database"
+    | "/_page/demo/date-controls"
     | "/_page/demo/history"
     | "/_page/demo/kanban"
+    | "/_page/demo/markdown"
     | "/_page/demo/object"
     | "/_page/demo/order"
     | "/_page/demo/selection"
     | "/_page/demo/sheet"
     | "/_page/demo/topology"
     | "/_page/demo/tree"
+    | "/_page/demo/ui-primitives"
+    | "/_page/demo/viewport"
     | "/_page/docs/adapter-clipboard"
     | "/_page/docs/adapter-contenteditable"
     | "/_page/docs/adapter-grid-cell"
     | "/_page/docs/adapter-interaction"
     | "/_page/docs/adapter-keyboard"
+    | "/_page/docs/adapter-virtual-selection"
     | "/_page/docs/adapters"
+    | "/_page/docs/animation"
     | "/_page/docs/api"
     | "/_page/docs/clipboard"
     | "/_page/docs/composer"
     | "/_page/docs/concepts"
+    | "/_page/docs/connector-a2ui"
     | "/_page/docs/connector-ajv"
     | "/_page/docs/connector-react"
     | "/_page/docs/connector-react-hook-form"
@@ -1550,7 +1860,9 @@ export interface FileRouteTypes {
     | "/_page/docs/connector-zod-validate"
     | "/_page/docs/connectors"
     | "/_page/docs/database"
+    | "/_page/docs/foundation"
     | "/_page/docs/history"
+    | "/_page/docs/how-we-build"
     | "/_page/docs/intent"
     | "/_page/docs/intent-guide"
     | "/_page/docs/mention"
@@ -1572,6 +1884,7 @@ export interface FileRouteTypes {
     | "/_page/widgets/toolbar"
     | "/_page/widgets/tree"
     | "/_page/adapters/"
+    | "/_page/applications/"
     | "/_page/connectors/"
     | "/_page/demo/"
     | "/_page/docs/"
@@ -1581,6 +1894,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/cancel"
     | "/_page/docs/affordance/caret"
     | "/_page/docs/affordance/context-menu"
+    | "/_page/docs/affordance/contextual"
     | "/_page/docs/affordance/copy-drag"
     | "/_page/docs/affordance/delete"
     | "/_page/docs/affordance/double-click"
@@ -1589,6 +1903,7 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/focus"
     | "/_page/docs/affordance/fold"
     | "/_page/docs/affordance/forbid"
+    | "/_page/docs/affordance/handles"
     | "/_page/docs/affordance/history"
     | "/_page/docs/affordance/hover"
     | "/_page/docs/affordance/marquee"
@@ -1602,9 +1917,12 @@ export interface FileRouteTypes {
     | "/_page/docs/affordance/triple-click"
     | "/_page/docs/affordance/typeahead"
     | "/_page/docs/affordance/zoom"
+    | "/_page/docs/api/a2ui"
     | "/_page/docs/api/affordance"
     | "/_page/docs/api/ajv"
+    | "/_page/docs/api/animation-react"
     | "/_page/docs/api/annotation"
+    | "/_page/docs/api/calendar"
     | "/_page/docs/api/collaboration"
     | "/_page/docs/api/composer"
     | "/_page/docs/api/composer-react"
@@ -1614,6 +1932,7 @@ export interface FileRouteTypes {
     | "/_page/docs/api/editing"
     | "/_page/docs/api/file-intake"
     | "/_page/docs/api/json-document"
+    | "/_page/docs/api/markdown-react"
     | "/_page/docs/api/react"
     | "/_page/docs/api/react-hook-form"
     | "/_page/docs/api/rich-text"
@@ -1631,9 +1950,11 @@ export interface FileRouteTypes {
     | "/_page/docs/collaboration/history"
     | "/_page/docs/collaboration/lifecycle"
     | "/_page/docs/collaboration/replica"
+    | "/_page/docs/document-types/$candidate"
     | "/_page/connectors/zod/"
     | "/_page/docs/affordance/"
     | "/_page/docs/collaboration/"
+    | "/_page/docs/document-types/"
     | "/_page/docs/collaboration/text/lease"
     | "/_page/docs/collaboration/text/";
   fileRoutesById: FileRoutesById;
@@ -1708,11 +2029,60 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageAdaptersKeyboardRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/adapters/virtual-selection": {
+      id: "/_page/adapters/virtual-selection";
+      path: "/adapters/virtual-selection";
+      fullPath: "/adapters/virtual-selection";
+      preLoaderRoute: typeof PageAdaptersVirtualSelectionRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/affordances/handles": {
+      id: "/_page/affordances/handles";
+      path: "/affordances/handles";
+      fullPath: "/affordances/handles";
+      preLoaderRoute: typeof PageAffordancesHandlesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/applications/": {
+      id: "/_page/applications/";
+      path: "/applications";
+      fullPath: "/applications/";
+      preLoaderRoute: typeof PageApplicationsIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/applications/ai-agent": {
+      id: "/_page/applications/ai-agent";
+      path: "/applications/ai-agent";
+      fullPath: "/applications/ai-agent";
+      preLoaderRoute: typeof PageApplicationsAiAgentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/applications/calendar": {
+      id: "/_page/applications/calendar";
+      path: "/applications/calendar";
+      fullPath: "/applications/calendar";
+      preLoaderRoute: typeof PageApplicationsCalendarRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/artifact/llm-agent": {
+      id: "/_page/artifact/llm-agent";
+      path: "/artifact/llm-agent";
+      fullPath: "/artifact/llm-agent";
+      preLoaderRoute: typeof PageArtifactLlmAgentRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/connectors/": {
       id: "/_page/connectors/";
       path: "/connectors";
       fullPath: "/connectors/";
       preLoaderRoute: typeof PageConnectorsIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/connectors/a2ui": {
+      id: "/_page/connectors/a2ui";
+      path: "/connectors/a2ui";
+      fullPath: "/connectors/a2ui";
+      preLoaderRoute: typeof PageConnectorsA2uiRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/connectors/ajv": {
@@ -1764,11 +2134,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoIndexRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/animation": {
+      id: "/_page/demo/animation";
+      path: "/demo/animation";
+      fullPath: "/demo/animation";
+      preLoaderRoute: typeof PageDemoAnimationRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/demo/annotation": {
       id: "/_page/demo/annotation";
       path: "/demo/annotation";
       fullPath: "/demo/annotation";
       preLoaderRoute: typeof PageDemoAnnotationRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/calendar": {
+      id: "/_page/demo/calendar";
+      path: "/demo/calendar";
+      fullPath: "/demo/calendar";
+      preLoaderRoute: typeof PageDemoCalendarRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/canvas": {
@@ -1799,6 +2183,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoDatabaseRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/date-controls": {
+      id: "/_page/demo/date-controls";
+      path: "/demo/date-controls";
+      fullPath: "/demo/date-controls";
+      preLoaderRoute: typeof PageDemoDateControlsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/demo/history": {
       id: "/_page/demo/history";
       path: "/demo/history";
@@ -1811,6 +2202,13 @@ declare module "@tanstack/react-router" {
       path: "/demo/kanban";
       fullPath: "/demo/kanban";
       preLoaderRoute: typeof PageDemoKanbanRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/markdown": {
+      id: "/_page/demo/markdown";
+      path: "/demo/markdown";
+      fullPath: "/demo/markdown";
+      preLoaderRoute: typeof PageDemoMarkdownRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/demo/object": {
@@ -1855,6 +2253,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDemoTreeRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/demo/ui-primitives": {
+      id: "/_page/demo/ui-primitives";
+      path: "/demo/ui-primitives";
+      fullPath: "/demo/ui-primitives";
+      preLoaderRoute: typeof PageDemoUiPrimitivesRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/demo/viewport": {
+      id: "/_page/demo/viewport";
+      path: "/demo/viewport";
+      fullPath: "/demo/viewport";
+      preLoaderRoute: typeof PageDemoViewportRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/": {
       id: "/_page/docs/";
       path: "/docs";
@@ -1897,11 +2309,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAdapterKeyboardRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/adapter-virtual-selection": {
+      id: "/_page/docs/adapter-virtual-selection";
+      path: "/docs/adapter-virtual-selection";
+      fullPath: "/docs/adapter-virtual-selection";
+      preLoaderRoute: typeof PageDocsAdapterVirtualSelectionRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/adapters": {
       id: "/_page/docs/adapters";
       path: "/docs/adapters";
       fullPath: "/docs/adapters";
       preLoaderRoute: typeof PageDocsAdaptersRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/animation": {
+      id: "/_page/docs/animation";
+      path: "/docs/animation";
+      fullPath: "/docs/animation";
+      preLoaderRoute: typeof PageDocsAnimationRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/api": {
@@ -1930,6 +2356,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/concepts";
       fullPath: "/docs/concepts";
       preLoaderRoute: typeof PageDocsConceptsRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/connector-a2ui": {
+      id: "/_page/docs/connector-a2ui";
+      path: "/docs/connector-a2ui";
+      fullPath: "/docs/connector-a2ui";
+      preLoaderRoute: typeof PageDocsConnectorA2uiRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/connector-ajv": {
@@ -1988,11 +2421,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsDatabaseRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/foundation": {
+      id: "/_page/docs/foundation";
+      path: "/docs/foundation";
+      fullPath: "/docs/foundation";
+      preLoaderRoute: typeof PageDocsFoundationRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/history": {
       id: "/_page/docs/history";
       path: "/docs/history";
       fullPath: "/docs/history";
       preLoaderRoute: typeof PageDocsHistoryRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/how-we-build": {
+      id: "/_page/docs/how-we-build";
+      path: "/docs/how-we-build";
+      fullPath: "/docs/how-we-build";
+      preLoaderRoute: typeof PageDocsHowWeBuildRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/intent": {
@@ -2191,6 +2638,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAffordanceContextMenuRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/affordance/contextual": {
+      id: "/_page/docs/affordance/contextual";
+      path: "/docs/affordance/contextual";
+      fullPath: "/docs/affordance/contextual";
+      preLoaderRoute: typeof PageDocsAffordanceContextualRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/affordance/copy-drag": {
       id: "/_page/docs/affordance/copy-drag";
       path: "/docs/affordance/copy-drag";
@@ -2245,6 +2699,13 @@ declare module "@tanstack/react-router" {
       path: "/docs/affordance/forbid";
       fullPath: "/docs/affordance/forbid";
       preLoaderRoute: typeof PageDocsAffordanceForbidRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/affordance/handles": {
+      id: "/_page/docs/affordance/handles";
+      path: "/docs/affordance/handles";
+      fullPath: "/docs/affordance/handles";
+      preLoaderRoute: typeof PageDocsAffordanceHandlesRouteImport;
       parentRoute: typeof PageRoute;
     };
     "/_page/docs/affordance/history": {
@@ -2338,6 +2799,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsAffordanceZoomRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/api/a2ui": {
+      id: "/_page/docs/api/a2ui";
+      path: "/a2ui";
+      fullPath: "/docs/api/a2ui";
+      preLoaderRoute: typeof PageDocsApiA2uiRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/affordance": {
       id: "/_page/docs/api/affordance";
       path: "/affordance";
@@ -2352,11 +2820,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsApiAjvRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
+    "/_page/docs/api/animation-react": {
+      id: "/_page/docs/api/animation-react";
+      path: "/animation-react";
+      fullPath: "/docs/api/animation-react";
+      preLoaderRoute: typeof PageDocsApiAnimationReactRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
     "/_page/docs/api/annotation": {
       id: "/_page/docs/api/annotation";
       path: "/annotation";
       fullPath: "/docs/api/annotation";
       preLoaderRoute: typeof PageDocsApiAnnotationRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/calendar": {
+      id: "/_page/docs/api/calendar";
+      path: "/calendar";
+      fullPath: "/docs/api/calendar";
+      preLoaderRoute: typeof PageDocsApiCalendarRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
     "/_page/docs/api/collaboration": {
@@ -2420,6 +2902,13 @@ declare module "@tanstack/react-router" {
       path: "/json-document";
       fullPath: "/docs/api/json-document";
       preLoaderRoute: typeof PageDocsApiJsonDocumentRouteImport;
+      parentRoute: typeof PageDocsApiRoute;
+    };
+    "/_page/docs/api/markdown-react": {
+      id: "/_page/docs/api/markdown-react";
+      path: "/markdown-react";
+      fullPath: "/docs/api/markdown-react";
+      preLoaderRoute: typeof PageDocsApiMarkdownReactRouteImport;
       parentRoute: typeof PageDocsApiRoute;
     };
     "/_page/docs/api/react": {
@@ -2548,6 +3037,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PageDocsCollaborationReplicaRouteImport;
       parentRoute: typeof PageRoute;
     };
+    "/_page/docs/document-types/": {
+      id: "/_page/docs/document-types/";
+      path: "/docs/document-types";
+      fullPath: "/docs/document-types/";
+      preLoaderRoute: typeof PageDocsDocumentTypesIndexRouteImport;
+      parentRoute: typeof PageRoute;
+    };
+    "/_page/docs/document-types/$candidate": {
+      id: "/_page/docs/document-types/$candidate";
+      path: "/docs/document-types/$candidate";
+      fullPath: "/docs/document-types/$candidate";
+      preLoaderRoute: typeof PageDocsDocumentTypesCandidateRouteImport;
+      parentRoute: typeof PageRoute;
+    };
     "/_page/docs/collaboration/text/": {
       id: "/_page/docs/collaboration/text/";
       path: "/docs/collaboration/text";
@@ -2566,9 +3069,12 @@ declare module "@tanstack/react-router" {
 }
 
 interface PageDocsApiRouteChildren {
+  PageDocsApiA2uiRoute: typeof PageDocsApiA2uiRoute;
   PageDocsApiAffordanceRoute: typeof PageDocsApiAffordanceRoute;
   PageDocsApiAjvRoute: typeof PageDocsApiAjvRoute;
+  PageDocsApiAnimationReactRoute: typeof PageDocsApiAnimationReactRoute;
   PageDocsApiAnnotationRoute: typeof PageDocsApiAnnotationRoute;
+  PageDocsApiCalendarRoute: typeof PageDocsApiCalendarRoute;
   PageDocsApiCollaborationRoute: typeof PageDocsApiCollaborationRoute;
   PageDocsApiComposerRoute: typeof PageDocsApiComposerRoute;
   PageDocsApiComposerReactRoute: typeof PageDocsApiComposerReactRoute;
@@ -2578,6 +3084,7 @@ interface PageDocsApiRouteChildren {
   PageDocsApiEditingRoute: typeof PageDocsApiEditingRoute;
   PageDocsApiFileIntakeRoute: typeof PageDocsApiFileIntakeRoute;
   PageDocsApiJsonDocumentRoute: typeof PageDocsApiJsonDocumentRoute;
+  PageDocsApiMarkdownReactRoute: typeof PageDocsApiMarkdownReactRoute;
   PageDocsApiReactRoute: typeof PageDocsApiReactRoute;
   PageDocsApiReactHookFormRoute: typeof PageDocsApiReactHookFormRoute;
   PageDocsApiRichTextRoute: typeof PageDocsApiRichTextRoute;
@@ -2595,9 +3102,12 @@ interface PageDocsApiRouteChildren {
 }
 
 const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
+  PageDocsApiA2uiRoute: PageDocsApiA2uiRoute,
   PageDocsApiAffordanceRoute: PageDocsApiAffordanceRoute,
   PageDocsApiAjvRoute: PageDocsApiAjvRoute,
+  PageDocsApiAnimationReactRoute: PageDocsApiAnimationReactRoute,
   PageDocsApiAnnotationRoute: PageDocsApiAnnotationRoute,
+  PageDocsApiCalendarRoute: PageDocsApiCalendarRoute,
   PageDocsApiCollaborationRoute: PageDocsApiCollaborationRoute,
   PageDocsApiComposerRoute: PageDocsApiComposerRoute,
   PageDocsApiComposerReactRoute: PageDocsApiComposerReactRoute,
@@ -2608,6 +3118,7 @@ const PageDocsApiRouteChildren: PageDocsApiRouteChildren = {
   PageDocsApiEditingRoute: PageDocsApiEditingRoute,
   PageDocsApiFileIntakeRoute: PageDocsApiFileIntakeRoute,
   PageDocsApiJsonDocumentRoute: PageDocsApiJsonDocumentRoute,
+  PageDocsApiMarkdownReactRoute: PageDocsApiMarkdownReactRoute,
   PageDocsApiReactRoute: PageDocsApiReactRoute,
   PageDocsApiReactHookFormRoute: PageDocsApiReactHookFormRoute,
   PageDocsApiRichTextRoute: PageDocsApiRichTextRoute,
@@ -2636,35 +3147,50 @@ interface PageRouteChildren {
   PageAdaptersClipboardRoute: typeof PageAdaptersClipboardRoute;
   PageAdaptersContenteditableRoute: typeof PageAdaptersContenteditableRoute;
   PageAdaptersKeyboardRoute: typeof PageAdaptersKeyboardRoute;
+  PageAdaptersVirtualSelectionRoute: typeof PageAdaptersVirtualSelectionRoute;
+  PageAffordancesHandlesRoute: typeof PageAffordancesHandlesRoute;
+  PageApplicationsAiAgentRoute: typeof PageApplicationsAiAgentRoute;
+  PageApplicationsCalendarRoute: typeof PageApplicationsCalendarRoute;
+  PageArtifactLlmAgentRoute: typeof PageArtifactLlmAgentRoute;
+  PageConnectorsA2uiRoute: typeof PageConnectorsA2uiRoute;
   PageConnectorsAjvRoute: typeof PageConnectorsAjvRoute;
   PageConnectorsContenteditableRoute: typeof PageConnectorsContenteditableRoute;
   PageConnectorsReactRoute: typeof PageConnectorsReactRoute;
   PageConnectorsReactHookFormRoute: typeof PageConnectorsReactHookFormRoute;
   PageConnectorsTanstackTableRoute: typeof PageConnectorsTanstackTableRoute;
   PageConnectorsWebRoute: typeof PageConnectorsWebRoute;
+  PageDemoAnimationRoute: typeof PageDemoAnimationRoute;
   PageDemoAnnotationRoute: typeof PageDemoAnnotationRoute;
+  PageDemoCalendarRoute: typeof PageDemoCalendarRoute;
   PageDemoCanvasRoute: typeof PageDemoCanvasRoute;
   PageDemoClipboardRoute: typeof PageDemoClipboardRoute;
   PageDemoComposerRoute: typeof PageDemoComposerRoute;
   PageDemoDatabaseRoute: typeof PageDemoDatabaseRoute;
+  PageDemoDateControlsRoute: typeof PageDemoDateControlsRoute;
   PageDemoHistoryRoute: typeof PageDemoHistoryRoute;
   PageDemoKanbanRoute: typeof PageDemoKanbanRoute;
+  PageDemoMarkdownRoute: typeof PageDemoMarkdownRoute;
   PageDemoObjectRoute: typeof PageDemoObjectRoute;
   PageDemoOrderRoute: typeof PageDemoOrderRoute;
   PageDemoSelectionRoute: typeof PageDemoSelectionRoute;
   PageDemoSheetRoute: typeof PageDemoSheetRoute;
   PageDemoTopologyRoute: typeof PageDemoTopologyRoute;
   PageDemoTreeRoute: typeof PageDemoTreeRoute;
+  PageDemoUiPrimitivesRoute: typeof PageDemoUiPrimitivesRoute;
+  PageDemoViewportRoute: typeof PageDemoViewportRoute;
   PageDocsAdapterClipboardRoute: typeof PageDocsAdapterClipboardRoute;
   PageDocsAdapterContenteditableRoute: typeof PageDocsAdapterContenteditableRoute;
   PageDocsAdapterGridCellRoute: typeof PageDocsAdapterGridCellRoute;
   PageDocsAdapterInteractionRoute: typeof PageDocsAdapterInteractionRoute;
   PageDocsAdapterKeyboardRoute: typeof PageDocsAdapterKeyboardRoute;
+  PageDocsAdapterVirtualSelectionRoute: typeof PageDocsAdapterVirtualSelectionRoute;
   PageDocsAdaptersRoute: typeof PageDocsAdaptersRoute;
+  PageDocsAnimationRoute: typeof PageDocsAnimationRoute;
   PageDocsApiRoute: typeof PageDocsApiRouteWithChildren;
   PageDocsClipboardRoute: typeof PageDocsClipboardRoute;
   PageDocsComposerRoute: typeof PageDocsComposerRoute;
   PageDocsConceptsRoute: typeof PageDocsConceptsRoute;
+  PageDocsConnectorA2uiRoute: typeof PageDocsConnectorA2uiRoute;
   PageDocsConnectorAjvRoute: typeof PageDocsConnectorAjvRoute;
   PageDocsConnectorReactRoute: typeof PageDocsConnectorReactRoute;
   PageDocsConnectorReactHookFormRoute: typeof PageDocsConnectorReactHookFormRoute;
@@ -2673,7 +3199,9 @@ interface PageRouteChildren {
   PageDocsConnectorZodValidateRoute: typeof PageDocsConnectorZodValidateRoute;
   PageDocsConnectorsRoute: typeof PageDocsConnectorsRoute;
   PageDocsDatabaseRoute: typeof PageDocsDatabaseRoute;
+  PageDocsFoundationRoute: typeof PageDocsFoundationRoute;
   PageDocsHistoryRoute: typeof PageDocsHistoryRoute;
+  PageDocsHowWeBuildRoute: typeof PageDocsHowWeBuildRoute;
   PageDocsIntentRoute: typeof PageDocsIntentRoute;
   PageDocsIntentGuideRoute: typeof PageDocsIntentGuideRoute;
   PageDocsMentionRoute: typeof PageDocsMentionRoute;
@@ -2695,6 +3223,7 @@ interface PageRouteChildren {
   PageWidgetsToolbarRoute: typeof PageWidgetsToolbarRoute;
   PageWidgetsTreeRoute: typeof PageWidgetsTreeRoute;
   PageAdaptersIndexRoute: typeof PageAdaptersIndexRoute;
+  PageApplicationsIndexRoute: typeof PageApplicationsIndexRoute;
   PageConnectorsIndexRoute: typeof PageConnectorsIndexRoute;
   PageDemoIndexRoute: typeof PageDemoIndexRoute;
   PageDocsIndexRoute: typeof PageDocsIndexRoute;
@@ -2704,6 +3233,7 @@ interface PageRouteChildren {
   PageDocsAffordanceCancelRoute: typeof PageDocsAffordanceCancelRoute;
   PageDocsAffordanceCaretRoute: typeof PageDocsAffordanceCaretRoute;
   PageDocsAffordanceContextMenuRoute: typeof PageDocsAffordanceContextMenuRoute;
+  PageDocsAffordanceContextualRoute: typeof PageDocsAffordanceContextualRoute;
   PageDocsAffordanceCopyDragRoute: typeof PageDocsAffordanceCopyDragRoute;
   PageDocsAffordanceDeleteRoute: typeof PageDocsAffordanceDeleteRoute;
   PageDocsAffordanceDoubleClickRoute: typeof PageDocsAffordanceDoubleClickRoute;
@@ -2712,6 +3242,7 @@ interface PageRouteChildren {
   PageDocsAffordanceFocusRoute: typeof PageDocsAffordanceFocusRoute;
   PageDocsAffordanceFoldRoute: typeof PageDocsAffordanceFoldRoute;
   PageDocsAffordanceForbidRoute: typeof PageDocsAffordanceForbidRoute;
+  PageDocsAffordanceHandlesRoute: typeof PageDocsAffordanceHandlesRoute;
   PageDocsAffordanceHistoryRoute: typeof PageDocsAffordanceHistoryRoute;
   PageDocsAffordanceHoverRoute: typeof PageDocsAffordanceHoverRoute;
   PageDocsAffordanceMarqueeRoute: typeof PageDocsAffordanceMarqueeRoute;
@@ -2728,9 +3259,11 @@ interface PageRouteChildren {
   PageDocsCollaborationHistoryRoute: typeof PageDocsCollaborationHistoryRoute;
   PageDocsCollaborationLifecycleRoute: typeof PageDocsCollaborationLifecycleRoute;
   PageDocsCollaborationReplicaRoute: typeof PageDocsCollaborationReplicaRoute;
+  PageDocsDocumentTypesCandidateRoute: typeof PageDocsDocumentTypesCandidateRoute;
   PageConnectorsZodIndexRoute: typeof PageConnectorsZodIndexRoute;
   PageDocsAffordanceIndexRoute: typeof PageDocsAffordanceIndexRoute;
   PageDocsCollaborationIndexRoute: typeof PageDocsCollaborationIndexRoute;
+  PageDocsDocumentTypesIndexRoute: typeof PageDocsDocumentTypesIndexRoute;
   PageDocsCollaborationTextLeaseRoute: typeof PageDocsCollaborationTextLeaseRoute;
   PageDocsCollaborationTextIndexRoute: typeof PageDocsCollaborationTextIndexRoute;
 }
@@ -2742,35 +3275,50 @@ const PageRouteChildren: PageRouteChildren = {
   PageAdaptersClipboardRoute: PageAdaptersClipboardRoute,
   PageAdaptersContenteditableRoute: PageAdaptersContenteditableRoute,
   PageAdaptersKeyboardRoute: PageAdaptersKeyboardRoute,
+  PageAdaptersVirtualSelectionRoute: PageAdaptersVirtualSelectionRoute,
+  PageAffordancesHandlesRoute: PageAffordancesHandlesRoute,
+  PageApplicationsAiAgentRoute: PageApplicationsAiAgentRoute,
+  PageApplicationsCalendarRoute: PageApplicationsCalendarRoute,
+  PageArtifactLlmAgentRoute: PageArtifactLlmAgentRoute,
+  PageConnectorsA2uiRoute: PageConnectorsA2uiRoute,
   PageConnectorsAjvRoute: PageConnectorsAjvRoute,
   PageConnectorsContenteditableRoute: PageConnectorsContenteditableRoute,
   PageConnectorsReactRoute: PageConnectorsReactRoute,
   PageConnectorsReactHookFormRoute: PageConnectorsReactHookFormRoute,
   PageConnectorsTanstackTableRoute: PageConnectorsTanstackTableRoute,
   PageConnectorsWebRoute: PageConnectorsWebRoute,
+  PageDemoAnimationRoute: PageDemoAnimationRoute,
   PageDemoAnnotationRoute: PageDemoAnnotationRoute,
+  PageDemoCalendarRoute: PageDemoCalendarRoute,
   PageDemoCanvasRoute: PageDemoCanvasRoute,
   PageDemoClipboardRoute: PageDemoClipboardRoute,
   PageDemoComposerRoute: PageDemoComposerRoute,
   PageDemoDatabaseRoute: PageDemoDatabaseRoute,
+  PageDemoDateControlsRoute: PageDemoDateControlsRoute,
   PageDemoHistoryRoute: PageDemoHistoryRoute,
   PageDemoKanbanRoute: PageDemoKanbanRoute,
+  PageDemoMarkdownRoute: PageDemoMarkdownRoute,
   PageDemoObjectRoute: PageDemoObjectRoute,
   PageDemoOrderRoute: PageDemoOrderRoute,
   PageDemoSelectionRoute: PageDemoSelectionRoute,
   PageDemoSheetRoute: PageDemoSheetRoute,
   PageDemoTopologyRoute: PageDemoTopologyRoute,
   PageDemoTreeRoute: PageDemoTreeRoute,
+  PageDemoUiPrimitivesRoute: PageDemoUiPrimitivesRoute,
+  PageDemoViewportRoute: PageDemoViewportRoute,
   PageDocsAdapterClipboardRoute: PageDocsAdapterClipboardRoute,
   PageDocsAdapterContenteditableRoute: PageDocsAdapterContenteditableRoute,
   PageDocsAdapterGridCellRoute: PageDocsAdapterGridCellRoute,
   PageDocsAdapterInteractionRoute: PageDocsAdapterInteractionRoute,
   PageDocsAdapterKeyboardRoute: PageDocsAdapterKeyboardRoute,
+  PageDocsAdapterVirtualSelectionRoute: PageDocsAdapterVirtualSelectionRoute,
   PageDocsAdaptersRoute: PageDocsAdaptersRoute,
+  PageDocsAnimationRoute: PageDocsAnimationRoute,
   PageDocsApiRoute: PageDocsApiRouteWithChildren,
   PageDocsClipboardRoute: PageDocsClipboardRoute,
   PageDocsComposerRoute: PageDocsComposerRoute,
   PageDocsConceptsRoute: PageDocsConceptsRoute,
+  PageDocsConnectorA2uiRoute: PageDocsConnectorA2uiRoute,
   PageDocsConnectorAjvRoute: PageDocsConnectorAjvRoute,
   PageDocsConnectorReactRoute: PageDocsConnectorReactRoute,
   PageDocsConnectorReactHookFormRoute: PageDocsConnectorReactHookFormRoute,
@@ -2779,7 +3327,9 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsConnectorZodValidateRoute: PageDocsConnectorZodValidateRoute,
   PageDocsConnectorsRoute: PageDocsConnectorsRoute,
   PageDocsDatabaseRoute: PageDocsDatabaseRoute,
+  PageDocsFoundationRoute: PageDocsFoundationRoute,
   PageDocsHistoryRoute: PageDocsHistoryRoute,
+  PageDocsHowWeBuildRoute: PageDocsHowWeBuildRoute,
   PageDocsIntentRoute: PageDocsIntentRoute,
   PageDocsIntentGuideRoute: PageDocsIntentGuideRoute,
   PageDocsMentionRoute: PageDocsMentionRoute,
@@ -2801,6 +3351,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageWidgetsToolbarRoute: PageWidgetsToolbarRoute,
   PageWidgetsTreeRoute: PageWidgetsTreeRoute,
   PageAdaptersIndexRoute: PageAdaptersIndexRoute,
+  PageApplicationsIndexRoute: PageApplicationsIndexRoute,
   PageConnectorsIndexRoute: PageConnectorsIndexRoute,
   PageDemoIndexRoute: PageDemoIndexRoute,
   PageDocsIndexRoute: PageDocsIndexRoute,
@@ -2810,6 +3361,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAffordanceCancelRoute: PageDocsAffordanceCancelRoute,
   PageDocsAffordanceCaretRoute: PageDocsAffordanceCaretRoute,
   PageDocsAffordanceContextMenuRoute: PageDocsAffordanceContextMenuRoute,
+  PageDocsAffordanceContextualRoute: PageDocsAffordanceContextualRoute,
   PageDocsAffordanceCopyDragRoute: PageDocsAffordanceCopyDragRoute,
   PageDocsAffordanceDeleteRoute: PageDocsAffordanceDeleteRoute,
   PageDocsAffordanceDoubleClickRoute: PageDocsAffordanceDoubleClickRoute,
@@ -2818,6 +3370,7 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsAffordanceFocusRoute: PageDocsAffordanceFocusRoute,
   PageDocsAffordanceFoldRoute: PageDocsAffordanceFoldRoute,
   PageDocsAffordanceForbidRoute: PageDocsAffordanceForbidRoute,
+  PageDocsAffordanceHandlesRoute: PageDocsAffordanceHandlesRoute,
   PageDocsAffordanceHistoryRoute: PageDocsAffordanceHistoryRoute,
   PageDocsAffordanceHoverRoute: PageDocsAffordanceHoverRoute,
   PageDocsAffordanceMarqueeRoute: PageDocsAffordanceMarqueeRoute,
@@ -2834,9 +3387,11 @@ const PageRouteChildren: PageRouteChildren = {
   PageDocsCollaborationHistoryRoute: PageDocsCollaborationHistoryRoute,
   PageDocsCollaborationLifecycleRoute: PageDocsCollaborationLifecycleRoute,
   PageDocsCollaborationReplicaRoute: PageDocsCollaborationReplicaRoute,
+  PageDocsDocumentTypesCandidateRoute: PageDocsDocumentTypesCandidateRoute,
   PageConnectorsZodIndexRoute: PageConnectorsZodIndexRoute,
   PageDocsAffordanceIndexRoute: PageDocsAffordanceIndexRoute,
   PageDocsCollaborationIndexRoute: PageDocsCollaborationIndexRoute,
+  PageDocsDocumentTypesIndexRoute: PageDocsDocumentTypesIndexRoute,
   PageDocsCollaborationTextLeaseRoute: PageDocsCollaborationTextLeaseRoute,
   PageDocsCollaborationTextIndexRoute: PageDocsCollaborationTextIndexRoute,
 };

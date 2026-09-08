@@ -1,0 +1,27 @@
+.llm-agent-app { display: flex; min-height: 0; flex: 1; background: var(--color-background-canvas); color: var(--color-foreground-strong); }
+.llm-agent-main { display: flex; min-width: 0; min-height: 0; flex: 1; flex-direction: column; }
+.llm-agent-sessions { width: 200px; flex: 0 0 200px; padding: 8px; border-right: 1px solid var(--color-border-subtle); background: var(--color-background-subtle); }
+.llm-agent-sessions-header { display: flex; height: 36px; align-items: center; justify-content: space-between; padding: 0 2px 6px 8px; }
+.llm-agent-sessions-header strong { font-size: 13px; }
+.llm-agent-sessions-header button { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: var(--radius-control); background: transparent; }
+.llm-agent-sessions nav { display: grid; gap: 3px; }
+.llm-agent-sessions nav button { width: 100%; justify-content: flex-start; overflow: hidden; padding: 8px; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-foreground-muted); text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.llm-agent-sessions nav button:hover, .llm-agent-sessions nav button.active { background: var(--color-background-canvas); color: var(--color-foreground-strong); }
+.llm-agent-app-header { display: flex; height: 48px; flex: 0 0 48px; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--color-border-subtle); }
+.llm-agent-app-header strong { font-size: 14px; }
+.llm-agent-app-header span { color: var(--color-foreground-muted); font-size: 12px; }
+.llm-agent-chat { width: min(768px, calc(100% - 32px)); min-height: 0; flex: 1; align-self: center; margin-inline: auto; padding: 32px 0 128px; overflow-y: auto; }
+.llm-agent-empty { display: grid; height: 100%; place-content: center; text-align: center; }
+.llm-agent-empty h1 { margin: 0; font-size: 28px; letter-spacing: -.04em; }
+.llm-agent-empty p { margin: 10px 0 0; color: var(--color-foreground-muted); }
+.llm-agent-state { margin: 0; color: var(--color-foreground-muted); font-size: 13px; }
+.llm-agent-message { min-width: 0; }
+.llm-agent-message p { margin: 0; white-space: pre-wrap; line-height: 1.7; }
+.llm-agent-message.assistant { width: 100%; padding: 22px 0 30px; }
+.llm-agent-message.user { width: fit-content; max-width: min(70%, 36rem); margin: 12px 0 10px auto; padding: 10px 16px; border: 1px solid rgb(var(--color-border-subtle) / .55); border-radius: calc(var(--radius-surface) * 2); background: rgb(var(--color-foreground-strong) / .08); color: rgb(var(--color-foreground-strong)); }
+.llm-agent-message.user [data-markdown-renderer] { display: block; }
+.llm-agent-input { display: flex; width: min(768px, calc(100% - 32px)); align-self: center; gap: 8px; margin: 0 auto 20px; padding: 10px 10px 10px 18px; border: 1px solid var(--color-border-subtle); border-radius: calc(var(--radius-surface) * 2.4); background: var(--color-background-canvas); box-shadow: var(--shadow-surface); }
+.llm-agent-input textarea { min-height: 28px; flex: 1; resize: none; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 28px; }
+.llm-agent-input button { display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: var(--radius-control); }
+.llm-agent-error { width: min(768px, calc(100% - 32px)); margin: -12px auto 12px; color: var(--color-foreground-accent); font-size: 12px; }
+@media (max-width: 720px) { .llm-agent-sessions { width: 160px; flex-basis: 160px; } }

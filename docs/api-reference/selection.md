@@ -16,6 +16,11 @@ collapsedRangeSelection<Point>(point: Point): RangeSelection<Point>
 ```ts
 createKeySelectionFamily<Key extends string = string>(): SelectionFamily<KeySelection<Key>, KeySelectionCommand<Key>, KeySelectionContext<Key>, KeySelectionMapping<Key>, Key, SelectionChange>
 ```
+## `createMaterializedRangeSelectionFamily`
+
+```ts
+createMaterializedRangeSelectionFamily<Point>(): SelectionFamily<MaterializedRangeSelection<Point>, MaterializedRangeSelectionCommand<Point>, MaterializedRangeSelectionContext<Point>, MaterializedRangeSelectionMapping<Point>, Point, SelectionChange>
+```
 ## `createRangeSelectionFamily`
 
 ```ts
@@ -32,6 +37,11 @@ type EditingMode<Lease extends string = string> =
 
 ```ts
 emptyKeySelection<Key extends string = string>(): KeySelection<Key>
+```
+## `emptyMaterializedRangeSelection`
+
+```ts
+emptyMaterializedRangeSelection<Point>(): MaterializedRangeSelection<Point>
 ```
 ## `emptyRangeSelection`
 
@@ -138,6 +148,53 @@ interface MaskSelection<Representation> {
   readonly representation: Representation;
 }
 ```
+## `MaterializedRangeSelection`
+
+```ts
+interface MaterializedRangeSelection<Point> extends RangeSelection<Point> {
+  readonly ranges: readonly MaterializedSelectionRange<Point>[];
+}
+```
+## `MaterializedRangeSelectionCommand`
+
+```ts
+type MaterializedRangeSelectionCommand<Point> =
+  | { readonly type: "collapse"; readonly point: Point }
+  | { readonly type: "extend-primary"; readonly point: Point }
+  | { readonly type: "toggle-point"; readonly point: Point }
+  | { readonly type: "clear" };
+```
+## `MaterializedRangeSelectionContext`
+
+```ts
+interface MaterializedRangeSelectionContext<Point> {
+  readonly topology: OrderedTopology<Point, Point>;
+}
+```
+## `MaterializedRangeSelectionMapping`
+
+```ts
+interface MaterializedRangeSelectionMapping<Point> {
+  mapPoint(point: Point): Point | null;
+}
+```
+## `MaterializedSelectionDragSource`
+
+```ts
+interface MaterializedSelectionDragSource<Point> {
+  readonly selection: MaterializedRangeSelection<Point>;
+  readonly anchor: Point;
+  readonly points: readonly Point[];
+  readonly selectionChanged: boolean;
+}
+```
+## `MaterializedSelectionRange`
+
+```ts
+interface MaterializedSelectionRange<Point> extends SelectionRange<Point> {
+  readonly points: readonly Point[];
+}
+```
 ## `NavigationCommand`
 
 ```ts
@@ -190,6 +247,11 @@ interface NavigationState<Point> {
 
 ```ts
 normalizeKeySelection<Key extends string>(state: KeySelection<Key>, context: KeySelectionContext<Key>): KeySelection<Key>
+```
+## `normalizeMaterializedRangeSelection`
+
+```ts
+normalizeMaterializedRangeSelection<Point>(state: MaterializedRangeSelection<Point>, topology: OrderedTopology<Point, Point>): MaterializedRangeSelection<Point>
 ```
 ## `normalizeRangeSelection`
 
@@ -300,6 +362,11 @@ reducePressInteraction<Point>(state: PointerInteractionState<Point>, sample: Poi
 interface RegionBuilder<Point, Region> {
   fromPoints(start: Point, current: Point): Region;
 }
+```
+## `resolveMaterializedSelectionDragSource`
+
+```ts
+resolveMaterializedSelectionDragSource<Point>(state: MaterializedRangeSelection<Point>, point: Point, context: MaterializedRangeSelectionContext<Point>): MaterializedSelectionDragSource<Point> | null
 ```
 ## `ScopedSelection`
 

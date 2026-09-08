@@ -20,7 +20,7 @@ import {
   dragAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { contentInteractionAttributes, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 import { WidgetDemoFrame } from "./WidgetDemoFrame";
@@ -94,6 +94,7 @@ export function BoardWidgetRoute() {
   const focusColumnId = focusKey === null
     ? null
     : board.columns.find((column) => column.cardIds.includes(focusKey))?.id ?? null;
+  const dragSnapshot = boardDrag.getSnapshot();
 
   function handleCardPointerDown(event: PointerEvent<HTMLElement>, cardId: string) {
     event.preventDefault();
@@ -192,7 +193,15 @@ export function BoardWidgetRoute() {
           }}
         >
           {board.columns.map((column) => (
-            <div key={column.id} {...webKanbanColumnProps(column.id)} className="grid content-start gap-2">
+            <div
+              key={column.id}
+              {...webKanbanColumnProps(column.id)}
+              {...contentInteractionAttributes({
+                role: "drop-target",
+                active: dragSnapshot.status === "dragging" && dragSnapshot.target?.columnId === column.id,
+              })}
+              className={classes("grid content-start gap-2", ui.surface.workspace)}
+            >
               <p className={classes("mb-0 mt-0", ui.text.label)}>{column.title}</p>
               <BoardListbox
                 label={column.title}
@@ -203,7 +212,6 @@ export function BoardWidgetRoute() {
                   const card = cards.get(cardId);
                   if (!card) return null;
                   const option = editingItemProps(editing.getItem(card.id));
-                  const dragSnapshot = boardDrag.getSnapshot();
                   const activeCardId = dragSnapshot.status === "dragging" ? dragSnapshot.item : null;
                   const offset = activeCardId === card.id ? dragPreview : null;
                   return (
@@ -213,6 +221,7 @@ export function BoardWidgetRoute() {
                         className={classes("w-full text-left", ui.surface.selectableBlock)}
                         selected={option.selected}
                         focus={option.focus}
+                        dragging={activeCardId === card.id}
                         {...activeDescendantItemProps(boardCardId(card.id))}
                         {...projectWebWidgetState({ role: "option", selected: option.selected })}
                         style={{

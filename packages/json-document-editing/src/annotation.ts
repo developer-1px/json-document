@@ -1,7 +1,9 @@
 import { buildPointer, type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import type { EditingHistoryOptions } from "./history.js";
 import { createEditingSession, type EditingResult, type EditingSnapshot } from "./session.js";
 import { assertAnnotation, assertAnnotationDocument } from "./annotation-validation.js";
+import { reconcileAnnotationSelection, transitionAnnotationSelection } from "./annotation-selection.js";
 
 export const ANNOTATION_PROFILE_V1 = "urn:interactive-os:json-document:annotation:1" as const;
 export interface AnnotationPoint extends Record<string, JSONValue> { readonly x: number; readonly y: number }
@@ -29,20 +31,23 @@ export type AnnotationIntent =
   | { readonly type: "annotation.delete"; readonly annotationId: string };
 export interface AnnotationEditor { readonly snapshot: EditingSnapshot<AnnotationSelection>; dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection>; undo(): EditingResult<AnnotationSelection>; redo(): EditingResult<AnnotationSelection>; subscribe(listener: () => void): () => void }
 
-export function createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): AnnotationEditor {
+export function createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, options: EditingHistoryOptions = {}): AnnotationEditor {
   const document = resolveDocumentSource(source);
   assertAnnotationDocument(document.value as AnnotationDocument);
-  const session = createEditingSession({ document, selection: selectionFor([]) });
+  const session = createEditingSession({
+    ...options,
+    document,
+    selection: selectionFor([]),
+    reconcileSelection(selection, value) {
+      return reconcileAnnotationSelection(selection, value as AnnotationDocument);
+    },
+  });
   const value = () => session.snapshot.value as AnnotationDocument;
   function dispatch(intent: AnnotationIntent): EditingResult<AnnotationSelection> {
     const annotations = value().annotations;
     if (intent.type === "selection.set") {
       if (intent.annotationId !== null && !annotations.some((item) => item.id === intent.annotationId)) return failure("annotation.not-found");
-      const current = session.snapshot.selection.ids;
-      const ids = intent.mode === "toggle" && intent.annotationId !== null
-        ? current.includes(intent.annotationId) ? current.filter((id) => id !== intent.annotationId) : [...current, intent.annotationId]
-        : intent.annotationId === null ? [] : [intent.annotationId];
-      return success(session.select(selectionFor(ids, ids.includes(intent.annotationId ?? "") ? intent.annotationId : ids.at(-1) ?? null)));
+      return success(session.select(transitionAnnotationSelection(session.snapshot.selection, intent, value())));
     }
     if (intent.type === "annotation.create") {
       try { assertAnnotation(intent.annotation, new Set(value().sources.map((item) => item.id))); } catch (error) { return failure("annotation.invalid", message(error)); }
@@ -109,8 +114,9 @@ export function annotationResizeHandle(selector: AnnotationSelector): "end" | "s
 function resize(selector: AnnotationSelector, handle: "end" | "south-east", dx: number, dy: number): AnnotationSelector | null {
   if (handle === "south-east" && selector.type === "rectangle") return { ...selector, width: Math.max(1, selector.width + dx), height: Math.max(1, selector.height + dy) };
   if (handle === "south-east" && selector.type === "path") {
-    const xs = selector.points.map((point) => point.x); const ys = selector.points.map((point) => point.y);
-    const x = Math.min(...xs); const y = Math.min(...ys); const width = Math.max(1, Math.max(...xs) - x); const height = Math.max(1, Math.max(...ys) - y);
+    const bounds = annotationSelectorBounds(selector);
+    const { x, y } = bounds;
+    const width = Math.max(1, bounds.width), height = Math.max(1, bounds.height);
     const scaleX = Math.max(1, width + dx) / width; const scaleY = Math.max(1, height + dy) / height;
     return { ...selector, points: selector.points.map((point) => ({ x: x + (point.x - x) * scaleX, y: y + (point.y - y) * scaleY })) };
   }

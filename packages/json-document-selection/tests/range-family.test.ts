@@ -1,8 +1,10 @@
 import { describe, expect, test } from "vitest";
 import {
   collapsedRangeSelection,
+  createMaterializedRangeSelectionFamily,
   createRangeSelectionFamily,
   emptyRangeSelection,
+  resolveMaterializedSelectionDragSource,
   type OrderedTopology,
 } from "../src/index.js";
 
@@ -20,6 +22,18 @@ function topology(ids: readonly string[]): OrderedTopology<string, string> {
 }
 
 describe("range selection family", () => {
+  test.each([false, true])("mapping preserves the surviving primary (materialized=%s)", (materialized) => {
+    const state = {
+      kind: "range" as const,
+      ranges: ["a", "b", "c"].map((point) => ({ anchor: point, focus: point, points: [point] })),
+      primaryIndex: 1,
+    };
+    const family = materialized ? createMaterializedRangeSelectionFamily<string>() : createRangeSelectionFamily<string>();
+    const result = family.map(state, { mapPoint: (point) => point === "a" ? null : point }, { topology: topology(["b", "c"]) });
+    expect(result.state.primaryIndex).toBe(0);
+    expect(result.state.ranges[result.state.primaryIndex!]?.focus).toBe("b");
+  });
+
   test("preserves directional anchor/focus and a valid primary", () => {
     const family = createRangeSelectionFamily<string>();
     const context = { topology: topology(["a", "b", "c", "d"]) };
@@ -74,5 +88,59 @@ describe("range selection family", () => {
       mapPoint: (point) => point === "b" ? "b2" : point,
     }, context);
     expect(result.state.ranges).toEqual([{ anchor: "a", focus: "b2" }]);
+  });
+});
+
+describe("materialized range selection family", () => {
+  test("keeps the whole snapshot when drag starts inside the current selection", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const context = { topology: topology(["a", "b", "c"]) };
+    let state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, { type: "collapse", point: "a" }, context).state;
+    state = family.transition(state, { type: "toggle-point", point: "c" }, context).state;
+
+    expect(resolveMaterializedSelectionDragSource(state, "c", context)).toEqual({
+      selection: state,
+      anchor: "c",
+      points: ["a", "c"],
+      selectionChanged: false,
+    });
+  });
+
+  test("replace-selects a pressed point outside the current selection", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const context = { topology: topology(["a", "b", "c"]) };
+    const state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, { type: "collapse", point: "a" }, context).state;
+
+    const source = resolveMaterializedSelectionDragSource(state, "b", context);
+    expect(source?.points).toEqual(["b"]);
+    expect(source?.selectionChanged).toBe(true);
+    expect(source?.selection.ranges).toEqual([{ anchor: "b", focus: "b", points: ["b"] }]);
+  });
+
+  test("keeps resolved points when the visible interval changes", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const first = { topology: topology(["a", "b", "c", "d"]) };
+    let state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, {
+      type: "collapse",
+      point: "a",
+    }, first).state;
+    state = family.transition(state, { type: "extend-primary", point: "c" }, first).state;
+
+    const nextView: OrderedTopology<string, string> = {
+      equals: (left, right) => left === right,
+      interval: (anchor, focus) => anchor === focus && ["c", "d"].includes(anchor) ? [anchor] : [],
+      reconcilePoint: (point) => ["a", "b", "c", "d"].includes(point) ? point : null,
+    };
+    expect(family.targets(state, { topology: nextView })).toEqual(["a", "b", "c"]);
+    expect(family.reconcile(state, { topology: nextView }).state).toEqual(state);
+  });
+
+  test("toggle removes a point from a materialized interval", () => {
+    const family = createMaterializedRangeSelectionFamily<string>();
+    const context = { topology: topology(["a", "b", "c"]) };
+    let state = family.transition({ kind: "range", ranges: [], primaryIndex: null }, { type: "collapse", point: "a" }, context).state;
+    state = family.transition(state, { type: "extend-primary", point: "c" }, context).state;
+    state = family.transition(state, { type: "toggle-point", point: "b" }, context).state;
+    expect(family.targets(state, context)).toEqual(["a", "c"]);
   });
 });

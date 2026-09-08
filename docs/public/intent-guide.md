@@ -62,3 +62,35 @@ if (!missed.ok) {
 바뀐 [Selection](selection.md)이 무엇을 저장하는지부터 확인합니다. editor가
 받을 수 있는 전체 `type`과 각 필드는 [Intent 레퍼런스](intent.md)에 정리되어
 있습니다.
+
+## 외부 변경과 선택 유효성
+
+새 domain을 구현할 때는 `createEditingSession`의 `reconcileSelection`에 domain
+정본 Selection family의 보정을 연결합니다. 외부 변경을 읽거나 구독 알림으로
+전달하기 전에 한 revision 안에서 보정되며, 별도의 Host undo stack은 필요하지
+않습니다. 다음은 키 선택 family를 사용하는 최소 조합입니다.
+
+```ts
+import { createJSONDocument } from "@interactive-os/json-document";
+import { createEditingSession } from "@interactive-os/json-document-editing";
+import { createKeySelectionFamily, type KeySelection } from "@interactive-os/json-document-selection";
+
+const document = createJSONDocument({ first: "hello", second: "world" });
+const family = createKeySelectionFamily();
+const session = createEditingSession<KeySelection>({
+  document,
+  selection: { kind: "explicit", keys: ["first"], primaryKey: "first" },
+  reconcileSelection: (selection, value) => family.reconcile(selection, {
+    keys: Object.keys(value as Record<string, unknown>),
+    universe: "document-fields",
+    universeMismatch: "clear",
+  }).state,
+});
+document.commit([{ op: "remove", path: "/first" }]);
+session.snapshot.selection.primaryKey; // null
+```
+
+이 callback은 현재 값에서 선택을 유효하게 만드는 경계일 뿐, 외부 applied change의
+의미 기반 위치 mapping이나 협업 history rebase는 아닙니다. 외부 변경 시 local
+undo/redo를 비우는 정책은 유지됩니다. RichText Domain은 이 옵션에서 정본
+RangeSelection family와 RichText topology를 사용합니다.

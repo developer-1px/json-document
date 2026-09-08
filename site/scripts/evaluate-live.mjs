@@ -1,24 +1,14 @@
 import { readFileSync } from "node:fs";
 import { validateSiteRoutes } from "./route-checks.mjs";
+import { validateLlmsContract } from "../../docs/public-contract-checks.mjs";
 
 const siteUrl = (process.env.SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");
 const attempts = Number(process.env.SITE_LIVE_ATTEMPTS ?? "18");
 const delayMs = Number(process.env.SITE_LIVE_DELAY_MS ?? "10000");
 const routes = JSON.parse(readFileSync(new URL("../site-routes.json", import.meta.url), "utf8"));
-const activeCompanionPackages = new Set([
-  "@interactive-os/json-document-selection",
-  "@interactive-os/json-document-editing",
-  "@interactive-os/json-document-react",
-  "@interactive-os/json-document-react-hook-form",
-  "@interactive-os/json-document-ajv",
-  "@interactive-os/json-document-zod",
-  "@interactive-os/json-document-tanstack-table",
-  "@interactive-os/json-document-web",
-  "@interactive-os/json-document-contenteditable",
-  "@interactive-os/json-document-collaboration",
-  "@interactive-os/json-document-contenteditable-collaboration",
-]);
 validateSiteRoutes(routes, fail);
+const rootRoute = routes.find((route) => route.path === "/");
+if (rootRoute === undefined) fail("live site routes are missing the root route.");
 
 function fail(message) {
   throw new Error(message);
@@ -41,8 +31,10 @@ async function fetchText(path, allowedStatuses = [200]) {
 
 async function checkOnce() {
   const index = await fetchText("/");
+  if (!index.includes(`<title>${rootRoute.title}</title>`)) {
+    fail("live index is missing the canonical root route title.");
+  }
   for (const pattern of [
-    /<title>json-document - Headless JSON editing<\/title>/,
     /name="description"/,
     /property="og:title"/,
     /rel="icon"/,
@@ -78,23 +70,7 @@ async function checkOnce() {
   }
 
   const llms = await fetchText("/llms.txt");
-  if (
-    !/^# json-document v3$/m.test(llms)
-    || !/공개 Root는 정확히 다음 21개 symbol/.test(llms)
-    || !/`JSONDocument`의 필수 member는 정확히 여섯 개다/.test(llms)
-    || !/## Connector, host adapter와 companion/.test(llms)
-    || !/@interactive-os\/editable/.test(llms)
-  ) {
-    fail("live llms.txt is missing the v3 Core contract.");
-  }
-  const packageReferences = llms.match(/@interactive-os\/json-document-[a-z0-9-]+/g) ?? [];
-  if (
-    packageReferences.some((packageName) => !activeCompanionPackages.has(packageName))
-    || /@interactive-os\/json-document\/(?:session|react)\b/.test(llms)
-    || /\blabs\/extensions\b/.test(llms)
-  ) {
-    fail("live llms.txt still exposes a removed legacy surface.");
-  }
+  validateLlmsContract(llms, (message) => fail(`live ${message}`));
 
   const manifest = JSON.parse(await fetchText("/site.webmanifest"));
   if (
@@ -108,7 +84,7 @@ async function checkOnce() {
   }
 
   const favicon = await fetchText("/favicon.svg");
-  if (!/<svg/.test(favicon) || !/aria-label="@interactive-os\/json-document"/.test(favicon)) {
+  if (!/<svg/.test(favicon) || !/aria-label="json-document cat"/.test(favicon)) {
     fail("live favicon.svg is missing expected SVG content.");
   }
 

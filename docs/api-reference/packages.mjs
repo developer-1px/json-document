@@ -1,4 +1,5 @@
 export const apiReferencePackages = [
+  ["a2ui", "@interactive-os/json-document-a2ui", "packages/json-document-a2ui/src/index.ts", "Connector", "A2UI streaming document connector"],
   ["json-document", "@interactive-os/json-document", "packages/json-document/src/application/document/index.ts", "JSON Document", "Core document 값·주소·patch 계약"],
   ["selection", "@interactive-os/json-document-selection", "packages/json-document-selection/src/index.ts", "Editing", "구조적 selection과 topology 계약"],
   ["editing", "@interactive-os/json-document-editing", "packages/json-document-editing/src/index.ts", "Editing", "intent, editor, history 편집 계약"],
@@ -9,8 +10,11 @@ export const apiReferencePackages = [
   ["tanstack-table", "@interactive-os/json-document-tanstack-table", "packages/json-document-tanstack-table/src/index.ts", "Connector", "TanStack Table connector"],
   ["affordance", "@interactive-os/json-document-affordance", "packages/json-document-affordance/src/index.ts", "Affordance", "입력 문법과 interaction session"],
   ["ui-primitives-react", "@interactive-os/json-document-ui-primitives-react", "packages/json-document-ui-primitives-react/src/index.ts", "UI Primitives", "표준 React UI primitive"],
+  ["animation-react", "@interactive-os/json-document-animation-react", "packages/json-document-animation-react/src/index.ts", "UI Primitives", "생성 대기 시각 언어"],
+  ["markdown-react", "@interactive-os/json-document-markdown-react", "packages/json-document-markdown-react/src/index.ts", "Artifact", "스트리밍 Markdown 투영과 렌더링"],
   ["database", "@interactive-os/json-document-database", "packages/json-document-database/src/index.ts", "Hands", "Database Hand domain 계약"],
   ["annotation", "@interactive-os/json-document-annotation", "packages/json-document-annotation/src/index.ts", "Hands", "Annotation Hand interaction과 SVG projection"],
+  ["calendar", "@interactive-os/json-document-calendar", "packages/json-document-calendar/src/index.ts", "Hands", "Calendar React lifecycle와 occurrence interaction 계약"],
   ["web", "@interactive-os/json-document-web", "packages/json-document-web/src/index.ts", "Adapter", "Web platform adapter"],
   ["contenteditable", "@interactive-os/json-document-contenteditable", "packages/json-document-contenteditable/src/index.ts", "Adapter", "contenteditable platform adapter"],
   ["rich-text", "@interactive-os/json-document-rich-text", "packages/json-document-rich-text/src/index.ts", "Editing", "Rich Text domain과 editing 계약"],
@@ -25,4 +29,13 @@ export const apiReferencePackages = [
   ["rich-text-react", "@interactive-os/json-document-rich-text-react", "packages/json-document-rich-text-react/src/index.tsx", "Connector", "Rich Text React connector"],
   ["collaboration", "@interactive-os/json-document-collaboration", "packages/json-document-collaboration/src/index.ts", "Collaboration", "replica, history, text collaboration runtime"],
   ["contenteditable-collaboration", "@interactive-os/json-document-contenteditable-collaboration", "packages/contenteditable-collaboration/src/index.ts", "Collaboration", "collaborative contenteditable lease"],
-].map(([slug, packageName, entrypoint, owner, responsibility]) => ({ slug, packageName, entrypoint, owner, responsibility }));
+].map(([slug, packageName, entrypoint, owner, responsibility]) => ({
+  slug, packageName, entrypoint, owner, responsibility,
+  subpaths: slug === "collaboration" ? [{
+    packageName: "@interactive-os/json-document-collaboration/history",
+    entrypoint: "packages/json-document-collaboration/src/history-index.ts",
+  }, {
+    packageName: "@interactive-os/json-document-collaboration/editing",
+    entrypoint: "packages/json-document-collaboration/src/editing-index.ts",
+  }] : [],
+}));

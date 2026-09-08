@@ -11,14 +11,18 @@ import { useEditingObservation, useTreeEditing } from "@interactive-os/json-docu
 import {
   createWebClipboardSurface,
   treeClipboardCodec,
+  isWebEditingHostTarget,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
+  applyAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -117,13 +121,13 @@ export function TreeDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Tree actions"
         toolbar={(
           <>
-            <IconButton label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Paste"
+            <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+            <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+            <Command label="Paste"
               disabled={!clipboard}
               onClick={() => {
                 if (!clipboard) return;
@@ -131,11 +135,11 @@ export function TreeDemoRoute() {
               }}
             >
               <ClipboardPaste aria-hidden="true" size={16} />
-            </IconButton>
-            <IconButton label="Delete" onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></IconButton>
+            </Command>
+            <Command label="Delete" onClick={() => run({ type: "selection.remove", topology }, "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
             <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" disabled={commands.undo.disabled} onClick={() => { editor.undo(); observation.announce("Undone"); }}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" disabled={commands.redo.disabled} onClick={() => { editor.redo(); observation.announce("Redone"); }}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
         inspector={(
@@ -151,19 +155,32 @@ export function TreeDemoRoute() {
             className="m-0 grid list-none gap-1 p-0"
             tabIndex={0}
             {...clipboardSurface}
-            onKeyDown={editing.getKeyDownHandler()}
+            onKeyDown={(event) => {
+              if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+                applyAffordance(selectAllAffordance(event, {
+                  allSelected: editor.selectedNodeIdsIn(topology).length === topology.visibleIds.length,
+                }, { repeat: "preserve" }), {
+                  hand: (hand) => {
+                    if (hand.type !== "select-all") return;
+                    run({ type: "selection.select-all", topology }, "All visible nodes selected");
+                    event.preventDefault();
+                  },
+                });
+              }
+              if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
+            }}
           >
             {rows.map((row) => {
               return (
                 <li key={row.id} style={{ paddingLeft: `${row.depth * 1.25}rem` }}>
                   <div className="grid grid-cols-[2rem_minmax(0,1fr)]">
                     {row.hasChildren ? (
-                      <IconButton
+                      <Command
                         label={row.expanded ? `Collapse ${row.label}` : `Expand ${row.label}`}
                         onClick={() => editing.toggle(row.id)}
                       >
                         {row.expanded ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronRight aria-hidden="true" size={16} />}
-                      </IconButton>
+                      </Command>
                     ) : <span />}
                     <SelectableItem
                       data-node-id={row.id}
@@ -179,7 +196,7 @@ export function TreeDemoRoute() {
           </ul>
           <p className={classes("mb-0 mt-3", ui.text.meta)}>Fold a branch to take it out of the visible line. Selection and clipboard read that line only.</p>
         </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

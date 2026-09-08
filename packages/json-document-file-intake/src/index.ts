@@ -1,5 +1,7 @@
 import type { JSONValue } from "@interactive-os/json-document";
 
+export { formatFileSize } from "./file-size.js";
+
 export interface FileCandidate extends Record<string, JSONValue> {
   readonly name: string;
   readonly size: number;

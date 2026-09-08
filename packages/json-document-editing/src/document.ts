@@ -1,9 +1,14 @@
 import { type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { createEditingSession, type EditingResult, type EditingSession, type EditingSnapshot } from "./session.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
+  reconcileRangeSelection,
+  replaceRangeSelection,
   selectRangePoint,
 } from "./range-selection.js";
 import { lineInterval, lineTopology } from "./topology.js";
@@ -45,7 +50,20 @@ export interface DocumentClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 
+export const documentClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.blocks+json" as const,
+  parse(value: unknown): DocumentClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.blocks)
+      && value.blocks.every((block) => isClipboardRecord(block) && typeof block.id === "string" && typeof block.text === "string")
+      ? value as DocumentClipboard : null;
+  },
+};
+
 export type DocumentIntent =
+  | { readonly type: "selection.select-all" }
   | { readonly type: "selection.set"; readonly blockId: string; readonly mode?: "replace" | "extend" | "toggle"; readonly offset?: number }
   | { readonly type: "text.replace"; readonly blockId: string; readonly text: string; readonly offset?: number }
   | { readonly type: "block.insert"; readonly afterId?: string; readonly text?: string }
@@ -65,14 +83,21 @@ export interface DocumentEditor {
   subscribe(listener: (snapshot: EditingSnapshot<DocumentSelection>) => void): () => void;
 }
 
-export function createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options: { readonly createId?: () => string } = {}): DocumentEditor {
+export function createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options: EditingHistoryOptions & { readonly createId?: () => string } = {}): DocumentEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as BlockDocument;
-  let sequence = 0;
-  const createId = options.createId ?? (() => `block-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("block"));
   const first = initial.blocks[0];
   const initialSelection = first ? collapsed(first.id, 0) : emptySelection();
-  const session = createEditingSession({ document, selection: initialSelection });
+  const session = createEditingSession({
+    ...options,
+    document,
+    selection: initialSelection,
+    reconcileSelection: (selection, value) => asDocumentSelection(reconcileRangeSelection(selection, (point) => {
+      const block = (value as BlockDocument).blocks.find((block) => block.id === point.blockId);
+      return block ? pointAt(block, point.offset) : null;
+    })),
+  });
 
   function value(): BlockDocument {
     return session.snapshot.value as BlockDocument;
@@ -90,6 +115,14 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
 
   function dispatch(intent: DocumentIntent): EditingResult<DocumentSelection> {
     const blocks = value().blocks;
+    if (intent.type === "selection.select-all") {
+      const first = blocks[0];
+      const last = blocks.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first && last ? { anchor: pointAt(first, 0), focus: pointAt(last, last.text.length) } : null,
+        (left, right) => left.blockId === right.blockId && left.offset === right.offset);
+      return success(session.select(asDocumentSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       const index = blocks.findIndex((block) => block.id === intent.blockId);
       if (index < 0) return failure("selection.block-not-found");
@@ -98,7 +131,9 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
         session.snapshot.selection,
         point,
         intent.mode ?? "replace",
-        (left, right) => left.blockId === right.blockId,
+        // Toggle addresses whole blocks; caret/range endpoints also include offset.
+        (left, right) => left.blockId === right.blockId
+          && (intent.mode === "toggle" || left.offset === right.offset),
       );
       return success(session.select(asDocumentSelection(selection)));
     }
@@ -138,17 +173,22 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
       if ((intent.direction < 0 && start === 0) || (intent.direction > 0 && end === blocks.length - 1)) return failure("move.boundary");
       const selected = blocks.filter((block) => ids.includes(block.id));
       const insertAt = intent.direction < 0 ? start - 1 : start + 1;
-      const operations: JSONPatchOperation[] = [
-        ...indices.sort((left, right) => right - left).map((index) => ({
-          op: "remove" as const,
-          path: `/blocks/${index}`,
-        })),
-        ...selected.map((block, offset) => ({
-          op: "add" as const,
-          path: `/blocks/${insertAt + offset}`,
-          value: block,
-        })),
+      const currentIds = blocks.map((block) => block.id);
+      const operations: JSONPatchOperation[] = [];
+      // Noncontiguous groups can need moves in both directions. Place leftward
+      // members first, then rightward members in reverse, without shifting a
+      // member that has already reached its final position.
+      const moves = selected.map((block, offset) => ({ id: block.id, from: currentIds.indexOf(block.id), index: insertAt + offset }));
+      const orderedMoves = [
+        ...moves.filter(({ from, index }) => from > index),
+        ...moves.filter(({ from, index }) => from < index).reverse(),
       ];
+      for (const { id, index } of orderedMoves) {
+        const from = currentIds.indexOf(id);
+        if (from === index) continue;
+        operations.push({ op: "move", from: `/blocks/${from}`, path: `/blocks/${index}` });
+        currentIds.splice(index, 0, currentIds.splice(from, 1)[0]!);
+      }
       return session.apply({
         operations,
         selectionAfter: session.snapshot.selection,
@@ -185,11 +225,7 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
     get selectedBlockIds() { return selectedIds(); },
     dispatch,
     copy,
-    cut() {
-      const clipboard = copy();
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(session, value().blocks, selectedIds()) };
-    },
+    cut: () => cutEditingClipboard(copy, () => removeSelected(session, value().blocks, selectedIds())),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

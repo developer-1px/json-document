@@ -14,6 +14,9 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { assertObjectDocument } from "./object-validation.js";
 
 export interface DocumentObject extends Record<string, JSONValue> {
@@ -43,6 +46,22 @@ export interface ObjectClipboard extends Record<string, JSONValue> {
   readonly objects: ReadonlyArray<DocumentObject>;
   readonly text: string;
 }
+
+export const objectClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.objects+json" as const,
+  parse(value: unknown): ObjectClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.objects)
+      && value.objects.every((item) => isClipboardRecord(item)
+        && typeof item.id === "string" && typeof item.label === "string"
+        && typeof item.x === "number" && typeof item.y === "number"
+        && typeof item.width === "number" && typeof item.height === "number"
+        && typeof item.color === "string")
+      ? value as ObjectClipboard : null;
+  },
+};
 
 export interface ObjectPastePlacement {
   readonly type: "offset";
@@ -87,18 +106,27 @@ export interface ObjectEditor {
 
 export function createObjectEditor(
   source: EditingDocumentSource<ObjectDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
 ): ObjectEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as ObjectDocument;
   assertObjectDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `object-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("object"));
   const selectionFamily = createKeySelectionFamily<string>();
   const first = initial.objects[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? selectionFor([first.id]) : selectionFor([]),
+    reconcileSelection(selection, value) {
+      const context: KeySelectionContext<string> = {
+        keys: (value as ObjectDocument).objects.map((object) => object.id),
+        universe: "objects",
+        universeMismatch: "clear",
+      };
+      const next = selectionFamily.reconcile(selection, context).state;
+      return selectionFor(selectionFamily.targets(next, context), next.primaryKey);
+    },
   });
 
   function value(): ObjectDocument {
@@ -252,11 +280,7 @@ export function createObjectEditor(
     get selectedObjects() { return selectedObjects(); },
     dispatch,
     copy,
-    cut() {
-      const clipboard = copy();
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(selectedObjects().map((object) => object.id)) };
-    },
+    cut: () => cutEditingClipboard(copy, () => removeSelected(selectedObjects().map((object) => object.id))),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

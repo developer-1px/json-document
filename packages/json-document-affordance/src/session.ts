@@ -79,8 +79,15 @@ export interface RenameSession<Key> {
   cancel(): void;
 }
 
-export function createRenameSession<Key>(options: {
+/** Owns the draft lifecycle. A false tryCommit retains the draft without finishing; onCommit always finishes. */
+export function createRenameSession<Key>(options: ({
   readonly onCommit: (key: Key, draft: string) => void;
+  readonly tryCommit?: never;
+} | {
+  readonly tryCommit: (key: Key, draft: string) => boolean;
+  readonly onCommit?: never;
+}) & {
+  readonly onCancel?: (key: Key, draft: string) => void;
   readonly onFinish?: (key: Key) => void;
   readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void;
 }): RenameSession<Key> {
@@ -93,7 +100,12 @@ export function createRenameSession<Key>(options: {
   function finish(commit: boolean) {
     if (snapshot === null) return;
     const finished = snapshot;
-    if (commit) options.onCommit(finished.key, finished.draft);
+    if (commit) {
+      if (options.tryCommit !== undefined) {
+        if (!options.tryCommit(finished.key, finished.draft)) return;
+      } else options.onCommit(finished.key, finished.draft);
+    }
+    else options.onCancel?.(finished.key, finished.draft);
     publish(null);
     options.onFinish?.(finished.key);
   }

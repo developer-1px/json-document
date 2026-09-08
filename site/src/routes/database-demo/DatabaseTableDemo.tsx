@@ -3,13 +3,13 @@ import { DatabaseHand } from "@interactive-os/json-document-database";
 import "@interactive-os/json-document-database/styles.css";
 import { createDatabaseEditor, type DatabaseEditor } from "@interactive-os/json-document-editing";
 import { Inspector } from "../../shared/ui/inspector";
-import { ProductApp } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { initialDatabase } from "./initial-database";
 
 export function DatabaseTableDemo() {
   const [editor] = useState<DatabaseEditor>(() => createDatabaseEditor(initialDatabase));
   return (
-    <ProductApp canvasClassName="relative overflow-auto p-0">
+    <ProductShell canvasClassName="relative overflow-auto p-0">
       <DatabaseHand
         editor={editor}
         viewId="table"
@@ -33,6 +33,6 @@ export function DatabaseTableDemo() {
           ]} />
         )}
       />
-    </ProductApp>
+    </ProductShell>
   );
 }

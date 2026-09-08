@@ -1,8 +1,9 @@
 import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { Check, Copy } from "lucide-react";
 import { createWebClipboardTextWriter } from "@interactive-os/json-document-web";
+import { useVirtualSelectionScope } from "@interactive-os/json-document-react";
 import { codeLanguageLabel, tokenizeCodeLine, type CodeLanguage } from "./code-tokens";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "./styles";
 
 type CodeBlockSize = "compact" | "content" | "standard" | "tall";
@@ -24,11 +25,16 @@ export function CodeBlock(props: {
   readonly className?: string;
   readonly testId?: string;
   readonly highlightedLines?: ReadonlyArray<ReadonlyArray<HighlightedCodeToken>>;
+  readonly linePrefix?: ReactNode;
 }) {
   const source = withoutTerminalLineBreak(props.source.replace(/\r\n/g, "\n"));
   const label = props.label ?? codeLanguageLabel(props.language);
   const lines = source.split("\n");
   const [copied, setCopied] = useState(false);
+  const selectionRef = useVirtualSelectionScope<HTMLPreElement>({
+    activation: "contained",
+    readAllText: () => source,
+  });
 
   useEffect(() => setCopied(false), [source]);
 
@@ -44,7 +50,7 @@ export function CodeBlock(props: {
         {props.meta ? <> · {props.meta}</> : null}
         {props.signal ? <> · {props.signal}</> : null}
       </figcaption>
-      <IconButton
+      <Command
         rootClassName={ui.code.block.copyRoot}
         label={copied ? "Copied" : "Copy"}
         className={ui.code.block.copy}
@@ -52,8 +58,9 @@ export function CodeBlock(props: {
         onClick={() => void copySource()}
       >
         <CopyIcon copied={copied} />
-      </IconButton>
+      </Command>
       <pre
+        ref={selectionRef}
         data-testid={props.testId}
         className={classes(ui.code.block.viewport[props.size ?? "standard"], ui.code.block.pre)}
       >
@@ -67,6 +74,7 @@ export function CodeBlock(props: {
                   data-code-line
                   {...(props.language === "json" ? { "data-json-line": true } : {})}
                 >
+                  {props.linePrefix}
                   {props.highlightedLines?.[lineIndex]?.map((token, tokenIndex) => (
                     <span key={`${tokenIndex}:${token.content}`} style={{ color: token.color }}>
                       {token.content}

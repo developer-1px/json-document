@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -159,6 +159,11 @@ equal("v3 peer dependencies", manifest.package?.peerDependencies, []);
 equal("public contract entrypoints", Object.keys(packageContract), ["root"]);
 
 const sourceExports = publicExports(rootSource);
+const exportCount = sourceExports.values.length + sourceExports.types.length;
+requirePattern("profile export count", profile, new RegExp(`root entrypoint 하나와 ${exportCount}개 symbol`));
+requirePattern("profile runtime export count", profile, new RegExp(`values\\s+${sourceExports.values.length}\\b`));
+requirePattern("profile type export count", profile, new RegExp(`types\\s+${sourceExports.types.length}\\b`));
+requirePattern("profile total export count", profile, new RegExp(`total\\s+${exportCount}\\b`));
 equal("root source values", sourceExports.values, [...packageContract.root.values].sort());
 equal("root source types", sourceExports.types, [...packageContract.root.types].sort());
 equal(
@@ -215,7 +220,6 @@ for (const word of ["MUST", "SHOULD", "MAY"]) {
 }
 for (const pattern of [
   /stateless JSON Patch -> JSON Document -> host adapter/,
-  /root entrypoint 하나와 21개 symbol/,
   /runtime dependency와 peer dependency가 없다/,
   /제거된 `\/session`과\s*`\/react` implementation은 export가 아니며 production build와 tarball에\s*포함하지 않는다/,
 ]) {
@@ -242,9 +246,6 @@ const jsonPathBinding = read(manifest.conformance.jsonPathBinding);
 const foundationVectors = json(manifest.conformance.foundationVectors);
 const pressureVectors = json(manifest.conformance.pressureVectors);
 const pressureSuite = read(manifest.conformance.pressureSuite);
-const independentJSONDocumentImplementation = read(
-  manifest.conformance.independentJSONDocumentImplementation,
-);
 const independentJSONDocumentBinding = read(
   manifest.conformance.independentJSONDocumentBinding,
 );
@@ -444,22 +445,20 @@ assertGenericSuite(
   pressureSuite,
   /JSONDocumentHarness[\s\S]*runPressureConformance/,
 );
-if (
-  /@interactive-os\/json-document|\/src\//.test(
-    independentJSONDocumentImplementation,
-  )
-) {
-  fail("independent JSON Document: reference package or private source import leaked.");
-}
-if (
-  /@interactive-os\/json-document|\/src\//.test(independentJSONDocumentBinding)
-) {
-  fail("independent JSON Document binding must not import the reference implementation.");
+const independentDirectory = dirname(manifest.conformance.independentJSONDocumentImplementation);
+for (const file of readdirSync(join(repoRoot, independentDirectory), { recursive: true })) {
+  if (!file.endsWith(".ts")) continue;
+  if (/@interactive-os\/json-document|\/src\//.test(read(join(independentDirectory, file)))) {
+    fail(`independent implementation ${file}: reference or private source import leaked.`);
+  }
 }
 for (const pattern of [
   /createIndependentJSONDocument/,
   /runJSONDocumentConformance\(independentHarness\)/,
   /runPressureConformance\(independentHarness\)/,
+  /runJSONPathConformance\(/,
+  /runRFC6902Conformance\(independentPatchHarness\)/,
+  /runProtocolConformance\(independentPatchHarness\)/,
 ]) {
   requirePattern("independent JSON Document binding", independentJSONDocumentBinding, pattern);
 }
@@ -512,6 +511,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    "json-document standardization ok: 1 entrypoint, 21 exports, 6 JSON Document members, 0 runtime peers",
+    `json-document standardization ok: 1 entrypoint, ${exportCount} exports, 6 JSON Document members, 0 runtime peers`,
   );
 }

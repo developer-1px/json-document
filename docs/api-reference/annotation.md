@@ -46,12 +46,40 @@ interface AnnotationHandLabels {
 interface AnnotationHandProps {
   readonly editor: AnnotationEditor;
   readonly sourceUrl: string;
+  readonly tool: AnnotationTool;
+  readonly onToolChange: (tool: AnnotationTool) => void;
+  readonly reactionShadow?: string;
   readonly createId: () => string;
   readonly classNames?: AnnotationHandClassNames;
   readonly enabledTools?: ReadonlyArray<AnnotationTool>;
   readonly labels?: AnnotationHandLabels;
   readonly rasterStyle: WebAnnotationRasterStyle;
   readonly onAnnouncement?: (message: string) => void;
+}
+```
+## `AnnotationOutput`
+
+```ts
+interface AnnotationOutput {
+  readonly structured: string;
+  readonly structuredDownloadUrl: string;
+  readonly renderedImage: string | null;
+  readonly imageError: boolean;
+  readonly canRestore: boolean;
+  save(): void;
+  restore(): boolean;
+}
+```
+## `AnnotationOutputOptions`
+
+```ts
+interface AnnotationOutputOptions {
+  /** The same document instance passed to createAnnotationEditor. */
+  readonly document: JSONDocument;
+  readonly editor: AnnotationEditor;
+  readonly sourceUrl: string;
+  readonly rasterStyle: WebAnnotationRasterStyle;
+  readonly renderImage: boolean;
 }
 ```
 ## `AnnotationTool`
@@ -63,4 +91,9 @@ type AnnotationTool = "select" | "comment" | "draw" | "arrow" | "like" | "dislik
 
 ```ts
 const annotationTools: readonly [{ readonly id: "select"; readonly label: "Select"; readonly shortcut: "V"; readonly icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; }, ... 4 more ..., { ...; }]
+```
+## `useAnnotationOutput`
+
+```ts
+useAnnotationOutput(options: AnnotationOutputOptions): AnnotationOutput
 ```

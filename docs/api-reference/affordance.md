@@ -132,6 +132,31 @@ type AffordanceResult<H extends AffordanceHand = AffordanceHand> =
   | AffordancePreview<H>
   | AffordanceCommit<H>;
 ```
+## `AnchoredFloatingPosition`
+
+```ts
+interface AnchoredFloatingPosition {
+  readonly x: number;
+  readonly y: number;
+  readonly placement: FloatingPlacement;
+  readonly availableWidth: number;
+  readonly availableHeight: number;
+  readonly overflow: FloatingOverflow;
+  readonly fits: boolean;
+}
+```
+## `AnchoredFloatingPositionInput`
+
+```ts
+interface AnchoredFloatingPositionInput {
+  readonly anchor: FloatingRect;
+  readonly floating: FloatingSize;
+  readonly boundary: FloatingRect;
+  readonly policy: FloatingPlacementPolicy;
+  readonly offset?: number;
+  readonly boundaryPadding?: number;
+}
+```
 ## `applyAffordance`
 
 ```ts
@@ -226,10 +251,92 @@ clickCountAffordance(detail: number): AffordancePreview
 ```ts
 commitAffordance<H extends AffordanceHand>(result: AffordancePreview<H>): AffordanceCommit<H> | null
 ```
+## `computeAnchoredFloatingPosition`
+
+```ts
+computeAnchoredFloatingPosition(input: AnchoredFloatingPositionInput): AnchoredFloatingPosition
+```
+## `contentInteractionAffordance`
+
+```ts
+contentInteractionAffordance(input: ContentInteractionInput): ContentInteractionAffordance
+```
+## `ContentInteractionAffordance`
+
+```ts
+type ContentInteractionAffordance = {
+  readonly role: ContentInteractionRole;
+  readonly phase: ContentInteractionPhase;
+  readonly selected: boolean;
+  readonly primary: boolean;
+  readonly elevated: boolean;
+};
+```
+## `ContentInteractionInput`
+
+```ts
+type ContentInteractionInput =
+  | {
+      readonly role: "content";
+      readonly selected?: boolean;
+      readonly primary?: boolean;
+      readonly active?: boolean;
+      readonly dragging?: boolean;
+    }
+  | {
+      readonly role: "drop-target" | "insertion";
+      readonly active: boolean;
+    };
+```
+## `ContentInteractionPhase`
+
+```ts
+type ContentInteractionPhase = "rest" | "active" | "dragging";
+```
+## `ContentInteractionRole`
+
+```ts
+type ContentInteractionRole = "content" | "drop-target" | "insertion";
+```
 ## `contextMenuAffordance`
 
 ```ts
 contextMenuAffordance(input: { readonly type?: string; readonly button?: number; readonly key?: string; readonly shiftKey?: boolean; }): AffordancePreview
+```
+## `contextualAffordance`
+
+```ts
+contextualAffordance<Id extends string>(input: { readonly approached?: boolean; readonly focused?: boolean; readonly selected?: boolean; readonly editing?: boolean; readonly capabilities: ReadonlyArray<ContextualAffordanceCapability<Id>>; }): ContextualAffordanceSnapshot<Id>
+```
+## `ContextualAffordanceCapability`
+
+```ts
+type ContextualAffordanceCapability<Id extends string = string> = {
+  readonly id: Id;
+  readonly phases: ReadonlyArray<Exclude<ContextualAffordancePhase, "rest">>;
+};
+```
+## `ContextualAffordancePhase`
+
+```ts
+type ContextualAffordancePhase = "rest" | "approach" | "selected" | "editing";
+```
+## `ContextualAffordanceSnapshot`
+
+```ts
+type ContextualAffordanceSnapshot<Id extends string = string> = {
+  readonly phase: ContextualAffordancePhase;
+  readonly visible: ReadonlyArray<Id>;
+};
+```
+## `ControlHandleDescriptor`
+
+```ts
+type ControlHandleDescriptor = {
+  readonly kind: "control";
+  readonly axis?: InteractionHandleAxis;
+  readonly cursor?: InteractionHandleCursorPolicy;
+};
 ```
 ## `createBoardDragSession`
 
@@ -246,6 +353,11 @@ createCanvasGestureSession<Gesture extends CanvasGestureState>(options?: CanvasG
 ```ts
 createGestureSession<Gesture extends GestureState>(options?: GestureSessionOptions<Gesture>): GestureSession<Gesture>
 ```
+## `createInteractionHandleSession`
+
+```ts
+createInteractionHandleSession(): InteractionHandleSession
+```
 ## `createLineFocusSession`
 
 ```ts
@@ -254,12 +366,17 @@ createLineFocusSession<Key extends string>(options: { readonly initialKey?: Key 
 ## `createRenameSession`
 
 ```ts
-createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
+createRenameSession<Key>(options: ({ readonly onCommit: (key: Key, draft: string) => void; readonly tryCommit?: never; } | { readonly tryCommit: (key: Key, draft: string) => boolean; readonly onCommit?: never; }) & { readonly onCancel?: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
 ```
 ## `createTypeaheadSession`
 
 ```ts
 createTypeaheadSession<Key>(options: { readonly onMatch: (key: Key) => void; readonly onSnapshot?: (snapshot: TypeaheadSessionSnapshot) => void; }): TypeaheadSession<Key>
+```
+## `createViewportPositionSession`
+
+```ts
+createViewportPositionSession<Key>(options: ViewportPositionOptions<Key>): ViewportPositionSession<Key>
 ```
 ## `deleteAffordance`
 
@@ -275,6 +392,15 @@ disclosureAffordance(input: { readonly key: string; readonly expanded: boolean; 
 
 ```ts
 dragAffordance(origin: Point, point: Point, modifiers?: { readonly shiftKey?: boolean; readonly altKey?: boolean; }): AffordancePreview
+```
+## `DragHandleDescriptor`
+
+```ts
+type DragHandleDescriptor = {
+  readonly kind: "drag";
+  readonly axis?: InteractionHandleAxis;
+  readonly cursor?: InteractionHandleCursorPolicy;
+};
 ```
 ## `dragOperation`
 
@@ -295,6 +421,63 @@ editingCommandFromWebKeyboardStroke(stroke: WebKeyboardStroke): WebKeyboardComma
 
 ```ts
 escapeAffordance(input: { readonly key?: string; readonly type?: string; readonly grabbing?: boolean; readonly selected?: boolean; }): AffordancePreview
+```
+## `FloatingAlignment`
+
+```ts
+type FloatingAlignment = "start" | "center" | "end";
+```
+## `FloatingOverflow`
+
+```ts
+interface FloatingOverflow {
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+```
+## `FloatingPlacement`
+
+```ts
+type FloatingPlacement = FloatingSide | `${FloatingSide}-${Exclude<FloatingAlignment, "center">}`;
+```
+## `FloatingPlacementPolicy`
+
+```ts
+type FloatingPlacementPolicy =
+  | {
+      readonly type: "preferred";
+      readonly placement: FloatingPlacement;
+      readonly fallbacks?: ReadonlyArray<FloatingPlacement>;
+    }
+  | {
+      readonly type: "locked";
+      readonly placement: FloatingPlacement;
+    };
+```
+## `FloatingRect`
+
+```ts
+interface FloatingRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+```
+## `FloatingSide`
+
+```ts
+type FloatingSide = "top" | "right" | "bottom" | "left";
+```
+## `FloatingSize`
+
+```ts
+interface FloatingSize {
+  readonly width: number;
+  readonly height: number;
+}
 ```
 ## `focusAffordance`
 
@@ -376,6 +559,102 @@ type HistoryAffordanceResult = AffordancePreview<HistoryAffordanceHand> & {
 
 ```ts
 hoverAffordance(input: { readonly elapsedMs: number; readonly inside: boolean; readonly delayMs?: number; readonly highlight?: boolean; }): AffordancePreview
+```
+## `InteractionHandleAxis`
+
+```ts
+type InteractionHandleAxis = "x" | "y" | "both";
+```
+## `InteractionHandleCancelReason`
+
+```ts
+type InteractionHandleCancelReason = "cancel" | "lost-capture" | "superseded";
+```
+## `interactionHandleCursor`
+
+```ts
+interactionHandleCursor(descriptor: InteractionHandleDescriptor, state?: "idle" | "active"): InteractionHandleCursor
+```
+## `InteractionHandleCursor`
+
+```ts
+type InteractionHandleCursor =
+  | "grab"
+  | "grabbing"
+  | "move"
+  | "crosshair"
+  | "col-resize"
+  | "row-resize"
+  | "nwse-resize"
+  | "nesw-resize"
+  | `${ResizeEdge}-resize`;
+```
+## `InteractionHandleCursorPolicy`
+
+```ts
+type InteractionHandleCursorPolicy = {
+  readonly idle: InteractionHandleCursor;
+  readonly active?: InteractionHandleCursor;
+};
+```
+## `interactionHandleDelta`
+
+```ts
+interactionHandleDelta(descriptor: InteractionHandleDescriptor, origin: Point, point: Point): InteractionHandleDelta
+```
+## `InteractionHandleDelta`
+
+```ts
+type InteractionHandleDelta = {
+  readonly dx: number;
+  readonly dy: number;
+};
+```
+## `InteractionHandleDescriptor`
+
+```ts
+type InteractionHandleDescriptor =
+  | DragHandleDescriptor
+  | ResizeHandleDescriptor
+  | ControlHandleDescriptor;
+```
+## `InteractionHandleEvent`
+
+```ts
+type InteractionHandleEvent = {
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly phase: InteractionHandlePhase;
+  readonly origin: Point;
+  readonly point: Point;
+  readonly delta: InteractionHandleDelta;
+  readonly cursor: InteractionHandleCursor;
+  readonly reason?: InteractionHandleCancelReason;
+};
+```
+## `InteractionHandlePhase`
+
+```ts
+type InteractionHandlePhase = "start" | "preview" | "commit" | "cancel";
+```
+## `InteractionHandleSession`
+
+```ts
+interface InteractionHandleSession {
+  getSnapshot(): InteractionHandleSnapshot | null;
+  start(descriptor: InteractionHandleDescriptor, origin: Point): InteractionHandleEvent;
+  preview(point: Point): InteractionHandleEvent | null;
+  commit(point: Point): InteractionHandleEvent | null;
+  cancel(reason?: InteractionHandleCancelReason): InteractionHandleEvent | null;
+}
+```
+## `InteractionHandleSnapshot`
+
+```ts
+type InteractionHandleSnapshot = {
+  readonly descriptor: InteractionHandleDescriptor;
+  readonly origin: Point;
+  readonly point: Point;
+};
 ```
 ## `LineFocusSession`
 
@@ -485,6 +764,15 @@ resizeAffordance(origin: Point, point: Point, edge: ResizeEdge, modifiers?: { re
 ```ts
 type ResizeEdge = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 ```
+## `ResizeHandleDescriptor`
+
+```ts
+type ResizeHandleDescriptor = {
+  readonly kind: "resize";
+  readonly edge: ResizeEdge;
+  readonly cursor?: InteractionHandleCursorPolicy;
+};
+```
 ## `resolveAffordanceKey`
 
 ```ts
@@ -493,7 +781,7 @@ resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview
 ## `selectAllAffordance`
 
 ```ts
-selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">, state: { readonly allSelected: boolean; }): AffordancePreview
+selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">, state: { readonly allSelected: boolean; }, options?: { readonly repeat?: "preserve" | "toggle"; }): AffordancePreview
 ```
 ## `SelectOperation`
 
@@ -564,6 +852,67 @@ interface TypeaheadSessionInput<Key> {
 interface TypeaheadSessionSnapshot {
   readonly buffer: string;
   readonly at: number;
+}
+```
+## `ViewportPositionBehavior`
+
+```ts
+type ViewportPositionBehavior = "smooth" | "instant";
+```
+## `ViewportPositionCancelReason`
+
+```ts
+type ViewportPositionCancelReason = "cancel" | "missing-target" | "target-left-viewport" | "user-interaction";
+```
+## `ViewportPositionGeometry`
+
+```ts
+interface ViewportPositionGeometry {
+  readonly targetOffset: number;
+  readonly tailReserveOffset: number;
+  readonly viewportHeight: number;
+}
+```
+## `ViewportPositionOptions`
+
+```ts
+interface ViewportPositionOptions<Key> extends ViewportPositionPorts<Key> {
+  readonly onCancel?: (reason: ViewportPositionCancelReason) => void;
+  readonly onChange?: (snapshot: ViewportPositionSnapshot<Key>) => void;
+}
+```
+## `ViewportPositionPorts`
+
+```ts
+interface ViewportPositionPorts<Key> {
+  readonly measure: (key: Key) => ViewportPositionGeometry | null;
+  readonly setTailReserve: (key: Key, height: number) => boolean;
+  readonly scrollTo: (top: number, behavior: "smooth" | "instant") => void;
+  readonly scheduleFrame: (callback: () => void) => () => void;
+}
+```
+## `ViewportPositionSession`
+
+```ts
+interface ViewportPositionSession<Key> {
+  getSnapshot(): ViewportPositionSnapshot<Key>;
+  position(targetKey: Key, viewportOffset: number, behavior?: ViewportPositionBehavior): void;
+  layoutChanged(): void;
+  targetVisibilityChanged(visible: boolean): void;
+  complete(): void;
+  cancel(reason?: ViewportPositionCancelReason): void;
+}
+```
+## `ViewportPositionSnapshot`
+
+```ts
+interface ViewportPositionSnapshot<Key> {
+  readonly active: boolean;
+  readonly applyingScroll: boolean;
+  readonly owned: boolean;
+  readonly tailReserve: number;
+  readonly targetKey: Key | null;
+  readonly viewportOffset: number | null;
 }
 ```
 ## `wheelAffordance`

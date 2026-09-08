@@ -3,7 +3,7 @@ import { Maximize2, Minimize2 } from "lucide-react";
 import { Tabs } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../ui/styles";
 import { ActionLink } from "../ui/interactive";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
 import { ShikiSourceCodeBlock } from "./ShikiSourceCodeBlock";
 import { demoEntrySource, discoverDemoSources, type DemoSourceFile } from "./demo-sources";
 
@@ -61,7 +61,7 @@ export function DemoWorkbench(props: {
 
   return (
     <section className={classes("min-w-0", ui.product.frame, expanded && "fixed inset-3 z-50 overflow-auto bg-background-canvas shadow-overlay")} aria-label="Demo workbench" data-expanded={expanded || undefined}>
-      <div className={classes(ui.demoWorkbench.header, "flex items-start justify-between gap-2")}>
+      <div className={classes(ui.demoWorkbench.header, "flex items-center justify-between gap-2")}>
         <Tabs
           className={ui.demoWorkbench.tabList}
           tabClassName={ui.demoWorkbench.tab}
@@ -72,9 +72,9 @@ export function DemoWorkbench(props: {
           tabId={(_tab, index) => `${id}-tab-${index}`}
           panelId={(_tab, index) => `${id}-panel-${index}`}
         />
-        <IconButton label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
+        <Command label={expanded ? "Restore demo size" : "Expand demo"} aria-pressed={expanded} onClick={() => setExpanded((current) => !current)}>
           {expanded ? <Minimize2 aria-hidden="true" size={16} /> : <Maximize2 aria-hidden="true" size={16} />}
-        </IconButton>
+        </Command>
       </div>
 
       <div

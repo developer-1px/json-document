@@ -11,6 +11,11 @@ intent, editor, history 편집 계약의 public entrypoint입니다. 아래 항�
 ```ts
 acceptsDatabaseValue(property: DatabaseProperty, value: JSONValue): boolean
 ```
+## `addCalendarDate`
+
+```ts
+addCalendarDate(day: string, days: number): string | null
+```
 ## `Annotation`
 
 ```ts
@@ -103,6 +108,21 @@ interface AnnotationSource extends Record<string, JSONValue> { readonly id: stri
 ```ts
 assertAnnotationDocument(document: AnnotationDocument): void
 ```
+## `bindCalendarAllDayIntent`
+
+```ts
+bindCalendarAllDayIntent(intent: CalendarAllDayPointerIntent | null, event: CalendarEvent | undefined, occurrenceStart: string | null, scope?: "this" | "this-and-following" | "all"): CalendarIntent | null
+```
+## `bindCalendarMonthIntent`
+
+```ts
+bindCalendarMonthIntent(intent: CalendarMonthPointerIntent | null, event: CalendarEvent | undefined, occurrenceStart: string | null, scope?: "this" | "this-and-following" | "all"): CalendarIntent | null
+```
+## `bindCalendarTimeGridIntent`
+
+```ts
+bindCalendarTimeGridIntent(intent: CalendarTimeGridPointerIntent | null, event: CalendarEvent | undefined, occurrenceStart: string | null, scope?: "this" | "this-and-following" | "all"): CalendarIntent | null
+```
 ## `BlockDocument`
 
 ```ts
@@ -110,50 +130,505 @@ interface BlockDocument extends Record<string, JSONValue> {
   readonly blocks: ReadonlyArray<DocumentBlock>;
 }
 ```
+## `CalendarAllDayHandle`
+
+```ts
+type CalendarAllDayHandle = "body" | "start" | "end";
+```
+## `calendarAllDayLayout`
+
+```ts
+calendarAllDayLayout(events: ReadonlyArray<CalendarEvent>, days: ReadonlyArray<string>): ReadonlyArray<{ readonly event: CalendarEvent; readonly startIndex: number; readonly span: number; readonly lane: number; readonly laneCount: number; }>
+```
+## `CalendarAllDayPointerIntent`
+
+```ts
+type CalendarAllDayPointerIntent = Extract<
+  CalendarIntent,
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move-day" } | { type: "event.resize" }
+>;
+```
+## `CalendarAllDayPointerRelease`
+
+```ts
+type CalendarAllDayPointerRelease = {
+  readonly originDay: string;
+  readonly originEventId: string | null;
+  readonly originEventStart: string | null;
+  readonly originHandle: CalendarAllDayHandle | null;
+  readonly targetDay: string;
+};
+```
+## `calendarAllDaySpan`
+
+```ts
+calendarAllDaySpan(originDay: string, targetDay: string): { readonly start: string; readonly end: string; } | null
+```
+## `calendarBusyDates`
+
+```ts
+calendarBusyDates(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlySet<string>
+```
+## `CalendarCalendar`
+
+```ts
+interface CalendarCalendar extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly title: string;
+  readonly hidden: boolean;
+  readonly color: string;
+}
+```
+## `CalendarClipboard`
+
+```ts
+interface CalendarClipboard extends Record<string, JSONValue> {
+  readonly type: "application/vnd.interactive-os.calendar+json";
+  readonly anchorOccurrenceStart: string;
+  readonly items: ReadonlyArray<CalendarClipboardItem>;
+  readonly text: string;
+}
+```
+## `calendarClipboardFormat`
+
+```ts
+const calendarClipboardFormat: { mimeType: "application/vnd.interactive-os.calendar+json"; parse(value: unknown): CalendarClipboard | null; }
+```
+## `CalendarClipboardItem`
+
+```ts
+interface CalendarClipboardItem extends Record<string, JSONValue> {
+  readonly sourceEventId: string;
+  readonly occurrenceStart: string;
+  readonly event: CalendarEvent;
+}
+```
+## `calendarDatePart`
+
+```ts
+calendarDatePart(value: string): string
+```
+## `CalendarDocument`
+
+```ts
+interface CalendarDocument extends Record<string, JSONValue> {
+  readonly calendars: ReadonlyArray<CalendarCalendar>;
+  readonly events: ReadonlyArray<CalendarEvent>;
+}
+```
+## `calendarDocumentCalendar`
+
+```ts
+calendarDocumentCalendar(document: CalendarDocument, calendarId: string): CalendarCalendar | null
+```
+## `calendarDocumentCalendars`
+
+```ts
+calendarDocumentCalendars(document: CalendarDocument): ReadonlyArray<CalendarCalendar>
+```
+## `CalendarEditor`
+
+```ts
+interface CalendarEditor {
+  readonly snapshot: EditingSnapshot<CalendarSelection>;
+  readonly selectedEvents: ReadonlyArray<CalendarEvent>;
+  readonly selectedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+  readonly primaryOccurrence: CalendarOccurrenceSelection | null;
+  prepareSelectionDrag(
+    point: CalendarOccurrencePoint,
+    topology?: CalendarOccurrenceTopologySnapshot,
+  ): CalendarSelectionDragSource | null;
+  dispatch(intent: CalendarIntent): EditingResult<CalendarSelection>;
+  copy(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): CalendarClipboard | null;
+  cut(occurrences?: ReadonlyArray<CalendarOccurrenceSelection>): EditingClipboardCut<CalendarClipboard, EditingResult<CalendarSelection>> | null;
+  paste(clipboard: CalendarClipboard, target?: string): EditingResult<CalendarSelection>;
+  undo(): EditingResult<CalendarSelection>;
+  redo(): EditingResult<CalendarSelection>;
+  subscribe(listener: (snapshot: EditingSnapshot<CalendarSelection>) => void): () => void;
+}
+```
+## `CalendarEvent`
+
+```ts
+interface CalendarEvent extends Record<string, JSONValue> {
+  readonly id: string;
+  readonly title: string;
+  readonly start: string;
+  readonly end: string;
+  readonly allDay: boolean;
+  readonly calendarId: string;
+  readonly recurrence: CalendarRecurrence | null;
+  readonly excludeDates: ReadonlyArray<string>;
+}
+```
+## `CalendarEventPatch`
+
+```ts
+type CalendarEventPatch = {
+  readonly title?: string;
+  readonly start?: string;
+  readonly end?: string;
+  readonly allDay?: boolean;
+  readonly calendarId?: string;
+  readonly recurrence?: CalendarEvent["recurrence"];
+};
+```
+## `calendarEventsInMonth`
+
+```ts
+calendarEventsInMonth(events: ReadonlyArray<CalendarEvent>, month: string): ReadonlyArray<CalendarEvent>
+```
+## `calendarEventsOnDay`
+
+```ts
+calendarEventsOnDay(events: ReadonlyArray<CalendarEvent>, day: string): ReadonlyArray<CalendarEvent>
+```
+## `calendarInstantAt`
+
+```ts
+calendarInstantAt(day: string, minutesFromMidnight: number): string | null
+```
+## `CalendarIntent`
+
+```ts
+type CalendarIntent =
+  | {
+      readonly type: "selection.set";
+      readonly point: CalendarOccurrencePoint;
+      readonly topology?: CalendarOccurrenceTopologySnapshot;
+      readonly mode?: "replace" | "extend" | "toggle";
+    }
+  | { readonly type: "selection.clear" }
+  | { readonly type: "selection.remove" }
+  | {
+      readonly type: "selection.move";
+      readonly source: CalendarSelectionDragSource;
+      readonly target: CalendarSelectionMoveTarget;
+      readonly scope?: "this" | "this-and-following" | "all";
+    }
+  | {
+      readonly type: "event.create";
+      readonly start: string;
+      readonly end: string;
+      readonly title?: string;
+      readonly allDay?: boolean;
+      readonly calendarId?: string;
+      readonly recurrence?: CalendarRecurrence | null;
+    }
+  | { readonly type: "event.move"; readonly eventId: string; readonly start: string }
+  | { readonly type: "event.resize"; readonly eventId: string; readonly edge: "start" | "end"; readonly instant: string }
+  | { readonly type: "event.move-day"; readonly eventId: string; readonly day: string }
+  | {
+      readonly type: "event.update";
+      readonly eventId: string;
+      readonly title?: string;
+      readonly start?: string;
+      readonly end?: string;
+      readonly allDay?: boolean;
+      readonly calendarId?: string;
+      readonly recurrence?: CalendarRecurrence | null;
+    }
+  | {
+      readonly type: "occurrence.edit";
+      readonly eventId: string;
+      readonly occurrenceStart: string;
+      readonly scope: "this" | "this-and-following" | "all";
+      readonly title?: string;
+      readonly start?: string;
+      readonly end?: string;
+    }
+  | {
+      readonly type: "occurrence.remove";
+      readonly eventId: string;
+      readonly occurrenceStart: string;
+      readonly scope: "this" | "this-and-following" | "all";
+    }
+  | { readonly type: "calendar.set-hidden"; readonly calendarId: string; readonly hidden: boolean };
+```
+## `calendarIntervalLastDate`
+
+```ts
+calendarIntervalLastDate(start: string, end: string, allDay: boolean): string
+```
+## `calendarMonthDayLayout`
+
+```ts
+calendarMonthDayLayout(events: ReadonlyArray<CalendarEvent>, day: string, rowLimit: number): { readonly events: ReadonlyArray<CalendarEvent>; readonly hiddenCount: number; }
+```
+## `CalendarMonthPointerIntent`
+
+```ts
+type CalendarMonthPointerIntent = Extract<
+  CalendarIntent,
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move-day" }
+>;
+```
+## `CalendarMonthPointerRelease`
+
+```ts
+type CalendarMonthPointerRelease = {
+  readonly originDay: string;
+  readonly originEventId: string | null;
+  readonly originEventStart?: string | null;
+  readonly targetDay: string;
+  readonly eventsOnTargetDay: ReadonlyArray<{ readonly id: string }>;
+};
+```
+## `calendarMonthWeekLayout`
+
+```ts
+calendarMonthWeekLayout(events: ReadonlyArray<CalendarEvent>, days: ReadonlyArray<string>, rowLimit: number): { readonly items: ReadonlyArray<{ readonly event: CalendarEvent; readonly startIndex: number; readonly span: number; readonly lane: number; }>; readonly hiddenCounts: ReadonlyArray<number>; readonly laneCount: number; }
+```
+## `calendarNowMarker`
+
+```ts
+calendarNowMarker(nowInstant: string, day: string): { readonly minutes: number; } | null
+```
+## `CalendarOccurrence`
+
+```ts
+type CalendarOccurrence = {
+  readonly event: CalendarEvent;
+  readonly start: string;
+  readonly end: string;
+};
+```
+## `calendarOccurrenceAfterIntent`
+
+```ts
+calendarOccurrenceAfterIntent(intent: CalendarIntent | null, origin: CalendarOccurrenceRange, committed: CalendarOccurrenceRange | null): CalendarOccurrenceRange
+```
+## `calendarOccurrenceForInspector`
+
+```ts
+calendarOccurrenceForInspector(selected: Pick<CalendarEvent, "start" | "end" | "recurrence">, occurrence: CalendarOccurrenceRange): { readonly start: string; readonly end: string; }
+```
+## `calendarOccurrenceFromSelection`
+
+```ts
+calendarOccurrenceFromSelection(selected: Pick<CalendarEvent, "start" | "end"> | null): CalendarOccurrenceRange
+```
+## `CalendarOccurrencePoint`
+
+```ts
+interface CalendarOccurrencePoint extends Record<string, JSONValue> {
+  readonly eventId: string;
+  readonly occurrenceStart: string;
+}
+```
+## `CalendarOccurrenceRange`
+
+```ts
+type CalendarOccurrenceRange = {
+  readonly start: string | null;
+  readonly end: string | null;
+};
+```
+## `CalendarOccurrenceSelection`
+
+```ts
+interface CalendarOccurrenceSelection {
+  readonly eventId: string;
+  readonly start: string;
+  readonly end: string;
+}
+```
+## `calendarOccurrenceTopology`
+
+```ts
+calendarOccurrenceTopology(document: CalendarDocument, rangeStart: string, rangeEnd: string): CalendarOccurrenceTopologySnapshot
+```
+## `CalendarOccurrenceTopologySnapshot`
+
+```ts
+interface CalendarOccurrenceTopologySnapshot extends Record<string, JSONValue> {
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
+}
+```
+## `CalendarRecurrence`
+
+```ts
+interface CalendarRecurrence extends Record<string, JSONValue> {
+  readonly freq: "daily" | "weekly" | "monthly" | "yearly";
+  readonly interval: number;
+  readonly until: string;
+}
+```
+## `calendarRecurrenceWithFrequency`
+
+```ts
+calendarRecurrenceWithFrequency(current: CalendarRecurrence | null, value: unknown): CalendarRecurrence | null
+```
+## `calendarRecurrenceWithInterval`
+
+```ts
+calendarRecurrenceWithInterval(current: CalendarRecurrence | null, value: unknown): CalendarRecurrence | null
+```
+## `calendarRecurrenceWithUntil`
+
+```ts
+calendarRecurrenceWithUntil(current: CalendarRecurrence | null, until: string): CalendarRecurrence | null
+```
+## `CalendarSelection`
+
+```ts
+interface CalendarSelection extends Record<string, JSONValue> {
+  readonly kind: "range";
+  readonly ranges: ReadonlyArray<CalendarSelectionRange>;
+  readonly primaryIndex: number | null;
+}
+```
+## `CalendarSelectionDragSource`
+
+```ts
+interface CalendarSelectionDragSource {
+  readonly anchor: CalendarOccurrencePoint;
+  readonly primary: CalendarOccurrencePoint;
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
+  readonly occurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+}
+```
+## `CalendarSelectionMovePlan`
+
+```ts
+type CalendarSelectionMovePlan =
+  | {
+      readonly ok: true;
+      readonly events: ReadonlyArray<CalendarEvent>;
+      readonly selectionAfter: CalendarSelection;
+      readonly movedOccurrences: ReadonlyArray<CalendarOccurrenceSelection>;
+    }
+  | { readonly ok: false; readonly code: string };
+```
+## `CalendarSelectionMoveTarget`
+
+```ts
+type CalendarSelectionMoveTarget =
+  | { readonly type: "instant"; readonly instant: string }
+  | { readonly type: "day"; readonly day: string };
+```
+## `CalendarSelectionRange`
+
+```ts
+interface CalendarSelectionRange extends Record<string, JSONValue> {
+  readonly anchor: CalendarOccurrencePoint;
+  readonly focus: CalendarOccurrencePoint;
+  readonly points: ReadonlyArray<CalendarOccurrencePoint>;
+}
+```
+## `calendarShiftInstant`
+
+```ts
+calendarShiftInstant(instant: string, minutes: number): string | null
+```
+## `calendarTimedLayout`
+
+```ts
+calendarTimedLayout(events: ReadonlyArray<CalendarEvent>, day: string): ReadonlyArray<{ readonly event: CalendarEvent; readonly startMinutes: number; readonly endMinutes: number; readonly lane: number; readonly laneCount: number; }>
+```
+## `CalendarTimeGridHandle`
+
+```ts
+type CalendarTimeGridHandle = "body" | "start" | "end";
+```
+## `CalendarTimeGridPointerIntent`
+
+```ts
+type CalendarTimeGridPointerIntent = Extract<
+  CalendarIntent,
+  { type: "event.create" } | { type: "selection.set" } | { type: "selection.clear" } | { type: "event.move" } | { type: "event.resize" }
+>;
+```
+## `CalendarTimeGridPointerRelease`
+
+```ts
+type CalendarTimeGridPointerRelease = {
+  readonly originInstant: string;
+  readonly originEventId: string | null;
+  readonly originEventStart: string | null;
+  readonly originHandle: CalendarTimeGridHandle | null;
+  readonly targetInstant: string;
+};
+```
+## `calendarUpdateIntent`
+
+```ts
+calendarUpdateIntent(event: CalendarEvent, occurrenceStart: string | null, scope: Extract<CalendarIntent, { type: "occurrence.edit"; }>["scope"], patch: CalendarEventPatch): CalendarIntent
+```
+## `CalendarView`
+
+```ts
+type CalendarView = "day" | "week" | "month" | "year";
+```
+## `calendarVisibleEvents`
+
+```ts
+calendarVisibleEvents(document: CalendarDocument): ReadonlyArray<CalendarEvent>
+```
+## `calendarVisibleHourBand`
+
+```ts
+calendarVisibleHourBand(startMinutes: number, endMinutes: number, hourStart: number, hourEnd: number): { readonly startMinutes: number; readonly endMinutes: number; } | null
+```
 ## `createAnnotationEditor`
 
 ```ts
-createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>): AnnotationEditor
+createAnnotationEditor(source: EditingDocumentSource<AnnotationDocument>, options?: EditingHistoryOptions): AnnotationEditor
+```
+## `createCalendarEditor`
+
+```ts
+createCalendarEditor(source: EditingDocumentSource<CalendarDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; readonly initialEventIds?: ReadonlyArray<string>; }): CalendarEditor
 ```
 ## `createDatabaseEditor`
 
 ```ts
-createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>): DatabaseEditor
+createDatabaseEditor(source: EditingDocumentSource<DatabaseDocument>, options?: EditingHistoryOptions): DatabaseEditor
 ```
 ## `createDocumentEditor`
 
 ```ts
-createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: { readonly createId?: () => string; }): DocumentEditor
+createDocumentEditor(source: EditingDocumentSource<BlockDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): DocumentEditor
+```
+## `createEditingId`
+
+```ts
+createEditingId(prefix: string): string
 ```
 ## `createEditingSession`
 
 ```ts
-createEditingSession<Selection extends JSONValue>(options: { readonly document: JSONDocument; readonly selection: Selection; }): EditingSession<Selection>
+createEditingSession<Selection extends JSONValue>(options: EditingSessionOptions<Selection>): EditingSession<Selection>
 ```
 ## `createKanbanEditor`
 
 ```ts
-createKanbanEditor(source: EditingDocumentSource<KanbanDocument>): KanbanEditor
+createKanbanEditor(source: EditingDocumentSource<KanbanDocument>, options?: EditingHistoryOptions): KanbanEditor
 ```
 ## `createObjectEditor`
 
 ```ts
-createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: { readonly createId?: () => string; }): ObjectEditor
+createObjectEditor(source: EditingDocumentSource<ObjectDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): ObjectEditor
 ```
 ## `createOrderEditor`
 
 ```ts
-createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: { readonly createId?: () => string; }): OrderEditor
+createOrderEditor(source: EditingDocumentSource<OrderDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): OrderEditor
 ```
 ## `createSheetEditor`
 
 ```ts
-createSheetEditor(source: EditingDocumentSource<SheetDocument>): SheetEditor
+createSheetEditor(source: EditingDocumentSource<SheetDocument>, options?: EditingHistoryOptions): SheetEditor
 ```
 ## `createTreeEditor`
 
 ```ts
-createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: { readonly createId?: () => string; }): TreeEditor
+createTreeEditor(source: EditingDocumentSource<TreeDocument>, options?: EditingHistoryOptions & { readonly createId?: () => string; }): TreeEditor
+```
+## `cutEditingClipboard`
+
+```ts
+cutEditingClipboard<Payload, Result>(copy: () => Payload | null, remove: (clipboard: Payload) => Result): EditingClipboardCut<Payload, Result> | null
 ```
 ## `DatabaseCell`
 
@@ -170,6 +645,11 @@ interface DatabaseClipboard extends Record<string, JSONValue> {
   readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>>;
   readonly text: string;
 }
+```
+## `databaseClipboardFormat`
+
+```ts
+const databaseClipboardFormat: { mimeType: "application/vnd.interactive-os.database+json"; parse(value: unknown): DatabaseClipboard | null; }
 ```
 ## `DatabaseDocument`
 
@@ -360,6 +840,11 @@ interface DocumentClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `documentClipboardFormat`
+
+```ts
+const documentClipboardFormat: { mimeType: "application/vnd.interactive-os.blocks+json"; parse(value: unknown): DocumentClipboard | null; }
+```
 ## `DocumentEditor`
 
 ```ts
@@ -378,6 +863,7 @@ interface DocumentEditor {
 
 ```ts
 type DocumentIntent =
+  | { readonly type: "selection.select-all" }
   | { readonly type: "selection.set"; readonly blockId: string; readonly mode?: "replace" | "extend" | "toggle"; readonly offset?: number }
   | { readonly type: "text.replace"; readonly blockId: string; readonly text: string; readonly offset?: number }
   | { readonly type: "block.insert"; readonly afterId?: string; readonly text?: string }
@@ -429,11 +915,73 @@ interface DocumentSelection extends Record<string, JSONValue> {
 ```ts
 documentSelectionFocus(selection: DocumentSelection): DocumentPoint | null
 ```
+## `EditingClipboardCut`
+
+```ts
+interface EditingClipboardCut<Payload, Result> {
+  readonly clipboard: Payload;
+  readonly result: Result;
+}
+```
 ## `EditingDispatch`
 
 ```ts
 interface EditingDispatch<Intent extends EditingIntent, Selection extends JSONValue> {
   dispatch(intent: Intent): EditingResult<Selection>;
+}
+```
+## `EditingDocumentChange`
+
+```ts
+interface EditingDocumentChange {
+  readonly before: JSONValue;
+  readonly after: JSONValue;
+  /** Null when catching up without an observed, matching applied change. */
+  readonly change: JSONAppliedChange | null;
+}
+```
+## `EditingHistory`
+
+```ts
+interface EditingHistory {
+  status(): EditingHistoryStatus;
+  undo(): EditingHistoryResult;
+  redo(): EditingHistoryResult;
+  /** Includes history-only changes, even when the document value stays equal. */
+  subscribe(listener: () => void): () => void;
+}
+```
+## `EditingHistoryOptions`
+
+```ts
+interface EditingHistoryOptions {
+  /** Use the history belonging to the same document. Omit for local history. */
+  readonly history?: EditingHistory;
+}
+```
+## `EditingHistoryResult`
+
+```ts
+type EditingHistoryResult =
+  | {
+      readonly ok: true;
+      readonly target: string;
+      /** This operation's applied change; null for a history-only transition. */
+      readonly change: JSONAppliedChange | null;
+      /** This operation's status, captured before notifying subscribers. */
+      readonly status: EditingHistoryStatus;
+    }
+  | { readonly ok: false; readonly code: string; readonly reason?: string };
+```
+## `EditingHistoryStatus`
+
+```ts
+interface EditingHistoryStatus {
+  readonly undoTarget: string | null;
+  readonly redoTarget: string | null;
+  readonly canUndo: boolean;
+  readonly canRedo: boolean;
+  readonly revision: number;
 }
 ```
 ## `EditingIntent`
@@ -451,6 +999,7 @@ interface EditingPlan<Selection extends JSONValue> {
   readonly selectionAfter: Selection;
   readonly origin: string;
   readonly history?: "record" | "ignore";
+  /** Groups local inverse history. An external history owner defines its own steps. */
   readonly historyGroup?: string;
 }
 ```
@@ -474,6 +1023,16 @@ interface EditingSession<Selection extends JSONValue> {
   subscribe(listener: (snapshot: EditingSnapshot<Selection>) => void): () => void;
 }
 ```
+## `EditingSessionOptions`
+
+```ts
+interface EditingSessionOptions<Selection extends JSONValue> extends EditingHistoryOptions {
+  readonly document: JSONDocument;
+  readonly selection: Selection;
+  readonly mapSelection?: (selection: Selection, change: EditingDocumentChange) => Selection;
+  readonly reconcileSelection?: (selection: Selection, value: JSONValue) => Selection;
+}
+```
 ## `EditingSnapshot`
 
 ```ts
@@ -484,6 +1043,11 @@ interface EditingSnapshot<Selection extends JSONValue> {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
 }
+```
+## `formatCalendarInstant`
+
+```ts
+formatCalendarInstant(value: Temporal.PlainDateTime): string
 ```
 ## `gridCellsInRange`
 
@@ -540,6 +1104,26 @@ interface GridTopology {
   readonly rowIds: ReadonlyArray<string>;
   readonly columnIds: ReadonlyArray<string>;
 }
+```
+## `interpretCalendarAllDayPointer`
+
+```ts
+interpretCalendarAllDayPointer(release: CalendarAllDayPointerRelease): CalendarAllDayPointerIntent | null
+```
+## `interpretCalendarMonthPointer`
+
+```ts
+interpretCalendarMonthPointer(release: CalendarMonthPointerRelease): CalendarMonthPointerIntent | null
+```
+## `interpretCalendarTimeGridPointer`
+
+```ts
+interpretCalendarTimeGridPointer(release: CalendarTimeGridPointerRelease): CalendarTimeGridPointerIntent | null
+```
+## `isCalendarAllDay`
+
+```ts
+isCalendarAllDay(event: Pick<CalendarEvent, "allDay">): boolean
 ```
 ## `jsonCellText`
 
@@ -646,6 +1230,11 @@ interface ObjectClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `objectClipboardFormat`
+
+```ts
+const objectClipboardFormat: { mimeType: "application/vnd.interactive-os.objects+json"; parse(value: unknown): ObjectClipboard | null; }
+```
 ## `ObjectDocument`
 
 ```ts
@@ -726,6 +1315,11 @@ interface OrderClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `orderClipboardFormat`
+
+```ts
+const orderClipboardFormat: { mimeType: "application/vnd.interactive-os.order+json"; parse(value: unknown): OrderClipboard | null; }
+```
 ## `OrderDocument`
 
 ```ts
@@ -751,6 +1345,7 @@ interface OrderEditor {
 
 ```ts
 type OrderIntent =
+  | { readonly type: "selection.select-all" }
   | {
       readonly type: "selection.set";
       readonly itemId: string;
@@ -792,6 +1387,36 @@ interface OrderSelection extends Record<string, JSONValue> {
   readonly primaryIndex: number | null;
 }
 ```
+## `parseCalendarView`
+
+```ts
+parseCalendarView(value: unknown): CalendarView | null
+```
+## `planCalendarSelectionMove`
+
+```ts
+planCalendarSelectionMove(events: ReadonlyArray<CalendarEvent>, occurrences: ReadonlyArray<CalendarOccurrenceSelection>, anchor: CalendarOccurrencePoint, target: CalendarSelectionMoveTarget, options?: { readonly scope?: "this" | "this-and-following" | "all"; readonly createId?: () => string; readonly primary?: CalendarOccurrencePoint; }): CalendarSelectionMovePlan
+```
+## `previewCalendarAllDay`
+
+```ts
+previewCalendarAllDay(events: ReadonlyArray<CalendarEvent>, release: CalendarAllDayPointerRelease, scope?: "this" | "this-and-following" | "all"): ReadonlyArray<CalendarEvent>
+```
+## `previewCalendarMonth`
+
+```ts
+previewCalendarMonth(events: ReadonlyArray<CalendarEvent>, release: CalendarMonthPointerRelease, scope?: "this" | "this-and-following" | "all"): ReadonlyArray<CalendarEvent>
+```
+## `previewCalendarTimeGrid`
+
+```ts
+previewCalendarTimeGrid(events: ReadonlyArray<CalendarEvent>, release: CalendarTimeGridPointerRelease, scope?: "this" | "this-and-following" | "all"): ReadonlyArray<CalendarEvent>
+```
+## `projectCalendarOccurrences`
+
+```ts
+projectCalendarOccurrences(events: ReadonlyArray<CalendarEvent>, rangeStart: string, rangeEnd: string): ReadonlyArray<CalendarOccurrence>
+```
 ## `projectTreeVisibility`
 
 ```ts
@@ -812,6 +1437,11 @@ interface SheetClipboard extends Record<string, JSONValue> {
   readonly cells: ReadonlyArray<ReadonlyArray<JSONValue>>;
   readonly text: string;
 }
+```
+## `sheetClipboardFormat`
+
+```ts
+const sheetClipboardFormat: { mimeType: "application/vnd.interactive-os.sheet+json"; parse(value: unknown): SheetClipboard | null; }
 ```
 ## `SheetColumn`
 
@@ -848,6 +1478,7 @@ interface SheetEditor {
 
 ```ts
 type SheetIntent =
+  | { readonly type: "selection.select-all"; readonly topology?: SheetTopology }
   | {
       readonly type: "selection.set";
       readonly rowId: string;
@@ -926,6 +1557,11 @@ interface TreeClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 ```
+## `treeClipboardFormat`
+
+```ts
+const treeClipboardFormat: { mimeType: "application/vnd.interactive-os.tree+json"; parse(value: unknown): TreeClipboard | null; }
+```
 ## `TreeDocument`
 
 ```ts
@@ -952,6 +1588,7 @@ interface TreeEditor {
 
 ```ts
 type TreeIntent =
+  | { readonly type: "selection.select-all"; readonly topology: TreeTopology }
   | {
       readonly type: "selection.set";
       readonly nodeId: string;

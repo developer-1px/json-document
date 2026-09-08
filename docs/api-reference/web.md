@@ -16,6 +16,26 @@ activeDescendantContainerProps(activeId: string | null): Readonly<{ tabIndex: 0;
 ```ts
 activeDescendantItemProps(id: string): Readonly<{ id: string; }>
 ```
+## `calendarCommandFromWebKeyboardEvent`
+
+```ts
+calendarCommandFromWebKeyboardEvent(event: WebCalendarKeyboardEvent): WebCalendarCommand | null
+```
+## `calendarDayDeltaFromWebWidth`
+
+```ts
+calendarDayDeltaFromWebWidth(deltaPx: number, columnWidthPx: number): number
+```
+## `calendarKeyFromWebRow`
+
+```ts
+calendarKeyFromWebRow<Key>(clientX: number, bounds: { readonly left: number; readonly width: number; }, keys: ReadonlyArray<Key>): Key | null
+```
+## `calendarMinutesFromWebGrid`
+
+```ts
+calendarMinutesFromWebGrid(clientY: number, bounds: { readonly top: number; readonly height: number; }, options: { readonly hourStart: number; readonly hourEnd: number; readonly stepMinutes: number; }): number
+```
 ## `chordFromStroke`
 
 ```ts
@@ -35,6 +55,11 @@ composerAttachmentCandidatesFromWebClipboard(event: WebFileClipboardEvent): Read
 
 ```ts
 composerAttachmentCandidatesFromWebFiles(files: WebFileCandidateList | ReadonlyArray<WebFileCandidate>): ReadonlyArray<FileCandidate>
+```
+## `createWebAnchoredFloatingPositionPorts`
+
+```ts
+createWebAnchoredFloatingPositionPorts(options: WebAnchoredFloatingPositionOptions): WebAnchoredFloatingPositionPorts
 ```
 ## `createWebClipboardBinding`
 
@@ -56,15 +81,27 @@ createWebClipboardTextWriter(options?: { readonly clipboard?: WebClipboardTextPo
 ```ts
 createWebDragDropSession<Item, Target>(options?: WebDragDropSessionOptions<Item, Target>): WebDragDropSession<Item, Target>
 ```
+## `createWebJSONClipboardRepresentation`
+
+```ts
+createWebJSONClipboardRepresentation<Payload extends WebClipboardPayload>(format: WebJSONClipboardFormat<Payload>): WebClipboardCodec<Payload>
+```
 ## `createWebKeyboardAdapter`
 
 ```ts
-createWebKeyboardAdapter(options?: { readonly keymap?: WebKeymap; }): WebKeyboardAdapter
+createWebKeyboardAdapter(): WebKeyboardAdapter
+createWebKeyboardAdapter(options: { readonly keymap?: WebKeymap; readonly defaults?: true; }): WebKeyboardAdapter
+createWebKeyboardAdapter<Command>(options: { readonly keymap: WebKeymap<Command>; readonly defaults: false; }): WebKeyboardAdapter<Command>
 ```
 ## `createWebPointerSession`
 
 ```ts
 createWebPointerSession<State>(options?: WebPointerSessionOptions<State>): WebPointerSession<State>
+```
+## `createWebViewportPositionPorts`
+
+```ts
+createWebViewportPositionPorts<Key>(options: WebViewportPositionOptions<Key>): WebViewportPositionPorts<Key>
 ```
 ## `databaseClipboardCodec`
 
@@ -106,6 +143,11 @@ findWebGridCell<Cell extends WebGridCellAddressElement>(root: WebGridCellAddress
 ```ts
 findWebKanbanCardDropTarget(point: { readonly x: number; readonly y: number; }, webDocument?: { elementFromPoint(x: number, y: number): WebKanbanTargetElement | null; }): KanbanCardDropTarget | null
 ```
+## `findWebPointTarget`
+
+```ts
+findWebPointTarget<Element extends WebPointTargetElement = WebPointTargetElement>(selector: string, point: { readonly x: number; readonly y: number; }, root?: WebPointTargetRoot<Element>): Element | null
+```
 ## `focusWebItem`
 
 ```ts
@@ -115,6 +157,16 @@ focusWebItem<Item extends WebFocusableItem>(root: WebFocusItemRoot<Item> | null,
 
 ```ts
 gridBoundary(topology: GridTopology, point: GridPoint, edge: "start" | "end"): GridPoint | null
+```
+## `isWebEditableTarget`
+
+```ts
+isWebEditableTarget(target: object | null): boolean
+```
+## `isWebEditingHostTarget`
+
+```ts
+isWebEditingHostTarget(root: object, target: object | null): boolean
 ```
 ## `kanbanCardDropTargetFromWebElement`
 
@@ -166,6 +218,11 @@ projectWebWidgetState(state: WebWidgetState): WebWidgetARIA
 ```ts
 readWebRasterFile(file: WebRasterFile): Promise<WebRasterSourceResult>
 ```
+## `registerWebVirtualSelectionScope`
+
+```ts
+registerWebVirtualSelectionScope(document: object, options: WebVirtualSelectionScopeOptions): WebVirtualSelectionScopeRegistration
+```
 ## `renderWebAnnotationRaster`
 
 ```ts
@@ -191,10 +248,77 @@ const sheetClipboardCodec: WebClipboardCodec<SheetClipboard>
 ```ts
 textInputFromControl(event: WebTextControlEvent): WebTextInput
 ```
+## `textSelectionFromControl`
+
+```ts
+textSelectionFromControl(event: WebTextControlEvent): SelectionRange<number>
+```
 ## `treeClipboardCodec`
 
 ```ts
 const treeClipboardCodec: WebClipboardCodec<TreeClipboard>
+```
+## `WebAnchoredFloatingElement`
+
+```ts
+interface WebAnchoredFloatingElement {
+  getBoundingClientRect(): {
+    readonly x?: number;
+    readonly y?: number;
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  };
+}
+```
+## `WebAnchoredFloatingGeometry`
+
+```ts
+interface WebAnchoredFloatingGeometry {
+  readonly anchor: WebFloatingRect;
+  readonly floating: WebFloatingRect;
+  readonly boundary: WebFloatingRect;
+}
+```
+## `WebAnchoredFloatingPositionOptions`
+
+```ts
+interface WebAnchoredFloatingPositionOptions {
+  readonly getAnchor: () => WebAnchoredFloatingElement | null;
+  readonly getFloating: () => WebAnchoredFloatingElement | null;
+  readonly getBoundary?: () => WebAnchoredFloatingElement | null;
+  readonly viewport: WebAnchoredFloatingViewport;
+  readonly createResizeObserver?: (callback: () => void) => WebAnchoredFloatingResizeObserver;
+}
+```
+## `WebAnchoredFloatingPositionPorts`
+
+```ts
+interface WebAnchoredFloatingPositionPorts {
+  measure(): WebAnchoredFloatingGeometry | null;
+  observe(callback: () => void): () => void;
+}
+```
+## `WebAnchoredFloatingResizeObserver`
+
+```ts
+interface WebAnchoredFloatingResizeObserver {
+  observe(target: object): void;
+  disconnect(): void;
+}
+```
+## `WebAnchoredFloatingViewport`
+
+```ts
+interface WebAnchoredFloatingViewport {
+  readonly innerWidth: number;
+  readonly innerHeight: number;
+  addEventListener(type: "resize" | "scroll", listener: () => void, options?: boolean): void;
+  removeEventListener(type: "resize" | "scroll", listener: () => void, options?: boolean): void;
+  requestAnimationFrame(callback: () => void): number;
+  cancelAnimationFrame(handle: number): void;
+}
 ```
 ## `WebAnnotationRasterResult`
 
@@ -211,6 +335,30 @@ interface WebAnnotationRasterStyle {
   readonly fill: string;
   readonly lineWidth: number;
   readonly labelFont: string;
+}
+```
+## `WebCalendarCommand`
+
+```ts
+type WebCalendarCommand =
+  | { readonly type: "view"; readonly view: CalendarView }
+  | { readonly type: "shift"; readonly direction: 1 | -1 }
+  | { readonly type: "today" }
+  | { readonly type: "create" }
+  | { readonly type: "rename" }
+  | { readonly type: "remove" }
+  | { readonly type: "dismiss" };
+```
+## `WebCalendarKeyboardEvent`
+
+```ts
+interface WebCalendarKeyboardEvent {
+  readonly key: string;
+  readonly target: unknown;
+  readonly shiftKey?: boolean;
+  readonly metaKey?: boolean;
+  readonly ctrlKey?: boolean;
+  readonly altKey?: boolean;
 }
 ```
 ## `WebClientPoint`
@@ -240,7 +388,7 @@ interface WebClipboardBindingOptions<
   readonly codec: WebClipboardCodec<Payload>;
   readonly representations?: ReadonlyArray<WebClipboardRepresentation<Payload>>;
   readonly read: () => Payload | null;
-  readonly cut?: (payload: Payload) => EditingResult;
+  readonly cut?: (payload: Payload) => EditingResult | null;
   readonly paste: (payload: Payload) => EditingResult;
 }
 ```
@@ -393,6 +541,16 @@ interface WebFileClipboardEvent {
   readonly clipboardData: { readonly files: WebFileCandidateList } | null;
 }
 ```
+## `WebFloatingRect`
+
+```ts
+interface WebFloatingRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+```
 ## `WebFocusableItem`
 
 ```ts
@@ -448,6 +606,14 @@ interface WebGridCellAddressRoot<Cell extends WebGridCellAddressElement> {
   querySelectorAll(selectors: string): ArrayLike<Cell>;
 }
 ```
+## `WebJSONClipboardFormat`
+
+```ts
+interface WebJSONClipboardFormat<Payload extends WebClipboardPayload> {
+  readonly mimeType: Payload["type"];
+  parse(value: unknown): Payload | null;
+}
+```
 ## `webKanbanCardProps`
 
 ```ts
@@ -469,8 +635,8 @@ interface WebKanbanTargetElement {
 ## `WebKeyboardAdapter`
 
 ```ts
-interface WebKeyboardAdapter {
-  resolve(stroke: WebKeyboardStroke): WebKeyboardCommand | null;
+interface WebKeyboardAdapter<Command = WebKeyboardCommand> {
+  resolve(stroke: WebKeyboardStroke): Command | null;
 }
 ```
 ## `WebKeyboardCommand`
@@ -497,7 +663,7 @@ interface WebKeyboardStroke {
 ## `WebKeymap`
 
 ```ts
-type WebKeymap = Readonly<Record<string, WebKeyboardCommand>>;
+type WebKeymap<Command = WebKeyboardCommand> = Readonly<Record<string, Command>>;
 ```
 ## `WebModifierState`
 
@@ -549,6 +715,25 @@ type WebPointerSessionSnapshot<State> = Readonly<{
   pointerId: number;
   state: State;
 }>;
+```
+## `WebPointTargetElement`
+
+```ts
+interface WebPointTargetElement {
+  getBoundingClientRect(): {
+    readonly left: number;
+    readonly right: number;
+    readonly top: number;
+    readonly bottom: number;
+  };
+}
+```
+## `WebPointTargetRoot`
+
+```ts
+interface WebPointTargetRoot<Element extends WebPointTargetElement = WebPointTargetElement> {
+  querySelectorAll(selector: string): ArrayLike<Element>;
+}
 ```
 ## `WebPressInput`
 
@@ -618,6 +803,8 @@ webSVGViewportFromElement(svg: WebSVGElement): WebSVGViewport
 interface WebTextControl {
   readonly value: string;
   readonly selectionStart: number | null;
+  readonly selectionEnd?: number | null;
+  readonly selectionDirection?: "forward" | "backward" | "none" | null;
 }
 ```
 ## `WebTextControlEvent`
@@ -633,6 +820,102 @@ interface WebTextControlEvent {
 interface WebTextInput {
   readonly text: string;
   readonly offset: number;
+}
+```
+## `WebViewportPositionElement`
+
+```ts
+interface WebViewportPositionElement {
+  readonly style: { height: string };
+  getBoundingClientRect(): { readonly top: number };
+}
+```
+## `WebViewportPositionObserver`
+
+```ts
+interface WebViewportPositionObserver {
+  observe(target: object, options?: object): void;
+  disconnect(): void;
+}
+```
+## `WebViewportPositionOptions`
+
+```ts
+interface WebViewportPositionOptions<Key> {
+  readonly viewport: WebViewportPositionViewport;
+  readonly content?: object;
+  readonly findTarget: (key: Key) => WebViewportPositionElement | null;
+  readonly findTailReserve?: (key: Key) => WebViewportPositionElement | null;
+  readonly createResizeObserver?: (callback: () => void) => WebViewportPositionObserver;
+  readonly createMutationObserver?: (callback: () => void) => WebViewportPositionObserver;
+  readonly createVisibilityObserver?: (
+    callback: (visible: boolean) => void,
+    root: object,
+  ) => WebViewportPositionVisibilityObserver;
+  readonly requestFrame?: (callback: () => void) => number;
+  readonly cancelFrame?: (handle: number) => void;
+}
+```
+## `WebViewportPositionPorts`
+
+```ts
+interface WebViewportPositionPorts<Key> {
+  measure(key: Key): { targetOffset: number; tailReserveOffset: number; viewportHeight: number } | null;
+  setTailReserve(key: Key, height: number): boolean;
+  scrollTo(top: number, behavior: "smooth" | "instant"): void;
+  scheduleFrame(callback: () => void): () => void;
+  observeLayout(callback: () => void): () => void;
+  observeTargetVisibility(key: Key, callback: (visible: boolean) => void): () => void;
+  observeUserInteraction(callback: () => void): () => void;
+}
+```
+## `WebViewportPositionViewport`
+
+```ts
+interface WebViewportPositionViewport {
+  readonly clientHeight: number;
+  readonly scrollTop: number;
+  getBoundingClientRect(): { readonly top: number };
+  scrollTo(options: { readonly top: number; readonly behavior: "smooth" | "instant" }): void;
+  addEventListener?(type: "wheel" | "pointerdown", listener: () => void, options?: { readonly passive?: boolean }): void;
+  removeEventListener?(type: "wheel" | "pointerdown", listener: () => void): void;
+}
+```
+## `WebViewportPositionVisibilityObserver`
+
+```ts
+interface WebViewportPositionVisibilityObserver {
+  observe(target: object): void;
+  disconnect(): void;
+}
+```
+## `WebVirtualSelectionScopeActivation`
+
+```ts
+type WebVirtualSelectionScopeActivation = "contained" | "fallback";
+```
+## `WebVirtualSelectionScopeElementRef`
+
+```ts
+interface WebVirtualSelectionScopeElementRef {
+  readonly current: object | null;
+}
+```
+## `WebVirtualSelectionScopeOptions`
+
+```ts
+interface WebVirtualSelectionScopeOptions {
+  readonly activation: WebVirtualSelectionScopeActivation;
+  readonly boundaryRef?: WebVirtualSelectionScopeElementRef;
+  readonly readAllText: () => string;
+  readonly selectionRef: WebVirtualSelectionScopeElementRef;
+}
+```
+## `WebVirtualSelectionScopeRegistration`
+
+```ts
+interface WebVirtualSelectionScopeRegistration {
+  unregister(): void;
 }
 ```
 ## `WebWidgetARIA`

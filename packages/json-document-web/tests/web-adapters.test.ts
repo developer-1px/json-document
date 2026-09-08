@@ -19,6 +19,7 @@ import {
   createWebPointerSession,
   createWebClipboardBinding,
   createWebClipboardSurface,
+  createWebJSONClipboardRepresentation,
   createWebClipboardTextWriter,
   databaseClipboardCodec,
   documentClipboardCodec,
@@ -26,6 +27,7 @@ import {
   createWebKeyboardAdapter,
   findWebGridCell,
   findWebKanbanCardDropTarget,
+  findWebPointTarget,
   activeDescendantContainerProps,
   activeDescendantItemProps,
   defaultWebKeymap,
@@ -44,6 +46,7 @@ import {
   selectionOperationFromModifiers,
   sheetClipboardCodec,
   textInputFromControl,
+  textSelectionFromControl,
   webFocusItemProps,
   webGridCellAddressProps,
   webKanbanCardProps,
@@ -51,6 +54,22 @@ import {
   type WebClipboardData,
   type WebClipboardEvent,
 } from "../src/index.js";
+
+describe("native text selection projection", () => {
+  test.each([
+    { selectionStart: 2, selectionEnd: 4, selectionDirection: "forward", expected: { anchor: 2, focus: 4 } },
+    { selectionStart: 1, selectionEnd: 4, selectionDirection: "backward", expected: { anchor: 4, focus: 1 } },
+    { selectionStart: 2, selectionEnd: 2, selectionDirection: "none", expected: { anchor: 2, focus: 2 } },
+    { selectionStart: -1, selectionEnd: 99, selectionDirection: "backward", expected: { anchor: 5, focus: 0 } },
+    { selectionStart: null, selectionEnd: null, selectionDirection: null, expected: { anchor: 5, focus: 5 } },
+  ] as const)("preserves anchor/focus for $selectionDirection $selectionStart:$selectionEnd", ({ expected, ...selection }) => {
+    expect(textSelectionFromControl({ currentTarget: { value: "Alpha", ...selection } })).toEqual(expected);
+  });
+
+  test("accepts an existing cursor-only control as a collapsed selection", () => {
+    expect(textSelectionFromControl({ currentTarget: { value: "Alpha", selectionStart: 2 } })).toEqual({ anchor: 2, focus: 2 });
+  });
+});
 
 describe("Web file intake translation", () => {
   const files = [
@@ -82,6 +101,17 @@ describe("Web Kanban drop target", () => {
     expect(kanbanCardDropTargetFromWebElement(column)).toEqual({ columnId: "doing", beforeCardId: null });
     expect(kanbanCardDropTargetFromWebElement(kanbanElement({}))).toBeNull();
     expect(findWebKanbanCardDropTarget({ x: 10, y: 20 }, { elementFromPoint: () => card })).toEqual({ columnId: "doing", beforeCardId: "review" });
+  });
+});
+
+describe("Web point target", () => {
+  test("finds a visual drop target while pointer capture keeps the event target elsewhere", () => {
+    const outside = { getBoundingClientRect: () => ({ left: 0, right: 40, top: 0, bottom: 40 }) };
+    const target = { getBoundingClientRect: () => ({ left: 40, right: 80, top: 0, bottom: 40 }) };
+    const root = { querySelectorAll: () => [outside, target] };
+
+    expect(findWebPointTarget("[data-drop-target]", { x: 60, y: 20 }, root)).toBe(target);
+    expect(findWebPointTarget("[data-drop-target]", { x: 90, y: 20 }, root)).toBeNull();
   });
 });
 
@@ -192,6 +222,19 @@ describe("Web grid cell address", () => {
 });
 
 describe("Web clipboard Adapter", () => {
+  test("creates a JSON representation from a domain-owned format without a Web catalog entry", () => {
+    type Payload = { readonly type: "application/x-local"; readonly text: string; readonly value: number };
+    const representation = createWebJSONClipboardRepresentation<Payload>({
+      mimeType: "application/x-local",
+      parse: (value) => typeof value === "object" && value !== null && "value" in value
+        ? value as Payload
+        : null,
+    });
+    const payload: Payload = { type: "application/x-local", text: "seven", value: 7 };
+    expect(representation.decode(representation.encode(payload))).toEqual(payload);
+    expect(representation.decode("{}")) .toBeNull();
+  });
+
   test("normalizes imperative text write success, unsupported, and rejection", async () => {
     const writes: string[] = [];
     const writer = createWebClipboardTextWriter({
@@ -370,7 +413,7 @@ describe("Web clipboard Adapter", () => {
     expect((editor.snapshot.value as BlockDocument).blocks.map((block) => block.id)).toEqual(["a", "b"]);
   });
 
-  test("malformed and rejected pastes preserve canonical state and native handling", () => {
+  test("malformed pastes pass through but rejected supported pastes cancel native handling", () => {
     const editor = createDocumentEditor({ blocks: [{ id: "a", text: "Alpha" }] });
     const binding = createWebClipboardBinding({
       codec: documentClipboardCodec,
@@ -390,7 +433,7 @@ describe("Web clipboard Adapter", () => {
     expect(binding.copy(event(validData)).ok).toBe(true);
     const rejected = event(validData);
     expect(binding.paste(rejected)).toMatchObject({ ok: false, code: "editing.rejected" });
-    expect(rejected.defaultPrevented).toBe(false);
+    expect(rejected.defaultPrevented).toBe(true);
     expect(editor.snapshot.value).toBe(initial);
     expect(editor.snapshot.canUndo).toBe(false);
   });
@@ -609,6 +652,26 @@ describe("Web keyboard Adapter", () => {
     });
     expect(custom.resolve({ key: "Enter", shiftKey: false, metaKey: false, ctrlKey: false }))
       .toEqual({ type: "toggle" });
+  });
+
+  test("resolves an isolated product semantic keymap without structural defaults", () => {
+    type ProductCommand =
+      | { readonly type: "open" }
+      | { readonly type: "shift"; readonly direction: 1 | -1 };
+    const product = createWebKeyboardAdapter<ProductCommand>({
+      keymap: {
+        Enter: { type: "open" },
+        ArrowRight: { type: "shift", direction: 1 },
+      },
+      defaults: false,
+    });
+
+    expect(product.resolve({ key: "Enter", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "open" });
+    expect(product.resolve({ key: "ArrowRight", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toEqual({ type: "shift", direction: 1 });
+    expect(product.resolve({ key: "Delete", shiftKey: false, metaKey: false, ctrlKey: false }))
+      .toBeNull();
   });
 
   test("moves and bounds a grid point in visible order", () => {

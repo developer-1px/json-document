@@ -7,14 +7,15 @@ import {
   type ReactNode,
 } from "react";
 import { useListbox } from "./listbox.js";
+import type { ControlAffordanceProps } from "./control-affordance.js";
 
-export type SelectOption = {
-  readonly id: string;
+export type PopupChoiceOption<Id extends string = string> = {
+  readonly id: Id;
   readonly label: string;
   readonly disabled?: boolean;
 };
 
-export type SelectClassNames = {
+export type PopupChoiceClassNames = {
   readonly root?: string;
   readonly trigger?: string;
   readonly listbox?: string;
@@ -23,19 +24,20 @@ export type SelectClassNames = {
   readonly selectedOption?: string;
 };
 
-export function Select(props: {
+export function PopupChoice<Id extends string>(props: {
   readonly id?: string;
   readonly label: string;
-  readonly value: string;
-  readonly options: ReadonlyArray<SelectOption>;
-  readonly onValueChange: (value: string) => void;
-  readonly renderValue?: (option: SelectOption) => ReactNode;
-  readonly renderOption?: (option: SelectOption) => ReactNode;
-  readonly classNames?: SelectClassNames;
+  readonly value: Id;
+  readonly options: ReadonlyArray<PopupChoiceOption<Id>>;
+  readonly onValueChange: (value: Id) => void;
+  readonly renderValue?: (option: PopupChoiceOption<Id>) => ReactNode;
+  readonly renderOption?: (option: PopupChoiceOption<Id>) => ReactNode;
+  readonly classNames?: PopupChoiceClassNames;
   readonly disabled?: boolean;
-}) {
+} & ControlAffordanceProps) {
   const generatedId = useId();
   const listboxId = props.id ?? `json-document-select-${generatedId.replaceAll(":", "")}`;
+  const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listboxRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -62,6 +64,15 @@ export function Select(props: {
     if (open) listboxRef.current?.focus();
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close(false);
+    };
+    document.addEventListener("pointerdown", dismissOutside, true);
+    return () => document.removeEventListener("pointerdown", dismissOutside, true);
+  }, [open]);
+
   function close(restoreFocus = true) {
     setOpen(false);
     if (restoreFocus) queueMicrotask(() => triggerRef.current?.focus());
@@ -74,7 +85,7 @@ export function Select(props: {
   }
 
   return (
-    <div className={props.classNames?.root} data-ui-primitive="select">
+    <div ref={rootRef} className={props.classNames?.root} data-ui-control="choice" data-ui-presentation="popup" data-ui-affordance={props.affordance}>
       <button
         ref={triggerRef}
         type="button"

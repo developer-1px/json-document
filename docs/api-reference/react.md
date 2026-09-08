@@ -6,6 +6,19 @@ React lifecycle connector의 public entrypoint입니다. 아래 항목은 packag
 
 > 이 문서는 `packages/json-document-react/src/index.ts`에서 생성됩니다. API를 변경한 뒤 `npm run docs:api`를 실행하세요.
 
+## `AnchoredFloatingPositionBinding`
+
+```ts
+interface AnchoredFloatingPositionBinding<
+  Anchor extends HTMLElement = HTMLElement,
+  Floating extends HTMLElement = HTMLElement,
+> {
+  readonly anchorRef: RefCallback<Anchor>;
+  readonly floatingRef: RefCallback<Floating>;
+  readonly position: AnchoredFloatingPosition | null;
+  readonly style: CSSProperties;
+}
+```
 ## `DocumentTextControl`
 
 ```ts
@@ -276,6 +289,22 @@ interface TreeEditingKeyboardOptions {
   readonly ignoreCommand?: EditingKeyboardOptions<string>["ignoreCommand"];
 }
 ```
+## `useAnchoredFloatingPosition`
+
+```ts
+useAnchoredFloatingPosition<Anchor extends HTMLElement = HTMLElement, Floating extends HTMLElement = HTMLElement>(options: UseAnchoredFloatingPositionOptions): AnchoredFloatingPositionBinding<Anchor, Floating>
+```
+## `UseAnchoredFloatingPositionOptions`
+
+```ts
+interface UseAnchoredFloatingPositionOptions {
+  readonly active: boolean;
+  readonly policy: FloatingPlacementPolicy;
+  readonly offset?: number;
+  readonly boundaryPadding?: number;
+  readonly boundaryRef?: RefObject<HTMLElement | null>;
+}
+```
 ## `useDocumentEditor`
 
 ```ts
@@ -382,5 +411,19 @@ interface UseTreeEditingOptions<Selection extends JSONValue> {
   readonly operationFromEvent?: UseEditingOptions<Selection>["operationFromEvent"];
   readonly ignorePress?: UseEditingOptions<Selection>["ignorePress"];
   readonly keyboard?: TreeEditingKeyboardOptions;
+}
+```
+## `useVirtualSelectionScope`
+
+```ts
+useVirtualSelectionScope<Element extends HTMLElement = HTMLElement>(options: UseVirtualSelectionScopeOptions): RefCallback<Element>
+```
+## `UseVirtualSelectionScopeOptions`
+
+```ts
+interface UseVirtualSelectionScopeOptions {
+  readonly activation: WebVirtualSelectionScopeActivation;
+  readonly boundaryRef?: { readonly current: HTMLElement | null };
+  readonly readAllText: () => string;
 }
 ```

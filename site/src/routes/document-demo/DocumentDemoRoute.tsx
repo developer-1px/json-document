@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ClipboardPaste, Copy, CopyPlus, Plus, Redo2, Scissors, Trash2, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
@@ -19,16 +19,20 @@ import {
   createWebClipboardSurface,
   createWebClipboardTextWriter,
   documentClipboardCodec,
+  isWebEditingHostTarget,
   lineBoundary,
   moveLinePoint,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
+  applyAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, ChoiceChip, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command, Toggle, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -106,19 +110,6 @@ export function DocumentDemoRoute() {
       onRedo: () => {
         run(() => editor.redo(), "Redone");
       },
-      text: {
-        offset: () => documentSelectionFocus(editor.snapshot.selection)?.offset ?? 0,
-        length: () => {
-          const blockId = documentSelectionFocus(editor.snapshot.selection)?.blockId;
-          const block = (editor.snapshot.value as BlockDocument).blocks.find((item) => item.id === blockId);
-          return block?.text.length ?? 0;
-        },
-        onOffset: (offset, mode) => {
-          const blockId = documentSelectionFocus(editor.snapshot.selection)?.blockId;
-          if (!blockId) return;
-          run(() => dispatchIntent({ type: "selection.set", blockId, mode, offset }), "Selection changed");
-        },
-      },
     },
   });
   const snapshot = editing.snapshot;
@@ -168,22 +159,22 @@ export function DocumentDemoRoute() {
         >A deliberately small interface for selection, clipboard, history, keyboard input, and canonical JSON publication.</PageHeader>
 
     )}>
-        <ProductApp
+        <ProductShell
           toolbarLabel="Document actions"
           toolbar={(
             <>
-              <Action label="Add" icon={<Plus aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")} />
-              <Action label="Duplicate" icon={<CopyPlus aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")} />
-              <Action label="Move up" icon={<ArrowUp aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")} />
-              <Action label="Move down" icon={<ArrowDown aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")} />
+              <Command label="Add" onClick={() => run(() => dispatchIntent({ type: "block.insert", afterId: lastSelectedId, text: "New block" }), "Block added")}><Plus aria-hidden="true" size={16} /></Command>
+              <Command label="Duplicate" onClick={() => run(() => dispatchIntent({ type: "selection.duplicate" }), "Selection duplicated")}><CopyPlus aria-hidden="true" size={16} /></Command>
+              <Command label="Move up" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: -1 }), "Selection moved up")}><ArrowUp aria-hidden="true" size={16} /></Command>
+              <Command label="Move down" onClick={() => run(() => dispatchIntent({ type: "selection.move", direction: 1 }), "Selection moved down")}><ArrowDown aria-hidden="true" size={16} /></Command>
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
-              <Action label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
-              <Action label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} onClick={pasteSelection} disabled={!clipboard} />
-              <Action label="Delete" icon={<Trash2 aria-hidden="true" size={16} />} onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")} />
+              <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+              <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+              <Command label="Paste" onClick={pasteSelection} disabled={!clipboard}><ClipboardPaste aria-hidden="true" size={16} /></Command>
+              <Command label="Delete" onClick={() => run(() => dispatchIntent({ type: "selection.remove" }), "Selection deleted")}><Trash2 aria-hidden="true" size={16} /></Command>
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Command label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
+              <Command label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
             </>
           )}
           inspector={(
@@ -212,16 +203,29 @@ export function DocumentDemoRoute() {
             ]} />
           )}
         >
-          <section aria-label="Editable document">
+          <section aria-label="Editable document" className="mx-auto max-w-2xl">
             <div
               ref={surfaceRef}
               tabIndex={0}
               {...clipboardSurface}
-              onKeyDown={editing.getKeyDownHandler()}
+              onKeyDown={(event) => {
+                if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+                  applyAffordance(selectAllAffordance(event, {
+                    allSelected: editor.selectedBlockIds.length === document.blocks.length,
+                  }, { repeat: "preserve" }), {
+                    hand: (hand) => {
+                      if (hand.type !== "select-all") return;
+                      run(() => dispatchIntent({ type: "selection.select-all" }), "All blocks selected");
+                      event.preventDefault();
+                    },
+                  });
+                }
+                if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
+              }}
               className={ui.state.focus}
             >
               {document.blocks.length === 0 ? (
-                <ActionButton kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</ActionButton>
+                <Command kind="primary" className="p-8" onClick={() => run(() => dispatchIntent({ type: "block.insert", text: "New block" }), "Block added")}>Add the first block</Command>
               ) : document.blocks.map((block, index) => {
                 const item = editing.getItem(block.id);
                 return (
@@ -232,11 +236,12 @@ export function DocumentDemoRoute() {
                   className={classes("group grid grid-cols-[2rem_minmax(0,1fr)]", ui.surface.documentBlock)}
                   {...editingItemProps(item)}
                 >
-                  <ChoiceChip
-                    selected={item.getIsSelected()}
+                  <Toggle
+                    pressed={item.getIsSelected()}
+                    presentation="chip"
                     aria-label={`Select block ${index + 1}`}
                     className={classes(ui.surface.documentIndex, ui.text.meta)}
-                  >{index + 1}</ChoiceChip>
+                  >{index + 1}</Toggle>
                   <DocumentTextControl
                     aria-label={`Block ${index + 1} text`}
                     text={block.text}
@@ -250,7 +255,7 @@ export function DocumentDemoRoute() {
                     onClickCount={setLastClickCount}
                     onTextInput={(next) => dispatchIntent({ type: "text.replace", blockId: block.id, ...next })}
                     rows={Math.max(1, Math.ceil(block.text.length / 64))}
-                    className={classes("min-h-11 resize-none", ui.field.seamless)}
+                    className={classes("min-h-12 resize-none", ui.field.seamless)}
                   />
                 </SelectableItem>
                 );
@@ -258,11 +263,7 @@ export function DocumentDemoRoute() {
             </div>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Shift-click selects a range. Mod-click adds or removes a block. Arrow keys move the selection when focus is on the surface.</p>
           </section>
-        </ProductApp>
+        </ProductShell>
     </DemoPage>
   );
-}
-
-function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }

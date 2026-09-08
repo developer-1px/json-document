@@ -34,6 +34,32 @@
   ],
   "track": [
     {
+      "id": "track-numeric-object-member",
+      "before": { "items": { "0": "a", "1": "b" } },
+      "pointer": "/items/1",
+      "applied": [{ "op": "add", "path": "/items/0", "value": "A" }],
+      "expect": "/items/1"
+    },
+    {
+      "id": "track-object-add-replaces-descendant",
+      "before": { "item": { "title": "a" } },
+      "pointer": "/item/title",
+      "applied": [{ "op": "add", "path": "/item", "value": { "title": "b" } }],
+      "expect": null
+    },
+    {
+      "id": "track-container-type-changes-in-batch",
+      "before": { "items": { "0": "a", "1": "b" } },
+      "pointer": "/items/1",
+      "applied": [
+        { "op": "move", "from": "/items", "path": "/archive" },
+        { "op": "add", "path": "/items", "value": [] },
+        { "op": "move", "from": "/archive/1", "path": "/items/0" },
+        { "op": "add", "path": "/items/0", "value": "x" }
+      ],
+      "expect": "/items/1"
+    },
+    {
       "id": "track-array-add",
       "pointer": "/items/2/title",
       "applied": [{ "op": "add", "path": "/items/0", "value": null }],

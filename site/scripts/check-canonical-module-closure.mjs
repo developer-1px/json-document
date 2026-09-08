@@ -11,10 +11,10 @@ const databasePropertyConsumers = [
   "packages/json-document-zod/src/database-document.ts",
 ];
 const annotationDemo = readSource("routes/annotation-demo/AnnotationDemoRoute.tsx");
-if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", "AnnotationHand")) {
-  throw new Error("Annotation Demo must consume the canonical AnnotationHand");
+for (const symbol of ["AnnotationHand", "useAnnotationOutput"]) {
+  if (!hasNamedImport(annotationDemo, "@interactive-os/json-document-annotation", symbol)) throw new Error(`Annotation Demo must consume the canonical ${symbol}`);
 }
-for (const localResponsibility of ["createGestureSession", "projectWebClientPointToSVG", "function AnnotationShape", "function CommentComposer", "presentStructuredSnapshot"]) {
+for (const localResponsibility of ["createGestureSession", "projectWebClientPointToSVG", "function AnnotationShape", "function CommentComposer", "presentStructuredSnapshot", "JSON.stringify", "JSON.parse", "renderWebAnnotationRaster"]) {
   if (annotationDemo.includes(localResponsibility)) throw new Error(`Annotation Demo owns displaced behavior: ${localResponsibility}`);
 }
 const entries = [...registrySource.matchAll(/^\s*"\/[^"]+"[^\n]+"(routes\/[^"]+)"\),?$/gm)].map((match) => match[1]);
@@ -23,9 +23,12 @@ const usages = [...sourceRegistry.matchAll(/packageName:\s*["']([^"']+)["'],\s*\
   symbol: match[2],
   sourcePath: match[3],
 }));
-for (const symbol of ["ActionButton", "ToggleButton", "IconButton", "SelectableItem", "DisclosureButton"]) {
+for (const symbol of ["Command", "Toggle", "SelectableItem", "Tabs", "DisclosureButton"]) {
   usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol, sourcePath: "packages/json-document-ui-primitives-react/src/controls.tsx" });
 }
+usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol: "Choice", sourcePath: "packages/json-document-ui-primitives-react/src/choice.tsx" });
+for (const symbol of ["Check", "Field", "Search", "ValueInput"]) usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol, sourcePath: "packages/json-document-ui-primitives-react/src/input-controls.tsx" });
+for (const symbol of ["Popover", "Dialog"]) usages.push({ packageName: "@interactive-os/json-document-ui-primitives-react", symbol, sourcePath: "packages/json-document-ui-primitives-react/src/presentations.tsx" });
 
 const packageDirectories = readdirSync(join(repositoryRoot, "packages"), { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && existsSync(join(repositoryRoot, "packages", entry.name, "package.json")))
@@ -39,6 +42,21 @@ for (const path of databasePropertyConsumers) {
   const source = readSource(path);
   if (/property\.type === "number"\s*\?\s*Number\(/.test(source) || /(?:currentTarget\.)?value === "true"/.test(source)) {
     throw new Error(`${path} bypasses canonical Database property value conversion`);
+  }
+}
+const databaseHandSource = readSource("packages/json-document-database/src/database-hand.tsx");
+if (/clipboardData\.setData|onCopy=\{\s*\(event\)/.test(databaseHandSource)) {
+  throw new Error("DatabaseHand bypasses the canonical Web Clipboard surface");
+}
+
+const allowedRawPreSources = new Set([
+  "routes/adapters/virtual-selection/VirtualSelectionAdapterLab.tsx",
+  "shared/ui/code-block.tsx",
+]);
+for (const path of sourceFiles(siteSourceRoot)) {
+  const relative = path.slice(siteSourceRoot.length + 1);
+  if (!allowedRawPreSources.has(relative) && /<pre\b/.test(readFileSync(path, "utf8"))) {
+    throw new Error(`${relative} renders a copyable raw <pre> outside the canonical CodeBlock surface`);
   }
 }
 
@@ -100,4 +118,12 @@ function hasNamedImport(source, packageName, symbol) {
     if (imported.includes(symbol)) return true;
   }
   return false;
+}
+
+function sourceFiles(root) {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.tsx?$/.test(entry.name) ? [path] : [];
+  });
 }

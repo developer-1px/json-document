@@ -54,6 +54,25 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("exposes the canonical editing-host predicate in clipboard Usage", async () => {
+    const sources = await discoverDemoSources("routes/adapters/clipboard/ClipboardAdapterDemoRoute.tsx");
+    const input = sources.find((file) => file.path === "packages/json-document-web/src/input.ts");
+    expect(input).toBeDefined();
+    expect(await input!.load()).toContain("export function isWebEditingHostTarget");
+  });
+  test("registers Editing observation and move rendering owners through public Rich Text usage", async () => {
+    const sources = await discoverDemoSources("routes/rich-text-demo/RichTextDemoRoute.tsx");
+    const session = sources.find((file) => file.path === "packages/json-document-editing/src/session.ts");
+    expect(session).toBeDefined();
+    expect(await session!.load()).toContain("reconcileSelection");
+    const renderStore = sources.find((file) => file.path === "packages/json-document-rich-text-react/src/render-store.ts");
+    expect(renderStore).toBeDefined();
+    expect(await renderStore!.load()).toContain("appliedOperationsFor");
+    const appliedChange = sources.find((file) => file.path === "packages/json-document-rich-text/src/applied-change.ts");
+    expect(appliedChange).toBeDefined();
+    expect(await appliedChange!.load()).toContain("readonly from?: string");
+  });
+
   test("keeps source metadata separate from the route component split point", () => {
     const route = defineDemo({ source: "routes/example/ExampleDemo.tsx" });
     expect(route.staticData.demo).toEqual({ source: "routes/example/ExampleDemo.tsx" });
@@ -64,9 +83,13 @@ describe("Demo definition and source discovery", () => {
     const document = await discoverDemoSources("routes/document-demo/DocumentDemoRoute.tsx");
     expect(document.map((file) => file.path)).toEqual([
       "routes/document-demo/DocumentDemoRoute.tsx",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
@@ -75,18 +98,26 @@ describe("Demo definition and source discovery", () => {
     expect(source).toContain("export function DocumentDemoRoute()");
     expect(source).toContain('from "@interactive-os/json-document-react"');
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.path)).toEqual([
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-document-text-control.ts",
       "packages/json-document-editing/src/document.ts",
     ]);
     expect(document.some((file) => file.path.includes("shared/ui"))).toBe(false);
     expect(document.filter((file) => file.path.startsWith("packages/")).map((file) => file.referencePath)).toEqual([
+      "/docs/api/web",
+      "/docs/api/ui-primitives-react",
       "/docs/api/ui-primitives-react",
       "/docs/api/react",
       "/docs/api/react",
+      "/docs/api/affordance",
+      "/docs/api/web",
       "/docs/api/web",
       "/docs/api/react",
       "/docs/api/editing",
@@ -98,11 +129,20 @@ describe("Demo definition and source discovery", () => {
       "routes/database-demo/DatabaseDemoRoute.tsx",
       "routes/database-demo/DatabaseTableDemo.tsx",
       "routes/database-demo/initial-database.ts",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-database/src/database-hand.tsx",
+      "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/toolbar.tsx",
+      "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-editing/src/database.ts",
       "packages/json-document-editing/src/database-property-value.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
+      "packages/json-document-ui-primitives-react/src/surfaces.tsx",
+      "packages/json-document-web/src/pointer-session.ts",
+      "packages/json-document-affordance/src/interaction-handle.ts",
     ]);
     expect((await discoverDemoSources("routes/widgets/ListboxWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/ListboxWidgetRoute.tsx",
@@ -110,6 +150,7 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-affordance/src/session.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-react/src/use-editing.ts",
+      "packages/json-document-editing/src/order.ts",
     ]);
   });
 
@@ -117,6 +158,7 @@ describe("Demo definition and source discovery", () => {
     expect((await discoverDemoSources("routes/object-demo/ObjectDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/object-demo/ObjectDemoRoute.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
       "packages/json-document-web/src/clipboard.ts",
@@ -124,19 +166,30 @@ describe("Demo definition and source discovery", () => {
     ]);
   });
 
-  test("registers React and Web Grid owner sources next to Sheet usage", async () => {
-    expect((await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx")).map((file) => file.path)).toEqual([
+  test("registers the Sheet editor, React and Web Grid owners next to Sheet usage", async () => {
+    const sources = await discoverDemoSources("routes/sheet-demo/SheetDemo.tsx");
+    expect(sources.map((file) => file.path)).toEqual([
       "routes/sheet-demo/SheetDemo.tsx",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
       "packages/json-document-web/src/clipboard.ts",
+      "packages/json-document-editing/src/sheet.ts",
       "packages/json-document-react/src/use-grid-editing.ts",
       "packages/json-document-editing/src/topology.ts",
       "packages/json-document-web/src/grid-cell.ts",
+      "packages/json-document-ui-primitives-react/src/input-controls.tsx",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
       "packages/json-document-web/src/pointer-session.ts",
+      "packages/json-document-affordance/src/interaction-handle.ts",
     ]);
+    const owner = sources.find((file) => file.path === "packages/json-document-editing/src/sheet.ts")!;
+    expect(owner.referencePath).toBe("/docs/api/editing");
+    expect(await owner.load()).toContain("export function createSheetEditor");
   });
 
   test("registers the Composer lifecycle owner and its canonical domain closure next to Usage", async () => {
@@ -156,8 +209,8 @@ describe("Demo definition and source discovery", () => {
       "packages/json-document-rich-text-mention/src/index.ts",
       "packages/json-document-web/src/file-intake.ts",
       "packages/json-document-rich-text-react/src/index.tsx",
-      "packages/json-document-ui-primitives-react/src/file-size.ts",
-      "packages/json-document-ui-primitives-react/src/select.tsx",
+      "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/choice.tsx",
       "packages/json-document-ui-primitives-react/src/menu.tsx",
       "packages/json-document-ui-primitives-react/src/surfaces.tsx",
       "packages/json-document-affordance/src/session.ts",
@@ -168,9 +221,14 @@ describe("Demo definition and source discovery", () => {
   test("registers Tree visibility and React binding sources next to Tree usage", async () => {
     expect((await discoverDemoSources("routes/tree-demo/TreeDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/tree-demo/TreeDemoRoute.tsx",
+      "packages/json-document-web/src/input.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-react/src/use-editing.ts",
       "packages/json-document-react/src/editing-observation.ts",
+      "packages/json-document-affordance/src/select.ts",
+      "packages/json-document-web/src/keyboard.ts",
+      "packages/json-document-editing/src/tree.ts",
       "packages/json-document-web/src/clipboard.ts",
       "packages/json-document-react/src/use-tree-editing.ts",
       "packages/json-document-editing/src/tree-visibility.ts",
@@ -181,6 +239,7 @@ describe("Demo definition and source discovery", () => {
     expect((await discoverDemoSources("routes/kanban-demo/KanbanDemoRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/kanban-demo/KanbanDemoRoute.tsx",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
+      "packages/json-document-ui-primitives-react/src/product-shell.tsx",
       "packages/json-document-editing/src/kanban.ts",
       "packages/json-document-web/src/kanban-drop-target.ts",
       "packages/json-document-react/src/use-editing.ts",
@@ -189,6 +248,8 @@ describe("Demo definition and source discovery", () => {
     ]);
     expect((await discoverDemoSources("routes/widgets/BoardWidgetRoute.tsx")).map((file) => file.path)).toEqual([
       "routes/widgets/BoardWidgetRoute.tsx",
+      "packages/json-document-ui-primitives-react/src/content-interaction.ts",
+      "packages/json-document-affordance/src/content-interaction.ts",
       "packages/json-document-ui-primitives-react/src/controls.tsx",
       "packages/json-document-editing/src/kanban.ts",
       "packages/json-document-web/src/kanban-drop-target.ts",

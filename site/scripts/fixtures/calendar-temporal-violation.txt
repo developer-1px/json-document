@@ -1,0 +1,4 @@
+const now = new Date();
+const DAY_MS = 86_400_000;
+const nextYear = Number(value.slice(0, 4)) + 1;
+const month = String(index + 1).padStart(2, "0");

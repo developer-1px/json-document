@@ -9,6 +9,7 @@ import { DocumentTextControl, useEditing } from "@interactive-os/json-document-r
 import {
   createWebClipboardSurface,
   documentClipboardCodec,
+  isWebEditingHostTarget,
 } from "@interactive-os/json-document-web";
 import { Inspector } from "../../../shared/ui/inspector";
 import { SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
@@ -53,7 +54,15 @@ export function ClipboardAdapterLab() {
     <section
       aria-label="Clipboard adapter surface"
       tabIndex={0}
-      {...clipboardSurface}
+      onCopy={(event) => {
+        if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onCopy(event);
+      }}
+      onCut={(event) => {
+        if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onCut(event);
+      }}
+      onPaste={(event) => {
+        if (isWebEditingHostTarget(event.currentTarget, event.target)) clipboardSurface.onPaste(event);
+      }}
       className={classes("p-4", ui.surface.raised, ui.state.focus)}
     >
       <div className={classes("mb-3 flex flex-wrap justify-between gap-2", ui.text.meta)}>

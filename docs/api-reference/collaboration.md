@@ -425,3 +425,90 @@ interface TextSpliceOperation {
   readonly inserted: string;
 }
 ```
+## `@interactive-os/json-document-collaboration/history`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `createHistoryRuntime`
+
+```ts
+createHistoryRuntime(initial: unknown, options: CollaborationRuntimeOptions): HistoryRuntime
+```
+### `History`
+
+```ts
+interface History {
+  status(): HistoryStatus;
+  canUndo(): JSONPatchValidationResult;
+  undo(): HistoryResult;
+  canRedo(): JSONPatchValidationResult;
+  redo(): HistoryResult;
+}
+```
+### `HistoryRestoreResult`
+
+```ts
+type HistoryRestoreResult =
+  | {
+      readonly ok: true;
+      readonly runtime: HistoryRuntime;
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason: string;
+    };
+```
+### `HistoryResult`
+
+```ts
+type HistoryResult =
+  | {
+      readonly ok: true;
+      readonly changeId: ChangeId;
+      readonly target: ChangeId;
+      readonly didChangeDocument: boolean;
+      /** This operation's applied change; null when it only changes causal history. */
+      readonly change: JSONAppliedChange | null;
+      /** Captured before subscribers can author a later transition. */
+      readonly status: HistoryStatus & {
+        readonly canUndo: boolean;
+        readonly canRedo: boolean;
+      };
+    }
+  | {
+      readonly ok: false;
+      readonly code: string;
+      readonly reason?: string;
+    };
+```
+### `HistoryRuntime`
+
+```ts
+interface HistoryRuntime extends CollaborationRuntime {
+  readonly history: History;
+}
+```
+### `HistoryStatus`
+
+```ts
+interface HistoryStatus {
+  readonly undoTarget: ChangeId | null;
+  readonly redoTarget: ChangeId | null;
+  readonly undoDepth: number;
+  readonly redoDepth: number;
+  readonly revision: number;
+}
+```
+### `restoreHistoryRuntime`
+
+```ts
+restoreHistoryRuntime(input: unknown, options: CollaborationRestoreOptions): HistoryRestoreResult
+```
+## `@interactive-os/json-document-collaboration/editing`
+
+아래 API는 package root가 아닌 이 subpath에서 import합니다.
+### `createCollaborationEditingHistory`
+
+```ts
+createCollaborationEditingHistory(runtime: HistoryRuntime): EditingHistory
+```

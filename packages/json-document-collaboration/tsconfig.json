@@ -5,7 +5,7 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "references": [{ "path": "../json-document" }],
+  "references": [{ "path": "../json-document" }, { "path": "../json-document-editing" }],
   "include": [
     "src/**/*.ts"
   ]

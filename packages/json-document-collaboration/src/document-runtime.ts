@@ -106,6 +106,7 @@ export function createDocumentRuntime(state: RuntimeState): JSONDocument {
       state.initialTree,
       nextGraph.ordered,
       state.materializeValidation,
+      { ordered: state.graph.ordered, materialized: state.materialized },
     );
     if (!jsonEqual(nextMaterialized.value, patched.value)) {
       return failure(

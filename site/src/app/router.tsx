@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { pageDescriptors, type SiteRoute } from "./page-descriptors";
 
-export { type SiteNavigationGroup, type SiteRoute } from "./page-descriptors";
+export { isAppChrome, type SiteNavigationGroup, type SiteRoute } from "./page-descriptors";
 export const siteRoutes = pageDescriptors;
 
 const siteUrl = (import.meta.env.VITE_SITE_URL ?? "https://developer-1px.github.io/json-document").replace(/\/$/, "");

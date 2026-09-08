@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Plus, Redo2, Undo2 } from "lucide-react";
-import { createJSONDocument, type JSONValue } from "@interactive-os/json-document";
+import { createJSONDocument, trackPointer, type JSONValue } from "@interactive-os/json-document";
 import { documentSelectionFocus, type BlockDocument } from "@interactive-os/json-document-editing";
 import {
   DocumentTextControl,
@@ -11,7 +11,7 @@ import {
 } from "@interactive-os/json-document-react";
 import { historyAffordance } from "@interactive-os/json-document-affordance";
 import { Inspector } from "../../../shared/ui/inspector";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, Field, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -28,7 +28,33 @@ export function ReactConnectorLab() {
       <JSONDocumentSubscriptionLab />
       <EditingSnapshotLab />
       <UseEditingLab />
+      <PointerTrackingLab />
     </div>
+  );
+}
+
+function PointerTrackingLab() {
+  const [shape, setShape] = useState<"array" | "object">("array");
+  const before = shape === "array" ? { items: ["a", "b"] } : { items: { "0": "a", "1": "b" } };
+  const document = createJSONDocument(before);
+  const committed = document.commit([{ op: "add", path: "/items/0", value: "A" }]);
+  const tracked = committed.ok ? trackPointer("/items/1", committed.change.applied, before) : null;
+
+  return (
+    <section aria-label="Context-aware pointer tracking" className="lg:col-span-2">
+      <h2 className={ui.text.heading}>Track a position through a patch</h2>
+      <p className={ui.text.meta}>The previous snapshot distinguishes array insertion from numeric object-key replacement.</p>
+      <div className="flex gap-2">
+        <Command onClick={() => setShape("array")}>Array insertion</Command>
+        <Command onClick={() => setShape("object")}>Numeric object key</Command>
+      </div>
+      <p className={ui.text.meta}>Tracked address: <output data-testid="tracked-pointer">{tracked ?? "removed"}</output></p>
+      <Inspector label="Inspect pointer tracking" items={[
+        { label: "Before", testId: "pointer-before-json", value: before },
+        { label: "After", testId: "pointer-after-json", value: document.value },
+        { label: "Applied", testId: "pointer-applied-json", value: committed.ok ? committed.change.applied : [] },
+      ]} />
+    </section>
   );
 }
 
@@ -52,18 +78,18 @@ function JSONDocumentSubscriptionLab() {
 
       <label className={classes("grid gap-1", ui.text.meta)}>
         Document title
-        <input
+        <Field
+          label="Document title"
           value={value.title}
-          onChange={(event) => replace("/title", event.currentTarget.value)}
-          className={ui.field.control}
+          onValueChange={(value) => replace("/title", value)}
         />
       </label>
-      <IconButton label={`Count ${value.count}`}
+      <Command label={`Count ${value.count}`}
         onClick={() => replace("/count", value.count + 1)}
         className="mt-3"
       >
         <Plus aria-hidden="true" size={16} />
-      </IconButton>
+      </Command>
 
       <JSONPanel testId="react-document-json" value={value} />
     </section>
@@ -106,18 +132,18 @@ function EditingSnapshotLab() {
         ))}
       </div>
       <div className="mt-3 flex gap-2">
-        <IconButton label="Undo"
+        <Command label="Undo"
           disabled={commands.undo.disabled}
           onClick={() => editor.undo()}
         >
           <Undo2 aria-hidden="true" size={16} />
-        </IconButton>
-        <IconButton label="Redo"
+        </Command>
+        <Command label="Redo"
           disabled={commands.redo.disabled}
           onClick={() => editor.redo()}
         >
           <Redo2 aria-hidden="true" size={16} />
-        </IconButton>
+        </Command>
       </div>
 
       <JSONPanel testId="react-editor-json" value={snapshot.value} />

@@ -1,6 +1,6 @@
 import { type SiteNavigationGroup, type SiteRoute } from "./router";
 import { ChevronRight } from "lucide-react";
-import { siteLayers } from "./site-layers";
+import { sectionForGroup, siteSections, type SiteSection } from "./site-layers";
 import { ActionLink } from "../shared/ui/interactive";
 import { ui } from "../shared/ui/styles";
 
@@ -11,9 +11,20 @@ export type BreadcrumbCrumb = {
 
 const overview: BreadcrumbCrumb = { path: "/", label: "Overview" };
 
-const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = Object.fromEntries(
-  siteLayers.map((layer) => [layer.group, { path: layer.path, label: layer.label }]),
-) as Record<SiteNavigationGroup, BreadcrumbCrumb>;
+const groupLandings: Record<SiteNavigationGroup, BreadcrumbCrumb> = {
+  Introduction: { path: "/docs", label: "Introduce" },
+  "JSON Document": { path: "/docs/foundation", label: "JSON Document" },
+  "Document Types": { path: "/docs/document-types", label: "Document Types" },
+  Editing: { path: "/docs/intent-guide", label: "Editing" },
+  Collaboration: { path: "/docs/collaboration", label: "Collaboration" },
+  Adapter: { path: "/docs/adapters", label: "Platform Adapters" },
+  Connector: { path: "/docs/connectors", label: "Ecosystem Connectors" },
+  Affordance: { path: "/docs/affordance", label: "Affordances" },
+  "UI Primitives": { path: "/docs/ui-primitives", label: "UI Primitives" },
+  Hands: { path: "/editors", label: "Hands" },
+  Artifact: { path: "/viewer", label: "Artifact" },
+  Applications: { path: "/applications", label: "Applications" },
+};
 
 export function breadcrumbTrail(
   route: SiteRoute,
@@ -31,15 +42,29 @@ export function breadcrumbTrail(
       : undefined;
   }
 
+  const directSection = siteSections.find((section) => section.path === route.path && section.groups.length === 0);
   const group = routeGroup(route, routes);
-  if (group) {
+  if (directSection) {
+    stack[0] = { path: directSection.path, label: directSection.label };
+  } else if (group) {
+    const section = sectionForGroup(group);
     const landing = groupLandings[group];
-    if (stack[0]?.path === landing.path && stack[0]?.label === "Overview") stack[0] = landing;
-    else if (stack[0]?.label !== group) stack.unshift(landing);
+    if (stack[0]?.path === section.path) stack[0] = { path: section.path, label: section.label };
+    else {
+      if (landing.path !== section.path && stack[0]?.path !== landing.path) stack.unshift(landing);
+      stack.unshift({ path: section.path, label: section.label });
+    }
   }
   if (stack[0]?.path !== overview.path) stack.unshift(overview);
 
   return stack;
+}
+
+export function routeSection(route: SiteRoute, routes: ReadonlyArray<SiteRoute>): SiteSection | undefined {
+  const direct = siteSections.find((section) => section.path === route.path);
+  if (direct) return direct;
+  const group = routeGroup(route, routes);
+  return group ? sectionForGroup(group) : undefined;
 }
 
 function crumbLabel(route: SiteRoute): string {
@@ -94,6 +119,7 @@ export function rootNavRoutes(routes: ReadonlyArray<SiteRoute>): ReadonlyArray<S
     route.path !== "/"
     && route.navigationGroup === undefined
     && route.parentPath === undefined
+    && route.sidebar !== false
   );
 }
 

@@ -4,8 +4,14 @@ import type {
   RichTextSelection,
 } from "@interactive-os/json-document-rich-text";
 import { createRichTextNodeId } from "@interactive-os/json-document-rich-text";
-import { createWebClipboardBinding, type WebClipboardData, type WebClipboardEvent } from "@interactive-os/json-document-web";
+import { createWebClipboardBinding, createWebKeyboardAdapter, isWebEditingHostTarget, type WebClipboardData, type WebClipboardEvent } from "@interactive-os/json-document-web";
 import { createRichTextClipboardCodec, createRichTextClipboardRepresentations } from "./clipboard.js";
+
+// Preserve this binding's historical Alt acceptance alongside the shared Mod-z defaults.
+const keyboard = createWebKeyboardAdapter({ keymap: {
+  "Mod-Alt-z": { type: "undo" },
+  "Mod-Alt-Shift-z": { type: "redo" },
+} });
 
 export interface RichTextContentEditableBinding {
   isComposing(): boolean;
@@ -39,7 +45,7 @@ export function createRichTextContentEditableBinding(options: {
   });
 
   const beforeInput = (event: InputEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     if (composition !== null && (
       event.inputType.includes("Composition")
       || event.isComposing
@@ -56,7 +62,6 @@ export function createRichTextContentEditableBinding(options: {
     const platformSelection = readSelectionFromInput(event);
     const normallyUsesPlatformRange = ![
       "insertText",
-      "insertTranspose",
       "deleteContentBackward",
       "deleteContentForward",
     ].includes(event.inputType);
@@ -69,9 +74,11 @@ export function createRichTextContentEditableBinding(options: {
       ? publishSelection(platformSelection)
       : null;
     if (targetSelection === null) syncSelection();
-    if (["insertText", "insertReplacementText", "insertFromYank", "insertTranspose"].includes(event.inputType) && event.data !== null) {
+    const text = event.data ?? (event.dataTransfer?.types.includes("text/plain")
+      ? event.dataTransfer.getData("text/plain") : null);
+    if (["insertText", "insertReplacementText", "insertFromYank", "insertTranspose"].includes(event.inputType) && text !== null) {
       event.preventDefault();
-      report("text.insert", editor.dispatch({ type: "text.insert", text: event.data }));
+      report("text.insert", editor.dispatch({ type: "text.insert", text }));
     } else if (event.inputType === "insertParagraph") {
       event.preventDefault();
       report("block.split", editor.dispatch({ type: "block.split" }));
@@ -109,7 +116,7 @@ export function createRichTextContentEditableBinding(options: {
     }
   };
   const compositionStart = (event: CompositionEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     if (composition !== null) finishComposition(true);
     const selection = syncSelection() ?? editor.snapshot.selection;
     const scope = compositionScope(root, selection);
@@ -119,6 +126,10 @@ export function createRichTextContentEditableBinding(options: {
       element: scope.element,
       beforeText: scope.beforeText,
       scoped: scope.scoped,
+      basis: selection.ranges.flatMap(({ anchor, focus }) => [anchor, focus]).map((point) => ({
+        nodeId: point.nodeId,
+        node: JSON.stringify(editor.topology.locate(point.nodeId)?.node),
+      })),
       phase: "composing",
       endData: null,
     };
@@ -126,7 +137,7 @@ export function createRichTextContentEditableBinding(options: {
     options.onAction?.("composition.start");
   };
   const compositionEnd = (event: CompositionEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     if (composition === null) return;
     composition.phase = "ending";
     composition.endData = event.data;
@@ -135,32 +146,32 @@ export function createRichTextContentEditableBinding(options: {
     compositionEndTimer = setTimeout(() => finishComposition(true), 30);
   };
   const input = (event: Event) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     if (composition?.phase === "ending") queueMicrotask(() => finishComposition(false));
   };
   const copy = (event: ClipboardEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     syncSelection();
     reportClipboard("clipboard.copy", clipboard.copy(asWebEvent(event)));
   };
   const cut = (event: ClipboardEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     syncSelection();
     reportClipboard("clipboard.cut", clipboard.cut(asWebEvent(event)));
   };
   const paste = (event: ClipboardEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     syncSelection();
     reportClipboard("clipboard.paste", clipboard.paste(asWebEvent(event)));
   };
   const selectionChanged = (event: Event) => {
-    if (eventBelongsToEditingRoot(root, event) && composition === null && !renderPending) syncSelection();
+    if (isWebEditingHostTarget(root, event.target) && composition === null && !renderPending) syncSelection();
   };
   const documentSelectionChanged = () => {
     if (composition === null && !renderPending) syncSelection();
   };
   const keyDown = (event: KeyboardEvent) => {
-    if (!eventBelongsToEditingRoot(root, event)) return;
+    if (!isWebEditingHostTarget(root, event.target)) return;
     if ((event.key === "Backspace" || event.key === "Delete") && !event.metaKey && !event.ctrlKey && !event.altKey && !event.isComposing && composition === null) {
       const direction = event.key === "Backspace" ? "backward" : "forward";
       event.preventDefault();
@@ -169,9 +180,10 @@ export function createRichTextContentEditableBinding(options: {
       report("text.delete", editor.dispatch({ type: "text.delete", direction, unit: "character" }));
       return;
     }
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+    const command = keyboard.resolve(event);
+    if (command?.type === "undo" || command?.type === "redo") {
       event.preventDefault();
-      report(event.shiftKey ? "redo" : "undo", event.shiftKey ? editor.redo() : editor.undo());
+      report(command.type, command.type === "redo" ? editor.redo() : editor.undo());
     }
   };
 
@@ -233,13 +245,22 @@ export function createRichTextContentEditableBinding(options: {
       return;
     }
 
-    report("selection.set", editor.dispatch({ type: "selection.set", selection: lease.selection }));
-    report("composition.commit", editor.dispatch({
-      type: "text.insert",
-      text: diff.inserted,
-      historyGroup: lease.id,
-    }));
-    options.onCompositionChange?.(false);
+    try {
+      if (lease.basis.some(({ nodeId, node }) => JSON.stringify(editor.topology.locate(nodeId)?.node) !== node)) {
+        report("composition.commit", { ok: false, code: "rich-text.composition-stale" });
+        return;
+      }
+      const selected = editor.dispatch({ type: "selection.set", selection: lease.selection });
+      report("selection.set", selected);
+      if (!selected.ok) return;
+      report("composition.commit", editor.dispatch({
+        type: "text.insert",
+        text: diff.inserted,
+        historyGroup: lease.id,
+      }));
+    } finally {
+      options.onCompositionChange?.(false);
+    }
   }
 
   function syncSelection(): RichTextSelection | null {
@@ -288,6 +309,7 @@ interface CompositionLease {
   readonly element: HTMLElement;
   readonly beforeText: string;
   readonly scoped: boolean;
+  readonly basis: ReadonlyArray<{ readonly nodeId: string; readonly node: string | undefined }>;
   phase: "composing" | "ending";
   endData: string | null;
 }
@@ -369,7 +391,7 @@ export function restoreRichTextDOMSelection(root: HTMLElement, selection: RichTe
 
 function domPoint(root: HTMLElement, node: Node, offset: number): RichTextPoint | null {
   const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
-  if (!elementBelongsToEditingRoot(root, element)) return null;
+  if (!isWebEditingHostTarget(root, element)) return null;
   const textRoot = element?.closest<HTMLElement>("[data-rich-text-text-id]");
   if (textRoot && root.contains(textRoot)) {
     const range = root.ownerDocument.createRange();
@@ -391,25 +413,6 @@ function domPoint(root: HTMLElement, node: Node, offset: number): RichTextPoint 
     return boundary.compareBoundaryPoints(Range.END_TO_END, probe) >= 0;
   }).length;
   return { kind: "child", nodeId: containerId, offset: logicalOffset, affinity: "forward" };
-}
-
-function eventBelongsToEditingRoot(root: HTMLElement, event: Event): boolean {
-  const target = event.target;
-  const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
-  return elementBelongsToEditingRoot(root, element);
-}
-
-function elementBelongsToEditingRoot(root: HTMLElement, element: Element | null): boolean {
-  if (element === null || !root.contains(element)) return false;
-  let current: Element | null = element;
-  while (current !== null && current !== root) {
-    if (current.hasAttribute("contenteditable")) {
-      const value = current.getAttribute("contenteditable")?.toLowerCase();
-      if (value !== "false" && value !== "inherit") return false;
-    }
-    current = current.parentElement;
-  }
-  return current === root;
 }
 
 function findDOMPoint(root: HTMLElement, point: RichTextPoint): { readonly node: Node; readonly offset: number } | null {

@@ -1,4 +1,6 @@
-export { createDocumentEditor, documentSelectionFocus } from "./document.js";
+export { createDocumentEditor, documentClipboardFormat, documentSelectionFocus } from "./document.js";
+export { cutEditingClipboard } from "./clipboard.js";
+export type { EditingClipboardCut } from "./clipboard.js";
 export { jsonCellText } from "./cell-text.js";
 export {
   gridCellsInRange,
@@ -11,15 +13,62 @@ export {
   lineTopology,
 } from "./topology.js";
 export type { GridPoint, GridRangeBounds, GridTopology, LineTopology } from "./topology.js";
-export { createDatabaseEditor, nextDatabasePropertySort } from "./database.js";
+export { createDatabaseEditor, databaseClipboardFormat, nextDatabasePropertySort } from "./database.js";
 export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } from "./database-property-value.js";
-export { createObjectEditor } from "./object.js";
-export { createOrderEditor } from "./order.js";
+export { createObjectEditor, objectClipboardFormat } from "./object.js";
+export { createOrderEditor, orderClipboardFormat } from "./order.js";
 export { createEditingSession } from "./session.js";
-export { createSheetEditor } from "./sheet.js";
-export { createTreeEditor } from "./tree.js";
+export { createEditingId } from "./identity.js";
+export type { EditingHistory, EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
+export { createSheetEditor, sheetClipboardFormat } from "./sheet.js";
+export { createTreeEditor, treeClipboardFormat } from "./tree.js";
 export { projectTreeVisibility, treeVisibilityNeighbor } from "./tree-visibility.js";
 export { createKanbanEditor } from "./kanban.js";
+export {
+  calendarAllDayLayout,
+  calendarBusyDates,
+  calendarEventsInMonth,
+  calendarEventsOnDay,
+  calendarMonthDayLayout,
+  calendarMonthWeekLayout,
+  calendarNowMarker,
+  calendarOccurrenceTopology,
+  calendarTimedLayout,
+  calendarVisibleEvents,
+  createCalendarEditor,
+  calendarClipboardFormat,
+} from "./calendar.js";
+export {
+  calendarRecurrenceWithFrequency,
+  calendarRecurrenceWithInterval,
+  calendarRecurrenceWithUntil,
+  projectCalendarOccurrences,
+} from "./calendar-occurrence.js";
+export {
+  calendarOccurrenceAfterIntent,
+  calendarOccurrenceForInspector,
+  calendarOccurrenceFromSelection,
+  calendarUpdateIntent,
+  calendarVisibleHourBand,
+} from "./calendar-selection.js";
+export type { CalendarEventPatch, CalendarOccurrenceRange } from "./calendar-selection.js";
+export { previewCalendarAllDay, previewCalendarMonth, previewCalendarTimeGrid } from "./calendar-preview.js";
+export { bindCalendarAllDayIntent, interpretCalendarAllDayPointer } from "./calendar-allday-pointer.js";
+export { bindCalendarMonthIntent, interpretCalendarMonthPointer } from "./calendar-month-pointer.js";
+export { bindCalendarTimeGridIntent, interpretCalendarTimeGridPointer } from "./calendar-time-grid-pointer.js";
+export {
+  addCalendarDate,
+  calendarAllDaySpan,
+  calendarDatePart,
+  calendarDocumentCalendar,
+  calendarDocumentCalendars,
+  calendarInstantAt,
+  calendarIntervalLastDate,
+  calendarShiftInstant,
+  formatCalendarInstant,
+  isCalendarAllDay,
+  parseCalendarView,
+} from "./calendar-validation.js";
 export { ANNOTATION_PROFILE_V1, annotationResizeHandle, annotationSelectorBounds, createAnnotationEditor, transformAnnotationSelector } from "./annotation.js";
 export { assertAnnotationDocument } from "./annotation-validation.js";
 export type {
@@ -86,6 +135,8 @@ export type {
 export type { EditingDispatch, EditingIntent } from "./intent.js";
 export type {
   EditingPlan,
+  EditingDocumentChange,
+  EditingSessionOptions,
   EditingResult,
   EditingSession,
   EditingSnapshot,
@@ -128,3 +179,40 @@ export type {
   KanbanIntent,
   KanbanSelection,
 } from "./kanban.js";
+export type {
+  CalendarCalendar,
+  CalendarClipboard,
+  CalendarClipboardItem,
+  CalendarDocument,
+  CalendarEditor,
+  CalendarEvent,
+  CalendarIntent,
+  CalendarOccurrenceSelection,
+  CalendarOccurrencePoint,
+  CalendarOccurrenceTopologySnapshot,
+  CalendarRecurrence,
+  CalendarSelection,
+  CalendarSelectionRange,
+  CalendarSelectionDragSource,
+  CalendarView,
+} from "./calendar.js";
+export { planCalendarSelectionMove } from "./calendar-selection-move.js";
+export type {
+  CalendarSelectionMovePlan,
+  CalendarSelectionMoveTarget,
+} from "./calendar-selection-move.js";
+export type { CalendarOccurrence } from "./calendar-occurrence.js";
+export type {
+  CalendarAllDayHandle,
+  CalendarAllDayPointerIntent,
+  CalendarAllDayPointerRelease,
+} from "./calendar-allday-pointer.js";
+export type {
+  CalendarMonthPointerIntent,
+  CalendarMonthPointerRelease,
+} from "./calendar-month-pointer.js";
+export type {
+  CalendarTimeGridHandle,
+  CalendarTimeGridPointerIntent,
+  CalendarTimeGridPointerRelease,
+} from "./calendar-time-grid-pointer.js";

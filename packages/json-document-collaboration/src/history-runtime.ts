@@ -8,7 +8,7 @@ import {
   prepareGraph,
   type PreparedGraph,
 } from "./change.js";
-import { patchBetweenValues } from "./document-patch.js";
+import { patchBetweenTrees } from "./document-patch.js";
 import { jsonEqual } from "@interactive-os/json-document";
 import {
   historyOperationFor,
@@ -212,6 +212,7 @@ export function createHistory(state: RuntimeState): History {
     const prepared = prepareHistoryChange(direction);
     if (!prepared.ok) return prepared;
 
+    const previousTree = state.materialized.tree;
     assignCausalState(state, {
       known: prepared.value.known,
       graph: prepared.value.graph,
@@ -221,9 +222,11 @@ export function createHistory(state: RuntimeState): History {
 
     let documentChange = undefined;
     if (prepared.value.didChangeDocument) {
-      const documentCommit = state.documentStore.commit(patchBetweenValues(
+      const documentCommit = state.documentStore.commit(patchBetweenTrees(
         state.documentStore.value,
         state.materialized.value,
+        previousTree,
+        state.materialized.tree,
       ));
       if (!documentCommit.ok) {
         throw new Error(
@@ -232,17 +235,23 @@ export function createHistory(state: RuntimeState): History {
       }
       documentChange = documentCommit.change;
     }
+    const result = Object.freeze({
+      ok: true as const,
+      changeId: freezeChangeId(prepared.value.change.changeId),
+      target: freezeChangeId(prepared.value.target),
+      didChangeDocument: prepared.value.didChangeDocument,
+      change: documentChange ?? null,
+      status: Object.freeze({
+        ...resolveHistoryState().status,
+        canUndo: prepareHistoryChange("undo").ok,
+        canRedo: prepareHistoryChange("redo").ok,
+      }),
+    });
     state.notify({
       ...(documentChange === undefined ? {} : { documentChange }),
       replicaStatus: state.replicaStatus(),
     });
-
-    return Object.freeze({
-      ok: true,
-      changeId: freezeChangeId(prepared.value.change.changeId),
-      target: freezeChangeId(prepared.value.target),
-      didChangeDocument: prepared.value.didChangeDocument,
-    });
+    return result;
   }
 
   return Object.freeze({

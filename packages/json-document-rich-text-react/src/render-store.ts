@@ -9,6 +9,9 @@ import {
 import { recordPlaceholderScan, recordRenderStoreBlockScan } from "./render-instrument.js";
 
 export interface RichTextRenderStore {
+  setComposing(composing: boolean): void;
+  getNodeVersion(nodeId: string): number;
+  getRenderRevision(): number;
   getBlockIds(): ReadonlyArray<string>;
   getDocumentId(): string;
   getNode(nodeId: string): RichTextNode | null;
@@ -18,17 +21,7 @@ export interface RichTextRenderStore {
   subscribeStructure(notify: () => void): () => void;
 }
 
-const stores = new WeakMap<RichTextEditor, RichTextRenderStore>();
-
-export function richTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
-  const cached = stores.get(editor);
-  if (cached) return cached;
-  const created = createRichTextRenderStore(editor);
-  stores.set(editor, created);
-  return created;
-}
-
-function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
+export function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore {
   const pointer = editor.pointer ?? "";
   let document = documentAtPointer(editor.snapshot.value, pointer);
   let blockIds: ReadonlyArray<string> = document.content.map((node) => node.id);
@@ -38,13 +31,20 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
   const nodeListeners = new Map<string, Set<() => void>>();
   const placeholderListeners = new Set<() => void>();
   const structureListeners = new Set<() => void>();
+  let unsubscribeEditor: (() => void) | null = null;
+  let composing = false;
+  let composingBlockId: string | undefined;
+  const nodeVersions = new Map<string, number>();
+  let renderRevision = 0;
 
-  editor.subscribe((snapshot) => {
+  function synchronize(snapshot = editor.snapshot, catchUp = false): void {
+    if (composing) return;
     const next = documentAtPointer(snapshot.value, pointer);
     if (next === document) return;
     const previous = document;
     document = next;
-    const recorded = appliedOperationsFor(next);
+    // A disconnected store can have missed more than the latest change.
+    const recorded = catchUp || unsubscribeEditor === null ? null : appliedOperationsFor(next);
     const applied = recorded === null ? null : relativeOperations(recorded, pointer);
     if (placeholderListeners.size > 0) {
       const nextPlaceholderBlockId = applied !== null && !contentStructureChanged(applied)
@@ -81,16 +81,56 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
       blockIds = nextIds;
       for (const notify of structureListeners) notify();
     }
-  });
+  }
+
+  function observe(): void {
+    synchronize();
+    unsubscribeEditor ??= editor.subscribe(synchronize);
+  }
+
+  function release(): void {
+    if (nodeListeners.size || placeholderListeners.size || structureListeners.size) return;
+    unsubscribeEditor?.();
+    unsubscribeEditor = null;
+  }
 
   return {
-    getBlockIds() { return blockIds; },
-    getDocumentId() { return document.id; },
+    setComposing(next) {
+      if (composing === next) return;
+      if (next) {
+        synchronize();
+        const selection = editor.snapshot.selection;
+        const point = selection.primaryIndex === null ? undefined : selection.ranges[selection.primaryIndex]?.anchor;
+        const path = point === undefined ? undefined : richTextTopology(document).locate(point.nodeId)?.path;
+        const index = path?.[0] ?? (point?.kind === "child" && path?.length === 0 ? point.offset : undefined);
+        composingBlockId = index === undefined ? undefined : document.content[index]?.id;
+        composing = true;
+        return;
+      }
+      composing = false;
+      // More than one change may have arrived during this root's DOM lease.
+      synchronize(editor.snapshot, true);
+      renderRevision++;
+      if (composingBlockId !== undefined) {
+        // Native DOM can differ even after cancellation or a rejected commit.
+        // Replace only its block's React boundary, not the whole document.
+        nodeVersions.set(composingBlockId, renderRevision);
+        notifyNode(composingBlockId, nodeListeners);
+        composingBlockId = undefined;
+      }
+      for (const notify of structureListeners) notify();
+    },
+    getNodeVersion(nodeId) { return nodeVersions.get(nodeId) ?? 0; },
+    getRenderRevision() { return renderRevision; },
+    getBlockIds() { synchronize(); return blockIds; },
+    getDocumentId() { synchronize(); return document.id; },
     getNode(nodeId) {
+      synchronize();
       const located = richTextTopology(document).locate(nodeId);
       return located && located.node.type !== "doc" ? located.node as RichTextNode : null;
     },
     getPlaceholderBlockId() {
+      synchronize();
       if (!placeholderInitialized) {
         placeholderBlockId = rebuildPlaceholderState(document, visibleBlocks);
         placeholderInitialized = true;
@@ -98,15 +138,18 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
       return placeholderBlockId;
     },
     subscribeNode(nodeId, notify) {
+      observe();
       const listeners = nodeListeners.get(nodeId) ?? new Set<() => void>();
       listeners.add(notify);
       nodeListeners.set(nodeId, listeners);
       return () => {
         listeners.delete(notify);
         if (listeners.size === 0) nodeListeners.delete(nodeId);
+        release();
       };
     },
     subscribePlaceholder(notify) {
+      observe();
       if (placeholderListeners.size === 0) {
         placeholderBlockId = rebuildPlaceholderState(document, visibleBlocks);
         placeholderInitialized = true;
@@ -118,11 +161,13 @@ function createRichTextRenderStore(editor: RichTextEditor): RichTextRenderStore 
           visibleBlocks = new Set();
           placeholderInitialized = false;
         }
+        release();
       };
     },
     subscribeStructure(notify) {
+      observe();
       structureListeners.add(notify);
-      return () => { structureListeners.delete(notify); };
+      return () => { structureListeners.delete(notify); release(); };
     },
   };
 }
@@ -172,13 +217,18 @@ function isPlaceholderBlock(node: RichTextNode): boolean {
 }
 
 function relativeOperations(
-  operations: ReadonlyArray<{ readonly op: string; readonly path: string }>,
+  operations: ReadonlyArray<{ readonly op: string; readonly path: string; readonly from?: string }>,
   pointer: string,
 ): ReadonlyArray<{ readonly op: string; readonly path: string }> {
   if (pointer === "") return operations;
-  return operations
-    .filter((operation) => operation.path === pointer || operation.path.startsWith(`${pointer}/`))
-    .map((operation) => ({ ...operation, path: operation.path.slice(pointer.length) }));
+  return operations.flatMap((operation) => {
+    if (operation.path === pointer || operation.path.startsWith(`${pointer}/`)) {
+      return [{ ...operation, path: operation.path.slice(pointer.length) }];
+    }
+    // A move out of the bound subtree still changes its source structure.
+    return operation.op === "move" && (operation.from === pointer || operation.from?.startsWith(`${pointer}/`))
+      ? [{ op: "move", path: "" }] : [];
+  });
 }
 
 function documentAtPointer(value: unknown, pointer: string): RichTextDocument {
@@ -195,6 +245,7 @@ function contentStructureChanged(
   applied: ReadonlyArray<{ readonly op: string; readonly path: string }>,
 ): boolean {
   return applied.some((operation) => {
+    if (operation.op === "move") return true;
     if (operation.path === "" || operation.path === "/content") return true;
     return (operation.op === "add" || operation.op === "remove") && /^\/content\/\d+$/.test(operation.path);
   });

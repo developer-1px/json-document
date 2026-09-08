@@ -21,8 +21,9 @@ import {
   commitAffordance,
   dropAffordance,
 } from "@interactive-os/json-document-affordance";
-import { IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -41,6 +42,7 @@ const initialBoard: KanbanDocument = {
 
 export function KanbanDemoRoute() {
   const [editor] = useState(() => createKanbanEditor(initialBoard));
+  const [draggingId, setDraggingId] = useState<string | null>(null);
   const [boardDrag] = useState(() => createBoardDragSession<string, KanbanCardDropTarget>({
     onCommit: ({ item: cardId, target }) => {
       editor.dispatch({
@@ -87,12 +89,12 @@ export function KanbanDemoRoute() {
       </PageHeader>
 
     )}>
-      <ProductApp
+      <ProductShell
         toolbarLabel="Kanban actions"
         toolbar={(
           <>
-            <IconButton label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" disabled={commands.undo.disabled} onClick={() => editor.undo()}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" disabled={commands.redo.disabled} onClick={() => editor.redo()}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         )}
       >
@@ -148,19 +150,23 @@ export function KanbanDemoRoute() {
                   type="button"
                   selected={option.selected}
                   focus={option.focus}
+                  dragging={draggingId === card.id}
                   draggable
                   {...webKanbanCardProps(card.id)}
-                  data-selected={option.selected ? "true" : "false"}
                   data-focus={option.focus ? "true" : "false"}
                   aria-selected={option.selected}
                   onClick={option.onClick}
                   onDragStart={(event) => {
                     editing.getItem(card.id).getPressHandler()(event);
+                    setDraggingId(card.id);
                     boardDrag.begin(card.id);
                     dragSession.begin(card.id);
                   }}
-                  onDragEnd={() => dragSession.cancel()}
-                  className={classes("w-full p-3 text-left", ui.surface.documentBlock, ui.interactive.selectable)}
+                  onDragEnd={() => {
+                    setDraggingId(null);
+                    dragSession.cancel();
+                  }}
+                  className={classes("w-full p-3 text-left", ui.surface.documentBlock)}
                 >
                   {card.title}
                 </SelectableItem>
@@ -169,7 +175,7 @@ export function KanbanDemoRoute() {
           </div>
         ))}
       </section>
-      </ProductApp>
+      </ProductShell>
     </DemoPage>
   );
 }

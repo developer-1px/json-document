@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { routeFile, validateSiteRoutes } from "./route-checks.mjs";
+import { validateLlmsContract } from "../../docs/public-contract-checks.mjs";
 
 const siteRoot = new URL("..", import.meta.url).pathname;
 const dist = join(siteRoot, "dist");
@@ -110,6 +111,7 @@ const fallback = read("404.html");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
 const manifest = JSON.parse(read("site.webmanifest"));
+validateLlmsContract(read("llms.txt"), (message) => fail(`site dist ${message}`));
 
 for (const pattern of [
   /<title>json-document - Agent artifact editing<\/title>/,

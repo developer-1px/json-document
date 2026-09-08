@@ -1,0 +1,4 @@
+const now = Temporal.Now.plainDateTimeISO();
+const tomorrow = Temporal.PlainDate.from(value).add({ days: 1 });
+const nextYear = Temporal.PlainDate.from(value).add({ years: 1 });
+const month = Temporal.PlainDate.from(value).add({ months: index });

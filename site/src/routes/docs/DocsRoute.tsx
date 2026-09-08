@@ -1,20 +1,23 @@
-import { useMemo } from "react";
-import { ActionLink } from "../../shared/ui/interactive";
-import { PageFrame, PageHeader, type PetiteCatIllustration } from "../../shared/ui/primitives";
-import { classes, ui } from "../../shared/ui/styles";
-import { MarkdownViewer, markdownHeadings } from "./MarkdownViewer";
+import type { PetiteCatIllustration } from "../../shared/ui/primitives";
 import { docPages, type DocPageId } from "./doc-pages";
+import { DocumentationPage } from "./DocumentationPage";
 
 const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   overview: "package",
+  foundation: "braces",
+  howWeBuild: "branch",
+  applications: "peek",
+  documentTypes: "braces",
   adapters: "peek",
   adapterKeyboard: "terminal",
   adapterGridCell: "database",
   adapterInteraction: "cursor",
   adapterClipboard: "clipboard",
+  adapterVirtualSelection: "cursor",
   adapterContenteditable: "cursor",
   affordance: "cursor",
   uiPrimitives: "braces",
+  animation: "cursor",
   affordanceSelect: "cursor",
   affordanceFold: "branch",
   affordanceDrag: "peek",
@@ -28,12 +31,14 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   affordanceRename: "terminal",
   affordanceNudge: "peek",
   affordanceHover: "cursor",
+  affordanceContextual: "cursor",
   affordanceDoubleClick: "peek",
   affordanceTripleClick: "peek",
   affordanceContextMenu: "clipboard",
   affordanceMarquee: "cursor",
   affordanceDrop: "connector",
   affordanceCopyDrag: "peek",
+  affordanceHandles: "cursor",
   affordanceResize: "branch",
   affordancePan: "sleep",
   affordanceScroll: "sleep",
@@ -71,12 +76,17 @@ const docIllustrations: Record<DocPageId, PetiteCatIllustration> = {
   reactApi: "connector",
   reactHookFormApi: "connector",
   ajvApi: "connector",
+  a2uiApi: "connector",
+  connectorA2ui: "connector",
   zodApi: "connector",
   tanStackTableApi: "connector",
   affordanceApi: "patch",
   uiPrimitivesApi: "patch",
+  animationApi: "patch",
+  markdownReactApi: "patch",
   databaseApi: "database",
   annotationApi: "cursor",
+  calendarApi: "database",
   webApi: "terminal",
   contenteditableApi: "cursor",
   richTextApi: "terminal",
@@ -101,6 +111,22 @@ export function DocsOverviewRoute() {
   return <DocsRoute pageId="overview" />;
 }
 
+export function FoundationRoute() {
+  return <DocsRoute pageId="foundation" />;
+}
+
+export function HowWeBuildRoute() {
+  return <DocsRoute pageId="howWeBuild" />;
+}
+
+export function ApplicationsRoute() {
+  return <DocsRoute pageId="applications" />;
+}
+
+export function DocumentTypesDocsRoute() {
+  return <DocsRoute pageId="documentTypes" />;
+}
+
 export function AdapterDocsRoute() {
   return <DocsRoute pageId="adapters" />;
 }
@@ -119,6 +145,10 @@ export function AdapterInteractionDocsRoute() {
 
 export function AdapterClipboardDocsRoute() {
   return <DocsRoute pageId="adapterClipboard" />;
+}
+
+export function AdapterVirtualSelectionDocsRoute() {
+  return <DocsRoute pageId="adapterVirtualSelection" />;
 }
 
 export function AdapterContenteditableDocsRoute() {
@@ -179,51 +209,11 @@ export function ReactEditingDocsRoute() {
 
 export function DocsRoute({ pageId }: { readonly pageId: DocPageId }) {
   const page = docPages[pageId];
-  const headings = useMemo(
-    () => markdownHeadings(page.source).filter((heading) => heading.level === 2),
-    [page.source],
-  );
-
   return (
-    <PageFrame>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_11rem]">
-        <div className="min-w-0" data-doc-content>
-          <div className="mx-auto max-w-3xl">
-            <PageHeader title={page.heading ?? page.label} illustration={docIllustrations[pageId]} />
-            <nav aria-label="Documentation sections" className={classes("mb-5 overflow-x-auto lg:hidden", ui.text.meta)}>
-              <div className="flex gap-1 whitespace-nowrap">
-                {headings.map((heading) => (
-                  <ActionLink
-                    key={`${heading.id}-${heading.text}`}
-                    href={`#${heading.id}`}
-                    className={classes("px-2 py-1 no-underline", ui.text.meta)}
-                  >
-                    {heading.text}
-                  </ActionLink>
-                ))}
-              </div>
-            </nav>
-            <MarkdownViewer source={page.source} hideTitle />
-          </div>
-        </div>
-
-        <aside className={classes("hidden self-start lg:sticky lg:top-4 lg:block", ui.text.meta)}>
-          <nav aria-label="On this page">
-            <div className={classes("mb-2", ui.text.heading)}>On this page</div>
-            <div className="grid">
-              {headings.map((heading) => (
-                <ActionLink
-                  key={`${heading.id}-${heading.text}`}
-                  href={`#${heading.id}`}
-                  className={classes("px-3 py-1 no-underline", ui.surface.navigationRule, ui.text.meta)}
-                >
-                  {heading.text}
-                </ActionLink>
-              ))}
-            </div>
-          </nav>
-        </aside>
-      </div>
-    </PageFrame>
+    <DocumentationPage
+      title={page.heading ?? page.label}
+      source={page.source}
+      illustration={docIllustrations[pageId]}
+    />
   );
 }

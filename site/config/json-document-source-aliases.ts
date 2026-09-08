@@ -8,12 +8,20 @@ export interface SourceAlias {
 export function jsonDocumentSourceAliases(): SourceAlias[] {
   return [
     {
+      find: "@interactive-os/json-document-a2ui",
+      replacement: sourceFile("packages/json-document-a2ui/src/index.ts"),
+    },
+    {
       find: "@interactive-os/json-document",
       replacement: sourceFile("packages/json-document/src/application/document/index.ts"),
     },
     {
       find: "@interactive-os/json-document-editing",
       replacement: sourceFile("packages/json-document-editing/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-calendar",
+      replacement: sourceFile("packages/json-document-calendar/src/index.ts"),
     },
     {
       find: "@interactive-os/json-document-selection",
@@ -36,8 +44,24 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
       replacement: sourceFile("packages/json-document-affordance/src/index.ts"),
     },
     {
+      find: "@interactive-os/json-document-ui-primitives-react/content-interaction.css",
+      replacement: sourceFile("packages/json-document-ui-primitives-react/src/content-interaction.css"),
+    },
+    {
       find: "@interactive-os/json-document-ui-primitives-react",
       replacement: sourceFile("packages/json-document-ui-primitives-react/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-animation-react/styles.css",
+      replacement: sourceFile("packages/json-document-animation-react/styles.css"),
+    },
+    {
+      find: "@interactive-os/json-document-animation-react",
+      replacement: sourceFile("packages/json-document-animation-react/src/index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-markdown-react",
+      replacement: sourceFile("packages/json-document-markdown-react/src/index.ts"),
     },
     {
       find: "@interactive-os/json-document-zod",
@@ -74,6 +98,10 @@ export function jsonDocumentSourceAliases(): SourceAlias[] {
     {
       find: "@interactive-os/json-document-collaboration/text",
       replacement: sourceFile("packages/json-document-collaboration/src/text-index.ts"),
+    },
+    {
+      find: "@interactive-os/json-document-collaboration/editing",
+      replacement: sourceFile("packages/json-document-collaboration/src/editing-index.ts"),
     },
     {
       find: "@interactive-os/json-document-collaboration",

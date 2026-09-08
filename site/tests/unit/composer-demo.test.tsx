@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { ComposerDemoRoute } from "../../src/routes/composer-demo/ComposerDemoRoute";
-import composerDemoSource from "../../src/routes/composer-demo/ComposerDemoRoute.tsx?raw";
+import composerDemoSource from "../../src/shared/composer/ComposerDemo.tsx?raw";
 import composerCommandsSource from "../../../packages/json-document-composer/src/commands.ts?raw";
 import composerSchemaSource from "../../../packages/json-document-composer/src/schema.ts?raw";
 import composerReferenceAtomSource from "../../../packages/json-document-composer-react/src/reference-atom.tsx?raw";

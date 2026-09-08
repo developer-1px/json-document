@@ -9,7 +9,7 @@ Rich Text domain과 editing 계약의 public entrypoint입니다. 아래 항목�
 ## `appliedOperationsFor`
 
 ```ts
-appliedOperationsFor(value: object): ReadonlyArray<{ readonly op: string; readonly path: string; }> | null
+appliedOperationsFor(value: object): ReadonlyArray<{ readonly op: string; readonly path: string; readonly from?: string; }> | null
 ```
 ## `createRichTextBlockFixture`
 
@@ -188,7 +188,7 @@ type RichTextEditorCreationResult =
 ## `RichTextEditorOptions`
 
 ```ts
-interface RichTextEditorOptions {
+interface RichTextEditorOptions extends EditingHistoryOptions {
   readonly document: JSONDocument;
   readonly pointer?: Pointer;
   readonly selection?: RichTextSelection;
@@ -395,6 +395,11 @@ interface RichTextParagraph extends RichTextNodeValue {
   readonly type: "paragraph";
   readonly content: ReadonlyArray<RichTextInlineNode>;
 }
+```
+## `richTextPlainText`
+
+```ts
+richTextPlainText(nodes: ReadonlyArray<RichTextNode>): string
 ```
 ## `RichTextPlainText`
 

@@ -5,6 +5,7 @@ import {
   useState,
   type CSSProperties,
   type KeyboardEvent,
+  type PointerEvent,
   type ReactNode,
 } from "react";
 import {
@@ -14,6 +15,7 @@ import {
   gridPointFromKey,
   gridPointKey,
   type DatabaseDocument,
+  type DatabaseClipboard,
   type DatabaseEditor,
   type DatabaseFilter,
   type DatabaseProperty,
@@ -26,11 +28,16 @@ import {
 } from "@interactive-os/json-document-editing";
 import { useEditing } from "@interactive-os/json-document-react";
 import {
+  createWebClipboardSurface,
   createWebKeyboardAdapter,
+  databaseClipboardCodec,
   findWebGridCell,
+  type WebClipboardRepresentation,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import { databaseDocumentFromZod } from "@interactive-os/json-document-zod";
+import { Check, Command, GridCell, Toolbar, useInteractionHandle } from "@interactive-os/json-document-ui-primitives-react";
+import type { InteractionHandleEvent } from "@interactive-os/json-document-affordance";
 import type { ZodType } from "zod/v4";
 import type { JSONValue } from "@interactive-os/json-document";
 import { ArrowDown, ArrowUp, Columns3, Minus, Plus, Redo2, Undo2, X } from "lucide-react";
@@ -263,7 +270,6 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
   const [editingInitialValue, setEditingInitialValue] = useState<string>();
   const [headerMenu, setHeaderMenu] = useState<{ readonly propertyId: string; readonly x: number; readonly y: number } | null>(null);
   const [draggedPropertyId, setDraggedPropertyId] = useState<string | null>(null);
-  const resize = useRef<{ readonly propertyId: string; readonly startX: number; readonly startWidth: number } | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const nextRecord = useRef(1);
   const snapshot = useEditingSnapshot(editor);
@@ -428,6 +434,28 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
     result: lastResult,
     nativeTextLease,
   };
+  const clipboardRepresentations: ReadonlyArray<WebClipboardRepresentation<DatabaseClipboard>> = [
+    databaseClipboardCodec,
+    {
+      mimeType: "text/plain",
+      encode: (clipboard) => clipboard.text,
+      decode: (text) => databaseClipboardFromText(text, document, topology, snapshot.selection.focus),
+    },
+  ];
+  const clipboardSurface = createWebClipboardSurface({
+    codec: databaseClipboardCodec,
+    representations: clipboardRepresentations,
+    read: () => editor.copy(topology),
+    paste: (clipboard) => editor.dispatch({ type: "clipboard.paste", clipboard, topology }),
+    onResult(result) {
+      if (!result.ok) {
+        if (result.code === "editing.rejected") announce(result.reason ?? result.code);
+        return;
+      }
+      if (result.operation === "copy") announce("Selection copied");
+      if (result.operation === "paste") emit("cell.commit", "Selection pasted");
+    },
+  });
 
   return (
     <div
@@ -437,13 +465,13 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
       data-readonly={props.readOnly ? "true" : "false"}
       data-database-table-surface=""
     >
-      <div className="jd-database__toolbar" role="toolbar" aria-label="Database actions">
-        {props.features.create && !props.readOnly ? <button type="button" data-kind="primary" aria-label={props.labels.newRecord} title={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></button> : null}
-        {props.features.delete && !props.readOnly ? <button type="button" data-kind="danger" aria-label={props.labels.deleteRecord} title={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></button> : null}
+      <Toolbar className="jd-database__toolbar" label="Database actions">
+        {props.features.create && !props.readOnly ? <Command type="button" data-kind="primary" label={props.labels.newRecord} onClick={addRecord}><Plus aria-hidden="true" size={16} /></Command> : null}
+        {props.features.delete && !props.readOnly ? <Command type="button" data-kind="danger" label={props.labels.deleteRecord} onClick={deleteSelected}><Minus aria-hidden="true" size={16} /></Command> : null}
         {props.features.history && !props.readOnly ? (
           <>
-            <button type="button" aria-label={props.labels.undo} title={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><Undo2 aria-hidden="true" size={16} /></button>
-            <button type="button" aria-label={props.labels.redo} title={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><Redo2 aria-hidden="true" size={16} /></button>
+            <Command type="button" label={props.labels.undo} disabled={!snapshot.canUndo} onClick={() => history("undo")}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command type="button" label={props.labels.redo} disabled={!snapshot.canRedo} onClick={() => history("redo")}><Redo2 aria-hidden="true" size={16} /></Command>
           </>
         ) : null}
         {props.features.filter ? (
@@ -462,11 +490,11 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
             <div className="jd-database__column-menu">
               {document.schema.properties.map((property) => (
                 <label key={property.id}>
-                  <input
-                    type="checkbox"
+                  <Check
+                    label={property.name}
                     checked={view.propertyVisibility[property.id] !== false}
-                    onChange={(event) => configure({
-                      propertyVisibility: { ...view.propertyVisibility, [property.id]: event.currentTarget.checked },
+                    onCheckedChange={(checked) => configure({
+                      propertyVisibility: { ...view.propertyVisibility, [property.id]: checked },
                     })}
                   />
                   {property.name}
@@ -478,30 +506,15 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
         {props.toolbar}
         {props.renderToolbar?.(context)}
         {announcement ? <output className="jd-database__announcement" aria-live="polite">{announcement}</output> : null}
-      </div>
+      </Toolbar>
 
       <div
         className="jd-database__viewport"
         aria-label="Database editor"
         tabIndex={0}
         onKeyDown={keyDown}
-        onCopy={(event) => {
-          const clipboard = editor.copy(topology);
-          if (clipboard === null) return;
-          event.preventDefault();
-          event.clipboardData.setData(clipboard.type, JSON.stringify(clipboard));
-          event.clipboardData.setData("text/plain", clipboard.text);
-          announce("Selection copied");
-        }}
-        onPaste={(event) => {
-          if (props.readOnly) return;
-          const clipboard = clipboardFromData(event.clipboardData, document, topology, snapshot.selection.focus);
-          if (clipboard === null) return;
-          event.preventDefault();
-          const result = editor.dispatch({ type: "clipboard.paste", clipboard, topology });
-          if (result.ok) emit("cell.commit", "Selection pasted");
-          else announce(result.code);
-        }}
+        onCopy={clipboardSurface.onCopy}
+        onPaste={props.readOnly ? undefined : clipboardSurface.onPaste}
       >
         <table ref={tableRef} role="grid" aria-label={props.labels.ariaLabel} aria-multiselectable="true">
           <thead>
@@ -533,41 +546,15 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   style={{ ...columnStyle(property.id, properties, view.propertyWidths, props.presentation?.propertyPinned), position: "relative" }}
                   data-pinned={props.presentation?.propertyPinned?.[property.id]}
                 >
-                  <button type="button" onClick={() => configure({ sort: nextDatabasePropertySort(view.sort, property.id) })}>
+                  <Command type="button" onClick={() => configure({ sort: nextDatabasePropertySort(view.sort, property.id) })}>
                     <span>{property.name}</span>
                     <small>{property.type}{sortMark(view.sort, property.id)}</small>
-                  </button>
-                  <span
-                    role="separator"
-                    aria-label={`${property.name} column width`}
-                    data-resize-edge="e"
-                    data-property-id={property.id}
-                    style={{ position: "absolute", insetBlock: 0, insetInlineEnd: 0, width: 6, cursor: "col-resize" }}
-                    onMouseDown={(event) => {
-                      event.preventDefault();
-                      const startX = event.clientX;
-                      const startWidth = view.propertyWidths[property.id] ?? 160;
-                      const finish = (up: MouseEvent) => {
-                        window.removeEventListener("mouseup", finish);
-                        configure({ propertyWidths: { ...view.propertyWidths, [property.id]: Math.max(88, startWidth + up.clientX - startX) } });
-                      };
-                      window.addEventListener("mouseup", finish);
-                    }}
-                    onPointerDown={(event) => {
-                      event.currentTarget.setPointerCapture(event.pointerId);
-                      resize.current = { propertyId: property.id, startX: event.clientX, startWidth: view.propertyWidths[property.id] ?? 160 };
-                    }}
-                    onPointerMove={(event) => {
-                      if (resize.current?.propertyId !== property.id) return;
-                      event.currentTarget.style.left = `${event.clientX - resize.current.startX}px`;
-                    }}
-                    onPointerUp={(event) => {
-                      const active = resize.current;
-                      resize.current = null;
-                      event.currentTarget.style.left = "";
-                      if (!active) return;
-                      configure({ propertyWidths: { ...view.propertyWidths, [property.id]: Math.max(88, active.startWidth + event.clientX - active.startX) } });
-                    }}
+                  </Command>
+                  <DatabaseColumnResizeHandle
+                    label={`${property.name} column width`}
+                    propertyId={property.id}
+                    width={view.propertyWidths[property.id] ?? 160}
+                    onCommit={(width) => configure({ propertyWidths: { ...view.propertyWidths, [property.id]: width } })}
                   />
                 </th>
               ))}
@@ -588,12 +575,11 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                   const hostRecord = hostRecordFor<Row>(record);
                   const custom = props.renderCell?.[property.id];
                   return (
-                    <td
+                    <GridCell
                       key={property.id}
-                      role="gridcell"
+                      selected={selected}
+                      focus={item.getIsFocus()}
                       tabIndex={item.getIsFocus() ? 0 : -1}
-                      aria-selected={selected}
-                      data-selected={selected ? "true" : "false"}
                       {...webGridCellAddressProps(point)}
                       data-record-id={record.id}
                       data-property-id={property.id}
@@ -633,7 +619,7 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
                           }}
                         />
                       )}
-                    </td>
+                    </GridCell>
                   );
                 })}
                 {hiddenProperties.map((property) => <td key={property.id} />)}
@@ -647,14 +633,45 @@ function DatabaseTableSurface<Row extends Record<string, unknown>>(props: Databa
           const property = document.schema.properties.find((candidate) => candidate.id === headerMenu.propertyId);
           if (!property) return null;
           return <div role="menu" aria-label={`${property.name} property`} className="jd-database__column-menu" style={{ position: "fixed", left: headerMenu.x, top: headerMenu.y }}>
-            <button type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...view.propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</button>
-            {filterItems(property).map((item) => <button key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</button>)}
-            {view.filter?.propertyId === property.id ? <button type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</button> : null}
+            <Command type="button" role="menuitem" onClick={() => { configure({ propertyVisibility: { ...view.propertyVisibility, [property.id]: false } }); setHeaderMenu(null); }}>Hide</Command>
+            {filterItems(property).map((item) => <Command key={String(item.value)} type="button" role="menuitem" onClick={() => { configure({ filter: { propertyId: property.id, operator: "equals", value: item.value } }); setHeaderMenu(null); }}>Filter {item.label}</Command>)}
+            {view.filter?.propertyId === property.id ? <Command type="button" role="menuitem" onClick={() => { configure({ filter: null }); setHeaderMenu(null); }}>Clear filter</Command> : null}
           </div>;
         })() : null}
       </div>
       {props.renderInspector?.(context)}
     </div>
+  );
+}
+
+function DatabaseColumnResizeHandle(props: {
+  readonly label: string;
+  readonly propertyId: string;
+  readonly width: number;
+  readonly onCommit: (width: number) => void;
+}) {
+  const binding = useInteractionHandle<HTMLSpanElement>({
+    descriptor: { kind: "resize", edge: "e", cursor: { idle: "col-resize" } },
+    onHandle(interaction: InteractionHandleEvent, event: PointerEvent<HTMLSpanElement>) {
+      if (interaction.phase === "preview") {
+        event.currentTarget.style.transform = `translateX(${interaction.delta.dx}px)`;
+      } else if (interaction.phase === "commit") {
+        event.currentTarget.style.transform = "";
+        props.onCommit(Math.max(88, props.width + interaction.delta.dx));
+      } else if (interaction.phase === "cancel") {
+        event.currentTarget.style.transform = "";
+      }
+    },
+  });
+  return (
+    <span
+      {...binding.handleProps}
+      role="separator"
+      aria-label={props.label}
+      data-resize-edge="e"
+      data-property-id={props.propertyId}
+      style={{ position: "absolute", insetBlock: 0, insetInlineEnd: 0, width: 6, cursor: binding.cursor }}
+    />
   );
 }
 
@@ -744,7 +761,7 @@ function FilterControl(props: {
         </select>
       </label>
       {property ? <FilterValue property={property} value={value} onChange={(next) => props.onFilter({ propertyId, operator: "equals", value: next })} /> : null}
-      {props.filter ? <button type="button" aria-label={props.labels.clearFilter} title={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></button> : null}
+      {props.filter ? <Command type="button" label={props.labels.clearFilter} onClick={() => props.onFilter(null)}><X aria-hidden="true" size={16} /></Command> : null}
     </div>
   );
 }
@@ -836,20 +853,12 @@ function databasePoint(point: { readonly rowId: string; readonly columnId: strin
   return { recordId: point.rowId, propertyId: point.columnId };
 }
 
-function clipboardFromData(
-  data: DataTransfer,
+function databaseClipboardFromText(
+  text: string,
   document: DatabaseDocument,
   topology: { readonly propertyIds: ReadonlyArray<string> },
   focus: { readonly propertyId: string } | null,
 ) {
-  const structured = data.getData("application/vnd.interactive-os.database+json");
-  if (structured) {
-    try {
-      const value = JSON.parse(structured);
-      if (value?.type === "application/vnd.interactive-os.database+json" && Array.isArray(value.cells)) return value;
-    } catch {}
-  }
-  const text = data.getData("text/plain");
   if (!text || focus === null) return null;
   const start = topology.propertyIds.indexOf(focus.propertyId);
   if (start < 0) return null;

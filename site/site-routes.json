@@ -7,7 +7,7 @@
   },
   {
     "path": "/viewer",
-    "label": "MD · PPT · Sheet",
+    "label": "Document · Presentation · Spreadsheet",
     "title": "Artifact - json-document",
     "heading": "Artifact",
     "description": "MD·PPT·Sheet artifact가 한 host에 나타나고 서로 다른 Hands를 얻는 미래의 mock입니다.",
@@ -21,6 +21,15 @@
     "heading": "왜 json-document인가",
     "description": "문서·표·보드가 같은 JSON 계약을 쓰고, 협업과 장르의 손과 붙이는 층을 같은 커널 위에 올리는 이유를 설명합니다.",
     "language": "ko",
+    "navigationGroup": "Introduction"
+  },
+  {
+    "path": "/docs/foundation",
+    "label": "Overview",
+    "title": "Foundation - json-document",
+    "heading": "Foundation",
+    "description": "JSON Document, Document Types, Editing과 Collaboration이 공유하는 기반 계약을 설명합니다.",
+    "language": "ko",
     "navigationGroup": "JSON Document"
   },
   {
@@ -29,7 +38,124 @@
     "title": "Concept Map - json-document",
     "description": "JSON Document에서 Artifact까지 책임이 쌓이는 순서와 각 계층의 경계를 설명합니다.",
     "language": "ko",
-    "navigationGroup": "JSON Document"
+    "navigationGroup": "Introduction"
+  },
+  {
+    "path": "/docs/how-we-build",
+    "label": "How We Build",
+    "title": "How We Build - json-document",
+    "heading": "제품에서 정본 모듈을 발견하는 방법",
+    "description": "Application을 먼저 만들고 실제 제품 책임을 canonical module로 추출한 뒤 제품이 다시 소비하는 개발 순환을 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Introduction"
+  },
+  {
+    "path": "/applications",
+    "label": "Overview",
+    "title": "Applications - json-document",
+    "heading": "Applications",
+    "description": "Artifact와 Hands를 실제 제품 경험으로 조합하고 재사용 책임을 발견하는 Application 목록입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications"
+  },
+  {
+    "path": "/applications/calendar",
+    "label": "Calendar",
+    "title": "Calendar Application - json-document",
+    "description": "Calendar Document Type, Hand, UI와 App-owned policy를 조합한 Calendar Application입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "app"
+  },
+  {
+    "path": "/applications/ai-agent",
+    "label": "AI Agent",
+    "title": "AI Agent Application - json-document",
+    "description": "Composer, Markdown, AG-UI와 A2UI를 session runtime에 조합한 AI Agent Application입니다.",
+    "language": "ko",
+    "navigationGroup": "Applications",
+    "chrome": "app"
+  },
+  {
+    "path": "/docs/document-types",
+    "label": "Overview · TBD",
+    "title": "Document Types · TBD - json-document",
+    "heading": "Document Types · TBD",
+    "description": "JSON Document의 의미 모델을 소유하는 Document Type 책임과 아직 확정하지 않은 후보를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/rich-text",
+    "label": "Rich Text · TBD",
+    "title": "Rich Text Document Type · TBD - json-document",
+    "description": "Rich Text의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/order",
+    "label": "Order · TBD",
+    "title": "Order Document Type · TBD - json-document",
+    "description": "Order의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/object",
+    "label": "Object · TBD",
+    "title": "Object Document Type · TBD - json-document",
+    "description": "Object의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/tree",
+    "label": "Tree · TBD",
+    "title": "Tree Document Type · TBD - json-document",
+    "description": "Tree의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/database",
+    "label": "Database · TBD",
+    "title": "Database Document Type · TBD - json-document",
+    "description": "Database의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/calendar",
+    "label": "Calendar · TBD",
+    "title": "Calendar Document Type · TBD - json-document",
+    "description": "Calendar의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/sheet",
+    "label": "Sheet · TBD",
+    "title": "Sheet Document Type · TBD - json-document",
+    "description": "Sheet의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/kanban",
+    "label": "Kanban · TBD",
+    "title": "Kanban Document Type · TBD - json-document",
+    "description": "Kanban의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
+  },
+  {
+    "path": "/docs/document-types/annotation",
+    "label": "Annotation · TBD",
+    "title": "Annotation Document Type · TBD - json-document",
+    "description": "Annotation의 Document Type 소유권을 확정하기 전 후보 상태와 필요한 증거를 정리합니다.",
+    "language": "ko",
+    "navigationGroup": "Document Types"
   },
   {
     "path": "/docs/api",
@@ -177,6 +303,22 @@
     "navigationGroup": "Connector"
   },
   {
+    "path": "/docs/api/a2ui",
+    "label": "API · A2UI",
+    "title": "A2UI API - json-document",
+    "description": "@interactive-os/json-document-a2ui의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
+    "path": "/docs/connector-a2ui",
+    "label": "A2UI",
+    "title": "A2UI Connector - json-document",
+    "description": "A2UI 메시지와 JSONL을 JSONDocument로 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Connector"
+  },
+  {
     "path": "/docs/api/zod",
     "label": "API · Zod",
     "title": "Zod API - json-document",
@@ -217,6 +359,44 @@
     "navigationGroup": "UI Primitives"
   },
   {
+    "path": "/docs/api/animation-react",
+    "label": "API · Animation",
+    "title": "Animation API - json-document",
+    "description": "@interactive-os/json-document-animation-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives"
+  },
+  {
+    "path": "/docs/api/markdown-react",
+    "label": "API · Markdown",
+    "title": "Markdown React API - json-document",
+    "description": "@interactive-os/json-document-markdown-react의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact",
+    "relatedDemoPath": "/demo/markdown",
+    "relatedDemoLabel": "Streaming Markdown"
+  },
+  {
+    "path": "/demo/markdown",
+    "label": "Streaming Markdown",
+    "title": "Streaming Markdown - json-document",
+    "heading": "Streaming Markdown",
+    "description": "불완전한 Markdown 스트림과 커스텀 component renderer를 정본 패키지로 검증합니다.",
+    "language": "ko",
+    "navigationGroup": "Artifact",
+    "parentPath": "/docs/api/markdown-react"
+  },
+  {
+    "path": "/demo/ui-primitives",
+    "label": "Design system",
+    "title": "Design system - json-document",
+    "heading": "Design system",
+    "description": "토큰, control, shell, overlay, date, surface, wait animation을 한 페이지에서 보여 줍니다.",
+    "language": "ko",
+    "parentPath": "/docs/ui-primitives",
+    "navigationGroup": "UI Primitives"
+  },
+  {
     "path": "/docs/api/database",
     "label": "API · Database",
     "title": "Database API - json-document",
@@ -229,6 +409,14 @@
     "label": "API · Annotation",
     "title": "Annotation API - json-document",
     "description": "@interactive-os/json-document-annotation의 전체 public API입니다.",
+    "language": "ko",
+    "navigationGroup": "Hands"
+  },
+  {
+    "path": "/docs/api/calendar",
+    "label": "API · Calendar",
+    "title": "Calendar API - json-document",
+    "description": "@interactive-os/json-document-calendar의 전체 public API입니다.",
     "language": "ko",
     "navigationGroup": "Hands"
   },
@@ -433,6 +621,15 @@
     "sidebar": false
   },
   {
+    "path": "/demo/viewport",
+    "label": "Viewport Position",
+    "title": "Viewport Position - json-document",
+    "description": "Position an exact object at a requested viewport offset while 87 production-captured stream chunks consume temporary trailing scroll range.",
+    "language": "ko",
+    "parentPath": "/editors",
+    "navigationGroup": "Hands"
+  },
+  {
     "path": "/docs/order",
     "label": "Order",
     "title": "Order - json-document",
@@ -520,6 +717,45 @@
     "sidebar": false
   },
   {
+    "path": "/demo/calendar",
+    "label": "Calendar legacy route",
+    "title": "Calendar legacy route - json-document",
+    "description": "Calendar Application의 이전 Demo 경로를 새 Application 경로로 연결합니다.",
+    "language": "ko",
+    "sidebar": false
+  },
+  {
+    "path": "/demo/date-controls",
+    "label": "Date controls",
+    "title": "Date controls - json-document",
+    "description": "HTML date, time, month, week, datetime-local fields with calendar and range pickers.",
+    "language": "ko",
+    "parentPath": "/docs/api/calendar",
+    "navigationGroup": "Hands",
+    "sidebar": false
+  },
+  {
+    "path": "/docs/animation",
+    "label": "Animation",
+    "title": "Animation - json-document",
+    "heading": "Animation",
+    "description": "생성 대기 구간의 시각 언어를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "UI Primitives",
+    "relatedDemoPath": "/demo/animation",
+    "relatedDemoLabel": "Animation"
+  },
+  {
+    "path": "/demo/animation",
+    "label": "Wait animations",
+    "title": "Wait animation visuals - json-document",
+    "description": "Shimmer, skeleton, caret, dots, orb, morse, and gradient sweep.",
+    "language": "ko",
+    "parentPath": "/docs/animation",
+    "navigationGroup": "UI Primitives",
+    "sidebar": false
+  },
+  {
     "path": "/docs/database",
     "label": "Database",
     "title": "Database - json-document",
@@ -553,6 +789,13 @@
     "title": "Agent Chat Composer - json-document",
     "description": "Cstar 디자인을 이식하고 canonical Rich Text, inline atom, 파일 context, history와 clipboard로 재구현한 Agent Chat Composer입니다.",
     "parentPath": "/docs/composer",
+    "sidebar": false
+  },
+  {
+    "path": "/artifact/llm-agent",
+    "label": "AI Agent legacy route",
+    "title": "AI Agent legacy route - json-document",
+    "description": "AI Agent Application의 이전 Artifact 경로를 새 Application 경로로 연결합니다.",
     "sidebar": false
   },
   {
@@ -627,6 +870,23 @@
     "navigationGroup": "Adapter"
   },
   {
+    "path": "/docs/adapter-virtual-selection",
+    "label": "Virtual Selection",
+    "title": "Virtual Selection Adapter - json-document",
+    "heading": "Virtual Selection Adapter",
+    "description": "부분 마운트된 DOM의 Native Selection과 전체 model-backed plain-text 복사를 연결합니다.",
+    "language": "ko",
+    "navigationGroup": "Adapter"
+  },
+  {
+    "path": "/affordances/handles",
+    "label": "Interaction Handles Live Demo",
+    "title": "Interaction Handles Live Demo - json-document",
+    "description": "DragHandle, ResizeHandle, ControlHandle의 정본 descriptor, cursor, lifecycle Usage입니다.",
+    "navigationGroup": "Affordance",
+    "sidebar": false
+  },
+  {
     "path": "/adapters/keyboard",
     "label": "Keyboard Live Demo",
     "title": "Keyboard Adapter Live Demo - json-document",
@@ -660,6 +920,18 @@
     "integration": {
       "kind": "adapter",
       "packageName": "@interactive-os/json-document-contenteditable"
+    }
+  },
+  {
+    "path": "/adapters/virtual-selection",
+    "label": "Virtual Selection adapter",
+    "title": "Virtual Selection Adapter Live Demo - json-document",
+    "description": "Official virtual selection adapter: a native Range represents mounted content while copy writes complete model text.",
+    "navigationGroup": "Adapter",
+    "sidebar": false,
+    "integration": {
+      "kind": "adapter",
+      "packageName": "@interactive-os/json-document-web"
     }
   },
   {
@@ -781,6 +1053,18 @@
     }
   },
   {
+    "path": "/connectors/a2ui",
+    "label": "A2UI Live Demo",
+    "title": "A2UI Connector Live Demo - json-document",
+    "description": "분할 A2UI JSONL을 canonical JSONDocument로 연결합니다.",
+    "navigationGroup": "Connector",
+    "sidebar": false,
+    "integration": {
+      "kind": "connector",
+      "packageName": "@interactive-os/json-document-a2ui"
+    }
+  },
+  {
     "path": "/connectors/zod",
     "label": "Zod Live Demo",
     "title": "Zod Connector Live Demo - json-document",
@@ -820,6 +1104,8 @@
     "description": "표준화된 Hands 행동과 디자인 시스템을 갖춘 minimalist React UI를 설명합니다.",
     "language": "ko",
     "navigationGroup": "UI Primitives",
+    "relatedDemoPath": "/demo/ui-primitives",
+    "relatedDemoLabel": "Design system",
     "sidebar": false
   },
   {
@@ -971,6 +1257,18 @@
     "parentPath": "/docs/affordance"
   },
   {
+    "path": "/docs/affordance/contextual",
+    "label": "Contextual",
+    "title": "Contextual affordance - json-document",
+    "heading": "Contextual affordance",
+    "description": "콘텐츠 상태에 따라 필요한 shy control만 가까이 드러내는 정본 계약입니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "relatedDemoPath": "/demo/calendar",
+    "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
     "path": "/docs/affordance/double-click",
     "label": "Double-click",
     "title": "Double-click - json-document",
@@ -1048,6 +1346,18 @@
     "navigationGroup": "Affordance",
     "relatedDemoPath": "/demo/canvas",
     "relatedDemoLabel": "증명 열기",
+    "parentPath": "/docs/affordance"
+  },
+  {
+    "path": "/docs/affordance/handles",
+    "label": "Interaction Handles",
+    "title": "Interaction Handles - json-document",
+    "heading": "Interaction Handles",
+    "description": "Drag·Resize·Control 손잡이가 하나의 descriptor, cursor, pointer lifecycle을 공유하는 생태계 경계를 설명합니다.",
+    "language": "ko",
+    "navigationGroup": "Affordance",
+    "relatedDemoPath": "/affordances/handles",
+    "relatedDemoLabel": "Usage 열기",
     "parentPath": "/docs/affordance"
   },
   {

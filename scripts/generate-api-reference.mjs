@@ -8,7 +8,7 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const check = process.argv.includes("--check");
 const configPath = join(root, "tsconfig.build.json");
 const parsed = ts.parseJsonConfigFileContent(ts.readConfigFile(configPath, ts.sys.readFile).config, ts.sys, root);
-const entrypoints = apiReferencePackages.map(({ entrypoint }) => join(root, entrypoint));
+const entrypoints = apiReferencePackages.flatMap(({ entrypoint, subpaths }) => [entrypoint, ...subpaths.map((subpath) => subpath.entrypoint)]).map((entrypoint) => join(root, entrypoint));
 const sourcePaths = Object.fromEntries(apiReferencePackages.map(({ packageName, entrypoint }) => [packageName, [entrypoint]]));
 const program = ts.createProgram([...new Set([...parsed.fileNames, ...entrypoints])], {
   ...parsed.options,
@@ -74,6 +74,18 @@ for (const descriptor of apiReferencePackages) {
     display(symbol, entry),
     "```",
   ].join("\n"));
+  for (const subpath of descriptor.subpaths) {
+    const subpathEntry = program.getSourceFile(join(root, subpath.entrypoint));
+    if (!subpathEntry) throw new Error(`public entrypoint를 찾을 수 없습니다: ${subpath.entrypoint}`);
+    const subpathExports = checker.getExportsOfModule(checker.getSymbolAtLocation(subpathEntry))
+      .filter((symbol) => !exports.some((rootExport) => rootExport === symbol))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    exportCount += subpathExports.length;
+    sections.push(`## \`${subpath.packageName}\`\n\n아래 API는 package root가 아닌 이 subpath에서 import합니다.`);
+    sections.push(...subpathExports.map((symbol) => [
+      `### \`${symbol.name}\``, "", "```ts", display(symbol, subpathEntry), "```",
+    ].join("\n")));
+  }
   const output = [
     `# ${descriptor.packageName} API`,
     "",

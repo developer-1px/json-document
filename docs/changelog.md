@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Added canonical wait-animation visuals: mono and spectrum shimmer text,
+  wave dots and Claude-style wave grid, streaming caret, pulsing markers,
+  morse beats, loading bar, progress ring, staggered skeleton lines, and
+  gradient / beam / hue outlines, and large form masses (orb, blob, aurora,
+  ring field, cloud).
+- Tightened wait visuals against live catalog source: dual-layer shimmer
+  text, skewed placeholder sheen, ellipse wave grid, offset-path border
+  beam, and radial shine rim.
+- Added orbit dots and equalizer bars as wait visuals.
+- Added dual counter-rotate rings as a wait visual.
+- Added an infinity stroke as a wait visual.
+- Added a morph square-to-circle spinner as a wait visual.
+- Added a comet arc with a leading-edge tip as a wait visual.
+- Added helix paired dots as a wait visual.
+- Added a particle burst from a core as a wait visual.
+- Added dual-axis helix rings as a wait visual.
+- Added fading radial spokes as a wait visual.
+- Added a radar sweep scan as a wait visual.
+- Gave Calendar app chrome: a collapsible site rail, no docs header or demo
+  workbench, and a full-height product surface.
+- Added HTML date, time, datetime-local, month, and week controls plus APG
+  calendar, range calendar, date picker, and date-range picker primitives.
+- Added Calendar Hands for interval events across day, week, month, and year
+  views. Timed span create/move/resize, an all-day band, and month press-release
+  map through `interpretCalendarTimeGridPointer`,
+  `interpretCalendarAllDayPointer`, and `interpretCalendarMonthPointer`.
 - Added an Agent Chat Composer Hand based on the Cstar design source, with
   canonical Rich Text instruction, mention and skill atoms, attachment context,
   native clipboard, IME, and local history.

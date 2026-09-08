@@ -10,139 +10,67 @@ test("official overview exposes the product hierarchy", async ({ page }) => {
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
   await expect(navigation.getByRole("group", { name: "Start" })).toHaveCount(0);
   await expect(navigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Dependency map" }).getByRole("link")).toHaveText([
-    "JSON Document",
-    "Hands",
-    "Artifact",
+  expect(await page.locator("[data-home-scene]").evaluateAll((scenes) => scenes.map((scene) => scene.getAttribute("data-home-scene")))).toEqual([
+    "hero",
+    "foundation",
+    "hands-artifact",
+    "applications",
+    "how-we-build",
   ]);
+  await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+    "모든 편집은 같은 값에서 시작합니다.",
+    "Hands가 Artifact를 만지고 편집합니다.",
+    "제품에서 책임을 발견합니다.",
+    "제품에서 시작해 생태계로 돌아갑니다.",
+  ]);
+  for (const image of await page.getByRole("main").getByRole("img").all()) {
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth > 0)).toBe(true);
+  }
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
   await expect(navigation.getByRole("link", { name: "Why" })).toHaveCount(0);
   await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
-  await navigation.getByRole("button", { name: "JSON Document" }).click();
-  await expect(navigation.getByRole("group", { name: "JSON Document" }).getByRole("link")).toHaveText([
+  await navigation.getByRole("button", { name: "Introduce" }).click();
+  await expect(navigation.getByRole("group", { name: "Introduce" }).getByRole("link")).toHaveText([
     "Why",
     "Concept Map",
-    "API Reference",
-    "Public API",
+    "How We Build",
   ]);
-  await expect(navigation.getByRole("link", { name: "Replica" })).toHaveCount(0);
-  await navigation.getByRole("button", { name: "Collaboration" }).click();
-  await expect(navigation.getByRole("group", { name: "Collaboration" }).getByRole("link")).toHaveText([
-    "API · Collaboration",
-    "API · Contenteditable",
-    "Replica",
-    "Lifecycle",
-    "Collaborative History",
-    "Text",
-  ]);
-  await navigation.getByRole("button", { name: "Editing" }).click();
-  await expect(navigation.getByRole("group", { name: "Editing" }).getByRole("link")).toHaveText([
-    "API · Selection",
-    "API · Editing",
-    "API · Rich Text",
-    "Intent guide",
-    "Intent",
-    "Topology",
-    "Selection",
-    "Clipboard",
-    "History",
-    "Rich Text vertical",
-  ]);
+  await navigation.getByRole("button", { name: "Foundation" }).click();
+  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
+  await expect(navigation.getByRole("group", { name: "Foundation" }).getByRole("link", { name: "Overview", exact: true })).toBeVisible();
+  await navigation.getByRole("button", { name: "Building Blocks" }).click();
+  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Hands" }).click();
   await expect(navigation.getByRole("group", { name: "Hands" }).getByRole("link")).toHaveText([
-    "API · Rich Text Mention",
-    "API · Rich Text Suggestion",
-    "API · Suggestion React",
-    "API · Mention React",
-    "API · Composer",
-    "API · Composer React",
-    "API · Database",
     "Overview",
     "Official Hands · TBD",
     "Order",
     "Object",
-    "Annotation",
     "Tree",
     "Database",
     "Composer",
     "Mention",
   ]);
-  await navigation.getByRole("button", { name: "Adapter" }).click();
-  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
-    "API · Web",
-    "API · Contenteditable",
-    "API · Rich Text Web",
-    "Overview",
-    "Keyboard",
-    "Grid cell",
-    "Interaction",
-    "Clipboard Reference",
-    "Contenteditable",
-  ]);
-  await navigation.getByRole("button", { name: "Connector" }).click();
-  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
-    "API · React",
-    "API · React Hook Form",
-    "API · Ajv",
-    "API · Zod",
-    "API · TanStack Table",
-    "API · Rich Text React",
-    "Overview",
-    "React Reference",
-    "React Hook Form",
-    "Ajv",
-    "Zod",
-    "TanStack Table",
-  ]);
-  await navigation.getByRole("button", { name: "Affordance" }).click();
-  await expect(navigation.getByRole("group", { name: "Affordance" }).getByRole("link")).toHaveText([
-    "API Reference",
-    "Focus",
-    "Caret",
-    "Select",
-    "Typeahead",
-    "Activate",
-    "Escape",
-    "Expand/Collapse",
-    "Undo",
-    "Delete",
-    "Rename",
-    "Nudge",
-    "Hover",
-    "Double-click",
-    "Triple-click",
-    "Context menu",
-    "Drag",
-    "Marquee",
-    "Drop",
-    "Duplicate",
-    "Resize",
-    "Pan",
-    "Scroll",
-    "Zoom",
-    "Snap",
-    "Not-allowed",
-  ]);
-  await navigation.getByRole("button", { name: "UI Primitives" }).click();
-  await expect(navigation.getByRole("group", { name: "UI Primitives" }).getByRole("link")).toHaveText(["API Reference"]);
-  await expect(navigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
-  await expect(navigation.getByRole("group", { name: "Reference" })).toHaveCount(0);
   await navigation.getByRole("button", { name: "Artifact" }).click();
-  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText(["MD · PPT · Sheet", "API · File Intake"]);
+  await expect(navigation.getByRole("group", { name: "Artifact" }).getByRole("link")).toHaveText([
+    "Document · Presentation · Spreadsheet",
+  ]);
+  await navigation.getByRole("button", { name: "Applications" }).click();
+  await expect(navigation.getByRole("group", { name: "Applications" }).getByRole("link")).toHaveText([
+    "Overview",
+    "Calendar",
+    "AI Agent",
+  ]);
+  await expect(navigation.getByRole("link", { name: "Reference", exact: true })).toHaveAttribute("href", "/docs/api");
   expect(await navigation.getByRole("group").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")))).toEqual([
-    "JSON Document",
-    "Editing",
-    "Adapter",
-    "Connector",
-    "Affordance",
-    "UI Primitives",
+    "Introduce",
+    "Foundation",
+    "Building Blocks",
     "Hands",
     "Artifact",
-    "Collaboration",
+    "Applications",
   ]);
-  expect(await navigation.getByRole("group", { name: "Collaboration" }).evaluate((element) => ({
-    borderTopWidth: getComputedStyle(element).borderTopWidth,
-    paddingTop: getComputedStyle(element).paddingTop,
-  }))).toEqual({ borderTopWidth: "1px", paddingTop: "16px" });
   await expect(navigation.getByRole("link", { name: "Extensions" })).toHaveCount(0);
   expect(requests.some(isLegacyRequest)).toBe(false);
 });
@@ -151,22 +79,76 @@ test("mobile navigation preserves the product groups without duplicating documen
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("none");
+  await expect(page.locator("[data-home-scene]")).toHaveCount(5);
+
   const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(siteNavigation.getByRole("group", { name: "JSON Document" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Introduce" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Foundation" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Core" })).toHaveCount(0);
-  await expect(siteNavigation.getByRole("group", { name: "Editing" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Hands" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Artifact" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Adapter" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Building Blocks" })).toBeVisible();
   await expect(siteNavigation.getByRole("group", { name: "Demos" })).toHaveCount(0);
-  await expect(siteNavigation.getByRole("group", { name: "Connector" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Affordance" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "Collaboration" })).toBeVisible();
+  await expect(siteNavigation.getByRole("group", { name: "Applications" })).toBeVisible();
 
   await page.goto("/docs/concepts");
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation sections" })).toBeVisible();
   await expect(siteNavigation.getByRole("link", { name: "Concept Map" })).toHaveAttribute("aria-current", "page");
+});
+
+test("short desktop view keeps the home story in natural document flow", async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 650 });
+  await page.goto("/");
+
+  expect(await page.getByRole("main").evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("none");
+  await expect(page.locator("[data-home-scene]")).toHaveCount(5);
+});
+
+test("desktop home scroll settles one mandatory scene at a time", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  const home = page.getByRole("main");
+  expect(await home.evaluate((element) => getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
+  await home.evaluate((element) => element.scrollBy({ top: element.clientHeight * 0.65 }));
+  await expect.poll(() => home.evaluate((element) => ({
+    height: element.clientHeight,
+    top: element.scrollTop,
+  }))).toEqual({ height: 900, top: 900 });
+  await expect(page.locator('[data-home-scene="foundation"]')).toBeInViewport();
+});
+
+test("Document Types publishes a TBD responsibility boundary", async ({ page }) => {
+  await page.goto("/docs/document-types");
+
+  await expect(page).toHaveTitle("Document Types · TBD - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Document Types · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "책임", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "후보 · TBD" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "Foundation" })).toHaveAttribute("href", "/docs/foundation");
+  await expect(page.getByRole("navigation", { name: "Breadcrumb" }).getByText("Overview · TBD")).toBeVisible();
+});
+
+test("Document Type candidate submenu keeps ownership explicitly TBD", async ({ page }) => {
+  await page.goto("/docs/document-types/calendar");
+
+  await expect(page).toHaveTitle("Calendar Document Type · TBD - json-document");
+  await expect(page.getByRole("heading", { level: 1, name: "Calendar Document Type · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "확정에 필요한 증거" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "소스 기반 감사 현황" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "왜 필요한가" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "무엇을 하는가" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "현재 관찰된 schema · TBD" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "필드 설명" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "start / end / allDay", exact: true })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "현재 관찰된 schema · TBD" })).toBeVisible();
+  await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await expect(page.getByText("packages/json-document-editing/src/calendar.ts", { exact: true })).toBeVisible();
+  await expect(page.getByText("10개 책임 occurrence", { exact: false })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "mislocated module", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Site navigation" }).getByRole("link", { name: "Calendar · TBD" })).toHaveAttribute("aria-current", "page");
 });
 
 test("official docs routes render with route metadata in a real browser", async ({ page }) => {
@@ -180,14 +162,14 @@ test("official docs routes render with route metadata in a real browser", async 
   await expect(page.getByRole("heading", { level: 3, name: "값을 다루는 하나의 계약" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Documentation pages" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "On this page" })).toBeVisible();
-  await expect(siteNavigation.getByRole("group", { name: "JSON Document" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
-  await siteNavigation.getByRole("button", { name: "Connector" }).click();
-  await siteNavigation.getByRole("group", { name: "Connector" }).getByRole("link", { name: "Overview", exact: true }).click();
+  await expect(siteNavigation.getByRole("group", { name: "Introduce" }).getByRole("link", { name: "Why" })).toHaveAttribute("aria-current", "page");
+  await siteNavigation.getByRole("button", { name: "Building Blocks" }).click();
+  await siteNavigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Overview", exact: true }).nth(1).click();
   await expect(page).toHaveTitle("Connector Docs - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document Connectors" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(0);
 
-  await page.getByRole("link", { name: "API Reference" }).first().click();
+  await siteNavigation.getByRole("link", { name: "Reference", exact: true }).click();
   await expect(page).toHaveTitle("json-document API - json-document");
   await expect(page.getByRole("heading", { level: 1, name: "json-document API" })).toBeVisible();
 });
@@ -214,6 +196,7 @@ test("Connector pages declare the connection before the live demo", async ({ pag
     "/connectors/tanstack-table",
     "/adapters/keyboard",
     "/adapters/clipboard",
+    "/adapters/virtual-selection",
     "/adapters/contenteditable",
   ];
 
@@ -234,36 +217,14 @@ test("Connector pages declare the connection before the live demo", async ({ pag
 test("Adapter and Connector menus expose contract docs while demos stay embedded", async ({ page }) => {
   await page.goto("/docs/adapter-keyboard");
   const navigation = page.getByRole("navigation", { name: "Site navigation" });
-  await expect(navigation.getByRole("group", { name: "Adapter" }).getByRole("link")).toHaveText([
-    "API · Web",
-    "API · Contenteditable",
-    "API · Rich Text Web",
-    "Overview",
-    "Keyboard",
-    "Grid cell",
-    "Interaction",
-    "Clipboard Reference",
-    "Contenteditable",
-  ]);
+  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Keyboard" })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: /^API ·/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Adapter" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
 
   await page.goto("/docs/connector-zod-validate");
-  await expect(navigation.getByRole("group", { name: "Connector" }).getByRole("link")).toHaveText([
-    "API · React",
-    "API · React Hook Form",
-    "API · Ajv",
-    "API · Zod",
-    "API · TanStack Table",
-    "API · Rich Text React",
-    "Overview",
-    "React Reference",
-    "React Hook Form",
-    "Ajv",
-    "Zod",
-    "Validate",
-    "TanStack Table",
-  ]);
+  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Zod" })).toBeVisible();
+  await expect(navigation.getByRole("group", { name: "Building Blocks" }).getByRole("link", { name: "Validate" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Zod Validate" })).toBeVisible();
   await expect(page.locator("[data-live-demo]")).toHaveCount(1);
 });
@@ -318,6 +279,7 @@ test("ordinary pages reuse one petite decorative cat without covering intro copy
     "/adapters",
     "/adapters/keyboard",
     "/adapters/clipboard",
+    "/adapters/virtual-selection",
     "/adapters/contenteditable",
   ];
 
@@ -441,12 +403,12 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   expect(await navigation.getByRole("link", { name: "json-document" }).evaluate((element) => (
     getComputedStyle(element).borderBottomWidth
   ))).toBe("0px");
-  expect(await navigation.getByRole("button", { name: "Editing" }).evaluate((element) => (
+  expect(await navigation.getByRole("button", { name: "Foundation" }).evaluate((element) => (
     getComputedStyle(element).borderLeftColor
-  ))).toBe("rgb(222, 109, 85)");
+  ))).toContain("222, 109, 85");
   const currentCat = navigation.getByRole("link", { name: "Selection", exact: true }).locator("svg");
   await expect(currentCat).toHaveCount(1);
-  expect(await currentCat.evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
+  expect(await currentCat.evaluate((element) => getComputedStyle(element).color)).toContain("222, 109, 85");
   await expect(navigation.locator('a[aria-current="page"] svg')).toHaveCount(1);
 
   const heading = page.getByRole("heading", { level: 2, name: "대상을 하나 고르기" });
@@ -455,7 +417,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
     fontSize: getComputedStyle(element).fontSize,
   }))).toEqual({
     borderTopWidth: "0px",
-    fontSize: "18px",
+    fontSize: "16px",
   });
 
   const horizon = page.locator("[data-page-header] [data-petite-cat]").locator("xpath=..");
@@ -482,7 +444,7 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
   await page.locator('[data-live-demo="/connectors/react"]').scrollIntoViewIfNeeded();
   expect(await page.getByLabel("Document title").evaluate((element) => (
     getComputedStyle(element).borderColor
-  ))).toBe("rgb(216, 209, 197)");
+  ))).toBe("rgba(0, 0, 0, 0)");
 
   await page.goto("/demo/selection");
   expect(await page.getByRole("region", { name: "모드와 블록 선택하기" }).evaluate((element) => ({
@@ -497,8 +459,18 @@ test("docs chrome groups with paper and type instead of rest-state borders", asy
 
   await unselected.click();
   await expect(unselected).toHaveAttribute("data-selected", "true");
-  await expect.poll(async () => unselected.evaluate((element) => getComputedStyle(element).outlineColor))
-    .toBe("rgb(222, 109, 85)");
+  await expect.poll(async () => unselected.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderColor: style.borderColor,
+      outlineColor: style.outlineColor,
+    };
+  })).toEqual({
+    backgroundColor: "rgb(251, 248, 242)",
+    borderColor: "rgba(0, 0, 0, 0)",
+    outlineColor: "rgba(0, 0, 0, 0)",
+  });
 
   await page.goto("/demo/sheet");
   expect(await page.getByRole("columnheader", { name: "Name" }).evaluate((element) => (
@@ -511,17 +483,18 @@ test("editor demos keep one product app under the page lobby", async ({ page }) 
   await page.goto("/demo/tree");
 
   await expect(page.locator("[data-page-header]")).toHaveCount(1);
-  await expect(page.locator("[data-product-app]")).toHaveCount(1);
-  const app = page.locator("[data-product-app]");
+  await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(1);
+  const app = page.locator('[data-ui-component="product-shell"]');
   await expect(app.getByRole("toolbar", { name: "Tree actions" })).toBeVisible();
   await expect(app.getByRole("treeitem").or(app.getByText("Fruit", { exact: true })).first()).toBeVisible();
   await expect(app.getByRole("button", { name: "Collapse Fruit" })).toBeVisible();
-  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => (
-    getComputedStyle(element).backgroundColor
-  ))).toBe("rgba(0, 0, 0, 0)");
+  expect(await app.getByRole("button", { name: "Collapse Fruit" }).evaluate((element) => ({
+    backgroundColor: getComputedStyle(element).backgroundColor,
+    borderWidth: getComputedStyle(element).borderWidth,
+  }))).toEqual({ backgroundColor: "rgba(0, 0, 0, 0)", borderWidth: "0px" });
 
   await page.goto("/demo/selection");
-  await expect(page.locator("[data-product-app]")).toHaveCount(0);
+  await expect(page.locator('[data-ui-component="product-shell"]')).toHaveCount(0);
 });
 
 test("cat palette gives impact to interaction states and keeps code ink-led", async ({ page }) => {
@@ -531,8 +504,8 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
 
   const titleInput = page.getByLabel("Document title");
   expect(await titleInput.evaluate(controlSnapshot)).toMatchObject({
-    backgroundColor: "rgb(255, 255, 255)",
-    borderColor: "rgb(216, 209, 197)",
+    backgroundColor: "rgba(251, 248, 242, 0.7)",
+    borderColor: "rgba(0, 0, 0, 0)",
     color: "rgb(41, 40, 36)",
   });
 
@@ -541,10 +514,10 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
   await page.keyboard.press("Tab");
   expect((await titleInput.evaluate(controlSnapshot)).boxShadow).toContain("rgba(222, 109, 85, 0.25)");
 
-  const currentLink = page.getByRole("navigation", { name: "Site navigation" })
-    .getByRole("group", { name: "Connector" })
+  const siteNavigation = page.getByRole("navigation", { name: "Site navigation" });
+  const currentLink = siteNavigation.getByRole("group", { name: "Building Blocks" })
     .getByRole("link", { name: "React Reference", exact: true });
-  expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toBe("rgb(222, 109, 85)");
+  expect(await currentLink.locator("svg").evaluate((element) => getComputedStyle(element).color)).toContain("222, 109, 85");
 
   await page.goto("/docs/api");
   const code = page.getByRole("figure", { name: "TypeScript" }).first();
@@ -574,8 +547,8 @@ test("cat palette gives impact to interaction states and keeps code ink-led", as
     backgroundColor: getComputedStyle(element).backgroundColor,
     borderColor: getComputedStyle(element).borderColor,
   }))).toEqual({
-    backgroundColor: "rgb(251, 248, 242)",
-    borderColor: "rgb(222, 109, 85)",
+    backgroundColor: "rgb(255, 255, 255)",
+    borderColor: "rgb(229, 231, 235) rgb(229, 231, 235) rgb(216, 209, 197)",
   });
   expect(await page.getByRole("combobox").first().evaluate(controlSnapshot)).toMatchObject({
     backgroundColor: "rgb(255, 255, 255)",

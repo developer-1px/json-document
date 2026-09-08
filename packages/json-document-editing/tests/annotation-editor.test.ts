@@ -1,3 +1,4 @@
+import { createJSONDocument } from "@interactive-os/json-document";
 import { describe, expect, test } from "vitest";
 import {
   ANNOTATION_PROFILE_V1,
@@ -90,5 +91,50 @@ describe("Annotation editor", () => {
     expect(annotationSelectorBounds(rectangle.target.selector)).toEqual({ x: 20, y: 30, width: 40, height: 50 });
     expect(annotationResizeHandle(rectangle.target.selector)).toBe("south-east");
     expect(annotationResizeHandle(point.target.selector)).toBeNull();
+  });
+});
+
+
+describe("Annotation Key selection compatibility", () => {
+  test("keeps insertion order and primary across toggles, document edits, undo and redo", () => {
+    const editor = createAnnotationEditor(document([point, rectangle, arrow]));
+    editor.dispatch({ type: "selection.set", annotationId: "arrow", mode: "replace" });
+    editor.dispatch({ type: "selection.set", annotationId: "point", mode: "toggle" });
+    editor.dispatch({ type: "selection.set", annotationId: "rect", mode: "toggle" });
+    const selected = { kind: "annotation", ids: ["arrow", "point", "rect"], primaryId: "rect" };
+    expect(editor.snapshot.selection).toEqual(selected);
+    expect(editor.snapshot.canUndo).toBe(false);
+    editor.dispatch({ type: "annotation.move", annotationId: "rect", dx: 5, dy: 8 });
+    expect(editor.snapshot.selection.ids).toEqual(["rect"]);
+    editor.undo();
+    expect(editor.snapshot.selection).toEqual(selected);
+    editor.redo();
+    expect(editor.snapshot.selection.ids).toEqual(["rect"]);
+    editor.undo();
+    editor.dispatch({ type: "selection.set", annotationId: "rect", mode: "toggle" });
+    expect(editor.snapshot.selection).toEqual({ kind: "annotation", ids: ["arrow", "point"], primaryId: "point" });
+    const before = editor.snapshot;
+    expect(editor.dispatch({ type: "selection.set", annotationId: "missing", mode: "toggle" }).ok).toBe(false);
+    expect(editor.snapshot).toEqual(before);
+    editor.dispatch({ type: "selection.set", annotationId: null, mode: "toggle" });
+    expect(editor.snapshot.selection).toEqual({ kind: "annotation", ids: [], primaryId: null });
+  });
+
+  test("reconciles external removal without reordering surviving selections", () => {
+    const core = createJSONDocument(document([point, rectangle, arrow]));
+    const editor = createAnnotationEditor(core);
+    for (const annotationId of ["arrow", "rect", "point"]) editor.dispatch({ type: "selection.set", annotationId, mode: "toggle" });
+    core.commit([{ op: "replace", path: "/annotations", value: [rectangle, arrow, point] }]);
+    expect(editor.snapshot.selection.ids).toEqual(["arrow", "rect", "point"]);
+    core.commit([{ op: "remove", path: "/annotations/2" }]);
+    expect(editor.snapshot.selection).toEqual({ kind: "annotation", ids: ["arrow", "rect"], primaryId: "rect" });
+  });
+
+  test("rejects degenerate arrow preview and commit without changing history or selection", () => {
+    const editor = createAnnotationEditor(document([arrow]));
+    const before = editor.snapshot;
+    expect(transformAnnotationSelector(arrow.target.selector, { type: "resize", handle: "end", dx: -10, dy: -10 })).toBeNull();
+    expect(editor.dispatch({ type: "annotation.resize", annotationId: "arrow", handle: "end", dx: -10, dy: -10 }).ok).toBe(false);
+    expect(editor.snapshot).toEqual(before);
   });
 });

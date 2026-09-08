@@ -1,7 +1,7 @@
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import { Redo2, Undo2 } from "lucide-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { ActionButton, IconButton, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
+import { Command, SelectableItem } from "@interactive-os/json-document-ui-primitives-react";
 import { PageHeader } from "../../shared/ui/primitives";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
@@ -40,15 +40,15 @@ export function HistoryDemoRoute() {
               );
             })}
           </div>
-          <ActionButton kind="primary" onClick={edit}>편집 적용</ActionButton>
+          <Command kind="primary" onClick={edit}>편집 적용</Command>
         </section>
 
         <section className={classes("p-4", ui.surface.raised)} aria-labelledby="history-call">
           <p className={ui.text.label}>2 · History API</p>
           <h2 id="history-call" className={classes("mb-2 mt-1", ui.text.heading)}>{lastCall}</h2>
           <div className="mb-3 flex gap-2">
-            <IconButton label="Undo" onClick={undo} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></IconButton>
-            <IconButton label="Redo" onClick={redo} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></IconButton>
+            <Command label="Undo" onClick={undo} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
+            <Command label="Redo" onClick={redo} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
           </div>
           <Inspector label="Inspect history state" items={[
             {

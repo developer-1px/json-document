@@ -10,6 +10,7 @@
     { "path": "../json-document-selection" },
     { "path": "../json-document-editing" },
     { "path": "../json-document-react" },
+    { "path": "../json-document-ui-primitives-react" },
     { "path": "../json-document-web" },
     { "path": "../json-document-zod" }
   ],

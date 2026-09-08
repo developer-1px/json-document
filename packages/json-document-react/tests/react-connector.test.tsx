@@ -13,6 +13,23 @@ import {
 afterEach(cleanup);
 
 describe("React Connector", () => {
+  test("accepts copied document snapshots without repeated renders", () => {
+    const inner = createJSONDocument({ title: "Draft" });
+    const document = { ...inner, get value() { return structuredClone(inner.value); } };
+    let renders = 0;
+    function View() {
+      renders += 1;
+      const value = useJSONDocumentValue(document) as { title: string };
+      return <output>{value.title}</output>;
+    }
+    render(<View />);
+    expect(screen.getByText("Draft")).toBeTruthy();
+    expect(renders).toBe(1);
+    act(() => { inner.commit([{ op: "replace", path: "/title", value: "Ready" }]); });
+    expect(screen.getByText("Ready")).toBeTruthy();
+    expect(renders).toBe(2);
+  });
+
   test("composes Document textarea caret, click count, input, and cursor restoration", () => {
     const caretRanges: unknown[] = [];
     const inputs: unknown[] = [];
@@ -38,6 +55,44 @@ describe("React Connector", () => {
     expect(caretRanges).toContainEqual({ from: 1, to: 3, mode: "replace" });
     expect(clicks).toEqual([2]);
     expect(inputs).toEqual([{ text: "Alps", offset: 4 }]);
+  });
+
+  test("keeps native directional ranges when Document publishes their focus offset", () => {
+    const editor = createDocumentEditor({ blocks: [{ id: "a", text: "Alpha" }] });
+    function View() {
+      const snapshot = useEditingSnapshot(editor);
+      return <DocumentTextControl
+        aria-label="Bound Document text"
+        text="Alpha"
+        offset={snapshot.selection.ranges[0]?.focus.offset ?? null}
+        onCaretRange={(anchor, focus, mode) => {
+          editor.dispatch({ type: "selection.set", blockId: "a", offset: anchor });
+          if (mode === "extend" || anchor !== focus) {
+            editor.dispatch({ type: "selection.set", blockId: "a", offset: focus, mode: "extend" });
+          }
+        }}
+        onTextInput={() => {}}
+      />;
+    }
+    render(<View />);
+    const control = screen.getByRole("textbox", { name: "Bound Document text" }) as HTMLTextAreaElement;
+    act(() => { control.focus(); });
+    for (const [start, end, direction, anchor, focus] of [
+      [2, 4, "forward", 2, 4],
+      [1, 2, "backward", 2, 1],
+      [3, 3, "none", 3, 3],
+    ] as const) {
+      control.setSelectionRange(start, end, direction);
+      fireEvent.select(control);
+      expect(editor.snapshot.selection.ranges).toEqual([{
+        anchor: { blockId: "a", offset: anchor }, focus: { blockId: "a", offset: focus },
+      }]);
+      expect([control.selectionStart, control.selectionEnd]).toEqual([start, end]);
+      if (direction !== "none") expect(control.selectionDirection).toBe(direction);
+    }
+    expect(editor.snapshot).toMatchObject({ value: { blocks: [{ id: "a", text: "Alpha" }] }, canUndo: false, canRedo: false });
+    act(() => { editor.dispatch({ type: "selection.set", blockId: "a", offset: 0 }); });
+    expect([control.selectionStart, control.selectionEnd]).toEqual([0, 0]);
   });
 
   test("exposes the shared document through the official Connector entry point", () => {
@@ -112,5 +167,19 @@ describe("React Connector", () => {
 
     expect(screen.getByText("Initial")).toBeTruthy();
     expect(editors[0]).toBe(editors[1]);
+  });
+
+  test("updates Editing consumers when an earlier document subscriber reads the editor", () => {
+    const document = createJSONDocument({ blocks: [{ id: "a", text: "Alpha" }] });
+    const editor = createDocumentEditor(document);
+    document.subscribe(() => { void editor.snapshot; });
+    function View() {
+      const snapshot = useEditingSnapshot(editor);
+      const value = snapshot.value as { blocks: ReadonlyArray<{ text: string }> };
+      return <output>{snapshot.revision}:{value.blocks[0]?.text}</output>;
+    }
+    render(<View />);
+    act(() => { document.commit([{ op: "replace", path: "/blocks/0/text", value: "External" }]); });
+    expect(screen.getByText("1:External")).toBeTruthy();
   });
 });

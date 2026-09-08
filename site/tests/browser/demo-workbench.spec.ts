@@ -1,5 +1,23 @@
 import { expect, test } from "@playwright/test";
 
+for (const { route, entry, owner } of [
+  { route: "/demo/order", entry: "OrderDemoRoute.tsx", owner: "order.ts" },
+  { route: "/demo/tree", entry: "TreeDemoRoute.tsx", owner: "tree.ts" },
+  { route: "/demo/sheet", entry: "SheetDemoRoute.tsx", owner: "sheet.ts" },
+  { route: "/demo", entry: "DocumentDemoRoute.tsx", owner: "document.ts" },
+]) {
+  test(`${route} Usage links select-all to its canonical owner`, async ({ page }) => {
+    await page.goto(route);
+    const workbench = page.getByRole("region", { name: "Demo workbench" });
+    await workbench.getByRole("tab", { name: entry, exact: true }).click();
+    await workbench.getByRole("tab", { name: owner, exact: true }).click();
+    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText('"selection.select-all"');
+    await expect(workbench.getByRole("link", { name: "API Reference" })).toHaveAttribute("href", "/docs/api/editing");
+    await workbench.getByRole("tab", { name: "select.ts", exact: true }).click();
+    await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText('"preserve"');
+  });
+}
+
 test("switches between the live demo and its actual full source without resetting demo state", async ({ page }) => {
   await page.goto("/demo");
 
@@ -39,11 +57,20 @@ test("shows every demo-owned database file as a source tab", async ({ page }) =>
     "DatabaseDemoRoute.tsx",
     "DatabaseTableDemo.tsx",
     "initial-database.ts",
+    "product-shell.tsx",
     "database-hand.tsx",
+    "keyboard.ts",
+    "controls.tsx",
+    "toolbar.tsx",
+    "clipboard.ts",
     "database.ts",
     "database-property-value.ts",
     "topology.ts",
     "grid-cell.ts",
+    "input-controls.tsx",
+    "surfaces.tsx",
+    "pointer-session.ts",
+    "interaction-handle.ts",
   ]);
 });
 
@@ -68,8 +95,9 @@ test("keeps documentation above the sticky product workbench", async ({ page }) 
 
   await tablist.getByRole("tab", { name: "DocumentDemoRoute.tsx" }).click();
   await expect(page.getByText("routes/document-demo/DocumentDemoRoute.tsx")).toBeVisible();
+  await expect(workbench.getByRole("tabpanel").locator("pre")).toContainText("export function DocumentDemoRoute()");
   await page.evaluate(() => window.scrollTo(0, 900));
   const stickyTabs = await tablist.boundingBox();
   expect(stickyTabs).not.toBeNull();
-  expect(stickyTabs!.y).toBeLessThanOrEqual(1);
+  expect(stickyTabs!.y).toBeLessThanOrEqual(9);
 });

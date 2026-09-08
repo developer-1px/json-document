@@ -3,6 +3,10 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { reconcileRangeSelection, replaceRangeSelection } from "./range-selection.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   createRangeSelectionFamily,
   type OrderedTopology,
@@ -56,7 +60,22 @@ export interface TreeClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 
+export const treeClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.tree+json" as const,
+  parse(value: unknown): TreeClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.nodes)
+      && value.nodes.every((node) => isClipboardRecord(node)
+        && typeof node.id === "string" && typeof node.label === "string"
+        && (node.parentId === null || typeof node.parentId === "string"))
+      ? value as TreeClipboard : null;
+  },
+};
+
 export type TreeIntent =
+  | { readonly type: "selection.select-all"; readonly topology: TreeTopology }
   | {
       readonly type: "selection.set";
       readonly nodeId: string;
@@ -85,18 +104,20 @@ export interface TreeEditor {
 
 export function createTreeEditor(
   source: EditingDocumentSource<TreeDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
 ): TreeEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as TreeDocument;
   assertTreeDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `node-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("node"));
   const selectionFamily = createRangeSelectionFamily<TreePoint, string>();
   const first = initial.nodes[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? collapsed(first.id) : emptySelection(),
+    reconcileSelection: (selection, value) => asTreeSelection(reconcileRangeSelection(selection,
+      (point) => (value as TreeDocument).nodes.some((node) => node.id === point.nodeId) ? point : null)),
   });
   let indexedDocument: TreeDocument | undefined = initial;
   let indexedNodes: TreeNodeIndex | undefined = createTreeNodeIndex(initial.nodes);
@@ -151,6 +172,14 @@ export function createTreeEditor(
 
   function dispatch(intent: TreeIntent): EditingResult<TreeSelection> {
     const topology = resolveTopology(intent.topology);
+    if (intent.type === "selection.select-all") {
+      const first = topology.visibleIds[0];
+      const last = topology.visibleIds.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first !== undefined && last !== undefined ? { anchor: { nodeId: first }, focus: { nodeId: last } } : null,
+        (left, right) => left.nodeId === right.nodeId);
+      return success(session.select(asTreeSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       if (!(topologyCache.get(topology) as TreeTopologyIndex).visible.has(intent.nodeId)) {
         return failure("selection.node-not-visible");
@@ -235,11 +264,10 @@ export function createTreeEditor(
     selectedNodeIdsIn,
     dispatch,
     copy,
-    cut(topology) {
-      const clipboard = copy(topology);
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(resolveTopology(topology), selectedNodeIdsIn(topology)) };
-    },
+    cut: (topology) => cutEditingClipboard(
+      () => copy(topology),
+      () => removeSelected(resolveTopology(topology), selectedNodeIdsIn(topology)),
+    ),
     reconcile,
     undo: () => session.undo(),
     redo: () => session.redo(),

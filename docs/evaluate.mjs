@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { validateLlmsContract, validatePublicPackageReferences } from "./public-contract-checks.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -31,7 +32,7 @@ function filesUnder(path) {
     .flatMap((entry) => {
       if (
         entry.isDirectory()
-        && [".git", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
+        && [".git", ".worktrees", ".npm-cache", "node_modules", "dist", "build", "coverage", "test-results"].includes(entry.name)
       ) {
         return [];
       }
@@ -48,7 +49,11 @@ function fail(message) {
 
 const publicDocs = {
   overview: read("docs/public/overview.md"),
+  applications: read("docs/public/applications.md"),
   concepts: read("docs/public/concepts.md"),
+  foundation: read("docs/public/foundation.md"),
+  howWeBuild: read("docs/public/how-we-build.md"),
+  documentTypes: read("docs/public/document-types.md"),
   selection: read("docs/public/selection.md"),
   history: read("docs/public/history.md"),
   clipboard: read("docs/public/clipboard.md"),
@@ -60,8 +65,10 @@ const publicDocs = {
   adapters: read("docs/public/adapters.md"),
   adapterGridCell: read("docs/public/adapter-grid-cell.md"),
   adapterInteraction: read("docs/public/adapter-interaction.md"),
+  adapterVirtualSelection: read("docs/public/adapter-virtual-selection.md"),
   affordance: read("docs/public/affordance.md"),
   uiPrimitives: read("docs/public/ui-primitives.md"),
+  animation: read("docs/public/animation.md"),
   affordanceSelect: read("docs/public/affordance-select.md"),
   affordanceFold: read("docs/public/affordance-fold.md"),
   affordanceDrag: read("docs/public/affordance-drag.md"),
@@ -75,12 +82,14 @@ const publicDocs = {
   affordanceRename: read("docs/public/affordance-rename.md"),
   affordanceNudge: read("docs/public/affordance-nudge.md"),
   affordanceHover: read("docs/public/affordance-hover.md"),
+  affordanceContextual: read("docs/public/affordance-contextual.md"),
   affordanceDoubleClick: read("docs/public/affordance-double-click.md"),
   affordanceTripleClick: read("docs/public/affordance-triple-click.md"),
   affordanceContextMenu: read("docs/public/affordance-context-menu.md"),
   affordanceMarquee: read("docs/public/affordance-marquee.md"),
   affordanceDrop: read("docs/public/affordance-drop.md"),
   affordanceCopyDrag: read("docs/public/affordance-copy-drag.md"),
+  affordanceHandles: read("docs/public/affordance-handles.md"),
   affordanceResize: read("docs/public/affordance-resize.md"),
   affordancePan: read("docs/public/affordance-pan.md"),
   affordanceScroll: read("docs/public/affordance-scroll.md"),
@@ -130,30 +139,6 @@ const publicContract = readJson("packages/json-document/public-contract.json");
 const rootPackage = readJson("package.json");
 const implementationShape = read("standards/repository-implementation-shape.md");
 const domEditingLifecycle = read("standards/dom-editing-lifecycle.md");
-const activeCompanionPackages = new Set([
-  "@interactive-os/json-document-editing",
-  "@interactive-os/json-document-composer",
-  "@interactive-os/json-document-composer-react",
-  "@interactive-os/json-document-file-intake",
-  "@interactive-os/json-document-rich-text-suggestion",
-  "@interactive-os/json-document-rich-text-suggestion-react",
-  "@interactive-os/json-document-rich-text-mention",
-  "@interactive-os/json-document-rich-text-mention-react",
-  "@interactive-os/json-document-selection",
-  "@interactive-os/json-document-react",
-  "@interactive-os/json-document-react-hook-form",
-  "@interactive-os/json-document-ajv",
-  "@interactive-os/json-document-affordance",
-  "@interactive-os/json-document-ui-primitives-react",
-  "@interactive-os/json-document-zod",
-  "@interactive-os/json-document-database",
-  "@interactive-os/json-document-annotation",
-  "@interactive-os/json-document-tanstack-table",
-  "@interactive-os/json-document-web",
-  "@interactive-os/json-document-contenteditable",
-  "@interactive-os/json-document-collaboration",
-  "@interactive-os/json-document-contenteditable-collaboration",
-]);
 
 if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "adapter-clipboard.md",
@@ -161,11 +146,13 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "adapter-grid-cell.md",
   "adapter-interaction.md",
   "adapter-keyboard.md",
+  "adapter-virtual-selection.md",
   "adapters.md",
   "affordance-activate.md",
   "affordance-cancel.md",
   "affordance-caret.md",
   "affordance-context-menu.md",
+  "affordance-contextual.md",
   "affordance-copy-drag.md",
   "affordance-delete.md",
   "affordance-double-click.md",
@@ -174,6 +161,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "affordance-focus.md",
   "affordance-fold.md",
   "affordance-forbid.md",
+  "affordance-handles.md",
   "affordance-history.md",
   "affordance-hover.md",
   "affordance-marquee.md",
@@ -188,7 +176,9 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "affordance-typeahead.md",
   "affordance-zoom.md",
   "affordance.md",
+  "animation.md",
   "api.md",
+  "applications.md",
   "clipboard.md",
   "collaboration-history.md",
   "collaboration-lease.md",
@@ -198,6 +188,7 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "collaboration.md",
   "composer.md",
   "concepts.md",
+  "connector-a2ui.md",
   "connector-ajv.md",
   "connector-react-hook-form.md",
   "connector-react.md",
@@ -206,8 +197,11 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
   "connector-zod.md",
   "connectors.md",
   "database.md",
+  "document-types.md",
+  "foundation.md",
   "hands.md",
   "history.md",
+  "how-we-build.md",
   "intent-guide.md",
   "intent.md",
   "llms.txt",
@@ -227,10 +221,11 @@ if (JSON.stringify(fileNames("docs/public")) !== JSON.stringify([
 
 if (JSON.stringify(fileNames("standards")) !== JSON.stringify([
   "dom-editing-lifecycle.md",
+  "editing-grammar.md",
   "repository-implementation-shape.md",
   "repository-naming.md",
 ])) {
-  fail("standards: repository naming and implementation shape must be the only repository-wide standard files.");
+  fail("standards: only repository naming, implementation shape, DOM editing lifecycle, and the editing grammar design may appear at the root.");
 }
 
 for (const token of [
@@ -279,25 +274,8 @@ if (misplacedMarkdown.length > 0) {
 }
 
 for (const [name, source] of Object.entries(surfaces)) {
-  if (/@interactive-os\/json-document\/(?:session|react)\b/.test(source)) {
-    fail(`${name}: removed package subpath is still documented.`);
-  }
-  for (
-    const match of source.matchAll(
-      /@interactive-os\/json-document-[a-z0-9-]+\b/g,
-    )
-  ) {
-    if (
-      !activeCompanionPackages.has(match[0])
-    ) {
-      fail(
-        `${name}: removed json-document extension is still documented as current: ${match[0]}.`,
-      );
-    }
-  }
-  if (/\blabs\/extensions\b/.test(source)) {
-    fail(`${name}: removed lab path is still documented as current.`);
-  }
+  const validate = name === "llms" ? validateLlmsContract : validatePublicPackageReferences;
+  validate(source, (message) => fail(`${name}: ${message}`));
 }
 
 for (const [name, source] of Object.entries(surfaces)) {

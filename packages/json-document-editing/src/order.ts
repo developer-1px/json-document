@@ -3,9 +3,14 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
+import { createEditingId } from "./identity.js";
+import type { EditingHistoryOptions } from "./history.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   collapsedRangeSelection,
   emptyRangeSelection,
+  reconcileRangeSelection,
+  replaceRangeSelection,
   selectRangePoint,
   type RangeSelectionState,
 } from "./range-selection.js";
@@ -47,7 +52,20 @@ export interface OrderClipboard extends Record<string, JSONValue> {
   readonly text: string;
 }
 
+export const orderClipboardFormat = {
+  mimeType: "application/vnd.interactive-os.order+json" as const,
+  parse(value: unknown): OrderClipboard | null {
+    return isClipboardRecord(value)
+      && value.type === this.mimeType
+      && typeof value.text === "string"
+      && Array.isArray(value.items)
+      && value.items.every((item) => isClipboardRecord(item) && typeof item.id === "string" && typeof item.label === "string")
+      ? value as OrderClipboard : null;
+  },
+};
+
 export type OrderIntent =
+  | { readonly type: "selection.select-all" }
   | {
       readonly type: "selection.set";
       readonly itemId: string;
@@ -70,17 +88,19 @@ export interface OrderEditor {
 
 export function createOrderEditor(
   source: EditingDocumentSource<OrderDocument>,
-  options: { readonly createId?: () => string } = {},
+  options: EditingHistoryOptions & { readonly createId?: () => string } = {},
 ): OrderEditor {
   const document = resolveDocumentSource(source);
   const initial = document.value as OrderDocument;
   assertOrderDocument(initial);
-  let sequence = 0;
-  const createId = options.createId ?? (() => `item-${++sequence}`);
+  const createId = options.createId ?? (() => createEditingId("item"));
   const first = initial.items[0];
   const session = createEditingSession({
+    ...options,
     document,
     selection: first ? collapsed(first.id) : emptySelection(),
+    reconcileSelection: (selection, value) => asOrderSelection(reconcileRangeSelection(selection,
+      (point) => (value as OrderDocument).items.some((item) => item.id === point.itemId) ? point : null)),
   });
 
   function value(): OrderDocument {
@@ -99,6 +119,14 @@ export function createOrderEditor(
 
   function dispatch(intent: OrderIntent): EditingResult<OrderSelection> {
     const items = value().items;
+    if (intent.type === "selection.select-all") {
+      const first = items[0];
+      const last = items.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first && last ? { anchor: { itemId: first.id }, focus: { itemId: last.id } } : null,
+        (left, right) => left.itemId === right.itemId);
+      return success(session.select(asOrderSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       if (!items.some((item) => item.id === intent.itemId)) return failure("selection.item-not-found");
       const point: OrderPoint = { itemId: intent.itemId };
@@ -170,11 +198,7 @@ export function createOrderEditor(
     get selectedItemIds() { return selectedItemIds(); },
     dispatch,
     copy,
-    cut() {
-      const clipboard = copy();
-      if (!clipboard) return null;
-      return { clipboard, result: removeSelected(selectedItemIds()) };
-    },
+    cut: () => cutEditingClipboard(copy, () => removeSelected(selectedItemIds())),
     undo: () => session.undo(),
     redo: () => session.redo(),
     subscribe: (listener) => session.subscribe(listener),

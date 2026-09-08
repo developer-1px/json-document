@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { ClipboardPaste, Copy, PaintBucket, Redo2, Scissors, Undo2 } from "lucide-react";
 import { DemoPage } from "../../shared/demo-workbench/DemoPage";
 import {
@@ -20,17 +20,20 @@ import {
   moveGridPoint,
   rovingFocusItemProps,
   sheetClipboardCodec,
+  isWebEditingHostTarget,
   webGridCellAddressProps,
 } from "@interactive-os/json-document-web";
 import {
   historyAffordance,
   editingCommandFromWebKeyboardStroke,
   applyAffordance,
+  selectAllAffordance,
 } from "@interactive-os/json-document-affordance";
-import { GridCell } from "@interactive-os/json-document-ui-primitives-react";
+import { Field, GridCell } from "@interactive-os/json-document-ui-primitives-react";
 import { Inspector } from "../../shared/ui/inspector";
-import { IconButton } from "@interactive-os/json-document-ui-primitives-react";
-import { PageHeader, ProductApp } from "../../shared/ui/primitives";
+import { Command } from "@interactive-os/json-document-ui-primitives-react";
+import { PageHeader } from "../../shared/ui/primitives";
+import { ProductShell } from "@interactive-os/json-document-ui-primitives-react";
 import { classes, ui } from "../../shared/ui/styles";
 import { editingItemProps } from "@interactive-os/json-document-react";
 
@@ -171,20 +174,20 @@ export function SheetDemo() {
         >A small editable grid for rectangular selection, TSV clipboard, history, and canonical JSON publication.</PageHeader>
 
     )}>
-        <ProductApp
+        <ProductShell
           toolbarLabel="Sheet actions"
           toolbar={(
             <>
-              <Action label="Copy" icon={<Copy aria-hidden="true" size={16} />} onClick={copySelection} />
-              <Action label="Cut" icon={<Scissors aria-hidden="true" size={16} />} onClick={cutSelection} />
-              <Action label="Paste" icon={<ClipboardPaste aria-hidden="true" size={16} />} onClick={pasteSelection} disabled={clipboard === null} />
-              <Action label="Fill selected" icon={<PaintBucket aria-hidden="true" size={16} />} onClick={() => run(
+              <Command label="Copy" onClick={copySelection}><Copy aria-hidden="true" size={16} /></Command>
+              <Command label="Cut" onClick={cutSelection}><Scissors aria-hidden="true" size={16} /></Command>
+              <Command label="Paste" onClick={pasteSelection} disabled={clipboard === null}><ClipboardPaste aria-hidden="true" size={16} /></Command>
+              <Command label="Fill selected" onClick={() => run(
                 () => dispatchIntent({ type: "selection.fill", value: "Selected" }),
                 "Selected cells filled",
-              )} />
+              )}><PaintBucket aria-hidden="true" size={16} /></Command>
               <span className={classes("mx-1 w-px", ui.surface.separator)} aria-hidden="true" />
-              <Action label="Undo" icon={<Undo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled} />
-              <Action label="Redo" icon={<Redo2 aria-hidden="true" size={16} />} onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled} />
+              <Command label="Undo" onClick={() => run(() => editor.undo(), "Undone")} disabled={commands.undo.disabled}><Undo2 aria-hidden="true" size={16} /></Command>
+              <Command label="Redo" onClick={() => run(() => editor.redo(), "Redone")} disabled={commands.redo.disabled}><Redo2 aria-hidden="true" size={16} /></Command>
               <output data-testid="sheet-clipboard-tsv" className={classes("ml-auto self-center whitespace-pre", ui.text.meta)}>{clipboard?.text ?? "Clipboard is empty"}</output>
             </>
           )}
@@ -202,7 +205,20 @@ export function SheetDemo() {
             aria-label="Editable sheet"
             tabIndex={0}
             {...clipboardSurface}
-            onKeyDown={editing.getKeyDownHandler()}
+            onKeyDown={(event) => {
+              if (isWebEditingHostTarget(event.currentTarget, event.target)) {
+                applyAffordance(selectAllAffordance(event, {
+                  allSelected: editor.selectedCells.length === sheet.rows.length * sheet.columns.length,
+                }, { repeat: "preserve" }), {
+                  hand: (hand) => {
+                    if (hand.type !== "select-all") return;
+                    run(() => dispatchIntent({ type: "selection.select-all" }), "All cells selected");
+                    event.preventDefault();
+                  },
+                });
+              }
+              if (!event.defaultPrevented) editing.getKeyDownHandler()(event);
+            }}
             className={classes("min-w-0 overflow-auto", ui.state.focus)}
           >
             <table role="grid" aria-label="Project sheet" aria-multiselectable="true" className={classes("w-full min-w-[34rem]", ui.surface.table, ui.text.body)}>
@@ -228,17 +244,18 @@ export function SheetDemo() {
                           {...rovingFocusItemProps(item.getIsFocus())}
                           data-row-id={row.id}
                           data-column-id={column.id}
-                          className={classes(ui.interactive.selectable, "p-0", ui.surface.gridCell)}
+                          className={classes("p-0", ui.surface.gridCell)}
                           {...editingItemProps(item)}
                         >
-                            <input
-                              aria-label={`${column.label} row ${rowIndex + 1}`}
+                            <Field
+                              label={`${column.label} row ${rowIndex + 1}`}
+                              presentation="seamless"
                               value={jsonCellText(row.cells[column.id])}
-                              onChange={(event) => run(
-                                () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value: event.currentTarget.value }),
+                              onValueChange={(value) => run(
+                                () => dispatchIntent({ type: "cell.commit", rowId: row.id, columnId: column.id, value }),
                                 `${column.label} committed`,
                               )}
-                              className={classes("w-full min-w-0", ui.field.seamless)}
+                              className="w-full min-w-0"
                             />
                         </GridCell>
                       );
@@ -249,15 +266,11 @@ export function SheetDemo() {
             </table>
             <p className={classes("mb-0 mt-3", ui.text.meta)}>Click replaces selection. Shift-click extends the primary rectangle. Mod-click or Mod+Space toggles a cell. Arrows move by the visible grid; Shift+arrows extend it. Delete clears selected cells. Fill selected changes every selected cell in one transaction.</p>
           </section>
-        </ProductApp>
+        </ProductShell>
     </DemoPage>
   );
 }
 
 function focusCell(surface: HTMLElement | null, point: { readonly rowId: string; readonly columnId: string }) {
   findWebGridCell<HTMLElement>(surface, point)?.querySelector<HTMLInputElement>("input")?.focus();
-}
-
-function Action(props: { readonly label: string; readonly icon: ReactNode; readonly onClick: () => void; readonly disabled?: boolean }) {
-  return <IconButton label={props.label} disabled={props.disabled} onClick={props.onClick}>{props.icon}</IconButton>;
 }

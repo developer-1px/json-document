@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { DemoPage } from "../demo-workbench/DemoPage";
-import { CodeBlock, InlineCode } from "./code-block";
+import { CodeBlock } from "./code-block";
 import type { CodeLanguage } from "./code-tokens";
 import { PageHeader, type PetiteCatIllustration } from "./primitives";
 import { classes, ui } from "./styles";
@@ -33,9 +33,14 @@ export function CatalogDemoPage(props: {
             aside={(
               <div className={ui.code.install}>
                 <div className={ui.text.label}>Install</div>
-                <InlineCode className="mt-2 block overflow-x-auto whitespace-nowrap" prompt>
-                  {props.install}
-                </InlineCode>
+                <CodeBlock
+                  className="mt-2"
+                  label="Install command"
+                  language="shell"
+                  linePrefix={<span aria-hidden="true" className={ui.code.prompt}>$ </span>}
+                  size="compact"
+                  source={props.install}
+                />
               </div>
             )}
           >

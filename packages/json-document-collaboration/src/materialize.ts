@@ -45,6 +45,10 @@ export function materializeChanges(
   initialTree: TreeState,
   ordered: ReadonlyArray<CollaborationChange>,
   validate: ((candidate: JSONValue) => JSONPatchValidationResult) | undefined,
+  previous?: {
+    readonly ordered: ReadonlyArray<CollaborationChange>;
+    readonly materialized: MaterializedDocument;
+  },
 ): MaterializedDocument {
   const isAncestor = createAncestry(ordered);
   const changes = new Map(
@@ -54,12 +58,20 @@ export function materializeChanges(
   const appliedUndoTargets = new Map<string, ChangeId>();
   const appliedHistoryKeys = new Set<string>();
   const historySuppressed: SuppressedChange[] = [];
+  // Only a data-only, unchanged prefix can be reused. Reordering or any history
+  // control may change earlier acceptance decisions and must replay from base.
+  const prefix = previous !== undefined
+    && previous.ordered.length <= ordered.length
+    && previous.ordered.every((change, index) => change === ordered[index])
+    && ordered.every((change) => classifyHistoryChange(change).kind === "none")
+    ? previous : undefined;
   let replay = replayDataChanges(
     initialTree,
     ordered,
     disabledByTarget,
     validate,
     isAncestor,
+    prefix,
   );
 
   for (const change of ordered) {
@@ -292,33 +304,22 @@ export function validateCandidate(
 function createAncestry(
   ordered: ReadonlyArray<CollaborationChange>,
 ): (left: ChangeId, right: ChangeId) => boolean {
-  const changes = new Map(
-    ordered.map((change) => [changeIdKey(change.changeId), change]),
-  );
-  const cache = new Map<string, boolean>();
-
-  return (left: ChangeId, right: ChangeId): boolean => {
-    const leftKey = changeIdKey(left);
-    const rightKey = changeIdKey(right);
-    if (leftKey === rightKey) return false;
-    if (left.actorId === right.actorId) return left.counter < right.counter;
-    const pair = `${leftKey.length}:${leftKey}${rightKey}`;
-    const cached = cache.get(pair);
-    if (cached !== undefined) return cached;
-
-    const seen = new Set<string>();
-    const visit = (currentKey: string): boolean => {
-      if (currentKey === leftKey) return true;
-      if (seen.has(currentKey)) return false;
-      seen.add(currentKey);
-      const current = changes.get(currentKey);
-      if (current === undefined) return false;
-      return current.deps.some((dependency) => visit(changeIdKey(dependency)));
-    };
-    const result = visit(rightKey);
-    cache.set(pair, result);
-    return result;
-  };
+  // The graph has a topological order and each actor has one contiguous chain.
+  // Actor frontiers answer reachability without recursive, per-pair graph walks.
+  const frontiers = new Map<string, ReadonlyMap<string, number>>();
+  for (const change of ordered) {
+    const frontier = new Map<string, number>();
+    for (const dependency of change.deps) {
+      for (const [actor, counter] of frontiers.get(changeIdKey(dependency)) ?? []) {
+        frontier.set(actor, Math.max(frontier.get(actor) ?? 0, counter));
+      }
+      frontier.set(dependency.actorId, Math.max(frontier.get(dependency.actorId) ?? 0, dependency.counter));
+    }
+    frontiers.set(changeIdKey(change.changeId), frontier);
+  }
+  return (left, right) => left.actorId === right.actorId
+    ? left.counter < right.counter
+    : (frontiers.get(changeIdKey(right))?.get(left.actorId) ?? 0) >= left.counter;
 }
 
 function freezeConflict(
@@ -380,14 +381,20 @@ function replayDataChanges(
   disabledByTarget: ReadonlyMap<string, ChangeId>,
   validate: ((candidate: JSONValue) => JSONPatchValidationResult) | undefined,
   isAncestor: (left: ChangeId, right: ChangeId) => boolean,
+  prefix?: {
+    readonly ordered: ReadonlyArray<CollaborationChange>;
+    readonly materialized: MaterializedDocument;
+  },
 ): DataReplay {
-  let tree = cloneTree(initialTree);
+  const baseTree = prefix?.materialized.tree ?? initialTree;
+  let tree = cloneTree(baseTree);
   let projected: Extract<ReturnType<typeof projectTree>, { readonly ok: true }> | null = null;
   let firstDataChange = true;
-  const suppressed: SuppressedChange[] = [];
-  const appliedKeys = new Set<string>();
+  const suppressed: SuppressedChange[] = [...(prefix?.materialized.suppressed ?? [])];
+  const appliedKeys = new Set<string>(prefix?.materialized.history.appliedKeys);
 
   for (const [order, change] of ordered.entries()) {
+    if (order < (prefix?.ordered.length ?? 0)) continue;
     const classified = classifyHistoryChange(change);
     if (classified.kind !== "none") continue;
     const key = changeIdKey(change.changeId);
@@ -397,7 +404,7 @@ function replayDataChanges(
     firstDataChange = false;
     const applied = applySemanticChange(candidate, change, order);
     if (!applied.ok) {
-      if (candidate === tree) tree = cloneTree(initialTree);
+      if (candidate === tree) tree = cloneTree(baseTree);
       suppressed.push(freezeSuppressed(
         change.changeId,
         applied.code,
@@ -415,7 +422,7 @@ function replayDataChanges(
 
     const materializedDocument = projectTree(candidate, isAncestor);
     if (!materializedDocument.ok) {
-      if (candidate === tree) tree = cloneTree(initialTree);
+      if (candidate === tree) tree = cloneTree(baseTree);
       suppressed.push(freezeSuppressed(
         change.changeId,
         materializedDocument.code,
@@ -426,7 +433,7 @@ function replayDataChanges(
 
     const validation = validateCandidate(validate, materializedDocument.value);
     if (!validation.ok) {
-      if (candidate === tree) tree = cloneTree(initialTree);
+      if (candidate === tree) tree = cloneTree(baseTree);
       suppressed.push(freezeSuppressed(
         change.changeId,
         validation.code,

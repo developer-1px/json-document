@@ -1,5 +1,62 @@
 # @interactive-os/json-document-collaboration
 
+## Editing history integration
+
+`@interactive-os/json-document-collaboration/editing` exports
+`createCollaborationEditingHistory(runtime: HistoryRuntime): EditingHistory`.
+This optional subpath connects existing selective history to all Editing domain
+editors, including Rich Text. It does not extend JSONDocument or the wire.
+
+```ts
+import { createHistoryRuntime } from "@interactive-os/json-document-collaboration/history";
+import { createCollaborationEditingHistory } from "@interactive-os/json-document-collaboration/editing";
+import { createDocumentEditor } from "@interactive-os/json-document-editing";
+
+const runtime = createHistoryRuntime({ blocks: [{ id: "a", text: "Draft" }] }, {
+  actorId: "browser-a", epochId: "document-42/v1",
+  ruleset: { id: "blocks", digest: "blocks/v1" },
+});
+const editor = createDocumentEditor(runtime.document, {
+  history: createCollaborationEditingHistory(runtime),
+});
+editor.dispatch({ type: "text.replace", blockId: "a", text: "Edited" });
+editor.undo(); // Same selective owner as runtime.history, with editor selection restoration.
+```
+
+Use `createTextRuntime` for concurrent text splices. Pass the history and document
+from the **same runtime**. Toolbar and DOM integrations call `editor.undo/redo`;
+they must not maintain separate stacks. Status includes causal-only changes and
+subscriptions are released with the last editor observer.
+
+One causal commit is one undo step. Editing's local `historyGroup` does not group
+causal changes, and an external-history Editing plan cannot opt out of recording.
+History remains local unless this connection is explicitly configured.
+See [Collaborative History](../../docs/public/collaboration-history.md) and the
+owner [API reference](../../docs/api-reference/collaboration.md).
+
+Successful `runtime.history.undo/redo` results include their own `change`
+(`JSONAppliedChange | null`) and immutable resulting `status`, including
+`canUndo` and `canRedo`. Both are captured before notifying document or replica
+subscribers. A history-only operation returns `change: null`, even when a
+subscriber authors another document change before the call returns. The Editing
+connection forwards that result instead of treating the first observed change
+as the history operation. These fields do not enter bundles or checkpoints.
+
+Remote `document.subscribe` notifications compile visible tree identities into
+ordered JSON Patch moves, insertions, and removals. Consumers can use
+`trackPointer(pointer, change.applied, before)` with the previous snapshot to
+follow array reorders, object renames, and cross-container moves. A batch may use
+temporary transfer locations to preserve identities through swaps; only the
+final document is published. Root replacement still invalidates descendants,
+while moving a surviving container to root retains its descendant addresses.
+JSON-equal transitions remain notification-free under the JSONDocument contract.
+
+Data-only causal append reuses the previous materialization. Reordered histories
+and history controls still replay from the epoch base. Causal ancestry uses actor
+frontiers rather than recursive dependency walks. `benchmarks/runtime.mjs` measures
+both remote history ingest and the first subsequent edit by a new actor; no wire
+or checkpoint format changed.
+
 Transport-free causal collaboration engine for the six-member
 `@interactive-os/json-document` JSON Document contract.
 

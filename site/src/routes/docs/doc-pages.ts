@@ -5,12 +5,17 @@ import editingApiMarkdown from "../../../../docs/api-reference/editing.md?raw";
 import reactApiMarkdown from "../../../../docs/api-reference/react.md?raw";
 import reactHookFormApiMarkdown from "../../../../docs/api-reference/react-hook-form.md?raw";
 import ajvApiMarkdown from "../../../../docs/api-reference/ajv.md?raw";
+import a2uiApiMarkdown from "../../../../docs/api-reference/a2ui.md?raw";
+import connectorA2uiMarkdown from "../../../../docs/public/connector-a2ui.md?raw";
 import zodApiMarkdown from "../../../../docs/api-reference/zod.md?raw";
 import tanStackTableApiMarkdown from "../../../../docs/api-reference/tanstack-table.md?raw";
 import affordanceApiMarkdown from "../../../../docs/api-reference/affordance.md?raw";
 import uiPrimitivesApiMarkdown from "../../../../docs/api-reference/ui-primitives-react.md?raw";
+import animationApiMarkdown from "../../../../docs/api-reference/animation-react.md?raw";
+import markdownReactApiMarkdown from "../../../../docs/api-reference/markdown-react.md?raw";
 import databaseApiMarkdown from "../../../../docs/api-reference/database.md?raw";
 import annotationApiMarkdown from "../../../../docs/api-reference/annotation.md?raw";
+import calendarApiMarkdown from "../../../../docs/api-reference/calendar.md?raw";
 import webApiMarkdown from "../../../../docs/api-reference/web.md?raw";
 import contenteditableApiMarkdown from "../../../../docs/api-reference/contenteditable.md?raw";
 import richTextApiMarkdown from "../../../../docs/api-reference/rich-text.md?raw";
@@ -28,6 +33,7 @@ import contenteditableCollaborationApiMarkdown from "../../../../docs/api-refere
 import clipboardMarkdown from "../../../../docs/public/clipboard.md?raw";
 import affordanceMarkdown from "../../../../docs/public/affordance.md?raw";
 import uiPrimitivesMarkdown from "../../../../docs/public/ui-primitives.md?raw";
+import animationMarkdown from "../../../../docs/public/animation.md?raw";
 import affordanceDragMarkdown from "../../../../docs/public/affordance-drag.md?raw";
 import affordanceFoldMarkdown from "../../../../docs/public/affordance-fold.md?raw";
 import affordanceHistoryMarkdown from "../../../../docs/public/affordance-history.md?raw";
@@ -41,12 +47,14 @@ import affordanceDeleteMarkdown from "../../../../docs/public/affordance-delete.
 import affordanceRenameMarkdown from "../../../../docs/public/affordance-rename.md?raw";
 import affordanceNudgeMarkdown from "../../../../docs/public/affordance-nudge.md?raw";
 import affordanceHoverMarkdown from "../../../../docs/public/affordance-hover.md?raw";
+import affordanceContextualMarkdown from "../../../../docs/public/affordance-contextual.md?raw";
 import affordanceDoubleClickMarkdown from "../../../../docs/public/affordance-double-click.md?raw";
 import affordanceTripleClickMarkdown from "../../../../docs/public/affordance-triple-click.md?raw";
 import affordanceContextMenuMarkdown from "../../../../docs/public/affordance-context-menu.md?raw";
 import affordanceMarqueeMarkdown from "../../../../docs/public/affordance-marquee.md?raw";
 import affordanceDropMarkdown from "../../../../docs/public/affordance-drop.md?raw";
 import affordanceCopyDragMarkdown from "../../../../docs/public/affordance-copy-drag.md?raw";
+import affordanceHandlesMarkdown from "../../../../docs/public/affordance-handles.md?raw";
 import affordanceResizeMarkdown from "../../../../docs/public/affordance-resize.md?raw";
 import affordancePanMarkdown from "../../../../docs/public/affordance-pan.md?raw";
 import affordanceScrollMarkdown from "../../../../docs/public/affordance-scroll.md?raw";
@@ -58,6 +66,7 @@ import adapterKeyboardMarkdown from "../../../../docs/public/adapter-keyboard.md
 import adapterGridCellMarkdown from "../../../../docs/public/adapter-grid-cell.md?raw";
 import adapterInteractionMarkdown from "../../../../docs/public/adapter-interaction.md?raw";
 import adapterClipboardMarkdown from "../../../../docs/public/adapter-clipboard.md?raw";
+import adapterVirtualSelectionMarkdown from "../../../../docs/public/adapter-virtual-selection.md?raw";
 import adapterContenteditableMarkdown from "../../../../docs/public/adapter-contenteditable.md?raw";
 import collaborationMarkdown from "../../../../docs/public/collaboration.md?raw";
 import collaborationHistoryMarkdown from "../../../../docs/public/collaboration-history.md?raw";
@@ -81,12 +90,16 @@ import intentMarkdown from "../../../../docs/public/intent.md?raw";
 import objectMarkdown from "../../../../docs/public/object.md?raw";
 import orderMarkdown from "../../../../docs/public/order.md?raw";
 import overviewMarkdown from "../../../../docs/public/overview.md?raw";
+import foundationMarkdown from "../../../../docs/public/foundation.md?raw";
 import reactEditingMarkdown from "../../../../docs/public/react-editing.md?raw";
 import selectionMarkdown from "../../../../docs/public/selection.md?raw";
 import topologyMarkdown from "../../../../docs/public/topology.md?raw";
 import treeMarkdown from "../../../../docs/public/tree.md?raw";
 import databaseMarkdown from "../../../../docs/public/database.md?raw";
 import officialHandsMarkdown from "../../../../docs/public/official-hands.md?raw";
+import documentTypesMarkdown from "../../../../docs/public/document-types.md?raw";
+import howWeBuildMarkdown from "../../../../docs/public/how-we-build.md?raw";
+import applicationsMarkdown from "../../../../docs/public/applications.md?raw";
 import { pageDescriptor } from "../../app/page-descriptors";
 
 function docPage(path: string, source: string) {
@@ -95,14 +108,20 @@ function docPage(path: string, source: string) {
 
 export const docPages = {
   overview: docPage("/docs", overviewMarkdown),
+  foundation: docPage("/docs/foundation", foundationMarkdown),
+  howWeBuild: docPage("/docs/how-we-build", howWeBuildMarkdown),
+  applications: docPage("/applications", applicationsMarkdown),
+  documentTypes: docPage("/docs/document-types", documentTypesMarkdown),
   adapters: docPage("/docs/adapters", adaptersMarkdown),
   adapterKeyboard: docPage("/docs/adapter-keyboard", adapterKeyboardMarkdown),
   adapterGridCell: docPage("/docs/adapter-grid-cell", adapterGridCellMarkdown),
   adapterInteraction: docPage("/docs/adapter-interaction", adapterInteractionMarkdown),
   adapterClipboard: docPage("/docs/adapter-clipboard", adapterClipboardMarkdown),
+  adapterVirtualSelection: docPage("/docs/adapter-virtual-selection", adapterVirtualSelectionMarkdown),
   adapterContenteditable: docPage("/docs/adapter-contenteditable", adapterContenteditableMarkdown),
   affordance: docPage("/docs/affordance", affordanceMarkdown),
   uiPrimitives: docPage("/docs/ui-primitives", uiPrimitivesMarkdown),
+  animation: docPage("/docs/animation", animationMarkdown),
   affordanceSelect: docPage("/docs/affordance/select", affordanceSelectMarkdown),
   affordanceFold: docPage("/docs/affordance/fold", affordanceFoldMarkdown),
   affordanceDrag: docPage("/docs/affordance/drag", affordanceDragMarkdown),
@@ -116,12 +135,14 @@ export const docPages = {
   affordanceRename: docPage("/docs/affordance/rename", affordanceRenameMarkdown),
   affordanceNudge: docPage("/docs/affordance/nudge", affordanceNudgeMarkdown),
   affordanceHover: docPage("/docs/affordance/hover", affordanceHoverMarkdown),
+  affordanceContextual: docPage("/docs/affordance/contextual", affordanceContextualMarkdown),
   affordanceDoubleClick: docPage("/docs/affordance/double-click", affordanceDoubleClickMarkdown),
   affordanceTripleClick: docPage("/docs/affordance/triple-click", affordanceTripleClickMarkdown),
   affordanceContextMenu: docPage("/docs/affordance/context-menu", affordanceContextMenuMarkdown),
   affordanceMarquee: docPage("/docs/affordance/marquee", affordanceMarqueeMarkdown),
   affordanceDrop: docPage("/docs/affordance/drop", affordanceDropMarkdown),
   affordanceCopyDrag: docPage("/docs/affordance/copy-drag", affordanceCopyDragMarkdown),
+  affordanceHandles: docPage("/docs/affordance/handles", affordanceHandlesMarkdown),
   affordanceResize: docPage("/docs/affordance/resize", affordanceResizeMarkdown),
   affordancePan: docPage("/docs/affordance/pan", affordancePanMarkdown),
   affordanceScroll: docPage("/docs/affordance/scroll", affordanceScrollMarkdown),
@@ -159,12 +180,17 @@ export const docPages = {
   reactApi: docPage("/docs/api/react", reactApiMarkdown),
   reactHookFormApi: docPage("/docs/api/react-hook-form", reactHookFormApiMarkdown),
   ajvApi: docPage("/docs/api/ajv", ajvApiMarkdown),
+  a2uiApi: docPage("/docs/api/a2ui", a2uiApiMarkdown),
+  connectorA2ui: docPage("/docs/connector-a2ui", connectorA2uiMarkdown),
   zodApi: docPage("/docs/api/zod", zodApiMarkdown),
   tanStackTableApi: docPage("/docs/api/tanstack-table", tanStackTableApiMarkdown),
   affordanceApi: docPage("/docs/api/affordance", affordanceApiMarkdown),
   uiPrimitivesApi: docPage("/docs/api/ui-primitives-react", uiPrimitivesApiMarkdown),
+  animationApi: docPage("/docs/api/animation-react", animationApiMarkdown),
+  markdownReactApi: docPage("/docs/api/markdown-react", markdownReactApiMarkdown),
   databaseApi: docPage("/docs/api/database", databaseApiMarkdown),
   annotationApi: docPage("/docs/api/annotation", annotationApiMarkdown),
+  calendarApi: docPage("/docs/api/calendar", calendarApiMarkdown),
   webApi: docPage("/docs/api/web", webApiMarkdown),
   contenteditableApi: docPage("/docs/api/contenteditable", contenteditableApiMarkdown),
   richTextApi: docPage("/docs/api/rich-text", richTextApiMarkdown),

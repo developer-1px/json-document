@@ -359,6 +359,7 @@ export function CanvasWidgetRoute() {
                   }}
                   selected={option.selected}
                   focus={option.focus}
+                  dragging={offset !== null}
                   {...activeDescendantItemProps(canvasObjectId(object.id))}
                   {...projectWebWidgetState({ role: "option", selected: option.selected })}
                   onPointerDown={(event) => {
