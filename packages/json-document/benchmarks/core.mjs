@@ -75,6 +75,54 @@ for (const size of sizes) {
     commitBudgetPerTenThousandMs * (size / 10_000),
   );
 
+  const batchSize = Math.min(size, 1_000);
+  const batchDocument = createJSONDocument(initial);
+  let batchDone = false;
+  const batchOperations = Array.from({ length: batchSize }, (_, index) => ({
+    op: "replace",
+    path: `/items/${Math.floor(index * size / batchSize)}/done`,
+    value: batchDone,
+  }));
+  measure(`commit ${batchSize} leaf replaces`, () => {
+    batchDone = !batchDone;
+    for (const operation of batchOperations) operation.value = batchDone;
+    const result = batchDocument.commit(batchOperations);
+    return result.ok && result.change.applied.length === batchSize;
+  });
+  measure(`commit ${batchSize} equivalent leaf replaces`, () => {
+    const result = batchDocument.commit(batchOperations);
+    return result.ok && result.change.applied.length === 0;
+  });
+
+  const rootDocument = createJSONDocument(Object.fromEntries(
+    Array.from({ length: size }, (_, index) => [`field-${index}`, false]),
+  ));
+  const rootOperations = Array.from({ length: batchSize }, (_, index) => ({
+    op: "add", path: `/field-${index}`, value: false,
+  }));
+  let rootDone = false;
+  measure(`commit ${batchSize} root object writes`, () => {
+    rootDone = !rootDone;
+    for (const operation of rootOperations) operation.value = rootDone;
+    const result = rootDocument.commit(rootOperations);
+    return result.ok && result.change.applied.length === batchSize;
+  });
+
+  const structuralDocument = createJSONDocument(initial);
+  const appended = Array.from({ length: batchSize }, (_, index) => ({
+    op: "add", path: "/items/-", value: { id: `added-${index}`, done: false },
+  }));
+  const removed = Array.from({ length: batchSize }, (_, index) => ({
+    op: "remove", path: `/items/${size - index - 1}`,
+  }));
+  let structuralDone = false;
+  measure(`commit ${batchSize} appends and descending removes`, () => {
+    structuralDone = !structuralDone;
+    for (const operation of appended) operation.value.done = structuralDone;
+    const result = structuralDocument.commit([...appended, ...removed]);
+    return result.ok && result.change.applied.length === batchSize * 2;
+  });
+
   const queryDocument = createJSONDocument(initial);
   measure("query direct item", () => {
     const result = queryDocument.query(`$.items[${middle}].id`);

@@ -116,12 +116,10 @@ export function createJSONDocumentState(
       const metadata = ownMetadata(commitOptions?.metadata);
       if (!metadata.ok) return metadata;
 
-      const local = localCommitEffect(state, operations);
       const result = prepare(operations);
       if (!result.ok) return result;
 
-      const unchanged = local === "noop" || (local === "unknown" && jsonEqual(state, result.value));
-      if (unchanged) {
+      if (isUnchangedCommit(state, result.value, result.change.applied)) {
         return Object.freeze({
           ok: true,
           change: createChange([], metadata.value),
@@ -171,78 +169,39 @@ export function createJSONDocumentState(
   }
 }
 
-function localCommitEffect(
-  state: JSONValue,
+function isUnchangedCommit(
+  before: JSONValue,
+  after: JSONValue,
   operations: ReadonlyArray<JSONPatchOperation>,
-): "noop" | "changed" | "unknown" {
-  if (operations.length === 0) return "noop";
-  if (operations.length === 1 && operations[0]?.op === "add") {
-    return singleAddEffect(state, operations[0]);
-  }
-  const seen: string[] = [];
-  let changed = false;
-  for (const operation of operations) {
-    if (operation === undefined || typeof operation !== "object" || operation === null) return "unknown";
-    if (operation.op === "replace") {
-      if (typeof operation.path !== "string") return "unknown";
-      if (operation.path === "") {
-        if (operations.length !== 1) return "unknown";
-        return jsonEqual(state, operation.value) ? "noop" : "changed";
+): boolean {
+  if (before === after) return true;
+  if (operations.length === 1) {
+    const operation = operations[0]!;
+    if (operation.op === "remove") return false;
+    if (operation.op === "add") {
+      const segments = parsePointer(operation.path);
+      if (segments.length > 0) {
+        const parent = readAt(before, segments.slice(0, -1));
+        if (parent.ok && Array.isArray(parent.value)) return false;
       }
-      if (overlapsLocalPath(seen, operation.path)) return "unknown";
-      seen.push(operation.path);
-      let segments: string[];
-      try {
-        segments = parsePointer(operation.path);
-      } catch {
-        return "unknown";
-      }
-      const current = readAt(state, segments);
-      if (!current.ok) return "unknown";
-      if (!jsonEqual(current.value, operation.value)) changed = true;
-      continue;
+      const current = readAt(before, segments);
+      return current.ok && jsonEqual(current.value, operation.value);
     }
-    if (operation.op === "add" || operation.op === "remove") {
-      if (typeof operation.path !== "string" || operation.path === "") return "unknown";
-      // A later operation can cancel a structural mutation or overwrite an
-      // object add. Only the final value establishes a multi-operation effect.
-      if (operations.length > 1) return "unknown";
-      changed = true;
-      continue;
-    }
-    return "unknown";
   }
-  return changed ? "changed" : "noop";
-}
-
-function overlapsLocalPath(seen: ReadonlyArray<string>, path: string): boolean {
-  return seen.some((existing) => (
-    existing === path
-    || existing.startsWith(`${path}/`)
-    || path.startsWith(`${existing}/`)
-  ));
-}
-
-function singleAddEffect(
-  state: JSONValue,
-  operation: Extract<JSONPatchOperation, { readonly op: "add" }>,
-): "noop" | "changed" | "unknown" {
-  if (typeof operation.path !== "string") return "unknown";
-  let segments: string[];
-  try {
-    segments = parsePointer(operation.path);
-  } catch {
-    return "unknown";
+  // Successful replacements can only change their target subtrees. Comparing
+  // those paths in the final value also covers repeated and overlapping paths,
+  // without pairwise overlap checks or a walk through unchanged array siblings.
+  if (operations.every((operation) => operation.op === "replace" || operation.op === "test")) {
+    return operations.every((operation) => {
+      if (operation.op === "test") return true;
+      const segments = parsePointer(operation.path);
+      const previous = readAt(before, segments);
+      const current = readAt(after, segments);
+      return previous.ok === current.ok
+        && (!previous.ok || (current.ok && jsonEqual(previous.value, current.value)));
+    });
   }
-  if (segments.length === 0) {
-    return jsonEqual(state, operation.value) ? "noop" : "changed";
-  }
-  const parent = readAt(state, segments.slice(0, -1));
-  if (!parent.ok || Array.isArray(parent.value)) return "changed";
-  const current = readAt(state, segments);
-  return current.ok && jsonEqual(current.value, operation.value)
-    ? "noop"
-    : "changed";
+  return jsonEqual(before, after);
 }
 
 const OK: JSONPatchValidationResult = Object.freeze({ ok: true });
