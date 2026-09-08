@@ -8,6 +8,7 @@ import {
   collapsedRangeSelection,
   emptyRangeSelection,
   reconcileRangeSelection,
+  replaceRangeSelection,
   selectRangePoint,
 } from "./range-selection.js";
 import { lineInterval, lineTopology } from "./topology.js";
@@ -62,6 +63,7 @@ export const documentClipboardFormat = {
 };
 
 export type DocumentIntent =
+  | { readonly type: "selection.select-all" }
   | { readonly type: "selection.set"; readonly blockId: string; readonly mode?: "replace" | "extend" | "toggle"; readonly offset?: number }
   | { readonly type: "text.replace"; readonly blockId: string; readonly text: string; readonly offset?: number }
   | { readonly type: "block.insert"; readonly afterId?: string; readonly text?: string }
@@ -113,6 +115,14 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
 
   function dispatch(intent: DocumentIntent): EditingResult<DocumentSelection> {
     const blocks = value().blocks;
+    if (intent.type === "selection.select-all") {
+      const first = blocks[0];
+      const last = blocks.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first && last ? { anchor: pointAt(first, 0), focus: pointAt(last, last.text.length) } : null,
+        (left, right) => left.blockId === right.blockId && left.offset === right.offset);
+      return success(session.select(asDocumentSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       const index = blocks.findIndex((block) => block.id === intent.blockId);
       if (index < 0) return failure("selection.block-not-found");

@@ -366,7 +366,7 @@ createLineFocusSession<Key extends string>(options: { readonly initialKey?: Key 
 ## `createRenameSession`
 
 ```ts
-createRenameSession<Key>(options: { readonly onCommit: (key: Key, draft: string) => void; readonly onCancel?: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
+createRenameSession<Key>(options: ({ readonly onCommit: (key: Key, draft: string) => void; readonly tryCommit?: never; } | { readonly tryCommit: (key: Key, draft: string) => boolean; readonly onCommit?: never; }) & { readonly onCancel?: (key: Key, draft: string) => void; readonly onFinish?: (key: Key) => void; readonly onSnapshot?: (snapshot: RenameSessionSnapshot<Key> | null) => void; }): RenameSession<Key>
 ```
 ## `createTypeaheadSession`
 
@@ -781,7 +781,7 @@ resolveAffordanceKey(stroke: WebKeyboardStroke): AffordancePreview
 ## `selectAllAffordance`
 
 ```ts
-selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">, state: { readonly allSelected: boolean; }): AffordancePreview
+selectAllAffordance(stroke: Pick<WebKeyboardStroke, "key" | "metaKey" | "ctrlKey">, state: { readonly allSelected: boolean; }, options?: { readonly repeat?: "preserve" | "toggle"; }): AffordancePreview
 ```
 ## `SelectOperation`
 

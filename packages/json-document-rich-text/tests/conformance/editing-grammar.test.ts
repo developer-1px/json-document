@@ -1,6 +1,6 @@
 import { createJSONDocument } from "@interactive-os/json-document";
 import { createRangeSelectionFamily } from "@interactive-os/json-document-selection";
-import { expect } from "vitest";
+import { expect, test } from "vitest";
 import { editingGrammar } from "../../../json-document-editing/tests/conformance/editing-grammar.js";
 import {
   createRichTextEditor, type RichTextClipboard, type RichTextDocument,
@@ -17,6 +17,28 @@ const initial: RichTextDocument = {
 const point = (offset: number): RichTextPoint => ({ kind: "text", nodeId: "t", offset, affinity: "forward" });
 const range = (anchor: number, focus = anchor): RichTextSelection => ({
   kind: "range", ranges: [{ anchor: point(anchor), focus: point(focus) }], primaryIndex: 0,
+});
+
+test.each([
+  { backward: false, moveAfterUndo: false }, { backward: true, moveAfterUndo: false },
+  { backward: false, moveAfterUndo: true }, { backward: true, moveAfterUndo: true },
+])("EG-HISTORY / replacement restores directed range ($backward), redo survives selection ($moveAfterUndo)", ({ backward, moveAfterUndo }) => {
+  const editor = createRichTextEditor({ document: createJSONDocument(initial) });
+  const before = backward ? range(4, 2) : range(2, 4);
+  expect(editor.dispatch({ type: "selection.set", selection: before }).ok).toBe(true);
+  expect(editor.dispatch({ type: "text.insert", text: "X" }).ok).toBe(true);
+  const after = { ...initial, content: [
+    { id: "p", type: "paragraph", content: [{ id: "t", type: "text", text: "AlXa", marks: [] }] },
+    initial.content[1],
+  ] };
+  expect(editor.snapshot).toMatchObject({ value: after, selection: range(3), canUndo: true, canRedo: false });
+  expect(editor.undo()).toMatchObject({ ok: true, snapshot: { value: initial, selection: before, canUndo: false, canRedo: true } });
+  if (moveAfterUndo) {
+    expect(editor.dispatch({ type: "selection.set", selection: range(0) })).toMatchObject({
+      ok: true, snapshot: { value: initial, selection: range(0), canUndo: false, canRedo: true },
+    });
+  }
+  expect(editor.redo()).toMatchObject({ ok: true, snapshot: { value: after, selection: range(3), canUndo: true, canRedo: false } });
 });
 
 editingGrammar("Rich Text v1 / inline slice / local history", () => {

@@ -56,6 +56,20 @@ drop targets, and insertion positions without owning DOM or product color.
 own the reusable state that spans several events. Product selection and rename
 Intents remain callbacks supplied by the host.
 
+`createRenameSession` accepts either the legacy `onCommit(key, draft): void`
+or synchronous `tryCommit(key, draft): boolean`. A false result keeps the active
+key and draft without publishing a finish. Updating and retrying can then
+complete the edit; success or cancellation clears the draft and calls `onFinish`
+once. The domain editor still owns validation and document changes:
+
+```ts
+createRenameSession<string>({
+  tryCommit: (itemId, label) => editor.dispatch({ type: "item.rename", itemId, label }).ok,
+  onSnapshot: renderDraft,
+  onFinish: restoreFocus,
+});
+```
+
 `createBoardDragSession` owns the input-agnostic active item, drop-target
 preview, commit, and cancel lifecycle for Board Hands. Web pointer and HTML
 Drag and Drop sessions feed it; Hosts still resolve targets and dispatch the
@@ -79,13 +93,14 @@ open/focus semantics remain outside this geometry contract.
 
 Usage: [Affordance](https://developer-1px.github.io/json-document/docs/affordance)
 
-`selectAllAffordance` implements an explicit Mod+A toggle input convention:
-when everything is selected it emits `clear`; otherwise it emits `select-all`.
-The semantic `select-all` command itself is idempotent. Hosts choosing this
-input convention consume the existing Affordance API.
+`selectAllAffordance(stroke, state, { repeat: "preserve" })` emits `select-all`
+for Mod+A even when everything is selected. The default editing Usage chooses
+this policy. Omission or `{ repeat: "toggle" }` retains the existing behavior:
+emit `clear` when `state.allSelected`, otherwise `select-all`. This is an input
+policy; domain editors own the selected universe and its semantic transition.
 
 [Editing grammar integration tests](tests/conformance/editing-grammar.test.ts)
-connect that mapping to KeySelection and connect `createGestureSession` to
+connect both mappings to selection, cover rejected draft commits, and connect `createGestureSession` to
 Document's `selection.move`. Structural preview and cancellation leave committed
 value/history unchanged; commit dispatches the latest preview once. This proves
 the tested composition, not every Host callback. IME composition has a separate

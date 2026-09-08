@@ -5,7 +5,7 @@ import {
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import { createEditingId } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
-import { reconcileRangeSelection } from "./range-selection.js";
+import { reconcileRangeSelection, replaceRangeSelection } from "./range-selection.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
   createRangeSelectionFamily,
@@ -75,6 +75,7 @@ export const treeClipboardFormat = {
 };
 
 export type TreeIntent =
+  | { readonly type: "selection.select-all"; readonly topology: TreeTopology }
   | {
       readonly type: "selection.set";
       readonly nodeId: string;
@@ -171,6 +172,14 @@ export function createTreeEditor(
 
   function dispatch(intent: TreeIntent): EditingResult<TreeSelection> {
     const topology = resolveTopology(intent.topology);
+    if (intent.type === "selection.select-all") {
+      const first = topology.visibleIds[0];
+      const last = topology.visibleIds.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first !== undefined && last !== undefined ? { anchor: { nodeId: first }, focus: { nodeId: last } } : null,
+        (left, right) => left.nodeId === right.nodeId);
+      return success(session.select(asTreeSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       if (!(topologyCache.get(topology) as TreeTopologyIndex).visible.has(intent.nodeId)) {
         return failure("selection.node-not-visible");

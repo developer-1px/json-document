@@ -10,6 +10,7 @@ import {
   collapsedRangeSelection,
   emptyRangeSelection,
   reconcileRangeSelection,
+  replaceRangeSelection,
   selectRangePoint,
   type RangeSelectionState,
 } from "./range-selection.js";
@@ -64,6 +65,7 @@ export const orderClipboardFormat = {
 };
 
 export type OrderIntent =
+  | { readonly type: "selection.select-all" }
   | {
       readonly type: "selection.set";
       readonly itemId: string;
@@ -117,6 +119,14 @@ export function createOrderEditor(
 
   function dispatch(intent: OrderIntent): EditingResult<OrderSelection> {
     const items = value().items;
+    if (intent.type === "selection.select-all") {
+      const first = items[0];
+      const last = items.at(-1);
+      const selection = replaceRangeSelection(session.snapshot.selection,
+        first && last ? { anchor: { itemId: first.id }, focus: { itemId: last.id } } : null,
+        (left, right) => left.itemId === right.itemId);
+      return success(session.select(asOrderSelection(selection)));
+    }
     if (intent.type === "selection.set") {
       if (!items.some((item) => item.id === intent.itemId)) return failure("selection.item-not-found");
       const point: OrderPoint = { itemId: intent.itemId };

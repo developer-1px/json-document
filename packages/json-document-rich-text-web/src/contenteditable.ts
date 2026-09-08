@@ -4,8 +4,14 @@ import type {
   RichTextSelection,
 } from "@interactive-os/json-document-rich-text";
 import { createRichTextNodeId } from "@interactive-os/json-document-rich-text";
-import { createWebClipboardBinding, isWebEditingHostTarget, type WebClipboardData, type WebClipboardEvent } from "@interactive-os/json-document-web";
+import { createWebClipboardBinding, createWebKeyboardAdapter, isWebEditingHostTarget, type WebClipboardData, type WebClipboardEvent } from "@interactive-os/json-document-web";
 import { createRichTextClipboardCodec, createRichTextClipboardRepresentations } from "./clipboard.js";
+
+// Preserve this binding's historical Alt acceptance alongside the shared Mod-z defaults.
+const keyboard = createWebKeyboardAdapter({ keymap: {
+  "Mod-Alt-z": { type: "undo" },
+  "Mod-Alt-Shift-z": { type: "redo" },
+} });
 
 export interface RichTextContentEditableBinding {
   isComposing(): boolean;
@@ -174,9 +180,10 @@ export function createRichTextContentEditableBinding(options: {
       report("text.delete", editor.dispatch({ type: "text.delete", direction, unit: "character" }));
       return;
     }
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+    const command = keyboard.resolve(event);
+    if (command?.type === "undo" || command?.type === "redo") {
       event.preventDefault();
-      report(event.shiftKey ? "redo" : "undo", event.shiftKey ? editor.redo() : editor.undo());
+      report(command.type, command.type === "redo" ? editor.redo() : editor.undo());
     }
   };
 

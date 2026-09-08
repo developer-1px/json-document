@@ -114,6 +114,26 @@ no-op, canceled, preview, and remote-presence changes do not create local docume
 history. Native text selection remains input/editor-owned and connects through
 an explicit edit lease rather than becoming a structural selection variant.
 
+`selection.select-all` replaces the complete range selection in one publication.
+Document selects from the first block's offset 0 to the last block's text end;
+Order selects the full item order. Tree requires `topology` and selects its
+visible IDs. Sheet uses its document axes or the supplied `topology` row/column
+order. An empty universe clears selection. Repeating the operation preserves
+content and document Undo/Redo; it still publishes one selection revision under
+the existing session contract. Tree Copy/Cut still includes selected nodes'
+descendants, and Sheet Copy/Cut still uses the primary rectangle.
+
+```ts
+documentEditor.dispatch({ type: "selection.select-all" });
+orderEditor.dispatch({ type: "selection.select-all" });
+treeEditor.dispatch({ type: "selection.select-all", topology: { visibleIds } });
+sheetEditor.dispatch({ type: "selection.select-all", topology: { rowIds, columnIds } });
+```
+
+[Whole-selection conformance cases](tests/conformance/select-all.test.ts) cover
+empty, single, repeated, reordered and filtered targets, one publication, and
+document history retention. Usage: the Document, Order, Tree and Sheet demos.
+
 `Database` keeps typed property schema and records in canonical JSON while its
 saved Table views own property order, visibility, width, sort, and filter. The
 editor projects each saved view into a visible record/property topology for

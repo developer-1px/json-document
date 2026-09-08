@@ -8,6 +8,14 @@ Selection round-trips both text offsets and container child boundaries. Copy,
 cut, and paste publish/consume structured Rich Text, safe semantic HTML, and
 plain text in that priority order.
 
+Keyboard Undo/Redo consumes the Web package's `createWebKeyboardAdapter` defaults
+(`Mod-z`, `Mod-Shift-z`). This binding retains its historical Alt variants through
+explicit keymap entries. Root ownership and composition handling stay in this
+binding. [Keyboard history tests](tests/history-keyboard.test.ts) exercise native
+range replacement and meta/control Undo/Redo, including backward ranges and
+selection movement after Undo without losing Redo. These synthetic DOM cases
+complement the Rich Text demo's real-browser input tests.
+
 IME composition uses a DOM reconciliation lease rather than inserting
 `compositionend.data` directly. The binding captures the canonical selection
 and pre-composition DOM text, lets the platform mutate the active DOM while
