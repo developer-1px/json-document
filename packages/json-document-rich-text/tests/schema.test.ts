@@ -48,6 +48,25 @@ const canonical: RichTextDocument = {
 };
 
 describe("Official Rich Text schema", () => {
+  it("keeps normalization values and patch payloads independently mutable", () => {
+    const input = {
+      profile: canonical.profile, id: "doc", type: "doc",
+      content: [{ id: "p", type: "paragraph", content: [
+        { id: "a", type: "text", text: "A", marks: [] },
+        { id: "b", type: "text", text: "B", marks: [] },
+      ] }],
+    };
+    const normalized = normalizeRichText(input);
+    if (!normalized.ok) throw new Error(normalized.reason);
+    const operation = normalized.operations.find((operation) => operation.path === "/content/0/content");
+    expect(operation).toMatchObject({ op: "replace", value: [{ text: "AB" }] });
+    if (operation?.op !== "replace") throw new Error("missing normalization patch");
+    (operation.value as Array<{ text: string }>)[0]!.text = "patch-only";
+    expect(normalized.value.content[0]).toMatchObject({ content: [{ text: "AB" }] });
+    input.content[0]!.content[0]!.text = "input-only";
+    expect(normalized.value.content[0]).toMatchObject({ content: [{ text: "AB" }] });
+  });
+
   it("rejects non-JSON extension attrs before normalization or history changes", () => {
     const schema = createRichTextSchema({ profile: "urn:example:json-attrs:1", nodes: {
       "com.example/data": { group: "block", atom: true, attrs: { value: { required: true, validate: () => true } }, content: null, allowedMarks: "none" },

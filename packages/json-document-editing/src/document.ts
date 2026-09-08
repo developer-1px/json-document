@@ -1,6 +1,6 @@
 import { type JSONPatchOperation, type JSONValue } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createEditingId } from "./identity.js";
+import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { createEditingSession, type EditingResult, type EditingSession, type EditingSnapshot } from "./session.js";
@@ -153,7 +153,7 @@ export function createDocumentEditor(source: EditingDocumentSource<BlockDocument
     if (intent.type === "block.insert") {
       const afterIndex = intent.afterId === undefined ? blocks.length - 1 : blocks.findIndex((block) => block.id === intent.afterId);
       if (intent.afterId !== undefined && afterIndex < 0) return failure("insert.target-not-found");
-      const block: DocumentBlock = { id: createUniqueId(blocks, createId), text: intent.text ?? "" };
+      const block: DocumentBlock = { id: createEditingIdAllocator(blocks.map((block) => block.id), createId, "block")(), text: intent.text ?? "" };
       const index = afterIndex + 1;
       return session.apply({
         operations: [{ op: "add", path: `/blocks/${index}`, value: block }],
@@ -279,26 +279,13 @@ function rangesFor(blocks: ReadonlyArray<DocumentBlock>): DocumentSelection {
   return { kind: "range", ranges: blocks.map((block) => ({ anchor: pointAt(block), focus: pointAt(block) })), primaryIndex: blocks.length === 0 ? null : 0 };
 }
 
-function createUniqueId(blocks: ReadonlyArray<DocumentBlock>, createId: () => string): string {
-  const existing = new Set(blocks.map((block) => block.id));
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const id = createId();
-    if (!existing.has(id)) return id;
-  }
-  throw new Error("createId did not produce a unique block id");
-}
-
 function cloneBlocksWithUniqueIds(
   source: ReadonlyArray<DocumentBlock>,
   existing: ReadonlyArray<DocumentBlock>,
   createId: () => string,
 ): DocumentBlock[] {
-  const occupied = [...existing];
-  return source.map((block) => {
-    const copy = { ...block, id: createUniqueId(occupied, createId) };
-    occupied.push(copy);
-    return copy;
-  });
+  const allocateId = createEditingIdAllocator(existing.map((block) => block.id), createId, "block");
+  return source.map((block) => ({ ...block, id: allocateId() }));
 }
 
 function success(snapshot: EditingSnapshot<DocumentSelection>): EditingResult<DocumentSelection> {

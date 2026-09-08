@@ -723,6 +723,11 @@ const registeredPublicUsages = [
     sourcePath: "packages/json-document-editing/src/identity.ts",
   },
   {
+    packageName: "@interactive-os/json-document-editing",
+    symbol: "createEditingIdAllocator",
+    sourcePath: "packages/json-document-editing/src/identity.ts",
+  },
+  {
     packageName: "@interactive-os/json-document-collaboration/editing",
     symbol: "createCollaborationEditingHistory",
     sourcePath: "packages/json-document-collaboration/src/editing-index.ts",

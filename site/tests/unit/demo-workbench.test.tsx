@@ -1,8 +1,9 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, renderHook, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { DemoWorkbench } from "../../src/shared/demo-workbench/DemoWorkbench";
 import { defineDemo } from "../../src/shared/demo-workbench/define-demo";
 import { discoverDemoSources } from "../../src/shared/demo-workbench/demo-sources";
+import { useClipboardLab } from "../../src/routes/editing-demos/useClipboardLab";
 
 afterEach(cleanup);
 
@@ -54,6 +55,21 @@ describe("DemoWorkbench", () => {
 });
 
 describe("Demo definition and source discovery", () => {
+  test("exercises and exposes the canonical ID allocator in Clipboard Usage", async () => {
+    const hook = renderHook(useClipboardLab);
+    act(() => { hook.result.current.copy(); });
+    act(() => { hook.result.current.paste(); });
+    act(() => { hook.result.current.paste(); });
+    const value = hook.result.current.snapshot.value as { blocks: Array<{ id: string }> };
+    expect(value.blocks).toHaveLength(5);
+    expect(new Set(value.blocks.map((block) => block.id)).size).toBe(5);
+    expect(value.blocks.filter((block) => block.id.startsWith("clipboard-block-"))).toHaveLength(2);
+    const sources = await discoverDemoSources("routes/editing-demos/ClipboardDemoRoute.tsx");
+    const owner = sources.find((file) => file.path === "packages/json-document-editing/src/identity.ts");
+    expect(owner?.referencePath).toMatch(/^\/docs\/api\//);
+    expect(await owner!.load()).toContain("export function createEditingIdAllocator");
+  });
+
   test("Annotation Usage exposes the Hand, output, geometry, selection projection and Key owner", async () => {
     const sources = await discoverDemoSources("routes/annotation-demo/AnnotationDemoRoute.tsx");
     for (const path of [

@@ -18,7 +18,7 @@ export { acceptsDatabaseValue, databaseValueFromText, defaultDatabaseValue } fro
 export { createObjectEditor, objectClipboardFormat } from "./object.js";
 export { createOrderEditor, orderClipboardFormat } from "./order.js";
 export { createEditingSession } from "./session.js";
-export { createEditingId } from "./identity.js";
+export { createEditingId, createEditingIdAllocator } from "./identity.js";
 export type { EditingHistory, EditingHistoryOptions, EditingHistoryResult, EditingHistoryStatus } from "./history.js";
 export { createSheetEditor, sheetClipboardFormat } from "./sheet.js";
 export { createTreeEditor, treeClipboardFormat } from "./tree.js";

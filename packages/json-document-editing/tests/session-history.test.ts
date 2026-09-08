@@ -1,8 +1,76 @@
-import { createJSONDocument } from "@interactive-os/json-document";
-import { describe, expect, test } from "vitest";
+import { createJSONDocument, type JSONPatchOperation } from "@interactive-os/json-document";
+import { describe, expect, test, vi } from "vitest";
 import { createEditingSession } from "../src/session.js";
 
 describe("selection-aware editing history", () => {
+  test("lowers aliased selection points while metadata and history remain detached", () => {
+    const document = createJSONDocument({ n: 0 });
+    const point = { offset: 1 };
+    const session = createEditingSession({ document, selection: { anchor: point, focus: point } });
+    const retained = session.snapshot;
+    const after = { offset: 2 };
+    const result = session.apply({
+      operations: [{ op: "replace", path: "/n", value: 1 }],
+      selectionAfter: { anchor: after, focus: after }, origin: "edit",
+    });
+    expect(result.ok).toBe(true);
+    point.offset = 9;
+    after.offset = 9;
+    expect(retained.selection).toEqual({ anchor: { offset: 1 }, focus: { offset: 1 } });
+    expect(result.ok && result.change?.metadata?.editing).toMatchObject({
+      selectionBefore: { anchor: { offset: 1 }, focus: { offset: 1 } },
+      selectionAfter: { anchor: { offset: 2 }, focus: { offset: 2 } },
+    });
+    expect(session.undo()).toMatchObject({ ok: true, snapshot: { selection: retained.selection } });
+    expect(session.redo()).toMatchObject({ ok: true, snapshot: { selection: { anchor: { offset: 2 } } } });
+  });
+
+  test("ignored local history skips inverse reads but preserves canonical failures and redo", () => {
+    const inner = createJSONDocument({ n: 0, ignored: 0 });
+    const at = vi.fn(inner.at);
+    const document = { ...inner, get value() { return inner.value; }, at };
+    const session = createEditingSession({ document, selection: null });
+    session.apply({ operations: [{ op: "replace", path: "/n", value: 1 }], selectionAfter: null, origin: "record" });
+    session.undo();
+    at.mockClear();
+    const operations: JSONPatchOperation[] = [
+      { op: "replace", path: "/ignored", value: 1 },
+      { op: "replace", path: "/ignored", value: 2 },
+    ];
+    expect(session.apply({ operations, selectionAfter: null, origin: "ignore", history: "ignore" }).ok).toBe(true);
+    expect(at).not.toHaveBeenCalled();
+    const before = session.snapshot;
+    const invalid: JSONPatchOperation[] = [{ op: "remove", path: "/missing" }, { op: "test", path: "/n", value: 99 }];
+    expect(session.apply({ operations: invalid, selectionAfter: null, origin: "ignore", history: "ignore" }))
+      .toEqual(inner.validatePatch(invalid));
+    expect(session.snapshot).toEqual(before);
+    expect(session.redo().ok).toBe(true);
+    expect(inner.value).toEqual({ n: 1, ignored: 2 });
+  });
+
+  test("preserves step order in a large mixed inverse and a long private history", () => {
+    const document = createJSONDocument({ source: { value: "kept" }, destination: "overwritten", values: Array(300).fill(0) });
+    const session = createEditingSession({ document, selection: null });
+    const initial = document.value;
+    const operations: JSONPatchOperation[] = [
+      { op: "move", from: "/source", path: "/destination" },
+      ...Array.from({ length: 300 }, (_, index): JSONPatchOperation => ({ op: "replace", path: `/values/${index}`, value: index + 1 })),
+    ];
+    expect(session.apply({ operations, selectionAfter: null, origin: "batch" }).ok).toBe(true);
+    const changed = document.value;
+    expect(session.undo().ok).toBe(true);
+    expect(document.value).toEqual(initial);
+    expect(session.redo().ok).toBe(true);
+    expect(document.value).toEqual(changed);
+    for (let value = 1; value <= 200; value++) {
+      expect(session.apply({ operations: [{ op: "replace", path: "/values/0", value: value + 1 }], selectionAfter: null, origin: "history" }).ok).toBe(true);
+    }
+    for (let index = 0; index < 200; index++) expect(session.undo().ok).toBe(true);
+    expect(document.value).toEqual(changed);
+    for (let index = 0; index < 200; index++) expect(session.redo().ok).toBe(true);
+    expect(document.at("/values/0")).toMatchObject({ ok: true, value: 201 });
+  });
+
   test.each([false, true])("reconciles external selection once before publication (observed=%s)", (observed) => {
     const document = createJSONDocument({ text: "long" });
     let reconciles = 0;

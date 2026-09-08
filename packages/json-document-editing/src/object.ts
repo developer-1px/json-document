@@ -14,7 +14,7 @@ import {
   type EditingSnapshot,
 } from "./session.js";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createEditingId } from "./identity.js";
+import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { assertObjectDocument } from "./object-validation.js";
@@ -287,26 +287,13 @@ export function createObjectEditor(
   };
 }
 
-function createUniqueId(objects: ReadonlyArray<DocumentObject>, createId: () => string): string {
-  const existing = new Set(objects.map((object) => object.id));
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const id = createId();
-    if (!existing.has(id)) return id;
-  }
-  throw new Error("createId did not produce a unique object id");
-}
-
 function cloneObjectsWithUniqueIds(
   source: ReadonlyArray<DocumentObject>,
   existing: ReadonlyArray<DocumentObject>,
   createId: () => string,
 ): DocumentObject[] {
-  const occupied = [...existing];
-  return source.map((object) => {
-    const copy = { ...object, id: createUniqueId(occupied, createId) };
-    occupied.push(copy);
-    return copy;
-  });
+  const allocateId = createEditingIdAllocator(existing.map((object) => object.id), createId, "object");
+  return source.map((object) => ({ ...object, id: allocateId() }));
 }
 
 function selectionFor(

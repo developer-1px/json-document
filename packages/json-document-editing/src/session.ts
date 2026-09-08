@@ -89,7 +89,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
   let isNotifying = false;
 
   function ownSelection(value: Selection): Selection {
-    // JSON Document owns detachment and immutable JSON values, including selection.
+    // Selection families may alias anchor/focus/points. JSON serialization lowers
+    // that graph to a tree before Core validates and owns the immutable snapshot.
     return createJSONDocument(clone(value)).value as Selection;
   }
 
@@ -235,7 +236,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       return { ok: true, snapshot: publish() };
     }
 
-    const inverse = options.history ? [] : invertEditingPatch(document, plan.operations);
+    const inverse = options.history || plan.history === "ignore" ? [] : invertEditingPatch(document, plan.operations);
     if (inverse === null) {
       const validation = document.validatePatch(plan.operations);
       return validation.ok ? { ok: false, code: "history.inverse-unavailable" } : validation;
@@ -243,8 +244,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     const result = commit(plan.operations, {
       editing: {
         origin: plan.origin,
-        selectionBefore: clone(beforeSelection),
-        selectionAfter: clone(selectionAfter),
+        selectionBefore: beforeSelection,
+        selectionAfter,
       },
     });
     if (!result.ok) return result;
@@ -269,14 +270,14 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       };
       const previous = undoStack.at(-1);
       if (previous && plan.historyGroup !== undefined && activeHistoryGroup === plan.historyGroup && previous.group === plan.historyGroup) {
-        undoStack = [...undoStack.slice(0, -1), {
+        undoStack[undoStack.length - 1] = {
           ...entry,
           forward: [...previous.forward, ...entry.forward],
           inverse: [...entry.inverse, ...previous.inverse],
           selectionBefore: previous.selectionBefore,
-        }];
+        };
       } else {
-        undoStack = [...undoStack, entry];
+        undoStack.push(entry);
       }
       activeHistoryGroup = plan.historyGroup;
       redoStack = [];
@@ -289,7 +290,7 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
     const operations = direction === "undo" ? entry.inverse : entry.forward;
     const nextSelection = direction === "undo" ? entry.selectionBefore : entry.selectionAfter;
     const result = commit(operations, {
-      editing: { origin: direction, selectionAfter: clone(nextSelection) },
+      editing: { origin: direction, selectionAfter: nextSelection },
     });
     if (!result.ok) return result;
     selection = nextSelection;
@@ -366,8 +367,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "undo");
       if (result.ok) {
-        undoStack = undoStack.slice(0, -1);
-        redoStack = [...redoStack, entry];
+        undoStack.pop();
+        redoStack.push(entry);
         return { ...result, snapshot: publishCommit() };
       }
       return result;
@@ -380,8 +381,8 @@ export function createEditingSession<Selection extends JSONValue>(options: Editi
       if (!entry) return { ok: false, code: "history.empty" };
       const result = restore(entry, "redo");
       if (result.ok) {
-        redoStack = redoStack.slice(0, -1);
-        undoStack = [...undoStack, entry];
+        redoStack.pop();
+        undoStack.push(entry);
         return { ...result, snapshot: publishCommit() };
       }
       return result;

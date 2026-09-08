@@ -3,7 +3,7 @@ import {
   type JSONValue,
 } from "@interactive-os/json-document";
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
-import { createEditingId } from "./identity.js";
+import { createEditingId, createEditingIdAllocator } from "./identity.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import {
@@ -232,26 +232,13 @@ function rangesFor(items: ReadonlyArray<OrderItem>): OrderSelection {
   };
 }
 
-function createUniqueId(items: ReadonlyArray<OrderItem>, createId: () => string): string {
-  const existing = new Set(items.map((item) => item.id));
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const id = createId();
-    if (!existing.has(id)) return id;
-  }
-  throw new Error("createId did not produce a unique order item id");
-}
-
 function cloneItemsWithUniqueIds(
   source: ReadonlyArray<OrderItem>,
   existing: ReadonlyArray<OrderItem>,
   createId: () => string,
 ): OrderItem[] {
-  const occupied = [...existing];
-  return source.map((item) => {
-    const copy = { ...item, id: createUniqueId(occupied, createId) };
-    occupied.push(copy);
-    return copy;
-  });
+  const allocateId = createEditingIdAllocator(existing.map((item) => item.id), createId, "order item");
+  return source.map((item) => ({ ...item, id: allocateId() }));
 }
 
 function success(snapshot: EditingSnapshot<OrderSelection>): EditingResult<OrderSelection> {

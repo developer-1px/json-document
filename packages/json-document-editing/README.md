@@ -79,6 +79,13 @@ replica. Custom `createId` injection remains supported; its provider must ensure
 uniqueness across all writers. Environments without `crypto.randomUUID` fail
 explicitly with `editing.id-provider-unavailable`; no weak random fallback is used.
 
+`createEditingIdAllocator(existingIds, createId, subject)` reads an iterable of
+occupied IDs once and returns a function that reserves each newly allocated ID.
+Use one allocator for a batch; the five structural editors share this owner.
+Each call tries the injected provider at most 100 times before throwing
+`createId did not produce a unique <subject> id`. The allocator covers its local
+reservation set, not cross-replica uniqueness; the provider still owns that.
+
 The last UI unsubscribe releases the session's document and external-history
 observation connections. Local undo/redo validity is independent of UI subscriptions:
 a one-shot change marker retains no session, history stack or UI callback and

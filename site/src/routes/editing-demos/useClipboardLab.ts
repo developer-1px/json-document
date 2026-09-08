@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
+import { createEditingId, createEditingIdAllocator, type BlockDocument, type DocumentClipboard } from "@interactive-os/json-document-editing";
 import { useDocumentEditor, useEditing } from "@interactive-os/json-document-react";
 
 const clipboardLabDocument: BlockDocument = {
@@ -12,7 +12,12 @@ const clipboardLabDocument: BlockDocument = {
 
 /** Owns the Clipboard page's payload and copy/cut/paste command observation. */
 export function useClipboardLab() {
-  const editor = useDocumentEditor(clipboardLabDocument);
+  const [createId] = useState(() => createEditingIdAllocator(
+    clipboardLabDocument.blocks.map((block) => block.id),
+    () => createEditingId("clipboard-block"),
+    "block",
+  ));
+  const editor = useDocumentEditor(clipboardLabDocument, { createId });
   const [clipboard, setClipboard] = useState<DocumentClipboard | null>(null);
   const [lastCall, setLastCall] = useState("블록을 선택한 뒤 copy 또는 cut을 실행합니다.");
   const editing = useEditing({
