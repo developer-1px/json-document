@@ -1,9 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { buildPointer, createJSONDocument } from "@interactive-os/json-document";
 import * as richTextReact from "../src/index.js";
 import { RichTextEditorSurface, RichTextRenderer } from "../src/index.js";
 import {
   createRichTextSchema,
+  createRichTextEditor,
+  createRichTextBlockFixture,
   richTextSchemaV1,
   type RichTextDocument,
   type RichTextEditor,
@@ -18,6 +21,26 @@ describe("public surface", () => {
 });
 
 describe("RichTextRenderer", () => {
+  it.each([false, true])("renders the same nested document through an escaped pointer (fragment: %s)", (uriFragment) => {
+    const key = "a/b~ #한";
+    const value = createRichTextBlockFixture(2, { idPrefix: "nested" });
+    const editor = createRichTextEditor({
+      document: createJSONDocument({ [key]: value }),
+      pointer: buildPointer([key], { uriFragment }),
+    });
+    const html = renderToStaticMarkup(<RichTextEditorSurface editor={editor} />);
+    expect(html).toContain('data-rich-text-node-id="nested-0"');
+    expect(html).toContain('data-rich-text-node-id="nested-1"');
+  });
+
+  it("renders the root URI fragment", () => {
+    const editor = createRichTextEditor({
+      document: createJSONDocument(createRichTextBlockFixture(1, { idPrefix: "root" })),
+      pointer: "#",
+    });
+    expect(renderToStaticMarkup(<RichTextEditorSurface editor={editor} />)).toContain('data-rich-text-node-id="root-0"');
+  });
+
   it("renders every official container with DOM mapping identifiers", () => {
     const html = renderToStaticMarkup(<RichTextRenderer document={{
       profile: "urn:interactive-os:json-document:rich-text:1",

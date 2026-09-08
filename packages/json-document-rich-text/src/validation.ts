@@ -1,4 +1,4 @@
-import type { JSONValue, Pointer } from "@interactive-os/json-document";
+import { isJSONValue, type Pointer } from "@interactive-os/json-document";
 import { getActiveRichTextInstrument } from "./instrument.js";
 import {
   RICH_TEXT_PROFILE_V1,
@@ -192,13 +192,14 @@ function validateAttrs(
   const names = Object.keys(specs);
   if (names.length === 0) return "attrs" in owner ? fail("rich-text.schema-violation", "Unexpected attrs.", `${pointer}/attrs`) : { ok: true };
   if (!isJSONObject(owner.attrs)) return fail("rich-text.schema-violation", "Required attrs object is missing.", `${pointer}/attrs`);
+  if (!isJSONValue(owner.attrs)) return fail("rich-text.schema-violation", "Attrs must contain JSON values.", `${pointer}/attrs`);
   for (const [name, spec] of Object.entries(specs)) {
     const value = owner.attrs[name];
     if (value === undefined) {
       if (spec.required && spec.default === undefined) return fail("rich-text.schema-violation", `Missing attr ${name}.`, `${pointer}/attrs/${name}`);
       continue;
     }
-    if (!isJSONValue(value) || !spec.validate(value)) return fail("rich-text.schema-violation", `Invalid attr ${name}.`, `${pointer}/attrs/${name}`);
+    if (!spec.validate(value)) return fail("rich-text.schema-violation", `Invalid attr ${name}.`, `${pointer}/attrs/${name}`);
   }
   for (const name of Object.keys(owner.attrs)) if (specs[name] === undefined) return fail("rich-text.schema-violation", `Unknown attr ${name}.`, `${pointer}/attrs/${name}`);
   return { ok: true };
@@ -216,13 +217,6 @@ function fail(code: RichTextFailureCode, reason: string, pointer?: Pointer): Ric
 
 function isJSONObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isJSONValue(value: unknown): value is JSONValue {
-  if (value === null || typeof value === "string" || typeof value === "boolean") return true;
-  if (typeof value === "number") return Number.isFinite(value);
-  if (Array.isArray(value)) return value.every(isJSONValue);
-  return isJSONObject(value) && Object.values(value).every(isJSONValue);
 }
 
 export { RICH_TEXT_PROFILE_V1 };

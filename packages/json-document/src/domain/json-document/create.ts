@@ -7,6 +7,7 @@ import {
   parsePointer,
   queryJSONPath,
   readAt,
+  readPointer,
   type JSONAppliedChange,
   type JSONPatchValidationResult,
   type JSONChangeMetadata,
@@ -80,20 +81,7 @@ export function createJSONDocumentState(
       return state;
     },
     at(pointer: string): ReadResult {
-      let segments: string[];
-      try {
-        segments = parsePointer(pointer);
-      } catch (error) {
-        return failure(
-          "invalid_pointer",
-          error instanceof Error ? error.message : "invalid pointer",
-          pointer,
-        );
-      }
-      const result = readAt(state, segments);
-      return result.ok
-        ? Object.freeze({ ok: true, path: pointer, value: result.value as JSONValue })
-        : failure("path_not_found", `path not found: ${pointer}`, pointer);
+      return readPointer(state, pointer);
     },
     query(jsonPath: string): QueryResult {
       try {

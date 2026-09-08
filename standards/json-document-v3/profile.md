@@ -86,7 +86,7 @@ JSON이 아니거나 validation에 거부되면 TypeScript reference binding은
 | JD3-HOST-001 | rendering, DOM focus, geometry, keyboard policy, system clipboard, filesystem, network, formula engine, CRDT와 OT는 host 또는 extension이 소유해야 하며 Core JSON Document의 필수 data나 member가 되어서는 안 된다. |
 | JD3-CONFORMANCE-001 | conformance는 public factory 또는 injected harness만 사용하는 machine-readable black-box vector로 성공, 실패, atomicity, immutability, probe/commit parity, change notification을 검증해야 한다. private source path, provider object, 특정 dist layout을 요구하면 안 된다. |
 | JD3-CONFORMANCE-002 | 이 profile을 stable이라고 선언하려면 같은 suite가 reference implementation과 최소 한 개의 독립 구현을 통과하고 form, table/data-grid, outliner/tree, rich text, storage/collaboration의 다섯 pressure vertical에서 같은 제약이 확인되어야 한다. |
-| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 23개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
+| JD3-BINDING-001 | Kernel package export와 TypeScript declaration은 언어별 binding contract이며 보편 protocol과 별도로 versioning해야 한다. v3 Kernel package는 root entrypoint와 25개 Kernel symbol만 공개하고 runtime·peer dependency 없이 빌드되어야 한다. public JSON Document declaration은 application-owned structural contract여야 하고 removed session, framework binding, implementation runtime alias나 private declaration path를 노출하면 안 된다. Framework와 schema integration은 독립 Connector package에서 versioning할 수 있다. |
 
 ## Result 초안
 
@@ -212,14 +212,19 @@ array-property 분류만 공통 leaf에 두고, parity test가 untrusted boundar
 
 ## Package binding
 
-`@interactive-os/json-document`는 root entrypoint 하나와 23개 symbol을
+`@interactive-os/json-document`는 root entrypoint 하나와 25개 symbol을
 공개한다. `JSONDocument`의 canonical member는 여섯 개다.
 
 ```txt
-values  10
+values  12
 types  13
-total  23
+total  25
 ```
+
+`isJSONValue`와 `readPointer`는 JSON 값 검증과 주소 조회의 stateless TypeScript
+binding이다. 기존 Core 규칙을 소비자에게 제공하며 document member, wire 형식,
+JSON 유효성 또는 domain schema를 추가하지 않는다. 공개 목록은 package의
+`public-contract.json`이 소유한다.
 
 패키지는 runtime dependency와 peer dependency가 없다. 제거된 `/session`과
 `/react` implementation은 export가 아니며 production build와 tarball에

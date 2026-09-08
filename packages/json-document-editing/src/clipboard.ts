@@ -19,9 +19,3 @@ export function cutEditingClipboard<Payload, Result>(
 export function isClipboardRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
-
-export function isClipboardJSONValue(value: unknown): boolean {
-  if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return true;
-  if (Array.isArray(value)) return value.every(isClipboardJSONValue);
-  return isClipboardRecord(value) && Object.values(value).every(isClipboardJSONValue);
-}

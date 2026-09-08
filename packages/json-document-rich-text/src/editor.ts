@@ -1,6 +1,7 @@
 import {
   buildPointer,
   createJSONDocument,
+  isJSONValue,
   parsePointer,
   type JSONDocument,
   type JSONPatchOperation,
@@ -113,10 +114,11 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   const initialValidation = indexValidatedRichText(initial, schema);
   if (!initialValidation.ok) throw new TypeError(initialValidation.reason);
   const initialTopology = richTextTopology(initial);
+  const patchPointer = buildPointer(parsePointer(pointer));
   let previousDocument = initial;
   function observeChange(change: import("@interactive-os/json-document").JSONAppliedChange): void {
     const next = readRichTextDocument(options.document, pointer);
-    seedRichTextTopology(previousDocument, next, change.applied, pointer);
+    seedRichTextTopology(previousDocument, next, change.applied, patchPointer);
     rememberAppliedOperations(next, change.applied);
     previousDocument = next;
   }
@@ -304,7 +306,7 @@ export function createRichTextEditor(options: RichTextEditorOptions): RichTextEd
   }
 
   function pasteClipboard(clipboard: RichTextClipboard): EditingResult<RichTextSelection> {
-    if (clipboard.type !== RICH_TEXT_CLIPBOARD_MIME || clipboard.slice.profile !== schema.profile) {
+    if (!isJSONValue(clipboard) || clipboard.type !== RICH_TEXT_CLIPBOARD_MIME || clipboard.slice.profile !== schema.profile) {
       return failure("rich-text.clipboard-invalid");
     }
     const ranges = session.snapshot.selection.ranges;

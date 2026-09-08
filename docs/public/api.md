@@ -158,6 +158,14 @@ import { jsonEqual } from "@interactive-os/json-document";
 jsonEqual({ title: "Draft", tags: [] }, { tags: [], title: "Draft" }); // true
 ```
 
+## 문서 없이 JSON 값 검증·조회하기
+
+Snapshot 조회와 일반 JSON 값 검증에는 `readPointer(value, pointer)`와
+`isJSONValue(value)`를 사용합니다. 두 함수는 값을 복제하거나 정규화하지
+않습니다. 주소 조회는 `document.at`과 같은 문법·실패 결과를 사용하고 원본
+참조를 반환합니다. 상세 제약과 예제는 [Core package 문서](https://github.com/developer-1px/json-document/blob/main/packages/json-document/README.md)의
+순수 core 항목에서 확인할 수 있습니다.
+
 ## 문서 없이 patch 적용하기
 
 `applyPatch(value, operations)`는 document 상태를 만들지 않고 RFC 6902
@@ -287,6 +295,8 @@ type Failure = {
 | --- | --- | --- |
 | 현재 값 | `document.value` | `JSONValue` |
 | 한 위치 읽기 | `document.at(pointer)` | `ReadResult` |
+| snapshot에서 한 위치 읽기 | `readPointer(value, pointer)` | `ReadResult` |
+| JSON 값 검사 | `isJSONValue(value)` | boolean/type guard |
 | 여러 위치 찾기 | `document.query(jsonPath)` | `QueryResult` |
 | patch 검사 | `document.validatePatch(operations)` | `JSONPatchValidationResult` |
 | 상태 변경 | `document.commit(operations, options?)` | `JSONDocumentCommitResult` |
@@ -298,13 +308,13 @@ type Failure = {
 
 ## 공개 export
 
-Package root는 다음 23개 symbol을 공개합니다.
+Package root는 다음 25개 symbol을 공개합니다.
 
 ```txt
 values
   applyPatch, createJSONDocument
   appendSegment, buildPointer, parentPointer, parsePointer
-  jsonEqual, parseArrayIndex, trackPointer, tryParsePointer
+  isJSONValue, jsonEqual, parseArrayIndex, readPointer, trackPointer, tryParsePointer
 
 types
   JSONValue, Pointer, JSONPatchOperation
