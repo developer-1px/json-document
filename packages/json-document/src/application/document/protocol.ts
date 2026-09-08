@@ -8,12 +8,15 @@ import {
   trackPointer as trackPointerInternal,
   tryParsePointer as tryParsePointerInternal,
   jsonEqual as jsonEqualInternal,
+  isJSONValue as isJSONValueInternal,
+  readPointer as readPointerInternal,
 } from "../../domain/json-document/index.js";
 import type {
   JSONPatchOperation,
   JSONPatchResult,
   JSONValue,
   Pointer,
+  ReadResult,
 } from "./contract.js";
 
 export function applyPatch(
@@ -33,6 +36,16 @@ export function parseArrayIndex(segment: string): number | null {
 
 export function jsonEqual(left: unknown, right: unknown): boolean {
   return jsonEqualInternal(left, right);
+}
+
+/** Tests Core's JSON tree constraints without cloning or normalizing the input. */
+export function isJSONValue(value: unknown): value is JSONValue {
+  return isJSONValueInternal(value);
+}
+
+/** Reads a JSON value by Pointer, preserving the selected value's identity. */
+export function readPointer(value: JSONValue, pointer: Pointer): ReadResult {
+  return readPointerInternal(value, pointer);
 }
 
 export function tryParsePointer(pointer: Pointer): string[] | null {

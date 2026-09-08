@@ -3,10 +3,6 @@ const regexCache = new Map<string, RegExp | null>();
 
 export const objectHasOwn = Object.prototype.hasOwnProperty;
 
-export function escapeSeg(s: string): string {
-  return s.replace(/~/g, "~0").replace(/\//g, "~1");
-}
-
 export function plainRegexLiteral(pattern: string): string | null {
   for (let index = 0; index < pattern.length; index += 1) {
     switch (pattern[index]) {

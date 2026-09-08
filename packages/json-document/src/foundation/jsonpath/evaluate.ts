@@ -1,11 +1,12 @@
 // foundation/jsonpath/evaluate — Query AST + JSON 입력 → Match[] (Pointer + value).
 // RFC 9535 §2 의 normalized 의미. Pointer 는 RFC 6901.
 
+import { appendSegment } from "../pointer/core.js";
 import type { Query, Segment, Selector, FilterExpr, Comparable, FilterQuery, FunctionExpr, Match } from "./ast.js";
 import { jsonEqual } from "../json/equal.js";
 import { evaluateArrayRegexFilter, evaluateArrayWildcardField } from "./fast.js";
 import { evaluateSimpleQuery, evaluateSinglePathQuery } from "./simple.js";
-import { compiledRegex, escapeSeg, normalizeSliceIndex, objectHasOwn } from "./support.js";
+import { compiledRegex, normalizeSliceIndex, objectHasOwn } from "./support.js";
 
 /** root JSON 입력에 query 적용 → matches. 결과 순서: RFC 9535 정합 (DFS). */
 export function evaluate(query: Query, root: unknown): Match[] {
@@ -54,7 +55,7 @@ function visitDescendants(m: Match, cb: (n: Match) => void): void {
     }
   } else {
     for (const k of Object.keys(m.value as Record<string, unknown>)) {
-      visitDescendants({ pointer: m.pointer + "/" + escapeSeg(k), value: (m.value as Record<string, unknown>)[k] }, cb);
+      visitDescendants({ pointer: appendSegment(m.pointer, k), value: (m.value as Record<string, unknown>)[k] }, cb);
     }
   }
 }
@@ -64,7 +65,7 @@ function applySelector(sel: Selector, m: Match, root: unknown): Match[] {
     if (m.value === null || typeof m.value !== "object" || Array.isArray(m.value)) return [];
     const obj = m.value as Record<string, unknown>;
     if (!objectHasOwn.call(obj, sel.name)) return [];
-    return [{ pointer: m.pointer + "/" + escapeSeg(sel.name), value: obj[sel.name] }];
+    return [{ pointer: appendSegment(m.pointer, sel.name), value: obj[sel.name] }];
   }
   if (sel.kind === "index") {
     if (!Array.isArray(m.value)) return [];
@@ -91,7 +92,7 @@ function applySelector(sel: Selector, m: Match, root: unknown): Match[] {
       return m.value.map((v, i) => ({ pointer: m.pointer + "/" + i, value: v }));
     }
     const obj = m.value as Record<string, unknown>;
-    return Object.keys(obj).map((k) => ({ pointer: m.pointer + "/" + escapeSeg(k), value: obj[k] }));
+    return Object.keys(obj).map((k) => ({ pointer: appendSegment(m.pointer, k), value: obj[k] }));
   }
   if (sel.kind === "filter") {
     if (m.value === null || typeof m.value !== "object") return [];
@@ -104,7 +105,7 @@ function applySelector(sel: Selector, m: Match, root: unknown): Match[] {
     } else {
       const obj = m.value as Record<string, unknown>;
       for (const k of Object.keys(obj)) {
-        const cm = { pointer: m.pointer + "/" + escapeSeg(k), value: obj[k] };
+        const cm = { pointer: appendSegment(m.pointer, k), value: obj[k] };
         if (evalFilter(sel.expr, cm, root)) out.push(cm);
       }
     }

@@ -106,13 +106,13 @@ Initial value와 patch payload, metadata, exposed document value/change는 docum
 
 ## 공개 root
 
-Root는 23개 public symbol만 공개합니다.
+Root의 공개 계약은 `public-contract.json`으로 검사합니다.
 
 ```txt
 values
   applyPatch, createJSONDocument
   appendSegment, buildPointer, parentPointer, parsePointer
-  jsonEqual, parseArrayIndex, trackPointer, tryParsePointer
+  isJSONValue, jsonEqual, parseArrayIndex, readPointer, trackPointer, tryParsePointer
 
 types
   JSONValue, Pointer, JSONPatchOperation
@@ -128,6 +128,30 @@ history와 clipboard는 optional editing companion이 조합하고, framework bi
 `/react` subpath를 공개하지 않습니다.
 
 ## 순수 core
+
+`isJSONValue(value: unknown): value is JSONValue`는 Core의 JSON tree 제약을
+검사합니다. 값을 복제하거나 정규화하지 않습니다. 유한하지 않은 숫자, 희소 배열,
+접근자·symbol 속성, 비표준 객체, 순환 또는 공유 객체 참조는 거절합니다.
+도메인 schema의 추가 조건은 각 도메인이 검사합니다.
+
+`readPointer(value: JSONValue, pointer: Pointer): ReadResult`는 `document.at`과
+동일한 주소 해석을 값에 직접 적용합니다. 일반 Pointer와 URI fragment를 지원하고,
+실패는 `invalid_pointer` 또는 `path_not_found`로 반환합니다. 입력은 이미 유효한
+JSON이어야 하며, 반환한 값은 원본 참조입니다. 입력을 복제·동결하거나 소유하지
+않으므로 immutable snapshot을 읽을 때도 참조 동일성이 유지됩니다.
+
+```ts
+import { isJSONValue, readPointer } from "@interactive-os/json-document";
+
+const input: unknown = { "a/b~": [{ title: "Draft" }] };
+if (isJSONValue(input)) {
+  const result = readPointer(input, "#/a~1b~0/0/title");
+  // { ok: true, path: "#/a~1b~0/0/title", value: "Draft" }
+}
+```
+
+실행 가능한 Usage와 구현 source는 site의 `/connectors/react`에서 확인할 수
+있습니다. 이 stateless API는 `JSONDocument`의 여섯 멤버를 늘리지 않습니다.
 
 `applyPatch`는 schema, session, UI 없이 ordered atomic JSON Patch를 적용합니다.
 

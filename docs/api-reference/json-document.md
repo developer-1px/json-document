@@ -26,6 +26,11 @@ buildPointer(segments: ReadonlyArray<string | number>, options?: { readonly uriF
 ```ts
 createJSONDocument(initial: unknown, options?: JSONDocumentOptions): JSONDocument
 ```
+## `isJSONValue`
+
+```ts
+isJSONValue(value: unknown): value is JSONValue
+```
 ## `JSONAppliedChange`
 
 ```ts
@@ -166,6 +171,11 @@ type QueryResult =
       readonly code: string;
       readonly reason?: string;
     };
+```
+## `readPointer`
+
+```ts
+readPointer(value: JSONValue, pointer: Pointer): ReadResult
 ```
 ## `ReadResult`
 

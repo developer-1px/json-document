@@ -1,6 +1,7 @@
-import type {
-  JSONPatchValidationResult,
-  JSONValue,
+import {
+  buildPointer,
+  type JSONPatchValidationResult,
+  type JSONValue,
 } from "@interactive-os/json-document";
 import type { ZodType } from "zod/v4";
 
@@ -37,17 +38,7 @@ export function createZodValidator(
       ok: false,
       code,
       reason: issue.message,
-      pointer: issuePathToPointer(issue.path),
+      pointer: buildPointer(issue.path.map(String)),
     };
   };
-}
-
-function issuePathToPointer(path: ReadonlyArray<PropertyKey>): string {
-  return path.length === 0
-    ? ""
-    : `/${path.map((segment) => escapePointerToken(String(segment))).join("/")}`;
-}
-
-function escapePointerToken(token: string): string {
-  return token.replace(/~/g, "~0").replace(/\//g, "~1");
 }

@@ -1,5 +1,11 @@
 import { buildPointer } from "../pointer/core.js";
 import { isJsonArrayIndexKey } from "./classification.js";
+import type { JSONValue } from "../protocol/contract.js";
+
+/** Tests the Core JSON value boundary without invoking getters or normalizing data. */
+export function isJSONValue(value: unknown): value is JSONValue {
+  return jsonSerializableErrorFast(value) === null;
+}
 
 export function jsonSerializableError(value: unknown): string | null {
   return jsonSerializableErrorFast(value) === null ? null : jsonSerializableErrorDetailed(value);

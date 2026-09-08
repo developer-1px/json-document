@@ -105,6 +105,8 @@ import richTextReactSurfaceSource from "../../../../packages/json-document-rich-
 import richTextRenderStoreSource from "../../../../packages/json-document-rich-text-react/src/render-store.ts?raw";
 import uiFileSizeSource from "../../../../packages/json-document-file-intake/src/file-size.ts?raw";
 import coreDocumentSource from "../../../../packages/json-document/src/application/document/create.ts?raw";
+import corePointerReadSource from "../../../../packages/json-document/src/foundation/protocol/read.ts?raw";
+import coreJSONValidationSource from "../../../../packages/json-document/src/foundation/json/serializable.ts?raw";
 import selectionRangeSource from "../../../../packages/json-document-selection/src/range/index.ts?raw";
 import selectionMaterializedRangeSource from "../../../../packages/json-document-selection/src/range/materialized.ts?raw";
 import contentEditableReactSource from "../../../../packages/json-document-contenteditable/src/content-editable.tsx?raw";
@@ -283,6 +285,8 @@ const registeredUsageSources = new Map<string, string>([
   ["packages/json-document-rich-text-react/src/render-store.ts", richTextRenderStoreSource],
   ["packages/json-document-file-intake/src/file-size.ts", uiFileSizeSource],
   ["packages/json-document/src/application/document/create.ts", coreDocumentSource],
+  ["packages/json-document/src/foundation/protocol/read.ts", corePointerReadSource],
+  ["packages/json-document/src/foundation/json/serializable.ts", coreJSONValidationSource],
   ["packages/json-document-selection/src/range/index.ts", selectionRangeSource],
   ["packages/json-document-selection/src/range/materialized.ts", selectionMaterializedRangeSource],
   ["packages/json-document-contenteditable/src/content-editable.tsx", contentEditableReactSource],
@@ -656,6 +660,16 @@ const registeredPublicUsages = [
     packageName: "@interactive-os/json-document",
     symbol: "createJSONDocument",
     sourcePath: "packages/json-document/src/application/document/create.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document",
+    symbol: "readPointer",
+    sourcePath: "packages/json-document/src/foundation/protocol/read.ts",
+  },
+  {
+    packageName: "@interactive-os/json-document",
+    symbol: "isJSONValue",
+    sourcePath: "packages/json-document/src/foundation/json/serializable.ts",
   },
   {
     packageName: "@interactive-os/json-document",

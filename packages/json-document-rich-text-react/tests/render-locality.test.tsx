@@ -2,7 +2,7 @@
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-import { createJSONDocument } from "@interactive-os/json-document";
+import { buildPointer, createJSONDocument } from "@interactive-os/json-document";
 import {
   createRichTextBlockFixture,
   createRichTextEditor,
@@ -20,6 +20,32 @@ import {
 import { createRichTextRenderStore } from "../src/render-store.js";
 
 describe("Rich Text React locality", () => {
+  it.each([false, true])("observes nested edits, history, and external changes (fragment: %s)", (uriFragment) => {
+    const key = "a/b~ #한";
+    const value = createRichTextBlockFixture(3, { idPrefix: "nested" });
+    const document = createJSONDocument({ [key]: value });
+    const pointer = buildPointer([key], { uriFragment });
+    const editor = createRichTextEditor({ document, pointer, selection: collapsed("nested-text-1", 1) });
+    const store = createRichTextRenderStore(editor);
+    let changed = 0;
+    const unsubscribe = store.subscribeNode("nested-text-1", () => { changed++; });
+    const untouched = store.getNode("nested-0");
+    expect(editor.dispatch({ type: "text.insert", text: "y" }).ok).toBe(true);
+    expect(changed).toBe(1);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "xy" });
+    expect(store.getNode("nested-0")).toBe(untouched);
+    expect(lastRenderStoreBlockScan()).toBe(1);
+    expect(editor.undo().ok).toBe(true);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "x" });
+    expect(editor.redo().ok).toBe(true);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "xy" });
+    expect(document.commit([{ op: "replace", path: buildPointer([key, "content", 1, "content", 0, "text"]), value: "remote" }]).ok).toBe(true);
+    expect(store.getNode("nested-text-1")).toMatchObject({ text: "remote" });
+    expect(store.getNode("nested-0")).toBe(untouched);
+    expect(editor.pointer).toBe(pointer);
+    unsubscribe();
+  });
+
   it("catches up after disconnected structural and leaf edits", () => {
     const editor = createRichTextEditor({
       document: createJSONDocument(createRichTextBlockFixture(3, { idPrefix: "offline" })),

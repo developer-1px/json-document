@@ -1,5 +1,6 @@
 import {
   buildPointer,
+  isJSONValue,
   type JSONPatchOperation,
   type JSONValue,
 } from "@interactive-os/json-document";
@@ -12,7 +13,7 @@ import {
 import { resolveDocumentSource, type EditingDocumentSource } from "./document-source.js";
 import type { EditingHistoryOptions } from "./history.js";
 import { reconcileRangeSelection, replaceRangeSelection } from "./range-selection.js";
-import { cutEditingClipboard, isClipboardJSONValue, isClipboardRecord } from "./clipboard.js";
+import { cutEditingClipboard, isClipboardRecord } from "./clipboard.js";
 import { gridCellsInRange, gridPointIndex, gridPointKey, gridRangeBounds, type GridTopology } from "./topology.js";
 import { assertSheetDocument, assertUniqueSheetIds } from "./sheet-validation.js";
 import {
@@ -74,10 +75,10 @@ export interface SheetClipboard extends Record<string, JSONValue> {
 export const sheetClipboardFormat = {
   mimeType: "application/vnd.interactive-os.sheet+json" as const,
   parse(value: unknown): SheetClipboard | null {
-    if (!isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
+    if (!isJSONValue(value) || !isClipboardRecord(value) || value.type !== this.mimeType || typeof value.text !== "string") return null;
     if (!Array.isArray(value.cells) || value.cells.length === 0 || !Array.isArray(value.cells[0])) return null;
     const width = value.cells[0].length;
-    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width && row.every(isClipboardJSONValue))
+    return width > 0 && value.cells.every((row) => Array.isArray(row) && row.length === width)
       ? value as SheetClipboard : null;
   },
 };
@@ -304,6 +305,7 @@ function paste(
   topology?: SheetTopology,
   index?: SheetIndex,
 ): EditingResult<SheetSelection> {
+  if (!isJSONValue(clipboard)) return failure("clipboard.invalid");
   const focus = session.snapshot.selection.focus;
   if (focus === null) return failure("selection.empty");
   if (clipboard.cells.length === 0 || clipboard.cells.some((row) => row.length === 0)) {
